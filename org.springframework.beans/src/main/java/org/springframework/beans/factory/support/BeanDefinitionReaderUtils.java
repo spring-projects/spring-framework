@@ -166,12 +166,24 @@ public class BeanDefinitionReaderUtils {
 	 * for the given bean definition or the definition cannot be registered
 	 */
 	public static String registerWithGeneratedName(
-			AbstractBeanDefinition definition, BeanDefinitionRegistry registry)
+			BeanDefinition definition, BeanDefinitionRegistry registry)
 			throws BeanDefinitionStoreException {
-
 		String generatedName = generateBeanName(definition, registry, false);
 		registry.registerBeanDefinition(generatedName, definition);
 		return generatedName;
+	}
+
+	/**
+	 * @deprecated since Spring 3.1 in favor of
+	 * {@link #registerWithGeneratedName(BeanDefinition, BeanDefinitionRegistry)}
+	 * and its more general signature.
+	 */
+	@Deprecated
+	public static String registerWithGeneratedName(
+			AbstractBeanDefinition definition, BeanDefinitionRegistry registry)
+			throws BeanDefinitionStoreException {
+		return registerWithGeneratedName((BeanDefinition)definition, registry);
+
 	}
 
 }

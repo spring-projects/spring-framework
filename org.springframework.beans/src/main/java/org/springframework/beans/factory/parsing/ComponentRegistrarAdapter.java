@@ -14,39 +14,42 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation;
+package org.springframework.beans.factory.parsing;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.parsing.BeanComponentDefinition;
-import org.springframework.beans.factory.parsing.ComponentDefinition;
-import org.springframework.beans.factory.parsing.ComponentRegistrar;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.xml.ParserContext;
 
 /**
  * TODO SPR-7420: document
+ * <p>Adapter is necessary as opposed to having ParserContext
+ * implement ComponentRegistrar directly due to tooling issues.
+ * STS may ship with a version of Spring older that 3.1 (when
+ * this type was introduced), and will run into
+ * IncompatibleClassChangeErrors when it's (3.0.5) ParserContext
+ * tries to mix with our (3.1.0) BeanDefinitionParser
+ * (and related) infrastructure.
  *
  * @author Chris Beams
  * @since 3.1
  */
-class SimpleComponentRegistrar implements ComponentRegistrar {
+public class ComponentRegistrarAdapter implements ComponentRegistrar {
 
-	private final BeanDefinitionRegistry registry;
+	private final ParserContext parserContext;
 
-	public SimpleComponentRegistrar(BeanDefinitionRegistry registry) {
-		this.registry = registry;
+	public ComponentRegistrarAdapter(ParserContext parserContext) {
+		this.parserContext = parserContext;
 	}
 
 	public String registerWithGeneratedName(BeanDefinition beanDefinition) {
-		return BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, this.registry);
+		return this.parserContext.getReaderContext().registerWithGeneratedName(beanDefinition);
 	}
 
 	public void registerBeanComponent(BeanComponentDefinition component) {
-		BeanDefinitionReaderUtils.registerBeanDefinition(component, this.registry);
-		registerComponent(component);
+		this.parserContext.registerBeanComponent(component);
 	}
 
 	public void registerComponent(ComponentDefinition component) {
-		// no-op
+		this.parserContext.registerComponent(component);
 	}
+
 }

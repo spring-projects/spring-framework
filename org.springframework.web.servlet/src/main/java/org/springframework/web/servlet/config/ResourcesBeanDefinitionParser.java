@@ -16,10 +16,9 @@
 
 package org.springframework.web.servlet.config;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.context.config.SpecificationContext;
+import org.springframework.context.config.AbstractSpecificationBeanDefinitionParser;
+import org.springframework.context.config.FeatureSpecification;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
@@ -32,32 +31,16 @@ import org.w3c.dom.Element;
  * @see MvcResources
  * @see MvcResourcesExecutor
  */
-class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
+class ResourcesBeanDefinitionParser extends AbstractSpecificationBeanDefinitionParser {
 
 	/**
 	 * Parses the {@code <mvc:resources/>} tag
 	 */
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		MvcResources spec = createSpecification(element, parserContext);
-		if (spec != null) {
-			spec.execute(createSpecificationContext(parserContext));
-		}
-		return null;
-	}
-
-	private MvcResources createSpecification(Element element, ParserContext parserContext) {
+	public FeatureSpecification doParse(Element element, ParserContext parserContext) {
 		String mapping = element.getAttribute("mapping");
-		if (!StringUtils.hasText(mapping)) {
-			parserContext.getReaderContext().error("The 'mapping' attribute is required.",
-					parserContext.extractSource(element));
-			return null;
-		}
-		String[] locations = StringUtils.commaDelimitedListToStringArray(element.getAttribute("location"));
-		if (locations.length == 0) {
-			parserContext.getReaderContext().error("The 'location' attribute is required.",
-					parserContext.extractSource(element));
-			return null;
-		}
+		String[] locations =
+			StringUtils.commaDelimitedListToStringArray(element.getAttribute("location"));
+
 		MvcResources spec = new MvcResources(mapping, locations);
 		if (element.hasAttribute("cache-period")) {
 			spec.cachePeriod(element.getAttribute("cache-period"));
@@ -65,23 +48,8 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		if (element.hasAttribute("order")) {
 			spec.order(element.getAttribute("order"));
 		}
-		spec.source(parserContext.extractSource(element));
-		spec.sourceName(element.getTagName());
-		return spec;
-	}
 
-	/**
-	 * Adapt the given ParserContext instance into an SpecificationContext.
-	 *
-	 * TODO SPR-7420: consider unifying the two through a superinterface.
-	 * TODO SPR-7420: create a common ParserContext-to-SpecificationContext adapter util
-	 */
-	private SpecificationContext createSpecificationContext(ParserContext parserContext) {
-		SpecificationContext context = new SpecificationContext();
-		context.setRegistry(parserContext.getRegistry());
-		context.setRegistrar(parserContext);
-		context.setProblemReporter(parserContext.getReaderContext().getProblemReporter());
-		return context;
+		return spec;
 	}
 
 }

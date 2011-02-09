@@ -30,12 +30,11 @@ public class ReaderContext {
 
 	private final Resource resource;
 
+	private final ProblemReporter problemReporter;
+
 	private final ReaderEventListener eventListener;
 
 	private final SourceExtractor sourceExtractor;
-
-	// TODO SPR-7420: review exposing problem reporter
-	protected final ProblemReporter problemReporter;
 
 
 	public ReaderContext(Resource resource, ProblemReporter problemReporter,

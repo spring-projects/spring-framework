@@ -16,10 +16,10 @@
 
 package org.springframework.web.servlet.config;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.context.config.SpecificationContext;
+import org.springframework.context.config.AbstractSpecificationBeanDefinitionParser;
+import org.springframework.context.config.FeatureSpecification;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
@@ -31,40 +31,21 @@ import org.w3c.dom.Element;
  * register a {@link DefaultServletHttpRequestHandler}.  Will also register a 
  * {@link SimpleUrlHandlerMapping} for mapping resource requests, and a 
  * {@link HttpRequestHandlerAdapter} if necessary. 
- * 
+ *
  * @author Rossen Stoyanchev
+ * @author Chris Beams
  * @since 3.0.4
  */
-class DefaultServletHandlerBeanDefinitionParser implements BeanDefinitionParser {
+class DefaultServletHandlerBeanDefinitionParser extends AbstractSpecificationBeanDefinitionParser {
 
 	/**
 	 * Parses the {@code <mvc:default-servlet-handler/>} tag.
 	 */
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
-		MvcDefaultServletHandler spec = createSpecification(element, parserContext);
-		spec.execute(createSpecificationContext(parserContext));
-		return null;
-	}
-
-	private MvcDefaultServletHandler createSpecification(Element element, ParserContext parserContext) {
+	public FeatureSpecification doParse(Element element, ParserContext parserContext) {
 		String defaultServletHandler = element.getAttribute("default-servlet-handler");
-		MvcDefaultServletHandler spec = StringUtils.hasText(defaultServletHandler) ? new MvcDefaultServletHandler(
-				defaultServletHandler) : new MvcDefaultServletHandler();
-		return spec;
-	}
-
-	/**
-	 * Adapt the given ParserContext instance into an SpecificationContext.
-	 *
-	 * TODO SPR-7420: consider unifying the two through a superinterface.
-	 * TODO SPR-7420: create a common ParserContext-to-SpecificationContext adapter util
-	 */
-	private SpecificationContext createSpecificationContext(ParserContext parserContext) {
-		SpecificationContext context = new SpecificationContext();
-		context.setRegistry(parserContext.getRegistry());
-		context.setRegistrar(parserContext);
-		context.setProblemReporter(parserContext.getReaderContext().getProblemReporter());
-		return context;
+		return StringUtils.hasText(defaultServletHandler) ?
+				new MvcDefaultServletHandler(defaultServletHandler) :
+				new MvcDefaultServletHandler();
 	}
 
 }

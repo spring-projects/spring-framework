@@ -354,8 +354,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
-	// TODO SPR-7420: consider unifying the two through a superinterface.
-	// TODO SPR-7420: create a common ParserContext-to-SpecificationContext adapter util
 	private SpecificationContext createSpecificationContext(ConfigurableListableBeanFactory beanFactory) {
 		final BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
 		SpecificationContext specificationContext = new SpecificationContext();
@@ -363,8 +361,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		specificationContext.setResourceLoader(this.resourceLoader);
 		specificationContext.setRegistry(registry);
 		specificationContext.setRegistrar(new SimpleComponentRegistrar(registry));
-		// TODO SPR-7420: how to get hold of the current problem reporter here?
-		specificationContext.setProblemReporter(new FailFastProblemReporter());
+		specificationContext.setProblemReporter(this.problemReporter);
 		return specificationContext;
 	}
 

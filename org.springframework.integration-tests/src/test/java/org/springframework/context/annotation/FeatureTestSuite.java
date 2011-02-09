@@ -73,6 +73,7 @@ import org.springframework.web.servlet.config.MvcViewControllersTests;
 	MvcResourcesTests.class,
 	MvcDefaultServletHandlerTests.class,
 	MvcNamespaceTests.class
+})
 */
 public class FeatureTestSuite {
 

@@ -16,9 +16,20 @@
 
 package org.springframework.beans.factory.parsing;
 
-public interface ComponentRegistrar extends BeanDefinitionRegistrar {
+import org.springframework.beans.factory.config.BeanDefinition;
+
+/**
+ * TODO SPR-7420: document
+ *
+ * @author Chris Beams
+ * @since 3.1
+ */
+public interface ComponentRegistrar {
+
+	String registerWithGeneratedName(BeanDefinition beanDefinition);
 
 	void registerBeanComponent(BeanComponentDefinition component);
 
 	void registerComponent(ComponentDefinition component);
+
 }
