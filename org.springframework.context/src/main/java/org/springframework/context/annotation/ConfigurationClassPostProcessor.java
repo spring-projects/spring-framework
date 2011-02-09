@@ -322,7 +322,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			if (!(FeatureSpecification.class.isAssignableFrom(featureMethod.getReturnType()))) {
 				// TODO SPR-7420: raise a Problem instead?
 				throw new IllegalArgumentException(
-						"return type from @Feature methods must be assignable to FeatureSpecification");
+						format("Return type for @Feature method %s.%s() must be assignable to FeatureSpecification",
+								featureMethod.getDeclaringClass().getSimpleName(), featureMethod.getName()));
 			}
 
 			List<Object> beanArgs = new ArrayList<Object>();
