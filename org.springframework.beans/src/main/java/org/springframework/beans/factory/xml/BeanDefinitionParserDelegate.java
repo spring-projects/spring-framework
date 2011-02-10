@@ -325,7 +325,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Initialize the default lazy-init, autowire, dependency check settings,
 	 * init-method, destroy-method and merge settings. Support nested 'beans'
-	 * element use cases by falling back to <literal>parent</literal> in case the
+	 * element use cases by falling back to the given parent in case the
 	 * defaults are not explicitly set locally.
 	 * @see #populateDefaults(DocumentDefaultsDefinition, DocumentDefaultsDefinition, org.w3c.dom.Element)
 	 * @see #getDefaults()
@@ -333,6 +333,15 @@ public class BeanDefinitionParserDelegate {
 	public void initDefaults(Element root, BeanDefinitionParserDelegate parent) {
 		populateDefaults(this.defaults, (parent != null ? parent.defaults : null), root);
 		this.readerContext.fireDefaultsRegistered(this.defaults);
+	}
+
+	/**
+	 * Initialize the default settings assuming a {@code null} parent delegate.
+	 * @deprecated in Spring 3.1 in favor of
+	 * {@link #initDefaults(Element, BeanDefinitionParserDelegate)}
+	 */
+	public void initDefaults(Element root) {
+		initDefaults(root, null);
 	}
 
 	/**
