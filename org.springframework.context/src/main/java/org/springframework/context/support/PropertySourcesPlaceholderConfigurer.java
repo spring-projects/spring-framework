@@ -17,11 +17,12 @@
 package org.springframework.context.support;
 
 import java.io.IOException;
+import java.util.Properties;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.config.AbstractPropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.PlaceholderConfigurerSupport;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.ConfigurablePropertyResolver;
 import org.springframework.core.env.Environment;
@@ -33,17 +34,17 @@ import org.springframework.core.env.PropertySourcesPropertyResolver;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Specialization of {@link AbstractPropertyPlaceholderConfigurer}
+ * Specialization of {@link org.springframework.beans.factory.config.PlaceholderConfigurerSupport}
  *
  * <p>Local properties are added as a property source in any case. Precedence is based
  * on the value of the {@link #setLocalOverride localOverride} property.
  *
  * @author Chris Beams
  * @since 3.1
- * @see AbstractPropertyPlaceholderConfigurer
+ * @see org.springframework.beans.factory.config.PlaceholderConfigurerSupport
  * @see org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
  */
-public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceholderConfigurer
+public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerSupport
 		implements EnvironmentAware {
 
 	/**
@@ -58,20 +59,11 @@ public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceh
 	 */
 	public static final String ENVIRONMENT_PROPERTIES_PROPERTY_SOURCE_NAME = "environmentProperties";
 
+
 	private MutablePropertySources propertySources;
 
 	private Environment environment;
 
-
-	/**
-	 * {@inheritDoc}
-	 * <p>{@code PropertySources} from this environment will be searched when replacing ${...} placeholders
-	 * @see #setPropertySources
-	 * @see #postProcessBeanFactory
-	 */
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
-	}
 
 	/**
 	 * Customize the set of {@link PropertySources} to be used by this configurer.
@@ -85,15 +77,26 @@ public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceh
 
 	/**
 	 * {@inheritDoc}
+	 * <p>{@code PropertySources} from this environment will be searched when replacing ${...} placeholders.
+	 * @see #setPropertySources
+	 * @see #postProcessBeanFactory
+	 */
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
+
+	/**
+	 * {@inheritDoc}
 	 * <p>Processing occurs by replacing ${...} placeholders in bean definitions by resolving each
 	 * against this configurer's set of {@link PropertySources}, which includes:
 	 * <ul>
-	 *   <li>all {@linkplain Environment#getPropertySources environment property sources}, if an
-	 *       {@code Environment} {@linkplain #setEnvironment is present}
-	 *   <li>{@linkplain #mergeProperties merged local properties}, if {@linkplain #setLocation any}
-	 *       {@linkplain #setLocations have} {@linkplain #setProperties been}
-	 *       {@linkplain #setPropertiesArray specified}
-	 *   <li>any property sources set by calling {@link #setPropertySources}
+	 * <li>all {@linkplain Environment#getPropertySources environment property sources}, if an
+	 * {@code Environment} {@linkplain #setEnvironment is present}
+	 * <li>{@linkplain #mergeProperties merged local properties}, if {@linkplain #setLocation any}
+	 * {@linkplain #setLocations have} {@linkplain #setProperties been}
+	 * {@linkplain #setPropertiesArray specified}
+	 * <li>any property sources set by calling {@link #setPropertySources}
 	 * </ul>
 	 * <p>If {@link #setPropertySources} is called, <strong>environment and local properties will be
 	 * ignored</strong>. This method is designed to give the user fine-grained control over property
@@ -118,7 +121,8 @@ public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceh
 					new PropertiesPropertySource(LOCAL_PROPERTIES_PROPERTY_SOURCE_NAME, this.mergeProperties());
 				if (this.localOverride) {
 					this.propertySources.addFirst(localPropertySource);
-				} else {
+				}
+				else {
 					this.propertySources.addLast(localPropertySource);
 				}
 			}
@@ -150,20 +154,19 @@ public class PropertySourcesPlaceholderConfigurer extends AbstractPropertyPlaceh
 			}
 		};
 
-		this.doProcessProperties(beanFactoryToProcess, valueResolver);
+		doProcessProperties(beanFactoryToProcess, valueResolver);
 	}
 
 	/**
-	 * Implemented for compatibility with {@link AbstractPropertyPlaceholderConfigurer}.
+	 * Implemented for compatibility with {@link org.springframework.beans.factory.config.PlaceholderConfigurerSupport}.
 	 * @deprecated in favor of {@link #processProperties(ConfigurableListableBeanFactory, ConfigurablePropertyResolver)}
 	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	@Deprecated
-	protected void processProperties(ConfigurableListableBeanFactory beanFactory, java.util.Properties props)
-			throws BeansException {
+	protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props) {
 		throw new UnsupportedOperationException(
-				"call processProperties(ConfigurableListableBeanFactory, ConfigurablePropertyResolver)");
+				"Call processProperties(ConfigurableListableBeanFactory, ConfigurablePropertyResolver) instead");
 	}
 
 }
