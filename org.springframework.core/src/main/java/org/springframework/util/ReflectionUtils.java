@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -251,7 +252,7 @@ public abstract class ReflectionUtils {
 		if (ex instanceof RuntimeException) {
 			throw (RuntimeException) ex;
 		}
-		handleUnexpectedException(ex);
+		throw new UndeclaredThrowableException(ex);
 	}
 
 	/**
@@ -283,7 +284,7 @@ public abstract class ReflectionUtils {
 		if (ex instanceof Error) {
 			throw (Error) ex;
 		}
-		handleUnexpectedException(ex);
+		throw new UndeclaredThrowableException(ex);
 	}
 
 	/**
@@ -304,15 +305,7 @@ public abstract class ReflectionUtils {
 		if (ex instanceof Error) {
 			throw (Error) ex;
 		}
-		handleUnexpectedException(ex);
-	}
-
-	/**
-	 * Throws an IllegalStateException with the given exception as root cause.
-	 * @param ex the unexpected exception
-	 */
-	private static void handleUnexpectedException(Throwable ex) {
-		throw new IllegalStateException("Unexpected exception thrown", ex);
+		throw new UndeclaredThrowableException(ex);
 	}
 
 	/**

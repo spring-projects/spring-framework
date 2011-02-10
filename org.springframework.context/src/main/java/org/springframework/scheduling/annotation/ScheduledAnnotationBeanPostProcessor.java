@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-import org.springframework.scheduling.support.MethodInvokingRunnable;
+import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
@@ -103,16 +103,7 @@ public class ScheduledAnnotationBeanPostProcessor
 							"Only void-returning methods may be annotated with @Scheduled.");
 					Assert.isTrue(method.getParameterTypes().length == 0,
 							"Only no-arg methods may be annotated with @Scheduled.");
-					MethodInvokingRunnable runnable = new MethodInvokingRunnable();
-					runnable.setTargetObject(bean);
-					runnable.setTargetMethod(method.getName());
-					runnable.setArguments(new Object[0]);
-					try {
-						runnable.prepare();
-					}
-					catch (Exception ex) {
-						throw new IllegalStateException("failed to prepare task", ex);
-					}
+					Runnable runnable = new ScheduledMethodRunnable(bean, method);
 					boolean processedSchedule = false;
 					String errorMessage = "Exactly one of 'cron', 'fixedDelay', or 'fixedRate' is required.";
 					String cron = annotation.cron();
