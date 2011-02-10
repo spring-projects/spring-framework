@@ -85,7 +85,7 @@ import org.springframework.util.StringValueResolver;
  * @see PropertyPlaceholderConfigurer
  * @see org.springframework.context.support.PropertySourcesPlaceholderConfigurer
  */
-public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyResourceConfigurer
+public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfigurer
 		implements BeanNameAware, BeanFactoryAware {
 
 	/** Default placeholder prefix: {@value} */
@@ -96,6 +96,7 @@ public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyReso
 
 	/** Default value separator: {@value} */
 	public static final String DEFAULT_VALUE_SEPARATOR = ":";
+
 
 	/** Defaults to {@value #DEFAULT_PLACEHOLDER_PREFIX} */
 	protected String placeholderPrefix = DEFAULT_PLACEHOLDER_PREFIX;
@@ -189,8 +190,10 @@ public abstract class AbstractPropertyPlaceholderConfigurer extends PropertyReso
 		this.beanFactory = beanFactory;
 	}
 
+
 	protected void doProcessProperties(ConfigurableListableBeanFactory beanFactoryToProcess,
 			StringValueResolver valueResolver) {
+
 		BeanDefinitionVisitor visitor = new BeanDefinitionVisitor(valueResolver);
 
 		String[] beanNames = beanFactoryToProcess.getBeanDefinitionNames();
