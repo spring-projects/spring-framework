@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.scheduling.support;
+
+import java.lang.reflect.UndeclaredThrowableException;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
@@ -49,6 +51,9 @@ public class DelegatingErrorHandlingRunnable implements Runnable {
 	public void run() {
 		try {
 			this.delegate.run();
+		}
+		catch (UndeclaredThrowableException ex) {
+			this.errorHandler.handleError(ex.getUndeclaredThrowable());
 		}
 		catch (Throwable ex) {
 			this.errorHandler.handleError(ex);

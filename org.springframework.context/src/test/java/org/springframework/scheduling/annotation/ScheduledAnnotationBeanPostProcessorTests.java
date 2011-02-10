@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.scheduling.annotation;
 
-import static org.junit.Assert.assertEquals;
-
+import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -34,12 +35,12 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-import org.springframework.scheduling.support.MethodInvokingRunnable;
+import org.springframework.scheduling.support.ScheduledMethodRunnable;
 
 /**
  * @author Mark Fisher
+ * @author Juergen Hoeller
  */
-@SuppressWarnings({"unchecked", "unused"})
 public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
@@ -58,11 +59,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Map<Runnable, Long> fixedDelayTasks = (Map<Runnable, Long>)
 				new DirectFieldAccessor(registrar).getPropertyValue("fixedDelayTasks");
 		assertEquals(1, fixedDelayTasks.size());
-		MethodInvokingRunnable runnable = (MethodInvokingRunnable) fixedDelayTasks.keySet().iterator().next();
-		Object targetObject = runnable.getTargetObject();
-		String targetMethod = runnable.getTargetMethod();
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) fixedDelayTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
 		assertEquals(target, targetObject);
-		assertEquals("fixedDelay", targetMethod);
+		assertEquals("fixedDelay", targetMethod.getName());
 		assertEquals(new Long(5000), fixedDelayTasks.values().iterator().next());
 	}
 
@@ -82,16 +83,16 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Map<Runnable, Long> fixedRateTasks = (Map<Runnable, Long>)
 				new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
 		assertEquals(1, fixedRateTasks.size());
-		MethodInvokingRunnable runnable = (MethodInvokingRunnable) fixedRateTasks.keySet().iterator().next();
-		Object targetObject = runnable.getTargetObject();
-		String targetMethod = runnable.getTargetMethod();
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) fixedRateTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
 		assertEquals(target, targetObject);
-		assertEquals("fixedRate", targetMethod);
+		assertEquals("fixedRate", targetMethod.getName());
 		assertEquals(new Long(3000), fixedRateTasks.values().iterator().next());
 	}
 
 	@Test
-	public void cronTask() {
+	public void cronTask() throws InterruptedException {
 		StaticApplicationContext context = new StaticApplicationContext();
 		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
 		BeanDefinition targetDefinition = new RootBeanDefinition(
@@ -106,12 +107,13 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Map<Runnable, String> cronTasks = (Map<Runnable, String>)
 				new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
 		assertEquals(1, cronTasks.size());
-		MethodInvokingRunnable runnable = (MethodInvokingRunnable) cronTasks.keySet().iterator().next();
-		Object targetObject = runnable.getTargetObject();
-		String targetMethod = runnable.getTargetMethod();
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) cronTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
 		assertEquals(target, targetObject);
-		assertEquals("cron", targetMethod);
+		assertEquals("cron", targetMethod.getName());
 		assertEquals("*/7 * * * * ?", cronTasks.values().iterator().next());
+		Thread.sleep(10000);
 	}
 
 	@Test
@@ -130,11 +132,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Map<Runnable, Long> fixedRateTasks = (Map<Runnable, Long>)
 				new DirectFieldAccessor(registrar).getPropertyValue("fixedRateTasks");
 		assertEquals(1, fixedRateTasks.size());
-		MethodInvokingRunnable runnable = (MethodInvokingRunnable) fixedRateTasks.keySet().iterator().next();
-		Object targetObject = runnable.getTargetObject();
-		String targetMethod = runnable.getTargetMethod();
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) fixedRateTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
 		assertEquals(target, targetObject);
-		assertEquals("checkForUpdates", targetMethod);
+		assertEquals("checkForUpdates", targetMethod.getName());
 		assertEquals(new Long(5000), fixedRateTasks.values().iterator().next());
 	}
 
@@ -154,11 +156,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Map<Runnable, String> cronTasks = (Map<Runnable, String>)
 				new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
 		assertEquals(1, cronTasks.size());
-		MethodInvokingRunnable runnable = (MethodInvokingRunnable) cronTasks.keySet().iterator().next();
-		Object targetObject = runnable.getTargetObject();
-		String targetMethod = runnable.getTargetMethod();
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) cronTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
 		assertEquals(target, targetObject);
-		assertEquals("generateReport", targetMethod);
+		assertEquals("generateReport", targetMethod.getName());
 		assertEquals("0 0 * * * ?", cronTasks.values().iterator().next());
 	}
 
@@ -184,11 +186,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Map<Runnable, String> cronTasks = (Map<Runnable, String>)
 				new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
 		assertEquals(1, cronTasks.size());
-		MethodInvokingRunnable runnable = (MethodInvokingRunnable) cronTasks.keySet().iterator().next();
-		Object targetObject = runnable.getTargetObject();
-		String targetMethod = runnable.getTargetMethod();
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) cronTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
 		assertEquals(target, targetObject);
-		assertEquals("x", targetMethod);
+		assertEquals("x", targetMethod.getName());
 		assertEquals(businessHoursCronExpression, cronTasks.values().iterator().next());
 	}
 
@@ -214,11 +216,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		Map<Runnable, String> cronTasks = (Map<Runnable, String>)
 				new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
 		assertEquals(1, cronTasks.size());
-		MethodInvokingRunnable runnable = (MethodInvokingRunnable) cronTasks.keySet().iterator().next();
-		Object targetObject = runnable.getTargetObject();
-		String targetMethod = runnable.getTargetMethod();
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) cronTasks.keySet().iterator().next();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
 		assertEquals(target, targetObject);
-		assertEquals("y", targetMethod);
+		assertEquals("y", targetMethod.getName());
 		assertEquals(businessHoursCronExpression, cronTasks.values().iterator().next());
 	}
 
@@ -267,28 +269,27 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	private static class FixedDelayTestBean {
+	public static class FixedDelayTestBean {
 
 		@Scheduled(fixedDelay=5000)
 		public void fixedDelay() {
 		}
-
 	}
 
 
-	private static class FixedRateTestBean {
+	public static class FixedRateTestBean {
 
 		@Scheduled(fixedRate=3000)
 		public void fixedRate() {
 		}
-
 	}
 
 
-	private static class CronTestBean {
+	public static class CronTestBean {
 
 		@Scheduled(cron="*/7 * * * * ?")
-		public void cron() {
+		public void cron() throws IOException {
+			throw new IOException("no no no");
 		}
 
 	}
