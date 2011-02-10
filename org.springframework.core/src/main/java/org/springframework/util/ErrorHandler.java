@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ package org.springframework.util;
  */
 public interface ErrorHandler {
 
+	/**
+	 * Handle the given error, possibly rethrowing it as a fatal exception
+	 */
 	void handleError(Throwable t);
 
 }

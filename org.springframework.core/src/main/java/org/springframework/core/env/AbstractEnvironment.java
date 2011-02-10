@@ -16,10 +16,7 @@
 
 package org.springframework.core.env;
 
-import static java.lang.String.format;
-import static org.springframework.util.StringUtils.commaDelimitedListToSet;
-import static org.springframework.util.StringUtils.trimAllWhitespace;
-
+import static java.lang.String.*;
 import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -28,9 +25,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import static org.springframework.util.StringUtils.*;
 
 /**
  * Abstract base class for {@link Environment} implementations.
@@ -67,7 +66,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	//---------------------------------------------------------------------
 
 	public String[] getActiveProfiles() {
-		return this.doGetActiveProfiles().toArray(new String[]{});
+		return StringUtils.toStringArray(doGetActiveProfiles());
 	}
 
 	protected Set<String> doGetActiveProfiles() {
@@ -86,7 +85,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	public String[] getDefaultProfiles() {
-		return this.doGetDefaultProfiles().toArray(new String[]{});
+		return StringUtils.toStringArray(doGetDefaultProfiles());
 	}
 
 	protected Set<String> doGetDefaultProfiles() {
