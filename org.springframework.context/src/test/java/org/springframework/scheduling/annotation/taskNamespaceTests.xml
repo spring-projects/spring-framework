@@ -11,10 +11,18 @@
 	<context:load-time-weaver aspectj-weaving="on"/>
 	-->
 
-	<task:annotation-driven executor="executor"/>
+	<task:annotation-driven executor="executor" scheduler="scheduler"/>
+
+	<task:scheduled-tasks scheduler="scheduler">
+		<task:scheduled ref="target" method="test" fixed-rate="1000"/>
+	</task:scheduled-tasks>
 
 	<bean id="executor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
 		<property name="threadNamePrefix" value="testExecutor"/>
+	</bean>
+
+	<bean id="scheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
+		<property name="threadNamePrefix" value="testScheduler"/>
 	</bean>
 
 	<bean id="target" class="org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessorTests$TestBean"/>

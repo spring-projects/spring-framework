@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,18 @@
 
 package org.springframework.scheduling.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.scheduling.support.MethodInvokingRunnable;
+import org.springframework.scheduling.support.ScheduledMethodRunnable;
 
 /**
  * @author Mark Fisher
@@ -64,11 +63,11 @@ public class ScheduledTasksBeanDefinitionParserTests {
 		Map<Runnable, Long> tasks = (Map<Runnable, Long>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedRateTasks");
 		Runnable runnable = tasks.keySet().iterator().next();
-		assertEquals(MethodInvokingRunnable.class, runnable.getClass());
-		Object targetObject = ((MethodInvokingRunnable) runnable).getTargetObject();
-		String targetMethod = ((MethodInvokingRunnable) runnable).getTargetMethod();
+		assertEquals(ScheduledMethodRunnable.class, runnable.getClass());
+		Object targetObject = ((ScheduledMethodRunnable) runnable).getTarget();
+		Method targetMethod = ((ScheduledMethodRunnable) runnable).getMethod();
 		assertEquals(this.testBean, targetObject);
-		assertEquals("test", targetMethod);
+		assertEquals("test", targetMethod.getName());
 	}
 
 	@Test
