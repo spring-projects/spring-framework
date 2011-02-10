@@ -12,8 +12,8 @@ Changes in version 3.1 M1 (2011-02-11)
 * introduced support for environment profiles in bean definition files
 * introduced PropertySourcesPlaceholderConfigurer as alternative to PropertyPlaceholderConfigurer
 * introduced "c:" namespace for constructor argument shortcuts (analogous to the "p:" namespace)
-* introduced @FeatureConfiguration classes with @Feature methods returns FeatureSpecifications
-* added TxAnnotationDriven and MvcAnnotationDriven etc as out of the box FeatureSpecifications
+* introduced @FeatureConfiguration classes with @Feature methods that return FeatureSpecifications
+* added TxAnnotationDriven, MvcAnnotationDriven, etc. as out-of-the-box FeatureSpecifications
 * introduced caching abstraction and cache annotation support
 * ProxyCreationContext uses "ThreadLocal.remove()" over "ThreadLocal.set(null)" as well
 * fixed potential InjectionMetadata NPE when using SpringBeanAutowiringInterceptor
@@ -22,7 +22,7 @@ Changes in version 3.1 M1 (2011-02-11)
 * Servlet/PortletRequestDataBinder perform unwrapping for MultipartRequest as well
 * ResourceHttpRequestHandler does not set Content-Length header for 304 response
 * LocaleChangeInterceptor validates locale values in order to prevent XSS vulnerability
-
+* BeanDefinitionVisitor now actually visits factory method names
 
 Changes in version 3.0.5 (2010-10-20)
 -------------------------------------
