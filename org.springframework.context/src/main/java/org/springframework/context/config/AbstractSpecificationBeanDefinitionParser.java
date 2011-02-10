@@ -24,6 +24,7 @@ import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.ReaderContext;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.env.DefaultEnvironment;
 import org.w3c.dom.Element;
 
 /**
@@ -54,11 +55,19 @@ public abstract class AbstractSpecificationBeanDefinitionParser implements BeanD
 		specContext.setRegistry(parserContext.getRegistry());
 		specContext.setRegistrar(new ComponentRegistrarAdapter(parserContext));
 		specContext.setResourceLoader(parserContext.getReaderContext().getResourceLoader());
-		specContext.setEnvironment(parserContext.getDelegate().getEnvironment());
+		try {
+			// again, STS constraints around the addition of the new getEnvironment()
+			// method in 3.1.0 (it's not present in STS current spring version, 3.0.5)
+			// TODO 3.1 GA: remove this block prior to 3.1 GA
+			specContext.setEnvironment(parserContext.getDelegate().getEnvironment());
+		} catch (NoSuchMethodError ex) {
+			specContext.setEnvironment(new DefaultEnvironment());
+		}
 		try {
 			// access the reader context's problem reporter reflectively in order to
 			// compensate for tooling (STS) constraints around introduction of changes
 			// to parser context / reader context classes.
+			// TODO 3.1 GA: remove this block prior to 3.1 GA
 			Field field = ReaderContext.class.getDeclaredField("problemReporter");
 			field.setAccessible(true);
 			ProblemReporter problemReporter = (ProblemReporter)field.get(parserContext.getReaderContext());

@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -58,6 +59,7 @@ import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
+import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -263,6 +265,17 @@ public class BeanDefinitionParserDelegate {
 		Assert.notNull(readerContext, "Environment must not be null");
 		this.readerContext = readerContext;
 		this.environment = environment;
+	}
+
+	/**
+	 * Create a new BeanDefinitionParserDelegate associated with the
+	 * supplied {@link XmlReaderContext} and a new {@link DefaultEnvironment}.
+	 * @deprecated since Spring 3.1 in favor of
+	 * {@link #BeanDefinitionParserDelegate(XmlReaderContext, Environment)}
+	 */
+	@Deprecated
+	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
+		this(readerContext, new DefaultEnvironment());
 	}
 
 	/**
