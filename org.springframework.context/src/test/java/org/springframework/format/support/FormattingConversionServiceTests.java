@@ -33,7 +33,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -94,7 +94,13 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testFormatFieldForAnnotation() throws Exception {
 		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
-		doTestFormatFieldForAnnotation(Model.class);
+		doTestFormatFieldForAnnotation(Model.class, false);
+	}
+
+	@Test
+	public void testFormatFieldForAnnotationWithDirectFieldAccess() throws Exception {
+		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
+		doTestFormatFieldForAnnotation(Model.class, true);
 	}
 
 	@Test
@@ -109,7 +115,7 @@ public class FormattingConversionServiceTests {
 		context.refresh();
 		context.getBeanFactory().initializeBean(formattingService, "formattingService");
 		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
-		doTestFormatFieldForAnnotation(ModelWithPlaceholders.class);
+		doTestFormatFieldForAnnotation(ModelWithPlaceholders.class, false);
 	}
 
 	@Test
@@ -124,10 +130,10 @@ public class FormattingConversionServiceTests {
 		context.getBeanFactory().registerSingleton("ppc", ppc);
 		context.refresh();
 		formattingService = context.getBean("formattingService", FormattingConversionService.class);
-		doTestFormatFieldForAnnotation(ModelWithPlaceholders.class);
+		doTestFormatFieldForAnnotation(ModelWithPlaceholders.class, false);
 	}
 
-	private void doTestFormatFieldForAnnotation(Class<?> modelClass) throws Exception {
+	private void doTestFormatFieldForAnnotation(Class<?> modelClass, boolean directFieldAccess) throws Exception {
 		formattingService.addConverter(new Converter<Date, Long>() {
 			public Long convert(Date source) {
 				return source.getTime();
@@ -160,20 +166,23 @@ public class FormattingConversionServiceTests {
 		assertEquals(new LocalDate(2009, 11, 2), new LocalDate(dates.get(2)));
 
 		Object model = BeanUtils.instantiate(modelClass);
-		BeanWrapper accessor = PropertyAccessorFactory.forBeanPropertyAccess(model);
+		ConfigurablePropertyAccessor accessor = directFieldAccess ? PropertyAccessorFactory.forDirectFieldAccess(model) :
+				PropertyAccessorFactory.forBeanPropertyAccess(model);
 		accessor.setConversionService(formattingService);
 		accessor.setPropertyValue("dates", "10-31-09,11-1-09,11-2-09");
 		dates = (List<Date>) accessor.getPropertyValue("dates");
 		assertEquals(new LocalDate(2009, 10, 31), new LocalDate(dates.get(0)));
 		assertEquals(new LocalDate(2009, 11, 1), new LocalDate(dates.get(1)));
 		assertEquals(new LocalDate(2009, 11, 2), new LocalDate(dates.get(2)));
-		accessor.setPropertyValue("dates[0]", "10-30-09");
-		accessor.setPropertyValue("dates[1]", "10-1-09");
-		accessor.setPropertyValue("dates[2]", "10-2-09");
-		dates = (List<Date>) accessor.getPropertyValue("dates");
-		assertEquals(new LocalDate(2009, 10, 30), new LocalDate(dates.get(0)));
-		assertEquals(new LocalDate(2009, 10, 1), new LocalDate(dates.get(1)));
-		assertEquals(new LocalDate(2009, 10, 2), new LocalDate(dates.get(2)));
+		if (!directFieldAccess) {
+			accessor.setPropertyValue("dates[0]", "10-30-09");
+			accessor.setPropertyValue("dates[1]", "10-1-09");
+			accessor.setPropertyValue("dates[2]", "10-2-09");
+			dates = (List<Date>) accessor.getPropertyValue("dates");
+			assertEquals(new LocalDate(2009, 10, 30), new LocalDate(dates.get(0)));
+			assertEquals(new LocalDate(2009, 10, 1), new LocalDate(dates.get(1)));
+			assertEquals(new LocalDate(2009, 10, 2), new LocalDate(dates.get(2)));
+		}
 	}
 	
 	@Test
@@ -191,7 +200,7 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testParseEmptyString() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
-		assertNull(formattingService.convert("", TypeDescriptor.valueOf(Integer.class)));
+		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
@@ -206,7 +215,7 @@ public class FormattingConversionServiceTests {
 
 	@Test
 	public void testParseEmptyStringDefault() throws ParseException {
-		assertNull(formattingService.convert("", TypeDescriptor.valueOf(Integer.class)));
+		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
 
