@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.util.StringValueResolver;
  * contained in a BeanDefinition, resolving any placeholders found.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.2
  * @see BeanDefinition
  * @see BeanDefinition#getPropertyValues
@@ -162,6 +163,7 @@ public class BeanDefinitionVisitor {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	protected Object resolveValue(Object value) {
 		if (value instanceof BeanDefinition) {
 			visitBeanDefinition((BeanDefinition) value);
@@ -209,7 +211,6 @@ public class BeanDefinitionVisitor {
 		return value;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void visitArray(Object[] arrayVal) {
 		for (int i = 0; i < arrayVal.length; i++) {
 			Object elem = arrayVal[i];
@@ -220,7 +221,7 @@ public class BeanDefinitionVisitor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected void visitList(List listVal) {
 		for (int i = 0; i < listVal.size(); i++) {
 			Object elem = listVal.get(i);
@@ -231,7 +232,7 @@ public class BeanDefinitionVisitor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected void visitSet(Set setVal) {
 		Set newContent = new LinkedHashSet();
 		boolean entriesModified = false;
@@ -248,7 +249,7 @@ public class BeanDefinitionVisitor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected void visitMap(Map<?, ?> mapVal) {
 		Map newContent = new LinkedHashMap();
 		boolean entriesModified = false;
