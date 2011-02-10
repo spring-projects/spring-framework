@@ -16,16 +16,15 @@
 
 package org.springframework.expression.spel;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+import static junit.framework.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -75,14 +74,14 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		// ArrayList containing List<Integer> to List<String>
 		Class<?> clazz = typeDescriptorForListOfString.getElementType();
 		assertEquals(String.class,clazz);
-		List l = (List) tcs.convertValue(listOfInteger, typeDescriptorForListOfString);
+		List l = (List) tcs.convertValue(listOfInteger, TypeDescriptor.forObject(listOfInteger), typeDescriptorForListOfString);
 		assertNotNull(l);
 
 		// ArrayList containing List<String> to List<Integer>
 		clazz = typeDescriptorForListOfInteger.getElementType();
 		assertEquals(Integer.class,clazz);
 		
-		l = (List) tcs.convertValue(listOfString, typeDescriptorForListOfString);
+		l = (List) tcs.convertValue(listOfString, TypeDescriptor.forObject(listOfString), typeDescriptorForListOfString);
 		assertNotNull(l);
 	}
 	
@@ -121,8 +120,7 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		assertTrue(evaluationContext.getTypeConverter()
 				.canConvert(TypeDescriptor.valueOf(String.class), collectionType));
 		// ... and it can be done successfully
-		assertEquals("[1, 2, 3, 4]", evaluationContext.getTypeConverter().convertValue("1,2,3,4", collectionType).toString());
-
+		assertEquals("[1, 2, 3, 4]", evaluationContext.getTypeConverter().convertValue("1,2,3,4", TypeDescriptor.valueOf(String.class), collectionType).toString());
 
 		evaluationContext.setVariable("target", new TestTarget());
 
@@ -133,6 +131,47 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 
 	}
 
+	public static class Foo {
+
+		private Collection<Foo> foos;
+
+		public final String value;
+
+		public Foo(String value) {
+			this.value = value;
+		}
+
+		public void setFoos(Collection<Foo> foos) {
+			this.foos = foos;
+		}
+
+		public Collection<Foo> getFoos() {
+			return this.foos;
+		}
+
+	}
+
+	@Test
+	public void testConvert() {
+		Foo root = new Foo("bar");
+		StandardEvaluationContext context = new StandardEvaluationContext(root);
+
+		Collection<String> foos = Collections.singletonList("baz");
+
+		// property access, works
+		Expression expression = parser.parseExpression("foos");
+		expression.setValue(context, foos);
+		Foo baz = root.getFoos().iterator().next();
+		assertEquals("baz", baz.value);
+
+		// method call, fails (ClassCastException)
+		expression = parser.parseExpression("setFoos(#foos)");
+		context.setVariable("foos", foos);
+		expression.getValue(context);
+		baz = root.getFoos().iterator().next();
+		assertEquals("baz", baz.value);
+	}
+
 
 	/**
 	 * Type converter that uses the core conversion service.
@@ -141,10 +180,6 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 
 		private final ConversionService service = new DefaultConversionService();
 
-		public Object convertValue(Object value, TypeDescriptor typeDescriptor) throws EvaluationException {
-			return this.service.convert(value, typeDescriptor);
-		}
-		
 		public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return this.service.canConvert(sourceType, targetType);
 		}
@@ -152,7 +187,6 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) throws EvaluationException {
 			return this.service.convert(value, sourceType, targetType);
 		}
-		
 	}
 
 }

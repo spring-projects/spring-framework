@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,13 +188,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return result;
 	}
 
-	public boolean canConvert(Object source, TypeDescriptor targetType) {
-		return canConvert(TypeDescriptor.forObject(source), targetType);
-	}
-
-	public Object convert(Object source, TypeDescriptor targetType) {
-		return convert(source, TypeDescriptor.forObject(source), targetType);
-	}
 
 	public String toString() {
 		List<String> converterStrings = new ArrayList<String>();
