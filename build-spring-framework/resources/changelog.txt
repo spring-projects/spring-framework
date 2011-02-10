@@ -9,20 +9,24 @@ Changes in version 3.1 M1 (2011-02-11)
 * upgraded to JUnit 4.8.1 and TestNG 5.12.1
 * fixed aspects bundle to declare dependencies for @Async aspect as well
 * introduced Environment abstraction with flexible placeholder resolution
-* introduced support for environment profiles in bean definition files
+* introduced support for environment profiles in XML bean definition files
+* introduced @Profile annotation for configuration classes and individual component classes
 * introduced PropertySourcesPlaceholderConfigurer as alternative to PropertyPlaceholderConfigurer
 * introduced "c:" namespace for constructor argument shortcuts (analogous to the "p:" namespace)
 * introduced @FeatureConfiguration classes with @Feature methods that return FeatureSpecifications
 * added TxAnnotationDriven, MvcAnnotationDriven, etc. as out-of-the-box FeatureSpecifications
 * introduced caching abstraction and cache annotation support
+* moved EhCache FactoryBeans from context-support to context module
+* EhCacheManagerFactoryBean properly closes "ehcache.xml" input stream, if any
+* exceptions thrown by @Scheduled methods will be propagated to a registered ErrorHandler
 * ProxyCreationContext uses "ThreadLocal.remove()" over "ThreadLocal.set(null)" as well
+* BeanDefinitionVisitor now actually visits factory method names
 * fixed potential InjectionMetadata NPE when using SpringBeanAutowiringInterceptor
 * fixed AbstractBindingResult to avoid NPE in "hashCode()" if target is null
-* EhCacheManagerFactoryBean properly closes "ehcache.xml" input stream, if any
 * Servlet/PortletRequestDataBinder perform unwrapping for MultipartRequest as well
 * ResourceHttpRequestHandler does not set Content-Length header for 304 response
 * LocaleChangeInterceptor validates locale values in order to prevent XSS vulnerability
-* BeanDefinitionVisitor now actually visits factory method names
+
 
 Changes in version 3.0.5 (2010-10-20)
 -------------------------------------
