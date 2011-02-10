@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.beans.factory.config.AbstractPropertyPlaceholderConfigurer;
+import org.springframework.beans.factory.config.PlaceholderConfigurerSupport;
 import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.ApplicationContext;
@@ -45,8 +45,8 @@ public class ContextNamespaceHandlerTests {
 	public void propertyPlaceholder() throws Exception {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 				"contextNamespaceHandlerTests-replace.xml", getClass());
-		Map<String, AbstractPropertyPlaceholderConfigurer> beans = applicationContext
-				.getBeansOfType(AbstractPropertyPlaceholderConfigurer.class);
+		Map<String, PlaceholderConfigurerSupport> beans = applicationContext
+				.getBeansOfType(PlaceholderConfigurerSupport.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
 		String s = (String) applicationContext.getBean("string");
 		assertEquals("No properties replaced", "bar", s);
@@ -77,8 +77,8 @@ public class ContextNamespaceHandlerTests {
 		applicationContext.setEnvironment(env);
 		applicationContext.load(new ClassPathResource("contextNamespaceHandlerTests-simple.xml", getClass()));
 		applicationContext.refresh();
-		Map<String, AbstractPropertyPlaceholderConfigurer> beans = applicationContext
-				.getBeansOfType(AbstractPropertyPlaceholderConfigurer.class);
+		Map<String, PlaceholderConfigurerSupport> beans = applicationContext
+				.getBeansOfType(PlaceholderConfigurerSupport.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
 		String s = (String) applicationContext.getBean("string");
 		assertEquals("No properties replaced", "spam", s);
@@ -103,8 +103,8 @@ public class ContextNamespaceHandlerTests {
 	public void propertyPlaceholderIgnored() throws Exception {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
 				"contextNamespaceHandlerTests-replace-ignore.xml", getClass());
-		Map<String, AbstractPropertyPlaceholderConfigurer> beans = applicationContext
-				.getBeansOfType(AbstractPropertyPlaceholderConfigurer.class);
+		Map<String, PlaceholderConfigurerSupport> beans = applicationContext
+				.getBeansOfType(PlaceholderConfigurerSupport.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
 		String s = (String) applicationContext.getBean("string");
 		assertEquals("Properties replaced", "${bar}", s);
