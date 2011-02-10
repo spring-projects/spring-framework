@@ -87,16 +87,15 @@ public class DefaultEnvironment extends AbstractEnvironment {
 	/**
 	 * Create a new {@code Environment} populated with property sources in the following order:
 	 * <ul>
-	 *   <li>{@value #SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME}
-	 *   <li>{@value #SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME}
+	 * <li>{@value #SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME}
+	 * <li>{@value #SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME}
 	 * </ul>
-	 *
 	 * <p>Properties present in {@value #SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME}.
 	 */
 	public DefaultEnvironment() {
-		this.getPropertySources().addFirst(new MapPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, this.getSystemEnvironment()));
-		this.getPropertySources().addFirst(new MapPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, this.getSystemProperties()));
+		getPropertySources().addFirst(new MapPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, getSystemEnvironment()));
+		getPropertySources().addFirst(new MapPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, getSystemProperties()));
 	}
 
 }

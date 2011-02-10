@@ -56,9 +56,9 @@ public class DefaultWebEnvironment extends DefaultEnvironment {
 	 * Create a new {@code Environment} populated with the property sources contributed by
 	 * superclasses as well as:
 	 * <ul>
-	 *   <li>{@value #SERVLET_CONFIG_PROPERTY_SOURCE_NAME}
-	 *   <li>{@value #SERVLET_CONTEXT_PROPERTY_SOURCE_NAME}
-	 *   <li>(optionally) {@link JndiPropertySource#JNDI_PROPERTY_SOURCE_NAME "jndiPropertySource"}
+	 * <li>{@value #SERVLET_CONFIG_PROPERTY_SOURCE_NAME}
+	 * <li>{@value #SERVLET_CONTEXT_PROPERTY_SOURCE_NAME}
+	 * <li>(optionally) {@link JndiPropertySource#JNDI_PROPERTY_SOURCE_NAME "jndiPropertySource"}
 	 * </ul>
 	 * <p>Properties present in {@value #SERVLET_CONFIG_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #SERVLET_CONTEXT_PROPERTY_SOURCE_NAME}.
@@ -67,7 +67,6 @@ public class DefaultWebEnvironment extends DefaultEnvironment {
 	 * <p>The {@code Servlet}-related property sources are added as stubs for now, and will be
 	 * {@linkplain WebApplicationContextUtils#initServletPropertySources fully initialized}
 	 * once the actual {@link ServletConfig} and {@link ServletContext} objects are available.
-	 *
 	 * <p>If the {@link JndiPropertySource#JNDI_PROPERTY_SOURCE_ENABLED_FLAG "jndiPropertySourceEnabled"}
 	 * property is present in any of the default property sources, a {@link JndiPropertySource} will
 	 * be added as well, with precedence lower than servlet property sources, but higher than system
@@ -80,12 +79,13 @@ public class DefaultWebEnvironment extends DefaultEnvironment {
 	 * @see WebApplicationContextUtils#initServletPropertySources
 	 */
 	public DefaultWebEnvironment() {
-		this.getPropertySources().addFirst(new StubPropertySource(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
-		this.getPropertySources().addFirst(new StubPropertySource(SERVLET_CONFIG_PROPERTY_SOURCE_NAME));
+		getPropertySources().addFirst(new StubPropertySource(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
+		getPropertySources().addFirst(new StubPropertySource(SERVLET_CONFIG_PROPERTY_SOURCE_NAME));
 
 		Boolean jndiPropertySourceEnabled = this.getProperty(JndiPropertySource.JNDI_PROPERTY_SOURCE_ENABLED_FLAG, boolean.class);
-		if (jndiPropertySourceEnabled != null && jndiPropertySourceEnabled != false) {
-			this.getPropertySources().addAfter(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, new JndiPropertySource());
+		if (jndiPropertySourceEnabled != null && jndiPropertySourceEnabled) {
+			getPropertySources().addAfter(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, new JndiPropertySource());
 		}
 	}
+
 }

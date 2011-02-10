@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility methods for decorating tasks with error handling.
- * <p>
- * <b>NOTE:</b> This class is intended for internal use by Spring's scheduler
+ *
+ * <p><b>NOTE:</b> This class is intended for internal use by Spring's scheduler
  * implementations. It is only public so that it may be accessed from
  * implementations within other packages. It is <i>not</i> intended for general
  * use and may change in the future.
@@ -95,7 +95,6 @@ public abstract class TaskUtils {
 				logger.error("Unexpected error occurred in scheduled task.", t);
 			}
 		}
-
 	}
 
 
@@ -109,7 +108,6 @@ public abstract class TaskUtils {
 			super.handleError(t);
 			ReflectionUtils.rethrowRuntimeException(t);
 		}
-
 	}
 
 }
