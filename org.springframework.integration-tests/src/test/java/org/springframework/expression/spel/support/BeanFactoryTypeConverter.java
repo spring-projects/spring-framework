@@ -104,10 +104,5 @@ class BeanFactoryTypeConverter implements TypeConverter, BeanFactoryAware {
 		}
 		return delegate.convertIfNecessary(value, targetType.getType());
 	}
-	
-	public Object convertValue(Object value, TypeDescriptor targetType) {
-		return convertValue(value, TypeDescriptor.forObject(value), targetType);
-	}	
-
 
 }

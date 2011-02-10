@@ -16,13 +16,7 @@
 
 package org.springframework.core.convert.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import java.awt.Color;
+import java.awt.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractList;
@@ -40,7 +34,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
@@ -287,7 +283,8 @@ public class DefaultConversionTests {
 
 	@Test
 	public void convertArrayToCollectionGenericTypeConversion() throws Exception {
-		List<Integer> result = (List<Integer>) conversionService.convert(new String[] { "1", "2", "3" }, new TypeDescriptor(getClass().getDeclaredField("genericList")));
+		List<Integer> result = (List<Integer>) conversionService.convert(new String[] { "1", "2", "3" }, TypeDescriptor
+				.valueOf(String[].class), new TypeDescriptor(getClass().getDeclaredField("genericList")));
 		assertEquals(new Integer("1"), result.get(0));
 		assertEquals(new Integer("2"), result.get(1));
 		assertEquals(new Integer("3"), result.get(2));
@@ -297,7 +294,7 @@ public class DefaultConversionTests {
 	public void testSpr7766() throws Exception {
 		ConverterRegistry registry = ((ConverterRegistry) conversionService);
 		registry.addConverter(new ColorConverter());
-		List<Color> colors = (List<Color>) conversionService.convert(new String[] { "ffffff", "#000000" }, new TypeDescriptor(new MethodParameter(getClass().getMethod("handlerMethod", List.class), 0)));
+		List<Color> colors = (List<Color>) conversionService.convert(new String[] { "ffffff", "#000000" }, TypeDescriptor.valueOf(String[].class), new TypeDescriptor(new MethodParameter(getClass().getMethod("handlerMethod", List.class), 0)));
 		assertEquals(2, colors.size());
 		assertEquals(Color.WHITE, colors.get(0));
 		assertEquals(Color.BLACK, colors.get(1));
@@ -457,7 +454,8 @@ public class DefaultConversionTests {
 
 	@Test
 	public void convertStringToCollectionWithElementConversion() throws Exception {
-		List result = (List) conversionService.convert("1,2,3", new TypeDescriptor(getClass().getField("genericList")));
+		List result = (List) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
+				new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(3, result.size());
 		assertEquals(new Integer(1), result.get(0));
 		assertEquals(new Integer(2), result.get(1));
@@ -493,7 +491,8 @@ public class DefaultConversionTests {
 
 	@Test
 	public void convertObjectToCollectionWithElementConversion() throws Exception {
-		List<Integer> result = (List<Integer>) conversionService.convert(3L, new TypeDescriptor(getClass().getField("genericList")));
+		List<Integer> result = (List<Integer>) conversionService.convert(3L, TypeDescriptor.valueOf(Long.class),
+				new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(1, result.size());
 		assertEquals(new Integer(3), result.get(0));
 	}
@@ -528,7 +527,8 @@ public class DefaultConversionTests {
 		foo.add("1");
 		foo.add("2");
 		foo.add("3");
-		List<Integer> bar = (List<Integer>) conversionService.convert(foo, new TypeDescriptor(getClass().getField("genericList")));
+		List<Integer> bar = (List<Integer>) conversionService.convert(foo, TypeDescriptor.forObject(foo),
+				new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(new Integer(1), bar.get(0));
 		assertEquals(new Integer(2), bar.get(1));
 		assertEquals(new Integer(3), bar.get(2));
@@ -536,7 +536,8 @@ public class DefaultConversionTests {
 
 	@Test
 	public void convertCollectionToCollectionNull() throws Exception {
-		List<Integer> bar = (List<Integer>) conversionService.convert(null, new TypeDescriptor(getClass().getField("genericList")));
+		List<Integer> bar = (List<Integer>) conversionService.convert(null,
+				TypeDescriptor.valueOf(LinkedHashSet.class), new TypeDescriptor(getClass().getField("genericList")));
 		assertNull(bar);
 	}
 
@@ -546,7 +547,8 @@ public class DefaultConversionTests {
 		foo.add("1");
 		foo.add("2");
 		foo.add("3");
-		List bar = (List) conversionService.convert(foo, TypeDescriptor.valueOf(List.class));
+		List bar = (List) conversionService.convert(foo, TypeDescriptor.valueOf(LinkedHashSet.class), TypeDescriptor
+				.valueOf(List.class));
 		assertEquals("1", bar.get(0));
 		assertEquals("2", bar.get(1));
 		assertEquals("3", bar.get(2));
@@ -559,7 +561,8 @@ public class DefaultConversionTests {
 		map.put("2", "2");
 		map.put("3", "3");
 		Collection values = map.values();
-		List<Integer> bar = (List<Integer>) conversionService.convert(values, new TypeDescriptor(getClass().getField("genericList")));
+		List<Integer> bar = (List<Integer>) conversionService.convert(values,
+				TypeDescriptor.forObject(values), new TypeDescriptor(getClass().getField("genericList")));
 		assertEquals(3, bar.size());
 		assertEquals(new Integer(1), bar.get(0));
 		assertEquals(new Integer(2), bar.get(1));
@@ -573,7 +576,8 @@ public class DefaultConversionTests {
 		Map<String, String> foo = new HashMap<String, String>();
 		foo.put("1", "BAR");
 		foo.put("2", "BAZ");
-		Map<String, FooEnum> map = (Map<String, FooEnum>) conversionService.convert(foo, new TypeDescriptor(getClass().getField("genericMap")));
+		Map<String, FooEnum> map = (Map<String, FooEnum>) conversionService.convert(foo,
+				TypeDescriptor.forObject(foo), new TypeDescriptor(getClass().getField("genericMap")));
 		assertEquals(FooEnum.BAR, map.get(1));
 		assertEquals(FooEnum.BAZ, map.get(2));
 	}

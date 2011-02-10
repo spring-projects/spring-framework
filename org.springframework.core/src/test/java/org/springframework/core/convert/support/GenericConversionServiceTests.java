@@ -16,14 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,7 +24,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -111,12 +105,12 @@ public class GenericConversionServiceTests {
 
 	public void convertNullTargetClass() {
 		assertNull(conversionService.convert("3", (Class<?>) null));
-		assertNull(conversionService.convert("3", TypeDescriptor.NULL));
+		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
 	}
 
 	@Test
 	public void convertNullTypeDescriptor() {
-		assertNull(conversionService.convert("3", TypeDescriptor.NULL));
+		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
 	}
 
 	@Test
@@ -150,7 +144,7 @@ public class GenericConversionServiceTests {
 		Boolean b = conversionService.convert("true", boolean.class);
 		assertEquals(Boolean.TRUE, b);
 		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(boolean.class)));
-		b = (Boolean) conversionService.convert("true", TypeDescriptor.valueOf(boolean.class));
+		b = (Boolean) conversionService.convert("true", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(boolean.class));
 		assertEquals(Boolean.TRUE, b);
 	}
 
@@ -260,7 +254,7 @@ public class GenericConversionServiceTests {
 		GenericConversionService conversionService = new DefaultConversionService();
 		Map<String, String> input = new LinkedHashMap<String, String>();
 		input.put("key", "value");
-		Object converted = conversionService.convert(input, new TypeDescriptor(getClass().getField("wildcardMap")));
+		Object converted = conversionService.convert(input, TypeDescriptor.forObject(input), new TypeDescriptor(getClass().getField("wildcardMap")));
 		assertEquals(input, converted);
 	}
 
@@ -323,7 +317,7 @@ public class GenericConversionServiceTests {
 		source.add("3");
 		TypeDescriptor td = new TypeDescriptor(getClass().getField("list"));
 		for (int i = 0; i < 1000000; i++) {
-			conversionService.convert(source, td);
+			conversionService.convert(source, TypeDescriptor.forObject(source), td);
 		}
 		watch.stop();
 		watch.start("convert 4,000,000 manually");
@@ -350,7 +344,7 @@ public class GenericConversionServiceTests {
 		source.put("3", "3");
 		TypeDescriptor td = new TypeDescriptor(getClass().getField("map"));		
 		for (int i = 0; i < 1000000; i++) {
-			conversionService.convert(source, td);
+			conversionService.convert(source, TypeDescriptor.forObject(source), td);
 		}
 		watch.stop();
 		watch.start("convert 4,000,000 manually");

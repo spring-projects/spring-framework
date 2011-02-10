@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,9 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 
 /**
- * Represents the invocation of a constructor. Either a constructor on a regular type or construction of an array. When
- * an array is constructed, an initializer can be specified.
+ * Represents the invocation of a constructor. Either a constructor on a regular type or
+ * construction of an array. When an array is constructed, an initializer can be specified.
+ *
  * <p>
  * Examples:<br>
  * new String('hello world')<br>
@@ -322,7 +323,7 @@ public class ConstructorReference extends SpelNodeImpl {
 		for (int i = 0; i < newObjectArray.length; i++) {
 			SpelNode elementNode = initializer.getChild(i);
 			Object arrayEntry = elementNode.getValue(state);
-			newObjectArray[i] = typeConverter.convertValue(arrayEntry, toTypeDescriptor);
+			newObjectArray[i] = typeConverter.convertValue(arrayEntry, TypeDescriptor.forObject(arrayEntry), toTypeDescriptor);
 		}
 	}
 

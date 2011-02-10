@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public interface TypeConverter {
 	/**
 	 * Convert (may coerce) a value from one type to another, for example from a boolean to a string.
 	 * The typeDescriptor parameter enables support for typed collections - if the caller really wishes they
-	 * can have a List<Integer> for example, rather than simply a List.
+	 * can have a List&lt;Integer&gt; for example, rather than simply a List.
 	 * @param value the value to be converted
 	 * @param sourceType a type descriptor that supplies extra information about the source object
 	 * @param targetType a type descriptor that supplies extra information about the requested result type
@@ -50,8 +50,4 @@ public interface TypeConverter {
 	 */
 	Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType);
 
-	// 3.1 additions for encapsulation of TypeDescriptor.forObject(value);
-	
-	Object convertValue(Object value, TypeDescriptor targetType);
-	
 }
