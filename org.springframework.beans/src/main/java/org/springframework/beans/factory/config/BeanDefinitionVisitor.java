@@ -115,7 +115,7 @@ public class BeanDefinitionVisitor {
 	}
 
 	protected void visitFactoryMethodName(BeanDefinition beanDefinition) {
-		String factoryMethodName = beanDefinition.getFactoryBeanName();
+		String factoryMethodName = beanDefinition.getFactoryMethodName();
 		if (factoryMethodName != null) {
 			String resolvedName = resolveStringValue(factoryMethodName);
 			if (!factoryMethodName.equals(resolvedName)) {

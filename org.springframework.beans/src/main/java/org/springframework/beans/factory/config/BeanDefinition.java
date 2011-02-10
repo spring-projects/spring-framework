@@ -123,8 +123,8 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Specify a factory method, if any. This method will be invoked with
 	 * constructor arguments, or with no arguments if none are specified.
-	 * The method will be invoked on the specifed factory bean, if any,
-	 * or as static method on the local bean class else.
+	 * The method will be invoked on the specified factory bean, if any,
+	 * or otherwise as a static method on the local bean class.
 	 * @param factoryMethodName static factory method name,
 	 * or <code>null</code> if normal constructor creation should be used
 	 * @see #getBeanClassName()
