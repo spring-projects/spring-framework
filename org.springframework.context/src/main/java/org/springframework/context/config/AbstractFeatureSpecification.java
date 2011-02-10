@@ -71,7 +71,7 @@ public abstract class AbstractFeatureSpecification implements SourceAwareSpecifi
 
 	public void execute(SpecificationContext specificationContext) {
 		FeatureSpecificationExecutor executor =
-			BeanUtils.instantiateClass(this.executorType, FeatureSpecificationExecutor.class);
+			BeanUtils.instantiateClass(this.executorType);
 		executor.execute(this, specificationContext);
 	}
 
