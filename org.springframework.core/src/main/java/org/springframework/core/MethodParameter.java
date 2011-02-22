@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.core;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -39,9 +41,9 @@ import org.springframework.util.Assert;
  */
 public class MethodParameter {
 
-	private Method method;
+	private final Method method;
 
-	private Constructor constructor;
+	private final Constructor constructor;
 
 	private final int parameterIndex;
 
@@ -61,6 +63,9 @@ public class MethodParameter {
 	private Map<Integer,Integer> typeIndexesPerLevel;
 
 	Map<TypeVariable, Type> typeVariableMap;
+
+	private int hash;
+
 
 
 	/**
@@ -87,6 +92,7 @@ public class MethodParameter {
 		this.method = method;
 		this.parameterIndex = parameterIndex;
 		this.nestingLevel = nestingLevel;
+		this.constructor = null;
 	}
 
 	/**
@@ -111,6 +117,7 @@ public class MethodParameter {
 		this.constructor = constructor;
 		this.parameterIndex = parameterIndex;
 		this.nestingLevel = nestingLevel;
+		this.method = null;
 	}
 
 	/**
@@ -148,10 +155,26 @@ public class MethodParameter {
 	}
 
 	/**
+	 * Returns the wrapped member.
+	 * @return the member
+	 */
+	private Member getMember() {
+		return this.method != null ? this.method : this.constructor;
+	}
+
+	/**
+	 * Returns the wrapped annotated element.
+	 * @return the annotated element
+	 */
+	private AnnotatedElement getAnnotatedElement() {
+		return this.method != null ? this.method : this.constructor;
+	}
+
+	/**
 	 * Return the class that declares the underlying Method or Constructor.
 	 */
 	public Class getDeclaringClass() {
-		return (this.method != null ? this.method.getDeclaringClass() : this.constructor.getDeclaringClass());
+		return getMember().getDeclaringClass();
 	}
 
 	/**
@@ -209,7 +232,7 @@ public class MethodParameter {
 	 * Return the annotations associated with the target method/constructor itself.
 	 */
 	public Annotation[] getMethodAnnotations() {
-		return (this.method != null ? this.method.getAnnotations() : this.constructor.getAnnotations());
+		return getAnnotatedElement().getAnnotations();
 	}
 
 	/**
@@ -219,8 +242,7 @@ public class MethodParameter {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
-		return (this.method != null ? this.method.getAnnotation(annotationType) :
-				(T) this.constructor.getAnnotation(annotationType));
+		return getAnnotatedElement().getAnnotation(annotationType);
 	}
 
 	/**
@@ -374,4 +396,36 @@ public class MethodParameter {
 		}
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj != null && obj instanceof MethodParameter) {
+			MethodParameter other = (MethodParameter) obj;
+
+			if (this.parameterIndex != other.parameterIndex) {
+				return false;
+			}
+			else if (this.getMember().equals(other.getMember())) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		return false;
+	}
+
+
+	@Override
+	public int hashCode() {
+		int result = hash;
+		if (result == 0) {
+			result = getMember().hashCode();
+			result = 31 * result + parameterIndex;
+			hash = result;
+		}
+		return result;
+	}
 }
