@@ -119,15 +119,15 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed]]></
 			</para>
 			
 			<programlisting language="java"><!-- select 'isbn' argument -->
-@Cacheable(value="book", <emphasis role="bold">key="isbn"</emphasis>
+@Cacheable(value="book", <emphasis role="bold">key="#isbn"</emphasis>
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
 <!-- select nested property of a certain argument -->
-@Cacheable(value="book", <emphasis role="bold">key="isbn.rawNumber"</emphasis>)
+@Cacheable(value="book", <emphasis role="bold">key="#isbn.rawNumber"</emphasis>)
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
 <!-- invoke arbitrary method using certain arguments -->
-@Cacheable(value="book", <emphasis role="bold">key="T(someType).hash(isbn)"</emphasis>)
+@Cacheable(value="book", <emphasis role="bold">key="T(someType).hash(#isbn)"</emphasis>)
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)</programlisting>
 
 			<para>The snippets above, show how easy it is to select a certain argument, one of its properties or even an arbitrary (static) method.</para>
@@ -346,13 +346,13 @@ public void loadBooks(InputStream batch)]]></programlisting>
 		
 		<programlisting language="java"><![CDATA[@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-@Cacheable(value=“books”, key="isbn")
+@Cacheable(value=“books”, key="#isbn")
 public @interface SlowService {
 }]]></programlisting>
 
 		<para>Above, we have defined our own <literal>SlowService</literal> annotation which itself is annotated with <literal>@Cacheable</literal> - now we can replace the following code:</para>
 		
-		<programlisting language="java"><![CDATA[@Cacheable(value="books", key="isbn"
+		<programlisting language="java"><![CDATA[@Cacheable(value="books", key="#isbn")
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]></programlisting>
 
 		<para>with:</para>
