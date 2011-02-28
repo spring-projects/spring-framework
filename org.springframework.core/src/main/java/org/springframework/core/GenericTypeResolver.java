@@ -214,7 +214,7 @@ public abstract class GenericTypeResolver {
 	 * @param typeVariableMap the TypeVariable Map to resolved against
 	 * @return the type if it resolves to a Class, or <code>Object.class</code> otherwise
 	 */
-	static Class resolveType(Type genericType, Map<TypeVariable, Type> typeVariableMap) {
+	public static Class resolveType(Type genericType, Map<TypeVariable, Type> typeVariableMap) {
 		Type rawType = getRawType(genericType, typeVariableMap);
 		return (rawType instanceof Class ? (Class) rawType : Object.class);
 	}
@@ -247,7 +247,7 @@ public abstract class GenericTypeResolver {
 	 * {@link Class} for the specified {@link Class}. Searches all super types,
 	 * enclosing types and interfaces.
 	 */
-	static Map<TypeVariable, Type> getTypeVariableMap(Class clazz) {
+	public static Map<TypeVariable, Type> getTypeVariableMap(Class clazz) {
 		Reference<Map<TypeVariable, Type>> ref = typeVariableCache.get(clazz);
 		Map<TypeVariable, Type> typeVariableMap = (ref != null ? ref.get() : null);
 
