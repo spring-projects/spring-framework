@@ -33,6 +33,13 @@ import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler
  * 	<li>{@link HttpRequestHandlerAdapter} to enable the DispatcherServlet to be
  *     able to invoke the above request handler.
  * </ul>
+ *
+ * This handler will forward all requests to the default Servlet. Therefore 
+ * it is important that it remains last in the order of all other URL 
+ * HandlerMappings. That will be the case if you use the {@link MvcAnnotationDriven} 
+ * feature or alternatively if you are setting up your customized HandlerMapping 
+ * instance be sure to set its "order" property to a value lower than that of 
+ * the DefaultServletHttpRequestHandler, which is Integer.MAX_VALUE. 
  * 
  * @author Rossen Stoyanchev
  * @since 3.1

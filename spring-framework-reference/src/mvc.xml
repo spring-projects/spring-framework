@@ -3509,8 +3509,16 @@ application.version=1.0.0]]>
   		<para>
   			This tag allows for mapping the <code>DispatcherServlet</code> to "/" (thus overriding the mapping of the container's default Servlet), 
   			while still allowing static resource requests to be handled by the container's default Servlet.  It configures a 
-  			<code>DefaultServletHttpRequestHandler</code> with a URL mapping (given a lowest precedence order) of "/**".  This handler will 
-  			forward all requests to the default Servlet.  To enable this feature using the default setup, simply include the tag in the form: 
+  			<code>DefaultServletHttpRequestHandler</code> with a URL mapping of "/**" and the lowest priority relative to other URL mappings.  
+  		</para>
+  		<para>
+  			This handler will forward all requests to the default Servlet. Therefore it is important that it remains last in the order of all
+  			other URL <code>HandlerMappings</code>. That will be the case if you use <code>&lt;mvc:annotation-driven&gt;</code> or alternatively if you 
+  			are setting up your own customized <code>HandlerMapping</code> instance be sure to set its <code>order</code> property to a value lower than 
+  			that of the <code>DefaultServletHttpRequestHandler</code>, which is <code>Integer.MAX_VALUE</code>.
+  		</para>
+  		<para>
+  			To enable the feature using the default setup, simply include the tag in the form:
   		</para>
   		<programlisting language="xml"><![CDATA[
 <mvc:default-servlet-handler/>]]>

@@ -171,6 +171,10 @@
 	Configures a handler for serving static resources by forwarding to the Servlet container's default Servlet.  Use of this
 	handler allows using a "/" mapping with the DispatcherServlet while still utilizing the Servlet container to serve static
 	resources.
+	This handler will forward all requests to the default Servlet. Therefore it is important that it remains last in the 
+	order of all other URL HandlerMappings. That will be the case if you use the "annotation-driven" element or alternatively 
+	if you are setting up your customized HandlerMapping instance be sure to set its "order" property to a value lower than 
+	that of the DefaultServletHttpRequestHandler, which is Integer.MAX_VALUE. 
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
