@@ -19,20 +19,29 @@ package org.springframework.web.servlet.view;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.View;
+import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -214,18 +223,49 @@ public class RedirectView extends AbstractUrlBasedView {
 			targetUrl.append(request.getContextPath());
 		}
 		targetUrl.append(getUrl());
+
+		String enc = this.encodingScheme;
+		if (enc == null) {
+			enc = request.getCharacterEncoding();
+		}
+		if (enc == null) {
+			enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
+		}
+
+		UriTemplate uriTemplate = createUriTemplate(targetUrl, enc);
+		if (uriTemplate.getVariableNames().size() > 0) {
+			targetUrl = new StringBuilder(uriTemplate.expand(model).toString());
+			model = removeKeys(model, uriTemplate.getVariableNames());
+		}
 		if (this.exposeModelAttributes) {
-			String enc = this.encodingScheme;
-			if (enc == null) {
-				enc = request.getCharacterEncoding();
-			}
-			if (enc == null) {
-				enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
-			}
 			appendQueryProperties(targetUrl, model, enc);
 		}
 
 		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
+	}
+
+	private UriTemplate createUriTemplate(StringBuilder targetUrl, final String encoding) {
+		return new UriTemplate(targetUrl.toString()) {
+			@Override
+			protected URI encodeUri(String uri) {
+				try {
+					String encoded = UriUtils.encodeUri(uri, encoding);
+					return new URI(encoded);
+				} catch (UnsupportedEncodingException ex) {
+					throw new IllegalStateException(ex);
+				} catch (URISyntaxException ex) {
+					throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex, ex);
+				}
+			}
+		};
+	}
+	
+	private static Map<String, Object> removeKeys(Map<String, Object> map, List<String> keysToRemove) {
+		Map<String, Object> result = new HashMap<String, Object>(map);
+		for (String key : keysToRemove) {
+			result.remove(key);
+		}
+		return result;
 	}
 
 	/**
