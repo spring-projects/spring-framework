@@ -43,6 +43,7 @@ import org.springframework.web.servlet.view.AbstractView;
  *
  * @author Jeremy Grelle
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @see org.springframework.http.converter.json.MappingJacksonHttpMessageConverter
  * @since 3.0
  */
@@ -61,8 +62,10 @@ public class MappingJacksonJsonView extends AbstractView {
 
 	private Set<String> renderedAttributes;
 
-	private boolean disableCaching = true;
+	private boolean extractValueFromSingleKeyModel = false;
 
+	private boolean disableCaching = true;
+	
 	/**
 	 * Construct a new {@code JacksonJsonView}, setting the content type to {@code application/json}.
 	 */
@@ -127,6 +130,19 @@ public class MappingJacksonJsonView extends AbstractView {
 		this.disableCaching = disableCaching;
 	}
 
+	/**
+	 * Set whether to serialize models containing a single attribute as a map or whether to 
+	 * extract the single value from the model and serialize it directly.
+	 * The effect of setting this flag is similar to using 
+	 * {@code MappingJacksonHttpMessageConverter} with an {@code @ResponseBody}.
+	 * request-handling method.  
+	 * 
+	 * <p>Default is {@code false}. 
+	 */
+	public void setExtractValueFromSingleKeyModel(boolean extractValueFromSingleKeyModel) {
+		this.extractValueFromSingleKeyModel = extractValueFromSingleKeyModel;
+	}
+
 	@Override
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
 		response.setContentType(getContentType());
@@ -170,7 +186,7 @@ public class MappingJacksonJsonView extends AbstractView {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}
-		return result;
+		return (this.extractValueFromSingleKeyModel && result.size() == 1) ? result.values().iterator().next() : result;
 	}
 
 }
