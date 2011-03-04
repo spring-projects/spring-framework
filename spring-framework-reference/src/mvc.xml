@@ -272,7 +272,7 @@
     setting up Spring Web MVC. <!--The discussion below is a little vague about what you're doing, when you do it, and what you're accomplishing. --><!-- Is the next step shown in the next example screen?-->You
     now need to configure the various beans used by the Spring Web MVC
     framework (over and above the <classname>DispatcherServlet</classname>
-    itself).<!--See previous sentence.Add info to indicate where you find info that tells you how to configure beans for MVC framework. --><!--Next paragraph, so what are you telling them to *do* here? --></para>
+    itself).<!--See previous sentence. Add info to indicate where you find info that tells you how to configure beans for MVC framework. --><!--Next paragraph, so what are you telling them to *do* here? --></para>
 
     <para>As detailed in <xref linkend="context-introduction" />,
     <interfacename>ApplicationContext</interfacename> instances in Spring can
@@ -451,7 +451,7 @@
         in the process to resolve the locale to use when processing the
         request (rendering the view, preparing data, and so on). If you do not
         need locale resolving, you do not need it.</para>
-        <!--Reword 'if you don't need local resolving, you dont need to use it '. Are you saying locale resolving is optional? If you don't configure it, will this step occur?-->
+        <!--Reword 'if you don't need local resolving, you don't need to use it '. Are you saying locale resolving is optional? If you don't configure it, will this step occur?-->
       </listitem>
 
       <listitem>
@@ -459,7 +459,7 @@
         as views determine which theme to use. If you do not use themes, you
         can ignore it.</para>
 
-        <!-- MLP perhaps say that there are not side effect to this binding.etc... Clarify *ignore it*. Does this step still occur if you don't use themes? -->
+        <!-- MLP perhaps say that there are not side effect to this binding, etc... Clarify *ignore it*. Does this step still occur if you don't use themes? -->
 
         <!--And what if you DO use themes, what do you do and when? Same question re locale resolving.-->
       </listitem>
@@ -1200,7 +1200,7 @@ public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet
             <listitem>
               <para>A <classname>HttpEntity&lt;?&gt;</classname> or
               <classname>ResponseEntity&lt;?&gt;</classname> object
-              to provide access to the Servlet reponse HTTP headers and
+              to provide access to the Servlet response HTTP headers and
               contents. The entity body will be converted to the response
               stream using
               <interfacename>HttpMessageConverter</interfacename>s. See <xref
@@ -1561,7 +1561,7 @@ public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encod
         is not <classname>String</classname>. 
         See <xref linkend="mvc-ann-typeconversion"/>.</para>
         
-        <tip><para>Built-in support is available for converting a coma-separated 
+        <tip><para>Built-in support is available for converting a comma-separated 
         string into an array/collection of strings or other types known to the 
         type conversion system. For example a method parameter annotated with 
         <literal>@RequestHeader("Accept")</literal> may be of type 
@@ -3125,10 +3125,10 @@ public class SimpleController {
       </itemizedlist>
 
       <sidebar>
-        <title>What, no automatic pluralisation?</title>
+        <title>What, no automatic pluralization?</title>
 
         <para>Spring Web MVC's convention-over-configuration support does not
-        support automatic pluralisation. That is, you cannot add a
+        support automatic pluralization. That is, you cannot add a
         <interfacename>List</interfacename> of <classname>Person</classname>
         objects to a <classname>ModelAndView</classname> and have the
         generated name be <classname>people</classname>.</para>
@@ -3325,7 +3325,7 @@ public class SimpleController {
     				<para>
 			    		Support for Spring 3's Type <link linkend="core-convert">ConversionService</link> in addition to JavaBeans PropertyEditors during Data Binding.
 			    		A ConversionService instance produced by the <classname>org.springframework.format.support.FormattingConversionServiceFactoryBean</classname> is used by default.
-			    		This can be overriden by setting the <literal>conversion-service</literal> attribute. 
+			    		This can be overridden by setting the <literal>conversion-service</literal> attribute. 
     				</para>
     			</listitem>
     			<listitem>
@@ -3436,7 +3436,7 @@ public class SimpleController {
   		<title>mvc:interceptors</title>
   		<para>
   			This tag allows you to register custom HandlerInterceptors or WebRequestInterceptors that should be applied to all HandlerMapping beans.
-  			You can also restrict the URL paths specifc interceptors apply to.
+  			You can also restrict the URL paths that specific interceptors apply to.
   		</para>
   		<para>
   			An example of registering an interceptor applied to all URL paths:
@@ -3461,7 +3461,7 @@ public class SimpleController {
   	<section id="mvc-view-controller">
   		<title>mvc:view-controller</title>
   		<para>
-  			This tag is a shorcut for defining a <classname>ParameterizableViewController</classname> that immediately forwards to a view when invoked.
+  			This tag is a shortcut for defining a <classname>ParameterizableViewController</classname> that immediately forwards to a view when invoked.
   			Use it in static cases when there is no Java Controller logic to execute before the view generates the response.
   		</para>
   		<para>
@@ -3493,7 +3493,7 @@ public class SimpleController {
   		</programlisting>
   		<para>
   			The <code>mapping</code> attribute must be an Ant pattern that can be used by <classname>SimpleUrlHandlerMapping</classname>, and the <code>location</code> 
-  			attribute must specify one or more valid resource directory locations.  Multiple resource locations may be specified using a comma-seperated list of values. 
+  			attribute must specify one or more valid resource directory locations.  Multiple resource locations may be specified using a comma-separated list of values. 
   			The locations specified will be checked in the specified order for the presence of the resource for any given request.  For example, to enable the serving 
   			of resources from both the web application root and from a known path of <code>/META-INF/public-web-resources/</code> in any jar on the classpath, the tag 
   			would be specified as: 
