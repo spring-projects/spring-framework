@@ -194,6 +194,36 @@ public class MappingJacksonJsonViewTest {
 		validateResult();
 	}
 
+	@Test
+	public void filterSingleKeyModel() throws Exception {
+		view.setExtractValueFromSingleKeyModel(true);
+
+		Map<String, Object> model = new HashMap<String, Object>();
+		TestBeanSimple bean = new TestBeanSimple();
+		model.put("foo", bean);
+
+		Object actual = view.filterModel(model);
+		
+		assertSame(bean, actual);
+	}
+	
+	@Test
+	public void filterTwoKeyModel() throws Exception {
+		view.setExtractValueFromSingleKeyModel(true);
+
+		Map<String, Object> model = new HashMap<String, Object>();
+		TestBeanSimple bean1 = new TestBeanSimple();
+		TestBeanSimple bean2 = new TestBeanSimple();
+		model.put("foo1", bean1);
+		model.put("foo2", bean2);
+
+		Object actual = view.filterModel(model);
+
+		assertTrue(actual instanceof Map);
+		assertSame(bean1, ((Map) actual).get("foo1"));
+		assertSame(bean2, ((Map) actual).get("foo2"));
+	}
+
 	private void validateResult() throws Exception {
 		Object jsResult =
 				jsContext.evaluateString(jsScope, "(" + response.getContentAsString() + ")", "JSON Stream", 1, null);

@@ -2610,7 +2610,9 @@ simpleReport.reportDataKey=myBeanData</programlisting>
   	of framework-specific classes) will be encoded as JSON. For cases where the 
   	contents of the map need to be filtered, users may specify a specific set of 
   	model attributes to encode via the <literal>RenderedAttributes</literal> 
-  	property.</para>
+  	property. The <literal>extractValueFromSingleKeyModel</literal> property
+  	may also be  used to have the value in single-key models extracted and 
+  	serialized directly rather than as a map of model attributes.</para>
 
 	<para>JSON mapping can be customized as needed through the use of Jackson's provided 
 	annotations. When further control is needed, a custom 
