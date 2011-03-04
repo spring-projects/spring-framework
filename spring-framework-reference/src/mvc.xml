@@ -603,23 +603,22 @@
 public class HelloWorldController {
 
     @RequestMapping("/helloWorld")
-    public ModelAndView helloWorld() {
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("helloWorld");
-        mav.addObject("message", "Hello World!");
-        return mav;
+    public String helloWorld(Model model) {
+        model.addAttribute("message", "Hello World!");
+        return "helloWorld";
     }
 }</programlisting>
 
     <para>As you can see, the <interfacename>@Controller</interfacename> and
     <interfacename>@RequestMapping</interfacename> annotations allow flexible
-    method names and signatures. In this particular example the method has no
-    parameters and returns a <classname>ModelAndView</classname>, but various
-    other (and better) strategies exist, <!--strategies for doing *what*? -->as
-    are explained later in this section. <classname>ModelAndView</classname>,
-    <interfacename>@Controller</interfacename>, and
-    <interfacename>@RequestMapping</interfacename> form the basis for the
-    Spring MVC implementation. This section documents these annotations and
+    method names and signatures. In this particular example the method accepts
+    a <classname>Model</classname> and returns a view name as a 
+    <classname>String</classname>, but various other method parameters and 
+    return values can be used as explained later in this section. 
+    <interfacename>@Controller</interfacename> and 
+    <interfacename>@RequestMapping</interfacename> and a number of other 
+    annotations form the basis for the Spring MVC implementation. 
+    This section documents these annotations and
     how they are most commonly used in a Servlet environment.</para>
 
     <section id="mvc-ann-controller">
@@ -679,7 +678,7 @@ public class HelloWorldController {
       class-level annotation maps a specific request path (or path pattern)
       onto a form controller, with additional method-level annotations
       narrowing the primary mapping for a specific HTTP method request method
-      ("GET"/"POST") or specific HTTP request parameters.</para>
+      ("GET", "POST", etc.) or an HTTP request parameter condition.</para>
 
       <para>The following example shows a controller in a Spring MVC
       application that uses this annotation:</para>
@@ -894,8 +893,8 @@ public class RelativePathUriTemplateController {
           Date, etc. Spring automatically converts to the appropriate type and
           throws a <classname>TypeMismatchException</classname> if the type is
           not correct. You can further customize this conversion process by
-          customizing the data binder. See <xref
-          linkend="mvc-ann-webdatabinder" />.</para>
+          customizing the data binder. See <xref linkend="mvc-ann-typeconversion"/>
+          and <xref linkend="mvc-ann-webdatabinder" />.</para>
         </tip>
       </section>
 
@@ -1252,6 +1251,10 @@ public class EditPetForm {
         <literal>required</literal> attribute to <literal>false</literal>
         (e.g., <literal>@RequestParam(value="id",
         required=false)</literal>).</para>
+        
+        <para>Type conversion is applied automatically if the target method parameter 
+        type is not <classname>String</classname>.
+        See <xref linkend="mvc-ann-typeconversion"/>.</para>
       </section>
 
       <section id="mvc-ann-requestbody">
@@ -1516,6 +1519,10 @@ public void displayHeaderInfo(<emphasis role="bold">@CookieValue("JSESSIONID")</
 
 }</programlisting>
 
+        <para>Type conversion is applied automatically if the target method 
+        parameter type is not <classname>String</classname>.
+        See <xref linkend="mvc-ann-typeconversion"/>.</para>
+
         <para>This annotation is supported for annotated handler methods in
         Servlet and Portlet environments.</para>
       </section>
@@ -1550,8 +1557,38 @@ public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encod
 
 }</programlisting>
 
+        <para>Type conversion is applied automatically if the method parameter 
+        is not <classname>String</classname>. 
+        See <xref linkend="mvc-ann-typeconversion"/>.</para>
+        
+        <tip><para>Built-in support is available for converting a coma-separated 
+        string into an array/collection of strings or other types known to the 
+        type conversion system. For example a method parameter annotated with 
+        <literal>@RequestHeader("Accept")</literal> may be of type 
+        <classname>String</classname> but also <classname>String[]</classname> 
+        or <classname>List&lt;String&gt;</classname>.</para></tip>
+
         <para>This annotation is supported for annotated handler methods in
         Servlet and Portlet environments.</para>
+      </section>
+
+      <section id="mvc-ann-typeconversion">
+        <title>Method Parameters And Type Conversion</title>
+        
+        <para>String-based values extracted from the request including
+        request parameters, path variables, request headers, and cookie values 
+        may need to be converted to the target type of the method parameter or 
+        field (e.g. binding a request parameter to a field in an  
+        <interfacename>@ModelAttribute</interfacename> parameter) they're bound to. 
+        If the target type is not <classname>String</classname>, Spring 
+        automatically converts to the appropriate type. 
+        All simple types such as int, long, Date, etc. are 
+        supported. You can further customize the conversion process 
+        through a <classname>WebDataBinder</classname>  
+        (see <xref linkend="mvc-ann-webdatabinder" />) or by registering 
+        <classname>Formatters</classname> with the 
+        <classname>FormattingConversionService</classname>
+        (see <xref linkend="format" />).</para>
       </section>
 
       <section id="mvc-ann-webdatabinder">
