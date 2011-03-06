@@ -16,11 +16,12 @@
 		<property name="cacheDefinitionSources" ref="annotationSource"/>
 	</bean>
 	
+	<!-- 
 	<bean id="advisor" class="org.springframework.cache.interceptor.BeanFactoryCacheDefinitionSourceAdvisor">
 		<property name="cacheDefinitionSource" ref="annotationSource"/>
-		<property name="adviceBeanName" value="cacheInterceptor"/>
+		<property name="adviceBeanName" value="cacheAspect"/>
 	</bean>
-	
+	 -->
 
 	<bean id="cacheManager" class="org.springframework.cache.support.MapCacheManager">
 		<property name="caches">
