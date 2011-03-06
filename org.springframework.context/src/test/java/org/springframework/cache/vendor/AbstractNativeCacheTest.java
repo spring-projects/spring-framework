@@ -16,9 +16,7 @@
 
 package org.springframework.cache.vendor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,8 +29,8 @@ import org.springframework.cache.Cache;
  */
 public abstract class AbstractNativeCacheTest<T> {
 
-	private T nativeCache;
-	private Cache cache;
+	protected T nativeCache;
+	protected Cache cache;
 	protected final static String CACHE_NAME = "testCache";
 
 	@Before

@@ -58,10 +58,14 @@ public class EhCacheCache implements Cache<Object, Object> {
 	}
 
 	public boolean containsKey(Object key) {
-		return cache.isKeyInCache(key);
+		// get the element to force the expiry check (since #isKeyInCache does not considers that)
+		Element element = cache.getQuiet(key);
+		return (element != null ? true : false);
 	}
 
 	public boolean containsValue(Object value) {
+		// force expiry check to guarantee a valid result (otherwise expired elements are considered)
+		cache.evictExpiredElements();
 		return cache.isValueInCache(value);
 	}
 
@@ -77,11 +81,8 @@ public class EhCacheCache implements Cache<Object, Object> {
 	}
 
 	public Object remove(Object key) {
-		Object value = null;
-		if (cache.isKeyInCache(key)) {
-			Element element = cache.getQuiet(key);
-			value = (element != null ? element.getObjectValue() : null);
-		}
+		Element element = cache.getQuiet(key);
+		Object value = (element != null ? element.getObjectValue() : null);
 		cache.remove(key);
 		return value;
 	}
