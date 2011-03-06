@@ -42,6 +42,10 @@ public class AnnotatedClassCacheableService implements CacheableService {
 	public void invalidate(Object arg1) {
 	}
 
+	@CacheEvict(value = "default", key = "#p0")
+	public void invalidate(Object arg1, Object arg2) {
+	}
+
 	@Cacheable(value = "default", key = "#p0")
 	public Object key(Object arg1, Object arg2) {
 		return counter.getAndIncrement();

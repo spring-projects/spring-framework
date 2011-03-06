@@ -21,14 +21,22 @@ import java.lang.reflect.Method;
 import org.springframework.cache.KeyGenerator;
 
 /**
- * Default key generator. Computes a resulting key based on the hashcode of the
- * given parameters.
+ * Default key generator. Returns 0 if no param is given, the param itself if only one is given or a hash code computed
+ * from all given params hash code.
  * 
  * @author Costin Leau
  */
 public class DefaultKeyGenerator implements KeyGenerator<Object> {
 
 	public Object extract(Method method, Object... params) {
+		if (params.length == 1) {
+			return params[0];
+		}
+
+		if (params.length == 0) {
+			return 0;
+		}
+
 		int hashCode = 17;
 
 		for (Object object : params) {

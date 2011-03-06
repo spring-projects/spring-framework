@@ -77,6 +77,21 @@ public abstract class AbstractAnnotationTest {
 		assertSame(r3, r4);
 	}
 
+	public void testInvalidateWKey(CacheableService service) throws Exception {
+		Object o1 = new Object();
+		Object o2 = new Object();
+
+		Object r1 = service.cache(o1);
+		Object r2 = service.cache(o1);
+
+		assertSame(r1, r2);
+		service.invalidate(o1, null);
+		Object r3 = service.cache(o1);
+		Object r4 = service.cache(o1);
+		assertNotSame(r1, r3);
+		assertSame(r3, r4);
+	}
+
 	public void testConditionalExpression(CacheableService service)
 			throws Exception {
 		Object r1 = service.conditional(4);
@@ -133,6 +148,11 @@ public abstract class AbstractAnnotationTest {
 	}
 
 	@Test
+	public void testInvalidateWithKey() throws Exception {
+		testInvalidateWKey(cs);
+	}
+
+	@Test
 	public void testConditionalExpression() throws Exception {
 		testConditionalExpression(cs);
 	}
@@ -150,6 +170,11 @@ public abstract class AbstractAnnotationTest {
 	@Test
 	public void testClassCacheInvalidate() throws Exception {
 		testInvalidate(ccs);
+	}
+
+	@Test
+	public void testClassCacheInvalidateWKey() throws Exception {
+		testInvalidateWKey(ccs);
 	}
 
 	@Test

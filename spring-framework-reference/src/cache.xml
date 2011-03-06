@@ -86,9 +86,13 @@ public Book findBook(ISBN isbn) {...}]]></programlisting>
 			<title>Default Key Generation</title>
 		
 			<para>Since caches are essentially key-value stores, each invocation of a cached method needs to be translated into a suitable key for cache access.
-			Out of the box, the caching abstraction uses a simple <literal>hash-code</literal> based <interfacename>KeyGenerator</interfacename> that computes the key based on the 
-			hashes of all objects used for method invocation. This approach works well for objects with <emphasis>natural keys</emphasis> as long as 
-			the <literal>hashCode()</literal> reflects that. If that is not the case then
+			Out of the box, the caching abstraction uses a simple <interfacename>KeyGenerator</interfacename> based on the following algorithm:</para>
+			<itemizedlist>
+			   <listitem>If no params are given, return 0.</listitem>
+			   <listitem>If only one param is given, return that instance.</listitem>
+			   <listitem>If more the one param is given, return a key computed from the hashes of all parameters.</listitem>
+			</itemizedlist>
+			This approach works well for objects with <emphasis>natural keys</emphasis> as long as the <literal>hashCode()</literal> reflects that. If that is not the case then
 			for distributed or persistent environments, the strategy needs to be changed as the objects hashCode is not preserved. 
 			In fact, depending on the JVM implementation or running conditions, the same hashCode can be reused for different objects, in the same VM instance.</para>
 			
