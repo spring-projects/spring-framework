@@ -63,12 +63,6 @@ public class EhCacheCache implements Cache<Object, Object> {
 		return (element != null ? true : false);
 	}
 
-	public boolean containsValue(Object value) {
-		// force expiry check to guarantee a valid result (otherwise expired elements are considered)
-		cache.evictExpiredElements();
-		return cache.isValueInCache(value);
-	}
-
 	public Object get(Object key) {
 		Element element = cache.get(key);
 		return (element != null ? element.getObjectValue() : null);
