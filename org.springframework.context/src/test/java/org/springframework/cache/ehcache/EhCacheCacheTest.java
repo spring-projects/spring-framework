@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 the original author or authors.
+ * Copyright 2010-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.cache.ehcache;
 
+import static org.junit.Assert.*;
 import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.Element;
 
+import org.junit.Test;
 import org.springframework.cache.Cache;
 import org.springframework.cache.vendor.AbstractNativeCacheTest;
 
@@ -40,5 +43,22 @@ public class EhCacheCacheTest extends AbstractNativeCacheTest<Ehcache> {
 	@Override
 	protected Cache createCache(Ehcache nativeCache) {
 		return new EhCacheCache(nativeCache);
+	}
+
+	@Test
+	public void testExpiredElements() throws Exception {
+		String key = "brancusi";
+		String value = "constantin";
+		Element brancusi = new Element(key, value);
+		// ttl = 10s
+		brancusi.setTimeToLive(3);
+		nativeCache.put(brancusi);
+
+		assertTrue(cache.containsKey(key));
+		assertEquals(value, cache.get(key));
+		// wait for the entry to expire
+		Thread.sleep(5 * 1000);
+		assertFalse("expired entry returned", cache.containsKey(key));
+		assertNull(cache.get(key));
 	}
 }
