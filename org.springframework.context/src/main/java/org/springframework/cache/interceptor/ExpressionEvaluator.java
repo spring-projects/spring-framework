@@ -56,7 +56,7 @@ class ExpressionEvaluator {
 	}
 
 	boolean condition(String conditionExpression, Method method, EvaluationContext evalContext) {
-		Expression condExp = conditionCache.get(conditionExpression);
+		Expression condExp = conditionCache.get(method);
 		if (condExp == null) {
 			condExp = parser.parseExpression(conditionExpression);
 			conditionCache.put(method, condExp);
@@ -65,7 +65,7 @@ class ExpressionEvaluator {
 	}
 
 	Object key(String keyExpression, Method method, EvaluationContext evalContext) {
-		Expression keyExp = keyCache.get(keyExpression);
+		Expression keyExp = keyCache.get(method);
 		if (keyExp == null) {
 			keyExp = parser.parseExpression(keyExpression);
 			keyCache.put(method, keyExp);
