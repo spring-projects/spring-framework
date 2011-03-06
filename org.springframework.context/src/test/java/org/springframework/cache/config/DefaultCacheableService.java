@@ -40,6 +40,10 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	public void invalidate(Object arg1) {
 	}
 
+	@CacheEvict(value = "default", key = "#p0")
+	public void invalidate(Object arg1, Object arg2) {
+	}
+
 	@Cacheable(value = "default", condition = "#classField == 3")
 	public Long conditional(int classField) {
 		return counter.getAndIncrement();

@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 
 /**
  * Cache 'key' extractor. Used for creating a key based on the given method
- * (used as context) and its parameter.
+ * (used as context) and its parameters.
  * 
  * @author Costin Leau
  */

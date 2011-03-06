@@ -28,6 +28,8 @@ public interface CacheableService<T> {
 
 	void invalidate(Object arg1);
 
+	void invalidate(Object arg1, Object arg2);
+
 	T conditional(int field);
 
 	T key(Object arg1, Object arg2);
