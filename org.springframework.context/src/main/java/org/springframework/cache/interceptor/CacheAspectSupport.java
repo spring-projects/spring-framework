@@ -127,12 +127,12 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	protected Collection<Cache<?, ?>> getCaches(CacheDefinition definition) {
 		Set<String> cacheNames = definition.getCacheNames();
 
-		Collection<Cache<?,?>> caches = new ArrayList<Cache<?,?>>(cacheNames.size());
+		Collection<Cache<?, ?>> caches = new ArrayList<Cache<?, ?>>(cacheNames.size());
 
 		for (String cacheName : cacheNames) {
 			Cache<Object, Object> cache = cacheManager.getCache(cacheName);
-			if (cache == null){
-				throw new IllegalArgumentException("Cannot find cache named ["+cacheName+"] for " + definition);
+			if (cache == null) {
+				throw new IllegalArgumentException("Cannot find cache named [" + cacheName + "] for " + definition);
 			}
 			caches.add(cache);
 		}
@@ -146,8 +146,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Object execute(Callable<Object> invocation, Object target,
-			Method method, Object[] args) throws Exception {
+	protected Object execute(Callable<Object> invocation, Object target, Method method, Object[] args) throws Exception {
 		// get backing class
 		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
 
@@ -155,26 +154,24 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			targetClass = target.getClass();
 		}
 
-		final CacheDefinition cacheDef = getCacheDefinitionSource()
-				.getCacheDefinition(method, targetClass);
+		final CacheDefinition cacheDef = getCacheDefinitionSource().getCacheDefinition(method, targetClass);
 
 		Object retVal = null;
 
 		// analyze caching information
 		if (cacheDef != null) {
-			CacheOperationContext context = getOperationContext(cacheDef,
-					method, args, targetClass);
-			Collection<Cache<?,?>> caches = context.getCaches();
+			CacheOperationContext context = getOperationContext(cacheDef, method, args, targetClass);
+			Collection<Cache<?, ?>> caches = context.getCaches();
 
 			if (context.hasConditionPassed()) {
 				// check operation
 				if (cacheDef instanceof CacheUpdateDefinition) {
 					Object key = context.generateKey();
 
-					if (key == null){
+					if (key == null) {
 						throw new IllegalArgumentException("Null key returned for cache definition " + cacheDef);
 					}
-					
+
 					//
 					// check usage of single cache
 					// very common case which allows for some optimization
@@ -184,8 +181,11 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					if (caches.size() == 1) {
 						Cache cache = caches.iterator().next();
 
+						// always get the value
+						retVal = cache.get(key);
+						// to avoid race-conditions of entries being removed between contains/get calls
 						if (cache.containsKey(key)) {
-							retVal = cache.get(key);
+							return retVal;
 						} else {
 							retVal = invocation.call();
 							cache.put(key, retVal);
@@ -196,21 +196,38 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					// multi cache path
 					//
 					else {
+						// to avoid the contains/get race condition we can:
+						// a. get the value in advanced (aka 'eagerGet')
+						// b. double check 'contains' before and after get
+						// a implies more calls in total if more then 3 caches are used (n*2 calls)
+						// b uses less calls in total but is 1 call heavier for one cache (n+2 calls)
+						// --
+						// for balance, a) is used for up to 3 caches, b for more then 4
+
+						boolean eagerGet = caches.size() <= 3;
+
 						// for each cache
 						boolean cacheHit = false;
-						
-						for (Iterator<Cache<?,?>> iterator = caches.iterator(); iterator.hasNext() && !cacheHit;) {
+
+						for (Iterator<Cache<?, ?>> iterator = caches.iterator(); iterator.hasNext() && !cacheHit;) {
 							Cache cache = iterator.next();
-							if (cache.containsKey(key)){
+							if (eagerGet) {
 								retVal = cache.get(key);
-								cacheHit = true;
+							}
+							if (cache.containsKey(key)) {
+								if (eagerGet) {
+									cacheHit = true;
+								} else {
+									retVal = cache.get(key);
+									cacheHit = cache.containsKey(key);
+								}
 							}
 						}
-						
+
 						if (!cacheHit) {
 							retVal = invocation.call();
 						}
-	
+
 						// update all caches (if needed)
 						for (Cache cache : caches) {
 							cache.putIfAbsent(key, retVal);
@@ -221,11 +238,11 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				if (cacheDef instanceof CacheInvalidateDefinition) {
 					CacheInvalidateDefinition invalidateDef = (CacheInvalidateDefinition) cacheDef;
 					retVal = invocation.call();
-					
+
 					// for each cache
 					// lazy key initialization
 					Object key = null;
-					
+
 					for (Cache cache : caches) {
 						// flush the cache (ignore arguments)
 						if (invalidateDef.isCacheWide()) {
@@ -259,15 +276,14 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		private final KeyGenerator<?> keyGenerator = CacheAspectSupport.this.keyGenerator;
 
-		public CacheOperationContext(CacheDefinition operationDefinition,
-				Method method, Object[] args, Class<?> targetClass) {
+		public CacheOperationContext(CacheDefinition operationDefinition, Method method, Object[] args,
+				Class<?> targetClass) {
 			this.definition = operationDefinition;
 			this.caches = CacheAspectSupport.this.getCaches(definition);
 			this.method = method;
 			this.args = args;
 
-			this.evalContext = evaluator.createEvaluationContext(caches, method,
-					args, targetClass);
+			this.evalContext = evaluator.createEvaluationContext(caches, method, args, targetClass);
 		}
 
 		/**
@@ -278,8 +294,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		 */
 		protected boolean hasConditionPassed() {
 			if (StringUtils.hasText(definition.getCondition())) {
-				return evaluator.condition(definition.getCondition(), method,
-						evalContext);
+				return evaluator.condition(definition.getCondition(), method, evalContext);
 			}
 			return true;
 		}
