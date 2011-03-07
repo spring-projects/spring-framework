@@ -92,6 +92,7 @@ public Book findBook(ISBN isbn) {...}]]></programlisting>
 			   <listitem>If only one param is given, return that instance.</listitem>
 			   <listitem>If more the one param is given, return a key computed from the hashes of all parameters.</listitem>
 			</itemizedlist>
+			<para>
 			This approach works well for objects with <emphasis>natural keys</emphasis> as long as the <literal>hashCode()</literal> reflects that. If that is not the case then
 			for distributed or persistent environments, the strategy needs to be changed as the objects hashCode is not preserved. 
 			In fact, depending on the JVM implementation or running conditions, the same hashCode can be reused for different objects, in the same VM instance.</para>
