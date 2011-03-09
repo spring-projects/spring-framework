@@ -3,8 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.1 M2 (2011-??-??)
+--------------------------------------
+
+* deprecated AbstractJUnit38SpringContextTests and AbstractTransactionalJUnit38SpringContextTests
+
+
 Changes in version 3.1 M1 (2011-02-11)
 --------------------------------------
+
+[SPR-8030] AbstractJUnit38SpringContextTests and AbstractTransactionalJUnit38SpringContextTests are now officially deprecated.
 
 * upgraded to JUnit 4.8.1 and TestNG 5.12.1
 * fixed aspects bundle to declare dependencies for @Async aspect as well
