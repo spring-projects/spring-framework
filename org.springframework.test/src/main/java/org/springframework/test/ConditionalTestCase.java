@@ -33,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
  * @since 2.0
  * @see #isDisabledInThisEnvironment
  * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
- * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
+ * ({@link org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests})
  */
 @Deprecated
 public abstract class ConditionalTestCase extends TestCase {

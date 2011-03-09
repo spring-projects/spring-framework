@@ -78,7 +78,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * @author Sam Brannen
  * @since 1.1.1
  * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
- * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
+ * ({@link org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests})
  */
 @Deprecated
 public abstract class AbstractTransactionalSpringContextTests extends AbstractDependencyInjectionSpringContextTests {

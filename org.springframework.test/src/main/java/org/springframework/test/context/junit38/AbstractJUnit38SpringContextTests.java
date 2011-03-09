@@ -109,7 +109,10 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * @see AbstractTransactionalJUnit38SpringContextTests
  * @see org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTestNGSpringContextTests
+ * @deprecated as of Spring 3.1, in favor of using
+ * {@link org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests AbstractJUnit4SpringContextTests}
  */
+@Deprecated
 @TestExecutionListeners( { DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class })
 public abstract class AbstractJUnit38SpringContextTests extends TestCase implements ApplicationContextAware {
 
