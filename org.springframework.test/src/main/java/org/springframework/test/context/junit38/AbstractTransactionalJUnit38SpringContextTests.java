@@ -66,8 +66,11 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.jdbc.SimpleJdbcTestUtils
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
+ * @deprecated as of Spring 3.1, in favor of using
+ * {@link org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests AbstractTransactionalJUnit4SpringContextTests}
  */
-@TestExecutionListeners({TransactionalTestExecutionListener.class})
+@Deprecated
+@TestExecutionListeners(TransactionalTestExecutionListener.class)
 @Transactional
 public abstract class AbstractTransactionalJUnit38SpringContextTests extends AbstractJUnit38SpringContextTests {
 

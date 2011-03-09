@@ -60,7 +60,7 @@ import org.springframework.util.Assert;
  * @see #getContext
  * @see #getConfigLocations
  * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
- * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
+ * ({@link org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests})
  */
 @Deprecated
 @SuppressWarnings({ "unchecked", "rawtypes" })
