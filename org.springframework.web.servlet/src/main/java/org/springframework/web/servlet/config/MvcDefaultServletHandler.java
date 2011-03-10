@@ -44,7 +44,7 @@ import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class MvcDefaultServletHandler extends AbstractFeatureSpecification {
+public final class MvcDefaultServletHandler extends AbstractFeatureSpecification {
 
 	private static final Class<? extends FeatureSpecificationExecutor> EXECUTOR_TYPE = MvcDefaultServletHandlerExecutor.class;
 

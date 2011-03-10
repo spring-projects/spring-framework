@@ -112,7 +112,7 @@ public interface FeatureSpecification {
 	 * have been set, including checks on mutually exclusive or mutually
 	 * dependent properties. May in some cases modify the state of the
 	 * specification e.g., instantiating types specified as strings.
-	 * @see AbstractSpecificationExecutor#execute(Specification)
+	 * @see AbstractSpecificationExecutor#execute(FeatureSpecification, SpecificationContext)
 	 * @return whether any problems occurred during validation
 	 */
 	boolean validate(ProblemReporter problemReporter);
