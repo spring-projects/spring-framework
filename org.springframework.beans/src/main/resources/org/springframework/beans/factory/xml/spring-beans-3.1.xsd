@@ -82,11 +82,12 @@
 			<xsd:attribute name="profile" use="optional" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The set of profiles for which this <beans> element may be parsed. May be a comma-delimited
-	list in the case of multiple profiles.  If one or more of the specified profiles are active at time
-	of parsing, the <beans> element will be parsed, and all of its <bean> elements registered,
-	&lt;import&gt; elements followed, etc.  If none of the specified profiles are active at time of parsing,
-	then the entire element and its contents will be ignored.
+	The set of profiles for which this <beans> element may be parsed. Multiple profiles can be
+	separated by any number of spaces, commas, or semi-colons (or indeed any mixture of the three).
+	If one or more of the specified profiles are active at time of parsing, the <beans> element
+	will be parsed, and all of its <bean> elements registered, &lt;import&gt; elements followed,
+	etc.  If none of the specified profiles are active at time of parsing, then the entire element
+	and its contents will be ignored.
 
 	Profiles are activated in one of two ways:
 		Programmatic:
