@@ -16,9 +16,6 @@
 
 package org.springframework.beans.factory.xml;
 
-import static org.springframework.util.StringUtils.commaDelimitedListToStringArray;
-import static org.springframework.util.StringUtils.trimAllWhitespace;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.LinkedHashSet;
@@ -124,7 +121,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
 		if (StringUtils.hasText(profileSpec)) {
 			Assert.state(this.environment != null, "environment property must not be null");
-			String[] specifiedProfiles = commaDelimitedListToStringArray(trimAllWhitespace(profileSpec));
+			String[] specifiedProfiles = StringUtils.tokenizeToStringArray(profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			if (!this.environment.acceptsProfiles(specifiedProfiles)) {
 				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
 				return;

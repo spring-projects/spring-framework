@@ -87,7 +87,10 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String BEANS_NAMESPACE_URI = "http://www.springframework.org/schema/beans";
 
-	public static final String BEAN_NAME_DELIMITERS = ",; ";
+	public static final String MULTI_VALUE_ATTRIBUTE_DELIMITERS = ",; ";
+
+	/** @deprecated as of Spring 3.1 in favor of {@link #MULTI_VALUE_ATTRIBUTE_DELIMITERS} */
+	public static final String BEAN_NAME_DELIMITERS = MULTI_VALUE_ATTRIBUTE_DELIMITERS;
 
 	/**
 	 * Value of a T/F attribute that represents true.
@@ -451,7 +454,7 @@ public class BeanDefinitionParserDelegate {
 
 		List<String> aliases = new ArrayList<String>();
 		if (StringUtils.hasLength(nameAttr)) {
-			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, BEAN_NAME_DELIMITERS);
+			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			aliases.addAll(Arrays.asList(nameArr));
 		}
 
@@ -624,7 +627,7 @@ public class BeanDefinitionParserDelegate {
 
 		if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 			String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
-			bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, BEAN_NAME_DELIMITERS));
+			bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, MULTI_VALUE_ATTRIBUTE_DELIMITERS));
 		}
 
 		String autowireCandidate = ele.getAttribute(AUTOWIRE_CANDIDATE_ATTRIBUTE);
