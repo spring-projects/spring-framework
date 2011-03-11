@@ -16,9 +16,14 @@
 
 package org.springframework.context.annotation;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.springframework.context.annotation.configuration.StubSpecification;
 import org.springframework.context.config.FeatureSpecification;
+import org.springframework.core.io.ResourceLoader;
 
 public class FeatureConfigurationClassTests {
 
@@ -26,6 +31,14 @@ public class FeatureConfigurationClassTests {
 	public void featureConfigurationClassesMustNotContainBeanAnnotatedMethods() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(FeatureConfigWithBeanAnnotatedMethod.class);
+		ctx.refresh();
+	}
+
+	@Test
+	public void featureMethodsMayAcceptResourceLoaderParameter() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setDisplayName("enclosing app ctx");
+		ctx.register(FeatureMethodWithResourceLoaderParameter.class);
 		ctx.refresh();
 	}
 
@@ -47,6 +60,18 @@ class FeatureConfigWithBeanAnnotatedMethod {
 	 */
 	@Feature
 	public FeatureSpecification feature() {
+		return new StubSpecification();
+	}
+}
+
+@FeatureConfiguration
+class FeatureMethodWithResourceLoaderParameter {
+	@Feature
+	public FeatureSpecification feature(ResourceLoader rl) {
+		// prove that the injected ResourceLoader is actually the enclosing application context
+		Object target = ((EarlyBeanReferenceProxy)rl).dereferenceTargetBean();
+		assertThat(target, instanceOf(AnnotationConfigApplicationContext.class));
+		assertThat(((AnnotationConfigApplicationContext)target).getDisplayName(), is("enclosing app ctx"));
 		return new StubSpecification();
 	}
 }
