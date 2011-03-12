@@ -23,7 +23,9 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.springframework.context.annotation.configuration.StubSpecification;
 import org.springframework.context.config.FeatureSpecification;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.mock.env.MockEnvironment;
 
 public class FeatureConfigurationClassTests {
 
@@ -38,6 +40,7 @@ public class FeatureConfigurationClassTests {
 	public void featureMethodsMayAcceptResourceLoaderParameter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.setDisplayName("enclosing app ctx");
+		ctx.setEnvironment(new MockEnvironment().withProperty("foo", "bar"));
 		ctx.register(FeatureMethodWithResourceLoaderParameter.class);
 		ctx.refresh();
 	}
@@ -67,7 +70,10 @@ class FeatureConfigWithBeanAnnotatedMethod {
 @FeatureConfiguration
 class FeatureMethodWithResourceLoaderParameter {
 	@Feature
-	public FeatureSpecification feature(ResourceLoader rl) {
+	public FeatureSpecification feature(ResourceLoader rl,
+			Environment e) {
+		// prove that the injected Environment is that of the enclosing app context
+		assertThat(e.getProperty("foo"), is("bar"));
 		// prove that the injected ResourceLoader is actually the enclosing application context
 		Object target = ((EarlyBeanReferenceProxy)rl).dereferenceTargetBean();
 		assertThat(target, instanceOf(AnnotationConfigApplicationContext.class));
