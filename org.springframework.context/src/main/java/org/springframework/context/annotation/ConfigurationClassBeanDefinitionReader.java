@@ -39,13 +39,14 @@ import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.config.SpecificationContext;
 import org.springframework.context.config.FeatureSpecification;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.core.Conventions;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
@@ -91,6 +92,8 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final MetadataReaderFactory metadataReaderFactory;
 
+	private ResourceLoader resourceLoader;
+
 	private SpecificationContext specificationContext;
 
 	/**
@@ -107,11 +110,12 @@ class ConfigurationClassBeanDefinitionReader {
 		this.sourceExtractor = sourceExtractor;
 		this.problemReporter = problemReporter;
 		this.metadataReaderFactory = metadataReaderFactory;
+		this.resourceLoader = resourceLoader;
 		// TODO SPR-7420: see about passing in the SpecificationContext created in ConfigurationClassPostProcessor
 		this.specificationContext = new SpecificationContext();
 		this.specificationContext.setRegistry(this.registry);
 		this.specificationContext.setRegistrar(new SimpleComponentRegistrar(this.registry));
-		this.specificationContext.setResourceLoader(resourceLoader);
+		this.specificationContext.setResourceLoader(this.resourceLoader);
 		this.specificationContext.setEnvironment(environment);
 		this.specificationContext.setProblemReporter(problemReporter);
 	}
@@ -302,8 +306,15 @@ class ConfigurationClassBeanDefinitionReader {
 			Class<?> readerClass = entry.getValue();
 			if (!readerInstanceCache.containsKey(readerClass)) {
 				try {
+					// Instantiate the specified BeanDefinitionReader
 					BeanDefinitionReader readerInstance = (BeanDefinitionReader)
 							readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
+
+					// Delegate the current ResourceLoader to it if possible
+					if (readerInstance instanceof AbstractBeanDefinitionReader) {
+						((AbstractBeanDefinitionReader)readerInstance).setResourceLoader(this.resourceLoader);
+					}
+
 					readerInstanceCache.put(readerClass, readerInstance);
 				}
 				catch (Exception ex) {
