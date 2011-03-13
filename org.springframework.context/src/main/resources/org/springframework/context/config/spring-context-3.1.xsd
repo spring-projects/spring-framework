@@ -90,7 +90,7 @@
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Activates replacement of ${...} placeholders, resolved against the specified properties file or
-	Properties object (if any). Defines an PropertySourcesPlaceholderConfigurer within the context.
+	Properties object (if any). Defines a PropertySourcesPlaceholderConfigurer within the context.
 	For backward compatibility with versions earlier than Spring 3.1, a PropertyPlaceholderConfigurer will be
 	registered if the 'system-properties-mode' attribute has been explicitly assigned a value.
 			]]></xsd:documentation>
@@ -101,6 +101,11 @@
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="propertyPlaceholder" />
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
 
 	<xsd:element name="property-override">
