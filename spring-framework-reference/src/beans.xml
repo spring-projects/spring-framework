@@ -532,16 +532,17 @@ List userList service.getUsernameList();
       <para>In XML-based configuration metadata, you use the
         <literal>id</literal> and/or <literal>name</literal> attributes to
         specify the bean identifier(s). The <literal>id</literal> attribute
-        allows you to specify exactly one id, and because it is a real XML
-        element ID attribute, the XML parser can do some extra validation when
-        other elements reference the id. As such, it is the preferred way to
-        specify a bean identifier. However, the XML specification does limit the
-        characters that are legal in XML ids. This is usually not a constraint,
-        but if you need to use one of these special XML characters, or want to
-        introduce other aliases to the bean, you can also specify them in the
-        <literal>name</literal> attribute, separated by a comma
-        (<literal>,</literal>), semicolon (<literal>;</literal>), or white
-        space.</para>
+        allows you to specify exactly one id.  Conventionally these names are
+        alphanumeric ('myBean', 'fooService', etc), but may special characters
+        as well.  If you want to introduce other aliases to the bean, you can
+        also specify them in the <literal>name</literal> attribute, separated by
+        a comma (<literal>,</literal>), semicolon (<literal>;</literal>), or
+        white space.  As a historical note, in versions prior to Spring 3.1, the
+        <literal>id</literal> attribute was typed as an
+        <literal>xsd:ID</literal>, which constrained possible characters.  As of
+        3.1, it is now <literal>xsd:string</literal>.  Note that bean id
+        uniqueness is still enforced by the container, though no longer by XML
+        parsers.</para>
 
       <para>You are not required to supply a name or id for a bean. If no name
         or id is supplied explicitly, the container generates a unique name for
