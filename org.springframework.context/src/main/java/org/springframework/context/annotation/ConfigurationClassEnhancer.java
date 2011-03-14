@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -64,6 +65,7 @@ class ConfigurationClassEnhancer {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
 
 		this.callbackInstances.add(new BeanMethodInterceptor(beanFactory));
+		this.callbackInstances.add(new DisposableBeanMethodInterceptor());
 		this.callbackInstances.add(NoOp.INSTANCE);
 
 		for (Callback callback : this.callbackInstances) {
@@ -74,7 +76,13 @@ class ConfigurationClassEnhancer {
 		// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
 		callbackFilter = new CallbackFilter() {
 			public int accept(Method candidateMethod) {
-				return (BeanAnnotationHelper.isBeanAnnotated(candidateMethod) ? 0 : 1);
+				if (BeanAnnotationHelper.isBeanAnnotated(candidateMethod)) {
+					return 0;
+				}
+				if (DisposableBeanMethodInterceptor.isDestroyMethod(candidateMethod)) {
+					return 1;
+				}
+				return 2;
 			}
 		};
 	}
@@ -104,6 +112,7 @@ class ConfigurationClassEnhancer {
 		// any performance problem.
 		enhancer.setUseCache(false);
 		enhancer.setSuperclass(superclass);
+		enhancer.setInterfaces(new Class[] {DisposableBean.class});
 		enhancer.setUseFactory(false);
 		enhancer.setCallbackFilter(this.callbackFilter);
 		enhancer.setCallbackTypes(this.callbackTypes.toArray(new Class[this.callbackTypes.size()]));
@@ -142,6 +151,29 @@ class ConfigurationClassEnhancer {
 			return beanFactory.getBean(beanName);
 		}
 		
+	}
+
+
+	/**
+	 * Intercepts the invocation of any {@link DisposableBean#destroy()} on @Configuration
+	 * class instances for the purpose of de-registering CGLIB callbacks. This helps avoid
+	 * garbage collection issues See SPR-7901.
+	 */
+	private static class DisposableBeanMethodInterceptor implements MethodInterceptor {
+
+		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+			Enhancer.registerStaticCallbacks(obj.getClass(), null);
+			if (DisposableBean.class.isAssignableFrom(obj.getClass().getSuperclass())) {
+				return proxy.invokeSuper(obj, args);
+			}
+			return null;
+		}
+
+		public static boolean isDestroyMethod(Method candidateMethod) {
+			return candidateMethod.getName().equals("destroy") &&
+				candidateMethod.getParameterTypes().length == 0 &&
+				DisposableBean.class.isAssignableFrom(candidateMethod.getDeclaringClass());
+		}
 	}
 
 
