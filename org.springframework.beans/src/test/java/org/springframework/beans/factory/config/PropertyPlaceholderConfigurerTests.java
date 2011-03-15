@@ -243,7 +243,6 @@ public class PropertyPlaceholderConfigurerTests {
 	}
 
 
-	// TODO SPR-7508: duplicated from EnvironmentPropertyResolutionSearchTests
 	@SuppressWarnings("unchecked")
 	private static Map<String, String> getModifiableSystemEnvironment() {
 		Class<?>[] classes = Collections.class.getDeclaredClasses();
