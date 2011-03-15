@@ -160,7 +160,6 @@ public class MutablePropertySources implements PropertySources {
 	 */
 	protected void removeIfPresent(PropertySource<?> propertySource) {
 		if (this.propertySourceList.contains(propertySource)) {
-			// TODO SPR-7508: add logging
 			this.propertySourceList.remove(propertySource);
 		}
 	}

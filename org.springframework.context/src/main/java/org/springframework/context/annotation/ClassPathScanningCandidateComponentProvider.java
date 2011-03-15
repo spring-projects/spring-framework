@@ -300,7 +300,6 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				if (!ProfileHelper.isProfileAnnotationPresent(metadata)) {
 					return true;
 				}
-				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
 				return this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata));
 			}
 		}

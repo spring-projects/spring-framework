@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,6 @@ class ConfigurationClassParser {
 		AnnotationMetadata metadata = configClass.getMetadata();
 		if (this.environment != null && ProfileHelper.isProfileAnnotationPresent(metadata)) {
 			if (!this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata))) {
-				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
 				return;
 			}
 		}

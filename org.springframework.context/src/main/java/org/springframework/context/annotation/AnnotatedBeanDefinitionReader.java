@@ -116,7 +116,6 @@ public class AnnotatedBeanDefinitionReader {
 
 		if (ProfileHelper.isProfileAnnotationPresent(metadata)) {
 			if (!this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata))) {
-				// TODO SPR-7508: log that this bean is being rejected on profile mismatch
 				return;
 			}
 		}
