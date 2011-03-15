@@ -47,9 +47,9 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.context.config.SpecificationContext;
 import org.springframework.context.config.FeatureSpecification;
 import org.springframework.context.config.SourceAwareSpecification;
+import org.springframework.context.config.SpecificationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -331,7 +331,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			for (int i = 0; i < parameterTypes.length; i++) {
 				MethodParameter mp = new MethodParameter(featureMethod, i);
 				DependencyDescriptor dd = new DependencyDescriptor(mp, true, false);
-				Object proxiedBean = proxyCreator.createProxy(dd);
+				Object proxiedBean = proxyCreator.createProxyIfPossible(dd);
 				beanArgs.add(proxiedBean);
 			}
 
