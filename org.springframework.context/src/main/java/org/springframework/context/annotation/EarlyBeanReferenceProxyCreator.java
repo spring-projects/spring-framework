@@ -47,10 +47,6 @@ import org.springframework.util.ReflectionUtils;
  */
 class EarlyBeanReferenceProxyCreator {
 
-	static final String FINAL_CLASS_ERROR_MESSAGE =
-		"Cannot create subclass proxy for bean type %s because it is a final class. " +
-		"Make the class non-final or inject the bean by interface rather than by concrete class.";
-
 	static final String MISSING_NO_ARG_CONSTRUCTOR_ERROR_MESSAGE =
 		"Cannot create subclass proxy for bean type %s because it does not have a no-arg constructor. " +
 		"Add a no-arg constructor or attempt to inject the bean by interface rather than by concrete class.";
@@ -73,9 +69,14 @@ class EarlyBeanReferenceProxyCreator {
 
 	/**
 	 * Create a proxy that will ultimately dereference its target object using
-	 * the given dependency descriptor.
+	 * the given dependency descriptor. No proxy is created if the dependency type
+	 * is final, rather the dependency is resolved immediately. This is important
+	 * especially with regard to supporting @Value injection.
 	 */
-	public Object createProxy(DependencyDescriptor descriptor) {
+	public Object createProxyIfPossible(DependencyDescriptor descriptor) {
+		if (Modifier.isFinal(descriptor.getDependencyType().getModifiers())) {
+			return beanFactory.resolveDependency(descriptor, "");
+		}
 		return doCreateProxy(new ResolveDependencyTargetBeanDereferencingInterceptor(descriptor));
 	}
 
@@ -123,9 +124,6 @@ class EarlyBeanReferenceProxyCreator {
 	 */
 	private static void assertClassIsProxyCapable(Class<?> clazz) {
 		Assert.isTrue(!clazz.isInterface(), "class parameter must be a concrete type");
-		if ((clazz.getModifiers() & Modifier.FINAL) != 0) {
-			throw new ProxyCreationException(String.format(FINAL_CLASS_ERROR_MESSAGE, clazz.getName()));
-		}
 		try {
 			// attempt to retrieve the no-arg constructor for the class
 			Constructor<?> noArgCtor = clazz.getDeclaredConstructor();

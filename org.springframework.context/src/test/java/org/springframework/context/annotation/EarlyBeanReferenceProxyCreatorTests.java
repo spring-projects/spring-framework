@@ -25,7 +25,6 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.springframework.context.annotation.EarlyBeanReferenceProxyCreator.FINAL_CLASS_ERROR_MESSAGE;
 import static org.springframework.context.annotation.EarlyBeanReferenceProxyCreator.MISSING_NO_ARG_CONSTRUCTOR_ERROR_MESSAGE;
 import static org.springframework.context.annotation.EarlyBeanReferenceProxyCreator.PRIVATE_NO_ARG_CONSTRUCTOR_ERROR_MESSAGE;
 
@@ -64,7 +63,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	public void proxyToStringAvoidsEagerInstantiation() throws Exception {
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
 
-		TestBean proxy = (TestBean) pc.createProxy(descriptorFor(TestBean.class));
+		TestBean proxy = (TestBean) pc.createProxyIfPossible(descriptorFor(TestBean.class));
 
 		assertThat(proxy.toString(), equalTo("EarlyBeanReferenceProxy for bean of type TestBean"));
 	}
@@ -72,7 +71,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	@Test(expected=NoSuchBeanDefinitionException.class)
 	public void proxyThrowsNoSuchBeanDefinitionExceptionWhenDelegatingMethodCallToNonExistentBean() throws Exception {
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
-		TestBean proxy = (TestBean) pc.createProxy(descriptorFor(TestBean.class));
+		TestBean proxy = (TestBean) pc.createProxyIfPossible(descriptorFor(TestBean.class));
 
 		proxy.getName();
 	}
@@ -80,7 +79,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	@Test
 	public void proxyHashCodeAvoidsEagerInstantiation() throws Exception {
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
-		TestBean proxy = (TestBean) pc.createProxy(descriptorFor(TestBean.class));
+		TestBean proxy = (TestBean) pc.createProxyIfPossible(descriptorFor(TestBean.class));
 
 		assertThat(proxy.hashCode(), equalTo(System.identityHashCode(proxy)));
 	}
@@ -89,12 +88,12 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	public void proxyEqualsAvoidsEagerInstantiation() throws Exception {
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
 
-		TestBean proxy = (TestBean) pc.createProxy(descriptorFor(TestBean.class));
+		TestBean proxy = (TestBean) pc.createProxyIfPossible(descriptorFor(TestBean.class));
 
 		assertThat(proxy.equals(new Object()), is(false));
 		assertThat(proxy.equals(proxy), is(true));
 
-		TestBean proxy2 = (TestBean) pc.createProxy(descriptorFor(TestBean.class));
+		TestBean proxy2 = (TestBean) pc.createProxyIfPossible(descriptorFor(TestBean.class));
 
 		assertThat(proxy, not(sameInstance(proxy2)));
 		assertThat(proxy.equals(proxy2), is(false));
@@ -106,7 +105,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	public void proxyFinalizeAvoidsEagerInstantiation() throws Exception {
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
 
-		BeanWithFinalizer proxy = (BeanWithFinalizer) pc.createProxy(descriptorFor(BeanWithFinalizer.class));
+		BeanWithFinalizer proxy = (BeanWithFinalizer) pc.createProxyIfPossible(descriptorFor(BeanWithFinalizer.class));
 
 		assertThat(BeanWithFinalizer.finalizerWasCalled, is(false));
 		BeanWithFinalizer.class.getDeclaredMethod("finalize").invoke(proxy);
@@ -119,7 +118,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 				BeanDefinitionBuilder.rootBeanDefinition(TestBean.class)
 				.addPropertyValue("name", "testBeanName").getBeanDefinition());
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
-		TestBean proxy = (TestBean) pc.createProxy(descriptorFor(TestBean.class));
+		TestBean proxy = (TestBean) pc.createProxyIfPossible(descriptorFor(TestBean.class));
 
 		assertThat(bf.containsBeanDefinition("testBean"), is(true));
 		assertThat(bf.containsSingleton("testBean"), is(false));
@@ -131,7 +130,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	public void beanAnnotatedMethodsReturnEarlyProxyAsWell() throws Exception {
 		bf.registerBeanDefinition("componentWithInterfaceBeanMethod", new RootBeanDefinition(ComponentWithInterfaceBeanMethod.class));
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
-		ComponentWithInterfaceBeanMethod proxy = (ComponentWithInterfaceBeanMethod) pc.createProxy(descriptorFor(ComponentWithInterfaceBeanMethod.class));
+		ComponentWithInterfaceBeanMethod proxy = (ComponentWithInterfaceBeanMethod) pc.createProxyIfPossible(descriptorFor(ComponentWithInterfaceBeanMethod.class));
 
 		ITestBean bean = proxy.aBeanMethod();
 		assertThat(bean, instanceOf(EarlyBeanReferenceProxy.class));
@@ -153,7 +152,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 		beanMethodBeanDef.setFactoryMethodName("aBeanMethod");
 		bf.registerBeanDefinition("aBeanMethod", beanMethodBeanDef);
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
-		ComponentWithConcreteBeanMethod proxy = (ComponentWithConcreteBeanMethod) pc.createProxy(descriptorFor(ComponentWithConcreteBeanMethod.class));
+		ComponentWithConcreteBeanMethod proxy = (ComponentWithConcreteBeanMethod) pc.createProxyIfPossible(descriptorFor(ComponentWithConcreteBeanMethod.class));
 
 		TestBean bean = proxy.aBeanMethod();
 		assertThat(bean.getName(), equalTo("concrete"));
@@ -162,7 +161,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	@Test
 	public void interfaceBeansAreProxied() throws Exception {
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
-		ITestBean proxy = (ITestBean) pc.createProxy(descriptorFor(ITestBean.class));
+		ITestBean proxy = (ITestBean) pc.createProxyIfPossible(descriptorFor(ITestBean.class));
 
 		assertThat(proxy, instanceOf(EarlyBeanReferenceProxy.class));
 		assertThat(AopUtils.isCglibProxyClass(proxy.getClass()), is(true));
@@ -174,7 +173,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	@Test
 	public void concreteBeansAreProxied() throws Exception {
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
-		TestBean proxy = (TestBean) pc.createProxy(descriptorFor(TestBean.class));
+		TestBean proxy = (TestBean) pc.createProxyIfPossible(descriptorFor(TestBean.class));
 
 		assertThat(proxy, instanceOf(EarlyBeanReferenceProxy.class));
 		assertThat(AopUtils.isCglibProxyClass(proxy.getClass()), is(true));
@@ -187,7 +186,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	public void beanAnnotatedMethodsWithInterfaceReturnTypeAreProxied() throws Exception {
 		bf.registerBeanDefinition("componentWithInterfaceBeanMethod", new RootBeanDefinition(ComponentWithInterfaceBeanMethod.class));
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
-		ComponentWithInterfaceBeanMethod proxy = (ComponentWithInterfaceBeanMethod) pc.createProxy(descriptorFor(ComponentWithInterfaceBeanMethod.class));
+		ComponentWithInterfaceBeanMethod proxy = (ComponentWithInterfaceBeanMethod) pc.createProxyIfPossible(descriptorFor(ComponentWithInterfaceBeanMethod.class));
 
 		ITestBean bean = proxy.aBeanMethod();
 		assertThat(bean, instanceOf(EarlyBeanReferenceProxy.class));
@@ -201,7 +200,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	public void beanAnnotatedMethodsWithConcreteReturnTypeAreProxied() throws Exception {
 		bf.registerBeanDefinition("componentWithConcreteBeanMethod", new RootBeanDefinition(ComponentWithConcreteBeanMethod.class));
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
-		ComponentWithConcreteBeanMethod proxy = (ComponentWithConcreteBeanMethod) pc.createProxy(descriptorFor(ComponentWithConcreteBeanMethod.class));
+		ComponentWithConcreteBeanMethod proxy = (ComponentWithConcreteBeanMethod) pc.createProxyIfPossible(descriptorFor(ComponentWithConcreteBeanMethod.class));
 
 		TestBean bean = proxy.aBeanMethod();
 		assertThat(bean, instanceOf(EarlyBeanReferenceProxy.class));
@@ -215,7 +214,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	public void attemptToProxyClassMissingNoArgConstructorFailsGracefully() throws Exception {
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
 		try {
-			pc.createProxy(descriptorFor(BeanMissingNoArgConstructor.class));
+			pc.createProxyIfPossible(descriptorFor(BeanMissingNoArgConstructor.class));
 			fail("expected ProxyCreationException");
 		} catch(ProxyCreationException ex) {
 			assertThat(ex.getMessage(),
@@ -227,7 +226,7 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	public void attemptToProxyClassWithPrivateNoArgConstructorFailsGracefully() throws Exception {
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
 		try {
-			pc.createProxy(descriptorFor(BeanWithPrivateNoArgConstructor.class));
+			pc.createProxyIfPossible(descriptorFor(BeanWithPrivateNoArgConstructor.class));
 			fail("expected ProxyCreationException");
 		} catch(ProxyCreationException ex) {
 			assertThat(ex.getMessage(),
@@ -236,15 +235,12 @@ public class EarlyBeanReferenceProxyCreatorTests {
 	}
 
 	@Test
-	public void attemptToProxyFinalClassFailsGracefully() throws Exception {
+	public void attemptToProxyFinalClassReturnsNonProxiedInstance() throws Exception {
+		bf.registerBeanDefinition("finalBean", new RootBeanDefinition(FinalBean.class));
 		EarlyBeanReferenceProxyCreator pc = new EarlyBeanReferenceProxyCreator(bf);
-		try {
-			pc.createProxy(descriptorFor(FinalBean.class));
-			fail("expected ProxyCreationException");
-		} catch(ProxyCreationException ex) {
-			assertThat(ex.getMessage(),
-					equalTo(format(FINAL_CLASS_ERROR_MESSAGE, FinalBean.class.getName())));
-		}
+		Object bean = pc.createProxyIfPossible(descriptorFor(FinalBean.class));
+		assertThat(bean, instanceOf(FinalBean.class));
+		assertThat(bean, not(instanceOf(EarlyBeanReferenceProxy.class)));
 	}
 
 	private DependencyDescriptor descriptorFor(Class<?> paramType) throws Exception {
