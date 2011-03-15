@@ -214,9 +214,11 @@ public abstract class PropertySource<T> {
 			super(name, new Object());
 		}
 
+		/**
+		 * Always return {@code null}.
+		 */
 		@Override
 		public String getProperty(String key) {
-			// TODO SPR-7408: logging
 			return null;
 		}
 	}

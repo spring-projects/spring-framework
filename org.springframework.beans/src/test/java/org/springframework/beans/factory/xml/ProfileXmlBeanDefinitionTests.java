@@ -30,9 +30,11 @@ import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.io.ClassPathResource;
 
 /**
- * TODO SPR-7508: document
+ * Tests various combinations of profile declarations against various profile
+ * activation and profile default scenarios.
  *
  * @author Chris Beams
+ * @since 3.1
  */
 public class ProfileXmlBeanDefinitionTests {
 

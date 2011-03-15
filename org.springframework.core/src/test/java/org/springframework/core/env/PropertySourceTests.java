@@ -72,7 +72,6 @@ public class PropertySourceTests {
 		assertThat(propertySources.contains(ps1), is(true));
 		assertThat(propertySources.contains(PropertySource.named("ps1")), is(true));
 
-		// TODO SPR-7508: consider disallowing duplicates somehow (in the actual data structure used by environment)
 		PropertySource<?> ps1replacement = new MapPropertySource("ps1", map2); // notice - different map
 		assertThat(propertySources.add(ps1replacement), is(true)); // true because linkedlist allows duplicates
 		assertThat(propertySources.size(), is(2));

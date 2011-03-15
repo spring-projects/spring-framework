@@ -41,7 +41,6 @@ import java.util.Map;
 import org.junit.Test;
 import org.springframework.mock.env.MockPropertySource;
 
-
 /**
  * Unit tests for {@link DefaultEnvironment}.
  *
@@ -230,7 +229,7 @@ public class EnvironmentTests {
 	}
 
 	@Test
-	public void getSystemEnvironment_withAndWithoutSecurityManager() throws Exception {
+	public void getSystemEnvironment_withAndWithoutSecurityManager() {
 		getModifiableSystemEnvironment().put(ALLOWED_PROPERTY_NAME, ALLOWED_PROPERTY_VALUE);
 		getModifiableSystemEnvironment().put(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);
 
@@ -270,17 +269,20 @@ public class EnvironmentTests {
 		getModifiableSystemEnvironment().remove(DISALLOWED_PROPERTY_NAME);
 	}
 
-	// TODO SPR-7508: duplicated from EnvironmentPropertyResolutionSearchTests
 	@SuppressWarnings("unchecked")
-	private static Map<String, String> getModifiableSystemEnvironment() throws Exception {
+	private static Map<String, String> getModifiableSystemEnvironment() {
 		Class<?>[] classes = Collections.class.getDeclaredClasses();
-		Map<String, String> systemEnv = System.getenv();
+		Map<String, String> env = System.getenv();
 		for (Class<?> cl : classes) {
 			if ("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
-				Field field = cl.getDeclaredField("m");
-				field.setAccessible(true);
-				Object obj = field.get(systemEnv);
-				return (Map<String, String>) obj;
+				try {
+					Field field = cl.getDeclaredField("m");
+					field.setAccessible(true);
+					Object obj = field.get(env);
+					return (Map<String, String>) obj;
+				} catch (Exception ex) {
+					throw new RuntimeException(ex);
+				}
 			}
 		}
 		throw new IllegalStateException();

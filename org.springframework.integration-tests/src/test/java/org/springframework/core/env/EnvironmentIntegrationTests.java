@@ -354,9 +354,6 @@ public class EnvironmentIntegrationTests {
 		assertEnvironmentAwareInvoked(ctx, prodEnv);
 	}
 
-	// TODO SPR-7508: need to think about how a custom environment / custom property sources
-	// would be specified in an actual webapp using XmlWebApplicationContext. What do the
-	// context params look like, etc.
 	@Test
 	public void xmlWebApplicationContext() {
 		AbstractRefreshableWebApplicationContext ctx = new XmlWebApplicationContext();
@@ -541,7 +538,6 @@ public class EnvironmentIntegrationTests {
 	public void resourceAdapterApplicationContext() {
 		ResourceAdapterApplicationContext ctx = new ResourceAdapterApplicationContext(new SimpleBootstrapContext(new SimpleTaskWorkManager()));
 
-		// TODO SPR-7508: should be a JCA-specific environment?
 		assertHasDefaultEnvironment(ctx);
 
 		registerEnvironmentBeanDefinition(ctx);
