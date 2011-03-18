@@ -50,6 +50,6 @@ public interface MessageCodesResolver {
 	 * @param fieldType the field type (may be <code>null</code> if not determinable)
 	 * @return the message codes to use
 	 */
-	String[] resolveMessageCodes(String errorCode, String objectName, String field, Class fieldType);
+	String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType);
 
 }

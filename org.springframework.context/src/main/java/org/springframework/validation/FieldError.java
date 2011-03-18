@@ -31,6 +31,7 @@ import org.springframework.util.ObjectUtils;
  * @since 10.03.2003
  * @see DefaultMessageCodesResolver
  */
+@SuppressWarnings("serial")
 public class FieldError extends ObjectError {
 
 	private final String field;

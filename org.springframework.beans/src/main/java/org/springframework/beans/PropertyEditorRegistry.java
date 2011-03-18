@@ -39,7 +39,7 @@ public interface PropertyEditorRegistry {
 	 * @param requiredType the type of the property
 	 * @param propertyEditor the editor to register
 	 */
-	void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor);
+	void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor);
 
 	/**
 	 * Register the given custom property editor for the given type and
@@ -64,7 +64,7 @@ public interface PropertyEditorRegistry {
 	 * <code>null</code> if registering an editor for all properties of the given type
 	 * @param propertyEditor editor to register
 	 */
-	void registerCustomEditor(Class requiredType, String propertyPath, PropertyEditor propertyEditor);
+	void registerCustomEditor(Class<?> requiredType, String propertyPath, PropertyEditor propertyEditor);
 
 	/**
 	 * Find a custom property editor for the given type and property.
@@ -74,6 +74,6 @@ public interface PropertyEditorRegistry {
 	 * <code>null</code> if looking for an editor for all properties of the given type
 	 * @return the registered editor, or <code>null</code> if none
 	 */
-	PropertyEditor findCustomEditor(Class requiredType, String propertyPath);
+	PropertyEditor findCustomEditor(Class<?> requiredType, String propertyPath);
 
 }

@@ -40,6 +40,7 @@ import org.springframework.util.Assert;
  * @see DataBinder#getBindingResult()
  * @see DataBinder#close()
  */
+@SuppressWarnings("serial")
 public class BindException extends Exception implements BindingResult {
 
 	private final BindingResult bindingResult;
@@ -134,7 +135,7 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getErrorCount();
 	}
 
-	public List getAllErrors() {
+	public List<ObjectError> getAllErrors() {
 		return this.bindingResult.getAllErrors();
 	}
 
@@ -146,7 +147,7 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getGlobalErrorCount();
 	}
 
-	public List getGlobalErrors() {
+	public List<ObjectError> getGlobalErrors() {
 		return this.bindingResult.getGlobalErrors();
 	}
 
@@ -162,7 +163,7 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getFieldErrorCount();
 	}
 
-	public List getFieldErrors() {
+	public List<FieldError> getFieldErrors() {
 		return this.bindingResult.getFieldErrors();
 	}
 
@@ -178,7 +179,7 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getFieldErrorCount(field);
 	}
 
-	public List getFieldErrors(String field) {
+	public List<FieldError> getFieldErrors(String field) {
 		return this.bindingResult.getFieldErrors(field);
 	}
 
@@ -190,7 +191,7 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getFieldValue(field);
 	}
 
-	public Class getFieldType(String field) {
+	public Class<?> getFieldType(String field) {
 		return this.bindingResult.getFieldType(field);
 	}
 
@@ -206,6 +207,7 @@ public class BindException extends Exception implements BindingResult {
 		return this.bindingResult.getRawFieldValue(field);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public PropertyEditor findEditor(String field, Class valueType) {
 		return this.bindingResult.findEditor(field, valueType);
 	}

@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.PropertyAccessor
  * @see org.springframework.beans.ConfigurablePropertyAccessor
  */
+@SuppressWarnings("serial")
 public abstract class AbstractPropertyBindingResult extends AbstractBindingResult {
 
 	private ConversionService conversionService;
@@ -85,7 +86,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @see #getPropertyAccessor()
 	 */
 	@Override
-	public Class getFieldType(String field) {
+	public Class<?> getFieldType(String field) {
 		return getPropertyAccessor().getPropertyType(fixedField(field));
 	}
 
@@ -133,7 +134,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * @return the custom PropertyEditor, or <code>null</code>
 	 */
 	protected PropertyEditor getCustomEditor(String fixedField) {
-		Class targetType = getPropertyAccessor().getPropertyType(fixedField);
+		Class<?> targetType = getPropertyAccessor().getPropertyType(fixedField);
 		PropertyEditor editor = getPropertyAccessor().findCustomEditor(targetType, fixedField);
 		if (editor == null) {
 			editor = BeanUtils.findEditorByConvention(targetType);
@@ -146,8 +147,8 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	 * if applicable.
 	 */
 	@Override
-	public PropertyEditor findEditor(String field, Class valueType) {
-		Class valueTypeForLookup = valueType;
+	public PropertyEditor findEditor(String field, Class<?> valueType) {
+		Class<?> valueTypeForLookup = valueType;
 		if (valueTypeForLookup == null) {
 			valueTypeForLookup = getFieldType(field);
 		}
