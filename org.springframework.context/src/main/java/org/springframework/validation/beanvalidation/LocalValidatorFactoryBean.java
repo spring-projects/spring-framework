@@ -62,6 +62,7 @@ import org.springframework.util.CollectionUtils;
 public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		implements ValidatorFactory, ApplicationContextAware, InitializingBean {
 
+	@SuppressWarnings("rawtypes")
 	private Class providerClass;
 
 	private MessageInterpolator messageInterpolator;
@@ -85,6 +86,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	 * @see javax.validation.Validation#byProvider(Class)
 	 * @see javax.validation.Validation#byDefaultProvider()
 	 */
+	@SuppressWarnings("rawtypes")
 	public void setProviderClass(Class<? extends ValidationProvider> providerClass) {
 		this.providerClass = providerClass;
 	}
@@ -177,6 +179,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
+		@SuppressWarnings("rawtypes")
 		Configuration configuration = (this.providerClass != null ?
 				Validation.byProvider(this.providerClass).configure() :
 				Validation.byDefaultProvider().configure());

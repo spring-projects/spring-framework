@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.5.3
  */
+@SuppressWarnings("serial")
 public abstract class AbstractErrors implements Errors, Serializable {
 
 	private String nestedPath = "";
@@ -146,8 +147,8 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	public ObjectError getGlobalError() {
-		List globalErrors = getGlobalErrors();
-		return (!globalErrors.isEmpty() ? (ObjectError) globalErrors.get(0) : null);
+		List<ObjectError> globalErrors = getGlobalErrors();
+		return (!globalErrors.isEmpty() ? globalErrors.get(0) : null);
 	}
 
 	public boolean hasFieldErrors() {
@@ -159,8 +160,8 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	public FieldError getFieldError() {
-		List fieldErrors = getFieldErrors();
-		return (!fieldErrors.isEmpty() ? (FieldError) fieldErrors.get(0) : null);
+		List<FieldError> fieldErrors = getFieldErrors();
+		return (!fieldErrors.isEmpty() ? fieldErrors.get(0) : null);
 	}
 
 	public boolean hasFieldErrors(String field) {
@@ -184,12 +185,12 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	}
 
 	public FieldError getFieldError(String field) {
-		List fieldErrors = getFieldErrors(field);
+		List<FieldError> fieldErrors = getFieldErrors(field);
 		return (!fieldErrors.isEmpty() ? (FieldError) fieldErrors.get(0) : null);
 	}
 
 
-	public Class getFieldType(String field) {
+	public Class<?> getFieldType(String field) {
 		Object value = getFieldValue(field);
 		if (value != null) {
 			return value.getClass();

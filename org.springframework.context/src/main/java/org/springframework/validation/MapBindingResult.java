@@ -33,9 +33,10 @@ import org.springframework.util.Assert;
  * @since 2.0
  * @see java.util.Map
  */
+@SuppressWarnings("serial")
 public class MapBindingResult extends AbstractBindingResult implements Serializable {
 
-	private final Map target;
+	private final Map<?, ?> target;
 
 
 	/**
@@ -43,14 +44,14 @@ public class MapBindingResult extends AbstractBindingResult implements Serializa
 	 * @param target the target Map to bind onto
 	 * @param objectName the name of the target object
 	 */
-	public MapBindingResult(Map target, String objectName) {
+	public MapBindingResult(Map<?, ?> target, String objectName) {
 		super(objectName);
 		Assert.notNull(target, "Target Map must not be null");
 		this.target = target;
 	}
 
 
-	public final Map getTargetMap() {
+	public final Map<?, ?> getTargetMap() {
 		return this.target;
 	}
 

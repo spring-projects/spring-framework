@@ -509,18 +509,15 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return this.conversionService;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
+	public void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, propertyEditor);
 	}
 
-	@SuppressWarnings("unchecked")
-	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
+	public void registerCustomEditor(Class<?> requiredType, String field, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, field, propertyEditor);
 	}
 
-	@SuppressWarnings("unchecked")
-	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
+	public PropertyEditor findCustomEditor(Class<?> requiredType, String propertyPath) {
 		return getPropertyEditorRegistry().findCustomEditor(requiredType, propertyPath);
 	}
 
@@ -700,8 +697,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @throws BindException if there were any errors in the bind operation
 	 * @see BindingResult#getModel()
 	 */
-	@SuppressWarnings("unchecked")
-	public Map close() throws BindException {
+	public Map<?, ?> close() throws BindException {
 		if (getBindingResult().hasErrors()) {
 			throw new BindException(getBindingResult());
 		}

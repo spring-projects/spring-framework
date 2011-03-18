@@ -296,6 +296,6 @@ public interface Errors {
 	 * @param field the field name
 	 * @return the type of the field, or <code>null</code> if not determinable
 	 */
-	Class getFieldType(String field);
+	Class<?> getFieldType(String field);
 
 }

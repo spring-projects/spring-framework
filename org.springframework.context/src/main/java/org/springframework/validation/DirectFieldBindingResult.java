@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * @see DataBinder#initDirectFieldAccess()
  * @see BeanPropertyBindingResult
  */
+@SuppressWarnings("serial")
 public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 
 	private final Object target;

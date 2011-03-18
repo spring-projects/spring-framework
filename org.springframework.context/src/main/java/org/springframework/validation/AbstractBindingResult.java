@@ -41,6 +41,7 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  * @see Errors
  */
+@SuppressWarnings("serial")
 public abstract class AbstractBindingResult extends AbstractErrors implements BindingResult, Serializable {
 
 	private final String objectName;
@@ -131,7 +132,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	public String[] resolveMessageCodes(String errorCode, String field) {
-		Class fieldType = getFieldType(field);
+		Class<?> fieldType = getFieldType(field);
 		return getMessageCodesResolver().resolveMessageCodes(
 				errorCode, getObjectName(), fixedField(field), fieldType);
 	}
@@ -237,7 +238,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * @see #getActualFieldValue
 	 */
 	@Override
-	public Class getFieldType(String field) {
+	public Class<?> getFieldType(String field) {
 		Object value = getActualFieldValue(fixedField(field));
 		if (value != null) {
 			return value.getClass();
@@ -286,10 +287,10 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * {@link #getPropertyEditorRegistry() PropertyEditorRegistry}'s
 	 * editor lookup facility, if available.
 	 */
-	public PropertyEditor findEditor(String field, Class valueType) {
+	public PropertyEditor findEditor(String field, Class<?> valueType) {
 		PropertyEditorRegistry editorRegistry = getPropertyEditorRegistry();
 		if (editorRegistry != null) {
-			Class valueTypeToUse = valueType;
+			Class<?> valueTypeToUse = valueType;
 			if (valueTypeToUse == null) {
 				valueTypeToUse = getFieldType(field);
 			}

@@ -94,7 +94,7 @@ public interface BindingResult extends Errors {
 	 * is given but should be specified in any case for consistency checking)
 	 * @return the registered editor, or <code>null</code> if none
 	 */
-	PropertyEditor findEditor(String field, Class valueType);
+	PropertyEditor findEditor(String field, Class<?> valueType);
 
 	/**
 	 * Return the underlying PropertyEditorRegistry.

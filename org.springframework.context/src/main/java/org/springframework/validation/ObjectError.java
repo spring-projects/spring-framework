@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * @see DefaultMessageCodesResolver
  * @since 10.03.2003
  */
+@SuppressWarnings("serial")
 public class ObjectError extends DefaultMessageSourceResolvable {
 
 	private final String objectName;

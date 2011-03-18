@@ -40,6 +40,7 @@ import org.springframework.util.Assert;
  * @see DataBinder#initBeanPropertyAccess()
  * @see DirectFieldBindingResult
  */
+@SuppressWarnings("serial")
 public class BeanPropertyBindingResult extends AbstractPropertyBindingResult implements Serializable {
 
 	private final Object target;

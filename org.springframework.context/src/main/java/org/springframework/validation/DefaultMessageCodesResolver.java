@@ -75,6 +75,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 1.0.1
  */
+@SuppressWarnings("serial")
 public class DefaultMessageCodesResolver implements MessageCodesResolver, Serializable {
 
 	/**
@@ -119,7 +120,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * details on the generated codes.
 	 * @return the list of codes
 	 */
-	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class fieldType) {
+	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType) {
 		List<String> codeList = new ArrayList<String>();
 		List<String> fieldList = new ArrayList<String>();
 		buildFieldList(field, fieldList);

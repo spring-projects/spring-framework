@@ -36,7 +36,7 @@ public abstract class BindingResultUtils {
 	 * @return the BindingResult, or <code>null</code> if none found
 	 * @throws IllegalStateException if the attribute found is not of type BindingResult
 	 */
-	public static BindingResult getBindingResult(Map model, String name) {
+	public static BindingResult getBindingResult(Map<?, ?> model, String name) {
 		Assert.notNull(model, "Model map must not be null");
 		Assert.notNull(name, "Name must not be null");
 		Object attr = model.get(BindingResult.MODEL_KEY_PREFIX + name);
@@ -53,7 +53,7 @@ public abstract class BindingResultUtils {
 	 * @return the BindingResult (never <code>null</code>)
 	 * @throws IllegalStateException if no BindingResult found
 	 */
-	public static BindingResult getRequiredBindingResult(Map model, String name) {
+	public static BindingResult getRequiredBindingResult(Map<?, ?> model, String name) {
 		BindingResult bindingResult = getBindingResult(model, name);
 		if (bindingResult == null) {
 			throw new IllegalStateException("No BindingResult attribute found for name '" + name +
