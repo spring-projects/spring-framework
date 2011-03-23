@@ -25,6 +25,7 @@ import java.util.Date;
 
 import junit.framework.TestCase;
 
+import org.junit.Ignore;
 import org.springframework.beans.TestBean;
 
 /**
@@ -192,7 +193,12 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		//System.in.read();
 	}
 
-	public void testMemUsage() throws Exception {
+	/**
+	 * Ignored because Ubuntu packages OpenJDK with debug symbols enabled.
+	 * See SPR-8078.
+	 */
+	@Ignore
+	public void ignore_testClassesWithoutDebugSymbols() throws Exception {
 		// JDK classes don't have debug information (usually)
 		Class clazz = Component.class;
 		String methodName = "list";
