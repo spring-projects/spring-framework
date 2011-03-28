@@ -59,6 +59,11 @@ public class DefaultCacheableService implements CacheableService<Long> {
 		return counter.getAndIncrement();
 	}
 
+	@Cacheable(value = "default", key = "#root.methodName + #root.method.name + #root.targetClass + #root.target")
+	public Long rootVars(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
 	@Cacheable("default")
 	public Long nullValue(Object arg1) {
 		nullInvocations.incrementAndGet();

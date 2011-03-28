@@ -56,6 +56,11 @@ public class AnnotatedClassCacheableService implements CacheableService {
 		return counter.getAndIncrement();
 	}
 
+	@Cacheable(value = "default", key = "#root.methodName + #root.method.name + #root.targetClass + #root.target")
+	public Object rootVars(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
 	public Object nullValue(Object arg1) {
 		nullInvocations.incrementAndGet();
 		return null;

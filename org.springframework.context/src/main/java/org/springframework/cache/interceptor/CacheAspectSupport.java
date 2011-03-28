@@ -141,8 +141,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	protected CacheOperationContext getOperationContext(CacheDefinition definition, Method method, Object[] args,
-			Class<?> targetClass) {
-		return new CacheOperationContext(definition, method, args, targetClass);
+			Object target, Class<?> targetClass) {
+		return new CacheOperationContext(definition, method, args, target, targetClass);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -160,7 +160,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		// analyze caching information
 		if (cacheDef != null) {
-			CacheOperationContext context = getOperationContext(cacheDef, method, args, targetClass);
+			CacheOperationContext context = getOperationContext(cacheDef, method, args, target, targetClass);
 			Collection<Cache<?, ?>> caches = context.getCaches();
 
 			if (context.hasConditionPassed()) {
@@ -277,13 +277,13 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		private final KeyGenerator<?> keyGenerator = CacheAspectSupport.this.keyGenerator;
 
 		public CacheOperationContext(CacheDefinition operationDefinition, Method method, Object[] args,
-				Class<?> targetClass) {
+				Object target, Class<?> targetClass) {
 			this.definition = operationDefinition;
 			this.caches = CacheAspectSupport.this.getCaches(definition);
 			this.method = method;
 			this.args = args;
 
-			this.evalContext = evaluator.createEvaluationContext(caches, method, args, targetClass);
+			this.evalContext = evaluator.createEvaluationContext(caches, method, args, target, targetClass);
 		}
 
 		/**

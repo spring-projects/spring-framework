@@ -177,6 +177,30 @@ public Book findBook(String name)]]></programlisting>
 					  	<entry><screen>#root.methodName</screen></entry>
 					  </row>
 					  <row>
+					  	<entry>method</entry>
+					  	<entry>root object</entry>
+					  	<entry>The method being invoked</entry>
+					  	<entry><screen>#root.method.name</screen></entry>
+					  </row>
+					  <row>
+					  	<entry>target</entry>
+					  	<entry>root object</entry>
+					  	<entry>The target object being invoked</entry>
+					  	<entry><screen>#root.target</screen></entry>
+					  </row>
+					  <row>
+					  	<entry>targetClass</entry>
+					  	<entry>root object</entry>
+					  	<entry>The class of the target being invoked</entry>
+					  	<entry><screen>#root.targetClass</screen></entry>
+					  </row>
+					  <row>
+					  	<entry>params</entry>
+					  	<entry>root object</entry>
+					  	<entry>The arguments (as array) used for invoking the target</entry>
+					  	<entry><screen>#root.params[0]</screen></entry>
+					  </row>
+					  <row>
 					  	<entry>caches</entry>
 					  	<entry>root object</entry>
 					  	<entry>Collection of caches against which the current method is executed</entry>

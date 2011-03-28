@@ -16,6 +16,7 @@
 
 package org.springframework.cache.interceptor;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.cache.Cache;
@@ -28,12 +29,22 @@ import org.springframework.util.Assert;
  */
 public class DefaultCacheExpressionRootObject implements CacheExpressionRootObject {
 
+	private final Object target;
+	private final Class<?> targetClass;
 	private final String methodName;
+	private final Method method;
 	private final Collection<Cache<?, ?>> caches;
+	private final Object[] args;
 
-	public DefaultCacheExpressionRootObject(Collection<Cache<?,?>> caches, String methodName) {
-		Assert.hasText(methodName, "method name is required");
-		this.methodName = methodName;
+	public DefaultCacheExpressionRootObject(Collection<Cache<?, ?>> caches, Method method, Object[] args,
+			Object target, Class<?> targetClass) {
+		Assert.notNull(method, "method is required");
+		Assert.notNull(targetClass, "targetClass is required");
+		this.method = method;
+		this.methodName = method.getName();
+		this.target = target;
+		this.targetClass = targetClass;
+		this.args = args;
 		this.caches = caches;
 	}
 
@@ -43,5 +54,21 @@ public class DefaultCacheExpressionRootObject implements CacheExpressionRootObje
 
 	public Collection<Cache<?, ?>> getCaches() {
 		return caches;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public Object[] getParams() {
+		return args;
+	}
+
+	public Object getTarget() {
+		return target;
+	}
+
+	public Class<?> getTargetClass() {
+		return targetClass;
 	}
 }

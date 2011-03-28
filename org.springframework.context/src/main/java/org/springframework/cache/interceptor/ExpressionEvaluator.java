@@ -47,8 +47,10 @@ class ExpressionEvaluator {
 	private Map<Method, Expression> keyCache = new ConcurrentHashMap<Method, Expression>();
 	private Map<Method, Method> targetMethodCache = new ConcurrentHashMap<Method, Method>();
 
-	EvaluationContext createEvaluationContext(Collection<Cache<?, ?>> caches, Method method, Object[] args, Class<?> targetClass) {
-		DefaultCacheExpressionRootObject rootObject = new DefaultCacheExpressionRootObject(caches, method.getName());
+	EvaluationContext createEvaluationContext(Collection<Cache<?, ?>> caches, Method method, Object[] args,
+			Object target, Class<?> targetClass) {
+		DefaultCacheExpressionRootObject rootObject = new DefaultCacheExpressionRootObject(caches, method, args,
+				target, targetClass);
 		StandardEvaluationContext evaluationContext = new LazyParamAwareEvaluationContext(rootObject,
 				paramNameDiscoverer, method, args, targetClass, targetMethodCache);
 
