@@ -28,11 +28,17 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.junit.Ignore;
 import org.springframework.jmx.AbstractMBeanServerTests;
 
 /**
  * @author Rob Harrop
  */
+// @Ignore should have no effect for JUnit 3.8 tests; however, it appears
+// that tests on the CI server -- as well as those in Eclipse -- do in
+// fact get ignored. So we leave @Ignore here so that developers can
+// easily search for ignored tests.
+@Ignore("Requires jmxremote_optional.jar; see comments in AbstractMBeanServerTests for details.")
 public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
