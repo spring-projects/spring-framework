@@ -16,6 +16,7 @@
 
 package org.springframework.cache.interceptor;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.cache.Cache;
@@ -33,6 +34,34 @@ interface CacheExpressionRootObject {
 	 * @return name of the cached method.
 	 */
 	String getMethodName();
+
+	/**
+	 * Returns the method being cached.
+	 * 
+	 * @return method being cached
+	 */
+	Method getMethod();
+
+	/**
+	 * Returns the parameters for this invocation.
+	 * 
+	 * @return params for this invocation.
+	 */
+	Object[] getParams();
+
+	/**
+	 * Returns the target instance being cached.
+	 * 
+	 * @return target instance
+	 */
+	Object getTarget();
+
+	/**
+	 * Returns the target class.
+	 * 
+	 * @return target class
+	 */
+	Class<?> getTargetClass();
 
 	/**
 	 * Returns the caches against which the method is executed.

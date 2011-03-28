@@ -40,4 +40,6 @@ public interface CacheableService<T> {
 
 	Number nullInvocations();
 
+	T rootVars(Object arg1);
+
 }

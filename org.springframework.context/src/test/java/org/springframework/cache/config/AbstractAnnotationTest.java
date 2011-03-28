@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationContext;
@@ -137,6 +138,16 @@ public abstract class AbstractAnnotationTest {
 		assertTrue(cache.containsKey(keyName));
 	}
 
+	public void testRootVars(CacheableService service) {
+		Object key = new Object();
+		Object r1 = service.rootVars(key);
+		assertSame(r1, service.rootVars(key));
+		Cache<Object, Object> cache = cm.getCache("default");
+		// assert the method name is used
+		String expectedKey = "rootVarsrootVars" + AopProxyUtils.ultimateTargetClass(service) + service;
+		assertTrue(cache.containsKey(expectedKey));
+	}
+
 	@Test
 	public void testCacheable() throws Exception {
 		testCacheable(cs);
@@ -204,5 +215,15 @@ public abstract class AbstractAnnotationTest {
 	@Test
 	public void testClassMethodName() throws Exception {
 		testMethodName(ccs, "namedefault");
+	}
+
+	@Test
+	public void testRootVars() throws Exception {
+		testRootVars(cs);
+	}
+
+	@Test
+	public void testClassRootVars() throws Exception {
+		testRootVars(ccs);
 	}
 }
