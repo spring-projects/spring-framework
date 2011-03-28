@@ -22,11 +22,10 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.ejb.HibernateEntityManagerFactory;
-import org.junit.Ignore;
-
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.domain.Person;
+import org.springframework.test.annotation.IfProfileValue;
 
 /**
  * Hibernate-specific JPA tests.
@@ -34,7 +33,8 @@ import org.springframework.orm.jpa.domain.Person;
  * @author Juergen Hoeller
  * @author Rod Johnson
  */
-@Ignore // cannot find AnnotationBeanConfigurerAspect
+// Essentially @Ignore-d since AnnotationBeanConfigurerAspect cannot be found
+@IfProfileValue(name="test-group", value="broken")
 public class HibernateEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
 
