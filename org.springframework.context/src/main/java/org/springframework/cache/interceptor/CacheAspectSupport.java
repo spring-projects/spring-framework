@@ -306,6 +306,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		private CacheDefinition definition;
 		private final Collection<Cache<?, ?>> caches;
+		private final Object target;
 		private final Method method;
 		private final Object[] args;
 
@@ -318,6 +319,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				Object target, Class<?> targetClass) {
 			this.definition = operationDefinition;
 			this.caches = CacheAspectSupport.this.getCaches(definition);
+			this.target = target;
 			this.method = method;
 			this.args = args;
 
@@ -352,7 +354,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				return evaluator.key(definition.getKey(), method, evalContext);
 			}
 
-			return keyGenerator.extract(method, args);
+			return keyGenerator.extract(target, method, args);
 		}
 
 		protected Collection<Cache<?, ?>> getCaches() {
