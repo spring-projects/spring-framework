@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,62 +16,70 @@
 
 package org.springframework.web.util;
 
-import java.io.FileNotFoundException;
+import static org.junit.Assert.assertTrue;
+
 import java.net.URL;
 
 import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletException;
 
-import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
-
+import org.junit.Test;
 import org.springframework.core.io.FileSystemResourceLoader;
-import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 
 /**
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 21.02.2005
  */
-@Ignore
-public class Log4jWebConfigurerTests extends TestCase {
+public class Log4jWebConfigurerTests {
 
-	public void testInitLoggingWithClasspath() throws FileNotFoundException {
-		doTestInitLogging("classpath:org/springframework/util/testlog4j.properties", false);
+	private static final String TESTLOG4J_PROPERTIES = "testlog4j.properties";
+	private static final String CLASSPATH_RESOURCE = "classpath:org/springframework/web/util/testlog4j.properties";
+	private static final String RELATIVE_PATH = "src/test/resources/org/springframework/web/util/testlog4j.properties";
+
+	@Test
+	public void initLoggingWithClasspathResource() {
+		initLogging(CLASSPATH_RESOURCE, false);
 	}
 
-	public void testInitLoggingWithRelativeFilePath() throws FileNotFoundException {
-		doTestInitLogging("test/org/springframework/util/testlog4j.properties", false);
+	@Test
+	public void initLoggingWithClasspathResourceAndRefreshInterval() {
+		initLogging(CLASSPATH_RESOURCE, true);
+	}
+	
+	@Test
+	public void initLoggingWithRelativeFilePath() {
+		initLogging(RELATIVE_PATH, false);
 	}
 
-	public void testInitLoggingWithAbsoluteFilePath() throws FileNotFoundException {
-		URL url = Log4jWebConfigurerTests.class.getResource("testlog4j.properties");
-		doTestInitLogging(url.toString(), false);
+	@Test
+	public void initLoggingWithRelativeFilePathAndRefreshInterval() {
+		initLogging(RELATIVE_PATH, true);
+	}
+	
+	@Test
+	public void initLoggingWithUrl() {
+		URL url = Log4jWebConfigurerTests.class.getResource(TESTLOG4J_PROPERTIES);
+		initLogging(url.toString(), false);
 	}
 
-	public void testInitLoggingWithClasspathAndRefreshInterval() throws FileNotFoundException {
-		doTestInitLogging("classpath:org/springframework/util/testlog4j.properties", true);
+	@Test
+	public void initLoggingWithUrlAndRefreshInterval() {
+		URL url = Log4jWebConfigurerTests.class.getResource(TESTLOG4J_PROPERTIES);
+		initLogging(url.toString(), true);
 	}
 
-	public void testInitLoggingWithRelativeFilePathAndRefreshInterval() throws FileNotFoundException {
-		doTestInitLogging("test/org/springframework/util/testlog4j.properties", true);
+	@Ignore("Only works on MS Windows")
+	@Test
+	public void initLoggingWithAbsoluteFilePathAndRefreshInterval() {
+		URL url = Log4jWebConfigurerTests.class.getResource(TESTLOG4J_PROPERTIES);
+		initLogging(url.getFile(), true);
 	}
 
-	/* only works on Windows
-	public void testInitLoggingWithAbsoluteFilePathAndRefreshInterval() throws FileNotFoundException {
-		URL url = Log4jConfigurerTests.class.getResource("testlog4j.properties");
-		doTestInitLogging(url.getFile(), true);
-	}
-	*/
-
-	public void testInitLoggingWithFileUrlAndRefreshInterval() throws FileNotFoundException {
-		URL url = Log4jWebConfigurerTests.class.getResource("testlog4j.properties");
-		doTestInitLogging(url.toString(), true);
-	}
-
-	private void doTestInitLogging(String location, boolean refreshInterval) {
+	private void initLogging(String location, boolean refreshInterval) {
 		MockServletContext sc = new MockServletContext("", new FileSystemResourceLoader());
 		sc.addInitParameter(Log4jWebConfigurer.CONFIG_LOCATION_PARAM, location);
 		if (refreshInterval) {
@@ -80,15 +88,14 @@ public class Log4jWebConfigurerTests extends TestCase {
 		Log4jWebConfigurer.initLogging(sc);
 
 		try {
-			doTestLogOutput();
-		}
-		finally {
+			assertLogOutput();
+		} finally {
 			Log4jWebConfigurer.shutdownLogging(sc);
 		}
 		assertTrue(MockLog4jAppender.closeCalled);
 	}
 
-	private void doTestLogOutput() {
+	private void assertLogOutput() {
 		Log log = LogFactory.getLog(this.getClass());
 		log.debug("debug");
 		log.info("info");
@@ -103,18 +110,17 @@ public class Log4jWebConfigurerTests extends TestCase {
 		assertTrue(MockLog4jAppender.loggingStrings.contains("fatal"));
 	}
 
+	@Test
 	public void testLog4jConfigListener() {
 		Log4jConfigListener listener = new Log4jConfigListener();
-
+		
 		MockServletContext sc = new MockServletContext("", new FileSystemResourceLoader());
-		sc.addInitParameter(Log4jWebConfigurer.CONFIG_LOCATION_PARAM,
-				"test/org/springframework/util/testlog4j.properties");
+		sc.addInitParameter(Log4jWebConfigurer.CONFIG_LOCATION_PARAM, RELATIVE_PATH);
 		listener.contextInitialized(new ServletContextEvent(sc));
-
+		
 		try {
-			doTestLogOutput();
-		}
-		finally {
+			assertLogOutput();
+		} finally {
 			listener.contextDestroyed(new ServletContextEvent(sc));
 		}
 		assertTrue(MockLog4jAppender.closeCalled);
