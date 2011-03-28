@@ -40,6 +40,7 @@ import org.springframework.util.SerializationTestUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		extends AbstractEntityManagerFactoryIntegrationTests {
 
@@ -73,6 +74,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	//@NotTransactional
+	@SuppressWarnings({ "unused", "unchecked" })
 	public void testEntityManagerProxyIsProxy() {
 		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
@@ -127,6 +129,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void testMultipleResults() {
 		// Add with JDBC
 		String firstName = "Tony";
@@ -185,6 +188,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		assertEquals("1 row must have been inserted", 1, countRowsInTable("person"));
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testQueryNoPersons() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
@@ -200,6 +204,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	@NotTransactional
+	@SuppressWarnings("unchecked")
 	public void testQueryNoPersonsNotTransactional() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
@@ -214,6 +219,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		}
 	}
 
+	@SuppressWarnings({ "unused", "unchecked" })
 	public void testQueryNoPersonsShared() {
 		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
 		Query q = em.createQuery("select p from Person as p");
@@ -229,6 +235,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	@NotTransactional
+	@SuppressWarnings("unchecked")
 	public void testQueryNoPersonsSharedNotTransactional() {
 		EntityManager em = SharedEntityManagerCreator.createSharedEntityManager(entityManagerFactory);
 		Query q = em.createQuery("select p from Person as p");
