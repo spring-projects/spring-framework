@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,13 +28,11 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.Ignore;
 import org.springframework.jmx.AbstractMBeanServerTests;
 
 /**
  * @author Rob Harrop
  */
-@Ignore // see https://issuetracker.springsource.com/browse/BRITS-235
 public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
@@ -45,8 +43,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 		try {
 			checkServerConnection(getServer());
-		}
-		finally {
+		} finally {
 			bean.destroy();
 		}
 	}
@@ -62,8 +59,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 		try {
 			checkServerConnection(getServer());
-		}
-		finally {
+		} finally {
 			bean.destroy();
 		}
 	}
@@ -80,8 +76,7 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 			// Try to get the connector bean.
 			ObjectInstance instance = getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
 			assertNotNull("ObjectInstance should not be null", instance);
-		}
-		finally {
+		} finally {
 			bean.destroy();
 		}
 	}
@@ -94,11 +89,9 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 			// Try to get the connector bean.
 			getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
 			fail("Instance should not be found");
-		}
-		catch (InstanceNotFoundException ex) {
+		} catch (InstanceNotFoundException ex) {
 			// expected
-		}
-		finally {
+		} finally {
 			bean.destroy();
 		}
 	}
@@ -115,8 +108,8 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 		assertNotNull("MBeanServerConnection should not be null", connection);
 
 		// Test for MBean server equality.
-		assertEquals("Registered MBean count should be the same",
-				hostedServer.getMBeanCount(), connection.getMBeanCount());
+		assertEquals("Registered MBean count should be the same", hostedServer.getMBeanCount(),
+				connection.getMBeanCount());
 	}
 
 }

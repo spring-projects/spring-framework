@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,18 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
+ * <strong>Note:</strong> the JMX test suite requires the presence of the
+ * <code>jmxremote_optional.jar</code> in your classpath. Thus, if you
+ * run into the <em>"Unsupported protocol: jmxmp"</em> error, you will
+ * need to download the
+ * <a href="http://www.oracle.com/technetwork/java/javase/tech/download-jsp-141676.html">JMX Remote API 1.0.1_04 Reference Implementation</a> 
+ * from Oracle and extract <code>jmxremote_optional.jar</code> into your
+ * classpath, for example in the <code>lib/ext</code> folder of your JVM.
+ * See also <a href="https://issuetracker.springsource.com/browse/EBR-349">EBR-349</a>.
+ * 
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public abstract class AbstractMBeanServerTests extends TestCase {
 
@@ -38,8 +48,7 @@ public abstract class AbstractMBeanServerTests extends TestCase {
 		this.server = MBeanServerFactory.createMBeanServer();
 		try {
 			onSetUp();
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			releaseServer();
 			throw ex;
 		}

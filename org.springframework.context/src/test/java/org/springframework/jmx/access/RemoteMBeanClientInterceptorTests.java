@@ -26,12 +26,9 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.Ignore;
-
 /**
  * @author Rob Harrop
  */
-@Ignore // see https://issuetracker.springsource.com/browse/BRITS-235
 public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
 
 	private static final String SERVICE_URL = "service:jmx:jmxmp://localhost:9876";

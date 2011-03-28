@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.junit.Ignore;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
 
@@ -43,8 +42,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		return JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
 	}
 
-	@Ignore // see https://issuetracker.springsource.com/browse/BRITS-235
-	public void ignoreTestValidConnection() throws Exception {
+	public void testValidConnection() throws Exception {
 		JMXConnectorServer connectorServer = getConnectorServer();
 		connectorServer.start();
 
@@ -59,12 +57,10 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 
 				// perform simple MBean count test
 				assertEquals("MBean count should be the same", getServer().getMBeanCount(), connection.getMBeanCount());
-			}
-			finally {
+			} finally {
 				bean.destroy();
 			}
-		}
-		finally {
+		} finally {
 			connectorServer.stop();
 		}
 	}
@@ -74,14 +70,12 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		try {
 			bean.afterPropertiesSet();
 			fail("IllegalArgumentException should be raised when no service url is provided");
-		}
-		catch (IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			// expected
 		}
 	}
 
-	@Ignore // see https://issuetracker.springsource.com/browse/BRITS-235
-	public void ignoreTestWithLazyConnection() throws Exception {
+	public void testWithLazyConnection() throws Exception {
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
 		bean.setServiceUrl(SERVICE_URL);
 		bean.setConnectOnStartup(false);
@@ -95,8 +89,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 			connector = getConnectorServer();
 			connector.start();
 			assertEquals("Incorrect MBean count", getServer().getMBeanCount(), connection.getMBeanCount());
-		}
-		finally {
+		} finally {
 			bean.destroy();
 			if (connector != null) {
 				connector.stop();

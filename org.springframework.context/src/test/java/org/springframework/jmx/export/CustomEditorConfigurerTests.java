@@ -22,13 +22,11 @@ import java.util.Date;
 
 import javax.management.ObjectName;
 
-import org.junit.Ignore;
 import org.springframework.jmx.AbstractJmxTests;
 
 /**
  * @author Rob Harrop
  */
-@Ignore // changes in CustomEditorConfigurer broke these tests (see diff between r304:305)
 public class CustomEditorConfigurerTests extends AbstractJmxTests {
 
 	private final SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
@@ -38,7 +36,7 @@ public class CustomEditorConfigurerTests extends AbstractJmxTests {
 	}
 
 	public void testDatesInJmx() throws Exception {
-		System.out.println(getServer().getClass().getName());
+		// System.out.println(getServer().getClass().getName());
 		ObjectName oname = new ObjectName("bean:name=dateRange");
 
 		Date startJmx = (Date) getServer().getAttribute(oname, "StartDate");
