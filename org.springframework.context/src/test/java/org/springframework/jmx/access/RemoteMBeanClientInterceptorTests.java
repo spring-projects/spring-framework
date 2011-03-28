@@ -26,24 +26,30 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.junit.Ignore;
+
 /**
  * @author Rob Harrop
  */
+// @Ignore should have no effect for JUnit 3.8 tests; however, it appears
+// that tests on the CI server -- as well as those in Eclipse -- do in
+// fact get ignored. So we leave @Ignore here so that developers can
+// easily search for ignored tests.
+@Ignore("Requires jmxremote_optional.jar; see comments in AbstractMBeanServerTests for details.")
 public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
 
 	private static final String SERVICE_URL = "service:jmx:jmxmp://localhost:9876";
 
 	private JMXConnectorServer connectorServer;
 
-	private JMXConnector connector;	
-	
+	private JMXConnector connector;
+
 	public void onSetUp() throws Exception {
 		super.onSetUp();
 		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
 		try {
 			this.connectorServer.start();
-		}
-		catch (BindException ex) {
+		} catch (BindException ex) {
 			// skipping tests, server already running at this port
 			runTests = false;
 		}
@@ -58,7 +64,7 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		return this.connector.getMBeanServerConnection();
 	}
 
-	public void tearDown() throws Exception {		
+	public void tearDown() throws Exception {
 		if (this.connector != null) {
 			this.connector.close();
 		}

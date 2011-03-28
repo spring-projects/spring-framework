@@ -186,8 +186,10 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		}
 	}
 
-	// @Ignore has no effect for JUnit 3.8 tests; however, we leave it
-	// here so that developers can easily search for ignored tests.
+	// @Ignore should have no effect for JUnit 3.8 tests; however, it appears
+	// that tests on the CI server -- as well as those in Eclipse -- do in
+	// fact get ignored. So we leave @Ignore here so that developers can
+	// easily search for ignored tests.
 	//
 	// Once fixed, renamed to test* instead of ignore*.
 	@Ignore("Requires jmxremote_optional.jar; see comments in AbstractMBeanServerTests for details.")
