@@ -137,7 +137,8 @@ public class ProfileValueJUnit38SpringContextTests extends TestCase {
 	 * explicitly configured with an empty list, thus disabling all default
 	 * listeners.
 	 */
-	@TestExecutionListeners(value = {}, inheritListeners = false)
+	@SuppressWarnings("deprecation")
+	@TestExecutionListeners(listeners = {}, inheritListeners = false)
 	public static class DefaultProfileValueSourceTestCase extends AbstractJUnit38SpringContextTests {
 
 		int invocationCount = 0;
