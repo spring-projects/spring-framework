@@ -28,7 +28,7 @@ import org.springframework.cache.KeyGenerator;
  */
 public class DefaultKeyGenerator implements KeyGenerator<Object> {
 
-	public Object extract(Method method, Object... params) {
+	public Object extract(Object target, Method method, Object... params) {
 		if (params.length == 1) {
 			return params[0];
 		}

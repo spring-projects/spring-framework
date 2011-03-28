@@ -26,5 +26,5 @@ import java.lang.reflect.Method;
  */
 public interface KeyGenerator<K> {
 
-	K extract(Method method, Object... params);
+	K extract(Object target, Method method, Object... params);
 }
