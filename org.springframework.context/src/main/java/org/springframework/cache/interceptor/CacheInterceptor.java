@@ -40,7 +40,6 @@ import org.aopalliance.intercept.MethodInvocation;
 @SuppressWarnings("serial")
 public class CacheInterceptor extends CacheAspectSupport implements MethodInterceptor, Serializable {
 
-	@SuppressWarnings("unchecked")
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 

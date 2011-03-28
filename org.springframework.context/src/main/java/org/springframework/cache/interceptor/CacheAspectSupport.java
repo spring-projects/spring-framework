@@ -154,6 +154,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			targetClass = target.getClass();
 		}
 
+		boolean log = logger.isTraceEnabled();
+
 		final CacheDefinition cacheDef = getCacheDefinitionSource().getCacheDefinition(method, targetClass);
 
 		Object retVal = null;
@@ -168,8 +170,14 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				if (cacheDef instanceof CacheUpdateDefinition) {
 					Object key = context.generateKey();
 
+					if (log) {
+						logger.trace("Computed cache key " + key + " for definition " + cacheDef);
+					}
+
 					if (key == null) {
-						throw new IllegalArgumentException("Null key returned for cache definition " + cacheDef);
+						throw new IllegalArgumentException(
+								"Null key returned for cache definition (maybe you are using named params on classes without debug info?) "
+										+ cacheDef);
 					}
 
 					//
@@ -185,8 +193,16 @@ public abstract class CacheAspectSupport implements InitializingBean {
 						retVal = cache.get(key);
 						// to avoid race-conditions of entries being removed between contains/get calls
 						if (cache.containsKey(key)) {
+							if (log) {
+								logger.trace("Key " + key + " found in cache, returning value " + retVal);
+							}
 							return retVal;
 						} else {
+							if (log) {
+								logger.trace("Key " + key + " NOT found in cache, invoking target method for caching "
+										+ method);
+							}
+
 							retVal = invocation.call();
 							cache.put(key, retVal);
 						}
@@ -225,7 +241,16 @@ public abstract class CacheAspectSupport implements InitializingBean {
 						}
 
 						if (!cacheHit) {
+							if (log) {
+								logger.trace("Key " + key + " NOT found in cache(s), invoking cached target method  "
+										+ method);
+							}
 							retVal = invocation.call();
+						}
+						else {
+							if (log) {
+								logger.trace("Key " + key + " found in cache, returning value " + retVal);
+							}
 						}
 
 						// update all caches (if needed)
@@ -247,10 +272,18 @@ public abstract class CacheAspectSupport implements InitializingBean {
 						// flush the cache (ignore arguments)
 						if (invalidateDef.isCacheWide()) {
 							cache.clear();
+							if (log) {
+								logger.trace("Invalidating entire cache for definition " + cacheDef + " on method "
+										+ method);
+							}
 						} else {
 							// check key
 							if (key == null) {
 								key = context.generateKey();
+							}
+							if (log) {
+								logger.trace("Invalidating cache key " + key + " for definition " + cacheDef
+										+ " on method " + method);
 							}
 							cache.remove(key);
 						}
@@ -258,6 +291,11 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				}
 
 				return retVal;
+			}
+			else {
+				if (log) {
+					logger.trace("Cache condition failed on method " + method + " for definition " + cacheDef);
+				}
 			}
 		}
 
