@@ -163,6 +163,23 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void runBare() throws Throwable {
+		
+		// getName will return the name of the method being run.
+		if (isDisabledInThisEnvironment(getName())) {
+			// Let superclass log that we didn't run the test.
+			super.runBare();
+			return;
+		}
+
+		final Method testMethod = getTestMethod();
+
+		if (isDisabledInThisEnvironment(testMethod)) {
+			recordDisabled();
+			this.logger.info("**** " + getClass().getName() + "." + getName() + " is disabled in this environment: "
+					+ "Total disabled tests=" + getDisabledTestCount());
+			return;
+		}
+
 		if (!shouldUseShadowLoader()) {
 			super.runBare();
 			return;

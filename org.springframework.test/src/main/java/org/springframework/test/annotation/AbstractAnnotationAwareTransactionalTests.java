@@ -143,6 +143,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	 */
 	@Override
 	public void runBare() throws Throwable {
+
 		// getName will return the name of the method being run.
 		if (isDisabledInThisEnvironment(getName())) {
 			// Let superclass log that we didn't run the test.
@@ -154,7 +155,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 
 		if (isDisabledInThisEnvironment(testMethod)) {
 			recordDisabled();
-			this.logger.info("**** " + getClass().getName() + "." + getName() + " disabled in this environment: "
+			this.logger.info("**** " + getClass().getName() + "." + getName() + " is disabled in this environment: "
 					+ "Total disabled tests=" + getDisabledTestCount());
 			return;
 		}
