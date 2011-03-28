@@ -48,19 +48,28 @@ public @interface ContextConfiguration {
 	/**
 	 * The resource locations to use for loading an
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
-	 * <p>Check out {@link org.springframework.test.context.support.AbstractContextLoader#modifyLocations)}'s
-	 * javadoc for details on how a location String will be interpreted at runtime,
+	 * <p>Check out the javadoc for {@link org.springframework.test.context.support.AbstractContextLoader#modifyLocations AbstractContextLoader.modifyLocations()}
+	 * for details on how a location String will be interpreted at runtime,
 	 * in particular in case of a relative path. Also, check out the documentation on
-	 * {@link org.springframework.test.context.support.AbstractContextLoader#generateDefaultLocations}
+	 * {@link org.springframework.test.context.support.AbstractContextLoader#generateDefaultLocations AbstractContextLoader.generateDefaultLocations()}
 	 * for details on the default locations that are going to be used if none are specified.
 	 * <p>Note that the above-mentioned default rules only apply for a standard
-	 * {@link org.springframework.test.context.support.AbstractContextLoader} subclass
-	 * such as {@link org.springframework.test.context.support.GenericXmlContextLoader}
+	 * {@link org.springframework.test.context.support.AbstractContextLoader AbstractContextLoader} subclass
+	 * such as {@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader}
 	 * which is the effective default implementation used at runtime.
 	 */
 	String[] locations() default {};
 
 	/**
+	 * TODO Document classes().
+	 * 
+	 * @since 3.1
+	 */
+	Class<?>[] classes() default {};
+
+	/**
+	 * TODO Update documentation regarding classes vs. locations.
+	 * 
 	 * Whether or not {@link #locations() resource locations} from superclasses
 	 * should be <em>inherited</em>.
 	 * <p>The default value is <code>true</code>, which means that an annotated
@@ -100,8 +109,8 @@ public @interface ContextConfiguration {
      * an explicit loader. If no class in the hierarchy specifies an explicit
      * loader, a default loader will be used instead.
 	 * <p>The default concrete implementation chosen at runtime will be
-	 * {@link org.springframework.test.context.support.GenericXmlContextLoader}.
-	 * Also check out {@link org.springframework.test.context.support.AbstractContextLoader}'s
+	 * {@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader}.
+	 * Also check out {@link org.springframework.test.context.support.AbstractContextLoader AbstractContextLoader}'s
 	 * javadoc for details on the default behavior there.
 	 */
 	Class<? extends ContextLoader> loader() default ContextLoader.class;
