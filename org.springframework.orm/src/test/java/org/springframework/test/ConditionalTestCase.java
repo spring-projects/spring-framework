@@ -70,7 +70,7 @@ public abstract class ConditionalTestCase extends TestCase {
 		// getName will return the name of the method being run
 		if (isDisabledInThisEnvironment(getName())) {
 			recordDisabled();
-			this.logger.info("**** " + getClass().getName() + "." + getName() + " disabled in this environment: "
+			this.logger.info("**** " + getClass().getName() + "." + getName() + " is disabled in this environment: "
 					+ "Total disabled tests = " + getDisabledTestCount());
 			return;
 		}

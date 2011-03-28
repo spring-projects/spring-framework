@@ -67,6 +67,8 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
+ * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 public abstract class AbstractAnnotationAwareTransactionalTests extends
 		AbstractTransactionalDataSourceSpringContextTests {
@@ -151,7 +153,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 
 		if (isDisabledInThisEnvironment(testMethod)) {
 			recordDisabled();
-			this.logger.info("**** " + getClass().getName() + "." + getName() + " disabled in this environment: "
+			this.logger.info("**** " + getClass().getName() + "." + getName() + " is disabled in this environment: "
 					+ "Total disabled tests=" + getDisabledTestCount());
 			return;
 		}

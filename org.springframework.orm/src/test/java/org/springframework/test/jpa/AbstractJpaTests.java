@@ -77,6 +77,8 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
+ * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactionalTests {
 
@@ -157,13 +159,31 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	}
 
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void runBare() throws Throwable {
-		if (!shouldUseShadowLoader()) {
+		
+		// getName will return the name of the method being run.
+		if (isDisabledInThisEnvironment(getName())) {
+			// Let superclass log that we didn't run the test.
 			super.runBare();
 			return;
 		}
 
+		final Method testMethod = getTestMethod();
+
+		if (isDisabledInThisEnvironment(testMethod)) {
+			recordDisabled();
+			this.logger.info("**** " + getClass().getName() + "." + getName() + " is disabled in this environment: "
+					+ "Total disabled tests=" + getDisabledTestCount());
+			return;
+		}
+		
+		if (!shouldUseShadowLoader()) {
+			super.runBare();
+			return;
+		}
+		
 		String combinationOfContextLocationsForThisTestClass = cacheKeys(); 			
 		ClassLoader classLoaderForThisTestClass = getClass().getClassLoader();
 		// save the TCCL
@@ -305,6 +325,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 		private final LoadTimeWeaver ltw;
 
+		@SuppressWarnings("unused")
 		public LoadTimeWeaverInjectingBeanPostProcessor(LoadTimeWeaver ltw) {
 			this.ltw = ltw;
 		}
@@ -325,6 +346,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 		private final ClassLoader shadowingClassLoader;
 
+		@SuppressWarnings("unused")
 		public ShadowingLoadTimeWeaver(ClassLoader shadowingClassLoader) {
 			this.shadowingClassLoader = shadowingClassLoader;
 		}
