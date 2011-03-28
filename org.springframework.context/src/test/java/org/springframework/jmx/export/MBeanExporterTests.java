@@ -80,10 +80,12 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	// Note that @Ignore has no effect for JUnit 3.8 TestCase-based tests,
-	// we leave it here to allow developers to easily search for ignored 
+	// but we leave it here to allow developers to easily search for ignored 
 	// tests. As a work-around, the method is prefixed with "ignore"
 	// instead of "test" as required by JUnit 3.x.
-	@Ignore("NotificationListenerBean constructor does not throw the expected IllegalArgumentException")
+	//
+	// See: https://jira.springsource.org/browse/SPR-8091
+	@Ignore("[SPR-8091] NotificationListenerBean constructor does not throw the expected IllegalArgumentException")
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void ignoreTestRegisterNullNotificationListenerType() throws Exception {
 		Map listeners = new HashMap();
