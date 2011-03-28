@@ -24,7 +24,7 @@ import org.springframework.test.context.TestExecutionListeners;
 /**
  * Unit test for {@link AbstractJUnit38SpringContextTests} which focuses on
  * proper support of the {@link Repeat @Repeat} annotation.
- *
+ * 
  * @author Sam Brannen
  * @since 2.5
  */
@@ -42,7 +42,7 @@ public class RepeatedJUnit38SpringContextTests extends TestCase {
 		final RepeatedTestCase repeatedTestCase = new RepeatedTestCase(testName);
 		repeatedTestCase.run();
 		assertEquals("Verifying number of invocations for test method [" + testName + "].", expectedNumInvocations,
-				repeatedTestCase.invocationCount);
+			repeatedTestCase.invocationCount);
 	}
 
 	public void testRepeatAnnotationSupport() throws Exception {
@@ -58,7 +58,8 @@ public class RepeatedJUnit38SpringContextTests extends TestCase {
 	 * explicitly configured with an empty list, thus disabling all default
 	 * listeners.
 	 */
-	@TestExecutionListeners(value = {}, inheritListeners = false)
+	@SuppressWarnings("deprecation")
+	@TestExecutionListeners(listeners = {}, inheritListeners = false)
 	protected static class RepeatedTestCase extends AbstractJUnit38SpringContextTests {
 
 		int invocationCount = 0;
