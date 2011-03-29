@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,6 +234,26 @@ public class TestContext extends AttributeAccessorSupport {
 		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
 		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
 				+ annotationType + "] and class [" + clazz + "]");
+
+		// TODO [SPR-6184] Implement recursive search for configuration classes.
+		// This needs to integrate seamlessly (i.e., analogous yet mutually
+		// exclusive) with the existing locations search.
+		ContextConfiguration cc = declaringClass.getAnnotation(annotationType);
+		if (cc != null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Retrieved @ContextConfiguration [" + cc + "] for declaring class [" + declaringClass
+						+ "]");
+			}
+
+			Class<?>[] configClasses = cc.classes();
+
+			if (!ObjectUtils.isEmpty(configClasses)) {
+				for (Class<?> configClass : configClasses) {
+					locationsList.add(configClass.getName());
+				}
+				return locationsList.toArray(new String[locationsList.size()]);
+			}
+		}
 
 		while (declaringClass != null) {
 			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
