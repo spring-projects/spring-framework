@@ -44,10 +44,11 @@ import org.springframework.test.context.junit4.orm.HibernateSessionFlushingTests
  */
 @RunWith(Suite.class)
 // Note: the following 'multi-line' layout is for enhanced code readability.
-@SuiteClasses( {//
+@SuiteClasses({//
 StandardJUnit4FeaturesTests.class,//
 	StandardJUnit4FeaturesSpringRunnerTests.class,//
 	SpringJUnit47ClassRunnerRuleTests.class,//
+	AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
 	ExpectedExceptionSpringRunnerTests.class,//
 	TimedSpringRunnerTests.class,//
 	RepeatedSpringRunnerTests.class,//
