@@ -21,12 +21,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.Assert;
 
 /**
  * TODO Document AnnotationConfigContextLoader.
@@ -34,99 +32,61 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 3.1
  */
-public class AnnotationConfigContextLoader extends AbstractContextLoader {
+public class AnnotationConfigContextLoader extends AbstractGenericContextLoader {
 
 	private static final Log logger = LogFactory.getLog(AnnotationConfigContextLoader.class);
 
 
 	/**
-	 * TODO Document loadContext().
-	 * 
-	 * @see org.springframework.test.context.ContextLoader#loadContext(java.lang.String[])
+	 * Creates a new {@link AnnotationConfigApplicationContext}.
 	 */
-	public ApplicationContext loadContext(String... locations) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Creating an AnnotationConfigApplicationContext for "
-					+ ObjectUtils.nullSafeToString(locations));
-		}
+	@Override
+	protected GenericApplicationContext createGenericApplicationContext() {
+		return new AnnotationConfigApplicationContext();
+	}
 
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		prepareContext(context);
-		customizeBeanFactory(context.getDefaultListableBeanFactory());
+	/**
+	 * TODO Document overridden loadBeanDefinitions().
+	 */
+	@Override
+	protected void loadBeanDefinitions(GenericApplicationContext context, String... locations) {
+
+		Assert.isInstanceOf(AnnotationConfigApplicationContext.class, context,
+			"context must be an instance of AnnotationConfigApplicationContext");
+
+		AnnotationConfigApplicationContext annotationConfigApplicationContext = (AnnotationConfigApplicationContext) context;
 
 		List<Class<?>> configClasses = new ArrayList<Class<?>>();
 		for (String location : locations) {
-			final Class<?> clazz = getClass().getClassLoader().loadClass(location);
-			configClasses.add(clazz);
+			try {
+				Class<?> clazz = getClass().getClassLoader().loadClass(location);
+				configClasses.add(clazz);
+			}
+			catch (ClassNotFoundException e) {
+				throw new IllegalArgumentException(String.format(
+					"The supplied resource location [%s] does not represent a class.", location), e);
+			}
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Loading AnnotationConfigApplicationContext from config classes: " + configClasses);
+			logger.debug("Registering configuration classes: " + configClasses);
 		}
 
 		for (Class<?> configClass : configClasses) {
-			context.register(configClass);
+			annotationConfigApplicationContext.register(configClass);
 		}
-
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		customizeContext(context);
-		context.refresh();
-		context.registerShutdownHook();
-
-		return context;
 	}
 
 	/**
-	 * Prepare the {@link GenericApplicationContext} created by this
-	 * ContextLoader. Called <i>before</> bean definitions are read.
-	 * <p>
-	 * The default implementation is empty. Can be overridden in subclasses to
-	 * customize GenericApplicationContext's standard settings.
-	 * 
-	 * @param context the context for which the BeanDefinitionReader should be
-	 * created
-	 * @see #loadContext
-	 * @see org.springframework.context.support.GenericApplicationContext#setResourceLoader
-	 * @see org.springframework.context.support.GenericApplicationContext#setId
+	 * Returns <code>null</code>; intended as a <em>no-op</em> operation.
 	 */
-	protected void prepareContext(GenericApplicationContext context) {
-	}
-
-	/**
-	 * Customize the internal bean factory of the ApplicationContext created by
-	 * this ContextLoader.
-	 * <p>
-	 * The default implementation is empty but can be overridden in subclasses
-	 * to customize DefaultListableBeanFactory's standard settings.
-	 * 
-	 * @param beanFactory the bean factory created by this ContextLoader
-	 * @see #loadContext
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowBeanDefinitionOverriding(boolean)
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowEagerClassLoading(boolean)
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowCircularReferences(boolean)
-	 * @see org.springframework.beans.factory.support.DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping(boolean)
-	 */
-	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
-	}
-
-	/**
-	 * Customize the {@link GenericApplicationContext} created by this
-	 * ContextLoader <i>after</i> bean definitions have been loaded into the
-	 * context but before the context is refreshed.
-	 * <p>
-	 * The default implementation is empty but can be overridden in subclasses
-	 * to customize the application context.
-	 * 
-	 * @param context the newly created application context
-	 * @see #loadContext(String...)
-	 */
-	protected void customizeContext(GenericApplicationContext context) {
+	@Override
+	protected BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
+		return null;
 	}
 
 	/**
 	 * TODO Document overridden generateDefaultLocations().
-	 * 
-	 * @see org.springframework.test.context.support.AbstractContextLoader#generateDefaultLocations(java.lang.Class)
 	 */
 	@Override
 	protected String[] generateDefaultLocations(Class<?> clazz) {
@@ -135,21 +95,15 @@ public class AnnotationConfigContextLoader extends AbstractContextLoader {
 	}
 
 	/**
-	 * TODO Document modifyLocations().
-	 * 
-	 * @see org.springframework.test.context.support.AbstractContextLoader#modifyLocations(java.lang.Class,
-	 * java.lang.String[])
+	 * Returns the supplied <code>locations</code> unmodified.
 	 */
 	@Override
 	protected String[] modifyLocations(Class<?> clazz, String... locations) {
-		// TODO Implement modifyLocations() (?).
 		return locations;
 	}
 
 	/**
-	 * TODO Document getResourceSuffix().
-	 * 
-	 * @see org.springframework.test.context.support.AbstractContextLoader#getResourceSuffix()
+	 * Returns &quot;Config</code>&quot;.
 	 */
 	@Override
 	protected String getResourceSuffix() {
