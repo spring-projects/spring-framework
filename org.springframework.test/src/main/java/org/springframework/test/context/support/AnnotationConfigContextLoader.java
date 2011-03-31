@@ -16,15 +16,13 @@
 
 package org.springframework.test.context.support;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * TODO Document AnnotationConfigContextLoader.
@@ -56,25 +54,22 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 
 		AnnotationConfigApplicationContext annotationConfigApplicationContext = (AnnotationConfigApplicationContext) context;
 
-		List<Class<?>> configClasses = new ArrayList<Class<?>>();
-		for (String location : locations) {
+		Class<?>[] configClasses = new Class<?>[locations.length];
+		for (int i = 0; i < locations.length; i++) {
 			try {
-				Class<?> clazz = getClass().getClassLoader().loadClass(location);
-				configClasses.add(clazz);
+				Class<?> clazz = getClass().getClassLoader().loadClass(locations[i]);
+				configClasses[i] = clazz;
 			}
 			catch (ClassNotFoundException e) {
 				throw new IllegalArgumentException(String.format(
-					"The supplied resource location [%s] does not represent a class.", location), e);
+					"The supplied resource location [%s] does not represent a class.", locations[i]), e);
 			}
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Registering configuration classes: " + configClasses);
+			logger.debug("Registering configuration classes: " + ObjectUtils.nullSafeToString(configClasses));
 		}
-
-		for (Class<?> configClass : configClasses) {
-			annotationConfigApplicationContext.register(configClass);
-		}
+		annotationConfigApplicationContext.register(configClasses);
 	}
 
 	/**
