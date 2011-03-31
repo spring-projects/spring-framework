@@ -221,7 +221,7 @@ public class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
-			this.beanInfo = Introspector.getBeanInfo(beanClass);
+			this.beanInfo = new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass));
 
 			// Immediately remove class from Introspector cache, to allow for proper
 			// garbage collection on class loader shutdown - we cache it here anyway,
