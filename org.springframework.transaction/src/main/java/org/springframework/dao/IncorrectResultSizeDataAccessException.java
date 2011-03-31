@@ -21,9 +21,11 @@ package org.springframework.dao;
  * for example when expecting a single row but getting 0 or more than 1 rows.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 1.0.2
  * @see EmptyResultDataAccessException
  */
+@SuppressWarnings("serial")
 public class IncorrectResultSizeDataAccessException extends DataRetrievalFailureException {
 
 	private int expectedSize;
@@ -59,6 +61,18 @@ public class IncorrectResultSizeDataAccessException extends DataRetrievalFailure
 	 */
 	public IncorrectResultSizeDataAccessException(String msg, int expectedSize) {
 		super(msg);
+		this.expectedSize = expectedSize;
+		this.actualSize = -1;
+	}
+
+	/**
+	 * Constructor for IncorrectResultSizeDataAccessException.
+	 * @param msg the detail message
+	 * @param ex the wrapped exception
+	 * @param expectedSize the expected result size
+	 */
+	public IncorrectResultSizeDataAccessException(String msg, int expectedSize, Throwable ex) {
+		super(msg, ex);
 		this.expectedSize = expectedSize;
 		this.actualSize = -1;
 	}
