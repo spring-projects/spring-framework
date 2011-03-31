@@ -829,7 +829,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #executeSchemaStatement
 	 */
-	protected void executeSchemaScript(Connection con, String[] sql) throws SQLException {
+	protected void executeSchemaScript(Connection con, String... sql) throws SQLException {
 		if (sql != null && sql.length > 0) {
 			boolean oldAutoCommit = con.getAutoCommit();
 			if (!oldAutoCommit) {
@@ -966,8 +966,9 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * resources are specified locally via this bean.
 	 * @see org.hibernate.cfg.Configuration#configure(java.net.URL)
 	 */
-	public void setConfigLocation(Resource configLocation) {
+	public This setConfigLocation(Resource configLocation) {
 		this.configLocations = new Resource[] {configLocation};
+		return this.instance;
 	}
 
 	/**
@@ -990,8 +991,9 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addCacheableFile(java.io.File)
 	 */
-	public void setCacheableMappingLocations(Resource[] cacheableMappingLocations) {
+	public This setCacheableMappingLocations(Resource... cacheableMappingLocations) {
 		this.cacheableMappingLocations = cacheableMappingLocations;
+		return this.instance;
 	}
 
 
@@ -1002,8 +1004,9 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * resources are specified locally via this bean.
 	 * @see org.hibernate.cfg.Configuration#configure(java.net.URL)
 	 */
-	public void setConfigLocations(Resource[] configLocations) {
+	public This setConfigLocations(Resource... configLocations) {
 		this.configLocations = configLocations;
+		return this.instance;
 	}
 
 	/**
@@ -1015,8 +1018,9 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * @see org.springframework.orm.hibernate3.support.BlobByteArrayType
 	 * @see org.springframework.orm.hibernate3.support.BlobSerializableType
 	 */
-	public void setLobHandler(LobHandler lobHandler) {
+	public This setLobHandler(LobHandler lobHandler) {
 		this.lobHandler = lobHandler;
+		return this.instance;
 	}
 
 	/**
@@ -1178,7 +1182,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * @see #setMappingLocations
 	 * @see org.hibernate.cfg.Configuration#addResource
 	 */
-	public This setMappingResources(String[] mappingResources) {
+	public This setMappingResources(String... mappingResources) {
 		this.mappingResources = mappingResources;
 		return instance;
 	}
@@ -1190,7 +1194,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addJar(java.io.File)
 	 */
-	public This setMappingJarLocations(Resource[] mappingJarLocations) {
+	public This setMappingJarLocations(Resource... mappingJarLocations) {
 		this.mappingJarLocations = mappingJarLocations;
 		return instance;
 	}
@@ -1202,7 +1206,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addDirectory(java.io.File)
 	 */
-	public This setMappingDirectoryLocations(Resource[] mappingDirectoryLocations) {
+	public This setMappingDirectoryLocations(Resource... mappingDirectoryLocations) {
 		this.mappingDirectoryLocations = mappingDirectoryLocations;
 		return instance;
 	}
@@ -1216,7 +1220,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * or to specify all mappings locally.
 	 * @see org.hibernate.cfg.Configuration#addInputStream
 	 */
-	public This setMappingLocations(Resource[] mappingLocations) {
+	public This setMappingLocations(Resource... mappingLocations) {
 		this.mappingLocations = mappingLocations;
 		return instance;
 	}
@@ -1333,7 +1337,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * @see FilterDefinitionFactoryBean
 	 * @see org.hibernate.cfg.Configuration#addFilterDefinition
 	 */
-	public This setFilterDefinitions(FilterDefinition[] filterDefinitions) {
+	public This setFilterDefinitions(FilterDefinition... filterDefinitions) {
 		this.filterDefinitions = filterDefinitions;
 		return this.instance;
 	}
@@ -1347,7 +1351,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * @see TypeDefinitionBean
 	 * @see org.hibernate.cfg.Mappings#addTypeDef(String, String, java.util.Properties)
 	 */
-	public This setTypeDefinitions(TypeDefinitionBean[] typeDefinitions) {
+	public This setTypeDefinitions(TypeDefinitionBean... typeDefinitions) {
 		this.typeDefinitions = typeDefinitions;
 		return this.instance;
 	}

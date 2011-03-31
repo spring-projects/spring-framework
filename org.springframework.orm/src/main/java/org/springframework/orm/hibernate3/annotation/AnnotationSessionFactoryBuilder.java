@@ -167,7 +167,7 @@ public class AnnotationSessionFactoryBuilder extends SessionFactoryBuilderSuppor
 	 * JDK 1.5+ annotation metadata will be read.
 	 * @see org.hibernate.cfg.AnnotationConfiguration#addPackage
 	 */
-	public AnnotationSessionFactoryBuilder setAnnotatedPackages(String[] annotatedPackages) {
+	public AnnotationSessionFactoryBuilder setAnnotatedPackages(String... annotatedPackages) {
 		this.annotatedPackages = annotatedPackages;
 		return this;
 	}
@@ -180,13 +180,14 @@ public class AnnotationSessionFactoryBuilder extends SessionFactoryBuilderSuppor
 	 * Hibernate's special <code>@org.hibernate.annotations.Entity</code>.
 	 * @see #setPackagesToScan
 	 */
-	public AnnotationSessionFactoryBuilder setEntityTypeFilters(TypeFilter[] entityTypeFilters) {
+	public AnnotationSessionFactoryBuilder setEntityTypeFilters(TypeFilter... entityTypeFilters) {
 		this.entityTypeFilters = entityTypeFilters;
 		return this;
 	}
 
-	public void setResourcePatternResolver(ResourcePatternResolver resourcePatternResolver) {
+	public AnnotationSessionFactoryBuilder setResourcePatternResolver(ResourcePatternResolver resourcePatternResolver) {
 		this.resourcePatternResolver = resourcePatternResolver;
+		return this;
 	}
 
 	/**
