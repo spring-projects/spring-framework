@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import org.hibernate.transaction.TransactionManagerLookup;
 /**
  * Implementation of Hibernate's {@link TransactionManagerLookup} interface
  * that returns a Spring-managed JTA {@link TransactionManager}, determined
- * by LocalSessionFactoryBean's "jtaTransactionManager" property.
+ * by SessionFactoryBuilder's "jtaTransactionManager" property.
  *
  * <p>The main advantage of this TransactionManagerLookup is that it avoids
  * double configuration of JTA specifics. A single TransactionManager bean can
- * be used for both JtaTransactionManager and LocalSessionFactoryBean, with no
+ * be used for both JtaTransactionManager and SessionFactoryBuilder, with no
  * JTA setup in Hibernate configuration.
  *
  * <p>Alternatively, use Hibernate's own TransactionManagerLookup implementations:
@@ -40,7 +40,7 @@ import org.hibernate.transaction.TransactionManagerLookup;
  *
  * @author Juergen Hoeller
  * @since 1.2
- * @see LocalSessionFactoryBean#setJtaTransactionManager
+ * @see SessionFactoryBuilder#setJtaTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
  */
 public class LocalTransactionManagerLookup implements TransactionManagerLookup {
@@ -49,11 +49,11 @@ public class LocalTransactionManagerLookup implements TransactionManagerLookup {
 
 
 	public LocalTransactionManagerLookup() {
-		TransactionManager tm = LocalSessionFactoryBean.getConfigTimeTransactionManager();
+		TransactionManager tm = SessionFactoryBuilderSupport.getConfigTimeTransactionManager();
 		// absolutely needs thread-bound TransactionManager to initialize
 		if (tm == null) {
 			throw new IllegalStateException("No JTA TransactionManager found - " +
-			    "'jtaTransactionManager' property must be set on LocalSessionFactoryBean");
+			    "'jtaTransactionManager' property must be set on SessionFactoryBuilder");
 		}
 		this.transactionManager = tm;
 	}

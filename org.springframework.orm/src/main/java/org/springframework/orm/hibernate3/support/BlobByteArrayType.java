@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
 
 /**
  * Hibernate UserType implementation for byte arrays that get mapped to BLOBs.
- * Retrieves the LobHandler to use from LocalSessionFactoryBean at config time.
+ * Retrieves the LobHandler to use from SessionFactoryBuilder at config time.
  *
  * <p>Can also be defined in generic Hibernate mappings, as DefaultLobCreator will
  * work with most JDBC-compliant database drivers. In this case, the field type
@@ -38,15 +38,15 @@ import org.springframework.jdbc.support.lob.LobHandler;
  *
  * @author Juergen Hoeller
  * @since 1.2
- * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setLobHandler
+ * @see org.springframework.orm.hibernate3.SessionFactoryBuilder#setLobHandler
  */
 public class BlobByteArrayType extends AbstractLobType  {
 
 	/**
 	 * Constructor used by Hibernate: fetches config-time LobHandler and
-	 * config-time JTA TransactionManager from LocalSessionFactoryBean.
-	 * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#getConfigTimeLobHandler
-	 * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#getConfigTimeTransactionManager
+	 * config-time JTA TransactionManager from SessionFactoryBuilder.
+	 * @see org.springframework.orm.hibernate3.SessionFactoryBuilder#getConfigTimeLobHandler
+	 * @see org.springframework.orm.hibernate3.SessionFactoryBuilder#getConfigTimeTransactionManager
 	 */
 	public BlobByteArrayType() {
 		super();
@@ -64,7 +64,7 @@ public class BlobByteArrayType extends AbstractLobType  {
 		return new int[] {Types.BLOB};
 	}
 
-	public Class returnedClass() {
+	public Class<?> returnedClass() {
 		return byte[].class;
 	}
 

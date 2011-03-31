@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,233 +16,169 @@
 
 package org.springframework.orm.hibernate3.annotation;
 
-import java.io.IOException;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
-
 import org.hibernate.HibernateException;
-import org.hibernate.MappingException;
-import org.hibernate.cfg.AnnotationConfiguration;
-import org.hibernate.cfg.Configuration;
-
+import org.hibernate.SessionFactory;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
-import org.springframework.util.ClassUtils;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.orm.hibernate3.HibernateExceptionTranslator;
+import org.springframework.orm.hibernate3.SessionFactoryBeanOperations;
+import org.springframework.orm.hibernate3.SessionFactoryBeanDelegate;
+import org.springframework.orm.hibernate3.SessionFactoryBuilderSupport;
 
 /**
- * Subclass of Spring's standard LocalSessionFactoryBean for Hibernate,
- * supporting JDK 1.5+ annotation metadata for mappings.
+ * Subclass of {@link AnnotationSessionFactoryBuilder} adhering to Spring's
+ * {@link org.springframework.beans.factory.FactoryBean FactoryBean} contract,
+ * making it suitable for use in XML configuration.
  *
- * <p>Note: This class requires Hibernate 3.2 or later, with the
- * Java Persistence API and the Hibernate Annotations add-on present.
- *
- * <p>Example for an AnnotationSessionFactoryBean bean definition:
+ * <p>A typical {@code AnnotationSessionFactoryBean} bean definition:
  *
  * <pre class="code">
- * &lt;bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"&gt;
- *   &lt;property name="dataSource" ref="dataSource"/&gt;
- *   &lt;property name="annotatedClasses"&gt;
- *     &lt;list&gt;
- *       &lt;value&gt;test.package.Foo&lt;/value&gt;
- *       &lt;value&gt;test.package.Bar&lt;/value&gt;
- *     &lt;/list&gt;
- *   &lt;/property&gt;
- * &lt;/bean&gt;</pre>
+ * {@code
+ * <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+ *   <property name="dataSource" ref="dataSource"/>
+ *   <property name="annotatedClasses">
+ *     <list>
+ *       <value>test.package.Foo</value>
+ *       <value>test.package.Bar</value>
+ *     </list>
+ *   </property>
+ * </bean>}</pre>
  *
  * Or when using classpath scanning for autodetection of entity classes:
  *
  * <pre class="code">
- * &lt;bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"&gt;
- *   &lt;property name="dataSource" ref="dataSource"/&gt;
- *   &lt;property name="packagesToScan" value="test.package"/&gt;
- * &lt;/bean&gt;</pre>
+ * {@code
+ * <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+ *   <property name="dataSource" ref="dataSource"/>
+ *   <property name="packagesToScan" value="test.package"/>
+ * </bean>}</pre>
+ *
+ * <p>Implements the
+ * {@link org.springframework.dao.support.PersistenceExceptionTranslator
+ * PersistenceExceptionTranslator} interface, as autodetected by Spring's {@link
+ * org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
+ * PersistenceExceptionTranslationPostProcessor}, for AOP-based translation of
+ * native Hibernate exceptions to Spring's {@link DataAccessException} hierarchy.
+ * Hence, the presence of an {@code AnnotationSessionFactoryBean} automatically
+ * enables a {@code PersistenceExceptionTranslationPostProcessor} to translate
+ * Hibernate exceptions.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 1.2.2
- * @see #setDataSource
- * @see #setHibernateProperties
- * @see #setAnnotatedClasses
- * @see #setAnnotatedPackages
+ * @see SessionFactoryBuilderSupport
+ * @see AnnotationSessionFactoryBuilder
  */
-public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implements ResourceLoaderAware {
+public class AnnotationSessionFactoryBean extends AnnotationSessionFactoryBuilder
+		implements SessionFactoryBeanOperations, ResourceLoaderAware {
 
-	private static final String RESOURCE_PATTERN = "/**/*.class";
+	private final SessionFactoryBeanDelegate delegate = new SessionFactoryBeanDelegate(this);
 
-
-	private Class[] annotatedClasses;
-
-	private String[] annotatedPackages;
-
-	private String[] packagesToScan;
-
-	private TypeFilter[] entityTypeFilters = new TypeFilter[] {
-			new AnnotationTypeFilter(Entity.class, false),
-			new AnnotationTypeFilter(Embeddable.class, false),
-			new AnnotationTypeFilter(MappedSuperclass.class, false),
-			new AnnotationTypeFilter(org.hibernate.annotations.Entity.class, false)};
-
-	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
-
-
-	public AnnotationSessionFactoryBean() {
-		setConfigurationClass(AnnotationConfiguration.class);
+	@Deprecated
+	public void setCacheProvider(org.hibernate.cache.CacheProvider cacheProvider) {
+		delegate.setCacheProvider(cacheProvider);
 	}
-
 
 	@Override
-	public void setConfigurationClass(Class configurationClass) {
-		if (configurationClass == null || !AnnotationConfiguration.class.isAssignableFrom(configurationClass)) {
-			throw new IllegalArgumentException(
-					"AnnotationSessionFactoryBean only supports AnnotationConfiguration or subclasses");
-		}
-		super.setConfigurationClass(configurationClass);
+	protected void preBuildSessionFactory() {
+		delegate.preBuildSessionFactory();
 	}
 
-	/**
-	 * Specify annotated classes, for which mappings will be read from
-	 * class-level JDK 1.5+ annotation metadata.
-	 * @see org.hibernate.cfg.AnnotationConfiguration#addAnnotatedClass(Class)
-	 */
-	public void setAnnotatedClasses(Class[] annotatedClasses) {
-		this.annotatedClasses = annotatedClasses;
-	}
-
-	/**
-	 * Specify the names of annotated packages, for which package-level
-	 * JDK 1.5+ annotation metadata will be read.
-	 * @see org.hibernate.cfg.AnnotationConfiguration#addPackage(String)
-	 */
-	public void setAnnotatedPackages(String[] annotatedPackages) {
-		this.annotatedPackages = annotatedPackages;
-	}
-
-	/**
-	 * Set whether to use Spring-based scanning for entity classes in the classpath
-	 * instead of listing annotated classes explicitly.
-	 * <p>Default is none. Specify packages to search for autodetection of your entity
-	 * classes in the classpath. This is analogous to Spring's component-scan feature
-	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
-	 */
-	public void setPackagesToScan(String[] packagesToScan) {
-		this.packagesToScan = packagesToScan;
-	}
-
-	/**
-	 * Specify custom type filters for Spring-based scanning for entity classes.
-	 * <p>Default is to search all specified packages for classes annotated with
-	 * <code>@javax.persistence.Entity</code>, <code>@javax.persistence.Embeddable</code>
-	 * or <code>@javax.persistence.MappedSuperclass</code>, as well as for
-	 * Hibernate's special <code>@org.hibernate.annotations.Entity</code>.
-	 * @see #setPackagesToScan
-	 */
-	public void setEntityTypeFilters(TypeFilter[] entityTypeFilters) {
-		this.entityTypeFilters = entityTypeFilters;
+	@Override
+	protected void postBuildSessionFactory() {
+		delegate.postBuildSessionFactory();
 	}
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
+		this.setResourcePatternResolver(ResourcePatternUtils.getResourcePatternResolver(resourceLoader));
 	}
 
-
-	/**
-	 * Reads metadata from annotated classes and packages into the
-	 * AnnotationConfiguration instance.
-	 */
-	@Override
-	protected void postProcessMappings(Configuration config) throws HibernateException {
-		AnnotationConfiguration annConfig = (AnnotationConfiguration) config;
-		if (this.annotatedClasses != null) {
-			for (Class annotatedClass : this.annotatedClasses) {
-				annConfig.addAnnotatedClass(annotatedClass);
-			}
-		}
-		if (this.annotatedPackages != null) {
-			for (String annotatedPackage : this.annotatedPackages) {
-				annConfig.addPackage(annotatedPackage);
-			}
-		}
-		scanPackages(annConfig);
+	public void destroy() throws HibernateException {
+		delegate.destroy();
 	}
 
-	/**
-	 * Perform Spring-based scanning for entity classes.
-	 * @see #setPackagesToScan
-	 */
-	protected void scanPackages(AnnotationConfiguration config) {
-		if (this.packagesToScan != null) {
-			try {
-				for (String pkg : this.packagesToScan) {
-					String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
-							ClassUtils.convertClassNameToResourcePath(pkg) + RESOURCE_PATTERN;
-					Resource[] resources = this.resourcePatternResolver.getResources(pattern);
-					MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
-					for (Resource resource : resources) {
-						if (resource.isReadable()) {
-							MetadataReader reader = readerFactory.getMetadataReader(resource);
-							String className = reader.getClassMetadata().getClassName();
-							if (matchesFilter(reader, readerFactory)) {
-								config.addAnnotatedClass(this.resourcePatternResolver.getClassLoader().loadClass(className));
-							}
-						}
-					}
-				}
-			}
-			catch (IOException ex) {
-				throw new MappingException("Failed to scan classpath for unlisted classes", ex);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new MappingException("Failed to load annotated classes from classpath", ex);
-			}
-		}
+	public SessionFactory getObject() {
+		return delegate.getObject();
+	}
+
+	public Class<? extends SessionFactory> getObjectType() {
+		return delegate.getObjectType();
+	}
+
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		delegate.setBeanClassLoader(beanClassLoader);
+	}
+
+	public boolean isSingleton() {
+		return delegate.isSingleton();
+	}
+
+	public void afterPropertiesSet() throws Exception {
+		delegate.afterPropertiesSet();
+	}
+
+	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
+		return delegate.translateExceptionIfPossible(ex);
+	}
+
+	public void setJdbcExceptionTranslator(
+			SQLExceptionTranslator jdbcExceptionTranslator) {
+		delegate.setJdbcExceptionTranslator(jdbcExceptionTranslator);
+	}
+
+	public void setPersistenceExceptionTranslator(
+			HibernateExceptionTranslator hibernateExceptionTranslator) {
+		delegate.setPersistenceExceptionTranslator(hibernateExceptionTranslator);
 	}
 
 	/**
-	 * Check whether any of the configured entity type filters matches
-	 * the current class descriptor contained in the metadata reader.
+	 * @deprecated as of Spring 3.1 in favor of {@link #scanPackages()} which
+	 * can access the internal {@code AnnotationConfiguration} instance via
+	 * {@link #getConfiguration()}.
 	 */
-	private boolean matchesFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
-		if (this.entityTypeFilters != null) {
-			for (TypeFilter filter : this.entityTypeFilters) {
-				if (filter.match(reader, readerFactory)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-
-	/**
-	 * This default implementation delegates to {@link #postProcessAnnotationConfiguration}.
-	 */
-	@Override
-	protected void postProcessConfiguration(Configuration config) throws HibernateException {
-		postProcessAnnotationConfiguration((AnnotationConfiguration) config);
+	@Deprecated
+	protected void scanPackages(org.hibernate.cfg.AnnotationConfiguration config) {
+		this.scanPackages();
 	}
 
 	/**
-	 * To be implemented by subclasses which want to to perform custom
-	 * post-processing of the AnnotationConfiguration object after this
-	 * FactoryBean performed its default initialization.
-	 * <p>Note: As of Hibernate 3.6, AnnotationConfiguration's features
-	 * have been rolled into Configuration itself. Simply overriding
-	 * {@link #postProcessConfiguration(org.hibernate.cfg.Configuration)}
-	 * becomes an option as well then.
-	 * @param config the current AnnotationConfiguration object
-	 * @throws HibernateException in case of Hibernate initialization errors
+	 * @deprecated as of Spring 3.1 in favor of {@link #newSessionFactory()} which
+	 * can access the internal {@code Configuration} instance via {@link #getConfiguration()}.
 	 */
-	protected void postProcessAnnotationConfiguration(AnnotationConfiguration config) throws HibernateException {
+	@Deprecated
+	protected SessionFactory newSessionFactory(org.hibernate.cfg.Configuration config) throws HibernateException {
+		return this.newSessionFactory();
+	}
+
+	/**
+	 * @deprecated as of Spring 3.1 in favor of {@link #postProcessMappings()} which
+	 * can access the internal {@code Configuration} instance via {@link #getConfiguration()}.
+	 */
+	@Deprecated
+	protected void postProcessMappings(org.hibernate.cfg.Configuration config) throws HibernateException {
+		this.postProcessMappings();
+	}
+
+	/**
+	 * @deprecated as of Spring 3.1 in favor of {@link #postProcessConfiguration()} which
+	 * can access the internal {@code Configuration} instance via {@link #getConfiguration()}.
+	 */
+	@Deprecated
+	protected void postProcessConfiguration(org.hibernate.cfg.Configuration config) throws HibernateException {
+		this.postProcessConfiguration();
+	}
+
+	/**
+	 * @deprecated as of Spring 3.1 in favor of {@link #postProcessAnnotationConfiguration()}
+	 * which can access the internal {@code AnnotationConfiguration} instance via
+	 * {@link #getConfiguration()}.
+	 */
+	@Deprecated
+	protected void postProcessAnnotationConfiguration(org.hibernate.cfg.AnnotationConfiguration config) throws HibernateException {
+		this.postProcessAnnotationConfiguration();
 	}
 
 }

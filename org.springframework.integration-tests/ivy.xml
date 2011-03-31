@@ -74,7 +74,9 @@
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations.common" rev="3.3.0.ga" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.4.0.GA" conf="test->compile"/>
 		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
+		<dependency org="org.jboss.javassist" name="com.springsource.javassist" rev="3.3.0.ga" conf="test->runtime"/>
 		<dependency org="org.jruby" name="com.springsource.org.jruby" rev="1.4.0" conf="optional, runtime->compile"/>
+		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="${slf4j.version}" conf="test->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="test->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration" conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="test->compile"/>

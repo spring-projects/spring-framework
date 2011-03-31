@@ -181,12 +181,13 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * property values before writing to and reading from the database.
 	 * Will get applied to any <b>new</b> Session created by this object.
 	 * <p>Such an interceptor can either be set at the SessionFactory level,
-	 * i.e. on LocalSessionFactoryBean, or at the Session level, i.e. on
-	 * HibernateTemplate, HibernateInterceptor, and HibernateTransactionManager.
-	 * It's preferable to set it on LocalSessionFactoryBean or HibernateTransactionManager
-	 * to avoid repeated configuration and guarantee consistent behavior in transactions.
+	 * i.e. on SessionFactoryBuilder/LocalSessionFactoryBean, or at the Session
+	 * level, i.e. on HibernateTemplate, HibernateInterceptor, and
+	 * HibernateTransactionManager. It's preferable to set it on
+	 * SessionFactoryBuilder or HibernateTransactionManager to avoid repeated
+	 * configuration and guarantee consistent behavior in transactions.
 	 * @see #setEntityInterceptorBeanName
-	 * @see LocalSessionFactoryBean#setEntityInterceptor
+	 * @see SessionFactoryBuilder#setEntityInterceptor
 	 * @see HibernateTransactionManager#setEntityInterceptor
 	 */
 	public void setEntityInterceptor(Interceptor entityInterceptor) {
@@ -208,7 +209,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
 			}
-			return (Interceptor) this.beanFactory.getBean((String) this.entityInterceptor, Interceptor.class);
+			return this.beanFactory.getBean((String) this.entityInterceptor, Interceptor.class);
 		}
 		return (Interceptor) this.entityInterceptor;
 	}
@@ -272,7 +273,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * Sessions (for example, within a transaction).
 	 * @see #enableFilters(org.hibernate.Session)
 	 * @see org.hibernate.Session#enableFilter(String)
-	 * @see LocalSessionFactoryBean#setFilterDefinitions
+	 * @see SessionFactoryBuilder#setFilterDefinitions
 	 */
 	public void setFilterName(String filter) {
 		this.filterNames = new String[] {filter};
@@ -287,7 +288,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 	 * Sessions (for example, within a transaction).
 	 * @see #enableFilters(org.hibernate.Session)
 	 * @see org.hibernate.Session#enableFilter(String)
-	 * @see LocalSessionFactoryBean#setFilterDefinitions
+	 * @see SessionFactoryBuilder#setFilterDefinitions
 	 */
 	public void setFilterNames(String[] filterNames) {
 		this.filterNames = filterNames;

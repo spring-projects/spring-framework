@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.event.EventSource;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -77,10 +76,10 @@ import org.springframework.util.Assert;
  * management, not participating in a custom Hibernate CurrentSessionContext
  * unless you explicitly switch {@link #setAllowCreate "allowCreate"} to "false".</b>
  *
- * <p>{@link LocalSessionFactoryBean} is the preferred way of obtaining a reference
- * to a specific Hibernate SessionFactory, at least in a non-EJB environment.
- * The Spring application context will manage its lifecycle, initializing and
- * shutting down the factory as part of the application.
+ * <p>Using a {@link SessionFactoryBuilder} is the preferred way of obtaining a
+ * reference to a specific Hibernate SessionFactory, at least in a non-EJB
+ * environment. The Spring application context will manage its lifecycle,
+ * initializing and shutting down the factory as part of the application.
  *
  * <p>Note that operations that return an Iterator (i.e. <code>iterate</code>)
  * are supposed to be used within Spring-driven or JTA-driven transactions
@@ -99,7 +98,7 @@ import org.springframework.util.Assert;
  * @see #setSessionFactory
  * @see HibernateCallback
  * @see org.hibernate.Session
- * @see LocalSessionFactoryBean
+ * @see SessionFactoryBuilder
  * @see HibernateTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter

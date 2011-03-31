@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.orm.hibernate3;
+package org.springframework.orm.hibernate3.scannable;
 
-/**
- * Subclass of LocalDataSourceConnectionProvider that will be used
- * if SessionFactoryBean's "dataSource" property is set
- * in combination with a Hibernate TransactionManagerLookup.
- *
- * @author Juergen Hoeller
- * @since 2.5.1
- */
-public class LocalJtaDataSourceConnectionProvider extends LocalDataSourceConnectionProvider {
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
-	/**
-	 * This implementation returns <code>true</code>,
-	 * since we're assuming a JTA DataSource.
-	 */
-	@Override
-	public boolean supportsAggressiveRelease() {
-		return true;
+@Entity
+public class Foo {
+	@SuppressWarnings("unused")
+	@Id private int id;
+
+	private String name;
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
+	public String getName() {
+		return this.name;
+	}
 }
