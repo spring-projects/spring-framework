@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class MapPropertySource extends EnumerablePropertySource<Map<String, Object>> {
 
-	protected MapPropertySource(String name, Map<String, Object> source) {
+	public MapPropertySource(String name, Map<String, Object> source) {
 		super(name, source);
 	}
 
