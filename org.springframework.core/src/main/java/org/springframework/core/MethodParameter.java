@@ -279,6 +279,20 @@ public class MethodParameter {
 	}
 
 	/**
+	 * Return true if the parameter has at least one annotation, false if it has none.
+	 */
+	public boolean hasParameterAnnotations() {
+		return getParameterAnnotations().length != 0;
+	}
+
+	/**
+	 * Return true if the parameter has the given annotation type, and false if it doesn't.
+	 */
+	public <T extends Annotation> boolean hasParameterAnnotation(Class<T> annotationType) {
+		return getParameterAnnotation(annotationType) != null;
+	}
+
+	/**
 	 * Initialize parameter name discovery for this method parameter.
 	 * <p>This method does not actually try to retrieve the parameter name at
 	 * this point; it just allows discovery to happen when the application calls

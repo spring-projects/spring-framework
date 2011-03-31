@@ -19,8 +19,8 @@ package org.springframework.validation;
 import java.beans.PropertyEditor;
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -270,11 +270,11 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * @see org.springframework.web.servlet.mvc.SimpleFormController
 	 */
 	public Map<String, Object> getModel() {
-		Map<String, Object> model = new HashMap<String, Object>(2);
-		// Errors instance, even if no errors.
-		model.put(MODEL_KEY_PREFIX + getObjectName(), this);
+		Map<String, Object> model = new LinkedHashMap<String, Object>(2);
 		// Mapping from name to target object.
 		model.put(getObjectName(), getTarget());
+		// Errors instance, even if no errors.
+		model.put(MODEL_KEY_PREFIX + getObjectName(), this);
 		return model;
 	}
 
