@@ -80,8 +80,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * this instance needs to be aware of the DataSource ({@link #setDataSource}).
  * The given DataSource should obviously match the one used by the given
  * SessionFactory. To achieve this, configure both to the same JNDI DataSource,
- * or preferably create the SessionFactory with {@link LocalSessionFactoryBean} and
- * a local DataSource (which will be autodetected by this transaction manager).
+ * or preferably create the SessionFactory with {@link SessionFactoryBuilder} /
+ * {@link LocalSessionFactoryBean} and a local DataSource (which will be
+ * autodetected by this transaction manager).
  *
  * <p>JTA (usually through {@link org.springframework.transaction.jta.JtaTransactionManager})
  * is necessary for accessing multiple transactional resources within the same
@@ -116,6 +117,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @since 1.2
  * @see #setSessionFactory
  * @see #setDataSource
+ * @see SessionFactoryBuilder
  * @see LocalSessionFactoryBean
  * @see SessionFactoryUtils#getSession
  * @see SessionFactoryUtils#applyTransactionTimeout
@@ -129,6 +131,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
+@SuppressWarnings("serial")
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
@@ -194,7 +197,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * The DataSource should match the one used by the Hibernate SessionFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the SessionFactory was configured with LocalDataSourceConnectionProvider,
-	 * i.e. by Spring's LocalSessionFactoryBean with a specified "dataSource",
+	 * i.e. by Spring's SessionFactoryBuilder with a specified "dataSource",
 	 * the DataSource will be auto-detected: You can still explictly specify the
 	 * DataSource, but you don't need to in this case.
 	 * <p>A transactional JDBC Connection for this DataSource will be provided to
@@ -208,7 +211,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * unwrapped to extract its target DataSource.
 	 * @see #setAutodetectDataSource
 	 * @see LocalDataSourceConnectionProvider
-	 * @see LocalSessionFactoryBean#setDataSource
+	 * @see SessionFactoryBuilder#setDataSource
 	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils
 	 * @see org.springframework.jdbc.core.JdbcTemplate
@@ -234,11 +237,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Set whether to autodetect a JDBC DataSource used by the Hibernate SessionFactory,
-	 * if set via LocalSessionFactoryBean's <code>setDataSource</code>. Default is "true".
+	 * if set via SessionFactoryBuilder's <code>setDataSource</code>. Default is "true".
 	 * <p>Can be turned off to deliberately ignore an available DataSource, in order
 	 * to not expose Hibernate transactions as JDBC transactions for that DataSource.
 	 * @see #setDataSource
-	 * @see LocalSessionFactoryBean#setDataSource
+	 * @see SessionFactoryBuilder#setDataSource
 	 */
 	public void setAutodetectDataSource(boolean autodetectDataSource) {
 		this.autodetectDataSource = autodetectDataSource;
@@ -329,11 +332,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * property values before writing to and reading from the database.
 	 * Will get applied to any new Session created by this transaction manager.
 	 * <p>Such an interceptor can either be set at the SessionFactory level,
-	 * i.e. on LocalSessionFactoryBean, or at the Session level, i.e. on
+	 * i.e. on SessionFactoryBuilder, or at the Session level, i.e. on
 	 * HibernateTemplate, HibernateInterceptor, and HibernateTransactionManager.
-	 * It's preferable to set it on LocalSessionFactoryBean or HibernateTransactionManager
+	 * It's preferable to set it on SessionFactoryBuilder or HibernateTransactionManager
 	 * to avoid repeated configuration and guarantee consistent behavior in transactions.
-	 * @see LocalSessionFactoryBean#setEntityInterceptor
+	 * @see SessionFactoryBuilder#setEntityInterceptor
 	 * @see HibernateTemplate#setEntityInterceptor
 	 * @see HibernateInterceptor#setEntityInterceptor
 	 */
@@ -504,6 +507,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					logger.debug(
 							"Preparing JDBC Connection of Hibernate Session [" + SessionFactoryUtils.toString(session) + "]");
 				}
+				@SuppressWarnings("deprecation")
 				Connection con = session.connection();
 				Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 				txObject.setPreviousIsolationLevel(previousIsolationLevel);
@@ -516,7 +520,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 							"HibernateTransactionManager is not allowed to support custom isolation levels: " +
 							"make sure that its 'prepareConnection' flag is on (the default) and that the " +
 							"Hibernate connection release mode is set to 'on_close' (SpringTransactionFactory's default). " +
-							"Make sure that your LocalSessionFactoryBean actually uses SpringTransactionFactory: Your " +
+							"Make sure that your SessionFactoryBuilder actually uses SpringTransactionFactory: Your " +
 							"Hibernate properties should *not* include a 'hibernate.transaction.factory_class' property!");
 				}
 				if (logger.isDebugEnabled()) {
@@ -560,6 +564,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			// Register the Hibernate Session's JDBC Connection for the DataSource, if set.
 			if (getDataSource() != null) {
+				@SuppressWarnings("deprecation")
 				Connection con = session.connection();
 				ConnectionHolder conHolder = new ConnectionHolder(con);
 				if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
@@ -721,6 +726,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// the isolation level and/or read-only flag of the JDBC Connection here.
 			// Else, we need to rely on the connection pool to perform proper cleanup.
 			try {
+				@SuppressWarnings("deprecation")
 				Connection con = session.connection();
 				DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
 			}

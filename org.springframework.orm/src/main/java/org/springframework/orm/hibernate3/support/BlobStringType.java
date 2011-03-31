@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
 
 /**
  * Hibernate UserType implementation for Strings that get mapped to BLOBs.
- * Retrieves the LobHandler to use from LocalSessionFactoryBean at config time.
+ * Retrieves the LobHandler to use from SessionFactoryBuilder at config time.
  *
  * <p>This is intended for the (arguably unnatural, but still common) case
  * where character data is stored in a binary LOB. This requires encoding
@@ -44,15 +44,15 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * @author Juergen Hoeller
  * @since 1.2.7
  * @see #getCharacterEncoding()
- * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setLobHandler
+ * @see org.springframework.orm.hibernate3.SessionFactoryBuilder#setLobHandler
  */
 public class BlobStringType extends AbstractLobType {
 
 	/**
 	 * Constructor used by Hibernate: fetches config-time LobHandler and
-	 * config-time JTA TransactionManager from LocalSessionFactoryBean.
-	 * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#getConfigTimeLobHandler
-	 * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#getConfigTimeTransactionManager
+	 * config-time JTA TransactionManager from SessionFactoryBuilder.
+	 * @see org.springframework.orm.hibernate3.SessionFactoryBuilder#getConfigTimeLobHandler
+	 * @see org.springframework.orm.hibernate3.SessionFactoryBuilder#getConfigTimeTransactionManager
 	 */
 	public BlobStringType() {
 		super();
@@ -70,7 +70,7 @@ public class BlobStringType extends AbstractLobType {
 		return new int[] {Types.BLOB};
 	}
 
-	public Class returnedClass() {
+	public Class<?> returnedClass() {
 		return String.class;
 	}
 

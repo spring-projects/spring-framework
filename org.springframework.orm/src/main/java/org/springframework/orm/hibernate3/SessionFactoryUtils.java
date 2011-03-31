@@ -212,7 +212,7 @@ public abstract class SessionFactoryUtils {
 	 * <p>Supports setting a Session-level Hibernate entity interceptor that allows
 	 * to inspect and change property values before writing to and reading from the
 	 * database. Such an interceptor can also be set at the SessionFactory level
-	 * (i.e. on LocalSessionFactoryBean), on HibernateTransactionManager, or on
+	 * (i.e. on SessionFactoryBuilder), on HibernateTransactionManager, or on
 	 * HibernateInterceptor/HibernateTemplate.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param entityInterceptor Hibernate entity interceptor, or <code>null</code> if none
@@ -221,7 +221,7 @@ public abstract class SessionFactoryUtils {
 	 * when actually registering a transaction synchronization)
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
-	 * @see LocalSessionFactoryBean#setEntityInterceptor
+	 * @see SessionFactoryBuilder#setEntityInterceptor
 	 * @see HibernateInterceptor#setEntityInterceptor
 	 * @see HibernateTemplate#setEntityInterceptor
 	 */

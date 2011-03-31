@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,19 +28,20 @@ import org.springframework.beans.factory.InitializingBean;
  * definition, as list element for the "typeDefinitions" bean property.
  * For example:
  *
- * <pre>
- * &lt;bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
+ * <pre class="code">
+ * {@code
+ * <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
  *   ...
- *   &lt;property name="typeDefinitions"&gt;
- *     &lt;list&gt;
- *       &lt;bean class="org.springframework.orm.hibernate3.TypeDefinitionBean"&gt;
- *         &lt;property name="typeName" value="myType"/&gt;
- *         &lt;property name="typeClass" value="mypackage.MyTypeClass"/&gt;
- *       &lt;/bean&gt;
- *     &lt;/list&gt;
- *   &lt;/property&gt;
+ *   <property name="typeDefinitions">
+ *     <list>
+ *       <bean class="org.springframework.orm.hibernate3.TypeDefinitionBean">
+ *         <property name="typeName" value="myType"/>
+ *         <property name="typeClass" value="mypackage.MyTypeClass"/>
+ *       </bean>
+ *     </list>
+ *   </property>
  *   ...
- * &lt;/bean&gt;</pre>
+ * </bean>}</pre>
  *
  * Alternatively, specify a bean id (or name) attribute for the inner bean,
  * instead of the "typeName" property.
