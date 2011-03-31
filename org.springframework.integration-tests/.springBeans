@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beansProjectDescription>
 	<version>1</version>
-	<pluginVersion><![CDATA[2.6.0.201102250324-M2]]></pluginVersion>
+	<pluginVersion><![CDATA[2.6.0.201103160035-RELEASE]]></pluginVersion>
 	<configSuffixes>
 		<configSuffix><![CDATA[xml]]></configSuffix>
 	</configSuffixes>
 	<enableImports><![CDATA[false]]></enableImports>
 	<configs>
-		<config>src/test/resources/org/springframework/orm/hibernate3/LocalSessionFactoryBeanXmlConfig-context.xml</config>
 	</configs>
 	<configSets>
 	</configSets>
