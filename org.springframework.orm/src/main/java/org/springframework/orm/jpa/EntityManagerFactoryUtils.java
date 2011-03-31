@@ -294,7 +294,7 @@ public abstract class EntityManagerFactoryUtils {
 			return new EmptyResultDataAccessException(ex.getMessage(), 1);
 		}
 		if (ex instanceof NonUniqueResultException) {
-			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1);
+			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, ex);
 		}
 		if (ex instanceof OptimisticLockException) {
 			return new JpaOptimisticLockingFailureException((OptimisticLockException) ex);

@@ -666,7 +666,7 @@ public abstract class SessionFactoryUtils {
 			return new HibernateObjectRetrievalFailureException((WrongClassException) ex);
 		}
 		if (ex instanceof NonUniqueResultException) {
-			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1);
+			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, ex);
 		}
 		if (ex instanceof StaleObjectStateException) {
 			return new HibernateOptimisticLockingFailureException((StaleObjectStateException) ex);
