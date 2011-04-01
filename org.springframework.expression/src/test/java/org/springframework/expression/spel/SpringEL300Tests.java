@@ -36,11 +36,13 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.ReflectiveMethodResolver;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
@@ -811,5 +813,109 @@ public class SpringEL300Tests extends ExpressionTestCase {
         assertEquals("[D(aaa), D(bbb), D(ccc)]",value3.toString());
 	}
 
+	@Test
+	public void varargsAndPrimitives_SPR8174() throws Exception  {
+		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
+		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
+		
+		args.add(TypeDescriptor.forObject(34L));
+		ReflectionUtil<Integer> ru = new ReflectionUtil<Integer>();
+		MethodExecutor me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"methodToCall",args);
+		
+		args.set(0,TypeDescriptor.forObject(23));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		me.execute(emptyEvalContext, ru, 45);
+
+		args.set(0,TypeDescriptor.forObject(23f));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		me.execute(emptyEvalContext, ru, 45f);
+
+		args.set(0,TypeDescriptor.forObject(23d));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		me.execute(emptyEvalContext, ru, 23d);
+
+		args.set(0,TypeDescriptor.forObject((short)23));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		me.execute(emptyEvalContext, ru, (short)23);
+
+		args.set(0,TypeDescriptor.forObject(23L));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		me.execute(emptyEvalContext, ru, 23L);
+
+		args.set(0,TypeDescriptor.forObject((char)65));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		me.execute(emptyEvalContext, ru, (char)65);
+
+		args.set(0,TypeDescriptor.forObject((byte)23));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		me.execute(emptyEvalContext, ru, (byte)23);
+		
+		args.set(0,TypeDescriptor.forObject(true));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
+		me.execute(emptyEvalContext, ru, true);
+		
+		// trickier:
+		args.set(0,TypeDescriptor.forObject(12));
+		args.add(TypeDescriptor.forObject(23f));
+		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"bar",args);
+		me.execute(emptyEvalContext, ru, 12,23f);
+		
+	}
+	
+	
+	
+	public class ReflectionUtil<T extends Number> {
+	      public Object methodToCall(T param) {
+	    	  System.out.println(param+" "+param.getClass());
+	            return "Object methodToCall(T param)";
+	      }
+	      
+	      public void foo(int... array) {
+	    	  if (array.length==0) {
+	    		  throw new RuntimeException();
+	    	  }
+	      }	      
+	      public void foo(float...array) {
+	    	  if (array.length==0) {
+	    		  throw new RuntimeException();
+	    	  }
+	      }
+	      public void foo(double...array) {
+	    	  if (array.length==0) {
+	    		  throw new RuntimeException();
+	    	  }
+	      }
+	      public void foo(short...array) {
+	    	  if (array.length==0) {
+	    		  throw new RuntimeException();
+	    	  }
+	      }
+	      public void foo(long...array) {
+	    	  if (array.length==0) {
+	    		  throw new RuntimeException();
+	    	  }
+	      }
+	      public void foo(boolean...array) {
+	    	  if (array.length==0) {
+	    		  throw new RuntimeException();
+	    	  }
+	      }
+	      public void foo(char...array) {
+	    	  if (array.length==0) {
+	    		  throw new RuntimeException();
+	    	  }
+	      }
+	      public void foo(byte...array) {
+	    	  if (array.length==0) {
+	    		  throw new RuntimeException();
+	    	  }
+	      }
+	      
+	      public void bar(int... array) {
+	    	  if (array.length==0) {
+	    		  throw new RuntimeException();
+	    	  }
+	      }
+	}    
 	
 }
