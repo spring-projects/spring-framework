@@ -316,18 +316,73 @@ public class ReflectionHelper {
 			if (argumentCount >= parameterCount) {
 				arraySize = argumentCount - (parameterCount - 1);
 			}
-			Object[] repackagedArguments = (Object[]) Array.newInstance(requiredParameterTypes[parameterCount - 1].getComponentType(),
-					arraySize);
-			// Copy all but the varargs arguments
-			for (int i = 0; i < arraySize; i++) {
-				repackagedArguments[i] = args[parameterCount + i - 1];
-			}
+			
 			// Create an array for the varargs arguments
 			Object[] newArgs = new Object[parameterCount];
 			for (int i = 0; i < newArgs.length - 1; i++) {
 				newArgs[i] = args[i];
 			}
-			newArgs[newArgs.length - 1] = repackagedArguments;
+			// Now sort out the final argument, which is the varargs one.  Before entering this
+			// method the arguments should have been converted to the box form of the required type.
+			Class<?> componentType = requiredParameterTypes[parameterCount-1].getComponentType();
+			if (componentType.isPrimitive()) {
+				if (componentType==Integer.TYPE) {
+					int[] repackagedArguments = (int[]) Array.newInstance(componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Integer)args[parameterCount + i - 1]).intValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				} else if(componentType==Float.TYPE) {
+					float[] repackagedArguments = (float[]) Array.newInstance(componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Float)args[parameterCount + i - 1]).floatValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				} else if(componentType==Double.TYPE) {
+					double[] repackagedArguments = (double[]) Array.newInstance(componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Double)args[parameterCount + i - 1]).doubleValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				} else if(componentType==Short.TYPE) {
+					short[] repackagedArguments = (short[]) Array.newInstance(componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Short)args[parameterCount + i - 1]).shortValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				} else if(componentType==Character.TYPE) {
+					char[] repackagedArguments = (char[]) Array.newInstance(componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Character)args[parameterCount + i - 1]).charValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				} else if(componentType==Byte.TYPE) {
+					byte[] repackagedArguments = (byte[]) Array.newInstance(componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Byte)args[parameterCount + i - 1]).byteValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				} else if(componentType==Boolean.TYPE) {
+					boolean[] repackagedArguments = (boolean[]) Array.newInstance(componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Boolean)args[parameterCount + i - 1]).booleanValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				} else if(componentType==Long.TYPE) {
+					long[] repackagedArguments = (long[]) Array.newInstance(componentType, arraySize);
+					for (int i = 0; i < arraySize; i++) {
+						repackagedArguments[i] = ((Long)args[parameterCount + i - 1]).longValue();
+					}
+					newArgs[newArgs.length - 1] = repackagedArguments;
+				}
+			} else {
+			  Object[] repackagedArguments = (Object[]) Array.newInstance(componentType, arraySize);
+				// Copy all but the varargs arguments
+				for (int i = 0; i < arraySize; i++) {
+					repackagedArguments[i] = args[parameterCount + i - 1];
+				}
+				newArgs[newArgs.length - 1] = repackagedArguments;
+			}
 			return newArgs;
 		}
 		return args;
