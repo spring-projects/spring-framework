@@ -61,9 +61,9 @@ public class DefaultComparatorUnitTests {
 	@Test
 	public void testNulls() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
-		Assert.assertTrue(comparator.compare(null,"abc")>0);
+		Assert.assertTrue(comparator.compare(null,"abc")<0);
 		Assert.assertTrue(comparator.compare(null,null)==0);
-		Assert.assertTrue(comparator.compare("abc",null)<0);
+		Assert.assertTrue(comparator.compare("abc",null)>0);
 	}
 
 	@Test
