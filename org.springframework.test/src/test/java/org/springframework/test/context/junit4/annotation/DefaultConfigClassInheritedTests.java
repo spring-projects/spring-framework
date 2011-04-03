@@ -19,7 +19,6 @@ package org.springframework.test.context.junit4.annotation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,6 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Sam Brannen
  * @since 3.1
  */
-@Ignore("[SPR-6184] Disabled until ContextLoaderUtils supports recursive search for configuration classes")
 @ContextConfiguration
 public class DefaultConfigClassInheritedTests extends DefaultConfigClassBaseTests {
 

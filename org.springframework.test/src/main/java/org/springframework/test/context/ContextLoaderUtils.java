@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
 /**
  * Utility methods for working with {@link ContextLoader ContextLoaders}.
  * 
- * <p>TODO: Consider refactoring into a stateful ContextLoaderResolver.
+ * <p>TODO Consider refactoring into a stateful ContextLoaderResolver.
  * 
  * @author Sam Brannen
  * @since 3.1
@@ -43,6 +43,9 @@ public abstract class ContextLoaderUtils {
 	private static final Log logger = LogFactory.getLog(ContextLoaderUtils.class);
 
 	private static final String STANDARD_DEFAULT_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.GenericXmlContextLoader";
+
+	private static final ClassNameLocationsResolver classNameLocationsResolver = new ClassNameLocationsResolver();
+	private static final ResourcePathLocationsResolver resourcePathLocationsResolver = new ResourcePathLocationsResolver();
 
 
 	/**
@@ -164,53 +167,29 @@ public abstract class ContextLoaderUtils {
 
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
 		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
-		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
-				+ annotationType + "] and class [" + clazz + "]");
+		Assert.notNull(declaringClass, String.format(
+			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]", annotationType,
+			clazz));
 
 		boolean processConfigurationClasses = (contextLoader instanceof ResourceTypeAwareContextLoader)
 				&& ((ResourceTypeAwareContextLoader) contextLoader).supportsClassResources();
-
-		return processConfigurationClasses ? //
-		resolveConfigurationClassNames(contextLoader, annotationType, declaringClass)
-				: resolveStringLocations(contextLoader, annotationType, declaringClass);
-	}
-
-	/**
-	 * TODO Document resolveStringLocations().
-	 *
-	 * @param contextLoader
-	 * @param annotationType
-	 * @param declaringClass
-	 * @return
-	 */
-	private static String[] resolveStringLocations(ContextLoader contextLoader,
-			Class<ContextConfiguration> annotationType, Class<?> declaringClass) {
+		LocationsResolver locationsResolver = processConfigurationClasses ? classNameLocationsResolver
+				: resourcePathLocationsResolver;
 
 		List<String> locationsList = new ArrayList<String>();
 
 		while (declaringClass != null) {
 			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
+
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
 					contextConfiguration, declaringClass));
 			}
 
-			String[] valueLocations = contextConfiguration.value();
-			String[] locations = contextConfiguration.locations();
-			if (!ObjectUtils.isEmpty(valueLocations) && !ObjectUtils.isEmpty(locations)) {
-				String msg = String.format(
-					"Test class [%s] has been configured with @ContextConfiguration's 'value' [%s] and 'locations' [%s] attributes. Only one declaration of resource locations is permitted per @ContextConfiguration annotation.",
-					declaringClass, ObjectUtils.nullSafeToString(valueLocations),
-					ObjectUtils.nullSafeToString(locations));
-				logger.error(msg);
-				throw new IllegalStateException(msg);
-			}
-			else if (!ObjectUtils.isEmpty(valueLocations)) {
-				locations = valueLocations;
-			}
+			String[] resolvedLocations = locationsResolver.resolveLocations(contextConfiguration, declaringClass);
+			String[] processedLocations = contextLoader.processLocations(declaringClass, resolvedLocations);
+			locationsList.addAll(0, Arrays.<String> asList(processedLocations));
 
-			locations = contextLoader.processLocations(declaringClass, locations);
-			locationsList.addAll(0, Arrays.<String> asList(locations));
 			declaringClass = contextConfiguration.inheritLocations() ? AnnotationUtils.findAnnotationDeclaringClass(
 				annotationType, declaringClass.getSuperclass()) : null;
 		}
@@ -218,37 +197,52 @@ public abstract class ContextLoaderUtils {
 		return locationsList.toArray(new String[locationsList.size()]);
 	}
 
-	/**
-	 * TODO Document resolveConfigClassNames().
-	 *
-	 * @param contextLoader
-	 * @param annotationType
-	 * @param declaringClass
-	 * @return
-	 */
-	private static String[] resolveConfigurationClassNames(ContextLoader contextLoader,
-			Class<ContextConfiguration> annotationType, Class<?> declaringClass) {
 
-		// TODO [SPR-6184] Implement recursive search for configuration classes.
+	private static interface LocationsResolver {
 
-		ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
-		if (logger.isTraceEnabled()) {
-			logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
-				contextConfiguration, declaringClass));
-		}
+		String[] resolveLocations(ContextConfiguration contextConfiguration, Class<?> declaringClass);
+	}
 
-		String[] classNames = null;
+	private static final class ResourcePathLocationsResolver implements LocationsResolver {
 
-		Class<?>[] configClasses = contextConfiguration.classes();
-		if (!ObjectUtils.isEmpty(configClasses)) {
-			classNames = new String[configClasses.length];
+		public String[] resolveLocations(ContextConfiguration contextConfiguration, Class<?> declaringClass) {
 
-			for (int i = 0; i < configClasses.length; i++) {
-				classNames[i] = configClasses[i].getName();
+			String[] locations = contextConfiguration.locations();
+			String[] valueLocations = contextConfiguration.value();
+
+			if (!ObjectUtils.isEmpty(valueLocations) && !ObjectUtils.isEmpty(locations)) {
+				String msg = String.format(
+					"Test class [%s] has been configured with @ContextConfiguration's 'value' [%s] and 'locations' [%s] attributes. Only one declaration of resource locations is permitted per @ContextConfiguration annotation.",
+					declaringClass, ObjectUtils.nullSafeToString(valueLocations),
+					ObjectUtils.nullSafeToString(locations));
+				ContextLoaderUtils.logger.error(msg);
+				throw new IllegalStateException(msg);
 			}
-		}
+			else if (!ObjectUtils.isEmpty(valueLocations)) {
+				locations = valueLocations;
+			}
 
-		return contextLoader.processLocations(declaringClass, classNames);
+			return locations;
+		}
+	}
+
+	private static final class ClassNameLocationsResolver implements LocationsResolver {
+
+		public String[] resolveLocations(ContextConfiguration contextConfiguration, Class<?> declaringClass) {
+
+			String[] classNames = null;
+
+			Class<?>[] configClasses = contextConfiguration.classes();
+			if (!ObjectUtils.isEmpty(configClasses)) {
+				classNames = new String[configClasses.length];
+
+				for (int i = 0; i < configClasses.length; i++) {
+					classNames[i] = configClasses[i].getName();
+				}
+			}
+
+			return classNames;
+		}
 	}
 
 }
