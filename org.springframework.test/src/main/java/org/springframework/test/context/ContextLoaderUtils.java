@@ -162,41 +162,31 @@ public abstract class ContextLoaderUtils {
 		Assert.notNull(contextLoader, "ContextLoader must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 
-		List<String> locationsList = new ArrayList<String>();
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
 		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
 		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
 				+ annotationType + "] and class [" + clazz + "]");
 
-		// --- configuration class resources ----------------------------
+		boolean processConfigurationClasses = (contextLoader instanceof ResourceTypeAwareContextLoader)
+				&& ((ResourceTypeAwareContextLoader) contextLoader).supportsClassResources();
 
-		// TODO [SPR-6184] Implement recursive search for configuration classes.
-		// This needs to integrate seamlessly (i.e., analogous yet mutually
-		// exclusive) with the existing locations search.
-		if ((contextLoader instanceof ResourceTypeAwareContextLoader)
-				&& ((ResourceTypeAwareContextLoader) contextLoader).supportsClassResources()) {
+		return processConfigurationClasses ? //
+		resolveConfigurationClassNames(contextLoader, annotationType, declaringClass)
+				: resolveStringLocations(contextLoader, annotationType, declaringClass);
+	}
 
-			ContextConfiguration cc = declaringClass.getAnnotation(annotationType);
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].", cc,
-					declaringClass));
-			}
+	/**
+	 * TODO Document resolveStringLocations().
+	 *
+	 * @param contextLoader
+	 * @param annotationType
+	 * @param declaringClass
+	 * @return
+	 */
+	private static String[] resolveStringLocations(ContextLoader contextLoader,
+			Class<ContextConfiguration> annotationType, Class<?> declaringClass) {
 
-			String[] classNames = null;
-
-			Class<?>[] configClasses = cc.classes();
-			if (!ObjectUtils.isEmpty(configClasses)) {
-				classNames = new String[configClasses.length];
-
-				for (int i = 0; i < configClasses.length; i++) {
-					classNames[i] = configClasses[i].getName();
-				}
-			}
-
-			return contextLoader.processLocations(declaringClass, classNames);
-		}
-
-		// --- location/value resources ---------------------------------
+		List<String> locationsList = new ArrayList<String>();
 
 		while (declaringClass != null) {
 			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
@@ -226,6 +216,39 @@ public abstract class ContextLoaderUtils {
 		}
 
 		return locationsList.toArray(new String[locationsList.size()]);
+	}
+
+	/**
+	 * TODO Document resolveConfigClassNames().
+	 *
+	 * @param contextLoader
+	 * @param annotationType
+	 * @param declaringClass
+	 * @return
+	 */
+	private static String[] resolveConfigurationClassNames(ContextLoader contextLoader,
+			Class<ContextConfiguration> annotationType, Class<?> declaringClass) {
+
+		// TODO [SPR-6184] Implement recursive search for configuration classes.
+
+		ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
+				contextConfiguration, declaringClass));
+		}
+
+		String[] classNames = null;
+
+		Class<?>[] configClasses = contextConfiguration.classes();
+		if (!ObjectUtils.isEmpty(configClasses)) {
+			classNames = new String[configClasses.length];
+
+			for (int i = 0; i < configClasses.length; i++) {
+				classNames[i] = configClasses[i].getName();
+			}
+		}
+
+		return contextLoader.processLocations(declaringClass, classNames);
 	}
 
 }
