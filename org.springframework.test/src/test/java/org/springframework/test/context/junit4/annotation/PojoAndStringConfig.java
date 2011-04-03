@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
  * @since 3.1
  */
 @Configuration
-public class AnnotationConfigSpringJUnit4ClassRunnerAppCtxTestsConfig {
+public class PojoAndStringConfig {
 
 	@Bean
 	public Employee employee() {

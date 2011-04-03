@@ -29,7 +29,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -231,9 +230,9 @@ public class TestContext extends AttributeAccessorSupport {
 
 		// TODO [SPR-6184] Implement recursive search for configuration classes.
 		// This needs to integrate seamlessly (i.e., analogous yet mutually
-		// exclusive) with the existing locations search. Furthermore, the
-		// solution must not depend on an explicit ACCL check.
-		if (contextLoader instanceof AnnotationConfigContextLoader) {
+		// exclusive) with the existing locations search.
+		if ((contextLoader instanceof ResourceTypeAwareContextLoader)
+				&& ((ResourceTypeAwareContextLoader) contextLoader).supportsClassResources()) {
 
 			ContextConfiguration cc = declaringClass.getAnnotation(annotationType);
 			if (logger.isTraceEnabled()) {
@@ -317,11 +316,12 @@ public class TestContext extends AttributeAccessorSupport {
 	 */
 	public ApplicationContext getApplicationContext() {
 		synchronized (this.contextCache) {
-			ApplicationContext context = this.contextCache.get(contextKeyString(this.locations));
+			String contextKeyString = contextKeyString(this.locations);
+			ApplicationContext context = this.contextCache.get(contextKeyString);
 			if (context == null) {
 				try {
 					context = loadApplicationContext();
-					this.contextCache.put(contextKeyString(this.locations), context);
+					this.contextCache.put(contextKeyString, context);
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException("Failed to load ApplicationContext", ex);

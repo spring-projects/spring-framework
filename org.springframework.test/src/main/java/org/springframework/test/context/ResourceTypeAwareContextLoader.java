@@ -14,19 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit4.annotation;
-
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTests;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+package org.springframework.test.context;
 
 /**
- * TODO [SPR-6184] Document AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.
- * 
+ * TODO Document ResourceTypeAwareContextLoader.
+ *
  * @author Sam Brannen
  * @since 3.1
  */
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = PojoAndStringConfig.class)
-public class AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {
-	/* all tests are in the parent class. */
+public interface ResourceTypeAwareContextLoader extends ContextLoader {
+
+	/**
+	 * @return <code>true</code> if this <code>ContextLoader</code> supports
+	 * String-based resource locations
+	 * @see ContextConfiguration#locations()
+	 * @see ContextConfiguration#value()
+	 */
+	boolean supportsStringResources();
+
+	/**
+	 * @return <code>true</code> if this <code>ContextLoader</code> supports
+	 * Class-based resource locations
+	 * @see ContextConfiguration#classes()
+	 */
+	boolean supportsClassResources();
+
 }
