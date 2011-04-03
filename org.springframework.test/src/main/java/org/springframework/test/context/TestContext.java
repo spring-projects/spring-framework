@@ -236,39 +236,41 @@ public class TestContext extends AttributeAccessorSupport {
 		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
 				+ annotationType + "] and class [" + clazz + "]");
 
+		// --- configuration class resources ----------------------------
+
 		// TODO [SPR-6184] Implement recursive search for configuration classes.
 		// This needs to integrate seamlessly (i.e., analogous yet mutually
-		// exclusive) with the existing locations search.
-		ContextConfiguration cc = declaringClass.getAnnotation(annotationType);
-		if (cc != null) {
+		// exclusive) with the existing locations search. Furthermore, the
+		// solution must not depend on an explicit ACCL check.
+		if (contextLoader instanceof AnnotationConfigContextLoader) {
+
+			ContextConfiguration cc = declaringClass.getAnnotation(annotationType);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Retrieved @ContextConfiguration [" + cc + "] for declaring class [" + declaringClass
-						+ "]");
+				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].", cc,
+					declaringClass));
 			}
+
+			String[] classNames = null;
 
 			Class<?>[] configClasses = cc.classes();
-
 			if (!ObjectUtils.isEmpty(configClasses)) {
-				for (Class<?> configClass : configClasses) {
-					locationsList.add(configClass.getName());
+				classNames = new String[configClasses.length];
+
+				for (int i = 0; i < configClasses.length; i++) {
+					classNames[i] = configClasses[i].getName();
 				}
-				return locationsList.toArray(new String[locationsList.size()]);
 			}
 
-			// TODO [SPR-6184] Remove interim-solution ACCL check.
-			//
-			// Config classes are not defined, but the context loader might
-			// have been set to AnnotationConfigContextLoader.
-			if (AnnotationConfigContextLoader.class.isAssignableFrom(cc.loader())) {
-				return contextLoader.processLocations(declaringClass, new String[] {});
-			}
+			return contextLoader.processLocations(declaringClass, classNames);
 		}
+
+		// --- location/value resources ---------------------------------
 
 		while (declaringClass != null) {
 			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Retrieved @ContextConfiguration [" + contextConfiguration + "] for declaring class ["
-						+ declaringClass + "]");
+				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
+					contextConfiguration, declaringClass));
 			}
 
 			String[] valueLocations = contextConfiguration.value();
