@@ -21,7 +21,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * TODO Document AnnotationConfigSuiteTests.
+ * TODO [SPR-6184] Document tests.
  *
  * @author Sam Brannen
  * @since 3.1

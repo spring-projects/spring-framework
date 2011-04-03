@@ -29,7 +29,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
- * TODO [SPR-6184] Document DefaultConfigClassAnnotationConfigTests.
+ * TODO [SPR-6184] Document tests.
  * 
  * @author Sam Brannen
  * @since 3.1

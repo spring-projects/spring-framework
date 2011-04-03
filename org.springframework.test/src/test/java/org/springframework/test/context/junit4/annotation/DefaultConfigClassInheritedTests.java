@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
- * TODO [SPR-6184] Document InheritedConfigClassAnnotationConfigTests.
+ * TODO [SPR-6184] Document tests.
  * 
  * @author Sam Brannen
  * @since 3.1
