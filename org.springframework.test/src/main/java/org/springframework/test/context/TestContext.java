@@ -79,15 +79,12 @@ public class TestContext extends AttributeAccessorSupport {
 	 * and {@link ContextCache context cache} and parse the corresponding
 	 * {@link ContextConfiguration &#064;ContextConfiguration} annotation, if
 	 * present.
-	 * <p>
-	 * If the supplied class name for the default ContextLoader is
+	 * <p>If the supplied class name for the default ContextLoader is
 	 * <code>null</code> or <em>empty</em> and no <code>ContextLoader</code>
 	 * class is explicitly supplied via the
 	 * <code>&#064;ContextConfiguration</code> annotation, a
 	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
 	 * GenericXmlContextLoader} will be used instead.
-	 * </p>
-	 * 
 	 * @param testClass the test class for which the test context should be
 	 * constructed (must not be <code>null</code>)
 	 * @param contextCache the context cache from which the constructed test
@@ -132,7 +129,6 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * <p>
 	 * Retrieve the {@link ContextLoader} {@link Class} to use for the supplied
 	 * {@link Class test class}.
 	 * <ol>
@@ -146,14 +142,11 @@ public class TestContext extends AttributeAccessorSupport {
 	 * the class hierarchy, an attempt will be made to load and return the class
 	 * with the supplied <code>defaultContextLoaderClassName</code>.</li>
 	 * </ol>
-	 * 
 	 * @param clazz the class for which to retrieve <code>ContextLoader</code>
 	 * class; must not be <code>null</code>
 	 * @param defaultContextLoaderClassName the name of the default
-	 * <code>ContextLoader</code> class to use; must not be <code>null</code> or
-	 * empty
-	 * @return the <code>ContextLoader</code> class to use for the specified
-	 * class
+	 * <code>ContextLoader</code> class to use; must not be <code>null</code> or empty
+	 * @return the <code>ContextLoader</code> class to use for the specified class
 	 * @throws IllegalArgumentException if {@link ContextConfiguration
 	 * &#064;ContextConfiguration} is not <em>present</em> on the supplied class
 	 */
@@ -209,14 +202,12 @@ public class TestContext extends AttributeAccessorSupport {
 	 * {@link Class class}, using the supplied {@link ContextLoader} to
 	 * {@link ContextLoader#processLocations(Class, String...) process} the
 	 * locations.
-	 * <p>
-	 * Note that the {@link ContextConfiguration#inheritLocations()
+	 * <p>Note that the {@link ContextConfiguration#inheritLocations()
 	 * inheritLocations} flag of {@link ContextConfiguration
 	 * &#064;ContextConfiguration} will be taken into consideration.
 	 * Specifically, if the <code>inheritLocations</code> flag is set to
 	 * <code>true</code>, locations defined in the annotated class will be
 	 * appended to the locations defined in superclasses.
-	 * 
 	 * @param contextLoader the ContextLoader to use for processing the
 	 * locations (must not be <code>null</code>)
 	 * @param clazz the class for which to retrieve the resource locations (must
@@ -299,9 +290,7 @@ public class TestContext extends AttributeAccessorSupport {
 	/**
 	 * Load an <code>ApplicationContext</code> for this test context using the
 	 * configured <code>ContextLoader</code> and resource locations.
-	 * 
-	 * @throws Exception if an error occurs while loading the application
-	 * context
+	 * @throws Exception if an error occurs while loading the application context
 	 */
 	private ApplicationContext loadApplicationContext() throws Exception {
 		Assert.notNull(this.contextLoader, "Can not load an ApplicationContext with a NULL 'contextLoader'. "
@@ -322,7 +311,6 @@ public class TestContext extends AttributeAccessorSupport {
 	/**
 	 * Get the {@link ApplicationContext application context} for this test
 	 * context, possibly cached.
-	 * 
 	 * @return the application context
 	 * @throws IllegalStateException if an error occurs while retrieving the
 	 * application context
@@ -345,7 +333,6 @@ public class TestContext extends AttributeAccessorSupport {
 
 	/**
 	 * Get the {@link Class test class} for this test context.
-	 * 
 	 * @return the test class (never <code>null</code>)
 	 */
 	public final Class<?> getTestClass() {
@@ -354,9 +341,7 @@ public class TestContext extends AttributeAccessorSupport {
 
 	/**
 	 * Get the current {@link Object test instance} for this test context.
-	 * <p>
-	 * Note: this is a mutable property.
-	 * 
+	 * <p>Note: this is a mutable property.
 	 * @return the current test instance (may be <code>null</code>)
 	 * @see #updateState(Object,Method,Throwable)
 	 */
@@ -366,9 +351,7 @@ public class TestContext extends AttributeAccessorSupport {
 
 	/**
 	 * Get the current {@link Method test method} for this test context.
-	 * <p>
-	 * Note: this is a mutable property.
-	 * 
+	 * <p>Note: this is a mutable property.
 	 * @return the current test method (may be <code>null</code>)
 	 * @see #updateState(Object, Method, Throwable)
 	 */
@@ -379,9 +362,7 @@ public class TestContext extends AttributeAccessorSupport {
 	/**
 	 * Get the {@link Throwable exception} that was thrown during execution of
 	 * the {@link #getTestMethod() test method}.
-	 * <p>
-	 * Note: this is a mutable property.
-	 * 
+	 * <p>Note: this is a mutable property.
 	 * @return the exception that was thrown, or <code>null</code> if no
 	 * exception was thrown
 	 * @see #updateState(Object, Method, Throwable)
@@ -403,7 +384,6 @@ public class TestContext extends AttributeAccessorSupport {
 	/**
 	 * Update this test context to reflect the state of the currently executing
 	 * test.
-	 * 
 	 * @param testInstance the current test instance (may be <code>null</code>)
 	 * @param testMethod the current test method (may be <code>null</code>)
 	 * @param testException the exception that was thrown in the test method, or
