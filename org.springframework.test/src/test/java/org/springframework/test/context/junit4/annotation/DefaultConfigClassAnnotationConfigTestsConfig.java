@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit4;
+package org.springframework.test.context.junit4.annotation;
 
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
  * @since 3.1
  */
 @Configuration
-public class AnnotationConfigSpringJUnit4ClassRunnerAppCtxTestsConfig {
+public class DefaultConfigClassAnnotationConfigTestsConfig {
 
 	@Bean
 	public Employee employee() {
@@ -42,21 +42,6 @@ public class AnnotationConfigSpringJUnit4ClassRunnerAppCtxTestsConfig {
 	@Bean
 	public Pet pet() {
 		return new Pet("Fido");
-	}
-
-	@Bean
-	public String foo() {
-		return "Foo";
-	}
-
-	@Bean
-	public String bar() {
-		return "Bar";
-	}
-
-	@Bean
-	public String quux() {
-		return "Quux";
 	}
 
 }

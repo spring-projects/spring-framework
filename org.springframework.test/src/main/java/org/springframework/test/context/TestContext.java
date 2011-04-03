@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -252,6 +253,14 @@ public class TestContext extends AttributeAccessorSupport {
 					locationsList.add(configClass.getName());
 				}
 				return locationsList.toArray(new String[locationsList.size()]);
+			}
+
+			// TODO [SPR-6184] Remove interim-solution ACCL check.
+			//
+			// Config classes are not defined, but the context loader might
+			// have been set to AnnotationConfigContextLoader.
+			if (AnnotationConfigContextLoader.class.isAssignableFrom(cc.loader())) {
+				return contextLoader.processLocations(declaringClass, new String[] {});
 			}
 		}
 
