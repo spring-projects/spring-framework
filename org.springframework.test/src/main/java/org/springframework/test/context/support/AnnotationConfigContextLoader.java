@@ -44,32 +44,42 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * TODO Document overridden loadBeanDefinitions().
+	 * Registers {@link org.springframework.context.annotation.Configuration configuration classes}
+	 * in the supplied {@link AnnotationConfigApplicationContext} from the specified
+	 * class names. Each class name must be the fully qualified class name of a
+	 * configuration class. The <code>AnnotationConfigApplicationContext</code>
+	 * assumes the responsibility of loading the appropriate bean definitions.
+	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}.
+	 * @param context the context in which the configuration classes should be registered
+	 * @param classNames the names of configuration classes to register in the context
+	 * @throws IllegalArgumentException if the supplied context is not an instance of
+	 * <code>AnnotationConfigApplicationContext</code> or if a supplied class name
+	 * does not represent a class
+	 * @see #createGenericApplicationContext
 	 */
 	@Override
-	protected void loadBeanDefinitions(GenericApplicationContext context, String... locations) {
+	protected void loadBeanDefinitions(GenericApplicationContext context, String... classNames) {
 
 		Assert.isInstanceOf(AnnotationConfigApplicationContext.class, context,
 			"context must be an instance of AnnotationConfigApplicationContext");
 
-		AnnotationConfigApplicationContext annotationConfigApplicationContext = (AnnotationConfigApplicationContext) context;
+		Class<?>[] configClasses = new Class<?>[classNames.length];
 
-		Class<?>[] configClasses = new Class<?>[locations.length];
-		for (int i = 0; i < locations.length; i++) {
+		for (int i = 0; i < classNames.length; i++) {
+			String className = classNames[i];
 			try {
-				Class<?> clazz = getClass().getClassLoader().loadClass(locations[i]);
-				configClasses[i] = clazz;
+				configClasses[i] = (Class<?>) getClass().getClassLoader().loadClass(className);
 			}
 			catch (ClassNotFoundException e) {
 				throw new IllegalArgumentException(String.format(
-					"The supplied resource location [%s] does not represent a class.", locations[i]), e);
+					"The supplied class name [%s] does not represent a class.", className), e);
 			}
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Registering configuration classes: " + ObjectUtils.nullSafeToString(configClasses));
 		}
-		annotationConfigApplicationContext.register(configClasses);
+		((AnnotationConfigApplicationContext) context).register(configClasses);
 	}
 
 	/**
@@ -81,12 +91,23 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * TODO Document overridden generateDefaultLocations().
+	 * Generates the default {@link org.springframework.context.annotation.Configuration configuration class}
+	 * names array based on the supplied class.
+	 * <p>For example, if the supplied class is <code>com.example.MyTest</code>,
+	 * the generated array will contain a single string with a value of
+	 * &quot;com.example.MyTest<code>&lt;suffix&gt;</code>&quot;,
+	 * where <code>&lt;suffix&gt;</code> is the value of the
+	 * {@link #getResourceSuffix() resource suffix} string.
+	 * @param clazz the class for which the default configuration class names are to be generated
+	 * @return an array of default configuration class names
+	 * @see #getResourceSuffix()
 	 */
 	@Override
 	protected String[] generateDefaultLocations(Class<?> clazz) {
-		// TODO Implement generateDefaultLocations().
-		throw new UnsupportedOperationException("Not yet implemented");
+		Assert.notNull(clazz, "Class must not be null");
+		String suffix = getResourceSuffix();
+		Assert.hasText(suffix, "Resource suffix must not be empty");
+		return new String[] { clazz.getName() + suffix };
 	}
 
 	/**
@@ -98,7 +119,8 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * Returns &quot;Config</code>&quot;.
+	 * Returns &quot;Config</code>&quot;; intended to be used as a suffix
+	 * to be appended to the name of the test class.
 	 */
 	@Override
 	protected String getResourceSuffix() {

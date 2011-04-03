@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit4;
+package org.springframework.test.context.junit4.annotation;
 
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTests;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
