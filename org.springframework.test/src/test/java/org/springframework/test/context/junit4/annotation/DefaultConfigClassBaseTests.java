@@ -19,7 +19,6 @@ package org.springframework.test.context.junit4.annotation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.Employee;
@@ -34,7 +33,6 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  * @author Sam Brannen
  * @since 3.1
  */
-@Ignore("[SPR-6184] Disabled until ContextLoaderUtils supports recursive search for configuration classes")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class DefaultConfigClassBaseTests {

@@ -32,13 +32,9 @@ import org.junit.runners.Suite.SuiteClasses;
 
 AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,
 
-DefaultConfigClassBaseTests.class
+DefaultConfigClassBaseTests.class,
 
-// TODO Uncomment once working. Note that JUnit's Suite runner apparently
-// does not heed the presence of @Ignore on a suite class, at least not
-// when run within STS 2.6.0.
-//
-// DefaultConfigClassInheritedTests.class
+DefaultConfigClassInheritedTests.class
 
 })
 public class AnnotationConfigSuiteTests {
