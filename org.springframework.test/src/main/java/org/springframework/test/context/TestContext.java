@@ -18,20 +18,14 @@ package org.springframework.test.context;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * TestContext encapsulates the context in which a test is executed, agnostic of
@@ -44,8 +38,6 @@ import org.springframework.util.StringUtils;
 public class TestContext extends AttributeAccessorSupport {
 
 	private static final long serialVersionUID = -5827157174866681233L;
-
-	private static final String STANDARD_DEFAULT_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.GenericXmlContextLoader";
 
 	private static final Log logger = LogFactory.getLog(TestContext.class);
 
@@ -96,194 +88,28 @@ public class TestContext extends AttributeAccessorSupport {
 		Assert.notNull(testClass, "Test class must not be null");
 		Assert.notNull(contextCache, "ContextCache must not be null");
 
-		if (!StringUtils.hasText(defaultContextLoaderClassName)) {
-			defaultContextLoaderClassName = STANDARD_DEFAULT_CONTEXT_LOADER_CLASS_NAME;
-		}
-
 		ContextConfiguration contextConfiguration = testClass.getAnnotation(ContextConfiguration.class);
-		String[] locations = null;
 		ContextLoader contextLoader = null;
+		String[] locations = null;
 
 		if (contextConfiguration == null) {
 			if (logger.isInfoEnabled()) {
-				logger.info("@ContextConfiguration not found for class [" + testClass + "]");
+				logger.info(String.format("@ContextConfiguration not found for class [%s]", testClass));
 			}
 		}
 		else {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Retrieved @ContextConfiguration [" + contextConfiguration + "] for class [" + testClass
-						+ "]");
+				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for class [%s]", contextConfiguration,
+					testClass));
 			}
-
-			Class<? extends ContextLoader> contextLoaderClass = retrieveContextLoaderClass(testClass,
-				defaultContextLoaderClassName);
-			contextLoader = (ContextLoader) BeanUtils.instantiateClass(contextLoaderClass);
-			locations = retrieveContextLocations(contextLoader, testClass);
+			contextLoader = ContextLoaderUtils.resolveContextLoader(testClass, defaultContextLoaderClassName);
+			locations = ContextLoaderUtils.resolveContextLocations(contextLoader, testClass);
 		}
 
 		this.testClass = testClass;
 		this.contextCache = contextCache;
 		this.contextLoader = contextLoader;
 		this.locations = locations;
-	}
-
-	/**
-	 * Retrieve the {@link ContextLoader} {@link Class} to use for the supplied
-	 * {@link Class test class}.
-	 * <ol>
-	 * <li>If the {@link ContextConfiguration#loader() loader} attribute of
-	 * {@link ContextConfiguration &#064;ContextConfiguration} is configured
-	 * with an explicit class, that class will be returned.</li>
-	 * <li>If a <code>loader</code> class is not specified, the class hierarchy
-	 * will be traversed to find a parent class annotated with
-	 * <code>&#064;ContextConfiguration</code>; go to step #1.</li>
-	 * <li>If no explicit <code>loader</code> class is found after traversing
-	 * the class hierarchy, an attempt will be made to load and return the class
-	 * with the supplied <code>defaultContextLoaderClassName</code>.</li>
-	 * </ol>
-	 * @param clazz the class for which to retrieve <code>ContextLoader</code>
-	 * class; must not be <code>null</code>
-	 * @param defaultContextLoaderClassName the name of the default
-	 * <code>ContextLoader</code> class to use; must not be <code>null</code> or empty
-	 * @return the <code>ContextLoader</code> class to use for the specified class
-	 * @throws IllegalArgumentException if {@link ContextConfiguration
-	 * &#064;ContextConfiguration} is not <em>present</em> on the supplied class
-	 */
-	@SuppressWarnings("unchecked")
-	private Class<? extends ContextLoader> retrieveContextLoaderClass(Class<?> clazz,
-			String defaultContextLoaderClassName) {
-		Assert.notNull(clazz, "Class must not be null");
-		Assert.hasText(defaultContextLoaderClassName, "Default ContextLoader class name must not be null or empty");
-
-		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
-		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
-				+ annotationType + "] and class [" + clazz + "]");
-
-		while (declaringClass != null) {
-			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Processing ContextLoader for @ContextConfiguration [" + contextConfiguration
-						+ "] and declaring class [" + declaringClass + "]");
-			}
-
-			Class<? extends ContextLoader> contextLoaderClass = contextConfiguration.loader();
-			if (!ContextLoader.class.equals(contextLoaderClass)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found explicit ContextLoader [" + contextLoaderClass
-							+ "] for @ContextConfiguration [" + contextConfiguration + "] and declaring class ["
-							+ declaringClass + "]");
-				}
-				return contextLoaderClass;
-			}
-
-			declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType,
-				declaringClass.getSuperclass());
-		}
-
-		try {
-			ContextConfiguration contextConfiguration = clazz.getAnnotation(ContextConfiguration.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Using default ContextLoader class [" + defaultContextLoaderClassName
-						+ "] for @ContextConfiguration [" + contextConfiguration + "] and class [" + clazz + "]");
-			}
-			return (Class<? extends ContextLoader>) getClass().getClassLoader().loadClass(defaultContextLoaderClassName);
-		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalStateException("Could not load default ContextLoader class ["
-					+ defaultContextLoaderClassName + "]. Specify @ContextConfiguration's 'loader' "
-					+ "attribute or make the default loader class available.");
-		}
-	}
-
-	/**
-	 * Retrieve {@link ApplicationContext} resource locations for the supplied
-	 * {@link Class class}, using the supplied {@link ContextLoader} to
-	 * {@link ContextLoader#processLocations(Class, String...) process} the
-	 * locations.
-	 * <p>Note that the {@link ContextConfiguration#inheritLocations()
-	 * inheritLocations} flag of {@link ContextConfiguration
-	 * &#064;ContextConfiguration} will be taken into consideration.
-	 * Specifically, if the <code>inheritLocations</code> flag is set to
-	 * <code>true</code>, locations defined in the annotated class will be
-	 * appended to the locations defined in superclasses.
-	 * @param contextLoader the ContextLoader to use for processing the
-	 * locations (must not be <code>null</code>)
-	 * @param clazz the class for which to retrieve the resource locations (must
-	 * not be <code>null</code>)
-	 * @return the list of ApplicationContext resource locations for the
-	 * specified class, including locations from superclasses if appropriate
-	 * @throws IllegalArgumentException if {@link ContextConfiguration
-	 * &#064;ContextConfiguration} is not <em>present</em> on the supplied class
-	 */
-	private String[] retrieveContextLocations(ContextLoader contextLoader, Class<?> clazz) {
-		Assert.notNull(contextLoader, "ContextLoader must not be null");
-		Assert.notNull(clazz, "Class must not be null");
-
-		List<String> locationsList = new ArrayList<String>();
-		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
-		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
-				+ annotationType + "] and class [" + clazz + "]");
-
-		// --- configuration class resources ----------------------------
-
-		// TODO [SPR-6184] Implement recursive search for configuration classes.
-		// This needs to integrate seamlessly (i.e., analogous yet mutually
-		// exclusive) with the existing locations search.
-		if ((contextLoader instanceof ResourceTypeAwareContextLoader)
-				&& ((ResourceTypeAwareContextLoader) contextLoader).supportsClassResources()) {
-
-			ContextConfiguration cc = declaringClass.getAnnotation(annotationType);
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].", cc,
-					declaringClass));
-			}
-
-			String[] classNames = null;
-
-			Class<?>[] configClasses = cc.classes();
-			if (!ObjectUtils.isEmpty(configClasses)) {
-				classNames = new String[configClasses.length];
-
-				for (int i = 0; i < configClasses.length; i++) {
-					classNames[i] = configClasses[i].getName();
-				}
-			}
-
-			return contextLoader.processLocations(declaringClass, classNames);
-		}
-
-		// --- location/value resources ---------------------------------
-
-		while (declaringClass != null) {
-			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
-					contextConfiguration, declaringClass));
-			}
-
-			String[] valueLocations = contextConfiguration.value();
-			String[] locations = contextConfiguration.locations();
-			if (!ObjectUtils.isEmpty(valueLocations) && !ObjectUtils.isEmpty(locations)) {
-				String msg = String.format(
-					"Test class [%s] has been configured with @ContextConfiguration's 'value' [%s] and 'locations' [%s] attributes. Only one declaration of resource locations is permitted per @ContextConfiguration annotation.",
-					declaringClass, ObjectUtils.nullSafeToString(valueLocations),
-					ObjectUtils.nullSafeToString(locations));
-				logger.error(msg);
-				throw new IllegalStateException(msg);
-			}
-			else if (!ObjectUtils.isEmpty(valueLocations)) {
-				locations = valueLocations;
-			}
-
-			locations = contextLoader.processLocations(declaringClass, locations);
-			locationsList.addAll(0, Arrays.<String> asList(locations));
-			declaringClass = contextConfiguration.inheritLocations() ? AnnotationUtils.findAnnotationDeclaringClass(
-				annotationType, declaringClass.getSuperclass()) : null;
-		}
-
-		return locationsList.toArray(new String[locationsList.size()]);
 	}
 
 	/**
