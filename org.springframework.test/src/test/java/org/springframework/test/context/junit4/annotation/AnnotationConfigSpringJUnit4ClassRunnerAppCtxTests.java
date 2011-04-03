@@ -21,7 +21,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTest
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
- * TODO [SPR-6184] Document AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.
+ * TODO [SPR-6184] Document tests.
  * 
  * @author Sam Brannen
  * @since 3.1
