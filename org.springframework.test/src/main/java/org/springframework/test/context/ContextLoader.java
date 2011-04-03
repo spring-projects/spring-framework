@@ -19,8 +19,7 @@ package org.springframework.test.context;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Strategy interface for loading an
- * {@link ApplicationContext application context}.
+ * Strategy interface for loading an {@link ApplicationContext application context}.
  *
  * <p>Clients of a ContextLoader should call
  * {@link #processLocations(Class,String...) processLocations()} prior to
@@ -34,6 +33,7 @@ import org.springframework.context.ApplicationContext;
  *
  * <p>Spring provides the following out-of-the-box implementations:
  * <ul>
+ * <li>{@link org.springframework.test.context.support.AnnotationConfigContextLoader AnnotationConfigContextLoader}</li>
  * <li>{@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader}</li>
  * <li>{@link org.springframework.test.context.support.GenericPropertiesContextLoader GenericPropertiesContextLoader}</li>
  * </ul>

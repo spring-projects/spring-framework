@@ -19,6 +19,7 @@ package org.springframework.test.context.support;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.test.context.ContextLoader;
+import org.springframework.test.context.ResourceTypeAwareContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -37,7 +38,7 @@ import org.springframework.util.StringUtils;
  * @see #generateDefaultLocations
  * @see #modifyLocations
  */
-public abstract class AbstractContextLoader implements ContextLoader {
+public abstract class AbstractContextLoader implements ResourceTypeAwareContextLoader {
 
 	/**
 	 * If the supplied <code>locations</code> are <code>null</code> or
@@ -58,8 +59,8 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * @see org.springframework.test.context.ContextLoader#processLocations
 	 */
 	public final String[] processLocations(Class<?> clazz, String... locations) {
-		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ?
-				generateDefaultLocations(clazz) : modifyLocations(clazz, locations);
+		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ? generateDefaultLocations(clazz)
+				: modifyLocations(clazz, locations);
 	}
 
 	/**
@@ -80,8 +81,8 @@ public abstract class AbstractContextLoader implements ContextLoader {
 		Assert.notNull(clazz, "Class must not be null");
 		String suffix = getResourceSuffix();
 		Assert.hasText(suffix, "Resource suffix must not be empty");
-		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + "/" +
-				ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix };
+		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + "/"
+				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix };
 	}
 
 	/**
@@ -119,7 +120,6 @@ public abstract class AbstractContextLoader implements ContextLoader {
 		return modifiedLocations;
 	}
 
-
 	/**
 	 * Determine whether or not <em>default</em> resource locations should be
 	 * generated if the <code>locations</code> provided to
@@ -140,5 +140,23 @@ public abstract class AbstractContextLoader implements ContextLoader {
 	 * @see #generateDefaultLocations(Class)
 	 */
 	protected abstract String getResourceSuffix();
+
+	/**
+	 * TODO Document supportsStringResources() implementation.
+	 * 
+	 * @return <code>true</code>
+	 */
+	public boolean supportsStringResources() {
+		return true;
+	}
+
+	/**
+	 * TODO Document supportsClassResources() implementations.
+	 * 
+	 * @return <code>false</code>
+	 */
+	public boolean supportsClassResources() {
+		return false;
+	}
 
 }

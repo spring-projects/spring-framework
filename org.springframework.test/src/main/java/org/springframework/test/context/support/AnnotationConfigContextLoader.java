@@ -127,4 +127,20 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 		return "Config";
 	}
 
+	/**
+	 * @return <code>true</code>
+	 */
+	@Override
+	public boolean supportsClassResources() {
+		return true;
+	}
+
+	/**
+	 * @return <code>false</code>
+	 */
+	@Override
+	public boolean supportsStringResources() {
+		return false;
+	}
+
 }
