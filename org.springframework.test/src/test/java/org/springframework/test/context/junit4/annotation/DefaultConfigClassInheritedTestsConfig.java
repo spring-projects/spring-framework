@@ -16,30 +16,22 @@
 
 package org.springframework.test.context.junit4.annotation;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.beans.Pet;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * TODO Document AnnotationConfigSuiteTests.
- *
+ * TODO [SPR-6184] Document configuration class.
+ * 
  * @author Sam Brannen
  * @since 3.1
  */
-@RunWith(Suite.class)
-// Note: the following 'multi-line' layout is for enhanced code readability.
-@SuiteClasses({
+@Configuration
+public class DefaultConfigClassInheritedTestsConfig {
 
-AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,
+	@Bean
+	public Pet pet() {
+		return new Pet("Fido");
+	}
 
-DefaultConfigClassBaseTests.class
-
-// TODO Uncomment once working. Note that JUnit's Suite runner apparently
-// does not heed the presence of @Ignore on a suite class, at least not
-// when run within STS 2.6.0.
-//
-// DefaultConfigClassInheritedTests.class
-
-})
-public class AnnotationConfigSuiteTests {
 }

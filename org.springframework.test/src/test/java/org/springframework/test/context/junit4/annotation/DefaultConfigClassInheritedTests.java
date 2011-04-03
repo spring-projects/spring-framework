@@ -20,37 +20,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
- * TODO [SPR-6184] Document DefaultConfigClassAnnotationConfigTests.
+ * TODO [SPR-6184] Document InheritedConfigClassAnnotationConfigTests.
  * 
  * @author Sam Brannen
  * @since 3.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-public class DefaultConfigClassAnnotationConfigTests {
-
-	@Autowired
-	private Employee employee;
+@ContextConfiguration
+public class DefaultConfigClassInheritedTests extends DefaultConfigClassBaseTests {
 
 	@Autowired
 	private Pet pet;
 
 
 	@Test
-	public final void autowiredFields() {
-		assertNotNull("The employee field should have been autowired.", this.employee);
-		assertEquals("John Smith", this.employee.getName());
-
-		assertNotNull("The pet field should have been autowired.", this.pet);
+	public void verifyPetSetFromExtendedContextConfig() {
+		assertNotNull("The pet should have been autowired.", this.pet);
 		assertEquals("Fido", this.pet.getName());
 	}
 
