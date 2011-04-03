@@ -28,14 +28,10 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 // Note: the following 'multi-line' layout is for enhanced code readability.
-@SuiteClasses({
-
-AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,
-
-DefaultConfigClassBaseTests.class,
-
-DefaultConfigClassInheritedTests.class
-
+@SuiteClasses({//
+AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
+	DefaultConfigClassBaseTests.class,//
+	DefaultConfigClassInheritedTests.class //
 })
 public class AnnotationConfigSuiteTests {
 }
