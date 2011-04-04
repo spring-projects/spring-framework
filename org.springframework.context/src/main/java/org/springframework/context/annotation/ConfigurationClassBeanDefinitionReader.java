@@ -322,7 +322,7 @@ public class ConfigurationClassBeanDefinitionReader {
 				}
 			}
 			BeanDefinitionReader reader = readerInstanceCache.get(readerClass);
-			// TODO SPR-6310: qualify relatively pathed locations as done in AbstractContextLoader.modifyLocations
+			// TODO SPR-6310: qualify relative path locations as done in AbstractContextLoader.modifyLocations
 			reader.loadBeanDefinitions(resource);
 		}
 	}
@@ -383,7 +383,7 @@ public class ConfigurationClassBeanDefinitionReader {
 
 	/**
 	 * {@link RootBeanDefinition} marker subclass used to signify that a bean definition
-	 * created from a configuration class as opposed to any other configuration source.
+	 * was created from a configuration class as opposed to any other configuration source.
 	 * Used in bean overriding cases where it's necessary to determine whether the bean
 	 * definition was created externally.
 	 */
@@ -423,7 +423,7 @@ public class ConfigurationClassBeanDefinitionReader {
 	 */
 	private static class InvalidConfigurationImportProblem extends Problem {
 		public InvalidConfigurationImportProblem(String className, Resource resource, AnnotationMetadata metadata) {
-			super(String.format("%s was @Import'ed as a but is not annotated with @FeatureConfiguration or " +
+			super(String.format("%s was @Import'ed but is not annotated with @FeatureConfiguration or " +
 					"@Configuration nor does it declare any @Bean methods. Update the class to " +
 					"meet one of these requirements or do not attempt to @Import it.", className),
 					new Location(resource, metadata));
