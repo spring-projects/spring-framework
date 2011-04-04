@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,11 @@ import org.springframework.util.xml.StaxUtils;
  */
 public class JibxMarshaller extends AbstractMarshaller implements InitializingBean {
 
+	private static final String DEFAULT_BINDING_NAME = "binding";
+
 	private Class<?> targetClass;
+
+	private String targetPackage;
 
 	private String bindingName;
 
@@ -106,12 +110,24 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 
 	/**
-	 * Set the target class for this instance. This property is required.
+	 * Set the target class for this instance. Setting either this property or the
+	 * {@link #setTargetPackage(String) targetPackage} property is required.
+	 *
+	 * <p>If this property is set, {@link #setTargetPackage(String) targetPackage} is ignored.
 	 */
 	public void setTargetClass(Class<?> targetClass) {
 		this.targetClass = targetClass;
 	}
 
+	/**
+	 * Set the target package for this instance. Setting either this property or the
+	 * {@link #setTargetClass(Class) targetClass} property is required.
+	 *
+	 * <p>If {@link #setTargetClass(Class) targetClass} is set, this property is ignored.
+	 */
+	public void setTargetPackage(String targetPackage) {
+		this.targetPackage = targetPackage;
+	}
 	/**
 	 * Set the optional binding name for this instance.
 	 */
@@ -185,24 +201,38 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 	public void afterPropertiesSet() throws JiBXException {
-		Assert.notNull(this.targetClass, "'targetClass' is required");
-		if (StringUtils.hasLength(this.bindingName)) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Configured for target class [" + this.targetClass + "] using binding [" + this.bindingName + "]");
+		if (this.targetClass != null) {
+			if (StringUtils.hasLength(this.bindingName)) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Configured for target class [" + this.targetClass + "] using binding [" + this.bindingName + "]");
+				}
+				this.bindingFactory = BindingDirectory.getFactory(this.bindingName, this.targetClass);
 			}
-			this.bindingFactory = BindingDirectory.getFactory(this.bindingName, this.targetClass);
-		}
-		else {
-			if (logger.isInfoEnabled()) {
-				logger.info("Configured for target class [" + this.targetClass + "]");
+			else {
+				if (logger.isInfoEnabled()) {
+					logger.info("Configured for target class [" + this.targetClass + "]");
+				}
+				this.bindingFactory = BindingDirectory.getFactory(this.targetClass);
 			}
-			this.bindingFactory = BindingDirectory.getFactory(this.targetClass);
+		} else if (this.targetPackage != null) {
+			if (!StringUtils.hasLength(bindingName)) {
+				bindingName = DEFAULT_BINDING_NAME;
+			}
+			if (logger.isInfoEnabled()) {
+				logger.info("Configured for target package [" + targetPackage	+ "] using binding [" + bindingName + "]");
+			}
+			this.bindingFactory = BindingDirectory.getFactory(bindingName, targetPackage);
+		} else {
+			throw new IllegalArgumentException("either 'targetClass' or 'targetPackage' is required");
 		}
 	}
 
 
 	public boolean supports(Class<?> clazz) {
 		Assert.notNull(clazz, "'clazz' must not be null");
+		if (this.targetClass != null) {
+			return this.targetClass.equals(clazz);
+		}
 		String[] mappedClasses = this.bindingFactory.getMappedClasses();
 		String className = clazz.getName();
 		for (String mappedClass : mappedClasses) {
