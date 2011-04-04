@@ -73,7 +73,7 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see ConfigurationClassParser
  */
-class ConfigurationClassBeanDefinitionReader {
+public class ConfigurationClassBeanDefinitionReader {
 
 	private static final String CONFIGURATION_CLASS_FULL = "full";
 
