@@ -28,6 +28,7 @@ package org.springframework.context;
  * @author Chris Beams
  * @since 3.1
  * @see org.springframework.web.context.ContextLoader#customizeContext
+ * @see org.springframework.web.context.ContextLoader#CONTEXT_INITIALIZER_CLASSES_PARAM
  */
 public interface ApplicationContextInitializer<C extends ConfigurableApplicationContext> {
 
