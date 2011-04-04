@@ -126,7 +126,7 @@ public abstract class ContextLoaderUtils {
 		}
 
 		try {
-			ContextConfiguration contextConfiguration = clazz.getAnnotation(ContextConfiguration.class);
+			ContextConfiguration contextConfiguration = clazz.getAnnotation(annotationType);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Using default ContextLoader class [" + defaultContextLoaderClassName
 						+ "] for @ContextConfiguration [" + contextConfiguration + "] and class [" + clazz + "]");
@@ -165,16 +165,16 @@ public abstract class ContextLoaderUtils {
 		Assert.notNull(contextLoader, "ContextLoader must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 
+		boolean processConfigurationClasses = (contextLoader instanceof ResourceTypeAwareContextLoader)
+				&& ((ResourceTypeAwareContextLoader) contextLoader).supportsClassResources();
+		LocationsResolver locationsResolver = processConfigurationClasses ? classNameLocationsResolver
+				: resourcePathLocationsResolver;
+
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
 		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
 		Assert.notNull(declaringClass, String.format(
 			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]", annotationType,
 			clazz));
-
-		boolean processConfigurationClasses = (contextLoader instanceof ResourceTypeAwareContextLoader)
-				&& ((ResourceTypeAwareContextLoader) contextLoader).supportsClassResources();
-		LocationsResolver locationsResolver = processConfigurationClasses ? classNameLocationsResolver
-				: resourcePathLocationsResolver;
 
 		List<String> locationsList = new ArrayList<String>();
 
