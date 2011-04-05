@@ -82,6 +82,9 @@ public class ExtendedBeanInfo implements BeanInfo {
 			// is the method a NON-INDEXED setter? ignore return type in order to capture non-void signatures
 			if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
 				String propertyName = propertyNameFor(method);
+				if(propertyName.length() == 0) {
+					continue ALL_METHODS;
+				}
 				for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
 					Method readMethod = pd.getReadMethod();
 					Method writeMethod = pd.getWriteMethod();
@@ -109,6 +112,9 @@ public class ExtendedBeanInfo implements BeanInfo {
 			// is the method an INDEXED setter? ignore return type in order to capture non-void signatures
 			if (method.getName().startsWith("set") && method.getParameterTypes().length == 2 && method.getParameterTypes()[0].equals(int.class)) {
 				String propertyName = propertyNameFor(method);
+				if(propertyName.length() == 0) {
+					continue ALL_METHODS;
+				}
 				DELEGATE_PD:
 				for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
 					if (!(pd instanceof IndexedPropertyDescriptor)) {
