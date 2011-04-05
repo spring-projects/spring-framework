@@ -19,8 +19,6 @@ package org.springframework.beans;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
@@ -32,7 +30,6 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.ExtendedBeanInfo.PropertyDescriptorComparator;
 
@@ -485,6 +482,23 @@ public class ExtendedBeanInfoTests {
 		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
 	}
 
+	/**
+	 * Ensures that an empty string is not passed into a PropertyDescriptor constructor. This
+	 * could occur when handling ArrayList.set(int,Object)
+	 */
+	@Test
+	public void emptyPropertiesIgnored() throws IntrospectionException {
+		@SuppressWarnings("unused") class C {
+			public Object set(Object o) { return null; }
+			public Object set(int i, Object o) { return null; }
+		}
+
+		BeanInfo bi = Introspector.getBeanInfo(C.class);
+		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
+
+		assertThat(ebi.getPropertyDescriptors(), equalTo(bi.getPropertyDescriptors()));
+	}
+
 	@Test
 	public void propertyCountsMatch() throws IntrospectionException {
 		BeanInfo bi = Introspector.getBeanInfo(TestBean.class);
@@ -544,7 +558,6 @@ public class ExtendedBeanInfoTests {
 		assertThat(c.compare(new PropertyDescriptor("1", null, null), new PropertyDescriptor("a", null, null)), lessThan(0));
 		assertThat(c.compare(new PropertyDescriptor("a", null, null), new PropertyDescriptor("A", null, null)), greaterThan(0));
 	}
-
 
 	private boolean hasWriteMethodForProperty(BeanInfo beanInfo, String propertyName) {
 		for (PropertyDescriptor pd : beanInfo.getPropertyDescriptors()) {
