@@ -24,7 +24,6 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -83,9 +82,14 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	private Charset charset = Charset.forName("UTF-8");
 
+	private List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
+
 	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
 
 	public FormHttpMessageConverter() {
+		this.supportedMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED);
+		this.supportedMediaTypes.add(MediaType.MULTIPART_FORM_DATA);
+
 		this.partConverters.add(new ByteArrayHttpMessageConverter());
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false);
@@ -120,29 +124,43 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
 			return false;
 		}
-		if (mediaType != null) {
-			return MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType);
-		}
-		else {
+		if (mediaType == null) {
 			return true;
 		}
+		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
+			// we can't read multipart
+			if (!supportedMediaType.equals(MediaType.MULTIPART_FORM_DATA) &&
+				supportedMediaType.includes(mediaType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
 			return false;
 		}
-		if (mediaType != null) {
-			return mediaType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED) ||
-					mediaType.isCompatibleWith(MediaType.MULTIPART_FORM_DATA);
-		}
-		else {
+		if (mediaType == null || MediaType.ALL.equals(mediaType)) {
 			return true;
 		}
+		for (MediaType supportedMediaType : getSupportedMediaTypes()) {
+			if (supportedMediaType.isCompatibleWith(mediaType)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Set the list of {@link MediaType} objects supported by this converter.
+	 */
+	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
+		this.supportedMediaTypes = supportedMediaTypes;
 	}
 
 	public List<MediaType> getSupportedMediaTypes() {
-		return Arrays.asList(MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA);
+		return Collections.unmodifiableList(supportedMediaTypes);
 	}
 
 	public MultiValueMap<String, String> read(Class<? extends MultiValueMap<String, ?>> clazz,
