@@ -30,12 +30,12 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.InvocableHandlerMethod;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
 
 /**
- * Test fixture for {@link RequestMappingHandlerAdapter} unit tests.
+ * Test fixture for {@link RequestMappingHandlerMethodAdapter} unit tests.
  * 
- * The tests in this class focus on {@link RequestMappingHandlerAdapter} functionality exclusively.
+ * The tests in this class focus on {@link RequestMappingHandlerMethodAdapter} functionality exclusively.
  * Also see {@link RequestMappingHandlerAdapterIntegrationTests} for higher-level tests invoking 
  * {@link Controller @Controller} methods. 
  * 
@@ -43,7 +43,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  */
 public class RequestMappingHandlerAdapterTests {
 
-	private RequestMappingHandlerAdapter handlerAdapter;
+	private RequestMappingHandlerMethodAdapter handlerAdapter;
 	
 	private MockHttpServletRequest request;
 	
@@ -51,7 +51,7 @@ public class RequestMappingHandlerAdapterTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.handlerAdapter = new RequestMappingHandlerAdapter();
+		this.handlerAdapter = new RequestMappingHandlerMethodAdapter();
 		this.handlerAdapter.setApplicationContext(new GenericWebApplicationContext());
 		this.handlerAdapter.afterPropertiesSet();
 

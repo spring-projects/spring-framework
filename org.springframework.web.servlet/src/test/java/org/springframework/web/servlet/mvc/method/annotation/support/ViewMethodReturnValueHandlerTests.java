@@ -45,12 +45,12 @@ public class ViewMethodReturnValueHandlerTests {
 
 	private ServletWebRequest webRequest;
 
-	private ModelAndViewContainer<View> mavContainer;
+	private ModelAndViewContainer mavContainer;
 
 	@Before
 	public void setUp() {
 		this.handler = new ViewMethodReturnValueHandler();
-		this.mavContainer = new ModelAndViewContainer<View>(new ExtendedModelMap());
+		this.mavContainer = new ModelAndViewContainer(new ExtendedModelMap());
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 	

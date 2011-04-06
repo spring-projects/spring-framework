@@ -77,12 +77,12 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
 
 /**
- * A test fixture for higher-level {@link RequestMappingHandlerAdapter} tests.
+ * A test fixture for higher-level {@link RequestMappingHandlerMethodAdapter} tests.
  * 
- * <p>The aim here is not to test {@link RequestMappingHandlerAdapter} itself nor to exercise 
+ * <p>The aim here is not to test {@link RequestMappingHandlerMethodAdapter} itself nor to exercise 
  * every {@link Controller @Controller} method feature but to have a place to try any feature
  * related to {@link Controller @Controller} invocations. Preferably actual tests should be 
  * added to the components that provide that respective functionality.
@@ -98,7 +98,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  */
 public class RequestMappingHandlerAdapterIntegrationTests {
 
-	private RequestMappingHandlerAdapter handlerAdapter;
+	private RequestMappingHandlerMethodAdapter handlerAdapter;
 	
 	private MockHttpServletRequest request;
 	
@@ -109,7 +109,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setValidator(new StubValidator());
 		
-		this.handlerAdapter = new RequestMappingHandlerAdapter();
+		this.handlerAdapter = new RequestMappingHandlerMethodAdapter();
 		this.handlerAdapter.setWebBindingInitializer(bindingInitializer);
 		this.handlerAdapter.setCustomArgumentResolvers(new WebArgumentResolver[] { new ColorArgumentResolver() });
 		

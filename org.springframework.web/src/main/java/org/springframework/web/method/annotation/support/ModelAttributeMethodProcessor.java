@@ -160,10 +160,10 @@ public class ModelAttributeMethodProcessor
 		return returnType.getMethodAnnotation(ModelAttribute.class) != null;
 	}
 
-	public <V> void handleReturnValue(Object returnValue, 
-									  MethodParameter returnType, 
-									  ModelAndViewContainer<V> mavContainer,
-									  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(Object returnValue, 
+								  MethodParameter returnType, 
+								  ModelAndViewContainer mavContainer,
+								  NativeWebRequest webRequest) throws Exception {
 		String name = ModelFactory.getNameForReturnValue(returnValue, returnType);
 		mavContainer.addModelAttribute(name, returnValue);
 	}

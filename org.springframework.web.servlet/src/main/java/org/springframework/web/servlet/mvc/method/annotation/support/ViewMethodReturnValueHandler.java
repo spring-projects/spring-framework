@@ -39,17 +39,19 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <V> void handleReturnValue(Object returnValue, 
-									  MethodParameter returnType, 
-									  ModelAndViewContainer<V> mavContainer, 
-									  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(Object returnValue, 
+								  MethodParameter returnType, 
+								  ModelAndViewContainer mavContainer, 
+								  NativeWebRequest webRequest) throws Exception {
 		if (returnValue instanceof String) {
 			mavContainer.setViewName((String) returnValue);
 		}
+		else if (returnValue instanceof View){
+			mavContainer.setView(returnValue);
+		}
 		else {
-			V view = (V) returnValue;
-			mavContainer.setView(view);
+			// should not happen
+			throw new UnsupportedOperationException();
 		}
 	}
 

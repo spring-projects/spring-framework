@@ -70,10 +70,10 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <V> void handleReturnValue(Object returnValue, 
-									  MethodParameter returnType, 
-									  ModelAndViewContainer<V> mavContainer,
-									  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(Object returnValue, 
+								  MethodParameter returnType, 
+								  ModelAndViewContainer mavContainer,
+								  NativeWebRequest webRequest) throws Exception {
 		if (returnValue instanceof Model) {
 			mavContainer.addModelAttributes((Model) returnValue);
 		}

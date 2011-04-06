@@ -46,9 +46,9 @@ public interface HandlerMethodReturnValueHandler extends HandlerMethodProcessor 
 	 * @param webRequest the current request
 	 * @throws Exception in case of errors
 	 */
-	<V> void handleReturnValue(Object returnValue,
-							   MethodParameter returnType,
-							   ModelAndViewContainer<V> mavContainer,
-							   NativeWebRequest webRequest) throws Exception;
+	void handleReturnValue(Object returnValue,
+						   MethodParameter returnType,
+						   ModelAndViewContainer mavContainer,
+						   NativeWebRequest webRequest) throws Exception;
 
 }

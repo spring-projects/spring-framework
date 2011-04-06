@@ -97,7 +97,6 @@ public class ModelMethodProcessorTests {
 		assertSame(model, result);
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Test
 	public void handleReturnValue() throws Exception {
 		ExtendedModelMap implicitModel = new ExtendedModelMap();
@@ -106,7 +105,7 @@ public class ModelMethodProcessorTests {
 		ExtendedModelMap returnValue = new ExtendedModelMap();
 		returnValue.put("attr2", "value2");
 		
-		ModelAndViewContainer<?> mavContainer = new ModelAndViewContainer(implicitModel);
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer(implicitModel);
 		resolver.handleReturnValue(returnValue , modelReturnType, mavContainer, webRequest);
 		ModelMap actualModel = mavContainer.getModel();
 		assertEquals("value1", actualModel.get("attr1"));

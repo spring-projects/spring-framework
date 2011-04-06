@@ -195,20 +195,18 @@ public class ModelAttributeMethodProcessorTests {
 		processor.resolveArgument(notAnnotatedParam, model, webRequest, binderFactory);
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Test
 	public void handleAnnotatedReturnValue() throws Exception {
-		ModelAndViewContainer<?> mavContainer = new ModelAndViewContainer(model);
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer(model);
 		processor.handleReturnValue("expected", annotatedReturnParam, mavContainer, webRequest);
 
 		assertEquals("expected", mavContainer.getModel().get("modelAttrName"));
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	public void handleNotAnnotatedReturnValue() throws Exception {
 		TestBean testBean = new TestBean("expected");
-		ModelAndViewContainer<?> mavContainer = new ModelAndViewContainer(model);
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer(model);
 		processor.handleReturnValue(testBean, notAnnotatedReturnParam, mavContainer, webRequest);
 		
 		assertSame(testBean, mavContainer.getModel().get("testBean"));
