@@ -28,8 +28,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerContainer;
-import org.springframework.web.method.support.StubReturnValueHandler;
-import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
+import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
 
 /**
  * Test fixture for {@link ServletInvocableHandlerMethod} unit tests.
@@ -51,7 +50,7 @@ public class ServletInvocableHandlerMethodTests {
 	@Test
 	public void setResponseStatus() throws Exception {
 		HandlerMethodReturnValueHandlerContainer handlers = new HandlerMethodReturnValueHandlerContainer();
-		handlers.registerReturnValueHandler(new StubReturnValueHandler(void.class, false));
+		handlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(null));
 
 		Method method = Handler.class.getDeclaredMethod("responseStatus");
 		ServletInvocableHandlerMethod handlerMethod = new ServletInvocableHandlerMethod(new Handler(), method);
