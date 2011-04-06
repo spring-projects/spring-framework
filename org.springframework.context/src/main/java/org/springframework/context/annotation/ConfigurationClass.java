@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ final class ConfigurationClass {
 	 */
 	public ConfigurationClass(Class<?> clazz, String beanName) {
 		Assert.hasText(beanName, "bean name must not be null");
-		this.metadata = new StandardAnnotationMetadata(clazz);
+		this.metadata = new StandardAnnotationMetadata(clazz, true);
 		this.resource = new DescriptiveResource(clazz.toString());
 		this.beanName = beanName;
 		this.imported = false;
@@ -112,7 +112,7 @@ final class ConfigurationClass {
 	 * @since 3.1.1
 	 */
 	public ConfigurationClass(Class<?> clazz, boolean imported) {
-		this.metadata = new StandardAnnotationMetadata(clazz);
+		this.metadata = new StandardAnnotationMetadata(clazz, true);
 		this.resource = new DescriptiveResource(clazz.toString());
 		this.imported = imported;
 	}

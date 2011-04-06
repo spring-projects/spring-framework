@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ResourceLoader;
@@ -139,7 +140,7 @@ class ConfigurationClassParser {
 			if (superClassName != null && !Object.class.getName().equals(superClassName)) {
 				if (metadata instanceof StandardAnnotationMetadata) {
 					Class<?> clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
-					metadata = new StandardAnnotationMetadata(clazz.getSuperclass());
+					metadata = new StandardAnnotationMetadata(clazz.getSuperclass(), true);
 				}
 				else {
 					MetadataReader reader = this.metadataReaderFactory.getMetadataReader(superClassName);
@@ -187,10 +188,10 @@ class ConfigurationClassParser {
 		}
 
 		// process any @ComponentScan annotions
-		Map<String, Object> componentScanAttributes = metadata.getAnnotationAttributes(ComponentScan.class.getName());
-		if (componentScanAttributes != null) {
+		AnnotationAttributes componentScan = MetadataUtils.attributesFor(metadata, ComponentScan.class);
+		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
-			Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScanAttributes);
+			Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScan);
 
 			// check the set of scanned definitions for any further config classes and parse recursively if necessary
 			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {

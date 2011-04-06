@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,27 @@ public class StandardMethodMetadata implements MethodMetadata {
 
 	private final Method introspectedMethod;
 
+	private final boolean nestedAnnotationsAsMap;
+
 
 	/**
 	 * Create a new StandardMethodMetadata wrapper for the given Method.
 	 * @param introspectedMethod the Method to introspect
 	 */
 	public StandardMethodMetadata(Method introspectedMethod) {
+		this(introspectedMethod, false);
+	}
+
+	/**
+	 * Create a new StandardMethodMetadata wrapper for the given Method.
+	 * @param introspectedMethod the Method to introspect
+	 * @param nestedAnnotationsAsMap
+	 * @since 3.1.1
+	 */
+	public StandardMethodMetadata(Method introspectedMethod, boolean nestedAnnotationsAsMap) {
 		Assert.notNull(introspectedMethod, "Method must not be null");
 		this.introspectedMethod = introspectedMethod;
+		this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
 	}
 
 	/**
@@ -94,11 +107,13 @@ public class StandardMethodMetadata implements MethodMetadata {
 		Annotation[] anns = this.introspectedMethod.getAnnotations();
 		for (Annotation ann : anns) {
 			if (ann.annotationType().getName().equals(annotationType)) {
-				return AnnotationUtils.getAnnotationAttributes(ann, true);
+				return AnnotationUtils.getAnnotationAttributes(
+						ann, true, nestedAnnotationsAsMap);
 			}
 			for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
 				if (metaAnn.annotationType().getName().equals(annotationType)) {
-					return AnnotationUtils.getAnnotationAttributes(metaAnn, true);
+					return AnnotationUtils.getAnnotationAttributes(
+							metaAnn, true, this.nestedAnnotationsAsMap);
 				}
 			}
 		}
