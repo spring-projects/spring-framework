@@ -38,7 +38,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  */
 public class InvocableHandlerMethodTests {
 
-	private HandlerMethodArgumentResolverContainer argResolvers;
+	private HandlerMethodArgumentResolverComposite argResolvers;
 
 	private NativeWebRequest webRequest;
 
@@ -46,7 +46,7 @@ public class InvocableHandlerMethodTests {
 
 	@Before
 	public void setUp() throws Exception {
-		argResolvers = new HandlerMethodArgumentResolverContainer();
+		argResolvers = new HandlerMethodArgumentResolverComposite();
 
 		response = new MockHttpServletResponse();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), response);
@@ -96,7 +96,7 @@ public class InvocableHandlerMethodTests {
 			throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
 		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(handler, method);
-		handlerMethod.setArgumentResolverContainer(argResolvers);
+		handlerMethod.setHandlerMethodArgumentResolvers(argResolvers);
 		return handlerMethod;
 	}
 	

@@ -40,7 +40,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.annotation.support.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.InvocableHandlerMethod;
-import org.springframework.web.method.support.HandlerMethodArgumentResolverContainer;
+import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 
 /**
  * Test fixture for {@link InitBinderMethodDataBinderFactory} unit tests.
@@ -109,7 +109,7 @@ public class InitBinderMethodDataBinderFactoryTests {
 	public void createBinderTypeConversion() throws Exception {
 		request.setParameter("requestParam", "22");
 
-		HandlerMethodArgumentResolverContainer argResolvers = new HandlerMethodArgumentResolverContainer();
+		HandlerMethodArgumentResolverComposite argResolvers = new HandlerMethodArgumentResolverComposite();
 		argResolvers.registerArgumentResolver(new RequestParamMethodArgumentResolver(null, false));
 
 		String methodName = "initBinderTypeConversion";
@@ -122,16 +122,16 @@ public class InitBinderMethodDataBinderFactoryTests {
 
 	private InitBinderMethodDataBinderFactory createFactory(String methodName, Class<?>... parameterTypes)
 			throws Exception {
-		return createFactory(new HandlerMethodArgumentResolverContainer(), methodName, parameterTypes);
+		return createFactory(new HandlerMethodArgumentResolverComposite(), methodName, parameterTypes);
 	}
 	
-	private InitBinderMethodDataBinderFactory createFactory(HandlerMethodArgumentResolverContainer argResolvers,
+	private InitBinderMethodDataBinderFactory createFactory(HandlerMethodArgumentResolverComposite argResolvers,
 			String methodName, Class<?>... parameterTypes) throws Exception {
 		Object handler = new InitBinderHandler();
 		Method method = InitBinderHandler.class.getMethod(methodName, parameterTypes);
 
 		InvocableHandlerMethod controllerMethod = new InvocableHandlerMethod(handler, method);
-		controllerMethod.setArgumentResolverContainer(argResolvers);
+		controllerMethod.setHandlerMethodArgumentResolvers(argResolvers);
 		controllerMethod.setDataBinderFactory(new DefaultDataBinderFactory(null));
 		controllerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		

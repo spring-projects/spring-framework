@@ -44,8 +44,10 @@ import org.springframework.web.method.annotation.ExceptionMethodMapping;
 import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
 import org.springframework.web.method.annotation.support.ModelMethodProcessor;
 import org.springframework.web.method.annotation.support.WebArgumentResolverAdapter;
-import org.springframework.web.method.support.HandlerMethodArgumentResolverContainer;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandlerContainer;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
@@ -68,8 +70,6 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodR
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
- * @see #setCustomArgumentResolvers(WebArgumentResolver[])
- * @see #setCustomModelAndViewResolvers(ModelAndViewResolver[])
  * @see #setMessageConverters(HttpMessageConverter[])
  */
 public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandlerMethodExceptionResolver implements
@@ -84,9 +84,9 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	private final Map<Class<?>, ExceptionMethodMapping> exceptionMethodMappingCache = 
 		new ConcurrentHashMap<Class<?>, ExceptionMethodMapping>();
 
-	private final HandlerMethodArgumentResolverContainer argumentResolvers = new HandlerMethodArgumentResolverContainer();
+	private HandlerMethodArgumentResolverComposite argumentResolvers;
 	
-	private final HandlerMethodReturnValueHandlerContainer returnValueHandlers = new HandlerMethodReturnValueHandlerContainer();
+	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 	/**
 	 * Creates an instance of {@link RequestMappingHandlerMethodExceptionResolver}.
@@ -145,25 +145,71 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 		this.customModelAndViewResolvers = customModelAndViewResolvers;
 	}
 
+	/**
+	 * Set the {@link HandlerMethodArgumentResolver}s to use to resolve argument values for 
+	 * {@link ExceptionHandler} methods. This is an optional property.
+	 * @param argumentResolvers the argument resolvers to use
+	 */
+	public void setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolver[] argumentResolvers) {
+		this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
+		for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
+			this.argumentResolvers.registerArgumentResolver(resolver);
+		}
+	}
+	
+	/**
+	 * Set the {@link HandlerMethodReturnValueHandler}s to use to handle the return values of 
+	 * {@link ExceptionHandler} methods. This is an optional property.
+	 * @param returnValueHandlers the return value handlers to use
+	 */
+	public void setHandlerMethodReturnValueHandlers(HandlerMethodReturnValueHandler[] returnValueHandlers) {
+		this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+		for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
+			this.returnValueHandlers.registerReturnValueHandler(handler);
+		}
+	}
+
 	public void afterPropertiesSet() throws Exception {
+		initMethodArgumentResolvers();
+		initMethodReturnValueHandlers();
+	}
+	
+	private void initMethodArgumentResolvers() {
+		if (argumentResolvers != null) {
+			return;
+		}
+		argumentResolvers = new HandlerMethodArgumentResolverComposite();
+		
+		argumentResolvers.registerArgumentResolver(new ServletRequestMethodArgumentResolver());
+		argumentResolvers.registerArgumentResolver(new ServletResponseMethodArgumentResolver());
+
 		if (customArgumentResolvers != null) {
 			for (WebArgumentResolver customResolver : customArgumentResolvers) {
 				argumentResolvers.registerArgumentResolver(new WebArgumentResolverAdapter(customResolver));
 			}
 		}	
+	}
 
-		argumentResolvers.registerArgumentResolver(new ServletRequestMethodArgumentResolver());
-		argumentResolvers.registerArgumentResolver(new ServletResponseMethodArgumentResolver());
+	private void initMethodReturnValueHandlers() {
+		if (returnValueHandlers != null) {
+			return;
+		}
+		returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
 
+		// Annotation-based handlers
 		returnValueHandlers.registerReturnValueHandler(new RequestResponseBodyMethodProcessor(messageConverters));
 		returnValueHandlers.registerReturnValueHandler(new ModelAttributeMethodProcessor(false));
+		
+		// Type-based handlers
 		returnValueHandlers.registerReturnValueHandler(new ModelAndViewMethodReturnValueHandler());
 		returnValueHandlers.registerReturnValueHandler(new ModelMethodProcessor());
 		returnValueHandlers.registerReturnValueHandler(new ViewMethodReturnValueHandler());
 		returnValueHandlers.registerReturnValueHandler(new HttpEntityMethodProcessor(messageConverters));
+		
+		// Default handler
 		returnValueHandlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(customModelAndViewResolvers));
 	}
-
+	
 	@Override
 	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request, 
 														   HttpServletResponse response, 
@@ -176,8 +222,8 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 			if (method != null) {
 				Object handler = handlerMethod.getBean();
 				ServletInvocableHandlerMethod exceptionHandler = new ServletInvocableHandlerMethod(handler, method);
-				exceptionHandler.setArgumentResolverContainer(argumentResolvers);
-				exceptionHandler.setReturnValueHandlers(returnValueHandlers);
+				exceptionHandler.setHandlerMethodArgumentResolvers(argumentResolvers);
+				exceptionHandler.setHandlerMethodReturnValueHandlers(returnValueHandlers);
 				
 				ServletWebRequest webRequest = new ServletWebRequest(request, response);
 				ModelMap model = new ExtendedModelMap();

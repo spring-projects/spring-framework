@@ -35,14 +35,14 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class HandlerMethodReturnValueHandlerContainer implements HandlerMethodReturnValueHandler {
+public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodReturnValueHandler {
 	
-	protected final Log logger = LogFactory.getLog(HandlerMethodArgumentResolverContainer.class);
+	protected final Log logger = LogFactory.getLog(HandlerMethodArgumentResolverComposite.class);
 
-	private List<HandlerMethodReturnValueHandler> returnValueHandlers = 
+	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = 
 		new ArrayList<HandlerMethodReturnValueHandler>();
 
-	private Map<MethodParameter, HandlerMethodReturnValueHandler> returnValueHandlerCache =
+	private final Map<MethodParameter, HandlerMethodReturnValueHandler> returnValueHandlerCache =
 		new ConcurrentHashMap<MethodParameter, HandlerMethodReturnValueHandler>();
 
 	/**

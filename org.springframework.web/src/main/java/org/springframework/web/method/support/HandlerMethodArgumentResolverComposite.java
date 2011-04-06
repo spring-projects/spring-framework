@@ -37,14 +37,14 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class HandlerMethodArgumentResolverContainer implements HandlerMethodArgumentResolver {
+public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgumentResolver {
 
-	protected final Log logger = LogFactory.getLog(HandlerMethodArgumentResolverContainer.class);
+	protected final Log logger = LogFactory.getLog(HandlerMethodArgumentResolverComposite.class);
 
-	private List<HandlerMethodArgumentResolver> argumentResolvers = 
+	private final List<HandlerMethodArgumentResolver> argumentResolvers = 
 		new ArrayList<HandlerMethodArgumentResolver>();
 
-	private Map<MethodParameter, HandlerMethodArgumentResolver> argumentResolverCache =
+	private final Map<MethodParameter, HandlerMethodArgumentResolver> argumentResolverCache =
 		new ConcurrentHashMap<MethodParameter, HandlerMethodArgumentResolver>();
 
 	/**

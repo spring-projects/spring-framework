@@ -27,7 +27,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandlerContainer;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
 
 /**
@@ -49,12 +49,12 @@ public class ServletInvocableHandlerMethodTests {
 
 	@Test
 	public void setResponseStatus() throws Exception {
-		HandlerMethodReturnValueHandlerContainer handlers = new HandlerMethodReturnValueHandlerContainer();
+		HandlerMethodReturnValueHandlerComposite handlers = new HandlerMethodReturnValueHandlerComposite();
 		handlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(null));
 
 		Method method = Handler.class.getDeclaredMethod("responseStatus");
 		ServletInvocableHandlerMethod handlerMethod = new ServletInvocableHandlerMethod(new Handler(), method);
-		handlerMethod.setReturnValueHandlers(handlers);
+		handlerMethod.setHandlerMethodReturnValueHandlers(handlers);
 
 		handlerMethod.invokeAndHandle(webRequest, null);
 

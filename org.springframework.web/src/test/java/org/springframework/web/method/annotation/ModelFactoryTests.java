@@ -46,7 +46,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.annotation.support.ModelMethodProcessor;
-import org.springframework.web.method.support.HandlerMethodArgumentResolverContainer;
+import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 
 /**
@@ -154,11 +154,11 @@ public class ModelFactoryTests {
 	private ModelFactory createFactory(Object handler, String methodName, Class<?>... parameterTypes) throws Exception{
 		Method method = ModelHandler.class.getMethod(methodName, parameterTypes);
 
-		HandlerMethodArgumentResolverContainer argResolvers = new HandlerMethodArgumentResolverContainer();
+		HandlerMethodArgumentResolverComposite argResolvers = new HandlerMethodArgumentResolverComposite();
 		argResolvers.registerArgumentResolver(new ModelMethodProcessor());
 
 		InvocableHandlerMethod controllerMethod = new InvocableHandlerMethod(handler, method);
-		controllerMethod.setArgumentResolverContainer(argResolvers);
+		controllerMethod.setHandlerMethodArgumentResolvers(argResolvers);
 		controllerMethod.setDataBinderFactory(null);
 		controllerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		

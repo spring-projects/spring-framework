@@ -47,8 +47,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
-import org.springframework.web.method.support.HandlerMethodArgumentResolverContainer;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandlerContainer;
+import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
@@ -119,10 +119,10 @@ public class ControllerMethodAnnotationDetectionTests {
 		if (useAutoProxy) {
 			handler = getProxyBean(handler);
 		}
-		HandlerMethodArgumentResolverContainer argResolvers = new HandlerMethodArgumentResolverContainer();
+		HandlerMethodArgumentResolverComposite argResolvers = new HandlerMethodArgumentResolverComposite();
 		argResolvers.registerArgumentResolver(new ModelAttributeMethodProcessor(false));
 		
-		HandlerMethodReturnValueHandlerContainer handlers = new HandlerMethodReturnValueHandlerContainer();
+		HandlerMethodReturnValueHandlerComposite handlers = new HandlerMethodReturnValueHandlerComposite();
 		handlers.registerReturnValueHandler(new ModelAttributeMethodProcessor(false));
 		handlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(null));
 
@@ -131,8 +131,8 @@ public class ControllerMethodAnnotationDetectionTests {
 		Method method = methods.iterator().next();
 
 		ServletInvocableHandlerMethod attrMethod = new ServletInvocableHandlerMethod(handler, method);
-		attrMethod.setArgumentResolverContainer(argResolvers);
-		attrMethod.setReturnValueHandlers(handlers);
+		attrMethod.setHandlerMethodArgumentResolvers(argResolvers);
+		attrMethod.setHandlerMethodReturnValueHandlers(handlers);
 		attrMethod.setDataBinderFactory(new DefaultDataBinderFactory(null));
 		
 		return attrMethod;
