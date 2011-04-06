@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
@@ -27,11 +26,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.HandlerMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
-import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerContainer;
+import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.ModelAndView;
@@ -95,7 +92,11 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		setResponseStatus((ServletWebRequest) request);
 
-		ModelAndViewContainer<View> mavContainer = new ModelAndViewContainer<View>(model);
+		if (returnValue == null && (isRequestNotModified(request) || usesResponseArgument())) {
+			return null;
+		}
+		
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer(model);
 		returnValueHandlers.handleReturnValue(returnValue, getReturnType(), mavContainer, request);
 
 		return getModelAndView(request, mavContainer, returnValue);
@@ -122,36 +123,32 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * Create a {@link ModelAndView} from a {@link ModelAndViewContainer}.
 	 */
 	private ModelAndView getModelAndView(NativeWebRequest request, 
-										 ModelAndViewContainer<View> mavContainer,
+										 ModelAndViewContainer mavContainer,
 										 Object returnValue) {
-		if (returnValue == null && isResponseHandled(request)) {
-			return null;
-		}
-		else if (returnValueHandlerUsesResponseArgument()) {
+		if (returnValueHandlerUsesResponseArgument()) {
 			return null;
 		}
 		else {
 			ModelAndView mav = new ModelAndView().addAllObjects(mavContainer.getModel());
 			mav.setViewName(mavContainer.getViewName());
 			if (mavContainer.getView() != null) {
-				mav.setView(mavContainer.getView());
+				mav.setView((View) mavContainer.getView());
 			} 
 			return mav;			
 		}
 	}
 
-	private boolean isResponseHandled(NativeWebRequest request) {
+	/**
+	 * Check whether the request qualifies as not modified... 
+	 * TODO: document fully including sample user code
+	 */
+	private boolean isRequestNotModified(NativeWebRequest request) {
 		ServletWebRequest servletRequest = (ServletWebRequest) request;
 		return (servletRequest.isNotModified() || (responseStatus != null) || usesResponseArgument());
 	}
 	
-	/**
-	 * Whether any of the underlying {@link HandlerMethodArgumentResolver}s or 
-	 * {@link HandlerMethodReturnValueHandler}s use the response argument.
-	 * @see HandlerMethodProcessor#usesResponseArgument(MethodParameter)
-	 */
 	protected boolean usesResponseArgument() {
-		return (super.usesResponseArgument() || returnValueHandlerUsesResponseArgument());
+		return (super.usesResponseArgument() || returnValueHandlerUsesResponseArgument() || (responseStatus != null));
 	}
 
 	private boolean returnValueHandlerUsesResponseArgument() {

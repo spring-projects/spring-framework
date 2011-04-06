@@ -57,10 +57,10 @@ public class HandlerMethodReturnValueHandlerContainer implements HandlerMethodRe
 	 * Handles the given method return value by iterating over registered {@link HandlerMethodReturnValueHandler}s 
 	 * to find one that supports it.
 	 */
-	public <V> void handleReturnValue(Object returnValue, 
-									  MethodParameter returnType, 
-									  ModelAndViewContainer<V> mavContainer,
-									  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(Object returnValue, 
+								  MethodParameter returnType, 
+								  ModelAndViewContainer mavContainer,
+								  NativeWebRequest webRequest) throws Exception {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
 		if (handler != null) {
 			handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);

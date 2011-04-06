@@ -55,11 +55,10 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <V> void handleReturnValue(Object returnValue, 
-									  MethodParameter returnType, 
-									  ModelAndViewContainer<V> mavContainer, 
-									  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(Object returnValue, 
+								  MethodParameter returnType, 
+								  ModelAndViewContainer mavContainer, 
+								  NativeWebRequest webRequest) throws Exception {
 
 		for (ModelAndViewResolver resolver : this.customModelAndViewResolvers) {
 			Class<?> handlerType = returnType.getDeclaringClass();
@@ -67,7 +66,7 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 			ExtendedModelMap extModel = (ExtendedModelMap) mavContainer.getModel();
 			ModelAndView mav = resolver.resolveModelAndView(method, handlerType, returnValue, extModel, webRequest);
 			if (mav != ModelAndViewResolver.UNRESOLVED) {
-				mavContainer.setView((V) mav.getView());
+				mavContainer.setView(mav.getView());
 				mavContainer.setViewName(mav.getViewName());
 				mavContainer.addModelAttributes(mav.getModel());
 				return;

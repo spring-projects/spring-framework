@@ -47,10 +47,10 @@ public class StubReturnValueHandler implements HandlerMethodReturnValueHandler {
 		return returnType.getParameterType().equals(this.supportedReturnType);
 	}
 
-	public <V> void handleReturnValue(Object returnValue, 
-									  MethodParameter returnType, 
-									  ModelAndViewContainer<V> mavContainer,
-									  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(Object returnValue, 
+								  MethodParameter returnType, 
+								  ModelAndViewContainer mavContainer,
+								  NativeWebRequest webRequest) throws Exception {
 		this.unhandledReturnValue = returnValue;
 		if (returnValue != null) {
 			mavContainer.addModelAttribute(Conventions.getVariableName(returnValue), returnValue);

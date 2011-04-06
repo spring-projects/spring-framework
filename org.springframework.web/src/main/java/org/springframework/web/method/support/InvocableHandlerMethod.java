@@ -16,6 +16,7 @@
 
 package org.springframework.web.method.support;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -201,7 +202,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		if (args != null &&  args.length > 0) {
 			builder.append(" and argument types ");
 			for (int i = 0; i < args.length; i++) {
-				builder.append(" : arg[").append(i).append("] ").append(args[i].getClass());
+				String argClass = (args[i] != null) ? args[i].getClass().toString() : "null";
+				builder.append(" : arg[").append(i).append("] ").append(argClass);
 			}
 		}
 		else {

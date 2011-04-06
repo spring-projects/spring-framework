@@ -112,10 +112,10 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	}
 
-	public <V> void handleReturnValue(Object returnValue, 
-									  MethodParameter returnType, 
-									  ModelAndViewContainer<V> mavContainer, 
-									  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(Object returnValue, 
+								  MethodParameter returnType, 
+								  ModelAndViewContainer mavContainer, 
+								  NativeWebRequest webRequest) throws Exception {
 		if (returnValue == null) {
 			return;
 		}

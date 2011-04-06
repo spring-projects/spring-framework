@@ -34,7 +34,7 @@ public class HandlerMethodReturnValueHandlerContainerTests {
 
 	private HandlerMethodReturnValueHandlerContainer container;
 
-	ModelAndViewContainer<?> mavContainer;
+	ModelAndViewContainer mavContainer;
 	
 	private MethodParameter paramInteger;
 
@@ -47,7 +47,7 @@ public class HandlerMethodReturnValueHandlerContainerTests {
 		this.paramInteger = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
 		this.paramString = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
 		
-		mavContainer = new ModelAndViewContainer<Object>(null); 
+		mavContainer = new ModelAndViewContainer(null); 
 	}
 	
 	@Test

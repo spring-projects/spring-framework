@@ -28,8 +28,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
 
 /**
  * Test fixture for {@link DefaultMethodReturnValueHandler} unit tests.
@@ -42,12 +40,12 @@ public class DefaultMethodReturnValueHandlerTests {
 
 	private ServletWebRequest webRequest;
 
-	private ModelAndViewContainer<View> mavContainer;
+	private ModelAndViewContainer mavContainer;
 
 	@Before
 	public void setUp() {
 		this.handler = new DefaultMethodReturnValueHandler(null);
-		this.mavContainer = new ModelAndViewContainer<View>(new ExtendedModelMap());
+		this.mavContainer = new ModelAndViewContainer(new ExtendedModelMap());
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 	

@@ -79,10 +79,10 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		return new ServletServerHttpRequest(servletRequest);
 	}
 
-	public <V> void handleReturnValue(Object returnValue, 
-									  MethodParameter returnType, 
-									  ModelAndViewContainer<V> mavContainer, 
-									  NativeWebRequest webRequest) 
+	public void handleReturnValue(Object returnValue, 
+								  MethodParameter returnType, 
+								  ModelAndViewContainer mavContainer, 
+								  NativeWebRequest webRequest) 
 			throws IOException, HttpMediaTypeNotAcceptableException {
 		if (returnValue != null) {
 			writeWithMessageConverters(webRequest, returnValue);

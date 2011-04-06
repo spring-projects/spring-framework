@@ -92,7 +92,7 @@ import org.springframework.web.util.WebUtils;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter implements BeanFactoryAware,
+public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAdapter implements BeanFactoryAware,
 		InitializingBean {
 
 	private WebArgumentResolver[] customArgumentResolvers;
@@ -127,9 +127,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	private final HandlerMethodArgumentResolverContainer binderMethodArgResolvers = new HandlerMethodArgumentResolverContainer();
 	
 	/**
-	 * Create a {@link RequestMappingHandlerAdapter} instance.
+	 * Create a {@link RequestMappingHandlerMethodAdapter} instance.
 	 */
-	public RequestMappingHandlerAdapter() {
+	public RequestMappingHandlerMethodAdapter() {
 		
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316

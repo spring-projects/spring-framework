@@ -31,14 +31,12 @@ import org.springframework.ui.ModelMap;
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
- *
- * @param <V> Servlet or Portlet specific View type.
  */
-public class ModelAndViewContainer<V> {
+public class ModelAndViewContainer {
 
 	private String viewName;
 	
-	private V view;
+	private Object view;
 	
 	private final ModelMap actualModel = new ExtendedModelMap();
 	
@@ -60,11 +58,11 @@ public class ModelAndViewContainer<V> {
 		this.viewName = viewName;
 	}
 
-	public V getView() {
+	public Object getView() {
 		return this.view;
 	}
 	
-	public void setView(V view) {
+	public void setView(Object view) {
 		this.view = view;
 	}
 

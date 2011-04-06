@@ -38,15 +38,14 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <V> void handleReturnValue(Object returnValue,
-									  MethodParameter returnType, 
-									  ModelAndViewContainer<V> mavContainer, 
-									  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(Object returnValue,
+								  MethodParameter returnType, 
+								  ModelAndViewContainer mavContainer, 
+								  NativeWebRequest webRequest) throws Exception {
 		ModelAndView mav = (ModelAndView) returnValue;
-		mavContainer.setView((V) mav.getView());
+		mavContainer.setView(mav.getView());
 		mavContainer.setViewName(mav.getViewName());
 		mavContainer.addModelAttributes(mav.getModel());
 	}
-	
+
 }
