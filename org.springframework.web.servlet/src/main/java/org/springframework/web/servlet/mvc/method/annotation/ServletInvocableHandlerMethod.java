@@ -27,7 +27,7 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandlerContainer;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerAdapter;
@@ -47,9 +47,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	
 	private String responseReason;
 	
-	private HandlerMethodReturnValueHandlerContainer returnValueHandlers;
+	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
-	public void setReturnValueHandlers(HandlerMethodReturnValueHandlerContainer returnValueHandlers) {
+	public void setHandlerMethodReturnValueHandlers(HandlerMethodReturnValueHandlerComposite returnValueHandlers) {
 		this.returnValueHandlers = returnValueHandlers;
 	}
 
@@ -72,7 +72,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	/**
 	 * Invokes the method via {@link #invokeForRequest(NativeWebRequest, ModelMap, Object...)} and also handles the 
 	 * return value by invoking one of the {@link HandlerMethodReturnValueHandler} instances registered via 
-	 * {@link #setReturnValueHandlers(HandlerMethodReturnValueHandlerContainer)}. 
+	 * {@link #setHandlerMethodReturnValueHandlers(HandlerMethodReturnValueHandlerComposite)}. 
 	 * If the method is annotated with {@link SessionStatus} the response status will be set.
 	 * @param request the current request
 	 * @param model the model used throughout the current request

@@ -16,7 +16,6 @@
 
 package org.springframework.web.method.support;
 
-import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -39,14 +38,14 @@ import org.springframework.web.method.HandlerMethod;
  * 
  * <p>Resolving argument values often requires a {@link WebDataBinder} for data binding and type conversion. 
  * Use {@link #setDataBinderFactory(WebDataBinderFactory)} to provide a factory for that. The list of argument 
- * resolvers can be set via {@link #setArgumentResolverContainer(HandlerMethodArgumentResolverContainer)}.
+ * resolvers can be set via {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)}.
  *  
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class InvocableHandlerMethod extends HandlerMethod {
 
-	private HandlerMethodArgumentResolverContainer argumentResolvers = new HandlerMethodArgumentResolverContainer();
+	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
 	private WebDataBinderFactory dataBinderFactory;
 
@@ -86,7 +85,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Set {@link HandlerMethodArgumentResolver}s to use to use for resolving method argument values.
 	 */
-	public void setArgumentResolverContainer(HandlerMethodArgumentResolverContainer argumentResolvers) {
+	public void setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
 		this.argumentResolvers = argumentResolvers;
 	}
 
@@ -102,7 +101,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Invoke the method after resolving its argument values based on the given request.
 	 * <p>Most argument values are resolved with the help of {@link HandlerMethodArgumentResolver}s 
-	 * configured via {@link #setArgumentResolverContainer(HandlerMethodArgumentResolverContainer)}. 
+	 * configured via {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)}. 
 	 * However, the {@code provideArgs} parameter can be used to supply argument values for use
 	 * directly rather than relying on argument resolution - e.g. {@link WebDataBinder}, 
 	 * {@link SessionStatus}, or the thrown exception in a HandlerExceptionResolver.
