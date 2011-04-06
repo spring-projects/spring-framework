@@ -33,8 +33,8 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
-import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodExceptionResolver;
 
 /**
  * Test fixture for the configuration in mvc-config-annotation-driven.xml.
@@ -52,7 +52,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	@Test
 	public void testMessageCodesResolver() {
 		loadBeanDefinitions("mvc-config-message-codes-resolver.xml");
-		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
+		RequestMappingHandlerMethodAdapter adapter = appContext.getBean(RequestMappingHandlerMethodAdapter.class);
 		assertNotNull(adapter);
 		Object initializer = new DirectFieldAccessor(adapter).getPropertyValue("webBindingInitializer");
 		assertNotNull(initializer);
@@ -64,21 +64,21 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	@Test
 	public void testMessageConverters() {
 		loadBeanDefinitions("mvc-config-message-converters.xml");
-		verifyMessageConverters(appContext.getBean(AnnotationMethodHandlerAdapter.class), true);
-		verifyMessageConverters(appContext.getBean(AnnotationMethodHandlerExceptionResolver.class), true);
+		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodAdapter.class), true);
+		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodExceptionResolver.class), true);
 	}
 
 	@Test
 	public void testMessageConvertersWithoutDefaultRegistrations() {
 		loadBeanDefinitions("mvc-config-message-converters-defaults-off.xml");
-		verifyMessageConverters(appContext.getBean(AnnotationMethodHandlerAdapter.class), false);
-		verifyMessageConverters(appContext.getBean(AnnotationMethodHandlerExceptionResolver.class), false);
+		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodAdapter.class), false);
+		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodExceptionResolver.class), false);
 	}
 
 	@Test
 	public void testArgumentResolvers() {
 		loadBeanDefinitions("mvc-config-argument-resolvers.xml");
-		AnnotationMethodHandlerAdapter adapter = appContext.getBean(AnnotationMethodHandlerAdapter.class);
+		RequestMappingHandlerMethodAdapter adapter = appContext.getBean(RequestMappingHandlerMethodAdapter.class);
 		assertNotNull(adapter);
 		Object resolvers = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
 		assertNotNull(resolvers);

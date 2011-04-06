@@ -85,6 +85,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletCook
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletModelAttributeMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
 import org.springframework.web.util.WebUtils;
 
@@ -183,6 +184,13 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	 */
 	public void setMessageConverters(HttpMessageConverter<?>[] messageConverters) {
 		this.messageConverters = messageConverters;
+	}
+
+	/**
+	 * Return the message body converters that this adapter has been configured with.
+	 */
+	public HttpMessageConverter<?>[] getMessageConverters() {
+		return messageConverters;
 	}
 
 	/**
@@ -313,7 +321,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 
 		if (customArgumentResolvers != null) {
 			for (WebArgumentResolver customResolver : customArgumentResolvers) {
-				argumentResolvers.registerArgumentResolver(new WebArgumentResolverAdapter(customResolver));
+				argumentResolvers.registerArgumentResolver(new ServletWebArgumentResolverAdapter(customResolver));
 			}
 		}
 		
@@ -343,7 +351,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 
 		if (customArgumentResolvers != null) {
 			for (WebArgumentResolver customResolver : customArgumentResolvers) {
-				initBinderArgumentResolvers.registerArgumentResolver(new WebArgumentResolverAdapter(customResolver));
+				initBinderArgumentResolvers.registerArgumentResolver(new ServletWebArgumentResolverAdapter(customResolver));
 			}
 		}
 

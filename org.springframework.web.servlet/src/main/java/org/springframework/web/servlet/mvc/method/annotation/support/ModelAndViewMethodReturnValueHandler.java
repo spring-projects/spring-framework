@@ -42,10 +42,15 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 								  MethodParameter returnType, 
 								  ModelAndViewContainer mavContainer, 
 								  NativeWebRequest webRequest) throws Exception {
-		ModelAndView mav = (ModelAndView) returnValue;
-		mavContainer.setView(mav.getView());
-		mavContainer.setViewName(mav.getViewName());
-		mavContainer.addModelAttributes(mav.getModel());
+		if (returnValue != null) {
+			ModelAndView mav = (ModelAndView) returnValue;
+			mavContainer.setView(mav.getView());
+			mavContainer.setViewName(mav.getViewName());
+			mavContainer.addModelAttributes(mav.getModel());
+		}
+		else {
+			// TODO
+		}
 	}
 
 }
