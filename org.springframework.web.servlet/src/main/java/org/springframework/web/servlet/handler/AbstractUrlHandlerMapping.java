@@ -22,7 +22,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -204,9 +204,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			}
 		}
 		if (handler != null && this.mappedInterceptors != null) {
-			Set<HandlerInterceptor> mappedInterceptors =
+			HandlerInterceptor[] mappedInterceptors =
 					this.mappedInterceptors.getInterceptors(lookupPath, this.pathMatcher);
-			if (!mappedInterceptors.isEmpty()) {
+			if (mappedInterceptors.length != 0) {
 				HandlerExecutionChain chain;
 				if (handler instanceof HandlerExecutionChain) {
 					chain = (HandlerExecutionChain) handler;
@@ -214,7 +214,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				else {
 					chain = new HandlerExecutionChain(handler);
 				}
-				chain.addInterceptors(mappedInterceptors.toArray(new HandlerInterceptor[mappedInterceptors.size()]));
+				chain.addInterceptors(mappedInterceptors);
 			}
 		}
 		if (handler != null && logger.isDebugEnabled()) {
