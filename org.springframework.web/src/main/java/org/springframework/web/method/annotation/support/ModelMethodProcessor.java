@@ -74,11 +74,18 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 								  MethodParameter returnType, 
 								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest) throws Exception {
+		if (returnValue == null) {
+			return;
+		}
 		if (returnValue instanceof Model) {
 			mavContainer.addModelAttributes((Model) returnValue);
 		}
-		else {
+		else if (returnValue instanceof Map){
 			mavContainer.addModelAttributes((Map) returnValue);
+		}
+		else {
+			// should not happen
+			throw new UnsupportedOperationException();
 		}
 	}
 

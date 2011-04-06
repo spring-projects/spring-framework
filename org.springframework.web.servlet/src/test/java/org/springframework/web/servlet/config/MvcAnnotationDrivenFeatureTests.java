@@ -36,6 +36,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
 
 /**
  * Integration tests for the {@link MvcAnnotationDriven} feature specification.
@@ -50,7 +51,7 @@ public class MvcAnnotationDrivenFeatureTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(MvcFeature.class, MvcBeans.class);
 		ctx.refresh();
-		AnnotationMethodHandlerAdapter adapter = ctx.getBean(AnnotationMethodHandlerAdapter.class);
+		RequestMappingHandlerMethodAdapter adapter = ctx.getBean(RequestMappingHandlerMethodAdapter.class);
 		assertNotNull(adapter);
 		Object initializer = new DirectFieldAccessor(adapter).getPropertyValue("webBindingInitializer");
 		assertNotNull(initializer);

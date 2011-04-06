@@ -64,7 +64,7 @@ public class ModelAttributeMethodProcessor
 		if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
 			return true;
 		}
-		else if (this.resolveArgumentsWithoutAnnotations && !parameter.hasParameterAnnotations()) {
+		else if (this.resolveArgumentsWithoutAnnotations) {
 			return !BeanUtils.isSimpleProperty(parameter.getParameterType());
 		}
 		else {
@@ -164,8 +164,10 @@ public class ModelAttributeMethodProcessor
 								  MethodParameter returnType, 
 								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest) throws Exception {
-		String name = ModelFactory.getNameForReturnValue(returnValue, returnType);
-		mavContainer.addModelAttribute(name, returnValue);
+		if (returnValue != null) {
+			String name = ModelFactory.getNameForReturnValue(returnValue, returnType);
+			mavContainer.addModelAttribute(name, returnValue);
+		}
 	}
 
 }

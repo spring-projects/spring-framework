@@ -40,10 +40,10 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
-import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
-import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
@@ -78,11 +78,11 @@ final class MvcAnnotationDrivenExecutor extends AbstractSpecificationExecutor<Mv
 		ComponentRegistrar registrar = specContext.getRegistrar();
 		Object source = spec.source();
 
-		RootBeanDefinition annMappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
-		annMappingDef.setSource(source);
-		annMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		annMappingDef.getPropertyValues().add("order", 0);
-		String annMappingName = registrar.registerWithGeneratedName(annMappingDef);
+		RootBeanDefinition methodMappingDef = new RootBeanDefinition(RequestMappingHandlerMethodMapping.class);
+		methodMappingDef.setSource(source);
+		methodMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		methodMappingDef.getPropertyValues().add("order", 0);
+		String methodMappingName = registrar.registerWithGeneratedName(methodMappingDef);
 
 		Object conversionService = getConversionService(spec, registrar);
 		Object validator = getValidator(spec, registrar);
@@ -97,15 +97,15 @@ final class MvcAnnotationDrivenExecutor extends AbstractSpecificationExecutor<Mv
 
 		ManagedList<? super Object> messageConverters = getMessageConverters(spec, registrar);
 
-		RootBeanDefinition annAdapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
-		annAdapterDef.setSource(source);
-		annAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		annAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
-		annAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
+		RootBeanDefinition methodAdapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+		methodAdapterDef.setSource(source);
+		methodAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		methodAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
+		methodAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
 		if (!spec.argumentResolvers().isEmpty()) {
-			annAdapterDef.getPropertyValues().add("customArgumentResolvers", spec.argumentResolvers());
+			methodAdapterDef.getPropertyValues().add("customArgumentResolvers", spec.argumentResolvers());
 		}
-		String annAdapterName = registrar.registerWithGeneratedName(annAdapterDef);
+		String methodAdapterName = registrar.registerWithGeneratedName(methodAdapterDef);
 
 		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
 		csInterceptorDef.setSource(source);
@@ -117,12 +117,13 @@ final class MvcAnnotationDrivenExecutor extends AbstractSpecificationExecutor<Mv
 		mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, csInterceptorDef);
 		String mappedInterceptorName = registrar.registerWithGeneratedName(mappedCsInterceptorDef);
 
-		RootBeanDefinition annExceptionResolver = new RootBeanDefinition(AnnotationMethodHandlerExceptionResolver.class);
-		annExceptionResolver.setSource(source);
-		annExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		annExceptionResolver.getPropertyValues().add("messageConverters", messageConverters);
-		annExceptionResolver.getPropertyValues().add("order", 0);
-		String annExceptionResolverName = registrar.registerWithGeneratedName(annExceptionResolver);
+		RootBeanDefinition methodExceptionResolver = new RootBeanDefinition(
+				RequestMappingHandlerMethodExceptionResolver.class);
+		methodExceptionResolver.setSource(source);
+		methodExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		methodExceptionResolver.getPropertyValues().add("messageConverters", messageConverters);
+		methodExceptionResolver.getPropertyValues().add("order", 0);
+		String methodExceptionResolverName = registrar.registerWithGeneratedName(methodExceptionResolver);
 
 		RootBeanDefinition responseStatusExceptionResolver = new RootBeanDefinition(
 				ResponseStatusExceptionResolver.class);
@@ -139,9 +140,9 @@ final class MvcAnnotationDrivenExecutor extends AbstractSpecificationExecutor<Mv
 		String defaultExceptionResolverName = registrar.registerWithGeneratedName(defaultExceptionResolver);
 
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(spec.sourceName(), source);
-		compDefinition.addNestedComponent(new BeanComponentDefinition(annMappingDef, annMappingName));
-		compDefinition.addNestedComponent(new BeanComponentDefinition(annAdapterDef, annAdapterName));
-		compDefinition.addNestedComponent(new BeanComponentDefinition(annExceptionResolver, annExceptionResolverName));
+		compDefinition.addNestedComponent(new BeanComponentDefinition(methodMappingDef, methodMappingName));
+		compDefinition.addNestedComponent(new BeanComponentDefinition(methodAdapterDef, methodAdapterName));
+		compDefinition.addNestedComponent(new BeanComponentDefinition(methodExceptionResolver, methodExceptionResolverName));
 		compDefinition.addNestedComponent(new BeanComponentDefinition(responseStatusExceptionResolver,
 				responseStatusExceptionResolverName));
 		compDefinition.addNestedComponent(new BeanComponentDefinition(defaultExceptionResolver,

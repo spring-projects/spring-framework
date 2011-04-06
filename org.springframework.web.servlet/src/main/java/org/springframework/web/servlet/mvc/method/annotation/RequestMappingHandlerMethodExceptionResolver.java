@@ -43,7 +43,6 @@ import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.annotation.ExceptionMethodMapping;
 import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
 import org.springframework.web.method.annotation.support.ModelMethodProcessor;
-import org.springframework.web.method.annotation.support.WebArgumentResolverAdapter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -57,6 +56,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ModelAndVie
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestResponseBodyMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
 
 /**
@@ -185,7 +185,7 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 
 		if (customArgumentResolvers != null) {
 			for (WebArgumentResolver customResolver : customArgumentResolvers) {
-				argumentResolvers.registerArgumentResolver(new WebArgumentResolverAdapter(customResolver));
+				argumentResolvers.registerArgumentResolver(new ServletWebArgumentResolverAdapter(customResolver));
 			}
 		}	
 	}

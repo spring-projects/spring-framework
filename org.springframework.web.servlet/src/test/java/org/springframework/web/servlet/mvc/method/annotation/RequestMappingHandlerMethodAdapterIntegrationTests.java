@@ -96,7 +96,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * 
  * @author Rossen Stoyanchev
  */
-public class RequestMappingHandlerAdapterIntegrationTests {
+public class RequestMappingHandlerMethodAdapterIntegrationTests {
 
 	private RequestMappingHandlerMethodAdapter handlerAdapter;
 	

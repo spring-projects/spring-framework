@@ -36,12 +36,12 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * Test fixture for {@link RequestMappingHandlerMethodAdapter} unit tests.
  * 
  * The tests in this class focus on {@link RequestMappingHandlerMethodAdapter} functionality exclusively.
- * Also see {@link RequestMappingHandlerAdapterIntegrationTests} for higher-level tests invoking 
+ * Also see {@link RequestMappingHandlerMethodAdapterIntegrationTests} for higher-level tests invoking 
  * {@link Controller @Controller} methods. 
  * 
  * @author Rossen Stoyanchev
  */
-public class RequestMappingHandlerAdapterTests {
+public class RequestMappingHandlerMethodAdapterTests {
 
 	private RequestMappingHandlerMethodAdapter handlerAdapter;
 	

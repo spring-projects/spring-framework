@@ -43,6 +43,9 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 								  MethodParameter returnType, 
 								  ModelAndViewContainer mavContainer, 
 								  NativeWebRequest webRequest) throws Exception {
+		if (returnValue == null) {
+			return;
+		}
 		if (returnValue instanceof String) {
 			mavContainer.setViewName((String) returnValue);
 		}
