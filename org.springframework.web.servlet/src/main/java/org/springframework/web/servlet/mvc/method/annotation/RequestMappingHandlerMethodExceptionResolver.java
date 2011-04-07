@@ -34,6 +34,7 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
@@ -59,12 +60,19 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebA
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
 
 /**
- * A {@link AbstractHandlerMethodExceptionResolver} that matches thrown exceptions to {@link ExceptionHandler}-annotated 
- * methods. If a match is found the exception-handling method is invoked to process the request.
+ * An {@link AbstractHandlerMethodExceptionResolver} that looks for an {@link ExceptionHandler}-annotated method 
+ * that can handle a thrown exception. If a match is found the exception-handling method is invoked to finish 
+ * processing the request.
  * 
- * <p>See {@link ExceptionHandler} for information on supported method arguments and return values for exception-handling 
- * methods. You can customize method argument resolution and return value processing through the various bean properties 
- * in this class.
+ * <p>{@link ExceptionMethodMapping} is a key contributing class storing method-to-exception type mappings extracted
+ * from {@link ExceptionHandler} annotations or from the list of method arguments on the exception-handling method.
+ * {@link ExceptionMethodMapping} assists with actually locating a method for a thrown exception.  
+ * 
+ * <p>Once located the invocation of the exception-handling method is done using much of the same classes
+ * used for {@link RequestMapping} methods, which is described under {@link RequestMappingHandlerMethodAdapter}.
+ *  
+ * <p>See {@link ExceptionHandler} for information on supported method arguments and return values for 
+ * exception-handling methods. 
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -94,17 +102,6 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 		this.messageConverters = new HttpMessageConverter[] { new ByteArrayHttpMessageConverter(),
 				stringHttpMessageConverter, new SourceHttpMessageConverter<Source>(),
 				new XmlAwareFormHttpMessageConverter() };
-	}
-
-	/**
-	 * Set a custom ArgumentResolver to use for special method parameter types.
-	 * <p>Such a custom ArgumentResolver will kick in first, having a chance to resolve
-	 * an argument value before the standard argument handling kicks in.
-	 * <p>Note: this is provided for backward compatibility. The preferred way to do this is to 
-	 * implement a {@link HandlerMethodArgumentResolver}.
-	 */
-	public void setCustomArgumentResolver(WebArgumentResolver argumentResolver) {
-		this.customArgumentResolvers = new WebArgumentResolver[]{argumentResolver};
 	}
 
 	/**

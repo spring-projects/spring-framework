@@ -42,9 +42,11 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
@@ -56,6 +58,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
+import org.springframework.web.method.annotation.InitBinderMethodDataBinderFactory;
 import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.annotation.SessionAttributesHandler;
 import org.springframework.web.method.annotation.support.ErrorsMethodArgumentResolver;
@@ -90,10 +93,30 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodR
 import org.springframework.web.util.WebUtils;
 
 /**
- * An extension of {@link AbstractHandlerMethodAdapter} with support for {@link RequestMapping} handler methods.
+ * A {@link AbstractHandlerMethodAdapter} variant with support for invoking {@link RequestMapping} handler methods.
+ * 
+ * <p>Invoking a {@link RequestMapping} method typically involves the invocation of other handler methods such as 
+ * {@link ModelAttribute} methods for contributing attributes to the model and {@link InitBinder} methods for 
+ * initializing {@link WebDataBinder} instances for data binding and type conversion purposes.
+ * 
+ * <p>{@link InvocableHandlerMethod} is the key contributing class that helps with the invocation of any handler 
+ * method after resolving its arguments through a set of {@link HandlerMethodArgumentResolver}s. 
+ * {@link ServletInvocableHandlerMethod} on the other hand, handles the return value through a set of 
+ * {@link HandlerMethodReturnValueHandler}s resulting in a {@link ModelAndView} when view resolution applies.
+ * 
+ * <p>Specifically assisting with the invocation of {@link ModelAttribute} methods is the {@link ModelFactory} while 
+ * the invocation of {@link InitBinder} methods is done with the help of the {@link InitBinderMethodDataBinderFactory},
+ * which is passed on to {@link HandlerMethodArgumentResolver}s where data binder instances are needed.
+ * 
+ * <p>This class is the central point that assembles all of the above mentioned contributors and drives them while
+ * also invoking the actual {@link RequestMapping} handler method through a {@link ServletInvocableHandlerMethod}.  
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
+ * @see InvocableHandlerMethod
+ * @see ServletInvocableHandlerMethod
+ * @see HandlerMethodArgumentResolver
+ * @see HandlerMethodReturnValueHandler
  */
 public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAdapter implements BeanFactoryAware,
 		InitializingBean {
@@ -143,36 +166,22 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	}
 
 	/**
-	 * Set a custom WebArgumentResolvers to use for special method parameter types.
-	 * <p>Such a custom WebArgumentResolver will kick in first, having a chance to resolve
-	 * an argument value before the standard argument handling kicks in.
-	 */
-	public void setCustomArgumentResolver(WebArgumentResolver argumentResolver) {
-		this.customArgumentResolvers = new WebArgumentResolver[] {argumentResolver};
-	}
-
-	/**
 	 * Set one or more custom WebArgumentResolvers to use for special method parameter types.
 	 * <p>Any such custom WebArgumentResolver will kick in first, having a chance to resolve
 	 * an argument value before the standard argument handling kicks in.
+	 * <p>Note: this is provided for backward compatibility. The preferred way to do this is to 
+	 * implement a {@link HandlerMethodArgumentResolver}.
 	 */
 	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
 	}
 
 	/**
-	 * Set a custom ModelAndViewResolvers to use for special method return types.
-	 * <p>Such a custom ModelAndViewResolver will kick in first, having a chance to resolve
-	 * a return value before the standard ModelAndView handling kicks in.
-	 */
-	public void setCustomModelAndViewResolver(ModelAndViewResolver customModelAndViewResolver) {
-		this.customModelAndViewResolvers = new ModelAndViewResolver[] {customModelAndViewResolver};
-	}
-
-	/**
 	 * Set one or more custom ModelAndViewResolvers to use for special method return types.
 	 * <p>Any such custom ModelAndViewResolver will kick in first, having a chance to resolve
 	 * a return value before the standard ModelAndView handling kicks in.
+	 * <p>Note: this is provided for backward compatibility. The preferred way to do this is to 
+	 * implement a {@link HandlerMethodReturnValueHandler}.
 	 */
 	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
 		this.customModelAndViewResolvers = customModelAndViewResolvers;
@@ -436,6 +445,10 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 		return invokeHandlerMethod(request, response, handlerMethod);
 	}
 
+	/**
+	 * Whether the given handler type defines any handler-specific session attributes via {@link SessionAttributes}. 
+	 * Also initializes the sessionAttributesHandlerCache for the given handler type. 
+	 */
 	private boolean hasSessionAttributes(Class<?> handlerType) {
 		SessionAttributesHandler handler = null;
 		synchronized(this.sessionAttributesHandlerCache) {
@@ -448,6 +461,9 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 		return handler.hasSessionAttributes();
 	}
 
+	/**
+	 * Invoke the {@link RequestMapping} handler method preparing a {@link ModelAndView} if view resolution is required.
+	 */
 	private ModelAndView invokeHandlerMethod(HttpServletRequest request, 
 											 HttpServletResponse response, 
 											 HandlerMethod handlerMethod) throws Exception {
