@@ -33,18 +33,10 @@ import org.springframework.web.servlet.View;
 
 /**
  * Extends {@link InvocableHandlerMethod} with the ability to handle the return value through registered 
- * {@link HandlerMethodArgumentResolver}s. If the handler method is annotated with {@link ResponseStatus}, 
- * the  status on the response is set accordingly after method invocation but before return value handling.
+ * {@link HandlerMethodArgumentResolver}s. 
  * 
- * <p>Return value handling may be skipped entirely if the handler method returns a {@code null} (or is a 
- * {@code void} method) and one of the following other conditions is true:
- * <ul>
- * <li>One of the {@link HandlerMethodArgumentResolver}s set the {@link ModelAndViewContainer#setResolveView(boolean)} 
- * flag to {@code false}. This is the case when a method argument allows the handler method access to the response.
- * <li>The request qualifies as being not modified according to {@link ServletWebRequest#isNotModified()}.
- * This is used in conjunction with a "Last-Modified" header or ETag.
- * <li>The status on the response was set as a result of a {@link ResponseStatus} annotation
- * </ul>
+ * <p>The {@link ModelAndViewContainer} for the request contains the results from the handling of the return value. 
+ * It can be used to access model attributes and view selection and to check if view resolution is needed.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1

@@ -575,7 +575,8 @@ public class ServletHandlerMethodTests {
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
 				adapterDef.getPropertyValues().add("webBindingInitializer", new MyWebBindingInitializer());
-				adapterDef.getPropertyValues().add("customArgumentResolver", new MySpecialArgumentResolver());
+				WebArgumentResolver[] argumentResolvers = new WebArgumentResolver[] {new MySpecialArgumentResolver()};
+				adapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 			}
 		});
@@ -1082,7 +1083,8 @@ public class ServletHandlerMethodTests {
 		initDispatcherServlet(ModelAndViewResolverController.class, new BeanDefinitionRegistrar() {
 			public void register(GenericWebApplicationContext wac) {
 				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
-				adapterDef.getPropertyValues().add("customModelAndViewResolver", new MyModelAndViewResolver());
+				ModelAndViewResolver[] mavResolvers = new ModelAndViewResolver[] {new MyModelAndViewResolver()};
+				adapterDef.getPropertyValues().add("customModelAndViewResolvers", mavResolvers);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 			}
 		});
