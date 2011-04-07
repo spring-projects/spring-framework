@@ -42,8 +42,6 @@ import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
@@ -77,7 +75,7 @@ public class ModelAttributeMethodProcessorTests {
 	
 	private MethodParameter notAnnotatedReturnParam;
 
-	private ModelMap model;
+	private ModelAndViewContainer mavContainer;
 
 	private NativeWebRequest webRequest;
 	
@@ -97,7 +95,7 @@ public class ModelAttributeMethodProcessorTests {
 		this.annotatedReturnParam = new MethodParameter(getClass().getDeclaredMethod("annotatedReturnValue"), -1);
 		this.notAnnotatedReturnParam = new MethodParameter(getClass().getDeclaredMethod("notAnnotatedReturnValue"), -1);
 		
-		model = new ExtendedModelMap();
+		mavContainer = new ModelAndViewContainer();
 
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
@@ -139,7 +137,7 @@ public class ModelAttributeMethodProcessorTests {
 
 	private void createBinderFromModelAttr(String expectedAttrName, MethodParameter param) throws Exception {
 		Object target = new TestBean();
-		model.addAttribute(expectedAttrName, target);
+		mavContainer.addAttribute(expectedAttrName, target);
 
 		WebDataBinder dataBinder = new WebRequestDataBinder(null);
 
@@ -147,7 +145,7 @@ public class ModelAttributeMethodProcessorTests {
 		expect(binderFactory.createBinder(webRequest, target, expectedAttrName)).andReturn(dataBinder);
 		replay(binderFactory);
 		
-		processor.resolveArgument(param, model, webRequest, binderFactory);
+		processor.resolveArgument(param, mavContainer, webRequest, binderFactory);
 		
 		verify(binderFactory);
 	}
@@ -160,7 +158,7 @@ public class ModelAttributeMethodProcessorTests {
 		expect(factory.createBinder((NativeWebRequest) anyObject(), notNull(), eq("attrName"))).andReturn(dataBinder);
 		replay(factory);
 		
-		processor.resolveArgument(annotatedParam, model, webRequest, factory);
+		processor.resolveArgument(annotatedParam, mavContainer, webRequest, factory);
 		
 		verify(factory);
 	}
@@ -168,14 +166,14 @@ public class ModelAttributeMethodProcessorTests {
 	@Test
 	public void bindAndValidate() throws Exception {
 		Object target = new TestBean();
-		model.addAttribute("attrName", target);
+		mavContainer.addAttribute("attrName", target);
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target);
 
 		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
 		expect(binderFactory.createBinder(webRequest, target, "attrName")).andReturn(dataBinder);
 		replay(binderFactory);
 		
-		processor.resolveArgument(annotatedParam, model, webRequest, binderFactory);
+		processor.resolveArgument(annotatedParam, mavContainer, webRequest, binderFactory);
 
 		assertTrue(dataBinder.isBindInvoked());
 		assertTrue(dataBinder.isValidateInvoked());
@@ -184,7 +182,7 @@ public class ModelAttributeMethodProcessorTests {
 	@Test(expected=BindException.class)
 	public void bindAndFail() throws Exception {
 		Object target = new TestBean();
-		model.addAttribute(target);
+		mavContainer.getModel().addAttribute(target);
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target);
 		dataBinder.getBindingResult().reject("error");
 
@@ -192,12 +190,12 @@ public class ModelAttributeMethodProcessorTests {
 		expect(binderFactory.createBinder(webRequest, target, "testBean")).andReturn(dataBinder);
 		replay(binderFactory);
 		
-		processor.resolveArgument(notAnnotatedParam, model, webRequest, binderFactory);
+		processor.resolveArgument(notAnnotatedParam, mavContainer, webRequest, binderFactory);
 	}
 	
 	@Test
 	public void handleAnnotatedReturnValue() throws Exception {
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer(model);
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		processor.handleReturnValue("expected", annotatedReturnParam, mavContainer, webRequest);
 
 		assertEquals("expected", mavContainer.getModel().get("modelAttrName"));
@@ -206,7 +204,7 @@ public class ModelAttributeMethodProcessorTests {
 	@Test
 	public void handleNotAnnotatedReturnValue() throws Exception {
 		TestBean testBean = new TestBean("expected");
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer(model);
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		processor.handleReturnValue(testBean, notAnnotatedReturnParam, mavContainer, webRequest);
 		
 		assertSame(testBean, mavContainer.getModel().get("testBean"));

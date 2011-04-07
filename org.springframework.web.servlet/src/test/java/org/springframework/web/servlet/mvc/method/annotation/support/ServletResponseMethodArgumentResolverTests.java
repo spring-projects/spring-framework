@@ -28,6 +28,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
 
 import static org.junit.Assert.*;
@@ -45,12 +46,14 @@ public class ServletResponseMethodArgumentResolverTests {
 
 	private MockHttpServletResponse servletResponse;
 
+	private ModelAndViewContainer mavContainer;
+
 	@Before
 	public void setUp() throws Exception {
 		resolver = new ServletResponseMethodArgumentResolver();
-		supportedParams =
-				getClass().getMethod("supportedParams", ServletResponse.class, OutputStream.class, Writer.class);
+		supportedParams = getClass().getMethod("supportedParams", ServletResponse.class, OutputStream.class, Writer.class);
 		servletResponse = new MockHttpServletResponse();
+		mavContainer = new ModelAndViewContainer();
 		webRequest = new ServletWebRequest(new MockHttpServletRequest(), servletResponse);
 	}
 
@@ -65,8 +68,9 @@ public class ServletResponseMethodArgumentResolverTests {
 
 		assertTrue("ServletResponse not supported", resolver.supportsParameter(servletResponseParameter));
 
-		Object result = resolver.resolveArgument(servletResponseParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(servletResponseParameter, mavContainer, webRequest, null);
 		assertSame("Invalid result", servletResponse, result);
+		assertFalse(mavContainer.isResolveView());
 	}
 
 	@Test
@@ -75,8 +79,9 @@ public class ServletResponseMethodArgumentResolverTests {
 
 		assertTrue("OutputStream not supported", resolver.supportsParameter(outputStreamParameter));
 
-		Object result = resolver.resolveArgument(outputStreamParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(outputStreamParameter, mavContainer, webRequest, null);
 		assertSame("Invalid result", servletResponse.getOutputStream(), result);
+		assertFalse(mavContainer.isResolveView());
 	}
 
 	@Test
@@ -85,8 +90,9 @@ public class ServletResponseMethodArgumentResolverTests {
 
 		assertTrue("Writer not supported", resolver.supportsParameter(writerParameter));
 
-		Object result = resolver.resolveArgument(writerParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(writerParameter, mavContainer, webRequest, null);
 		assertSame("Invalid result", servletResponse.getWriter(), result);
+		assertFalse(mavContainer.isResolveView());
 	}
 
 	public void supportedParams(ServletResponse p0, OutputStream p1, Writer p2) {

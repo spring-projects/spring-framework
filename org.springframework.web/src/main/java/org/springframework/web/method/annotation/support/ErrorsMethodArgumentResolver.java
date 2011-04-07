@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * An implementation of {@link HandlerMethodArgumentResolver} that resolves {@link Errors} method parameters.
@@ -47,9 +48,10 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 	}
 
 	public Object resolveArgument(MethodParameter parameter, 
-								  ModelMap model, 
+								  ModelAndViewContainer mavContainer, 
 								  NativeWebRequest webRequest,
 								  WebDataBinderFactory binderFactory) throws Exception {
+		ModelMap model = mavContainer.getModel();
 		if (model.size() > 0) {
 			List<String> keys = new ArrayList<String>(model.keySet());
 			String lastKey = keys.get(model.size()-1);

@@ -25,13 +25,13 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Abstract base class for argument resolvers that resolve named values.
@@ -59,7 +59,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	}
 
 	public final Object resolveArgument(MethodParameter parameter,
-										ModelMap model,
+										ModelAndViewContainer mavContainer,
 										NativeWebRequest webRequest, 
 										WebDataBinderFactory binderFactory) throws Exception {
 		Class<?> paramType = parameter.getParameterType();

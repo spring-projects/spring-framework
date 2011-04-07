@@ -29,8 +29,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 
 /**
- * A specialization of {@link DefaultDataBinderFactory} that further initializes {@link WebDataBinder} instances
- * through the invocation one or more {@link InitBinder} methods. 
+ * A specialization of {@link DefaultDataBinderFactory} that further initializes {@link WebDataBinder} instances 
+ * by invoking {@link InitBinder} methods. 
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -41,7 +41,7 @@ public class InitBinderMethodDataBinderFactory extends DefaultDataBinderFactory 
 	
 	/**
 	 * Create an {@code InitBinderMethodDataBinderFactory} instance with the given {@link InitBinder} methods.
-	 * @param initBinderMethods {@link InitBinder} methods to use when initializing new data binder instances  
+	 * @param initBinderMethods {@link InitBinder} methods to use to invoke to initialize new data binder instances  
 	 * @param bindingInitializer a {@link WebBindingInitializer} to initialize new data binder instances with
 	 */
 	public InitBinderMethodDataBinderFactory(List<InvocableHandlerMethod> initBinderMethods, 
@@ -51,9 +51,9 @@ public class InitBinderMethodDataBinderFactory extends DefaultDataBinderFactory 
 	}
 
 	/**
-	 * Create a new {@link WebDataBinder} for the given target object and initialize it through the invocation
-	 * of {@link InitBinder} methods. Only {@link InitBinder} annotations that don't specify attributes names
-	 * and {@link InitBinder} annotations that contain the target object name are invoked.
+	 * Create a {@link WebDataBinder} for the given object and initialize it by calling {@link InitBinder} methods. 
+	 * Only methods with an {@link InitBinder} annotation value that doesn't list attributes names or methods with 
+	 * an {@link InitBinder} annotation value that matches the target object name are invoked.
 	 * @see InitBinder#value() 
 	 */
 	@Override

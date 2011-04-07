@@ -32,9 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -48,6 +46,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.annotation.support.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Text fixture for {@link ModelFactory} unit tests.
@@ -64,6 +63,8 @@ public class ModelFactoryTests {
 	
 	private InvocableHandlerMethod requestMethod;
 	
+	private ModelAndViewContainer mavContainer;
+	
 	@Before
 	public void setUp() throws Exception {
 		Object handler = new ModelHandler();
@@ -73,38 +74,39 @@ public class ModelFactoryTests {
 		this.sessionAttributeStore = new DefaultSessionAttributeStore();
 		this.handlerSessionAttributeStore = new SessionAttributesHandler(handler.getClass(), sessionAttributeStore);
 		
+		this.mavContainer = new ModelAndViewContainer();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 	
 	@Test
 	public void createModel() throws Exception {
-		ModelMap model = createFactory(new ModelHandler(), "model", Model.class).createModel(webRequest, requestMethod);
-		assertEquals(Boolean.TRUE, model.get("model"));
+		createFactory(new ModelHandler(), "model", Model.class).initModel(webRequest, mavContainer, requestMethod);
+		assertEquals(Boolean.TRUE, mavContainer.getAttribute("model"));
 	}
 
 	@Test
 	public void createModelWithName() throws Exception {
-		ModelMap model = createFactory(new ModelHandler(), "modelWithName").createModel(webRequest, requestMethod);
-		assertEquals(Boolean.TRUE, model.get("name"));
+		createFactory(new ModelHandler(), "modelWithName").initModel(webRequest, mavContainer, requestMethod);
+		assertEquals(Boolean.TRUE, mavContainer.getAttribute("name"));
 	}
 
 	@Test
 	public void createModelWithDefaultName() throws Exception {
-		ModelMap model = createFactory(new ModelHandler(), "modelWithDefaultName").createModel(webRequest, requestMethod);
-		assertEquals(Boolean.TRUE, model.get("boolean"));
+		createFactory(new ModelHandler(), "modelWithDefaultName").initModel(webRequest, mavContainer, requestMethod);
+		assertEquals(Boolean.TRUE, mavContainer.getAttribute("boolean"));
 	}
 
 	@Test
 	public void createModelWithExistingName() throws Exception {
-		ModelMap model = createFactory(new ModelHandler(), "modelWithName").createModel(webRequest, requestMethod);
-		assertEquals(Boolean.TRUE, model.get("name"));
+		createFactory(new ModelHandler(), "modelWithName").initModel(webRequest, mavContainer, requestMethod);
+		assertEquals(Boolean.TRUE, mavContainer.getAttribute("name"));
 	}
 
 	@Test
 	public void createModelWithNullAttribute() throws Exception {
-		ModelMap model = createFactory(new ModelHandler(), "modelWithNullAttribute").createModel(webRequest, requestMethod);
-		assertTrue(model.containsKey("name"));
-		assertNull(model.get("name"));
+		createFactory(new ModelHandler(), "modelWithNullAttribute").initModel(webRequest, mavContainer, requestMethod);
+		assertTrue(mavContainer.containsAttribute("name"));
+		assertNull(mavContainer.getAttribute("name"));
 	}
 	
 	@Test
@@ -114,8 +116,8 @@ public class ModelFactoryTests {
 		// Query attribute to associate it with the handler type 
 		assertTrue(handlerSessionAttributeStore.isHandlerSessionAttribute("sessionAttr", null));
 		
-		ModelMap model = createFactory(new ModelHandler(), "model", Model.class).createModel(webRequest, requestMethod);
-		assertEquals("sessionAttrValue", model.get("sessionAttr"));
+		createFactory(new ModelHandler(), "model", Model.class).initModel(webRequest, mavContainer, requestMethod);
+		assertEquals("sessionAttrValue", mavContainer.getAttribute("sessionAttr"));
 	}
 	
 	@Test
@@ -128,8 +130,7 @@ public class ModelFactoryTests {
 		String attrName = "attr1";
 		Object attrValue = new Object();
 
-		ModelMap actualModel = new ExtendedModelMap();
-		actualModel.addAttribute(attrName, attrValue);
+		mavContainer.addAttribute(attrName, attrValue);
 		
 		WebDataBinder dataBinder = new WebDataBinder(attrValue, attrName);
 
@@ -138,11 +139,11 @@ public class ModelFactoryTests {
 		replay(binderFactory);
 		
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, sessionAttributeStore);
-		modelFactory.updateAttributes(webRequest, new SimpleSessionStatus(), actualModel, null);
+		modelFactory.updateModel(webRequest, mavContainer, new SimpleSessionStatus());
 
-		assertEquals(attrValue, actualModel.remove(attrName));
-		assertSame(dataBinder.getBindingResult(), actualModel.remove(bindingResultKey(attrName)));
-		assertEquals(0, actualModel.size());
+		assertEquals(attrValue, mavContainer.getModel().remove(attrName));
+		assertSame(dataBinder.getBindingResult(), mavContainer.getModel().remove(bindingResultKey(attrName)));
+		assertEquals(0, mavContainer.getModel().size());
 		
 		verify(binderFactory);
 	}

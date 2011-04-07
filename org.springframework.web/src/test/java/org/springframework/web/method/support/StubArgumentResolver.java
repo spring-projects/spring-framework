@@ -20,10 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 /**
  * Resolves a method argument from a stub value. Records all resolved parameters.
@@ -58,8 +56,10 @@ public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 		return parameter.getParameterType().equals(this.supportedType);
 	}
 
-	public Object resolveArgument(MethodParameter parameter, ModelMap model, NativeWebRequest webRequest,
-			WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, 
+								  ModelAndViewContainer mavContainer,
+								  NativeWebRequest webRequest, 
+								  WebDataBinderFactory binderFactory) throws Exception {
 		this.resolvedParameters.add(parameter);
 		return this.stubValue;
 	}

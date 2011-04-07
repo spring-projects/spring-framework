@@ -47,7 +47,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 		this.paramInteger = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
 		this.paramString = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
 		
-		mavContainer = new ModelAndViewContainer(null); 
+		mavContainer = new ModelAndViewContainer(); 
 	}
 	
 	@Test
@@ -80,18 +80,6 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 	public void noSuitableReturnValueHandler() throws Exception {
 		registerReturnValueHandler(Integer.class, false);
 		this.composite.handleReturnValue("value", paramString, null, null);
-	}
-
-	@Test
-	public void returnValueHandlerUsesResponse() throws Exception {
-		registerReturnValueHandler(Integer.class, true);
-		assertTrue(this.composite.usesResponseArgument(paramInteger));
-	}
-
-	@Test
-	public void returnValueHandlerDosntUseResponse() throws Exception {
-		registerReturnValueHandler(Integer.class, false);
-		assertFalse(this.composite.usesResponseArgument(paramInteger));
 	}
 	
 	protected StubReturnValueHandler registerReturnValueHandler(Class<?> returnType, boolean usesResponse) {

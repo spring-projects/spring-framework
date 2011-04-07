@@ -78,18 +78,6 @@ public class HandlerMethodArgumentResolverCompositeTests {
 		this.composite.resolveArgument(paramString, null, null, null);
 	}
 
-	@Test
-	public void argResolverUsesResponse() throws Exception {
-		registerResolver(Integer.class, null, true);
-		assertTrue(this.composite.usesResponseArgument(paramInteger));
-	}
-
-	@Test
-	public void argResolverDoesntUseResponse() throws Exception {
-		registerResolver(Integer.class, null, false);
-		assertFalse(this.composite.usesResponseArgument(paramInteger));
-	}
-
 	protected StubArgumentResolver registerResolver(Class<?> supportedType, Object stubValue, boolean usesResponse) {
 		StubArgumentResolver resolver = new StubArgumentResolver(supportedType, stubValue, usesResponse);
 		this.composite.registerArgumentResolver(resolver);

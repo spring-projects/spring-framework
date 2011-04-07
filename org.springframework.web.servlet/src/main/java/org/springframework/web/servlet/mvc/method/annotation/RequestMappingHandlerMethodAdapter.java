@@ -41,7 +41,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -67,13 +66,14 @@ import org.springframework.web.method.annotation.support.RequestHeaderMapMethodA
 import org.springframework.web.method.annotation.support.RequestHeaderMethodArgumentResolver;
 import org.springframework.web.method.annotation.support.RequestParamMapMethodArgumentResolver;
 import org.springframework.web.method.annotation.support.RequestParamMethodArgumentResolver;
-import org.springframework.web.method.annotation.support.WebArgumentResolverAdapter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
@@ -459,13 +459,25 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		SessionStatus sessionStatus = new SimpleSessionStatus();
 		
-		ModelMap implicitModel = modelFactory.createModel(webRequest, requestMethod);
-		ModelAndView mav = requestMethod.invokeAndHandle(webRequest, implicitModel, sessionStatus);
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+		
+		modelFactory.initModel(webRequest, mavContainer, requestMethod);
+		
+		requestMethod.invokeAndHandle(webRequest, mavContainer, sessionStatus);
 
-		ModelMap actualModel = (mav != null) ? mav.getModelMap() : null;
-		modelFactory.updateAttributes(webRequest, sessionStatus, actualModel, implicitModel);
-
-		return mav;
+		modelFactory.updateModel(webRequest, mavContainer, sessionStatus);
+		
+		if (!mavContainer.isResolveView()) {
+			return null;
+		}
+		else {
+			ModelAndView mav = new ModelAndView().addAllObjects(mavContainer.getModel());
+			mav.setViewName(mavContainer.getViewName());
+			if (mavContainer.getView() != null) {
+				mav.setView((View) mavContainer.getView());
+			} 
+			return mav;				
+		}
 	}
 
 	private WebDataBinderFactory createDataBinderFactory(HandlerMethod handlerMethod) {

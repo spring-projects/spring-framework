@@ -35,8 +35,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -49,8 +47,7 @@ import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
 
 /**
@@ -106,10 +103,10 @@ public class ControllerMethodAnnotationDetectionTests {
 		NativeWebRequest webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
 		servletRequest.setParameter("name", "Chad");
 		
-		ModelMap model = new ExtendedModelMap();
-		ModelAndView mav = requestMappingMethod.invokeAndHandle(webRequest, model);
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+		requestMappingMethod.invokeAndHandle(webRequest, mavContainer);
 
-		Object modelAttr = mav.getModelMap().get("attrName");
+		Object modelAttr = mavContainer.getAttribute("attrName");
 
 		assertEquals(TestBean.class, modelAttr.getClass());
 		assertEquals("Chad", ((TestBean) modelAttr).getName());

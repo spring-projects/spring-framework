@@ -24,14 +24,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.annotation.support.ErrorsMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Test fixture for {@link ErrorsMethodArgumentResolver} unit tests.
@@ -66,15 +64,15 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 		WebDataBinder dataBinder = new WebDataBinder(new Object(), "attr");
 		BindingResult bindingResult = dataBinder.getBindingResult();
 
-		ModelMap model = new ExtendedModelMap();
-		model.addAttribute("ignore1", "value1");
-		model.addAttribute("ignore2", "value2");
-		model.addAttribute("ignore3", "value3");
-		model.addAttribute("ignore4", "value4");
-		model.addAttribute("ignore5", "value5");
-		model.addAllAttributes(bindingResult.getModel()); // Predictable iteration order of model keys important!
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+		mavContainer.addAttribute("ignore1", "value1");
+		mavContainer.addAttribute("ignore2", "value2");
+		mavContainer.addAttribute("ignore3", "value3");
+		mavContainer.addAttribute("ignore4", "value4");
+		mavContainer.addAttribute("ignore5", "value5");
+		mavContainer.addAllAttributes(bindingResult.getModel()); // Predictable iteration order of model keys important!
 		
-		Object actual = resolver.resolveArgument(errorsParam, model, webRequest, null);
+		Object actual = resolver.resolveArgument(errorsParam, mavContainer, webRequest, null);
 
 		assertSame(actual, bindingResult);
 	}
@@ -89,14 +87,14 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 		WebDataBinder binder2 = new WebDataBinder(target1, "attr2");
 		BindingResult bindingResult2 = binder2.getBindingResult();
 
-		ModelMap model = new ExtendedModelMap();
-		model.addAttribute("attr1", target1);
-		model.addAttribute("attr2", target2);
-		model.addAttribute("filler", "fillerValue");
-		model.addAllAttributes(bindingResult1.getModel()); 
-		model.addAllAttributes(bindingResult2.getModel()); 
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+		mavContainer.addAttribute("attr1", target1);
+		mavContainer.addAttribute("attr2", target2);
+		mavContainer.addAttribute("filler", "fillerValue");
+		mavContainer.addAllAttributes(bindingResult1.getModel()); 
+		mavContainer.addAllAttributes(bindingResult2.getModel()); 
 		
-		Object actual = resolver.resolveArgument(errorsParam, model, webRequest, null);
+		Object actual = resolver.resolveArgument(errorsParam, mavContainer, webRequest, null);
 
 		assertSame("Should resolve to the latest BindingResult added", actual, bindingResult2);
 	}
@@ -106,16 +104,16 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 		WebDataBinder dataBinder = new WebDataBinder(new Object(), "attr");
 		BindingResult bindingResult = dataBinder.getBindingResult();
 
-		ModelMap model = new ExtendedModelMap();
-		model.addAllAttributes(bindingResult.getModel());
-		model.addAttribute("ignore1", "value1");
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+		mavContainer.addAllAttributes(bindingResult.getModel());
+		mavContainer.addAttribute("ignore1", "value1");
 		
-		resolver.resolveArgument(errorsParam, model, webRequest, null);
+		resolver.resolveArgument(errorsParam, mavContainer, webRequest, null);
 	}
 	
 	@Test(expected=IllegalStateException.class)
 	public void noBindingResult() throws Exception {
-		resolver.resolveArgument(errorsParam, new ExtendedModelMap(), webRequest, null);
+		resolver.resolveArgument(errorsParam, new ModelAndViewContainer(), webRequest, null);
 	}
 
 	@SuppressWarnings("unused")

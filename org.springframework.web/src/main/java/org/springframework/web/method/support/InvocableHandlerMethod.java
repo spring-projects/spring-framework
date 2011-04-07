@@ -24,7 +24,6 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
@@ -33,12 +32,15 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.HandlerMethod;
 
 /**
- * Provides a way to invoke a handler method after resolving its method argument values through 
- * {@link HandlerMethodArgumentResolver}s in the context of the current request.
+ * Provides a method for invoking the handler method for a given request after resolving its method argument 
+ * values through registered {@link HandlerMethodArgumentResolver}s.
  * 
- * <p>Resolving argument values often requires a {@link WebDataBinder} for data binding and type conversion. 
- * Use {@link #setDataBinderFactory(WebDataBinderFactory)} to provide a factory for that. The list of argument 
- * resolvers can be set via {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)}.
+ * <p>Argument resolution often requires a {@link WebDataBinder} for data binding or for type conversion. 
+ * Use the {@link #setDataBinderFactory(WebDataBinderFactory)} property to supply a binder factory to pass to
+ * argument resolvers. 
+ * 
+ * <p>Use {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)} to customize 
+ * the list of argument resolvers.
  *  
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -52,7 +54,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
 	/**
-	 * Constructs a new invocable handler method with the given bean instance and method.
+	 * Constructs a new handler method with the given bean instance and method.
 	 * @param bean the bean instance
 	 * @param method the method
 	 */
@@ -61,7 +63,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Constructs a new invocable handler method with the given bean instance, method name and parameters.
+	 * Constructs a new handler method with the given bean instance, method name and parameters.
 	 * @param bean the object bean
 	 * @param methodName the method name
 	 * @param parameterTypes the method parameter types
@@ -73,9 +75,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Sets the {@link WebDataBinderFactory} to be passed to argument resolvers that require a 
-	 * {@link WebDataBinder} to do type conversion or data binding on the method argument value.
-	 * 
+	 * Sets the {@link WebDataBinderFactory} to be passed to argument resolvers allowing them to create
+	 * a {@link WebDataBinder} for data binding and type conversion purposes.
 	 * @param dataBinderFactory the data binder factory.
 	 */
 	public void setDataBinderFactory(WebDataBinderFactory dataBinderFactory) {
@@ -90,30 +91,30 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Set the ParameterNameDiscoverer to use for resolving method parameter names if needed
-	 * (e.g. for default attribute names).
-	 * <p>Default is a {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer}.
+	 * Set the ParameterNameDiscoverer for resolving parameter names when needed (e.g. default request attribute name).
+	 * <p>Default is an {@link org.springframework.core.LocalVariableTableParameterNameDiscoverer} instance.
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 
 	/**
-	 * Invoke the method after resolving its argument values based on the given request.
-	 * <p>Most argument values are resolved with the help of {@link HandlerMethodArgumentResolver}s 
-	 * configured via {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)}. 
-	 * However, the {@code provideArgs} parameter can be used to supply argument values for use
-	 * directly rather than relying on argument resolution - e.g. {@link WebDataBinder}, 
-	 * {@link SessionStatus}, or the thrown exception in a HandlerExceptionResolver.
+	 * Invoke the method after resolving its argument values in the context of the given request. <p>Argument 
+	 * values are commonly resolved through {@link HandlerMethodArgumentResolver}s. The {@code provideArgs} 
+	 * parameter however may supply argument values to be used directly, i.e. without argument resolution. 
+	 * Examples of provided argument values include a {@link WebDataBinder}, a {@link SessionStatus}, or 
+	 * a thrown exception instance. Provided argument values are checked before argument resolvers.
+	 * 
 	 * @param request the current request
-	 * @param model the model used throughout the current request
-	 * @param providedArgs argument values to try to use, thus bypassing argument resolution
+	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
+	 * @param providedArgs argument values to try to use without view resolution
 	 * @return the raw value returned by the invoked method
+	 * @exception Exception raised if no suitable argument resolver can be found, or the method raised an exception 
 	 */
-	public final Object invokeForRequest(NativeWebRequest request, ModelMap model, Object... providedArgs)
-			throws Exception {
-
-		Object[] args = getMethodArguments(request, model, providedArgs);
+	public final Object invokeForRequest(NativeWebRequest request, 
+										 ModelAndViewContainer mavContainer, 
+										 Object... providedArgs) throws Exception {
+		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
 
 		if (logger.isTraceEnabled()) {
 			StringBuilder builder = new StringBuilder("Invoking [");
@@ -131,8 +132,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return returnValue;
 	}
 
-	private Object[] getMethodArguments(NativeWebRequest request, ModelMap model, Object... providedArgs)
-			throws Exception {
+	/**
+	 * Get the method argument values for the current request.
+	 */
+	private Object[] getMethodArgumentValues(NativeWebRequest request, 
+											 ModelAndViewContainer mavContainer, 
+											 Object... providedArgs) throws Exception {
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
@@ -141,13 +146,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			GenericTypeResolver.resolveParameterType(parameter, getBean().getClass());
 
 			args[i] = resolveProvidedArgument(parameter, providedArgs);
-
 			if (args[i] != null) {
 				continue;
 			}
-
 			if (this.argumentResolvers.supportsParameter(parameter)) {
-				args[i] = this.argumentResolvers.resolveArgument(parameter, model, request, dataBinderFactory);
+				args[i] = this.argumentResolvers.resolveArgument(parameter, mavContainer, request, dataBinderFactory);
 			}
 			else {
 				throw new IllegalStateException("Cannot resolve argument index=" + parameter.getParameterIndex() + ""
@@ -158,6 +161,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return args;
 	}
 
+	/**
+	 * Attempt to resolve a method parameter from the list of provided argument values.
+	 */
 	private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
 		if (providedArgs == null) {
 			return null;
@@ -171,10 +177,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 	
 	/**
-	 * Invokes this handler method with the given argument values.
-	 * @param args the argument values
-	 * @return the result of the invocation
-	 * @throws Exception when the method invocation results in an exception
+	 * Invoke this handler method with the given argument values.
 	 */
 	private Object invoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(this.getBridgedMethod());
@@ -223,20 +226,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		if (targetException instanceof Exception) {
 			throw (Exception) targetException;
 		}
-	}
-
-	/**
-	 * Whether any of the registered {@link HandlerMethodArgumentResolver}s use the response argument.
-	 * @see HandlerMethodProcessor#usesResponseArgument(MethodParameter)
-	 */
-	protected boolean usesResponseArgument() {
-		MethodParameter[] methodParameters = getMethodParameters();
-		for (MethodParameter methodParameter : methodParameters) {
-			if (this.argumentResolvers.usesResponseArgument(methodParameter)) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 }

@@ -19,7 +19,6 @@ package org.springframework.web.method.annotation.support;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.support.WebArgumentResolver;
@@ -28,6 +27,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Adapts a {@link WebArgumentResolver} into the {@link HandlerMethodArgumentResolver} contract.
@@ -75,7 +75,7 @@ public class WebArgumentResolverAdapter implements HandlerMethodArgumentResolver
 	}
 
 	public Object resolveArgument(MethodParameter parameter,
-								  ModelMap model,
+								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws Exception {
 		Class<?> paramType = parameter.getParameterType();
