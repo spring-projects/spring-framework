@@ -570,7 +570,7 @@ public abstract class ReflectionUtils {
 
 
 	/**
-	 * Callback optionally used to method fields to be operated on by a method callback.
+	 * Callback optionally used to filter methods to be operated on by a method callback.
 	 */
 	public interface MethodFilter {
 
