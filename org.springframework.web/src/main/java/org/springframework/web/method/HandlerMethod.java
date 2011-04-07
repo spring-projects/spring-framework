@@ -44,7 +44,7 @@ import org.springframework.util.ClassUtils;
 public class HandlerMethod {
 
 	/** Logger that is available to subclasses */
-	protected final Log logger = LogFactory.getLog(this.getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Object bean;
 

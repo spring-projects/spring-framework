@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -46,19 +45,10 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 	}
 
 	public Object resolveArgument(MethodParameter parameter, 
-								  ModelMap model, 
+								  ModelAndViewContainer mavContainer, 
 								  NativeWebRequest webRequest,
 								  WebDataBinderFactory binderFactory) throws Exception {
-		Class<?> paramType = parameter.getParameterType();
-		if (Model.class.isAssignableFrom(paramType)) {
-			return model;
-		}
-		else if (Map.class.isAssignableFrom(paramType)) {
-			return model;
-		}
-		
-		// should not happen
-		throw new UnsupportedOperationException();
+		return mavContainer.getModel();
 	}
 
 	public boolean supportsReturnType(MethodParameter returnType) {
@@ -78,10 +68,10 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 			return;
 		}
 		if (returnValue instanceof Model) {
-			mavContainer.addModelAttributes((Model) returnValue);
+			mavContainer.addAllAttributes(((Model) returnValue).asMap());
 		}
 		else if (returnValue instanceof Map){
-			mavContainer.addModelAttributes((Map) returnValue);
+			mavContainer.addAllAttributes((Map) returnValue);
 		}
 		else {
 			// should not happen

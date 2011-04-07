@@ -68,7 +68,7 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 			if (mav != ModelAndViewResolver.UNRESOLVED) {
 				mavContainer.setView(mav.getView());
 				mavContainer.setViewName(mav.getViewName());
-				mavContainer.addModelAttributes(mav.getModel());
+				mavContainer.addAllAttributes(mav.getModel());
 				return;
 			}
 		}
@@ -78,7 +78,7 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 		}
 		else if (!BeanUtils.isSimpleProperty(returnValue.getClass())) {
 			String name = ModelFactory.getNameForReturnValue(returnValue, returnType);
-			mavContainer.addModelAttribute(name, returnValue);
+			mavContainer.addAttribute(name, returnValue);
 		}
 
 		// should not happen

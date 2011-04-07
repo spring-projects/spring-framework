@@ -27,10 +27,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
@@ -55,7 +55,7 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 	}
 
 	public Object resolveArgument(MethodParameter parameter,
-								  ModelMap model,
+								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws IOException {
 		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);

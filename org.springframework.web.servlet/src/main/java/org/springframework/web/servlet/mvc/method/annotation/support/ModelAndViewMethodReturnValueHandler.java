@@ -46,10 +46,10 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 			ModelAndView mav = (ModelAndView) returnValue;
 			mavContainer.setView(mav.getView());
 			mavContainer.setViewName(mav.getViewName());
-			mavContainer.addModelAttributes(mav.getModel());
+			mavContainer.addAllAttributes(mav.getModel());
 		}
 		else {
-			// TODO
+			mavContainer.setResolveView(false);
 		}
 	}
 

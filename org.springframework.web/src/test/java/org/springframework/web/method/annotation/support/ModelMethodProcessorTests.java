@@ -88,13 +88,13 @@ public class ModelMethodProcessorTests {
 
 	@Test
 	public void resolveArgumentValue() throws Exception {
-		ExtendedModelMap model = new ExtendedModelMap();
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
-		Object result = resolver.resolveArgument(modelParameter, model, webRequest, null);
-		assertSame(model, result);
+		Object result = resolver.resolveArgument(modelParameter, mavContainer, webRequest, null);
+		assertSame(mavContainer.getModel(), result);
 		
-		result = resolver.resolveArgument(mapParameter, model, webRequest, null);
-		assertSame(model, result);
+		result = resolver.resolveArgument(mapParameter, mavContainer, webRequest, null);
+		assertSame(mavContainer.getModel(), result);
 	}
 	
 	@Test

@@ -17,7 +17,6 @@
 package org.springframework.web.method.support;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 
@@ -82,14 +81,6 @@ public class InvocableHandlerMethodTests {
 		method.invokeForRequest(webRequest, null);
 		
 		assertEquals("intArg", resolver.getResolvedParameterNames().get(0).getParameterName());
-	}
-
-	@Test
-	public void usesResponseArgResolver() throws Exception {
-		InvocableHandlerMethod requestMethod = handlerMethod(new Handler(), "usesResponse", int.class);
-		registerResolver(int.class, 99, true);
-
-		assertTrue(requestMethod.usesResponseArgument());
 	}
 
 	private InvocableHandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes)

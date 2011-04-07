@@ -20,13 +20,11 @@ import java.lang.annotation.Annotation;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindException;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -77,18 +75,16 @@ public class ModelAttributeMethodProcessor
 	}
 
 	/**
-	 * Creates a {@link WebDataBinder} for the target model attribute and applies data binding to it.
-	 * The model attribute may be obtained from the "implicit" model, from the session via, or by 
-	 * direct instantiation.
-	 * 
-	 * @throws Exception if invoking an data binder initialization fails or if data binding and/or 
-	 * 		validation results in errors and the next method parameter is not of type {@link Errors}.
+	 * Resolves the argument to a model attribute creating a {@link WebDataBinder} and invoking data binding on it.
+	 * The model attribute is obtained from the model first or otherwise created via direct instantiation.
+	 * @throws Exception if data binder initialization fails or if data binding results in errors and the next 
+	 * method parameter is not of type {@link Errors}.
 	 */
 	public final Object resolveArgument(MethodParameter parameter, 
-										ModelMap model, 
+										ModelAndViewContainer mavContainer, 
 										NativeWebRequest webRequest,
 										WebDataBinderFactory binderFactory) throws Exception {
-		WebDataBinder binder = createDataBinder(parameter, model, webRequest, binderFactory);
+		WebDataBinder binder = createDataBinder(parameter, mavContainer, webRequest, binderFactory);
 
 		if (binder.getTarget() != null) {
 			doBind(binder, webRequest);
@@ -102,24 +98,23 @@ public class ModelAttributeMethodProcessor
 			}
 		}
 
-		model.putAll(binder.getBindingResult().getModel());
+		mavContainer.addAllAttributes(binder.getBindingResult().getModel());
 
 		return binder.getTarget();
 	}
 
 	/**
-	 * Creates a {@link WebDataBinder} for a target object which may be obtained from the "implicit" model,
-	 * the session via {@link SessionAttributeStore}, or by direct instantiation.  
+	 * Creates a {@link WebDataBinder} for a target object.
 	 */
 	private WebDataBinder createDataBinder(MethodParameter parameter, 
-										   ModelMap model, 
+										   ModelAndViewContainer mavContainer, 
 										   NativeWebRequest webRequest, 
 										   WebDataBinderFactory binderFactory) throws Exception {
 		String attrName = ModelFactory.getNameForParameter(parameter);
 		
 		Object target;
-		if (model.containsKey(attrName)) {
-			target = model.get(attrName);
+		if (mavContainer.containsAttribute(attrName)) {
+			target = mavContainer.getAttribute(attrName);
 		}
 		else {
 			target = BeanUtils.instantiateClass(parameter.getParameterType());
@@ -166,7 +161,7 @@ public class ModelAttributeMethodProcessor
 								  NativeWebRequest webRequest) throws Exception {
 		if (returnValue != null) {
 			String name = ModelFactory.getNameForReturnValue(returnValue, returnType);
-			mavContainer.addModelAttribute(name, returnValue);
+			mavContainer.addAttribute(name, returnValue);
 		}
 	}
 

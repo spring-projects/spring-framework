@@ -53,7 +53,7 @@ public class StubReturnValueHandler implements HandlerMethodReturnValueHandler {
 								  NativeWebRequest webRequest) throws Exception {
 		this.unhandledReturnValue = returnValue;
 		if (returnValue != null) {
-			mavContainer.addModelAttribute(Conventions.getVariableName(returnValue), returnValue);
+			mavContainer.addAttribute(Conventions.getVariableName(returnValue), returnValue);
 		}
 	}
 

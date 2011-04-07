@@ -24,10 +24,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Implementation of {@link HandlerMethodArgumentResolver} that supports {@link ServletResponse} and related arguments.
@@ -47,11 +47,13 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 	}
 
 	public Object resolveArgument(MethodParameter parameter,
-								  ModelMap model,
+								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws IOException {
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		Class<?> parameterType = parameter.getParameterType();
+
+		mavContainer.setResolveView(false);
 
 		if (ServletResponse.class.isAssignableFrom(parameterType)) {
 			Object nativeResponse = webRequest.getNativeResponse(parameterType);
@@ -67,7 +69,9 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 		else if (Writer.class.isAssignableFrom(parameterType)) {
 			return response.getWriter();
 		}
-		// should not happen
-		throw new UnsupportedOperationException();
+		else {
+			// should not happen
+			throw new UnsupportedOperationException();
+		}
 	}
 }

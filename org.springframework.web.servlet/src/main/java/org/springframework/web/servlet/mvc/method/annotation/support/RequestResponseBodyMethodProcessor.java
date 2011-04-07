@@ -27,7 +27,6 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,7 +65,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	}
 
 	public Object resolveArgument(MethodParameter parameter,
-								  ModelMap model,
+								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
@@ -82,8 +81,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	public void handleReturnValue(Object returnValue, 
 								  MethodParameter returnType, 
 								  ModelAndViewContainer mavContainer, 
-								  NativeWebRequest webRequest) 
-			throws IOException, HttpMediaTypeNotAcceptableException {
+								  NativeWebRequest webRequest) throws IOException, HttpMediaTypeNotAcceptableException {
+		mavContainer.setResolveView(false);
 		if (returnValue != null) {
 			writeWithMessageConverters(webRequest, returnValue);
 		}

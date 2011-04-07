@@ -43,7 +43,7 @@ public class ServletInitBinderMethodDataBinderFactory extends InitBinderMethodDa
 	}
 
 	/**
-	 * {@inheritDoc} creates a Servlet data binder.
+	 * Creates a Servlet data binder.
 	 */
 	@Override
 	protected WebDataBinder createBinderInstance(Object target, String objectName) {

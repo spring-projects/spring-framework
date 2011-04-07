@@ -28,6 +28,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
 
 /**
@@ -56,7 +57,7 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = new ServletInvocableHandlerMethod(new Handler(), method);
 		handlerMethod.setHandlerMethodReturnValueHandlers(handlers);
 
-		handlerMethod.invokeAndHandle(webRequest, null);
+		handlerMethod.invokeAndHandle(webRequest, new ModelAndViewContainer());
 
 		assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
 		assertEquals("400 Bad Request", response.getErrorMessage());

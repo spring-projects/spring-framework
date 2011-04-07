@@ -18,16 +18,21 @@ package org.springframework.web.method.support;
 
 import java.util.Map;
 
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.validation.support.BindingAwareModelMap;
 
 /**
- * Contains model and view choices made by {@link HandlerMethodReturnValueHandler}s.
+ * Provides access to the model and a place to record model and view related decisions to all 
+ * {@link HandlerMethodArgumentResolver}s and {@link HandlerMethodReturnValueHandler}s .
  * 
- * <p>Allows return value handlers to set only the bits that are relevant to them - i.e. model, view, 
- * or none, while also taking care of merging attributes added by the {@link HandlerMethodReturnValueHandler}
- * with attributes from the implicit model.
+ * <p>In addition to storing model attributes and a view, the {@link ModelAndViewContainer} also provides
+ * a {@link #setResolveView(boolean)} flag, which can be used to request or bypass a view resolution phase.
+ * This is most commonly used from {@link HandlerMethodReturnValueHandler}s but in some cases may also be 
+ * used from {@link HandlerMethodArgumentResolver}s such as when a handler method accepts an argument 
+ * providing access to the response. When that is the case, if the handler method returns {@code null},
+ * view resolution is skipped.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -38,44 +43,117 @@ public class ModelAndViewContainer {
 	
 	private Object view;
 	
-	private final ModelMap actualModel = new ExtendedModelMap();
+	private final ModelMap model;
 	
-	private final ModelMap implicitModel;
+	private boolean resolveView = true;
 
-	public ModelAndViewContainer(ModelMap implicitModel) {
-		this.implicitModel = (implicitModel != null) ? implicitModel : new ExtendedModelMap();
+	/**
+	 * Create a {@link ModelAndViewContainer} instance with a {@link BindingAwareModelMap}.
+	 */
+	public ModelAndViewContainer() {
+		this.model = new BindingAwareModelMap();
 	}
 
+	/**
+	 * Create a {@link ModelAndViewContainer} instance with the given {@link ModelMap} instance.
+	 * @param model the model to use
+	 */
+	public ModelAndViewContainer(ModelMap model) {
+		Assert.notNull(model);
+		this.model = model;
+	}
+
+	/**
+	 * @return the model for the current request
+	 */
 	public ModelMap getModel() {
-		return new ExtendedModelMap().addAllAttributes(actualModel).mergeAttributes(implicitModel);
+		return model;
 	}
 
+	/**
+	 * @return the view name to use for view resolution, or {@code null}
+	 */
 	public String getViewName() {
 		return this.viewName;
 	}
 	
+	/**
+	 * @param viewName the name of the view to use for view resolution
+	 */
 	public void setViewName(String viewName) {
 		this.viewName = viewName;
 	}
 
+	/**
+	 * @return the view instance to use for view resolution  
+	 */
 	public Object getView() {
 		return this.view;
 	}
 	
+	/**
+	 * @param view the view instance to use for view resolution
+	 */
 	public void setView(Object view) {
 		this.view = view;
 	}
+	
+	/**
+	 * @return whether the view resolution is requested ({@code true}), or should be bypassed ({@code false})
+	 */
+	public boolean isResolveView() {
+		return resolveView;
+	}
 
-	public void addModelAttributes(Model attributes) {
-		actualModel.addAllAttributes(attributes.asMap());
+	/**
+	 * @param resolveView whether the view resolution is requested ({@code true}), or should be bypassed ({@code false}) 
+	 */
+	public void setResolveView(boolean resolveView) {
+		this.resolveView = resolveView;
+	}
+
+	/**
+	 * Whether model contains an attribute of the given name.
+	 * @param name the name of the model attribute
+	 * @return {@code true} if the model contains an attribute by that name and the name is not an empty string 
+	 */
+	public boolean containsAttribute(String name) {
+		return (StringUtils.hasText(name) && model.containsAttribute(name));
 	}
 	
-	public void addModelAttributes(Map<String, Object> attributes) {
-		actualModel.addAllAttributes(attributes);
+	/**
+	 * @param name the attribute to get from the model
+	 * @return the attribute or {@code null}
+	 */
+	public Object getAttribute(String name) {
+		return model.get(name);
+	}
+	
+	/**
+	 * Add the supplied attribute under the given name.
+	 * @param name the name of the model attribute (never null)
+	 * @param value the model attribute value (can be null)
+	 */
+	public void addAttribute(String name, Object value) {
+		model.addAttribute(name, value);
+	}
+	
+	/**
+	 * Copy all attributes in the supplied Map into the model
+	 */
+	public void addAllAttributes(Map<String, ?> attributes) {
+		model.addAllAttributes(attributes);
 	}
 
-	public void addModelAttribute(String name, Object value) {
-		actualModel.addAttribute(name, value);
+	/**
+	 * Add the given attribute if the model does not already contain such an attribute.
+	 * @param name the name of the attribute to check and add
+	 * @param value the value of the attribute
+	 */
+	public void mergeAttribute(String name, Object value) {
+		if (!containsAttribute(name)) {
+			model.addAttribute(name, value);
+		}
 	}
-
+	
 }

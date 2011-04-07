@@ -35,7 +35,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -74,7 +73,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	public Object resolveArgument(MethodParameter parameter,
-								  ModelMap model,
+								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) 
 			throws IOException, HttpMediaTypeNotSupportedException {
@@ -116,19 +115,25 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 								  MethodParameter returnType, 
 								  ModelAndViewContainer mavContainer, 
 								  NativeWebRequest webRequest) throws Exception {
+		mavContainer.setResolveView(false);
+
 		if (returnValue == null) {
 			return;
 		}
+
+		HttpOutputMessage outputMessage = createOutputMessage(webRequest);
+
 		Assert.isInstanceOf(HttpEntity.class, returnValue);
 		HttpEntity<?> responseEntity = (HttpEntity<?>) returnValue;
-		HttpOutputMessage outputMessage = createOutputMessage(webRequest);
 		if (responseEntity instanceof ResponseEntity) {
 			((ServerHttpResponse) outputMessage).setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
 		}
+
 		HttpHeaders entityHeaders = responseEntity.getHeaders();
 		if (!entityHeaders.isEmpty()) {
 			outputMessage.getHeaders().putAll(entityHeaders);
 		}
+		
 		Object body = responseEntity.getBody();
 		if (body != null) {
 			writeWithMessageConverters(body, createInputMessage(webRequest), outputMessage);

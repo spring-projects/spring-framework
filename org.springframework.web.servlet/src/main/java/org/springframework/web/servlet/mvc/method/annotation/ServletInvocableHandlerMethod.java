@@ -20,23 +20,31 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.HandlerAdapter;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 
 /**
- * Extends {@link InvocableHandlerMethod} with the ability to handle the return value of the invocation
- * resulting in a {@link ModelAndView} according to the {@link HandlerAdapter} contract.
+ * Extends {@link InvocableHandlerMethod} with the ability to handle the return value through registered 
+ * {@link HandlerMethodArgumentResolver}s. If the handler method is annotated with {@link ResponseStatus}, 
+ * the  status on the response is set accordingly after method invocation but before return value handling.
+ * 
+ * <p>Return value handling may be skipped entirely if the handler method returns a {@code null} (or is a 
+ * {@code void} method) and one of the following other conditions is true:
+ * <ul>
+ * <li>One of the {@link HandlerMethodArgumentResolver}s set the {@link ModelAndViewContainer#setResolveView(boolean)} 
+ * flag to {@code false}. This is the case when a method argument allows the handler method access to the response.
+ * <li>The request qualifies as being not modified according to {@link ServletWebRequest#isNotModified()}.
+ * This is used in conjunction with a "Last-Modified" header or ETag.
+ * <li>The status on the response was set as a result of a {@link ResponseStatus} annotation
+ * </ul>
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -70,36 +78,47 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	/**
-	 * Invokes the method via {@link #invokeForRequest(NativeWebRequest, ModelMap, Object...)} and also handles the 
-	 * return value by invoking one of the {@link HandlerMethodReturnValueHandler} instances registered via 
-	 * {@link #setHandlerMethodReturnValueHandlers(HandlerMethodReturnValueHandlerComposite)}. 
-	 * If the method is annotated with {@link SessionStatus} the response status will be set.
+	 * Invokes the method and handles the return value through registered {@link HandlerMethodReturnValueHandler}s. 
+	 * If the handler method is annotated with {@link ResponseStatus}, the status on the response is set accordingly 
+	 * after method invocation but before return value handling.
+	 * <p>Return value handling may be skipped entirely if the handler method returns a {@code null} (or is a 
+	 * {@code void} method) and one of the following other conditions is true:
+	 * <ul>
+	 * <li>One of the {@link HandlerMethodArgumentResolver}s set the {@link ModelAndViewContainer#setResolveView(boolean)} 
+	 * flag to {@code false}. This is the case when a method argument allows the handler method access to the response.
+	 * <li>The request qualifies as being not modified according to {@link ServletWebRequest#isNotModified()}.
+	 * This is used in conjunction with a "Last-Modified" header or ETag.
+	 * <li>The status on the response was set as a result of a {@link ResponseStatus} annotation
+	 * </ul>
+	 * <p>After the call, use the {@link ModelAndViewContainer} parameter to access model attributes and view selection
+	 * and to determine if view resolution is needed.
+	 * 
 	 * @param request the current request
-	 * @param model the model used throughout the current request
-	 * @param providedArgs argument values to use as-is if they match to a method parameter's type
-	 * @return ModelAndView object with the name of the view and the required model data, or <code>null</code> 
-	 * if the response was handled
+	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
+	 * @param providedArgs argument values to try to use without the need for view resolution
 	 */
-	public final ModelAndView invokeAndHandle(NativeWebRequest request, 
-											  ModelMap model, 
-											  Object... providedArgs)  throws Exception {
-		
+	public final void invokeAndHandle(NativeWebRequest request, 
+									  ModelAndViewContainer mavContainer, 
+									  Object...providedArgs) throws Exception {
+
 		if (!returnValueHandlers.supportsReturnType(getReturnType())) {
 			throw new IllegalStateException("No suitable HandlerMethodReturnValueHandler for method " + toString());
 		}
 
-		Object returnValue = invokeForRequest(request, model, providedArgs);
+		Object returnValue = invokeForRequest(request, mavContainer, providedArgs);
 
 		setResponseStatus((ServletWebRequest) request);
 
-		if (returnValue == null && (isRequestNotModified(request) || usesResponseArgument())) {
-			return null;
+		if (returnValue == null) {
+			if (isRequestNotModified(request) || hasResponseStatus() || !mavContainer.isResolveView()) {
+				mavContainer.setResolveView(false);
+				return;
+			}
 		}
 		
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer(model);
-		returnValueHandlers.handleReturnValue(returnValue, getReturnType(), mavContainer, request);
+		mavContainer.setResolveView(true);
 
-		return getModelAndView(request, mavContainer, returnValue);
+		returnValueHandlers.handleReturnValue(returnValue, getReturnType(), mavContainer, request);
 	}
 
 	/**
@@ -120,38 +139,17 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	/**
-	 * Create a {@link ModelAndView} from a {@link ModelAndViewContainer}.
+	 * Does the request qualify as not modified?
 	 */
-	private ModelAndView getModelAndView(NativeWebRequest request, 
-										 ModelAndViewContainer mavContainer,
-										 Object returnValue) {
-		if (returnValueHandlerUsesResponseArgument()) {
-			return null;
-		}
-		else {
-			ModelAndView mav = new ModelAndView().addAllObjects(mavContainer.getModel());
-			mav.setViewName(mavContainer.getViewName());
-			if (mavContainer.getView() != null) {
-				mav.setView((View) mavContainer.getView());
-			} 
-			return mav;			
-		}
+	private boolean isRequestNotModified(NativeWebRequest request) {
+		return ((ServletWebRequest) request).isNotModified();
 	}
 
 	/**
-	 * Check whether the request qualifies as not modified... 
-	 * TODO: document fully including sample user code
+	 * Does the method set the response status?
 	 */
-	private boolean isRequestNotModified(NativeWebRequest request) {
-		ServletWebRequest servletRequest = (ServletWebRequest) request;
-		return (servletRequest.isNotModified() || (responseStatus != null) || usesResponseArgument());
-	}
-	
-	protected boolean usesResponseArgument() {
-		return (super.usesResponseArgument() || returnValueHandlerUsesResponseArgument() || (responseStatus != null));
+	private boolean hasResponseStatus() {
+		return responseStatus != null;
 	}
 
-	private boolean returnValueHandlerUsesResponseArgument() {
-		return returnValueHandlers.usesResponseArgument(getReturnType());
-	}
 }

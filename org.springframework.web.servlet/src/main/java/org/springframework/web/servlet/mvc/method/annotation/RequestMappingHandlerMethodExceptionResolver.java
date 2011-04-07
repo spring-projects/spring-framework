@@ -32,8 +32,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.support.WebArgumentResolver;
@@ -47,9 +45,10 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
-import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.support.HttpEntityMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ModelAndViewMethodReturnValueHandler;
@@ -60,17 +59,15 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebA
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
 
 /**
- * An extension of {@link AbstractHandlerMethodExceptionResolver} that matches thrown exceptions to
- * {@link ExceptionHandler @ExceptionHandler} methods in the handler. If a match is found the
- * exception-handling method is invoked to process the request.
+ * A {@link AbstractHandlerMethodExceptionResolver} that matches thrown exceptions to {@link ExceptionHandler}-annotated 
+ * methods. If a match is found the exception-handling method is invoked to process the request.
  * 
- * <p>See {@link ExceptionHandler} for information on supported method arguments and return values
- * for exception-handling methods. You can customize method argument resolution and return value 
- * processing through the various bean properties in this class.
+ * <p>See {@link ExceptionHandler} for information on supported method arguments and return values for exception-handling 
+ * methods. You can customize method argument resolution and return value processing through the various bean properties 
+ * in this class.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
- * @see #setMessageConverters(HttpMessageConverter[])
  */
 public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandlerMethodExceptionResolver implements
 		InitializingBean {
@@ -78,8 +75,6 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	private WebArgumentResolver[] customArgumentResolvers;
 
 	private HttpMessageConverter<?>[] messageConverters;
-
-	private ModelAndViewResolver[] customModelAndViewResolvers;
 
 	private final Map<Class<?>, ExceptionMethodMapping> exceptionMethodMappingCache = 
 		new ConcurrentHashMap<Class<?>, ExceptionMethodMapping>();
@@ -102,9 +97,11 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	}
 
 	/**
-	 * Set a custom ArgumentResolvers to use for special method parameter types.
+	 * Set a custom ArgumentResolver to use for special method parameter types.
 	 * <p>Such a custom ArgumentResolver will kick in first, having a chance to resolve
 	 * an argument value before the standard argument handling kicks in.
+	 * <p>Note: this is provided for backward compatibility. The preferred way to do this is to 
+	 * implement a {@link HandlerMethodArgumentResolver}.
 	 */
 	public void setCustomArgumentResolver(WebArgumentResolver argumentResolver) {
 		this.customArgumentResolvers = new WebArgumentResolver[]{argumentResolver};
@@ -114,6 +111,8 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	 * Set one or more custom ArgumentResolvers to use for special method parameter types.
 	 * <p>Any such custom ArgumentResolver will kick in first, having a chance to resolve
 	 * an argument value before the standard argument handling kicks in.
+	 * <p>Note: this is provided for backward compatibility. The preferred way to do this is to 
+	 * implement a {@link HandlerMethodArgumentResolver}.
 	 */
 	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
@@ -125,24 +124,6 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	 */
 	public void setMessageConverters(HttpMessageConverter<?>[] messageConverters) {
 		this.messageConverters = messageConverters;
-	}
-
-	/**
-	 * Set a custom ModelAndViewResolvers to use for special method return types.
-	 * <p>Such a custom ModelAndViewResolver will kick in first, having a chance to resolve
-	 * a return value before the standard ModelAndView handling kicks in.
-	 */
-	public void setCustomModelAndViewResolver(ModelAndViewResolver customModelAndViewResolver) {
-		this.customModelAndViewResolvers = new ModelAndViewResolver[] {customModelAndViewResolver};
-	}
-
-	/**
-	 * Set one or more custom ModelAndViewResolvers to use for special method return types.
-	 * <p>Any such custom ModelAndViewResolver will kick in first, having a chance to resolve
-	 * a return value before the standard ModelAndView handling kicks in.
-	 */
-	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
-		this.customModelAndViewResolvers = customModelAndViewResolvers;
 	}
 
 	/**
@@ -207,9 +188,14 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 		returnValueHandlers.registerReturnValueHandler(new HttpEntityMethodProcessor(messageConverters));
 		
 		// Default handler
-		returnValueHandlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(customModelAndViewResolvers));
+		returnValueHandlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(null));
 	}
 	
+	/**
+	 * Attempts to find an {@link ExceptionHandler}-annotated method that can handle the thrown exception.
+	 * The exception-handling method, if found, is invoked resulting in a {@link ModelAndView}.
+	 * @return a {@link ModelAndView} if a matching exception-handling method was found, or {@code null} otherwise
+	 */
 	@Override
 	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request, 
 														   HttpServletResponse response, 
@@ -226,13 +212,25 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 				exceptionHandler.setHandlerMethodReturnValueHandlers(returnValueHandlers);
 				
 				ServletWebRequest webRequest = new ServletWebRequest(request, response);
-				ModelMap model = new ExtendedModelMap();
 				try {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Invoking exception-handling method: " + exceptionHandler);
 					}
-					ModelAndView mav = exceptionHandler.invokeAndHandle(webRequest , model , ex);
-					return (mav != null) ? mav : new ModelAndView();
+
+					ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+					exceptionHandler.invokeAndHandle(webRequest, mavContainer, ex);
+					
+					if (!mavContainer.isResolveView()) {
+						return new ModelAndView();
+					}
+					else {
+						ModelAndView mav = new ModelAndView().addAllObjects(mavContainer.getModel());
+						mav.setViewName(mavContainer.getViewName());
+						if (mavContainer.getView() != null) {
+							mav.setView((View) mavContainer.getView());
+						} 
+						return mav;				
+					}
 				}
 				catch (Exception invocationEx) {
 					logger.error("Invoking exception-handling method resulted in exception : " + 
@@ -244,6 +242,9 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 		return null;
 	}
 
+	/**
+	 * @return an {@link ExceptionMethodMapping} for the the given handler method, never {@code null} 
+	 */
 	private ExceptionMethodMapping getExceptionMethodMapping(HandlerMethod handlerMethod) {
 		Class<?> handlerType = handlerMethod.getBeanType();
 		ExceptionMethodMapping mapping = exceptionMethodMappingCache.get(handlerType);
@@ -256,7 +257,7 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	}
 
 	/**
-	 * Pre-built MethodFilter that matches {@link ExceptionHandler @ExceptionHandler} methods.
+	 * MethodFilter that matches {@link ExceptionHandler @ExceptionHandler} methods.
 	 */
 	public static MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
 

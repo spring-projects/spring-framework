@@ -29,7 +29,7 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 
 /**
  * Defines the algorithm for searching handler methods exhaustively including interfaces and parent 
- * classes while also dealing with parameterized methods and interface and class-based  proxies.
+ * classes while also dealing with parameterized methods as well as interface and class-based proxies.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -42,6 +42,7 @@ public abstract class HandlerMethodSelector {
 	 * 
 	 * @param handlerType the handler type to search handler methods on
 	 * @param handlerMethodFilter a {@link MethodFilter} to help recognize handler methods of interest
+	 * @return the selected methods, or an empty set
 	 */
 	public static Set<Method> selectMethods(final Class<?> handlerType, final MethodFilter handlerMethodFilter) {
 		final Set<Method> handlerMethods = new LinkedHashSet<Method>();

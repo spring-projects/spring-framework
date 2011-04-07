@@ -46,6 +46,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.support.HttpEntityMethodProcessor;
 
 /**
@@ -65,15 +66,17 @@ public class HttpEntityMethodProcessorTests {
 
 	private MethodParameter intReturnValue;
 
+	private MethodParameter httpEntityReturnValue;
+
+	private MethodParameter intParameter;
+
+	private ModelAndViewContainer mavContainer;
+	
 	private ServletWebRequest request;
 
 	private MockHttpServletRequest servletRequest;
 
 	private MockHttpServletResponse servletResponse;
-
-	private MethodParameter httpEntityReturnValue;
-
-	private MethodParameter intParameter;
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -93,6 +96,8 @@ public class HttpEntityMethodProcessorTests {
 		Method other = getClass().getMethod("otherMethod");
 		intReturnValue = new MethodParameter(other, -1);
 
+		mavContainer = new ModelAndViewContainer();
+		
 		servletRequest = new MockHttpServletRequest();
 		servletResponse = new MockHttpServletResponse();
 		request = new ServletWebRequest(servletRequest, servletResponse);
@@ -135,7 +140,7 @@ public class HttpEntityMethodProcessorTests {
 
 		replay(messageConverter);
 
-		HttpEntity<?> result = (HttpEntity<String>) processor.resolveArgument(httpEntityParam, null, request, null);
+		HttpEntity<?> result = (HttpEntity<String>) processor.resolveArgument(httpEntityParam, mavContainer, request, null);
 		assertEquals("Invalid argument", expected, result.getBody());
 
 		verify(messageConverter);
@@ -152,14 +157,14 @@ public class HttpEntityMethodProcessorTests {
 
 		replay(messageConverter);
 
-		processor.resolveArgument(httpEntityParam, null, request, null);
+		processor.resolveArgument(httpEntityParam, mavContainer, request, null);
 
 		verify(messageConverter);
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNoContentType() throws Exception {
-		processor.resolveArgument(httpEntityParam, null, request, null);
+		processor.resolveArgument(httpEntityParam, mavContainer, request, null);
 	}
 
 	@Test
@@ -175,8 +180,9 @@ public class HttpEntityMethodProcessorTests {
 
 		replay(messageConverter);
 
-		processor.handleReturnValue(returnValue, responseEntityReturnValue, null, request);
+		processor.handleReturnValue(returnValue, responseEntityReturnValue, mavContainer, request);
 
+		assertFalse(mavContainer.isResolveView());
 		verify(messageConverter);
 	}
 
@@ -193,8 +199,9 @@ public class HttpEntityMethodProcessorTests {
 
 		replay(messageConverter);
 
-		processor.handleReturnValue(returnValue, responseEntityReturnValue, null, request);
+		processor.handleReturnValue(returnValue, responseEntityReturnValue, mavContainer, request);
 
+		assertFalse(mavContainer.isResolveView());
 		verify(messageConverter);
 	}
 
@@ -205,8 +212,9 @@ public class HttpEntityMethodProcessorTests {
 		ResponseEntity<String> returnValue = new ResponseEntity<String>(responseHeaders, HttpStatus.ACCEPTED);
 
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(new StringHttpMessageConverter());
-		processor.handleReturnValue(returnValue, responseEntityReturnValue, null, request);
+		processor.handleReturnValue(returnValue, responseEntityReturnValue, mavContainer, request);
 
+		assertFalse(mavContainer.isResolveView());
 		assertEquals("headerValue", servletResponse.getHeader("header"));
 	}
 
@@ -217,8 +225,9 @@ public class HttpEntityMethodProcessorTests {
 		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.ACCEPTED);
 
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(new StringHttpMessageConverter());
-		processor.handleReturnValue(returnValue, responseEntityReturnValue, null, request);
+		processor.handleReturnValue(returnValue, responseEntityReturnValue, mavContainer, request);
 
+		assertFalse(mavContainer.isResolveView());
 		assertEquals("headerValue", servletResponse.getHeader("header"));
 	}
 	

@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -28,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Implementation of {@link HandlerMethodArgumentResolver} that supports {@link Map} arguments annotated with
@@ -52,7 +52,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 	}
 
 	public Object resolveArgument(MethodParameter parameter,
-								  ModelMap model,
+								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws Exception {
 		Class<?> paramType = parameter.getParameterType();

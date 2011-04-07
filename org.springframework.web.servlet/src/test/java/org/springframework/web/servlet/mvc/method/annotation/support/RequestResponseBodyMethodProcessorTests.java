@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestResponseBodyMethodProcessor;
 
 /**
@@ -63,6 +64,8 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	private MethodParameter intReturnValue;
 
+	private ModelAndViewContainer mavContainer;
+	
 	private NativeWebRequest webRequest;
 
 	private MockHttpServletRequest servletRequest;
@@ -79,6 +82,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		Method other = getClass().getMethod("otherMethod");
 		intReturnValue = new MethodParameter(other, -1);
 
+		mavContainer = new ModelAndViewContainer();
+		
 		servletRequest = new MockHttpServletRequest();
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
@@ -116,7 +121,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		replay(messageConverter);
 
-		Object result = processor.resolveArgument(stringParameter, null, webRequest, null);
+		Object result = processor.resolveArgument(stringParameter, mavContainer, webRequest, null);
 		assertEquals("Invalid argument", expected, result);
 
 		verify(messageConverter);
@@ -134,14 +139,14 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		replay(messageConverter);
 
-		processor.resolveArgument(stringParameter, null, webRequest, null);
+		processor.resolveArgument(stringParameter, mavContainer, webRequest, null);
 
 		verify(messageConverter);
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNoContentType() throws Exception {
-		processor.resolveArgument(stringParameter, null, webRequest, null);
+		processor.resolveArgument(stringParameter, mavContainer, webRequest, null);
 	}
 
 	@Test
@@ -156,8 +161,9 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		replay(messageConverter);
 
-		processor.handleReturnValue(returnValue, stringReturnValue, null, webRequest);
+		processor.handleReturnValue(returnValue, stringReturnValue, mavContainer, webRequest);
 
+		assertFalse(mavContainer.isResolveView());
 		verify(messageConverter);
 	}
 
@@ -173,8 +179,9 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		replay(messageConverter);
 
-		processor.handleReturnValue(returnValue, stringReturnValue, null, webRequest);
+		processor.handleReturnValue(returnValue, stringReturnValue, mavContainer, webRequest);
 
+		assertFalse(mavContainer.isResolveView());
 		verify(messageConverter);
 	}
 
