@@ -16,20 +16,13 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-
 import java.util.Arrays;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -42,8 +35,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.handler.MappedInterceptor;
-import org.springframework.web.servlet.mvc.method.annotation.RequestKey;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodMapping;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -96,7 +89,7 @@ public class RequestMappingHandlerMethodMappingTests {
 
 	@Test
 	public void uriTemplateVariables() {
-		RequestKey key = new RequestKey(Arrays.asList("/{path1}/{path2}"), null, null, null);
+		RequestKey key = new RequestKey(Arrays.asList("/{path1}/{path2}"), null);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 
 		mapping.handleMatch(key, request);

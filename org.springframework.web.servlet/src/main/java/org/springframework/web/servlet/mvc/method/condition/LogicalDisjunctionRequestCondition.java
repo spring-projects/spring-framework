@@ -14,16 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.method.annotation;
+package org.springframework.web.servlet.mvc.method.condition;
 
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * A condition that can be matched to a ServletRequest.
- * 
- * @author Rossen Stoyanchev
+ * {@link RequestCondition} implementation that represents a logical OR (i.e. ||).
+ *
+ * @author Arjen Poutsma
+ * @since 3.1
  */
-interface RequestCondition {
+class LogicalDisjunctionRequestCondition extends RequestConditionComposite {
 
-	boolean match(HttpServletRequest request);
+	LogicalDisjunctionRequestCondition(List<RequestCondition> conditions) {
+		super(conditions);
+	}
+
+	public boolean match(HttpServletRequest request) {
+		for (RequestCondition condition : conditions) {
+			if (condition.match(request)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	protected String getToStringInfix() {
+		return " || ";
+	}
+
 }

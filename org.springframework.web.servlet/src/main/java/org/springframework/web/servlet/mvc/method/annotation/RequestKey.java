@@ -23,12 +23,13 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.method.condition.RequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -43,11 +44,17 @@ public final class RequestKey {
 
 	private final Set<RequestMethod> methods;
 
-	private final Set<RequestCondition> paramConditions;
+	private final RequestCondition paramsCondition;
 
-	private final Set<RequestCondition> headerConditions;
+	private final RequestCondition headersCondition;
+
+	private final RequestCondition consumesCondition;
 
 	private int hash;
+
+	RequestKey(Collection<String> patterns, Collection<RequestMethod> methods) {
+		this(patterns, methods, null, null, null);
+	}
 
 	/**
 	 * Creates a new {@code RequestKey} instance with the given parameters.
@@ -56,12 +63,14 @@ public final class RequestKey {
 	 */
 	RequestKey(Collection<String> patterns,
 			   Collection<RequestMethod> methods,
-			   Collection<RequestCondition> paramConditions,
-			   Collection<RequestCondition> headerConditions) {
+			   RequestCondition paramsCondition,
+			   RequestCondition headersCondition,
+			   RequestCondition consumesCondition) {
 		this.patterns = asUnmodifiableSet(prependLeadingSlash(patterns));
 		this.methods = asUnmodifiableSet(methods);
-		this.paramConditions = asUnmodifiableSet(paramConditions);
-		this.headerConditions = asUnmodifiableSet(headerConditions);
+		this.paramsCondition = paramsCondition != null ? paramsCondition : RequestConditionFactory.trueCondition();
+		this.headersCondition = headersCondition != null ? headersCondition : RequestConditionFactory.trueCondition();
+		this.consumesCondition = consumesCondition != null ? consumesCondition : RequestConditionFactory.trueCondition();
 	}
 
 	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
@@ -95,7 +104,9 @@ public final class RequestKey {
 	public static RequestKey createFromRequestMapping(RequestMapping annotation) {
 		return new RequestKey(Arrays.asList(annotation.value()), Arrays.asList(annotation.method()),
 						RequestConditionFactory.parseParams(annotation.params()),
-						RequestConditionFactory.parseHeaders(annotation.headers()));
+						RequestConditionFactory.parseHeaders(annotation.headers()),
+						RequestConditionFactory.parseConsumes(annotation.consumes())
+				);
 	}
 
 	/**
@@ -109,7 +120,7 @@ public final class RequestKey {
 	public static RequestKey createFromServletRequest(HttpServletRequest request, UrlPathHelper urlPathHelper) {
 		String lookupPath = urlPathHelper.getLookupPathForRequest(request);
 		RequestMethod method = RequestMethod.valueOf(request.getMethod());
-		return new RequestKey(Arrays.asList(lookupPath), Arrays.asList(method), null, null);
+		return new RequestKey(Collections.singleton(lookupPath), Collections.singleton(method));
 	}
 
 	/**
@@ -129,32 +140,32 @@ public final class RequestKey {
 	/**
 	 * Returns the request parameters of this request key.
 	 */
-	public Set<RequestCondition> getParams() {
-		return paramConditions;
+	public RequestCondition getParams() {
+		return paramsCondition;
 	}
 
 	/**
 	 * Returns the request headers of this request key.
 	 */
-	public Set<RequestCondition> getHeaders() {
-		return headerConditions;
+	public RequestCondition getHeaders() {
+		return headersCondition;
 	}
 
 	/**
-	 * Creates a new {@code RequestKey} by combining it with another. The typical use case for this is combining type
+	 * Combines this {@code RequestKey} with another. The typical use case for this is combining type
 	 * and method-level {@link RequestMapping @RequestMapping} annotations.
 	 *
-	 * @param methodKey the method-level RequestKey
+	 * @param other the method-level RequestKey
 	 * @param pathMatcher to {@linkplain PathMatcher#combine(String, String) combine} the patterns
 	 * @return the combined request key
 	 */
-	public RequestKey combine(RequestKey methodKey, PathMatcher pathMatcher) {
-		Set<String> patterns = combinePatterns(this.patterns, methodKey.patterns, pathMatcher);
-		Set<RequestMethod> methods = union(this.methods, methodKey.methods);
-		Set<RequestCondition> params = union(this.paramConditions, methodKey.paramConditions);
-		Set<RequestCondition> headers = union(this.headerConditions, methodKey.headerConditions);
+	public RequestKey combine(RequestKey other, PathMatcher pathMatcher) {
+		Set<String> patterns = combinePatterns(this.patterns, other.patterns, pathMatcher);
+		Set<RequestMethod> methods = union(this.methods, other.methods);
+		RequestCondition params = RequestConditionFactory.and(this.paramsCondition, other.paramsCondition);
+		RequestCondition headers = RequestConditionFactory.and(this.headersCondition, other.headersCondition);
 
-		return new RequestKey(patterns, methods, params, headers);
+		return new RequestKey(patterns, methods, params, headers, null);
 	}
 
 	private static Set<String> combinePatterns(Collection<String> typePatterns,
@@ -205,7 +216,7 @@ public final class RequestKey {
 			List<String> matchingPatterns = getMatchingPatterns(request, pathMatcher, urlPathHelper);
 			if (!matchingPatterns.isEmpty()) {
 				Set<RequestMethod> matchingMethods = getMatchingMethods(request);
-				return new RequestKey(matchingPatterns, matchingMethods, this.paramConditions, this.headerConditions);
+				return new RequestKey(matchingPatterns, matchingMethods, this.paramsCondition, this.headersCondition, null);
 			}
 			else {
 				return null;
@@ -245,11 +256,11 @@ public final class RequestKey {
 	}
 
 	private boolean checkParams(HttpServletRequest request) {
-		return checkConditions(paramConditions, request);
+		return paramsCondition.match(request);
 	}
 
 	private boolean checkHeaders(HttpServletRequest request) {
-		return checkConditions(headerConditions, request);
+		return headersCondition.match(request);
 	}
 
 	private String getMatchingPattern(String pattern, String lookupPath, PathMatcher pathMatcher) {
@@ -284,8 +295,8 @@ public final class RequestKey {
 		if (obj != null && obj instanceof RequestKey) {
 			RequestKey other = (RequestKey) obj;
 			return (this.patterns.equals(other.patterns) && this.methods.equals(other.methods) &&
-					this.paramConditions.equals(other.paramConditions) &&
-					this.headerConditions.equals(other.headerConditions));
+					this.paramsCondition.equals(other.paramsCondition) &&
+					this.headersCondition.equals(other.headersCondition));
 		}
 		return false;
 	}
@@ -296,8 +307,8 @@ public final class RequestKey {
 		if (result == 0) {
 			result = patterns.hashCode();
 			result = 31 * result + methods.hashCode();
-			result = 31 * result + paramConditions.hashCode();
-			result = 31 * result + headerConditions.hashCode();
+			result = 31 * result + paramsCondition.hashCode();
+			result = 31 * result + headersCondition.hashCode();
 			hash = result;
 		}
 		return result;
@@ -311,14 +322,9 @@ public final class RequestKey {
 			builder.append(',');
 			builder.append(methods);
 		}
-		if (!headerConditions.isEmpty()) {
-			builder.append(',');
-			builder.append(headerConditions);
-		}
-		if (!paramConditions.isEmpty()) {
-			builder.append(',');
-			builder.append(paramConditions);
-		}
+		builder.append(",params=").append(paramsCondition.toString());
+		builder.append(",headers=").append(headersCondition.toString());
+		builder.append(",consumes=").append(consumesCondition.toString());
 		builder.append('}');
 		return builder.toString();
 	}
