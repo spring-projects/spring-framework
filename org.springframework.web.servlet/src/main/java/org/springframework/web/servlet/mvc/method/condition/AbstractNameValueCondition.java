@@ -66,7 +66,7 @@ abstract class AbstractNameValueCondition<T> extends AbstractRequestCondition {
 	protected abstract boolean matchValue(HttpServletRequest request);
 
 	@Override
-	public int getWeight() {
+	public int getSpecificity() {
 		return 1;
 	}
 
