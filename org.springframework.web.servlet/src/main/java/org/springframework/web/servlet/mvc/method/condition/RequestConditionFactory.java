@@ -33,13 +33,9 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class RequestConditionFactory {
 
-	private static final RequestCondition TRUE_CONDITION = new RequestCondition() {
+	private static final RequestCondition TRUE_CONDITION = new AbstractRequestCondition(0) {
 		public boolean match(HttpServletRequest request) {
 			return true;
-		}
-
-		public int weight() {
-			return 0;
 		}
 
 		@Override
@@ -48,15 +44,10 @@ public abstract class RequestConditionFactory {
 		}
 	};
 
-	private static final RequestCondition FALSE_CONDITION = new RequestCondition() {
+	private static final RequestCondition FALSE_CONDITION = new AbstractRequestCondition(0) {
 		public boolean match(HttpServletRequest request) {
 			return false;
 		}
-
-		public int weight() {
-			return 0;
-		}
-
 
 		@Override
 		public String toString() {
@@ -64,10 +55,20 @@ public abstract class RequestConditionFactory {
 		}
 	};
 
+	/**
+	 * Returns a condition that always returns {@code true} for {@link RequestCondition#match(HttpServletRequest)}.
+	 *
+	 * @return a condition that returns {@code true}
+	 */
 	public static RequestCondition trueCondition() {
 		return TRUE_CONDITION;
 	}
 
+	/**
+	 * Returns a condition that always returns {@code false} for {@link RequestCondition#match(HttpServletRequest)}.
+	 *
+	 * @return a condition that returns {@code false}
+	 */
 	public static RequestCondition falseCondition() {
 		return FALSE_CONDITION;
 	}
@@ -87,7 +88,12 @@ public abstract class RequestConditionFactory {
 				iterator.remove();
 			}
 		}
-		return new LogicalConjunctionRequestCondition(filteredConditions);
+		if (filteredConditions.isEmpty()) {
+			return trueCondition();
+		}
+		else {
+			return new LogicalConjunctionRequestCondition(filteredConditions);
+		}
 	}
 
 	/**
@@ -108,7 +114,12 @@ public abstract class RequestConditionFactory {
 				iterator.remove();
 			}
 		}
-		return new LogicalDisjunctionRequestCondition(filteredConditions);
+		if (filteredConditions.isEmpty()) {
+			return trueCondition();
+		}
+		else {
+			return new LogicalDisjunctionRequestCondition(filteredConditions);
+		}
 	}
 
 	/**
@@ -120,7 +131,7 @@ public abstract class RequestConditionFactory {
 	 */
 	public static RequestCondition parseParams(String... params) {
 		if (ObjectUtils.isEmpty(params)) {
-			return TRUE_CONDITION;
+			return trueCondition();
 		}
 		RequestCondition[] result = new RequestCondition[params.length];
 		for (int i = 0; i < params.length; i++) {
@@ -138,7 +149,7 @@ public abstract class RequestConditionFactory {
 	 */
 	public static RequestCondition parseHeaders(String... headers) {
 		if (ObjectUtils.isEmpty(headers)) {
-			return TRUE_CONDITION;
+			return trueCondition();
 		}
 		RequestCondition[] result = new RequestCondition[headers.length];
 		for (int i = 0; i < headers.length; i++) {
@@ -157,9 +168,16 @@ public abstract class RequestConditionFactory {
 		return "Accept".equalsIgnoreCase(name) || "Content-Type".equalsIgnoreCase(name);
 	}
 
+	/**
+	 * Parses the given consumes, and returns them as a single request condition.
+	 *
+	 * @param consumes the consumes
+	 * @return the request condition
+	 * @see org.springframework.web.bind.annotation.RequestMapping#consumes()
+	 */
 	public static RequestCondition parseConsumes(String... consumes) {
 		if (ObjectUtils.isEmpty(consumes)) {
-			return TRUE_CONDITION;
+			return trueCondition();
 		}
 		RequestCondition[] result = new RequestCondition[consumes.length];
 		for (int i = 0; i < consumes.length; i++) {
@@ -167,9 +185,5 @@ public abstract class RequestConditionFactory {
 		}
 		return or(result);
 	}
-
-	//
-	// Conditions
-	//
 
 }

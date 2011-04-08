@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author Arjen Poutsma
  * @since 3.1
  */
-abstract class AbstractNameValueCondition<T> implements RequestCondition {
+abstract class AbstractNameValueCondition<T> extends AbstractRequestCondition {
 
 	protected final String name;
 
@@ -35,6 +35,7 @@ abstract class AbstractNameValueCondition<T> implements RequestCondition {
 	protected final boolean isNegated;
 
 	AbstractNameValueCondition(String expression) {
+		super(1);
 		int separator = expression.indexOf('=');
 		if (separator == -1) {
 			this.isNegated = expression.startsWith("!");
@@ -64,11 +65,6 @@ abstract class AbstractNameValueCondition<T> implements RequestCondition {
 	protected abstract boolean matchName(HttpServletRequest request);
 
 	protected abstract boolean matchValue(HttpServletRequest request);
-
-	public int weight() {
-		return 1;
-	}
-
 
 	@Override
 	public int hashCode() {

@@ -24,11 +24,12 @@ import org.springframework.util.StringUtils;
 /**
 * @author Arjen Poutsma
 */
-class ConsumesRequestCondition implements RequestCondition {
+class ConsumesRequestCondition extends AbstractRequestCondition {
 
 	private final MediaType mediaType;
 
 	ConsumesRequestCondition(String mediaType) {
+		super(1);
 		this.mediaType = MediaType.parseMediaType(mediaType);
 	}
 
@@ -41,7 +42,4 @@ class ConsumesRequestCondition implements RequestCondition {
 		return false;
 	}
 
-	public int weight() {
-		return 1;
-	}
 }
