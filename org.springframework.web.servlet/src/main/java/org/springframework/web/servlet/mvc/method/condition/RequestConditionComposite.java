@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.util.Assert;
+
 /**
  * Abstract base class for {@link RequestCondition} implementations that wrap other request conditions.
  *
@@ -31,11 +33,12 @@ abstract class RequestConditionComposite extends AbstractRequestCondition {
 	protected final List<RequestCondition> conditions;
 
 	protected RequestConditionComposite(List<RequestCondition> conditions) {
-		super(getWeight(conditions));
+		Assert.notEmpty(conditions, "'conditions' must not be empty");
 		this.conditions = Collections.unmodifiableList(conditions);
 	}
 
-	private static int getWeight(List<RequestCondition> conditions) {
+	@Override
+	public int getWeight() {
 		int weight = 0;
 		for (RequestCondition condition : conditions) {
 			if (condition instanceof AbstractRequestCondition) {

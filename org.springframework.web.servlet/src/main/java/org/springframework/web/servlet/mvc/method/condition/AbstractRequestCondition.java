@@ -24,19 +24,11 @@ package org.springframework.web.servlet.mvc.method.condition;
  */
 public abstract class AbstractRequestCondition implements RequestCondition {
 
-	private final int weight;
-
-	protected AbstractRequestCondition(int weight) {
-		this.weight = weight;
-	}
-
-	public int getWeight() {
-		return weight;
-	}
+	public abstract int getWeight();
 
 	public int compareTo(RequestCondition o) {
 		AbstractRequestCondition other = (AbstractRequestCondition) o;
-		return other.weight - this.weight;
+		return other.getWeight() - this.getWeight();
 	}
 
 }

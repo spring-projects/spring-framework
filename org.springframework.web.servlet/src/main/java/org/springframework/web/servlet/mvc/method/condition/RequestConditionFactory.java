@@ -33,9 +33,14 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class RequestConditionFactory {
 
-	private static final RequestCondition TRUE_CONDITION = new AbstractRequestCondition(0) {
+	private static final RequestCondition TRUE_CONDITION = new AbstractRequestCondition() {
 		public boolean match(HttpServletRequest request) {
 			return true;
+		}
+
+		@Override
+		public int getWeight() {
+			return 0;
 		}
 
 		@Override
@@ -44,10 +49,16 @@ public abstract class RequestConditionFactory {
 		}
 	};
 
-	private static final RequestCondition FALSE_CONDITION = new AbstractRequestCondition(0) {
+	private static final RequestCondition FALSE_CONDITION = new AbstractRequestCondition() {
 		public boolean match(HttpServletRequest request) {
 			return false;
 		}
+
+		@Override
+		public int getWeight() {
+			return 0;
+		}
+		
 
 		@Override
 		public String toString() {
