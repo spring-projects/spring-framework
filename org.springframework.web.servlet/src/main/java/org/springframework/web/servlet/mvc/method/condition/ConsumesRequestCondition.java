@@ -29,7 +29,6 @@ class ConsumesRequestCondition extends AbstractRequestCondition {
 	private final MediaType mediaType;
 
 	ConsumesRequestCondition(String mediaType) {
-		super(1);
 		this.mediaType = MediaType.parseMediaType(mediaType);
 	}
 
@@ -42,4 +41,8 @@ class ConsumesRequestCondition extends AbstractRequestCondition {
 		return false;
 	}
 
+	@Override
+	public int getWeight() {
+		return 1;
+	}
 }

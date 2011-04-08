@@ -35,7 +35,6 @@ abstract class AbstractNameValueCondition<T> extends AbstractRequestCondition {
 	protected final boolean isNegated;
 
 	AbstractNameValueCondition(String expression) {
-		super(1);
 		int separator = expression.indexOf('=');
 		if (separator == -1) {
 			this.isNegated = expression.startsWith("!");
@@ -65,6 +64,11 @@ abstract class AbstractNameValueCondition<T> extends AbstractRequestCondition {
 	protected abstract boolean matchName(HttpServletRequest request);
 
 	protected abstract boolean matchValue(HttpServletRequest request);
+
+	@Override
+	public int getWeight() {
+		return 1;
+	}
 
 	@Override
 	public int hashCode() {
