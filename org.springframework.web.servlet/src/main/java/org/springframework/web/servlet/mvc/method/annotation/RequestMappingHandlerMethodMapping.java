@@ -252,11 +252,11 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 			if (result != 0) {
 				return result;
 			}
-			result = otherKey.getParams().weight() - key.getParams().weight();
+			result = key.getParams().compareTo(otherKey.getParams());
 			if (result != 0) {
 				return result;
 			}
-			result = otherKey.getHeaders().weight() - key.getHeaders().weight();
+			result = key.getHeaders().compareTo(otherKey.getHeaders());
 			if (result != 0) {
 				return result;
 			}

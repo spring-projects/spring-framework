@@ -155,15 +155,19 @@ public final class RequestKey {
 	 * Combines this {@code RequestKey} with another. The typical use case for this is combining type
 	 * and method-level {@link RequestMapping @RequestMapping} annotations.
 	 *
-	 * @param other the method-level RequestKey
+	 * @param methodKey the method-level RequestKey
 	 * @param pathMatcher to {@linkplain PathMatcher#combine(String, String) combine} the patterns
 	 * @return the combined request key
 	 */
-	public RequestKey combine(RequestKey other, PathMatcher pathMatcher) {
-		Set<String> patterns = combinePatterns(this.patterns, other.patterns, pathMatcher);
-		Set<RequestMethod> methods = union(this.methods, other.methods);
-		RequestCondition params = RequestConditionFactory.and(this.paramsCondition, other.paramsCondition);
-		RequestCondition headers = RequestConditionFactory.and(this.headersCondition, other.headersCondition);
+	public RequestKey combine(RequestKey methodKey, PathMatcher pathMatcher) {
+		Set<String> patterns = combinePatterns(this.patterns, methodKey.patterns, pathMatcher);
+		Set<RequestMethod> methods = union(this.methods, methodKey.methods);
+		RequestCondition params = RequestConditionFactory.and(this.paramsCondition, methodKey.paramsCondition);
+		RequestCondition headers = RequestConditionFactory.and(this.headersCondition, methodKey.headersCondition);
+		RequestCondition consumes;
+//		if (methodKey.consumesCondition.weight() > this.consumesCondition.weight()) {
+//
+//		}
 
 		return new RequestKey(patterns, methods, params, headers, null);
 	}
@@ -276,15 +280,6 @@ public final class RequestKey {
 			return pattern +"/";
 		}
 		return null;
-	}
-	
-	private static boolean checkConditions(Set<RequestCondition> conditions, HttpServletRequest request) {
-		for (RequestCondition condition : conditions) {
-			if (!condition.match(request)) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	@Override

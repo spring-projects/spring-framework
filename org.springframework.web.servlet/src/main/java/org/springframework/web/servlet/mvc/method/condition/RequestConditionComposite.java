@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,20 +26,24 @@ import java.util.List;
  * @author Arjen Poutsma
  * @since 3.1
  */
-abstract class RequestConditionComposite implements RequestCondition {
+abstract class RequestConditionComposite extends AbstractRequestCondition {
 
 	protected final List<RequestCondition> conditions;
 
-	public RequestConditionComposite(List<RequestCondition> conditions) {
-		this.conditions = conditions;
+	protected RequestConditionComposite(List<RequestCondition> conditions) {
+		super(getWeight(conditions));
+		this.conditions = Collections.unmodifiableList(conditions);
 	}
 
-	public int weight() {
-		int size = 0;
+	private static int getWeight(List<RequestCondition> conditions) {
+		int weight = 0;
 		for (RequestCondition condition : conditions) {
-			size += condition.weight();
+			if (condition instanceof AbstractRequestCondition) {
+				AbstractRequestCondition abstractRequestCondition = (AbstractRequestCondition) condition;
+				weight += abstractRequestCondition.getWeight();
+			}
 		}
-		return size;
+		return weight;
 	}
 
 	@Override

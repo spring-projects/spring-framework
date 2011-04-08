@@ -16,27 +16,27 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
- * Defines the contract for conditions that must be met before an incoming request matches a {@link
- * org.springframework.web.servlet.mvc.method.annotation.RequestKey RequestKey}.
+ * Abstract base class for {@link RequestCondition} that provides a standard {@link Comparable} implementation.
  *
- * <p>Implementations of this interface are created by the {@link RequestConditionFactory}.
- *
- * @author Rossen Stoyanchev
  * @author Arjen Poutsma
- * @see RequestConditionFactory
  * @since 3.1
  */
-public interface RequestCondition extends Comparable<RequestCondition> {
+public abstract class AbstractRequestCondition implements RequestCondition {
 
-	/**
-	 * Indicates whether this condition matches against the given servlet request.
-	 *
-	 * @param request the request
-	 * @return {@code true} if this condition matches the request; {@code false} otherwise
-	 */
-	boolean match(HttpServletRequest request);
+	private final int weight;
+
+	protected AbstractRequestCondition(int weight) {
+		this.weight = weight;
+	}
+
+	public int getWeight() {
+		return weight;
+	}
+
+	public int compareTo(RequestCondition o) {
+		AbstractRequestCondition other = (AbstractRequestCondition) o;
+		return other.weight - this.weight;
+	}
 
 }
