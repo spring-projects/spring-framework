@@ -84,6 +84,16 @@ public abstract class RequestConditionFactory {
 		return FALSE_CONDITION;
 	}
 
+	public static RequestCondition mostSpecific(RequestCondition... conditions) {
+		if (ObjectUtils.isEmpty(conditions)) {
+			return trueCondition();
+		}
+		RequestCondition[] copy = new RequestCondition[conditions.length];
+		System.arraycopy(conditions, 0, copy, 0, conditions.length);
+		Arrays.sort(copy);
+		return copy[0];
+	}
+
 	/**
 	 * Combines the given conditions into a logical AND, i.e. the returned condition will return {@code true} for {@link
 	 * RequestCondition#match(HttpServletRequest)} if all of the given conditions do so.

@@ -164,12 +164,9 @@ public final class RequestKey {
 		Set<RequestMethod> methods = union(this.methods, methodKey.methods);
 		RequestCondition params = RequestConditionFactory.and(this.paramsCondition, methodKey.paramsCondition);
 		RequestCondition headers = RequestConditionFactory.and(this.headersCondition, methodKey.headersCondition);
-		RequestCondition consumes;
-//		if (methodKey.consumesCondition.weight() > this.consumesCondition.weight()) {
-//
-//		}
+		RequestCondition consumes = RequestConditionFactory.mostSpecific(methodKey.consumesCondition, this.consumesCondition);
 
-		return new RequestKey(patterns, methods, params, headers, null);
+		return new RequestKey(patterns, methods, params, headers, consumes);
 	}
 
 	private static Set<String> combinePatterns(Collection<String> typePatterns,
@@ -213,14 +210,16 @@ public final class RequestKey {
 	 * @return a new request key that contains all matching attributes
 	 */
 	public RequestKey getMatchingKey(HttpServletRequest request, PathMatcher pathMatcher, UrlPathHelper urlPathHelper) {
-		if (!checkMethod(request) || !checkParams(request) || !checkHeaders(request)) {
+		if (!checkMethod(request) || !paramsCondition.match(request) || !headersCondition.match(request) ||
+				!consumesCondition.match(request)) {
 			return null;
 		}
 		else {
 			List<String> matchingPatterns = getMatchingPatterns(request, pathMatcher, urlPathHelper);
 			if (!matchingPatterns.isEmpty()) {
 				Set<RequestMethod> matchingMethods = getMatchingMethods(request);
-				return new RequestKey(matchingPatterns, matchingMethods, this.paramsCondition, this.headersCondition, null);
+				return new RequestKey(matchingPatterns, matchingMethods, this.paramsCondition, this.headersCondition,
+						this.consumesCondition);
 			}
 			else {
 				return null;
@@ -257,14 +256,6 @@ public final class RequestKey {
 
 	private boolean checkMethod(HttpServletRequest request) {
 		return methods.isEmpty() || methods.contains(RequestMethod.valueOf(request.getMethod()));
-	}
-
-	private boolean checkParams(HttpServletRequest request) {
-		return paramsCondition.match(request);
-	}
-
-	private boolean checkHeaders(HttpServletRequest request) {
-		return headersCondition.match(request);
 	}
 
 	private String getMatchingPattern(String pattern, String lookupPath, PathMatcher pathMatcher) {

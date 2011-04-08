@@ -22,8 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 
 /**
-* @author Arjen Poutsma
-*/
+ * @author Arjen Poutsma
+ */
 class ConsumesRequestCondition extends AbstractRequestCondition {
 
 	private final MediaType mediaType;
@@ -33,12 +33,14 @@ class ConsumesRequestCondition extends AbstractRequestCondition {
 	}
 
 	public boolean match(HttpServletRequest request) {
-		String contentTypeString = request.getContentType();
-		if (StringUtils.hasLength(contentTypeString)) {
-			MediaType contentType = MediaType.parseMediaType(contentTypeString);
-			return this.mediaType.includes(contentType);
+		MediaType contentType;
+		if (StringUtils.hasLength(request.getContentType())) {
+			contentType = MediaType.parseMediaType(request.getContentType());
 		}
-		return false;
+		else {
+			contentType = MediaType.APPLICATION_OCTET_STREAM;
+		}
+		return this.mediaType.includes(contentType);
 	}
 
 	@Override

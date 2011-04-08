@@ -147,7 +147,7 @@ public class RequestKeyTests {
 	}
 
 	@Test
-	public void testMatchingKeyContent() {
+	public void matchingKeyContent() {
 		UrlPathHelper urlPathHelper = new UrlPathHelper();
 		PathMatcher pathMatcher = new AntPathMatcher();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
@@ -167,7 +167,7 @@ public class RequestKeyTests {
 	}
 
 	@Test
-	public void testParamConditions() {
+	public void paramsCondition() {
 		UrlPathHelper urlPathHelper = new UrlPathHelper();
 		PathMatcher pathMatcher = new AntPathMatcher();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
@@ -185,7 +185,7 @@ public class RequestKeyTests {
 	}
 
 	@Test
-	public void testHeaderConditions() {
+	public void headersCondition() {
 		UrlPathHelper urlPathHelper = new UrlPathHelper();
 		PathMatcher pathMatcher = new AntPathMatcher();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
@@ -203,7 +203,27 @@ public class RequestKeyTests {
 	}
 
 	@Test
-	public void testCreateFromServletRequest() {
+	public void consumesCondition() {
+		UrlPathHelper urlPathHelper = new UrlPathHelper();
+		PathMatcher pathMatcher = new AntPathMatcher();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		request.setContentType("text/plain");
+
+		RequestKey key = new RequestKey(singleton("/foo"), null, null, null, RequestConditionFactory.parseConsumes(
+				"text/plain"));
+		RequestKey match = key.getMatchingKey(request, pathMatcher, urlPathHelper);
+
+		assertNotNull(match);
+
+		key = new RequestKey(singleton("/foo"), null, null, null, RequestConditionFactory.parseConsumes(
+				"application/xml"));
+		match = key.getMatchingKey(request, pathMatcher, urlPathHelper);
+
+		assertNull(match);
+	}
+
+	@Test
+	public void createFromServletRequest() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		RequestKey key = RequestKey.createFromServletRequest(request, new UrlPathHelper());
 		assertEquals(new RequestKey(singleton("/foo"), singleton(RequestMethod.GET), null, null, null), key);
