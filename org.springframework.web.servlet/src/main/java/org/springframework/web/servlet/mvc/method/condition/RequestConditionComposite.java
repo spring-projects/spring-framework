@@ -38,12 +38,12 @@ abstract class RequestConditionComposite extends AbstractRequestCondition {
 	}
 
 	@Override
-	public int getWeight() {
+	public int getSpecificity() {
 		int weight = 0;
 		for (RequestCondition condition : conditions) {
 			if (condition instanceof AbstractRequestCondition) {
 				AbstractRequestCondition abstractRequestCondition = (AbstractRequestCondition) condition;
-				weight += abstractRequestCondition.getWeight();
+				weight += abstractRequestCondition.getSpecificity();
 			}
 		}
 		return weight;

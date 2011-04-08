@@ -44,7 +44,20 @@ class ConsumesRequestCondition extends AbstractRequestCondition {
 	}
 
 	@Override
-	public int getWeight() {
+	public int getSpecificity() {
 		return 1;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj != null && obj instanceof ConsumesRequestCondition) {
+			ConsumesRequestCondition other = (ConsumesRequestCondition) obj;
+			return this.mediaType.equals(other.mediaType);
+		}
+		return false;
+	}
+
 }

@@ -17,18 +17,25 @@
 package org.springframework.web.servlet.mvc.method.condition;
 
 /**
- * Abstract base class for {@link RequestCondition} that provides a standard {@link Comparable} implementation.
+ * Abstract base class for {@link RequestCondition} that provides a standard {@link Comparable} implementation based on
+ * the conditions {@linkplain #getSpecificity() specificity}.
  *
  * @author Arjen Poutsma
  * @since 3.1
  */
 public abstract class AbstractRequestCondition implements RequestCondition {
 
-	public abstract int getWeight();
+	/**
+	 * Returns the conditions specificity. More specific conditions should return a higher value than ones which are less
+	 * so.
+	 *
+	 * @return the conditions specificity
+	 */
+	protected abstract int getSpecificity();
 
 	public int compareTo(RequestCondition o) {
 		AbstractRequestCondition other = (AbstractRequestCondition) o;
-		return other.getWeight() - this.getWeight();
+		return other.getSpecificity() - this.getSpecificity();
 	}
 
 }

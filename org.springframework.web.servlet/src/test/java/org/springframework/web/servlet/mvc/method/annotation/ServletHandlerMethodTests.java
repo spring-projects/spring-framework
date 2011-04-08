@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,6 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
@@ -47,7 +40,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -61,6 +53,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -139,6 +132,8 @@ import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionRes
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.NestedServletException;
+
+import static org.junit.Assert.*;
 
 /**
  * The origin of this test fixture is {@link ServletHandlerMethodTests}. The tests were adapted to run against 
@@ -1000,19 +995,19 @@ public class ServletHandlerMethodTests {
 		initDispatcherServlet(ContentTypeHeadersController.class, null);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/something");
-		request.addHeader("Content-Type", "application/pdf");
+		request.setContentType("application/pdf");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("pdf", response.getContentAsString());
 
 		request = new MockHttpServletRequest("POST", "/something");
-		request.addHeader("Content-Type", "text/html");
+		request.setContentType("text/html");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("text", response.getContentAsString());
 
 		request = new MockHttpServletRequest("POST", "/something");
-		request.addHeader("Content-Type", "application/xml");
+		request.setContentType("application/xml");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals(404, response.getStatus());
@@ -1023,13 +1018,13 @@ public class ServletHandlerMethodTests {
 		initDispatcherServlet(NegatedContentTypeHeadersController.class, null);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/something");
-		request.addHeader("Content-Type", "application/pdf");
+		request.setContentType("application/pdf");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("pdf", response.getContentAsString());
 
 		request = new MockHttpServletRequest("POST", "/something");
-		request.addHeader("Content-Type", "text/html");
+		request.setContentType("text/html");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("non-pdf", response.getContentAsString());

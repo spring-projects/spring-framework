@@ -23,6 +23,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Factory for {@link RequestCondition} objects.
@@ -39,7 +40,7 @@ public abstract class RequestConditionFactory {
 		}
 
 		@Override
-		public int getWeight() {
+		public int getSpecificity() {
 			return 0;
 		}
 
@@ -55,10 +56,9 @@ public abstract class RequestConditionFactory {
 		}
 
 		@Override
-		public int getWeight() {
+		public int getSpecificity() {
 			return 0;
 		}
-		
 
 		@Override
 		public String toString() {
@@ -92,6 +92,24 @@ public abstract class RequestConditionFactory {
 		System.arraycopy(conditions, 0, copy, 0, conditions.length);
 		Arrays.sort(copy);
 		return copy[0];
+	}
+
+	/**
+	 * Wraps the given condition in a logical NOT, i.e. the returned condition will return {@code true} for {@link
+	 * RequestCondition#match(HttpServletRequest)} if the given condition return {@code false}, and vice-versa.
+	 *
+	 * @return a condition that represents a logical NOT
+	 */
+	public static RequestCondition not(RequestCondition condition) {
+		if (condition == TRUE_CONDITION) {
+			return falseCondition();
+		}
+		else if (condition == FALSE_CONDITION) {
+			return trueCondition();
+		}
+		else {
+			return new LogicalNegationRequestCondition(condition);
+		}
 	}
 
 	/**
@@ -175,7 +193,11 @@ public abstract class RequestConditionFactory {
 		RequestCondition[] result = new RequestCondition[headers.length];
 		for (int i = 0; i < headers.length; i++) {
 			HeaderRequestCondition header = new HeaderRequestCondition(headers[i]);
-			if (isMediaTypeHeader(header.name)) {
+			if ("Content-Type".equalsIgnoreCase(header.name) && StringUtils.hasLength(header.value)) {
+				RequestCondition consumesCondition = new ConsumesRequestCondition(header.value);
+				result[i] = header.isNegated ? not(consumesCondition) : consumesCondition;
+			}
+			else if (isMediaTypeHeader(header.name)) {
 				result[i] = new MediaTypeHeaderRequestCondition(headers[i]);
 			}
 			else {
