@@ -25,7 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
- * TODO [SPR-6184] Document tests.
+ * Integration tests that verify support for configuration classes in
+ * the Spring TestContext Framework.
+ * 
+ * <p>Configuration will be loaded from {@link DefaultConfigClassBaseTestsConfig}
+ * and {@link DefaultConfigClassInheritedTestsConfig}.
  * 
  * @author Sam Brannen
  * @since 3.1

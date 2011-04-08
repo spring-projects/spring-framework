@@ -21,7 +21,8 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * TODO [SPR-6184] Document tests.
+ * JUnit test suite for annotation-driven <em>configuration class</em>
+ * support in the Spring TestContext Framework.
  *
  * @author Sam Brannen
  * @since 3.1
@@ -33,5 +34,5 @@ AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
 	DefaultConfigClassBaseTests.class,//
 	DefaultConfigClassInheritedTests.class //
 })
-public class AnnotationConfigSuiteTests {
+public class AnnotationConfigTestSuite {
 }

@@ -128,19 +128,11 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * @return <code>true</code>
+	 * Returns {@link ResourceType#CLASSES}.
 	 */
 	@Override
-	public boolean supportsClassResources() {
-		return true;
-	}
-
-	/**
-	 * @return <code>false</code>
-	 */
-	@Override
-	public boolean supportsStringResources() {
-		return false;
+	public ResourceType getResourceType() {
+		return ResourceType.CLASSES;
 	}
 
 }

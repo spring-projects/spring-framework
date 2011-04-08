@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.test.context.ResourceTypeAwareContextLoader.ResourceType;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -101,8 +102,9 @@ public abstract class ContextLoaderUtils {
 
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
 		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
-		Assert.notNull(declaringClass, "Could not find an 'annotation declaring class' for annotation type ["
-				+ annotationType + "] and class [" + clazz + "]");
+		Assert.notNull(declaringClass, String.format(
+			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]", annotationType,
+			clazz));
 
 		while (declaringClass != null) {
 			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
@@ -166,7 +168,7 @@ public abstract class ContextLoaderUtils {
 		Assert.notNull(clazz, "Class must not be null");
 
 		boolean processConfigurationClasses = (contextLoader instanceof ResourceTypeAwareContextLoader)
-				&& ((ResourceTypeAwareContextLoader) contextLoader).supportsClassResources();
+				&& ResourceType.CLASSES == ((ResourceTypeAwareContextLoader) contextLoader).getResourceType();
 		LocationsResolver locationsResolver = processConfigurationClasses ? classNameLocationsResolver
 				: resourcePathLocationsResolver;
 
@@ -212,9 +214,10 @@ public abstract class ContextLoaderUtils {
 
 			if (!ObjectUtils.isEmpty(valueLocations) && !ObjectUtils.isEmpty(locations)) {
 				String msg = String.format(
-					"Test class [%s] has been configured with @ContextConfiguration's 'value' [%s] and 'locations' [%s] attributes. Only one declaration of resource locations is permitted per @ContextConfiguration annotation.",
-					declaringClass, ObjectUtils.nullSafeToString(valueLocations),
-					ObjectUtils.nullSafeToString(locations));
+					"Test class [%s] has been configured with @ContextConfiguration's 'value' [%s] "
+							+ "and 'locations' [%s] attributes. Only one declaration of resource "
+							+ "locations is permitted per @ContextConfiguration annotation.", declaringClass,
+					ObjectUtils.nullSafeToString(valueLocations), ObjectUtils.nullSafeToString(locations));
 				ContextLoaderUtils.logger.error(msg);
 				throw new IllegalStateException(msg);
 			}

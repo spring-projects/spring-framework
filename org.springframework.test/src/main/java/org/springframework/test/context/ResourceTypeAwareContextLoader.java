@@ -25,18 +25,34 @@ package org.springframework.test.context;
 public interface ResourceTypeAwareContextLoader extends ContextLoader {
 
 	/**
-	 * @return <code>true</code> if this <code>ContextLoader</code> supports
-	 * String-based resource locations
-	 * @see ContextConfiguration#locations()
-	 * @see ContextConfiguration#value()
+	 * TODO Document ResourceType.
 	 */
-	boolean supportsStringResources();
+	public static enum ResourceType {
+
+		/**
+		 * String-based resource locations.
+		 * 
+		 * @see ContextConfiguration#locations()
+		 * @see ContextConfiguration#value()
+		 */
+		LOCATIONS,
+
+		/**
+		 * Configuration classes.
+		 * 
+		 * @see ContextConfiguration#classes()
+		 */
+		CLASSES;
+
+	};
+
 
 	/**
-	 * @return <code>true</code> if this <code>ContextLoader</code> supports
-	 * Class-based resource locations
-	 * @see ContextConfiguration#classes()
+	 * Get the application context {@link ResourceType} supported by this
+	 * <code>ContextLoader</code>.
+	 *
+	 * @return the context resource type supported by this ContextLoader
 	 */
-	boolean supportsClassResources();
+	ResourceType getResourceType();
 
 }
