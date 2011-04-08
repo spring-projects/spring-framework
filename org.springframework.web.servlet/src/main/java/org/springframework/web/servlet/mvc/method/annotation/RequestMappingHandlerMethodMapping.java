@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.annotation.AnnotationUtils;
@@ -253,11 +252,11 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 			if (result != 0) {
 				return result;
 			}
-			result = otherKey.getParams().size() - key.getParams().size();
+			result = otherKey.getParams().weight() - key.getParams().weight();
 			if (result != 0) {
 				return result;
 			}
-			result = otherKey.getHeaders().size() - key.getHeaders().size();
+			result = otherKey.getHeaders().weight() - key.getHeaders().weight();
 			if (result != 0) {
 				return result;
 			}
