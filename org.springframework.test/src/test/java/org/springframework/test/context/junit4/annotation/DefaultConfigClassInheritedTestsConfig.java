@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * TODO [SPR-6184] Document configuration class.
+ * ApplicationContext configuration class for {@link DefaultConfigClassInheritedTests}.
  * 
  * @author Sam Brannen
  * @since 3.1

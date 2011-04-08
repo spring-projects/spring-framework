@@ -64,7 +64,7 @@ public abstract class AbstractContextLoader implements ResourceTypeAwareContextL
 	}
 
 	/**
-	 * Generates the default classpath resource locations array based on the
+	 * Generate the default classpath resource locations array based on the
 	 * supplied class.
 	 * <p>For example, if the supplied class is <code>com.example.MyTest</code>,
 	 * the generated locations will contain a single string with a value of
@@ -142,21 +142,11 @@ public abstract class AbstractContextLoader implements ResourceTypeAwareContextL
 	protected abstract String getResourceSuffix();
 
 	/**
-	 * TODO Document supportsStringResources() implementation.
-	 * 
-	 * @return <code>true</code>
+	 * The default implementation returns {@link ResourceType#LOCATIONS}.
+	 * <p>Can be overridden by subclasses.
 	 */
-	public boolean supportsStringResources() {
-		return true;
-	}
-
-	/**
-	 * TODO Document supportsClassResources() implementations.
-	 * 
-	 * @return <code>false</code>
-	 */
-	public boolean supportsClassResources() {
-		return false;
+	public ResourceType getResourceType() {
+		return ResourceType.LOCATIONS;
 	}
 
 }

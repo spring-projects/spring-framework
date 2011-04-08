@@ -28,7 +28,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
- * TODO [SPR-6184] Document tests.
+ * Integration tests that verify support for configuration classes in
+ * the Spring TestContext Framework.
+ * 
+ * <p>Configuration will be loaded from {@link DefaultConfigClassBaseTestsConfig}.
  * 
  * @author Sam Brannen
  * @since 3.1

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public @interface ContextConfiguration {
 	 * defined by an annotated superclass. Thus, subclasses have the option of
 	 * <em>extending</em> the list of resource locations. In the following
 	 * example, the {@link org.springframework.context.ApplicationContext ApplicationContext}
-     * for <code>ExtendedTest</code> will be loaded from
+	 * for <code>ExtendedTest</code> will be loaded from
 	 * &quot;base-context.xml&quot; <strong>and</strong>
 	 * &quot;extended-context.xml&quot;, in that order. Beans defined in
 	 * &quot;extended-context.xml&quot; may therefore override those defined in
@@ -106,8 +106,8 @@ public @interface ContextConfiguration {
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * <p>If not specified, the loader will be inherited from the first superclass
 	 * which is annotated with <code>&#064;ContextConfiguration</code> and specifies
-     * an explicit loader. If no class in the hierarchy specifies an explicit
-     * loader, a default loader will be used instead.
+	 * an explicit loader. If no class in the hierarchy specifies an explicit
+	 * loader, a default loader will be used instead.
 	 * <p>The default concrete implementation chosen at runtime will be
 	 * {@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader}.
 	 * Also check out {@link org.springframework.test.context.support.AbstractContextLoader AbstractContextLoader}'s
