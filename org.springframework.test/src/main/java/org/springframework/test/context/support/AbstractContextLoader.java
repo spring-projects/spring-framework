@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,11 +86,11 @@ public abstract class AbstractContextLoader implements ResourceTypeAwareContextL
 	}
 
 	/**
-	 * Generate a modified version of the supplied locations array and returns it.
-	 * <p>A plain path, e.g. &quot;context.xml&quot;, will be treated as a
-	 * classpath resource from the same package in which the specified class is
-	 * defined. A path starting with a slash is treated as a fully qualified
-	 * class path location, e.g.:
+	 * Generate a modified version of the supplied locations array and return it.
+	 * <p>A plain path &mdash; for example, &quot;context.xml&quot; &mdash;
+	 * will be treated as a classpath resource from the same package in which
+	 * the specified class is defined. A path starting with a slash is treated
+	 * as a fully qualified classpath location, for example:
 	 * &quot;/org/springframework/whatever/foo.xml&quot;. A path which
 	 * references a URL (e.g., a path prefixed with
 	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
@@ -144,6 +144,7 @@ public abstract class AbstractContextLoader implements ResourceTypeAwareContextL
 	/**
 	 * The default implementation returns {@link ResourceType#LOCATIONS}.
 	 * <p>Can be overridden by subclasses.
+	 * @since 3.1
 	 */
 	public ResourceType getResourceType() {
 		return ResourceType.LOCATIONS;
