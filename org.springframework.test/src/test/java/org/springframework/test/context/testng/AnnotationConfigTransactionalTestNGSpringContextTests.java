@@ -16,22 +16,17 @@
 
 package org.springframework.test.context.testng;
 
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import javax.annotation.Resource;
 
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.testng.annotations.AfterClass;
@@ -41,22 +36,26 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
- * Combined unit test for {@link AbstractTestNGSpringContextTests} and
- * {@link AbstractTransactionalTestNGSpringContextTests}.
+ * Integration tests that verify support for
+ * {@link import org.springframework.context.annotation.Configuration @Configuration}
+ * classes with TestNG-based tests.
+ * 
+ * <p>Configuration will be loaded from
+ * {@link AnnotationConfigTransactionalTestNGSpringContextTestsConfig}.
  * 
  * @author Sam Brannen
- * @since 2.5
+ * @since 3.1
  */
 @SuppressWarnings("deprecation")
-@ContextConfiguration
-public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTransactionalTestNGSpringContextTests
-		implements BeanNameAware, InitializingBean {
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
+public class AnnotationConfigTransactionalTestNGSpringContextTests extends
+		AbstractTransactionalTestNGSpringContextTests {
 
 	private static final String JANE = "jane";
 	private static final String SUE = "sue";
 	private static final String YODA = "yoda";
 
-	private static final int NUM_TESTS = 8;
+	private static final int NUM_TESTS = 2;
 	private static final int NUM_TX_TESTS = 1;
 
 	private static int numSetUpCalls = 0;
@@ -64,22 +63,11 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	private static int numTearDownCalls = 0;
 	private static int numTearDownCallsInTransaction = 0;
 
-	private boolean beanInitialized = false;
-
-	private String beanName = "replace me with [" + getClass().getName() + "]";
-
+	@Autowired
 	private Employee employee;
 
 	@Autowired
 	private Pet pet;
-
-	@Autowired(required = false)
-	protected Long nonrequiredLong;
-
-	@Resource()
-	protected String foo;
-
-	protected String bar;
 
 
 	private int createPerson(String name) {
@@ -88,24 +76,6 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	private int deletePerson(String name) {
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
-	}
-
-	public void afterPropertiesSet() throws Exception {
-		this.beanInitialized = true;
-	}
-
-	public void setBeanName(String beanName) {
-		this.beanName = beanName;
-	}
-
-	@Autowired
-	protected void setEmployee(Employee employee) {
-		this.employee = employee;
-	}
-
-	@Resource
-	protected void setBar(String bar) {
-		this.bar = bar;
 	}
 
 	private void assertNumRowsInPersonTable(int expectedNumRows, String testState) {
@@ -135,59 +105,12 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 
 	@Test
 	@NotTransactional
-	public void verifyApplicationContextSet() {
-		assertInTransaction(false);
-		assertNotNull(super.applicationContext,
-			"The application context should have been set due to ApplicationContextAware semantics.");
-		Employee employeeBean = (Employee) super.applicationContext.getBean("employee");
-		assertEquals(employeeBean.getName(), "John Smith", "employee's name.");
-	}
+	public void autowiringFromConfigClass() {
+		assertNotNull("The employee should have been autowired.", employee);
+		assertEquals("John Smith", employee.getName());
 
-	@Test
-	@NotTransactional
-	public void verifyBeanInitialized() {
-		assertInTransaction(false);
-		assertTrue(beanInitialized,
-			"This test instance should have been initialized due to InitializingBean semantics.");
-	}
-
-	@Test
-	@NotTransactional
-	public void verifyBeanNameSet() {
-		assertInTransaction(false);
-		assertEquals(beanName, getClass().getName(),
-			"The bean name of this test instance should have been set due to BeanNameAware semantics.");
-	}
-
-	@Test
-	@NotTransactional
-	public void verifyAnnotationAutowiredFields() {
-		assertInTransaction(false);
-		assertNull(nonrequiredLong, "The nonrequiredLong field should NOT have been autowired.");
-		assertNotNull(pet, "The pet field should have been autowired.");
-		assertEquals(pet.getName(), "Fido", "pet's name.");
-	}
-
-	@Test
-	@NotTransactional
-	public void verifyAnnotationAutowiredMethods() {
-		assertInTransaction(false);
-		assertNotNull(employee, "The setEmployee() method should have been autowired.");
-		assertEquals(employee.getName(), "John Smith", "employee's name.");
-	}
-
-	@Test
-	@NotTransactional
-	public void verifyResourceAnnotationInjectedFields() {
-		assertInTransaction(false);
-		assertEquals(foo, "Foo", "The foo field should have been injected via @Resource.");
-	}
-
-	@Test
-	@NotTransactional
-	public void verifyResourceAnnotationInjectedMethods() {
-		assertInTransaction(false);
-		assertEquals(bar, "Bar", "The setBar() method should have been injected via @Resource.");
+		assertNotNull("The pet should have been autowired.", pet);
+		assertEquals("Fido", pet.getName());
 	}
 
 	@BeforeTransaction
