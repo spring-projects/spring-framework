@@ -23,10 +23,8 @@ import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
- * <p>
  * Concrete implementation of {@link AbstractGenericContextLoader} which reads
  * bean definitions from Java {@link Properties} resources.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
@@ -34,12 +32,8 @@ import org.springframework.context.support.GenericApplicationContext;
 public class GenericPropertiesContextLoader extends AbstractGenericContextLoader {
 
 	/**
-	 * <p>
 	 * Creates a new {@link PropertiesBeanDefinitionReader}.
-	 * </p>
-	 *
-	 * @return a new PropertiesBeanDefinitionReader.
-	 * @see AbstractGenericContextLoader#createBeanDefinitionReader(GenericApplicationContext)
+	 * @return a new PropertiesBeanDefinitionReader
 	 * @see PropertiesBeanDefinitionReader
 	 */
 	@Override
@@ -49,8 +43,6 @@ public class GenericPropertiesContextLoader extends AbstractGenericContextLoader
 
 	/**
 	 * Returns &quot;<code>-context.properties</code>&quot;.
-	 *
-	 * @see org.springframework.test.context.support.AbstractContextLoader#getResourceSuffix()
 	 */
 	@Override
 	public String getResourceSuffix() {
