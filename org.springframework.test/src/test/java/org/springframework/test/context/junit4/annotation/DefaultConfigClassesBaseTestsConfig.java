@@ -16,26 +16,26 @@
 
 package org.springframework.test.context.junit4.annotation;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import org.springframework.beans.Employee;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * JUnit test suite for annotation-driven <em>configuration class</em>
- * support in the Spring TestContext Framework.
- *
+ * ApplicationContext configuration class for {@link DefaultConfigClassesBaseTests}.
+ * 
  * @author Sam Brannen
  * @since 3.1
  */
-@RunWith(Suite.class)
-// Note: the following 'multi-line' layout is for enhanced code readability.
-@SuiteClasses({//
-AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
-	DefaultConfigClassesBaseTests.class,//
-	DefaultConfigClassesInheritedTests.class,//
-	BeanOverridingDefaultConfigClassesInheritedTests.class,//
-	BeanOverridingExplicitConfigClassesInheritedTests.class,//
-	ExplicitConfigClassesInheritedTests.class //
-})
-public class AnnotationConfigTestSuite {
+@Configuration
+public class DefaultConfigClassesBaseTestsConfig {
+
+	@Bean
+	public Employee employee() {
+		Employee employee = new Employee();
+		employee.setName("John Smith");
+		employee.setAge(42);
+		employee.setCompany("Acme Widgets, Inc.");
+		return employee;
+	}
+
 }

@@ -1,0 +1,45 @@
+/*
+ * Copyright 2002-2011 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.test.context.junit4.annotation;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
+
+/**
+ * Integration tests that verify support for configuration classes in
+ * the Spring TestContext Framework.
+ * 
+ * <p>Configuration will be loaded from {@link DefaultConfigClassesBaseTestsConfig}
+ * and {@link BeanOverridingDefaultConfigClassesInheritedTestsConfig}.
+ * 
+ * @author Sam Brannen
+ * @since 3.1
+ */
+@ContextConfiguration
+public class BeanOverridingDefaultConfigClassesInheritedTests extends DefaultConfigClassesBaseTests {
+
+	@Test
+	@Override
+	public void verifyEmployeeSetFromBaseContextConfig() {
+		assertNotNull("The employee should have been autowired.", this.employee);
+		assertEquals("The employee bean should have been overridden.", "Yoda", this.employee.getName());
+	}
+
+}

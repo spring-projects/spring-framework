@@ -16,26 +16,22 @@
 
 package org.springframework.test.context.junit4.annotation;
 
-import org.springframework.beans.Employee;
+import org.springframework.beans.Pet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * ApplicationContext configuration class for {@link DefaultConfigClassBaseTests}.
+ * ApplicationContext configuration class for {@link DefaultConfigClassesInheritedTests}.
  * 
  * @author Sam Brannen
  * @since 3.1
  */
 @Configuration
-public class DefaultConfigClassBaseTestsConfig {
+public class DefaultConfigClassesInheritedTestsConfig {
 
 	@Bean
-	public Employee employee() {
-		Employee employee = new Employee();
-		employee.setName("John Smith");
-		employee.setAge(42);
-		employee.setCompany("Acme Widgets, Inc.");
-		return employee;
+	public Pet pet() {
+		return new Pet("Fido");
 	}
 
 }
