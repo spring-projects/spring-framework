@@ -17,7 +17,14 @@
 package org.springframework.test.context;
 
 /**
- * TODO Document ResourceTypeAwareContextLoader.
+ * Extension of the {@link ContextLoader} API for context loaders that
+ * are aware of the type of context configuration resources that they
+ * support.
+ * <p>Prior to Spring 3.1, context loaders supported only String-based
+ * resource locations; as of Spring 3.1 context loaders may choose to
+ * support either String-based or Class-based resources (but not both).
+ * <p>If a context loader does not implement this interface it is assumed
+ * that the loader supports String-based resource locations.
  *
  * @author Sam Brannen
  * @since 3.1
@@ -25,22 +32,23 @@ package org.springframework.test.context;
 public interface ResourceTypeAwareContextLoader extends ContextLoader {
 
 	/**
-	 * TODO Document ResourceType.
+	 * Enumeration of context configuration resource types that a given
+	 * <code>ContextLoader</code> can support.
+	 * <p>The enum constants have a one-to-one correlation to attributes
+	 * of the {@link ContextConfiguration} annotation.
 	 */
 	public static enum ResourceType {
 
 		/**
 		 * String-based resource locations.
-		 * 
-		 * @see ContextConfiguration#locations()
-		 * @see ContextConfiguration#value()
+		 * @see ContextConfiguration#locations
+		 * @see ContextConfiguration#value
 		 */
 		LOCATIONS,
 
 		/**
-		 * Configuration classes.
-		 * 
-		 * @see ContextConfiguration#classes()
+		 * Configuration class resources.
+		 * @see ContextConfiguration#classes
 		 */
 		CLASSES;
 
@@ -48,10 +56,7 @@ public interface ResourceTypeAwareContextLoader extends ContextLoader {
 
 
 	/**
-	 * Get the application context {@link ResourceType} supported by this
-	 * <code>ContextLoader</code>.
-	 *
-	 * @return the context resource type supported by this ContextLoader
+	 * @return the context configuration resource type supported by this ContextLoader
 	 */
 	ResourceType getResourceType();
 

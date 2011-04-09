@@ -31,9 +31,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Utility methods for working with {@link ContextLoader ContextLoaders}.
- * 
- * <p>TODO Consider refactoring into a stateful ContextLoaderResolver.
+ * Utility methods for working with {@link ContextLoader ContextLoaders}
+ * and resource locations.
  * 
  * @author Sam Brannen
  * @since 3.1
@@ -41,17 +40,26 @@ import org.springframework.util.StringUtils;
  */
 public abstract class ContextLoaderUtils {
 
+	// TODO Consider refactoring ContextLoaderUtils into a stateful
+	// ContextLoaderResolver.
+
 	private static final Log logger = LogFactory.getLog(ContextLoaderUtils.class);
 
 	private static final String STANDARD_DEFAULT_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.GenericXmlContextLoader";
 
-	private static final ClassNameLocationsResolver classNameLocationsResolver = new ClassNameLocationsResolver();
 	private static final ResourcePathLocationsResolver resourcePathLocationsResolver = new ResourcePathLocationsResolver();
+	private static final ClassNameLocationsResolver classNameLocationsResolver = new ClassNameLocationsResolver();
 
 
 	/**
-	 * TODO Document resolveContextLoader().
-	 *
+	 * Resolves the {@link ContextLoader}
+	 * {@link Class} to use for the supplied {@link Class testClass} and
+	 * then instantiates and returns that <code>ContextLoader</code>.
+	 * <p>If the supplied <code>defaultContextLoaderClassName</code> is
+	 * <code>null</code> or <em>empty</em>, the <em>standard</em>
+	 * default context loader class name ({@value #STANDARD_DEFAULT_CONTEXT_LOADER_CLASS_NAME})
+	 * will be used. For details on the class resolution process, see
+	 * {@link #resolveContextLoaderClass(Class, String)}.
 	 * @param testClass the test class for which the <code>ContextLoader</code>
 	 * should be resolved (must not be <code>null</code>)
 	 * @param defaultContextLoaderClassName the name of the default
@@ -74,7 +82,7 @@ public abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Retrieve the {@link ContextLoader} {@link Class} to use for the supplied
+	 * Resolve the {@link ContextLoader} {@link Class} to use for the supplied
 	 * {@link Class test class}.
 	 * <ol>
 	 * <li>If the {@link ContextConfiguration#loader() loader} attribute of
@@ -200,13 +208,38 @@ public abstract class ContextLoaderUtils {
 	}
 
 
+	/**
+	 * Strategy interface for resolving application context resource locations.
+	 * <p>The semantics of the resolved locations are implementation-dependent.
+	 */
 	private static interface LocationsResolver {
 
+		/**
+		 * Resolves application context resource locations for the supplied
+		 * {@link ContextConfiguration} annotation and the class which declared it.
+		 * @param contextConfiguration the <code>ContextConfiguration</code>
+		 * for which to resolve resource locations
+		 * @param declaringClass the class that declared <code>ContextConfiguration</code>
+		 * @return an array of application context resource locations
+		 * (can be <code>null</code> or empty)
+		 */
 		String[] resolveLocations(ContextConfiguration contextConfiguration, Class<?> declaringClass);
 	}
 
+	/**
+	 * <code>LocationsResolver</code> that resolves locations as Strings,
+	 * which are assumed to be path-based resources.
+	 */
 	private static final class ResourcePathLocationsResolver implements LocationsResolver {
 
+		/**
+		 * Resolves path-based resources from the {@link ContextConfiguration#locations() locations}
+		 * and {@link ContextConfiguration#value() value} attributes of the supplied
+		 * {@link ContextConfiguration} annotation.
+		 * <p>Ignores the {@link ContextConfiguration#classes() classes} attribute. 
+		 * @throws IllegalStateException if both the locations and value
+		 * attributes have been declared
+		 */
 		public String[] resolveLocations(ContextConfiguration contextConfiguration, Class<?> declaringClass) {
 
 			String[] locations = contextConfiguration.locations();
@@ -229,8 +262,17 @@ public abstract class ContextLoaderUtils {
 		}
 	}
 
+	/**
+	 * <code>LocationsResolver</code> that converts classes to fully qualified class names.
+	 */
 	private static final class ClassNameLocationsResolver implements LocationsResolver {
 
+		/**
+		 * Resolves class names from the {@link ContextConfiguration#classes() classes}
+		 * attribute of the supplied {@link ContextConfiguration} annotation.
+		 * <p>Ignores the {@link ContextConfiguration#locations() locations}
+		 * and {@link ContextConfiguration#value() value} attributes.
+		 */
 		public String[] resolveLocations(ContextConfiguration contextConfiguration, Class<?> declaringClass) {
 
 			String[] classNames = null;
