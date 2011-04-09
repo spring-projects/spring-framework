@@ -1,33 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
 
-	<bean id="employee" class="org.springframework.beans.Employee">
-		<property name="name" value="John Smith" />
-		<property name="age" value="42" />
-		<property name="company" value="Acme Widgets, Inc." />
-	</bean>
+	<bean id="employee" class="org.springframework.beans.Employee" p:name="John Smith" p:age="42"
+		p:company="Acme Widgets, Inc." />
 
-	<bean id="pet" class="org.springframework.beans.Pet">
-		<constructor-arg value="Fido" />
-	</bean>
+	<bean id="pet" class="org.springframework.beans.Pet" c:_="Fido" />
 
-	<bean id="foo" class="java.lang.String">
-		<constructor-arg value="Foo" />
-	</bean>
+	<bean id="foo" class="java.lang.String" c:_="Foo" />
 
-	<bean id="bar" class="java.lang.String">
-		<constructor-arg value="Bar" />
-	</bean>
-
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
-		p:driverClassName="org.hsqldb.jdbcDriver" p:url="jdbc:hsqldb:mem:transactional_tests" p:username="sa" p:password="" />
+	<bean id="bar" class="java.lang.String" c:_="Bar" />
 
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
 		p:data-source-ref="dataSource" />
 
-	<bean id="databaseSetup"
-		class="org.springframework.test.context.testng.ConcreteTransactionalTestNGSpringContextTests$DatabaseSetup" />
+	<jdbc:embedded-database id="dataSource">
+		<jdbc:script location="classpath:/org/springframework/test/context/testng/schema.sql" />
+		<jdbc:script location="classpath:/org/springframework/test/context/testng/data.sql" />
+	</jdbc:embedded-database>
 
 </beans>
