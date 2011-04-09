@@ -20,34 +20,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.Employee;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  * Integration tests that verify support for configuration classes in
  * the Spring TestContext Framework.
  * 
- * <p>Configuration will be loaded from {@link DefaultConfigClassBaseTestsConfig}.
+ * <p>Configuration will be loaded from {@link DefaultConfigClassesBaseTestsConfig}
+ * and {@link BeanOverridingDefaultConfigClassesInheritedTestsConfig}.
  * 
  * @author Sam Brannen
  * @since 3.1
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-public class DefaultConfigClassBaseTests {
-
-	@Autowired
-	private Employee employee;
-
+@ContextConfiguration(classes = BeanOverridingDefaultConfigClassesInheritedTestsConfig.class)
+public class BeanOverridingExplicitConfigClassesInheritedTests extends ExplicitConfigClassesBaseTests {
 
 	@Test
+	@Override
 	public void verifyEmployeeSetFromBaseContextConfig() {
-		assertNotNull("The employee field should have been autowired.", this.employee);
-		assertEquals("John Smith", this.employee.getName());
+		assertNotNull("The employee should have been autowired.", this.employee);
+		assertEquals("The employee bean should have been overridden.", "Yoda", this.employee.getName());
 	}
 
 }

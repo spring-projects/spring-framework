@@ -16,22 +16,28 @@
 
 package org.springframework.test.context.junit4.annotation;
 
-import org.springframework.beans.Pet;
+import org.springframework.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * ApplicationContext configuration class for {@link DefaultConfigClassInheritedTests}.
+ * ApplicationContext configuration class for
+ * {@link BeanOverridingDefaultConfigClassesInheritedTests} and
+ * {@link BeanOverridingExplicitConfigClassesInheritedTests}.
  * 
  * @author Sam Brannen
  * @since 3.1
  */
 @Configuration
-public class DefaultConfigClassInheritedTestsConfig {
+public class BeanOverridingDefaultConfigClassesInheritedTestsConfig {
 
 	@Bean
-	public Pet pet() {
-		return new Pet("Fido");
+	public Employee employee() {
+		Employee employee = new Employee();
+		employee.setName("Yoda");
+		employee.setAge(900);
+		employee.setCompany("The Force");
+		return employee;
 	}
 
 }

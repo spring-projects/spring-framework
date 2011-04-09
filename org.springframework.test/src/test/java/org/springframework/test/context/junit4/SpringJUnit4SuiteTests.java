@@ -22,8 +22,8 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.test.context.ClassLevelDirtiesContextTests;
 import org.springframework.test.context.SpringRunnerContextCacheTests;
 import org.springframework.test.context.junit4.annotation.AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests;
-import org.springframework.test.context.junit4.annotation.DefaultConfigClassBaseTests;
-import org.springframework.test.context.junit4.annotation.DefaultConfigClassInheritedTests;
+import org.springframework.test.context.junit4.annotation.DefaultConfigClassesBaseTests;
+import org.springframework.test.context.junit4.annotation.DefaultConfigClassesInheritedTests;
 import org.springframework.test.context.junit4.orm.HibernateSessionFlushingTests;
 
 /**
@@ -52,8 +52,8 @@ StandardJUnit4FeaturesTests.class,//
 	StandardJUnit4FeaturesSpringRunnerTests.class,//
 	SpringJUnit47ClassRunnerRuleTests.class,//
 	AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
-	DefaultConfigClassBaseTests.class,//
-	DefaultConfigClassInheritedTests.class,//
+	DefaultConfigClassesBaseTests.class,//
+	DefaultConfigClassesInheritedTests.class,//
 	ExpectedExceptionSpringRunnerTests.class,//
 	TimedSpringRunnerTests.class,//
 	RepeatedSpringRunnerTests.class,//
