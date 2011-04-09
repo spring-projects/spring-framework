@@ -20,24 +20,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
- * <p>
  * JUnit 4 based unit test for verifying support for the
  * {@link ContextConfiguration#inheritLocations() inheritLocations} flag of
  * {@link ContextConfiguration @ContextConfiguration} indirectly proposed in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3896"
  * target="_blank">SPR-3896</a>.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
  */
-@ContextConfiguration(locations = { "DefaultLocationsInheritedTests-context.xml" })
+@ContextConfiguration("DefaultLocationsInheritedTests-context.xml")
 public class ExplicitLocationsInheritedTests extends ExplicitLocationsBaseTests {
 
 	@Autowired
