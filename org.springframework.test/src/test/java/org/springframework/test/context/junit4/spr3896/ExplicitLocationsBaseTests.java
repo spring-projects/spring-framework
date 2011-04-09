@@ -21,29 +21,23 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
 /**
- * <p>
  * JUnit 4 based unit test for verifying support for the
  * {@link ContextConfiguration#inheritLocations() inheritLocations} flag of
  * {@link ContextConfiguration @ContextConfiguration} indirectly proposed in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3896"
  * target="_blank">SPR-3896</a>.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "DefaultLocationsBaseTests-context.xml" })
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class })
+@ContextConfiguration("DefaultLocationsBaseTests-context.xml")
 public class ExplicitLocationsBaseTests {
 
 	@Autowired

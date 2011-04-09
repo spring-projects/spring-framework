@@ -21,18 +21,16 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * <p>
  * JUnit 4 based test suite for functionality proposed in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3896"
  * target="_blank">SPR-3896</a>.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
  */
 @RunWith(Suite.class)
 // Note: the following 'multi-line' layout is for enhanced code readability.
-@SuiteClasses( {
+@SuiteClasses({
 
 DefaultLocationsBaseTests.class,
 
