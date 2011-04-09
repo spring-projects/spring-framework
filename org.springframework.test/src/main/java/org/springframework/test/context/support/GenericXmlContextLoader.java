@@ -31,7 +31,7 @@ public class GenericXmlContextLoader extends AbstractGenericContextLoader {
 
 	/**
 	 * Create a new {@link XmlBeanDefinitionReader}.
-	 * @return a new XmlBeanDefinitionReader.
+	 * @return a new XmlBeanDefinitionReader
 	 * @see XmlBeanDefinitionReader
 	 */
 	@Override

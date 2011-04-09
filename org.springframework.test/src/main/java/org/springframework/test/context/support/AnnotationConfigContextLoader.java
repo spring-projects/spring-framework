@@ -21,11 +21,22 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.ContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * TODO Document AnnotationConfigContextLoader.
+ * Concrete implementation of {@link AbstractGenericContextLoader} which
+ * creates an {@link AnnotationConfigApplicationContext} and registers
+ * bean definitions from
+ * {@link org.springframework.context.annotation.Configuration configuration classes}.
+ * 
+ * <p>This <code>ContextLoader</code> supports class-based context configuration
+ * {@link #getResourceType() resources} as opposed to string-based resources.
+ * Consequently, <em>locations</em> (as discussed in the {@link ContextLoader}
+ * API and superclasses) are interpreted as fully qualified class names
+ * in the context of this class. The documentation and method parameters
+ * reflect this.
  * 
  * @author Sam Brannen
  * @since 3.1
@@ -46,16 +57,18 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	/**
 	 * Registers {@link org.springframework.context.annotation.Configuration configuration classes}
 	 * in the supplied {@link AnnotationConfigApplicationContext} from the specified
-	 * class names. Each class name must be the fully qualified class name of a
-	 * configuration class. The <code>AnnotationConfigApplicationContext</code>
-	 * assumes the responsibility of loading the appropriate bean definitions.
+	 * class names.
+	 * <p>Each class name must be the <em>fully qualified class name</em> of an
+	 * annotated configuration class, component, or feature specification. The
+	 * <code>AnnotationConfigApplicationContext</code> assumes the responsibility
+	 * of loading the appropriate bean definitions.
 	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}.
 	 * @param context the context in which the configuration classes should be registered
 	 * @param classNames the names of configuration classes to register in the context
 	 * @throws IllegalArgumentException if the supplied context is not an instance of
 	 * <code>AnnotationConfigApplicationContext</code> or if a supplied class name
 	 * does not represent a class
-	 * @see #createGenericApplicationContext
+	 * @see #createGenericApplicationContext()
 	 */
 	@Override
 	protected void loadBeanDefinitions(GenericApplicationContext context, String... classNames) {
@@ -111,16 +124,18 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * Returns the supplied <code>locations</code> unmodified.
+	 * Returns the supplied class names unmodified.
 	 */
 	@Override
-	protected String[] modifyLocations(Class<?> clazz, String... locations) {
-		return locations;
+	protected String[] modifyLocations(Class<?> clazz, String... classNames) {
+		return classNames;
 	}
 
 	/**
 	 * Returns &quot;Config</code>&quot;; intended to be used as a suffix
-	 * to be appended to the name of the test class.
+	 * to append to the name of the test class when generating default
+	 * configuration class names.
+	 * @see #generateDefaultLocations(Class)
 	 */
 	@Override
 	protected String getResourceSuffix() {
@@ -131,7 +146,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * Returns {@link ResourceType#CLASSES}.
 	 */
 	@Override
-	public ResourceType getResourceType() {
+	public final ResourceType getResourceType() {
 		return ResourceType.CLASSES;
 	}
 
