@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.TestBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.ui.ExtendedModelMap;
@@ -61,6 +62,12 @@ public class DefaultMethodReturnValueHandlerTests {
 		assertNull(mavContainer.getViewName());
 		assertTrue(mavContainer.getModel().isEmpty());
 	}
+	
+	@Test
+	public void returnSingleModelAttribute() throws Exception{
+		handler.handleReturnValue(new TestBean(), createMethodParam("singleModelAttribute"), mavContainer, webRequest);
+		assertTrue(mavContainer.containsAttribute("testBean"));
+	}
 
 	private MethodParameter createMethodParam(String methodName) throws Exception {
 		Method method = getClass().getDeclaredMethod(methodName);
@@ -74,6 +81,11 @@ public class DefaultMethodReturnValueHandlerTests {
 
 	@SuppressWarnings("unused")
 	private void voidReturnValue() {
+	}
+	
+	@SuppressWarnings("unused")
+	private TestBean singleModelAttribute() {
+		return null;
 	}
 	
 }

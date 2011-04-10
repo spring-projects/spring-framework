@@ -32,6 +32,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 
@@ -55,7 +56,7 @@ public class ServletRequestMethodArgumentResolverTests {
 		resolver = new ServletRequestMethodArgumentResolver();
 		supportedParams = getClass()
 				.getMethod("supportedParams", ServletRequest.class, MultipartRequest.class, HttpSession.class,
-						Principal.class, Locale.class, InputStream.class, Reader.class);
+						Principal.class, Locale.class, InputStream.class, Reader.class, WebRequest.class);
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
 	}
@@ -135,13 +136,24 @@ public class ServletRequestMethodArgumentResolverTests {
 		assertSame("Invalid result", webRequest.getRequest().getReader(), result);
 	}
 
+	@Test
+	public void webRequest() throws Exception {
+		MethodParameter webRequestParameter = new MethodParameter(supportedParams, 7);
+
+		assertTrue("WebRequest not supported", resolver.supportsParameter(webRequestParameter));
+
+		Object result = resolver.resolveArgument(webRequestParameter, null, webRequest, null);
+		assertSame("Invalid result", webRequest, result);
+	}
+
 	public void supportedParams(ServletRequest p0,
 								MultipartRequest p1,
 								HttpSession p2,
 								Principal p3,
 								Locale p4,
 								InputStream p5,
-								Reader p9) {
+								Reader p6,
+								WebRequest p7) {
 	}
 
 }

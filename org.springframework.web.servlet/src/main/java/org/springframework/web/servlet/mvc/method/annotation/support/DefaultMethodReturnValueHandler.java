@@ -79,10 +79,12 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 		else if (!BeanUtils.isSimpleProperty(returnValue.getClass())) {
 			String name = ModelFactory.getNameForReturnValue(returnValue, returnType);
 			mavContainer.addAttribute(name, returnValue);
+			return;
 		}
-
-		// should not happen
-		throw new UnsupportedOperationException();
+		else {
+			// should not happen
+			throw new UnsupportedOperationException();
+		}
 	}
 
 }
