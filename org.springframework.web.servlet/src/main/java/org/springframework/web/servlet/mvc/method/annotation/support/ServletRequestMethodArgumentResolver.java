@@ -29,6 +29,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartRequest;
@@ -43,7 +44,8 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> parameterType = parameter.getParameterType();
-		return ServletRequest.class.isAssignableFrom(parameterType) ||
+		return WebRequest.class.isAssignableFrom(parameterType) || 
+				ServletRequest.class.isAssignableFrom(parameterType) ||
 				MultipartRequest.class.isAssignableFrom(parameterType) ||
 				HttpSession.class.isAssignableFrom(parameterType) || Principal.class.isAssignableFrom(parameterType) ||
 				Locale.class.equals(parameterType) || InputStream.class.isAssignableFrom(parameterType) ||
@@ -61,6 +63,9 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 		Class<?> parameterType = parameter.getParameterType();
 
+		if (WebRequest.class.isAssignableFrom(parameterType)) {
+			return webRequest;
+		}
 		if (ServletRequest.class.isAssignableFrom(parameterType) ||
 				MultipartRequest.class.isAssignableFrom(parameterType)) {
 			Object nativeRequest = webRequest.getNativeRequest(parameterType);
