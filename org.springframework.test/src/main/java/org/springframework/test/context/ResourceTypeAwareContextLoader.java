@@ -20,9 +20,11 @@ package org.springframework.test.context;
  * Extension of the {@link ContextLoader} API for context loaders that
  * are aware of the type of context configuration resources that they
  * support.
+ * 
  * <p>Prior to Spring 3.1, context loaders supported only String-based
  * resource locations; as of Spring 3.1 context loaders may choose to
  * support either String-based or Class-based resources (but not both).
+ * 
  * <p>If a context loader does not implement this interface it is assumed
  * that the loader supports String-based resource locations.
  *
@@ -34,6 +36,7 @@ public interface ResourceTypeAwareContextLoader extends ContextLoader {
 	/**
 	 * Enumeration of context configuration resource types that a given
 	 * <code>ContextLoader</code> can support.
+	 * 
 	 * <p>The enum constants have a one-to-one correlation to attributes
 	 * of the {@link ContextConfiguration} annotation.
 	 */

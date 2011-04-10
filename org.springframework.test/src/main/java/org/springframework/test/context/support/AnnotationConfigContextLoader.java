@@ -58,10 +58,12 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * Registers {@link org.springframework.context.annotation.Configuration configuration classes}
 	 * in the supplied {@link AnnotationConfigApplicationContext} from the specified
 	 * class names.
+	 * 
 	 * <p>Each class name must be the <em>fully qualified class name</em> of an
 	 * annotated configuration class, component, or feature specification. The
 	 * <code>AnnotationConfigApplicationContext</code> assumes the responsibility
 	 * of loading the appropriate bean definitions.
+	 * 
 	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}.
 	 * @param context the context in which the configuration classes should be registered
 	 * @param classNames the names of configuration classes to register in the context
@@ -106,6 +108,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	/**
 	 * Generates the default {@link org.springframework.context.annotation.Configuration configuration class}
 	 * names array based on the supplied class.
+	 * 
 	 * <p>For example, if the supplied class is <code>com.example.MyTest</code>,
 	 * the generated array will contain a single string with a value of
 	 * &quot;com.example.MyTest<code>&lt;suffix&gt;</code>&quot;,

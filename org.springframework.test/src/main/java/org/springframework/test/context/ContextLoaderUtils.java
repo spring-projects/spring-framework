@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  * @see ContextLoader
  */
-public abstract class ContextLoaderUtils {
+abstract class ContextLoaderUtils {
 
 	// TODO Consider refactoring ContextLoaderUtils into a stateful
 	// ContextLoaderResolver.
@@ -55,6 +55,7 @@ public abstract class ContextLoaderUtils {
 	 * Resolves the {@link ContextLoader}
 	 * {@link Class} to use for the supplied {@link Class testClass} and
 	 * then instantiates and returns that <code>ContextLoader</code>.
+	 * 
 	 * <p>If the supplied <code>defaultContextLoaderClassName</code> is
 	 * <code>null</code> or <em>empty</em>, the <em>standard</em>
 	 * default context loader class name ({@value #STANDARD_DEFAULT_CONTEXT_LOADER_CLASS_NAME})
@@ -68,7 +69,7 @@ public abstract class ContextLoaderUtils {
 	 * <code>testClass</code> 
 	 * @see #resolveContextLoaderClass(Class, String)
 	 */
-	public static ContextLoader resolveContextLoader(Class<?> testClass, String defaultContextLoaderClassName) {
+	static ContextLoader resolveContextLoader(Class<?> testClass, String defaultContextLoaderClassName) {
 		Assert.notNull(testClass, "Test class must not be null");
 
 		if (!StringUtils.hasText(defaultContextLoaderClassName)) {
@@ -156,6 +157,7 @@ public abstract class ContextLoaderUtils {
 	 * {@link Class class}, using the supplied {@link ContextLoader} to
 	 * {@link ContextLoader#processLocations(Class, String...) process} the
 	 * locations.
+	 * 
 	 * <p>Note that the {@link ContextConfiguration#inheritLocations()
 	 * inheritLocations} flag of {@link ContextConfiguration
 	 * &#064;ContextConfiguration} will be taken into consideration.
@@ -171,7 +173,7 @@ public abstract class ContextLoaderUtils {
 	 * @throws IllegalArgumentException if {@link ContextConfiguration
 	 * &#064;ContextConfiguration} is not <em>present</em> on the supplied class
 	 */
-	public static String[] resolveContextLocations(ContextLoader contextLoader, Class<?> clazz) {
+	static String[] resolveContextLocations(ContextLoader contextLoader, Class<?> clazz) {
 		Assert.notNull(contextLoader, "ContextLoader must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 
@@ -210,6 +212,7 @@ public abstract class ContextLoaderUtils {
 
 	/**
 	 * Strategy interface for resolving application context resource locations.
+	 * 
 	 * <p>The semantics of the resolved locations are implementation-dependent.
 	 */
 	private static interface LocationsResolver {
@@ -236,6 +239,7 @@ public abstract class ContextLoaderUtils {
 		 * Resolves path-based resources from the {@link ContextConfiguration#locations() locations}
 		 * and {@link ContextConfiguration#value() value} attributes of the supplied
 		 * {@link ContextConfiguration} annotation.
+		 * 
 		 * <p>Ignores the {@link ContextConfiguration#classes() classes} attribute. 
 		 * @throws IllegalStateException if both the locations and value
 		 * attributes have been declared
@@ -270,6 +274,7 @@ public abstract class ContextLoaderUtils {
 		/**
 		 * Resolves class names from the {@link ContextConfiguration#classes() classes}
 		 * attribute of the supplied {@link ContextConfiguration} annotation.
+		 * 
 		 * <p>Ignores the {@link ContextConfiguration#locations() locations}
 		 * and {@link ContextConfiguration#value() value} attributes.
 		 */
