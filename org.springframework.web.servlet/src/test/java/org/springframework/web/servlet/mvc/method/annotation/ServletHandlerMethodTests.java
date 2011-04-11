@@ -138,10 +138,10 @@ import org.springframework.web.util.NestedServletException;
 import static org.junit.Assert.*;
 
 /**
- * The origin of this test fixture is {@link ServletHandlerMethodTests}. The tests were adapted to run against 
- * the HandlerMethod infrastructure rather than against the DefaultAnnotationHandlerMapping, the 
- * AnnotationMethodHandlerAdapter, and the AnnotationMethodHandlerExceptionResolver. 
- * Tests that are not supported with HandlerMethod processing have been deleted and are listed at the bottom. 
+ * The origin of this test fixture is {@link ServletHandlerMethodTests} with tests in this class adapted to run 
+ * against the HandlerMethod infrastructure rather than against the DefaultAnnotationHandlerMapping, the 
+ * AnnotationMethodHandlerAdapter, and the AnnotationMethodHandlerExceptionResolver. Tests that are not 
+ * supported are listed at the bottom.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1

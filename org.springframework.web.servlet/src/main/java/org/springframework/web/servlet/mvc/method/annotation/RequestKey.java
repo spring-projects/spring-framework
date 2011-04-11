@@ -259,12 +259,15 @@ public final class RequestKey {
 	}
 
 	private String getMatchingPattern(String pattern, String lookupPath, PathMatcher pathMatcher) {
-		if (pattern.equals(lookupPath) || pathMatcher.match(pattern, lookupPath)) {
+		if (pattern.equals(lookupPath)) {
 			return pattern;
 		}
 		boolean hasSuffix = pattern.indexOf('.') != -1;
 		if (!hasSuffix && pathMatcher.match(pattern + ".*", lookupPath)) {
 			return pattern + ".*";
+		}
+		if (pathMatcher.match(pattern, lookupPath)) {
+			return pattern;
 		}
 		boolean endsWithSlash = pattern.endsWith("/");
 		if (!endsWithSlash && pathMatcher.match(pattern + "/", lookupPath)) {
