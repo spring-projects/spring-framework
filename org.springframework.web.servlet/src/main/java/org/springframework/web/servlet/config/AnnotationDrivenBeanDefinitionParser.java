@@ -16,13 +16,20 @@
 
 package org.springframework.web.servlet.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.context.config.AbstractSpecificationBeanDefinitionParser;
 import org.springframework.context.config.FeatureSpecification;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.DomUtils;
+import org.springframework.web.bind.support.WebArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 import org.w3c.dom.Element;
 
 /**
@@ -63,14 +70,15 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractSpecificationBeanDefi
 		}
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "argument-resolvers");
 		if (resolversElement != null) {
-			spec.argumentResolvers(extractBeanSubElements(resolversElement, parserContext));
+			ManagedList<BeanDefinitionHolder> beanDefs = extractBeanSubElements(resolversElement, parserContext);
+			spec.argumentResolvers(wrapWebArgumentResolverBeanDefs(beanDefs));
 		}
 
 		return spec;
 	}
 
-	private ManagedList<? super Object> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
-		ManagedList<? super Object> list = new ManagedList<Object>();
+	private ManagedList<BeanDefinitionHolder> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
+		ManagedList<BeanDefinitionHolder> list = new ManagedList<BeanDefinitionHolder>();
 		list.setSource(parserContext.extractSource(parentElement));
 		for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean")) {
 			BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(beanElement);
@@ -80,4 +88,23 @@ class AnnotationDrivenBeanDefinitionParser extends AbstractSpecificationBeanDefi
 		return list;
 	}
 
+	private ManagedList<BeanDefinitionHolder> wrapWebArgumentResolverBeanDefs(List<BeanDefinitionHolder> beanDefs) {
+		ManagedList<BeanDefinitionHolder> result = new ManagedList<BeanDefinitionHolder>();
+		
+		for (BeanDefinitionHolder beanDef : beanDefs) {
+			String className = beanDef.getBeanDefinition().getBeanClassName();
+			Class<?> clazz = ClassUtils.resolveClassName(className, ClassUtils.getDefaultClassLoader());
+			
+			if (WebArgumentResolver.class.isAssignableFrom(clazz)) {
+				RootBeanDefinition adapter = new RootBeanDefinition(ServletWebArgumentResolverAdapter.class);
+				adapter.getConstructorArgumentValues().addIndexedArgumentValue(0, beanDef);
+				result.add(new BeanDefinitionHolder(adapter, beanDef.getBeanName() + "Adapter"));
+			}
+			else {
+				result.add(beanDef);
+			}
+		}
+		
+		return result;
+	}
 }

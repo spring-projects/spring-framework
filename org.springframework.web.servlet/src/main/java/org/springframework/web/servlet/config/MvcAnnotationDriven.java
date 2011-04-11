@@ -15,6 +15,7 @@
  */
 package org.springframework.web.servlet.config;
 
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.ProblemCollector;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.context.config.AbstractFeatureSpecification;
@@ -145,8 +146,8 @@ public final class MvcAnnotationDriven extends AbstractFeatureSpecification {
 		return this;
 	}
 
-	void messageConverters(ManagedList<? super Object> messageConverters) {
-		this.messageConverters = messageConverters;
+	void messageConverters(ManagedList<BeanDefinitionHolder> converterBeanDefinitions) {
+		this.messageConverters.addAll(converterBeanDefinitions);
 	}
 
 	ManagedList<?> messageConverters() {
@@ -183,8 +184,8 @@ public final class MvcAnnotationDriven extends AbstractFeatureSpecification {
 		return this;
 	}
 
-	void argumentResolvers(ManagedList<? super Object> argumentResolvers) {
-		this.argumentResolvers = argumentResolvers;
+	void argumentResolvers(ManagedList<BeanDefinitionHolder> resolverBeanDefinitions) {
+		this.argumentResolvers.addAll(resolverBeanDefinitions);
 	}
 
 	ManagedList<?> argumentResolvers() {
