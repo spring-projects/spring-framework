@@ -163,7 +163,6 @@ public class RequestKeyTests {
 		expected = new RequestKey(asList("/foo", "/foo*", "/**"), null);
 
 		assertEquals("Matched patterns are sorted with best match at the top", expected, match);
-
 	}
 
 	@Test
