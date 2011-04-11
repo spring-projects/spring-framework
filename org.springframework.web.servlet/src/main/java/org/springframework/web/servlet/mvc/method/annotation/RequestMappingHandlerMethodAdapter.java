@@ -93,23 +93,23 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodR
 import org.springframework.web.util.WebUtils;
 
 /**
- * A {@link AbstractHandlerMethodAdapter} variant with support for invoking {@link RequestMapping} handler methods.
+ * An {@link AbstractHandlerMethodAdapter} variant with support for {@link RequestMapping} handler methods.
  * 
- * <p>Invoking a {@link RequestMapping} method typically involves the invocation of other handler methods such as 
- * {@link ModelAttribute} methods for contributing attributes to the model and {@link InitBinder} methods for 
- * initializing {@link WebDataBinder} instances for data binding and type conversion purposes.
+ * <p>Processing a {@link RequestMapping} method typically involves the invocation of {@link ModelAttribute} 
+ * methods for contributing attributes to the model and {@link InitBinder} methods for initializing 
+ * {@link WebDataBinder} instances for data binding and type conversion purposes.
  * 
- * <p>{@link InvocableHandlerMethod} is the key contributing class that helps with the invocation of any handler 
- * method after resolving its arguments through a set of {@link HandlerMethodArgumentResolver}s. 
- * {@link ServletInvocableHandlerMethod} on the other hand, handles the return value through a set of 
- * {@link HandlerMethodReturnValueHandler}s resulting in a {@link ModelAndView} when view resolution applies.
+ * <p>{@link InvocableHandlerMethod} is the key contributor that helps with the invocation of handler 
+ * methods of all types resolving their arguments through registered {@link HandlerMethodArgumentResolver}s. 
+ * {@link ServletInvocableHandlerMethod} on the other hand adds handling of the return value for {@link RequestMapping}
+ * methods through registered {@link HandlerMethodReturnValueHandler}s resulting in a {@link ModelAndView}. 
  * 
- * <p>Specifically assisting with the invocation of {@link ModelAttribute} methods is the {@link ModelFactory} while 
- * the invocation of {@link InitBinder} methods is done with the help of the {@link InitBinderMethodDataBinderFactory},
- * which is passed on to {@link HandlerMethodArgumentResolver}s where data binder instances are needed.
+ * <p>{@link ModelFactory} is another contributor that assists with the invocation of all {@link ModelAttribute} 
+ * methods to populate a model while {@link InitBinderMethodDataBinderFactory} assists with the invocation of 
+ * {@link InitBinder} methods for initializing data binder instances when needed.
  * 
- * <p>This class is the central point that assembles all of the above mentioned contributors and drives them while
- * also invoking the actual {@link RequestMapping} handler method through a {@link ServletInvocableHandlerMethod}.  
+ * <p>This class is the central point that assembles all of mentioned contributors and invokes the actual 
+ * {@link RequestMapping} handler method through a {@link ServletInvocableHandlerMethod}.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -121,11 +121,15 @@ import org.springframework.web.util.WebUtils;
 public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAdapter implements BeanFactoryAware,
 		InitializingBean {
 
-	private WebArgumentResolver[] customArgumentResolvers;
+	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = 
+		new ArrayList<HandlerMethodArgumentResolver>();
 
-	private ModelAndViewResolver[] customModelAndViewResolvers;
+	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers = 
+		new ArrayList<HandlerMethodReturnValueHandler>();
+	
+	private final List<ModelAndViewResolver> modelAndViewResolvers = new ArrayList<ModelAndViewResolver>();
 
-	private HttpMessageConverter<?>[] messageConverters;
+	private List<HttpMessageConverter<?>> messageConverters;
 
 	private WebBindingInitializer webBindingInitializer;
 
@@ -160,45 +164,118 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316
 		
-		this.messageConverters = new HttpMessageConverter[] { new ByteArrayHttpMessageConverter(),
-				stringHttpMessageConverter, new SourceHttpMessageConverter<Source>(),
-				new XmlAwareFormHttpMessageConverter() };
+		messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(new ByteArrayHttpMessageConverter());
+		messageConverters.add(stringHttpMessageConverter);
+		messageConverters.add(new SourceHttpMessageConverter<Source>());
+		messageConverters.add(new XmlAwareFormHttpMessageConverter());
 	}
 
 	/**
-	 * Set one or more custom WebArgumentResolvers to use for special method parameter types.
-	 * <p>Any such custom WebArgumentResolver will kick in first, having a chance to resolve
-	 * an argument value before the standard argument handling kicks in.
-	 * <p>Note: this is provided for backward compatibility. The preferred way to do this is to 
-	 * implement a {@link HandlerMethodArgumentResolver}.
+	 * Set one or more custom argument resolvers to use with {@link RequestMapping}, {@link ModelAttribute}, and
+	 * {@link InitBinder} methods. Custom argument resolvers are given a chance to resolve argument values 
+	 * ahead of the standard argument resolvers registered by default.
+	 * <p>Argument resolvers of type {@link HandlerMethodArgumentResolver} and {@link WebArgumentResolver} are
+	 * accepted with instances of the latter adapted via {@link ServletWebArgumentResolverAdapter}. For new
+	 * implementations {@link HandlerMethodArgumentResolver} should be preferred over {@link WebArgumentResolver}.
 	 */
-	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
-		this.customArgumentResolvers = argumentResolvers;
+	public void setCustomArgumentResolvers(List<?> argumentResolvers) {
+		if (argumentResolvers == null) {
+			return;
+		}
+		List<HandlerMethodArgumentResolver> adaptedResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		for (Object resolver : argumentResolvers) {
+			if (resolver instanceof WebArgumentResolver) {
+				adaptedResolvers.add(new ServletWebArgumentResolverAdapter((WebArgumentResolver) resolver));
+			}
+			else if (resolver instanceof HandlerMethodArgumentResolver) {
+				adaptedResolvers.add((HandlerMethodArgumentResolver) resolver);
+			}
+			else {
+				throw new IllegalArgumentException(
+						"An argument resolver must be a HandlerMethodArgumentResolver or a WebArgumentResolver");
+			}
+		}
+		this.customArgumentResolvers.addAll(adaptedResolvers);
+	}
+	
+	/**
+	 * Set the argument resolvers to use with {@link RequestMapping} and {@link ModelAttribute} methods. 
+	 * This is an optional property providing full control over all argument resolvers in contrast to  
+	 * {@link #setCustomArgumentResolvers(List)}, which does not override default registrations.
+	 * @param argumentResolvers argument resolvers for {@link RequestMapping} and {@link ModelAttribute} methods
+	 */
+	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		if (argumentResolvers != null) {
+			this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
+			registerArgumentResolvers(argumentResolvers);
+		}
+	}
+	
+	/**
+	 * Set the argument resolvers to use with {@link InitBinder} methods. This is an optional property 
+	 * providing full control over all argument resolvers for {@link InitBinder} methods in contrast to   
+	 * {@link #setCustomArgumentResolvers(List)}, which does not override default registrations.
+	 * @param argumentResolvers argument resolvers for {@link InitBinder} methods
+	 */
+	public void setInitBinderArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		if (argumentResolvers != null) {
+			this.initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
+			registerInitBinderArgumentResolvers(argumentResolvers);
+		}
 	}
 
 	/**
-	 * Set one or more custom ModelAndViewResolvers to use for special method return types.
-	 * <p>Any such custom ModelAndViewResolver will kick in first, having a chance to resolve
-	 * a return value before the standard ModelAndView handling kicks in.
-	 * <p>Note: this is provided for backward compatibility. The preferred way to do this is to 
-	 * implement a {@link HandlerMethodReturnValueHandler}.
+	 * Set custom return value handlers to use to handle the return values of {@link RequestMapping} methods. 
+	 * Custom return value handlers are given a chance to handle a return value before the standard 
+	 * return value handlers registered by default.
+	 * @param returnValueHandlers custom return value handlers for {@link RequestMapping} methods  
 	 */
-	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
-		this.customModelAndViewResolvers = customModelAndViewResolvers;
+	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+		if (returnValueHandlers != null) {
+			this.customReturnValueHandlers.addAll(returnValueHandlers);
+		}
+	}
+
+	/**
+	 * Set the {@link HandlerMethodReturnValueHandler}s to use to use with {@link RequestMapping} methods. 
+	 * This is an optional property providing full control over all return value handlers in contrast to   
+	 * {@link #setCustomReturnValueHandlers(List)}, which does not override default registrations. 
+	 * @param returnValueHandlers the return value handlers for {@link RequestMapping} methods
+	 */
+	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+		if (returnValueHandlers != null) {
+			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+			registerReturnValueHandlers(returnValueHandlers);
+		}
+	}
+
+	/**
+	 * Set custom {@link ModelAndViewResolver}s to use to handle the return values of {@link RequestMapping} methods.
+	 * <p>Custom {@link ModelAndViewResolver}s are provided for backward compatibility and are invoked at the very, 
+	 * from the {@link DefaultMethodReturnValueHandler}, after all standard {@link HandlerMethodReturnValueHandler}s 
+	 * have been given a chance. This is because {@link ModelAndViewResolver}s do not have a method to indicate 
+	 * if they support a given return type or not. For this reason it is recommended to use 
+	 * {@link HandlerMethodReturnValueHandler} and {@link #setCustomReturnValueHandlers(List)} instead.
+	 */
+	public void setModelAndViewResolvers(List<ModelAndViewResolver> modelAndViewResolvers) {
+		if (modelAndViewResolvers != null) {
+			this.modelAndViewResolvers.addAll(modelAndViewResolvers);
+		}
 	}
 
 	/**
 	 * Set the message body converters to use.
 	 * <p>These converters are used to convert from and to HTTP requests and responses.
 	 */
-	public void setMessageConverters(HttpMessageConverter<?>[] messageConverters) {
+	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = messageConverters;
 	}
 
 	/**
 	 * Return the message body converters that this adapter has been configured with.
 	 */
-	public HttpMessageConverter<?>[] getMessageConverters() {
+	public List<HttpMessageConverter<?>> getMessageConverters() {
 		return messageConverters;
 	}
 
@@ -263,42 +340,6 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 	
-	/**
-	 * Set the {@link HandlerMethodArgumentResolver}s to use to resolve argument values for {@link RequestMapping} 
-	 * and {@link ModelAttribute} methods. This is an optional property.
-	 * @param argumentResolvers the argument resolvers to use
-	 */
-	public void setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolver[] argumentResolvers) {
-		this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
-		for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
-			this.argumentResolvers.registerArgumentResolver(resolver);
-		}
-	}
-
-	/**
-	 * Set the {@link HandlerMethodReturnValueHandler}s to use to handle the return values of 
-	 * {@link RequestMapping} methods. This is an optional property.
-	 * @param returnValueHandlers the return value handlers to use
-	 */
-	public void setHandlerMethodReturnValueHandlers(HandlerMethodReturnValueHandler[] returnValueHandlers) {
-		this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
-		for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
-			this.returnValueHandlers.registerReturnValueHandler(handler);
-		}
-	}
-
-	/**
-	 * Set the {@link HandlerMethodArgumentResolver}s to use to resolve argument values for {@link InitBinder} 
-	 * methods. This is an optional property.
-	 * @param argumentResolvers the argument resolvers to use
-	 */
-	public void setInitBinderMethodArgumentResolvers(HandlerMethodArgumentResolver[] argumentResolvers) {
-		this.initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
-		for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
-			this.initBinderArgumentResolvers.registerArgumentResolver(resolver);
-		}
-	}
-	
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
@@ -306,90 +347,110 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	}
 
 	public void afterPropertiesSet() throws Exception {
-		initHandlerMethodArgumentResolvers();
-		initHandlerMethodReturnValueHandlers();
-		initBinderMethodArgumentResolvers();
+		if (argumentResolvers == null) {
+			argumentResolvers = new HandlerMethodArgumentResolverComposite();
+			registerArgumentResolvers(customArgumentResolvers);
+			registerArgumentResolvers(getDefaultArgumentResolvers(messageConverters, beanFactory));
+		}
+		if (returnValueHandlers == null) {
+			returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+			registerReturnValueHandlers(customReturnValueHandlers);
+			registerReturnValueHandlers(getDefaultReturnValueHandlers(messageConverters, modelAndViewResolvers));
+		}
+		if (initBinderArgumentResolvers == null) {
+			initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
+			registerInitBinderArgumentResolvers(customArgumentResolvers);
+			registerInitBinderArgumentResolvers(getDefaultInitBinderArgumentResolvers(beanFactory));
+		}
 	}
 
-	private void initHandlerMethodArgumentResolvers() {
-		if (argumentResolvers != null) {
-			return;
+	private void registerArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
+			this.argumentResolvers.registerArgumentResolver(resolver);
 		}
-		argumentResolvers = new HandlerMethodArgumentResolverComposite();
-		
-		// Annotation-based resolvers
-		argumentResolvers.registerArgumentResolver(new RequestParamMethodArgumentResolver(beanFactory, false));
-		argumentResolvers.registerArgumentResolver(new RequestParamMapMethodArgumentResolver());
-		argumentResolvers.registerArgumentResolver(new PathVariableMethodArgumentResolver(beanFactory));
-		argumentResolvers.registerArgumentResolver(new ServletModelAttributeMethodProcessor(false));
-		argumentResolvers.registerArgumentResolver(new RequestResponseBodyMethodProcessor(messageConverters));
-		argumentResolvers.registerArgumentResolver(new RequestHeaderMethodArgumentResolver(beanFactory));
-		argumentResolvers.registerArgumentResolver(new RequestHeaderMapMethodArgumentResolver());
-		argumentResolvers.registerArgumentResolver(new ServletCookieValueMethodArgumentResolver(beanFactory));
-		argumentResolvers.registerArgumentResolver(new ExpressionValueMethodArgumentResolver(beanFactory));
-
-		if (customArgumentResolvers != null) {
-			for (WebArgumentResolver customResolver : customArgumentResolvers) {
-				argumentResolvers.registerArgumentResolver(new ServletWebArgumentResolverAdapter(customResolver));
-			}
-		}
-		
-		// Type-based resolvers
-		argumentResolvers.registerArgumentResolver(new ServletRequestMethodArgumentResolver());
-		argumentResolvers.registerArgumentResolver(new ServletResponseMethodArgumentResolver());
-		argumentResolvers.registerArgumentResolver(new HttpEntityMethodProcessor(messageConverters));
-		argumentResolvers.registerArgumentResolver(new ModelMethodProcessor());
-		argumentResolvers.registerArgumentResolver(new ErrorsMethodArgumentResolver());
-		
-		// Default-mode resolution
-		argumentResolvers.registerArgumentResolver(new RequestParamMethodArgumentResolver(beanFactory, true));
-		argumentResolvers.registerArgumentResolver(new ServletModelAttributeMethodProcessor(true));
-	}	
-
-	private void initBinderMethodArgumentResolvers() {
-		if (initBinderArgumentResolvers != null) {
-			return;
-		}
-		initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
-		
-		// Annotation-based resolvers
-		initBinderArgumentResolvers.registerArgumentResolver(new RequestParamMethodArgumentResolver(beanFactory, false));
-		initBinderArgumentResolvers.registerArgumentResolver(new RequestParamMapMethodArgumentResolver());
-		initBinderArgumentResolvers.registerArgumentResolver(new PathVariableMethodArgumentResolver(beanFactory));
-		initBinderArgumentResolvers.registerArgumentResolver(new ExpressionValueMethodArgumentResolver(beanFactory));
-
-		if (customArgumentResolvers != null) {
-			for (WebArgumentResolver customResolver : customArgumentResolvers) {
-				initBinderArgumentResolvers.registerArgumentResolver(new ServletWebArgumentResolverAdapter(customResolver));
-			}
-		}
-
-		// Type-based resolvers
-		initBinderArgumentResolvers.registerArgumentResolver(new ServletRequestMethodArgumentResolver());
-		initBinderArgumentResolvers.registerArgumentResolver(new ServletResponseMethodArgumentResolver());
-		
-		// Default-mode resolution
-		initBinderArgumentResolvers.registerArgumentResolver(new RequestParamMethodArgumentResolver(beanFactory, true));
 	}
 
-	private void initHandlerMethodReturnValueHandlers() {
-		if (returnValueHandlers != null) {
-			return;
+	private void registerInitBinderArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
+			this.initBinderArgumentResolvers.registerArgumentResolver(resolver);
 		}
-		returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+	}
+	
+	private void registerReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+		for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
+			this.returnValueHandlers.registerReturnValueHandler(handler);
+		}
+	}
+
+	public static List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers(
+			List<HttpMessageConverter<?>> messageConverters, ConfigurableBeanFactory beanFactory) {
+		
+		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
+
+		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, false));
+		resolvers.add(new RequestParamMapMethodArgumentResolver());
+		resolvers.add(new PathVariableMethodArgumentResolver(beanFactory));
+		resolvers.add(new ServletModelAttributeMethodProcessor(false));
+		resolvers.add(new RequestResponseBodyMethodProcessor(messageConverters));
+		resolvers.add(new RequestHeaderMethodArgumentResolver(beanFactory));
+		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
+		resolvers.add(new ServletCookieValueMethodArgumentResolver(beanFactory));
+		resolvers.add(new ExpressionValueMethodArgumentResolver(beanFactory));
+
+		// Type-based resolvers
+		resolvers.add(new ServletRequestMethodArgumentResolver());
+		resolvers.add(new ServletResponseMethodArgumentResolver());
+		resolvers.add(new HttpEntityMethodProcessor(messageConverters));
+		resolvers.add(new ModelMethodProcessor());
+		resolvers.add(new ErrorsMethodArgumentResolver());
+		
+		// Default-mode resolution
+		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, true));
+		resolvers.add(new ServletModelAttributeMethodProcessor(true));
+		
+		return resolvers;
+	}
+
+	public static List<HandlerMethodArgumentResolver> getDefaultInitBinderArgumentResolvers(
+			ConfigurableBeanFactory beanFactory) {
+
+		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
+
+		// Annotation-based resolvers
+		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, false));
+		resolvers.add(new RequestParamMapMethodArgumentResolver());
+		resolvers.add(new PathVariableMethodArgumentResolver(beanFactory));
+		resolvers.add(new ExpressionValueMethodArgumentResolver(beanFactory));
+
+		// Type-based resolvers
+		resolvers.add(new ServletRequestMethodArgumentResolver());
+		resolvers.add(new ServletResponseMethodArgumentResolver());
+		
+		// Default-mode resolution
+		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, true));
+		
+		return resolvers;
+	}
+	
+	public static List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers(
+			List<HttpMessageConverter<?>> messageConverters, List<ModelAndViewResolver> modelAndViewResolvers) {
+		
+		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
 		
 		// Annotation-based handlers
-		returnValueHandlers.registerReturnValueHandler(new RequestResponseBodyMethodProcessor(messageConverters));
-		returnValueHandlers.registerReturnValueHandler(new ModelAttributeMethodProcessor(false));
+		handlers.add(new RequestResponseBodyMethodProcessor(messageConverters));
+		handlers.add(new ModelAttributeMethodProcessor(false));
 		
 		// Type-based handlers
-		returnValueHandlers.registerReturnValueHandler(new ModelAndViewMethodReturnValueHandler());
-		returnValueHandlers.registerReturnValueHandler(new ModelMethodProcessor());
-		returnValueHandlers.registerReturnValueHandler(new ViewMethodReturnValueHandler());
-		returnValueHandlers.registerReturnValueHandler(new HttpEntityMethodProcessor(messageConverters));
+		handlers.add(new ModelAndViewMethodReturnValueHandler());
+		handlers.add(new ModelMethodProcessor());
+		handlers.add(new ViewMethodReturnValueHandler());
+		handlers.add(new HttpEntityMethodProcessor(messageConverters));
 		
 		// Default handler
-		returnValueHandlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(customModelAndViewResolvers));
+		handlers.add(new DefaultMethodReturnValueHandler(modelAndViewResolvers));
+		
+		return handlers;
 	}
 
 	@Override

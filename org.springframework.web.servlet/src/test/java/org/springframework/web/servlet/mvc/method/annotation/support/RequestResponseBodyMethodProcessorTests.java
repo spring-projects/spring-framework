@@ -27,7 +27,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +47,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.mvc.method.annotation.support.RequestResponseBodyMethodProcessor;
 
 /**
  * @author Arjen Poutsma
@@ -74,7 +75,11 @@ public class RequestResponseBodyMethodProcessorTests {
 	@Before
 	public void setUp() throws Exception {
 		messageConverter = createMock(HttpMessageConverter.class);
-		processor = new RequestResponseBodyMethodProcessor(messageConverter);
+		
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(messageConverter);
+		processor = new RequestResponseBodyMethodProcessor(messageConverters);
+		
 		Method handle = getClass().getMethod("handle", String.class, Integer.TYPE);
 		stringParameter = new MethodParameter(handle, 0);
 		intParameter = new MethodParameter(handle, 1);

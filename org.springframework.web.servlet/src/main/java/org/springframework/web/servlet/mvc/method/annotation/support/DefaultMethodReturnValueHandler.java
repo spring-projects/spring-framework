@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
@@ -41,10 +43,22 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
  */
 public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 	
-	private final ModelAndViewResolver[] customModelAndViewResolvers;
+	private final List<ModelAndViewResolver> modelAndViewResolvers = new ArrayList<ModelAndViewResolver>();
 
-	public DefaultMethodReturnValueHandler(ModelAndViewResolver[] customResolvers) {
-		this.customModelAndViewResolvers = (customResolvers != null) ? customResolvers : new ModelAndViewResolver[] {};
+	/**
+	 * Create a {@link DefaultMethodReturnValueHandler} instance without {@link ModelAndViewResolver}s.
+	 */
+	public DefaultMethodReturnValueHandler() {
+		this(null);
+	}
+
+	/**
+	 * Create a {@link DefaultMethodReturnValueHandler} with a list of {@link ModelAndViewResolver}s.
+	 */
+	public DefaultMethodReturnValueHandler(List<ModelAndViewResolver> modelAndViewResolvers) {
+		if (modelAndViewResolvers != null) {
+			this.modelAndViewResolvers.addAll(modelAndViewResolvers);
+		}
 	}
 
 	public boolean supportsReturnType(MethodParameter returnType) {
@@ -60,7 +74,7 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 								  ModelAndViewContainer mavContainer, 
 								  NativeWebRequest webRequest) throws Exception {
 
-		for (ModelAndViewResolver resolver : this.customModelAndViewResolvers) {
+		for (ModelAndViewResolver resolver : modelAndViewResolvers) {
 			Class<?> handlerType = returnType.getDeclaringClass();
 			Method method = returnType.getMethod();
 			ExtendedModelMap extModel = (ExtendedModelMap) mavContainer.getModel();

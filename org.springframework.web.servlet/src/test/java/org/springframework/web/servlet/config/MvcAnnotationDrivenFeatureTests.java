@@ -19,6 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -35,8 +37,10 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 
 /**
  * Integration tests for the {@link MvcAnnotationDriven} feature specification.
@@ -46,6 +50,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  */
 public class MvcAnnotationDrivenFeatureTests {
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testMessageCodesResolver() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -58,16 +63,17 @@ public class MvcAnnotationDrivenFeatureTests {
 		MessageCodesResolver resolver = ((ConfigurableWebBindingInitializer) initializer).getMessageCodesResolver();
 		assertNotNull(resolver);
 		assertEquals("test.foo.bar", resolver.resolveMessageCodes("foo", "bar")[0]);
-		Object argResolvers = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
-		assertNotNull(argResolvers);
-		WebArgumentResolver[] argResolversArray = (WebArgumentResolver[]) argResolvers;
-		assertEquals(1, argResolversArray.length);
-		assertTrue(argResolversArray[0] instanceof TestWebArgumentResolver);
+		Object value = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+		assertNotNull(value);
+		List<HandlerMethodArgumentResolver> resolvers = (List<HandlerMethodArgumentResolver>) value;
+		assertEquals(2, resolvers.size());
+		assertTrue(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter);
+		assertTrue(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver);
 		Object converters = new DirectFieldAccessor(adapter).getPropertyValue("messageConverters");
 		assertNotNull(converters);
-		HttpMessageConverter<?>[] convertersArray = (HttpMessageConverter<?>[]) converters;
-		assertTrue("Default converters are registered in addition to the custom one", convertersArray.length > 1);
-		assertTrue(convertersArray[0] instanceof StringHttpMessageConverter);
+		List<HttpMessageConverter<?>> convertersArray = (List<HttpMessageConverter<?>>) converters;
+		assertTrue("Default converters are registered in addition to the custom one", convertersArray.size() > 1);
+		assertTrue(convertersArray.get(0) instanceof StringHttpMessageConverter);
 	}
 
 }
@@ -81,7 +87,8 @@ class MvcFeature {
 			.messageCodesResolver(mvcBeans.messageCodesResolver())
 			.validator(mvcBeans.validator())
 			.messageConverters(new StringHttpMessageConverter())
-			.argumentResolvers(new TestWebArgumentResolver());
+			.argumentResolvers(new TestWebArgumentResolver())
+			.argumentResolvers(new TestHandlerMethodArgumentResolver());
 	}
 }
 

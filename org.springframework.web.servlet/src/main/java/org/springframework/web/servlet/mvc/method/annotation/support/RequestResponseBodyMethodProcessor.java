@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,7 +48,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class RequestResponseBodyMethodProcessor extends AbstractMessageConverterMethodProcessor {
 
-	public RequestResponseBodyMethodProcessor(HttpMessageConverter<?>... messageConverters) {
+	public RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
 		super(messageConverters);
 	}
 

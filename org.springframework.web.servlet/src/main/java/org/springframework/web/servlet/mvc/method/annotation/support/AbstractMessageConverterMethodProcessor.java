@@ -46,9 +46,9 @@ public abstract class AbstractMessageConverterMethodProcessor
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final HttpMessageConverter<?>[] messageConverters;
+	private final List<HttpMessageConverter<?>> messageConverters;
 
-	protected AbstractMessageConverterMethodProcessor(HttpMessageConverter<?>... messageConverters) {
+	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notNull(messageConverters, "'messageConverters' must not be null");
 		this.messageConverters = messageConverters;
 	}

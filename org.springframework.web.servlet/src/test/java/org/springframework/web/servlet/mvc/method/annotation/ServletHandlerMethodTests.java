@@ -1079,7 +1079,7 @@ public class ServletHandlerMethodTests {
 			public void register(GenericWebApplicationContext wac) {
 				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
 				ModelAndViewResolver[] mavResolvers = new ModelAndViewResolver[] {new MyModelAndViewResolver()};
-				adapterDef.getPropertyValues().add("customModelAndViewResolvers", mavResolvers);
+				adapterDef.getPropertyValues().add("modelAndViewResolvers", mavResolvers);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 			}
 		});
