@@ -40,7 +40,9 @@ import org.springframework.http.HttpMethod;
  * @author Arjen Poutsma
  * @since 3.0
  * @see CommonsClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
+ * @deprecated In favor of {@link HttpComponentsClientHttpRequest}
  */
+@Deprecated
 final class CommonsClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	private final HttpClient httpClient;

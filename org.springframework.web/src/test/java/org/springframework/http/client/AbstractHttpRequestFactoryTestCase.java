@@ -67,7 +67,6 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("OPTIONS")), "/methods/options");
 		jettyContext.addServlet(new ServletHolder(new PostServlet()), "/methods/post");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("PUT")), "/methods/put");
-		jettyContext.addServlet(new ServletHolder(new RedirectServlet("/status/ok")), "/redirect");
 		jettyServer.start();
 	}
 
@@ -170,35 +169,6 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		}
 	}
 
-	@Test
-	public void redirect() throws Exception {
-		ClientHttpResponse response = null;
-		try {
-			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/redirect"), HttpMethod.PUT);
-			response = request.execute();
-			assertEquals("Invalid Location value", new URI(baseUrl + "/status/ok"),
-					response.getHeaders().getLocation());
-
-		}
-		finally {
-			if (response != null) {
-				response.close();
-				response = null;
-			}
-		}
-		try {
-			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/redirect"), HttpMethod.GET);
-			response = request.execute();
-			assertNull("Invalid Location value", response.getHeaders().getLocation());
-
-		}
-		finally {
-			if (response != null) {
-				response.close();
-			}
-		}
-	}
-
 	/** Servlet that sets a given status code. */
 	private static class StatusServlet extends GenericServlet {
 
@@ -278,27 +248,6 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 				}
 			}
 			FileCopyUtils.copy(request.getInputStream(), response.getOutputStream());
-		}
-	}
-
-	private static class RedirectServlet extends GenericServlet {
-
-		private final String location;
-
-		private RedirectServlet(String location) {
-			this.location = location;
-		}
-
-		@Override
-		public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-			HttpServletRequest request = (HttpServletRequest) req;
-			HttpServletResponse response = (HttpServletResponse) res;
-			response.setStatus(HttpServletResponse.SC_SEE_OTHER);
-			StringBuilder builder = new StringBuilder();
-			builder.append(request.getScheme()).append("://");
-			builder.append(request.getServerName()).append(':').append(request.getServerPort());
-			builder.append(location);
-			response.addHeader("Location", builder.toString());
 		}
 	}
 
