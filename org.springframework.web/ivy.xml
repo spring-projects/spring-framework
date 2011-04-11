@@ -60,6 +60,8 @@
                     conf="optional, httpclient->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1"
                     conf="compile, commons-logging->compile"/>
+		<dependency org="org.apache.httpcomponents" name="com.springsource.org.apache.httpcomponents.httpclient" rev="4.1.1"
+                    conf="optional, httpclient->compile"/>
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15"
                     conf="optional, log4j->compile"/>
         <dependency org="org.codehaus.jackson" name="com.springsource.org.codehaus.jackson.mapper" rev="1.4.2"
