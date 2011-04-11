@@ -175,28 +175,13 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	 * Set one or more custom argument resolvers to use with {@link RequestMapping}, {@link ModelAttribute}, and
 	 * {@link InitBinder} methods. Custom argument resolvers are given a chance to resolve argument values 
 	 * ahead of the standard argument resolvers registered by default.
-	 * <p>Argument resolvers of type {@link HandlerMethodArgumentResolver} and {@link WebArgumentResolver} are
-	 * accepted with instances of the latter adapted via {@link ServletWebArgumentResolverAdapter}. For new
-	 * implementations {@link HandlerMethodArgumentResolver} should be preferred over {@link WebArgumentResolver}.
+	 * <p>An existing {@link WebArgumentResolver} can either adapted with {@link ServletWebArgumentResolverAdapter} 
+	 * or preferably converted to a {@link HandlerMethodArgumentResolver} instead. 
 	 */
-	public void setCustomArgumentResolvers(List<?> argumentResolvers) {
-		if (argumentResolvers == null) {
-			return;
+	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		if (argumentResolvers != null) {
+			this.customArgumentResolvers.addAll(argumentResolvers);
 		}
-		List<HandlerMethodArgumentResolver> adaptedResolvers = new ArrayList<HandlerMethodArgumentResolver>();
-		for (Object resolver : argumentResolvers) {
-			if (resolver instanceof WebArgumentResolver) {
-				adaptedResolvers.add(new ServletWebArgumentResolverAdapter((WebArgumentResolver) resolver));
-			}
-			else if (resolver instanceof HandlerMethodArgumentResolver) {
-				adaptedResolvers.add((HandlerMethodArgumentResolver) resolver);
-			}
-			else {
-				throw new IllegalArgumentException(
-						"An argument resolver must be a HandlerMethodArgumentResolver or a WebArgumentResolver");
-			}
-		}
-		this.customArgumentResolvers.addAll(adaptedResolvers);
 	}
 	
 	/**
