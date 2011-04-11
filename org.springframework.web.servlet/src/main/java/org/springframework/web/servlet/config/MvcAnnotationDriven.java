@@ -30,6 +30,8 @@ import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.WebArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 
 /**
  * Specifies the Spring MVC "annotation-driven" container feature. The
@@ -167,9 +169,16 @@ public final class MvcAnnotationDriven extends AbstractFeatureSpecification {
 		return this.shouldRegisterDefaultMessageConverters;
 	}
 
+	public MvcAnnotationDriven argumentResolvers(HandlerMethodArgumentResolver... resolvers) {
+		for (HandlerMethodArgumentResolver resolver : resolvers) {
+			this.argumentResolvers.add(resolver);
+		}
+		return this;
+	}
+
 	public MvcAnnotationDriven argumentResolvers(WebArgumentResolver... resolvers) {
 		for (WebArgumentResolver resolver : resolvers) {
-			this.argumentResolvers.add(resolver);
+			this.argumentResolvers.add(new ServletWebArgumentResolverAdapter(resolver));
 		}
 		return this;
 	}

@@ -19,6 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
@@ -31,10 +33,14 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
+import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 
 /**
  * Test fixture for the configuration in mvc-config-annotation-driven.xml.
@@ -75,17 +81,19 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodExceptionResolver.class), false);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testArgumentResolvers() {
 		loadBeanDefinitions("mvc-config-argument-resolvers.xml");
 		RequestMappingHandlerMethodAdapter adapter = appContext.getBean(RequestMappingHandlerMethodAdapter.class);
 		assertNotNull(adapter);
-		Object resolvers = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
-		assertNotNull(resolvers);
-		assertTrue(resolvers instanceof WebArgumentResolver[]);
-		assertEquals(2, ((WebArgumentResolver[]) resolvers).length);
-		assertTrue(((WebArgumentResolver[]) resolvers)[0] instanceof TestWebArgumentResolver);
-		assertTrue(((WebArgumentResolver[]) resolvers)[1] instanceof TestWebArgumentResolver);
+		Object value = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+		assertNotNull(value);
+		assertTrue(value instanceof List);
+		List<HandlerMethodArgumentResolver> resolvers = (List<HandlerMethodArgumentResolver>) value;
+		assertEquals(2, resolvers.size());
+		assertTrue(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter);
+		assertTrue(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver);
 	}
 
 	private void loadBeanDefinitions(String fileName) {
@@ -95,20 +103,20 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		appContext.refresh();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void verifyMessageConverters(Object bean, boolean hasDefaultRegistrations) {
 		assertNotNull(bean);
-		Object converters = new DirectFieldAccessor(bean).getPropertyValue("messageConverters");
-		assertNotNull(converters);
-		assertTrue(converters instanceof HttpMessageConverter<?>[]);
+		Object value = new DirectFieldAccessor(bean).getPropertyValue("messageConverters");
+		assertNotNull(value);
+		assertTrue(value instanceof List);
+		List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) value; 
 		if (hasDefaultRegistrations) {
-			assertTrue("Default converters are registered in addition to custom ones",
-					((HttpMessageConverter<?>[]) converters).length > 2);
+			assertTrue("Default converters are registered in addition to custom ones", converters.size() > 2);
 		} else {
-			assertTrue("Default converters should not be registered",
-					((HttpMessageConverter<?>[]) converters).length == 2);
+			assertTrue("Default converters should not be registered", converters.size() == 2);
 		}
-		assertTrue(((HttpMessageConverter<?>[]) converters)[0] instanceof StringHttpMessageConverter);
-		assertTrue(((HttpMessageConverter<?>[]) converters)[1] instanceof ResourceHttpMessageConverter);
+		assertTrue(converters.get(0) instanceof StringHttpMessageConverter);
+		assertTrue(converters.get(1) instanceof ResourceHttpMessageConverter);
 	}
 
 }
@@ -119,6 +127,18 @@ class TestWebArgumentResolver implements WebArgumentResolver {
 		return null;
 	}
 
+}
+
+class TestHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
+
+	public boolean supportsParameter(MethodParameter parameter) {
+		return false;
+	}
+
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+		return null;
+	}
 }
 
 class TestMessageCodesResolver implements MessageCodesResolver {

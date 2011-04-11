@@ -27,7 +27,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -82,7 +84,10 @@ public class HttpEntityMethodProcessorTests {
 	@Before
 	public void setUp() throws Exception {
 		messageConverter = createMock(HttpMessageConverter.class);
-		processor = new HttpEntityMethodProcessor(messageConverter);
+		
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(messageConverter);
+		processor = new HttpEntityMethodProcessor(messageConverters);
 
 		Method handle1 = getClass().getMethod("handle1", HttpEntity.class, ResponseEntity.class, Integer.TYPE);
 		httpEntityParam = new MethodParameter(handle1, 0);
@@ -211,7 +216,9 @@ public class HttpEntityMethodProcessorTests {
 		responseHeaders.set("header", "headerValue");
 		ResponseEntity<String> returnValue = new ResponseEntity<String>(responseHeaders, HttpStatus.ACCEPTED);
 
-		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(new StringHttpMessageConverter());
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(new StringHttpMessageConverter());
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(messageConverters);
 		processor.handleReturnValue(returnValue, responseEntityReturnValue, mavContainer, request);
 
 		assertFalse(mavContainer.isResolveView());
@@ -224,7 +231,9 @@ public class HttpEntityMethodProcessorTests {
 		responseHeaders.set("header", "headerValue");
 		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.ACCEPTED);
 
-		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(new StringHttpMessageConverter());
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(new StringHttpMessageConverter());
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(messageConverters);
 		processor.handleReturnValue(returnValue, responseEntityReturnValue, mavContainer, request);
 
 		assertFalse(mavContainer.isResolveView());

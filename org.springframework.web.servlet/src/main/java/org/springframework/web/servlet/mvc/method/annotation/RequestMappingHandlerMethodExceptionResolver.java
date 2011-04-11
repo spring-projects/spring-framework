@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -80,9 +82,13 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodR
 public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandlerMethodExceptionResolver implements
 		InitializingBean {
 
-	private WebArgumentResolver[] customArgumentResolvers;
+	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = 
+		new ArrayList<HandlerMethodArgumentResolver>();
 
-	private HttpMessageConverter<?>[] messageConverters;
+	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers = 
+		new ArrayList<HandlerMethodReturnValueHandler>();
+
+	private List<HttpMessageConverter<?>> messageConverters;
 
 	private final Map<Class<?>, ExceptionMethodMapping> exceptionMethodMappingCache = 
 		new ConcurrentHashMap<Class<?>, ExceptionMethodMapping>();
@@ -99,95 +105,139 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316
 		
-		this.messageConverters = new HttpMessageConverter[] { new ByteArrayHttpMessageConverter(),
-				stringHttpMessageConverter, new SourceHttpMessageConverter<Source>(),
-				new XmlAwareFormHttpMessageConverter() };
+		messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		messageConverters.add(new ByteArrayHttpMessageConverter());
+		messageConverters.add(stringHttpMessageConverter);
+		messageConverters.add(new SourceHttpMessageConverter<Source>());
+		messageConverters.add(new XmlAwareFormHttpMessageConverter());
 	}
 
 	/**
-	 * Set one or more custom ArgumentResolvers to use for special method parameter types.
-	 * <p>Any such custom ArgumentResolver will kick in first, having a chance to resolve
-	 * an argument value before the standard argument handling kicks in.
-	 * <p>Note: this is provided for backward compatibility. The preferred way to do this is to 
-	 * implement a {@link HandlerMethodArgumentResolver}.
+	 * Set one or more custom argument resolvers to use with {@link ExceptionHandler} methods. Custom argument resolvers
+	 * are given a chance to resolve argument values ahead of the standard argument resolvers registered by default.
+	 * <p>Argument resolvers of type {@link HandlerMethodArgumentResolver} and {@link WebArgumentResolver} are
+	 * accepted with instances of the latter adapted via {@link ServletWebArgumentResolverAdapter}. For new
+	 * implementations {@link HandlerMethodArgumentResolver} should be preferred over {@link WebArgumentResolver}.
 	 */
-	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
-		this.customArgumentResolvers = argumentResolvers;
+	public void setCustomArgumentResolvers(List<?> argumentResolvers) {
+		if (argumentResolvers == null) {
+			return;
+		}
+		List<HandlerMethodArgumentResolver> adaptedResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		for (Object resolver : argumentResolvers) {
+			if (resolver instanceof WebArgumentResolver) {
+				adaptedResolvers.add(new ServletWebArgumentResolverAdapter((WebArgumentResolver) resolver));
+			}
+			else if (resolver instanceof HandlerMethodArgumentResolver) {
+				adaptedResolvers.add((HandlerMethodArgumentResolver) resolver);
+			}
+			else {
+				throw new IllegalArgumentException(
+						"An argument resolver must be a HandlerMethodArgumentResolver or a WebArgumentResolver");
+			}
+		}
+		this.customArgumentResolvers.addAll(adaptedResolvers);
+	}	
+
+	/**
+	 * Set the argument resolvers to use with {@link ExceptionHandler} methods. 
+	 * This is an optional property providing full control over all argument resolvers in contrast to  
+	 * {@link #setCustomArgumentResolvers(List)}, which does not override default registrations.
+	 * @param argumentResolvers argument resolvers for {@link ExceptionHandler} methods
+	 */
+	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		if (argumentResolvers != null) {
+			this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
+			registerArgumentResolvers(argumentResolvers);
+		}
 	}
 
+	/**
+	 * Set custom return value handlers to use to handle the return values of {@link ExceptionHandler} methods. 
+	 * Custom return value handlers are given a chance to handle a return value before the standard 
+	 * return value handlers registered by default.
+	 * @param returnValueHandlers custom return value handlers for {@link ExceptionHandler} methods  
+	 */
+	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+		if (returnValueHandlers != null) {
+			this.customReturnValueHandlers.addAll(returnValueHandlers);
+		}
+	}
+
+	/**
+	 * Set the {@link HandlerMethodReturnValueHandler}s to use to use with {@link ExceptionHandler} methods. 
+	 * This is an optional property providing full control over all return value handlers in contrast to   
+	 * {@link #setCustomReturnValueHandlers(List)}, which does not override default registrations. 
+	 * @param returnValueHandlers the return value handlers for {@link ExceptionHandler} methods
+	 */
+	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+		if (returnValueHandlers != null) {
+			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+			registerReturnValueHandlers(returnValueHandlers);
+		}
+	}
+	
 	/**
 	 * Set the message body converters to use.
 	 * <p>These converters are used to convert from and to HTTP requests and responses.
 	 */
-	public void setMessageConverters(HttpMessageConverter<?>[] messageConverters) {
+	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = messageConverters;
 	}
 
-	/**
-	 * Set the {@link HandlerMethodArgumentResolver}s to use to resolve argument values for 
-	 * {@link ExceptionHandler} methods. This is an optional property.
-	 * @param argumentResolvers the argument resolvers to use
-	 */
-	public void setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolver[] argumentResolvers) {
-		this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
+	public void afterPropertiesSet() throws Exception {
+		if (argumentResolvers == null) {
+			argumentResolvers = new HandlerMethodArgumentResolverComposite();
+			registerArgumentResolvers(customArgumentResolvers);
+			registerArgumentResolvers(getDefaultArgumentResolvers());
+		}
+		if (returnValueHandlers == null) {
+			returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+			registerReturnValueHandlers(customReturnValueHandlers);
+			registerReturnValueHandlers(getDefaultReturnValueHandlers(messageConverters));
+		}
+	}
+
+	private void registerArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
 			this.argumentResolvers.registerArgumentResolver(resolver);
 		}
 	}
 	
-	/**
-	 * Set the {@link HandlerMethodReturnValueHandler}s to use to handle the return values of 
-	 * {@link ExceptionHandler} methods. This is an optional property.
-	 * @param returnValueHandlers the return value handlers to use
-	 */
-	public void setHandlerMethodReturnValueHandlers(HandlerMethodReturnValueHandler[] returnValueHandlers) {
-		this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+	private void registerReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
 			this.returnValueHandlers.registerReturnValueHandler(handler);
 		}
 	}
 
-	public void afterPropertiesSet() throws Exception {
-		initMethodArgumentResolvers();
-		initMethodReturnValueHandlers();
+	public static List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
+		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		resolvers.add(new ServletRequestMethodArgumentResolver());
+		resolvers.add(new ServletResponseMethodArgumentResolver());
+		return resolvers;
 	}
-	
-	private void initMethodArgumentResolvers() {
-		if (argumentResolvers != null) {
-			return;
-		}
-		argumentResolvers = new HandlerMethodArgumentResolverComposite();
+
+	public static List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers(
+			List<HttpMessageConverter<?>> messageConverters) {
 		
-		argumentResolvers.registerArgumentResolver(new ServletRequestMethodArgumentResolver());
-		argumentResolvers.registerArgumentResolver(new ServletResponseMethodArgumentResolver());
-
-		if (customArgumentResolvers != null) {
-			for (WebArgumentResolver customResolver : customArgumentResolvers) {
-				argumentResolvers.registerArgumentResolver(new ServletWebArgumentResolverAdapter(customResolver));
-			}
-		}	
-	}
-
-	private void initMethodReturnValueHandlers() {
-		if (returnValueHandlers != null) {
-			return;
-		}
-		returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
-
+		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		
 		// Annotation-based handlers
-		returnValueHandlers.registerReturnValueHandler(new RequestResponseBodyMethodProcessor(messageConverters));
-		returnValueHandlers.registerReturnValueHandler(new ModelAttributeMethodProcessor(false));
+		handlers.add(new RequestResponseBodyMethodProcessor(messageConverters));
+		handlers.add(new ModelAttributeMethodProcessor(false));
 		
 		// Type-based handlers
-		returnValueHandlers.registerReturnValueHandler(new ModelAndViewMethodReturnValueHandler());
-		returnValueHandlers.registerReturnValueHandler(new ModelMethodProcessor());
-		returnValueHandlers.registerReturnValueHandler(new ViewMethodReturnValueHandler());
-		returnValueHandlers.registerReturnValueHandler(new HttpEntityMethodProcessor(messageConverters));
+		handlers.add(new ModelAndViewMethodReturnValueHandler());
+		handlers.add(new ModelMethodProcessor());
+		handlers.add(new ViewMethodReturnValueHandler());
+		handlers.add(new HttpEntityMethodProcessor(messageConverters));
 		
 		// Default handler
-		returnValueHandlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(null));
+		handlers.add(new DefaultMethodReturnValueHandler());
+		
+		return handlers;
 	}
-	
+
 	/**
 	 * Attempts to find an {@link ExceptionHandler}-annotated method that can handle the thrown exception.
 	 * The exception-handling method, if found, is invoked resulting in a {@link ModelAndView}.

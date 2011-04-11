@@ -26,10 +26,12 @@ import java.awt.Color;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -74,10 +76,11 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 
 /**
  * A test fixture for higher-level {@link RequestMappingHandlerMethodAdapter} tests.
@@ -109,9 +112,12 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setValidator(new StubValidator());
 		
+		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		customResolvers.add(new ServletWebArgumentResolverAdapter(new ColorArgumentResolver()));
+		
 		this.handlerAdapter = new RequestMappingHandlerMethodAdapter();
 		this.handlerAdapter.setWebBindingInitializer(bindingInitializer);
-		this.handlerAdapter.setCustomArgumentResolvers(new WebArgumentResolver[] { new ColorArgumentResolver() });
+		this.handlerAdapter.setCustomArgumentResolvers(customResolvers);
 		
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();

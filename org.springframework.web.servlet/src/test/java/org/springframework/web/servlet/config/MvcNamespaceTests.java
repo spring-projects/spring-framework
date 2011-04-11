@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import javax.servlet.RequestDispatcher;
@@ -111,8 +112,8 @@ public class MvcNamespaceTests {
 		RequestMappingHandlerMethodAdapter adapter = appContext.getBean(RequestMappingHandlerMethodAdapter.class);
 		assertNotNull(adapter);
 		
-		HttpMessageConverter<?>[] messageConverters = adapter.getMessageConverters();
-		assertTrue(messageConverters.length > 0);
+		List<HttpMessageConverter<?>> messageConverters = adapter.getMessageConverters();
+		assertTrue(messageConverters.size() > 0);
 
 		assertNotNull(appContext.getBean(FormattingConversionServiceFactoryBean.class));
 		assertNotNull(appContext.getBean(ConversionService.class));

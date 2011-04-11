@@ -21,6 +21,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,7 +54,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodProcessor {
 
-	public HttpEntityMethodProcessor(HttpMessageConverter<?>... messageConverters) {
+	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
 		super(messageConverters);
 	}
 
