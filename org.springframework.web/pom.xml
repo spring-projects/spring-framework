@@ -98,6 +98,12 @@
 			<version>3.1</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.1.1</version>
+			<optional>true</optional>
+		</dependency>
 		<!-- common logging dependency is in spring-core -->
 		<dependency>
 			<groupId>log4j</groupId>
