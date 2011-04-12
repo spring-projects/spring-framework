@@ -16,8 +16,6 @@
 
 package org.springframework.conversation.manager;
 
-import org.springframework.conversation.Conversation;
-
 /**
  * An abstract implementation for a conversation repository. Its implementation is based on the
  * {@link org.springframework.conversation.manager.DefaultConversation} and manages its initial timeout and provides
@@ -89,11 +87,16 @@ public abstract class AbstractConversationRepository implements ConversationRepo
 	 * @param conversation the conversation to be removed, including its children, if any
 	 */
 	protected final void removeConversation(MutableConversation conversation) {
-		for (Conversation child : conversation.getChildren()) {
-			// remove the child from its parent and recursively invoke this method to remove the children of the
-			// current conversation
-			conversation.removeChildConversation((MutableConversation)child);
-			removeConversation((MutableConversation)child);
+		// as recursively removing children will decrease the children list, always pick out
+		// the first child to be removed next
+		while (conversation.getChildren().size() > 0) {
+			removeConversation((MutableConversation)conversation.getChildren().get(0));
+		}
+
+		// remove the conversation from its parent, if any
+		MutableConversation parentConversation = (MutableConversation) conversation.getParent();
+		if (parentConversation != null) {
+			parentConversation.removeChildConversation(conversation);
 		}
 
 		// end the conversation (will internally clear the attributes, invoke destruction callbacks, if any, and
@@ -102,7 +105,7 @@ public abstract class AbstractConversationRepository implements ConversationRepo
 		conversation.invalidate();
 
 		// finally, remove the single object from the repository
-		removeSingleConversationObject((MutableConversation)conversation);
+		removeSingleConversationObject((MutableConversation) conversation);
 	}
 
 	/**
