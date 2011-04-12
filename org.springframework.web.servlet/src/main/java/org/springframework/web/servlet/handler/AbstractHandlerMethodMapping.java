@@ -36,8 +36,22 @@ import org.springframework.web.method.HandlerMethodSelector;
 
 /**
  * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping HandlerMapping} implementations that
- * support {@link HandlerMethod}s.
+ * support mapping requests to {@link HandlerMethod}s rather than to handlers.
+ * 
+ * <p>Each {@link HandlerMethod} is registered with a unique key. Subclasses define the key type and how to create it
+ * for a given handler method. Keys represent conditions for matching a handler method to a request. 
  *
+ * <p>Subclasses must also define how to create a key for an incoming request. The resulting key is used to perform 
+ * a {@link HandlerMethod} lookup possibly resulting in a direct match. However, when a map lookup is insufficient, 
+ * the keys of all handler methods are iterated and subclasses are allowed to make an exhaustive check of key 
+ * conditions against the request.
+ * 
+ * <p>Since there can be more than one matching key for a request, subclasses must define a comparator for sorting
+ * the keys of matching handler methods in order to find the most specific match.
+ *
+ * @param <T> A unique key for the registration of mapped {@link HandlerMethod}s representing the conditions to
+ * match a handler method to a request.
+ * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -80,6 +94,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	protected abstract boolean isHandler(String beanName);
 
+	/**
+	 * Detect and register handler methods for the specified handler.
+	 */
 	private void detectHandlerMethods(final String handlerName) {
 		Class<?> handlerType = getApplicationContext().getType(handlerName);
 

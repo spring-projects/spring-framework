@@ -33,10 +33,18 @@ import org.springframework.web.servlet.mvc.method.condition.RequestConditionFact
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * TODO
+ * Contains a set of conditions to match to a given request such as URL patterns, HTTP methods, request 
+ * parameters and headers. 
+ * 
+ * <p>A {@link RequestKey} can be combined with another {@link RequestKey} resulting in a new {@link RequestKey}
+ * with conditions from both (see {@link #combine(RequestKey, PathMatcher)}).
+ * 
+ * <p>A {@link RequestKey} can be matched to a request resulting in a new {@link RequestKey} with the subset of
+ * conditions relevant to the request (see {@link #getMatchingKey(HttpServletRequest, PathMatcher, UrlPathHelper)}).
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @since 3.1
  */
 public final class RequestKey {
 
@@ -52,14 +60,19 @@ public final class RequestKey {
 
 	private int hash;
 
+	/**
+	 * Creates a new {@code RequestKey} instance with the given URL patterns and HTTP methods.
+	 * 
+	 * <p>Package protected for testing purposes.
+	 */
 	RequestKey(Collection<String> patterns, Collection<RequestMethod> methods) {
 		this(patterns, methods, null, null, null);
 	}
 
 	/**
-	 * Creates a new {@code RequestKey} instance with the given parameters.
-	 *
-	 * <p/>Package protected for testing purposes.
+	 * Creates a new {@code RequestKey} instance with a full set of conditions.
+	 * 
+	 * <p>Package protected for testing purposes.
 	 */
 	RequestKey(Collection<String> patterns,
 			   Collection<RequestMethod> methods,
@@ -152,12 +165,22 @@ public final class RequestKey {
 	}
 
 	/**
-	 * Combines this {@code RequestKey} with another. The typical use case for this is combining type
-	 * and method-level {@link RequestMapping @RequestMapping} annotations.
-	 *
-	 * @param methodKey the method-level RequestKey
+	 * Combines this {@code RequestKey} with another as follows: 
+	 * <ul>
+	 * <li>URL patterns:
+	 * 	<ul>
+	 * 	  <li>If both keys have path patterns combine them according to the rules of the given {@link PathMatcher}.
+	 * 	  <li>If either key contains path patterns but not both use only what is available.
+	 * 	  <li>If neither key contains path patterns use "/".
+	 * 	</ul>
+	 * <li>HTTP methods are combined as union of all HTTP methods listed in both keys.
+	 * <li>Request parameter are combined into a logical AND.
+	 * <li>Request header are combined into a logical AND.
+	 * <li>Consumes .. TODO
+	 * </ul>
+	 * @param methodKey the key to combine with
 	 * @param pathMatcher to {@linkplain PathMatcher#combine(String, String) combine} the patterns
-	 * @return the combined request key
+	 * @return a new request key containing conditions from both keys
 	 */
 	public RequestKey combine(RequestKey methodKey, PathMatcher pathMatcher) {
 		Set<String> patterns = combinePatterns(this.patterns, methodKey.patterns, pathMatcher);
@@ -199,15 +222,18 @@ public final class RequestKey {
 	}
 
 	/**
-	 * Returns a new {@code RequestKey} that contains all matching attributes of this key, given the {@link
-	 * HttpServletRequest}. Matching patterns in the returned RequestKey are sorted according to {@link
-	 * PathMatcher#getPatternComparator(String)} with the best matching pattern at the top.
-	 *
-	 * @param request the servlet request
-	 * @param pathMatcher to {@linkplain PathMatcher#match(String, String) match} patterns
-	 * @param urlPathHelper to create the {@linkplain UrlPathHelper#getLookupPathForRequest(HttpServletRequest) lookup
-	 * path}
-	 * @return a new request key that contains all matching attributes
+	 * Returns a new {@code RequestKey} that contains all conditions of this key that are relevant to the request.
+	 * <ul>
+	 * <li>The list of URL path patterns is trimmed to contain the patterns that match the URL with matching patterns 
+	 * sorted via {@link PathMatcher#getPatternComparator(String)}. 
+	 * <li>The list of HTTP methods is trimmed to contain only the method of the request. 
+	 * <li>Request parameter and request header conditions are included in full. 
+	 * <li>The list of consumes conditions is trimmed and sorted to match the request "Content-Type" header.
+	 * </ul>   
+	 * @param request the current request
+	 * @param pathMatcher to check for matching patterns
+	 * @param urlPathHelper to derive the lookup path for the request
+	 * @return a new request key that contains all matching attributes, or {@code null} if not all conditions match
 	 */
 	public RequestKey getMatchingKey(HttpServletRequest request, PathMatcher pathMatcher, UrlPathHelper urlPathHelper) {
 		if (!checkMethod(request) || !paramsCondition.match(request) || !headersCondition.match(request) ||
@@ -217,7 +243,7 @@ public final class RequestKey {
 		else {
 			List<String> matchingPatterns = getMatchingPatterns(request, pathMatcher, urlPathHelper);
 			if (!matchingPatterns.isEmpty()) {
-				Set<RequestMethod> matchingMethods = getMatchingMethods(request);
+				Set<RequestMethod> matchingMethods = getMatchingMethod(request);
 				return new RequestKey(matchingPatterns, matchingMethods, this.paramsCondition, this.headersCondition,
 						this.consumesCondition);
 			}
@@ -245,7 +271,7 @@ public final class RequestKey {
 		return matchingPatterns;
 	}
 
-	private Set<RequestMethod> getMatchingMethods(HttpServletRequest request) {
+	private Set<RequestMethod> getMatchingMethod(HttpServletRequest request) {
 		if (this.methods.isEmpty()) {
 			return this.methods;
 		}
