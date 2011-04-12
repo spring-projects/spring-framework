@@ -176,6 +176,61 @@ public class ConversationRepositoryTest {
 				repository.getConversation(rootConversationId));
 	}
 
+	@Test
+	public void testRepositoryDefaultTimeout() {
+		LocalTransientConversationRepository repository = new LocalTransientConversationRepository();
+		repository.setDefaultConversationTimeout(100);
+
+		MutableConversation conversation = repository.createNewConversation();
+		assertEquals("default timeout of repository has to be set on newly created conversations", 100,
+				conversation.getTimeout());
+
+		MutableConversation conversation2 = repository.createNewConversation();
+		conversation2.setTimeout(50);
+		assertEquals("setting a timeout on a conversation must not change the default one", 100,
+				conversation.getTimeout());
+	}
+
+	@Test
+	public void testRepositoryTimeoutInheritance() {
+		LocalTransientConversationRepository repository = new LocalTransientConversationRepository();
+		repository.setDefaultConversationTimeout(100);
+
+		MutableConversation conversation = repository.createNewConversation();
+		conversation.setTimeout(50);
+		MutableConversation childConversation = repository.createNewChildConversation(conversation, false);
+
+		assertEquals("timeout of a child conversation must be inherited from its parent", 50,
+				childConversation.getTimeout());
+	}
+
+	@Test
+	public void testRepositoryCustomTimeoutChildParentPropagation() {
+		LocalTransientConversationRepository repository = new LocalTransientConversationRepository();
+		repository.setDefaultConversationTimeout(100);
+
+		MutableConversation conversation = repository.createNewConversation();
+		conversation.setTimeout(50);
+		MutableConversation childConversation = repository.createNewChildConversation(conversation, false);
+		childConversation.setTimeout(70);
+
+		assertEquals("the custom timeout being set on a child conversation must be propagated to its parent", 70,
+				conversation.getTimeout());
+	}
+
+	@Test
+	public void testRepositoryCustomTimeoutParentChildPropagation() {
+		LocalTransientConversationRepository repository = new LocalTransientConversationRepository();
+		repository.setDefaultConversationTimeout(100);
+
+		MutableConversation conversation = repository.createNewConversation();
+		MutableConversation childConversation = repository.createNewChildConversation(conversation, false);
+		conversation.setTimeout(50);
+
+		assertEquals("the custom timeout being set on a parent conversation must be propagated to its children", 50,
+				childConversation.getTimeout());
+	}
+	
 	protected ConversationRepository createRepository() {
 		return new LocalTransientConversationRepository();
 	}
