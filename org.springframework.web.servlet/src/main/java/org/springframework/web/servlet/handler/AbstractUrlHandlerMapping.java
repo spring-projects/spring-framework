@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -165,13 +164,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	@Override
 	protected void initInterceptors() {
 		super.initInterceptors();
-		Map<String, MappedInterceptor> mappedInterceptors = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				getApplicationContext(), MappedInterceptor.class, true, false);
-		if (!mappedInterceptors.isEmpty()) {
-			this.mappedInterceptors = new MappedInterceptors(mappedInterceptors.values().toArray(
-					new MappedInterceptor[mappedInterceptors.size()]));
+		if (mappedInterceptors == null) {
+			this.mappedInterceptors = MappedInterceptors.createFromDeclaredBeans(getApplicationContext());
 		}
-
 	}
 
 	/**
@@ -201,20 +196,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 				}
 				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
-			}
-		}
-		if (handler != null && this.mappedInterceptors != null) {
-			HandlerInterceptor[] mappedInterceptors =
-					this.mappedInterceptors.getInterceptors(lookupPath, this.pathMatcher);
-			if (mappedInterceptors.length != 0) {
-				HandlerExecutionChain chain;
-				if (handler instanceof HandlerExecutionChain) {
-					chain = (HandlerExecutionChain) handler;
-				}
-				else {
-					chain = new HandlerExecutionChain(handler);
-				}
-				chain.addInterceptors(mappedInterceptors);
 			}
 		}
 		if (handler != null && logger.isDebugEnabled()) {
@@ -306,6 +287,19 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	protected void validateHandler(Object handler, HttpServletRequest request) throws Exception {
 	}
 
+	@Override
+	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+		HandlerExecutionChain chain = super.getHandlerExecutionChain(handler, request);
+		if (this.mappedInterceptors != null) {
+			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
+			HandlerInterceptor[] handlerInterceptors = mappedInterceptors.getInterceptors(lookupPath, pathMatcher);
+			if (handlerInterceptors.length > 0) {
+				chain.addInterceptors(handlerInterceptors);
+			}
+		}
+		return chain;
+	}
+	
 	/**
 	 * Build a handler object for the given raw handler, exposing the actual
 	 * handler, the {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}, as well as
