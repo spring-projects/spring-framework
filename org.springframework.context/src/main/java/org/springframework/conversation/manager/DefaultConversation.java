@@ -176,13 +176,12 @@ public class DefaultConversation implements MutableConversation, Serializable {
 				children = null;
 			}
         }
+
+		// remove the parent conversation from the child relationship
+		((DefaultConversation)conversation).removeParent();
     }
 
-    protected void removeFromParent() {
-        if (parent != null) {
-            parent.removeChildConversation(this);
-        }
-
+    protected void removeParent() {
 		parent = null;
     }
 
