@@ -35,6 +35,7 @@ Import-Template:
  org.springframework.aop.*;version=${spring.osgi.range};resolution:=optional,
  org.springframework.beans.*;version=${spring.osgi.range},
  org.springframework.core.*;version=${spring.osgi.range},
+ org.springframework.conversation.*;version=${spring.osgi.range},
  org.springframework.expression.*;version=${spring.osgi.range};resolution:=optional,
  org.springframework.instrument.*;version="0";resolution:=optional,
  org.springframework.util.*;version=${spring.osgi.range},
