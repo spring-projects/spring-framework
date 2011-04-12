@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.annotation.AnnotationUtils;
@@ -44,7 +45,22 @@ import org.springframework.web.servlet.handler.MappedInterceptors;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * TODO
+ * An {@link AbstractHandlerMethodMapping} variant that uses {@link RequestKey}s for the registration and the lookup 
+ * of {@link HandlerMethod}s.
+ * 
+ * <p>A {@link RequestKey} for an incoming request contains the URL and the HTTP method of the request. 
+ * A {@link RequestKey} for a handler method contains all conditions found in the method @{@link RequestMapping} 
+ * annotation combined with all conditions found in the type @{@link RequestMapping} annotation, if present. 
+ * 
+ * <p>An incoming request matches to a handler method directly when a @{@link RequestMapping} annotation contains 
+ * a single, non-pattern URL and a single HTTP method. When a {@link RequestKey} contains additional conditions 
+ * (e.g. more URL patterns, request parameters, headers, etc) those conditions must be checked against the 
+ * request rather than against the key that represents it. This results in the creation of a new handler method 
+ * {@link RequestKey} with the subset of conditions relevant to the current request (see 
+ * {@link RequestKey#getMatchingKey(HttpServletRequest, PathMatcher, UrlPathHelper)}).
+ * Such keys can then be compared against each other, in the context of the current request, making it possible 
+ * to select to the best matching {@link RequestKey} in case of multiple matches and also the best matching 
+ * pattern within the selected key.   
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -168,6 +184,18 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 		}
 	}
 
+	/**
+	 * Returns a new {@link RequestKey} with attributes matching to the current request or {@code null}.
+	 * @see RequestKey#getMatchingKey(HttpServletRequest, PathMatcher, UrlPathHelper)
+	 */
+	@Override
+	protected RequestKey getMatchingKey(RequestKey key, HttpServletRequest request) {
+		return key.getMatchingKey(request, pathMatcher, urlPathHelper);
+	}
+
+	/**
+	 * Returns a {@link Comparator} that can be used to sort and select the best matching {@link RequestKey}.
+	 */
 	@Override
 	protected Comparator<RequestKey> getKeyComparator(HttpServletRequest request) {
 		return new RequestKeyComparator(request);
@@ -181,24 +209,10 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 	}
 
-	@Override
-	protected RequestKey getMatchingKey(RequestKey key, HttpServletRequest request) {
-		return key.getMatchingKey(request, pathMatcher, urlPathHelper);
-	}
-
-	@Override
-	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
-		HandlerExecutionChain chain = super.getHandlerExecutionChain(handler, request);
-		if (this.mappedInterceptors != null) {
-			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
-			HandlerInterceptor[] handlerInterceptors = mappedInterceptors.getInterceptors(lookupPath, pathMatcher);
-			if (handlerInterceptors.length > 0) {
-				chain.addInterceptors(handlerInterceptors);
-			}
-		}
-		return chain;
-	}
-
+	/**
+	 * Iterates all {@link RequestKey}s looking for keys that match by URL but not by HTTP method.
+	 * @exception HttpRequestMethodNotSupportedException if there are matches by URL but not by HTTP method
+	 */
 	@Override
 	protected HandlerMethod handleNoMatch(Set<RequestKey> requestKeys, HttpServletRequest request)
 			throws HttpRequestMethodNotSupportedException {
@@ -223,13 +237,29 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 	}
 
 	/**
-	 * A comparator for RequestKey types. Effective comparison can only be done in the context of a specific request. For
-	 * example not all configured patterns may apply to the current request. Therefore an HttpServletRequest is required as
-	 * input.
+	 * Adds mapped interceptors to the handler execution chain.
+	 */
+	@Override
+	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+		HandlerExecutionChain chain = super.getHandlerExecutionChain(handler, request);
+		if (this.mappedInterceptors != null) {
+			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
+			HandlerInterceptor[] handlerInterceptors = mappedInterceptors.getInterceptors(lookupPath, pathMatcher);
+			if (handlerInterceptors.length > 0) {
+				chain.addInterceptors(handlerInterceptors);
+			}
+		}
+		return chain;
+	}
+
+	/**
+	 * A comparator for {@link RequestKey}s. Effective comparison can only be done in the context of a 
+	 * specific request. For example not all {@link RequestKey} patterns may apply to the current request. 
+	 * Therefore an HttpServletRequest is required as input.
 	 *
-	 * Furthermore, the following assumptions are made about the input RequestKeys: <ul> <li>Each RequestKey has been fully
-	 * matched to the request <li>The RequestKey contains matched patterns only <li>Patterns are ordered with the best
-	 * matching pattern at the top </ul>
+	 * <p>Furthermore, the following assumptions are made about the input RequestKeys: 
+	 * <ul><li>Each RequestKey has been fully matched to the request <li>The RequestKey contains matched 
+	 * patterns only <li>Patterns are ordered with the best matching pattern at the top </ul>
 	 *
 	 * @see RequestMappingHandlerMethodMapping#getMatchingKey(RequestKey, HttpServletRequest)
 	 */
