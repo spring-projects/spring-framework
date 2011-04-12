@@ -118,6 +118,7 @@ public class DefaultConversation implements MutableConversation, Serializable {
 
 	public void clear() {
 		attributes.clear();
+		touch();
 	}
 
     public void setId(String id) {
@@ -157,6 +158,8 @@ public class DefaultConversation implements MutableConversation, Serializable {
 
     public void addChildConversation(MutableConversation conversation, boolean isIsolated) {
 		checkValidity();
+		touch();
+
 		if (conversation instanceof DefaultConversation) {
 			// set this conversation as the parent within the given child conversation
 			((DefaultConversation)conversation).setParentConversation(this, isIsolated);
@@ -170,6 +173,7 @@ public class DefaultConversation implements MutableConversation, Serializable {
 	}
 
     public void removeChildConversation(MutableConversation conversation) {
+		touch();
         if (children != null) {
             children.remove(conversation);
 			if (children.size() == 0) {
