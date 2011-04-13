@@ -31,12 +31,21 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 
 /**
- * A catch-all {@link HandlerMethodReturnValueHandler} to handle return values not handled by any other return 
- * value handler. 
- * 
- * <p>This handler should always be last in the order as {@link #supportsReturnType(MethodParameter)} always returns
- * {@code true}. An attempt is made to handle the return value through a custom {@link ModelAndViewResolver}s or 
- * otherwise by treating it as a single model attribute.
+ * Attempts to handle return value types not recognized by any other {@link HandlerMethodReturnValueHandler}. 
+ * Intended to be used as the last of a list of registered handlers as {@link #supportsReturnType(MethodParameter)}
+ * always returns {@code true}.
+ * <p>Handling takes place in the following order:
+ * <ul>
+ * <li>Iterate over the list of {@link ModelAndViewResolver}s provided to the constructor of this class looking 
+ * for a return value that isn't {@link ModelAndViewResolver#UNRESOLVED}. 
+ * <li>If the return value is not a simple type it is treated as a single model attribute to be added to the model 
+ * with a name derived from its type.
+ * </ul>
+ * <p>Note that {@link ModelAndViewResolver} is supported for backwards compatibility. Since the only way to check 
+ * if it supports a return value type is to try to resolve the return value, a {@link ModelAndViewResolver} can
+ * only be invoked from here after no other {@link HandlerMethodReturnValueHandler} has recognized the return 
+ * value. To avoid this limitation change the {@link ModelAndViewResolver} to implement 
+ * {@link HandlerMethodReturnValueHandler} instead.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -63,10 +72,6 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return true;
-	}
-
-	public boolean usesResponseArgument(MethodParameter parameter) {
-		return false;
 	}
 
 	public void handleReturnValue(Object returnValue, 

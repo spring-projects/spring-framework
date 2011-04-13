@@ -31,20 +31,23 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Implementation of {@link HandlerMethodArgumentResolver} that supports {@link Map} arguments annotated with
- * {@link RequestHeader @RequestHeader}.
+ * Resolves {@link Map} method arguments annotated with an @{@link RequestHeader}. 
+ * See {@link RequestHeaderMethodArgumentResolver} for individual header values with an @{@link RequestHeader}.
+ * 
+ * <p>The created {@link Map} contains all request header name/value pairs. If the method parameter type 
+ * is {@link MultiValueMap} instead, the created map contains all request headers and all their values in case 
+ * request headers have multiple values.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
+ * @since 3.1
+ * @see RequestHeaderMethodArgumentResolver
  */
 public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(RequestHeader.class)
 				&& Map.class.isAssignableFrom(parameter.getParameterType());
-	}
-
-	public boolean usesResponseArgument(MethodParameter parameter) {
-		return false;
 	}
 
 	public Object resolveArgument(MethodParameter parameter,

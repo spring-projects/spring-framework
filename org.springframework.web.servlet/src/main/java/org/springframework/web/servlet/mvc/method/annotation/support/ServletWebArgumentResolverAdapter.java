@@ -22,15 +22,16 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.annotation.support.WebArgumentResolverAdapter;
+import org.springframework.web.method.annotation.support.AbstractWebArgumentResolverAdapter;
 
 /**
- * A Servlet-specific {@link WebArgumentResolverAdapter} that provides access to a {@link NativeWebRequest}.
+ * A Servlet-specific {@link AbstractWebArgumentResolverAdapter} that creates a {@link NativeWebRequest} 
+ * from {@link ServletRequestAttributes}.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ServletWebArgumentResolverAdapter extends WebArgumentResolverAdapter {
+public class ServletWebArgumentResolverAdapter extends AbstractWebArgumentResolverAdapter {
 
 	public ServletWebArgumentResolverAdapter(WebArgumentResolver adaptee) {
 		super(adaptee);
@@ -45,5 +46,4 @@ public class ServletWebArgumentResolverAdapter extends WebArgumentResolverAdapte
 		}
 		return null;
 	}
-
 }

@@ -23,28 +23,25 @@ import org.springframework.core.MethodParameter;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * An implementation of {@link HandlerMethodArgumentResolver} that resolves {@link Errors} method parameters.
- * Such parameters must be preceded by {@link ModelAttribute} parameters as described in {@link RequestMapping}.
+ * Resolves method arguments of type {@link Errors} and {@link BindingResult}.
+ * 
+ * <p>This argument should appear after a model attribute argument in the signature of the handler method. 
+ * It is resolved by accessing the last attribute in the model expecting that to be a {@link BindingResult}.
  * 
  * @author Rossen Stoyanchev
+ * @since 3.1
  */
 public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		return Errors.class.isAssignableFrom(paramType);
-	}
-
-	public boolean usesResponseArgument(MethodParameter parameter) {
-		return false;
 	}
 
 	public Object resolveArgument(MethodParameter parameter, 
@@ -67,5 +64,4 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 	private boolean isBindingResultKey(String key) {
 		return key.startsWith(BindingResult.MODEL_KEY_PREFIX);
 	}
-
 }

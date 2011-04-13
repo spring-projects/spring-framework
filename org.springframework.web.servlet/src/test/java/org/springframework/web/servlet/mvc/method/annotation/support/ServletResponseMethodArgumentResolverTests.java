@@ -58,11 +58,6 @@ public class ServletResponseMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void usesResponseArgument() {
-		assertTrue("resolver uses response argument", resolver.usesResponseArgument(null));
-	}
-
-	@Test
 	public void servletResponse() throws Exception {
 		MethodParameter servletResponseParameter = new MethodParameter(supportedParams, 0);
 

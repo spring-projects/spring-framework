@@ -25,7 +25,7 @@ import org.springframework.web.method.annotation.InitBinderMethodDataBinderFacto
 import org.springframework.web.method.support.InvocableHandlerMethod;
 
 /**
- * An {@link InitBinderMethodDataBinderFactory} for Servlet environments. 
+ * An {@link InitBinderMethodDataBinderFactory} that creates a {@link ServletRequestDataBinder}. 
  * 
  * @author Rossen Stoyanchev
  * @since 3.1

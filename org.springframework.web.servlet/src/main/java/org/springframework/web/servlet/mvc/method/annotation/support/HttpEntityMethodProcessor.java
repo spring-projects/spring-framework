@@ -40,13 +40,11 @@ import org.springframework.util.Assert;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Implementation of {@link HandlerMethodArgumentResolver} and {@link HandlerMethodReturnValueHandler} 
- * that supports {@link HttpEntity} and {@link ResponseEntity}.
+ * Resolves {@link HttpEntity} method argument values.
+ * Handles {@link HttpEntity} and {@link ResponseEntity} return values.  
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -68,26 +66,15 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		return HttpEntity.class.equals(parameterType) || ResponseEntity.class.equals(parameterType);
 	}
 
-	public boolean usesResponseArgument(MethodParameter parameterOrReturnType) {
-		// only when HttpEntity or ResponseEntity is used as a return type
-		return parameterOrReturnType.getParameterIndex() == -1;
-	}
-
 	public Object resolveArgument(MethodParameter parameter,
 								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) 
 			throws IOException, HttpMediaTypeNotSupportedException {
+		HttpInputMessage inputMessage = createInputMessage(webRequest);
 		Class<?> paramType = getHttpEntityType(parameter);
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
-		HttpInputMessage inputMessage = createInputMessage(webRequest);
 		return new HttpEntity<Object>(body, inputMessage.getHeaders());
-	}
-	
-	@Override
-	protected HttpInputMessage createInputMessage(NativeWebRequest webRequest) {
-		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		return new ServletServerHttpRequest(servletRequest);
 	}
 
 	private Class<?> getHttpEntityType(MethodParameter methodParam) {
@@ -109,7 +96,12 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 		throw new IllegalArgumentException(
 				"HttpEntity parameter (" + methodParam.getParameterName() + ") is not parameterized");
-
+	}
+	
+	@Override
+	protected HttpInputMessage createInputMessage(NativeWebRequest webRequest) {
+		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+		return new ServletServerHttpRequest(servletRequest);
 	}
 
 	public void handleReturnValue(Object returnValue, 
@@ -150,4 +142,5 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		HttpServletResponse servletResponse = (HttpServletResponse) webRequest.getNativeResponse();
 		return new ServletServerHttpResponse(servletResponse);
 	}
+
 }

@@ -26,10 +26,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
- * Abstract base class for {@link HandlerAdapter} implementations that support {@link HandlerMethod}s. 
- * Contains template methods for handling these handler method.
+ * Abstract base class for {@link HandlerAdapter} implementations that support the handling of requests through
+ * the execution of {@link HandlerMethod}s rather than handlers. 
  *
  * @author Arjen Poutsma
+ * @since 3.1
  */
 public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator implements HandlerAdapter, Ordered {
 

@@ -18,31 +18,32 @@ package org.springframework.web.method.annotation.support;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Implementation of {@link HandlerMethodArgumentResolver} that supports arguments annotated with
- * {@link CookieValue @CookieValue}.
- *
+ * A base abstract class to resolve method arguments annotated with @{@link CookieValue}. Subclasses must define how
+ * to extract the cookie value from the request.
+ * 
+ * <p>An @{@link CookieValue} is a named value that is resolved from a cookie. It has a required flag and a 
+ * default value to fall back on when the cookie does not exist. See the base class 
+ * {@link AbstractNamedValueMethodArgumentResolver} for more information on how named values are processed.
+ * 
+ * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved cookie values that don't yet match 
+ * the method parameter type.
+ * 
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
+ * @since 3.1
  */
-public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
+public abstract class AbstractCookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
-	private UrlPathHelper urlPathHelper = new UrlPathHelper();
-
-	public CookieValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+	/**
+	 * @param beanFactory a bean factory to use for resolving  ${...} placeholder and #{...} SpEL expressions 
+	 * in default values, or {@code null} if default values are not expected to contain expressions
+	 */
+	public AbstractCookieValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
-	}
-
-	public UrlPathHelper getUrlPathHelper() {
-		return urlPathHelper;
-	}
-
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-		this.urlPathHelper = urlPathHelper;
 	}
 
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -56,17 +57,10 @@ public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodA
 	}
 
 	@Override
-	protected Object resolveNamedValueArgument(NativeWebRequest webRequest,
-											   MethodParameter parameter,
-											   String cookieName) throws Exception {
-
-		throw new UnsupportedOperationException("@CookieValue not supported");
-	}
-
-	@Override
 	protected void handleMissingValue(String cookieName, MethodParameter parameter) {
+		String paramTypeName = parameter.getParameterType().getName();
 		throw new IllegalStateException(
-				"Missing cookie value '" + cookieName + "' of type [" + parameter.getParameterType().getName() + "]");
+				"Missing cookie named '" + cookieName + "' for method parameter type [" + paramTypeName + "]");
 	}
 
 	private static class CookieValueNamedValueInfo extends NamedValueInfo {

@@ -21,11 +21,13 @@ import javax.servlet.ServletRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
 
 /**
- * A {@link ModelAttributeMethodProcessor} for Servlet environments.
+ * A Servlet-specific {@link ModelAttributeMethodProcessor} variant that casts the {@link WebDataBinder} 
+ * instance to {@link ServletRequestDataBinder} prior to invoking data binding.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -33,13 +35,12 @@ import org.springframework.web.method.annotation.support.ModelAttributeMethodPro
 public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodProcessor {
 
 	/**
-	 * Creates a {@link ServletModelAttributeMethodProcessor} instance.
-	 * @param resolveWithoutAnnotations enable default resolution mode in which parameters without
-	 * 		annotations that aren't simple types (see {@link BeanUtils#isSimpleProperty(Class)})  
-	 * 		are also treated as model attributes with a default name based on the model attribute type.
+	 * @param useDefaultResolution in default resolution mode a method argument that isn't a simple type, as
+	 * defined in {@link BeanUtils#isSimpleProperty(Class)}, is treated as a model attribute even if it doesn't 
+	 * have an @{@link ModelAttribute} annotation with its name derived from the model attribute type.
 	 */
-	public ServletModelAttributeMethodProcessor(boolean resolveWithoutAnnotations) {
-		super(resolveWithoutAnnotations);
+	public ServletModelAttributeMethodProcessor(boolean useDefaultResolution) {
+		super(useDefaultResolution);
 	}
 
 	/**

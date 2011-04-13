@@ -33,6 +33,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 
@@ -47,6 +48,8 @@ public class ServletRequestMethodArgumentResolverTests {
 
 	private Method supportedParams;
 
+	private ModelAndViewContainer mavContainer;
+	
 	private ServletWebRequest webRequest;
 
 	private MockHttpServletRequest servletRequest;
@@ -57,23 +60,21 @@ public class ServletRequestMethodArgumentResolverTests {
 		supportedParams = getClass()
 				.getMethod("supportedParams", ServletRequest.class, MultipartRequest.class, HttpSession.class,
 						Principal.class, Locale.class, InputStream.class, Reader.class, WebRequest.class);
+		mavContainer = new ModelAndViewContainer();
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
 	}
 
 	@Test
-	public void usesResponseArgument() {
-		assertFalse("resolver uses response argument", resolver.usesResponseArgument(null));
-	}
-
-	@Test
 	public void servletRequest() throws Exception {
 		MethodParameter servletRequestParameter = new MethodParameter(supportedParams, 0);
-
-		assertTrue("ServletRequest not supported", resolver.supportsParameter(servletRequestParameter));
-
-		Object result = resolver.resolveArgument(servletRequestParameter, null, webRequest, null);
+		
+		boolean isSupported = resolver.supportsParameter(servletRequestParameter);
+		Object result = resolver.resolveArgument(servletRequestParameter, mavContainer, webRequest, null);
+		
+		assertTrue("ServletRequest not supported", isSupported);
 		assertSame("Invalid result", servletRequest, result);
+		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
 	}
 
 	@Test
@@ -82,10 +83,12 @@ public class ServletRequestMethodArgumentResolverTests {
 		servletRequest.setSession(session);
 		MethodParameter sessionParameter = new MethodParameter(supportedParams, 2);
 
-		assertTrue("Session not supported", resolver.supportsParameter(sessionParameter));
+		boolean isSupported = resolver.supportsParameter(sessionParameter);
+		Object result = resolver.resolveArgument(sessionParameter, mavContainer, webRequest, null);
 
-		Object result = resolver.resolveArgument(sessionParameter, null, webRequest, null);
+		assertTrue("Session not supported", isSupported);
 		assertSame("Invalid result", session, result);
+		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
 	}
 
 	@Test

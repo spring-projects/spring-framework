@@ -28,7 +28,12 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves {@link Model} and {@link Map} method parameters. 
+ * Resolves {@link Map} and {@link Model} method arguments. 
+ * 
+ * <p>Handles {@link Model} return values adding their attributes to the {@link ModelAndViewContainer}. 
+ * Handles {@link Map} return values in the same way as long as the method does not have an @{@link ModelAttribute}.
+ * If the method does have an @{@link ModelAttribute}, it is assumed the returned {@link Map} is a model attribute
+ * and not a model.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -38,10 +43,6 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		return Model.class.isAssignableFrom(paramType) || Map.class.isAssignableFrom(paramType);
-	}
-
-	public boolean usesResponseArgument(MethodParameter parameter) {
-		return false;
 	}
 
 	public Object resolveArgument(MethodParameter parameter, 
@@ -78,5 +79,4 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 			throw new UnsupportedOperationException();
 		}
 	}
-
 }

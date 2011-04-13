@@ -374,7 +374,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 
 		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, false));
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
-		resolvers.add(new PathVariableMethodArgumentResolver(beanFactory));
+		resolvers.add(new PathVariableMethodArgumentResolver());
 		resolvers.add(new ServletModelAttributeMethodProcessor(false));
 		resolvers.add(new RequestResponseBodyMethodProcessor(messageConverters));
 		resolvers.add(new RequestHeaderMethodArgumentResolver(beanFactory));
@@ -404,7 +404,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 		// Annotation-based resolvers
 		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, false));
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
-		resolvers.add(new PathVariableMethodArgumentResolver(beanFactory));
+		resolvers.add(new PathVariableMethodArgumentResolver());
 		resolvers.add(new ExpressionValueMethodArgumentResolver(beanFactory));
 
 		// Type-based resolvers

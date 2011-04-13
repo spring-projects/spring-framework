@@ -35,7 +35,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.method.annotation.support.RequestHeaderMethodArgumentResolver;
 
 /**
  * @author Arjen Poutsma
@@ -83,11 +82,6 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@After
 	public void teardown() {
 		RequestContextHolder.resetRequestAttributes();
-	}
-
-	@Test
-	public void usesResponseArgument() throws NoSuchMethodException {
-		assertFalse("resolver uses response argument", resolver.usesResponseArgument(null));
 	}
 
 	@Test

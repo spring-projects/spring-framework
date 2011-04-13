@@ -34,7 +34,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.annotation.support.RequestParamMapMethodArgumentResolver;
 
 /**
  * @author Arjen Poutsma
@@ -66,11 +65,6 @@ public class RequestParamMapMethodArgumentResolverTests {
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 
-	}
-
-	@Test
-	public void usesResponseArgument() throws NoSuchMethodException {
-		assertFalse("resolver uses response argument", resolver.usesResponseArgument(null));
 	}
 
 	@Test

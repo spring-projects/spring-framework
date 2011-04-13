@@ -33,7 +33,6 @@ import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.annotation.support.WebArgumentResolverAdapter;
 
 /**
  * @author Arjen Poutsma
@@ -42,7 +41,7 @@ public class WebArgumentResolverAdapterTests {
 
 	private WebArgumentResolver adaptee;
 
-	private WebArgumentResolverAdapter adapter;
+	private TestWebArgumentResolverAdapter adapter;
 
 	private MethodParameter parameter;
 
@@ -51,7 +50,7 @@ public class WebArgumentResolverAdapterTests {
 	@Before
 	public void setUp() throws Exception {
 		adaptee = createMock(WebArgumentResolver.class);
-		adapter = new WebArgumentResolverAdapter(adaptee);
+		adapter = new TestWebArgumentResolverAdapter(adaptee);
 
 		parameter = new MethodParameter(getClass().getMethod("handle", Integer.TYPE), 0);
 
@@ -162,4 +161,17 @@ public class WebArgumentResolverAdapterTests {
 	public void handle(int param) {
 
 	}
+	
+	private class TestWebArgumentResolverAdapter extends AbstractWebArgumentResolverAdapter {
+
+		public TestWebArgumentResolverAdapter(WebArgumentResolver adaptee) {
+			super(adaptee);
+		}
+
+		@Override
+		protected NativeWebRequest getWebRequest() {
+			return WebArgumentResolverAdapterTests.this.webRequest;
+		}
+	}
+
 }
