@@ -20,28 +20,33 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.annotation.support.AbstractNamedValueMethodArgumentResolver;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Implementation of {@link HandlerMethodArgumentResolver} that supports arguments annotated with
- * {@link PathVariable @PathVariable}.
+ * Resolves method arguments annotated with an @{@link PathVariable}.
  *
+ * <p>An @{@link PathVariable} is a named value that gets resolved from a URI template variable. It is always 
+ * required and does not have a default value to fall back on. See the base class 
+ * {@link AbstractNamedValueMethodArgumentResolver} for more information on how named values are processed.
+ * 
+ * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved path variable values that 
+ * don't yet match the method parameter type.
+ * 
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @since 3.1
  */
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
-	public PathVariableMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
-		super(beanFactory);
+	public PathVariableMethodArgumentResolver() {
+		super(null);
 	}
 
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -56,16 +61,16 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected Object resolveNamedValueArgument(NativeWebRequest webRequest, MethodParameter parameter, String name)
-			throws Exception {
-		Map<String, String> uriTemplateVariables = (Map<String, String>) webRequest.getAttribute(
-				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-		return (uriTemplateVariables != null) ? uriTemplateVariables.get(name) : null;
+	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+		String key = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+		int scope = RequestAttributes.SCOPE_REQUEST;
+		Map<String, String> uriTemplateVars = (Map<String, String>) request.getAttribute(key, scope);
+		return (uriTemplateVars != null) ? uriTemplateVars.get(name) : null;
 	}
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
-		throw new IllegalStateException("Could not find @PathVariable [" + name + "] in @RequestMapping");
+		throw new IllegalStateException("Could not find the URL template variable [" + name + "]");
 	}
 
 	private static class PathVariableNamedValueInfo extends NamedValueInfo {
@@ -74,6 +79,4 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 			super(annotation.value(), true, ValueConstants.DEFAULT_NONE);
 		}
 	}
-
-
 }

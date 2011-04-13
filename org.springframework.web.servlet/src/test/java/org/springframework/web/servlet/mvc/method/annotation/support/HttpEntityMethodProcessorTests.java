@@ -123,15 +123,6 @@ public class HttpEntityMethodProcessorTests {
 	}
 
 	@Test
-	public void usesResponseArgument() {
-		assertFalse("HttpEntity parameter uses response argument", processor.usesResponseArgument(httpEntityParam));
-		assertTrue("ResponseBody return type does not use response argument",
-				processor.usesResponseArgument(responseEntityReturnValue));
-		assertTrue("HttpEntity return type does not use response argument",
-				processor.usesResponseArgument(httpEntityReturnValue));
-	}
-
-	@Test
 	@SuppressWarnings("unchecked")
 	public void resolveArgument() throws Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
@@ -146,8 +137,9 @@ public class HttpEntityMethodProcessorTests {
 		replay(messageConverter);
 
 		HttpEntity<?> result = (HttpEntity<String>) processor.resolveArgument(httpEntityParam, mavContainer, request, null);
-		assertEquals("Invalid argument", expected, result.getBody());
 
+		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
+		assertEquals("Invalid argument", expected, result.getBody());
 		verify(messageConverter);
 	}
 
@@ -164,6 +156,7 @@ public class HttpEntityMethodProcessorTests {
 
 		processor.resolveArgument(httpEntityParam, mavContainer, request, null);
 
+		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
 		verify(messageConverter);
 	}
 

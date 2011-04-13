@@ -31,7 +31,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.annotation.support.CookieValueMethodArgumentResolver;
+import org.springframework.web.method.annotation.support.AbstractCookieValueMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletCookieValueMethodArgumentResolver;
 
 /**
@@ -39,7 +39,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletCook
  */
 public class ServletCookieValueMethodArgumentResolverTests {
 
-	private CookieValueMethodArgumentResolver resolver;
+	private ServletCookieValueMethodArgumentResolver resolver;
 
 	private MethodParameter cookieParameter;
 
@@ -63,11 +63,6 @@ public class ServletCookieValueMethodArgumentResolverTests {
 		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 
-	}
-
-	@Test
-	public void usesResponseArgument() throws NoSuchMethodException {
-		assertFalse("resolver uses response argument", resolver.usesResponseArgument(null));
 	}
 
 	@Test

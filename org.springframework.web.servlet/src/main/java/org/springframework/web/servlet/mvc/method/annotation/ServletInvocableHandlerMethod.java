@@ -30,16 +30,19 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
 
 /**
- * Extends {@link InvocableHandlerMethod} with the ability to handle the return value through registered 
- * {@link HandlerMethodArgumentResolver}s. 
+ * Extends {@link InvocableHandlerMethod} with the ability to handle the value returned from the method through 
+ * a registered {@link HandlerMethodArgumentResolver} that supports the given return value type. 
+ * Return value handling may include writing to the response or updating the {@link ModelAndViewContainer} structure.
  * 
- * <p>The {@link ModelAndViewContainer} for the request contains the results from the handling of the return value. 
- * It can be used to access model attributes and view selection and to check if view resolution is needed.
+ * <p>If the underlying method has a {@link ResponseStatus} instruction, the status on the response is set 
+ * accordingly after the method is invoked but before the return value is handled.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
+ * @see #invokeAndHandle(NativeWebRequest, ModelAndViewContainer, Object...)
  */
 public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
@@ -65,25 +68,23 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		if (annotation != null) {
 			this.responseStatus = annotation.value();
 			this.responseReason = annotation.reason();
-
 		}
 	}
 
 	/**
-	 * Invokes the method and handles the return value through registered {@link HandlerMethodReturnValueHandler}s. 
-	 * If the handler method is annotated with {@link ResponseStatus}, the status on the response is set accordingly 
-	 * after method invocation but before return value handling.
-	 * <p>Return value handling may be skipped entirely if the handler method returns a {@code null} (or is a 
-	 * {@code void} method) and one of the following other conditions is true:
+	 * Invokes the method and handles the return value through a registered {@link HandlerMethodReturnValueHandler}. 
+	 * <p>Return value handling may be skipped entirely when the method returns {@code null} (also possibly due
+	 * to a {@code void} return type) and one of the following additional conditions is true:
 	 * <ul>
-	 * <li>One of the {@link HandlerMethodArgumentResolver}s set the {@link ModelAndViewContainer#setResolveView(boolean)} 
-	 * flag to {@code false}. This is the case when a method argument allows the handler method access to the response.
-	 * <li>The request qualifies as being not modified according to {@link ServletWebRequest#isNotModified()}.
-	 * This is used in conjunction with a "Last-Modified" header or ETag.
-	 * <li>The status on the response was set as a result of a {@link ResponseStatus} annotation
+	 * <li>A {@link HandlerMethodArgumentResolver} has set the {@link ModelAndViewContainer#setResolveView(boolean)} 
+	 * flag to {@code false} -- e.g. method arguments providing access to the response.
+	 * <li>The request qualifies as "not modified" as defined in {@link ServletWebRequest#checkNotModified(long)}
+	 * and {@link ServletWebRequest#checkNotModified(String)}. In this case a response with "not modified" response 
+	 * headers will be automatically generated without the need for return value handling. 
+	 * <li>The status on the response is set due to a @{@link ResponseStatus} instruction.
 	 * </ul>
-	 * <p>After the call, use the {@link ModelAndViewContainer} parameter to access model attributes and view selection
-	 * and to determine if view resolution is needed.
+	 * <p>After the return value is handled, callers of this method can use the {@link ModelAndViewContainer} 
+	 * to gain access to model attributes, view selection choices, and to check if view resolution is even needed.
 	 * 
 	 * @param request the current request
 	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
@@ -131,17 +132,18 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	/**
-	 * Does the request qualify as not modified?
+	 * Does the given request qualify as "not modified"?
+	 * @see ServletWebRequest#checkNotModified(long)
+	 * @see ServletWebRequest#checkNotModified(String)
 	 */
 	private boolean isRequestNotModified(NativeWebRequest request) {
 		return ((ServletWebRequest) request).isNotModified();
 	}
 
 	/**
-	 * Does the method set the response status?
+	 * Does this method have the response status instruction?
 	 */
 	private boolean hasResponseStatus() {
 		return responseStatus != null;
 	}
-
 }

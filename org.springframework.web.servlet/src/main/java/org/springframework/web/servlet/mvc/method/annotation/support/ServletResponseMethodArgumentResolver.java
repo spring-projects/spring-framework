@@ -28,32 +28,45 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
 
 /**
- * Implementation of {@link HandlerMethodArgumentResolver} that supports {@link ServletResponse} and related arguments.
+ * Resolves response-related method argument values of types:
+ * <ul>
+ * <li>{@link ServletResponse}
+ * <li>{@link OutputStream}
+ * <li>{@link Writer}
+ * </ul>
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
+ * @since 3.1
  */
 public class ServletResponseMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> parameterType = parameter.getParameterType();
-		return ServletResponse.class.isAssignableFrom(parameterType) ||
-				OutputStream.class.isAssignableFrom(parameterType) || Writer.class.isAssignableFrom(parameterType);
+		Class<?> paramType = parameter.getParameterType();
+		return ServletResponse.class.isAssignableFrom(paramType)
+				|| OutputStream.class.isAssignableFrom(paramType) 
+				|| Writer.class.isAssignableFrom(paramType);
 	}
 
-	public boolean usesResponseArgument(MethodParameter parameter) {
-		return true;
-	}
-
+	/**
+	 * {@inheritDoc}
+	 * <p>Sets the {@link ModelAndViewContainer#setResolveView(boolean)} flag to {@code false} to indicate
+	 * that the method signature provides access to the response. If subsequently the underlying method  
+	 * returns {@code null}, view resolution will be bypassed.
+	 * @see ServletInvocableHandlerMethod#invokeAndHandle(NativeWebRequest, ModelAndViewContainer, Object...)
+	 */
 	public Object resolveArgument(MethodParameter parameter,
 								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws IOException {
+		
+		mavContainer.setResolveView(false);
+
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		Class<?> parameterType = parameter.getParameterType();
-
-		mavContainer.setResolveView(false);
 
 		if (ServletResponse.class.isAssignableFrom(parameterType)) {
 			Object nativeResponse = webRequest.getNativeResponse(parameterType);
@@ -74,4 +87,5 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 			throw new UnsupportedOperationException();
 		}
 	}
+	
 }

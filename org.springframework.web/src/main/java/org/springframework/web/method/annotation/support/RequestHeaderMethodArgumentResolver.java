@@ -20,18 +20,31 @@ import java.util.Map;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 /**
- * Implementation of {@link HandlerMethodArgumentResolver} that supports arguments annotated with
- * {@link RequestHeader @RequestHeader}.
+ * Resolves method arguments annotated with @{@link RequestHeader} with the exception of {@link Map} arguments. 
+ * See {@link RequestHeaderMapMethodArgumentResolver} for {@link Map} arguments annotated with @{@link RequestHeader}.
+ * 
+ * <p>An @{@link RequestHeader} is a named value that gets resolved from a request header. It has a required flag
+ * and a default value to fall back on when the request header does not exist. See the base class 
+ * {@link AbstractNamedValueMethodArgumentResolver} for more information on how named values are processed.
  *
+ * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved request header values that 
+ * don't yet match the method parameter type.
+ * 
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
+ * @since 3.1
  */
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
+	/**
+	 * @param beanFactory a bean factory to use for resolving  ${...} placeholder and #{...} SpEL expressions 
+	 * in default values, or {@code null} if default values are not expected to contain expressions
+	 */
 	public RequestHeaderMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
@@ -48,10 +61,8 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	}
 
 	@Override
-	protected Object resolveNamedValueArgument(NativeWebRequest webRequest,
-											   MethodParameter parameter,
-											   String headerName) throws Exception {
-		String[] headerValues = webRequest.getHeaderValues(headerName);
+	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+		String[] headerValues = request.getHeaderValues(name);
 		if (headerValues != null) {
 			return (headerValues.length == 1 ? headerValues[0] : headerValues);
 		}
@@ -62,8 +73,9 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 
 	@Override
 	protected void handleMissingValue(String headerName, MethodParameter parameter) {
+		String paramTypeName = parameter.getParameterType().getName();
 		throw new IllegalStateException(
-				"Missing header '" + headerName + "' of type [" + parameter.getParameterType().getName() + "]");
+				"Missing header '" + headerName + "' for method parameter type [" + paramTypeName + "]");
 	}
 
 	private static class RequestHeaderNamedValueInfo extends NamedValueInfo {
@@ -72,5 +84,4 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 			super(annotation.value(), annotation.required(), annotation.defaultValue());
 		}
 	}
-
 }

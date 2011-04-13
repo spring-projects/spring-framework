@@ -17,7 +17,6 @@
 package org.springframework.web.method.annotation.support;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -69,11 +68,6 @@ public class ModelMethodProcessorTests {
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 
-	@Test
-	public void usesResponseArgument() {
-		assertFalse(resolver.usesResponseArgument(null));
-	}
-	
 	@Test
 	public void supportsParameter() {
 		assertTrue(resolver.supportsParameter(modelParameter));

@@ -30,10 +30,18 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Implementation of {@link HandlerMethodArgumentResolver} that supports {@link Map} arguments annotated with
- * {@link RequestParam @RequestParam}.
+ * Resolves {@link Map} method arguments annotated with an @{@link RequestParam} where the annotation does not 
+ * specify a request parameter name. See {@link RequestParamMethodArgumentResolver} for resolving {@link Map} 
+ * method arguments with a request parameter name.
+ * 
+ * <p>The created {@link Map} contains all request parameter name/value pairs. If the method parameter type 
+ * is {@link MultiValueMap} instead, the created map contains all request parameters and all there values for 
+ * cases where request parameters have multiple values.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
+ * @since 3.1
+ * @see RequestParamMethodArgumentResolver
  */
 public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -44,10 +52,6 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 				return !StringUtils.hasText(requestParamAnnot.value());
 			}
 		}
-		return false;
-	}
-
-	public boolean usesResponseArgument(MethodParameter parameter) {
 		return false;
 	}
 

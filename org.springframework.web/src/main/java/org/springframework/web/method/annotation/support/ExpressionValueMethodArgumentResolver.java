@@ -21,18 +21,28 @@ import javax.servlet.ServletException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 /**
- * Implementation of {@link HandlerMethodArgumentResolver} that supports arguments annotated 
- * with {@link Value @Value}.
+ * Resolves method arguments annotated with @{@link Value}.
+ * 
+ * <p>An @{@link Value} is a named value that does not have a name but gets resolved from a default value string 
+ * that may contain ${...} placeholder or Spring Expression Language #{...} expressions. See the base class 
+ * {@link AbstractNamedValueMethodArgumentResolver} for more information on how named values are processed.
+ * 
+ * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved argument values that don't yet match 
+ * the method parameter type.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
+	/**
+	 * @param beanFactory a bean factory to use for resolving  ${...} placeholder and #{...} SpEL expressions 
+	 * in default values, or {@code null} if default values are not expected to contain expressions
+	 */
 	public ExpressionValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);
 	}
@@ -48,16 +58,15 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 	}
 
 	@Override
-	protected Object resolveNamedValueArgument(NativeWebRequest webRequest, MethodParameter parameter, String name)
+	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest)
 			throws Exception {
-		// Only interested in default value resolution
+		// There is no name to be resolved
 		return null;
 	}
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
-		// Should not happen
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("Did not expect to handle a missing value: an @Value is never required");
 	}
 
 	private static class ExpressionValueNamedValueInfo extends NamedValueInfo {
@@ -65,6 +74,5 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 		private ExpressionValueNamedValueInfo(Value annotation) {
 			super("@Value", false, annotation.value());
 		}
-	}
-
+	}	
 }

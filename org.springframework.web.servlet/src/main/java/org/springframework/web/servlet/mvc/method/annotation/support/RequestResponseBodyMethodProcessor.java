@@ -34,13 +34,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Implementation of {@link HandlerMethodArgumentResolver} and {@link HandlerMethodReturnValueHandler} that supports
- * parameters annotated with {@link RequestBody} and return values annotated with {@link ResponseBody}.
+ * Resolves method arguments annotated with @{@link RequestBody}.
+ * Handles return values from methods annotated with @{@link ResponseBody}.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -58,11 +56,6 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return returnType.getMethodAnnotation(ResponseBody.class) != null;
-	}
-
-	public boolean usesResponseArgument(MethodParameter parameterOrReturnType) {
-		return parameterOrReturnType.getParameterIndex() == -1 &&
-				parameterOrReturnType.getMethodAnnotation(ResponseBody.class) != null;
 	}
 
 	public Object resolveArgument(MethodParameter parameter,

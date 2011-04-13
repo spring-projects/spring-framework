@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
@@ -34,24 +35,30 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves model attribute method parameters. 
+ * Resolves method arguments annotated with @{@link ModelAttribute}. Or if created in default resolution mode, 
+ * resolves any non-simple type argument even without an @{@link ModelAttribute}. See the constructor for details.
+ * 
+ * <p>A model attribute argument value is obtained from the model or is created using its default constructor. 
+ * Data binding and optionally validation is then applied through a {@link WebDataBinder} instance. Validation is
+ * invoked optionally when the argument is annotated with an {@code @Valid}. 
+ * 
+ * <p>Also handles return values from methods annotated with an @{@link ModelAttribute}. The return value is 
+ * added to the {@link ModelAndViewContainer}.  
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ModelAttributeMethodProcessor
-		implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
+public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
 
-	private final boolean resolveArgumentsWithoutAnnotations;
+	private final boolean useDefaultResolution;
 	
 	/**
-	 * Creates a {@link ModelAttributeMethodProcessor} instance.
-	 * @param resolveArgumentsWithoutAnnotations enable default resolution mode in which arguments without
-	 * 		annotations that aren't simple types (see {@link BeanUtils#isSimpleProperty(Class)})  
-	 * 		are also treated as model attributes with a default name based on the model attribute type.
+	 * @param useDefaultResolution in default resolution mode a method argument that isn't a simple type, as
+	 * defined in {@link BeanUtils#isSimpleProperty(Class)}, is treated as a model attribute even if it doesn't 
+	 * have an @{@link ModelAttribute} annotation with its name derived from the model attribute type.
 	 */
-	public ModelAttributeMethodProcessor(boolean resolveArgumentsWithoutAnnotations) {
-		this.resolveArgumentsWithoutAnnotations = resolveArgumentsWithoutAnnotations;
+	public ModelAttributeMethodProcessor(boolean useDefaultResolution) {
+		this.useDefaultResolution = useDefaultResolution;
 	}
 
 	/**
@@ -62,7 +69,7 @@ public class ModelAttributeMethodProcessor
 		if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
 			return true;
 		}
-		else if (this.resolveArgumentsWithoutAnnotations) {
+		else if (this.useDefaultResolution) {
 			return !BeanUtils.isSimpleProperty(parameter.getParameterType());
 		}
 		else {
@@ -70,15 +77,13 @@ public class ModelAttributeMethodProcessor
 		}
 	}
 
-	public boolean usesResponseArgument(MethodParameter parameter) {
-		return false;
-	}
-
 	/**
-	 * Resolves the argument to a model attribute creating a {@link WebDataBinder} and invoking data binding on it.
-	 * The model attribute is obtained from the model first or otherwise created via direct instantiation.
-	 * @throws Exception if data binder initialization fails or if data binding results in errors and the next 
-	 * method parameter is not of type {@link Errors}.
+	 * Resolves the argument to a model attribute looking up the attribute in the model or instantiating it using its
+	 * default constructor. Data binding and optionally validation is then applied through a {@link WebDataBinder} 
+	 * instance. Validation is invoked optionally when the method parameter is annotated with an {@code @Valid}.
+	 * 
+	 * @throws Exception if a {@link WebDataBinder} could not be created or if data binding and validation result in 
+	 * an error and the next method parameter is not of type {@link Errors} or {@link BindingResult}.
 	 */
 	public final Object resolveArgument(MethodParameter parameter, 
 										ModelAndViewContainer mavContainer, 
@@ -164,5 +169,4 @@ public class ModelAttributeMethodProcessor
 			mavContainer.addAttribute(name, returnValue);
 		}
 	}
-
 }

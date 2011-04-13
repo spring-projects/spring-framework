@@ -18,12 +18,16 @@ package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
 
 /**
- * Handles {@link View} and view name return values.
+ * Handles return values that are of type {@link View} or {@link String} (i.e. a logical view name).
+ * <p>Since {@link String} return value can be interpeted in multiple ways, this resolver should be ordered 
+ * after return value handlers that recognize annotated return values such as the 
+ * {@link ModelAttributeMethodProcessor} and the {@link RequestResponseBodyMethodProcessor}.
  *  
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -33,10 +37,6 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> paramType = returnType.getParameterType();
 		return (View.class.isAssignableFrom(paramType) || (String.class.equals(paramType)));
-	}
-
-	public boolean usesResponseArgument(MethodParameter parameter) {
-		return false;
 	}
 
 	public void handleReturnValue(Object returnValue, 

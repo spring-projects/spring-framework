@@ -52,7 +52,7 @@ public class PathVariableMethodArgumentResolverTests {
 	
 	@Before
 	public void setUp() throws Exception {
-		resolver = new PathVariableMethodArgumentResolver(null);
+		resolver = new PathVariableMethodArgumentResolver();
 		Method method = getClass().getMethod("handle", String.class, String.class);
 		pathVarParam = new MethodParameter(method, 0);
 		stringParam = new MethodParameter(method, 1);
@@ -62,11 +62,6 @@ public class PathVariableMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 	}
 	
-	@Test
-	public void usesResponseArgument() {
-		assertFalse(resolver.usesResponseArgument(null));
-	}
-
 	@Test
 	public void supportsParameter() {
 		assertTrue("Parameter with @PathVariable annotation", resolver.supportsParameter(pathVarParam));

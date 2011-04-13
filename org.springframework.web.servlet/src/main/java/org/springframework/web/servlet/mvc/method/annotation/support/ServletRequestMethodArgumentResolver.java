@@ -36,61 +36,74 @@ import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * Implementation of {@link HandlerMethodArgumentResolver} that supports {@link ServletRequest} and related arguments.
+ * Resolves request-related method argument values of the following types: 
+ * <ul>
+ * <li>{@link WebRequest}
+ * <li>{@link ServletRequest}
+ * <li>{@link MultipartRequest}
+ * <li>{@link HttpSession}
+ * <li>{@link Principal}
+ * <li>{@link Locale}
+ * <li>{@link InputStream}
+ * <li>{@link Reader}
+ * </ul>
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
+ * @since 3.1
  */
 public class ServletRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> parameterType = parameter.getParameterType();
-		return WebRequest.class.isAssignableFrom(parameterType) || 
-				ServletRequest.class.isAssignableFrom(parameterType) ||
-				MultipartRequest.class.isAssignableFrom(parameterType) ||
-				HttpSession.class.isAssignableFrom(parameterType) || Principal.class.isAssignableFrom(parameterType) ||
-				Locale.class.equals(parameterType) || InputStream.class.isAssignableFrom(parameterType) ||
-				Reader.class.isAssignableFrom(parameterType);
-	}
-
-	public boolean usesResponseArgument(MethodParameter parameter) {
-		return false;
+		Class<?> paramType = parameter.getParameterType();
+		return WebRequest.class.isAssignableFrom(paramType) || 
+				ServletRequest.class.isAssignableFrom(paramType) ||
+				MultipartRequest.class.isAssignableFrom(paramType) ||
+				HttpSession.class.isAssignableFrom(paramType) || 
+				Principal.class.isAssignableFrom(paramType) ||
+				Locale.class.equals(paramType) || 
+				InputStream.class.isAssignableFrom(paramType) ||
+				Reader.class.isAssignableFrom(paramType);
 	}
 
 	public Object resolveArgument(MethodParameter parameter,
 								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws IOException {
-		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-		Class<?> parameterType = parameter.getParameterType();
-
-		if (WebRequest.class.isAssignableFrom(parameterType)) {
+		
+		Class<?> paramType = parameter.getParameterType();
+		if (WebRequest.class.isAssignableFrom(paramType)) {
 			return webRequest;
 		}
-		if (ServletRequest.class.isAssignableFrom(parameterType) ||
-				MultipartRequest.class.isAssignableFrom(parameterType)) {
-			Object nativeRequest = webRequest.getNativeRequest(parameterType);
+		
+		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+		if (ServletRequest.class.isAssignableFrom(paramType) || MultipartRequest.class.isAssignableFrom(paramType)) {
+			Object nativeRequest = webRequest.getNativeRequest(paramType);
 			if (nativeRequest == null) {
 				throw new IllegalStateException(
-						"Current request is not of type [" + parameterType.getName() + "]: " + request);
+						"Current request is not of type [" + paramType.getName() + "]: " + request);
 			}
 			return nativeRequest;
 		}
-		else if (HttpSession.class.isAssignableFrom(parameterType)) {
+		else if (HttpSession.class.isAssignableFrom(paramType)) {
 			return request.getSession();
 		}
-		else if (Principal.class.isAssignableFrom(parameterType)) {
+		else if (Principal.class.isAssignableFrom(paramType)) {
 			return request.getUserPrincipal();
 		}
-		else if (Locale.class.equals(parameterType)) {
+		else if (Locale.class.equals(paramType)) {
 			return RequestContextUtils.getLocale(request);
 		}
-		else if (InputStream.class.isAssignableFrom(parameterType)) {
+		else if (InputStream.class.isAssignableFrom(paramType)) {
 			return request.getInputStream();
 		}
-		else if (Reader.class.isAssignableFrom(parameterType)) {
+		else if (Reader.class.isAssignableFrom(paramType)) {
 			return request.getReader();
 		}
-		// should not happen
-		throw new UnsupportedOperationException();
+		else {
+			// should not happen
+			throw new UnsupportedOperationException();
+		}
 	}
+	
 }

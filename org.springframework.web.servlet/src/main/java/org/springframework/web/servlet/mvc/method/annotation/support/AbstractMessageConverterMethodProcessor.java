@@ -37,6 +37,10 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 
 /**
+ * A base class for resolving method argument values by reading from the body of a request with 
+ * {@link HttpMessageConverter}s and for handling method return values by writing to the response with 
+ * {@link HttpMessageConverter}s.
+ *   
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1

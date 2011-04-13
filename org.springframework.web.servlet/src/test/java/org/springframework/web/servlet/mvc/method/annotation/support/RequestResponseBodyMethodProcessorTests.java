@@ -107,13 +107,6 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@Test
-	public void usesResponseArgument() {
-		assertFalse("RequestBody parameter uses response argument", processor.usesResponseArgument(stringParameter));
-		assertTrue("ResponseBody return type does not use response argument",
-				processor.usesResponseArgument(stringReturnValue));
-	}
-
-	@Test
 	public void resolveArgument() throws Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		String expected = "Foo";
@@ -127,8 +120,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		replay(messageConverter);
 
 		Object result = processor.resolveArgument(stringParameter, mavContainer, webRequest, null);
-		assertEquals("Invalid argument", expected, result);
 
+		assertEquals("Invalid argument", expected, result);
+		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
 		verify(messageConverter);
 
 	}
@@ -146,6 +140,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		processor.resolveArgument(stringParameter, mavContainer, webRequest, null);
 
+		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
 		verify(messageConverter);
 	}
 
@@ -168,7 +163,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		processor.handleReturnValue(returnValue, stringReturnValue, mavContainer, webRequest);
 
-		assertFalse(mavContainer.isResolveView());
+		assertFalse("The ResolveView flag wasn't turned off", mavContainer.isResolveView());
 		verify(messageConverter);
 	}
 
@@ -186,7 +181,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		processor.handleReturnValue(returnValue, stringReturnValue, mavContainer, webRequest);
 
-		assertFalse(mavContainer.isResolveView());
+		assertFalse("The ResolveView flag wasn't turned off", mavContainer.isResolveView());
 		verify(messageConverter);
 	}
 
