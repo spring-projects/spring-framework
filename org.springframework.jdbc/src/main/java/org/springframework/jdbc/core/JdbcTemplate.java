@@ -922,6 +922,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		});
 	}
 
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs) {
+		return batchUpdate(sql, batchArgs, new int[0]);
+	}
+
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) {
+		return BatchUpdateUtils.executeBatchUpdate(sql, batchArgs, argTypes, this);
+	}
+	
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with callable statements

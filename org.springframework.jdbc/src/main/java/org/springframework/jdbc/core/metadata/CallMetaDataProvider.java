@@ -25,7 +25,7 @@ import org.springframework.jdbc.core.SqlParameter;
 /**
  * Interface specifying the API to be implemented by a class providing call metadata.
  * This is intended for internal use by Spring's
- * {@link org.springframework.jdbc.core.simple.SimpleJdbcTemplate}.
+ * {@link org.springframework.jdbc.core.simple.SimpleJdbcCall}.
  *
  * @author Thomas Risberg
  * @since 2.5

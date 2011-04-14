@@ -27,7 +27,11 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
  * @author Juergen Hoeller
  * @since 2.0
  * @see SimpleJdbcTemplate
+ * @deprecated since Spring 3.1 in favor of {@link org.springframework.jdbc.core.support.JdbcDaoSupport} and
+ * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport}. The JdbcTemplate and 
+ * NamedParameterJdbcTemplate now provide all the functionality of the SimpleJdbcTemplate.
  */
+@Deprecated
 public class SimpleJdbcDaoSupport extends JdbcDaoSupport {
 	
 	private SimpleJdbcTemplate simpleJdbcTemplate;

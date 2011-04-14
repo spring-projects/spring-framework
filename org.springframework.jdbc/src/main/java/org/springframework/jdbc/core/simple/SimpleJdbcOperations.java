@@ -37,7 +37,11 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * @see org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
  * @see SimpleJdbcTemplate
  * @see org.springframework.jdbc.core.JdbcOperations
+ * @deprecated since Spring 3.1 in favor of {@link org.springframework.jdbc.core.JdbcOperations} and
+ * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations}. The JdbcTemplate and 
+ * NamedParameterJdbcTemplate now provide all the functionality of the SimpleJdbcTemplate.
  */
+@Deprecated
 public interface SimpleJdbcOperations {
 
 	/**

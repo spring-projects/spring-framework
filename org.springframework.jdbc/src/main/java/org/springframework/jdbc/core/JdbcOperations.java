@@ -987,6 +987,24 @@ public interface JdbcOperations {
 	 */
 	int[] batchUpdate(String sql, BatchPreparedStatementSetter pss) throws DataAccessException;
 
+	/**
+	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * @param sql the SQL statement to execute
+	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
+	 * @return an array containing the numbers of rows affected by each update in the batch
+	 */
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs);
+
+	/**
+	 * Execute a batch using the supplied SQL statement with the batch of supplied arguments.
+	 * @param sql the SQL statement to execute.
+	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
+	 * @return an array containing the numbers of rows affected by each update in the batch
+	 */
+	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes);
+	
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with callable statements
