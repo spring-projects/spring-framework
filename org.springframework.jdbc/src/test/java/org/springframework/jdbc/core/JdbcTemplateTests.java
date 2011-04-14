@@ -42,6 +42,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.SQLWarningException;
 import org.springframework.jdbc.UncategorizedSQLException;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.jdbc.core.support.AbstractInterruptibleBatchPreparedStatementSetter;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
@@ -1120,6 +1121,75 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ctrlDatabaseMetaData.verify();
 	}
 
+	public void testBatchUpdateWithListOfObjectArrays() throws Exception {
+
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final List<Object[]> ids = new ArrayList<Object[]>();
+		ids.add(new Object[] {100});
+		ids.add(new Object[] {200});
+		final int[] rowsAffected = new int[] { 1, 2 };
+
+		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
+		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
+		MockControl ctrlConnection = MockControl.createControl(Connection.class);
+		Connection mockConnection = (Connection) ctrlConnection.getMock();
+		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+
+		BatchUpdateTestHelper.prepareBatchUpdateMocks(sql, ids, null, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
+				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
+				mockDatabaseMetaData);
+
+		BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource, ctrlConnection, ctrlPreparedStatement, ctrlDatabaseMetaData);
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+
+		int[] actualRowsAffected = template.batchUpdate(sql, ids);
+
+		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertEquals(rowsAffected[0], actualRowsAffected[0]);
+		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+
+		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
+	}
+
+	public void testBatchUpdateWithListOfObjectArraysPlusTypeInfo() throws Exception {
+
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final List<Object[]> ids = new ArrayList<Object[]>();
+		ids.add(new Object[] {100});
+		ids.add(new Object[] {200});
+		final int[] sqlTypes = new int[] {Types.NUMERIC};
+		final int[] rowsAffected = new int[] { 1, 2 };
+
+		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
+		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
+		MockControl ctrlConnection = MockControl.createControl(Connection.class);
+		Connection mockConnection = (Connection) ctrlConnection.getMock();
+		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+
+		BatchUpdateTestHelper.prepareBatchUpdateMocks(sql, ids, sqlTypes, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
+				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
+				mockDatabaseMetaData);
+
+		BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource, ctrlConnection, ctrlPreparedStatement, ctrlDatabaseMetaData);
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+
+		int[] actualRowsAffected = template.batchUpdate(sql, ids, sqlTypes);
+
+		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
+		assertEquals(rowsAffected[0], actualRowsAffected[0]);
+		assertEquals(rowsAffected[1], actualRowsAffected[1]);
+
+		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
+	}
+	
 	public void testCouldntGetConnectionOrExceptionTranslator() throws SQLException {
 		SQLException sex = new SQLException("foo", "07xxx");
 

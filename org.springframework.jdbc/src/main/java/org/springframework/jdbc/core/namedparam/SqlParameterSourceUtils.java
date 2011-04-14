@@ -28,7 +28,6 @@ import org.springframework.jdbc.core.SqlParameterValue;
  *
  * @author Thomas Risberg
  * @since 2.5
- * @see org.springframework.jdbc.core.simple.SimpleJdbcTemplate
  */
 public class SqlParameterSourceUtils {
 

@@ -50,7 +50,11 @@ import org.springframework.util.ObjectUtils;
  * @see ParameterizedRowMapper
  * @see SimpleJdbcDaoSupport
  * @see org.springframework.jdbc.core.JdbcTemplate
+ * @deprecated since Spring 3.1 in favor of {@link org.springframework.jdbc.core.JdbcTemplate} and
+ * {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate}. The JdbcTemplate and 
+ * NamedParameterJdbcTemplate now provide all the functionality of the SimpleJdbcTemplate.
  */
+@Deprecated
 public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	
 	/** The NamedParameterJdbcTemplate that we are wrapping */
