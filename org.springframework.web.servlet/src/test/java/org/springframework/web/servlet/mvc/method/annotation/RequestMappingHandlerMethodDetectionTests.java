@@ -63,7 +63,8 @@ public class RequestMappingHandlerMethodDetectionTests {
 				{ new MappingInterfaceController(), false}, 
 				{ new MappingAbstractClassController(), false}, 
 				{ new ParameterizedInterfaceController(), false }, 
-				{ new MappingParameterizedInterfaceController(), false }, 
+				{ new MappingParameterizedInterfaceController(), false },
+				{ new MappingClassController(), false }, 
 				{ new MappingAbstractClassController(), true}, 
 				{ new PlainController(), true}
 		});
@@ -80,7 +81,7 @@ public class RequestMappingHandlerMethodDetectionTests {
 
 	@Test
 	public void detectAndMapHandlerMethod() throws Exception {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/handle");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/type/handle");
 
 		TestRequestMappingHandlerMethodMapping mapping = createHandlerMapping(handler.getClass(), useAutoProxy);
 		HandlerMethod handlerMethod = mapping.getHandlerInternal(request);
@@ -110,55 +111,76 @@ public class RequestMappingHandlerMethodDetectionTests {
 		}
 	}
 
+	/* Annotation on interface method */
+	
 	@Controller
 	public interface MappingInterface {
 		@RequestMapping(value="/handle", method = RequestMethod.GET)
 		void handle();
 	}
-
+	@RequestMapping(value="/type")
 	public static class MappingInterfaceController implements MappingInterface {
 		public void handle() {
 		}
 	}
-
+	
+	/* Annotation on abstract class method */
+	
 	@Controller
 	public static abstract class MappingAbstractClass {
 		@RequestMapping(value = "/handle", method = RequestMethod.GET)
 		public abstract void handle();
 	}
-
+	@RequestMapping(value="/type")
 	public static class MappingAbstractClassController extends MappingAbstractClass {
 		public void handle() {
 		}
 	}
 
+	/* Annotation on parameterized controller method */
+
 	@Controller
 	public interface ParameterizedInterface<T> {
 		void handle(T object);
 	}
-
+	@RequestMapping(value="/type")
 	public static class ParameterizedInterfaceController implements ParameterizedInterface<TestBean> {
 		@RequestMapping(value = "/handle", method = RequestMethod.GET)
 		public void handle(TestBean object) {
 		}
 	}
 
+	/* Annotation on parameterized interface method */
+
 	@Controller
 	public interface MappingParameterizedInterface<T> {
 		@RequestMapping(value = "/handle", method = RequestMethod.GET)
 		void handle(T object);
 	}
-
+	@RequestMapping(value="/type")
 	public static class MappingParameterizedInterfaceController implements MappingParameterizedInterface<TestBean> {
 		public void handle(TestBean object) {
 		}
 	}
 
-	@Controller
-	public static class PlainController {
-		public PlainController() {
-		}
+	/* Type + method annotations, method in parent class only (SPR-8248) */
 
+	@Controller
+	public static class MappingClass {
+		@RequestMapping(value = "/handle", method = RequestMethod.GET)
+		public void handle(TestBean object) {
+		}
+	}
+	@RequestMapping(value="/type")
+	public static class MappingClassController extends MappingClass {
+		// Method in parent class only
+	}
+
+	/* Annotations on controller class */
+	
+	@Controller
+	@RequestMapping(value="/type")
+	public static class PlainController {
 		@RequestMapping(value = "/handle", method = RequestMethod.GET)
 		public void handle() {
 		}

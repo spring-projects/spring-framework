@@ -161,16 +161,17 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 	 * Type-level {@link RequestMapping @RequestMapping} annotations are also detected and their 
 	 * attributes combined with method-level {@link RequestMapping @RequestMapping} attributes.
 	 *
+	 * @param beanName the name of the bean the method belongs to
 	 * @param method the method to create a key for
 	 * @return the key, or {@code null}
 	 * @see RequestKey#combine(RequestKey, PathMatcher)
 	 */
 	@Override
-	protected RequestKey getKeyForMethod(Method method) {
+	protected RequestKey getKeyForMethod(String beanName, Method method) {
 		RequestMapping annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 		if (annotation != null) {
 			RequestKey methodKey = RequestKey.createFromRequestMapping(annotation);
-			RequestMapping typeAnnot = AnnotationUtils.findAnnotation(method.getDeclaringClass(), RequestMapping.class);
+			RequestMapping typeAnnot = getApplicationContext().findAnnotationOnBean(beanName, RequestMapping.class);
 			if (typeAnnot != null) {
 				RequestKey typeKey = RequestKey.createFromRequestMapping(typeAnnot);
 				return typeKey.combine(methodKey, pathMatcher);
