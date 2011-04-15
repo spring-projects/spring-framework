@@ -36,57 +36,57 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.support.PathVariableMethodArgumentResolver;
 
 /**
+ * Test fixture with {@link PathVariableMethodArgumentResolver}.
+ * 
  * @author Rossen Stoyanchev
  */
 public class PathVariableMethodArgumentResolverTests {
 
 	private PathVariableMethodArgumentResolver resolver;
 	
-	private MethodParameter pathVarParam;
+	private MethodParameter paramNamedString;
 
-	private MethodParameter stringParam;
-
-	private MockHttpServletRequest servletRequest;
+	private MethodParameter paramString;
 
 	private ServletWebRequest webRequest;
 	
+	private MockHttpServletRequest request;
+
 	@Before
 	public void setUp() throws Exception {
 		resolver = new PathVariableMethodArgumentResolver();
-		Method method = getClass().getMethod("handle", String.class, String.class);
-		pathVarParam = new MethodParameter(method, 0);
-		stringParam = new MethodParameter(method, 1);
 
-		servletRequest = new MockHttpServletRequest();
-		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-		webRequest = new ServletWebRequest(servletRequest, servletResponse);
+		Method method = getClass().getMethod("handle", String.class, String.class);
+		paramNamedString = new MethodParameter(method, 0);
+		paramString = new MethodParameter(method, 1);
+
+		request = new MockHttpServletRequest();
+		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
 	
 	@Test
 	public void supportsParameter() {
-		assertTrue("Parameter with @PathVariable annotation", resolver.supportsParameter(pathVarParam));
-		assertFalse("Parameter without @PathVariable annotation", resolver.supportsParameter(stringParam));
+		assertTrue("Parameter with @PathVariable annotation", resolver.supportsParameter(paramNamedString));
+		assertFalse("Parameter without @PathVariable annotation", resolver.supportsParameter(paramString));
 	}
 
 	@Test
 	public void resolveStringArgument() throws Exception {
-		String expected = "foo";
-
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
-		uriTemplateVars.put("name", expected);
-		servletRequest.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+		uriTemplateVars.put("name", "value");
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		String result = (String) resolver.resolveArgument(pathVarParam, null, webRequest, null);
-		assertEquals(expected, result);
+		String result = (String) resolver.resolveArgument(paramNamedString, null, webRequest, null);
+		assertEquals("value", result);
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void handleMissingValue() throws Exception {
-		resolver.resolveArgument(pathVarParam, null, webRequest, null);
+		resolver.resolveArgument(paramNamedString, null, webRequest, null);
 		fail("Unresolved path variable should lead to exception.");
 	}
 	
 	public void handle(@PathVariable(value = "name") String param1, String param2) {
 	}
-	
+
 }

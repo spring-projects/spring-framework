@@ -24,44 +24,34 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Resolves a method argument from a stub value. Records all resolved parameters.
+ * Resolves a method argument using a stub value and records resolved parameters.
  * 
  * @author Rossen Stoyanchev
  */
 public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private final Class<?> supportedType;
+	private final Class<?> parameterType;
 
 	private final Object stubValue;
 	
-	private final boolean usesResponse;
-	
 	private List<MethodParameter> resolvedParameters = new ArrayList<MethodParameter>();
 
-	public StubArgumentResolver(Class<?> supportedType, Object stubValue, boolean usesResponse) {
-		this.supportedType = supportedType;
+	public StubArgumentResolver(Class<?> parameterType, Object stubValue) {
+		this.parameterType = parameterType;
 		this.stubValue = stubValue;
-		this.usesResponse = usesResponse;
 	}
 
-	public List<MethodParameter> getResolvedParameterNames() {
+	public List<MethodParameter> getResolvedParameters() {
 		return resolvedParameters;
 	}
 
-	public boolean usesResponseArgument(MethodParameter parameter) {
-		return this.usesResponse;
-	}
-
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.getParameterType().equals(this.supportedType);
+		return parameter.getParameterType().equals(this.parameterType);
 	}
 
-	public Object resolveArgument(MethodParameter parameter, 
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest, 
-								  WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 		this.resolvedParameters.add(parameter);
 		return this.stubValue;
 	}
-
 }

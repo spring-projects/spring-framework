@@ -16,10 +16,14 @@
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,11 +31,14 @@ import org.springframework.beans.TestBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.ui.ExtendedModelMap;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 
 /**
- * Test fixture for {@link DefaultMethodReturnValueHandler} unit tests.
+ * Test fixture with {@link DefaultMethodReturnValueHandler}.
  * 
  * @author Rossen Stoyanchev
  */
@@ -39,53 +46,90 @@ public class DefaultMethodReturnValueHandlerTests {
 
 	private DefaultMethodReturnValueHandler handler;
 
-	private ServletWebRequest webRequest;
+	private List<ModelAndViewResolver> mavResolvers;
 
 	private ModelAndViewContainer mavContainer;
 
+	private ServletWebRequest request;
+
 	@Before
 	public void setUp() {
-		this.handler = new DefaultMethodReturnValueHandler(null);
-		this.mavContainer = new ModelAndViewContainer(new ExtendedModelMap());
-		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
-	}
-	
-	@Test(expected=UnsupportedOperationException.class)
-	public void returnSimpleType() throws Exception {
-		handler.handleReturnValue(55, createMethodParam("simpleType"), mavContainer, webRequest);
+		mavResolvers = new ArrayList<ModelAndViewResolver>();
+		handler = new DefaultMethodReturnValueHandler(mavResolvers);
+		mavContainer = new ModelAndViewContainer(new ExtendedModelMap());
+		request = new ServletWebRequest(new MockHttpServletRequest());
 	}
 
 	@Test
-	public void returnVoid() throws Exception {
-		handler.handleReturnValue(null, null, mavContainer, webRequest);
+	public void modelAndViewResolver() throws Exception {
+		MethodParameter testBeanType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
+		mavResolvers.add(new TestModelAndViewResolver(TestBean.class));
+		TestBean testBean = new TestBean("name");
+
+		handler.handleReturnValue(testBean, testBeanType, mavContainer, request);
+		
+		assertEquals("viewName", mavContainer.getViewName());
+		assertSame(testBean, mavContainer.getAttribute("modelAttrName"));
+		assertTrue(mavContainer.isResolveView());
+	}
+
+	@Test(expected=UnsupportedOperationException.class)
+	public void modelAndViewResolverUnresolved() throws Exception {
+		MethodParameter testBeanType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
+		mavResolvers.add(new TestModelAndViewResolver(TestBean.class));
+		handler.handleReturnValue(99, testBeanType, mavContainer, request);
+	}
+
+	@Test
+	public void handleNull() throws Exception {
+		handler.handleReturnValue(null, null, mavContainer, request);
+		
 		assertNull(mavContainer.getView());
 		assertNull(mavContainer.getViewName());
 		assertTrue(mavContainer.getModel().isEmpty());
 	}
 	
+	@Test(expected=UnsupportedOperationException.class)
+	public void handleSimpleType() throws Exception {
+		MethodParameter intType = new MethodParameter(getClass().getDeclaredMethod("intReturnValue"), -1);
+		handler.handleReturnValue(55, intType, mavContainer, request);
+	}
+
 	@Test
-	public void returnSingleModelAttribute() throws Exception{
-		handler.handleReturnValue(new TestBean(), createMethodParam("singleModelAttribute"), mavContainer, webRequest);
+	public void handleNonSimpleType() throws Exception{
+		MethodParameter testBeanType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
+		handler.handleReturnValue(new TestBean(), testBeanType, mavContainer, request);
+		
 		assertTrue(mavContainer.containsAttribute("testBean"));
 	}
 
-	private MethodParameter createMethodParam(String methodName) throws Exception {
-		Method method = getClass().getDeclaredMethod(methodName);
-		return new MethodParameter(method, -1);
-	}
-	
 	@SuppressWarnings("unused")
-	private int simpleType() {
+	private int intReturnValue() {
 		return 0;
 	}
 
 	@SuppressWarnings("unused")
-	private void voidReturnValue() {
-	}
-	
-	@SuppressWarnings("unused")
-	private TestBean singleModelAttribute() {
+	private TestBean testBeanReturnValue() {
 		return null;
 	}
 	
+	private static class TestModelAndViewResolver implements ModelAndViewResolver {
+		
+		private Class<?> returnValueType;
+		
+		public TestModelAndViewResolver(Class<?> returnValueType) {
+			this.returnValueType = returnValueType;
+		}
+
+		@SuppressWarnings("rawtypes")
+		public ModelAndView resolveModelAndView(Method method, Class handlerType, Object returnValue,
+				ExtendedModelMap model, NativeWebRequest request) {
+			if (returnValue != null && returnValue.getClass().equals(returnValueType)) {
+				return new ModelAndView("viewName", "modelAttrName", returnValue);
+			}
+			else {
+				return ModelAndViewResolver.UNRESOLVED;
+			}
+		}
+	}
 }

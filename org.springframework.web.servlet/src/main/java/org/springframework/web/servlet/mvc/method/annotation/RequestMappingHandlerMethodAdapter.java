@@ -121,13 +121,11 @@ import org.springframework.web.util.WebUtils;
 public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAdapter implements BeanFactoryAware,
 		InitializingBean {
 
-	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = 
-		new ArrayList<HandlerMethodArgumentResolver>();
+	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
-	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers = 
-		new ArrayList<HandlerMethodReturnValueHandler>();
+	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
 	
-	private final List<ModelAndViewResolver> modelAndViewResolvers = new ArrayList<ModelAndViewResolver>();
+	private List<ModelAndViewResolver> modelAndViewResolvers;
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
@@ -179,9 +177,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	 * or preferably converted to a {@link HandlerMethodArgumentResolver} instead. 
 	 */
 	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		if (argumentResolvers != null) {
-			this.customArgumentResolvers.addAll(argumentResolvers);
-		}
+		this.customArgumentResolvers = argumentResolvers;
 	}
 	
 	/**
@@ -193,7 +189,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
-			registerArgumentResolvers(argumentResolvers);
+			this.argumentResolvers.addResolvers(argumentResolvers);
 		}
 	}
 	
@@ -206,7 +202,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	public void setInitBinderArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			this.initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
-			registerInitBinderArgumentResolvers(argumentResolvers);
+			this.initBinderArgumentResolvers.addResolvers(argumentResolvers);
 		}
 	}
 
@@ -217,9 +213,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	 * @param returnValueHandlers custom return value handlers for {@link RequestMapping} methods  
 	 */
 	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-		if (returnValueHandlers != null) {
-			this.customReturnValueHandlers.addAll(returnValueHandlers);
-		}
+		this.customReturnValueHandlers = returnValueHandlers;
 	}
 
 	/**
@@ -231,7 +225,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		if (returnValueHandlers != null) {
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
-			registerReturnValueHandlers(returnValueHandlers);
+			this.returnValueHandlers.addHandlers(returnValueHandlers);
 		}
 	}
 
@@ -244,9 +238,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	 * {@link HandlerMethodReturnValueHandler} and {@link #setCustomReturnValueHandlers(List)} instead.
 	 */
 	public void setModelAndViewResolvers(List<ModelAndViewResolver> modelAndViewResolvers) {
-		if (modelAndViewResolvers != null) {
-			this.modelAndViewResolvers.addAll(modelAndViewResolvers);
-		}
+		this.modelAndViewResolvers = modelAndViewResolvers;
 	}
 
 	/**
@@ -334,36 +326,20 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	public void afterPropertiesSet() throws Exception {
 		if (argumentResolvers == null) {
 			argumentResolvers = new HandlerMethodArgumentResolverComposite();
-			registerArgumentResolvers(customArgumentResolvers);
-			registerArgumentResolvers(getDefaultArgumentResolvers(messageConverters, beanFactory));
+			argumentResolvers.addResolvers(customArgumentResolvers);
+			argumentResolvers.addResolvers(getDefaultArgumentResolvers(messageConverters, beanFactory));
 		}
+		
 		if (returnValueHandlers == null) {
 			returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
-			registerReturnValueHandlers(customReturnValueHandlers);
-			registerReturnValueHandlers(getDefaultReturnValueHandlers(messageConverters, modelAndViewResolvers));
+			returnValueHandlers.addHandlers(customReturnValueHandlers);
+			returnValueHandlers.addHandlers(getDefaultReturnValueHandlers(messageConverters, modelAndViewResolvers));
 		}
+		
 		if (initBinderArgumentResolvers == null) {
 			initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
-			registerInitBinderArgumentResolvers(customArgumentResolvers);
-			registerInitBinderArgumentResolvers(getDefaultInitBinderArgumentResolvers(beanFactory));
-		}
-	}
-
-	private void registerArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
-			this.argumentResolvers.registerArgumentResolver(resolver);
-		}
-	}
-
-	private void registerInitBinderArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
-			this.initBinderArgumentResolvers.registerArgumentResolver(resolver);
-		}
-	}
-	
-	private void registerReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-		for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
-			this.returnValueHandlers.registerReturnValueHandler(handler);
+			initBinderArgumentResolvers.addResolvers(customArgumentResolvers);
+			initBinderArgumentResolvers.addResolvers(getDefaultInitBinderArgumentResolvers(beanFactory));
 		}
 	}
 
@@ -372,6 +348,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 		
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
 
+		// Annotation-based resolvers
 		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, false));
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
 		resolvers.add(new PathVariableMethodArgumentResolver());

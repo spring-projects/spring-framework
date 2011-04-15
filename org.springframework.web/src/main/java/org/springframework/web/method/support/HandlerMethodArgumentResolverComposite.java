@@ -43,7 +43,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 	private final Map<MethodParameter, HandlerMethodArgumentResolver> argumentResolverCache =
 		new ConcurrentHashMap<MethodParameter, HandlerMethodArgumentResolver>();
-
+	
 	/**
 	 * Whether the given {@linkplain MethodParameter method parameter} is supported by any registered 
 	 * {@link HandlerMethodArgumentResolver}.
@@ -93,10 +93,21 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	}
 	
 	/**
-	 * Register the given {@link HandlerMethodArgumentResolver}.
+	 * Add the given {@link HandlerMethodArgumentResolver}.
 	 */
-	public void registerArgumentResolver(HandlerMethodArgumentResolver argumentResolver) {
+	public void addResolver(HandlerMethodArgumentResolver argumentResolver) {
 		this.argumentResolvers.add(argumentResolver);
+	}
+
+	/**
+	 * Add the given {@link HandlerMethodArgumentResolver}s.
+	 */
+	public void addResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		if (argumentResolvers != null) {
+			for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
+				this.argumentResolvers.add(resolver);
+			}
+		}
 	}
 
 }

@@ -18,8 +18,6 @@ package org.springframework.web.method.annotation.support;
 
 import static org.junit.Assert.assertSame;
 
-import java.lang.reflect.Method;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
@@ -32,88 +30,59 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Test fixture for {@link ErrorsMethodArgumentResolver} unit tests.
+ * Test fixture with {@link ErrorsMethodArgumentResolver}.
  * 
  * @author Rossen Stoyanchev
  */
 public class ErrorsMethodHandlerArgumentResolverTests {
 
+	private final ErrorsMethodArgumentResolver resolver = new ErrorsMethodArgumentResolver();
+
+	private BindingResult bindingResult;
+
+	private MethodParameter paramErrors;
+
 	private NativeWebRequest webRequest;
-
-	private ErrorsMethodArgumentResolver resolver;
-
-	private MethodParameter errorsParam;
 
 	@Before
 	public void setUp() throws Exception {
-		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
-
-		this.resolver = new ErrorsMethodArgumentResolver();
-
-		Method method = this.getClass().getDeclaredMethod("handle", Errors.class);
-		this.errorsParam = new MethodParameter(method, 0);
+		paramErrors = new MethodParameter(getClass().getDeclaredMethod("handle", Errors.class), 0);
+		bindingResult = new WebDataBinder(new Object(), "attr").getBindingResult();
+		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 
 	@Test
 	public void supports() throws Exception {
-		resolver.supportsParameter(errorsParam);
+		resolver.supportsParameter(paramErrors);
 	}
 
 	@Test
 	public void bindingResult() throws Exception {
-		WebDataBinder dataBinder = new WebDataBinder(new Object(), "attr");
-		BindingResult bindingResult = dataBinder.getBindingResult();
-
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAttribute("ignore1", "value1");
 		mavContainer.addAttribute("ignore2", "value2");
 		mavContainer.addAttribute("ignore3", "value3");
 		mavContainer.addAttribute("ignore4", "value4");
 		mavContainer.addAttribute("ignore5", "value5");
-		mavContainer.addAllAttributes(bindingResult.getModel()); // Predictable iteration order of model keys important!
+		mavContainer.addAllAttributes(bindingResult.getModel());
 		
-		Object actual = resolver.resolveArgument(errorsParam, mavContainer, webRequest, null);
+		Object actual = resolver.resolveArgument(paramErrors, mavContainer, webRequest, null);
 
 		assertSame(actual, bindingResult);
 	}
 
-	@Test
-	public void bindingResultExistingModelAttribute() throws Exception {
-		Object target1 = new Object();
-		WebDataBinder binder1 = new WebDataBinder(target1, "attr1");
-		BindingResult bindingResult1 = binder1.getBindingResult();
-
-		Object target2 = new Object();
-		WebDataBinder binder2 = new WebDataBinder(target1, "attr2");
-		BindingResult bindingResult2 = binder2.getBindingResult();
-
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		mavContainer.addAttribute("attr1", target1);
-		mavContainer.addAttribute("attr2", target2);
-		mavContainer.addAttribute("filler", "fillerValue");
-		mavContainer.addAllAttributes(bindingResult1.getModel()); 
-		mavContainer.addAllAttributes(bindingResult2.getModel()); 
-		
-		Object actual = resolver.resolveArgument(errorsParam, mavContainer, webRequest, null);
-
-		assertSame("Should resolve to the latest BindingResult added", actual, bindingResult2);
-	}
-
 	@Test(expected=IllegalStateException.class)
 	public void bindingResultNotFound() throws Exception {
-		WebDataBinder dataBinder = new WebDataBinder(new Object(), "attr");
-		BindingResult bindingResult = dataBinder.getBindingResult();
-
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAllAttributes(bindingResult.getModel());
 		mavContainer.addAttribute("ignore1", "value1");
 		
-		resolver.resolveArgument(errorsParam, mavContainer, webRequest, null);
+		resolver.resolveArgument(paramErrors, mavContainer, webRequest, null);
 	}
 	
 	@Test(expected=IllegalStateException.class)
 	public void noBindingResult() throws Exception {
-		resolver.resolveArgument(errorsParam, new ModelAndViewContainer(), webRequest, null);
+		resolver.resolveArgument(paramErrors, new ModelAndViewContainer(), webRequest, null);
 	}
 
 	@SuppressWarnings("unused")

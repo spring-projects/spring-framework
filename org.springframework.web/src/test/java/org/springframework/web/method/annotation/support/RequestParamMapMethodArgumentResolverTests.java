@@ -36,77 +36,83 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
+ * Test fixture with {@link RequestParamMapMethodArgumentResolver}.
+ * 
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class RequestParamMapMethodArgumentResolverTests {
 
 	private RequestParamMapMethodArgumentResolver resolver;
 
-	private MethodParameter mapParameter;
+	private MethodParameter paramMap;
 
-	private MethodParameter multiValueMapParameter;
+	private MethodParameter paramMultiValueMap;
 
-	private MockHttpServletRequest servletRequest;
+	private MethodParameter paramNamedMap;
+
+	private MethodParameter paramMapWithoutAnnot;
 
 	private NativeWebRequest webRequest;
 
-	private MethodParameter unsupportedParameter;
+	private MockHttpServletRequest request;
 
 	@Before
 	public void setUp() throws Exception {
 		resolver = new RequestParamMapMethodArgumentResolver();
-		Method method = getClass()
-				.getMethod("params", Map.class, MultiValueMap.class, Map.class);
-		mapParameter = new MethodParameter(method, 0);
-		multiValueMapParameter = new MethodParameter(method, 1);
-		unsupportedParameter = new MethodParameter(method, 2);
+		
+		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, Map.class, Map.class);
+		paramMap = new MethodParameter(method, 0);
+		paramMultiValueMap = new MethodParameter(method, 1);
+		paramNamedMap = new MethodParameter(method, 2);
+		paramMapWithoutAnnot = new MethodParameter(method, 3);
 
-		servletRequest = new MockHttpServletRequest();
-		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-		webRequest = new ServletWebRequest(servletRequest, servletResponse);
-
+		request = new MockHttpServletRequest();
+		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
 
 	@Test
 	public void supportsParameter() {
-		assertTrue("Map parameter not supported", resolver.supportsParameter(mapParameter));
-		assertTrue("MultiValueMap parameter not supported", resolver.supportsParameter(multiValueMapParameter));
-		assertFalse("non-@RequestParam map supported", resolver.supportsParameter(unsupportedParameter));
+		assertTrue("Map parameter not supported", resolver.supportsParameter(paramMap));
+		assertTrue("MultiValueMap parameter not supported", resolver.supportsParameter(paramMultiValueMap));
+		assertFalse("Map with name supported", resolver.supportsParameter(paramNamedMap));
+		assertFalse("non-@RequestParam map supported", resolver.supportsParameter(paramMapWithoutAnnot));
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void resolveMapArgument() throws Exception {
-		String headerName = "foo";
-		String headerValue = "bar";
-		Map<String, String> expected = Collections.singletonMap(headerName, headerValue);
-		servletRequest.addParameter(headerName, headerValue);
+		String name = "foo";
+		String value = "bar";
+		request.addParameter(name, value);
+		Map<String, String> expected = Collections.singletonMap(name, value);
 
-		Map<String, String> result = (Map<String, String>) resolver.resolveArgument(mapParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramMap, null, webRequest, null);
+		
+		assertTrue(result instanceof Map);
 		assertEquals("Invalid result", expected, result);
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void resolveMultiValueMapArgument() throws Exception {
-		String headerName = "foo";
-		String headerValue1 = "bar";
-		String headerValue2 = "baz";
+		String name = "foo";
+		String value1 = "bar";
+		String value2 = "baz";
+		request.addParameter(name, new String[]{value1, value2});
+		
 		MultiValueMap<String, String> expected = new LinkedMultiValueMap<String, String>(1);
-		expected.add(headerName, headerValue1);
-		expected.add(headerName, headerValue2);
-		servletRequest.addParameter(headerName, new String[]{headerValue1, headerValue2});
+		expected.add(name, value1);
+		expected.add(name, value2);
 
-		MultiValueMap<String, String> result =
-				(MultiValueMap<String, String>) resolver.resolveArgument(multiValueMapParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramMultiValueMap, null, webRequest, null);
+
+		assertTrue(result instanceof MultiValueMap);
 		assertEquals("Invalid result", expected, result);
 	}
 
 	public void params(@RequestParam Map<?, ?> param1,
 					   @RequestParam MultiValueMap<?, ?> param2,
-					   Map<?, ?> unsupported) {
-
+					   @RequestParam("name") Map<?, ?> param3,
+					   Map<?, ?> param4) {
 	}
-
 
 }

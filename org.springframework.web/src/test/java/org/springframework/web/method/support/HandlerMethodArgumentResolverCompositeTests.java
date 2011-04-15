@@ -27,60 +27,60 @@ import org.junit.Test;
 import org.springframework.core.MethodParameter;
 
 /**
- * Test fixture for {@link HandlerMethodArgumentResolverComposite} unit tests.
+ * Test fixture with {@link HandlerMethodArgumentResolverComposite}.
  * 
  * @author Rossen Stoyanchev
  */
 public class HandlerMethodArgumentResolverCompositeTests {
 
-	private HandlerMethodArgumentResolverComposite composite;
+	private HandlerMethodArgumentResolverComposite resolvers;
 
-	private MethodParameter paramInteger;
+	private MethodParameter paramInt;
 
-	private MethodParameter paramString;
+	private MethodParameter paramStr;
 
 	@Before
 	public void setUp() throws Exception {
-		this.composite = new HandlerMethodArgumentResolverComposite();
-
+		resolvers = new HandlerMethodArgumentResolverComposite();
+		
 		Method method = getClass().getDeclaredMethod("handle", Integer.class, String.class);
-		this.paramInteger = new MethodParameter(method, 0);
-		this.paramString = new MethodParameter(method, 1);
+		paramInt = new MethodParameter(method, 0);
+		paramStr = new MethodParameter(method, 1);
 	}
 	
 	@Test
 	public void supportsParameter() throws Exception {
-		registerResolver(Integer.class, null, false);
+		registerResolver(Integer.class, null);
 		
-		assertTrue(this.composite.supportsParameter(paramInteger));
-		assertFalse(this.composite.supportsParameter(paramString));
+		assertTrue(this.resolvers.supportsParameter(paramInt));
+		assertFalse(this.resolvers.supportsParameter(paramStr));
 	}
 	
 	@Test
 	public void resolveArgument() throws Exception {
-		registerResolver(Integer.class, Integer.valueOf(55), false);
-		Object resolvedValue = this.composite.resolveArgument(paramInteger, null, null, null);
+		registerResolver(Integer.class, Integer.valueOf(55));
+		Object resolvedValue = this.resolvers.resolveArgument(paramInt, null, null, null);
 
 		assertEquals(Integer.valueOf(55), resolvedValue);
 	}
 	
 	@Test
-	public void resolveArgumentMultipleResolvers() throws Exception {
-		registerResolver(Integer.class, Integer.valueOf(1), false);
-		registerResolver(Integer.class, Integer.valueOf(2), false);
-		Object resolvedValue = this.composite.resolveArgument(paramInteger, null, null, null);
+	public void checkArgumentResolverOrder() throws Exception {
+		registerResolver(Integer.class, Integer.valueOf(1));
+		registerResolver(Integer.class, Integer.valueOf(2));
+		Object resolvedValue = this.resolvers.resolveArgument(paramInt, null, null, null);
 
 		assertEquals("Didn't use the first registered resolver", Integer.valueOf(1), resolvedValue);
 	}
 	
 	@Test(expected=IllegalStateException.class)
 	public void noSuitableArgumentResolver() throws Exception {
-		this.composite.resolveArgument(paramString, null, null, null);
+		this.resolvers.resolveArgument(paramStr, null, null, null);
 	}
 
-	protected StubArgumentResolver registerResolver(Class<?> supportedType, Object stubValue, boolean usesResponse) {
-		StubArgumentResolver resolver = new StubArgumentResolver(supportedType, stubValue, usesResponse);
-		this.composite.registerArgumentResolver(resolver);
+	protected StubArgumentResolver registerResolver(Class<?> supportedType, Object stubValue) {
+		StubArgumentResolver resolver = new StubArgumentResolver(supportedType, stubValue);
+		this.resolvers.addResolver(resolver);
 		return resolver;
 	}
 

@@ -35,13 +35,16 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
+ * Test fixture with {@link WebArgumentResolverAdapterTests}.
+ * 
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class WebArgumentResolverAdapterTests {
 
-	private WebArgumentResolver adaptee;
-
 	private TestWebArgumentResolverAdapter adapter;
+
+	private WebArgumentResolver adaptee;
 
 	private MethodParameter parameter;
 
@@ -51,10 +54,10 @@ public class WebArgumentResolverAdapterTests {
 	public void setUp() throws Exception {
 		adaptee = createMock(WebArgumentResolver.class);
 		adapter = new TestWebArgumentResolverAdapter(adaptee);
-
 		parameter = new MethodParameter(getClass().getMethod("handle", Integer.TYPE), 0);
-
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
+		
+		// Expose request to the current thread (for SpEL expressions)
 		RequestContextHolder.setRequestAttributes(webRequest);
 	}
 
@@ -66,11 +69,9 @@ public class WebArgumentResolverAdapterTests {
 	@Test
 	public void supportsParameter() throws Exception {
 		expect(adaptee.resolveArgument(parameter, webRequest)).andReturn(42);
-
 		replay(adaptee);
 
-		boolean result = adapter.supportsParameter(parameter);
-		assertTrue("Parameter not supported", result);
+		assertTrue("Parameter not supported", adapter.supportsParameter(parameter));
 
 		verify(adaptee);
 	}
@@ -78,11 +79,9 @@ public class WebArgumentResolverAdapterTests {
 	@Test
 	public void supportsParameterUnresolved() throws Exception {
 		expect(adaptee.resolveArgument(parameter, webRequest)).andReturn(WebArgumentResolver.UNRESOLVED);
-
 		replay(adaptee);
 
-		boolean result = adapter.supportsParameter(parameter);
-		assertFalse("Parameter supported", result);
+		assertFalse("Parameter supported", adapter.supportsParameter(parameter));
 
 		verify(adaptee);
 	}
@@ -90,11 +89,9 @@ public class WebArgumentResolverAdapterTests {
 	@Test
 	public void supportsParameterWrongType() throws Exception {
 		expect(adaptee.resolveArgument(parameter, webRequest)).andReturn("Foo");
-
 		replay(adaptee);
 
-		boolean result = adapter.supportsParameter(parameter);
-		assertFalse("Parameter supported", result);
+		assertFalse("Parameter supported", adapter.supportsParameter(parameter));
 
 		verify(adaptee);
 	}
@@ -102,11 +99,9 @@ public class WebArgumentResolverAdapterTests {
 	@Test
 	public void supportsParameterThrowsException() throws Exception {
 		expect(adaptee.resolveArgument(parameter, webRequest)).andThrow(new Exception());
-
 		replay(adaptee);
 
-		boolean result = adapter.supportsParameter(parameter);
-		assertFalse("Parameter supported", result);
+		assertFalse("Parameter supported", adapter.supportsParameter(parameter));
 
 		verify(adaptee);
 	}
@@ -115,7 +110,6 @@ public class WebArgumentResolverAdapterTests {
 	public void resolveArgument() throws Exception {
 		int expected = 42;
 		expect(adaptee.resolveArgument(parameter, webRequest)).andReturn(expected);
-
 		replay(adaptee);
 
 		Object result = adapter.resolveArgument(parameter, null, webRequest, null);
@@ -128,7 +122,6 @@ public class WebArgumentResolverAdapterTests {
 	@Test(expected = IllegalStateException.class)
 	public void resolveArgumentUnresolved() throws Exception {
 		expect(adaptee.resolveArgument(parameter, webRequest)).andReturn(WebArgumentResolver.UNRESOLVED);
-
 		replay(adaptee);
 
 		adapter.resolveArgument(parameter, null, webRequest, null);
@@ -139,7 +132,6 @@ public class WebArgumentResolverAdapterTests {
 	@Test(expected = IllegalStateException.class)
 	public void resolveArgumentWrongType() throws Exception {
 		expect(adaptee.resolveArgument(parameter, webRequest)).andReturn("Foo");
-
 		replay(adaptee);
 
 		adapter.resolveArgument(parameter, null, webRequest, null);
@@ -150,7 +142,6 @@ public class WebArgumentResolverAdapterTests {
 	@Test(expected = Exception.class)
 	public void resolveArgumentThrowsException() throws Exception {
 		expect(adaptee.resolveArgument(parameter, webRequest)).andThrow(new Exception());
-
 		replay(adaptee);
 
 		adapter.resolveArgument(parameter, null, webRequest, null);
@@ -159,7 +150,6 @@ public class WebArgumentResolverAdapterTests {
 	}
 
 	public void handle(int param) {
-
 	}
 	
 	private class TestWebArgumentResolverAdapter extends AbstractWebArgumentResolverAdapter {

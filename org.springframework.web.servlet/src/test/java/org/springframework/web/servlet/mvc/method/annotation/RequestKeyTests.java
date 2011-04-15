@@ -31,6 +31,8 @@ import static org.junit.Assert.*;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 /**
+ * Test fixture for {@link RequestKey} tests.
+ * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */

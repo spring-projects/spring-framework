@@ -39,115 +39,125 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
+ * Test fixture with {@link RequestParamMethodArgumentResolver}.
+ * 
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class RequestParamMethodArgumentResolverTests {
 
 	private RequestParamMethodArgumentResolver resolver;
 
-	private MethodParameter stringParameter;
-
-	private MethodParameter stringArrayParameter;
-
-	private MethodParameter mapParameter;
-
-	private MethodParameter fileParameter;
-
-	private MethodParameter otherParameter;
-
-	private MockHttpServletRequest servletRequest;
+	private MethodParameter paramNamedDefaultValueString;
+	private MethodParameter paramNamedStringArray;
+	private MethodParameter paramNamedMap;
+	private MethodParameter paramMultiPartFile;
+	private MethodParameter paramMap;
+	private MethodParameter paramStringNotAnnot;
 
 	private NativeWebRequest webRequest;
 
-	private MethodParameter plainParameter;
+	private MockHttpServletRequest request;
 
 	@Before
 	public void setUp() throws Exception {
 		resolver = new RequestParamMethodArgumentResolver(null, true);
-		Method method = getClass()
-				.getMethod("params", String.class, String[].class, Map.class, MultipartFile.class, Map.class, String.class);
-		stringParameter = new MethodParameter(method, 0);
-		stringArrayParameter = new MethodParameter(method, 1);
-		mapParameter = new MethodParameter(method, 2);
-		fileParameter = new MethodParameter(method, 3);
-		otherParameter = new MethodParameter(method, 4);
-		plainParameter = new MethodParameter(method, 5);
 		
-		plainParameter.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		Method method = getClass().getMethod("params", 
+				String.class, String[].class, Map.class, MultipartFile.class, Map.class, String.class);
+		
+		paramNamedDefaultValueString = new MethodParameter(method, 0);
+		paramNamedStringArray = new MethodParameter(method, 1);
+		paramNamedMap = new MethodParameter(method, 2);
+		paramMultiPartFile = new MethodParameter(method, 3);
+		paramMap = new MethodParameter(method, 4);
+		paramStringNotAnnot = new MethodParameter(method, 5);
+		paramStringNotAnnot.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 
-		servletRequest = new MockHttpServletRequest();
-		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-		webRequest = new ServletWebRequest(servletRequest, servletResponse);
-
+		request = new MockHttpServletRequest();
+		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
 
 	@Test
 	public void supportsParameter() {
-		assertTrue("String parameter not supported", resolver.supportsParameter(stringParameter));
-		assertTrue("String array parameter not supported", resolver.supportsParameter(stringArrayParameter));
-		assertTrue("Named map not parameter supported", resolver.supportsParameter(mapParameter));
-		assertTrue("MultipartFile parameter not supported", resolver.supportsParameter(fileParameter));
-		assertFalse("non-@RequestParam parameter supported", resolver.supportsParameter(otherParameter));
-		assertTrue("Simple type params supported w/o annotations", resolver.supportsParameter(plainParameter));
+		resolver = new RequestParamMethodArgumentResolver(null, true);
+		assertTrue("String parameter not supported", resolver.supportsParameter(paramNamedDefaultValueString));
+		assertTrue("String array parameter not supported", resolver.supportsParameter(paramNamedStringArray));
+		assertTrue("Named map not parameter supported", resolver.supportsParameter(paramNamedMap));
+		assertTrue("MultipartFile parameter not supported", resolver.supportsParameter(paramMultiPartFile));
+		assertFalse("non-@RequestParam parameter supported", resolver.supportsParameter(paramMap));
+		assertTrue("Simple type params supported w/o annotations", resolver.supportsParameter(paramStringNotAnnot));
 		
 		resolver = new RequestParamMethodArgumentResolver(null, false);
-		assertFalse(resolver.supportsParameter(plainParameter));
+		assertFalse(resolver.supportsParameter(paramStringNotAnnot));
 	}
 
 	@Test
 	public void resolveStringArgument() throws Exception {
 		String expected = "foo";
-		servletRequest.addParameter("name", expected);
+		request.addParameter("name", expected);
 
-		String result = (String) resolver.resolveArgument(stringParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramNamedDefaultValueString, null, webRequest, null);
+
+		assertTrue(result instanceof String);
 		assertEquals("Invalid result", expected, result);
 	}
 
 	@Test
 	public void resolveStringArrayArgument() throws Exception {
 		String[] expected = new String[]{"foo", "bar"};
-		servletRequest.addParameter("name", expected);
+		request.addParameter("name", expected);
 
-		String[] result = (String[]) resolver.resolveArgument(stringArrayParameter, null, webRequest, null);
-		assertArrayEquals("Invalid result", expected, result);
+		Object result = resolver.resolveArgument(paramNamedStringArray, null, webRequest, null);
+
+		assertTrue(result instanceof String[]);
+		assertArrayEquals("Invalid result", expected, (String[]) result);
 	}
 
 	@Test
 	public void resolveMultipartFileArgument() throws Exception {
-		MockMultipartHttpServletRequest servletRequest = new MockMultipartHttpServletRequest();
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		MultipartFile expected = new MockMultipartFile("file", "Hello World".getBytes());
-		servletRequest.addFile(expected);
-		webRequest = new ServletWebRequest(servletRequest);
+		request.addFile(expected);
+		webRequest = new ServletWebRequest(request);
 
-		MultipartFile result = (MultipartFile) resolver.resolveArgument(fileParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramMultiPartFile, null, webRequest, null);
+
+		assertTrue(result instanceof MultipartFile);
 		assertEquals("Invalid result", expected, result);
 	}
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
-		String result = (String) resolver.resolveArgument(stringParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramNamedDefaultValueString, null, webRequest, null);
+		
+		assertTrue(result instanceof String);
 		assertEquals("Invalid result", "bar", result);
 	}
 
 	@Test(expected = MissingServletRequestParameterException.class)
 	public void notFound() throws Exception {
-		String result = (String) resolver.resolveArgument(stringArrayParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramNamedStringArray, null, webRequest, null);
+		
+		assertTrue(result instanceof String);
 		assertEquals("Invalid result", "bar", result);
 	}
 
 	@Test
 	public void resolveSimpleTypeParam() throws Exception {
-		servletRequest.setParameter("plainParam", "plainValue");
-		String result = (String) resolver.resolveArgument(plainParameter, null, webRequest, null);
+		request.setParameter("paramStringNotAnnot", "plainValue");
+		Object result = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, null);
+
+		assertTrue(result instanceof String);
 		assertEquals("plainValue", result);
 	}
 
 	public void params(@RequestParam(value = "name", defaultValue = "bar") String param1,
 					   @RequestParam("name") String[] param2,
 					   @RequestParam("name") Map<?, ?> param3,
-					   @RequestParam(value = "file") MultipartFile file,
-					   @RequestParam Map<?, ?> unsupported,
-					   String plainParam) {
+					   @RequestParam(value = "file") MultipartFile param4,
+					   @RequestParam Map<?, ?> param5,
+					   String paramStringNotAnnot) {
 	}
 
 }

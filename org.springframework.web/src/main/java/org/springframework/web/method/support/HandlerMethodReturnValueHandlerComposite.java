@@ -92,10 +92,21 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	}	
 	
 	/**
-	 * Register the given {@link HandlerMethodReturnValueHandler}.
+	 * Add the given {@link HandlerMethodReturnValueHandler}.
 	 */
-	public void registerReturnValueHandler(HandlerMethodReturnValueHandler returnValuehandler) {
+	public void addHandler(HandlerMethodReturnValueHandler returnValuehandler) {
 		returnValueHandlers.add(returnValuehandler);
+	}
+
+	/**
+	 * Add the given {@link HandlerMethodReturnValueHandler}s.
+	 */
+	public void addHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+		if (returnValueHandlers != null) {
+			for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
+				this.returnValueHandlers.add(handler);
+			}
+		}
 	}
 
 }

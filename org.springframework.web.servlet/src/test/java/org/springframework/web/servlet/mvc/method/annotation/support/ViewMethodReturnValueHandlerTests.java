@@ -35,7 +35,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodR
 import org.springframework.web.servlet.view.InternalResourceView;
 
 /**
- * Test fixture for {@link DefaultMethodReturnValueHandler} unit tests.
+ * Test fixture with {@link DefaultMethodReturnValueHandler}.
  * 
  * @author Rossen Stoyanchev
  */
@@ -43,15 +43,15 @@ public class ViewMethodReturnValueHandlerTests {
 
 	private ViewMethodReturnValueHandler handler;
 
-	private ServletWebRequest webRequest;
-
 	private ModelAndViewContainer mavContainer;
+
+	private ServletWebRequest webRequest;
 
 	@Before
 	public void setUp() {
-		this.handler = new ViewMethodReturnValueHandler();
-		this.mavContainer = new ModelAndViewContainer(new ExtendedModelMap());
-		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
+		handler = new ViewMethodReturnValueHandler();
+		mavContainer = new ModelAndViewContainer(new ExtendedModelMap());
+		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 	
 	@Test

@@ -22,51 +22,44 @@ import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
- * Test fixture for {@link InvocableHandlerMethod} unit tests.
+ * Test fixture with {@link InvocableHandlerMethod}.
  * 
  * @author Rossen Stoyanchev
  */
 public class InvocableHandlerMethodTests {
 
-	private HandlerMethodArgumentResolverComposite argResolvers;
+	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
 	private NativeWebRequest webRequest;
 
-	private MockHttpServletResponse response;
-
 	@Before
 	public void setUp() throws Exception {
-		argResolvers = new HandlerMethodArgumentResolverComposite();
-
-		response = new MockHttpServletResponse();
-		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), response);
+		argumentResolvers = new HandlerMethodArgumentResolverComposite();
+		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 	}
 
 	@Test
-	public void argResolutionAndReturnValueHandling() throws Exception {
-		StubArgumentResolver resolver0 = registerResolver(Integer.class, 99, false);
-		StubArgumentResolver resolver1 = registerResolver(String.class, "value", false);
-
-		InvocableHandlerMethod method = handlerMethod(new Handler(), "handle", Integer.class, String.class);
+	public void resolveArgument() throws Exception {
+		StubArgumentResolver intResolver = addResolver(Integer.class, 99);
+		StubArgumentResolver strResolver = addResolver(String.class, "value");
+		InvocableHandlerMethod method = invocableHandlerMethod("handle", Integer.class, String.class);
 		Object returnValue = method.invokeForRequest(webRequest, null);
 		
-		assertEquals("Integer resolver not invoked", 1, resolver0.getResolvedParameterNames().size());
-		assertEquals("String resolver not invoked", 1, resolver1.getResolvedParameterNames().size());
+		assertEquals("Integer resolver not invoked", 1, intResolver.getResolvedParameters().size());
+		assertEquals("String resolver not invoked", 1, strResolver.getResolvedParameters().size());
 		assertEquals("Invalid return value", "99-value", returnValue);
 	}
 	
 	@Test
-	public void providedArgResolution() throws Exception {
-		InvocableHandlerMethod method = handlerMethod(new Handler(), "handle", Integer.class, String.class);
+	public void resolveProvidedArgument() throws Exception {
+		InvocableHandlerMethod method = invocableHandlerMethod("handle", Integer.class, String.class);
 		Object returnValue = method.invokeForRequest(webRequest, null, 99, "value");
 
 		assertEquals("Expected raw return value with no handlers registered", String.class, returnValue.getClass());
@@ -74,27 +67,26 @@ public class InvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void parameterNameDiscovery() throws Exception {
-		StubArgumentResolver resolver = registerResolver(Integer.class, 99, false);
-
-		InvocableHandlerMethod method = handlerMethod(new Handler(), "parameterNameDiscovery", Integer.class);
+	public void discoverParameterName() throws Exception {
+		StubArgumentResolver resolver = addResolver(Integer.class, 99);
+		InvocableHandlerMethod method = invocableHandlerMethod("parameterNameDiscovery", Integer.class);
 		method.invokeForRequest(webRequest, null);
 		
-		assertEquals("intArg", resolver.getResolvedParameterNames().get(0).getParameterName());
+		assertEquals("intArg", resolver.getResolvedParameters().get(0).getParameterName());
 	}
 
-	private InvocableHandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes)
-			throws Exception {
-		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
-		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(handler, method);
-		handlerMethod.setHandlerMethodArgumentResolvers(argResolvers);
-		return handlerMethod;
+	private StubArgumentResolver addResolver(Class<?> parameterType, Object stubValue) {
+		StubArgumentResolver resolver = new StubArgumentResolver(parameterType, stubValue);
+		argumentResolvers.addResolver(resolver);
+		return resolver;
 	}
 	
-	private StubArgumentResolver registerResolver(Class<?> supportedType, Object stubValue, boolean usesResponse) {
-		StubArgumentResolver resolver = new StubArgumentResolver(supportedType, stubValue, usesResponse);
-		argResolvers.registerArgumentResolver(resolver);
-		return resolver;
+	private InvocableHandlerMethod invocableHandlerMethod(String methodName, Class<?>... paramTypes)
+			throws Exception {
+		Method method = Handler.class.getDeclaredMethod(methodName, paramTypes);
+		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(new Handler(), method);
+		handlerMethod.setHandlerMethodArgumentResolvers(argumentResolvers);
+		return handlerMethod;
 	}
 
 	private static class Handler {
@@ -108,15 +100,6 @@ public class InvocableHandlerMethodTests {
 		@RequestMapping
 		public void parameterNameDiscovery(Integer intArg) {
 		}
-	
-		@SuppressWarnings("unused")
-		@ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "400 Bad Request")
-		public void responseStatus() {
-		}
-
-		@SuppressWarnings("unused")
-		public String usesResponse(int arg) {
-			return "";
-		}
 	}
+
 }
