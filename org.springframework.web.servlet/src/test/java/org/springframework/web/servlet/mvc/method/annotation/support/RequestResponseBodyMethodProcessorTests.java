@@ -25,6 +25,7 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -49,7 +50,10 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
+ * Test fixture with {@link RequestResponseBodyMethodProcessor} and mock {@link HttpMessageConverter}.
+ * 
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class RequestResponseBodyMethodProcessorTests {
 
@@ -57,13 +61,10 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	private HttpMessageConverter<String> messageConverter;
 
-	private MethodParameter stringParameter;
-
-	private MethodParameter stringReturnValue;
-
-	private MethodParameter intParameter;
-
-	private MethodParameter intReturnValue;
+	private MethodParameter paramRequestBodyString;
+	private MethodParameter paramInt;
+	private MethodParameter returnTypeString;
+	private MethodParameter returnTypeInt;
 
 	private ModelAndViewContainer mavContainer;
 	
@@ -80,88 +81,80 @@ public class RequestResponseBodyMethodProcessorTests {
 		messageConverters.add(messageConverter);
 		processor = new RequestResponseBodyMethodProcessor(messageConverters);
 		
-		Method handle = getClass().getMethod("handle", String.class, Integer.TYPE);
-		stringParameter = new MethodParameter(handle, 0);
-		intParameter = new MethodParameter(handle, 1);
-		stringReturnValue = new MethodParameter(handle, -1);
-		Method other = getClass().getMethod("otherMethod");
-		intReturnValue = new MethodParameter(other, -1);
+		Method handle = getClass().getMethod("handle1", String.class, Integer.TYPE);
+		paramRequestBodyString = new MethodParameter(handle, 0);
+		paramInt = new MethodParameter(handle, 1);
+		returnTypeString = new MethodParameter(handle, -1);
+		returnTypeInt = new MethodParameter(getClass().getMethod("handle2"), -1);
 
 		mavContainer = new ModelAndViewContainer();
 		
 		servletRequest = new MockHttpServletRequest();
-		MockHttpServletResponse servletResponse = new MockHttpServletResponse();
-		webRequest = new ServletWebRequest(servletRequest, servletResponse);
+		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
 	}
 
 	@Test
 	public void supportsParameter() {
-		assertTrue("RequestBody parameter not supported", processor.supportsParameter(stringParameter));
-		assertFalse("non-RequestBody parameter supported", processor.supportsParameter(intParameter));
+		assertTrue("RequestBody parameter not supported", processor.supportsParameter(paramRequestBodyString));
+		assertFalse("non-RequestBody parameter supported", processor.supportsParameter(paramInt));
 	}
 
 	@Test
 	public void supportsReturnType() {
-		assertTrue("ResponseBody return type not supported", processor.supportsReturnType(stringReturnValue));
-		assertFalse("non-ResponseBody return type supported", processor.supportsReturnType(intReturnValue));
+		assertTrue("ResponseBody return type not supported", processor.supportsReturnType(returnTypeString));
+		assertFalse("non-ResponseBody return type supported", processor.supportsReturnType(returnTypeInt));
 	}
 
 	@Test
 	public void resolveArgument() throws Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
-		String expected = "Foo";
-
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
+		String body = "Foo";
 		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(contentType));
 		expect(messageConverter.canRead(String.class, contentType)).andReturn(true);
-		expect(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).andReturn(expected);
+		expect(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).andReturn(body);
 
 		replay(messageConverter);
 
-		Object result = processor.resolveArgument(stringParameter, mavContainer, webRequest, null);
+		Object result = processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 
-		assertEquals("Invalid argument", expected, result);
+		assertEquals("Invalid argument", body, result);
 		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
 		verify(messageConverter);
-
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNotReadable() throws Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
-
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
 		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(contentType));
 		expect(messageConverter.canRead(String.class, contentType)).andReturn(false);
-
 		replay(messageConverter);
 
-		processor.resolveArgument(stringParameter, mavContainer, webRequest, null);
+		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 
-		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
-		verify(messageConverter);
+		fail("Expected exception");
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNoContentType() throws Exception {
-		processor.resolveArgument(stringParameter, mavContainer, webRequest, null);
+		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
+		fail("Expected exception");
 	}
 
 	@Test
 	public void handleReturnValue() throws Exception {
 		MediaType accepted = MediaType.TEXT_PLAIN;
-		String returnValue = "Foo";
-
 		servletRequest.addHeader("Accept", accepted.toString());
 
+		String body = "Foo";
 		expect(messageConverter.canWrite(String.class, accepted)).andReturn(true);
-		messageConverter.write(eq(returnValue), eq(accepted), isA(HttpOutputMessage.class));
-
+		messageConverter.write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
 		replay(messageConverter);
 
-		processor.handleReturnValue(returnValue, stringReturnValue, mavContainer, webRequest);
+		processor.handleReturnValue(body, returnTypeString, mavContainer, webRequest);
 
 		assertFalse("The ResolveView flag wasn't turned off", mavContainer.isResolveView());
 		verify(messageConverter);
@@ -170,27 +163,23 @@ public class RequestResponseBodyMethodProcessorTests {
 	@Test(expected = HttpMediaTypeNotAcceptableException.class)
 	public void handleReturnValueNotAcceptable() throws Exception {
 		MediaType accepted = MediaType.TEXT_PLAIN;
-		String returnValue = "Foo";
-
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		expect(messageConverter.canWrite(String.class, accepted)).andReturn(false);
 		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
-
 		replay(messageConverter);
 
-		processor.handleReturnValue(returnValue, stringReturnValue, mavContainer, webRequest);
+		processor.handleReturnValue("Foo", returnTypeString, mavContainer, webRequest);
 
-		assertFalse("The ResolveView flag wasn't turned off", mavContainer.isResolveView());
-		verify(messageConverter);
+		fail("Expected exception");
 	}
 
 	@ResponseBody
-	public String handle(@RequestBody String s, int i) {
+	public String handle1(@RequestBody String s, int i) {
 		return s;
 	}
 
-	public int otherMethod() {
+	public int handle2() {
 		return 42;
 	}
 	

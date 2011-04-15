@@ -82,11 +82,9 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodR
 public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandlerMethodExceptionResolver implements
 		InitializingBean {
 
-	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = 
-		new ArrayList<HandlerMethodArgumentResolver>();
+	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
-	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers = 
-		new ArrayList<HandlerMethodReturnValueHandler>();
+	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
@@ -119,9 +117,7 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	 * or preferably converted to a {@link HandlerMethodArgumentResolver} instead. 
 	 */
 	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		if (argumentResolvers != null) {
-			this.customArgumentResolvers.addAll(argumentResolvers);
-		}
+		this.customArgumentResolvers= argumentResolvers;
 	}	
 
 	/**
@@ -133,7 +129,7 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
-			registerArgumentResolvers(argumentResolvers);
+			this.argumentResolvers.addResolvers(argumentResolvers);
 		}
 	}
 
@@ -144,9 +140,7 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	 * @param returnValueHandlers custom return value handlers for {@link ExceptionHandler} methods  
 	 */
 	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-		if (returnValueHandlers != null) {
-			this.customReturnValueHandlers.addAll(returnValueHandlers);
-		}
+		this.customReturnValueHandlers = returnValueHandlers;
 	}
 
 	/**
@@ -158,7 +152,7 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		if (returnValueHandlers != null) {
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
-			registerReturnValueHandlers(returnValueHandlers);
+			this.returnValueHandlers.addHandlers(returnValueHandlers);
 		}
 	}
 	
@@ -173,25 +167,13 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	public void afterPropertiesSet() throws Exception {
 		if (argumentResolvers == null) {
 			argumentResolvers = new HandlerMethodArgumentResolverComposite();
-			registerArgumentResolvers(customArgumentResolvers);
-			registerArgumentResolvers(getDefaultArgumentResolvers());
+			argumentResolvers.addResolvers(customArgumentResolvers);
+			argumentResolvers.addResolvers(getDefaultArgumentResolvers());
 		}
 		if (returnValueHandlers == null) {
 			returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
-			registerReturnValueHandlers(customReturnValueHandlers);
-			registerReturnValueHandlers(getDefaultReturnValueHandlers(messageConverters));
-		}
-	}
-
-	private void registerArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
-			this.argumentResolvers.registerArgumentResolver(resolver);
-		}
-	}
-	
-	private void registerReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-		for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
-			this.returnValueHandlers.registerReturnValueHandler(handler);
+			returnValueHandlers.addHandlers(customReturnValueHandlers);
+			returnValueHandlers.addHandlers(getDefaultReturnValueHandlers(messageConverters));
 		}
 	}
 

@@ -25,19 +25,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.InvocableHandlerMethod;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
 
 /**
- * Test fixture for {@link RequestMappingHandlerMethodAdapter} unit tests.
+ * Fine-grained {@link RequestMappingHandlerMethodAdapter} unit tests.
  * 
- * The tests in this class focus on {@link RequestMappingHandlerMethodAdapter} functionality exclusively.
- * Also see {@link RequestMappingHandlerMethodAdapterIntegrationTests} for higher-level tests invoking 
- * {@link Controller @Controller} methods. 
+ * <p>For higher-level adapter tests see:
+ * <ul>
+ * <li>{@link ServletHandlerMethodTests}
+ * <li>{@link RequestMappingHandlerMethodAdapterIntegrationTests}
+ * <li>{@link HandlerMethodAdapterAnnotationDetectionTests}
+ * </ul>
  * 
  * @author Rossen Stoyanchev
  */
@@ -94,4 +95,5 @@ public class RequestMappingHandlerMethodAdapterTests {
 		public void handle() {
 		}
 	}
+
 }

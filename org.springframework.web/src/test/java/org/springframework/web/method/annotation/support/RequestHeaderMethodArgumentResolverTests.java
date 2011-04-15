@@ -37,6 +37,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
+ * Test fixture with {@link RequestHeaderMethodArgumentResolver}.
+ * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -44,15 +46,11 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	private RequestHeaderMethodArgumentResolver resolver;
 
-	private MethodParameter stringParameter;
-
-	private MethodParameter stringArrayParameter;
-
-	private MethodParameter systemPropertyParameter;
-
-	private MethodParameter contextPathParameter;
-
-	private MethodParameter otherParameter;
+	private MethodParameter paramNamedDefaultValueStringHeader;
+	private MethodParameter paramNamedValueStringArray;
+	private MethodParameter paramSystemProperty;
+	private MethodParameter paramContextPath;
+	private MethodParameter paramNamedValueMap;
 
 	private MockHttpServletRequest servletRequest;
 
@@ -62,15 +60,14 @@ public class RequestHeaderMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();
-		
 		resolver = new RequestHeaderMethodArgumentResolver(context.getBeanFactory());
 
 		Method method = getClass().getMethod("params", String.class, String[].class, String.class, String.class, Map.class);
-		stringParameter = new MethodParameter(method, 0);
-		stringArrayParameter = new MethodParameter(method, 1);
-		systemPropertyParameter = new MethodParameter(method, 2);
-		contextPathParameter = new MethodParameter(method, 3);
-		otherParameter = new MethodParameter(method, 4);
+		paramNamedDefaultValueStringHeader = new MethodParameter(method, 0);
+		paramNamedValueStringArray = new MethodParameter(method, 1);
+		paramSystemProperty = new MethodParameter(method, 2);
+		paramContextPath = new MethodParameter(method, 3);
+		paramNamedValueMap = new MethodParameter(method, 4);
 
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
@@ -86,9 +83,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	@Test
 	public void supportsParameter() {
-		assertTrue("String parameter not supported", resolver.supportsParameter(stringParameter));
-		assertTrue("String array parameter not supported", resolver.supportsParameter(stringArrayParameter));
-		assertFalse("non-@RequestParam parameter supported", resolver.supportsParameter(otherParameter));
+		assertTrue("String parameter not supported", resolver.supportsParameter(paramNamedDefaultValueStringHeader));
+		assertTrue("String array parameter not supported", resolver.supportsParameter(paramNamedValueStringArray));
+		assertFalse("non-@RequestParam parameter supported", resolver.supportsParameter(paramNamedValueMap));
 	}
 
 	@Test
@@ -96,7 +93,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 		String expected = "foo";
 		servletRequest.addHeader("name", expected);
 
-		String result = (String) resolver.resolveArgument(stringParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramNamedDefaultValueStringHeader, null, webRequest, null);
+
+		assertTrue(result instanceof String);
 		assertEquals("Invalid result", expected, result);
 	}
 
@@ -105,39 +104,50 @@ public class RequestHeaderMethodArgumentResolverTests {
 		String[] expected = new String[]{"foo", "bar"};
 		servletRequest.addHeader("name", expected);
 
-		String[] result = (String[]) resolver.resolveArgument(stringArrayParameter, null, webRequest, null);
-		assertArrayEquals("Invalid result", expected, result);
+		Object result = resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
+
+		assertTrue(result instanceof String[]);
+		assertArrayEquals("Invalid result", expected, (String[]) result);
 	}
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
-		String result = (String) resolver.resolveArgument(stringParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramNamedDefaultValueStringHeader, null, webRequest, null);
+
+		assertTrue(result instanceof String);
 		assertEquals("Invalid result", "bar", result);
 	}
 
 	@Test
 	public void resolveDefaultValueFromSystemProperty() throws Exception {
-		System.setProperty("header", "bar");
-		String result = (String) resolver.resolveArgument(systemPropertyParameter, null, webRequest, null);
+		System.setProperty("systemProperty", "bar");
+		Object result = resolver.resolveArgument(paramSystemProperty, null, webRequest, null);
+		System.clearProperty("systemProperty");
+
+		assertTrue(result instanceof String);
 		assertEquals("bar", result);
 	}
 
 	@Test
 	public void resolveDefaultValueFromRequest() throws Exception {
 		servletRequest.setContextPath("/bar");
-		String result = (String) resolver.resolveArgument(contextPathParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramContextPath, null, webRequest, null);
+
+		assertTrue(result instanceof String);
 		assertEquals("/bar", result);
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void notFound() throws Exception {
-		String result = (String) resolver.resolveArgument(stringArrayParameter, null, webRequest, null);
+		Object result = resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
+
+		assertTrue(result instanceof String);
 		assertEquals("Invalid result", "bar", result);
 	}
 
 	public void params(@RequestHeader(value = "name", defaultValue = "bar") String param1,
 					   @RequestHeader("name") String[] param2,
-					   @RequestHeader(value = "name", defaultValue="#{systemProperties.header}") String param3,
+					   @RequestHeader(value = "name", defaultValue="#{systemProperties.systemProperty}") String param3,
 					   @RequestHeader(value = "name", defaultValue="#{request.contextPath}") String param4,
 					   @RequestHeader("name") Map<?, ?> unsupported) {
 	}

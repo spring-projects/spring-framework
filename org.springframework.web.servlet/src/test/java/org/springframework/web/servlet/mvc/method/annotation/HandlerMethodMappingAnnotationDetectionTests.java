@@ -21,8 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Arrays;
 import java.util.Collection;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -38,7 +36,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodMapping;
 
 /**
  * Test various scenarios for detecting handler methods depending on where @RequestMapping annotations 
@@ -55,7 +52,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
-public class RequestMappingHandlerMethodDetectionTests {
+public class HandlerMethodMappingAnnotationDetectionTests {
 
 	@Parameters
 	public static Collection<Object[]> handlerTypes() {
@@ -74,7 +71,7 @@ public class RequestMappingHandlerMethodDetectionTests {
 	
 	private boolean useAutoProxy;
 	
-	public RequestMappingHandlerMethodDetectionTests(Object handler, boolean useAutoProxy) {
+	public HandlerMethodMappingAnnotationDetectionTests(Object handler, boolean useAutoProxy) {
 		this.handler = handler;
 		this.useAutoProxy = useAutoProxy;
 	}
@@ -83,13 +80,13 @@ public class RequestMappingHandlerMethodDetectionTests {
 	public void detectAndMapHandlerMethod() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/type/handle");
 
-		TestRequestMappingHandlerMethodMapping mapping = createHandlerMapping(handler.getClass(), useAutoProxy);
-		HandlerMethod handlerMethod = mapping.getHandlerInternal(request);
+		RequestMappingHandlerMethodMapping mapping = createHandlerMapping(handler.getClass(), useAutoProxy);
+		HandlerMethod handlerMethod = (HandlerMethod) mapping.getHandler(request).getHandler();
 
 		assertNotNull("Failed to detect and map @RequestMapping handler method", handlerMethod);
 	}
 
-	private TestRequestMappingHandlerMethodMapping createHandlerMapping(Class<?> controllerType, boolean useAutoProxy) {
+	private RequestMappingHandlerMethodMapping createHandlerMapping(Class<?> controllerType, boolean useAutoProxy) {
 		GenericWebApplicationContext wac = new GenericWebApplicationContext();
 		wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerType));
 		if (useAutoProxy) {
@@ -99,16 +96,9 @@ public class RequestMappingHandlerMethodDetectionTests {
 			wac.getBeanFactory().registerSingleton("advsr", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 		}
 
-		TestRequestMappingHandlerMethodMapping mapping = new TestRequestMappingHandlerMethodMapping();
+		RequestMappingHandlerMethodMapping mapping = new RequestMappingHandlerMethodMapping();
 		mapping.setApplicationContext(wac);
-		
 		return mapping;
-	}
-
-	public static class TestRequestMappingHandlerMethodMapping extends RequestMappingHandlerMethodMapping {
-		public HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-			return super.getHandlerInternal(request);
-		}
 	}
 
 	/* Annotation on interface method */

@@ -68,7 +68,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMeth
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
-public class ControllerMethodAnnotationDetectionTests {
+public class HandlerMethodAdapterAnnotationDetectionTests {
 
 	@Parameters
 	public static Collection<Object[]> handlerTypes() {
@@ -87,7 +87,7 @@ public class ControllerMethodAnnotationDetectionTests {
 	
 	private boolean useAutoProxy;
 
-	public ControllerMethodAnnotationDetectionTests(Object handler, boolean useAutoProxy) {
+	public HandlerMethodAdapterAnnotationDetectionTests(Object handler, boolean useAutoProxy) {
 		this.handler = handler;
 		this.useAutoProxy = useAutoProxy;
 	}
@@ -117,11 +117,11 @@ public class ControllerMethodAnnotationDetectionTests {
 			handler = getProxyBean(handler);
 		}
 		HandlerMethodArgumentResolverComposite argResolvers = new HandlerMethodArgumentResolverComposite();
-		argResolvers.registerArgumentResolver(new ModelAttributeMethodProcessor(false));
+		argResolvers.addResolver(new ModelAttributeMethodProcessor(false));
 		
 		HandlerMethodReturnValueHandlerComposite handlers = new HandlerMethodReturnValueHandlerComposite();
-		handlers.registerReturnValueHandler(new ModelAttributeMethodProcessor(false));
-		handlers.registerReturnValueHandler(new DefaultMethodReturnValueHandler(null));
+		handlers.addHandler(new ModelAttributeMethodProcessor(false));
+		handlers.addHandler(new DefaultMethodReturnValueHandler(null));
 
 		Class<?> handlerType = ClassUtils.getUserClass(handler.getClass());
 		Set<Method> methods = HandlerMethodSelector.selectMethods(handlerType, REQUEST_MAPPING_METHODS);

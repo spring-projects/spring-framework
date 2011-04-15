@@ -52,7 +52,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -83,24 +82,23 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 
 /**
- * A test fixture for higher-level {@link RequestMappingHandlerMethodAdapter} tests.
+ * Serves as a sandbox to invoke all types of controller methods using all features except for the kitchen sink. 
+ * Once a problem has been debugged and understood, tests demonstrating the issue are preferably added to the 
+ * appropriate, more fine-grained test fixture.
  * 
- * <p>The aim here is not to test {@link RequestMappingHandlerMethodAdapter} itself nor to exercise 
- * every {@link Controller @Controller} method feature but to have a place to try any feature
- * related to {@link Controller @Controller} invocations. Preferably actual tests should be 
- * added to the components that provide that respective functionality.
- * 
- * <p>The following integration tests for detecting annotations on super types, parameterized
- * methods, and proxies may also be of interest:
+ * <p>If you wish to add high-level tests, consider the following other "integration"-style tests:
  * <ul>
- * 	<li>{@link RequestMappingHandlerMethodDetectionTests}
- * 	<li>{@link ControllerMethodAnnotationDetectionTests} 
+ * 	<li>{@link HandlerMethodAdapterAnnotationDetectionTests} 
+ * 	<li>{@link HandlerMethodMappingAnnotationDetectionTests}
+ * 	<li>{@link ServletHandlerMethodTests}
  * </ul>
  * 
  * @author Rossen Stoyanchev
  */
 public class RequestMappingHandlerMethodAdapterIntegrationTests {
 
+	private final Object handler = new Handler();
+	
 	private RequestMappingHandlerMethodAdapter handlerAdapter;
 	
 	private MockHttpServletRequest request;
@@ -114,20 +112,19 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 		
 		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<HandlerMethodArgumentResolver>();
 		customResolvers.add(new ServletWebArgumentResolverAdapter(new ColorArgumentResolver()));
-		
-		this.handlerAdapter = new RequestMappingHandlerMethodAdapter();
-		this.handlerAdapter.setWebBindingInitializer(bindingInitializer);
-		this.handlerAdapter.setCustomArgumentResolvers(customResolvers);
-		
+
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();
-		
-		this.handlerAdapter.setApplicationContext(context);
-		this.handlerAdapter.setBeanFactory(context.getBeanFactory());
-		this.handlerAdapter.afterPropertiesSet();
 
-		this.request = new MockHttpServletRequest();
-		this.response = new MockHttpServletResponse();
+		handlerAdapter = new RequestMappingHandlerMethodAdapter();
+		handlerAdapter.setWebBindingInitializer(bindingInitializer);
+		handlerAdapter.setCustomArgumentResolvers(customResolvers);
+		handlerAdapter.setApplicationContext(context);
+		handlerAdapter.setBeanFactory(context.getBeanFactory());
+		handlerAdapter.afterPropertiesSet();
+
+		request = new MockHttpServletRequest();
+		response = new MockHttpServletResponse();
 		
 		// Expose request to the current thread (for SpEL expressions)
 		RequestContextHolder.setRequestAttributes(new ServletWebRequest(request));
@@ -140,36 +137,36 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 
 	@Test
 	public void handleMvc() throws Exception {
-		Class<?>[] paramTypes = new Class<?>[] { int.class, String.class, String.class, String.class, Map.class,
+		
+		Class<?>[] parameterTypes = new Class<?>[] { int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
 				Color.class, HttpServletRequest.class, HttpServletResponse.class, User.class, OtherUser.class,
 				Model.class };
 
-		/* URI template vars (see RequestMappingHandlerMethodMapping) */
+		String datePattern = "yyyy.MM.dd";
+		String formattedDate = "2011.03.16";
+		Date date = new GregorianCalendar(2011, Calendar.MARCH, 16).getTime();
+
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.addHeader("header", "headerValue");
+		request.addHeader("anotherHeader", "anotherHeaderValue");
+		request.addParameter("datePattern", datePattern);
+		request.addParameter("dateParam", formattedDate);
+		request.addParameter("paramByConvention", "paramByConventionValue");
+		request.addParameter("age", "25");
+		request.setCookies(new Cookie("cookie", "99"));
+		request.setContent("Hello World".getBytes("UTF-8"));
+		request.setUserPrincipal(new User());
+		request.setContextPath("/contextPath");
+
+		System.setProperty("systemHeader", "systemHeaderValue");
+
+		/* Set up path variables as RequestMappingHandlerMethodMapping would... */
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
 		uriTemplateVars.put("pathvar", "pathvarValue");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		Date date = new GregorianCalendar(2011, Calendar.MARCH, 16).getTime();
-		String formattedDate = "2011.03.16";
-
-		System.setProperty("systemHeader", "systemHeaderValue");
-		
-		request.setCookies(new Cookie("cookie", "99"));
-		request.addHeader("header", "headerValue");
-		request.addHeader("anotherHeader", "anotherHeaderValue");
-		request.addParameter("datePattern", "yyyy.MM.dd");
-		request.addParameter("dateParam", formattedDate);
-		request.addParameter("paramByConvention", "paramByConventionValue");
-		request.addParameter("age", "25");
-		request.setContextPath("/contextPath");
-
-		request.addHeader("Content-Type", "text/plain; charset=utf-8");
-		request.setContent("Hello World".getBytes("UTF-8"));
-		
-		request.setUserPrincipal(new User());
-
-		HandlerMethod handlerMethod = handlerMethod(new RequestMappingHandler(), "handleMvc", paramTypes);
+		HandlerMethod handlerMethod = handlerMethod("handleMvc", parameterTypes);
 		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
 		ModelMap model = mav.getModelMap();
 
@@ -215,12 +212,13 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 	
 	@Test
 	public void handleRequestBody() throws Exception {
-		Class<?>[] paramTypes = new Class<?>[] { byte[].class };
+		
+		Class<?>[] parameterTypes = new Class<?>[] { byte[].class };
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		request.setContent("Hello Server".getBytes("UTF-8"));
 
-		HandlerMethod handlerMethod = handlerMethod(new RequestMappingHandler(), "handleRequestBody", paramTypes);
+		HandlerMethod handlerMethod = handlerMethod("handleRequestBody", parameterTypes);
 
 		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
 
@@ -231,12 +229,13 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 
 	@Test
 	public void handleHttpEntity() throws Exception {
-		Class<?>[] paramTypes = new Class<?>[] { HttpEntity.class };
+
+		Class<?>[] parameterTypes = new Class<?>[] { HttpEntity.class };
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		request.setContent("Hello Server".getBytes("UTF-8"));
 
-		HandlerMethod handlerMethod = handlerMethod(new RequestMappingHandler(), "handleHttpEntity", paramTypes);
+		HandlerMethod handlerMethod = handlerMethod("handleHttpEntity", parameterTypes);
 
 		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
 
@@ -246,22 +245,21 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 		assertEquals("headerValue", response.getHeader("header"));
 	}
 
-	private HandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes) throws Exception {
+	private HandlerMethod handlerMethod(String methodName, Class<?>... paramTypes) throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
 		return new InvocableHandlerMethod(handler, method);
 	}
 
+	@SuppressWarnings("unused")
 	@SessionAttributes(types=TestBean.class)
-	private static class RequestMappingHandler {
+	private static class Handler {
 
-		@SuppressWarnings("unused")
 		@InitBinder("dateParam")
 		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String datePattern) {			
 			SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
 			dataBinder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 		}
 
-		@SuppressWarnings("unused")
 		@ModelAttribute
 		public void model(Model model) {
 			TestBean modelAttr = new TestBean();
@@ -275,7 +273,6 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 			model.addAttribute(new OtherUser());
 		}
 
-		@SuppressWarnings("unused")
 		public String handleMvc(
 							@CookieValue("cookie") int cookie, 
 						 	@PathVariable("pathvar") String pathvar,
@@ -308,7 +305,6 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 			return "viewName";
 		}
 		
-		@SuppressWarnings("unused")
 		@ResponseStatus(value=HttpStatus.ACCEPTED)
 		@ResponseBody
 		public String handleRequestBody(@RequestBody byte[] bytes) throws Exception {
@@ -316,7 +312,6 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 			return "Handled requestBody=[" + requestBody + "]";
 		}
 
-		@SuppressWarnings("unused")
 		public ResponseEntity<String> handleHttpEntity(HttpEntity<byte[]> httpEntity) throws Exception {
 			HttpHeaders responseHeaders = new HttpHeaders();
 			responseHeaders.set("header", "headerValue");
@@ -352,4 +347,5 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 			return "other user";
 		}
 	}
+
 }

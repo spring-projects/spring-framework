@@ -16,13 +16,19 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+
 import java.util.Arrays;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -36,50 +42,67 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 
-import static org.junit.Assert.*;
-
 /**
+ * Test fixture with {@link RequestMappingHandlerMethodMapping}.
+ * 
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class RequestMappingHandlerMethodMappingTests {
 
-	private MyRequestMappingHandlerMethodMapping mapping;
+	private RequestMappingHandlerMethodMapping mapping;
 
-	private MyHandler handler;
+	private Handler handler;
 
 	private HandlerMethod fooMethod;
+
+	private HandlerMethod fooParamMethod;
 
 	private HandlerMethod barMethod;
 
 	@Before
 	public void setUp() throws Exception {
-		handler = new MyHandler();
+		handler = new Handler();
 		fooMethod = new HandlerMethod(handler, "foo");
+		fooParamMethod = new HandlerMethod(handler, "fooParam");
 		barMethod = new HandlerMethod(handler, "bar");
 
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerSingleton("handler", handler.getClass());
 
-		mapping = new MyRequestMappingHandlerMethodMapping();
+		mapping = new RequestMappingHandlerMethodMapping();
 		mapping.setApplicationContext(context);
 	}
-	
+
 	@Test
 	public void directMatch() throws Exception {
-		HandlerMethod result = mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
-		assertEquals(fooMethod.getMethod(), result.getMethod());
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		HandlerMethod hm = (HandlerMethod) mapping.getHandler(request).getHandler();
+		assertEquals(fooMethod.getMethod(), hm.getMethod());
 	}
 
 	@Test
 	public void globMatch() throws Exception {
-		HandlerMethod result = mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/bar"));
-		assertEquals(barMethod.getMethod(), result.getMethod());
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bar");
+		HandlerMethod hm = (HandlerMethod) mapping.getHandler(request).getHandler();
+		assertEquals(barMethod.getMethod(), hm.getMethod());
 	}
 
+	// TODO: SPR-8247
+	@Ignore
+	@Test
+	public void bestMatch() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		request.setParameter("p", "anything");
+		HandlerMethod hm = (HandlerMethod) mapping.getHandler(request).getHandler();
+		assertEquals(fooParamMethod.getMethod(), hm.getMethod());
+	}
+	
 	@Test
 	public void methodNotAllowed() throws Exception {
 		try {
-			mapping.getHandlerInternal(new MockHttpServletRequest("POST", "/bar"));
+			MockHttpServletRequest request = new MockHttpServletRequest("POST", "/bar");
+			mapping.getHandler(request);
 			fail("HttpRequestMethodNotSupportedException expected");
 		}
 		catch (HttpRequestMethodNotSupportedException ex) {
@@ -109,7 +132,6 @@ public class RequestMappingHandlerMethodMappingTests {
 		HandlerInterceptor interceptor = new HandlerInterceptorAdapter() {};
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] {path}, interceptor);
 
-		MyRequestMappingHandlerMethodMapping mapping = new MyRequestMappingHandlerMethodMapping();
 		mapping.setMappedInterceptors(new MappedInterceptor[] { mappedInterceptor });
 
 		HandlerExecutionChain chain = mapping.getHandlerExecutionChain(handler, new MockHttpServletRequest("GET", path));
@@ -120,27 +142,21 @@ public class RequestMappingHandlerMethodMappingTests {
 		assertNull(chain.getInterceptors());
 	}
 
-	private static class MyRequestMappingHandlerMethodMapping extends RequestMappingHandlerMethodMapping {
-
-		@Override
-		public HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-			return super.getHandlerInternal(request);
-		}
-	}
-
+	@SuppressWarnings("unused")
 	@Controller
-	private static class MyHandler {
+	private static class Handler {
 
-		@SuppressWarnings("unused")
 		@RequestMapping(value = "/foo", method = RequestMethod.GET)
 		public void foo() {
 		}
+		
+		@RequestMapping(value = "/foo", method = RequestMethod.GET, params="p")
+		public void fooParam() {
+		}
 
-		@SuppressWarnings("unused")
 		@RequestMapping(value = "/ba*", method = { RequestMethod.GET, RequestMethod.HEAD })
 		public void bar() {
 		}
-
 	}
-
+	
 }

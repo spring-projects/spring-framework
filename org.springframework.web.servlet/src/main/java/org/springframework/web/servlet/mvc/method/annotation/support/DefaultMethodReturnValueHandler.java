@@ -52,7 +52,7 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
  */
 public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 	
-	private final List<ModelAndViewResolver> modelAndViewResolvers = new ArrayList<ModelAndViewResolver>();
+	private final List<ModelAndViewResolver> mavResolvers;
 
 	/**
 	 * Create a {@link DefaultMethodReturnValueHandler} instance without {@link ModelAndViewResolver}s.
@@ -64,10 +64,8 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 	/**
 	 * Create a {@link DefaultMethodReturnValueHandler} with a list of {@link ModelAndViewResolver}s.
 	 */
-	public DefaultMethodReturnValueHandler(List<ModelAndViewResolver> modelAndViewResolvers) {
-		if (modelAndViewResolvers != null) {
-			this.modelAndViewResolvers.addAll(modelAndViewResolvers);
-		}
+	public DefaultMethodReturnValueHandler(List<ModelAndViewResolver> mavResolvers) {
+		this.mavResolvers = mavResolvers;
 	}
 
 	public boolean supportsReturnType(MethodParameter returnType) {
@@ -77,18 +75,20 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 	public void handleReturnValue(Object returnValue, 
 								  MethodParameter returnType, 
 								  ModelAndViewContainer mavContainer, 
-								  NativeWebRequest webRequest) throws Exception {
+								  NativeWebRequest request) throws Exception {
 
-		for (ModelAndViewResolver resolver : modelAndViewResolvers) {
-			Class<?> handlerType = returnType.getDeclaringClass();
-			Method method = returnType.getMethod();
-			ExtendedModelMap extModel = (ExtendedModelMap) mavContainer.getModel();
-			ModelAndView mav = resolver.resolveModelAndView(method, handlerType, returnValue, extModel, webRequest);
-			if (mav != ModelAndViewResolver.UNRESOLVED) {
-				mavContainer.setView(mav.getView());
-				mavContainer.setViewName(mav.getViewName());
-				mavContainer.addAllAttributes(mav.getModel());
-				return;
+		if (mavResolvers != null) {
+			for (ModelAndViewResolver resolver : mavResolvers) {
+				Class<?> handlerType = returnType.getDeclaringClass();
+				Method method = returnType.getMethod();
+				ExtendedModelMap model = (ExtendedModelMap) mavContainer.getModel();
+				ModelAndView mav = resolver.resolveModelAndView(method, handlerType, returnValue, model, request);
+				if (mav != ModelAndViewResolver.UNRESOLVED) {
+					mavContainer.setView(mav.getView());
+					mavContainer.setViewName(mav.getViewName());
+					mavContainer.addAllAttributes(mav.getModel());
+					return;
+				}
 			}
 		}
 

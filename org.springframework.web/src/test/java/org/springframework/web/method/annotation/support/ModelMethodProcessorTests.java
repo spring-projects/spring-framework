@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -35,81 +34,83 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Test fixture for {@link ModelMethodProcessor} unit tests.
+ * Test fixture with {@link ModelMethodProcessor}.
  * 
  * @author Rossen Stoyanchev
  */
 public class ModelMethodProcessorTests {
 
-	private ModelMethodProcessor resolver;
+	private ModelMethodProcessor processor;
 	
-	private MethodParameter modelParameter;
+	private ModelAndViewContainer mavContainer;
+	
+	private MethodParameter paramModel;
 
-	private MethodParameter modelReturnType;
+	private MethodParameter returnParamModel;
 
-	private MethodParameter mapParameter;
+	private MethodParameter paramMap;
 
-	private MethodParameter mapReturnType;
+	private MethodParameter returnParamMap;
 
 	private NativeWebRequest webRequest;
 
 	@Before
 	public void setUp() throws Exception {
-		this.resolver = new ModelMethodProcessor();
+		processor = new ModelMethodProcessor();
+		mavContainer = new ModelAndViewContainer();
 		
-		Method modelMethod = getClass().getDeclaredMethod("model", Model.class); 
-		this.modelParameter = new MethodParameter(modelMethod, 0);
-		this.modelReturnType = new MethodParameter(modelMethod, -1);
+		Method method = getClass().getDeclaredMethod("model", Model.class); 
+		paramModel = new MethodParameter(method, 0);
+		returnParamModel = new MethodParameter(method, -1);
 		
-		Method mapMethod = getClass().getDeclaredMethod("map", Map.class); 
-		this.mapParameter = new MethodParameter(mapMethod, 0);
-		this.mapReturnType = new MethodParameter(mapMethod, 0);
+		method = getClass().getDeclaredMethod("map", Map.class); 
+		paramMap = new MethodParameter(method, 0);
+		returnParamMap = new MethodParameter(method, 0);
 
-		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
+		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 
 	@Test
 	public void supportsParameter() {
-		assertTrue(resolver.supportsParameter(modelParameter));
-		assertTrue(resolver.supportsParameter(mapParameter));
+		assertTrue(processor.supportsParameter(paramModel));
+		assertTrue(processor.supportsParameter(paramMap));
 	}
 
 	@Test
 	public void supportsReturnType() {
-		assertTrue(resolver.supportsReturnType(modelReturnType));
-		assertTrue(resolver.supportsReturnType(mapReturnType));
+		assertTrue(processor.supportsReturnType(returnParamModel));
+		assertTrue(processor.supportsReturnType(returnParamMap));
 	}
 
 	@Test
 	public void resolveArgumentValue() throws Exception {
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-
-		Object result = resolver.resolveArgument(modelParameter, mavContainer, webRequest, null);
+		Object result = processor.resolveArgument(paramModel, mavContainer, webRequest, null);
 		assertSame(mavContainer.getModel(), result);
 		
-		result = resolver.resolveArgument(mapParameter, mavContainer, webRequest, null);
+		result = processor.resolveArgument(paramMap, mavContainer, webRequest, null);
 		assertSame(mavContainer.getModel(), result);
 	}
 	
 	@Test
-	public void handleReturnValue() throws Exception {
-		ExtendedModelMap implicitModel = new ExtendedModelMap();
-		implicitModel.put("attr1", "value1");
+	public void handleModelReturnValue() throws Exception {
+		mavContainer.addAttribute("attr1", "value1");
+		ModelMap returnValue = new ModelMap("attr2", "value2");
 
-		ExtendedModelMap returnValue = new ExtendedModelMap();
-		returnValue.put("attr2", "value2");
+		processor.handleReturnValue(returnValue , returnParamModel, mavContainer, webRequest);
 		
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer(implicitModel);
-		resolver.handleReturnValue(returnValue , modelReturnType, mavContainer, webRequest);
-		ModelMap actualModel = mavContainer.getModel();
-		assertEquals("value1", actualModel.get("attr1"));
-		assertEquals("value2", actualModel.get("attr2"));
+		assertEquals("value1", mavContainer.getModel().get("attr1"));
+		assertEquals("value2", mavContainer.getModel().get("attr2"));
+	}
+
+	@Test
+	public void handleMapReturnValue() throws Exception {
+		mavContainer.addAttribute("attr1", "value1");
+		Map<String, Object> returnValue = new ModelMap("attr2", "value2");
 		
-		mavContainer = new ModelAndViewContainer(implicitModel);
-		resolver.handleReturnValue(returnValue , mapReturnType, mavContainer, webRequest);
-		actualModel = mavContainer.getModel();
-		assertEquals("value1", actualModel.get("attr1"));
-		assertEquals("value2", actualModel.get("attr2"));
+		processor.handleReturnValue(returnValue , returnParamMap, mavContainer, webRequest);
+
+		assertEquals("value1", mavContainer.getModel().get("attr1"));
+		assertEquals("value2", mavContainer.getModel().get("attr2"));
 	}
 	
 	@SuppressWarnings("unused")
@@ -121,4 +122,5 @@ public class ModelMethodProcessorTests {
 	private Map<String, Object> map(Map<String, Object> map) {
 		return null;
 	}
+	
 }

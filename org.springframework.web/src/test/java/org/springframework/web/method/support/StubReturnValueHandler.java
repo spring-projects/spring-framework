@@ -16,48 +16,35 @@
 
 package org.springframework.web.method.support;
 
-import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Handles a return value by adding it as a model attribute with a default name. 
- * Records the raw return value (before handling). 
+ * Supports a fixed return value type. Records the last handled return value. 
  * 
  * @author Rossen Stoyanchev
  */
 public class StubReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	private final Class<?> supportedReturnType;
+	private final Class<?> returnType;
 	
-	private final boolean usesResponse;
-
-	private Object unhandledReturnValue;
+	private Object returnValue;
 	
-	public StubReturnValueHandler(Class<?> supportedReturnType, boolean usesResponse) {
-		this.supportedReturnType = supportedReturnType;
-		this.usesResponse = usesResponse;
+	public StubReturnValueHandler(Class<?> returnType) {
+		this.returnType = returnType;
 	}
 
-	public Object getUnhandledReturnValue() {
-		return this.unhandledReturnValue;
+	public Object getReturnValue() {
+		return this.returnValue;
 	}
 
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return returnType.getParameterType().equals(this.supportedReturnType);
+		return returnType.getParameterType().equals(this.returnType);
 	}
 
-	public void handleReturnValue(Object returnValue, 
-								  MethodParameter returnType, 
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest) throws Exception {
-		this.unhandledReturnValue = returnValue;
-		if (returnValue != null) {
-			mavContainer.addAttribute(Conventions.getVariableName(returnValue), returnValue);
-		}
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest) throws Exception {
+		this.returnValue = returnValue;
 	}
 
-	public boolean usesResponseArgument(MethodParameter parameter) {
-		return this.usesResponse;
-	}
 }

@@ -34,24 +34,26 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletResp
 import static org.junit.Assert.*;
 
 /**
+ * Test fixture with {@link ServletRequestMethodArgumentResolver}.
+ * 
  * @author Arjen Poutsma
  */
 public class ServletResponseMethodArgumentResolverTests {
 
 	private ServletResponseMethodArgumentResolver resolver;
 
-	private Method supportedParams;
+	private Method method;
+
+	private ModelAndViewContainer mavContainer;
 
 	private ServletWebRequest webRequest;
 
 	private MockHttpServletResponse servletResponse;
 
-	private ModelAndViewContainer mavContainer;
-
 	@Before
 	public void setUp() throws Exception {
 		resolver = new ServletResponseMethodArgumentResolver();
-		supportedParams = getClass().getMethod("supportedParams", ServletResponse.class, OutputStream.class, Writer.class);
+		method = getClass().getMethod("supportedParams", ServletResponse.class, OutputStream.class, Writer.class);
 		servletResponse = new MockHttpServletResponse();
 		mavContainer = new ModelAndViewContainer();
 		webRequest = new ServletWebRequest(new MockHttpServletRequest(), servletResponse);
@@ -59,7 +61,7 @@ public class ServletResponseMethodArgumentResolverTests {
 
 	@Test
 	public void servletResponse() throws Exception {
-		MethodParameter servletResponseParameter = new MethodParameter(supportedParams, 0);
+		MethodParameter servletResponseParameter = new MethodParameter(method, 0);
 
 		assertTrue("ServletResponse not supported", resolver.supportsParameter(servletResponseParameter));
 
@@ -70,7 +72,7 @@ public class ServletResponseMethodArgumentResolverTests {
 
 	@Test
 	public void outputStream() throws Exception {
-		MethodParameter outputStreamParameter = new MethodParameter(supportedParams, 1);
+		MethodParameter outputStreamParameter = new MethodParameter(method, 1);
 
 		assertTrue("OutputStream not supported", resolver.supportsParameter(outputStreamParameter));
 
@@ -81,7 +83,7 @@ public class ServletResponseMethodArgumentResolverTests {
 
 	@Test
 	public void writer() throws Exception {
-		MethodParameter writerParameter = new MethodParameter(supportedParams, 2);
+		MethodParameter writerParameter = new MethodParameter(method, 2);
 
 		assertTrue("Writer not supported", resolver.supportsParameter(writerParameter));
 

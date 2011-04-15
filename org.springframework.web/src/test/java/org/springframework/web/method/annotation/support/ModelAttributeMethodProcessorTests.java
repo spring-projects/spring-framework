@@ -55,7 +55,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Test fixture for {@link ModelAttributeMethodProcessor} unit tests.
+ * Test fixture with {@link ModelAttributeMethodProcessor}.
  * 
  * @author Rossen Stoyanchev
  */
@@ -63,17 +63,19 @@ public class ModelAttributeMethodProcessorTests {
 
 	private ModelAttributeMethodProcessor processor;
 	
-	private MethodParameter annotatedParam;
+	private MethodParameter paramNamedValidModelAttr;
 
-	private MethodParameter integerParam;
+	private MethodParameter paramErrors;
 
-	private MethodParameter defaultNameParam;
+	private MethodParameter paramInt;
 
-	private MethodParameter notAnnotatedParam;
+	private MethodParameter paramModelAttr;
+
+	private MethodParameter paramNonSimpleType;
 	
-	private MethodParameter annotatedReturnParam;
+	private MethodParameter returnParamNamedModelAttr;
 	
-	private MethodParameter notAnnotatedReturnParam;
+	private MethodParameter returnParamNonSimpleType;
 
 	private ModelAndViewContainer mavContainer;
 
@@ -81,66 +83,77 @@ public class ModelAttributeMethodProcessorTests {
 	
 	@Before
 	public void setUp() throws Exception {
-		this.processor = new ModelAttributeMethodProcessor(true);
+		processor = new ModelAttributeMethodProcessor(true);
 
-		Class<?> handlerType = ModelAttributeHandler.class;
-		Method method = handlerType.getDeclaredMethod("modelAttribute", TestBean.class, Errors.class, int.class,
-				TestBean.class, TestBean.class);
+		Method method = ModelAttributeHandler.class.getDeclaredMethod("modelAttribute", 
+				TestBean.class, Errors.class, int.class, TestBean.class, TestBean.class);
 		
-		this.annotatedParam = new MethodParameter(method, 0);
-		this.integerParam = new MethodParameter(method, 2);
-		this.defaultNameParam = new MethodParameter(method, 3);
-		this.notAnnotatedParam = new MethodParameter(method, 4);
+		paramNamedValidModelAttr = new MethodParameter(method, 0);
+		paramErrors = new MethodParameter(method, 1);
+		paramInt = new MethodParameter(method, 2);
+		paramModelAttr = new MethodParameter(method, 3);
+		paramNonSimpleType = new MethodParameter(method, 4);
 		
-		this.annotatedReturnParam = new MethodParameter(getClass().getDeclaredMethod("annotatedReturnValue"), -1);
-		this.notAnnotatedReturnParam = new MethodParameter(getClass().getDeclaredMethod("notAnnotatedReturnValue"), -1);
+		returnParamNamedModelAttr = new MethodParameter(getClass().getDeclaredMethod("annotatedReturnValue"), -1);
+		returnParamNonSimpleType = new MethodParameter(getClass().getDeclaredMethod("notAnnotatedReturnValue"), -1);
 		
 		mavContainer = new ModelAndViewContainer();
 
-		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
+		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 
 	@Test
 	public void supportParameter() throws Exception {
-		assertTrue(processor.supportsParameter(annotatedParam));
-		assertFalse(processor.supportsParameter(integerParam));
-		assertTrue(processor.supportsParameter(notAnnotatedParam));
+		processor = new ModelAttributeMethodProcessor(true);
+		assertTrue(processor.supportsParameter(paramNamedValidModelAttr));
+		assertTrue(processor.supportsParameter(paramErrors));
+		assertFalse(processor.supportsParameter(paramInt));
+		assertTrue(processor.supportsParameter(paramModelAttr));
+		assertTrue(processor.supportsParameter(paramNonSimpleType));
 		
-		this.processor = new ModelAttributeMethodProcessor(false);
-		assertFalse(processor.supportsParameter(notAnnotatedParam));
+		processor = new ModelAttributeMethodProcessor(false);
+		assertTrue(processor.supportsParameter(paramNamedValidModelAttr));
+		assertFalse(processor.supportsParameter(paramErrors));
+		assertFalse(processor.supportsParameter(paramInt));
+		assertTrue(processor.supportsParameter(paramModelAttr));
+		assertFalse(processor.supportsParameter(paramNonSimpleType));
 	}
 	
 	@Test
 	public void supportsReturnType() throws Exception {
-		assertTrue(processor.supportsReturnType(annotatedReturnParam));
-		assertFalse(processor.supportsReturnType(notAnnotatedReturnParam));
+		processor = new ModelAttributeMethodProcessor(true);
+		assertTrue(processor.supportsReturnType(returnParamNamedModelAttr));
+		assertFalse(processor.supportsReturnType(returnParamNonSimpleType));
+
+		processor = new ModelAttributeMethodProcessor(false);
+		assertTrue(processor.supportsReturnType(returnParamNamedModelAttr));
+		assertFalse(processor.supportsReturnType(returnParamNonSimpleType));
 	}
 	
 	@Test
 	public void shouldValidate() throws Exception {
-		assertTrue(processor.shouldValidate(annotatedParam));
-		assertFalse(processor.shouldValidate(notAnnotatedParam));
+		assertTrue(processor.shouldValidate(paramNamedValidModelAttr));
+		assertFalse(processor.shouldValidate(paramNonSimpleType));
 	}
 
 	@Test
 	public void failOnError() throws Exception {
-		assertFalse(processor.failOnError(annotatedParam));
-		assertTrue(processor.failOnError(notAnnotatedParam));
+		assertFalse("Shouldn't failOnError with BindingResult", processor.failOnError(paramNamedValidModelAttr));
+		assertTrue("Should failOnError without BindingResult", processor.failOnError(paramNonSimpleType));
 	}
 
 	@Test
 	public void createBinderFromModelAttribute() throws Exception {
-		createBinderFromModelAttr("attrName", annotatedParam);
-		createBinderFromModelAttr("testBean", defaultNameParam);
-		createBinderFromModelAttr("testBean", notAnnotatedParam);
+		createBinderFromModelAttr("attrName", paramNamedValidModelAttr);
+		createBinderFromModelAttr("testBean", paramModelAttr);
+		createBinderFromModelAttr("testBean", paramNonSimpleType);
 	}
 
 	private void createBinderFromModelAttr(String expectedAttrName, MethodParameter param) throws Exception {
 		Object target = new TestBean();
 		mavContainer.addAttribute(expectedAttrName, target);
 
-		WebDataBinder dataBinder = new WebRequestDataBinder(null);
-
+		WebDataBinder dataBinder = new WebRequestDataBinder(target);
 		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
 		expect(binderFactory.createBinder(webRequest, target, expectedAttrName)).andReturn(dataBinder);
 		replay(binderFactory);
@@ -158,7 +171,7 @@ public class ModelAttributeMethodProcessorTests {
 		expect(factory.createBinder((NativeWebRequest) anyObject(), notNull(), eq("attrName"))).andReturn(dataBinder);
 		replay(factory);
 		
-		processor.resolveArgument(annotatedParam, mavContainer, webRequest, factory);
+		processor.resolveArgument(paramNamedValidModelAttr, mavContainer, webRequest, factory);
 		
 		verify(factory);
 	}
@@ -167,13 +180,13 @@ public class ModelAttributeMethodProcessorTests {
 	public void bindAndValidate() throws Exception {
 		Object target = new TestBean();
 		mavContainer.addAttribute("attrName", target);
+		
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target);
-
 		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
 		expect(binderFactory.createBinder(webRequest, target, "attrName")).andReturn(dataBinder);
 		replay(binderFactory);
 		
-		processor.resolveArgument(annotatedParam, mavContainer, webRequest, binderFactory);
+		processor.resolveArgument(paramNamedValidModelAttr, mavContainer, webRequest, binderFactory);
 
 		assertTrue(dataBinder.isBindInvoked());
 		assertTrue(dataBinder.isValidateInvoked());
@@ -183,6 +196,7 @@ public class ModelAttributeMethodProcessorTests {
 	public void bindAndFail() throws Exception {
 		Object target = new TestBean();
 		mavContainer.getModel().addAttribute(target);
+
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target);
 		dataBinder.getBindingResult().reject("error");
 
@@ -190,48 +204,21 @@ public class ModelAttributeMethodProcessorTests {
 		expect(binderFactory.createBinder(webRequest, target, "testBean")).andReturn(dataBinder);
 		replay(binderFactory);
 		
-		processor.resolveArgument(notAnnotatedParam, mavContainer, webRequest, binderFactory);
+		processor.resolveArgument(paramNonSimpleType, mavContainer, webRequest, binderFactory);
 	}
 	
 	@Test
 	public void handleAnnotatedReturnValue() throws Exception {
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		processor.handleReturnValue("expected", annotatedReturnParam, mavContainer, webRequest);
-
+		processor.handleReturnValue("expected", returnParamNamedModelAttr, mavContainer, webRequest);
 		assertEquals("expected", mavContainer.getModel().get("modelAttrName"));
 	}
 
 	@Test
 	public void handleNotAnnotatedReturnValue() throws Exception {
 		TestBean testBean = new TestBean("expected");
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		processor.handleReturnValue(testBean, notAnnotatedReturnParam, mavContainer, webRequest);
+		processor.handleReturnValue(testBean, returnParamNonSimpleType, mavContainer, webRequest);
 		
 		assertSame(testBean, mavContainer.getModel().get("testBean"));
-	}
-	
-
-	@SessionAttributes(types=TestBean.class)
-	private static class ModelAttributeHandler {
-
-		@SuppressWarnings("unused")
-		public void modelAttribute(@ModelAttribute("attrName") @Valid TestBean annotatedAttr, 
-								   Errors errors,
-								   int intArg,
-								   @ModelAttribute TestBean defaultNameAttr,
-								   TestBean notAnnotatedAttr) {
-		}
-	}
-
-	@SuppressWarnings("unused")
-	@ModelAttribute("modelAttrName")
-	private String annotatedReturnValue() {
-		return null;
-	}
-
-	@SuppressWarnings("unused")
-	private TestBean notAnnotatedReturnValue() {
-		return null;
 	}
 	
 	private static class StubRequestDataBinder extends WebRequestDataBinder {
@@ -252,20 +239,40 @@ public class ModelAttributeMethodProcessorTests {
 			return validateInvoked;
 		}
 
-		@Override
 		public void bind(WebRequest request) {
-			this.bindInvoked = true;
+			bindInvoked = true;
 		}
 
-		@Override
 		public void validate() {
-			this.validateInvoked = true;
+			validateInvoked = true;
 		}
 	}
 
 	@Target({ METHOD, FIELD, CONSTRUCTOR, PARAMETER })
 	@Retention(RUNTIME)
 	public @interface Valid {
+	}
+
+	@SessionAttributes(types=TestBean.class)
+	private static class ModelAttributeHandler {
+		@SuppressWarnings("unused")
+		public void modelAttribute(@ModelAttribute("attrName") @Valid TestBean annotatedAttr, 
+								   Errors errors,
+								   int intArg,
+								   @ModelAttribute TestBean defaultNameAttr,
+								   TestBean notAnnotatedAttr) {
+		}
+	}
+
+	@SuppressWarnings("unused")
+	@ModelAttribute("modelAttrName")
+	private String annotatedReturnValue() {
+		return null;
+	}
+
+	@SuppressWarnings("unused")
+	private TestBean notAnnotatedReturnValue() {
+		return null;
 	}
 	
 }

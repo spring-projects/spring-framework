@@ -46,7 +46,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodExceptionResolver;
 
 /**
- * Test fixture for {@link RequestMappingHandlerMethodExceptionResolver} unit tests.
+ * Test fixture with {@link RequestMappingHandlerMethodExceptionResolver}.
  * 
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma

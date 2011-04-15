@@ -40,13 +40,16 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequ
 import static org.junit.Assert.*;
 
 /**
+ * Test fixture with {@link ServletRequestMethodArgumentResolver}.
+ * 
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class ServletRequestMethodArgumentResolverTests {
 
-	private ServletRequestMethodArgumentResolver resolver;
+	private final ServletRequestMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
 
-	private Method supportedParams;
+	private Method method;
 
 	private ModelAndViewContainer mavContainer;
 	
@@ -56,10 +59,8 @@ public class ServletRequestMethodArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		resolver = new ServletRequestMethodArgumentResolver();
-		supportedParams = getClass()
-				.getMethod("supportedParams", ServletRequest.class, MultipartRequest.class, HttpSession.class,
-						Principal.class, Locale.class, InputStream.class, Reader.class, WebRequest.class);
+		method = getClass().getMethod("supportedParams", ServletRequest.class, MultipartRequest.class,
+				HttpSession.class, Principal.class, Locale.class, InputStream.class, Reader.class, WebRequest.class);
 		mavContainer = new ModelAndViewContainer();
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
@@ -67,7 +68,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 	@Test
 	public void servletRequest() throws Exception {
-		MethodParameter servletRequestParameter = new MethodParameter(supportedParams, 0);
+		MethodParameter servletRequestParameter = new MethodParameter(method, 0);
 		
 		boolean isSupported = resolver.supportsParameter(servletRequestParameter);
 		Object result = resolver.resolveArgument(servletRequestParameter, mavContainer, webRequest, null);
@@ -81,7 +82,7 @@ public class ServletRequestMethodArgumentResolverTests {
 	public void session() throws Exception {
 		MockHttpSession session = new MockHttpSession();
 		servletRequest.setSession(session);
-		MethodParameter sessionParameter = new MethodParameter(supportedParams, 2);
+		MethodParameter sessionParameter = new MethodParameter(method, 2);
 
 		boolean isSupported = resolver.supportsParameter(sessionParameter);
 		Object result = resolver.resolveArgument(sessionParameter, mavContainer, webRequest, null);
@@ -99,7 +100,7 @@ public class ServletRequestMethodArgumentResolverTests {
 			}
 		};
 		servletRequest.setUserPrincipal(principal);
-		MethodParameter principalParameter = new MethodParameter(supportedParams, 3);
+		MethodParameter principalParameter = new MethodParameter(method, 3);
 
 		assertTrue("Principal not supported", resolver.supportsParameter(principalParameter));
 
@@ -111,7 +112,7 @@ public class ServletRequestMethodArgumentResolverTests {
 	public void locale() throws Exception {
 		Locale locale = Locale.ENGLISH;
 		servletRequest.addPreferredLocale(locale);
-		MethodParameter localeParameter = new MethodParameter(supportedParams, 4);
+		MethodParameter localeParameter = new MethodParameter(method, 4);
 
 		assertTrue("Locale not supported", resolver.supportsParameter(localeParameter));
 
@@ -121,7 +122,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 	@Test
 	public void inputStream() throws Exception {
-		MethodParameter inputStreamParameter = new MethodParameter(supportedParams, 5);
+		MethodParameter inputStreamParameter = new MethodParameter(method, 5);
 
 		assertTrue("InputStream not supported", resolver.supportsParameter(inputStreamParameter));
 
@@ -131,7 +132,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 	@Test
 	public void reader() throws Exception {
-		MethodParameter readerParameter = new MethodParameter(supportedParams, 6);
+		MethodParameter readerParameter = new MethodParameter(method, 6);
 
 		assertTrue("Reader not supported", resolver.supportsParameter(readerParameter));
 
@@ -141,7 +142,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 	@Test
 	public void webRequest() throws Exception {
-		MethodParameter webRequestParameter = new MethodParameter(supportedParams, 7);
+		MethodParameter webRequestParameter = new MethodParameter(method, 7);
 
 		assertTrue("WebRequest not supported", resolver.supportsParameter(webRequestParameter));
 

@@ -26,65 +26,63 @@ import org.junit.Test;
 import org.springframework.core.MethodParameter;
 
 /**
- * Test fixture for {@link HandlerMethodReturnValueHandlerComposite} unit tests.
+ * Test fixture with {@link HandlerMethodReturnValueHandlerComposite}.
  * 
  * @author Rossen Stoyanchev
  */
 public class HandlerMethodReturnValueHandlerCompositeTests {
 
-	private HandlerMethodReturnValueHandlerComposite composite;
+	private HandlerMethodReturnValueHandlerComposite handlers;
 
 	ModelAndViewContainer mavContainer;
 	
-	private MethodParameter paramInteger;
+	private MethodParameter paramInt;
 
-	private MethodParameter paramString;
+	private MethodParameter paramStr;
 
 	@Before
 	public void setUp() throws Exception {
-		this.composite = new HandlerMethodReturnValueHandlerComposite();
-
-		this.paramInteger = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
-		this.paramString = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
-		
+		handlers = new HandlerMethodReturnValueHandlerComposite();
 		mavContainer = new ModelAndViewContainer(); 
+		paramInt = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
+		paramStr = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
 	}
 	
 	@Test
 	public void supportsReturnType() throws Exception {
-		registerReturnValueHandler(Integer.class, false);
-		
-		assertTrue(this.composite.supportsReturnType(paramInteger));
-		assertFalse(this.composite.supportsReturnType(paramString));
+		registerHandler(Integer.class);
+
+		assertTrue(this.handlers.supportsReturnType(paramInt));
+		assertFalse(this.handlers.supportsReturnType(paramStr));
 	}
 	
 	@Test
 	public void handleReturnValue() throws Exception {
-		StubReturnValueHandler handler = registerReturnValueHandler(Integer.class, false);
-		this.composite.handleReturnValue(Integer.valueOf(55), paramInteger, mavContainer, null);
+		StubReturnValueHandler handler = registerHandler(Integer.class);
+		this.handlers.handleReturnValue(Integer.valueOf(55), paramInt, mavContainer, null);
 		
-		assertEquals(Integer.valueOf(55), handler.getUnhandledReturnValue());
+		assertEquals(Integer.valueOf(55), handler.getReturnValue());
 	}
 
 	@Test
 	public void handleReturnValueMultipleHandlers() throws Exception {
-		StubReturnValueHandler handler1 = registerReturnValueHandler(Integer.class, false);
-		StubReturnValueHandler handler2 = registerReturnValueHandler(Integer.class, false);
-		this.composite.handleReturnValue(Integer.valueOf(55), paramInteger, mavContainer, null);
+		StubReturnValueHandler h1 = registerHandler(Integer.class);
+		StubReturnValueHandler h2 = registerHandler(Integer.class);
+		this.handlers.handleReturnValue(Integer.valueOf(55), paramInt, mavContainer, null);
 		
-		assertEquals("Didn't use the 1st registered handler", Integer.valueOf(55), handler1.getUnhandledReturnValue());
-		assertNull("Shouldn't have use the 2nd registered handler", handler2.getUnhandledReturnValue());
+		assertEquals("Didn't use the 1st registered handler", Integer.valueOf(55), h1.getReturnValue());
+		assertNull("Shouldn't have use the 2nd registered handler", h2.getReturnValue());
 	}
 	
 	@Test(expected=IllegalStateException.class)
 	public void noSuitableReturnValueHandler() throws Exception {
-		registerReturnValueHandler(Integer.class, false);
-		this.composite.handleReturnValue("value", paramString, null, null);
+		registerHandler(Integer.class);
+		this.handlers.handleReturnValue("value", paramStr, null, null);
 	}
 	
-	protected StubReturnValueHandler registerReturnValueHandler(Class<?> returnType, boolean usesResponse) {
-		StubReturnValueHandler handler = new StubReturnValueHandler(returnType, usesResponse);
-		this.composite.registerReturnValueHandler(handler);
+	private StubReturnValueHandler registerHandler(Class<?> returnType) {
+		StubReturnValueHandler handler = new StubReturnValueHandler(returnType);
+		handlers.addHandler(handler);
 		return handler;
 	}
 	

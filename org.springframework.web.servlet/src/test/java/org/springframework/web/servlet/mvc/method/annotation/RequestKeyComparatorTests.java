@@ -32,6 +32,8 @@ import static java.util.Arrays.*;
 import static org.junit.Assert.*;
 
 /**
+ * Test fixture with {@link RequestMappingHandlerMethodMapping} testing its {@link RequestKey} comparator.
+ * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -143,4 +145,5 @@ public class RequestKeyComparatorTests {
 		assertTrue(comparator.compare(html, xml) > 0);
 		assertTrue(comparator.compare(xml, html) < 0);
 	}
+
 }
