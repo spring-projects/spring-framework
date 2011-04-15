@@ -25,9 +25,9 @@ import org.springframework.web.servlet.View;
 
 /**
  * Handles return values that are of type {@link View} or {@link String} (i.e. a logical view name).
- * <p>Since {@link String} return value can be interpeted in multiple ways, this resolver should be ordered 
- * after return value handlers that recognize annotated return values such as the 
- * {@link ModelAttributeMethodProcessor} and the {@link RequestResponseBodyMethodProcessor}.
+ * <p>Since a {@link String} return value may handled in different ways, especially in combination with method 
+ * annotations, this handler should be registered after return value handlers that look for method annotations
+ * such as the {@link ModelAttributeMethodProcessor} and the {@link RequestResponseBodyMethodProcessor}.
  *  
  * @author Rossen Stoyanchev
  * @since 3.1

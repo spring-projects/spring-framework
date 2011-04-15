@@ -60,4 +60,13 @@ class ConsumesRequestCondition extends AbstractRequestCondition {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		if (mediaType != null) {
+			builder.append(mediaType.toString());
+		}
+		return builder.toString();
+	}
+	
 }

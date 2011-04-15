@@ -97,29 +97,30 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Detect and register handler methods for the specified handler.
 	 */
-	private void detectHandlerMethods(final String handlerName) {
-		Class<?> handlerType = getApplicationContext().getType(handlerName);
+	private void detectHandlerMethods(final String beanName) {
+		Class<?> handlerType = getApplicationContext().getType(beanName);
 
 		Set<Method> methods = HandlerMethodSelector.selectMethods(handlerType, new MethodFilter() {
 			public boolean matches(Method method) {
-				return getKeyForMethod(method) != null;
+				return getKeyForMethod(beanName, method) != null;
 			}
 		});
 		for (Method method : methods) {
-			T key = getKeyForMethod(method);
-			HandlerMethod handlerMethod = new HandlerMethod(handlerName, getApplicationContext(), method);
+			T key = getKeyForMethod(beanName, method);
+			HandlerMethod handlerMethod = new HandlerMethod(beanName, getApplicationContext(), method);
 			registerHandlerMethod(key, handlerMethod);
 		}
 	}
 
 	/**
-	 * Provides a lookup key for the given method. A method for which no key can be determined is
+	 * Provides a lookup key for the given bean method. A method for which no key can be determined is
 	 * not considered a handler method.
 	 *
+	 * @param beanName the name of the bean the method belongs to
 	 * @param method the method to create a key for
 	 * @return the lookup key, or {@code null} if the method has none
 	 */
-	protected abstract T getKeyForMethod(Method method);
+	protected abstract T getKeyForMethod(String beanName, Method method);
 
 	/**
 	 * Registers a {@link HandlerMethod} under the given key.
@@ -133,12 +134,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		Assert.notNull(handlerMethod, "'handlerMethod' must not be null");
 		HandlerMethod mappedHandlerMethod = handlerMethods.get(key);
 		if (mappedHandlerMethod != null && !mappedHandlerMethod.equals(handlerMethod)) {
-			throw new IllegalStateException("Cannot map " + handlerMethod + " to \"" + key + "\": There is already "
-					+ mappedHandlerMethod + " mapped.");
+			throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + handlerMethod.getBean()
+					+ "' bean method \n" + handlerMethod + "\nto " + key + ": There is already '"
+					+ mappedHandlerMethod.getBean() + "' bean method\n" + mappedHandlerMethod + " mapped.");
 		}
 		handlerMethods.put(key, handlerMethod);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Mapped \"" + key + "\" onto " + handlerMethod);
+		if (logger.isInfoEnabled()) {
+			logger.info("Mapped \"" + key + "\" onto " + handlerMethod);
 		}
 	}
 
@@ -149,14 +151,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			return null;
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Looking up handler method for [" + key + "]");
+			logger.debug("Looking up handler method with key [" + key + "]");
 		}
 
 		HandlerMethod handlerMethod = lookupHandlerMethod(key, request);
 
 		if (logger.isDebugEnabled()) {
 			if (handlerMethod != null) {
-				logger.debug("Returning [" + handlerMethod + "] as best match for [" + key + "]");
+				logger.debug("Returning handler method [" + handlerMethod + "]");
 			}
 			else {
 				logger.debug("Did not find handler method for [" + key + "]");

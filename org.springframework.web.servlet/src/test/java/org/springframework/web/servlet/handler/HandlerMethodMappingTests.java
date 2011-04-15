@@ -103,7 +103,7 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected String getKeyForMethod(Method method) {
+		protected String getKeyForMethod(String beanName, Method method) {
 			String methodName = method.getName();
 			return methodName.startsWith("handler") ? methodName : null;
 		}

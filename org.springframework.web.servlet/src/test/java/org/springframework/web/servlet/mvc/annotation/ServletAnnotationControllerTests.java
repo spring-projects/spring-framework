@@ -1157,6 +1157,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
 			servlet.service(request, response);
+			fail("Didn't fail with due to ambiguous method mapping");
 		}
 		catch (NestedServletException ex) {
 			assertTrue(ex.getCause() instanceof IllegalStateException);
