@@ -123,7 +123,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 				webRequest.getResponse().sendError(this.responseStatus.value(), this.responseReason);
 			}
 			else {
-				webRequest.getResponse().sendError(this.responseStatus.value());
+				webRequest.getResponse().setStatus(this.responseStatus.value());
 			}
 
 			// to be picked up by the RedirectView

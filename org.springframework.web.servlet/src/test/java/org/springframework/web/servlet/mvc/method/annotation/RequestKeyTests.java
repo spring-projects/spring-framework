@@ -77,9 +77,13 @@ public class RequestKeyTests {
 
 		key1 = createKeyFromPatterns();
 		key2 = createKeyFromPatterns();
-		key3 = createKeyFromPatterns("/");
+		key3 = createKeyFromPatterns("");
 		assertEquals(key3.getPatterns(), key1.combine(key2, pathMatcher).getPatterns());
-	
+
+		key1 = createKeyFromPatterns("/t1");
+		key2 = createKeyFromPatterns("");
+		key3 = createKeyFromPatterns("/t1");
+		assertEquals(key3.getPatterns(), key1.combine(key2, pathMatcher).getPatterns());
 	}
 	
 	@Test
