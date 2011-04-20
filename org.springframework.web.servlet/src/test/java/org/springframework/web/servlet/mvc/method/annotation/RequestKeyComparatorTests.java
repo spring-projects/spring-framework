@@ -27,12 +27,13 @@ import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
+import org.springframework.web.util.UrlPathHelper;
 
 import static java.util.Arrays.*;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture with {@link RequestMappingHandlerMethodMapping} testing its {@link RequestKey} comparator.
+ * Test fixture with {@link RequestMappingHandlerMethodMapping} testing its {@link RequestMappingKey} comparator.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -52,9 +53,10 @@ public class RequestKeyComparatorTests {
 	@Test
 	public void moreSpecificPatternWins() {
 		request.setRequestURI("/foo");
-		Comparator<RequestKey> comparator = handlerMapping.getKeyComparator(request);
-		RequestKey key1 = new RequestKey(asList("/fo*"), null);
-		RequestKey key2 = new RequestKey(asList("/foo"), null);
+		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
+		Comparator<RequestMappingKey> comparator = handlerMapping.getMappingKeyComparator(lookupPath, request);
+		RequestMappingKey key1 = new RequestMappingKey(asList("/fo*"), null);
+		RequestMappingKey key2 = new RequestMappingKey(asList("/foo"), null);
 
 		assertEquals(1, comparator.compare(key1, key2));
 	}
@@ -62,9 +64,10 @@ public class RequestKeyComparatorTests {
 	@Test
 	public void equalPatterns() {
 		request.setRequestURI("/foo");
-		Comparator<RequestKey> comparator = handlerMapping.getKeyComparator(request);
-		RequestKey key1 = new RequestKey(asList("/foo*"), null);
-		RequestKey key2 = new RequestKey(asList("/foo*"), null);
+		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
+		Comparator<RequestMappingKey> comparator = handlerMapping.getMappingKeyComparator(lookupPath, request);
+		RequestMappingKey key1 = new RequestMappingKey(asList("/foo*"), null);
+		RequestMappingKey key2 = new RequestMappingKey(asList("/foo*"), null);
 
 		assertEquals(0, comparator.compare(key1, key2));
 	}
@@ -72,34 +75,35 @@ public class RequestKeyComparatorTests {
 	@Test
 	public void greaterNumberOfMatchingPatternsWins() throws Exception {
 		request.setRequestURI("/foo.html");
-		RequestKey key1 = new RequestKey(asList("/foo", "*.jpeg"), null);
-		RequestKey key2 = new RequestKey(asList("/foo", "*.html"), null);
-		RequestKey match1 = handlerMapping.getMatchingKey(key1, request);
-		RequestKey match2 = handlerMapping.getMatchingKey(key2, request);
-		List<RequestKey> matches = asList(match1, match2);
-		Collections.sort(matches, handlerMapping.getKeyComparator(request));
+		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
+		RequestMappingKey key1 = new RequestMappingKey(asList("/foo", "*.jpeg"), null);
+		RequestMappingKey key2 = new RequestMappingKey(asList("/foo", "*.html"), null);
+		RequestMappingKey match1 = handlerMapping.getMatchingMappingKey(key1, lookupPath, request);
+		RequestMappingKey match2 = handlerMapping.getMatchingMappingKey(key2, lookupPath, request);
+		List<RequestMappingKey> matches = asList(match1, match2);
+		Collections.sort(matches, handlerMapping.getMappingKeyComparator(lookupPath, request));
 
 		assertSame(match2.getPatterns(), matches.get(0).getPatterns());
 	}
 
 	@Test
 	public void oneMethodWinsOverNone() {
-		Comparator<RequestKey> comparator = handlerMapping.getKeyComparator(request);
-		RequestKey key1 = new RequestKey(null, null);
-		RequestKey key2 = new RequestKey(null, asList(RequestMethod.GET));
+		Comparator<RequestMappingKey> comparator = handlerMapping.getMappingKeyComparator("", request);
+		RequestMappingKey key1 = new RequestMappingKey(null, null);
+		RequestMappingKey key2 = new RequestMappingKey(null, asList(RequestMethod.GET));
 
 		assertEquals(1, comparator.compare(key1, key2));
 	}
 
 	@Test
 	public void methodsAndParams() {
-		RequestKey empty = new RequestKey(null, null);
-		RequestKey oneMethod = new RequestKey(null, asList(RequestMethod.GET));
-		RequestKey oneMethodOneParam =
-				new RequestKey(null, asList(RequestMethod.GET), RequestConditionFactory.parseParams("foo"), null, null);
-		List<RequestKey> list = asList(empty, oneMethod, oneMethodOneParam);
+		RequestMappingKey empty = new RequestMappingKey(null, null);
+		RequestMappingKey oneMethod = new RequestMappingKey(null, asList(RequestMethod.GET));
+		RequestMappingKey oneMethodOneParam =
+				new RequestMappingKey(null, asList(RequestMethod.GET), RequestConditionFactory.parseParams("foo"), null, null);
+		List<RequestMappingKey> list = asList(empty, oneMethod, oneMethodOneParam);
 		Collections.shuffle(list);
-		Collections.sort(list, handlerMapping.getKeyComparator(request));
+		Collections.sort(list, handlerMapping.getMappingKeyComparator("", request));
 
 		assertEquals(oneMethodOneParam, list.get(0));
 		assertEquals(oneMethod, list.get(1));
@@ -109,12 +113,12 @@ public class RequestKeyComparatorTests {
 	@Test 
 	@Ignore	// TODO : remove ignore
 	public void acceptHeaders() {
-		RequestKey html = new RequestKey(null, null, null, RequestConditionFactory.parseHeaders("accept=text/html"), null);
-		RequestKey xml = new RequestKey(null, null, null, RequestConditionFactory.parseHeaders("accept=application/xml"), null);
-		RequestKey none = new RequestKey(null, null);
+		RequestMappingKey html = new RequestMappingKey(null, null, null, RequestConditionFactory.parseHeaders("accept=text/html"), null);
+		RequestMappingKey xml = new RequestMappingKey(null, null, null, RequestConditionFactory.parseHeaders("accept=application/xml"), null);
+		RequestMappingKey none = new RequestMappingKey(null, null);
 
 		request.addHeader("Accept", "application/xml, text/html");
-		Comparator<RequestKey> comparator = handlerMapping.getKeyComparator(request);
+		Comparator<RequestMappingKey> comparator = handlerMapping.getMappingKeyComparator("", request);
 
 		assertTrue(comparator.compare(html, xml) > 0);
 		assertTrue(comparator.compare(xml, html) < 0);
@@ -125,14 +129,14 @@ public class RequestKeyComparatorTests {
 
 		request = new MockHttpServletRequest();
 		request.addHeader("Accept", "application/xml, text/*");
-		comparator = handlerMapping.getKeyComparator(request);
+		comparator = handlerMapping.getMappingKeyComparator("", request);
 
 		assertTrue(comparator.compare(html, xml) > 0);
 		assertTrue(comparator.compare(xml, html) < 0);
 
 		request = new MockHttpServletRequest();
 		request.addHeader("Accept", "application/pdf");
-		comparator = handlerMapping.getKeyComparator(request);
+		comparator = handlerMapping.getMappingKeyComparator("", request);
 
 		assertTrue(comparator.compare(html, xml) == 0);
 		assertTrue(comparator.compare(xml, html) == 0);
@@ -140,7 +144,7 @@ public class RequestKeyComparatorTests {
 		// See SPR-7000
 		request = new MockHttpServletRequest();
 		request.addHeader("Accept", "text/html;q=0.9,application/xml");
-		comparator = handlerMapping.getKeyComparator(request);
+		comparator = handlerMapping.getMappingKeyComparator("", request);
 
 		assertTrue(comparator.compare(html, xml) > 0);
 		assertTrue(comparator.compare(xml, html) < 0);

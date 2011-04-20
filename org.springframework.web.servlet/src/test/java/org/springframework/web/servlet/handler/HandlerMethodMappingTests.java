@@ -16,20 +16,21 @@
 
 package org.springframework.web.servlet.handler;
 
+import static org.junit.Assert.assertEquals;
+
 import java.lang.reflect.Method;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.util.UrlPathHelper;
-
-import static org.junit.Assert.*;
 
 /**
  * Test for {@link AbstractHandlerMethodMapping}.
@@ -54,14 +55,14 @@ public class HandlerMethodMappingTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void registerDuplicates() {
-		mapping.registerHandlerMethod("foo", handlerMethod1);
-		mapping.registerHandlerMethod("foo", handlerMethod2);
+		mapping.registerHandlerMethod(new HashSet<String>(), "foo", handlerMethod1);
+		mapping.registerHandlerMethod(new HashSet<String>(), "foo", handlerMethod2);
 	}
 
 	@Test
 	public void directMatch() throws Exception {
 		String key = "foo";
-		mapping.registerHandlerMethod(key, handlerMethod1);
+		mapping.registerHandlerMethod(new HashSet<String>(), key, handlerMethod1);
 
 		HandlerMethod result = mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
 		assertEquals(handlerMethod1, result);
@@ -69,8 +70,8 @@ public class HandlerMethodMappingTests {
 
 	@Test
 	public void patternMatch() throws Exception {
-		mapping.registerHandlerMethod("/fo*", handlerMethod1);
-		mapping.registerHandlerMethod("/f*", handlerMethod1);
+		mapping.registerHandlerMethod(new HashSet<String>(), "/fo*", handlerMethod1);
+		mapping.registerHandlerMethod(new HashSet<String>(), "/f*", handlerMethod1);
 
 		HandlerMethod result = mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
 		assertEquals(handlerMethod1, result);
@@ -78,46 +79,40 @@ public class HandlerMethodMappingTests {
 	
 	@Test(expected = IllegalStateException.class)
 	public void ambiguousMatch() throws Exception {
-		mapping.registerHandlerMethod("/f?o", handlerMethod1);
-		mapping.registerHandlerMethod("/fo?", handlerMethod2);
+		mapping.registerHandlerMethod(new HashSet<String>(), "/f?o", handlerMethod1);
+		mapping.registerHandlerMethod(new HashSet<String>(), "/fo?", handlerMethod2);
 
 		mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
 	}
 
 	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<String> {
 
-		private UrlPathHelper urlPathHelper = new UrlPathHelper();
-
 		private PathMatcher pathMatcher = new AntPathMatcher();
 
 		@Override
-		protected String getKeyForRequest(HttpServletRequest request) throws Exception {
-			return urlPathHelper.getLookupPathForRequest(request);
-		}
-
-		@Override
-		protected String getMatchingKey(String pattern, HttpServletRequest request) {
-			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
-
+		protected String getMatchingMappingKey(String pattern, String lookupPath, HttpServletRequest request) {
 			return pathMatcher.match(pattern, lookupPath) ? pattern : null;
 		}
 
 		@Override
-		protected String getKeyForMethod(String beanName, Method method) {
+		protected String getMappingKeyForMethod(String beanName, Method method) {
 			String methodName = method.getName();
 			return methodName.startsWith("handler") ? methodName : null;
 		}
 
 		@Override
-		protected Comparator<String> getKeyComparator(HttpServletRequest request) {
-			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
-
+		protected Comparator<String> getMappingKeyComparator(String lookupPath, HttpServletRequest request) {
 			return pathMatcher.getPatternComparator(lookupPath);
 		}
 
 		@Override
 		protected boolean isHandler(String beanName) {
 			return true;
+		}
+
+		@Override
+		protected Set<String> getMappingPaths(String key) {
+			return new HashSet<String>();
 		}
 	}
 
