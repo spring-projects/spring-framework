@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -41,6 +40,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.handler.MappedInterceptor;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Test fixture with {@link RequestMappingHandlerMethodMapping}.
@@ -102,8 +102,6 @@ public class RequestMappingHandlerMethodMappingTests {
 		assertEquals(emptyMethod.getMethod(), hm.getMethod());
 	}
 
-	// TODO: SPR-8247
-	@Ignore
 	@Test
 	public void bestMatch() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
@@ -126,10 +124,11 @@ public class RequestMappingHandlerMethodMappingTests {
 
 	@Test
 	public void uriTemplateVariables() {
-		RequestKey key = new RequestKey(Arrays.asList("/{path1}/{path2}"), null);
+		RequestMappingKey key = new RequestMappingKey(Arrays.asList("/{path1}/{path2}"), null);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
+		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 
-		mapping.handleMatch(key, request);
+		mapping.handleMatch(key, lookupPath, request);
 		
 		@SuppressWarnings("unchecked")
 		Map<String, String> actual = (Map<String, String>) request.getAttribute(

@@ -30,27 +30,18 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping HandlerMapping} implementations that
  * support mapping requests to {@link HandlerMethod}s rather than to handlers.
  * 
- * <p>Each {@link HandlerMethod} is registered with a unique key. Subclasses define the key type and how to create it
- * for a given handler method. Keys represent conditions for matching a handler method to a request. 
- *
- * <p>Subclasses must also define how to create a key for an incoming request. The resulting key is used to perform 
- * a {@link HandlerMethod} lookup possibly resulting in a direct match. However, when a map lookup is insufficient, 
- * the keys of all handler methods are iterated and subclasses are allowed to make an exhaustive check of key 
- * conditions against the request.
- * 
- * <p>Since there can be more than one matching key for a request, subclasses must define a comparator for sorting
- * the keys of matching handler methods in order to find the most specific match.
- *
- * @param <T> A unique key for the registration of mapped {@link HandlerMethod}s representing the conditions to
- * match a handler method to a request.
+ * @param <T> Represents a mapping key with conditions for mapping a request to a {@link HandlerMethod}.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -58,7 +49,51 @@ import org.springframework.web.method.HandlerMethodSelector;
  */
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping {
 
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
+
+	private final MultiValueMap<String, T> urlMap = new LinkedMultiValueMap<String, T>();
+	
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>();
+
+	/**
+	 * Set if URL lookup should always use the full path within the current servlet context. Else, the path within the
+	 * current servlet mapping is used if applicable (that is, in the case of a ".../*" servlet mapping in web.xml).
+	 * <p>Default is "false".
+	 *
+	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
+	 */
+	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
+		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
+	}
+
+	/**
+	 * Set if context path and request URI should be URL-decoded. Both are returned <i>undecoded</i> by the Servlet API, in
+	 * contrast to the servlet path. <p>Uses either the request encoding or the default encoding according to the Servlet
+	 * spec (ISO-8859-1).
+	 *
+	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
+	 */
+	public void setUrlDecode(boolean urlDecode) {
+		this.urlPathHelper.setUrlDecode(urlDecode);
+	}
+
+	/**
+	 * Set the UrlPathHelper to use for resolution of lookup paths. <p>Use this to override the default UrlPathHelper 
+	 * with a custom subclass, or to share common UrlPathHelper settings across multiple HandlerMappings and
+	 * MethodNameResolvers.
+	 *
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
+		this.urlPathHelper = urlPathHelper;
+	}
+	
+	/**
+	 * Return the {@link UrlPathHelper} to use for resolution of lookup paths.
+	 */
+	public UrlPathHelper getUrlPathHelper() {
+		return urlPathHelper;
+	}
 
 	/**
 	 * Calls the initialization of the superclass and detects handlers.
@@ -71,14 +106,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	/**
 	 * Register handler methods found in beans of the current ApplicationContext.
-	 * <p>The actual key determination for a handler is up to the concrete
-	 * {@link #getKeyForMethod(Method)} implementation. A method in a bean for which no key
-	 * could be determined is simply not considered a handler method.
-	 * @see #getKeyForMethod(Method)
+	 * <p>The actual mapping for a handler is up to the concrete {@link #getMappingKeyForMethod(String, Method)}
+	 * implementation.
 	 */
 	protected void initHandlerMethods() {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Looking for URL mappings in application context: " + getApplicationContext());
+			logger.debug("Looking for request mappings in application context: " + getApplicationContext());
 		}
 		for (String beanName : getApplicationContext().getBeanNamesForType(Object.class)) {
 			if (isHandler(beanName)){
@@ -102,80 +135,78 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		Set<Method> methods = HandlerMethodSelector.selectMethods(handlerType, new MethodFilter() {
 			public boolean matches(Method method) {
-				return getKeyForMethod(beanName, method) != null;
+				return getMappingKeyForMethod(beanName, method) != null;
 			}
 		});
 		for (Method method : methods) {
-			T key = getKeyForMethod(beanName, method);
 			HandlerMethod handlerMethod = new HandlerMethod(beanName, getApplicationContext(), method);
-			registerHandlerMethod(key, handlerMethod);
+			T mapping = getMappingKeyForMethod(beanName, method);
+			Set<String> paths = getMappingPaths(mapping);
+			registerHandlerMethod(paths, mapping, handlerMethod);
 		}
 	}
 
 	/**
-	 * Provides a lookup key for the given bean method. A method for which no key can be determined is
+	 * Provides a mapping key for the given bean method. A method for which no mapping can be determined is
 	 * not considered a handler method.
 	 *
 	 * @param beanName the name of the bean the method belongs to
-	 * @param method the method to create a key for
-	 * @return the lookup key, or {@code null} if the method has none
+	 * @param method the method to create a mapping for
+	 * @return the mapping key, or {@code null} if the method is not mapped
 	 */
-	protected abstract T getKeyForMethod(String beanName, Method method);
+	protected abstract T getMappingKeyForMethod(String beanName, Method method);
 
 	/**
-	 * Registers a {@link HandlerMethod} under the given key.
-	 *
-	 * @param key the key to register the method under
+	 * Registers a {@link HandlerMethod} with the given mapping.
+	 * 
+	 * @param paths URL paths mapped to this method
+	 * @param mappingKey the mapping key for the method
 	 * @param handlerMethod the handler method to register
-	 * @throws IllegalStateException if another method was already register under the key
+	 * @throws IllegalStateException if another method was already register under the same mapping
 	 */
-	protected void registerHandlerMethod(T key, HandlerMethod handlerMethod) {
-		Assert.notNull(key, "'key' must not be null");
+	protected void registerHandlerMethod(Set<String> paths, T mappingKey, HandlerMethod handlerMethod) {
+		Assert.notNull(mappingKey, "'mapping' must not be null");
 		Assert.notNull(handlerMethod, "'handlerMethod' must not be null");
-		HandlerMethod mappedHandlerMethod = handlerMethods.get(key);
+		HandlerMethod mappedHandlerMethod = handlerMethods.get(mappingKey);
 		if (mappedHandlerMethod != null && !mappedHandlerMethod.equals(handlerMethod)) {
 			throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + handlerMethod.getBean()
-					+ "' bean method \n" + handlerMethod + "\nto " + key + ": There is already '"
+					+ "' bean method \n" + handlerMethod + "\nto " + mappingKey + ": There is already '"
 					+ mappedHandlerMethod.getBean() + "' bean method\n" + mappedHandlerMethod + " mapped.");
 		}
-		handlerMethods.put(key, handlerMethod);
+		handlerMethods.put(mappingKey, handlerMethod);
 		if (logger.isInfoEnabled()) {
-			logger.info("Mapped \"" + key + "\" onto " + handlerMethod);
+			logger.info("Mapped \"" + mappingKey + "\" onto " + handlerMethod);
+		}
+		for (String path : paths) {
+			urlMap.add(path, mappingKey);
 		}
 	}
 
+	/**
+	 * Get the URL paths for the given mapping. 
+	 */
+	protected abstract Set<String> getMappingPaths(T mappingKey);
+
 	@Override
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-		T key = getKeyForRequest(request);
-		if (key == null) {
-			return null;
-		}
+		String lookupPath = urlPathHelper.getLookupPathForRequest(request);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Looking up handler method with key [" + key + "]");
+			logger.debug("Looking up handler method for path " + lookupPath);
 		}
 
-		HandlerMethod handlerMethod = lookupHandlerMethod(key, request);
+		HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
 
 		if (logger.isDebugEnabled()) {
 			if (handlerMethod != null) {
 				logger.debug("Returning handler method [" + handlerMethod + "]");
 			}
 			else {
-				logger.debug("Did not find handler method for [" + key + "]");
+				logger.debug("Did not find handler method for [" + lookupPath + "]");
 			}
 		}
 
 		return (handlerMethod != null) ? handlerMethod.createWithResolvedBean() : null;
 	}
-
-	/**
-	 * Abstract template method that returns the lookup key for the given HTTP servlet request.
-	 *
-	 * @param request the request to look up the key for
-	 * @return the key, or {@code null} if the request does not have one
-	 * @throws Exception in case of errors
-	 */
-	protected abstract T getKeyForRequest(HttpServletRequest request) throws Exception;
 
 	/**
 	 * Looks up the best-matching {@link HandlerMethod} for the given request.
@@ -185,119 +216,126 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * returns the 1st entry, if any. If no matches are found, {@link #handleNoMatch(Set, HttpServletRequest)} is
 	 * invoked.
 	 *
-	 * @param lookupKey current lookup key
+	 * @param lookupPath mapping lookup path within the current servlet mapping if applicable
 	 * @param request the current HTTP servlet request
 	 * @return the best-matching handler method, or {@code null} if there is no match
 	 */
-	protected HandlerMethod lookupHandlerMethod(T lookupKey, HttpServletRequest request) throws Exception {
-		if (handlerMethods.containsKey(lookupKey)) {
+	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
+		List<T> keys = urlMap.get(lookupPath);
+		if (keys == null) {
+			keys = new ArrayList<T>(handlerMethods.keySet());
+		}
+			
+		List<Match> matches = new ArrayList<Match>();
+		
+		for (T key : keys) {
+			T match = getMatchingMappingKey(key, lookupPath, request);
+			if (match != null) {
+				matches.add(new Match(match, handlerMethods.get(key)));
+			}
+		}
+
+		if (!matches.isEmpty()) {
+			Comparator<Match> comparator = new MatchComparator(getMappingKeyComparator(lookupPath, request));
+			Collections.sort(matches, comparator);
+
 			if (logger.isTraceEnabled()) {
-				logger.trace("Found direct match for [" + lookupKey + "]");
+				logger.trace("Found " + matches.size() + " matching mapping(s) for [" + lookupPath + "] : " + matches);
 			}
 
-			handleMatch(lookupKey, request);
-			return handlerMethods.get(lookupKey);
+			Match bestMatch = matches.get(0);
+			if (matches.size() > 1) {
+				Match secondBestMatch = matches.get(1);
+				if (comparator.compare(bestMatch, secondBestMatch) == 0) {
+					Method m1 = bestMatch.handlerMethod.getMethod();
+					Method m2 = secondBestMatch.handlerMethod.getMethod();
+					throw new IllegalStateException(
+							"Ambiguous handler methods mapped for HTTP path '" + request.getRequestURL() + "': {" +
+							m1 + ", " + m2 + "}");
+				}
+			}
+
+			handleMatch(bestMatch.mappingKey, lookupPath, request);
+			return bestMatch.handlerMethod;
 		}
 		else {
-			List<Match> matches = new ArrayList<Match>();
-
-			for (Map.Entry<T, HandlerMethod> entry : handlerMethods.entrySet()) {
-				T match = getMatchingKey(entry.getKey(), request);
-				if (match != null) {
-					matches.add(new Match(match, entry.getValue()));
-				}
-			}
-
-			if (!matches.isEmpty()) {
-				Comparator<Match> comparator = getMatchComparator(request);
-				Collections.sort(matches, comparator);
-
-				if (logger.isTraceEnabled()) {
-					logger.trace("Found " + matches.size() + " matching key(s) for [" + lookupKey + "] : " + matches);
-				}
-
-				Match bestMatch = matches.get(0);
-				if (matches.size() > 1) {
-					Match secondBestMatch = matches.get(1);
-					if (comparator.compare(bestMatch, secondBestMatch) == 0) {
-						Method m1 = bestMatch.handlerMethod.getMethod();
-						Method m2 = secondBestMatch.handlerMethod.getMethod();
-						throw new IllegalStateException(
-								"Ambiguous handler methods mapped for HTTP path '" + request.getRequestURL() + "': {" +
-										m1 + ", " + m2 + "}");
-					}
-				}
-
-				handleMatch(bestMatch.key, request);
-				return bestMatch.handlerMethod;
-			}
-			else {
-				return handleNoMatch(handlerMethods.keySet(), request);
-			}
+			return handleNoMatch(handlerMethods.keySet(), lookupPath, request);
 		}
 	}
 
 	/**
-	 * Invoked when a key matching to a request has been identified.
+	 * Invoked when a request has been matched to a mapping.
 	 *
-	 * @param key the key selected for the request returned by {@link #getMatchingKey(Object, HttpServletRequest)}.
+	 * @param mappingKey the mapping selected for the request returned by 
+	 * {@link #getMatchingMappingKey(Object, String, HttpServletRequest)}.
+	 * @param lookupPath mapping lookup path within the current servlet mapping if applicable
 	 * @param request the current request
 	 */
-	protected void handleMatch(T key, HttpServletRequest request) {
+	protected void handleMatch(T mappingKey, String lookupPath, HttpServletRequest request) {
 	}
 
 	/**
-	 * Returns the matching variant of the given key, given the current HTTP servlet request.
+	 * Checks if the mapping matches the current request and returns a mapping updated to contain only conditions 
+	 * relevant to the current request (for example a mapping may have several HTTP methods, the matching mapping
+	 * will contain only 1).
 	 *
-	 * @param key the key to get the matches for
+	 * @param mappingKey the mapping key to get a match for
+	 * @param lookupPath mapping lookup path within the current servlet mapping if applicable
 	 * @param request the current HTTP servlet request
-	 * @return the matching key, or {@code null} if the given key does not match against the servlet request
+	 * @return a matching mapping, or {@code null} if the given mapping does not match the request
 	 */
-	protected abstract T getMatchingKey(T key, HttpServletRequest request);
-
-	private Comparator<Match> getMatchComparator(HttpServletRequest request) {
-		final Comparator<T> keyComparator = getKeyComparator(request);
-		return new Comparator<Match>() {
-			public int compare(Match m1, Match m2) {
-				return keyComparator.compare(m1.key, m2.key);
-			}
-		};
-	}
+	protected abstract T getMatchingMappingKey(T mappingKey, String lookupPath, HttpServletRequest request);
 
 	/**
-	 * Returns a comparator to sort the keys with. The returned comparator should sort 'better' matches higher.
+	 * Returns a comparator to sort mapping keys with. The returned comparator should sort 'better' matches higher.
 	 *
+	 * @param lookupPath mapping lookup path within the current servlet mapping if applicable
 	 * @param request the current HTTP servlet request
 	 * @return the comparator
 	 */
-	protected abstract Comparator<T> getKeyComparator(HttpServletRequest request);
+	protected abstract Comparator<T> getMappingKeyComparator(String lookupPath, HttpServletRequest request);
 
 	/**
 	 * Invoked when no match was found. Default implementation returns {@code null}.
 	 *
-	 * @param requestKeys the registered request keys
+	 * @param mappingKeys all registered mappings
+	 * @param lookupPath mapping lookup path within the current servlet mapping if applicable
 	 * @param request the current HTTP request
 	 * @throws ServletException in case of errors
 	 */
-	protected HandlerMethod handleNoMatch(Set<T> requestKeys, HttpServletRequest request) throws Exception {
+	protected HandlerMethod handleNoMatch(Set<T> mappingKeys, String lookupPath, HttpServletRequest request)
+			throws Exception {
 		return null;
 	}
 
 	private class Match {
 
-		private final T key;
+		private final T mappingKey;
 
 		private final HandlerMethod handlerMethod;
 
-		private Match(T key, HandlerMethod handlerMethod) {
-			this.key = key;
+		private Match(T mapping, HandlerMethod handlerMethod) {
+			this.mappingKey = mapping;
 			this.handlerMethod = handlerMethod;
 		}
 
 		@Override
 		public String toString() {
-			return key.toString();
+			return mappingKey.toString();
 		}
 	}
 
+	private class MatchComparator implements Comparator<Match> {
+
+		private final Comparator<T> comparator;
+
+		public MatchComparator(Comparator<T> comparator) {
+			this.comparator = comparator;
+		}
+
+		public int compare(Match match1, Match match2) {
+			return comparator.compare(match1.mappingKey, match2.mappingKey);
+		}
+	}
+	
 }

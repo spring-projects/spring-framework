@@ -17,37 +17,35 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Contains a set of conditions to match to a given request such as URL patterns, HTTP methods, request 
  * parameters and headers. 
  * 
- * <p>A {@link RequestKey} can be combined with another {@link RequestKey} resulting in a new {@link RequestKey}
- * with conditions from both (see {@link #combine(RequestKey, PathMatcher)}).
+ * <p>A {@link RequestMappingKey} can be combined with another {@link RequestMappingKey} resulting in a new {@link RequestMappingKey}
+ * with conditions from both (see {@link #combine(RequestMappingKey, PathMatcher)}).
  * 
- * <p>A {@link RequestKey} can be matched to a request resulting in a new {@link RequestKey} with the subset of
- * conditions relevant to the request (see {@link #getMatchingKey(HttpServletRequest, PathMatcher, UrlPathHelper)}).
+ * <p>A {@link RequestMappingKey} can be matched to a request resulting in a new {@link RequestMappingKey} with the subset of
+ * conditions relevant to the request (see {@link #getMatchingKey(String, HttpServletRequest, PathMatcher)}).
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public final class RequestKey {
+public final class RequestMappingKey {
 
 	private final Set<String> patterns;
 
@@ -66,20 +64,18 @@ public final class RequestKey {
 	 * 
 	 * <p>Package protected for testing purposes.
 	 */
-	RequestKey(Collection<String> patterns, Collection<RequestMethod> methods) {
+	RequestMappingKey(Collection<String> patterns, Collection<RequestMethod> methods) {
 		this(patterns, methods, null, null, null);
 	}
 
 	/**
 	 * Creates a new {@code RequestKey} instance with a full set of conditions.
-	 * 
-	 * <p>Package protected for testing purposes.
 	 */
-	RequestKey(Collection<String> patterns,
-			   Collection<RequestMethod> methods,
-			   RequestCondition paramsCondition,
-			   RequestCondition headersCondition,
-			   RequestCondition consumesCondition) {
+	public RequestMappingKey(Collection<String> patterns,
+							 Collection<RequestMethod> methods,
+							 RequestCondition paramsCondition,
+							 RequestCondition headersCondition,
+							 RequestCondition consumesCondition) {
 		this.patterns = asUnmodifiableSet(prependLeadingSlash(patterns));
 		this.methods = asUnmodifiableSet(methods);
 		this.paramsCondition = paramsCondition != null ? paramsCondition : RequestConditionFactory.trueCondition();
@@ -107,34 +103,6 @@ public final class RequestKey {
 		}
 		Set<T> result = new LinkedHashSet<T>(collection);
 		return Collections.unmodifiableSet(result);
-	}
-
-	/**
-	 * Creates a new {@code RequestKey} from a {@link RequestMapping @RequestMapping} annotation.
-	 *
-	 * @param annotation the annotation
-	 * @return the request key created from the annotation
-	 */
-	public static RequestKey createFromRequestMapping(RequestMapping annotation) {
-		return new RequestKey(Arrays.asList(annotation.value()), Arrays.asList(annotation.method()),
-						RequestConditionFactory.parseParams(annotation.params()),
-						RequestConditionFactory.parseHeaders(annotation.headers()),
-						RequestConditionFactory.parseConsumes(annotation.consumes())
-				);
-	}
-
-	/**
-	 * Creates a new {@code RequestKey} from a {@link HttpServletRequest}.
-	 *
-	 * @param request the servlet request
-	 * @param urlPathHelper to create the {@linkplain UrlPathHelper#getLookupPathForRequest(HttpServletRequest) lookup
-	 * path}
-	 * @return the request key created from the servlet request
-	 */
-	public static RequestKey createFromServletRequest(HttpServletRequest request, UrlPathHelper urlPathHelper) {
-		String lookupPath = urlPathHelper.getLookupPathForRequest(request);
-		RequestMethod method = RequestMethod.valueOf(request.getMethod());
-		return new RequestKey(Collections.singleton(lookupPath), Collections.singleton(method));
 	}
 
 	/**
@@ -183,14 +151,14 @@ public final class RequestKey {
 	 * @param pathMatcher to {@linkplain PathMatcher#combine(String, String) combine} the patterns
 	 * @return a new request key containing conditions from both keys
 	 */
-	public RequestKey combine(RequestKey methodKey, PathMatcher pathMatcher) {
+	public RequestMappingKey combine(RequestMappingKey methodKey, PathMatcher pathMatcher) {
 		Set<String> patterns = combinePatterns(this.patterns, methodKey.patterns, pathMatcher);
 		Set<RequestMethod> methods = union(this.methods, methodKey.methods);
 		RequestCondition params = RequestConditionFactory.and(this.paramsCondition, methodKey.paramsCondition);
 		RequestCondition headers = RequestConditionFactory.and(this.headersCondition, methodKey.headersCondition);
 		RequestCondition consumes = RequestConditionFactory.mostSpecific(methodKey.consumesCondition, this.consumesCondition);
 
-		return new RequestKey(patterns, methods, params, headers, consumes);
+		return new RequestMappingKey(patterns, methods, params, headers, consumes);
 	}
 
 	private static Set<String> combinePatterns(Collection<String> typePatterns,
@@ -231,21 +199,21 @@ public final class RequestKey {
 	 * <li>Request parameter and request header conditions are included in full. 
 	 * <li>The list of consumes conditions is trimmed and sorted to match the request "Content-Type" header.
 	 * </ul>   
+	 * @param lookupPath mapping lookup path within the current servlet mapping if applicable
 	 * @param request the current request
 	 * @param pathMatcher to check for matching patterns
-	 * @param urlPathHelper to derive the lookup path for the request
 	 * @return a new request key that contains all matching attributes, or {@code null} if not all conditions match
 	 */
-	public RequestKey getMatchingKey(HttpServletRequest request, PathMatcher pathMatcher, UrlPathHelper urlPathHelper) {
+	public RequestMappingKey getMatchingKey(String lookupPath, HttpServletRequest request, PathMatcher pathMatcher) {
 		if (!checkMethod(request) || !paramsCondition.match(request) || !headersCondition.match(request) ||
 				!consumesCondition.match(request)) {
 			return null;
 		}
 		else {
-			List<String> matchingPatterns = getMatchingPatterns(request, pathMatcher, urlPathHelper);
+			List<String> matchingPatterns = getMatchingPatterns(lookupPath, request, pathMatcher);
 			if (!matchingPatterns.isEmpty()) {
 				Set<RequestMethod> matchingMethods = getMatchingMethod(request);
-				return new RequestKey(matchingPatterns, matchingMethods, this.paramsCondition, this.headersCondition,
+				return new RequestMappingKey(matchingPatterns, matchingMethods, this.paramsCondition, this.headersCondition,
 						this.consumesCondition);
 			}
 			else {
@@ -254,10 +222,9 @@ public final class RequestKey {
 		}
 	}
 
-	private List<String> getMatchingPatterns(HttpServletRequest request,
-											 PathMatcher pathMatcher,
-											 UrlPathHelper urlPathHelper) {
-		String lookupPath = urlPathHelper.getLookupPathForRequest(request);
+	private List<String> getMatchingPatterns(String lookupPath, 
+											 HttpServletRequest request,
+											 PathMatcher pathMatcher) {
 
 		List<String> matchingPatterns = new ArrayList<String>();
 		for (String pattern : this.patterns) {
@@ -308,8 +275,8 @@ public final class RequestKey {
 		if (this == obj) {
 			return true;
 		}
-		if (obj != null && obj instanceof RequestKey) {
-			RequestKey other = (RequestKey) obj;
+		if (obj != null && obj instanceof RequestMappingKey) {
+			RequestMappingKey other = (RequestMappingKey) obj;
 			return (this.patterns.equals(other.patterns) && this.methods.equals(other.methods) &&
 					this.paramsCondition.equals(other.paramsCondition) &&
 					this.headersCondition.equals(other.headersCondition));
