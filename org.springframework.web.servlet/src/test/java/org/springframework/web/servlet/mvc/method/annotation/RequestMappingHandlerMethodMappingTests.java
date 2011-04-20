@@ -60,12 +60,15 @@ public class RequestMappingHandlerMethodMappingTests {
 
 	private HandlerMethod barMethod;
 
+	private HandlerMethod emptyMethod;
+
 	@Before
 	public void setUp() throws Exception {
 		handler = new Handler();
 		fooMethod = new HandlerMethod(handler, "foo");
 		fooParamMethod = new HandlerMethod(handler, "fooParam");
 		barMethod = new HandlerMethod(handler, "bar");
+		emptyMethod = new HandlerMethod(handler, "empty");
 
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerSingleton("handler", handler.getClass());
@@ -86,6 +89,17 @@ public class RequestMappingHandlerMethodMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bar");
 		HandlerMethod hm = (HandlerMethod) mapping.getHandler(request).getHandler();
 		assertEquals(barMethod.getMethod(), hm.getMethod());
+	}
+
+	@Test
+	public void emptyPathMatch() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
+		HandlerMethod hm = (HandlerMethod) mapping.getHandler(request).getHandler();
+		assertEquals(emptyMethod.getMethod(), hm.getMethod());
+
+		request = new MockHttpServletRequest("GET", "/");
+		hm = (HandlerMethod) mapping.getHandler(request).getHandler();
+		assertEquals(emptyMethod.getMethod(), hm.getMethod());
 	}
 
 	// TODO: SPR-8247
@@ -144,6 +158,7 @@ public class RequestMappingHandlerMethodMappingTests {
 
 	@SuppressWarnings("unused")
 	@Controller
+	@RequestMapping
 	private static class Handler {
 
 		@RequestMapping(value = "/foo", method = RequestMethod.GET)
@@ -156,6 +171,10 @@ public class RequestMappingHandlerMethodMappingTests {
 
 		@RequestMapping(value = "/ba*", method = { RequestMethod.GET, RequestMethod.HEAD })
 		public void bar() {
+		}
+
+		@RequestMapping(value = "")
+		public void empty() {
 		}
 	}
 	

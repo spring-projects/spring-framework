@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.condition.RequestCondition;
@@ -92,7 +93,7 @@ public final class RequestKey {
 		}
 		Set<String> result = new LinkedHashSet<String>(patterns.size());
 		for (String pattern : patterns) {
-			if (!pattern.startsWith("/")) {
+			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
 				pattern = "/" + pattern;
 			}
 			result.add(pattern);
@@ -169,9 +170,9 @@ public final class RequestKey {
 	 * <ul>
 	 * <li>URL patterns:
 	 * 	<ul>
-	 * 	  <li>If both keys have path patterns combine them according to the rules of the given {@link PathMatcher}.
-	 * 	  <li>If either key contains path patterns but not both use only what is available.
-	 * 	  <li>If neither key contains path patterns use "/".
+	 * 	  <li>If both have patterns combine them according to the rules of the given {@link PathMatcher}
+	 * 	  <li>If either contains patterns, but not both, use the available pattern
+	 * 	  <li>If neither contains patterns use ""
 	 * 	</ul>
 	 * <li>HTTP methods are combined as union of all HTTP methods listed in both keys.
 	 * <li>Request parameter are combined into a logical AND.
@@ -198,8 +199,8 @@ public final class RequestKey {
 		Set<String> result = new LinkedHashSet<String>();
 		if (!typePatterns.isEmpty() && !methodPatterns.isEmpty()) {
 			for (String pattern1 : typePatterns) {
-				for (String p2 : methodPatterns) {
-					result.add(pathMatcher.combine(pattern1, p2));
+				for (String pattern2 : methodPatterns) {
+					result.add(pathMatcher.combine(pattern1, pattern2));
 				}
 			}
 		}
