@@ -53,6 +53,8 @@ public final class RequestMappingInfo {
 
 	private final RequestCondition headersCondition;
 
+	private final RequestCondition consumesCondition;
+
 	private int hash;
 
 	/**
@@ -61,7 +63,7 @@ public final class RequestMappingInfo {
 	 * <p>Package protected for testing purposes.
 	 */
 	RequestMappingInfo(Collection<String> patterns, Collection<RequestMethod> methods) {
-		this(patterns, methods, null, null);
+		this(patterns, methods, null, null, null);
 	}
 
 	/**
@@ -70,11 +72,13 @@ public final class RequestMappingInfo {
 	public RequestMappingInfo(Collection<String> patterns,
 							 Collection<RequestMethod> methods,
 							 RequestCondition paramsCondition,
-							 RequestCondition headersCondition) {
+							 RequestCondition headersCondition,
+							 RequestCondition consumesCondition) {
 		this.patterns = asUnmodifiableSet(prependLeadingSlash(patterns));
 		this.methods = asUnmodifiableSet(methods);
 		this.paramsCondition = paramsCondition != null ? paramsCondition : RequestConditionFactory.trueCondition();
 		this.headersCondition = headersCondition != null ? headersCondition : RequestConditionFactory.trueCondition();
+		this.consumesCondition = consumesCondition != null ? consumesCondition : RequestConditionFactory.trueCondition();
 	}
 
 	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
@@ -139,6 +143,7 @@ public final class RequestMappingInfo {
 	 * <li>HTTP methods are combined as union of all HTTP methods listed in both keys.
 	 * <li>Request parameter are combined into a logical AND.
 	 * <li>Request header are combined into a logical AND.
+	 * <li>Consumes .. TODO
 	 * </ul>
 	 * @param methodKey the key to combine with
 	 * @param pathMatcher to {@linkplain PathMatcher#combine(String, String) combine} the patterns
@@ -149,8 +154,9 @@ public final class RequestMappingInfo {
 		Set<RequestMethod> methods = union(this.methods, methodKey.methods);
 		RequestCondition params = RequestConditionFactory.and(this.paramsCondition, methodKey.paramsCondition);
 		RequestCondition headers = RequestConditionFactory.and(this.headersCondition, methodKey.headersCondition);
+		RequestCondition consumes = RequestConditionFactory.mostSpecific(methodKey.consumesCondition, this.consumesCondition);
 
-		return new RequestMappingInfo(patterns, methods, params, headers);
+		return new RequestMappingInfo(patterns, methods, params, headers, consumes);
 	}
 
 	private static Set<String> combinePatterns(Collection<String> typePatterns,
@@ -197,14 +203,16 @@ public final class RequestMappingInfo {
 	 * @return a new request key that contains all matching attributes, or {@code null} if not all conditions match
 	 */
 	public RequestMappingInfo getMatchingRequestMapping(String lookupPath, HttpServletRequest request, PathMatcher pathMatcher) {
-		if (!checkMethod(request) || !paramsCondition.match(request) || !headersCondition.match(request)) {
+		if (!checkMethod(request) || !paramsCondition.match(request) || !headersCondition.match(request) ||
+				!consumesCondition.match(request)) {
 			return null;
 		}
 		else {
 			List<String> matchingPatterns = getMatchingPatterns(lookupPath, request, pathMatcher);
 			if (!matchingPatterns.isEmpty()) {
 				Set<RequestMethod> matchingMethods = getMatchingMethod(request);
-				return new RequestMappingInfo(matchingPatterns, matchingMethods, this.paramsCondition, this.headersCondition);
+				return new RequestMappingInfo(matchingPatterns, matchingMethods, this.paramsCondition, this.headersCondition,
+						this.consumesCondition);
 			}
 			else {
 				return null;
@@ -297,6 +305,7 @@ public final class RequestMappingInfo {
 		}
 		builder.append(",params=").append(paramsCondition.toString());
 		builder.append(",headers=").append(headersCondition.toString());
+		builder.append(",consumes=").append(consumesCondition.toString());
 		builder.append('}');
 		return builder.toString();
 	}
