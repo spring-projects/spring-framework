@@ -22,7 +22,7 @@ import org.springframework.cache.KeyGenerator;
 
 /**
  * Default key generator. Returns 0 if no param is given, the param itself if only one is given or a hash code computed
- * from all given params hash code.
+ * from all given params hash code. Uses a constant (53) for null objects.
  * 
  * @author Costin Leau
  */
@@ -30,7 +30,7 @@ public class DefaultKeyGenerator implements KeyGenerator<Object> {
 
 	public Object extract(Object target, Method method, Object... params) {
 		if (params.length == 1) {
-			return params[0];
+			return (params[0] == null ? 53 : params[0]);
 		}
 
 		if (params.length == 0) {
@@ -40,7 +40,7 @@ public class DefaultKeyGenerator implements KeyGenerator<Object> {
 		int hashCode = 17;
 
 		for (Object object : params) {
-			hashCode = 31 * hashCode + object.hashCode();
+			hashCode = 31 * hashCode + (object == null ? 53 : object.hashCode());
 		}
 
 		return Integer.valueOf(hashCode);
