@@ -129,7 +129,8 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 	private static RequestMappingInfo createFromRequestMapping(RequestMapping annotation) {
 		return new RequestMappingInfo(Arrays.asList(annotation.value()), Arrays.asList(annotation.method()),
 						RequestConditionFactory.parseParams(annotation.params()),
-						RequestConditionFactory.parseHeaders(annotation.headers()));
+						RequestConditionFactory.parseHeaders(annotation.headers()),
+						RequestConditionFactory.parseConsumes());
 	}
 	
 	@Override

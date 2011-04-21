@@ -100,7 +100,7 @@ public class RequestKeyComparatorTests {
 		RequestMappingInfo empty = new RequestMappingInfo(null, null);
 		RequestMappingInfo oneMethod = new RequestMappingInfo(null, asList(RequestMethod.GET));
 		RequestMappingInfo oneMethodOneParam =
-				new RequestMappingInfo(null, asList(RequestMethod.GET), RequestConditionFactory.parseParams("foo"), null);
+				new RequestMappingInfo(null, asList(RequestMethod.GET), RequestConditionFactory.parseParams("foo"), null, null);
 		List<RequestMappingInfo> list = asList(empty, oneMethod, oneMethodOneParam);
 		Collections.shuffle(list);
 		Collections.sort(list, handlerMapping.getMappingComparator("", request));
@@ -113,8 +113,8 @@ public class RequestKeyComparatorTests {
 	@Test 
 	@Ignore	// TODO : remove ignore
 	public void acceptHeaders() {
-		RequestMappingInfo html = new RequestMappingInfo(null, null, null, RequestConditionFactory.parseHeaders("accept=text/html"));
-		RequestMappingInfo xml = new RequestMappingInfo(null, null, null, RequestConditionFactory.parseHeaders("accept=application/xml"));
+		RequestMappingInfo html = new RequestMappingInfo(null, null, null, RequestConditionFactory.parseHeaders("accept=text/html"), null);
+		RequestMappingInfo xml = new RequestMappingInfo(null, null, null, RequestConditionFactory.parseHeaders("accept=application/xml"), null);
 		RequestMappingInfo none = new RequestMappingInfo(null, null);
 
 		request.addHeader("Accept", "application/xml, text/html");

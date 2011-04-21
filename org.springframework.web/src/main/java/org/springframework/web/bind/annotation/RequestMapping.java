@@ -55,7 +55,7 @@ import java.lang.annotation.Target;
  * As a consequence, such an argument will never be <code>null</code>.
  * <i>Note that session access may not be thread-safe, in particular in a
  * Servlet environment: Consider switching the
- * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter#setSynchronizeOnSession "synchronizeOnSession"}
  * flag to "true" if multiple requests are allowed to access a session concurrently.</i>
  * <li>{@link org.springframework.web.context.request.WebRequest} or
  * {@link org.springframework.web.context.request.NativeWebRequest}.
@@ -106,7 +106,7 @@ import java.lang.annotation.Target;
  * <li>Command/form objects to bind parameters to: as bean properties or fields,
  * with customizable type conversion, depending on {@link InitBinder} methods
  * and/or the HandlerAdapter configuration - see the "webBindingInitializer"
- * property on AnnotationMethodHandlerAdapter.
+ * property on RequestMappingHandlerMethodAdapter.
  * Such command objects along with their validation results will be exposed
  * as model attributes, by default using the non-qualified command class name
  * in property notation (e.g. "orderAddress" for type "mypackage.OrderAddress").
@@ -180,8 +180,8 @@ import java.lang.annotation.Target;
  * <code>DispatcherServlet</code> and <code>DispatcherPortlet</code>.
  * However, if you are defining custom <code>HandlerMappings</code> or
  * <code>HandlerAdapters</code>, then you need to make sure that a
- * corresponding custom <code>DefaultAnnotationHandlerMapping</code>
- * and/or <code>AnnotationMethodHandlerAdapter</code> is defined as well
+ * corresponding custom <code>RequestMappingHandlerMethodMapping</code>
+ * and/or <code>RequestMappingHandlerMethodAdapter</code> is defined as well
  * - provided that you intend to use <code>@RequestMapping</code>.
  *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
@@ -198,8 +198,8 @@ import java.lang.annotation.Target;
  * @see SessionAttributes
  * @see InitBinder
  * @see org.springframework.web.context.request.WebRequest
- * @see org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping
- * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodMapping
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter
  * @see org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping
  * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
@@ -297,6 +297,4 @@ public @interface RequestMapping {
 	 */
 	String[] headers() default {}; 
 
-	String[] consumes() default "*/*";
-	
 }
