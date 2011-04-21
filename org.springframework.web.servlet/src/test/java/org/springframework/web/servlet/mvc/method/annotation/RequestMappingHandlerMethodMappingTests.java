@@ -124,7 +124,7 @@ public class RequestMappingHandlerMethodMappingTests {
 
 	@Test
 	public void uriTemplateVariables() {
-		RequestMappingKey key = new RequestMappingKey(Arrays.asList("/{path1}/{path2}"), null);
+		RequestMappingInfo key = new RequestMappingInfo(Arrays.asList("/{path1}/{path2}"), null);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 

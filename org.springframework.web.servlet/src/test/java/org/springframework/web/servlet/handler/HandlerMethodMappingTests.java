@@ -90,18 +90,18 @@ public class HandlerMethodMappingTests {
 		private PathMatcher pathMatcher = new AntPathMatcher();
 
 		@Override
-		protected String getMatchingMappingKey(String pattern, String lookupPath, HttpServletRequest request) {
+		protected String getMatchingMapping(String pattern, String lookupPath, HttpServletRequest request) {
 			return pathMatcher.match(pattern, lookupPath) ? pattern : null;
 		}
 
 		@Override
-		protected String getMappingKeyForMethod(String beanName, Method method) {
+		protected String getMappingForMethod(String beanName, Method method) {
 			String methodName = method.getName();
 			return methodName.startsWith("handler") ? methodName : null;
 		}
 
 		@Override
-		protected Comparator<String> getMappingKeyComparator(String lookupPath, HttpServletRequest request) {
+		protected Comparator<String> getMappingComparator(String lookupPath, HttpServletRequest request) {
 			return pathMatcher.getPatternComparator(lookupPath);
 		}
 
