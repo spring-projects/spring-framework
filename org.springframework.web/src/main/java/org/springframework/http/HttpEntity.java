@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,4 +122,19 @@ public class HttpEntity<T> {
 		return (this.body != null);
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder("<");
+		if (body != null) {
+			builder.append(body);
+			if (headers != null) {
+				builder.append(',');
+			}
+		}
+		if (headers != null) {
+			builder.append(headers);
+		}
+		builder.append('>');
+		return builder.toString();
+	}
 }
