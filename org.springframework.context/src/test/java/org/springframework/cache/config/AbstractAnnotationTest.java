@@ -148,6 +148,11 @@ public abstract class AbstractAnnotationTest {
 		assertTrue(cache.containsKey(expectedKey));
 	}
 
+	public void testNullArg(CacheableService service) {
+		Object r1 = service.cache(null);
+		assertSame(r1, service.cache(null));
+	}
+
 	@Test
 	public void testCacheable() throws Exception {
 		testCacheable(cs);
@@ -225,5 +230,15 @@ public abstract class AbstractAnnotationTest {
 	@Test
 	public void testClassRootVars() throws Exception {
 		testRootVars(ccs);
+	}
+
+	@Test
+	public void testNullArg() throws Exception {
+		testNullArg(cs);
+	}
+
+	@Test
+	public void testClassNullArg() throws Exception {
+		testNullArg(ccs);
 	}
 }
