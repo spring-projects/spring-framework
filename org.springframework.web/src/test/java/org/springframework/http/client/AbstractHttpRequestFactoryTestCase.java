@@ -107,12 +107,17 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		request.getHeaders().setContentLength(body.length);
 		FileCopyUtils.copy(body, request.getBody());
 		ClientHttpResponse response = request.execute();
-		assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
-		assertTrue("Header not found", response.getHeaders().containsKey(headerName));
-		assertEquals("Header value not found", Arrays.asList(headerValue1, headerValue2),
-				response.getHeaders().get(headerName));
-		byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
-		assertTrue("Invalid body", Arrays.equals(body, result));
+		try {
+			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
+			assertTrue("Header not found", response.getHeaders().containsKey(headerName));
+			assertEquals("Header value not found", Arrays.asList(headerValue1, headerValue2),
+					response.getHeaders().get(headerName));
+			byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
+			assertTrue("Invalid body", Arrays.equals(body, result));
+		}
+		finally {
+			response.close();
+		}
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -169,7 +174,9 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		}
 	}
 
-	/** Servlet that sets a given status code. */
+	/**
+	 * Servlet that sets a given status code.
+	 */
 	private static class StatusServlet extends GenericServlet {
 
 		private final int sc;

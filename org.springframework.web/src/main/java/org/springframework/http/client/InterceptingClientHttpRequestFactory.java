@@ -16,7 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.http.HttpMethod;
@@ -28,9 +27,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 3.1
  */
-public class InterceptingClientHttpRequestFactory implements ClientHttpRequestFactory {
-
-	private final ClientHttpRequestFactory requestFactory;
+public class InterceptingClientHttpRequestFactory extends AbstractClientHttpRequestFactoryWrapper {
 
 	private final ClientHttpRequestInterceptor[] interceptors;
 
@@ -42,12 +39,13 @@ public class InterceptingClientHttpRequestFactory implements ClientHttpRequestFa
 	 */
 	public InterceptingClientHttpRequestFactory(ClientHttpRequestFactory requestFactory,
 			ClientHttpRequestInterceptor[] interceptors) {
+		super(requestFactory);
 		Assert.notNull(requestFactory, "'requestFactory' must not be null");
-		this.requestFactory = requestFactory;
 		this.interceptors = interceptors != null ? interceptors : new ClientHttpRequestInterceptor[0];
 	}
 
-	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+	@Override
+	protected ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod, ClientHttpRequestFactory requestFactory) {
 		return new InterceptingClientHttpRequest(requestFactory, interceptors, uri, httpMethod);
 	}
 }
