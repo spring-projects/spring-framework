@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.annotation.support.AbstractNamedValueMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
@@ -71,6 +72,17 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
 		throw new IllegalStateException("Could not find the URL template variable [" + name + "]");
+	}
+
+	@Override
+	protected void handleResolvedValue(Object arg, 
+									   String name, 
+									   MethodParameter parameter,
+									   ModelAndViewContainer mavContainer, 
+									   NativeWebRequest webRequest) {
+		if (mavContainer != null) {
+			mavContainer.addAttribute(name, arg);
+		}
 	}
 
 	private static class PathVariableNamedValueInfo extends NamedValueInfo {

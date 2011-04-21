@@ -42,6 +42,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * <li>Obtain named value information for a method parameter
  * <li>Resolve names into argument values
  * <li>Handle missing argument values when argument values are required
+ * <li>Optionally handle a resolved value
  * </ul>
  * <p>A default value string can contain ${...} placeholders and Spring Expression Language #{...} expressions. 
  * For this to work a {@link ConfigurableBeanFactory} must be supplied to the class constructor.
@@ -87,16 +88,17 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			else if (namedValueInfo.required) {
 				handleMissingValue(namedValueInfo.name, parameter);
 			}
-			arg = checkForNull(namedValueInfo.name, arg, paramType);
+			arg = handleNullValue(namedValueInfo.name, arg, paramType);
 		}
 
 		if (binderFactory != null) {
 			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
-			return binder.convertIfNecessary(arg, paramType, parameter);
+			arg = binder.convertIfNecessary(arg, paramType, parameter);
 		}
-		else {
-			return arg;
-		}
+		
+		handleResolvedValue(arg, namedValueInfo.name, parameter, mavContainer, webRequest);
+
+		return arg;
 	}
 
 	/**
@@ -170,7 +172,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 */
 	protected abstract void handleMissingValue(String name, MethodParameter parameter) throws ServletException;
 
-	private Object checkForNull(String name, Object value, Class<?> paramType) {
+	/**
+	 * A {@code null} results in a {@code false} value for {@code boolean}s or an exception for other primitives.
+	 */
+	private Object handleNullValue(String name, Object value, Class<?> paramType) {
 		if (value == null) {
 			if (Boolean.TYPE.equals(paramType)) {
 				return Boolean.FALSE;
@@ -182,6 +187,19 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			}
 		}
 		return value;
+	}
+
+	/**
+	 * Invoked after a value is resolved.
+	 * @param arg the resolved argument value
+	 * @param name the argument name
+	 * @param parameter the argument parameter type
+	 * @param mavContainer the {@link ModelAndViewContainer}, which may be {@code null}
+	 * @param webRequest the current request
+	 */
+	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) {
+
 	}
 
 	/**
