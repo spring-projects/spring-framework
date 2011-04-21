@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,4 +93,27 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	public HttpStatus getStatusCode() {
 		return statusCode;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder("<");
+		builder.append(statusCode.toString());
+		builder.append(' ');
+		builder.append(statusCode.getReasonPhrase());
+		builder.append(',');
+		T body = getBody();
+		HttpHeaders headers = getHeaders();
+		if (body != null) {
+			builder.append(body);
+			if (headers != null) {
+				builder.append(',');
+			}
+		}
+		if (headers != null) {
+			builder.append(headers);
+		}
+		builder.append('>');
+		return builder.toString();
+	}
+
 }
