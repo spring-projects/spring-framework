@@ -46,14 +46,14 @@ import org.springframework.web.servlet.handler.MappedInterceptors;
 import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
 
 /**
- * An {@link AbstractHandlerMethodMapping} variant that uses {@link RequestMappingKey}s for the registration and 
+ * An {@link AbstractHandlerMethodMapping} variant that uses {@link RequestMappingInfo}s for the registration and 
  * the lookup of {@link HandlerMethod}s.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1.0
  */
-public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMapping<RequestMappingKey> {
+public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMapping<RequestMappingInfo> {
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -97,28 +97,28 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 	}
 
 	/**
-	 * Provides a {@link RequestMappingKey} for the given method. 
+	 * Provides a {@link RequestMappingInfo} for the given method. 
 	 * <p>Only {@link RequestMapping @RequestMapping}-annotated methods are considered. 
 	 * Type-level {@link RequestMapping @RequestMapping} annotations are also detected and their 
 	 * attributes combined with method-level {@link RequestMapping @RequestMapping} attributes.
 	 *
 	 * @param beanName the name of the bean the method belongs to
-	 * @param method the method to create a key for
-	 * @return the key, or {@code null}
-	 * @see RequestMappingKey#combine(RequestMappingKey, PathMatcher)
+	 * @param method the method to create a mapping for
+	 * @return the mapping, or {@code null}
+	 * @see RequestMappingInfo#combine(RequestMappingInfo, PathMatcher)
 	 */
 	@Override
-	protected RequestMappingKey getMappingKeyForMethod(String beanName, Method method) {
+	protected RequestMappingInfo getMappingForMethod(String beanName, Method method) {
 		RequestMapping annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 		if (annotation != null) {
-			RequestMappingKey methodKey = createFromRequestMapping(annotation);
+			RequestMappingInfo methodMapping = createFromRequestMapping(annotation);
 			RequestMapping typeAnnot = getApplicationContext().findAnnotationOnBean(beanName, RequestMapping.class);
 			if (typeAnnot != null) {
-				RequestMappingKey typeKey = createFromRequestMapping(typeAnnot);
-				return typeKey.combine(methodKey, pathMatcher);
+				RequestMappingInfo typeMapping = createFromRequestMapping(typeAnnot);
+				return typeMapping.combine(methodMapping, pathMatcher);
 			}
 			else {
-				return methodKey;
+				return methodMapping;
 			}
 		}
 		else {
@@ -126,55 +126,53 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 		}
 	}
 
-	private static RequestMappingKey createFromRequestMapping(RequestMapping annotation) {
-		return new RequestMappingKey(Arrays.asList(annotation.value()), Arrays.asList(annotation.method()),
+	private static RequestMappingInfo createFromRequestMapping(RequestMapping annotation) {
+		return new RequestMappingInfo(Arrays.asList(annotation.value()), Arrays.asList(annotation.method()),
 						RequestConditionFactory.parseParams(annotation.params()),
-						RequestConditionFactory.parseHeaders(annotation.headers()),
-						RequestConditionFactory.parseConsumes(annotation.consumes())
-				);
+						RequestConditionFactory.parseHeaders(annotation.headers()));
 	}
 	
 	@Override
-	protected Set<String> getMappingPaths(RequestMappingKey key) {
-		return key.getPatterns();
+	protected Set<String> getMappingPaths(RequestMappingInfo mapping) {
+		return mapping.getPatterns();
 	}
 
 	/**
-	 * Returns a new {@link RequestMappingKey} with attributes matching to the current request or {@code null}.
-	 * @see RequestMappingKey#getMatchingKey(String, HttpServletRequest, PathMatcher)
+	 * Returns a new {@link RequestMappingInfo} with attributes matching to the current request or {@code null}.
+	 * @see RequestMappingInfo#getMatchingRequestMapping(String, HttpServletRequest, PathMatcher)
 	 */
 	@Override
-	protected RequestMappingKey getMatchingMappingKey(RequestMappingKey key, String lookupPath, HttpServletRequest request) {
-		return key.getMatchingKey(lookupPath, request, pathMatcher);
+	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo mapping, String lookupPath, HttpServletRequest request) {
+		return mapping.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 	}
 
 	/**
-	 * Returns a {@link Comparator} that can be used to sort and select the best matching {@link RequestMappingKey}.
+	 * Returns a {@link Comparator} that can be used to sort and select the best matching {@link RequestMappingInfo}.
 	 */
 	@Override
-	protected Comparator<RequestMappingKey> getMappingKeyComparator(String lookupPath, HttpServletRequest request) {
-		return new RequestKeyComparator(lookupPath, request);
+	protected Comparator<RequestMappingInfo> getMappingComparator(String lookupPath, HttpServletRequest request) {
+		return new RequestMappingInfoComparator(lookupPath, request);
 	}
 
 	@Override
-	protected void handleMatch(RequestMappingKey key, String lookupPath, HttpServletRequest request) {
-		String pattern = key.getPatterns().iterator().next();
+	protected void handleMatch(RequestMappingInfo mapping, String lookupPath, HttpServletRequest request) {
+		String pattern = mapping.getPatterns().iterator().next();
 		Map<String, String> uriTemplateVariables = pathMatcher.extractUriTemplateVariables(pattern, lookupPath);
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 	}
 
 	/**
-	 * Iterates all {@link RequestMappingKey}s looking for keys that match by URL but not by HTTP method.
+	 * Iterates all {@link RequestMappingInfo}s looking for mappings that match by URL but not by HTTP method.
 	 * @exception HttpRequestMethodNotSupportedException if there are matches by URL but not by HTTP method
 	 */
 	@Override
-	protected HandlerMethod handleNoMatch(Set<RequestMappingKey> requestKeys, String lookupPath, HttpServletRequest request)
+	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos, String lookupPath, HttpServletRequest request)
 			throws HttpRequestMethodNotSupportedException {
 		Set<String> allowedMethods = new HashSet<String>(6);
-		for (RequestMappingKey requestKey : requestKeys) {
-			for (String pattern : requestKey.getPatterns()) {
+		for (RequestMappingInfo info : requestMappingInfos) {
+			for (String pattern : info.getPatterns()) {
 				if (pathMatcher.match(pattern, lookupPath)) {
-					for (RequestMethod method : requestKey.getMethods()) {
+					for (RequestMethod method : info.getMethods()) {
 						allowedMethods.add(method.name());
 					}
 				}
@@ -206,50 +204,50 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 	}
 
 	/**
-	 * A comparator for {@link RequestMappingKey}s. Effective comparison can only be done in the context of a 
-	 * specific request. For example not all {@link RequestMappingKey} patterns may apply to the current request. 
+	 * A comparator for {@link RequestMappingInfo}s. Effective comparison can only be done in the context of a 
+	 * specific request. For example not all {@link RequestMappingInfo} patterns may apply to the current request. 
 	 * Therefore an HttpServletRequest is required as input.
 	 *
-	 * <p>Furthermore, the following assumptions are made about the input RequestKeys: 
-	 * <ul><li>Each RequestKey has been fully matched to the request <li>The RequestKey contains matched 
-	 * patterns only <li>Patterns are ordered with the best matching pattern at the top </ul>
+	 * <p>Furthermore, the following assumptions are made about the input RequestMappings: 
+	 * <ul><li>Each RequestMappingInfo has been fully matched to the request <li>The RequestMappingInfo contains 
+	 * matched patterns only <li>Patterns are ordered with the best matching pattern at the top </ul>
 	 *
-	 * @see RequestMappingHandlerMethodMapping#getMatchingKey(RequestMappingKey, HttpServletRequest)
+	 * @see RequestMappingHandlerMethodMapping#getMatchingMapping(RequestMappingInfo, String, HttpServletRequest)
 	 */
-	private class RequestKeyComparator implements Comparator<RequestMappingKey> {
+	private class RequestMappingInfoComparator implements Comparator<RequestMappingInfo> {
 
 		private Comparator<String> patternComparator;
 
 		private List<MediaType> requestAcceptHeader;
 
-		public RequestKeyComparator(String lookupPath, HttpServletRequest request) {
+		public RequestMappingInfoComparator(String lookupPath, HttpServletRequest request) {
 			this.patternComparator = pathMatcher.getPatternComparator(lookupPath);
 			String acceptHeader = request.getHeader("Accept");
 			this.requestAcceptHeader = MediaType.parseMediaTypes(acceptHeader);
 			MediaType.sortByQualityValue(this.requestAcceptHeader);
 		}
 
-		public int compare(RequestMappingKey key, RequestMappingKey otherKey) {
-			int result = comparePatterns(key.getPatterns(), otherKey.getPatterns());
+		public int compare(RequestMappingInfo mapping, RequestMappingInfo otherMapping) {
+			int result = comparePatterns(mapping.getPatterns(), otherMapping.getPatterns());
 			if (result != 0) {
 				return result;
 			}
-			result = key.getParams().compareTo(otherKey.getParams());
+			result = mapping.getParams().compareTo(otherMapping.getParams());
 			if (result != 0) {
 				return result;
 			}
-			result = key.getHeaders().compareTo(otherKey.getHeaders());
+			result = mapping.getHeaders().compareTo(otherMapping.getHeaders());
 			if (result != 0) {
 				return result;
 			}
 /*
 			TODO: fix
-			result = compareAcceptHeaders(key.getAcceptHeaderMediaTypes(), otherKey.getAcceptHeaderMediaTypes());
+			result = compareAcceptHeaders(mapping.getAcceptHeaderMediaTypes(), otherMapping.getAcceptHeaderMediaTypes());
 			if (result != 0) {
 				return result;
 			}
 */
-			result = otherKey.getMethods().size() - key.getMethods().size();
+			result = otherMapping.getMethods().size() - mapping.getMethods().size();
 			if (result != 0) {
 				return result;
 			}
