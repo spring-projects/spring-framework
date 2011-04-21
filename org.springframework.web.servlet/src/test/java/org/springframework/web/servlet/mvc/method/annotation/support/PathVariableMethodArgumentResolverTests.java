@@ -32,6 +32,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.support.PathVariableMethodArgumentResolver;
 
@@ -48,6 +49,8 @@ public class PathVariableMethodArgumentResolverTests {
 
 	private MethodParameter paramString;
 
+	private ModelAndViewContainer mavContainer;
+	
 	private ServletWebRequest webRequest;
 	
 	private MockHttpServletRequest request;
@@ -60,6 +63,7 @@ public class PathVariableMethodArgumentResolverTests {
 		paramNamedString = new MethodParameter(method, 0);
 		paramString = new MethodParameter(method, 1);
 
+		mavContainer = new ModelAndViewContainer();
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
@@ -76,13 +80,14 @@ public class PathVariableMethodArgumentResolverTests {
 		uriTemplateVars.put("name", "value");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		String result = (String) resolver.resolveArgument(paramNamedString, null, webRequest, null);
-		assertEquals("value", result);
+		String result = (String) resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null);
+		assertEquals("PathVariable not resolved correctly", "value", result);
+		assertEquals("PathVariable not added to the model", "value", mavContainer.getAttribute("name"));
 	}
-
+	
 	@Test(expected = IllegalStateException.class)
 	public void handleMissingValue() throws Exception {
-		resolver.resolveArgument(paramNamedString, null, webRequest, null);
+		resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null);
 		fail("Unresolved path variable should lead to exception.");
 	}
 	

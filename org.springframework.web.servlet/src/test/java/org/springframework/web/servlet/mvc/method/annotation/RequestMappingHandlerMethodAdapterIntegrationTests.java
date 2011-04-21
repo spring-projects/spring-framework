@@ -293,7 +293,7 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 						 	@ModelAttribute OtherUser otherUser,
 						 	Model model) throws Exception {
 
-			model.addAttribute("cookie", cookie).addAttribute("pathvar", pathvar).addAttribute("header", header)
+			model.addAttribute("cookie", cookie).addAttribute("header", header)
 					.addAttribute("systemHeader", systemHeader).addAttribute("headerMap", headerMap)
 					.addAttribute("dateParam", dateParam).addAttribute("paramMap", paramMap)
 					.addAttribute("paramByConvention", paramByConvention).addAttribute("value", value)
