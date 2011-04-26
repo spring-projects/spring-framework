@@ -18,7 +18,9 @@ package org.springframework.orm.hibernate3;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -32,6 +34,7 @@ import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
@@ -45,7 +48,10 @@ import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.event.EventListeners;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.hibernate.transaction.JTATransactionFactory;
+
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
@@ -552,16 +558,37 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	}
 
 	/**
-	 * Wrap the given SessionFactory with a proxy, if demanded.
-	 * <p>The default implementation simply returns the given SessionFactory as-is.
-	 * Subclasses may override this to implement transaction awareness through
-	 * a SessionFactory proxy, for example.
-	 * @param rawSf the raw SessionFactory as built by {@link #buildSessionFactory()}
-	 * @return the SessionFactory reference to expose
+	 * Wrap the given {@code SessionFactory} with a proxy, if demanded.
+	 * <p>The default implementation wraps the given {@code SessionFactory} as a Spring
+	 * {@link DisposableBean} proxy in order to call {@link SessionFactory#close()} on
+	 * {@code ApplicationContext} {@linkplain ConfigurableApplicationContext#close() shutdown}.
+	 * <p>Subclasses may override this to implement transaction awareness through
+	 * a {@code SessionFactory} proxy for example, or even to avoid creation of the
+	 * {@code DisposableBean} proxy altogether.
+	 * @param rawSf the raw {@code SessionFactory} as built by {@link #buildSessionFactory()}
+	 * @return the {@code SessionFactory} reference to expose
 	 * @see #buildSessionFactory()
 	 */
-	protected SessionFactory wrapSessionFactoryIfNecessary(SessionFactory rawSf) {
-		return rawSf;
+	protected SessionFactory wrapSessionFactoryIfNecessary(final SessionFactory rawSf) {
+		return (SessionFactory) Proxy.newProxyInstance(
+			this.beanClassLoader,
+			new Class<?>[] {
+				SessionFactory.class,
+				DisposableBean.class
+			},
+			new InvocationHandler() {
+				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+					if (ReflectionUtils.isToStringMethod(method)) {
+						return String.format("DisposableBean proxy for SessionFactory [%s]", rawSf.toString());
+					}
+					if (method.equals(DisposableBean.class.getMethod("destroy"))) {
+						closeHibernateSessionFactory(SessionFactoryBuilderSupport.this, rawSf);
+						rawSf.close();
+						return null;
+					}
+					return method.invoke(rawSf, args);
+				}
+			});
 	}
 
 	/**
@@ -1407,6 +1434,26 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 */
 	public static LobHandler getConfigTimeLobHandler() {
 		return configTimeLobHandlerHolder.get();
+	}
+
+	static void closeHibernateSessionFactory(SessionFactoryBuilderSupport<?> builder, SessionFactory sessionFactory) {
+		builder.logger.info("Closing Hibernate SessionFactory");
+		DataSource dataSource = builder.getDataSource();
+		if (dataSource != null) {
+			// Make given DataSource available for potential SchemaExport,
+			// which unfortunately reinstantiates a ConnectionProvider.
+			SessionFactoryBuilderSupport.configTimeDataSourceHolder.set(dataSource);
+		}
+		try {
+			builder.beforeSessionFactoryDestruction();
+		}
+		finally {
+			sessionFactory.close();
+			if (dataSource != null) {
+				// Reset DataSource holder.
+				SessionFactoryBuilderSupport.configTimeDataSourceHolder.remove();
+			}
+		}
 	}
 
 }

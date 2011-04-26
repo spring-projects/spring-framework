@@ -125,4 +125,12 @@ public interface SessionFactoryBeanOperations
 	 */
 	DataAccessException translateExceptionIfPossible(RuntimeException ex);
 
+	/**
+	 * Override the default {@link DisposableBean} proxying behavior in
+	 * {@link SessionFactoryBuilderSupport#wrapSessionFactoryIfNecessary(SessionFactory)}
+	 * and return the raw {@code SessionFactory} instance, as {@link SessionFactory#close()}
+	 * will be called during this FactoryBean's normal {@linkplain #destroy() destruction lifecycle}.
+	 */
+	SessionFactory wrapSessionFactoryIfNecessary(SessionFactory rawSf);
+
 }

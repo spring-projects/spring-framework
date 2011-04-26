@@ -19,7 +19,9 @@ package org.springframework.orm.hibernate3;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.List;
@@ -34,6 +36,7 @@ import org.hibernate.classic.Session;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -128,6 +131,16 @@ public class HibernateSessionFactoryConfigurationTests {
 			assertThat(cause.getMessage().startsWith("setConfigurationClass() must be called before"), is(true));
 			throw cause;
 		}
+	}
+
+	@Test
+	public void builtSessionFactoryIsDisposableBeanProxy() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AnnotationSessionFactoryConfig.class);
+		SessionFactory sessionFactory = ctx.getBean(SessionFactory.class);
+		assertThat(sessionFactory, instanceOf(DisposableBean.class));
+		assertThat(sessionFactory.toString(), startsWith("DisposableBean proxy for SessionFactory"));
+		ctx.close();
+		assertTrue("SessionFactory was not closed as expected", sessionFactory.isClosed());
 	}
 
 
