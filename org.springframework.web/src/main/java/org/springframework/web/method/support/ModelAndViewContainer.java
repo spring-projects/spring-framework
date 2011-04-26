@@ -24,8 +24,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
 
 /**
- * Provides access to the model and a place to record model and view related decisions to all 
- * {@link HandlerMethodArgumentResolver}s and {@link HandlerMethodReturnValueHandler}s .
+ * Provides access to the model and a place to record model and view related decisions made by
+ * {@link HandlerMethodArgumentResolver}s or a {@link HandlerMethodReturnValueHandler}.
  * 
  * <p>In addition to storing model attributes and a view, the {@link ModelAndViewContainer} also provides
  * a {@link #setResolveView(boolean)} flag, which can be used to request or bypass a view resolution phase.

@@ -16,6 +16,7 @@
 
 package org.springframework.web.method.annotation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -41,13 +42,13 @@ public class InitBinderMethodDataBinderFactory extends DefaultDataBinderFactory 
 	
 	/**
 	 * Create an {@code InitBinderMethodDataBinderFactory} instance with the given {@link InitBinder} methods.
-	 * @param initBinderMethods {@link InitBinder} methods to use to invoke to initialize new data binder instances  
+	 * @param binderMethods {@link InitBinder} methods to use to invoke to initialize new data binder instances  
 	 * @param bindingInitializer a {@link WebBindingInitializer} to initialize new data binder instances with
 	 */
-	public InitBinderMethodDataBinderFactory(List<InvocableHandlerMethod> initBinderMethods, 
+	public InitBinderMethodDataBinderFactory(List<InvocableHandlerMethod> binderMethods, 
 											 WebBindingInitializer bindingInitializer) {
 		super(bindingInitializer);
-		this.initBinderMethods = initBinderMethods;
+		this.initBinderMethods = (binderMethods != null) ? binderMethods : new ArrayList<InvocableHandlerMethod>();
 	}
 
 	/**

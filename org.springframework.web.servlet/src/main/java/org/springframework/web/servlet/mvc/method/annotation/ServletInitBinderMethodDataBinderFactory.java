@@ -17,12 +17,17 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.method.annotation.InitBinderMethodDataBinderFactory;
 import org.springframework.web.method.support.InvocableHandlerMethod;
+import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * An {@link InitBinderMethodDataBinderFactory} that creates a {@link ServletRequestDataBinder}. 
@@ -47,7 +52,30 @@ public class ServletInitBinderMethodDataBinderFactory extends InitBinderMethodDa
 	 */
 	@Override
 	protected WebDataBinder createBinderInstance(Object target, String objectName) {
-		return new ServletRequestDataBinder(target, objectName);
+		return new ServletRequestPathVarDataBinder(target, objectName);
 	}
 
+	/**
+	 * Adds URI template variables to the map of request values used to do data binding. 
+	 */
+	private static class ServletRequestPathVarDataBinder extends ServletRequestDataBinder {
+
+		public ServletRequestPathVarDataBinder(Object target, String objectName) {
+			super(target, objectName);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected void doBind(MutablePropertyValues mpvs) {
+			RequestAttributes requestAttrs = RequestContextHolder.getRequestAttributes();
+			if (requestAttrs != null) {
+				String key = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+				int scope = RequestAttributes.SCOPE_REQUEST;
+				Map<String, String> uriTemplateVars = (Map<String, String>) requestAttrs.getAttribute(key, scope);
+				mpvs.addPropertyValues(uriTemplateVars);
+			}
+			super.doBind(mpvs);
+		}
+	}
+	
 }
