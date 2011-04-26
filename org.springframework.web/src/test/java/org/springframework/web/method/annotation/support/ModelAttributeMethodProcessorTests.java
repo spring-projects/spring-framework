@@ -132,14 +132,14 @@ public class ModelAttributeMethodProcessorTests {
 	
 	@Test
 	public void shouldValidate() throws Exception {
-		assertTrue(processor.shouldValidate(paramNamedValidModelAttr));
-		assertFalse(processor.shouldValidate(paramNonSimpleType));
+		assertTrue(processor.shouldValidate(null, paramNamedValidModelAttr));
+		assertFalse(processor.shouldValidate(null, paramNonSimpleType));
 	}
 
 	@Test
 	public void failOnError() throws Exception {
-		assertFalse("Shouldn't failOnError with BindingResult", processor.failOnError(paramNamedValidModelAttr));
-		assertTrue("Should failOnError without BindingResult", processor.failOnError(paramNonSimpleType));
+		assertFalse("Shouldn't failOnError with BindingResult", processor.failOnError(null, paramNamedValidModelAttr));
+		assertTrue("Should failOnError without BindingResult", processor.failOnError(null, paramNonSimpleType));
 	}
 
 	@Test

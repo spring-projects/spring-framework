@@ -94,11 +94,11 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		if (binder.getTarget() != null) {
 			doBind(binder, webRequest);
 
-			if (shouldValidate(parameter)) {
+			if (shouldValidate(binder, parameter)) {
 				binder.validate();
 			}
 
-			if (failOnError(parameter) && binder.getBindingResult().hasErrors()) {
+			if (failOnError(binder, parameter) && binder.getBindingResult().hasErrors()) {
 				throw new BindException(binder.getBindingResult());
 			}
 		}
@@ -133,9 +133,12 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	}
 
 	/**
+	 * Whether to validate the target object of the given {@link WebDataBinder} instance.
+	 * @param binder the data binder containing the validation candidate 
+	 * @param parameter the method argument for which data binding is performed
 	 * @return true if {@link DataBinder#validate()} should be invoked, false otherwise.
 	 */
-	protected boolean shouldValidate(MethodParameter parameter) {
+	protected boolean shouldValidate(WebDataBinder binder, MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation annot : annotations) {
 			if ("Valid".equals(annot.annotationType().getSimpleName())) {
@@ -146,9 +149,12 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	}
 
 	/**
+	 * Whether to raise a {@link BindException} in case of data binding or validation errors.
+	 * @param binder the binder on which validation is to be invoked 
+	 * @param parameter the method argument for which data binding is performed
 	 * @return true if the binding or validation errors should result in a {@link BindException}, false otherwise.
 	 */
-	protected boolean failOnError(MethodParameter parameter) {
+	protected boolean failOnError(WebDataBinder binder, MethodParameter parameter) {
 		int i = parameter.getParameterIndex();
 		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
 		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));

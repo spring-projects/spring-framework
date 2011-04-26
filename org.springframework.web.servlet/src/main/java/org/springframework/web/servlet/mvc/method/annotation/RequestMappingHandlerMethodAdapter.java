@@ -42,6 +42,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -257,11 +258,17 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	}
 
 	/**
-	 * Specify a WebBindingInitializer which will apply pre-configured
-	 * configuration to every DataBinder that this controller uses.
+	 * Set a WebBindingInitializer to apply configure every DataBinder instance this controller uses.
 	 */
 	public void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
 		this.webBindingInitializer = webBindingInitializer;
+	}
+
+	/**
+	 * Return the WebBindingInitializer which applies pre-configured configuration to {@link DataBinder} instances.
+	 */
+	public WebBindingInitializer getWebBindingInitializer() {
+		return webBindingInitializer;
 	}
 
 	/**
