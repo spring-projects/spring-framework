@@ -17,8 +17,8 @@
 package org.springframework.orm.hibernate3;
 
 import org.hibernate.HibernateException;
-
 import org.hibernate.SessionFactory;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
@@ -108,6 +108,11 @@ public class LocalSessionFactoryBean extends SessionFactoryBuilder implements Se
 	public void setPersistenceExceptionTranslator(
 			HibernateExceptionTranslator hibernateExceptionTranslator) {
 		delegate.setPersistenceExceptionTranslator(hibernateExceptionTranslator);
+	}
+
+	@Override
+	public SessionFactory wrapSessionFactoryIfNecessary(SessionFactory rawSf) {
+		return delegate.wrapSessionFactoryIfNecessary(rawSf);
 	}
 
 	/**
