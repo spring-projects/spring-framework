@@ -394,7 +394,7 @@ public class NotVeryUsefulAspect {
         <title>Autodetecting aspects through component scanning</title>
 
         <para>You may register aspect classes as regular beans in your Spring
-        XML configuration, or autodetect them throuch classpath scanning -
+        XML configuration, or autodetect them through classpath scanning -
         just like any other Spring-managed bean. However, note that the
         <emphasis>@Aspect</emphasis> annotation is <emphasis>not</emphasis>
         sufficient for autodetection in the classpath: For that purpose,
