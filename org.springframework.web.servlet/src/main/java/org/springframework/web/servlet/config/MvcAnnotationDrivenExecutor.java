@@ -42,7 +42,7 @@ import org.springframework.web.servlet.handler.ConversionServiceExposingIntercep
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
@@ -118,7 +118,7 @@ final class MvcAnnotationDrivenExecutor extends AbstractSpecificationExecutor<Mv
 		String mappedInterceptorName = registrar.registerWithGeneratedName(mappedCsInterceptorDef);
 
 		RootBeanDefinition methodExceptionResolver = new RootBeanDefinition(
-				RequestMappingHandlerMethodExceptionResolver.class);
+				ExceptionHandlerExceptionResolver.class);
 		methodExceptionResolver.setSource(source);
 		methodExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		methodExceptionResolver.getPropertyValues().add("messageConverters", messageConverters);
