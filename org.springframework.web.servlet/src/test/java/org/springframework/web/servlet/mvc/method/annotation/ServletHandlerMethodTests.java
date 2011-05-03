@@ -2636,7 +2636,7 @@ public class ServletHandlerMethodTests {
 				Class<?> adapterType = RequestMappingHandlerMethodAdapter.class;
 				wac.registerBeanDefinition("handlerAdapter", new RootBeanDefinition(adapterType));
 				
-				Class<?> resolverType = RequestMappingHandlerMethodExceptionResolver.class;
+				Class<?> resolverType = ExceptionHandlerExceptionResolver.class;
 				wac.registerBeanDefinition("requestMappingResolver", new RootBeanDefinition(resolverType));
 				
 				resolverType = ResponseStatusExceptionResolver.class;

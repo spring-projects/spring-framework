@@ -157,6 +157,7 @@ public class RequestMappingHandlerMethodMapping extends AbstractHandlerMethodMap
 
 	@Override
 	protected void handleMatch(RequestMappingInfo mapping, String lookupPath, HttpServletRequest request) {
+		super.handleMatch(mapping, lookupPath, request);
 		String pattern = mapping.getPatterns().iterator().next();
 		Map<String, String> uriTemplateVariables = pathMatcher.extractUriTemplateVariables(pattern, lookupPath);
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);

@@ -39,7 +39,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 
 /**
@@ -71,14 +71,14 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	public void testMessageConverters() {
 		loadBeanDefinitions("mvc-config-message-converters.xml");
 		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodAdapter.class), true);
-		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodExceptionResolver.class), true);
+		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), true);
 	}
 
 	@Test
 	public void testMessageConvertersWithoutDefaultRegistrations() {
 		loadBeanDefinitions("mvc-config-message-converters-defaults-off.xml");
 		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodAdapter.class), false);
-		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodExceptionResolver.class), false);
+		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), false);
 	}
 
 	@SuppressWarnings("unchecked")

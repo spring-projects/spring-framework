@@ -43,18 +43,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 /**
- * Test fixture with {@link RequestMappingHandlerMethodExceptionResolver}.
+ * Test fixture with {@link ExceptionHandlerExceptionResolver}.
  * 
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @since 3.1
  */
-public class RequestMappingHandlerMethodExceptionResolverTests {
+public class ExceptionHandlerExceptionResolverTests {
 
-	private RequestMappingHandlerMethodExceptionResolver exceptionResolver;
+	private ExceptionHandlerExceptionResolver exceptionResolver;
 
 	private MockHttpServletRequest request;
 
@@ -62,7 +62,7 @@ public class RequestMappingHandlerMethodExceptionResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		exceptionResolver = new RequestMappingHandlerMethodExceptionResolver();
+		exceptionResolver = new ExceptionHandlerExceptionResolver();
 		exceptionResolver.afterPropertiesSet();
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();

@@ -35,6 +35,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -272,6 +273,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param request the current request
 	 */
 	protected void handleMatch(T mapping, String lookupPath, HttpServletRequest request) {
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, lookupPath);
 	}
 
 	/**

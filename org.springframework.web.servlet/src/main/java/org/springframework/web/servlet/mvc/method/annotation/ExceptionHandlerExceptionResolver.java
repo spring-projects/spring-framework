@@ -79,7 +79,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodR
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandlerMethodExceptionResolver implements
+public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver implements
 		InitializingBean {
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
@@ -96,9 +96,9 @@ public class RequestMappingHandlerMethodExceptionResolver extends AbstractHandle
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 	/**
-	 * Creates an instance of {@link RequestMappingHandlerMethodExceptionResolver}.
+	 * Creates an instance of {@link ExceptionHandlerExceptionResolver}.
 	 */
-	public RequestMappingHandlerMethodExceptionResolver() {
+	public ExceptionHandlerExceptionResolver() {
 		
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316

@@ -331,95 +331,84 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	}
 
 	public void afterPropertiesSet() throws Exception {
+		initArgumentResolvers();
+		initReturnValueHandlers();
+		initInitBinderArgumentResolvers();
+	}
+
+	private void initArgumentResolvers() {
 		if (argumentResolvers == null) {
 			argumentResolvers = new HandlerMethodArgumentResolverComposite();
-			argumentResolvers.addResolvers(customArgumentResolvers);
-			argumentResolvers.addResolvers(getDefaultArgumentResolvers(messageConverters, beanFactory));
 		}
 		
-		if (returnValueHandlers == null) {
-			returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
-			returnValueHandlers.addHandlers(customReturnValueHandlers);
-			returnValueHandlers.addHandlers(getDefaultReturnValueHandlers(messageConverters, modelAndViewResolvers));
-		}
+		// Annotation-based resolvers
+		argumentResolvers.addResolver(new RequestParamMethodArgumentResolver(beanFactory, false));
+		argumentResolvers.addResolver(new RequestParamMapMethodArgumentResolver());
+		argumentResolvers.addResolver(new PathVariableMethodArgumentResolver());
+		argumentResolvers.addResolver(new ServletModelAttributeMethodProcessor(false));
+		argumentResolvers.addResolver(new RequestResponseBodyMethodProcessor(messageConverters));
+		argumentResolvers.addResolver(new RequestHeaderMethodArgumentResolver(beanFactory));
+		argumentResolvers.addResolver(new RequestHeaderMapMethodArgumentResolver());
+		argumentResolvers.addResolver(new ServletCookieValueMethodArgumentResolver(beanFactory));
+		argumentResolvers.addResolver(new ExpressionValueMethodArgumentResolver(beanFactory));
 		
+		// Custom resolvers
+		argumentResolvers.addResolvers(customArgumentResolvers);
+
+		// Type-based resolvers
+		argumentResolvers.addResolver(new ServletRequestMethodArgumentResolver());
+		argumentResolvers.addResolver(new ServletResponseMethodArgumentResolver());
+		argumentResolvers.addResolver(new HttpEntityMethodProcessor(messageConverters));
+		argumentResolvers.addResolver(new ModelMethodProcessor());
+		argumentResolvers.addResolver(new ErrorsMethodArgumentResolver());
+		
+		// Default-mode resolution
+		argumentResolvers.addResolver(new RequestParamMethodArgumentResolver(beanFactory, true));
+		argumentResolvers.addResolver(new ServletModelAttributeMethodProcessor(true));
+	}
+
+	private void initInitBinderArgumentResolvers() {
 		if (initBinderArgumentResolvers == null) {
 			initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
-			initBinderArgumentResolvers.addResolvers(customArgumentResolvers);
-			initBinderArgumentResolvers.addResolvers(getDefaultInitBinderArgumentResolvers(beanFactory));
 		}
-	}
-
-	public static List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers(
-			List<HttpMessageConverter<?>> messageConverters, ConfigurableBeanFactory beanFactory) {
-		
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
 
 		// Annotation-based resolvers
-		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, false));
-		resolvers.add(new RequestParamMapMethodArgumentResolver());
-		resolvers.add(new PathVariableMethodArgumentResolver());
-		resolvers.add(new ServletModelAttributeMethodProcessor(false));
-		resolvers.add(new RequestResponseBodyMethodProcessor(messageConverters));
-		resolvers.add(new RequestHeaderMethodArgumentResolver(beanFactory));
-		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
-		resolvers.add(new ServletCookieValueMethodArgumentResolver(beanFactory));
-		resolvers.add(new ExpressionValueMethodArgumentResolver(beanFactory));
+		initBinderArgumentResolvers.addResolver(new RequestParamMethodArgumentResolver(beanFactory, false));
+		initBinderArgumentResolvers.addResolver(new RequestParamMapMethodArgumentResolver());
+		initBinderArgumentResolvers.addResolver(new PathVariableMethodArgumentResolver());
+		initBinderArgumentResolvers.addResolver(new ExpressionValueMethodArgumentResolver(beanFactory));
+
+		// Custom resolvers
+		argumentResolvers.addResolvers(customArgumentResolvers);
 
 		// Type-based resolvers
-		resolvers.add(new ServletRequestMethodArgumentResolver());
-		resolvers.add(new ServletResponseMethodArgumentResolver());
-		resolvers.add(new HttpEntityMethodProcessor(messageConverters));
-		resolvers.add(new ModelMethodProcessor());
-		resolvers.add(new ErrorsMethodArgumentResolver());
+		initBinderArgumentResolvers.addResolver(new ServletRequestMethodArgumentResolver());
+		initBinderArgumentResolvers.addResolver(new ServletResponseMethodArgumentResolver());
 		
 		// Default-mode resolution
-		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, true));
-		resolvers.add(new ServletModelAttributeMethodProcessor(true));
-		
-		return resolvers;
-	}
-
-	public static List<HandlerMethodArgumentResolver> getDefaultInitBinderArgumentResolvers(
-			ConfigurableBeanFactory beanFactory) {
-
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
-
-		// Annotation-based resolvers
-		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, false));
-		resolvers.add(new RequestParamMapMethodArgumentResolver());
-		resolvers.add(new PathVariableMethodArgumentResolver());
-		resolvers.add(new ExpressionValueMethodArgumentResolver(beanFactory));
-
-		// Type-based resolvers
-		resolvers.add(new ServletRequestMethodArgumentResolver());
-		resolvers.add(new ServletResponseMethodArgumentResolver());
-		
-		// Default-mode resolution
-		resolvers.add(new RequestParamMethodArgumentResolver(beanFactory, true));
-		
-		return resolvers;
+		initBinderArgumentResolvers.addResolver(new RequestParamMethodArgumentResolver(beanFactory, true));
 	}
 	
-	public static List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers(
-			List<HttpMessageConverter<?>> messageConverters, List<ModelAndViewResolver> modelAndViewResolvers) {
-		
-		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
+	private void initReturnValueHandlers() {
+		if (returnValueHandlers == null) {
+			returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+		}
 		
 		// Annotation-based handlers
-		handlers.add(new RequestResponseBodyMethodProcessor(messageConverters));
-		handlers.add(new ModelAttributeMethodProcessor(false));
+		returnValueHandlers.addHandler(new RequestResponseBodyMethodProcessor(messageConverters));
+		returnValueHandlers.addHandler(new ModelAttributeMethodProcessor(false));
+		
+		// Custom return value handlers
+		returnValueHandlers.addHandlers(customReturnValueHandlers);
 		
 		// Type-based handlers
-		handlers.add(new ModelAndViewMethodReturnValueHandler());
-		handlers.add(new ModelMethodProcessor());
-		handlers.add(new ViewMethodReturnValueHandler());
-		handlers.add(new HttpEntityMethodProcessor(messageConverters));
+		returnValueHandlers.addHandler(new ModelAndViewMethodReturnValueHandler());
+		returnValueHandlers.addHandler(new ModelMethodProcessor());
+		returnValueHandlers.addHandler(new ViewMethodReturnValueHandler());
+		returnValueHandlers.addHandler(new HttpEntityMethodProcessor(messageConverters));
 		
 		// Default handler
-		handlers.add(new DefaultMethodReturnValueHandler(modelAndViewResolvers));
-		
-		return handlers;
+		returnValueHandlers.addHandler(new DefaultMethodReturnValueHandler(modelAndViewResolvers));
 	}
 
 	@Override
