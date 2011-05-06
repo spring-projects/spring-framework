@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostP
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.ClassUtils;
@@ -214,6 +215,12 @@ public class AnnotationConfigUtils {
 		if (abd.getMetadata().isAnnotated(DependsOn.class.getName())) {
 			String[] value = (String[]) abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
 			abd.setDependsOn(value);
+		}
+		if (abd instanceof AbstractBeanDefinition) {
+			if (abd.getMetadata().isAnnotated(Role.class.getName())) {
+				int value = (Integer) abd.getMetadata().getAnnotationAttributes(Role.class.getName()).get("value");
+				((AbstractBeanDefinition)abd).setRole(value);
+			}
 		}
 	}
 

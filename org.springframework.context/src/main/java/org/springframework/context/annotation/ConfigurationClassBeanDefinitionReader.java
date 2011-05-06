@@ -191,6 +191,13 @@ public class ConfigurationClassBeanDefinitionReader {
 		beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);
 
+		// consider role
+		Map<String, Object> roleAttributes = metadata.getAnnotationAttributes(Role.class.getName());
+		if (roleAttributes != null) {
+			int role = (Integer) roleAttributes.get("value");
+			beanDef.setRole(role);
+		}
+
 		// consider name and any aliases
 		Map<String, Object> beanAttributes = metadata.getAnnotationAttributes(Bean.class.getName());
 		List<String> names = new ArrayList<String>(Arrays.asList((String[]) beanAttributes.get("name")));
