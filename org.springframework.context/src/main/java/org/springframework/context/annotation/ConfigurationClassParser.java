@@ -21,12 +21,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
@@ -135,9 +138,12 @@ class ConfigurationClassParser {
 	}
 
 	protected void doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
-		if (metadata.isAnnotated(Import.class.getName())) {
-			processImport(configClass, (String[]) metadata.getAnnotationAttributes(Import.class.getName(), true).get("value"));
+		List<Map<String, Object>> allImportAttribs =
+			AnnotationUtils.findAllAnnotationAttributes(Import.class, metadata.getClassName(), true);
+		for (Map<String, Object> importAttribs : allImportAttribs) {
+			processImport(configClass, (String[]) importAttribs.get("value"));
 		}
+
 		if (metadata.isAnnotated(ImportResource.class.getName())) {
 			String[] resources = (String[]) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("value");
 			Class<?> readerClass = (Class<?>) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("reader");
