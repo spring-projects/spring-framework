@@ -6,6 +6,7 @@ Import-Template:
  javax.persistence;version="[1.0.0,3.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.aspectj.*;version=${aj.osgi.range};resolution:=optional,
+ org.springframework.context.*;version=${spring.osgi.range},
  org.springframework.beans.*;version=${spring.osgi.range},
  org.springframework.cache.*;version=${spring.osgi.range};resolution:=optional,
  org.springframework.core.*;version=${spring.osgi.range},

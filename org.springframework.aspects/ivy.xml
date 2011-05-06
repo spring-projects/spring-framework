@@ -13,6 +13,7 @@
 		<include file="${spring.build.dir}/common/default-ivy-configurations.xml"/>
 		<conf name="commons-logging" extends="runtime" description="JARs needed to run with Commons Logging"/>
 		<conf name="aspectj" extends="runtime" description="JARs needed to run with AspectJ"/>
+		<conf name="context" extends="runtime" description="JARs needed to register @Configuration classes and @Bean methods"/>
 		<conf name="tx" extends="runtime" description="JARs needed to run transactional aspects"/>
 		<conf name="orm" extends="runtime" description="JARs needed to compile JPA aspects"/>
 		<conf name="cache" extends="runtime" description="JARs needed to compile caching aspects"/>
@@ -32,7 +33,7 @@
 		<dependency org="org.springframework" name="org.springframework.transaction" rev="latest.integration" conf="optional, tx->compile"/>
 		<dependency org="org.springframework" name="org.springframework.orm" rev="latest.integration" conf="optional, orm->compile"/>
 		<dependency org="org.springframework" name="org.springframework.test" rev="latest.integration" conf="test->runtime"/>
-		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="test->runtime"/>
+		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="context->compile"/>
 		<dependency org="org.springframework" name="org.springframework.context.support" rev="latest.integration" conf="optional, cache->compile"/>
 		<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" conf="optional, orm->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="${org.junit.version}" conf="test->compile"/>
