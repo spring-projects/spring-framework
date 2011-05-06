@@ -37,6 +37,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
@@ -96,6 +97,20 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertTrue(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testReturnValueHandlers() {
+		loadBeanDefinitions("mvc-config-return-value-handlers.xml");
+		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
+		assertNotNull(adapter);
+		Object value = new DirectFieldAccessor(adapter).getPropertyValue("customReturnValueHandlers");
+		assertNotNull(value);
+		assertTrue(value instanceof List);
+		List<HandlerMethodReturnValueHandler> handlers = (List<HandlerMethodReturnValueHandler>) value;
+		assertEquals(1, handlers.size());
+		assertEquals(TestHandlerMethodReturnValueHandler.class, handlers.get(0).getClass());
+	}
+
 	private void loadBeanDefinitions(String fileName) {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		reader.loadBeanDefinitions(new ClassPathResource(fileName,
@@ -139,6 +154,19 @@ class TestHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 		return null;
 	}
+}
+
+class TestHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
+
+	public boolean supportsReturnType(MethodParameter returnType) {
+		return false;
+	}
+
+	public void handleReturnValue(Object returnValue,
+			MethodParameter returnType, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest) throws Exception {
+	}
+	
 }
 
 class TestMessageCodesResolver implements MessageCodesResolver {
