@@ -16,13 +16,13 @@
 
 package org.springframework.context.annotation;
 
-import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.core.type.MethodMetadata;
 
 /**
- * Represents a {@link Configuration} class method marked with the {@link Bean} annotation.
+ * Represents a {@link Configuration} class method marked with the
+ * {@link Bean} annotation.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -31,30 +31,13 @@ import org.springframework.core.type.MethodMetadata;
  * @see ConfigurationClassParser
  * @see ConfigurationClassBeanDefinitionReader
  */
-final class BeanMethod {
-
-	private final MethodMetadata metadata;
-
-	private final ConfigurationClass configurationClass;
-
+final class BeanMethod extends ConfigurationMethod {
 
 	public BeanMethod(MethodMetadata metadata, ConfigurationClass configurationClass) {
-		this.metadata = metadata;
-		this.configurationClass = configurationClass;
+		super(metadata, configurationClass);
 	}
 
-	public MethodMetadata getMetadata() {
-		return this.metadata;
-	}
-
-	public ConfigurationClass getConfigurationClass() {
-		return this.configurationClass;
-	}
-
-	public Location getResourceLocation() {
-		return new Location(this.configurationClass.getResource(), this.metadata);
-	}
-
+	@Override
 	public void validate(ProblemReporter problemReporter) {
 		if (this.configurationClass.getMetadata().isAnnotated(Configuration.class.getName())) {
 			if (!getMetadata().isOverridable()) {
@@ -67,13 +50,6 @@ final class BeanMethod {
 			}
 		}
 	}
-
-	@Override
-	public String toString() {
-		return String.format("[%s:name=%s,declaringClass=%s]",
-				this.getClass().getSimpleName(), this.getMetadata().getMethodName(), this.getMetadata().getDeclaringClassName());
-	}
-
 
 	/**
 	 * {@link Bean} methods must be overridable in order to accommodate CGLIB.

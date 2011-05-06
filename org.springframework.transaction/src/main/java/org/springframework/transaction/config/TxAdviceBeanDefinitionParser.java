@@ -48,8 +48,6 @@ import org.springframework.util.xml.DomUtils;
  */
 class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
-	private static final String TRANSACTION_MANAGER_ATTRIBUTE = "transaction-manager";
-
 	private static final String METHOD_ELEMENT = "method";
 
 	private static final String METHOD_NAME_ATTRIBUTE = "name";
@@ -76,7 +74,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
-		builder.addPropertyReference("transactionManager", element.getAttribute(TRANSACTION_MANAGER_ATTRIBUTE));
+		builder.addPropertyReference("transactionManager", TxNamespaceHandler.getTransactionManagerName(element));
 
 		List<Element> txAttributes = DomUtils.getChildElementsByTagName(element, ATTRIBUTES_ELEMENT);
 		if (txAttributes.size() > 1) {

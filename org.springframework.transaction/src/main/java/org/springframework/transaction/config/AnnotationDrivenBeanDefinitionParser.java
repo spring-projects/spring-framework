@@ -16,7 +16,15 @@
 
 package org.springframework.transaction.config;
 
+import org.w3c.dom.Element;
+
 import org.springframework.aop.config.AopNamespaceUtils;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.context.config.AbstractSpecificationBeanDefinitionParser;
 import org.springframework.context.config.FeatureSpecification;
@@ -40,7 +48,7 @@ import org.w3c.dom.Element;
  * @since 2.0
  * @see TxAnnotationDriven
  */
-class AnnotationDrivenBeanDefinitionParser extends AbstractSpecificationBeanDefinitionParser {
+class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	/**
 	 * The bean name of the internally managed transaction advisor (mode="proxy").

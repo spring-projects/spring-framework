@@ -33,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -45,8 +44,8 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.config.FeatureSpecification;
-import org.springframework.context.config.SpecificationContext;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.Conventions;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
@@ -94,7 +93,7 @@ public class ConfigurationClassBeanDefinitionReader {
 
 	private ResourceLoader resourceLoader;
 
-	private SpecificationContext specificationContext;
+	private Environment environment;
 
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
@@ -111,13 +110,7 @@ public class ConfigurationClassBeanDefinitionReader {
 		this.problemReporter = problemReporter;
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.resourceLoader = resourceLoader;
-		// TODO SPR-7420: see about passing in the SpecificationContext created in ConfigurationClassPostProcessor
-		this.specificationContext = new SpecificationContext();
-		this.specificationContext.setRegistry(this.registry);
-		this.specificationContext.setRegistrar(new SimpleComponentRegistrar(this.registry));
-		this.specificationContext.setResourceLoader(this.resourceLoader);
-		this.specificationContext.setEnvironment(environment);
-		this.specificationContext.setProblemReporter(problemReporter);
+		this.environment = environment;
 	}
 
 
@@ -137,33 +130,11 @@ public class ConfigurationClassBeanDefinitionReader {
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 		AnnotationMetadata metadata = configClass.getMetadata();
-		processFeatureAnnotations(metadata);
 		doLoadBeanDefinitionForConfigurationClassIfNecessary(configClass);
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
-	}
-
-	private void processFeatureAnnotations(AnnotationMetadata metadata) {
-		try {
-			for (String annotationType : metadata.getAnnotationTypes()) {
-				MetadataReader metadataReader = new SimpleMetadataReaderFactory().getMetadataReader(annotationType);
-				if (metadataReader.getAnnotationMetadata().isAnnotated(FeatureAnnotation.class.getName())) {
-					Map<String, Object> annotationAttributes = metadataReader.getAnnotationMetadata().getAnnotationAttributes(FeatureAnnotation.class.getName(), true);
-					// TODO SPR-7420: this is where we can catch user-defined types and avoid instantiating them for STS purposes
-					FeatureAnnotationParser processor = (FeatureAnnotationParser) BeanUtils.instantiateClass(Class.forName((String)annotationAttributes.get("parser")));
-					FeatureSpecification spec = processor.process(metadata);
-					spec.execute(this.specificationContext);
-				}
-			}
-		} catch (BeanDefinitionParsingException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			// TODO SPR-7420: what exception to throw?
-			throw new RuntimeException(ex);
-		}
 	}
 
 	/**
@@ -200,7 +171,7 @@ public class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
-	 * Read a particular {@link BeanMethod}, registering bean definitions
+	 * Read the given {@link BeanMethod}, registering bean definitions
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
 	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
@@ -423,8 +394,8 @@ public class ConfigurationClassBeanDefinitionReader {
 	 */
 	private static class InvalidConfigurationImportProblem extends Problem {
 		public InvalidConfigurationImportProblem(String className, Resource resource, AnnotationMetadata metadata) {
-			super(String.format("%s was @Import'ed but is not annotated with @FeatureConfiguration or " +
-					"@Configuration nor does it declare any @Bean methods. Update the class to " +
+			super(String.format("%s was @Import'ed but is not annotated with @Configuration " +
+					"nor does it declare any @Bean methods. Update the class to " +
 					"meet one of these requirements or do not attempt to @Import it.", className),
 					new Location(resource, metadata));
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,89 @@
 
 package org.springframework.web.servlet.config;
 
-import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.context.config.AbstractSpecificationBeanDefinitionParser;
-import org.springframework.context.config.FeatureSpecification;
-import org.springframework.util.StringUtils;
+import java.util.Map;
+
 import org.w3c.dom.Element;
+
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.support.ManagedMap;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.core.Ordered;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
+import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
- * {@code resources} element. 
+ * {@code resources} element to register a {@link ResourceHttpRequestHandler}.
+ * Will also register a {@link SimpleUrlHandlerMapping} for mapping resource requests, 
+ * and a {@link HttpRequestHandlerAdapter} if necessary. 
  *
- * @author Rossen Stoyanchev
+ * @author Keith Donald
+ * @author Jeremy Grelle
  * @since 3.0.4
- * @see MvcResources
- * @see MvcResourcesExecutor
  */
-class ResourcesBeanDefinitionParser extends AbstractSpecificationBeanDefinitionParser {
+class ResourcesBeanDefinitionParser extends AbstractHttpRequestHandlerBeanDefinitionParser implements BeanDefinitionParser {
 
-	/**
-	 * Parses the {@code <mvc:resources/>} tag
-	 */
-	public FeatureSpecification doParse(Element element, ParserContext parserContext) {
-		String mapping = element.getAttribute("mapping");
-		String[] locations =
-			StringUtils.commaDelimitedListToStringArray(element.getAttribute("location"));
-
-		MvcResources spec = new MvcResources(mapping, locations);
-		if (element.hasAttribute("cache-period")) {
-			spec.cachePeriod(element.getAttribute("cache-period"));
+	@Override
+	public void doParse(Element element, ParserContext parserContext) {
+		Object source = parserContext.extractSource(element);
+		registerResourceMappings(parserContext, element, source);
+	}
+	
+	private void registerResourceMappings(ParserContext parserContext, Element element, Object source) {
+		String resourceHandlerName = registerResourceHandler(parserContext, element, source);
+		if (resourceHandlerName == null) {
+			return;
 		}
-		if (element.hasAttribute("order")) {
-			spec.order(element.getAttribute("order"));
+		
+		Map<String, String> urlMap = new ManagedMap<String, String>();
+		String resourceRequestPath = element.getAttribute("mapping");
+		if (!StringUtils.hasText(resourceRequestPath)) {
+			parserContext.getReaderContext().error("The 'mapping' attribute is required.", parserContext.extractSource(element));
+	        return;
+		}
+		urlMap.put(resourceRequestPath, resourceHandlerName);
+		
+		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+		handlerMappingDef.setSource(source);
+		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
+		
+		String order = element.getAttribute("order");
+		// use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
+		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(order) ? order : Ordered.LOWEST_PRECEDENCE - 1);
+		
+		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
+		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
+		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));	
+	}
+	
+	private String registerResourceHandler(ParserContext parserContext, Element element, Object source) {
+		String locationAttr = element.getAttribute("location");
+		if (!StringUtils.hasText(locationAttr)) {
+			parserContext.getReaderContext().error("The 'location' attribute is required.", parserContext.extractSource(element));
+	        return null;
+		}		
+
+		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
+		resourceHandlerDef.setSource(source);
+		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		resourceHandlerDef.getPropertyValues().add("locations", StringUtils.commaDelimitedListToStringArray(locationAttr));
+
+		String cacheSeconds = element.getAttribute("cache-period");
+		if (StringUtils.hasText(cacheSeconds)) {
+			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
 		}
 
-		return spec;
+		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
+		parserContext.getRegistry().registerBeanDefinition(beanName, resourceHandlerDef);
+		parserContext.registerComponent(new BeanComponentDefinition(resourceHandlerDef, beanName));	
+		return beanName;
 	}
 
 }
