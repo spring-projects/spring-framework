@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
@@ -37,6 +38,7 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.StringUtils;
 
 /**
@@ -142,7 +144,7 @@ class ConfigurationClassParser {
 		List<Map<String, Object>> allImportAttribs =
 			AnnotationUtils.findAllAnnotationAttributes(Import.class, metadata.getClassName(), true);
 		for (Map<String, Object> importAttribs : allImportAttribs) {
-			processImport(configClass, (String[]) importAttribs.get("value"));
+			processImport(configClass, (String[]) importAttribs.get("value"), true);
 		}
 
 		if (metadata.isAnnotated(ImportResource.class.getName())) {
@@ -162,16 +164,29 @@ class ConfigurationClassParser {
 		}
 	}
 
-	private void processImport(ConfigurationClass configClass, String[] classesToImport) throws IOException {
-		if (this.importStack.contains(configClass)) {
+	private void processImport(ConfigurationClass configClass, String[] classesToImport, boolean checkForCircularImports) throws IOException {
+		if (checkForCircularImports && this.importStack.contains(configClass)) {
 			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack, configClass.getMetadata()));
 		}
 		else {
 			this.importStack.push(configClass);
-			for (String classToImport : classesToImport) {
-				this.importStack.registerImport(configClass.getMetadata().getClassName(), classToImport);
-				MetadataReader reader = this.metadataReaderFactory.getMetadataReader(classToImport);
-				processConfigurationClass(new ConfigurationClass(reader, null));
+			AnnotationMetadata importingClassMetadata = configClass.getMetadata();
+			for (String candidate : classesToImport) {
+				MetadataReader reader = this.metadataReaderFactory.getMetadataReader(candidate);
+				if (new AssignableTypeFilter(ImportSelector.class).match(reader, metadataReaderFactory)) {
+					// the candidate class is an ImportSelector -> delegate to it to determine imports
+					try {
+						ImportSelector selector = BeanUtils.instantiateClass(Class.forName(candidate), ImportSelector.class);
+						processImport(configClass, selector.selectImports(importingClassMetadata), false);
+					} catch (ClassNotFoundException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}
+				else {
+					// the candidate class not an ImportSelector -> process it as a @Configuration class
+					this.importStack.registerImport(importingClassMetadata.getClassName(), candidate);
+					processConfigurationClass(new ConfigurationClass(reader, null));
+				}
 			}
 			this.importStack.pop();
 		}
