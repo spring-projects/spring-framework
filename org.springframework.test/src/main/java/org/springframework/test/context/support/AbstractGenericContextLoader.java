@@ -28,15 +28,17 @@ import org.springframework.util.StringUtils;
 /**
  * Abstract, generic extension of {@link AbstractContextLoader} which loads a
  * {@link GenericApplicationContext} from the <em>locations</em> provided to
- * {@link #loadContext(String...)}.
+ * {@link #loadContext loadContext()}.
  *
- * <p>Concrete subclasses must provide an appropriate
- * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader}.
+ * <p>Concrete subclasses must provide an appropriate implementation of
+ * {@link #createBeanDefinitionReader createBeanDefinitionReader()},
+ * potentially overriding {@link #loadBeanDefinitions loadBeanDefinitions()}
+ * in addition.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
- * @see #loadContext(String...)
+ * @see #loadContext
  */
 public abstract class AbstractGenericContextLoader extends AbstractContextLoader {
 
@@ -47,8 +49,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * Loads a Spring ApplicationContext from the supplied <code>locations</code>.
 	 * <p>Implementation details:
 	 * <ul>
-	 * <li>Delegates to {@link #createGenericApplicationContext()} to
-	 * create a {@link GenericApplicationContext} instance.</li>
+	 * <li>Creates a {@link GenericApplicationContext} instance.</li>
 	 * <li>Calls {@link #prepareContext(GenericApplicationContext)} to
 	 * prepare the context.</li>
 	 * <li>Calls {@link #customizeBeanFactory(DefaultListableBeanFactory)} to
@@ -72,7 +73,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 			logger.debug(String.format("Loading ApplicationContext for locations [%s].",
 				StringUtils.arrayToCommaDelimitedString(locations)));
 		}
-		GenericApplicationContext context = createGenericApplicationContext();
+		GenericApplicationContext context = new GenericApplicationContext();
 		prepareContext(context);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		loadBeanDefinitions(context, locations);
@@ -81,20 +82,6 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		context.refresh();
 		context.registerShutdownHook();
 		return context;
-	}
-
-	/**
-	 * Factory method for creating a new {@link GenericApplicationContext} 
-	 * to be used by this <code>ContextLoader</code>.
-	 * <p>The default implementation returns an instance of
-	 * {@link GenericApplicationContext}. Can be overridden in subclasses
-	 * to return a specific subclass of <code>GenericApplicationContext</code>.
-	 * @return a new <code>GenericApplicationContext</code>
-	 * @since 3.1
-	 * @see #loadContext
-	 */
-	protected GenericApplicationContext createGenericApplicationContext() {
-		return new GenericApplicationContext();
 	}
 
 	/**
@@ -132,10 +119,10 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * {@link BeanDefinitionReader#loadBeanDefinitions(String) load} the
 	 * bean definitions.
 	 * <p>Subclasses must provide an appropriate implementation of
-	 * {@link #createBeanDefinitionReader}.
-	 * Alternatively subclasses may provide a <em>no-op</em> implementation
-	 * of {@link #createBeanDefinitionReader} and override this method to
-	 * provide a custom strategy for loading or registering bean definitions.
+	 * {@link #createBeanDefinitionReader}. Alternatively subclasses may
+	 * provide a <em>no-op</em> implementation of {@link #createBeanDefinitionReader}
+	 * and override this method to provide a custom strategy for loading or
+	 * registering bean definitions.
 	 * @param context the context into which the bean definitions should be loaded
 	 * @param locations the resource locations from which to load the bean definitions
 	 * @since 3.1
@@ -147,8 +134,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 
 	/**
 	 * Factory method for creating a new {@link BeanDefinitionReader} for
-	 * loading bean definitions into the supplied
-	 * {@link GenericApplicationContext context}.
+	 * loading bean definitions into the supplied {@link GenericApplicationContext context}.
 	 * @param context the context for which the BeanDefinitionReader should be created
 	 * @return a BeanDefinitionReader for the supplied context
 	 * @see #loadBeanDefinitions
