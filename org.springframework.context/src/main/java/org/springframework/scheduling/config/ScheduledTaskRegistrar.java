@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.config;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -82,6 +83,13 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
+	 * Return the scheduler instance for this registrar (may be null)
+	 */
+	public TaskScheduler getScheduler() {
+		return this.taskScheduler;
+	}
+
+	/**
 	 * Specify triggered tasks as a Map of Runnables (the tasks) and Trigger objects
 	 * (typically custom implementations of the {@link Trigger} interface).
 	 */
@@ -103,6 +111,49 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void setFixedRateTasks(Map<Runnable, Long> fixedRateTasks) {
 		this.fixedRateTasks = fixedRateTasks;
+	}
+
+	/**
+	 * Add a Runnable task to be triggered per the given {@link Trigger}.
+	 * @see TaskScheduler#scheduleAtFixedRate(Runnable, long)
+	 */
+	public void addTriggerTask(Runnable task, Trigger trigger) {
+		if (this.triggerTasks == null) {
+			this.triggerTasks = new HashMap<Runnable, Trigger>();
+		}
+		this.triggerTasks.put(task, trigger);
+	}
+
+	/**
+	 * Add a Runnable task to be triggered per the given cron expression
+	 */
+	public void addCronTask(Runnable task, String cronExpression) {
+		if (this.cronTasks == null) {
+			this.cronTasks = new HashMap<Runnable, String>();
+		}
+		this.cronTasks.put(task, cronExpression);
+	}
+
+	/**
+	 * Add a Runnable task to be triggered with the given fixed delay.
+	 * @see TaskScheduler#scheduleWithFixedDelay(Runnable, long)
+	 */
+	public void addFixedDelayTask(Runnable task, long delay) {
+		if (this.fixedDelayTasks == null) {
+			this.fixedDelayTasks = new HashMap<Runnable, Long>();
+		}
+		this.fixedDelayTasks.put(task, delay);
+	}
+
+	/**
+	 * Add a Runnable task to be triggered at the given fixed-rate period.
+	 * @see TaskScheduler#scheduleAtFixedRate(Runnable, long)
+	 */
+	public void addFixedRateTask(Runnable task, long period) {
+		if (this.fixedRateTasks == null) {
+			this.fixedRateTasks = new HashMap<Runnable, Long>();
+		}
+		this.fixedRateTasks.put(task, period);
 	}
 
 	/**
