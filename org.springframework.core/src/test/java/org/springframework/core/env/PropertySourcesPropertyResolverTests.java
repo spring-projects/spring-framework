@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.env.MockPropertySource;
 
-
 /**
- * Unit tests for {@link PropertyResolver}.
+ * Unit tests for {@link PropertySourcesPropertyResolver}.
  *
  * @author Chris Beams
  * @since 3.1
- * @see PropertySourcesPropertyResolver
  */
-public class PropertyResolverTests {
+public class PropertySourcesPropertyResolverTests {
 	private Properties testProperties;
 	private MutablePropertySources propertySources;
 	private ConfigurablePropertyResolver propertyResolver;
@@ -179,9 +177,6 @@ public class PropertyResolverTests {
 		}
 	}
 
-
-
-	/*
 	@Test
 	public void resolvePlaceholders() {
 		MutablePropertySources propertySources = new MutablePropertySources();
@@ -242,5 +237,5 @@ public class PropertyResolverTests {
 	public void resolveRequiredPlaceholders_withNullInput() {
 		new PropertySourcesPropertyResolver(new MutablePropertySources()).resolveRequiredPlaceholders(null);
 	}
-	*/
+
 }
