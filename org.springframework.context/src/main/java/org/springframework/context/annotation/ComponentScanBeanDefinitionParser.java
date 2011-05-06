@@ -98,6 +98,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		// Delegate bean definition registration to scanner class.
 		ClassPathBeanDefinitionScanner scanner = createScanner(readerContext, useDefaultFilters);
 		scanner.setResourceLoader(readerContext.getResourceLoader());
+		scanner.setEnvironment(parserContext.getDelegate().getEnvironment());
 		scanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());
 		scanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
 
