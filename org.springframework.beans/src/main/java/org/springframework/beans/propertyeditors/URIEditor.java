@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>By default, this editor will encode Strings into URIs. For instance,
  * a space will be encoded into {@code %20}. This behavior can be changed
- * by setting calling the {@link #URIEditor(boolean)} constructor.
+ * by calling the {@link #URIEditor(boolean)} constructor.
  *
  * <p>Note: A URI is more relaxed than a URL in that it does not require
  * a valid protocol to be specified. Any scheme within a valid URI syntax
