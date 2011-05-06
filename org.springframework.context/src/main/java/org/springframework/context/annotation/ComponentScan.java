@@ -44,10 +44,9 @@ import org.springframework.core.type.filter.TypeFilter;
  * @author Chris Beams
  * @since 3.1
  */
-@Documented
-@FeatureAnnotation(parser=ComponentScanAnnotationParser.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@Documented
 public @interface ComponentScan {
 
 	/**
@@ -89,6 +88,7 @@ public @interface ComponentScan {
 	 * necessary when using scopes in a proxy-style fashion.
 	 * <p>The default is defer to the default behavior of the component scanner used to
 	 * execute the actual scan.
+	 * <p>Note that setting this attribute overrides any value set for {@link #scopeResolver()}.
 	 * @see ClassPathBeanDefinitionScanner#setScopedProxyMode(ScopedProxyMode)
 	 */
 	ScopedProxyMode scopedProxy() default ScopedProxyMode.DEFAULT;
