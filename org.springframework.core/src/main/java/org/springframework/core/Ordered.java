@@ -47,6 +47,14 @@ public interface Ordered {
 	 */
 	int LOWEST_PRECEDENCE = Integer.MAX_VALUE;
 
+	/**
+	 * A reserved integer value indicating that a component should
+	 * be treated as unordered. Users should avoid this using this
+	 * reserved value ({@value}) when ordering their own components.
+	 * Useful when populating annotation, where null cannot be specified
+	 * as a default for integer attributes.
+	 */
+	int NOT_ORDERED = (Integer.MIN_VALUE +1) / 2; // -1073741823
 
 	/**
 	 * Return the order value of this object, with a
