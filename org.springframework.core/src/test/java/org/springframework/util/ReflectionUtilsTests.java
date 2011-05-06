@@ -16,6 +16,9 @@
 
 package org.springframework.util;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -24,7 +27,6 @@ import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.TestBean;
@@ -236,6 +238,88 @@ public class ReflectionUtilsTests {
 		assertNotNull(ReflectionUtils.findMethod(B.class, "bar", String.class));
 		assertNotNull(ReflectionUtils.findMethod(B.class, "foo", Integer.class));
 		assertNotNull(ReflectionUtils.findMethod(B.class, "getClass"));
+	}
+
+	@Test
+	public void isCglibRenamedMethod() throws SecurityException, NoSuchMethodException {
+		@SuppressWarnings("unused")
+		class C {
+			public void CGLIB$m1$123() { }
+			public void CGLIB$m1$0() { }
+			public void CGLIB$$0() { }
+			public void CGLIB$m1$() { }
+			public void CGLIB$m1() { }
+			public void m1() { }
+			public void m1$() { }
+			public void m1$1() { }
+		}
+		assertTrue(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$123")));
+		assertTrue(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$0")));
+		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$$0")));
+		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$")));
+		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1")));
+		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("m1")));
+		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("m1$")));
+		assertFalse(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("m1$1")));
+	}
+
+	@Test
+	public void getAllDeclaredMethods() throws Exception {
+		class Foo {
+			@Override
+			public String toString() {
+				return super.toString();
+			}
+		}
+		int toStringMethodCount = 0;
+		for (Method method : ReflectionUtils.getAllDeclaredMethods(Foo.class)) {
+			if (method.getName().equals("toString")) {
+				toStringMethodCount++;
+			}
+		}
+		assertThat(toStringMethodCount, is(2));
+	}
+
+	@Test
+	public void getUniqueDeclaredMethods() throws Exception {
+		class Foo {
+			@Override
+			public String toString() {
+				return super.toString();
+			}
+		}
+		int toStringMethodCount = 0;
+		for (Method method : ReflectionUtils.getUniqueDeclaredMethods(Foo.class)) {
+			if (method.getName().equals("toString")) {
+				toStringMethodCount++;
+			}
+		}
+		assertThat(toStringMethodCount, is(1));
+	}
+
+	@Test
+	public void getUniqueDeclaredMethods_withCovariantReturnType() throws Exception {
+		class Parent {
+			public Number m1() {
+				return new Integer(42);
+			}
+		}
+		class Leaf extends Parent {
+			@Override
+			public Integer m1() {
+				return new Integer(42);
+			}
+		}
+		int m1MethodCount = 0;
+		Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(Leaf.class);
+		for (Method method : methods) {
+			if (method.getName().equals("m1")) {
+				m1MethodCount++;
+			}
+		}
+		assertThat(m1MethodCount, is(1));
+		assertTrue(ObjectUtils.containsElement(methods, Leaf.class.getMethod("m1")));
+		assertFalse(ObjectUtils.containsElement(methods, Parent.class.getMethod("m1")));
 	}
 
 
