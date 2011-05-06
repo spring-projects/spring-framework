@@ -31,14 +31,14 @@ import org.springframework.core.type.MethodMetadata;
  * @see ConfigurationClassParser
  * @see ConfigurationClassBeanDefinitionReader
  */
-final class ConfigurationClassMethod {
+final class BeanMethod {
 
 	private final MethodMetadata metadata;
 
 	private final ConfigurationClass configurationClass;
 
 
-	public ConfigurationClassMethod(MethodMetadata metadata, ConfigurationClass configurationClass) {
+	public BeanMethod(MethodMetadata metadata, ConfigurationClass configurationClass) {
 		this.metadata = metadata;
 		this.configurationClass = configurationClass;
 	}

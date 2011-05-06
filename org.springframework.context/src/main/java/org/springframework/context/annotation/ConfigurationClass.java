@@ -40,7 +40,7 @@ import org.springframework.util.ClassUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.0
- * @see ConfigurationClassMethod
+ * @see BeanMethod
  * @see ConfigurationClassParser
  */
 final class ConfigurationClass {
@@ -51,7 +51,7 @@ final class ConfigurationClass {
 
 	private final Map<String, Class<?>> importedResources = new LinkedHashMap<String, Class<?>>();
 
-	private final Set<ConfigurationClassMethod> methods = new LinkedHashSet<ConfigurationClassMethod>();
+	private final Set<BeanMethod> beanMethods = new LinkedHashSet<BeanMethod>();
 
 	private String beanName;
 
@@ -89,12 +89,12 @@ final class ConfigurationClass {
 		return this.beanName;
 	}
 
-	public void addMethod(ConfigurationClassMethod method) {
-		this.methods.add(method);
+	public void addBeanMethod(BeanMethod method) {
+		this.beanMethods.add(method);
 	}
 
-	public Set<ConfigurationClassMethod> getMethods() {
-		return this.methods;
+	public Set<BeanMethod> getBeanMethods() {
+		return this.beanMethods;
 	}
 
 	public void addImportedResource(String importedResource, Class<?> readerClass) {
@@ -110,9 +110,9 @@ final class ConfigurationClass {
 		// @Configuration class may declare two @Bean methods with the same name.
 		final char hashDelim = '#';
 		Map<String, Integer> methodNameCounts = new HashMap<String, Integer>();
-		for (ConfigurationClassMethod method : methods) {
-			String dClassName = method.getMetadata().getDeclaringClassName();
-			String methodName = method.getMetadata().getMethodName();
+		for (BeanMethod beanMethod : beanMethods) {
+			String dClassName = beanMethod.getMetadata().getDeclaringClassName();
+			String methodName = beanMethod.getMetadata().getMethodName();
 			String fqMethodName = dClassName + hashDelim + methodName;
 			Integer currentCount = methodNameCounts.get(fqMethodName);
 			int newCount = currentCount != null ? currentCount + 1 : 1;
@@ -134,8 +134,8 @@ final class ConfigurationClass {
 			}
 		}
 
-		for (ConfigurationClassMethod method : this.methods) {
-			method.validate(problemReporter);
+		for (BeanMethod beanMethod : this.beanMethods) {
+			beanMethod.validate(problemReporter);
 		}
 	}
 
