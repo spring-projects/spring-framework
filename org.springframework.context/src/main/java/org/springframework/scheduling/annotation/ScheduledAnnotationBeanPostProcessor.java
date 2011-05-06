@@ -19,6 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -30,6 +31,7 @@ import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
@@ -44,9 +46,12 @@ import org.springframework.util.StringValueResolver;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0
  * @see Scheduled
+ * @see SchedulingConfigurer
  * @see org.springframework.scheduling.TaskScheduler
+ * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
  */
 public class ScheduledAnnotationBeanPostProcessor
 		implements BeanPostProcessor, Ordered, EmbeddedValueResolverAware, ApplicationContextAware,
@@ -58,7 +63,7 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	private ApplicationContext applicationContext;
 
-	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
+	private ScheduledTaskRegistrar registrar;
 
 	private final Map<Runnable, String> cronTasks = new HashMap<Runnable, String>();
 
@@ -134,15 +139,47 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (event.getApplicationContext() == this.applicationContext) {
-			if (this.scheduler != null) {
-				this.registrar.setScheduler(this.scheduler);
-			}
-			this.registrar.setCronTasks(this.cronTasks);
-			this.registrar.setFixedDelayTasks(this.fixedDelayTasks);
-			this.registrar.setFixedRateTasks(this.fixedRateTasks);
-			this.registrar.afterPropertiesSet();
+		if (event.getApplicationContext() != this.applicationContext) {
+			return;
 		}
+
+		Map<String, SchedulingConfigurer> configurers = applicationContext.getBeansOfType(SchedulingConfigurer.class);
+
+		if (this.cronTasks.isEmpty() && this.fixedDelayTasks.isEmpty() &&
+				this.fixedRateTasks.isEmpty() && configurers.isEmpty()) {
+			return;
+		}
+
+		this.registrar = new ScheduledTaskRegistrar();
+		this.registrar.setCronTasks(this.cronTasks);
+		this.registrar.setFixedDelayTasks(this.fixedDelayTasks);
+		this.registrar.setFixedRateTasks(this.fixedRateTasks);
+
+		if (this.scheduler != null) {
+			this.registrar.setScheduler(this.scheduler);
+		}
+
+		for (SchedulingConfigurer configurer : configurers.values()) {
+			configurer.configureTasks(this.registrar);
+		}
+
+		if (registrar.getScheduler() == null) {
+			Map<String, ? super Object> schedulers = new HashMap<String, Object>();
+			schedulers.putAll(applicationContext.getBeansOfType(TaskScheduler.class));
+			schedulers.putAll(applicationContext.getBeansOfType(ScheduledExecutorService.class));
+			if (schedulers.size() == 0) {
+				// do nothing -> fall back to default scheduler
+			} else if (schedulers.size() == 1) {
+				this.registrar.setScheduler(schedulers.values().iterator().next());
+			} else if (schedulers.size() >= 2){
+				throw new IllegalStateException("More than one TaskScheduler and/or ScheduledExecutorService  " +
+						"exist within the context. Remove all but one of the beans; or implement the " +
+						"SchedulingConfigurer interface and call ScheduledTaskRegistrar#setScheduler " +
+						"explicitly within the configureTasks() callback. Found the following beans: " + schedulers.keySet());
+			}
+		}
+
+		this.registrar.afterPropertiesSet();
 	}
 
 	public void destroy() throws Exception {
