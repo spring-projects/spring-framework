@@ -22,7 +22,7 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.core.type.filter.TypeFilter;
 
 /**
- * Unit tests for {@link ComponentScan} annotation.
+ * Unit tests for the @ComponentScan annotation.
  *
  * @author Chris Beams
  * @since 3.1
