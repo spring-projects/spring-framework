@@ -37,11 +37,6 @@ public interface MethodMetadata {
 	String getMethodName();
 
 	/**
-	 * Return the fully-qualified name of the return type of the method.
-	 */
-	String getMethodReturnType();
-
-	/**
 	 * Return the fully-qualified name of the class that declares this method.
 	 */
 	public String getDeclaringClassName();
