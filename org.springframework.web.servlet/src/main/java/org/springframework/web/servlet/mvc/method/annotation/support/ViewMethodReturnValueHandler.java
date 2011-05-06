@@ -17,31 +17,39 @@
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 
 /**
- * Handles return values that are of type {@link View} or {@link String} (i.e. a logical view name).
- * <p>Since a {@link String} return value may handled in different ways, especially in combination with method 
- * annotations, this handler should be registered after return value handlers that look for method annotations
- * such as the {@link ModelAttributeMethodProcessor} and the {@link RequestResponseBodyMethodProcessor}.
- *  
+ * Handles return values that are of type {@code void}, {@code String} (i.e. logical view name), or {@link View}.
+ *
+ * <p>A {@code null} return value, either due to a void return type or as the actual value returned from a
+ * method is left unhandled, leaving it to the configured {@link RequestToViewNameTranslator} to resolve the
+ * request to an actual view name. By default it is the {@link DefaultRequestToViewNameTranslator}.
+ *
+ * <p>Since a {@link String} return value may handled in different ways, especially in combination with method
+ * annotations such as @{@link ModelAttribute} and @{@link ResponseBody}, this handler should be ordered after
+ * return value handlers that support method annotations.
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
-	
+
 	public boolean supportsReturnType(MethodParameter returnType) {
-		Class<?> paramType = returnType.getParameterType();
-		return (View.class.isAssignableFrom(paramType) || (String.class.equals(paramType)));
+		Class<?> type = returnType.getParameterType();
+		return (void.class.equals(type) || String.class.equals(type) || View.class.isAssignableFrom(type));
 	}
 
-	public void handleReturnValue(Object returnValue, 
-								  MethodParameter returnType, 
-								  ModelAndViewContainer mavContainer, 
+	public void handleReturnValue(Object returnValue,
+								  MethodParameter returnType,
+								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest) throws Exception {
 		if (returnValue == null) {
 			return;
