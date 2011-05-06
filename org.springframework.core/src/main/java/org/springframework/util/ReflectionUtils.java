@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Simple utility class for working with the reflection API and handling
@@ -38,9 +39,12 @@ import java.util.List;
  * @author Rod Johnson
  * @author Costin Leau
  * @author Sam Brannen
+ * @author Chris Beams
  * @since 1.2.2
  */
 public abstract class ReflectionUtils {
+
+	private static final Pattern CGLIB_RENAMED_METHOD_PATTERN = Pattern.compile("CGLIB\\$(.+)\\$\\d+");
 
 	/**
 	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
@@ -380,6 +384,16 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
+	 * Determine whether the given method is a CGLIB 'renamed' method, following
+	 * the pattern "CGLIB$methodName$0".
+	 * @param renamedMethod the method to check
+	 * @see net.sf.cglib.proxy.Enhancer#rename
+	 */
+	public static boolean isCglibRenamedMethod(Method renamedMethod) {
+		return CGLIB_RENAMED_METHOD_PATTERN.matcher(renamedMethod.getName()).matches();
+	}
+
+	/**
 	 * Make the given field accessible, explicitly setting it accessible if
 	 * necessary. The <code>setAccessible(true)</code> method is only called
 	 * when actually necessary, to avoid unnecessary conflicts with a JVM
@@ -482,6 +496,42 @@ public abstract class ReflectionUtils {
 		doWithMethods(leafClass, new MethodCallback() {
 			public void doWith(Method method) {
 				methods.add(method);
+			}
+		});
+		return methods.toArray(new Method[methods.size()]);
+	}
+
+	/**
+	 * Get the unique set of declared methods on the leaf class and all superclasses. Leaf
+	 * class methods are included first and while traversing the superclass hierarchy any methods found
+	 * with signatures matching a method already included are filtered out.
+	 */
+	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass) throws IllegalArgumentException {
+		final List<Method> methods = new ArrayList<Method>(32);
+		doWithMethods(leafClass, new MethodCallback() {
+			public void doWith(Method method) {
+				boolean knownSignature = false;
+				Method methodBeingOverriddenWithCovariantReturnType = null;
+
+				for (Method existingMethod : methods) {
+					if (method.getName().equals(existingMethod.getName()) &&
+							Arrays.equals(method.getParameterTypes(), existingMethod.getParameterTypes())) {
+						// is this a covariant return type situation?
+						if (existingMethod.getReturnType() != method.getReturnType() &&
+								existingMethod.getReturnType().isAssignableFrom(method.getReturnType())) {
+							methodBeingOverriddenWithCovariantReturnType = existingMethod;
+						} else {
+							knownSignature = true;
+						}
+						break;
+					}
+				}
+				if (methodBeingOverriddenWithCovariantReturnType != null) {
+					methods.remove(methodBeingOverriddenWithCovariantReturnType);
+				}
+				if (!knownSignature && !isCglibRenamedMethod(method)) {
+					methods.add(method);
+				}
 			}
 		});
 		return methods.toArray(new Method[methods.size()]);

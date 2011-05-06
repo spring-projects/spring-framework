@@ -631,7 +631,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// If all factory methods have the same return type, return that type.
 		// Can't clearly figure out exact method due to type converting / autowiring!
 		int minNrOfArgs = mbd.getConstructorArgumentValues().getArgumentCount();
-		Method[] candidates = ReflectionUtils.getAllDeclaredMethods(factoryClass);
+		Method[] candidates = ReflectionUtils.getUniqueDeclaredMethods(factoryClass);
 		Set<Class> returnTypes = new HashSet<Class>(1);
 		for (Method factoryMethod : candidates) {
 			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
