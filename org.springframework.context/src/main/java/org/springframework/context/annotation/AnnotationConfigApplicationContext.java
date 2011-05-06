@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.util.Assert;
 
 /**
  * Standalone application context, accepting annotated classes as input - in particular
@@ -126,6 +127,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @see #refresh()
 	 */
 	public void register(Class<?>... annotatedClasses) {
+		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
 		this.reader.register(annotatedClasses);
 	}
 
@@ -137,6 +139,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @see #refresh()
 	 */
 	public void scan(String... basePackages) {
+		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		this.scanner.scan(basePackages);
 	}
 
