@@ -30,32 +30,32 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 
 /**
- * A specialization of {@link DefaultDataBinderFactory} that further initializes {@link WebDataBinder} instances 
- * by invoking {@link InitBinder} methods. 
- * 
+ * A specialization of {@link DefaultDataBinderFactory} that further initializes {@link WebDataBinder} instances
+ * by invoking {@link InitBinder} methods.
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class InitBinderMethodDataBinderFactory extends DefaultDataBinderFactory {
+public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 
 	private final List<InvocableHandlerMethod> initBinderMethods;
 	
 	/**
-	 * Create an {@code InitBinderMethodDataBinderFactory} instance with the given {@link InitBinder} methods.
-	 * @param binderMethods {@link InitBinder} methods to use to invoke to initialize new data binder instances  
+	 * Create an {@code InitBinderDataBinderFactory} instance with the given {@link InitBinder} methods.
+	 * @param binderMethods {@link InitBinder} methods to use to invoke to initialize new data binder instances
 	 * @param bindingInitializer a {@link WebBindingInitializer} to initialize new data binder instances with
 	 */
-	public InitBinderMethodDataBinderFactory(List<InvocableHandlerMethod> binderMethods, 
-											 WebBindingInitializer bindingInitializer) {
+	public InitBinderDataBinderFactory(List<InvocableHandlerMethod> binderMethods,
+									   WebBindingInitializer bindingInitializer) {
 		super(bindingInitializer);
 		this.initBinderMethods = (binderMethods != null) ? binderMethods : new ArrayList<InvocableHandlerMethod>();
 	}
 
 	/**
-	 * Create a {@link WebDataBinder} for the given object and initialize it by calling {@link InitBinder} methods. 
-	 * Only methods with an {@link InitBinder} annotation value that doesn't list attributes names or methods with 
+	 * Create a {@link WebDataBinder} for the given object and initialize it by calling {@link InitBinder} methods.
+	 * Only methods with an {@link InitBinder} annotation value that doesn't list attributes names or methods with
 	 * an {@link InitBinder} annotation value that matches the target object name are invoked.
-	 * @see InitBinder#value() 
+	 * @see InitBinder#value()
 	 */
 	@Override
 	public WebDataBinder createBinder(NativeWebRequest request, Object target, String objectName) throws Exception {

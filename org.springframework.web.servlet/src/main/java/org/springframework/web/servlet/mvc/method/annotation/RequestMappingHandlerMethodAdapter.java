@@ -59,7 +59,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
-import org.springframework.web.method.annotation.InitBinderMethodDataBinderFactory;
 import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.annotation.SessionAttributesHandler;
 import org.springframework.web.method.annotation.support.ErrorsMethodArgumentResolver;
@@ -95,23 +94,23 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * An {@link AbstractHandlerMethodAdapter} variant with support for {@link RequestMapping} handler methods.
- * 
- * <p>Processing a {@link RequestMapping} method typically involves the invocation of {@link ModelAttribute} 
- * methods for contributing attributes to the model and {@link InitBinder} methods for initializing 
+ *
+ * <p>Processing a {@link RequestMapping} method typically involves the invocation of {@link ModelAttribute}
+ * methods for contributing attributes to the model and {@link InitBinder} methods for initializing
  * {@link WebDataBinder} instances for data binding and type conversion purposes.
- * 
- * <p>{@link InvocableHandlerMethod} is the key contributor that helps with the invocation of handler 
- * methods of all types resolving their arguments through registered {@link HandlerMethodArgumentResolver}s. 
+ *
+ * <p>{@link InvocableHandlerMethod} is the key contributor that helps with the invocation of handler
+ * methods of all types resolving their arguments through registered {@link HandlerMethodArgumentResolver}s.
  * {@link ServletInvocableHandlerMethod} on the other hand adds handling of the return value for {@link RequestMapping}
- * methods through registered {@link HandlerMethodReturnValueHandler}s resulting in a {@link ModelAndView}. 
- * 
- * <p>{@link ModelFactory} is another contributor that assists with the invocation of all {@link ModelAttribute} 
- * methods to populate a model while {@link InitBinderMethodDataBinderFactory} assists with the invocation of 
+ * methods through registered {@link HandlerMethodReturnValueHandler}s resulting in a {@link ModelAndView}.
+ *
+ * <p>{@link ModelFactory} is another contributor that assists with the invocation of all {@link ModelAttribute}
+ * methods to populate a model while {@link ServletRequestDataBinderFactory} assists with the invocation of
  * {@link InitBinder} methods for initializing data binder instances when needed.
- * 
- * <p>This class is the central point that assembles all of mentioned contributors and invokes the actual 
+ *
+ * <p>This class is the central point that assembles all of mentioned contributors and invokes the actual
  * {@link RequestMapping} handler method through a {@link ServletInvocableHandlerMethod}.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  * @see InvocableHandlerMethod
@@ -172,18 +171,18 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 
 	/**
 	 * Set one or more custom argument resolvers to use with {@link RequestMapping}, {@link ModelAttribute}, and
-	 * {@link InitBinder} methods. Custom argument resolvers are given a chance to resolve argument values 
+	 * {@link InitBinder} methods. Custom argument resolvers are given a chance to resolve argument values
 	 * ahead of the standard argument resolvers registered by default.
-	 * <p>An existing {@link WebArgumentResolver} can either adapted with {@link ServletWebArgumentResolverAdapter} 
-	 * or preferably converted to a {@link HandlerMethodArgumentResolver} instead. 
+	 * <p>An existing {@link WebArgumentResolver} can either adapted with {@link ServletWebArgumentResolverAdapter}
+	 * or preferably converted to a {@link HandlerMethodArgumentResolver} instead.
 	 */
 	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
 	}
 	
 	/**
-	 * Set the argument resolvers to use with {@link RequestMapping} and {@link ModelAttribute} methods. 
-	 * This is an optional property providing full control over all argument resolvers in contrast to  
+	 * Set the argument resolvers to use with {@link RequestMapping} and {@link ModelAttribute} methods.
+	 * This is an optional property providing full control over all argument resolvers in contrast to
 	 * {@link #setCustomArgumentResolvers(List)}, which does not override default registrations.
 	 * @param argumentResolvers argument resolvers for {@link RequestMapping} and {@link ModelAttribute} methods
 	 */
@@ -195,8 +194,8 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	}
 	
 	/**
-	 * Set the argument resolvers to use with {@link InitBinder} methods. This is an optional property 
-	 * providing full control over all argument resolvers for {@link InitBinder} methods in contrast to   
+	 * Set the argument resolvers to use with {@link InitBinder} methods. This is an optional property
+	 * providing full control over all argument resolvers for {@link InitBinder} methods in contrast to
 	 * {@link #setCustomArgumentResolvers(List)}, which does not override default registrations.
 	 * @param argumentResolvers argument resolvers for {@link InitBinder} methods
 	 */
@@ -208,19 +207,19 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	}
 
 	/**
-	 * Set custom return value handlers to use to handle the return values of {@link RequestMapping} methods. 
-	 * Custom return value handlers are given a chance to handle a return value before the standard 
+	 * Set custom return value handlers to use to handle the return values of {@link RequestMapping} methods.
+	 * Custom return value handlers are given a chance to handle a return value before the standard
 	 * return value handlers registered by default.
-	 * @param returnValueHandlers custom return value handlers for {@link RequestMapping} methods  
+	 * @param returnValueHandlers custom return value handlers for {@link RequestMapping} methods
 	 */
 	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		this.customReturnValueHandlers = returnValueHandlers;
 	}
 
 	/**
-	 * Set the {@link HandlerMethodReturnValueHandler}s to use to use with {@link RequestMapping} methods. 
-	 * This is an optional property providing full control over all return value handlers in contrast to   
-	 * {@link #setCustomReturnValueHandlers(List)}, which does not override default registrations. 
+	 * Set the {@link HandlerMethodReturnValueHandler}s to use to use with {@link RequestMapping} methods.
+	 * This is an optional property providing full control over all return value handlers in contrast to
+	 * {@link #setCustomReturnValueHandlers(List)}, which does not override default registrations.
 	 * @param returnValueHandlers the return value handlers for {@link RequestMapping} methods
 	 */
 	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
@@ -232,10 +231,10 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 
 	/**
 	 * Set custom {@link ModelAndViewResolver}s to use to handle the return values of {@link RequestMapping} methods.
-	 * <p>Custom {@link ModelAndViewResolver}s are provided for backward compatibility and are invoked at the very, 
-	 * from the {@link DefaultMethodReturnValueHandler}, after all standard {@link HandlerMethodReturnValueHandler}s 
-	 * have been given a chance. This is because {@link ModelAndViewResolver}s do not have a method to indicate 
-	 * if they support a given return type or not. For this reason it is recommended to use 
+	 * <p>Custom {@link ModelAndViewResolver}s are provided for backward compatibility and are invoked at the very,
+	 * from the {@link DefaultMethodReturnValueHandler}, after all standard {@link HandlerMethodReturnValueHandler}s
+	 * have been given a chance. This is because {@link ModelAndViewResolver}s do not have a method to indicate
+	 * if they support a given return type or not. For this reason it is recommended to use
 	 * {@link HandlerMethodReturnValueHandler} and {@link #setCustomReturnValueHandlers(List)} instead.
 	 */
 	public void setModelAndViewResolvers(List<ModelAndViewResolver> modelAndViewResolvers) {
@@ -413,7 +412,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 
 	@Override
 	protected boolean supportsInternal(HandlerMethod handlerMethod) {
-		return supportsMethodParameters(handlerMethod.getMethodParameters()) && 
+		return supportsMethodParameters(handlerMethod.getMethodParameters()) &&
 			supportsReturnType(handlerMethod.getReturnType());
 	}
 	
@@ -465,8 +464,8 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	}
 
 	/**
-	 * Whether the given handler type defines any handler-specific session attributes via {@link SessionAttributes}. 
-	 * Also initializes the sessionAttributesHandlerCache for the given handler type. 
+	 * Whether the given handler type defines any handler-specific session attributes via {@link SessionAttributes}.
+	 * Also initializes the sessionAttributesHandlerCache for the given handler type.
 	 */
 	private boolean hasSessionAttributes(Class<?> handlerType) {
 		SessionAttributesHandler handler = null;
@@ -483,8 +482,8 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	/**
 	 * Invoke the {@link RequestMapping} handler method preparing a {@link ModelAndView} if view resolution is required.
 	 */
-	private ModelAndView invokeHandlerMethod(HttpServletRequest request, 
-											 HttpServletResponse response, 
+	private ModelAndView invokeHandlerMethod(HttpServletRequest request,
+											 HttpServletResponse response,
 											 HandlerMethod handlerMethod) throws Exception {
 		
 		WebDataBinderFactory binderFactory = createDataBinderFactory(handlerMethod);
@@ -510,7 +509,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 			mav.setViewName(mavContainer.getViewName());
 			if (mavContainer.getView() != null) {
 				mav.setView((View) mavContainer.getView());
-			} 
+			}
 			return mav;				
 		}
 	}
@@ -535,7 +534,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 			initBinderMethods.add(binderMethod);
 		}
 
-		return new ServletInitBinderMethodDataBinderFactory(initBinderMethods, this.webBindingInitializer);
+		return new ServletRequestDataBinderFactory(initBinderMethods, this.webBindingInitializer);
 	}
 
 	private ModelFactory createModelFactory(HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
@@ -559,7 +558,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 		return new ModelFactory(modelAttrMethods, binderFactory, sessionAttributesHandlerCache.get(handlerType));
 	}
 
-	private ServletInvocableHandlerMethod createRequestMappingMethod(HandlerMethod handlerMethod, 
+	private ServletInvocableHandlerMethod createRequestMappingMethod(HandlerMethod handlerMethod,
 															   		 WebDataBinderFactory binderFactory) {
 		Method method = handlerMethod.getMethod();
 		ServletInvocableHandlerMethod requestMethod = new ServletInvocableHandlerMethod(handlerMethod.getBean(), method);
@@ -586,7 +585,7 @@ public class RequestMappingHandlerMethodAdapter extends AbstractHandlerMethodAda
 	public static MethodFilter MODEL_ATTRIBUTE_METHODS = new MethodFilter() {
 
 		public boolean matches(Method method) {
-			return ((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) && 
+			return ((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
 					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null));
 		}
 	};

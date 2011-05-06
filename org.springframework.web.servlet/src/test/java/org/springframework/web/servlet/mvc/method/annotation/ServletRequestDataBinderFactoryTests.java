@@ -34,13 +34,13 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Test fixture with {@link ServletInitBinderMethodDataBinderFactory}.
- * 
+ * Test fixture with {@link ServletRequestDataBinderFactory}.
+ *
  * @author Rossen Stoyanchev
  */
-public class ServletInitBinderMethodDataBinderFactoryTests {
+public class ServletRequestDataBinderFactoryTests {
 
-	private ServletInitBinderMethodDataBinderFactory binderFactory;
+	private ServletRequestDataBinderFactory binderFactory;
 	
 	private MockHttpServletRequest request;
 	
@@ -48,7 +48,7 @@ public class ServletInitBinderMethodDataBinderFactoryTests {
 
 	@Before
 	public void setup() {
-		binderFactory = new ServletInitBinderMethodDataBinderFactory(null, null);
+		binderFactory = new ServletRequestDataBinderFactory(null, null);
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request);
 		RequestContextHolder.setRequestAttributes(webRequest);
