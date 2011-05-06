@@ -196,6 +196,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return this.propertyResolver.getProperty(key, targetType);
 	}
 
+	public <T> Class<T> getPropertyAsClass(String key, Class<T> targetType) {
+		return this.propertyResolver.getPropertyAsClass(key, targetType);
+	}
+
 	public String getRequiredProperty(String key) throws IllegalStateException {
 		return this.propertyResolver.getRequiredProperty(key);
 	}
