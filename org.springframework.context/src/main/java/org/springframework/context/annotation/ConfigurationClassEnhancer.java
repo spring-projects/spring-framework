@@ -163,6 +163,8 @@ class ConfigurationClassEnhancer {
 
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 			Enhancer.registerStaticCallbacks(obj.getClass(), null);
+			// does the actual (non-CGLIB) superclass actually implement DisposableBean?
+			// if so, call its dispose() method. If not, just exit.
 			if (DisposableBean.class.isAssignableFrom(obj.getClass().getSuperclass())) {
 				return proxy.invokeSuper(obj, args);
 			}
