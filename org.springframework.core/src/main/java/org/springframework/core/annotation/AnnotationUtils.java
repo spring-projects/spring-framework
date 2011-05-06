@@ -16,14 +16,20 @@
 
 package org.springframework.core.annotation;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -321,6 +327,60 @@ public abstract class AnnotationUtils {
 			}
 		}
 		return attrs;
+	}
+
+	/**
+	 * Return a list of attribute maps for all declarations of the given target annotation
+	 * on the given annotated class. Meta annotations are ordered first in the list, and if
+	 * the target annotation is declared directly on the class, its map of attributes will be
+	 * ordered last in the list.
+	 * @param targetAnnotation the annotation to search for, both locally and as a meta-annotation
+	 * @param annotatedClassName the class to search
+	 * @param classValuesAsString whether class attributes should be returned as strings
+	 * @see {@link #findAllAnnotationAttributes(Class, String)}
+	 */
+	public static List<Map<String, Object>> findAllAnnotationAttributes(
+			Class<? extends Annotation> targetAnnotation, String annotatedClassName, boolean classValuesAsString) throws IOException {
+
+		List<Map<String, Object>> allAttribs = new ArrayList<Map<String, Object>>();
+
+		MetadataReader reader = new SimpleMetadataReaderFactory().getMetadataReader(annotatedClassName);
+		AnnotationMetadata metadata = reader.getAnnotationMetadata();
+		String targetAnnotationType = targetAnnotation.getName();
+
+		for (String annotationType : metadata.getAnnotationTypes()) {
+			if (annotationType.equals(targetAnnotationType)) {
+				continue;
+			}
+			MetadataReader metaReader = new SimpleMetadataReaderFactory().getMetadataReader(annotationType);
+			Map<String, Object> targetAttribs =
+				metaReader.getAnnotationMetadata().getAnnotationAttributes(targetAnnotationType, classValuesAsString);
+			if (targetAttribs != null) {
+				allAttribs.add(targetAttribs);
+			}
+		}
+
+		Map<String, Object> localAttribs =
+			metadata.getAnnotationAttributes(targetAnnotationType, classValuesAsString);
+		if (localAttribs != null) {
+			allAttribs.add(localAttribs);
+		}
+
+		return allAttribs;
+	}
+
+	/**
+	 * Return a list of attribute maps for all declarations of the given target annotation
+	 * on the given annotated class. Meta annotations are ordered first in the list, and if
+	 * the target annotation is declared directly on the class, its map of attributes will be
+	 * ordered last in the list.
+	 * @param targetAnnotation the annotation to search for, both locally and as a meta-annotation
+	 * @param annotatedClassName the class to search
+	 * @see {@link #findAllAnnotationAttributes(Class, String, boolean)}
+	 */
+	public static List<Map<String, Object>> findAllAnnotationAttributes(
+			Class<? extends Annotation> targetAnnotation, String annotatedClassName) throws IOException {
+		return findAllAnnotationAttributes(targetAnnotation, annotatedClassName, false);
 	}
 
 	/**

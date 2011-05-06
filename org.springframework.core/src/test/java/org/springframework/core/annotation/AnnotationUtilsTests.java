@@ -16,16 +16,30 @@
 
 package org.springframework.core.annotation;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.annotation.AnnotationUtils.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
+import static org.springframework.core.annotation.AnnotationUtils.getAnnotation;
+import static org.springframework.core.annotation.AnnotationUtils.isAnnotationDeclaredLocally;
+import static org.springframework.core.annotation.AnnotationUtils.isAnnotationInherited;
 
+import java.io.IOException;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.core.Ordered;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Rod Johnson
@@ -202,6 +216,36 @@ public class AnnotationUtilsTests {
 		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		Order order = findAnnotation(method, Order.class);
 		assertNotNull(order);
+	}
+
+	@Test
+	public void findAllComponentAnnotationAttributes() throws IOException {
+		List<Map<String,Object>> allAttribs =
+			AnnotationUtils.findAllAnnotationAttributes(Component.class, HasLocalAndMetaComponentAnnotation.class.getName());
+
+		Object value = null;
+		for (Map<String, Object> attribs : allAttribs) {
+			value = attribs.get("value");
+		}
+
+		assertThat(allAttribs.size(), is(3));
+		assertEquals("local", value);
+	}
+
+	@Component(value="meta1")
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface Meta1 {
+	}
+
+	@Component(value="meta2")
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface Meta2 {
+	}
+
+	@Meta1
+	@Component(value="local")
+	@Meta2
+	static class HasLocalAndMetaComponentAnnotation {
 	}
 
 	public static interface AnnotatedInterface {
