@@ -67,15 +67,15 @@ import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapt
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 
 /**
  * @author Keith Donald
- * @author Arjen Poutsma 
+ * @author Arjen Poutsma
  * @author Jeremy Grelle
  */
 public class MvcNamespaceTests {
@@ -104,12 +104,12 @@ public class MvcNamespaceTests {
 		assertEquals(8, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
-		RequestMappingHandlerMethodMapping mapping = appContext.getBean(RequestMappingHandlerMethodMapping.class);
+		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(0, mapping.getOrder());
 		mapping.setDefaultHandler(handlerMethod);
 		
-		RequestMappingHandlerMethodAdapter adapter = appContext.getBean(RequestMappingHandlerMethodAdapter.class);
+		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 		
 		List<HttpMessageConverter<?>> messageConverters = adapter.getMessageConverters();
@@ -143,7 +143,7 @@ public class MvcNamespaceTests {
 		assertEquals(8, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
-		RequestMappingHandlerMethodMapping mapping = appContext.getBean(RequestMappingHandlerMethodMapping.class);
+		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
 		mapping.setDefaultHandler(handlerMethod);
 		
@@ -160,7 +160,7 @@ public class MvcNamespaceTests {
 		interceptor.preHandle(request, response, handler);
 		assertSame(appContext.getBean("conversionService"), request.getAttribute(ConversionService.class.getName()));
 	
-		RequestMappingHandlerMethodAdapter adapter = appContext.getBean(RequestMappingHandlerMethodAdapter.class);
+		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 		adapter.handle(request, response, handlerMethod);
 	}
@@ -172,7 +172,7 @@ public class MvcNamespaceTests {
 		assertEquals(8, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
-		RequestMappingHandlerMethodAdapter adapter = appContext.getBean(RequestMappingHandlerMethodAdapter.class);
+		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 
 		// default web binding initializer behavior test
@@ -192,7 +192,7 @@ public class MvcNamespaceTests {
 		assertEquals(11, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
-		RequestMappingHandlerMethodMapping mapping = appContext.getBean(RequestMappingHandlerMethodMapping.class);
+		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
 		mapping.setDefaultHandler(handlerMethod);
 		
@@ -327,7 +327,7 @@ public class MvcNamespaceTests {
 		assertEquals(10, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
-		RequestMappingHandlerMethodMapping mapping = appContext.getBean(RequestMappingHandlerMethodMapping.class);
+		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
 		mapping.setDefaultHandler(handlerMethod);		
 
@@ -351,7 +351,7 @@ public class MvcNamespaceTests {
 		assertEquals(12, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 
-		RequestMappingHandlerMethodMapping mapping = appContext.getBean(RequestMappingHandlerMethodMapping.class);
+		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
 		mapping.setDefaultHandler(handlerMethod);		
 

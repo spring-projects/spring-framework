@@ -33,20 +33,20 @@ import static java.util.Arrays.*;
 import static org.junit.Assert.*;
 
 /**
- * Test fixture with {@link RequestMappingHandlerMethodMapping} testing its {@link RequestMappingInfo} comparator.
- * 
+ * Test fixture with {@link RequestMappingHandlerMapping} testing its {@link RequestMappingInfo} comparator.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
 public class RequestKeyComparatorTests {
 
-	private RequestMappingHandlerMethodMapping handlerMapping;
+	private RequestMappingHandlerMapping handlerMapping;
 
 	private MockHttpServletRequest request;
 
 	@Before
 	public void setup() {
-		this.handlerMapping = new RequestMappingHandlerMethodMapping();
+		this.handlerMapping = new RequestMappingHandlerMapping();
 		this.request = new MockHttpServletRequest();
 	}
 
@@ -110,7 +110,7 @@ public class RequestKeyComparatorTests {
 		assertEquals(empty, list.get(2));
 	}
 
-	@Test 
+	@Test
 	@Ignore	// TODO : remove ignore
 	public void acceptHeaders() {
 		RequestMappingInfo html = new RequestMappingInfo(null, null, null, RequestConditionFactory.parseHeaders("accept=text/html"), null);

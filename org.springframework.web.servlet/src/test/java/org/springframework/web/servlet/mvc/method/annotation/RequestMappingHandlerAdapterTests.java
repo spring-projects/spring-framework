@@ -31,20 +31,20 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 
 /**
- * Fine-grained {@link RequestMappingHandlerMethodAdapter} unit tests.
- * 
+ * Fine-grained {@link RequestMappingHandlerAdapter} unit tests.
+ *
  * <p>For higher-level adapter tests see:
  * <ul>
  * <li>{@link ServletHandlerMethodTests}
- * <li>{@link RequestMappingHandlerMethodAdapterIntegrationTests}
+ * <li>{@link RequestMappingHandlerAdapterIntegrationTests}
  * <li>{@link HandlerMethodAdapterAnnotationDetectionTests}
  * </ul>
- * 
+ *
  * @author Rossen Stoyanchev
  */
-public class RequestMappingHandlerMethodAdapterTests {
+public class RequestMappingHandlerAdapterTests {
 
-	private RequestMappingHandlerMethodAdapter handlerAdapter;
+	private RequestMappingHandlerAdapter handlerAdapter;
 	
 	private MockHttpServletRequest request;
 	
@@ -52,7 +52,7 @@ public class RequestMappingHandlerMethodAdapterTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.handlerAdapter = new RequestMappingHandlerMethodAdapter();
+		this.handlerAdapter = new RequestMappingHandlerAdapter();
 		this.handlerAdapter.setApplicationContext(new GenericWebApplicationContext());
 		this.handlerAdapter.afterPropertiesSet();
 

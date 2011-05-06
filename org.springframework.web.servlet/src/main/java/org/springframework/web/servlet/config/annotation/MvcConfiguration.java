@@ -65,8 +65,8 @@ import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
@@ -79,7 +79,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * <p>Registers these handler mappings:
  * <ul>
- * 	<li>{@link RequestMappingHandlerMethodMapping} ordered at 0 for mapping requests to annotated controller methods.
+ * 	<li>{@link RequestMappingHandlerMapping} ordered at 0 for mapping requests to annotated controller methods.
  * 	<li>{@link SimpleUrlHandlerMapping} ordered at 1 to map URL paths directly to view names.
  * 	<li>{@link BeanNameUrlHandlerMapping} ordered at 2 to map URL paths to controller bean names.
  * 	<li>{@link SimpleUrlHandlerMapping} ordered at {@code Integer.MAX_VALUE-1} to serve static resource requests.
@@ -91,7 +91,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * <p>Registers these handler adapters:
  * <ul>
- * 	<li>{@link RequestMappingHandlerMethodAdapter} for processing requests using annotated controller methods.
+ * 	<li>{@link RequestMappingHandlerAdapter} for processing requests using annotated controller methods.
  * 	<li>{@link HttpRequestHandlerAdapter} for processing requests with {@link HttpRequestHandler}s.
  * 	<li>{@link SimpleControllerHandlerAdapter} for processing requests with interface-based {@link Controller}s.
  * </ul>
@@ -139,8 +139,8 @@ class MvcConfiguration implements ApplicationContextAware, ServletContextAware {
 	}
 
 	@Bean
-	RequestMappingHandlerMethodMapping requestMappingHandlerMapping() {
-		RequestMappingHandlerMethodMapping mapping = new RequestMappingHandlerMethodMapping();
+	RequestMappingHandlerMapping requestMappingHandlerMapping() {
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 		mapping.setOrder(0);
 		return mapping;
 	}
@@ -176,8 +176,8 @@ class MvcConfiguration implements ApplicationContextAware, ServletContextAware {
 	}
 
 	@Bean
-	RequestMappingHandlerMethodAdapter requestMappingHandlerAdapter() {
-		RequestMappingHandlerMethodAdapter adapter = new RequestMappingHandlerMethodAdapter();
+	RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
+		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
 
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setConversionService(conversionService());

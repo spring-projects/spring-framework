@@ -40,7 +40,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
@@ -75,7 +75,7 @@ public class MvcConfigurationTests {
 		configurer.configureMessageConverters(capture(converters));
 		replay(configurer);
 
-		RequestMappingHandlerMethodAdapter adapter = mvcConfiguration.requestMappingHandlerAdapter();
+		RequestMappingHandlerAdapter adapter = mvcConfiguration.requestMappingHandlerAdapter();
 
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
 		assertSame(conversionService.getValue(), initializer.getConversionService());

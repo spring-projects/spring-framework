@@ -38,17 +38,17 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 
 /**
- * Test various scenarios for detecting handler methods depending on where @RequestMapping annotations 
+ * Test various scenarios for detecting handler methods depending on where @RequestMapping annotations
  * are located -- super types, parameterized methods, or in combination with proxies.
  *
  * Note the following:
  * <ul>
- * 	<li>Parameterized methods cannot be used in combination with JDK dynamic proxies since the 
+ * 	<li>Parameterized methods cannot be used in combination with JDK dynamic proxies since the
  * 		proxy interface does not contain the bridged methods that need to be invoked.
  * 	<li>When using JDK dynamic proxies, the proxied interface must contain all required annotations.
  *	<li>Method-level annotations can be placed on parent classes or interfaces.
  * </ul>
- * 
+ *
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
@@ -56,13 +56,13 @@ public class HandlerMethodMappingAnnotationDetectionTests {
 
 	@Parameters
 	public static Collection<Object[]> handlerTypes() {
-		return Arrays.asList(new Object[][] { 
-				{ new MappingInterfaceController(), false}, 
-				{ new MappingAbstractClassController(), false}, 
-				{ new ParameterizedInterfaceController(), false }, 
+		return Arrays.asList(new Object[][] {
+				{ new MappingInterfaceController(), false},
+				{ new MappingAbstractClassController(), false},
+				{ new ParameterizedInterfaceController(), false },
 				{ new MappingParameterizedInterfaceController(), false },
-				{ new MappingClassController(), false }, 
-				{ new MappingAbstractClassController(), true}, 
+				{ new MappingClassController(), false },
+				{ new MappingAbstractClassController(), true},
 				{ new PlainController(), true}
 		});
 	}
@@ -80,13 +80,13 @@ public class HandlerMethodMappingAnnotationDetectionTests {
 	public void detectAndMapHandlerMethod() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/type/handle");
 
-		RequestMappingHandlerMethodMapping mapping = createHandlerMapping(handler.getClass(), useAutoProxy);
+		RequestMappingHandlerMapping mapping = createHandlerMapping(handler.getClass(), useAutoProxy);
 		HandlerMethod handlerMethod = (HandlerMethod) mapping.getHandler(request).getHandler();
 
 		assertNotNull("Failed to detect and map @RequestMapping handler method", handlerMethod);
 	}
 
-	private RequestMappingHandlerMethodMapping createHandlerMapping(Class<?> controllerType, boolean useAutoProxy) {
+	private RequestMappingHandlerMapping createHandlerMapping(Class<?> controllerType, boolean useAutoProxy) {
 		GenericWebApplicationContext wac = new GenericWebApplicationContext();
 		wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerType));
 		if (useAutoProxy) {
@@ -96,7 +96,7 @@ public class HandlerMethodMappingAnnotationDetectionTests {
 			wac.getBeanFactory().registerSingleton("advsr", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 		}
 
-		RequestMappingHandlerMethodMapping mapping = new RequestMappingHandlerMethodMapping();
+		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
 		mapping.setApplicationContext(wac);
 		return mapping;
 	}

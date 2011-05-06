@@ -49,8 +49,8 @@ import org.springframework.web.servlet.handler.ConversionServiceExposingIntercep
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.w3c.dom.Element;
@@ -105,7 +105,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
 		parserContext.pushContainingComponent(compDefinition);
 
-		RootBeanDefinition methodMappingDef = new RootBeanDefinition(RequestMappingHandlerMethodMapping.class);
+		RootBeanDefinition methodMappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
 		methodMappingDef.setSource(source);
 		methodMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		methodMappingDef.getPropertyValues().add("order", 0);
@@ -125,7 +125,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedList<?> messageConverters = getMessageConverters(element, source, parserContext);
 		ManagedList<?> argumentResolvers = getArgumentResolvers(element, source, parserContext);
 
-		RootBeanDefinition methodAdapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+		RootBeanDefinition methodAdapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 		methodAdapterDef.setSource(source);
 		methodAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		methodAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
