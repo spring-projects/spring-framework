@@ -96,6 +96,12 @@ public class AnnotationConfigUtils {
 			"org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect";
 
 	/**
+	 * The name of the AspectJ async execution aspect @{@code Configuration} class.
+	 */
+	public static final String ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME =
+			"org.springframework.scheduling.aspectj.AspectJAsyncConfiguration";
+
+	/**
 	 * The bean name of the internally managed cache advisor.
 	 */
 	public static final String CACHE_ADVISOR_BEAN_NAME =
