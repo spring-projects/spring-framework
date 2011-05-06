@@ -24,27 +24,38 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.beans.factory.parsing.FailFastProblemReporter;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.ConfigurationClassParser.ImportRegistry;
 import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -147,6 +158,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Derive further bean definitions from the configuration classes in the registry.
 	 */
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+		BeanDefinitionReaderUtils.registerWithGeneratedName(new RootBeanDefinition(ImportAwareBeanPostProcessor.class), registry);
 		if (this.postProcessBeanDefinitionRegistryCalled) {
 			throw new IllegalStateException(
 					"postProcessBeanDefinitionRegistry already called for this post-processor");
@@ -231,6 +243,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		// Read the model and create bean definitions based on its content
 		reader.loadBeanDefinitions(parser.getConfigurationClasses());
+
+		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
+		if (registry instanceof SingletonBeanRegistry) {
+			if (!((SingletonBeanRegistry) registry).containsSingleton("importRegistry")) {
+				((SingletonBeanRegistry) registry).registerSingleton("importRegistry", parser.getImportRegistry());
+			}
+		}
 	}
 
 	/**
@@ -278,4 +297,41 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
+
+	private static class ImportAwareBeanPostProcessor implements PriorityOrdered, BeanFactoryAware, BeanPostProcessor {
+
+		private BeanFactory beanFactory;
+
+		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+			this.beanFactory = beanFactory;
+		}
+
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+			if (bean instanceof ImportAware) {
+				ImportRegistry importRegistry = beanFactory.getBean(ImportRegistry.class);
+				String importingClass = importRegistry.getImportingClassFor(bean.getClass().getSuperclass().getName());
+				if (importingClass != null) {
+					try {
+						AnnotationMetadata metadata = new SimpleMetadataReaderFactory().getMetadataReader(importingClass).getAnnotationMetadata();
+						((ImportAware) bean).setImportMetadata(metadata);
+					} catch (IOException ex) {
+						// should never occur -> at this point we know the class is present anyway
+						throw new IllegalStateException(ex);
+					}
+				}
+				else {
+					// no importing class was found
+				}
+			}
+			return bean;
+		}
+
+		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+			return bean;
+		}
+
+		public int getOrder() {
+			return Ordered.HIGHEST_PRECEDENCE;
+		}
+	}
 }

@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -62,7 +63,7 @@ class ConfigurationClassParser {
 
 	private final ProblemReporter problemReporter;
 
-	private final Stack<ConfigurationClass> importStack = new ImportStack();
+	private final ImportStack importStack = new ImportStack();
 
 	private final Set<ConfigurationClass> configurationClasses =
 		new LinkedHashSet<ConfigurationClass>();
@@ -168,6 +169,7 @@ class ConfigurationClassParser {
 		else {
 			this.importStack.push(configClass);
 			for (String classToImport : classesToImport) {
+				this.importStack.registerImport(configClass.getMetadata().getClassName(), classToImport);
 				MetadataReader reader = this.metadataReaderFactory.getMetadataReader(classToImport);
 				processConfigurationClass(new ConfigurationClass(reader, null));
 			}
@@ -189,9 +191,28 @@ class ConfigurationClassParser {
 		return this.configurationClasses;
 	}
 
+	public ImportRegistry getImportRegistry() {
+		return this.importStack;
+	}
+
+
+	interface ImportRegistry {
+		String getImportingClassFor(String importedClass);
+	}
+
 
 	@SuppressWarnings("serial")
-	private static class ImportStack extends Stack<ConfigurationClass> {
+	private static class ImportStack extends Stack<ConfigurationClass> implements ImportRegistry {
+
+		private Map<String, String> imports = new HashMap<String, String>();
+
+		public String getImportingClassFor(String importedClass) {
+			return imports.get(importedClass);
+		}
+
+		public void registerImport(String importingClass, String importedClass) {
+			imports.put(importedClass, importingClass);
+		}
 
 		/**
 		 * Simplified contains() implementation that tests to see if any {@link ConfigurationClass}
