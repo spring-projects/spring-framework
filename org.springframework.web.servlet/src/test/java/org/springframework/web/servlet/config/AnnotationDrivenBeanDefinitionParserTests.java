@@ -38,7 +38,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 
@@ -58,7 +58,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	@Test
 	public void testMessageCodesResolver() {
 		loadBeanDefinitions("mvc-config-message-codes-resolver.xml");
-		RequestMappingHandlerMethodAdapter adapter = appContext.getBean(RequestMappingHandlerMethodAdapter.class);
+		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 		Object initializer = new DirectFieldAccessor(adapter).getPropertyValue("webBindingInitializer");
 		assertNotNull(initializer);
@@ -70,14 +70,14 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	@Test
 	public void testMessageConverters() {
 		loadBeanDefinitions("mvc-config-message-converters.xml");
-		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodAdapter.class), true);
+		verifyMessageConverters(appContext.getBean(RequestMappingHandlerAdapter.class), true);
 		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), true);
 	}
 
 	@Test
 	public void testMessageConvertersWithoutDefaultRegistrations() {
 		loadBeanDefinitions("mvc-config-message-converters-defaults-off.xml");
-		verifyMessageConverters(appContext.getBean(RequestMappingHandlerMethodAdapter.class), false);
+		verifyMessageConverters(appContext.getBean(RequestMappingHandlerAdapter.class), false);
 		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), false);
 	}
 
@@ -85,7 +85,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	@Test
 	public void testArgumentResolvers() {
 		loadBeanDefinitions("mvc-config-argument-resolvers.xml");
-		RequestMappingHandlerMethodAdapter adapter = appContext.getBean(RequestMappingHandlerMethodAdapter.class);
+		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 		Object value = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
 		assertNotNull(value);
@@ -109,7 +109,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		Object value = new DirectFieldAccessor(bean).getPropertyValue("messageConverters");
 		assertNotNull(value);
 		assertTrue(value instanceof List);
-		List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) value; 
+		List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) value;
 		if (hasDefaultRegistrations) {
 			assertTrue("Default converters are registered in addition to custom ones", converters.size() > 2);
 		} else {

@@ -82,24 +82,24 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 
 /**
- * Serves as a sandbox to invoke all types of controller methods using all features except for the kitchen sink. 
- * Once a problem has been debugged and understood, tests demonstrating the issue are preferably added to the 
+ * Serves as a sandbox to invoke all types of controller methods using all features except for the kitchen sink.
+ * Once a problem has been debugged and understood, tests demonstrating the issue are preferably added to the
  * appropriate, more fine-grained test fixture.
- * 
+ *
  * <p>If you wish to add high-level tests, consider the following other "integration"-style tests:
  * <ul>
- * 	<li>{@link HandlerMethodAdapterAnnotationDetectionTests} 
+ * 	<li>{@link HandlerMethodAdapterAnnotationDetectionTests}
  * 	<li>{@link HandlerMethodMappingAnnotationDetectionTests}
  * 	<li>{@link ServletHandlerMethodTests}
  * </ul>
- * 
+ *
  * @author Rossen Stoyanchev
  */
-public class RequestMappingHandlerMethodAdapterIntegrationTests {
+public class RequestMappingHandlerAdapterIntegrationTests {
 
 	private final Object handler = new Handler();
 	
-	private RequestMappingHandlerMethodAdapter handlerAdapter;
+	private RequestMappingHandlerAdapter handlerAdapter;
 	
 	private MockHttpServletRequest request;
 	
@@ -116,7 +116,7 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();
 
-		handlerAdapter = new RequestMappingHandlerMethodAdapter();
+		handlerAdapter = new RequestMappingHandlerAdapter();
 		handlerAdapter.setWebBindingInitializer(bindingInitializer);
 		handlerAdapter.setCustomArgumentResolvers(customResolvers);
 		handlerAdapter.setApplicationContext(context);
@@ -161,7 +161,7 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 
 		System.setProperty("systemHeader", "systemHeaderValue");
 
-		/* Set up path variables as RequestMappingHandlerMethodMapping would... */
+		/* Set up path variables as RequestMappingHandlerMapping would... */
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
 		uriTemplateVars.put("pathvar", "pathvarValue");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
@@ -274,14 +274,14 @@ public class RequestMappingHandlerMethodAdapterIntegrationTests {
 		}
 
 		public String handleMvc(
-							@CookieValue("cookie") int cookie, 
+							@CookieValue("cookie") int cookie,
 						 	@PathVariable("pathvar") String pathvar,
 						 	@RequestHeader("header") String header,
 						 	@RequestHeader(defaultValue="#{systemProperties.systemHeader}") String systemHeader,
 						 	@RequestHeader Map<String, Object> headerMap,
-						 	@RequestParam("dateParam") Date dateParam, 
+						 	@RequestParam("dateParam") Date dateParam,
 						 	@RequestParam Map<String, Object> paramMap,
-						 	String paramByConvention, 
+						 	String paramByConvention,
 						 	@Value("#{request.contextPath}") String value,
 						 	@ModelAttribute("modelAttr") @Valid TestBean modelAttr,
 						 	Errors errors,

@@ -143,11 +143,11 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
- * The origin of this test fixture is {@link ServletHandlerMethodTests} with tests in this class adapted to run 
- * against the HandlerMethod infrastructure rather than against the DefaultAnnotationHandlerMapping, the 
- * AnnotationMethodHandlerAdapter, and the AnnotationMethodHandlerExceptionResolver. Tests that are not 
+ * The origin of this test fixture is {@link ServletHandlerMethodTests} with tests in this class adapted to run
+ * against the HandlerMethod infrastructure rather than against the DefaultAnnotationHandlerMapping, the
+ * AnnotationMethodHandlerAdapter, and the AnnotationMethodHandlerExceptionResolver. Tests that are not
  * supported are listed at the bottom.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -263,7 +263,7 @@ public class ServletHandlerMethodTests {
 				csDef.getPropertyValues().add("converters", new TestBeanConverter());
 				RootBeanDefinition wbiDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
 				wbiDef.getPropertyValues().add("conversionService", csDef);
-				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				adapterDef.getPropertyValues().add("webBindingInitializer", wbiDef);
 				context.registerBeanDefinition("handlerAdapter", adapterDef);
 			}
@@ -555,7 +555,7 @@ public class ServletHandlerMethodTests {
 		initDispatcherServlet(MyCommandProvidingFormController.class, new BeanDefinitionRegistrar() {
 			public void register(GenericWebApplicationContext wac) {
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
-				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				adapterDef.getPropertyValues().add("webBindingInitializer", new MyWebBindingInitializer());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 			}
@@ -575,7 +575,7 @@ public class ServletHandlerMethodTests {
 		initDispatcherServlet(MyTypedCommandProvidingFormController.class, new BeanDefinitionRegistrar() {
 			public void register(GenericWebApplicationContext wac) {
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
-				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				adapterDef.getPropertyValues().add("webBindingInitializer", new MyWebBindingInitializer());
 				List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
 				argumentResolvers.add(new ServletWebArgumentResolverAdapter(new MySpecialArgumentResolver()));
@@ -817,7 +817,7 @@ public class ServletHandlerMethodTests {
 			public void register(GenericWebApplicationContext wac) {
 				RootBeanDefinition converterDef = new RootBeanDefinition(StringHttpMessageConverter.class);
 				converterDef.getPropertyValues().add("supportedMediaTypes", new MediaType("text", "plain"));
-				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				StringHttpMessageConverter converter = new StringHttpMessageConverter();
 				converter.setSupportedMediaTypes(Collections.singletonList(new MediaType("text", "plain")));
 				adapterDef.getPropertyValues().add("messageConverters", converter);
@@ -853,7 +853,7 @@ public class ServletHandlerMethodTests {
 	public void unsupportedRequestBody() throws ServletException, IOException {
 		initDispatcherServlet(RequestResponseBodyController.class, new BeanDefinitionRegistrar() {
 			public void register(GenericWebApplicationContext wac) {
-				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				adapterDef.getPropertyValues().add("messageConverters", new ByteArrayHttpMessageConverter());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 			}
@@ -887,7 +887,7 @@ public class ServletHandlerMethodTests {
 	public void badRequestRequestBody() throws ServletException, IOException {
 		initDispatcherServlet(RequestResponseBodyController.class, new BeanDefinitionRegistrar() {
 			public void register(GenericWebApplicationContext wac) {
-				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				adapterDef.getPropertyValues().add("messageConverters", new NotReadableMessageConverter());
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 			}
@@ -933,7 +933,7 @@ public class ServletHandlerMethodTests {
 	public void overlappingMesssageConvertersRequestBody() throws ServletException, IOException {
 		initDispatcherServlet(RequestResponseBodyController.class, new BeanDefinitionRegistrar() {
 			public void register(GenericWebApplicationContext wac) {
-				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
 				messageConverters.add(new StringHttpMessageConverter());
 				messageConverters
@@ -977,7 +977,7 @@ public class ServletHandlerMethodTests {
 				}
 				MarshallingHttpMessageConverter messageConverter = new MarshallingHttpMessageConverter(marshaller);
 
-				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				adapterDef.getPropertyValues().add("messageConverters", messageConverter);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 			}
@@ -1080,7 +1080,7 @@ public class ServletHandlerMethodTests {
 	public void mavResolver() throws ServletException, IOException {
 		initDispatcherServlet(ModelAndViewResolverController.class, new BeanDefinitionRegistrar() {
 			public void register(GenericWebApplicationContext wac) {
-				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				ModelAndViewResolver[] mavResolvers = new ModelAndViewResolver[] {new MyModelAndViewResolver()};
 				adapterDef.getPropertyValues().add("modelAndViewResolvers", mavResolvers);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
@@ -1335,7 +1335,7 @@ public class ServletHandlerMethodTests {
 				RootBeanDefinition csDef = new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
 				RootBeanDefinition wbiDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
 				wbiDef.getPropertyValues().add("conversionService", csDef);
-				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerMethodAdapter.class);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				adapterDef.getPropertyValues().add("webBindingInitializer", wbiDef);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 			}
@@ -1735,7 +1735,7 @@ public class ServletHandlerMethodTests {
 	}
 
 	@Controller
-	static class MyBinderInitializingCommandProvidingFormController 
+	static class MyBinderInitializingCommandProvidingFormController
 			extends MyCommandProvidingFormController<String, TestBean, ITestBean> {
 
 		@SuppressWarnings("unused")
@@ -2621,7 +2621,7 @@ public class ServletHandlerMethodTests {
 	}
 
 	@SuppressWarnings("serial")
-	private void initDispatcherServlet(final Class<?> controllerClass, final BeanDefinitionRegistrar registrar) 
+	private void initDispatcherServlet(final Class<?> controllerClass, final BeanDefinitionRegistrar registrar)
 			throws ServletException {
 
 		servlet = new DispatcherServlet() {
@@ -2630,10 +2630,10 @@ public class ServletHandlerMethodTests {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
 				
-				Class<?> mappingType = RequestMappingHandlerMethodMapping.class;
+				Class<?> mappingType = RequestMappingHandlerMapping.class;
 				wac.registerBeanDefinition("handlerMapping", new RootBeanDefinition(mappingType));
 				
-				Class<?> adapterType = RequestMappingHandlerMethodAdapter.class;
+				Class<?> adapterType = RequestMappingHandlerAdapter.class;
 				wac.registerBeanDefinition("handlerAdapter", new RootBeanDefinition(adapterType));
 				
 				Class<?> resolverType = ExceptionHandlerExceptionResolver.class;

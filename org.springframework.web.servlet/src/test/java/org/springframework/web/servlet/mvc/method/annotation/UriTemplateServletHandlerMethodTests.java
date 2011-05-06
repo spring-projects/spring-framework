@@ -46,9 +46,9 @@ import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionRes
 import org.springframework.web.servlet.mvc.annotation.UriTemplateServletAnnotationControllerTests;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
-/** 
+/**
  * The origin of this test class is {@link UriTemplateServletAnnotationControllerTests} with the tests in this class
- * adapted to run against the HandlerMethod infrastructure rather than against the DefaultAnnotationHandlerMapping, 
+ * adapted to run against the HandlerMethod infrastructure rather than against the DefaultAnnotationHandlerMapping,
  * the AnnotationMethodHandlerAdapter, and the AnnotationMethodHandlerExceptionResolver. Tests that are not supported
  * are listed at the bottom.
  *
@@ -259,7 +259,7 @@ public class UriTemplateServletHandlerMethodTests {
 	}
 
 	/*
-	 * See SPR-6640 
+	 * See SPR-6640
 	 */
 	@Test
 	public void menuTree() throws Exception {
@@ -592,7 +592,7 @@ public class UriTemplateServletHandlerMethodTests {
 	}
 
 	@SuppressWarnings("serial")
-	private void initDispatcherServlet(final Class<?> controllerClass, final BeanDefinitionRegistrar registrar) 
+	private void initDispatcherServlet(final Class<?> controllerClass, final BeanDefinitionRegistrar registrar)
 			throws ServletException {
 
 		servlet = new DispatcherServlet() {
@@ -601,10 +601,10 @@ public class UriTemplateServletHandlerMethodTests {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
 				
-				Class<?> mappingType = RequestMappingHandlerMethodMapping.class;
+				Class<?> mappingType = RequestMappingHandlerMapping.class;
 				wac.registerBeanDefinition("handlerMapping", new RootBeanDefinition(mappingType));
 				
-				Class<?> adapterType = RequestMappingHandlerMethodAdapter.class;
+				Class<?> adapterType = RequestMappingHandlerAdapter.class;
 				wac.registerBeanDefinition("handlerAdapter", new RootBeanDefinition(adapterType));
 				
 				Class<?> resolverType = ExceptionHandlerExceptionResolver.class;

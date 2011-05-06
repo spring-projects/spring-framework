@@ -43,14 +43,14 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Test fixture with {@link RequestMappingHandlerMethodMapping}.
- * 
+ * Test fixture with {@link RequestMappingHandlerMapping}.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class RequestMappingHandlerMethodMappingTests {
+public class RequestMappingHandlerMappingTests {
 
-	private RequestMappingHandlerMethodMapping mapping;
+	private RequestMappingHandlerMapping mapping;
 
 	private Handler handler;
 
@@ -73,7 +73,7 @@ public class RequestMappingHandlerMethodMappingTests {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerSingleton("handler", handler.getClass());
 
-		mapping = new RequestMappingHandlerMethodMapping();
+		mapping = new RequestMappingHandlerMapping();
 		mapping.setApplicationContext(context);
 	}
 
