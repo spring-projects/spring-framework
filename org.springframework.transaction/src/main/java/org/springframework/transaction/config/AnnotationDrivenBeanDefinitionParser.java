@@ -28,6 +28,7 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.context.config.AbstractSpecificationBeanDefinitionParser;
 import org.springframework.context.config.FeatureSpecification;
+import org.springframework.transaction.annotation.TransactionManagementCapability;
 import org.w3c.dom.Element;
 
 /**
@@ -46,21 +47,26 @@ import org.w3c.dom.Element;
  * @author Rob Harrop
  * @author Chris Beams
  * @since 2.0
- * @see TxAnnotationDriven
  */
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	/**
 	 * The bean name of the internally managed transaction advisor (mode="proxy").
+	 * @deprecated as of Spring 3.1 in favor of
+	 * {@link TransactionManagementCapability#TRANSACTION_ADVISOR_BEAN_NAME}
 	 */
+	@Deprecated
 	public static final String TRANSACTION_ADVISOR_BEAN_NAME =
-			TxAnnotationDrivenExecutor.TRANSACTION_ADVISOR_BEAN_NAME;
+			TransactionManagementCapability.TRANSACTION_ADVISOR_BEAN_NAME;
 
 	/**
 	 * The bean name of the internally managed transaction aspect (mode="aspectj").
+	 * @deprecated as of Spring 3.1 in favor of
+	 * {@link TransactionManagementCapability#TRANSACTION_ASPECT_BEAN_NAME}
 	 */
+	@Deprecated
 	public static final String TRANSACTION_ASPECT_BEAN_NAME =
-			TxAnnotationDrivenExecutor.TRANSACTION_ASPECT_BEAN_NAME;
+			TransactionManagementCapability.TRANSACTION_ASPECT_BEAN_NAME;
 
 
 	/**
