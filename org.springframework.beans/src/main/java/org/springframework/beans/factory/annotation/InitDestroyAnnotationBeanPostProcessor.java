@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ import org.springframework.util.ReflectionUtils;
  * @see #setInitAnnotationType
  * @see #setDestroyAnnotationType
  */
+@SuppressWarnings("serial")
 public class InitDestroyAnnotationBeanPostProcessor
 		implements DestructionAwareBeanPostProcessor, MergedBeanDefinitionPostProcessor, PriorityOrdered, Serializable {
 
@@ -117,7 +118,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	}
 
 
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
 			LifecycleMetadata metadata = findLifecycleMetadata(beanType);
 			metadata.checkConfigMembers(beanDefinition);
@@ -162,7 +163,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	}
 
 
-	private LifecycleMetadata findLifecycleMetadata(Class clazz) {
+	private LifecycleMetadata findLifecycleMetadata(Class<?> clazz) {
 		if (this.lifecycleMetadataCache == null) {
 			// Happens after deserialization, during destruction...
 			return buildLifecycleMetadata(clazz);
@@ -182,7 +183,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 		return metadata;
 	}
 
-	private LifecycleMetadata buildLifecycleMetadata(Class clazz) {
+	private LifecycleMetadata buildLifecycleMetadata(Class<?> clazz) {
 		final boolean debug = logger.isDebugEnabled();
 		LinkedList<LifecycleElement> initMethods = new LinkedList<LifecycleElement>();
 		LinkedList<LifecycleElement> destroyMethods = new LinkedList<LifecycleElement>();
@@ -242,7 +243,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 		private final Set<LifecycleElement> destroyMethods;
 
-		public LifecycleMetadata(Class targetClass, Collection<LifecycleElement> initMethods,
+		public LifecycleMetadata(Class<?> targetClass, Collection<LifecycleElement> initMethods,
 				Collection<LifecycleElement> destroyMethods) {
 
 			this.initMethods = new LinkedHashSet<LifecycleElement>();

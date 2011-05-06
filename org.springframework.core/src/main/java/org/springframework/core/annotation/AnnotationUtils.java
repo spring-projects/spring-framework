@@ -51,7 +51,7 @@ public abstract class AnnotationUtils {
 	/** The attribute name for annotations with a single element */
 	static final String VALUE = "value";
 
-	private static final Map<Class, Boolean> annotatedInterfaceCache = new WeakHashMap<Class, Boolean>();
+	private static final Map<Class<?>, Boolean> annotatedInterfaceCache = new WeakHashMap<Class<?>, Boolean>();
 
 
 	/**
@@ -120,7 +120,7 @@ public abstract class AnnotationUtils {
 		return annotation;
 	}
 
-	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class[] ifcs) {
+	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class<?>[] ifcs) {
 		A annotation = null;
 		for (Class<?> iface : ifcs) {
 			if (isInterfaceWithAnnotatedMethods(iface)) {
@@ -302,10 +302,10 @@ public abstract class AnnotationUtils {
 					Object value = method.invoke(annotation);
 					if (classValuesAsString) {
 						if (value instanceof Class) {
-							value = ((Class) value).getName();
+							value = ((Class<?>) value).getName();
 						}
 						else if (value instanceof Class[]) {
-							Class[] clazzArray = (Class[]) value;
+							Class<?>[] clazzArray = (Class[]) value;
 							String[] newValue = new String[clazzArray.length];
 							for (int i = 0; i < clazzArray.length; i++) {
 								newValue[i] = clazzArray[i].getName();

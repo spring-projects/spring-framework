@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,8 +115,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private ConfigurableListableBeanFactory beanFactory;
 
-	private final Map<Class<?>, Constructor[]> candidateConstructorsCache =
-			new ConcurrentHashMap<Class<?>, Constructor[]>();
+	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache =
+			new ConcurrentHashMap<Class<?>, Constructor<?>[]>();
 
 	private final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
 			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
@@ -209,7 +209,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
 			InjectionMetadata metadata = findAutowiringMetadata(beanType);
 			metadata.checkConfigMembers(beanDefinition);
@@ -217,17 +217,17 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	@Override
-	public Constructor[] determineCandidateConstructors(Class beanClass, String beanName) throws BeansException {
+	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
 		// Quick check on the concurrent map first, with minimal locking.
-		Constructor[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);
+		Constructor<?>[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);
 		if (candidateConstructors == null) {
 			synchronized (this.candidateConstructorsCache) {
 				candidateConstructors = this.candidateConstructorsCache.get(beanClass);
 				if (candidateConstructors == null) {
-					Constructor[] rawCandidates = beanClass.getDeclaredConstructors();
-					List<Constructor> candidates = new ArrayList<Constructor>(rawCandidates.length);
-					Constructor requiredConstructor = null;
-					Constructor defaultConstructor = null;
+					Constructor<?>[] rawCandidates = beanClass.getDeclaredConstructors();
+					List<Constructor<?>> candidates = new ArrayList<Constructor<?>>(rawCandidates.length);
+					Constructor<?> requiredConstructor = null;
+					Constructor<?> defaultConstructor = null;
 					for (Constructor<?> candidate : rawCandidates) {
 						Annotation annotation = findAutowiredAnnotation(candidate);
 						if (annotation != null) {
@@ -305,7 +305,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 
-	private InjectionMetadata findAutowiringMetadata(Class clazz) {
+	private InjectionMetadata findAutowiringMetadata(Class<?> clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
 		if (metadata == null) {
@@ -320,7 +320,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		return metadata;
 	}
 
-	private InjectionMetadata buildAutowiringMetadata(Class clazz) {
+	private InjectionMetadata buildAutowiringMetadata(Class<?> clazz) {
 		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
 		Class<?> targetClass = clazz;
 
@@ -534,7 +534,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					arguments = resolveCachedArguments(beanName);
 				}
 				else {
-					Class[] paramTypes = method.getParameterTypes();
+					Class<?>[] paramTypes = method.getParameterTypes();
 					arguments = new Object[paramTypes.length];
 					DependencyDescriptor[] descriptors = new DependencyDescriptor[paramTypes.length];
 					Set<String> autowiredBeanNames = new LinkedHashSet<String>(paramTypes.length);
