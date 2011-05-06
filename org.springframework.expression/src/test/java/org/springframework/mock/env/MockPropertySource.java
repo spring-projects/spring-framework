@@ -86,7 +86,7 @@ public class MockPropertySource extends PropertiesPropertySource {
 	/**
 	 * Set the given property on the underlying {@link Properties} object.
 	 */
-	public void setProperty(String key, String value) {
+	public void setProperty(String key, Object value) {
 		this.source.put(key, value);
 	}
 
@@ -95,7 +95,7 @@ public class MockPropertySource extends PropertiesPropertySource {
 	 * Useful for method chaining and fluent-style use.
 	 * @return this {@link MockPropertySource} instance
 	 */
-	public MockPropertySource withProperty(String key, String value) {
+	public MockPropertySource withProperty(String key, Object value) {
 		this.setProperty(key, value);
 		return this;
 	}
