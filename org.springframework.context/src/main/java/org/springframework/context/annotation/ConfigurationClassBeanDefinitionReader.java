@@ -95,6 +95,8 @@ public class ConfigurationClassBeanDefinitionReader {
 
 	private Environment environment;
 
+	private final ComponentScanAnnotationParser componentScanParser;
+
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
 	 * to populate the given {@link BeanDefinitionRegistry}.
@@ -111,6 +113,8 @@ public class ConfigurationClassBeanDefinitionReader {
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.resourceLoader = resourceLoader;
 		this.environment = environment;
+
+		this.componentScanParser = new ComponentScanAnnotationParser(resourceLoader, environment, registry);
 	}
 
 
@@ -130,6 +134,7 @@ public class ConfigurationClassBeanDefinitionReader {
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
 		AnnotationMetadata metadata = configClass.getMetadata();
+		componentScanParser.parse(metadata);
 		doLoadBeanDefinitionForConfigurationClassIfNecessary(configClass);
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
