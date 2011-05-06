@@ -139,7 +139,7 @@ public class ConfigurationClassBeanDefinitionReader {
 		AnnotationMetadata metadata = configClass.getMetadata();
 		processFeatureAnnotations(metadata);
 		doLoadBeanDefinitionForConfigurationClassIfNecessary(configClass);
-		for (ConfigurationClassMethod beanMethod : configClass.getMethods()) {
+		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
@@ -200,10 +200,10 @@ public class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
-	 * Read a particular {@link ConfigurationClassMethod}, registering bean definitions
+	 * Read a particular {@link BeanMethod}, registering bean definitions
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
-	private void loadBeanDefinitionsForBeanMethod(ConfigurationClassMethod beanMethod) {
+	private void loadBeanDefinitionsForBeanMethod(BeanMethod beanMethod) {
 		ConfigurationClass configClass = beanMethod.getConfigurationClass();
 		MethodMetadata metadata = beanMethod.getMetadata();
 

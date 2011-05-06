@@ -150,8 +150,8 @@ class ConfigurationClassParser {
 			}
 		}
 		Set<MethodMetadata> beanMethods = metadata.getAnnotatedMethods(Bean.class.getName());
-		for (MethodMetadata beanMethod : beanMethods) {
-			configClass.addMethod(new ConfigurationClassMethod(beanMethod, configClass));
+		for (MethodMetadata methodMetadata : beanMethods) {
+			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
 	}
 
