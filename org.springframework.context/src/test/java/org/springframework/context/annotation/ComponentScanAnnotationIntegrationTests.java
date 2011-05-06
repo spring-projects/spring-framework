@@ -34,7 +34,6 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.CustomAutowireConfigurer;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.SimpleMapScope;
-import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.ComponentScan.Filter;
@@ -114,7 +113,7 @@ public class ComponentScanAnnotationIntegrationTests {
 		try {
 			ctx.refresh();
 			fail("Expected exception when parsing @ComponentScan definition that declares no packages");
-		} catch (BeanDefinitionParsingException ex) {
+		} catch (IllegalStateException ex) {
 			assertThat(ex.getMessage(), containsString("At least one base package must be specified"));
 		}
 	}
