@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xsd:schema xmlns="http://www.springframework.org/schema/mvc"
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:tool="http://www.springframework.org/schema/tool"
 	targetNamespace="http://www.springframework.org/schema/mvc"
@@ -40,19 +40,19 @@
 						<xsd:attribute name="register-defaults" type="xsd:boolean" default="true">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-	Whether or not default HttpMessageConverter registrations should be added in addition to the ones provided within this element. 
+	Whether or not default HttpMessageConverter registrations should be added in addition to the ones provided within this element.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>
 					</xsd:complexType>
-				</xsd:element>			
+				</xsd:element>
 				<xsd:element name="argument-resolvers" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 	Configures one or more WebArgumentResolver types to use for resolving custom arguments to handler methods.
 	Typically implemented to detect special parameter types, resolving well-known argument values for them.
 	Using this configuration element is optional.
-	Using it does not override the built-in support for resolving handler method arguments. 
+	Using it does not override the built-in support for resolving handler method arguments.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
@@ -60,7 +60,27 @@
 							<xsd:element ref="beans:bean" minOccurs="1" maxOccurs="unbounded">
 								<xsd:annotation>
 									<xsd:documentation><![CDATA[
-	The HttpMessageConverter bean definition.
+	The HandlerMethodArgumentResolver or WebArgumentResolver bean definition.
+									]]></xsd:documentation>
+								</xsd:annotation>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>			
+				<xsd:element name="return-value-handlers" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures one or more HandlerMethodReturnValueHandler types to use for handling the return value from handler methods.
+	Using this configuration element is optional.
+	Using it does not override the built-in support for handling return values.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element ref="beans:bean" minOccurs="1" maxOccurs="unbounded">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The HandlerMethodReturnValueHandler bean definition.
 									]]></xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
@@ -101,7 +121,7 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The bean name of a MessageCodesResolver to use to build message codes from data binding and validation error codes.
-	This attribute is not required. 
+	This attribute is not required.
 	If not specified the DefaultMessageCodesResolver is used.
 					]]></xsd:documentation>
 					<xsd:appinfo>
@@ -171,10 +191,10 @@
 	Configures a handler for serving static resources by forwarding to the Servlet container's default Servlet.  Use of this
 	handler allows using a "/" mapping with the DispatcherServlet while still utilizing the Servlet container to serve static
 	resources.
-	This handler will forward all requests to the default Servlet. Therefore it is important that it remains last in the 
-	order of all other URL HandlerMappings. That will be the case if you use the "annotation-driven" element or alternatively 
-	if you are setting up your customized HandlerMapping instance be sure to set its "order" property to a value lower than 
-	that of the DefaultServletHttpRequestHandler, which is Integer.MAX_VALUE. 
+	This handler will forward all requests to the default Servlet. Therefore it is important that it remains last in the
+	order of all other URL HandlerMappings. That will be the case if you use the "annotation-driven" element or alternatively
+	if you are setting up your customized HandlerMapping instance be sure to set its "order" property to a value lower than
+	that of the DefaultServletHttpRequestHandler, which is Integer.MAX_VALUE.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>

@@ -124,6 +124,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		ManagedList<?> messageConverters = getMessageConverters(element, source, parserContext);
 		ManagedList<?> argumentResolvers = getArgumentResolvers(element, source, parserContext);
+		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, source, parserContext);
 
 		RootBeanDefinition methodAdapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 		methodAdapterDef.setSource(source);
@@ -132,6 +133,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		methodAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
 		if (argumentResolvers != null) {
 			methodAdapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
+		}
+		if (returnValueHandlers != null) {
+			methodAdapterDef.getPropertyValues().add("customReturnValueHandlers", returnValueHandlers);
 		}
 		String methodAdapterName = parserContext.getReaderContext().registerWithGeneratedName(methodAdapterDef);
 
@@ -224,6 +228,14 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		if (resolversElement != null) {
 			ManagedList<BeanDefinitionHolder> argumentResolvers = extractBeanSubElements(resolversElement, parserContext);
 			return wrapWebArgumentResolverBeanDefs(argumentResolvers);
+		}
+		return null;
+	}
+
+	private ManagedList<?> getReturnValueHandlers(Element element, Object source, ParserContext parserContext) {
+		Element handlersElement = DomUtils.getChildElementByTagName(element, "return-value-handlers");
+		if (handlersElement != null) {
+			return extractBeanSubElements(handlersElement, parserContext);
 		}
 		return null;
 	}
