@@ -43,8 +43,6 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 
 	private final int access;
 
-	private String returnType;
-
 	private String declaringClassName;
 
 	private final ClassLoader classLoader;
@@ -53,11 +51,10 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 
 	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>(2);
 
-	public MethodMetadataReadingVisitor(String name, String returnType, int access, String declaringClassName, ClassLoader classLoader,
+	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
 			MultiValueMap<String, MethodMetadata> methodMetadataMap) {
 		super(new EmptyVisitor());
 		this.name = name;
-		this.returnType = returnType;
 		this.access = access;
 		this.declaringClassName = declaringClassName;
 		this.classLoader = classLoader;
@@ -73,10 +70,6 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 
 	public String getMethodName() {
 		return this.name;
-	}
-
-	public String getMethodReturnType() {
-		return this.returnType;
 	}
 
 	public boolean isStatic() {
