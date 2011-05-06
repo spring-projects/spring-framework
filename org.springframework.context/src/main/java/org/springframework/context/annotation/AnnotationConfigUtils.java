@@ -71,6 +71,48 @@ public class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalCommonAnnotationProcessor";
 
 	/**
+	 * The bean name of the internally managed Scheduled annotation processor.
+	 */
+	public static final String SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME =
+			"org.springframework.context.annotation.internalScheduledAnnotationProcessor";
+
+	/**
+	 * The bean name of the internally managed Async annotation processor.
+	 */
+	public static final String ASYNC_ANNOTATION_PROCESSOR_BEAN_NAME =
+			"org.springframework.context.annotation.internalAsyncAnnotationProcessor";
+
+	/**
+	 * The bean name of the internally managed AspectJ async execution aspect.
+	 */
+	public static final String ASYNC_EXECUTION_ASPECT_BEAN_NAME =
+			"org.springframework.scheduling.config.internalAsyncExecutionAspect";
+
+	/**
+	 * The class name of the AspectJ async execution aspect.
+	 */
+	public static final String ASYNC_EXECUTION_ASPECT_CLASS_NAME =
+			"org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect";
+
+	/**
+	 * The bean name of the internally managed cache advisor.
+	 */
+	public static final String CACHE_ADVISOR_BEAN_NAME =
+			"org.springframework.cache.config.internalCacheAdvisor";
+
+	/**
+	 * The bean name of the internally managed cache aspect.
+	 */
+	public static final String CACHE_ASPECT_BEAN_NAME =
+			"org.springframework.cache.config.internalCacheAspect";
+
+	/**
+	 * The class name of the AspectJ caching aspect.
+	 */
+	public static final String CACHE_ASPECT_CLASS_NAME =
+			"org.springframework.cache.aspectj.AnnotationCacheAspect";
+
+	/**
 	 * The bean name of the internally managed JPA annotation processor.
 	 */
 	public static final String PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME =

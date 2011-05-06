@@ -16,6 +16,10 @@
 
 package org.springframework.cache.config;
 
+import static org.springframework.context.annotation.AnnotationConfigUtils.CACHE_ADVISOR_BEAN_NAME;
+import static org.springframework.context.annotation.AnnotationConfigUtils.CACHE_ASPECT_BEAN_NAME;
+import static org.springframework.context.annotation.AnnotationConfigUtils.CACHE_ASPECT_CLASS_NAME;
+
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -48,18 +52,6 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 
 	private static final String DEFAULT_CACHE_MANAGER_BEAN_NAME = "cacheManager";
 
-
-	/**
-	 * The bean name of the internally managed cache advisor (mode="proxy").
-	 */
-	public static final String CACHE_ADVISOR_BEAN_NAME = "org.springframework.cache.config.internalCacheAdvisor";
-
-	/**
-	 * The bean name of the internally managed cache aspect (mode="aspectj").
-	 */
-	public static final String CACHE_ASPECT_BEAN_NAME = "org.springframework.cache.config.internalCacheAspect";
-
-	private static final String CACHE_ASPECT_CLASS_NAME = "org.springframework.cache.aspectj.AnnotationCacheAspect";
 
 	/**
 	 * Parses the '<code>&lt;cache:annotation-driven/&gt;</code>' tag. Will
