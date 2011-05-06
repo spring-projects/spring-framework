@@ -42,6 +42,15 @@ public interface PropertyResolver {
 	<T> T getProperty(String key, Class<T> targetType);
 
 	/**
+	 * Convert the property value associated with the given key to a {@code Class}
+	 * of type {@code T} or {@code null} if the key cannot be resolved.
+	 * @throws ConversionException if class specified by property value cannot be found
+	 * or loaded or if targetType is not assignable from class specified by property value
+	 * @see #getProperty(String, Class)
+	 */
+	<T> Class<T> getPropertyAsClass(String key, Class<T> targetType);
+
+	/**
 	 * Return the property value associated with the given key, converted to the given
 	 * targetType (never {@code null}).
 	 * @throws IllegalStateException if the key cannot be resolved
