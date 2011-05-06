@@ -19,7 +19,7 @@ package org.springframework.test.context.support;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.util.Assert;
@@ -27,8 +27,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Concrete implementation of {@link AbstractGenericContextLoader} which
- * creates an {@link AnnotationConfigApplicationContext} and registers
- * bean definitions from
+ * registers bean definitions from
  * {@link org.springframework.context.annotation.Configuration configuration classes}.
  * 
  * <p>This <code>ContextLoader</code> supports class-based context configuration
@@ -47,43 +46,32 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 
 
 	/**
-	 * Creates a new {@link AnnotationConfigApplicationContext}.
-	 */
-	@Override
-	protected GenericApplicationContext createGenericApplicationContext() {
-		return new AnnotationConfigApplicationContext();
-	}
-
-	/**
 	 * Registers {@link org.springframework.context.annotation.Configuration configuration classes}
-	 * in the supplied {@link AnnotationConfigApplicationContext} from the specified
+	 * in the supplied {@link GenericApplicationContext context} from the specified
 	 * class names.
 	 * 
 	 * <p>Each class name must be the <em>fully qualified class name</em> of an
-	 * annotated configuration class, component, or feature specification. The
-	 * <code>AnnotationConfigApplicationContext</code> assumes the responsibility
-	 * of loading the appropriate bean definitions.
+	 * annotated configuration class, component, or feature specification. An
+	 * {@link AnnotatedBeanDefinitionReader} is used to register the appropriate
+	 * bean definitions.
 	 * 
-	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}.
+	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}
+	 * since <code>AnnotatedBeanDefinitionReader</code> is not an instance of
+	 * {@link BeanDefinitionReader}.
+	 * 
 	 * @param context the context in which the configuration classes should be registered
 	 * @param classNames the names of configuration classes to register in the context
-	 * @throws IllegalArgumentException if the supplied context is not an instance of
-	 * <code>AnnotationConfigApplicationContext</code> or if a supplied class name
-	 * does not represent a class
-	 * @see #createGenericApplicationContext()
+	 * @throws IllegalArgumentException if a supplied class name does not represent a class
 	 */
 	@Override
 	protected void loadBeanDefinitions(GenericApplicationContext context, String... classNames) {
-
-		Assert.isInstanceOf(AnnotationConfigApplicationContext.class, context,
-			"context must be an instance of AnnotationConfigApplicationContext");
 
 		Class<?>[] configClasses = new Class<?>[classNames.length];
 
 		for (int i = 0; i < classNames.length; i++) {
 			String className = classNames[i];
 			try {
-				configClasses[i] = (Class<?>) getClass().getClassLoader().loadClass(className);
+				configClasses[i] = (Class<?>) context.getClassLoader().loadClass(className);
 			}
 			catch (ClassNotFoundException e) {
 				throw new IllegalArgumentException(String.format(
@@ -94,7 +82,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Registering configuration classes: " + ObjectUtils.nullSafeToString(configClasses));
 		}
-		((AnnotationConfigApplicationContext) context).register(configClasses);
+		new AnnotatedBeanDefinitionReader(context).register(configClasses);
 	}
 
 	/**

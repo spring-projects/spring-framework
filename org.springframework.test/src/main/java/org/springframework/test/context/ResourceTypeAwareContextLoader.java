@@ -25,6 +25,9 @@ package org.springframework.test.context;
  * resource locations; as of Spring 3.1 context loaders may choose to
  * support either String-based or Class-based resources (but not both).
  * 
+ * <p>TODO Document how classes are converted into String[] locations
+ * and passed into the corresponding methods in the ContextLoader API.
+ * 
  * <p>If a context loader does not implement this interface it is assumed
  * that the loader supports String-based resource locations.
  *

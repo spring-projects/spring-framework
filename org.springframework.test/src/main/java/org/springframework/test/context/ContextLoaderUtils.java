@@ -137,8 +137,8 @@ abstract class ContextLoaderUtils {
 		}
 
 		try {
-			ContextConfiguration contextConfiguration = clazz.getAnnotation(annotationType);
 			if (logger.isTraceEnabled()) {
+				ContextConfiguration contextConfiguration = clazz.getAnnotation(annotationType);
 				logger.trace("Using default ContextLoader class [" + defaultContextLoaderClassName
 						+ "] for @ContextConfiguration [" + contextConfiguration + "] and class [" + clazz + "]");
 			}
