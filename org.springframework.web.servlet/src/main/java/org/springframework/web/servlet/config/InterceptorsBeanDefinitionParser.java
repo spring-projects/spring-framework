@@ -18,54 +18,59 @@ package org.springframework.web.servlet.config;
 
 import java.util.List;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.context.config.AbstractSpecificationBeanDefinitionParser;
-import org.springframework.context.config.FeatureSpecification;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.w3c.dom.Element;
 
 /**
- * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses 
- * a {@code interceptors} element to register  set of {@link MappedInterceptor}
- * definitions.
+ * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a {@code interceptors} element to register
+ * a set of {@link MappedInterceptor} definitions.
  * 
  * @author Keith Donald
- * @author Rossen Stoyanchev
- * 
  * @since 3.0
  */
-class InterceptorsBeanDefinitionParser extends AbstractSpecificationBeanDefinitionParser {
+class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 
-	/**
-	 * Parses the {@code <mvc:interceptors/>} tag.
-	 */
-	public FeatureSpecification doParse(Element element, ParserContext parserContext) {
-		MvcInterceptors mvcInterceptors = new MvcInterceptors();
-
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
+		parserContext.pushContainingComponent(compDefinition);
+		
 		List<Element> interceptors = DomUtils.getChildElementsByTagName(element, new String[] { "bean", "interceptor" });
 		for (Element interceptor : interceptors) {
+			RootBeanDefinition mappedInterceptorDef = new RootBeanDefinition(MappedInterceptor.class);
+			mappedInterceptorDef.setSource(parserContext.extractSource(interceptor));
+			mappedInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			String[] pathPatterns;
+			BeanDefinitionHolder interceptorDef;
 			if ("interceptor".equals(interceptor.getLocalName())) {
 				List<Element> paths = DomUtils.getChildElementsByTagName(interceptor, "mapping");
-				String[] pathPatterns = new String[paths.size()];
+				pathPatterns = new String[paths.size()];
 				for (int i = 0; i < paths.size(); i++) {
 					pathPatterns[i] = paths.get(i).getAttribute("path");
 				}
-				Element beanElement = DomUtils.getChildElementByTagName(interceptor, "bean");
-				mvcInterceptors.interceptor(pathPatterns, parseBeanElement(parserContext, beanElement));
+				Element interceptorBean = DomUtils.getChildElementByTagName(interceptor, "bean");
+				interceptorDef = parserContext.getDelegate().parseBeanDefinitionElement(interceptorBean);
+				interceptorDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(interceptorBean, interceptorDef);
 			} else {
-				mvcInterceptors.interceptor(null, parseBeanElement(parserContext, interceptor));
+				pathPatterns = null;
+				interceptorDef = parserContext.getDelegate().parseBeanDefinitionElement(interceptor);
+				interceptorDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(interceptor, interceptorDef);				
 			}
+			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, pathPatterns);
+			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, interceptorDef);
+			String mappedInterceptorName = parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptorDef);
+			parserContext.registerComponent(new BeanComponentDefinition(mappedInterceptorDef, mappedInterceptorName));
 		}
-
-		return mvcInterceptors;
+		
+		parserContext.popAndRegisterContainingComponent();
+		return null;
 	}
-
-	private BeanDefinitionHolder parseBeanElement(ParserContext parserContext, Element interceptor) {
-		BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(interceptor);
-		beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(interceptor, beanDef);
-		return beanDef;
-	}
-
+	
 }

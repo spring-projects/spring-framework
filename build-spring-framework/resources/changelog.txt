@@ -7,6 +7,8 @@ Changes in version 3.1 M2 (2011-??-??)
 --------------------------------------
 
 * deprecated AbstractJUnit38SpringContextTests and AbstractTransactionalJUnit38SpringContextTests
+* eliminated @Feature support in favor of @Enable* and framework-provided @Configuration classes
+* introduced @EnableTransactionManagement, @EnableScheduling, and other @Enable* annotations
 
 
 Changes in version 3.1 M1 (2011-02-11)
