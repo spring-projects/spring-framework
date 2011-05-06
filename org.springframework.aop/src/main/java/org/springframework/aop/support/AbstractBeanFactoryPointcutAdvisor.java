@@ -72,6 +72,11 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 		this.beanFactory = beanFactory;
 	}
 
+	public void setAdvice(Advice advice) {
+		synchronized (this.adviceMonitor) {
+			this.advice = advice;
+		}
+	}
 
 	public Advice getAdvice() {
 		synchronized (this.adviceMonitor) {

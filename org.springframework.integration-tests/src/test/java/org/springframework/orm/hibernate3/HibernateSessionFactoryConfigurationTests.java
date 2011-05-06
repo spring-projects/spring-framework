@@ -40,9 +40,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Feature;
-import org.springframework.context.annotation.FeatureConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
@@ -53,8 +50,8 @@ import org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBui
 import org.springframework.orm.hibernate3.scannable.Foo;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.config.TxAnnotationDriven;
 
 /**
  * Integration tests for configuring Hibernate SessionFactory types
@@ -201,7 +198,7 @@ public class HibernateSessionFactoryConfigurationTests {
 
 
 	@Configuration
-	@Import(TxConfig.class)
+	@EnableTransactionManagement
 	static class RepositoryConfig {
 		@Inject SessionFactory sessionFactory;
 
@@ -223,15 +220,6 @@ public class HibernateSessionFactoryConfigurationTests {
 		@Bean
 		PersistenceExceptionTranslator exceptionTranslator() {
 			return new HibernateExceptionTranslator();
-		}
-	}
-
-
-	@FeatureConfiguration
-	static class TxConfig {
-		@Feature
-		TxAnnotationDriven tx(PlatformTransactionManager txManager) {
-			return new TxAnnotationDriven(txManager);
 		}
 	}
 
