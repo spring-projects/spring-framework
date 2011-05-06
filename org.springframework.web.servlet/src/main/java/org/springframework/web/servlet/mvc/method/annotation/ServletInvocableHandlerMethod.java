@@ -30,16 +30,15 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
 
 /**
- * Extends {@link InvocableHandlerMethod} with the ability to handle the value returned from the method through 
- * a registered {@link HandlerMethodArgumentResolver} that supports the given return value type. 
+ * Extends {@link InvocableHandlerMethod} with the ability to handle the value returned from the method through
+ * a registered {@link HandlerMethodArgumentResolver} that supports the given return value type.
  * Return value handling may include writing to the response or updating the {@link ModelAndViewContainer} structure.
- * 
- * <p>If the underlying method has a {@link ResponseStatus} instruction, the status on the response is set 
+ *
+ * <p>If the underlying method has a {@link ResponseStatus} instruction, the status on the response is set
  * accordingly after the method is invoked but before the return value is handled.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  * @see #invokeAndHandle(NativeWebRequest, ModelAndViewContainer, Object...)
@@ -47,9 +46,9 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletResp
 public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	private HttpStatus responseStatus;
-	
+
 	private String responseReason;
-	
+
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 	public void setHandlerMethodReturnValueHandlers(HandlerMethodReturnValueHandlerComposite returnValueHandlers) {
@@ -72,26 +71,26 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	}
 
 	/**
-	 * Invokes the method and handles the return value through a registered {@link HandlerMethodReturnValueHandler}. 
+	 * Invokes the method and handles the return value through a registered {@link HandlerMethodReturnValueHandler}.
 	 * <p>Return value handling may be skipped entirely when the method returns {@code null} (also possibly due
 	 * to a {@code void} return type) and one of the following additional conditions is true:
 	 * <ul>
-	 * <li>A {@link HandlerMethodArgumentResolver} has set the {@link ModelAndViewContainer#setResolveView(boolean)} 
+	 * <li>A {@link HandlerMethodArgumentResolver} has set the {@link ModelAndViewContainer#setResolveView(boolean)}
 	 * flag to {@code false} -- e.g. method arguments providing access to the response.
 	 * <li>The request qualifies as "not modified" as defined in {@link ServletWebRequest#checkNotModified(long)}
-	 * and {@link ServletWebRequest#checkNotModified(String)}. In this case a response with "not modified" response 
-	 * headers will be automatically generated without the need for return value handling. 
+	 * and {@link ServletWebRequest#checkNotModified(String)}. In this case a response with "not modified" response
+	 * headers will be automatically generated without the need for return value handling.
 	 * <li>The status on the response is set due to a @{@link ResponseStatus} instruction.
 	 * </ul>
-	 * <p>After the return value is handled, callers of this method can use the {@link ModelAndViewContainer} 
+	 * <p>After the return value is handled, callers of this method can use the {@link ModelAndViewContainer}
 	 * to gain access to model attributes, view selection choices, and to check if view resolution is even needed.
-	 * 
+	 *
 	 * @param request the current request
 	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
 	 * @param providedArgs argument values to try to use without the need for view resolution
 	 */
-	public final void invokeAndHandle(NativeWebRequest request, 
-									  ModelAndViewContainer mavContainer, 
+	public final void invokeAndHandle(NativeWebRequest request,
+									  ModelAndViewContainer mavContainer,
 									  Object...providedArgs) throws Exception {
 
 		if (!returnValueHandlers.supportsReturnType(getReturnType())) {
@@ -108,7 +107,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 				return;
 			}
 		}
-		
+
 		mavContainer.setResolveView(true);
 
 		returnValueHandlers.handleReturnValue(returnValue, getReturnType(), mavContainer, request);

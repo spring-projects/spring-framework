@@ -26,9 +26,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
 
 /**
- * A Servlet-specific {@link ModelAttributeMethodProcessor} variant that casts the {@link WebDataBinder} 
+ * A Servlet-specific {@link ModelAttributeMethodProcessor} variant that casts the {@link WebDataBinder}
  * instance to {@link ServletRequestDataBinder} prior to invoking data binding.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -36,7 +36,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 
 	/**
 	 * @param useDefaultResolution in default resolution mode a method argument that isn't a simple type, as
-	 * defined in {@link BeanUtils#isSimpleProperty(Class)}, is treated as a model attribute even if it doesn't 
+	 * defined in {@link BeanUtils#isSimpleProperty(Class)}, is treated as a model attribute even if it doesn't
 	 * have an @{@link ModelAttribute} annotation with its name derived from the model attribute type.
 	 */
 	public ServletModelAttributeMethodProcessor(boolean useDefaultResolution) {
@@ -44,12 +44,15 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	}
 
 	/**
-	 * Expects the data binder to be an instance of {@link ServletRequestDataBinder}.
+	 * {@inheritDoc}
+	 * <p>This method downcasts the binder instance to {@link ServletRequestDataBinder} and invokes
+	 * its bind method passing a {@link ServletRequest} to it.
 	 */
 	@Override
 	protected void doBind(WebDataBinder binder, NativeWebRequest request) {
 		ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
-		((ServletRequestDataBinder) binder).bind(servletRequest);
+		ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
+		servletBinder.bind(servletRequest);
 	}
 
 }
