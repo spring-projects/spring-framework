@@ -43,11 +43,11 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 
 /**
- * Test fixture with {@link InitBinderMethodDataBinderFactory}.
- * 
+ * Test fixture with {@link InitBinderDataBinderFactory}.
+ *
  * @author Rossen Stoyanchev
  */
-public class InitBinderMethodDataBinderFactoryTests {
+public class InitBinderDataBinderFactoryTests {
 
 	private ConfigurableWebBindingInitializer bindingInitializer;
 
@@ -128,7 +128,7 @@ public class InitBinderMethodDataBinderFactoryTests {
 		handlerMethod.setDataBinderFactory(new DefaultDataBinderFactory(null));
 		handlerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		
-		return new InitBinderMethodDataBinderFactory(Arrays.asList(handlerMethod), bindingInitializer);
+		return new InitBinderDataBinderFactory(Arrays.asList(handlerMethod), bindingInitializer);
 	}	
 
 	private static class InitBinderHandler {

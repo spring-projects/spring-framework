@@ -35,16 +35,16 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves method arguments annotated with @{@link ModelAttribute}. Or if created in default resolution mode, 
+ * Resolves method arguments annotated with @{@link ModelAttribute}. Or if created in default resolution mode,
  * resolves any non-simple type argument even without an @{@link ModelAttribute}. See the constructor for details.
- * 
- * <p>A model attribute argument value is obtained from the model or is created using its default constructor. 
+ *
+ * <p>A model attribute argument value is obtained from the model or is created using its default constructor.
  * Data binding and optionally validation is then applied through a {@link WebDataBinder} instance. Validation is
- * invoked optionally when the argument is annotated with an {@code @Valid}. 
- * 
- * <p>Also handles return values from methods annotated with an @{@link ModelAttribute}. The return value is 
- * added to the {@link ModelAndViewContainer}.  
- * 
+ * invoked optionally when the argument is annotated with an {@code @Valid}.
+ *
+ * <p>Also handles return values from methods annotated with an @{@link ModelAttribute}. The return value is
+ * added to the {@link ModelAndViewContainer}.
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -54,7 +54,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	
 	/**
 	 * @param useDefaultResolution in default resolution mode a method argument that isn't a simple type, as
-	 * defined in {@link BeanUtils#isSimpleProperty(Class)}, is treated as a model attribute even if it doesn't 
+	 * defined in {@link BeanUtils#isSimpleProperty(Class)}, is treated as a model attribute even if it doesn't
 	 * have an @{@link ModelAttribute} annotation with its name derived from the model attribute type.
 	 */
 	public ModelAttributeMethodProcessor(boolean useDefaultResolution) {
@@ -62,8 +62,8 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	}
 
 	/**
-	 * @return true if the parameter is annotated with {@link ModelAttribute} or if it is a 
-	 * 		simple type without any annotations. 
+	 * @return true if the parameter is annotated with {@link ModelAttribute} or if it is a
+	 * 		simple type without any annotations.
 	 */
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
@@ -79,14 +79,14 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 	/**
 	 * Resolves the argument to a model attribute looking up the attribute in the model or instantiating it using its
-	 * default constructor. Data binding and optionally validation is then applied through a {@link WebDataBinder} 
+	 * default constructor. Data binding and optionally validation is then applied through a {@link WebDataBinder}
 	 * instance. Validation is invoked optionally when the method parameter is annotated with an {@code @Valid}.
-	 * 
-	 * @throws Exception if a {@link WebDataBinder} could not be created or if data binding and validation result in 
+	 *
+	 * @throws Exception if a {@link WebDataBinder} could not be created or if data binding and validation result in
 	 * an error and the next method parameter is not of type {@link Errors} or {@link BindingResult}.
 	 */
-	public final Object resolveArgument(MethodParameter parameter, 
-										ModelAndViewContainer mavContainer, 
+	public final Object resolveArgument(MethodParameter parameter,
+										ModelAndViewContainer mavContainer,
 										NativeWebRequest webRequest,
 										WebDataBinderFactory binderFactory) throws Exception {
 		WebDataBinder binder = createDataBinder(parameter, mavContainer, webRequest, binderFactory);
@@ -111,9 +111,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	/**
 	 * Creates a {@link WebDataBinder} for a target object.
 	 */
-	private WebDataBinder createDataBinder(MethodParameter parameter, 
-										   ModelAndViewContainer mavContainer, 
-										   NativeWebRequest webRequest, 
+	private WebDataBinder createDataBinder(MethodParameter parameter,
+										   ModelAndViewContainer mavContainer,
+										   NativeWebRequest webRequest,
 										   WebDataBinderFactory binderFactory) throws Exception {
 		String attrName = ModelFactory.getNameForParameter(parameter);
 		
@@ -128,13 +128,19 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		return binderFactory.createBinder(webRequest, target, attrName);
 	}
 	
+	/**
+	 * Bind the request to the target object contained in the provided binder instance.
+	 *
+	 * @param binder the binder with the target object to apply request values to
+	 * @param request the current request
+	 */
 	protected void doBind(WebDataBinder binder, NativeWebRequest request) {
 		((WebRequestDataBinder) binder).bind(request);
 	}
 
 	/**
 	 * Whether to validate the target object of the given {@link WebDataBinder} instance.
-	 * @param binder the data binder containing the validation candidate 
+	 * @param binder the data binder containing the validation candidate
 	 * @param parameter the method argument for which data binding is performed
 	 * @return true if {@link DataBinder#validate()} should be invoked, false otherwise.
 	 */
@@ -150,7 +156,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 	/**
 	 * Whether to raise a {@link BindException} in case of data binding or validation errors.
-	 * @param binder the binder on which validation is to be invoked 
+	 * @param binder the binder on which validation is to be invoked
 	 * @param parameter the method argument for which data binding is performed
 	 * @return true if the binding or validation errors should result in a {@link BindException}, false otherwise.
 	 */
@@ -166,8 +172,8 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		return returnType.getMethodAnnotation(ModelAttribute.class) != null;
 	}
 
-	public void handleReturnValue(Object returnValue, 
-								  MethodParameter returnType, 
+	public void handleReturnValue(Object returnValue,
+								  MethodParameter returnType,
 								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest) throws Exception {
 		if (returnValue != null) {

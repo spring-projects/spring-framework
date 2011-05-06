@@ -23,32 +23,42 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.method.annotation.InitBinderMethodDataBinderFactory;
+import org.springframework.web.method.annotation.InitBinderDataBinderFactory;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * An {@link InitBinderMethodDataBinderFactory} variation instantiating a data binder of type
+ * An {@link InitBinderDataBinderFactory} variation instantiating a data binder of type
  * {@link ServletRequestDataBinder} and further extending it with the ability to add URI template variables
  * to the values used in data binding.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ServletInitBinderMethodDataBinderFactory extends InitBinderMethodDataBinderFactory {
+public class ServletRequestDataBinderFactory extends InitBinderDataBinderFactory {
 
 	/**
-	 * Create an {@link ServletInitBinderMethodDataBinderFactory} instance.
+	 * Create an {@link ServletRequestDataBinderFactory} instance.
 	 * @param initBinderMethods init binder methods to use to initialize new data binders.
 	 * @param bindingInitializer a WebBindingInitializer to use to initialize created data binder instances.
 	 */
-	public ServletInitBinderMethodDataBinderFactory(List<InvocableHandlerMethod> initBinderMethods,
-													WebBindingInitializer bindingInitializer) {
+	public ServletRequestDataBinderFactory(List<InvocableHandlerMethod> initBinderMethods,
+										   WebBindingInitializer bindingInitializer) {
 		super(initBinderMethods, bindingInitializer);
 	}
 
+	/**
+	 * Returns the more specific {@link ServletRequestDataBinder} created by {@link #createBinderInstance(Object, String)}.
+	 */
+	@Override
+	public ServletRequestDataBinder createBinder(NativeWebRequest request, Object target, String objectName)
+			throws Exception {
+		return (ServletRequestDataBinder) super.createBinder(request, target, objectName);
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 * <p>This method creates a {@link ServletRequestDataBinder} instance that also adds URI template variables to
