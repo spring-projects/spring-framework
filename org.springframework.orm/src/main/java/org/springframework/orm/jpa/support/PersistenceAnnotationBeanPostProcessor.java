@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -159,6 +160,7 @@ import org.springframework.util.ObjectUtils;
  * @see javax.persistence.PersistenceUnit
  * @see javax.persistence.PersistenceContext
  */
+@SuppressWarnings("serial")
 public class PersistenceAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
@@ -315,14 +317,14 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
 			InjectionMetadata metadata = findPersistenceMetadata(beanType);
 			metadata.checkConfigMembers(beanDefinition);
 		}
 	}
 
-	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
@@ -357,7 +359,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 
-	private InjectionMetadata findPersistenceMetadata(final Class clazz) {
+	private InjectionMetadata findPersistenceMetadata(final Class<?> clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
 		if (metadata == null) {
@@ -592,7 +594,7 @@ public class PersistenceAnnotationBeanPostProcessor
 			AnnotatedElement ae = (AnnotatedElement) member;
 			PersistenceContext pc = ae.getAnnotation(PersistenceContext.class);
 			PersistenceUnit pu = ae.getAnnotation(PersistenceUnit.class);
-			Class resourceType = EntityManager.class;
+			Class<?> resourceType = EntityManager.class;
 			if (pc != null) {
 				if (pu != null) {
 					throw new IllegalStateException("Member may only be annotated with either " +

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,7 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor
  * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  */
+@SuppressWarnings("serial")
 public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
 
@@ -145,13 +146,17 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	static {
 		ClassLoader cl = CommonAnnotationBeanPostProcessor.class.getClassLoader();
 		try {
-			webServiceRefClass = (Class) cl.loadClass("javax.xml.ws.WebServiceRef");
+			@SuppressWarnings("unchecked")
+			Class<? extends Annotation> clazz = (Class<? extends Annotation>) cl.loadClass("javax.xml.ws.WebServiceRef");
+			webServiceRefClass = clazz;
 		}
 		catch (ClassNotFoundException ex) {
 			webServiceRefClass = null;
 		}
 		try {
-			ejbRefClass = (Class) cl.loadClass("javax.ejb.EJB");
+			@SuppressWarnings("unchecked")
+			Class<? extends Annotation> clazz = (Class<? extends Annotation>) cl.loadClass("javax.ejb.EJB");
+			ejbRefClass = clazz;
 		}
 		catch (ClassNotFoundException ex) {
 			ejbRefClass = null;
@@ -273,7 +278,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 
 	@Override
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class beanType, String beanName) {
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
 		if (beanType != null) {
 			InjectionMetadata metadata = findResourceMetadata(beanType);
@@ -281,7 +286,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 	}
 
-	public Object postProcessBeforeInstantiation(Class beanClass, String beanName) throws BeansException {
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
@@ -303,7 +308,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 
-	private InjectionMetadata findResourceMetadata(final Class clazz) {
+	private InjectionMetadata findResourceMetadata(final Class<?> clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
 		if (metadata == null) {
@@ -365,7 +370,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("@Resource annotation is not supported on static methods");
 								}
-								Class[] paramTypes = method.getParameterTypes();
+								Class<?>[] paramTypes = method.getParameterTypes();
 								if (paramTypes.length != 1) {
 									throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
 								}
@@ -502,6 +507,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	private class ResourceElement extends LookupElement {
 
+		@SuppressWarnings("unused")
 		protected boolean shareable = true;
 
 		public ResourceElement(Member member, PropertyDescriptor pd) {
@@ -512,7 +518,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		protected void initAnnotation(AnnotatedElement ae) {
 			Resource resource = ae.getAnnotation(Resource.class);
 			String resourceName = resource.name();
-			Class resourceType = resource.type();
+			Class<?> resourceType = resource.type();
 			this.isDefaultName = !StringUtils.hasLength(resourceName);
 			if (this.isDefaultName) {
 				resourceName = this.member.getName();
@@ -549,7 +555,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	private class WebServiceRefElement extends LookupElement {
 
-		private Class elementType;
+		private Class<?> elementType;
 
 		private String wsdlLocation;
 
@@ -561,7 +567,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		protected void initAnnotation(AnnotatedElement ae) {
 			WebServiceRef resource = ae.getAnnotation(WebServiceRef.class);
 			String resourceName = resource.name();
-			Class resourceType = resource.type();
+			Class<?> resourceType = resource.type();
 			this.isDefaultName = !StringUtils.hasLength(resourceName);
 			if (this.isDefaultName) {
 				resourceName = this.member.getName();
@@ -604,7 +610,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				}
 				if (StringUtils.hasLength(this.wsdlLocation)) {
 					try {
-						Constructor ctor = this.lookupType.getConstructor(new Class[] {URL.class, QName.class});
+						Constructor<?> ctor = this.lookupType.getConstructor(new Class[] {URL.class, QName.class});
 						WebServiceClient clientAnn = this.lookupType.getAnnotation(WebServiceClient.class);
 						if (clientAnn == null) {
 							throw new IllegalStateException("JAX-WS Service class [" + this.lookupType.getName() +
@@ -656,7 +662,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					resourceName = Introspector.decapitalize(resourceName.substring(3));
 				}
 			}
-			Class resourceType = resource.beanInterface();
+			Class<?> resourceType = resource.beanInterface();
 			if (resourceType != null && !Object.class.equals(resourceType)) {
 				checkResourceType(resourceType);
 			}
@@ -698,20 +704,20 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	private static class LookupDependencyDescriptor extends DependencyDescriptor {
 
-		private final Class lookupType;
+		private final Class<?> lookupType;
 
-		public LookupDependencyDescriptor(Field field, Class lookupType) {
+		public LookupDependencyDescriptor(Field field, Class<?> lookupType) {
 			super(field, true);
 			this.lookupType = lookupType;
 		}
 
-		public LookupDependencyDescriptor(Method method, Class lookupType) {
+		public LookupDependencyDescriptor(Method method, Class<?> lookupType) {
 			super(new MethodParameter(method, 0), true);
 			this.lookupType = lookupType;
 		}
 
 		@Override
-		public Class getDependencyType() {
+		public Class<?> getDependencyType() {
 			return this.lookupType;
 		}
 	}
