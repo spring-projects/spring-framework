@@ -180,7 +180,7 @@ public class ConfigurationClassBeanDefinitionReader {
 		String className = configClass.getMetadata().getClassName();
 		configBeanDef.setBeanClassName(className);
 		if (checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
-			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName(configBeanDef, this.registry);
+			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName((AbstractBeanDefinition)configBeanDef, this.registry);
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Registered bean definition for imported @Configuration class %s", configBeanName));
