@@ -23,6 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.config.AdviceMode;
 import org.springframework.core.Ordered;
@@ -52,7 +53,7 @@ import org.springframework.core.Ordered;
  * SimpleAsyncTaskExecutor} will be used to process async method invocations. To
  * customize this behavior, implement {@link AsyncConfigurer} and
  * provide your own {@link java.util.concurrent.Executor Executor} through the
- * {@link AsyncConfigurer#getExecutor() getExecutor()} method.
+ * {@link AsyncConfigurer#getAsyncExecutor() getExecutor()} method.
  *
  * <pre class="code">
  * &#064;Configuration
@@ -64,7 +65,8 @@ import org.springframework.core.Ordered;
  *         return new MyAsyncBean();
  *     }
  *
- *     public Executor getExecutor() {
+ *     &#064;Override
+ *     public Executor getAsyncExecutor() {
  *         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
  *         executor.setThreadNamePrefix("Custom-");
  *         executor.initialize();
