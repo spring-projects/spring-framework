@@ -32,6 +32,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
@@ -40,15 +41,25 @@ import org.springframework.util.ReflectionUtils.MethodCallback;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Bean post-processor that registers methods annotated with {@link Scheduled @Scheduled}
+ * Bean post-processor that registers methods annotated with @{@link Scheduled}
  * to be invoked by a {@link org.springframework.scheduling.TaskScheduler} according
  * to the "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
+ *
+ * <p>This post-processor is automatically registered by Spring's
+ * {@code <task:annotation-driven>} XML element, and also by the @{@link EnableScheduling}
+ * annotation.
+ *
+ * <p>Auto-detects any {@link SchedulingConfigurer} instances in the container,
+ * allowing for customization of the scheduler to be used or for fine-grained control
+ * over task registration (e.g. registration of {@link Trigger} tasks.
+ * See @{@link EnableScheduling} Javadoc for complete usage details.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 3.0
  * @see Scheduled
+ * @see EnableScheduling
  * @see SchedulingConfigurer
  * @see org.springframework.scheduling.TaskScheduler
  * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
