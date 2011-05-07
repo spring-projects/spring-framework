@@ -200,7 +200,7 @@ public class EnableAsyncTests {
 			return new AsyncBean();
 		}
 
-		public Executor getExecutor() {
+		public Executor getAsyncExecutor() {
 			ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 			executor.setThreadNamePrefix("Custom-");
 			executor.initialize();

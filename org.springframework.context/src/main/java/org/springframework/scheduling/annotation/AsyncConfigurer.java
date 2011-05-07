@@ -36,6 +36,6 @@ public interface AsyncConfigurer {
 	 * The {@link Executor} instance to be used when processing async
 	 * method invocations.
 	 */
-	Executor getExecutor();
+	Executor getAsyncExecutor();
 
 }

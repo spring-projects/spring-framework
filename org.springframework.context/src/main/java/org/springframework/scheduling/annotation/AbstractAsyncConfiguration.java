@@ -68,6 +68,6 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 		}
 
 		AsyncConfigurer configurer = configurers.iterator().next();
-		this.executor = configurer.getExecutor();
+		this.executor = configurer.getAsyncExecutor();
 	}
 }
