@@ -1531,6 +1531,7 @@ public class ServletHandlerMethodTests {
 
 	@RequestMapping("/myPage")
 	@SessionAttributes({"object1", "object2"})
+	@Controller
 	public interface MySessionAttributesControllerIfc {
 
 		@RequestMapping(method = RequestMethod.GET)
@@ -1540,7 +1541,6 @@ public class ServletHandlerMethodTests {
 		String post(@ModelAttribute("object1") Object object1);
 	}
 
-	@Controller
 	public static class MySessionAttributesControllerImpl implements MySessionAttributesControllerIfc {
 
 		public String get(Model model) {

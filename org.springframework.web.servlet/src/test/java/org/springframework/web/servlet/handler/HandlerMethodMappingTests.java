@@ -41,46 +41,48 @@ public class HandlerMethodMappingTests {
 
 	private AbstractHandlerMethodMapping<String> mapping;
 
-	private HandlerMethod handlerMethod1;
+	private MyHandler handler;
 
-	private HandlerMethod handlerMethod2;
+	private Method method1;
+
+	private Method method2;
 
 	@Before
 	public void setUp() throws Exception {
 		mapping = new MyHandlerMethodMapping();
-		MyHandler handler = new MyHandler();
-		handlerMethod1 = new HandlerMethod(handler, "handlerMethod1");
-		handlerMethod2 = new HandlerMethod(handler, "handlerMethod2");
+		handler = new MyHandler();
+		method1 = handler.getClass().getMethod("handlerMethod1");
+		method2 = handler.getClass().getMethod("handlerMethod2");
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void registerDuplicates() {
-		mapping.registerHandlerMethod(new HashSet<String>(), "foo", handlerMethod1);
-		mapping.registerHandlerMethod(new HashSet<String>(), "foo", handlerMethod2);
+		mapping.registerHandlerMethod(handler, method1, "foo");
+		mapping.registerHandlerMethod(handler, method2, "foo");
 	}
 
 	@Test
 	public void directMatch() throws Exception {
 		String key = "foo";
-		mapping.registerHandlerMethod(new HashSet<String>(), key, handlerMethod1);
+		mapping.registerHandlerMethod(handler, method1, key);
 
 		HandlerMethod result = mapping.getHandlerInternal(new MockHttpServletRequest("GET", key));
-		assertEquals(handlerMethod1, result);
+		assertEquals(method1, result.getMethod());
 	}
 
 	@Test
 	public void patternMatch() throws Exception {
-		mapping.registerHandlerMethod(new HashSet<String>(), "/fo*", handlerMethod1);
-		mapping.registerHandlerMethod(new HashSet<String>(), "/f*", handlerMethod1);
+		mapping.registerHandlerMethod(handler, method1, "/fo*");
+		mapping.registerHandlerMethod(handler, method1, "/f*");
 
 		HandlerMethod result = mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
-		assertEquals(handlerMethod1, result);
+		assertEquals(method1, result.getMethod());
 	}
 	
 	@Test(expected = IllegalStateException.class)
 	public void ambiguousMatch() throws Exception {
-		mapping.registerHandlerMethod(new HashSet<String>(), "/f?o", handlerMethod1);
-		mapping.registerHandlerMethod(new HashSet<String>(), "/fo?", handlerMethod2);
+		mapping.registerHandlerMethod(handler, method1, "/f?o");
+		mapping.registerHandlerMethod(handler, method2, "/fo?");
 
 		mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
 	}
@@ -95,7 +97,7 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected String getMappingForMethod(String beanName, Method method) {
+		protected String getMappingForMethod(Method method, Class<?> handlerType) {
 			String methodName = method.getName();
 			return methodName.startsWith("handler") ? methodName : null;
 		}
@@ -106,7 +108,7 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected boolean isHandler(String beanName) {
+		protected boolean isHandler(Class<?> beanType) {
 			return true;
 		}
 
