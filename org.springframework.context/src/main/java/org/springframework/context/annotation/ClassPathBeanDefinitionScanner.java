@@ -269,7 +269,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @return <code>true</code> if the bean can be registered as-is;
 	 * <code>false</code> if it should be skipped because there is an
 	 * existing, compatible bean definition for the specified name
-	 * @throws IllegalStateException if an existing, incompatible
+	 * @throws ConflictingBeanDefinitionException if an existing, incompatible
 	 * bean definition has been found for the specified name
 	 */
 	protected boolean checkCandidate(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
@@ -284,7 +284,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		if (isCompatible(beanDefinition, existingDef)) {
 			return false;
 		}
-		throw new IllegalStateException("Annotation-specified bean name '" + beanName +
+		throw new ConflictingBeanDefinitionException("Annotation-specified bean name '" + beanName +
 				"' for bean class [" + beanDefinition.getBeanClassName() + "] conflicts with existing, " +
 				"non-compatible bean definition of same name and class [" + existingDef.getBeanClassName() + "]");
 	}
