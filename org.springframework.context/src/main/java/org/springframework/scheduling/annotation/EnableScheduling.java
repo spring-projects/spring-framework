@@ -124,7 +124,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
  *         taskRegistrar.setScheduler(taskExecutor());
  *         taskRegistrar.addTriggerTask(
- *         addTriggerTask(
  *             new Runnable() {
  *                 task().work();
  *             },
