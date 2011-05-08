@@ -27,7 +27,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
@@ -44,19 +43,12 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.Conventions;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
@@ -74,15 +66,8 @@ import org.springframework.util.StringUtils;
  */
 public class ConfigurationClassBeanDefinitionReader {
 
-	private static final String CONFIGURATION_CLASS_FULL = "full";
-
-	private static final String CONFIGURATION_CLASS_LITE = "lite";
-
-	private static final String CONFIGURATION_CLASS_ATTRIBUTE =
-		Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
-
 	private static final Log logger = LogFactory.getLog(ConfigurationClassBeanDefinitionReader.class);
-	
+
 	private final BeanDefinitionRegistry registry;
 
 	private final SourceExtractor sourceExtractor;
@@ -93,28 +78,21 @@ public class ConfigurationClassBeanDefinitionReader {
 
 	private ResourceLoader resourceLoader;
 
-	private Environment environment;
-
-	private final ComponentScanAnnotationParser componentScanParser;
-
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
 	 * to populate the given {@link BeanDefinitionRegistry}.
 	 * @param problemReporter 
 	 * @param metadataReaderFactory 
 	 */
-	public ConfigurationClassBeanDefinitionReader(final BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
+	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
 			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
-			ResourceLoader resourceLoader, Environment environment) {
+			ResourceLoader resourceLoader) {
 
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
 		this.problemReporter = problemReporter;
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.resourceLoader = resourceLoader;
-		this.environment = environment;
-
-		this.componentScanParser = new ComponentScanAnnotationParser(resourceLoader, environment, registry);
 	}
 
 
@@ -133,8 +111,6 @@ public class ConfigurationClassBeanDefinitionReader {
 	 * class itself, all its {@link Bean} methods
 	 */
 	private void loadBeanDefinitionsForConfigurationClass(ConfigurationClass configClass) {
-		AnnotationMetadata metadata = configClass.getMetadata();
-		componentScanParser.parse(metadata);
 		doLoadBeanDefinitionForConfigurationClassIfNecessary(configClass);
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
@@ -155,7 +131,7 @@ public class ConfigurationClassBeanDefinitionReader {
 		BeanDefinition configBeanDef = new GenericBeanDefinition();
 		String className = configClass.getMetadata().getClassName();
 		configBeanDef.setBeanClassName(className);
-		if (checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
+		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
 			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName((AbstractBeanDefinition)configBeanDef, this.registry);
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
@@ -308,59 +284,6 @@ public class ConfigurationClassBeanDefinitionReader {
 			// TODO SPR-6310: qualify relative path locations as done in AbstractContextLoader.modifyLocations
 			reader.loadBeanDefinitions(resource);
 		}
-	}
-
-
-	/**
-	 * Check whether the given bean definition is a candidate for a configuration class,
-	 * and mark it accordingly.
-	 * @param beanDef the bean definition to check
-	 * @param metadataReaderFactory the current factory in use by the caller
-	 * @return whether the candidate qualifies as (any kind of) configuration class
-	 */
-	public static boolean checkConfigurationClassCandidate(BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
-		AnnotationMetadata metadata = null;
-	
-		// Check already loaded Class if present...
-		// since we possibly can't even load the class file for this Class.
-		if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
-			metadata = new StandardAnnotationMetadata(((AbstractBeanDefinition) beanDef).getBeanClass());
-		}
-		else {
-			String className = beanDef.getBeanClassName();
-			if (className != null) {
-				try {
-					MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
-					metadata = metadataReader.getAnnotationMetadata();
-				}
-				catch (IOException ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Could not find class file for introspecting factory methods: " + className, ex);
-					}
-					return false;
-				}
-			}
-		}
-	
-		if (metadata != null) {
-			if (metadata.isAnnotated(Configuration.class.getName())) {
-				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
-				return true;
-			}
-			else if (metadata.isAnnotated(Component.class.getName()) ||
-					metadata.hasAnnotatedMethods(Bean.class.getName())) {
-				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Determine whether the given bean definition indicates a full @Configuration class.
-	 */
-	public static boolean isFullConfigurationClass(BeanDefinition beanDef) {
-		return CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));
 	}
 
 

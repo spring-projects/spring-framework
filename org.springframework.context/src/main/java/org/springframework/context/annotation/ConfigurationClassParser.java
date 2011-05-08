@@ -28,11 +28,14 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
@@ -72,16 +75,24 @@ class ConfigurationClassParser {
 
 	private final Environment environment;
 
+	private final ResourceLoader resourceLoader;
+
+	private final ComponentScanAnnotationParser componentScanParser;
+
 
 	/**
 	 * Create a new {@link ConfigurationClassParser} instance that will be used
 	 * to populate the set of configuration classes.
 	 */
 	public ConfigurationClassParser(MetadataReaderFactory metadataReaderFactory,
-			ProblemReporter problemReporter, Environment environment) {
+			ProblemReporter problemReporter, Environment environment,
+			ResourceLoader resourceLoader, BeanDefinitionRegistry registry) {
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.problemReporter = problemReporter;
 		this.environment = environment;
+		this.resourceLoader = resourceLoader;
+
+		this.componentScanParser = new ComponentScanAnnotationParser(this.resourceLoader, this.environment, registry);
 	}
 
 
@@ -141,6 +152,25 @@ class ConfigurationClassParser {
 	}
 
 	protected void doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
+		Map<String, Object> componentScanAttributes = metadata.getAnnotationAttributes(ComponentScan.class.getName());
+		if (componentScanAttributes != null) {
+			// the config class is annotated with @ComponentScan -> perform the scan immediately
+			Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScanAttributes);
+
+			// check the set of scanned definitions for any further config classes and parse recursively if necessary
+			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
+				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), metadataReaderFactory)) {
+					try {
+						this.parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+					} catch (ConflictingBeanDefinitionException ex) {
+						throw new CircularComponentScanException(
+								"A conflicting bean definition was detected while processing @ComponentScan annotations. " +
+								"This usually indicates a circle between scanned packages.", ex);
+					}
+				}
+			}
+		}
+
 		List<Map<String, Object>> allImportAttribs =
 			AnnotationUtils.findAllAnnotationAttributes(Import.class, metadata.getClassName(), true);
 		for (Map<String, Object> importAttribs : allImportAttribs) {
