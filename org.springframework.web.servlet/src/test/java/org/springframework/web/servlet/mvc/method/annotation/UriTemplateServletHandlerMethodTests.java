@@ -542,6 +542,7 @@ public class UriTemplateServletHandlerMethodTests {
 
 	}
 
+	@Controller
 	@RequestMapping("/*/menu/**")
 	public static class MenuTreeController {
 

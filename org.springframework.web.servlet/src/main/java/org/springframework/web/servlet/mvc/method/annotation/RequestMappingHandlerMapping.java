@@ -46,12 +46,12 @@ import org.springframework.web.servlet.handler.MappedInterceptors;
 import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
 
 /**
- * An {@link AbstractHandlerMethodMapping} variant that uses {@link RequestMappingInfo}s for the registration and
+ * An {@link AbstractHandlerMethodMapping} variant that uses {@link RequestMappingInfo}s for the registration and 
  * the lookup of {@link HandlerMethod}s.
- *
+ * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
- * @since 3.1
+ * @since 3.1.0
  */
 public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<RequestMappingInfo> {
 
@@ -87,32 +87,30 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 	
 	/**
 	 * {@inheritDoc}
-	 * The handler determination is made based on the presence of a type-level {@link Controller} or
-	 * a type-level {@link RequestMapping} annotation.
+	 * The handler determination in this method is made based on the presence of a type-level {@link Controller} annotation.
 	 */
 	@Override
-	protected boolean isHandler(String beanName) {
-		return ((getApplicationContext().findAnnotationOnBean(beanName, RequestMapping.class) != null) ||
-				(getApplicationContext().findAnnotationOnBean(beanName, Controller.class) != null));
+	protected boolean isHandler(Class<?> beanType) {
+		return AnnotationUtils.findAnnotation(beanType, Controller.class) != null;
 	}
 
 	/**
-	 * Provides a {@link RequestMappingInfo} for the given method.
-	 * <p>Only {@link RequestMapping @RequestMapping}-annotated methods are considered.
-	 * Type-level {@link RequestMapping @RequestMapping} annotations are also detected and their
+	 * Provides a {@link RequestMappingInfo} for the given method. 
+	 * <p>Only {@link RequestMapping @RequestMapping}-annotated methods are considered. 
+	 * Type-level {@link RequestMapping @RequestMapping} annotations are also detected and their 
 	 * attributes combined with method-level {@link RequestMapping @RequestMapping} attributes.
 	 *
-	 * @param beanName the name of the bean the method belongs to
 	 * @param method the method to create a mapping for
+	 * @param handlerType the actual handler type, possibly a sub-type of {@code method.getDeclaringClass()}
 	 * @return the mapping, or {@code null}
 	 * @see RequestMappingInfo#combine(RequestMappingInfo, PathMatcher)
 	 */
 	@Override
-	protected RequestMappingInfo getMappingForMethod(String beanName, Method method) {
+	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 		RequestMapping annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 		if (annotation != null) {
 			RequestMappingInfo methodMapping = createFromRequestMapping(annotation);
-			RequestMapping typeAnnot = getApplicationContext().findAnnotationOnBean(beanName, RequestMapping.class);
+			RequestMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
 			if (typeAnnot != null) {
 				RequestMappingInfo typeMapping = createFromRequestMapping(typeAnnot);
 				return typeMapping.combine(methodMapping, pathMatcher);
@@ -206,12 +204,12 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 	}
 
 	/**
-	 * A comparator for {@link RequestMappingInfo}s. Effective comparison can only be done in the context of a
-	 * specific request. For example not all {@link RequestMappingInfo} patterns may apply to the current request.
+	 * A comparator for {@link RequestMappingInfo}s. Effective comparison can only be done in the context of a 
+	 * specific request. For example not all {@link RequestMappingInfo} patterns may apply to the current request. 
 	 * Therefore an HttpServletRequest is required as input.
 	 *
-	 * <p>Furthermore, the following assumptions are made about the input RequestMappings:
-	 * <ul><li>Each RequestMappingInfo has been fully matched to the request <li>The RequestMappingInfo contains
+	 * <p>Furthermore, the following assumptions are made about the input RequestMappings: 
+	 * <ul><li>Each RequestMappingInfo has been fully matched to the request <li>The RequestMappingInfo contains 
 	 * matched patterns only <li>Patterns are ordered with the best matching pattern at the top </ul>
 	 *
 	 * @see RequestMappingHandlerMapping#getMatchingMapping(RequestMappingInfo, String, HttpServletRequest)

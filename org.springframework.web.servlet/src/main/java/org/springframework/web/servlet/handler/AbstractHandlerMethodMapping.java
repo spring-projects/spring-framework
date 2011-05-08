@@ -97,6 +97,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
+	 * Return the map with all {@link HandlerMethod}s. The key of the map is the generic type 
+	 * <strong>{@code <T>}</strong> containing request mapping conditions.
+	 */
+	public Map<T, HandlerMethod> getHandlerMethods() {
+		return Collections.unmodifiableMap(handlerMethods);
+	}
+
+	/**
 	 * Calls the initialization of the superclass and detects handlers.
 	 */
 	@Override
@@ -115,35 +123,36 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			logger.debug("Looking for request mappings in application context: " + getApplicationContext());
 		}
 		for (String beanName : getApplicationContext().getBeanNamesForType(Object.class)) {
-			if (isHandler(beanName)){
+			if (isHandler(getApplicationContext().getType(beanName))){
 				detectHandlerMethods(beanName);
 			}
 		}
 	}
 
 	/**
-	 * Determines if the given bean is a handler that should be introspected for handler methods.
-	 * @param beanName the name of the bean to check
-	 * @return true if the bean is a handler and may contain handler methods, false otherwise.
+	 * Determines if the given type could contain handler methods.
+	 * @param beanType the type to check
+	 * @return true if this a type that could contain handler methods, false otherwise.
 	 */
-	protected abstract boolean isHandler(String beanName);
+	protected abstract boolean isHandler(Class<?> beanType);
 
 	/**
 	 * Detect and register handler methods for the specified handler.
+	 * @param handler the bean name of a handler or a handler instance
 	 */
-	private void detectHandlerMethods(final String beanName) {
-		Class<?> handlerType = getApplicationContext().getType(beanName);
-
+	protected void detectHandlerMethods(final Object handler) {
+		final Class<?> handlerType = (handler instanceof String) ? 
+				getApplicationContext().getType((String) handler) : handler.getClass();
+				
 		Set<Method> methods = HandlerMethodSelector.selectMethods(handlerType, new MethodFilter() {
 			public boolean matches(Method method) {
-				return getMappingForMethod(beanName, method) != null;
+				return getMappingForMethod(method, handlerType) != null;
 			}
 		});
+		
 		for (Method method : methods) {
-			HandlerMethod handlerMethod = new HandlerMethod(beanName, getApplicationContext(), method);
-			T mapping = getMappingForMethod(beanName, method);
-			Set<String> paths = getMappingPaths(mapping);
-			registerHandlerMethod(paths, mapping, handlerMethod);
+			T mapping = getMappingForMethod(method, handlerType);
+			registerHandlerMethod(handler, method, mapping);
 		}
 	}
 
@@ -151,40 +160,50 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * Provides a request mapping for the given bean method. A method for which no request mapping can be determined 
 	 * is not considered a handler method.
 	 *
-	 * @param beanName the name of the bean the method belongs to
 	 * @param method the method to create a mapping for
+	 * @param handlerType the actual handler type (possibly a subtype of {@code method.getDeclaringClass()})
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
-	protected abstract T getMappingForMethod(String beanName, Method method);
+	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
 	 * Registers a {@link HandlerMethod} with the given mapping.
 	 * 
-	 * @param paths URL paths mapped to this method
-	 * @param mapping the mapping for the method
-	 * @param handlerMethod the handler method to register
+	 * @param handler the bean name of the handler or the actual handler instance
+	 * @param method the method to register
+	 * @param mapping the mapping conditions associated with the handler method
 	 * @throws IllegalStateException if another method was already register under the same mapping
 	 */
-	protected void registerHandlerMethod(Set<String> paths, T mapping, HandlerMethod handlerMethod) {
-		Assert.notNull(mapping, "'mapping' must not be null");
-		Assert.notNull(handlerMethod, "'handlerMethod' must not be null");
-		HandlerMethod mappedHandlerMethod = handlerMethods.get(mapping);
-		if (mappedHandlerMethod != null && !mappedHandlerMethod.equals(handlerMethod)) {
+	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
+		HandlerMethod handlerMethod;
+		if (handler instanceof String) {
+			String beanName = (String) handler;
+			handlerMethod = new HandlerMethod(beanName, getApplicationContext(), method);
+		}
+		else {
+			handlerMethod = new HandlerMethod(handler, method);
+		}
+		
+		HandlerMethod oldHandlerMethod = handlerMethods.get(mapping);
+		if (oldHandlerMethod != null && !oldHandlerMethod.equals(handlerMethod)) {
 			throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + handlerMethod.getBean()
 					+ "' bean method \n" + handlerMethod + "\nto " + mapping + ": There is already '"
-					+ mappedHandlerMethod.getBean() + "' bean method\n" + mappedHandlerMethod + " mapped.");
+					+ oldHandlerMethod.getBean() + "' bean method\n" + oldHandlerMethod + " mapped.");
 		}
+		
 		handlerMethods.put(mapping, handlerMethod);
 		if (logger.isInfoEnabled()) {
 			logger.info("Mapped \"" + mapping + "\" onto " + handlerMethod);
 		}
+		
+		Set<String> paths = getMappingPaths(mapping);
 		for (String path : paths) {
 			urlMap.add(path, mapping);
 		}
 	}
 
 	/**
-	 * Get the URL paths for the given mapping. 
+	 * Get the URL paths associated with the given mapping. 
 	 */
 	protected abstract Set<String> getMappingPaths(T mapping);
 
