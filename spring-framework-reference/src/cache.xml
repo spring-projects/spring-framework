@@ -159,7 +159,7 @@ public Book findBook(String name)]]></programlisting>
 			
 	        <table id="cache-spel-context-tbl" pgwide="1">
           		<title>Cache SpEL available metadata</title>
-		          <tgroup cols="3">
+		          <tgroup cols="4">
 		            <colspec align="center" />
 		            <thead>
 		              <row>
@@ -249,8 +249,10 @@ public void loadBooks(InputStream batch)]]></programlisting>
 		
 		<programlisting language="xml"><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"]]>
   <emphasis role="bold">xmlns:cache="http://www.springframework.org/schema/cache"</emphasis><![CDATA[
-   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd]]><emphasis role="bold">http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd</emphasis><![CDATA[">]]>
-  <emphasis role="bold"><![CDATA[<cache:annotation-driven />]]></emphasis></programlisting>
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd]]>
+      <emphasis role="bold">http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd</emphasis><![CDATA[">]]>
+  <emphasis role="bold"><![CDATA[<cache:annotation-driven />]]></emphasis>
+<![CDATA[</beans>]]></programlisting>
 	
 		<para>The namespace allows various options to be specified that influence the way the caching behaviour is added to the application through AOP. The configuration is similar (on purpose)
 		with that of <literal><ulink url="tx-annotation-driven-settings">tx:annotation-driven</ulink></literal>:
@@ -293,7 +295,7 @@ public void loadBooks(InputStream batch)]]></programlisting>
                 proxy semantics, as discussed above, applying to method calls
                 coming in through the proxy only). The alternative mode
                 "aspectj" instead weaves the affected classes with Spring's
-                AspectJ transaction aspect, modifying the target class byte
+                AspectJ caching aspect, modifying the target class byte
                 code to apply to any kind of method call. AspectJ weaving
                 requires spring-aspects.jar in the classpath as well as
                 load-time weaving (or compile-time weaving) enabled. (See
@@ -307,7 +309,7 @@ public void loadBooks(InputStream batch)]]></programlisting>
                 <entry>false</entry>
 
                 <entry><para>Applies to proxy mode only. Controls what type of
-                transactional proxies are created for classes annotated with
+                caching proxies are created for classes annotated with
                 the <interfacename>@Cacheable</interfacename> or <interfacename>@CacheEvict</interfacename> annotations.
                 If the <literal>proxy-target-class</literal> attribute is set
                 to <literal>true</literal>, then class-based proxies are
@@ -336,20 +338,7 @@ public void loadBooks(InputStream batch)]]></programlisting>
           </tgroup>
         </table></para>
 
-      <note>
-        <para>The <literal>proxy-target-class</literal> attribute on the
-        <literal>&lt;cache:annotation-driven/&gt;</literal> element controls what
-        type of caching proxies are created for classes annotated with
-        the <interfacename>@Cacheable/@CacheEvict</interfacename> annotation. If
-        <literal>proxy-target-class</literal> attribute is set to
-        <literal>true</literal>, class-based proxies are created. If
-        <literal>proxy-target-class</literal> is <literal>false</literal> or
-        if the attribute is omitted, standard JDK interface-based proxies are
-        created. (See <xref linkend="aop-proxying" /> for a discussion of the
-        different proxy types.)</para>
-      </note>
-
-      <note>
+       <note>
         <para><literal>&lt;cache:annotation-driven/&gt;</literal> only looks for
         <interfacename>@Cacheable/@CacheEvict</interfacename> on beans in the same
         application context it is defined in. This means that, if you put
