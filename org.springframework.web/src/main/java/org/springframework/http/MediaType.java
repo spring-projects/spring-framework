@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -586,7 +586,7 @@ public class MediaType implements Comparable<MediaType> {
 
 
 	/**
-	 * Parse the given, comma-seperated string into a list of {@link MediaType} objects.
+	 * Parse the given, comma-separated string into a list of {@link MediaType} objects.
 	 * <p>This method can be used to parse an Accept or Content-Type header.
 	 * @param mediaTypes the string to parse
 	 * @return the list of media types
@@ -684,7 +684,10 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 
-	static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new Comparator<MediaType>() {
+	/**
+	 * Comparator used by {@link #sortBySpecificity(List)}.
+	 */
+	public static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new Comparator<MediaType>() {
 
 		public int compare(MediaType mediaType1, MediaType mediaType2) {
 			if (mediaType1.isWildcardType() && !mediaType2.isWildcardType()) { // */* < audio/*
@@ -724,7 +727,10 @@ public class MediaType implements Comparable<MediaType> {
 	};
 
 
-	static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = new Comparator<MediaType>() {
+	/**
+	 * Comparator used by {@link #sortByQualityValue(List)}.
+	 */
+	public static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = new Comparator<MediaType>() {
 
 		public int compare(MediaType mediaType1, MediaType mediaType2) {
 			double quality1 = mediaType1.getQualityValue();
