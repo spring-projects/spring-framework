@@ -33,6 +33,7 @@ import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
@@ -239,6 +240,15 @@ class ConfigurationClassEnhancer {
 				return this.beanFactory.getBean(beanName);
 			}
 
+			if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
+				logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " +
+						"assignable to Spring's BeanFactoryPostProcessor interface. This will " +
+						"result in a failure to process annotations such as @Autowired, " +
+						"@Resource and @PostConstruct within the method's declaring " +
+						"@Configuration class. Add the 'static' modifier to this method to avoid" +
+						"these container lifecycle issues; see @Bean Javadoc for complete details",
+						beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
+			}
 			return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 		}
 
