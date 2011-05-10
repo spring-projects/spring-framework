@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author Arjen Poutsma
  * @since 3.1
  */
-abstract class AbstractNameValueCondition<T> extends AbstractRequestCondition {
+abstract class AbstractNameValueCondition<T> implements RequestCondition {
 
 	protected final String name;
 
@@ -64,11 +64,6 @@ abstract class AbstractNameValueCondition<T> extends AbstractRequestCondition {
 	protected abstract boolean matchName(HttpServletRequest request);
 
 	protected abstract boolean matchValue(HttpServletRequest request);
-
-	@Override
-	public int getSpecificity() {
-		return 1;
-	}
 
 	@Override
 	public int hashCode() {

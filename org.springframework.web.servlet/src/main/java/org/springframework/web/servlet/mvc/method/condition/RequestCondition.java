@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
  * @see RequestConditionFactory
  * @since 3.1
  */
-public interface RequestCondition extends Comparable<RequestCondition> {
+public interface RequestCondition {
 
 	/**
 	 * Indicates whether this condition matches against the given servlet request.

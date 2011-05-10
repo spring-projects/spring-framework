@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.annotation.AnnotationUtils;
@@ -128,7 +127,7 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 		return new RequestMappingInfo(Arrays.asList(annotation.value()), Arrays.asList(annotation.method()),
 						RequestConditionFactory.parseParams(annotation.params()),
 						RequestConditionFactory.parseHeaders(annotation.headers()),
-						RequestConditionFactory.parseConsumes());
+						RequestConditionFactory.parseConsumes(annotation.consumes(), annotation.headers()));
 	}
 	
 	@Override
@@ -237,6 +236,10 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 				return result;
 			}
 			result = mapping.getHeaders().compareTo(otherMapping.getHeaders());
+			if (result != 0) {
+				return result;
+			}
+			result = mapping.getConsumes().compareTo(otherMapping.getConsumes());
 			if (result != 0) {
 				return result;
 			}

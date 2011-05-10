@@ -153,7 +153,7 @@ import java.lang.annotation.Target;
  * converters}.
  * <li>A {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
  * {@link org.springframework.http.ResponseEntity ResponseEntity&lt;?&gt;} object
- * to access to the Servlet reponse HTTP headers and contents. The entity body will
+ * to access to the Servlet response HTTP headers and contents. The entity body will
  * be converted to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
@@ -296,5 +296,19 @@ public @interface RequestMapping {
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] headers() default {}; 
+
+	/**
+	 * The consumable media types of the mapped request, narrowing the primary mapping.
+	 * <p>The format is a sequence of media types ("text/plain", "application/*),
+	 * with a request only mapped if the {@code Content-Type} matches one of these media types.
+	 * Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
+	 * all requests with a {@code Content-Type} other than "text/plain".
+	 * <p><b>Supported at the type level as well as at the method level!</b>
+	 * When used at the type level, all method-level mappings override
+	 * this consumes restriction.
+	 * @see org.springframework.http.MediaType
+	 * @see javax.servlet.http.HttpServletRequest#getContentType()
+	 */
+	String[] consumes() default "*/*";
 
 }
