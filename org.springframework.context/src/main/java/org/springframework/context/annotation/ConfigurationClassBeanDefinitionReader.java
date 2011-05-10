@@ -162,8 +162,16 @@ public class ConfigurationClassBeanDefinitionReader {
 		RootBeanDefinition beanDef = new ConfigurationClassBeanDefinition(configClass);
 		beanDef.setResource(configClass.getResource());
 		beanDef.setSource(this.sourceExtractor.extractSource(metadata, configClass.getResource()));
-		beanDef.setFactoryBeanName(configClass.getBeanName());
-		beanDef.setUniqueFactoryMethodName(metadata.getMethodName());
+		if (metadata.isStatic()) {
+			// static @Bean method
+			beanDef.setBeanClassName(configClass.getMetadata().getClassName());
+			beanDef.setFactoryMethodName(metadata.getMethodName());
+		}
+		else {
+			// instance @Bean method
+			beanDef.setFactoryBeanName(configClass.getBeanName());
+			beanDef.setUniqueFactoryMethodName(metadata.getMethodName());
+		}
 		beanDef.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);
 

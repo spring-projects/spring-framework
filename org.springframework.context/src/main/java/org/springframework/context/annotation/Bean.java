@@ -37,8 +37,8 @@ import org.springframework.beans.factory.annotation.Autowire;
  *
  * <p>While a {@link #name()} attribute is available, the default strategy for determining
  * the name of a bean is to use the name of the Bean method. This is convenient and
- * intuitive, but if explicit naming is desired, the {@link #name()} attribute may be used.
- * Also note that {@link #name()} accepts an array of Strings. This is in order to allow
+ * intuitive, but if explicit naming is desired, the {@code name()} attribute may be used.
+ * Also note that {@code name()} accepts an array of Strings. This is in order to allow
  * for specifying multiple names (i.e., aliases) for a single bean.
  *
  * <p>The <code>@Bean</code> annotation may be used on any methods in an <code>@Component</code>
@@ -55,6 +55,27 @@ import org.springframework.beans.factory.annotation.Autowire;
  * the semantics known from the original 'Spring JavaConfig' project which require CGLIB
  * subclassing of each such configuration class at runtime. As a consequence, configuration
  * classes and their factory methods must not be marked as final or private in this mode.
+ *
+ * <h3>A note on {@code BeanFactoryPostProcessor}-returning {@code @Bean} methods</h3>
+ * <p>Special consideration must be taken for {@code @Bean} methods that return Spring
+ * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessor}
+ * ({@code BFPP}) types. Because {@code BFPP} objects must be instantiated very early in the
+ * container lifecycle, they can interfere with processing of annotations such as {@code @Autowired},
+ * {@code @Value}, and {@code @PostConstruct} within {@code @Configuration} classes. To avoid these
+ * lifecycle issues, mark {@code BFPP}-returning {@code @Bean} methods as {@code static}. For example:
+ * <pre class="code">
+ *     &#064;Bean
+ *     public static PropertyPlaceholderConfigurer ppc() {
+ *         // instantiate, configure and return ppc ...
+ *     }
+ * </pre>
+ * By marking this method as {@code static}, it can be invoked without causing instantiation of its
+ * declaring {@code @Configuration} class, thus avoiding the above-mentioned lifecycle conflicts.
+ * Note however that {@code static} {@code @Bean} methods will not be enhanced for scoping and AOP
+ * semantics as mentioned above. This works out in {@code BFPP} cases, as they are not typically
+ * referenced by other {@code @Bean} methods. As a reminder, a WARN-level log message will be
+ * issued for any non-static {@code @Bean} methods having a return type assignable to
+ * {@code BeanFactoryPostProcessor}.
  *
  * @author Rod Johnson
  * @author Costin Leau
