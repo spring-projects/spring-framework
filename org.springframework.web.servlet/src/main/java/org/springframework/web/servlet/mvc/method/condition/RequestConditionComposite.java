@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
-
-import org.springframework.util.Assert;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Abstract base class for {@link RequestCondition} implementations that wrap other request conditions.
@@ -28,25 +28,16 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 3.1
  */
-abstract class RequestConditionComposite extends AbstractRequestCondition {
+abstract class RequestConditionComposite<T extends RequestCondition> implements RequestCondition {
 
-	protected final List<RequestCondition> conditions;
+	private final Set<T> conditions;
 
-	protected RequestConditionComposite(List<RequestCondition> conditions) {
-		Assert.notEmpty(conditions, "'conditions' must not be empty");
-		this.conditions = Collections.unmodifiableList(conditions);
+	protected RequestConditionComposite(Collection<T> conditions) {
+		this.conditions = Collections.unmodifiableSet(new LinkedHashSet<T>(conditions));
 	}
 
-	@Override
-	public int getSpecificity() {
-		int weight = 0;
-		for (RequestCondition condition : conditions) {
-			if (condition instanceof AbstractRequestCondition) {
-				AbstractRequestCondition abstractRequestCondition = (AbstractRequestCondition) condition;
-				weight += abstractRequestCondition.getSpecificity();
-			}
-		}
-		return weight;
+	protected Set<T> getConditions() {
+		return conditions;
 	}
 
 	@Override
@@ -70,7 +61,7 @@ abstract class RequestConditionComposite extends AbstractRequestCondition {
 	public String toString() {
 		StringBuilder builder = new StringBuilder("[");
 		String infix = getToStringInfix();
-		for (Iterator<RequestCondition> iterator = conditions.iterator(); iterator.hasNext();) {
+		for (Iterator<T> iterator = conditions.iterator(); iterator.hasNext();) {
 			RequestCondition condition = iterator.next();
 			builder.append(condition.toString());
 			if (iterator.hasNext()) {

@@ -16,7 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -25,20 +26,25 @@ import javax.servlet.http.HttpServletRequest;
  * @author Arjen Poutsma
  * @since 3.1
  */
-class LogicalConjunctionRequestCondition extends RequestConditionComposite {
+class LogicalConjunctionRequestCondition<T extends RequestCondition> extends RequestConditionComposite<T> {
 
-	LogicalConjunctionRequestCondition(List<RequestCondition> conditions) {
+	LogicalConjunctionRequestCondition(Collection<T> conditions) {
 		super(conditions);
 	}
 
 	public boolean match(HttpServletRequest request) {
-		for (RequestCondition condition : conditions) {
+		Set<T> conditions = getConditions();
+		if (conditions.isEmpty()) {
+			return true;
+		}
+		for (T condition : conditions) {
 			if (!condition.match(request)) {
 				return false;
 			}
 		}
 		return true;
 	}
+
 
 	@Override
 	protected String getToStringInfix() {

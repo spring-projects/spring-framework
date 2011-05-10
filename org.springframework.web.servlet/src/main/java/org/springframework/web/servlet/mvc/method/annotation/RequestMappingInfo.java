@@ -22,14 +22,14 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.method.condition.RequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
+import org.springframework.web.servlet.mvc.method.condition.ConsumesRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.ParamsRequestCondition;
 
 /**
  * Contains a set of conditions to match to a given request such as URL patterns, HTTP methods, request parameters 
@@ -49,16 +49,16 @@ public final class RequestMappingInfo {
 
 	private final Set<RequestMethod> methods;
 
-	private final RequestCondition paramsCondition;
+	private final ParamsRequestCondition paramsCondition;
 
-	private final RequestCondition headersCondition;
+	private final HeadersRequestCondition headersCondition;
 
-	private final RequestCondition consumesCondition;
+	private final ConsumesRequestCondition consumesCondition;
 
 	private int hash;
 
 	/**
-	 * Creates a new {@code RequestKey} instance with the given URL patterns and HTTP methods.
+	 * Creates a new {@code RequestMappingInfo} instance with the given URL patterns and HTTP methods.
 	 * 
 	 * <p>Package protected for testing purposes.
 	 */
@@ -67,18 +67,18 @@ public final class RequestMappingInfo {
 	}
 
 	/**
-	 * Creates a new {@code RequestKey} instance with a full set of conditions.
+	 * Creates a new {@code RequestMappingInfo} instance with a full set of conditions.
 	 */
 	public RequestMappingInfo(Collection<String> patterns,
 							 Collection<RequestMethod> methods,
-							 RequestCondition paramsCondition,
-							 RequestCondition headersCondition,
-							 RequestCondition consumesCondition) {
+							 ParamsRequestCondition paramsCondition,
+							 HeadersRequestCondition headersCondition,
+							 ConsumesRequestCondition consumesCondition) {
 		this.patterns = asUnmodifiableSet(prependLeadingSlash(patterns));
 		this.methods = asUnmodifiableSet(methods);
-		this.paramsCondition = paramsCondition != null ? paramsCondition : RequestConditionFactory.trueCondition();
-		this.headersCondition = headersCondition != null ? headersCondition : RequestConditionFactory.trueCondition();
-		this.consumesCondition = consumesCondition != null ? consumesCondition : RequestConditionFactory.trueCondition();
+		this.paramsCondition = paramsCondition != null ? paramsCondition : new ParamsRequestCondition();
+		this.headersCondition = headersCondition != null ? headersCondition : new HeadersRequestCondition();
+		this.consumesCondition = consumesCondition != null ? consumesCondition : new ConsumesRequestCondition();
 	}
 
 	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
@@ -118,21 +118,28 @@ public final class RequestMappingInfo {
 	}
 
 	/**
-	 * Returns the request parameters of this request key.
+	 * Returns the request parameters conditions of this request key.
 	 */
-	public RequestCondition getParams() {
+	public ParamsRequestCondition getParams() {
 		return paramsCondition;
 	}
 
 	/**
-	 * Returns the request headers of this request key.
+	 * Returns the request headers conditions of this request key.
 	 */
-	public RequestCondition getHeaders() {
+	public HeadersRequestCondition getHeaders() {
 		return headersCondition;
 	}
 
 	/**
-	 * Combines this {@code RequestKey} with another as follows: 
+	 * Returns the request consumes conditions of this request key.
+	 */
+	public ConsumesRequestCondition getConsumes() {
+		return consumesCondition;
+	}
+
+	/**
+	 * Combines this {@code RequestMappingInfo} with another as follows:
 	 * <ul>
 	 * <li>URL patterns:
 	 * 	<ul>
@@ -141,9 +148,9 @@ public final class RequestMappingInfo {
 	 * 	  <li>If neither contains patterns use ""
 	 * 	</ul>
 	 * <li>HTTP methods are combined as union of all HTTP methods listed in both keys.
-	 * <li>Request parameter are combined into a logical AND.
-	 * <li>Request header are combined into a logical AND.
-	 * <li>Consumes .. TODO
+	 * <li>Request parameters are combined as per {@link ParamsRequestCondition#combine(ParamsRequestCondition)}.
+	 * <li>Request headers are combined as per {@link HeadersRequestCondition#combine(HeadersRequestCondition)}.
+	 * <li>Consumes are combined as per {@link ConsumesRequestCondition#combine(ConsumesRequestCondition)}.
 	 * </ul>
 	 * @param methodKey the key to combine with
 	 * @param pathMatcher to {@linkplain PathMatcher#combine(String, String) combine} the patterns
@@ -152,9 +159,9 @@ public final class RequestMappingInfo {
 	public RequestMappingInfo combine(RequestMappingInfo methodKey, PathMatcher pathMatcher) {
 		Set<String> patterns = combinePatterns(this.patterns, methodKey.patterns, pathMatcher);
 		Set<RequestMethod> methods = union(this.methods, methodKey.methods);
-		RequestCondition params = RequestConditionFactory.and(this.paramsCondition, methodKey.paramsCondition);
-		RequestCondition headers = RequestConditionFactory.and(this.headersCondition, methodKey.headersCondition);
-		RequestCondition consumes = RequestConditionFactory.mostSpecific(methodKey.consumesCondition, this.consumesCondition);
+		ParamsRequestCondition params = this.paramsCondition.combine(methodKey.paramsCondition);
+		HeadersRequestCondition headers = this.headersCondition.combine(methodKey.headersCondition);
+		ConsumesRequestCondition consumes = this.consumesCondition.combine(methodKey.consumesCondition);
 
 		return new RequestMappingInfo(patterns, methods, params, headers, consumes);
 	}
@@ -189,7 +196,7 @@ public final class RequestMappingInfo {
 	}
 
 	/**
-	 * Returns a new {@code RequestKey} that contains all conditions of this key that are relevant to the request.
+	 * Returns a new {@code RequestMappingInfo} that contains all conditions of this key that are relevant to the request.
 	 * <ul>
 	 * <li>The list of URL path patterns is trimmed to contain the patterns that match the URL with matching patterns 
 	 * sorted via {@link PathMatcher#getPatternComparator(String)}. 
@@ -203,16 +210,20 @@ public final class RequestMappingInfo {
 	 * @return a new request key that contains all matching attributes, or {@code null} if not all conditions match
 	 */
 	public RequestMappingInfo getMatchingRequestMapping(String lookupPath, HttpServletRequest request, PathMatcher pathMatcher) {
-		if (!checkMethod(request) || !paramsCondition.match(request) || !headersCondition.match(request) ||
-				!consumesCondition.match(request)) {
+		ParamsRequestCondition matchingParamsCondition = paramsCondition.getMatchingCondition(request);
+		HeadersRequestCondition matchingHeadersCondition = headersCondition.getMatchingCondition(request);
+		ConsumesRequestCondition matchingConsumesCondition = consumesCondition.getMatchingCondition(request);
+
+		if (!checkMethod(request) || matchingParamsCondition == null || matchingHeadersCondition == null ||
+				matchingConsumesCondition == null) {
 			return null;
 		}
 		else {
 			List<String> matchingPatterns = getMatchingPatterns(lookupPath, request, pathMatcher);
 			if (!matchingPatterns.isEmpty()) {
 				Set<RequestMethod> matchingMethods = getMatchingMethod(request);
-				return new RequestMappingInfo(matchingPatterns, matchingMethods, this.paramsCondition, this.headersCondition,
-						this.consumesCondition);
+				return new RequestMappingInfo(matchingPatterns, matchingMethods, matchingParamsCondition,
+						matchingHeadersCondition, matchingConsumesCondition);
 			}
 			else {
 				return null;
@@ -277,7 +288,8 @@ public final class RequestMappingInfo {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
 			return (this.patterns.equals(other.patterns) && this.methods.equals(other.methods) &&
 					this.paramsCondition.equals(other.paramsCondition) &&
-					this.headersCondition.equals(other.headersCondition));
+					this.headersCondition.equals(other.headersCondition) &&
+					this.consumesCondition.equals(other.consumesCondition));
 		}
 		return false;
 	}
@@ -290,6 +302,7 @@ public final class RequestMappingInfo {
 			result = 31 * result + methods.hashCode();
 			result = 31 * result + paramsCondition.hashCode();
 			result = 31 * result + headersCondition.hashCode();
+			result = 31 * result + consumesCondition.hashCode();
 			hash = result;
 		}
 		return result;

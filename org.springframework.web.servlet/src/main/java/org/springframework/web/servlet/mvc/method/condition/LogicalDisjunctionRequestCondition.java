@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
-import java.util.List;
+import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -25,14 +25,14 @@ import javax.servlet.http.HttpServletRequest;
  * @author Arjen Poutsma
  * @since 3.1
  */
-class LogicalDisjunctionRequestCondition extends RequestConditionComposite {
+class LogicalDisjunctionRequestCondition<T extends RequestCondition> extends RequestConditionComposite<T> {
 
-	LogicalDisjunctionRequestCondition(List<RequestCondition> conditions) {
+	LogicalDisjunctionRequestCondition(Collection<T> conditions) {
 		super(conditions);
 	}
 
 	public boolean match(HttpServletRequest request) {
-		for (RequestCondition condition : conditions) {
+		for (RequestCondition condition : getConditions()) {
 			if (condition.match(request)) {
 				return true;
 			}
