@@ -216,6 +216,14 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return this.propertyResolver.getRequiredProperty(key, targetType);
 	}
 
+	public void setRequiredProperties(String... requiredProperties) {
+		this.propertyResolver.setRequiredProperties(requiredProperties);
+	}
+
+	public void validateRequiredProperties() throws MissingRequiredPropertiesException {
+		this.propertyResolver.validateRequiredProperties();
+	}
+
 	public String resolvePlaceholders(String text) {
 		return this.propertyResolver.resolvePlaceholders(text);
 	}

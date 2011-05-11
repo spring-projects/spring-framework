@@ -21,6 +21,9 @@ import static org.springframework.util.SystemPropertyUtils.PLACEHOLDER_PREFIX;
 import static org.springframework.util.SystemPropertyUtils.PLACEHOLDER_SUFFIX;
 import static org.springframework.util.SystemPropertyUtils.VALUE_SEPARATOR;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.convert.ConversionService;
@@ -47,6 +50,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	private String placeholderSuffix = PLACEHOLDER_SUFFIX;
 	private String valueSeparator = VALUE_SEPARATOR;
 
+	private final Set<String> requiredProperties = new LinkedHashSet<String>();
+
 	public ConversionService getConversionService() {
 		return this.conversionService;
 	}
@@ -63,6 +68,24 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
 		T value = getProperty(key, targetType);
 		return value == null ? defaultValue : value;
+	}
+
+	public void setRequiredProperties(String... requiredProperties) {
+		for (String key : requiredProperties) {
+			this.requiredProperties.add(key);
+		}
+	}
+
+	public void validateRequiredProperties() {
+		MissingRequiredPropertiesException ex = new MissingRequiredPropertiesException();
+		for (String key : this.requiredProperties) {
+			if (this.getProperty(key) == null) {
+				ex.addMissingRequiredProperty(key);
+			}
+		}
+		if (!ex.getMissingRequiredProperties().isEmpty()) {
+			throw ex;
+		}
 	}
 
 	public String getRequiredProperty(String key) throws IllegalStateException {

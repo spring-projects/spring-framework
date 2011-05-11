@@ -135,7 +135,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		return null;
 	}
 
-
 	@SuppressWarnings("serial")
 	static class ClassConversionException extends ConversionException {
 		public ClassConversionException(Class<?> actual, Class<?> expected) {
