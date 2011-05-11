@@ -192,9 +192,17 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return this.propertyResolver.getProperty(key);
 	}
 
+	public String getProperty(String key, String defaultValue) {
+		return this.propertyResolver.getProperty(key, defaultValue);
+	}
+
 	public <T> T getProperty(String key, Class<T> targetType) {
 		return this.propertyResolver.getProperty(key, targetType);
 	}
+
+	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+		return this.propertyResolver.getProperty(key, targetType, defaultValue);
+	};
 
 	public <T> Class<T> getPropertyAsClass(String key, Class<T> targetType) {
 		return this.propertyResolver.getPropertyAsClass(key, targetType);
