@@ -30,28 +30,28 @@ import org.springframework.web.servlet.DispatcherServlet;
  * in @{@link Controller} classes.
  * <pre>
  * &#064;Configuration
- * &#064;EnableMvcConfiguration
+ * &#064;EnableWebMvc
  * &#064;ComponentScan(
- *	basePackageClasses = { MyMvcConfiguration.class },
+ *	basePackageClasses = { MyConfiguration.class },
  * 	excludeFilters = { @Filter(type = FilterType.ANNOTATION, value = Configuration.class) }
  * )
- * public class MyMvcConfiguration {
+ * public class MyConfiguration {
  *
  * }
  * </pre>
- * <p>To customize the imported configuration you simply implement {@link MvcConfigurer}, or more likely extend
- * {@link MvcConfigurerSupport} overriding selected methods only. The most obvious place to do this is
- * the @{@link Configuration} class that enabled the Spring MVC configuration via @{@link EnableMvcConfiguration}.
- * However any @{@link Configuration} class and more generally any Spring bean can implement {@link MvcConfigurer}
+ * <p>To customize the imported configuration you simply implement {@link WebMvcConfigurer}, or more likely extend
+ * {@link WebMvcConfigurerAdapter} overriding selected methods only. The most obvious place to do this is
+ * the @{@link Configuration} class that enabled the Spring MVC configuration via @{@link EnableWebMvc}.
+ * However any @{@link Configuration} class and more generally any Spring bean can implement {@link WebMvcConfigurer}
  * to be detected and given an opportunity to customize Spring MVC configuration at startup.
  * <pre>
  * &#064;Configuration
- * &#064;EnableMvcConfiguration
+ * &#064;EnableWebMvc
  * &#064;ComponentScan(
- * 	basePackageClasses = { MyMvcConfiguration.class },
+ * 	basePackageClasses = { MyConfiguration.class },
  * 	excludeFilters = { @Filter(type = FilterType.ANNOTATION, value = Configuration.class) }
  * )
- * public class MyMvcConfiguration extends MvcConfigurerSupport {
+ * public class MyConfiguration extends WebMvcConfigurerAdapter {
  *
  * 	&#064;Override
  * 	public void registerFormatters(FormatterRegistry formatterRegistry) {
@@ -68,8 +68,8 @@ import org.springframework.web.servlet.DispatcherServlet;
  * }
  * </pre>
  *
- * @see MvcConfigurer
- * @see MvcConfigurerSupport
+ * @see WebMvcConfigurer
+ * @see WebMvcConfigurerAdapter
  *
  * @author Dave Syer
  * @author Rossen Stoyanchev
@@ -78,6 +78,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import(MvcConfiguration.class)
-public @interface EnableMvcConfiguration {
+@Import(WebMvcConfiguration.class)
+public @interface EnableWebMvc {
 }

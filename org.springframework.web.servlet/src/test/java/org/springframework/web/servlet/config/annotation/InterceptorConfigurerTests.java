@@ -29,6 +29,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.handler.MappedInterceptors;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
@@ -139,7 +140,8 @@ public class InterceptorConfigurerTests {
 	}
 
 	private HandlerInterceptor[] getInterceptorsForPath(String lookupPath) {
-		return configurer.getMappedInterceptors().getInterceptors(lookupPath, new AntPathMatcher());
+		MappedInterceptors mappedInterceptors = new MappedInterceptors(configurer.getInterceptors());
+		return mappedInterceptors.getInterceptors(lookupPath, new AntPathMatcher());
 	}
 
 	private void verifyAdaptedInterceptor(HandlerInterceptor interceptor, TestWebRequestInterceptor webInterceptor)

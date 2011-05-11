@@ -22,22 +22,23 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * An abstract class with empty method implementations of the {@link MvcConfigurer} interface for a simplified
- * implementation of {@link MvcConfigurer} so that subclasses can override selected methods only.
+ * An abstract class with empty method implementations of {@link WebMvcConfigurer}.
+ * Subclasses can override only the methods they need.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public abstract class MvcConfigurerSupport implements MvcConfigurer {
+public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 
 	/**
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void registerFormatters(FormatterRegistry formatterRegistry) {
+	public void addFormatters(FormatterRegistry formatterRegistry) {
 	}
 
 	/**
@@ -45,13 +46,6 @@ public abstract class MvcConfigurerSupport implements MvcConfigurer {
 	 * <p>This implementation is empty.
 	 */
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>This implementation is empty.
-	 */
-	public void configureValidator(Validator validator) {
 	}
 
 	/**
@@ -66,7 +60,14 @@ public abstract class MvcConfigurerSupport implements MvcConfigurer {
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void addCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation is empty.
+	 */
+	public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 	}
 
 	/**
@@ -80,14 +81,14 @@ public abstract class MvcConfigurerSupport implements MvcConfigurer {
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void addInterceptors(InterceptorConfigurer interceptorConfigurer) {
+	public void configureInterceptors(InterceptorConfigurer interceptorConfigurer) {
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void addViewControllers(ViewControllerConfigurer viewControllerConfigurer) {
+	public void configureViewControllers(ViewControllerConfigurer viewControllerConfigurer) {
 	}
 
 	/**

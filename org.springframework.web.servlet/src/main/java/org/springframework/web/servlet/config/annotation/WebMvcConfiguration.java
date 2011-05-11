@@ -58,6 +58,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
+import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptors;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.Controller;
@@ -72,10 +73,10 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 /**
  * Provides default configuration for Spring MVC applications. Registers Spring MVC infrastructure components to be
  * detected by the {@link DispatcherServlet}. Further below is a list of registered instances. This configuration is
- * enabled through the {@link EnableMvcConfiguration} annotation.
+ * enabled through the {@link EnableWebMvc} annotation.
  *
  * <p>A number of options are available for customizing the default configuration provided by this class.
- * See {@link EnableMvcConfiguration} and {@link MvcConfigurer} for details.
+ * See {@link EnableWebMvc} and {@link WebMvcConfigurer} for details.
  *
  * <p>Registers these handler mappings:
  * <ul>
@@ -87,7 +88,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * </ul>
  *
  * <p><strong>Note:</strong> that the SimpleUrlHandlerMapping instances above will have empty URL maps and
- * hence no effect until explicitly configured via {@link MvcConfigurer}.
+ * hence no effect until explicitly configured via {@link WebMvcConfigurer}.
  *
  * <p>Registers these handler adapters:
  * <ul>
@@ -110,23 +111,23 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * 	<li>{@link MappedInterceptors} containing a list Spring MVC lifecycle interceptors.
  * </ul>
  *
- * @see EnableMvcConfiguration
- * @see MvcConfigurer
+ * @see EnableWebMvc
+ * @see WebMvcConfigurer
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 @Configuration
-class MvcConfiguration implements ApplicationContextAware, ServletContextAware {
+class WebMvcConfiguration implements ApplicationContextAware, ServletContextAware {
 
-	private final MvcConfigurerComposite configurers = new MvcConfigurerComposite();
+	private final WebMvcConfigurerComposite configurers = new WebMvcConfigurerComposite();
 
 	private ServletContext servletContext;
 
 	private ApplicationContext applicationContext;
 
 	@Autowired(required = false)
-	public void setConfigurers(List<MvcConfigurer> configurers) {
+	public void setConfigurers(List<WebMvcConfigurer> configurers) {
 		this.configurers.addConfigurers(configurers);
 	}
 
@@ -139,29 +140,41 @@ class MvcConfiguration implements ApplicationContextAware, ServletContextAware {
 	}
 
 	@Bean
-	RequestMappingHandlerMapping requestMappingHandlerMapping() {
+	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
+		mapping.setMappedInterceptors(getMappedInterceptors());
 		mapping.setOrder(0);
 		return mapping;
 	}
 
-	@Bean
-	HandlerMapping viewControllerHandlerMapping() {
-		ViewControllerConfigurer configurer = new ViewControllerConfigurer();
-		configurer.setOrder(1);
-		configurers.addViewControllers(configurer);
-		return configurer.getHandlerMapping();
+	private MappedInterceptor[] getMappedInterceptors() {
+		InterceptorConfigurer configurer = new InterceptorConfigurer();
+		configurers.configureInterceptors(configurer);
+		configurer.addInterceptor(new ConversionServiceExposingInterceptor(conversionService()));
+		return configurer.getInterceptors();
 	}
 
 	@Bean
-	BeanNameUrlHandlerMapping beanNameHandlerMapping() {
+	public HandlerMapping viewControllerHandlerMapping() {
+		ViewControllerConfigurer configurer = new ViewControllerConfigurer();
+		configurer.setOrder(1);
+		configurers.configureViewControllers(configurer);
+		
+		SimpleUrlHandlerMapping handlerMapping = configurer.getHandlerMapping();
+		handlerMapping.setMappedInterceptors(getMappedInterceptors());
+		return handlerMapping;
+	}
+
+	@Bean
+	public BeanNameUrlHandlerMapping beanNameHandlerMapping() {
 		BeanNameUrlHandlerMapping mapping = new BeanNameUrlHandlerMapping();
 		mapping.setOrder(2);
+		mapping.setMappedInterceptors(getMappedInterceptors());
 		return mapping;
 	}
 
 	@Bean
-	HandlerMapping resourceHandlerMapping() {
+	public HandlerMapping resourceHandlerMapping() {
 		ResourceConfigurer configurer = new ResourceConfigurer(applicationContext, servletContext);
 		configurer.setOrder(Integer.MAX_VALUE-1);
 		configurers.configureResourceHandling(configurer);
@@ -169,14 +182,14 @@ class MvcConfiguration implements ApplicationContextAware, ServletContextAware {
 	}
 
 	@Bean
-	HandlerMapping defaultServletHandlerMapping() {
+	public HandlerMapping defaultServletHandlerMapping() {
 		DefaultServletHandlerConfigurer configurer = new DefaultServletHandlerConfigurer(servletContext);
 		configurers.configureDefaultServletHandling(configurer);
 		return configurer.getHandlerMapping();
 	}
 
 	@Bean
-	RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
+	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
 
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
@@ -185,29 +198,32 @@ class MvcConfiguration implements ApplicationContextAware, ServletContextAware {
 		adapter.setWebBindingInitializer(bindingInitializer);
 
 		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
-		configurers.addCustomArgumentResolvers(argumentResolvers);
+		configurers.addArgumentResolvers(argumentResolvers);
 		adapter.setCustomArgumentResolvers(argumentResolvers);
 
 		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
-		configurers.addCustomReturnValueHandlers(returnValueHandlers);
+		configurers.addReturnValueHandlers(returnValueHandlers);
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 
-		List<HttpMessageConverter<?>> converters = getDefaultHttpMessageConverters();
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		configurers.configureMessageConverters(converters);
+		if (converters.size() == 0) {
+			addDefaultHttpMessageConverters(converters);
+		}
 		adapter.setMessageConverters(converters);
 
 		return adapter;
 	}
 
 	@Bean(name="mvcConversionService")
-	FormattingConversionService conversionService() {
+	public FormattingConversionService conversionService() {
 		FormattingConversionService conversionService = new DefaultFormattingConversionService();
-		configurers.registerFormatters(conversionService);
+		configurers.addFormatters(conversionService);
 		return conversionService;
 	}
 
 	@Bean(name="mvcValidator")
-	Validator validator() {
+	public Validator validator() {
 		Validator validator = configurers.getValidator();
 		if (validator != null) {
 			return validator;
@@ -216,7 +232,7 @@ class MvcConfiguration implements ApplicationContextAware, ServletContextAware {
 			Class<?> clazz;
 			try {
 				String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
-				clazz = ClassUtils.forName(className, MvcConfiguration.class.getClassLoader());
+				clazz = ClassUtils.forName(className, WebMvcConfiguration.class.getClassLoader());
 			} catch (ClassNotFoundException e) {
 				throw new BeanInitializationException("Could not find default validator");
 			} catch (LinkageError e) {
@@ -236,11 +252,10 @@ class MvcConfiguration implements ApplicationContextAware, ServletContextAware {
 		}
 	}
 
-	private List<HttpMessageConverter<?>> getDefaultHttpMessageConverters() {
+	private void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> converters) {
 		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
 		stringConverter.setWriteAcceptCharset(false);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new ByteArrayHttpMessageConverter());
 		converters.add(stringConverter);
 		converters.add(new ResourceHttpMessageConverter());
@@ -258,28 +273,29 @@ class MvcConfiguration implements ApplicationContextAware, ServletContextAware {
 			converters.add(new AtomFeedHttpMessageConverter());
 			converters.add(new RssChannelHttpMessageConverter());
 		}
-
-		return converters;
 	}
 
 	@Bean
-	HttpRequestHandlerAdapter httpRequestHandlerAdapter() {
+	public HttpRequestHandlerAdapter httpRequestHandlerAdapter() {
 		return new HttpRequestHandlerAdapter();
 	}
 
 	@Bean
-	SimpleControllerHandlerAdapter simpleControllerHandlerAdapter() {
+	public SimpleControllerHandlerAdapter simpleControllerHandlerAdapter() {
 		return new SimpleControllerHandlerAdapter();
 	}
 
 	@Bean
-	HandlerExceptionResolver handlerExceptionResolver() throws Exception {
+	public HandlerExceptionResolver handlerExceptionResolver() throws Exception {
 		List<HandlerExceptionResolver> resolvers = new ArrayList<HandlerExceptionResolver>();
-		resolvers.add(createExceptionHandlerExceptionResolver());
-		resolvers.add(new ResponseStatusExceptionResolver());
-		resolvers.add(new DefaultHandlerExceptionResolver());
 		configurers.configureHandlerExceptionResolvers(resolvers);
 
+		if (resolvers.size() == 0) {
+			resolvers.add(createExceptionHandlerExceptionResolver());
+			resolvers.add(new ResponseStatusExceptionResolver());
+			resolvers.add(new DefaultHandlerExceptionResolver());
+		}
+		
 		HandlerExceptionResolverComposite composite = new HandlerExceptionResolverComposite();
 		composite.setOrder(0);
 		composite.setExceptionResolvers(resolvers);
@@ -288,22 +304,17 @@ class MvcConfiguration implements ApplicationContextAware, ServletContextAware {
 
 	private HandlerExceptionResolver createExceptionHandlerExceptionResolver() throws Exception {
 		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
-
-		List<HttpMessageConverter<?>> converters = getDefaultHttpMessageConverters();
-		configurers.configureMessageConverters(converters);
-		resolver.setMessageConverters(converters);
 		resolver.setOrder(0);
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		configurers.configureMessageConverters(converters);
+		if (converters.size() == 0) {
+			addDefaultHttpMessageConverters(converters);
+		}
+		resolver.setMessageConverters(converters);
 
 		resolver.afterPropertiesSet();
 		return resolver;
-	}
-
-	@Bean
-	MappedInterceptors mappedInterceptors() {
-		InterceptorConfigurer configurer = new InterceptorConfigurer();
-		configurer.addInterceptor(new ConversionServiceExposingInterceptor(conversionService()));
-		configurers.addInterceptors(configurer);
-		return configurer.getMappedInterceptors();
 	}
 
 }

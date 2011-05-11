@@ -34,7 +34,7 @@ import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler
  * by the Servlet container's default servlet.
  *
  * <p>It is important the configured handler remains last in the order of all {@link HandlerMapping} instances in
- * the Spring MVC web application context. That is is the case if relying on @{@link EnableMvcConfiguration}.
+ * the Spring MVC web application context. That is is the case if relying on @{@link EnableWebMvc}.
  * However, if you register your own HandlerMapping instance sure to set its "order" property to a value lower
  * than that of the {@link DefaultServletHttpRequestHandler}, which is {@link Integer#MAX_VALUE}.
  *
