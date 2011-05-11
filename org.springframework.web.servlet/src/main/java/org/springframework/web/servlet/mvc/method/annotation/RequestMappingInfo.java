@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.method.condition.ParamsRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
+import org.springframework.web.servlet.mvc.method.condition.RequestMethodsRequestCondition;
 
 /**
  * Contains a set of conditions to match to a given request such as URL patterns, HTTP methods, request parameters 
@@ -47,7 +49,7 @@ public final class RequestMappingInfo {
 
 	private final Set<String> patterns;
 
-	private final Set<RequestMethod> methods;
+	private final RequestMethodsRequestCondition methodsCondition;
 
 	private final ParamsRequestCondition paramsCondition;
 
@@ -62,20 +64,20 @@ public final class RequestMappingInfo {
 	 * 
 	 * <p>Package protected for testing purposes.
 	 */
-	RequestMappingInfo(Collection<String> patterns, Collection<RequestMethod> methods) {
-		this(patterns, methods, null, null, null);
+	RequestMappingInfo(Collection<String> patterns, RequestMethod[] methods) {
+		this(patterns, RequestConditionFactory.parseMethods(methods), null, null, null);
 	}
 
 	/**
 	 * Creates a new {@code RequestMappingInfo} instance with a full set of conditions.
 	 */
 	public RequestMappingInfo(Collection<String> patterns,
-							 Collection<RequestMethod> methods,
+							 RequestMethodsRequestCondition methodsCondition,
 							 ParamsRequestCondition paramsCondition,
 							 HeadersRequestCondition headersCondition,
 							 ConsumesRequestCondition consumesCondition) {
 		this.patterns = asUnmodifiableSet(prependLeadingSlash(patterns));
-		this.methods = asUnmodifiableSet(methods);
+		this.methodsCondition = methodsCondition != null ? methodsCondition : new RequestMethodsRequestCondition();
 		this.paramsCondition = paramsCondition != null ? paramsCondition : new ParamsRequestCondition();
 		this.headersCondition = headersCondition != null ? headersCondition : new HeadersRequestCondition();
 		this.consumesCondition = consumesCondition != null ? consumesCondition : new ConsumesRequestCondition();
@@ -111,10 +113,10 @@ public final class RequestMappingInfo {
 	}
 
 	/**
-	 * Returns the request methods of this request key.
+	 * Returns the request method conditions of this request key.
 	 */
-	public Set<RequestMethod> getMethods() {
-		return methods;
+	public RequestMethodsRequestCondition getMethods() {
+		return methodsCondition;
 	}
 
 	/**
@@ -158,7 +160,7 @@ public final class RequestMappingInfo {
 	 */
 	public RequestMappingInfo combine(RequestMappingInfo methodKey, PathMatcher pathMatcher) {
 		Set<String> patterns = combinePatterns(this.patterns, methodKey.patterns, pathMatcher);
-		Set<RequestMethod> methods = union(this.methods, methodKey.methods);
+		RequestMethodsRequestCondition methods = this.methodsCondition.combine(methodKey.methodsCondition);
 		ParamsRequestCondition params = this.paramsCondition.combine(methodKey.paramsCondition);
 		HeadersRequestCondition headers = this.headersCondition.combine(methodKey.headersCondition);
 		ConsumesRequestCondition consumes = this.consumesCondition.combine(methodKey.consumesCondition);
@@ -189,12 +191,6 @@ public final class RequestMappingInfo {
 		return result;
 	}
 
-	private static <T> Set<T> union(Collection<T> s1, Collection<T> s2) {
-		Set<T> union = new LinkedHashSet<T>(s1);
-		union.addAll(s2);
-		return union;
-	}
-
 	/**
 	 * Returns a new {@code RequestMappingInfo} that contains all conditions of this key that are relevant to the request.
 	 * <ul>
@@ -210,19 +206,19 @@ public final class RequestMappingInfo {
 	 * @return a new request key that contains all matching attributes, or {@code null} if not all conditions match
 	 */
 	public RequestMappingInfo getMatchingRequestMapping(String lookupPath, HttpServletRequest request, PathMatcher pathMatcher) {
+		RequestMethodsRequestCondition matchingMethodCondition = methodsCondition.getMatchingCondition(request);
 		ParamsRequestCondition matchingParamsCondition = paramsCondition.getMatchingCondition(request);
 		HeadersRequestCondition matchingHeadersCondition = headersCondition.getMatchingCondition(request);
 		ConsumesRequestCondition matchingConsumesCondition = consumesCondition.getMatchingCondition(request);
 
-		if (!checkMethod(request) || matchingParamsCondition == null || matchingHeadersCondition == null ||
+		if (matchingMethodCondition == null || matchingParamsCondition == null || matchingHeadersCondition == null ||
 				matchingConsumesCondition == null) {
 			return null;
 		}
 		else {
-			List<String> matchingPatterns = getMatchingPatterns(lookupPath, request, pathMatcher);
+			List<String> matchingPatterns = getMatchingPatterns(lookupPath, pathMatcher);
 			if (!matchingPatterns.isEmpty()) {
-				Set<RequestMethod> matchingMethods = getMatchingMethod(request);
-				return new RequestMappingInfo(matchingPatterns, matchingMethods, matchingParamsCondition,
+				return new RequestMappingInfo(matchingPatterns, matchingMethodCondition, matchingParamsCondition,
 						matchingHeadersCondition, matchingConsumesCondition);
 			}
 			else {
@@ -231,9 +227,7 @@ public final class RequestMappingInfo {
 		}
 	}
 
-	private List<String> getMatchingPatterns(String lookupPath, 
-											 HttpServletRequest request,
-											 PathMatcher pathMatcher) {
+	private List<String> getMatchingPatterns(String lookupPath, PathMatcher pathMatcher) {
 
 		List<String> matchingPatterns = new ArrayList<String>();
 		for (String pattern : this.patterns) {
@@ -246,19 +240,6 @@ public final class RequestMappingInfo {
 		Collections.sort(matchingPatterns, pathMatcher.getPatternComparator(lookupPath));
 
 		return matchingPatterns;
-	}
-
-	private Set<RequestMethod> getMatchingMethod(HttpServletRequest request) {
-		if (this.methods.isEmpty()) {
-			return this.methods;
-		}
-		else {
-			return Collections.singleton(RequestMethod.valueOf(request.getMethod()));
-		}
-	}
-
-	private boolean checkMethod(HttpServletRequest request) {
-		return methods.isEmpty() || methods.contains(RequestMethod.valueOf(request.getMethod()));
 	}
 
 	private String getMatchingPattern(String pattern, String lookupPath, PathMatcher pathMatcher) {
@@ -286,7 +267,8 @@ public final class RequestMappingInfo {
 		}
 		if (obj != null && obj instanceof RequestMappingInfo) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
-			return (this.patterns.equals(other.patterns) && this.methods.equals(other.methods) &&
+			return (this.patterns.equals(other.patterns) &&
+					this.methodsCondition.equals(other.methodsCondition) &&
 					this.paramsCondition.equals(other.paramsCondition) &&
 					this.headersCondition.equals(other.headersCondition) &&
 					this.consumesCondition.equals(other.consumesCondition));
@@ -299,7 +281,7 @@ public final class RequestMappingInfo {
 		int result = hash;
 		if (result == 0) {
 			result = patterns.hashCode();
-			result = 31 * result + methods.hashCode();
+			result = 31 * result + methodsCondition.hashCode();
 			result = 31 * result + paramsCondition.hashCode();
 			result = 31 * result + headersCondition.hashCode();
 			result = 31 * result + consumesCondition.hashCode();
@@ -312,13 +294,10 @@ public final class RequestMappingInfo {
 	public String toString() {
 		StringBuilder builder = new StringBuilder("{");
 		builder.append(patterns);
-		if (!methods.isEmpty()) {
-			builder.append(',');
-			builder.append(methods);
-		}
-		builder.append(",params=").append(paramsCondition.toString());
-		builder.append(",headers=").append(headersCondition.toString());
-		builder.append(",consumes=").append(consumesCondition.toString());
+		builder.append(",methods=").append(methodsCondition);
+		builder.append(",params=").append(paramsCondition);
+		builder.append(",headers=").append(headersCondition);
+		builder.append(",consumes=").append(consumesCondition);
 		builder.append('}');
 		return builder.toString();
 	}

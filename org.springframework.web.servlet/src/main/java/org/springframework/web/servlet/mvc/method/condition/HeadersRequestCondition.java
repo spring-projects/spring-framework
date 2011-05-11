@@ -59,7 +59,7 @@ public class HeadersRequestCondition
 	}
 
 	/**
-	 * Returns a new {@code RequestCondition} that contains all conditions of this key that match the request.
+	 * Returns a new {@code RequestCondition} that contains all conditions that match the request.
 	 *
 	 * @param request the request
 	 * @return a new request condition that contains all matching attributes, or {@code null} if not all conditions match

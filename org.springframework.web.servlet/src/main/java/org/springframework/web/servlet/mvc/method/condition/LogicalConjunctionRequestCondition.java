@@ -34,7 +34,7 @@ class LogicalConjunctionRequestCondition<T extends RequestCondition> extends Req
 
 	public boolean match(HttpServletRequest request) {
 		Set<T> conditions = getConditions();
-		if (conditions.isEmpty()) {
+		if (isEmpty()) {
 			return true;
 		}
 		for (T condition : conditions) {

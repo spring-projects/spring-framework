@@ -124,7 +124,8 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 	}
 
 	private static RequestMappingInfo createFromRequestMapping(RequestMapping annotation) {
-		return new RequestMappingInfo(Arrays.asList(annotation.value()), Arrays.asList(annotation.method()),
+		return new RequestMappingInfo(Arrays.asList(annotation.value()),
+						RequestConditionFactory.parseMethods(annotation.method()),
 						RequestConditionFactory.parseParams(annotation.params()),
 						RequestConditionFactory.parseHeaders(annotation.headers()),
 						RequestConditionFactory.parseConsumes(annotation.consumes(), annotation.headers()));
@@ -171,7 +172,7 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 		for (RequestMappingInfo info : requestMappingInfos) {
 			for (String pattern : info.getPatterns()) {
 				if (pathMatcher.match(pattern, lookupPath)) {
-					for (RequestMethod method : info.getMethods()) {
+					for (RequestMethod method : info.getMethods().getMethods()) {
 						allowedMethods.add(method.name());
 					}
 				}
@@ -250,7 +251,7 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 				return result;
 			}
 */
-			result = otherMapping.getMethods().size() - mapping.getMethods().size();
+			result = mapping.getMethods().compareTo(otherMapping.getMethods());
 			if (result != 0) {
 				return result;
 			}

@@ -32,6 +32,9 @@ class LogicalDisjunctionRequestCondition<T extends RequestCondition> extends Req
 	}
 
 	public boolean match(HttpServletRequest request) {
+		if (isEmpty()) {
+			return true;
+		}
 		for (RequestCondition condition : getConditions()) {
 			if (condition.match(request)) {
 				return true;
