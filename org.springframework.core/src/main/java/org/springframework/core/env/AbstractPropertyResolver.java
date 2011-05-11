@@ -55,6 +55,16 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		this.conversionService = conversionService;
 	}
 
+	public String getProperty(String key, String defaultValue) {
+		String value = getProperty(key);
+		return value == null ? defaultValue : value;
+	}
+
+	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+		T value = getProperty(key, targetType);
+		return value == null ? defaultValue : value;
+	}
+
 	public String getRequiredProperty(String key) throws IllegalStateException {
 		String value = getProperty(key);
 		if (value == null) {

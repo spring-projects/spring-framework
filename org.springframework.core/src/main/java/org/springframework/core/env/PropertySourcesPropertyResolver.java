@@ -56,11 +56,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		return this.getProperty(key, String.class);
 	}
 
-	public String getProperty(String key, String defaultValue) {
-		String value = getProperty(key);
-		return value == null ? defaultValue : value;
-	}
-
 	public <T> T getProperty(String key, Class<T> targetValueType) {
 		boolean debugEnabled = logger.isDebugEnabled();
 		if (logger.isTraceEnabled()) {
@@ -93,11 +88,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		}
 		return null;
 	}
-
-	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
-		T value = getProperty(key, targetType);
-		return value == null ? defaultValue : value;
-	};
 
 	public <T> Class<T> getPropertyAsClass(String key, Class<T> targetValueType) {
 		boolean debugEnabled = logger.isDebugEnabled();
