@@ -16,33 +16,32 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
 import org.junit.Test;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
 import org.springframework.web.util.UrlPathHelper;
 
+import static java.util.Arrays.*;
+import static java.util.Collections.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+
 /**
  * Test fixture for {@link RequestMappingInfo} tests.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class RequestKeyTests {
+public class RequestMappingInfoTests {
 
 	@Test
 	public void equals() {
-		RequestMappingInfo key1 = new RequestMappingInfo(singleton("/foo"), singleton(GET));
-		RequestMappingInfo key2 = new RequestMappingInfo(singleton("/foo"), singleton(GET));
+		RequestMappingInfo key1 = new RequestMappingInfo(singleton("/foo"), methods(GET));
+		RequestMappingInfo key2 = new RequestMappingInfo(singleton("/foo"), methods(GET));
 
 		assertEquals(key1, key2);
 		assertEquals(key1.hashCode(), key2.hashCode());
@@ -50,8 +49,8 @@ public class RequestKeyTests {
 
 	@Test
 	public void equalsPrependSlash() {
-		RequestMappingInfo key1 = new RequestMappingInfo(singleton("/foo"), singleton(GET));
-		RequestMappingInfo key2 = new RequestMappingInfo(singleton("foo"), singleton(GET));
+		RequestMappingInfo key1 = new RequestMappingInfo(singleton("/foo"), methods(GET));
+		RequestMappingInfo key2 = new RequestMappingInfo(singleton("foo"), methods(GET));
 
 		assertEquals(key1, key2);
 		assertEquals(key1.hashCode(), key2.hashCode());
@@ -86,7 +85,7 @@ public class RequestKeyTests {
 		key3 = createKeyFromPatterns("/t1");
 		assertEquals(key3.getPatterns(), key1.combine(key2, pathMatcher).getPatterns());
 	}
-	
+
 	@Test
 	public void matchPatternsToRequest() {
 		UrlPathHelper pathHelper = new UrlPathHelper();
@@ -94,7 +93,8 @@ public class RequestKeyTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		RequestMappingInfo key = new RequestMappingInfo(singleton("/foo"), null);
-		RequestMappingInfo match = key.getMatchingRequestMapping(pathHelper.getLookupPathForRequest(request), request, pathMatcher);
+		RequestMappingInfo match =
+				key.getMatchingRequestMapping(pathHelper.getLookupPathForRequest(request), request, pathMatcher);
 
 		assertNotNull(match);
 
@@ -142,12 +142,12 @@ public class RequestKeyTests {
 
 		assertNotNull("No method matches any method", match);
 
-		key = new RequestMappingInfo(singleton("/foo"), singleton(GET));
+		key = new RequestMappingInfo(singleton("/foo"), methods(GET));
 		match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNotNull("Exact match", match);
 
-		key = new RequestMappingInfo(singleton("/foo"), singleton(POST));
+		key = new RequestMappingInfo(singleton("/foo"), methods(POST));
 		match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNull("No match", match);
@@ -159,9 +159,9 @@ public class RequestKeyTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 
-		RequestMappingInfo key = new RequestMappingInfo(asList("/foo*", "/bar"), asList(GET, POST));
+		RequestMappingInfo key = new RequestMappingInfo(asList("/foo*", "/bar"), methods(GET, POST));
 		RequestMappingInfo match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
-		RequestMappingInfo expected = new RequestMappingInfo(singleton("/foo*"), singleton(GET));
+		RequestMappingInfo expected = new RequestMappingInfo(singleton("/foo*"), methods(GET));
 
 		assertEquals("Matching RequestKey contains matched patterns and methods only", expected, match);
 
@@ -179,12 +179,15 @@ public class RequestKeyTests {
 		request.setParameter("foo", "bar");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 
-		RequestMappingInfo key = new RequestMappingInfo(asList("/foo"), null, RequestConditionFactory.parseParams("foo=bar"), null, null);
+		RequestMappingInfo key =
+				new RequestMappingInfo(asList("/foo"), null, RequestConditionFactory.parseParams("foo=bar"), null,
+						null);
 		RequestMappingInfo match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNotNull(match);
 
-		key = new RequestMappingInfo(singleton("/foo"), null, RequestConditionFactory.parseParams("foo!=bar"), null, null);
+		key = new RequestMappingInfo(singleton("/foo"), null, RequestConditionFactory.parseParams("foo!=bar"), null,
+				null);
 		match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNull(match);
@@ -197,12 +200,15 @@ public class RequestKeyTests {
 		request.addHeader("foo", "bar");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 
-		RequestMappingInfo key = new RequestMappingInfo(singleton("/foo"), null, null, RequestConditionFactory.parseHeaders("foo=bar"), null);
+		RequestMappingInfo key =
+				new RequestMappingInfo(singleton("/foo"), null, null, RequestConditionFactory.parseHeaders("foo=bar"),
+						null);
 		RequestMappingInfo match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNotNull(match);
 
-		key = new RequestMappingInfo(singleton("/foo"), null, null, RequestConditionFactory.parseHeaders("foo!=bar"), null);
+		key = new RequestMappingInfo(singleton("/foo"), null, null, RequestConditionFactory.parseHeaders("foo!=bar"),
+				null);
 		match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNull(match);
@@ -215,14 +221,14 @@ public class RequestKeyTests {
 		request.setContentType("text/plain");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 
-		RequestMappingInfo key = new RequestMappingInfo(singleton("/foo"), null, null, null, RequestConditionFactory.parseConsumes(
-				"text/plain"));
+		RequestMappingInfo key = new RequestMappingInfo(singleton("/foo"), null, null, null,
+				RequestConditionFactory.parseConsumes("text/plain"));
 		RequestMappingInfo match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNotNull(match);
 
-		key = new RequestMappingInfo(singleton("/foo"), null, null, null, RequestConditionFactory.parseConsumes(
-				"application/xml"));
+		key = new RequestMappingInfo(singleton("/foo"), null, null, null,
+				RequestConditionFactory.parseConsumes("application/xml"));
 		match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNull(match);
@@ -230,6 +236,15 @@ public class RequestKeyTests {
 
 	private RequestMappingInfo createKeyFromPatterns(String... patterns) {
 		return new RequestMappingInfo(asList(patterns), null);
+	}
+
+	private RequestMethod[] methods(RequestMethod... methods) {
+		if (methods != null) {
+			return methods;
+		}
+		else {
+			return new RequestMethod[0];
+		}
 	}
 
 }

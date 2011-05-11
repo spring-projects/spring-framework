@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * Factory for {@link RequestCondition} objects.
@@ -38,14 +39,25 @@ public abstract class RequestConditionFactory {
 	private static final String ACCEPT_HEADER = "Accept";
 
 	/**
-	 * Parses the given parameters, and returns them as a single request conditions.
+	 * Parses the given request methods, and returns them as a single request condition.
+	 *
+	 * @param methods the methods
+	 * @return the request condition
+	 * @see org.springframework.web.bind.annotation.RequestMapping#method()
+	 */
+	public static RequestMethodsRequestCondition parseMethods(RequestMethod... methods) {
+		return methods != null ? new RequestMethodsRequestCondition(methods) : new RequestMethodsRequestCondition();
+	}
+
+	/**
+	 * Parses the given parameters, and returns them as a single request condition.
 	 *
 	 * @param params the parameters
 	 * @return the request condition
 	 * @see org.springframework.web.bind.annotation.RequestMapping#params()
 	 */
 	public static ParamsRequestCondition parseParams(String... params) {
-		return new ParamsRequestCondition(params);
+		return params != null ? new ParamsRequestCondition(params) : new ParamsRequestCondition();
 	}
 
 	/**
@@ -56,6 +68,9 @@ public abstract class RequestConditionFactory {
 	 * @see org.springframework.web.bind.annotation.RequestMapping#headers()
 	 */
 	public static HeadersRequestCondition parseHeaders(String... headers) {
+		if (headers == null) {
+			return new HeadersRequestCondition();
+		}
 		HeadersRequestCondition headersCondition = new HeadersRequestCondition(headers);
 
 		// filter out Accept and Content-Type headers, they are dealt with by produces and consumes respectively
@@ -107,8 +122,8 @@ public abstract class RequestConditionFactory {
 			if (CONTENT_TYPE_HEADER.equalsIgnoreCase(headerCondition.name)) {
 				List<MediaType> mediaTypes = MediaType.parseMediaTypes(headerCondition.value);
 				for (MediaType mediaType : mediaTypes) {
-					allConditions.add(
-							new ConsumesRequestCondition.ConsumeRequestCondition(mediaType, headerCondition.isNegated));
+					allConditions.add(new ConsumesRequestCondition.ConsumeRequestCondition(mediaType,
+							headerCondition.isNegated));
 				}
 			}
 		}

@@ -38,7 +38,7 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class RequestKeyComparatorTests {
+public class RequestMappingInfoComparatorTests {
 
 	private RequestMappingHandlerMapping handlerMapping;
 
@@ -90,7 +90,7 @@ public class RequestKeyComparatorTests {
 	public void oneMethodWinsOverNone() {
 		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator("", request);
 		RequestMappingInfo key1 = new RequestMappingInfo(null, null);
-		RequestMappingInfo key2 = new RequestMappingInfo(null, asList(RequestMethod.GET));
+		RequestMappingInfo key2 = new RequestMappingInfo(null, new RequestMethod[] {RequestMethod.GET});
 
 		assertEquals(1, comparator.compare(key1, key2));
 	}
@@ -98,9 +98,9 @@ public class RequestKeyComparatorTests {
 	@Test
 	public void methodsAndParams() {
 		RequestMappingInfo empty = new RequestMappingInfo(null, null);
-		RequestMappingInfo oneMethod = new RequestMappingInfo(null, asList(RequestMethod.GET));
+		RequestMappingInfo oneMethod = new RequestMappingInfo(null, new RequestMethod[] {RequestMethod.GET});
 		RequestMappingInfo oneMethodOneParam =
-				new RequestMappingInfo(null, asList(RequestMethod.GET), RequestConditionFactory.parseParams("foo"), null, null);
+				new RequestMappingInfo(null, RequestConditionFactory.parseMethods(RequestMethod.GET), RequestConditionFactory.parseParams("foo"), null, null);
 		List<RequestMappingInfo> list = asList(empty, oneMethod, oneMethodOneParam);
 		Collections.shuffle(list);
 		Collections.sort(list, handlerMapping.getMappingComparator("", request));
