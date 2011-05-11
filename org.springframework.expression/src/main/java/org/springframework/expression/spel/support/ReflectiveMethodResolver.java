@@ -49,7 +49,28 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	private static Method[] NO_METHODS = new Method[0];
 
 	private Map<Class<?>, MethodFilter> filters = null;
+	
+	// Using distance will ensure a more accurate match is discovered, 
+	// more closely following the Java rules.
+	private boolean useDistance = false;
 
+	
+	public ReflectiveMethodResolver() {
+		
+	}
+	
+	/**
+	 * This constructors allows the ReflectiveMethodResolver to be configured such that it will
+	 * use a distance computation to check which is the better of two close matches (when there
+	 * are multiple matches).  Using the distance computation is intended to ensure matches
+	 * are more closely representative of what a Java compiler would do when taking into 
+	 * account boxing/unboxing and whether the method candidates are declared to handle a
+	 * supertype of the type (of the argument) being passed in.
+	 * @param useDistance true if distance computation should be used when calculating matches
+	 */
+	public ReflectiveMethodResolver(boolean useDistance) {
+		this.useDistance = useDistance;
+	}
 	
 	/**
 	 * Locate a method on a type. There are three kinds of match that might occur:
@@ -93,6 +114,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			});
 
 			Method closeMatch = null;
+			int closeMatchDistance = Integer.MAX_VALUE;
 			int[] argsToConvert = null;
 			Method matchRequiringConversion = null;
 			boolean multipleOptions = false;
@@ -121,7 +143,16 @@ public class ReflectiveMethodResolver implements MethodResolver {
 							return new ReflectiveMethodExecutor(method, null);
 						}
 						else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.CLOSE) {
-							closeMatch = method;
+							if (!useDistance) {
+								closeMatch = method;
+							} else {
+								int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
+								if (matchDistance<closeMatchDistance) {
+									// this is a better match
+									closeMatchDistance = matchDistance;
+									closeMatch = method;
+								}
+							}
 						}
 						else if (matchInfo.kind == ReflectionHelper.ArgsMatchKind.REQUIRES_CONVERSION) {
 							if (matchRequiringConversion != null) {

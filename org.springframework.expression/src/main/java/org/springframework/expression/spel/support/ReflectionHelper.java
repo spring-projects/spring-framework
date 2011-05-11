@@ -102,6 +102,49 @@ public class ReflectionHelper {
 			}
 		}
 	}
+	
+	/**
+	 * Based on {@link MethodInvoker.getTypeDifferenceWeight} but operates on TypeDescriptors.
+	 */
+	public static int getTypeDifferenceWeight(List<TypeDescriptor> paramTypes, List<TypeDescriptor> argTypes) {
+		int result = 0;
+		for (int i = 0,max=paramTypes.size(); i < max; i++) {
+			TypeDescriptor argType = argTypes.get(i);
+			TypeDescriptor paramType = paramTypes.get(i);
+			if (argType==TypeDescriptor.NULL) {
+				if (paramType.isPrimitive()) {
+					return Integer.MAX_VALUE;
+				}
+			}
+			if (!ClassUtils.isAssignable(paramType.getClass(), argType.getClass())) {
+				return Integer.MAX_VALUE;
+			}
+			if (argType != TypeDescriptor.NULL) {
+				Class paramTypeClazz = paramType.getType();
+				if (paramTypeClazz.isPrimitive()) {
+					paramTypeClazz = Object.class;
+			    }
+				Class superClass = argType.getClass().getSuperclass();
+				while (superClass != null) {
+					if (paramType.equals(superClass)) {
+						result = result + 2;
+						superClass = null;
+					}
+					else if (ClassUtils.isAssignable(paramTypeClazz, superClass)) {
+						result = result + 2;
+						superClass = superClass.getSuperclass();
+					}
+					else {
+						superClass = null;
+					}
+				}
+				if (paramTypeClazz.isInterface()) {
+					result = result + 1;
+				}
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * Compare argument arrays and return information about whether they match. A supplied type converter and
