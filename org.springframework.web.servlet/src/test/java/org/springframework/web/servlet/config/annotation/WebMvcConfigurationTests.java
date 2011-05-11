@@ -21,11 +21,15 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.easymock.Capture;
 import org.easymock.EasyMock;
@@ -33,32 +37,39 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
- * A test fixture with an {@link MvcConfiguration} and a mock {@link MvcConfigurer} for verifying delegation.
+ * A test fixture for WebMvcConfiguration tests.
  *
  * @author Rossen Stoyanchev
  */
-public class MvcConfigurationTests {
+public class WebMvcConfigurationTests {
 
-	private MvcConfiguration mvcConfiguration;
+	private WebMvcConfiguration mvcConfiguration;
 
-	private MvcConfigurer configurer;
+	private WebMvcConfigurer configurer;
 
 	@Before
 	public void setUp() {
-		configurer = EasyMock.createMock(MvcConfigurer.class);
-		mvcConfiguration = new MvcConfiguration();
-		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
+		configurer = EasyMock.createMock(WebMvcConfigurer.class);
+		mvcConfiguration = new WebMvcConfiguration();
 	}
 
 	@Test
@@ -69,12 +80,13 @@ public class MvcConfigurationTests {
 		Capture<List<HttpMessageConverter<?>>> converters = new Capture<List<HttpMessageConverter<?>>>();
 
 		expect(configurer.getValidator()).andReturn(null);
-		configurer.registerFormatters(capture(conversionService));
-		configurer.addCustomArgumentResolvers(capture(resolvers));
-		configurer.addCustomReturnValueHandlers(capture(handlers));
+		configurer.addFormatters(capture(conversionService));
+		configurer.addArgumentResolvers(capture(resolvers));
+		configurer.addReturnValueHandlers(capture(handlers));
 		configurer.configureMessageConverters(capture(converters));
 		replay(configurer);
 
+		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
 		RequestMappingHandlerAdapter adapter = mvcConfiguration.requestMappingHandlerAdapter();
 
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
@@ -89,11 +101,30 @@ public class MvcConfigurationTests {
 		verify(configurer);
 	}
 
+	@Test 
+	public void configureMessageConverters() {
+		RequestMappingHandlerAdapter adapter = mvcConfiguration.requestMappingHandlerAdapter();
+		assertTrue("There should be at least two default converters ", adapter.getMessageConverters().size() > 1);
+
+		List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
+		configurers.add(new WebMvcConfigurerAdapter() {
+			@Override
+			public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+				converters.add(new StringHttpMessageConverter());
+			}
+		});
+		mvcConfiguration.setConfigurers(configurers );
+		
+		adapter = mvcConfiguration.requestMappingHandlerAdapter();
+		assertEquals("Only one custom converter should be registered", 1, adapter.getMessageConverters().size());
+	}
+	
 	@Test
 	public void getCustomValidator() {
 		expect(configurer.getValidator()).andReturn(new LocalValidatorFactoryBean());
 		replay(configurer);
 
+		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
 		mvcConfiguration.validator();
 
 		verify(configurer);
@@ -104,6 +135,7 @@ public class MvcConfigurationTests {
 		expect(configurer.getValidator()).andReturn(null);
 		replay(configurer);
 
+		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
 		mvcConfiguration.validator();
 
 		verify(configurer);
@@ -118,6 +150,7 @@ public class MvcConfigurationTests {
 		configurer.configureHandlerExceptionResolvers(capture(exceptionResolvers));
 		replay(configurer);
 
+		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
 		mvcConfiguration.handlerExceptionResolver();
 
 		assertEquals(3, exceptionResolvers.getValue().size());
@@ -129,4 +162,47 @@ public class MvcConfigurationTests {
 		verify(configurer);
 	}
 
+	@Test 
+	public void configureExceptionResolvers() throws Exception {
+		HandlerExceptionResolverComposite composite;
+		
+		composite = (HandlerExceptionResolverComposite) mvcConfiguration.handlerExceptionResolver();
+		assertTrue("Expected more than one exception resolver by default", composite.getExceptionResolvers().size() > 1);
+		
+		List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
+		configurers.add(new WebMvcConfigurerAdapter() {
+			@Override
+			public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+				exceptionResolvers.add(new DefaultHandlerExceptionResolver());
+			}
+		});
+		mvcConfiguration.setConfigurers(configurers);
+		
+		composite = (HandlerExceptionResolverComposite) mvcConfiguration.handlerExceptionResolver();
+		assertEquals("Only one custom converter is expected", 1, composite.getExceptionResolvers().size());
+	}
+	
+	@Test
+	public void configureInterceptors() throws Exception {
+		HttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		
+		StaticWebApplicationContext context = new StaticWebApplicationContext();
+		context.registerSingleton("controller", TestHandler.class);
+		
+		RequestMappingHandlerMapping hm = mvcConfiguration.requestMappingHandlerMapping();
+		hm.setApplicationContext(context);
+		HandlerExecutionChain chain = hm.getHandler(request);
+		assertNotNull("Expected at one default converter", chain.getInterceptors());
+	}
+	
+	@Controller
+	private static class TestHandler {
+		
+		@SuppressWarnings("unused")
+		@RequestMapping("/")
+		public void handle() {
+		}
+		
+	}
+	
 }

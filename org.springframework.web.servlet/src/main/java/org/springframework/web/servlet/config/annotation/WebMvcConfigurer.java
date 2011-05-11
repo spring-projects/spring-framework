@@ -36,12 +36,12 @@ import com.sun.corba.se.impl.presentation.rmi.ExceptionHandler;
 
 /**
  * Defines options for customizing or adding to the default Spring MVC configuration enabled through the use
- * of @{@link EnableMvcConfiguration}. The @{@link Configuration} class annotated with @{@link EnableMvcConfiguration}
+ * of @{@link EnableWebMvc}. The @{@link Configuration} class annotated with @{@link EnableWebMvc}
  * is the most obvious place to implement this interface. However all @{@link Configuration} classes and more generally
  * all Spring beans that implement this interface will be detected at startup and given a chance to customize Spring
- * MVC configuration provided it is enabled through @{@link EnableMvcConfiguration}.
+ * MVC configuration provided it is enabled through @{@link EnableWebMvc}.
  *
- * <p>Implementations of this interface will find it convenient to extend {@link MvcConfigurerSupport} that
+ * <p>Implementations of this interface will find it convenient to extend {@link WebMvcConfigurerAdapter} that
  * provides default method implementations and allows overriding only methods of interest.
  *
  * @author Rossen Stoyanchev
@@ -49,17 +49,18 @@ import com.sun.corba.se.impl.presentation.rmi.ExceptionHandler;
  * @author David Syer
  * @since 3.1
  */
-public interface MvcConfigurer {
+public interface WebMvcConfigurer {
 
 	/**
-	 * Register application-specific {@link Converter}s and {@link Formatter}s for use in Spring MVC.
+	 * Add {@link Converter}s and {@link Formatter}s in addition to the ones registered by default.
 	 */
-	void registerFormatters(FormatterRegistry formatterRegistry);
+	void addFormatters(FormatterRegistry formatterRegistry);
 
 	/**
-	 * Customize the list of {@link HttpMessageConverter}s to use when resolving method arguments or handling
-	 * return  values from @{@link RequestMapping} and @{@link ExceptionHandler} methods.
-	 * @param converters the list of converters, initially populated with the default set of converters
+	 * Configure the list of {@link HttpMessageConverter}s to use when resolving method arguments or handling
+	 * return  values in @{@link RequestMapping} and @{@link ExceptionHandler} methods. 
+	 * Specifying custom converters overrides the converters registered by default.
+	 * @param converters a list to add message converters to
 	 */
 	void configureMessageConverters(List<HttpMessageConverter<?>> converters);
 
@@ -71,37 +72,43 @@ public interface MvcConfigurer {
 	Validator getValidator();
 
 	/**
-	 * Add custom {@link HandlerMethodArgumentResolver}s to use for resolving argument values
-	 * on @{@link RequestMapping} and @{@link ExceptionHandler} methods.
+	 * Add custom {@link HandlerMethodArgumentResolver}s to use in addition to the ones registered by default.
+	 * <p>Generally custom argument resolvers are invoked first. However this excludes default argument resolvers that
+	 * rely on the presence of annotations (e.g. {@code @RequestParameter}, {@code @PathVariable}, etc.). Those 
+	 * argument resolvers are not customizable without configuring RequestMappingHandlerAdapter directly. 
 	 * @param argumentResolvers the list of custom converters, initially empty
 	 */
-	void addCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers);
+	void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers);
 
 	/**
-	 * Add custom {@link HandlerMethodReturnValueHandler}s to use for handling return values
-	 * from @{@link RequestMapping} and @{@link ExceptionHandler} methods.
+	 * Add custom {@link HandlerMethodReturnValueHandler}s to in addition to the ones registered by default.
+	 * <p>Generally custom return value handlers are invoked first. However this excludes default return value handlers 
+	 * that rely on the presence of annotations (e.g. {@code @ResponseBody}, {@code @ModelAttribute}, etc.). Those 
+	 * handlers are not customizable without configuring RequestMappingHandlerAdapter directly.
 	 * @param returnValueHandlers the list of custom handlers, initially empty
 	 */
-	void addCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers);
+	void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers);
 
 	/**
-	 * Customize the list of {@link HandlerExceptionResolver}s to use for handling controller exceptions.
-	 * @param exceptionResolvers the list of resolvers, initially populated with the default set of resolvers
+	 * Configure the list of {@link HandlerExceptionResolver}s to use for handling unresolved controller exceptions.
+	 * Specifying exception resolvers overrides the ones registered by default.
+	 * @param exceptionResolvers a list to add exception resolvers to
 	 */
 	void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
 
 	/**
-	 * Add Spring MVC interceptors. Interceptors can be of type {@link HandlerInterceptor} or
+	 * Configure the Spring MVC interceptors to use. Interceptors can be of type {@link HandlerInterceptor} or
 	 * {@link WebRequestInterceptor}.  They allow requests to be pre/post processed before/after controller
 	 * invocation. Interceptors can be registered to apply to all requests or limited to a set of path patterns.
 	 * @see InterceptorConfigurer
 	 */
-	void addInterceptors(InterceptorConfigurer interceptorConfigurer);
+	void configureInterceptors(InterceptorConfigurer interceptorConfigurer);
 
 	/**
-	 * Map URL paths to view names. This is convenient when a request can be rendered without a controller.
+	 * Configure the view controllers to use. A view controller is used to map a URL path directly to a view name.
+	 * This is convenient when a request does not require controller logic.
 	 */
-	void addViewControllers(ViewControllerConfigurer viewControllerConfigurer);
+	void configureViewControllers(ViewControllerConfigurer viewControllerConfigurer);
 
 	/**
 	 * Configure a handler for serving static resources such as images, js, and, css files through Spring MVC

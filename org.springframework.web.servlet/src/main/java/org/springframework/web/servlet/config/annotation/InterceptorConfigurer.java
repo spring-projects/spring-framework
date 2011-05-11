@@ -24,7 +24,6 @@ import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.MappedInterceptor;
-import org.springframework.web.servlet.handler.MappedInterceptors;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 
 /**
@@ -117,10 +116,10 @@ public class InterceptorConfigurer {
 	}
 
 	/**
-	 * Returns a {@link MappedInterceptors} instance with all registered interceptors.
+	 * Returns all registered interceptors.
 	 */
-	protected MappedInterceptors getMappedInterceptors() {
-		return new MappedInterceptors(mappedInterceptors.toArray(new MappedInterceptor[mappedInterceptors.size()]));
+	protected MappedInterceptor[] getInterceptors() {
+		return mappedInterceptors.toArray(new MappedInterceptor[mappedInterceptors.size()]);
 	}
 
 }

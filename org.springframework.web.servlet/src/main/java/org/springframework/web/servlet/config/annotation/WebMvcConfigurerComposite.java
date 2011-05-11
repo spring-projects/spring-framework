@@ -29,78 +29,78 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * An {@link MvcConfigurer} implementation that delegates to other {@link MvcConfigurer} instances.
+ * An {@link WebMvcConfigurer} implementation that delegates to other {@link WebMvcConfigurer} instances.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-class MvcConfigurerComposite implements MvcConfigurer {
+class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
-	private final List<MvcConfigurer> configurers = new ArrayList<MvcConfigurer>();
+	private final List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
 
-	void addConfigurers(List<MvcConfigurer> configurers) {
+	public void addConfigurers(List<WebMvcConfigurer> configurers) {
 		if (configurers != null) {
 			this.configurers.addAll(configurers);
 		}
 	}
 
-	public void registerFormatters(FormatterRegistry formatterRegistry) {
-		for (MvcConfigurer configurer : configurers) {
-			configurer.registerFormatters(formatterRegistry);
+	public void addFormatters(FormatterRegistry formatterRegistry) {
+		for (WebMvcConfigurer configurer : configurers) {
+			configurer.addFormatters(formatterRegistry);
 		}
 	}
 
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		for (MvcConfigurer configurer : configurers) {
+		for (WebMvcConfigurer configurer : configurers) {
 			configurer.configureMessageConverters(converters);
 		}
 	}
 
-	public void addCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		for (MvcConfigurer configurer : configurers) {
-			configurer.addCustomArgumentResolvers(argumentResolvers);
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		for (WebMvcConfigurer configurer : configurers) {
+			configurer.addArgumentResolvers(argumentResolvers);
 		}
 	}
 
-	public void addCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-		for (MvcConfigurer configurer : configurers) {
-			configurer.addCustomReturnValueHandlers(returnValueHandlers);
+	public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+		for (WebMvcConfigurer configurer : configurers) {
+			configurer.addReturnValueHandlers(returnValueHandlers);
 		}
 	}
 
 	public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-		for (MvcConfigurer configurer : configurers) {
+		for (WebMvcConfigurer configurer : configurers) {
 			configurer.configureHandlerExceptionResolvers(exceptionResolvers);
 		}
 	}
 
-	public void addInterceptors(InterceptorConfigurer interceptorRegistry) {
-		for (MvcConfigurer configurer : configurers) {
-			configurer.addInterceptors(interceptorRegistry);
+	public void configureInterceptors(InterceptorConfigurer interceptorRegistry) {
+		for (WebMvcConfigurer configurer : configurers) {
+			configurer.configureInterceptors(interceptorRegistry);
 		}
 	}
 
-	public void addViewControllers(ViewControllerConfigurer viewControllerConfigurer) {
-		for (MvcConfigurer configurer : configurers) {
-			configurer.addViewControllers(viewControllerConfigurer);
+	public void configureViewControllers(ViewControllerConfigurer viewControllerConfigurer) {
+		for (WebMvcConfigurer configurer : configurers) {
+			configurer.configureViewControllers(viewControllerConfigurer);
 		}
 	}
 
 	public void configureResourceHandling(ResourceConfigurer resourceConfigurer) {
-		for (MvcConfigurer configurer : configurers) {
+		for (WebMvcConfigurer configurer : configurers) {
 			configurer.configureResourceHandling(resourceConfigurer);
 		}
 	}
 
 	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer handlerConfigurer) {
-		for (MvcConfigurer configurer : configurers) {
+		for (WebMvcConfigurer configurer : configurers) {
 			configurer.configureDefaultServletHandling(handlerConfigurer);
 		}
 	}
 
 	public Validator getValidator() {
-		Map<MvcConfigurer, Validator> validators = new HashMap<MvcConfigurer, Validator>();
-		for (MvcConfigurer configurer : configurers) {
+		Map<WebMvcConfigurer, Validator> validators = new HashMap<WebMvcConfigurer, Validator>();
+		for (WebMvcConfigurer configurer : configurers) {
 			Validator validator = configurer.getValidator();
 			if (validator != null) {
 				validators.put(configurer, validator);
