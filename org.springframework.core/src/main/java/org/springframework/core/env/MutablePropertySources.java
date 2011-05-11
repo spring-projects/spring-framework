@@ -23,8 +23,8 @@ import org.springframework.util.Assert;
 
 /**
  * Default implementation of the {@link PropertySources} interface.
- * Allows manipulation of contained property sources and provides constructor
- * to copying an existing {@code PropertySources} instance.
+ * Allows manipulation of contained property sources and provides a constructor
+ * for copying an existing {@code PropertySources} instance.
  *
  * <p>Where <em>precedence</em> is mentioned in methods such as {@link #addFirst}
  * and {@link #addLast}, this is with regard to the order in which property sources
@@ -40,7 +40,6 @@ public class MutablePropertySources implements PropertySources {
 	static final String ILLEGAL_RELATIVE_ADDITION_MESSAGE = "PropertySource named [%s] cannot be added relative to itself";
 
 	private final LinkedList<PropertySource<?>> propertySourceList = new LinkedList<PropertySource<?>>();
-
 
 	/**
 	 * Create a new {@link MutablePropertySources} object.
@@ -105,7 +104,7 @@ public class MutablePropertySources implements PropertySources {
 		assertLegalRelativeAddition(relativePropertySourceName, propertySource);
 		removeIfPresent(propertySource);
 		int index = assertPresentAndGetIndex(relativePropertySourceName);
-		addAtIndex(index+1, propertySource);
+		addAtIndex(index + 1, propertySource);
 	}
 
 	/**
