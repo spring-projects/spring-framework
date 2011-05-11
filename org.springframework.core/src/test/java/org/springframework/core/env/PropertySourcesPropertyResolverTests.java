@@ -66,6 +66,13 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
+	public void getProperty_withDefaultValue() {
+		assertThat(propertyResolver.getProperty("foo", "myDefault"), is("myDefault"));
+		testProperties.put("foo", "bar");
+		assertThat(propertyResolver.getProperty("foo"), is("bar"));
+	}
+
+	@Test
 	public void getProperty_propertySourceSearchOrderIsFIFO() {
 		MutablePropertySources sources = new MutablePropertySources();
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(sources);
@@ -84,6 +91,13 @@ public class PropertySourcesPropertyResolverTests {
 		propertySources.addLast(new MapPropertySource("nullableProperties", nullableProperties));
 		nullableProperties.put("foo", null);
 		assertThat(propertyResolver.getProperty("foo"), nullValue());
+	}
+
+	@Test
+	public void getProperty_withTargetType_andDefaultValue() {
+		assertThat(propertyResolver.getProperty("foo", Integer.class, 42), equalTo(42));
+		testProperties.put("foo", 13);
+		assertThat(propertyResolver.getProperty("foo", Integer.class, 42), equalTo(13));
 	}
 
 	@Test
@@ -197,7 +211,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void resolvePlaceholders_withDefault() {
+	public void resolvePlaceholders_withDefaultValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
@@ -227,7 +241,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
-	public void resolveRequiredPlaceholders_withDefault() {
+	public void resolveRequiredPlaceholders_withDefaultValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
 		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
