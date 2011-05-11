@@ -813,6 +813,96 @@ public class SpringEL300Tests extends ExpressionTestCase {
         assertEquals("[D(aaa), D(bbb), D(ccc)]",value3.toString());
 	}
 
+	/**
+	 * Test whether {@link ReflectiveMethodResolver} follows Java Method Invocation Conversion order. And more precisely
+	 * that widening reference conversion is 'higher' than a unboxing conversion.
+	 */
+	@Test
+	public void testConversionPriority_8224() throws Exception {
+
+		@SuppressWarnings("unused")
+		class ConversionPriority1 {
+			public int getX(Number i) {
+				return 20;
+			}
+
+			public int getX(int i) {
+				return 10;
+			}
+		}
+
+		@SuppressWarnings("unused")
+		class ConversionPriority2 {
+			public int getX(int i) {
+				return 10;
+			}
+
+			public int getX(Number i) {
+				return 20;
+			}
+		}
+
+		final Integer INTEGER = Integer.valueOf(7);
+
+		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
+
+		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
+		args.add(TypeDescriptor.forObject(new Integer(42)));
+
+		ConversionPriority1 target = new ConversionPriority1();
+		MethodExecutor me = new ReflectiveMethodResolver(true).resolve(emptyEvalContext, target, "getX", args);
+		// MethodInvoker chooses getX(int i) when passing Integer
+		final int actual = (Integer) me.execute(emptyEvalContext, target, new Integer(42)).getValue();
+		// Compiler chooses getX(Number i) when passing Integer
+		final int compiler = target.getX(INTEGER);
+		// Fails!
+		assertEquals(compiler, actual);
+
+		ConversionPriority2 target2 = new ConversionPriority2();
+		MethodExecutor me2 = new ReflectiveMethodResolver(true).resolve(emptyEvalContext, target2, "getX", args);
+		// MethodInvoker chooses getX(int i) when passing Integer
+		int actual2 = (Integer) me2.execute(emptyEvalContext, target2, new Integer(42)).getValue();
+		// Compiler chooses getX(Number i) when passing Integer
+		int compiler2 = target2.getX(INTEGER);
+		// Fails!
+		assertEquals(compiler2, actual2);
+
+	}
+
+	/**
+	 * Test whether {@link ReflectiveMethodResolver} handles Widening Primitive Conversion. That's passing an 'int' to a
+	 * method accepting 'long' is ok.
+	 */
+	@Test
+	public void testWideningPrimitiveConversion_8224() throws Exception {
+
+		class WideningPrimitiveConversion {
+
+			public int getX(long i) {
+				return 10;
+			}
+		}
+
+		final Integer INTEGER_VALUE = Integer.valueOf(7);
+
+		WideningPrimitiveConversion target = new WideningPrimitiveConversion();
+
+		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
+
+		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
+		args.add(TypeDescriptor.forObject(INTEGER_VALUE));
+
+		MethodExecutor me = new ReflectiveMethodResolver(true).resolve(emptyEvalContext, target, "getX", args);
+
+		final int actual = (Integer) me.execute(emptyEvalContext, target, INTEGER_VALUE).getValue();
+
+		final int compiler = target.getX(INTEGER_VALUE);
+
+		assertEquals(compiler, actual);
+	}
+
+
+	
 	@Test
 	public void varargsAndPrimitives_SPR8174() throws Exception  {
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
