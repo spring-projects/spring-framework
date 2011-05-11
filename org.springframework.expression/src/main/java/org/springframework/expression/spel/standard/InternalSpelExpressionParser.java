@@ -599,7 +599,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	// This is complicated due to the support for dollars in identifiers.  Dollars are normally separate tokens but
 	// there we want to combine a series of identifiers and dollars into a single identifier
 	private boolean maybeEatMethodOrProperty(boolean nullSafeNavigation) {
-			if (peekToken(TokenKind.IDENTIFIER)) {
+		if (peekToken(TokenKind.IDENTIFIER)) {
 			Token methodOrPropertyName = nextToken();
 			SpelNodeImpl[] args = maybeEatMethodArgs();
 			if (args==null) {
@@ -761,6 +761,14 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			}
 			return true;
 		} else {
+			if (desiredTokenKind == TokenKind.IDENTIFIER) {
+				// might be one of the textual forms of the operators (e.g. NE for != ) - in which case we can treat it as an identifier
+				// The list is represented here: Tokenizer.alternativeOperatorNames and those ones are in order in the TokenKind enum
+				if (t.kind.ordinal()>=TokenKind.DIV.ordinal() && t.kind.ordinal()<=TokenKind.NOT.ordinal() && t.data!=null) {
+					// if t.data were null, we'd know it wasn't the textual form, it was the symbol form
+					return true;
+				}
+			}
 			return false;
 		}
 	}

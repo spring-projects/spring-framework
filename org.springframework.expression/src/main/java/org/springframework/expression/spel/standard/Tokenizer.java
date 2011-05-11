@@ -360,7 +360,7 @@ class Tokenizer {
 			String asString = new String(subarray).toUpperCase();
 			int idx = Arrays.binarySearch(alternativeOperatorNames,asString);
 			if (idx>=0) {
-				pushOneCharOrTwoCharToken(TokenKind.valueOf(asString),start);
+				pushOneCharOrTwoCharToken(TokenKind.valueOf(asString),start,subarray);
 				return;
 			}
 		}
@@ -429,8 +429,8 @@ class Tokenizer {
 		pos+=2;
 	}
 	
-	private void pushOneCharOrTwoCharToken(TokenKind kind, int pos) {
-		tokens.add(new Token(kind,pos,pos+kind.getLength()));
+	private void pushOneCharOrTwoCharToken(TokenKind kind, int pos, char[] data) {
+		tokens.add(new Token(kind,data,pos,pos+kind.getLength()));
 	}
 
 	//	ID:	('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'$'|'0'..'9'|DOT_ESCAPED)*;

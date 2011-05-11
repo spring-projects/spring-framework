@@ -1008,4 +1008,56 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	      }
 	}    
 	
+
+	@Test
+	public void testReservedWords_8228() throws Exception {
+		// "DIV","EQ","GE","GT","LE","LT","MOD","NE","NOT"
+        @SuppressWarnings("unused")
+        class Reserver {
+        	public Reserver getReserver() {
+        		return this;
+        	}
+        	public String NE = "abc";
+        	public String ne = "def";
+        	
+        	public int DIV = 1;
+        	public int div = 3;
+        	
+        	public Map m = new HashMap();
+        	
+        	@SuppressWarnings("unchecked")
+			Reserver() {
+        		m.put("NE","xyz");
+        	}
+        }
+        StandardEvaluationContext ctx = new StandardEvaluationContext(new Reserver());
+        SpelExpressionParser parser = new SpelExpressionParser();
+        String ex = "getReserver().NE";
+        SpelExpression exp = null;
+        exp = parser.parseRaw(ex);
+        String value = (String)exp.getValue(ctx);
+        Assert.assertEquals("abc",value);
+
+        ex = "getReserver().ne";
+        exp = parser.parseRaw(ex);
+        value = (String)exp.getValue(ctx);
+        Assert.assertEquals("def",value);
+
+        ex = "getReserver().m[NE]";
+        exp = parser.parseRaw(ex);
+        value = (String)exp.getValue(ctx);
+        Assert.assertEquals("xyz",value);
+        
+        ex = "getReserver().DIV";
+        exp = parser.parseRaw(ex);
+        Assert.assertEquals(1,exp.getValue(ctx));
+
+        ex = "getReserver().div";
+        exp = parser.parseRaw(ex);
+        Assert.assertEquals(3,exp.getValue(ctx));
+        
+        exp = parser.parseRaw("NE");
+        Assert.assertEquals("abc",exp.getValue(ctx));
+	}
+	
 }

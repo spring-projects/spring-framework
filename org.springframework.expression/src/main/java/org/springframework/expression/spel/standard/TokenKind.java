@@ -25,9 +25,10 @@ enum TokenKind {
 	LPAREN("("), RPAREN(")"), COMMA(","), IDENTIFIER,
 	COLON(":"),HASH("#"),RSQUARE("]"), LSQUARE("["), 
 	LCURLY("{"),RCURLY("}"),
-	DOT("."), PLUS("+"), STAR("*"), DIV("/"), NOT("!"), MINUS("-"), SELECT_FIRST("^["), SELECT_LAST("$["), QMARK("?"), PROJECT("!["),
-	GE(">="),GT(">"),LE("<="),LT("<"),EQ("=="),NE("!="),ASSIGN("="), INSTANCEOF("instanceof"), MATCHES("matches"), BETWEEN("between"),
-	SELECT("?["),  MOD("%"), POWER("^"),
+	DOT("."), PLUS("+"), STAR("*"),  MINUS("-"), SELECT_FIRST("^["), SELECT_LAST("$["), QMARK("?"), PROJECT("!["),
+	DIV("/"), GE(">="), GT(">"), LE("<="), LT("<"), EQ("=="), NE("!="),
+	MOD("%"), NOT("!"), ASSIGN("="), INSTANCEOF("instanceof"), MATCHES("matches"), BETWEEN("between"),
+	SELECT("?["),   POWER("^"),
 	ELVIS("?:"), SAFE_NAVI("?."), BEAN_REF("@")
 	;
 	 
