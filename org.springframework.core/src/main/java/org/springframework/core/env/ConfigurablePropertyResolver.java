@@ -45,6 +45,23 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	void setConversionService(ConversionService conversionService);
 
 	void setPlaceholderPrefix(String placeholderPrefix);
+
 	void setPlaceholderSuffix(String placeholderSuffix);
+
 	void setValueSeparator(String valueSeparator);
+
+	/**
+	 * Specify which properties must be present, to be verified by
+	 * {@link #validateRequiredProperties()}.
+	 */
+	void setRequiredProperties(String... requiredProperties);
+
+	/**
+	 * Validate that each of the properties specified by
+	 * {@link #setRequiredProperties} is present and resolves to a
+	 * non-{@code null} value.
+	 * @throws MissingRequiredPropertiesException if any of the required
+	 * properties are not resolvable.
+	 */
+	void validateRequiredProperties() throws MissingRequiredPropertiesException;
 }

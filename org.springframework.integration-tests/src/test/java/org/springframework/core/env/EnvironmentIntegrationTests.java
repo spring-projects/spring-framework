@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 import static org.springframework.context.ConfigurableApplicationContext.ENVIRONMENT_BEAN_NAME;
 import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.DERIVED_DEV_BEAN_NAME;
@@ -60,6 +61,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jca.context.ResourceAdapterApplicationContext;
 import org.springframework.jca.support.SimpleBootstrapContext;
 import org.springframework.jca.work.SimpleTaskWorkManager;
+import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
@@ -578,6 +580,32 @@ public class EnvironmentIntegrationTests {
 		assertEnvironmentAwareInvoked(ctx, prodEnv);
 		assertThat(ctx.containsBean(DEV_BEAN_NAME), is(false));
 		assertThat(ctx.containsBean(PROD_BEAN_NAME), is(true));
+	}
+
+	@Test
+	public void abstractApplicationContextValidatesRequiredPropertiesOnRefresh() {
+		{
+			ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.refresh();
+		}
+
+		{
+			ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.getEnvironment().setRequiredProperties("foo", "bar");
+			try {
+				ctx.refresh();
+				fail("expected missing property exception");
+			} catch (MissingRequiredPropertiesException ex) {
+			}
+		}
+
+		{
+			ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
+			ctx.getEnvironment().setRequiredProperties("foo");
+			ctx.setEnvironment(new MockEnvironment().withProperty("foo", "fooValue"));
+			ctx.refresh(); // should succeed
+		}
+
 	}
 
 
