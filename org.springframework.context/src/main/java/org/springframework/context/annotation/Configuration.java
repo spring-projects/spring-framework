@@ -46,7 +46,8 @@ import org.springframework.stereotype.Component;
  *    <li>Configuration classes must be non-final
  *    <li>Configuration classes must be non-local (may not be declared within a method)
  *    <li>Configuration classes must have a default/no-arg constructor and may not use
- *        {@link Autowired} constructor parameters
+ *        {@link Autowired} constructor parameters. Nested configuration classes must be
+ *        {@code static}
  * </ul>
  *
  * @author Rod Johnson
