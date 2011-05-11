@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.Location;
@@ -34,8 +36,12 @@ import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.ResourcePropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
@@ -64,6 +70,8 @@ import org.springframework.util.StringUtils;
  */
 class ConfigurationClassParser {
 
+	private static final Log logger = LogFactory.getLog(ConfigurationClassParser.class);
+
 	private final MetadataReaderFactory metadataReaderFactory;
 
 	private final ProblemReporter problemReporter;
@@ -72,6 +80,9 @@ class ConfigurationClassParser {
 
 	private final Set<ConfigurationClass> configurationClasses =
 		new LinkedHashSet<ConfigurationClass>();
+
+	private final Stack<PropertySource<?>> propertySources =
+		new Stack<PropertySource<?>>();
 
 	private final Environment environment;
 
@@ -152,6 +163,18 @@ class ConfigurationClassParser {
 	}
 
 	protected void doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
+		Map<String, Object> propertySourceAttributes =
+			metadata.getAnnotationAttributes(org.springframework.context.annotation.PropertySource.class.getName());
+		if (propertySourceAttributes != null) {
+			String name = (String) propertySourceAttributes.get("name");
+			String location = (String) propertySourceAttributes.get("value");
+			ClassLoader classLoader = this.resourceLoader.getClassLoader();
+			ResourcePropertySource ps = StringUtils.hasText(name) ?
+					new ResourcePropertySource(name, location, classLoader) :
+					new ResourcePropertySource(location, classLoader);
+			this.propertySources.push(ps);
+		}
+
 		Map<String, Object> componentScanAttributes = metadata.getAnnotationAttributes(ComponentScan.class.getName());
 		if (componentScanAttributes != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
@@ -234,6 +257,10 @@ class ConfigurationClassParser {
 
 	public Set<ConfigurationClass> getConfigurationClasses() {
 		return this.configurationClasses;
+	}
+
+	public Stack<PropertySource<?>> getPropertySources() {
+		return this.propertySources;
 	}
 
 	public ImportRegistry getImportRegistry() {

@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,7 +50,10 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ConfigurationClassParser.ImportRegistry;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -241,6 +245,19 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			}
 		}
 		parser.validate();
+
+		// Handle any @PropertySource annotations
+		if (!(this.environment instanceof ConfigurableEnvironment)) {
+			logger.warn("Ignoring @PropertySource annotations. " +
+					"Reason: Environment must implement ConfigurableEnvironment");
+		}
+		else {
+			MutablePropertySources envPropertySources = ((ConfigurableEnvironment)this.environment).getPropertySources();
+			Stack<PropertySource<?>> parsedPropertySources = parser.getPropertySources();
+			while (!parsedPropertySources.isEmpty()) {
+				envPropertySources.addLast(parsedPropertySources.pop());
+			}
+		}
 
 		// Read the model and create bean definitions based on its content
 		reader.loadBeanDefinitions(parser.getConfigurationClasses());
