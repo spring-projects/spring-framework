@@ -36,74 +36,74 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  */
 class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
-	private final List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
+	private final List<WebMvcConfigurer> delegates = new ArrayList<WebMvcConfigurer>();
 
-	public void addConfigurers(List<WebMvcConfigurer> configurers) {
+	public void addWebMvcConfigurers(List<WebMvcConfigurer> configurers) {
 		if (configurers != null) {
-			this.configurers.addAll(configurers);
+			this.delegates.addAll(configurers);
 		}
 	}
 
-	public void addFormatters(FormatterRegistry formatterRegistry) {
-		for (WebMvcConfigurer configurer : configurers) {
-			configurer.addFormatters(formatterRegistry);
+	public void addFormatters(FormatterRegistry registry) {
+		for (WebMvcConfigurer delegate : delegates) {
+			delegate.addFormatters(registry);
 		}
 	}
 
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		for (WebMvcConfigurer configurer : configurers) {
-			configurer.configureMessageConverters(converters);
+		for (WebMvcConfigurer delegate : delegates) {
+			delegate.configureMessageConverters(converters);
 		}
 	}
 
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		for (WebMvcConfigurer configurer : configurers) {
-			configurer.addArgumentResolvers(argumentResolvers);
+		for (WebMvcConfigurer delegate : delegates) {
+			delegate.addArgumentResolvers(argumentResolvers);
 		}
 	}
 
 	public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-		for (WebMvcConfigurer configurer : configurers) {
-			configurer.addReturnValueHandlers(returnValueHandlers);
+		for (WebMvcConfigurer delegate : delegates) {
+			delegate.addReturnValueHandlers(returnValueHandlers);
 		}
 	}
 
 	public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-		for (WebMvcConfigurer configurer : configurers) {
-			configurer.configureHandlerExceptionResolvers(exceptionResolvers);
+		for (WebMvcConfigurer delegate : delegates) {
+			delegate.configureHandlerExceptionResolvers(exceptionResolvers);
 		}
 	}
 
-	public void configureInterceptors(InterceptorConfigurer interceptorRegistry) {
-		for (WebMvcConfigurer configurer : configurers) {
-			configurer.configureInterceptors(interceptorRegistry);
+	public void configureInterceptors(InterceptorConfigurer configurer) {
+		for (WebMvcConfigurer delegate : delegates) {
+			delegate.configureInterceptors(configurer);
 		}
 	}
 
-	public void configureViewControllers(ViewControllerConfigurer viewControllerConfigurer) {
-		for (WebMvcConfigurer configurer : configurers) {
-			configurer.configureViewControllers(viewControllerConfigurer);
+	public void configureViewControllers(ViewControllerConfigurer configurer) {
+		for (WebMvcConfigurer delegate : delegates) {
+			delegate.configureViewControllers(configurer);
 		}
 	}
 
-	public void configureResourceHandling(ResourceConfigurer resourceConfigurer) {
-		for (WebMvcConfigurer configurer : configurers) {
-			configurer.configureResourceHandling(resourceConfigurer);
+	public void configureResourceHandling(ResourceConfigurer configurer) {
+		for (WebMvcConfigurer delegate : delegates) {
+			delegate.configureResourceHandling(configurer);
 		}
 	}
 
-	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer handlerConfigurer) {
-		for (WebMvcConfigurer configurer : configurers) {
-			configurer.configureDefaultServletHandling(handlerConfigurer);
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+		for (WebMvcConfigurer delegate : delegates) {
+			delegate.configureDefaultServletHandling(configurer);
 		}
 	}
 
 	public Validator getValidator() {
 		Map<WebMvcConfigurer, Validator> validators = new HashMap<WebMvcConfigurer, Validator>();
-		for (WebMvcConfigurer configurer : configurers) {
-			Validator validator = configurer.getValidator();
+		for (WebMvcConfigurer delegate : delegates) {
+			Validator validator = delegate.getValidator();
 			if (validator != null) {
-				validators.put(configurer, validator);
+				validators.put(delegate, validator);
 			}
 		}
 		if (validators.size() == 0) {

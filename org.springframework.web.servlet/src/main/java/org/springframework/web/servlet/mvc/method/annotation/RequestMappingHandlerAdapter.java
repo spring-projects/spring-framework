@@ -171,8 +171,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 	/**
 	 * Set one or more custom argument resolvers to use with {@link RequestMapping}, {@link ModelAttribute}, and
-	 * {@link InitBinder} methods. Custom argument resolvers are given a chance to resolve argument values
-	 * ahead of the standard argument resolvers registered by default.
+	 * {@link InitBinder} methods. 
+	 * <p>Generally custom argument resolvers are invoked first. However this excludes 
+	 * default argument resolvers that rely on the presence of annotations (e.g. {@code @RequestParameter}, 
+	 * {@code @PathVariable}, etc.) Those resolvers can only be customized via {@link #setArgumentResolvers(List)}
 	 * <p>An existing {@link WebArgumentResolver} can either adapted with {@link ServletWebArgumentResolverAdapter}
 	 * or preferably converted to a {@link HandlerMethodArgumentResolver} instead.
 	 */
@@ -208,8 +210,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 	/**
 	 * Set custom return value handlers to use to handle the return values of {@link RequestMapping} methods.
-	 * Custom return value handlers are given a chance to handle a return value before the standard
-	 * return value handlers registered by default.
+	 * <p>Generally custom return value handlers are invoked first. However this excludes default return value 
+	 * handlers that rely on the presence of annotations like {@code @ResponseBody}, {@code @ModelAttribute}, 
+	 * and others. Those handlers can only be customized via {@link #setReturnValueHandlers(List)}.
 	 * @param returnValueHandlers custom return value handlers for {@link RequestMapping} methods
 	 */
 	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {

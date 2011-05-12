@@ -59,7 +59,6 @@ import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.handler.MappedInterceptor;
-import org.springframework.web.servlet.handler.MappedInterceptors;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
@@ -88,7 +87,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * </ul>
  *
  * <p><strong>Note:</strong> that the SimpleUrlHandlerMapping instances above will have empty URL maps and
- * hence no effect until explicitly configured via {@link WebMvcConfigurer}.
+ * hence no effect until explicitly configured via one of the {@link WebMvcConfigurer} callbacks.
  *
  * <p>Registers these handler adapters:
  * <ul>
@@ -108,7 +107,6 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * <ul>
  * 	<li>{@link FormattingConversionService} for use with annotated controller methods and the spring:eval JSP tag.
  * 	<li>{@link Validator} for validating model attributes on annotated controller methods.
- * 	<li>{@link MappedInterceptors} containing a list Spring MVC lifecycle interceptors.
  * </ul>
  *
  * @see EnableWebMvc
@@ -128,7 +126,7 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 
 	@Autowired(required = false)
 	public void setConfigurers(List<WebMvcConfigurer> configurers) {
-		this.configurers.addConfigurers(configurers);
+		this.configurers.addWebMvcConfigurers(configurers);
 	}
 
 	public void setServletContext(ServletContext servletContext) {
