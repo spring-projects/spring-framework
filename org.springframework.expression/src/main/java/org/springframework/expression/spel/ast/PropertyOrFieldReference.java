@@ -37,6 +37,7 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
  * 
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Clark Duplichien 
  * @since 3.0
  */
 public class PropertyOrFieldReference extends SpelNodeImpl {
@@ -298,13 +299,12 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			}
 			else {
 				if (targetType != null) {
-					int pos = 0;
 					for (Class<?> clazz : targets) {
-						if (clazz == targetType) { // put exact matches on the front to be tried first?
-							specificAccessors.add(pos++, resolver);
+						if (clazz == targetType) {
+							specificAccessors.add( resolver);
+							break;
 						}
-						else if (clazz.isAssignableFrom(targetType)) { // put supertype matches at the end of the
-							// specificAccessor list
+						else if (clazz.isAssignableFrom(targetType)) { 
 							generalAccessors.add(resolver);
 						}
 					}
@@ -313,6 +313,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		}
 		List<PropertyAccessor> resolvers = new ArrayList<PropertyAccessor>();
 		resolvers.addAll(specificAccessors);
+		generalAccessors.removeAll(specificAccessors);
 		resolvers.addAll(generalAccessors);
 		return resolvers;
 	}
