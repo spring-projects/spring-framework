@@ -18,6 +18,7 @@ package org.springframework.expression.spel;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -51,6 +52,7 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
  * Tests based on Jiras up to the release of Spring 3.0.0
  * 
  * @author Andy Clement
+ * @author Clark Duplichien
  */
 public class SpringEL300Tests extends ExpressionTestCase {
 	
@@ -1060,4 +1062,136 @@ public class SpringEL300Tests extends ExpressionTestCase {
         Assert.assertEquals("abc",exp.getValue(ctx));
 	}
 	
+	/**
+	 * We add property accessors in the order:
+	 * First, Second, Third, Fourth.
+	 * They are not utilized in this order; preventing a priority or order of operations
+	 * in evaluation of SPEL expressions for a given context.
+	 */
+	@Test
+	public void testPropertyAccessorOrder_8211() {
+		ExpressionParser expressionParser = new SpelExpressionParser();
+		StandardEvaluationContext evaluationContext = 
+			new StandardEvaluationContext(new ContextObject());
+		
+		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("firstContext"));
+		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("secondContext"));
+		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("thirdContext"));
+		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("fourthContext"));
+		
+		assertEquals("first", 
+			expressionParser.parseExpression("shouldBeFirst").getValue(evaluationContext));
+		assertEquals("second", 
+				expressionParser.parseExpression("shouldBeSecond").getValue(evaluationContext));
+		assertEquals("third", 
+				expressionParser.parseExpression("shouldBeThird").getValue(evaluationContext));
+		assertEquals("fourth", 
+				expressionParser.parseExpression("shouldBeFourth").getValue(evaluationContext));
+	}
+	
+	// test not quite complete, it doesn't check that the list of resolvers at the end of 
+	// PropertyOrFieldReference.getPropertyAccessorsToTry() doesn't contain duplicates, which
+	// is what it is trying to test by having a property accessor that returns specific
+	// classes Integer and Number
+//	@Test
+//	public void testPropertyAccessorOrder_8211_2() {
+//		ExpressionParser expressionParser = new SpelExpressionParser();
+//		StandardEvaluationContext evaluationContext = 
+//			new StandardEvaluationContext(new Integer(42));
+//		
+//		evaluationContext.addPropertyAccessor(new TestPropertyAccessor2());
+//		
+//		assertEquals("42", expressionParser.parseExpression("x").getValue(evaluationContext));
+//	}
+	
+	class TestPropertyAccessor implements PropertyAccessor {
+		private String mapName;
+		public TestPropertyAccessor(String mapName) {
+			this.mapName = mapName;
+		}
+		@SuppressWarnings("unchecked")
+		public Map<String, String> getMap(Object target) {
+			try {
+				Field f = target.getClass().getDeclaredField(mapName);
+				return (Map<String,String>) f.get(target);
+			} catch (Exception e) {
+			}
+			return null;
+		}
+		public boolean canRead(EvaluationContext context, Object target, String name)
+				throws AccessException {
+			return getMap(target).containsKey(name);
+		}
+		public boolean canWrite(EvaluationContext context, Object target, String name)
+				throws AccessException {
+			return getMap(target).containsKey(name);
+		}
+		public Class<?>[] getSpecificTargetClasses() {
+			return new Class[]{ContextObject.class};
+		}
+		public TypedValue read(EvaluationContext context, Object target, String name)
+				throws AccessException {
+			return new TypedValue(getMap(target).get(name));
+		}
+		public void write(EvaluationContext context, Object target, String name, Object newValue)
+			throws AccessException {
+			getMap(target).put(name, (String) newValue);
+		}
+
+	}
+	
+//	class TestPropertyAccessor2 implements PropertyAccessor {
+//
+//		public Class[] getSpecificTargetClasses() {
+//			return new Class[]{Integer.class,Number.class};
+//		}
+//
+//		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
+//			return true;
+//		}
+//
+//		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
+//			return new TypedValue(target.toString(),TypeDescriptor.valueOf(String.class));
+//		}
+//
+//		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
+//			return false;
+//		}
+//
+//		public void write(EvaluationContext context, Object target, String name, Object newValue)
+//				throws AccessException {
+//			throw new UnsupportedOperationException();
+//		}
+//		
+//	}
+
+	class ContextObject {
+		public Map<String, String> firstContext = new HashMap<String, String>();
+		public Map<String, String> secondContext = new HashMap<String, String>();
+		public Map<String, String> thirdContext = new HashMap<String, String>();
+		public Map<String, String> fourthContext = new HashMap<String, String>();
+		
+		public ContextObject() {
+			firstContext.put("shouldBeFirst", "first");
+			secondContext.put("shouldBeFirst", "second");
+			thirdContext.put("shouldBeFirst", "third");
+			fourthContext.put("shouldBeFirst", "fourth");
+
+			secondContext.put("shouldBeSecond", "second");
+			thirdContext.put("shouldBeSecond", "third");
+			fourthContext.put("shouldBeSecond", "fourth");
+			
+			thirdContext.put("shouldBeThird", "third");
+			fourthContext.put("shouldBeThird", "fourth");
+			
+			fourthContext.put("shouldBeFourth", "fourth");
+		}
+		public Map<String, String> getFirstContext() {return firstContext;}
+		public Map<String, String> getSecondContext() {return secondContext;}
+		public Map<String, String> getThirdContext() {return thirdContext;}
+		public Map<String, String> getFourthContext() {return fourthContext;}
+	}
+
 }
+
+
