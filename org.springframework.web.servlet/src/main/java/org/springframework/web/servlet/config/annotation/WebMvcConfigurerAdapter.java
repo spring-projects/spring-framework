@@ -38,7 +38,7 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void addFormatters(FormatterRegistry formatterRegistry) {
+	public void addFormatters(FormatterRegistry registry) {
 	}
 
 	/**
@@ -81,28 +81,28 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void configureInterceptors(InterceptorConfigurer interceptorConfigurer) {
+	public void configureInterceptors(InterceptorConfigurer configurer) {
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void configureViewControllers(ViewControllerConfigurer viewControllerConfigurer) {
+	public void configureViewControllers(ViewControllerConfigurer configurer) {
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void configureResourceHandling(ResourceConfigurer resourceConfigurer) {
+	public void configureResourceHandling(ResourceConfigurer configurer) {
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer handlerConfigurer) {
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 	}
 
 }

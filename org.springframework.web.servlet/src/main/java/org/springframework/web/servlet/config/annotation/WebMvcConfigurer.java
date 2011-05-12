@@ -54,7 +54,7 @@ public interface WebMvcConfigurer {
 	/**
 	 * Add {@link Converter}s and {@link Formatter}s in addition to the ones registered by default.
 	 */
-	void addFormatters(FormatterRegistry formatterRegistry);
+	void addFormatters(FormatterRegistry registry);
 
 	/**
 	 * Configure the list of {@link HttpMessageConverter}s to use when resolving method arguments or handling
@@ -102,20 +102,20 @@ public interface WebMvcConfigurer {
 	 * invocation. Interceptors can be registered to apply to all requests or limited to a set of path patterns.
 	 * @see InterceptorConfigurer
 	 */
-	void configureInterceptors(InterceptorConfigurer interceptorConfigurer);
+	void configureInterceptors(InterceptorConfigurer configurer);
 
 	/**
 	 * Configure the view controllers to use. A view controller is used to map a URL path directly to a view name.
 	 * This is convenient when a request does not require controller logic.
 	 */
-	void configureViewControllers(ViewControllerConfigurer viewControllerConfigurer);
+	void configureViewControllers(ViewControllerConfigurer configurer);
 
 	/**
 	 * Configure a handler for serving static resources such as images, js, and, css files through Spring MVC
 	 * including setting cache headers optimized for efficient loading in a web browser. Resources can be served
 	 * out of locations under web application root, from the classpath, and others.
 	 */
-	void configureResourceHandling(ResourceConfigurer resourceConfigurer);
+	void configureResourceHandling(ResourceConfigurer configurer);
 
 	/**
 	 * Configure a handler for delegating unhandled requests by forwarding to the Servlet container's default
@@ -123,6 +123,6 @@ public interface WebMvcConfigurer {
 	 * cleaner URLs (without a servlet prefix) but may need to still allow some requests (e.g. static resources)
 	 * to be handled by the Servlet container's default servlet.
 	 */
-	void configureDefaultServletHandling(DefaultServletHandlerConfigurer handlerConfigurer);
+	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
 
 }

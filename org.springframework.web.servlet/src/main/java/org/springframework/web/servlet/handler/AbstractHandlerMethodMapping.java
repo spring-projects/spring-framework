@@ -127,6 +127,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				detectHandlerMethods(beanName);
 			}
 		}
+		handlerMethodsInitialized(getHandlerMethods());
 	}
 
 	/**
@@ -135,6 +136,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @return true if this a type that could contain handler methods, false otherwise.
 	 */
 	protected abstract boolean isHandler(Class<?> beanType);
+
+	/**
+	 * Invoked after all handler methods found in beans of the current ApplicationContext have been registered.
+	 * @param handlerMethods a read-only map with mapping conditions (generic type {@code <T>}) and HandlerMethods.
+	 */
+	protected void handlerMethodsInitialized(Map<T, HandlerMethod> handlerMethods) {
+	}
 
 	/**
 	 * Detect and register handler methods for the specified handler.

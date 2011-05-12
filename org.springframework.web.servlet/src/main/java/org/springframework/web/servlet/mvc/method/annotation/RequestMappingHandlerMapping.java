@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.annotation.AnnotationUtils;
@@ -91,6 +93,17 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
 		return AnnotationUtils.findAnnotation(beanType, Controller.class) != null;
+	}
+
+	@Override
+	protected void handlerMethodsInitialized(Map<RequestMappingInfo, HandlerMethod> handlerMethods) {
+		List<RequestMappingInfo> mappings = new ArrayList<RequestMappingInfo>(handlerMethods.keySet());
+		while (mappings.size() > 1) {
+			RequestMappingInfo mapping = mappings.remove(0);
+			for (RequestMappingInfo otherMapping : mappings) {
+				// further validate mapping conditions
+			}
+		}
 	}
 
 	/**
