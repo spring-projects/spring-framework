@@ -321,6 +321,15 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException;
 
 	/**
+	 * Explicitly control in-creation status of the specified bean. For
+	 * container internal use only.
+	 * @param beanName the name of the bean
+	 * @param inCreation whether the bean is currently in creation
+	 * @since 3.1
+	 */
+	void setCurrentlyInCreation(String beanName, boolean inCreation);
+
+	/**
 	 * Determine whether the specified bean is currently in creation.
 	 * @param beanName the name of the bean
 	 * @return whether the bean is currently in creation

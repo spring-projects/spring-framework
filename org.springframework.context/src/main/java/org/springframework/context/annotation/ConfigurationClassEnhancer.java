@@ -35,6 +35,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
@@ -233,23 +234,42 @@ class ConfigurationClassEnhancer {
 			    	return enhanceFactoryBean(factoryBean.getClass(), beanName);
 			    }
 			}
-			
-			// the bean is not a FactoryBean - check to see if it has been cached
-			if (factoryContainsBean(beanName)) {
-				// we have an already existing cached instance of this bean -> retrieve it
-				return this.beanFactory.getBean(beanName);
+
+			boolean factoryIsCaller = beanMethod.equals(SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod());
+			boolean factoryAlreadyContainsSingleton = this.beanFactory.containsSingleton(beanName);
+			if (factoryIsCaller && !factoryAlreadyContainsSingleton) {
+				// the factory is calling the bean method in order to instantiate and register the bean
+				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually
+				// create the bean instance.
+				if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
+					logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " +
+							"assignable to Spring's BeanFactoryPostProcessor interface. This will " +
+							"result in a failure to process annotations such as @Autowired, " +
+							"@Resource and @PostConstruct within the method's declaring " +
+							"@Configuration class. Add the 'static' modifier to this method to avoid " +
+							"these container lifecycle issues; see @Bean Javadoc for complete details",
+							beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
+				}
+				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
+			}
+			else {
+				// the user (i.e. not the factory) is requesting this bean through a
+				// call to the bean method, direct or indirect. The bean may have already been
+				// marked as 'in creation' in certain autowiring scenarios; if so, temporarily
+				// set the in-creation status to false in order to avoid an exception.
+				boolean alreadyInCreation = this.beanFactory.isCurrentlyInCreation(beanName);
+				try {
+					if (alreadyInCreation) {
+						this.beanFactory.setCurrentlyInCreation(beanName, false);
+					}
+					return this.beanFactory.getBean(beanName);
+				} finally {
+					if (alreadyInCreation) {
+						this.beanFactory.setCurrentlyInCreation(beanName, true);
+					}
+				}
 			}
 
-			if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
-				logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " +
-						"assignable to Spring's BeanFactoryPostProcessor interface. This will " +
-						"result in a failure to process annotations such as @Autowired, " +
-						"@Resource and @PostConstruct within the method's declaring " +
-						"@Configuration class. Add the 'static' modifier to this method to avoid" +
-						"these container lifecycle issues; see @Bean Javadoc for complete details",
-						beanMethod.getDeclaringClass().getSimpleName(), beanMethod.getName()));
-			}
-			return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 		}
 
 		/**
@@ -266,7 +286,9 @@ class ConfigurationClassEnhancer {
 		 * @return whether <var>beanName</var> already exists in the factory
 		 */
 		private boolean factoryContainsBean(String beanName) {
-			return (this.beanFactory.containsBean(beanName) && !this.beanFactory.isCurrentlyInCreation(beanName));
+			boolean containsBean = this.beanFactory.containsBean(beanName);
+			boolean currentlyInCreation = this.beanFactory.isCurrentlyInCreation(beanName);
+			return (containsBean && !currentlyInCreation);
 		}
 
 		/**

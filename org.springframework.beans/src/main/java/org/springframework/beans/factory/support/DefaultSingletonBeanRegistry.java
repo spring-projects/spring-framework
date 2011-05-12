@@ -97,6 +97,9 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Names of beans that are currently in creation */
 	private final Set<String> singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet<String>());
 
+	/** Names of beans currently excluded from in creation checks */
+	private final Set<String> inCreationCheckExclusions = new HashSet<String>();
+
 	/** List of suppressed Exceptions, available for associating related causes */
 	private Set<Exception> suppressedExceptions;
 
@@ -293,7 +296,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see #isSingletonCurrentlyInCreation
 	 */
 	protected void beforeSingletonCreation(String beanName) {
-		if (!this.singletonsCurrentlyInCreation.add(beanName)) {
+		if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.add(beanName)) {
 			throw new BeanCurrentlyInCreationException(beanName);
 		}
 	}
@@ -305,8 +308,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see #isSingletonCurrentlyInCreation
 	 */
 	protected void afterSingletonCreation(String beanName) {
-		if (!this.singletonsCurrentlyInCreation.remove(beanName)) {
+		if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.remove(beanName)) {
 			throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
+		}
+	}
+
+	public final void setCurrentlyInCreation(String beanName, boolean inCreation) {
+		if (!inCreation) {
+			this.inCreationCheckExclusions.add(beanName);
+		} else {
+			this.inCreationCheckExclusions.remove(beanName);
 		}
 	}
 

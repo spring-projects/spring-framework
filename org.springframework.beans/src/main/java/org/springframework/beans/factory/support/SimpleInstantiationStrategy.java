@@ -42,6 +42,8 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
+	private static final ThreadLocal<Method> currentlyInvokedFactoryMethod = new ThreadLocal<Method>();
+
 	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
@@ -140,9 +142,19 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			else {
 				ReflectionUtils.makeAccessible(factoryMethod);
 			}
-			
-			// It's a static method if the target is null.
-			return factoryMethod.invoke(factoryBean, args);
+
+			Method priorInvokedFactoryMethod = currentlyInvokedFactoryMethod.get();
+			try {
+				currentlyInvokedFactoryMethod.set(factoryMethod);
+				return factoryMethod.invoke(factoryBean, args);
+			} finally {
+				if (priorInvokedFactoryMethod != null) {
+					currentlyInvokedFactoryMethod.set(priorInvokedFactoryMethod);
+				}
+				else {
+					currentlyInvokedFactoryMethod.remove();
+				}
+			}
 		}
 		catch (IllegalArgumentException ex) {
 			throw new BeanDefinitionStoreException(
@@ -159,4 +171,12 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		}
 	}
 
+	/**
+	 * Return the factory method currently being invoked or {@code null} if none.
+	 * Allows factory method implementations to determine whether the current
+	 * caller is the container itself as opposed to user code.
+	 */
+	public static Method getCurrentlyInvokedFactoryMethod() {
+		return currentlyInvokedFactoryMethod.get();
+	}
 }
