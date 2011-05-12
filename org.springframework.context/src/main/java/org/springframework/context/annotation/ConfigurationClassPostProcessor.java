@@ -247,15 +247,17 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		parser.validate();
 
 		// Handle any @PropertySource annotations
-		if (!(this.environment instanceof ConfigurableEnvironment)) {
-			logger.warn("Ignoring @PropertySource annotations. " +
-					"Reason: Environment must implement ConfigurableEnvironment");
-		}
-		else {
-			MutablePropertySources envPropertySources = ((ConfigurableEnvironment)this.environment).getPropertySources();
-			Stack<PropertySource<?>> parsedPropertySources = parser.getPropertySources();
-			while (!parsedPropertySources.isEmpty()) {
-				envPropertySources.addLast(parsedPropertySources.pop());
+		Stack<PropertySource<?>> parsedPropertySources = parser.getPropertySources();
+		if (!parsedPropertySources.isEmpty()) {
+			if (!(this.environment instanceof ConfigurableEnvironment)) {
+				logger.warn("Ignoring @PropertySource annotations. " +
+						"Reason: Environment must implement ConfigurableEnvironment");
+			}
+			else {
+				MutablePropertySources envPropertySources = ((ConfigurableEnvironment)this.environment).getPropertySources();
+				while (!parsedPropertySources.isEmpty()) {
+					envPropertySources.addLast(parsedPropertySources.pop());
+				}
 			}
 		}
 
