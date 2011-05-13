@@ -35,15 +35,15 @@ import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler
  * {@link BeanDefinitionParser} that parses a {@code default-servlet-handler} element to 
  * register a {@link DefaultServletHttpRequestHandler}.  Will also register a 
  * {@link SimpleUrlHandlerMapping} for mapping resource requests, and a 
- * {@link HttpRequestHandlerAdapter} if necessary. 
+ * {@link HttpRequestHandlerAdapter}. 
  * 
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  * @since 3.0.4
  */
-class DefaultServletHandlerBeanDefinitionParser extends AbstractHttpRequestHandlerBeanDefinitionParser {
+class DefaultServletHandlerBeanDefinitionParser implements BeanDefinitionParser {
 
-	@Override
-	public void doParse(Element element, ParserContext parserContext) {
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 		
 		String defaultServletName = element.getAttribute("default-servlet-name");		
@@ -68,6 +68,14 @@ class DefaultServletHandlerBeanDefinitionParser extends AbstractHttpRequestHandl
 		String handlerMappingBeanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
 		parserContext.getRegistry().registerBeanDefinition(handlerMappingBeanName, handlerMappingDef);
 		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, handlerMappingBeanName));
+		
+		// Ensure BeanNameUrlHandlerMapping is not "turned off" (SPR-8289)
+		MvcNamespaceUtils.registerBeanNameUrlHandlerMapping(parserContext, source);
+
+		// Register HttpRequestHandlerAdapter
+		MvcNamespaceUtils.registerDefaultHandlerAdapters(parserContext, source);
+
+		return null;
 	}
 
 }

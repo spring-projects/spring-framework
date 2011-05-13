@@ -61,6 +61,7 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
@@ -99,10 +100,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testDefaultConfig() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config.xml", getClass()));
-		assertEquals(8, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config.xml", 11);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -138,10 +136,7 @@ public class MvcNamespaceTests {
 
 	@Test(expected=TypeMismatchException.class)
 	public void testCustomConversionService() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-conversion-service.xml", getClass()));
-		assertEquals(8, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config-custom-conversion-service.xml", 11);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -167,10 +162,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testCustomValidator() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-custom-validator.xml", getClass()));
-		assertEquals(8, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config-custom-validator.xml", 11);
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -187,10 +179,7 @@ public class MvcNamespaceTests {
 	
 	@Test
 	public void testInterceptors() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-interceptors.xml", getClass()));
-		assertEquals(11, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config-interceptors.xml", 14);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -220,10 +209,7 @@ public class MvcNamespaceTests {
 	
 	@Test
 	public void testResources() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-resources.xml", getClass()));
-		assertEquals(3, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config-resources.xml", 5);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -234,6 +220,10 @@ public class MvcNamespaceTests {
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(Ordered.LOWEST_PRECEDENCE - 1, mapping.getOrder());
+
+		BeanNameUrlHandlerMapping beanNameMapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
+		assertNotNull(beanNameMapping);
+		assertEquals(2, beanNameMapping.getOrder());
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setRequestURI("/resources/foo.css");
@@ -252,10 +242,7 @@ public class MvcNamespaceTests {
 	
 	@Test
 	public void testResourcesWithOptionalAttributes() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-resources-optional-attrs.xml", getClass()));
-		assertEquals(3, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 5);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -264,10 +251,7 @@ public class MvcNamespaceTests {
 	
 	@Test
 	public void testDefaultServletHandler() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-default-servlet.xml", getClass()));
-		assertEquals(3, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config-default-servlet.xml", 5);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -293,10 +277,7 @@ public class MvcNamespaceTests {
 	
 	@Test
 	public void testDefaultServletHandlerWithOptionalAttributes() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-default-servlet-optional-attrs.xml", getClass()));
-		assertEquals(3, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config-default-servlet-optional-attrs.xml", 5);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -322,10 +303,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testBeanDecoration() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-bean-decoration.xml", getClass()));
-		assertEquals(10, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config-bean-decoration.xml", 13);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -346,14 +324,15 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllers() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-view-controllers.xml", getClass()));
-		assertEquals(12, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 14);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
 		mapping.setDefaultHandler(handlerMethod);		
+
+		BeanNameUrlHandlerMapping beanNameMapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
+		assertNotNull(beanNameMapping);
+		assertEquals(2, beanNameMapping.getOrder());
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setMethod("GET");
@@ -405,10 +384,7 @@ public class MvcNamespaceTests {
 	/** WebSphere gives trailing servlet path slashes by default!! */
 	@Test
 	public void testViewControllersOnWebSphere() throws Exception {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource("mvc-config-view-controllers.xml", getClass()));
-		assertEquals(12, appContext.getBeanDefinitionCount());
-		appContext.refresh();
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 14);
 
 		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);
 		SimpleControllerHandlerAdapter adapter = appContext.getBean(SimpleControllerHandlerAdapter.class);
@@ -450,6 +426,22 @@ public class MvcNamespaceTests {
 		assertEquals("root", mv3.getViewName());
 	}
 
+	@Test
+	public void testViewControllersDefaultConfig() {
+		loadBeanDefinitions("mvc-config-view-controllers-minimal.xml", 4);
+
+		BeanNameUrlHandlerMapping beanNameMapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
+		assertNotNull(beanNameMapping);
+		assertEquals(2, beanNameMapping.getOrder());
+	}
+	
+	private void loadBeanDefinitions(String fileName, int expectedBeanCount) {
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
+		ClassPathResource resource = new ClassPathResource(fileName, AnnotationDrivenBeanDefinitionParserTests.class);
+		reader.loadBeanDefinitions(resource);
+		assertEquals(expectedBeanCount, appContext.getBeanDefinitionCount());
+		appContext.refresh();
+	}
 
 	@Controller
 	public static class TestController {

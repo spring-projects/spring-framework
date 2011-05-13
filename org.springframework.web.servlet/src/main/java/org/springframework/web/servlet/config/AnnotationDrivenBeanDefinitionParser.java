@@ -45,6 +45,7 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
+import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
@@ -97,7 +98,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static boolean romePresent =
 			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
-
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
@@ -177,6 +177,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		parserContext.registerComponent(new BeanComponentDefinition(responseStatusExceptionResolver, responseStatusExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(defaultExceptionResolver, defaultExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(mappedCsInterceptorDef, mappedInterceptorName));
+
+		// Ensure BeanNameUrlHandlerMapping is not "turned off" (SPR-8289)
+		MvcNamespaceUtils.registerBeanNameUrlHandlerMapping(parserContext, source);
+		
+		// Ensure default HandlerAdapters are not "turned off"
+		MvcNamespaceUtils.registerDefaultHandlerAdapters(parserContext, source);
+
 		parserContext.popAndRegisterContainingComponent();
 
 		return null;
@@ -317,4 +324,5 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		return result;
 	}
+
 }

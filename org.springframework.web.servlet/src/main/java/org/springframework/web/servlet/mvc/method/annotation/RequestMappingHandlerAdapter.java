@@ -332,7 +332,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		}
 	}
 
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		initArgumentResolvers();
 		initReturnValueHandlers();
 		initInitBinderArgumentResolvers();
