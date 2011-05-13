@@ -223,13 +223,22 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:choice maxOccurs="unbounded">
-				<xsd:element ref="beans:bean">
-					<xsd:annotation>
-						<xsd:documentation source="java:org.springframework.web.servlet.handler.MappedInterceptor"><![CDATA[
-	Registers an interceptor that intercepts every request regardless of its URI path.
-						]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:element>
+				<xsd:choice>
+					<xsd:element ref="beans:bean">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Registers an interceptor that intercepts every request regardless of its URI path..
+								]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element ref="beans:ref">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Registers an interceptor that intercepts every request regardless of its URI path..
+								]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+				</xsd:choice>
 				<xsd:element name="interceptor">
 					<xsd:annotation>
 						<xsd:documentation source="java:org.springframework.web.servlet.handler.MappedInterceptor"><![CDATA[
@@ -250,13 +259,22 @@
 									</xsd:attribute>
 								</xsd:complexType>
 							</xsd:element>
-							<xsd:element ref="beans:bean">
-								<xsd:annotation>
-									<xsd:documentation><![CDATA[
-	The interceptor's bean definition.
-									]]></xsd:documentation>
-								</xsd:annotation>
-							</xsd:element>
+							<xsd:choice>
+								<xsd:element ref="beans:bean">
+									<xsd:annotation>
+										<xsd:documentation><![CDATA[
+		The interceptor's bean definition.
+										]]></xsd:documentation>
+									</xsd:annotation>
+								</xsd:element>
+								<xsd:element ref="beans:ref">
+									<xsd:annotation>
+										<xsd:documentation><![CDATA[
+		A reference to an interceptor bean.
+										]]></xsd:documentation>
+									</xsd:annotation>
+								</xsd:element>
+							</xsd:choice>
 						</xsd:sequence>
 					</xsd:complexType>
 				</xsd:element>

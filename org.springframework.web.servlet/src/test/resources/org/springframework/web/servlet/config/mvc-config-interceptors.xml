@@ -3,12 +3,13 @@
     xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
 
 	<mvc:annotation-driven />
 
 	<mvc:interceptors>
 		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+		<ref bean="log4jInterceptor"/>
 		<mvc:interceptor>
 			<mvc:mapping path="/**" />
 			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
@@ -16,8 +17,11 @@
 		<mvc:interceptor>
 			<mvc:mapping path="/logged/**" />
 			<mvc:mapping path="/foo/logged" />
-			<bean class="org.springframework.web.context.request.Log4jNestedDiagnosticContextInterceptor" />
+			<ref bean="log4jInterceptor"/>
 		</mvc:interceptor>
 	</mvc:interceptors>
-	
+
+	<bean id="log4jInterceptor" 
+		class="org.springframework.web.context.request.Log4jNestedDiagnosticContextInterceptor" />
+		
 </beans>
