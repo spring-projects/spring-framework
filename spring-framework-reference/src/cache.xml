@@ -146,7 +146,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)</pr
 			If <literal>true</literal>, the method is cached - if not, it behaves as if the method is not cached, that is executed every since time no matter what values are in the cache or what
 			arguments are used. A quick example - the following method will be cached, only if the argument <literal>name</literal> has a length shorter then 32:</para>
 			
-			<programlisting language="java"><![CDATA[@Cacheable(value="book", condition="name.length < 32")
+			<programlisting language="java"><![CDATA[@Cacheable(value="book", condition="#name.length < 32")
 public Book findBook(String name)]]></programlisting>
 		</section>
 		
