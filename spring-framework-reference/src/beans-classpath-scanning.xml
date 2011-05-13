@@ -314,7 +314,7 @@ public class FactoryMethodComponent {
 
   // use of a custom qualifier and autowiring of method parameters
 
-  @Bean @BeanAge(1)
+  @Bean
   protected TestBean protectedInstance(@Qualifier("public") TestBean spouse,
                                        @Value("#{privateInstance.age}") String country) {
       TestBean tb = new TestBean("protectedInstance", 1);
