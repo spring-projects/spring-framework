@@ -26,7 +26,7 @@
 	</bean>
 	
 
-	<bean id="cacheManager" class="org.springframework.cache.support.MapCacheManager">
+	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
 			<set>
 				<bean class="org.springframework.cache.concurrent.ConcurrentCacheFactoryBean" p:name="default"/>
