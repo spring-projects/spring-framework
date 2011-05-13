@@ -36,31 +36,27 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
  * {@code resources} element to register a {@link ResourceHttpRequestHandler}.
  * Will also register a {@link SimpleUrlHandlerMapping} for mapping resource requests, 
- * and a {@link HttpRequestHandlerAdapter} if necessary. 
+ * and a {@link HttpRequestHandlerAdapter}. 
  *
  * @author Keith Donald
  * @author Jeremy Grelle
  * @since 3.0.4
  */
-class ResourcesBeanDefinitionParser extends AbstractHttpRequestHandlerBeanDefinitionParser implements BeanDefinitionParser {
+class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
-	@Override
-	public void doParse(Element element, ParserContext parserContext) {
+	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
-		registerResourceMappings(parserContext, element, source);
-	}
-	
-	private void registerResourceMappings(ParserContext parserContext, Element element, Object source) {
+		
 		String resourceHandlerName = registerResourceHandler(parserContext, element, source);
 		if (resourceHandlerName == null) {
-			return;
+			return null;
 		}
 		
 		Map<String, String> urlMap = new ManagedMap<String, String>();
 		String resourceRequestPath = element.getAttribute("mapping");
 		if (!StringUtils.hasText(resourceRequestPath)) {
 			parserContext.getReaderContext().error("The 'mapping' attribute is required.", parserContext.extractSource(element));
-	        return;
+	        return null;
 		}
 		urlMap.put(resourceRequestPath, resourceHandlerName);
 		
@@ -76,6 +72,14 @@ class ResourcesBeanDefinitionParser extends AbstractHttpRequestHandlerBeanDefini
 		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
 		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
 		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));	
+
+		// Ensure BeanNameUrlHandlerMapping is not "turned off" (SPR-8289)
+		MvcNamespaceUtils.registerBeanNameUrlHandlerMapping(parserContext, source);
+
+		// Register HttpRequestHandlerAdapter
+		MvcNamespaceUtils.registerDefaultHandlerAdapters(parserContext, source);
+
+		return null;
 	}
 	
 	private String registerResourceHandler(ParserContext parserContext, Element element, Object source) {

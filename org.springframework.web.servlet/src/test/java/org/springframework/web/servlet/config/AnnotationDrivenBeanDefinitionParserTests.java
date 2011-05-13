@@ -39,6 +39,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
@@ -111,10 +112,18 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertEquals(TestHandlerMethodReturnValueHandler.class, handlers.get(0).getClass());
 	}
 
+	@Test
+	public void beanNameUrlHandlerMapping() {
+		loadBeanDefinitions("mvc-config.xml");
+		BeanNameUrlHandlerMapping mapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
+		assertNotNull(mapping);
+		assertEquals(2, mapping.getOrder());
+	}
+
 	private void loadBeanDefinitions(String fileName) {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		reader.loadBeanDefinitions(new ClassPathResource(fileName,
-				AnnotationDrivenBeanDefinitionParserTests.class));
+		ClassPathResource resource = new ClassPathResource(fileName, AnnotationDrivenBeanDefinitionParserTests.class);
+		reader.loadBeanDefinitions(resource);
 		appContext.refresh();
 	}
 
@@ -133,7 +142,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertTrue(converters.get(0) instanceof StringHttpMessageConverter);
 		assertTrue(converters.get(1) instanceof ResourceHttpMessageConverter);
 	}
-
+	
 }
 
 class TestWebArgumentResolver implements WebArgumentResolver {
