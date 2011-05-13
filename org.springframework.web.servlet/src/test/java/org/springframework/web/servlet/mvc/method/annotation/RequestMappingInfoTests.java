@@ -181,13 +181,13 @@ public class RequestMappingInfoTests {
 
 		RequestMappingInfo key =
 				new RequestMappingInfo(asList("/foo"), null, RequestConditionFactory.parseParams("foo=bar"), null,
-						null);
+						null, null);
 		RequestMappingInfo match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNotNull(match);
 
 		key = new RequestMappingInfo(singleton("/foo"), null, RequestConditionFactory.parseParams("foo!=bar"), null,
-				null);
+				null, null);
 		match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNull(match);
@@ -202,13 +202,13 @@ public class RequestMappingInfoTests {
 
 		RequestMappingInfo key =
 				new RequestMappingInfo(singleton("/foo"), null, null, RequestConditionFactory.parseHeaders("foo=bar"),
-						null);
+						null, null);
 		RequestMappingInfo match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNotNull(match);
 
 		key = new RequestMappingInfo(singleton("/foo"), null, null, RequestConditionFactory.parseHeaders("foo!=bar"),
-				null);
+				null, null);
 		match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNull(match);
@@ -222,13 +222,33 @@ public class RequestMappingInfoTests {
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 
 		RequestMappingInfo key = new RequestMappingInfo(singleton("/foo"), null, null, null,
-				RequestConditionFactory.parseConsumes("text/plain"));
+				RequestConditionFactory.parseConsumes("text/plain"), null);
 		RequestMappingInfo match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNotNull(match);
 
 		key = new RequestMappingInfo(singleton("/foo"), null, null, null,
-				RequestConditionFactory.parseConsumes("application/xml"));
+				RequestConditionFactory.parseConsumes("application/xml"), null);
+		match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
+
+		assertNull(match);
+	}
+
+	@Test
+	public void producesCondition() {
+		PathMatcher pathMatcher = new AntPathMatcher();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		request.addHeader("Accept", "text/plain");
+		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
+
+		RequestMappingInfo key = new RequestMappingInfo(singleton("/foo"), null, null, null,
+				null, RequestConditionFactory.parseProduces("text/plain"));
+		RequestMappingInfo match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
+
+		assertNotNull(match);
+
+		key = new RequestMappingInfo(singleton("/foo"), null, null, null, null,
+				RequestConditionFactory.parseProduces("application/xml"));
 		match = key.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 
 		assertNull(match);

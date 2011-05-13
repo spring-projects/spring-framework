@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,33 +26,23 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Represents a collection of consumes conditions, typically obtained from {@link
- * org.springframework.web.bind.annotation.RequestMapping#consumes() @RequestMapping.consumes()}.
+ * Represents a collection of consumes conditions, typically obtained from {@link org.springframework.web.bind.annotation.RequestMapping#consumes()
+ * &#64;RequestMapping.consumes()}.
  *
  * @author Arjen Poutsma
- * @see RequestConditionFactory#parseHeaders(String...)
+ * @see RequestConditionFactory#parseConsumes(String...)
+ * @see RequestConditionFactory#parseConsumes(String[], String[])
  * @since 3.1
  */
 public class ConsumesRequestCondition
-		extends LogicalDisjunctionRequestCondition<ConsumesRequestCondition.ConsumeRequestCondition>
+		extends MediaTypesRequestCondition<ConsumesRequestCondition.ConsumeRequestCondition>
 		implements Comparable<ConsumesRequestCondition> {
-
-	private final ConsumeRequestCondition mostSpecificCondition;
 
 	ConsumesRequestCondition(Collection<ConsumeRequestCondition> conditions) {
 		super(conditions);
-		Assert.notEmpty(conditions, "'conditions' must not be empty");
-		mostSpecificCondition = getMostSpecificCondition();
-	}
-
-	private ConsumeRequestCondition getMostSpecificCondition() {
-		List<ConsumeRequestCondition> conditions = new ArrayList<ConsumeRequestCondition>(getConditions());
-		Collections.sort(conditions);
-		return conditions.get(0);
 	}
 
 	ConsumesRequestCondition(String... consumes) {
@@ -72,7 +61,7 @@ public class ConsumesRequestCondition
 	}
 
 	/**
-	 * Creates an default set of consumes request conditions.
+	 * Creates a default set of consumes request conditions.
 	 */
 	public ConsumesRequestCondition() {
 		this(Collections.singleton(new ConsumeRequestCondition(MediaType.ALL, false)));
@@ -101,8 +90,8 @@ public class ConsumesRequestCondition
 	}
 
 	/**
-	 * Combines this collection of request condition with another. Returns {@code other}, unless it has the default
-	 * value (i.e. <code>&#42;/&#42;</code>).
+	 * Combines this collection of request condition with another. Returns {@code other}, unless it has the default value
+	 * (i.e. <code>&#42;/&#42;</code>).
 	 *
 	 * @param other the condition to combine with
 	 */
@@ -122,79 +111,32 @@ public class ConsumesRequestCondition
 	}
 
 	public int compareTo(ConsumesRequestCondition other) {
-		return this.mostSpecificCondition.compareTo(other.mostSpecificCondition);
+		return this.getMostSpecificCondition().compareTo(other.getMostSpecificCondition());
 	}
 
-	private static MediaType getContentType(HttpServletRequest request) {
-		if (StringUtils.hasLength(request.getContentType())) {
-			return MediaType.parseMediaType(request.getContentType());
-		}
-		else {
-			return MediaType.APPLICATION_OCTET_STREAM;
-		}
-	}
-
-	static class ConsumeRequestCondition implements RequestCondition, Comparable<ConsumeRequestCondition> {
-
-		private final MediaType mediaType;
-
-		private final boolean isNegated;
+	static class ConsumeRequestCondition extends MediaTypesRequestCondition.MediaTypeRequestCondition {
 
 		ConsumeRequestCondition(String expression) {
-			if (expression.startsWith("!")) {
-				isNegated = true;
-				expression = expression.substring(1);
+			super(expression);
+		}
+
+		ConsumeRequestCondition(MediaType mediaType, boolean negated) {
+			super(mediaType, negated);
+		}
+
+		@Override
+		protected boolean match(HttpServletRequest request, MediaType mediaType) {
+			MediaType contentType = getContentType(request);
+			return mediaType.includes(contentType);
+		}
+
+		private MediaType getContentType(HttpServletRequest request) {
+			if (StringUtils.hasLength(request.getContentType())) {
+				return MediaType.parseMediaType(request.getContentType());
 			}
 			else {
-				isNegated = false;
+				return MediaType.APPLICATION_OCTET_STREAM;
 			}
-			this.mediaType = MediaType.parseMediaType(expression);
-		}
-
-		ConsumeRequestCondition(MediaType mediaType, boolean isNegated) {
-			this.mediaType = mediaType;
-			this.isNegated = isNegated;
-		}
-
-		public boolean match(HttpServletRequest request) {
-			MediaType contentType = getContentType(request);
-			boolean match = this.mediaType.includes(contentType);
-			return !isNegated ? match : !match;
-		}
-
-		public int compareTo(ConsumeRequestCondition other) {
-			return MediaType.SPECIFICITY_COMPARATOR.compare(this.mediaType, other.mediaType);
-		}
-
-		MediaType getMediaType() {
-			return mediaType;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj != null && obj instanceof ConsumeRequestCondition) {
-				ConsumeRequestCondition other = (ConsumeRequestCondition) obj;
-				return (this.mediaType.equals(other.mediaType)) && (this.isNegated == other.isNegated);
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return mediaType.hashCode();
-		}
-
-		@Override
-		public String toString() {
-			StringBuilder builder = new StringBuilder();
-			if (isNegated) {
-				builder.append('!');
-			}
-			builder.append(mediaType.toString());
-			return builder.toString();
 		}
 
 	}
