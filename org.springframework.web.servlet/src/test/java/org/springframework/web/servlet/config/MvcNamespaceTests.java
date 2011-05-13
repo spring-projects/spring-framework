@@ -179,7 +179,7 @@ public class MvcNamespaceTests {
 	
 	@Test
 	public void testInterceptors() throws Exception {
-		loadBeanDefinitions("mvc-config-interceptors.xml", 14);
+		loadBeanDefinitions("mvc-config-interceptors.xml", 16);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -191,20 +191,21 @@ public class MvcNamespaceTests {
 		request.addParameter("theme", "green");
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		assertEquals(3, chain.getInterceptors().length);
+		assertEquals(4, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[0] instanceof ConversionServiceExposingInterceptor);
 		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
-		assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof WebRequestHandlerInterceptorAdapter);
+		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
 
 		request.setRequestURI("/logged/accounts/12345");
 		chain = mapping.getHandler(request);
-		assertEquals(4, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);
+		assertEquals(5, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[4] instanceof WebRequestHandlerInterceptorAdapter);
 
 		request.setRequestURI("/foo/logged");
 		chain = mapping.getHandler(request);
-		assertEquals(4, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[3] instanceof WebRequestHandlerInterceptorAdapter);
+		assertEquals(5, chain.getInterceptors().length);
+		assertTrue(chain.getInterceptors()[4] instanceof WebRequestHandlerInterceptorAdapter);
 	}
 	
 	@Test
