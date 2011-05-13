@@ -311,4 +311,17 @@ public @interface RequestMapping {
 	 */
 	String[] consumes() default "*/*";
 
+	/**
+	 * The producible media types of the mapped request, narrowing the primary mapping.
+	 * <p>The format is a sequence of media types ("text/plain", "application/*),
+	 * with a request only mapped if the {@code Accept} matches one of these media types.
+	 * Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
+	 * all requests with a {@code Accept} other than "text/plain".
+	 * <p><b>Supported at the type level as well as at the method level!</b>
+	 * When used at the type level, all method-level mappings override
+	 * this consumes restriction.
+	 * @see org.springframework.http.MediaType
+	 */
+	String[] produces() default "*/*";
+
 }

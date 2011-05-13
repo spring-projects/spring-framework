@@ -99,6 +99,15 @@ public abstract class RequestConditionFactory {
 		return new ConsumesRequestCondition(consumes);
 	}
 
+	/**
+	 * Parses the given consumes and {@code Content-Type} headers, and returns them as a single request condition. <p>Only
+	 * {@code Content-Type} headers will be used, all other headers will be ignored.
+	 *
+	 * @param consumes the consumes
+	 * @param headers the headers
+	 * @return the request condition
+	 * @see org.springframework.web.bind.annotation.RequestMapping#consumes()
+	 */
 	public static ConsumesRequestCondition parseConsumes(String[] consumes, String[] headers) {
 
 		List<ConsumesRequestCondition.ConsumeRequestCondition> allConditions = parseContentTypeHeaders(headers);
@@ -115,19 +124,71 @@ public abstract class RequestConditionFactory {
 	}
 
 	private static List<ConsumesRequestCondition.ConsumeRequestCondition> parseContentTypeHeaders(String[] headers) {
-		List<ConsumesRequestCondition.ConsumeRequestCondition> allConditions =
+		List<ConsumesRequestCondition.ConsumeRequestCondition> conditions =
 				new ArrayList<ConsumesRequestCondition.ConsumeRequestCondition>();
 		HeadersRequestCondition headersCondition = new HeadersRequestCondition(headers);
 		for (HeadersRequestCondition.HeaderRequestCondition headerCondition : headersCondition.getConditions()) {
 			if (CONTENT_TYPE_HEADER.equalsIgnoreCase(headerCondition.name)) {
 				List<MediaType> mediaTypes = MediaType.parseMediaTypes(headerCondition.value);
 				for (MediaType mediaType : mediaTypes) {
-					allConditions.add(new ConsumesRequestCondition.ConsumeRequestCondition(mediaType,
+					conditions.add(new ConsumesRequestCondition.ConsumeRequestCondition(mediaType,
+							headerCondition.isNegated));
+				}
+			}
+		}
+		return conditions;
+	}
+
+	/**
+	 * Parses the given produces, and returns them as a single request condition.
+	 *
+	 * @param produces the produces
+	 * @return the request condition
+	 * @see org.springframework.web.bind.annotation.RequestMapping#produces()
+	 */
+	public static ProducesRequestCondition parseProduces(String... produces) {
+		return new ProducesRequestCondition(produces);
+	}
+
+	/**
+	 * Parses the given produces and {@code Accept} headers, and returns them as a single request condition. <p>Only {@code
+	 * Accept} headers will be used, all other headers will be ignored.
+	 *
+	 * @param produces the consumes
+	 * @param headers the headers
+	 * @return the request condition
+	 * @see org.springframework.web.bind.annotation.RequestMapping#produces()
+	 */
+	public static ProducesRequestCondition parseProduces(String[] produces, String[] headers) {
+
+		List<ProducesRequestCondition.ProduceRequestCondition> allConditions = parseAcceptHeaders(headers);
+
+		// ignore the default consumes() value if any accept headers have been set
+		boolean headersHasAccept = !allConditions.isEmpty();
+		boolean producesHasDefaultValue = produces.length == 1 && produces[0].equals("*/*");
+		if (!headersHasAccept || !producesHasDefaultValue) {
+			for (String produce : produces) {
+				allConditions.add(new ProducesRequestCondition.ProduceRequestCondition(produce));
+			}
+		}
+		return new ProducesRequestCondition(allConditions);
+	}
+
+	private static List<ProducesRequestCondition.ProduceRequestCondition> parseAcceptHeaders(String[] headers) {
+		List<ProducesRequestCondition.ProduceRequestCondition> allConditions =
+				new ArrayList<ProducesRequestCondition.ProduceRequestCondition>();
+		HeadersRequestCondition headersCondition = new HeadersRequestCondition(headers);
+		for (HeadersRequestCondition.HeaderRequestCondition headerCondition : headersCondition.getConditions()) {
+			if (ACCEPT_HEADER.equalsIgnoreCase(headerCondition.name)) {
+				List<MediaType> mediaTypes = MediaType.parseMediaTypes(headerCondition.value);
+				for (MediaType mediaType : mediaTypes) {
+					allConditions.add(new ProducesRequestCondition.ProduceRequestCondition(mediaType,
 							headerCondition.isNegated));
 				}
 			}
 		}
 		return allConditions;
 	}
+
 
 }

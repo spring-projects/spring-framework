@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -100,7 +99,7 @@ public class RequestMappingInfoComparatorTests {
 		RequestMappingInfo empty = new RequestMappingInfo(null, null);
 		RequestMappingInfo oneMethod = new RequestMappingInfo(null, new RequestMethod[] {RequestMethod.GET});
 		RequestMappingInfo oneMethodOneParam =
-				new RequestMappingInfo(null, RequestConditionFactory.parseMethods(RequestMethod.GET), RequestConditionFactory.parseParams("foo"), null, null);
+				new RequestMappingInfo(null, RequestConditionFactory.parseMethods(RequestMethod.GET), RequestConditionFactory.parseParams("foo"), null, null, null);
 		List<RequestMappingInfo> list = asList(empty, oneMethod, oneMethodOneParam);
 		Collections.shuffle(list);
 		Collections.sort(list, handlerMapping.getMappingComparator("", request));
@@ -111,16 +110,16 @@ public class RequestMappingInfoComparatorTests {
 	}
 
 	@Test
-	@Ignore	// TODO : remove ignore
-	public void acceptHeaders() {
-		RequestMappingInfo html = new RequestMappingInfo(null, null, null, RequestConditionFactory.parseHeaders("accept=text/html"), null);
-		RequestMappingInfo xml = new RequestMappingInfo(null, null, null, RequestConditionFactory.parseHeaders("accept=application/xml"), null);
+	public void produces() {
+		RequestMappingInfo html = new RequestMappingInfo(null, null, null, null, null, RequestConditionFactory.parseProduces("text/html"));
+		RequestMappingInfo xml = new RequestMappingInfo(null, null, null, null, null, RequestConditionFactory.parseProduces("application/xml"));
 		RequestMappingInfo none = new RequestMappingInfo(null, null);
 
 		request.addHeader("Accept", "application/xml, text/html");
 		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator("", request);
 
-		assertTrue(comparator.compare(html, xml) > 0);
+		int result = comparator.compare(html, xml);
+		assertTrue("Invalid comparison result: " + result, result > 0);
 		assertTrue(comparator.compare(xml, html) < 0);
 		assertTrue(comparator.compare(xml, none) < 0);
 		assertTrue(comparator.compare(none, xml) > 0);
