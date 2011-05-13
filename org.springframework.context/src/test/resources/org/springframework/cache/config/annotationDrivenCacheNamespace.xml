@@ -13,7 +13,7 @@
 		<aop:advisor advice-ref="debugInterceptor" pointcut="execution(* *..CacheableService.*(..))" order="1"/>
 	</aop:config>
 	
-	<bean id="cacheManager" class="org.springframework.cache.support.MapCacheManager">
+	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
 			<set>
 				<bean class="org.springframework.cache.concurrent.ConcurrentCacheFactoryBean" p:name="default"/>
