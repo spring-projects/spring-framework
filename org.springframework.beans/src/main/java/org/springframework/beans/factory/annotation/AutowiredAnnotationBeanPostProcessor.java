@@ -62,7 +62,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
  * that autowires annotated fields, setter methods and arbitrary config methods.
  * Such members to be injected are detected through a Java 5 annotation:
- * by default, Spring's {@link Autowired} annotation.
+ * by default, Spring's @{@link Autowired} and @{@link Value} annotations.
  *
  * <p>Only one constructor (at max) of any given bean class may carry this
  * annotation with the 'required' parameter set to <code>true</code>, 
@@ -83,21 +83,23 @@ import org.springframework.util.ReflectionUtils;
  * a special case of such a general config method. Such config methods
  * do not have to be public.
  *
- * <p>Also supports JSR-330's {@link javax.inject.Inject} annotation, if available.
+ * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation, if
+ * available.
  *
  * <p>Note: A default AutowiredAnnotationBeanPostProcessor will be registered
  * by the "context:annotation-config" and "context:component-scan" XML tags.
  * Remove or turn off the default annotation configuration there if you intend
  * to specify a custom AutowiredAnnotationBeanPostProcessor bean definition.
- * <p><b>NOTE:</b> Annotation injection will be performed <i>before</i> XML injection; thus
- * the latter configuration will override the former for properties wired through
- * both approaches. 
- * 
+ * <p><b>NOTE:</b> Annotation injection will be performed <i>before</i> XML injection;
+ * thus the latter configuration will override the former for properties wired through
+ * both approaches.
+ *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired
+ * @see Value
  */
 public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
 		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {

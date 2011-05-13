@@ -277,6 +277,7 @@
       interfaces that are well-known resolvable dependencies:
       <interfacename>BeanFactory</interfacename>,
       <interfacename>ApplicationContext</interfacename>,
+      <interfacename>Environment</interfacename>,
       <interfacename>ResourceLoader</interfacename>,
       <interfacename>ApplicationEventPublisher</interfacename>, and
       <interfacename>MessageSource</interfacename>. These interfaces and their
@@ -295,6 +296,21 @@
 
   <lineannotation>// ...</lineannotation>
 }</programlisting>
+
+    <note>
+      <para>
+        <interfacename>@Autowired</interfacename>,
+        <interfacename>@Inject</interfacename>,
+        <interfacename>@Resource</interfacename>, and
+        <interfacename>@Value</interfacename> annotations are handled by a
+        Spring <interfacename>BeanPostProcessor</interfacename> implementations
+        which in turn means that you <emphasis>cannot</emphasis>
+        apply these annotations within your own
+        <classname>BeanPostProcessor</classname> or
+        <classname>BeanFactoryPostProcessor</classname> types (if any). These
+        types must be 'wired up' explicitly via XML or using a Spring
+        <interfacename>@Bean</interfacename> method.</para>
+    </note>
   </section>
 
   <section id="beans-autowired-annotation-qualifiers">
