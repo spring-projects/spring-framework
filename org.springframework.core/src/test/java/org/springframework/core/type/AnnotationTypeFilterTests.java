@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,8 @@ package org.springframework.core.type;
 
 import java.lang.annotation.Inherited;
 
-import junit.framework.TestCase;
-
-import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
@@ -31,7 +29,7 @@ import org.springframework.stereotype.Component;
  * @author Juergen Hoeller
  */
 public class AnnotationTypeFilterTests extends TestCase {
-	
+
 	public void testDirectAnnotationMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeComponent";
@@ -52,7 +50,7 @@ public class AnnotationTypeFilterTests extends TestCase {
 		assertFalse(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
-	
+
 	public void testInheritedAnnotationFromBaseClassDoesMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeSubClassOfSomeComponent";
@@ -73,7 +71,7 @@ public class AnnotationTypeFilterTests extends TestCase {
 		assertFalse(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
-	
+
 	public void testNonAnnotatedClassDoesntMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeNonCandidateClass";
@@ -84,6 +82,17 @@ public class AnnotationTypeFilterTests extends TestCase {
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
+	public void testMatchesInterfacesIfConfigured() throws Exception {
+
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeComponentInterface";
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
+
+		AnnotationTypeFilter filter = new AnnotationTypeFilter(InheritedAnnotation.class, false, true);
+
+		assertTrue(filter.match(metadataReader, metadataReaderFactory));
+		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
+	}
 
 	// We must use a standalone set of types to ensure that no one else is loading them
 	// and interfering with ClassloadingAssertions.assertClassNotLoaded()

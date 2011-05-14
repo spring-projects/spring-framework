@@ -44,7 +44,8 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	 * Create a new AnnotationTypeFilter for the given annotation type.
 	 * This filter will also match meta-annotations. To disable the
 	 * meta-annotation matching, use the constructor that accepts a
-	 * '<code>considerMetaAnnotations</code>' argument.
+	 * '<code>considerMetaAnnotations</code>' argument. The filter will
+	 * not match interfaces.
 	 * @param annotationType the annotation type to match
 	 */
 	public AnnotationTypeFilter(Class<? extends Annotation> annotationType) {
@@ -53,11 +54,22 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 
 	/**
 	 * Create a new AnnotationTypeFilter for the given annotation type.
+	 * The filter will not match interfaces.
 	 * @param annotationType the annotation type to match
 	 * @param considerMetaAnnotations whether to also match on meta-annotations
 	 */
 	public AnnotationTypeFilter(Class<? extends Annotation> annotationType, boolean considerMetaAnnotations) {
-		super(annotationType.isAnnotationPresent(Inherited.class), false);
+		this(annotationType, considerMetaAnnotations, false);
+	}
+
+	/**
+	 * Create a new {@link AnnotationTypeFilter} for the given annotation type.
+	 * @param annotationType the annotation type to match
+	 * @param considerMetaAnnotations whether to also match on meta-annotations
+	 * @param considerInterfaces whether to also match interfaces
+	 */
+	public AnnotationTypeFilter(Class<? extends Annotation> annotationType, boolean considerMetaAnnotations, boolean considerInterfaces) {
+		super(annotationType.isAnnotationPresent(Inherited.class), considerInterfaces);
 		this.annotationType = annotationType;
 		this.considerMetaAnnotations = considerMetaAnnotations;
 	}
