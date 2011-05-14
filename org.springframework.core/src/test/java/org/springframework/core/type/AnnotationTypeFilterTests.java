@@ -16,8 +16,11 @@
 
 package org.springframework.core.type;
 
+import static org.junit.Assert.*;
+
 import java.lang.annotation.Inherited;
 
+import org.junit.Test;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
@@ -27,9 +30,11 @@ import org.springframework.stereotype.Component;
 /**
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
+ * @author Oliver Gierke
  */
-public class AnnotationTypeFilterTests extends TestCase {
+public class AnnotationTypeFilterTests {
 
+	@Test
 	public void testDirectAnnotationMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeComponent";
@@ -40,6 +45,7 @@ public class AnnotationTypeFilterTests extends TestCase {
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
+	@Test
 	public void testInheritedAnnotationFromInterfaceDoesNotMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeSubClassOfSomeComponentInterface";
@@ -51,6 +57,7 @@ public class AnnotationTypeFilterTests extends TestCase {
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
+	@Test
 	public void testInheritedAnnotationFromBaseClassDoesMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeSubClassOfSomeComponent";
@@ -61,6 +68,7 @@ public class AnnotationTypeFilterTests extends TestCase {
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
+	@Test
 	public void testNonInheritedAnnotationDoesNotMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation";
@@ -72,6 +80,7 @@ public class AnnotationTypeFilterTests extends TestCase {
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
+	@Test
 	public void testNonAnnotatedClassDoesntMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AnnotationTypeFilterTests$SomeNonCandidateClass";
@@ -82,6 +91,7 @@ public class AnnotationTypeFilterTests extends TestCase {
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
+	@Test
 	public void testMatchesInterfacesIfConfigured() throws Exception {
 
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
