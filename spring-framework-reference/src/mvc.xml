@@ -2158,18 +2158,31 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
         <para>The <classname>RedirectView</classname> issues an
         <literal>HttpServletResponse.sendRedirect()</literal> call that
-        returns to the client browser as an HTTP redirect. <!--Does preceding happen after what happens in first paragraph? Clarify sequence of events.-->All
-        model attributes are exposed as HTTP query parameters. This means that
-        the model must contain only objects (generally Strings or objects
-        converted to a String representation), which can be readily converted
-        to a textual HTTP query parameter.</para>
+        returns to the client browser as an HTTP redirect.
+        All model attributes are considered to be exposed as either URI template variables first, 
+        assuming the URL is a URI template such as <code>/account/{number}</code>, 
+        or as HTTP query parameters second. By default String and primitive model attributes 
+        are eligible to be exposed this way. However, this behavior can be extended by 
+        sub-classing RedirectView. Also consider that <code>@PathVariable</code>-annotated 
+        method arguments are automatically added to the model, which is convenient when 
+        redirecting to the same URL using a different HTTP method. For example:</para>
+        
+      <programlisting language="java">@RequestMapping(value = "/files/{path}", method = RequestMethod.POST)
+public String upload(@PathVariable String path, ...) {
+    // ...
+    return "redirect:files/{path};
+}
+
+@RequestMapping(value = "/files/{path}", method = RequestMethod.GET)
+public void get(@PathVariable String path, ...) {
+    // ...
+}</programlisting>        
 
         <para>If you use <classname>RedirectView</classname> and the view is
         created by the controller itself, it is recommended that you configure
         the redirect URL to be injected into the controller so that it is not
         baked into the controller but configured in the context along with the
-        view names. <!--I revised sentence because it sounds like something you need to do. Also reworded next heading to say what it's about. If not correct,--><!--reword.-->The
-        next section discusses this process.</para>
+        view names. The next section discusses this process.</para>
       </section>
 
       <section id="mvc-redirecting-redirect-prefix">
@@ -2194,13 +2207,10 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         <para>The net effect is the same as if the controller had returned a
         <classname>RedirectView</classname>, but now the controller itself can
         simply operate in terms of logical view names. A logical view name
-        such as <literal>redirect:/my/response/controller.html</literal> will
+        such as <literal>redirect:/myapp/some/resource</literal> will
         redirect relative to the current servlet context, while a name such as
-        <literal>redirect:http://myhost.com/some/arbitrary/path.html</literal>
-        will redirect to an absolute URL. The important thing is that, as long
-        as this redirect view name is injected into the controller like any
-        other logical view name, the controller is not even aware that
-        redirection is happening.</para>
+        <literal>redirect:http://myhost.com/some/arbitrary/path</literal>
+        will redirect to an absolute URL.</para>
       </section>
 
       <section id="mvc-redirecting-forward-prefix">
