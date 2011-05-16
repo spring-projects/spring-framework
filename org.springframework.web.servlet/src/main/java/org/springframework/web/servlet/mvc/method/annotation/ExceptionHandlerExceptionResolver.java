@@ -164,7 +164,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.messageConverters = messageConverters;
 	}
 
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		if (argumentResolvers == null) {
 			argumentResolvers = new HandlerMethodArgumentResolverComposite();
 			argumentResolvers.addResolvers(customArgumentResolvers);

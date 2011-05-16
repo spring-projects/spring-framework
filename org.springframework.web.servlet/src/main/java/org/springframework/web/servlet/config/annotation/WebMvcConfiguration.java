@@ -302,8 +302,7 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 
 	private HandlerExceptionResolver createExceptionHandlerExceptionResolver() throws Exception {
 		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
-		resolver.setOrder(0);
-
+		
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		configurers.configureMessageConverters(converters);
 		if (converters.size() == 0) {
