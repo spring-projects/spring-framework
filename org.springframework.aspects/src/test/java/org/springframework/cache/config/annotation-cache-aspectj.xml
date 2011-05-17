@@ -5,7 +5,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
        		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-	<bean id="annotationSource" class="org.springframework.cache.annotation.AnnotationCacheDefinitionSource"/>
+	<bean id="annotationSource" class="org.springframework.cache.annotation.AnnotationCacheOperationSource"/>
 	
 	<aop:config>
 		<aop:advisor advice-ref="debugInterceptor" pointcut="execution(* *..CacheableService.*(..))" order="1"/>
@@ -16,13 +16,6 @@
 		<property name="cacheDefinitionSources" ref="annotationSource"/>
 	</bean>
 	
-	<!-- 
-	<bean id="advisor" class="org.springframework.cache.interceptor.BeanFactoryCacheDefinitionSourceAdvisor">
-		<property name="cacheDefinitionSource" ref="annotationSource"/>
-		<property name="adviceBeanName" value="cacheAspect"/>
-	</bean>
-	 -->
-
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
 			<set>
