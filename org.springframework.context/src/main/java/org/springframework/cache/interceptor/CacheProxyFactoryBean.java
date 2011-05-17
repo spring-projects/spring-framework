@@ -49,7 +49,7 @@ public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean {
 	 * 
 	 * @param cacheDefinitionSources cache definition sources
 	 */
-	public void setCacheDefinitionSources(CacheDefinitionSource... cacheDefinitionSources) {
+	public void setCacheDefinitionSources(CacheOperationSource... cacheDefinitionSources) {
 		this.cachingInterceptor.setCacheDefinitionSources(cacheDefinitionSources);
 	}
 

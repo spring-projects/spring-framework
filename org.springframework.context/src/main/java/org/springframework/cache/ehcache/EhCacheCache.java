@@ -21,6 +21,7 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.DefaultValue;
 import org.springframework.util.Assert;
 
 /**
@@ -57,77 +58,16 @@ public class EhCacheCache implements Cache<Object, Object> {
 		cache.removeAll();
 	}
 
-	public boolean containsKey(Object key) {
-		// get the element to force the expiry check (since #isKeyInCache does not considers that)
-		Element element = cache.getQuiet(key);
-		return (element != null ? true : false);
-	}
-
-	public Object get(Object key) {
+	public ValueWrapper<Object> get(Object key) {
 		Element element = cache.get(key);
-		return (element != null ? element.getObjectValue() : null);
+		return (element != null ? new DefaultValue<Object>(element.getObjectValue()) : null);
 	}
 
-	public Object put(Object key, Object value) {
-		Element previous = cache.getQuiet(key);
+	public void put(Object key, Object value) {
 		cache.put(new Element(key, value));
-		return (previous != null ? previous.getValue() : null);
 	}
 
-	public Object remove(Object key) {
-		Element element = cache.getQuiet(key);
-		Object value = (element != null ? element.getObjectValue() : null);
+	public void evict(Object key) {
 		cache.remove(key);
-		return value;
-	}
-
-	public Object putIfAbsent(Object key, Object value) {
-		// putIfAbsent supported only from Ehcache 2.1
-		// return cache.putIfAbsent(new Element(key, value));
-		Element existing = cache.getQuiet(key);
-		if (existing == null) {
-			cache.put(new Element(key, value));
-			return null;
-		}
-		return existing.getObjectValue();
-	}
-
-	public boolean remove(Object key, Object value) {
-		// remove(Element) supported only from Ehcache 2.1
-		// return cache.removeElement(new Element(key, value));
-		Element existing = cache.getQuiet(key);
-		
-		if (existing != null && existing.getObjectValue().equals(value)) {
-	         cache.remove(key);
-	         return true;
-	    }
-		
-		return false;
-	}
-
-	public Object replace(Object key, Object value) {
-		// replace(Object, Object) supported only from Ehcache 2.1
-		// return cache.replace(new Element(key, value));
-		Element existing = cache.getQuiet(key);
-
-		if (existing != null) {
-			cache.put(new Element(key, value));
-			return existing.getObjectValue();
-		}
-
-		return null;
-	}
-
-	public boolean replace(Object key, Object oldValue, Object newValue) {
-		// replace(Object, Object, Object) supported only from Ehcache 2.1
-		// return cache.replace(new Element(key, oldValue), new Element(key,
-		// newValue));
-		Element existing = cache.getQuiet(key);
-
-		if (existing != null && existing.getObjectValue().equals(oldValue)) {
-			cache.put(new Element(key, newValue));
-			return true;
-		}
-		return false;
 	}
 }

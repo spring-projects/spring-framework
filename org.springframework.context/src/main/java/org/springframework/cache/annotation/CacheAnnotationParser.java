@@ -18,7 +18,7 @@ package org.springframework.cache.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 
-import org.springframework.cache.interceptor.CacheDefinition;
+import org.springframework.cache.interceptor.CacheOperation;
 
 
 /**
@@ -38,9 +38,9 @@ public interface CacheAnnotationParser {
 	 * metadata attribute class. Returns <code>null</code> if the method/class
 	 * is not cacheable.
 	 * @param ae the annotated method or class
-	 * @return CacheOperationDefinition the configured caching operation,
+	 * @return CacheOperation the configured caching operation,
 	 * or <code>null</code> if none was found
-	 * @see AnnotationCacheDefinitionSource#determineCacheOperationDefinition
+	 * @see AnnotationCacheOperationSource#determineCacheOperation
 	 */
-	CacheDefinition parseCacheAnnotation(AnnotatedElement ae);
+	CacheOperation parseCacheAnnotation(AnnotatedElement ae);
 }

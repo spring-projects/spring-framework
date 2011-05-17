@@ -16,7 +16,7 @@
 
 package org.springframework.cache.aspectj;
 
-import org.springframework.cache.annotation.AnnotationCacheDefinitionSource;
+import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 
@@ -43,7 +43,7 @@ import org.springframework.cache.annotation.Cacheable;
 public aspect AnnotationCacheAspect extends AbstractCacheAspect {
 
 	public AnnotationCacheAspect() {
-		super(new AnnotationCacheDefinitionSource(false));
+		super(new AnnotationCacheOperationSource(false));
 	}
 
 	/**
