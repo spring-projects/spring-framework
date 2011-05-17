@@ -16,12 +16,6 @@
 
 package org.springframework.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,8 +24,11 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -499,5 +496,14 @@ public class MediaTypeTests {
 		MediaType mediaType = MediaType.parseMediaType("application/xml");
 		assertEquals(mediaType, conversionService.convert("application/xml", MediaType.class));
 	}
+	
+	@Test
+	public void isConcrete() {
+		assertTrue("text/plain not concrete", MediaType.TEXT_PLAIN.isConcrete());
+		assertFalse("*/* concrete", MediaType.ALL.isConcrete());
+		assertFalse("text/* concrete", new MediaType("text", "*").isConcrete());
+	}
+
+
 
 }

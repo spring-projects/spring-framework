@@ -18,15 +18,11 @@ package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import java.io.IOException;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -37,8 +33,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves method arguments annotated with @{@link RequestBody}.
- * Handles return values from methods annotated with @{@link ResponseBody}.
+ * Resolves method arguments annotated with @{@link RequestBody}. Handles return values from methods annotated with 
+ * {@link ResponseBody}.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -60,25 +56,20 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	public Object resolveArgument(MethodParameter parameter,
 								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest, 
+								  NativeWebRequest webRequest,
 								  WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
 		return readWithMessageConverters(webRequest, parameter, parameter.getParameterType());
 	}
 
-	@Override
-	protected HttpInputMessage createInputMessage(NativeWebRequest webRequest) {
-		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		return new ServletServerHttpRequest(servletRequest);
-	}
-
-	public void handleReturnValue(Object returnValue, 
-								  MethodParameter returnType, 
-								  ModelAndViewContainer mavContainer, 
+	public void handleReturnValue(Object returnValue,
+								  MethodParameter returnType,
+								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest) throws IOException, HttpMediaTypeNotAcceptableException {
 		mavContainer.setResolveView(false);
 		if (returnValue != null) {
-			writeWithMessageConverters(webRequest, returnValue);
+			writeWithMessageConverters(returnValue, returnType, createInputMessage(webRequest),
+					createOutputMessage(webRequest));
 		}
 	}
 
@@ -87,5 +78,5 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		HttpServletResponse servletResponse = (HttpServletResponse) webRequest.getNativeResponse();
 		return new ServletServerHttpResponse(servletResponse);
 	}
-	
+
 }

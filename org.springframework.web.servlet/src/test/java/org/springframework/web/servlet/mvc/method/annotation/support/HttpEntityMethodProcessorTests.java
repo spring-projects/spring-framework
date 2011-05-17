@@ -16,26 +16,14 @@
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
 
 import org.easymock.Capture;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -49,8 +37,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link HttpEntityMethodProcessor} and mock {@link HttpMessageConverter}.
@@ -70,9 +62,10 @@ public class HttpEntityMethodProcessorTests {
 	private MethodParameter returnTypeResponseEntity;
 	private MethodParameter returnTypeHttpEntity;
 	private MethodParameter returnTypeInt;
+	private MethodParameter returnTypeResponseEntityProduces;
 
 	private ModelAndViewContainer mavContainer;
-	
+
 	private ServletWebRequest webRequest;
 
 	private MockHttpServletResponse servletResponse;
@@ -83,10 +76,12 @@ public class HttpEntityMethodProcessorTests {
 	@Before
 	public void setUp() throws Exception {
 		messageConverter = createMock(HttpMessageConverter.class);
-		
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-		messageConverters.add(messageConverter);
-		processor = new HttpEntityMethodProcessor(messageConverters);
+		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		replay(messageConverter);
+
+		processor = new HttpEntityMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
+		reset(messageConverter);
+
 
 		Method handle1 = getClass().getMethod("handle1", HttpEntity.class, ResponseEntity.class, Integer.TYPE);
 		paramHttpEntity = new MethodParameter(handle1, 0);
@@ -95,7 +90,10 @@ public class HttpEntityMethodProcessorTests {
 		returnTypeResponseEntity = new MethodParameter(handle1, -1);
 
 		returnTypeHttpEntity = new MethodParameter(getClass().getMethod("handle2", HttpEntity.class), -1);
+
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle3"), -1);
+
+		returnTypeResponseEntityProduces = new MethodParameter(getClass().getMethod("handle4"), -1);
 
 		mavContainer = new ModelAndViewContainer();
 		
@@ -124,7 +122,6 @@ public class HttpEntityMethodProcessorTests {
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
 		String body = "Foo";
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(contentType));
 		expect(messageConverter.canRead(String.class, contentType)).andReturn(true);
 		expect(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).andReturn(body);
 		replay(messageConverter);
@@ -165,6 +162,8 @@ public class HttpEntityMethodProcessorTests {
 		MediaType accepted = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Accept", accepted.toString());
 
+		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
+		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(messageConverter.canWrite(String.class, accepted)).andReturn(true);
 		messageConverter.write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
 		replay(messageConverter);
@@ -175,8 +174,43 @@ public class HttpEntityMethodProcessorTests {
 		verify(messageConverter);
 	}
 
+	@Test
+	public void handleReturnValueProduces() throws Exception {
+		String body = "Foo";
+		ResponseEntity<String> returnValue = new ResponseEntity<String>(body, HttpStatus.OK);
+
+		servletRequest.addHeader("Accept", "text/*");
+
+		expect(messageConverter.canWrite(String.class, MediaType.TEXT_HTML)).andReturn(true);
+		messageConverter.write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
+		replay(messageConverter);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntityProduces, mavContainer, webRequest);
+
+		assertFalse(mavContainer.isResolveView());
+		verify(messageConverter);
+	}
+
 	@Test(expected = HttpMediaTypeNotAcceptableException.class)
 	public void handleReturnValueNotAcceptable() throws Exception {
+		String body = "Foo";
+		ResponseEntity<String> returnValue = new ResponseEntity<String>(body, HttpStatus.OK);
+
+		MediaType accepted = MediaType.APPLICATION_ATOM_XML;
+		servletRequest.addHeader("Accept", accepted.toString());
+
+		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
+		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(MediaType.TEXT_PLAIN));
+		expect(messageConverter.canWrite(String.class, accepted)).andReturn(false);
+		replay(messageConverter);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		fail("Expected exception");
+	}
+	
+	@Test(expected = HttpMediaTypeNotAcceptableException.class)
+	public void handleReturnValueNotAcceptableProduces() throws Exception {
 		String body = "Foo";
 		ResponseEntity<String> returnValue = new ResponseEntity<String>(body, HttpStatus.OK);
 
@@ -184,10 +218,9 @@ public class HttpEntityMethodProcessorTests {
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		expect(messageConverter.canWrite(String.class, accepted)).andReturn(false);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
 		replay(messageConverter);
 
-		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+		processor.handleReturnValue(returnValue, returnTypeResponseEntityProduces, mavContainer, webRequest);
 
 		fail("Expected exception");
 	}
@@ -211,8 +244,10 @@ public class HttpEntityMethodProcessorTests {
 		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.ACCEPTED);
 
 		Capture<HttpOutputMessage> outputMessage = new Capture<HttpOutputMessage>();
-		expect(messageConverter.canWrite(String.class, MediaType.ALL)).andReturn(true);
-		messageConverter.write(eq("body"), eq(MediaType.ALL),  capture(outputMessage));
+		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
+		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(MediaType.TEXT_PLAIN));
+		expect(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).andReturn(true);
+		messageConverter.write(eq("body"), eq(MediaType.TEXT_PLAIN),  capture(outputMessage));
 		replay(messageConverter);
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
@@ -233,5 +268,11 @@ public class HttpEntityMethodProcessorTests {
 	public int handle3() {
 		return 42;
 	}
+
+	@RequestMapping(produces = {"text/html", "application/xhtml+xml"})
+	public ResponseEntity<String> handle4() {
+		return null;
+	}
+
 
 }

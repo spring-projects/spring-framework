@@ -23,9 +23,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,8 +31,6 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -71,8 +66,10 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) 
 			throws IOException, HttpMediaTypeNotSupportedException {
+
 		HttpInputMessage inputMessage = createInputMessage(webRequest);
 		Class<?> paramType = getHttpEntityType(parameter);
+
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
 		return new HttpEntity<Object>(body, inputMessage.getHeaders());
 	}
@@ -88,7 +85,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			else if (typeArgument instanceof GenericArrayType) {
 				Type componentType = ((GenericArrayType) typeArgument).getGenericComponentType();
 				if (componentType instanceof Class) {
-					// Surely, there should be a nicer way to do this
+					// Surely, there should be a nicer way to determine the array type
 					Object array = Array.newInstance((Class<?>) componentType, 0);
 					return array.getClass();
 				}
@@ -97,17 +94,12 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		throw new IllegalArgumentException(
 				"HttpEntity parameter (" + methodParam.getParameterName() + ") is not parameterized");
 	}
-	
-	@Override
-	protected HttpInputMessage createInputMessage(NativeWebRequest webRequest) {
-		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		return new ServletServerHttpRequest(servletRequest);
-	}
 
 	public void handleReturnValue(Object returnValue, 
 								  MethodParameter returnType, 
 								  ModelAndViewContainer mavContainer, 
 								  NativeWebRequest webRequest) throws Exception {
+		
 		mavContainer.setResolveView(false);
 
 		if (returnValue == null) {
@@ -129,18 +121,12 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		
 		Object body = responseEntity.getBody();
 		if (body != null) {
-			writeWithMessageConverters(body, createInputMessage(webRequest), outputMessage);
+			writeWithMessageConverters(body, returnType, createInputMessage(webRequest), outputMessage);
 		}
 		else {
 			// flush headers to the HttpServletResponse
 			outputMessage.getBody();
 		}
-	}
-
-	@Override
-	protected HttpOutputMessage createOutputMessage(NativeWebRequest webRequest) {
-		HttpServletResponse servletResponse = (HttpServletResponse) webRequest.getNativeResponse();
-		return new ServletServerHttpResponse(servletResponse);
 	}
 
 }

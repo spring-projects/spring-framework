@@ -806,13 +806,10 @@ public class ServletHandlerMethodTests {
 
 	@Test
 	public void responseBodyNoAcceptableMediaType() throws ServletException, IOException {
-		initDispatcherServlet(RequestResponseBodyController.class, new BeanDefinitionRegistrar() {
+		initDispatcherServlet(RequestResponseBodyProducesController.class, new BeanDefinitionRegistrar() {
 			public void register(GenericWebApplicationContext wac) {
-				RootBeanDefinition converterDef = new RootBeanDefinition(StringHttpMessageConverter.class);
-				converterDef.getPropertyValues().add("supportedMediaTypes", new MediaType("text", "plain"));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				StringHttpMessageConverter converter = new StringHttpMessageConverter();
-				converter.setSupportedMediaTypes(Collections.singletonList(new MediaType("text", "plain")));
 				adapterDef.getPropertyValues().add("messageConverters", converter);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
 			}
@@ -923,7 +920,7 @@ public class ServletHandlerMethodTests {
 	 * See SPR-6877
 	 */
 	@Test
-	public void overlappingMesssageConvertersRequestBody() throws ServletException, IOException {
+	public void overlappingMessageConvertersRequestBody() throws ServletException, IOException {
 		initDispatcherServlet(RequestResponseBodyController.class, new BeanDefinitionRegistrar() {
 			public void register(GenericWebApplicationContext wac) {
 				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
@@ -942,7 +939,7 @@ public class ServletHandlerMethodTests {
 		request.addHeader("Accept", "application/json, text/javascript, */*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("Invalid response status code", "application/json", response.getHeader("Content-Type"));
+		assertEquals("Invalid content-type", "application/json", response.getHeader("Content-Type"));
 	}
 
 	@Test
@@ -1006,7 +1003,7 @@ public class ServletHandlerMethodTests {
 		request.setContentType("application/xml");
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals(404, response.getStatus());
+		assertEquals(415, response.getStatus());
 	}
 
 	@Test
@@ -1053,6 +1050,12 @@ public class ServletHandlerMethodTests {
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("xml", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "application/msword");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(406, response.getStatus());
 	}
 
 	@Test
@@ -2160,6 +2163,16 @@ public class ServletHandlerMethodTests {
 	}
 
 	@Controller
+	public static class RequestResponseBodyProducesController {
+
+		@RequestMapping(value = "/something", method = RequestMethod.PUT, produces = "text/plain")
+		@ResponseBody
+		public String handle(@RequestBody String body) throws IOException {
+			return body;
+		}
+	}
+
+	@Controller
 	public static class ResponseBodyVoidController {
 
 		@RequestMapping("/something")
@@ -2608,7 +2621,7 @@ public class ServletHandlerMethodTests {
 	}
 
 	private interface BeanDefinitionRegistrar {
-		public void register(GenericWebApplicationContext context);
+		void register(GenericWebApplicationContext context);
 	}
 
 	@SuppressWarnings("serial")
