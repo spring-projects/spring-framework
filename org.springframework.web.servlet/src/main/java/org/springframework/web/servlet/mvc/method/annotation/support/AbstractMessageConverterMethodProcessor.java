@@ -158,6 +158,7 @@ public abstract class AbstractMessageConverterMethodProcessor
 			}
 			else if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION)) {
 				selectedMediaType = MediaType.APPLICATION_OCTET_STREAM;
+				break;
 			}
 		}
 		if (selectedMediaType != null) {
