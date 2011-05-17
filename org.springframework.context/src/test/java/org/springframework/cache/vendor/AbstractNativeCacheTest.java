@@ -63,7 +63,7 @@ public abstract class AbstractNativeCacheTest<T> {
 
 		assertNull(cache.get(key));
 		cache.put(key, value);
-		assertEquals(value, cache.get(key));
+		assertEquals(value, cache.get(key).get());
 	}
 
 	@Test
