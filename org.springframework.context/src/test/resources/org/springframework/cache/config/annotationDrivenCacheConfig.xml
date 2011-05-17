@@ -9,7 +9,7 @@
 
 	<bean id="apc" class="org.springframework.aop.framework.autoproxy.InfrastructureAdvisorAutoProxyCreator"/>
 
-	<bean id="annotationSource" class="org.springframework.cache.annotation.AnnotationCacheDefinitionSource"/>
+	<bean id="annotationSource" class="org.springframework.cache.annotation.AnnotationCacheOperationSource"/>
 	
 	<aop:config>
 		<aop:advisor advice-ref="debugInterceptor" pointcut="execution(* *..CacheableService.*(..))" order="1"/>
@@ -20,7 +20,7 @@
 		<property name="cacheDefinitionSources" ref="annotationSource"/>
 	</bean>
 	
-	<bean id="advisor" class="org.springframework.cache.interceptor.BeanFactoryCacheDefinitionSourceAdvisor">
+	<bean id="advisor" class="org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor">
 		<property name="cacheDefinitionSource" ref="annotationSource"/>
 		<property name="adviceBeanName" value="cacheInterceptor"/>
 	</bean>
