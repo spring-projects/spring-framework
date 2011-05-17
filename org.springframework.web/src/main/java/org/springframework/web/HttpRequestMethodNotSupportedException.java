@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web;
 
+import java.util.Collection;
 import javax.servlet.ServletException;
 
 /**
@@ -47,6 +48,15 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	 */
 	public HttpRequestMethodNotSupportedException(String method, String[] supportedMethods) {
 		this(method, supportedMethods, "Request method '" + method + "' not supported");
+	}
+
+	/**
+	 * Create a new HttpRequestMethodNotSupportedException.
+	 * @param method the unsupported HTTP request method
+	 * @param supportedMethods the actually supported HTTP methods
+	 */
+	public HttpRequestMethodNotSupportedException(String method, Collection<String> supportedMethods) {
+		this(method, supportedMethods.toArray(new String[supportedMethods.size()]));
 	}
 
 	/**

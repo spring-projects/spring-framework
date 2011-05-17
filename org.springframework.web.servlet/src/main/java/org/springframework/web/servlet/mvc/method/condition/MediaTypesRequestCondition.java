@@ -19,7 +19,9 @@ package org.springframework.web.servlet.mvc.method.condition;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
@@ -53,6 +55,18 @@ class MediaTypesRequestCondition<T extends MediaTypesRequestCondition.MediaTypeR
 	protected List<T> getSortedConditions() {
 		return sortedConditions;
 	}
+
+	/**
+	 * Returns all {@link MediaType}s contained in this condition.
+	 */
+	public Set<MediaType> getMediaTypes() {
+		Set<MediaType> result = new LinkedHashSet<MediaType>();
+		for (MediaTypeRequestCondition condition : getConditions()) {
+			result.add(condition.getMediaType());
+		}
+		return result;
+	}
+
 
 	/**
 	 * @author Arjen Poutsma

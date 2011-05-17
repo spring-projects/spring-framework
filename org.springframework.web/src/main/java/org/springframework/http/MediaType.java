@@ -322,7 +322,7 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Indicate whether the {@linkplain #getType() type} is the wildcard character <code>&#42;</code> or not.
+	 * Indicates whether the {@linkplain #getType() type} is the wildcard character <code>&#42;</code> or not.
 	 */
 	public boolean isWildcardType() {
 		return WILDCARD_TYPE.equals(type);
@@ -336,11 +336,20 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Indicate whether the {@linkplain #getSubtype() subtype} is the wildcard character <code>&#42;</code> or not.
+	 * Indicates whether the {@linkplain #getSubtype() subtype} is the wildcard character <code>&#42;</code> or not.
 	 * @return whether the subtype is <code>&#42;</code>
 	 */
 	public boolean isWildcardSubtype() {
 		return WILDCARD_TYPE.equals(subtype);
+	}
+
+	/**
+	 * Indicates whether this media type is concrete, i.e. whether neither the type or subtype is a wildcard
+	 * character <code>&#42;</code>.
+	 * @return whether this media type is concrete
+	 */
+	public boolean isConcrete() {
+		return !isWildcardType() && !isWildcardSubtype();
 	}
 
 	/**

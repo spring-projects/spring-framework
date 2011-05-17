@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.annotation.AnnotationUtils;
@@ -33,6 +34,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringUtils;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -46,9 +50,9 @@ import org.springframework.web.servlet.handler.MappedInterceptors;
 import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
 
 /**
- * An {@link AbstractHandlerMethodMapping} variant that uses {@link RequestMappingInfo}s for the registration and 
- * the lookup of {@link HandlerMethod}s.
- * 
+ * An {@link AbstractHandlerMethodMapping} variant that uses {@link RequestMappingInfo}s for the registration and the
+ * lookup of {@link HandlerMethod}s.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1.0
@@ -84,10 +88,10 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 			this.mappedInterceptors = MappedInterceptors.createFromDeclaredBeans(getApplicationContext());
 		}
 	}
-	
+
 	/**
-	 * {@inheritDoc}
-	 * The handler determination in this method is made based on the presence of a type-level {@link Controller} annotation.
+	 * {@inheritDoc} The handler determination in this method is made based on the presence of a type-level {@link
+	 * Controller} annotation.
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
@@ -106,9 +110,8 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 	}
 
 	/**
-	 * Provides a {@link RequestMappingInfo} for the given method. 
-	 * <p>Only {@link RequestMapping @RequestMapping}-annotated methods are considered. 
-	 * Type-level {@link RequestMapping @RequestMapping} annotations are also detected and their 
+	 * Provides a {@link RequestMappingInfo} for the given method. <p>Only {@link RequestMapping @RequestMapping}-annotated
+	 * methods are considered. Type-level {@link RequestMapping @RequestMapping} annotations are also detected and their
 	 * attributes combined with method-level {@link RequestMapping @RequestMapping} attributes.
 	 *
 	 * @param method the method to create a mapping for
@@ -137,14 +140,13 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 
 	private static RequestMappingInfo createFromRequestMapping(RequestMapping annotation) {
 		return new RequestMappingInfo(Arrays.asList(annotation.value()),
-						RequestConditionFactory.parseMethods(annotation.method()),
-						RequestConditionFactory.parseParams(annotation.params()),
-						RequestConditionFactory.parseHeaders(annotation.headers()),
-						RequestConditionFactory.parseConsumes(annotation.consumes(), annotation.headers()),
-						RequestConditionFactory.parseProduces(annotation.produces(), annotation.headers())
-				);
+				RequestConditionFactory.parseMethods(annotation.method()),
+				RequestConditionFactory.parseParams(annotation.params()),
+				RequestConditionFactory.parseHeaders(annotation.headers()),
+				RequestConditionFactory.parseConsumes(annotation.consumes(), annotation.headers()),
+				RequestConditionFactory.parseProduces(annotation.produces(), annotation.headers()));
 	}
-	
+
 	@Override
 	protected Set<String> getMappingPaths(RequestMappingInfo mapping) {
 		return mapping.getPatterns();
@@ -152,10 +154,13 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 
 	/**
 	 * Returns a new {@link RequestMappingInfo} with attributes matching to the current request or {@code null}.
+	 *
 	 * @see RequestMappingInfo#getMatchingRequestMapping(String, HttpServletRequest, PathMatcher)
 	 */
 	@Override
-	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo mapping, String lookupPath, HttpServletRequest request) {
+	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo mapping,
+													String lookupPath,
+													HttpServletRequest request) {
 		return mapping.getMatchingRequestMapping(lookupPath, request, pathMatcher);
 	}
 
@@ -177,26 +182,43 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 
 	/**
 	 * Iterates all {@link RequestMappingInfo}s looking for mappings that match by URL but not by HTTP method.
-	 * @exception HttpRequestMethodNotSupportedException if there are matches by URL but not by HTTP method
+	 *
+	 * @throws HttpRequestMethodNotSupportedException if there are matches by URL but not by HTTP method
 	 */
 	@Override
-	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos, String lookupPath, HttpServletRequest request)
-			throws HttpRequestMethodNotSupportedException {
+	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos,
+										  String lookupPath,
+										  HttpServletRequest request) throws ServletException {
 		Set<String> allowedMethods = new HashSet<String>(6);
+		Set<MediaType> consumableMediaTypes = new HashSet<MediaType>();
+		Set<MediaType> producibleMediaTypes = new HashSet<MediaType>();
 		for (RequestMappingInfo info : requestMappingInfos) {
-			for (String pattern : info.getPatterns()) {
-				if (pathMatcher.match(pattern, lookupPath)) {
-					for (RequestMethod method : info.getMethods().getMethods()) {
-						allowedMethods.add(method.name());
-					}
+			if (!info.getMethods().match(request)) {
+				for (RequestMethod method : info.getMethods().getMethods()) {
+					allowedMethods.add(method.name());
 				}
+			}
+			if (!info.getConsumes().match(request)) {
+				consumableMediaTypes.addAll(info.getConsumes().getMediaTypes());
+			}
+			if (!info.getProduces().match(request)) {
+				producibleMediaTypes.addAll(info.getProduces().getMediaTypes());
 			}
 		}
 		if (!allowedMethods.isEmpty()) {
-			throw new HttpRequestMethodNotSupportedException(request.getMethod(),
-					allowedMethods.toArray(new String[allowedMethods.size()]));
-
-		} else {
+			throw new HttpRequestMethodNotSupportedException(request.getMethod(), allowedMethods);
+		}
+		else if (!consumableMediaTypes.isEmpty()) {
+			MediaType contentType = null;
+			if (StringUtils.hasLength(request.getContentType())) {
+				contentType = MediaType.parseMediaType(request.getContentType());
+			}
+			throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<MediaType>(consumableMediaTypes));
+		}
+		else if (!producibleMediaTypes.isEmpty()) {
+			throw new HttpMediaTypeNotAcceptableException(new ArrayList<MediaType>(producibleMediaTypes));
+		}
+		else {
 			return null;
 		}
 	}
@@ -218,13 +240,13 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 	}
 
 	/**
-	 * A comparator for {@link RequestMappingInfo}s. Effective comparison can only be done in the context of a 
-	 * specific request. For example not all {@link RequestMappingInfo} patterns may apply to the current request. 
-	 * Therefore an HttpServletRequest is required as input.
+	 * A comparator for {@link RequestMappingInfo}s. Effective comparison can only be done in the context of a specific
+	 * request. For example not all {@link RequestMappingInfo} patterns may apply to the current request. Therefore an
+	 * HttpServletRequest is required as input.
 	 *
-	 * <p>Furthermore, the following assumptions are made about the input RequestMappings: 
-	 * <ul><li>Each RequestMappingInfo has been fully matched to the request <li>The RequestMappingInfo contains 
-	 * matched patterns only <li>Patterns are ordered with the best matching pattern at the top </ul>
+	 * <p>Furthermore, the following assumptions are made about the input RequestMappings: <ul><li>Each RequestMappingInfo
+	 * has been fully matched to the request <li>The RequestMappingInfo contains matched patterns only <li>Patterns are
+	 * ordered with the best matching pattern at the top </ul>
 	 *
 	 * @see RequestMappingHandlerMapping#getMatchingMapping(RequestMappingInfo, String, HttpServletRequest)
 	 */
@@ -287,26 +309,6 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 			else {
 				return 0;
 			}
-		}
-
-		private int compareAcceptHeaders(List<MediaType> accept, List<MediaType> otherAccept) {
-			for (MediaType requestAccept : this.requestAcceptHeader) {
-				int pos1 = indexOfIncluded(requestAccept, accept);
-				int pos2 = indexOfIncluded(requestAccept, otherAccept);
-				if (pos1 != pos2) {
-					return pos2 - pos1;
-				}
-			}
-			return 0;
-		}
-
-		private int indexOfIncluded(MediaType requestAccept, List<MediaType> accept) {
-			for (int i = 0; i < accept.size(); i++) {
-				if (requestAccept.includes(accept.get(i))) {
-					return i;
-				}
-			}
-			return -1;
 		}
 
 	}

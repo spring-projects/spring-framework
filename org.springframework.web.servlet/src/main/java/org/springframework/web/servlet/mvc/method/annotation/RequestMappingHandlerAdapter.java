@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -575,7 +574,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	/**
 	 * MethodFilter that matches {@link InitBinder @InitBinder} methods.
 	 */
-	public static MethodFilter INIT_BINDER_METHODS = new MethodFilter() {
+	public static final MethodFilter INIT_BINDER_METHODS = new MethodFilter() {
 
 		public boolean matches(Method method) {
 			return AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
@@ -585,7 +584,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	/**
 	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
 	 */
-	public static MethodFilter MODEL_ATTRIBUTE_METHODS = new MethodFilter() {
+	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = new MethodFilter() {
 
 		public boolean matches(Method method) {
 			return ((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
