@@ -193,16 +193,20 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 		Set<MediaType> consumableMediaTypes = new HashSet<MediaType>();
 		Set<MediaType> producibleMediaTypes = new HashSet<MediaType>();
 		for (RequestMappingInfo info : requestMappingInfos) {
-			if (!info.getMethods().match(request)) {
-				for (RequestMethod method : info.getMethods().getMethods()) {
-					allowedMethods.add(method.name());
+			for (String pattern : info.getPatterns()) {
+				if (pathMatcher.match(pattern, lookupPath)) {
+					if (!info.getMethods().match(request)) {
+						for (RequestMethod method : info.getMethods().getMethods()) {
+							allowedMethods.add(method.name());
+						}
+					}
+					if (!info.getConsumes().match(request)) {
+						consumableMediaTypes.addAll(info.getConsumes().getMediaTypes());
+					}
+					if (!info.getProduces().match(request)) {
+						producibleMediaTypes.addAll(info.getProduces().getMediaTypes());
+					}
 				}
-			}
-			if (!info.getConsumes().match(request)) {
-				consumableMediaTypes.addAll(info.getConsumes().getMediaTypes());
-			}
-			if (!info.getProduces().match(request)) {
-				producibleMediaTypes.addAll(info.getProduces().getMediaTypes());
 			}
 		}
 		if (!allowedMethods.isEmpty()) {
