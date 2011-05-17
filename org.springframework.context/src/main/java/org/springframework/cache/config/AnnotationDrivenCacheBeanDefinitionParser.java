@@ -16,9 +16,7 @@
 
 package org.springframework.cache.config;
 
-import static org.springframework.context.annotation.AnnotationConfigUtils.CACHE_ADVISOR_BEAN_NAME;
-import static org.springframework.context.annotation.AnnotationConfigUtils.CACHE_ASPECT_BEAN_NAME;
-import static org.springframework.context.annotation.AnnotationConfigUtils.CACHE_ASPECT_CLASS_NAME;
+import static org.springframework.context.annotation.AnnotationConfigUtils.*;
 
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -28,8 +26,8 @@ import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.cache.annotation.AnnotationCacheDefinitionSource;
-import org.springframework.cache.interceptor.BeanFactoryCacheDefinitionSourceAdvisor;
+import org.springframework.cache.annotation.AnnotationCacheOperationSource;
+import org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.w3c.dom.Element;
 
@@ -114,7 +112,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				Object eleSource = parserContext.extractSource(element);
 
 				// Create the CacheDefinitionSource definition.
-				RootBeanDefinition sourceDef = new RootBeanDefinition(AnnotationCacheDefinitionSource.class);
+				RootBeanDefinition sourceDef = new RootBeanDefinition(AnnotationCacheOperationSource.class);
 				sourceDef.setSource(eleSource);
 				sourceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				String sourceName = parserContext.getReaderContext().registerWithGeneratedName(sourceDef);
@@ -128,7 +126,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				String interceptorName = parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
 
 				// Create the CacheAdvisor definition.
-				RootBeanDefinition advisorDef = new RootBeanDefinition(BeanFactoryCacheDefinitionSourceAdvisor.class);
+				RootBeanDefinition advisorDef = new RootBeanDefinition(BeanFactoryCacheOperationSourceAdvisor.class);
 				advisorDef.setSource(eleSource);
 				advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				advisorDef.getPropertyValues().add("cacheDefinitionSource", new RuntimeBeanReference(sourceName));

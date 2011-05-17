@@ -20,11 +20,9 @@ import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
-import org.springframework.cache.interceptor.CacheDefinition;
-import org.springframework.cache.interceptor.CacheInvalidateDefinition;
-import org.springframework.cache.interceptor.CacheUpdateDefinition;
-import org.springframework.cache.interceptor.DefaultCacheInvalidateDefinition;
-import org.springframework.cache.interceptor.DefaultCacheUpdateDefinition;
+import org.springframework.cache.interceptor.CacheEvictOperation;
+import org.springframework.cache.interceptor.CacheOperation;
+import org.springframework.cache.interceptor.CacheUpdateOperation;
 
 /**
  * Strategy implementation for parsing Spring's {@link Cacheable} and {@link CacheEvict} annotations.
@@ -34,7 +32,7 @@ import org.springframework.cache.interceptor.DefaultCacheUpdateDefinition;
 @SuppressWarnings("serial")
 public class SpringCachingAnnotationParser implements CacheAnnotationParser, Serializable {
 
-	public CacheDefinition parseCacheAnnotation(AnnotatedElement ae) {
+	public CacheOperation parseCacheAnnotation(AnnotatedElement ae) {
 		Cacheable update = findAnnotation(ae, Cacheable.class);
 
 		if (update != null) {
@@ -44,7 +42,7 @@ public class SpringCachingAnnotationParser implements CacheAnnotationParser, Ser
 		CacheEvict invalidate = findAnnotation(ae, CacheEvict.class);
 
 		if (invalidate != null) {
-			return parseInvalidateAnnotation(ae, invalidate);
+			return parseEvictAnnotation(ae, invalidate);
 		}
 
 		return null;
@@ -63,8 +61,8 @@ public class SpringCachingAnnotationParser implements CacheAnnotationParser, Ser
 		return ann;
 	}
 
-	CacheUpdateDefinition parseCacheableAnnotation(AnnotatedElement target, Cacheable ann) {
-		DefaultCacheUpdateDefinition dcud = new DefaultCacheUpdateDefinition();
+	CacheUpdateOperation parseCacheableAnnotation(AnnotatedElement target, Cacheable ann) {
+		CacheUpdateOperation dcud = new CacheUpdateOperation();
 		dcud.setCacheNames(ann.value());
 		dcud.setCondition(ann.condition());
 		dcud.setKey(ann.key());
@@ -73,8 +71,8 @@ public class SpringCachingAnnotationParser implements CacheAnnotationParser, Ser
 		return dcud;
 	}
 
-	CacheInvalidateDefinition parseInvalidateAnnotation(AnnotatedElement target, CacheEvict ann) {
-		DefaultCacheInvalidateDefinition dcid = new DefaultCacheInvalidateDefinition();
+	CacheEvictOperation parseEvictAnnotation(AnnotatedElement target, CacheEvict ann) {
+		CacheEvictOperation dcid = new CacheEvictOperation();
 		dcid.setCacheNames(ann.value());
 		dcid.setCondition(ann.condition());
 		dcid.setKey(ann.key());

@@ -54,11 +54,9 @@ public class EhCacheCacheTest extends AbstractNativeCacheTest<Ehcache> {
 		brancusi.setTimeToLive(3);
 		nativeCache.put(brancusi);
 
-		assertTrue(cache.containsKey(key));
-		assertEquals(value, cache.get(key));
+		assertEquals(value, cache.get(key).get());
 		// wait for the entry to expire
 		Thread.sleep(5 * 1000);
-		assertFalse("expired entry returned", cache.containsKey(key));
 		assertNull(cache.get(key));
 	}
 }

@@ -58,7 +58,6 @@ public abstract class AbstractNativeCacheTest<T> {
 
 	@Test
 	public void testCachePut() throws Exception {
-
 		Object key = "enescu";
 		Object value = "george";
 
@@ -74,8 +73,6 @@ public abstract class AbstractNativeCacheTest<T> {
 
 		assertNull(cache.get(key));
 		cache.put(key, value);
-		assertEquals(value, cache.remove(key));
-		assertNull(cache.get(key));
 	}
 
 	@Test
@@ -87,67 +84,5 @@ public abstract class AbstractNativeCacheTest<T> {
 		cache.clear();
 		assertNull(cache.get("vlaicu"));
 		assertNull(cache.get("enescu"));
-	}
-
-	// concurrent map tests
-	@Test
-	public void testPutIfAbsent() throws Exception {
-		Object key = "enescu";
-		Object value1 = "george";
-		Object value2 = "geo";
-
-		assertNull(cache.get("enescu"));
-		cache.put(key, value1);
-		cache.putIfAbsent(key, value2);
-		assertEquals(value1, cache.get(key));
-	}
-
-	@Test
-	public void testConcurrentRemove() throws Exception {
-		Object key = "enescu";
-		Object value1 = "george";
-		Object value2 = "geo";
-
-		assertNull(cache.get("enescu"));
-		cache.put(key, value1);
-		// no remove
-		cache.remove(key, value2);
-		assertEquals(value1, cache.get(key));
-		// one remove
-		cache.remove(key, value1);
-		assertNull(cache.get("enescu"));
-	}
-
-	@Test
-	public void testConcurrentReplace() throws Exception {
-		Object key = "enescu";
-		Object value1 = "george";
-		Object value2 = "geo";
-
-		assertNull(cache.get("enescu"));
-		cache.put(key, value1);
-		cache.replace(key, value2);
-		assertEquals(value2, cache.get(key));
-		cache.remove(key);
-		cache.replace(key, value1);
-		assertNull(cache.get("enescu"));
-	}
-
-	@Test
-	public void testConcurrentReplaceIfEqual() throws Exception {
-		Object key = "enescu";
-		Object value1 = "george";
-		Object value2 = "geo";
-
-		assertNull(cache.get("enescu"));
-		cache.put(key, value1);
-		assertEquals(value1, cache.get(key));
-		// no replace
-		cache.replace(key, value2, value1);
-		assertEquals(value1, cache.get(key));
-		cache.replace(key, value1, value2);
-		assertEquals(value2, cache.get(key));
-		cache.replace(key, value2, value1);
-		assertEquals(value1, cache.get(key));
 	}
 }

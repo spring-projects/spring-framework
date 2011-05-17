@@ -20,14 +20,16 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.DefaultValue;
 import org.springframework.util.Assert;
 
 /**
  * Abstract base class delegating most of the {@link Map}-like methods
  * to the underlying cache.
  * 
- * <b>Note:</b>Allows null values to be stored, even if the underlying map
- * does not support them.
+ * <b>Note:</b>Allows null values to be stored even (for cases where the 
+ * underlying cache does not support them) as long as arbitrary serialized
+ * objects are supported.
  * 
  * @author Costin Leau
  */
@@ -57,7 +59,7 @@ public abstract class AbstractDelegatingCache<K, V> implements Cache<K, V> {
 	 * 
 	 * @param <D> map type
 	 * @param delegate map delegate
-	 * @param allowNullValues flag indicating whether null values are allowed or not
+	 * @param allowNullValues flag indicating whether null values should be replaced or not
 	 */
 	public <D extends Map<K, V>> AbstractDelegatingCache(D delegate, boolean allowNullValues) {
 		Assert.notNull(delegate);
@@ -73,30 +75,22 @@ public abstract class AbstractDelegatingCache<K, V> implements Cache<K, V> {
 		delegate.clear();
 	}
 
-	public boolean containsKey(Object key) {
-		return delegate.containsKey(key);
-	}
-
-	public V get(Object key) {
-		return filterNull(delegate.get(key));
+	public ValueWrapper<V> get(Object key) {
+		return new DefaultValue<V>(filterNull(delegate.get(key)));
 	}
 
 	@SuppressWarnings("unchecked")
-	public V put(K key, V value) {
+	public void put(K key, V value) {
 		if (allowNullValues && value == null) {
 			Map map = delegate;
-			Object val = map.put(key, NULL_HOLDER);
-			if (val == NULL_HOLDER) {
-				return null;
-			}
-			return (V) val;
+			map.put(key, NULL_HOLDER);
 		}
 
-		return filterNull(delegate.put(key, value));
+		delegate.put(key, value);
 	}
 
-	public V remove(Object key) {
-		return filterNull(delegate.remove(key));
+	public void evict(Object key) {
+		delegate.remove(key);
 	}
 
 	protected V filterNull(V val) {

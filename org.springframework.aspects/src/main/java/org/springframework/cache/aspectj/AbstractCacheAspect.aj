@@ -22,7 +22,7 @@ import java.util.concurrent.Callable;
 import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.cache.interceptor.CacheAspectSupport;
-import org.springframework.cache.interceptor.CacheDefinitionSource;
+import org.springframework.cache.interceptor.CacheOperationSource;
 
 /**
  * Abstract superaspect for AspectJ cache aspects. Concrete
@@ -46,11 +46,11 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 
 	/**
 	 * Construct object using the given caching metadata retrieval strategy.
-	 * @param cds {@link CacheDefinitionSource} implementation, retrieving Spring
+	 * @param cos {@link CacheOperationSource} implementation, retrieving Spring
 	 * cache metadata for each joinpoint.
 	 */
-	protected AbstractCacheAspect(CacheDefinitionSource... cds) {
-		setCacheDefinitionSources(cds);
+	protected AbstractCacheAspect(CacheOperationSource... cos) {
+		setCacheDefinitionSources(cos);
 	}
 
 	@SuppressAjWarnings("adviceDidNotMatch")
@@ -75,7 +75,7 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 	/**
 	 * Concrete subaspects must implement this pointcut, to identify
 	 * cached methods. For each selected joinpoint, {@link CacheOperationDefinition}
-	 * will be retrieved using Spring's {@link CacheDefinitionSource} interface.
+	 * will be retrieved using Spring's {@link CacheOperationSource} interface.
 	 */
 	protected abstract pointcut cacheMethodExecution(Object cachedObject);
 }
