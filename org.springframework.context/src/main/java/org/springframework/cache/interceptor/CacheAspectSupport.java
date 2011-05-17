@@ -185,11 +185,11 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 					for (Iterator<Cache<?, ?>> iterator = caches.iterator(); iterator.hasNext() && !cacheHit;) {
 						Cache cache = iterator.next();
-						Cache.ValueWrapper<Object> value = cache.get(key);
+						Cache.ValueWrapper<Object> wrapper = cache.get(key);
 
-						if (value != null) {
+						if (wrapper != null) {
 							cacheHit = true;
-							retVal = value.get();
+							retVal = wrapper.get();
 						}
 					}
 
@@ -199,15 +199,15 @@ public abstract class CacheAspectSupport implements InitializingBean {
 									+ method);
 						}
 						retVal = invocation.call();
+
+						// update all caches
+						for (Cache cache : caches) {
+							cache.put(key, retVal);
+						}
 					} else {
 						if (log) {
 							logger.trace("Key " + key + " found in cache, returning value " + retVal);
 						}
-					}
-
-					// update all caches
-					for (Cache cache : caches) {
-						cache.put(key, retVal);
 					}
 				}
 

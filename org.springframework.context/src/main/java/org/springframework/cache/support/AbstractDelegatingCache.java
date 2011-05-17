@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.interceptor.DefaultValue;
+import org.springframework.cache.interceptor.DefaultValueWrapper;
 import org.springframework.util.Assert;
 
 /**
@@ -76,7 +76,8 @@ public abstract class AbstractDelegatingCache<K, V> implements Cache<K, V> {
 	}
 
 	public ValueWrapper<V> get(Object key) {
-		return new DefaultValue<V>(filterNull(delegate.get(key)));
+		V v = delegate.get(key);
+		return (v != null ? new DefaultValueWrapper<V>(filterNull(v)) : null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -85,8 +86,9 @@ public abstract class AbstractDelegatingCache<K, V> implements Cache<K, V> {
 			Map map = delegate;
 			map.put(key, NULL_HOLDER);
 		}
-
-		delegate.put(key, value);
+		else {
+			delegate.put(key, value);
+		}
 	}
 
 	public void evict(Object key) {

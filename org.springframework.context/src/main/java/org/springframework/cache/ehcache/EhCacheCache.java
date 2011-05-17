@@ -21,7 +21,7 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.interceptor.DefaultValue;
+import org.springframework.cache.interceptor.DefaultValueWrapper;
 import org.springframework.util.Assert;
 
 /**
@@ -60,7 +60,7 @@ public class EhCacheCache implements Cache<Object, Object> {
 
 	public ValueWrapper<Object> get(Object key) {
 		Element element = cache.get(key);
-		return (element != null ? new DefaultValue<Object>(element.getObjectValue()) : null);
+		return (element != null ? new DefaultValueWrapper<Object>(element.getObjectValue()) : null);
 	}
 
 	public void put(Object key, Object value) {
