@@ -1,0 +1,128 @@
+/*
+ * Copyright 2010-2011 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.cache.interceptor;
+
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.springframework.util.Assert;
+
+/**
+ * Base class implementing {@link CacheOperation}.
+ *  
+ * @author Costin Leau
+ */
+public abstract class CacheOperation {
+
+	private Set<String> cacheNames = Collections.emptySet();
+	private String condition = "";
+	private String key = "";
+	private String name = "";
+
+
+	public Set<String> getCacheNames() {
+		return cacheNames;
+	}
+
+	public String getCondition() {
+		return condition;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setCacheName(String cacheName) {
+		Assert.hasText(cacheName);
+		this.cacheNames = Collections.singleton(cacheName);
+	}
+
+	public void setCacheNames(String[] cacheNames) {
+		Assert.notEmpty(cacheNames);
+		this.cacheNames = new LinkedHashSet<String>(cacheNames.length);
+		for (String string : cacheNames) {
+			this.cacheNames.add(string);
+		}
+	}
+
+	public void setCondition(String condition) {
+		Assert.notNull(condition);
+		this.condition = condition;
+	}
+
+	public void setKey(String key) {
+		Assert.notNull(key);
+		this.key = key;
+	}
+
+	public void setName(String name) {
+		Assert.hasText(name);
+		this.name = name;
+	}
+
+	/**
+	 * This implementation compares the <code>toString()</code> results.
+	 * @see #toString()
+	 */
+	@Override
+	public boolean equals(Object other) {
+		return (other instanceof CacheOperation && toString().equals(other.toString()));
+	}
+
+	/**
+	 * This implementation returns <code>toString()</code>'s hash code.
+	 * @see #toString()
+	 */
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
+	}
+
+	/**
+	 * Return an identifying description for this cache operation.
+	 * <p>Has to be overridden in subclasses for correct <code>equals</code>
+	 * and <code>hashCode</code> behavior. Alternatively, {@link #equals}
+	 * and {@link #hashCode} can be overridden themselves.
+	 */
+	@Override
+	public String toString() {
+		return getOperationDescription().toString();
+	}
+
+	/**
+	 * Return an identifying description for this caching operation.
+	 * <p>Available to subclasses, for inclusion in their <code>toString()</code> result.
+	 */
+	protected StringBuilder getOperationDescription() {
+		StringBuilder result = new StringBuilder();
+		result.append("CacheDefinition[");
+		result.append(name);
+		result.append("] caches=");
+		result.append(cacheNames);
+		result.append(" | condition='");
+		result.append(condition);
+		result.append("' | key='");
+		result.append(key);
+		result.append("'");
+		return result;
+	}
+}
