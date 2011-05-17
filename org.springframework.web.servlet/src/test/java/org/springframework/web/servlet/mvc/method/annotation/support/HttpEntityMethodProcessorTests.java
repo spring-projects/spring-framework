@@ -15,6 +15,7 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
+import static org.springframework.web.servlet.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -40,6 +41,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.HandlerMapping;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -162,8 +164,6 @@ public class HttpEntityMethodProcessorTests {
 		MediaType accepted = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Accept", accepted.toString());
 
-		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(messageConverter.canWrite(String.class, accepted)).andReturn(true);
 		messageConverter.write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
 		replay(messageConverter);
@@ -180,6 +180,7 @@ public class HttpEntityMethodProcessorTests {
 		ResponseEntity<String> returnValue = new ResponseEntity<String>(body, HttpStatus.OK);
 
 		servletRequest.addHeader("Accept", "text/*");
+		servletRequest.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(MediaType.TEXT_HTML));
 
 		expect(messageConverter.canWrite(String.class, MediaType.TEXT_HTML)).andReturn(true);
 		messageConverter.write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
@@ -244,8 +245,6 @@ public class HttpEntityMethodProcessorTests {
 		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.ACCEPTED);
 
 		Capture<HttpOutputMessage> outputMessage = new Capture<HttpOutputMessage>();
-		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(MediaType.TEXT_PLAIN));
 		expect(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).andReturn(true);
 		messageConverter.write(eq("body"), eq(MediaType.TEXT_PLAIN),  capture(outputMessage));
 		replay(messageConverter);

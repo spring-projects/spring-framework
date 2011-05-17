@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.HandlerMapping;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -151,8 +152,6 @@ public class RequestResponseBodyMethodProcessorTests {
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		String body = "Foo";
-		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(messageConverter.canWrite(String.class, accepted)).andReturn(true);
 		messageConverter.write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
 		replay(messageConverter);
@@ -168,6 +167,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		String body = "Foo";
 
 		servletRequest.addHeader("Accept", "text/*");
+		servletRequest.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(MediaType.TEXT_HTML));
 
 		expect(messageConverter.canWrite(String.class, MediaType.TEXT_HTML)).andReturn(true);
 		messageConverter.write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));

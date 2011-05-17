@@ -93,6 +93,14 @@ public interface HandlerMapping {
 	String URI_TEMPLATE_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".uriTemplateVariables";
 
 	/**
+	 * Name of the {@link HttpServletRequest} attribute that contains the set of producible MediaTypes 
+	 * applicable to the mapped handler. 
+	 * <p>Note: This attribute is not required to be supported by all HandlerMapping implementations. 
+	 * Handlers should not necessarily expect this request attribute to be present in all scenarios.
+	 */
+	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
+
+	/**
 	 * Return a handler and any interceptors for this request. The choice may be made
 	 * on request URL, session state, or any factor the implementing class chooses.
 	 * <p>The returned HandlerExecutionChain contains a handler Object, rather than
