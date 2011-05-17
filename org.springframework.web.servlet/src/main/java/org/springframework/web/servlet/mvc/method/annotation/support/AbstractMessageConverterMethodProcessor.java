@@ -17,18 +17,17 @@
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -37,12 +36,13 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * A base class for resolving method argument values by reading from the body of a request with {@link
@@ -124,22 +124,43 @@ public abstract class AbstractMessageConverterMethodProcessor
 	 * @return the output message
 	 */
 	protected HttpOutputMessage createOutputMessage(NativeWebRequest webRequest) {
-		HttpServletResponse servletResponse = webRequest.getNativeResponse(HttpServletResponse.class);
-		return new ServletServerHttpResponse(servletResponse);
+		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
+		return new ServletServerHttpResponse(response);
+	}
+
+	/**
+	 * Returns the media types that can be produced:
+	 * <ul>
+	 * 	<li>The set of producible media types specified in the request mappings, or
+	 * 	<li>The set of supported media types by all configured message converters, or
+	 * 	<li>{@link MediaType#ALL}
+	 */
+	@SuppressWarnings("unchecked")
+	protected Set<MediaType> getProducibleMediaTypes(NativeWebRequest webRequest) {
+		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+		Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		if (!CollectionUtils.isEmpty(mediaTypes)) {
+			return mediaTypes;
+		}
+		else if (!allSupportedMediaTypes.isEmpty()) {
+			return new HashSet<MediaType>(allSupportedMediaTypes);
+		}
+		else {
+			return Collections.singleton(MediaType.ALL);
+		}
+			
 	}
 
 	@SuppressWarnings("unchecked")
 	protected <T> void writeWithMessageConverters(T returnValue,
 												  MethodParameter returnType,
 												  HttpInputMessage inputMessage,
-												  HttpOutputMessage outputMessage)
+												  HttpOutputMessage outputMessage,
+												  Set<MediaType> producibleMediaTypes)
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
-		Set<MediaType> producibleMediaTypes = getProducibleMediaTypes(returnType.getMethod(), returnValue.getClass());
-		Set<MediaType> acceptableMediaTypes = getAcceptableMediaTypes(inputMessage);
-
 		List<MediaType> mediaTypes = new ArrayList<MediaType>();
-		for (MediaType acceptableMediaType : acceptableMediaTypes) {
+		for (MediaType acceptableMediaType : getAcceptableMediaTypes(inputMessage)) {
 			for (MediaType producibleMediaType : producibleMediaTypes) {
 				if (acceptableMediaType.isCompatibleWith(producibleMediaType)) {
 					mediaTypes.add(getMostSpecificMediaType(acceptableMediaType, producibleMediaType));
@@ -173,33 +194,7 @@ public abstract class AbstractMessageConverterMethodProcessor
 				}
 			}
 		}
-		else {
-			throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
-		}
-	}
-
-	private Set<MediaType> getProducibleMediaTypes(Method handlerMethod, Class<?> returnValueClass) {
-		RequestMapping requestMappingAnn = handlerMethod.getAnnotation(RequestMapping.class);
-		if (requestMappingAnn == null) {
-			requestMappingAnn = handlerMethod.getClass().getAnnotation(RequestMapping.class);
-		}
-		Set<MediaType> result = new HashSet<MediaType>();
-		if (requestMappingAnn != null) {
-			for (String produce : requestMappingAnn.produces()) {
-				result.add(MediaType.parseMediaType(produce));
-			}
-		}
-		else {
-			for (HttpMessageConverter<?> messageConverter : messageConverters) {
-				if (messageConverter.canWrite(returnValueClass, null)) {
-					result.addAll(messageConverter.getSupportedMediaTypes());
-				}
-			}
-		}
-		if (result.isEmpty()) {
-			result.add(MediaType.ALL);
-		}
-		return result;
+		throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
 	}
 
 	private Set<MediaType> getAcceptableMediaTypes(HttpInputMessage inputMessage) {
@@ -209,7 +204,7 @@ public abstract class AbstractMessageConverterMethodProcessor
 		}
 		return result;
 	}
-
+	
 	private MediaType getMostSpecificMediaType(MediaType type1, MediaType type2) {
 		return MediaType.SPECIFICITY_COMPARATOR.compare(type1, type2) < 0 ? type1 : type2;
 	}

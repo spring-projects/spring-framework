@@ -22,12 +22,14 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpResponse;
@@ -121,7 +123,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		
 		Object body = responseEntity.getBody();
 		if (body != null) {
-			writeWithMessageConverters(body, returnType, createInputMessage(webRequest), outputMessage);
+			Set<MediaType> mediaTypes = getProducibleMediaTypes(webRequest);
+			writeWithMessageConverters(body, returnType, createInputMessage(webRequest), outputMessage, mediaTypes);
 		}
 		else {
 			// flush headers to the HttpServletResponse
