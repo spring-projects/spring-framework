@@ -197,9 +197,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 */
 	private void processConfigurationClasses(BeanDefinitionRegistry registry) {
 		ConfigurationClassBeanDefinitionReader reader = getConfigurationClassBeanDefinitionReader(registry);
-		ConfigurationClassParser parser = new ConfigurationClassParser(
-				this.metadataReaderFactory, this.problemReporter, this.environment, this.resourceLoader, registry);
-		processConfigBeanDefinitions(parser, reader, registry);
+		processConfigBeanDefinitions(reader, registry);
 		enhanceConfigurationClasses((ConfigurableListableBeanFactory)registry);
 	}
 
@@ -215,7 +213,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Build and validate a configuration model based on the registry of
 	 * {@link Configuration} classes.
 	 */
-	public void processConfigBeanDefinitions(ConfigurationClassParser parser, ConfigurationClassBeanDefinitionReader reader, BeanDefinitionRegistry registry) {
+	public void processConfigBeanDefinitions(ConfigurationClassBeanDefinitionReader reader, BeanDefinitionRegistry registry) {
 		Set<BeanDefinitionHolder> configCandidates = new LinkedHashSet<BeanDefinitionHolder>();
 		for (String beanName : registry.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
@@ -230,6 +228,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Parse each @Configuration class
+		ConfigurationClassParser parser = new ConfigurationClassParser(
+				this.metadataReaderFactory, this.problemReporter, this.environment, this.resourceLoader, registry);
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
