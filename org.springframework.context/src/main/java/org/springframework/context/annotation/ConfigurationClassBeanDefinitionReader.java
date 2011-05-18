@@ -64,7 +64,7 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see ConfigurationClassParser
  */
-public class ConfigurationClassBeanDefinitionReader {
+class ConfigurationClassBeanDefinitionReader {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassBeanDefinitionReader.class);
 
