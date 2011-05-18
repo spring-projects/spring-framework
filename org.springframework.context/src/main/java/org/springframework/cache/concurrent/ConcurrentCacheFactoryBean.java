@@ -24,28 +24,28 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.StringUtils;
 
 /**
- * Factory bean for easy configuration of {@link ConcurrentCache} through Spring.
+ * Factory bean for easy configuration of {@link ConcurrentMapCache} through Spring.
  * 
  * @author Costin Leau
  */
-public class ConcurrentCacheFactoryBean<K, V> implements FactoryBean<ConcurrentCache<K, V>>, BeanNameAware,
+public class ConcurrentCacheFactoryBean<K, V> implements FactoryBean<ConcurrentMapCache<K, V>>, BeanNameAware,
 		InitializingBean {
 
 	private String name = "";
-	private ConcurrentCache<K, V> cache;
+	private ConcurrentMapCache<K, V> cache;
 
 	private ConcurrentMap<K, V> store;
 
 	public void afterPropertiesSet() {
-		cache = (store == null ? new ConcurrentCache<K, V>(name) : new ConcurrentCache<K, V>(store, name));
+		cache = (store == null ? new ConcurrentMapCache<K, V>(name) : new ConcurrentMapCache<K, V>(store, name, true));
 	}
 
-	public ConcurrentCache<K, V> getObject() throws Exception {
+	public ConcurrentMapCache<K, V> getObject() throws Exception {
 		return cache;
 	}
 
 	public Class<?> getObjectType() {
-		return (cache != null ? cache.getClass() : ConcurrentCache.class);
+		return (cache != null ? cache.getClass() : ConcurrentMapCache.class);
 	}
 
 	public boolean isSingleton() {

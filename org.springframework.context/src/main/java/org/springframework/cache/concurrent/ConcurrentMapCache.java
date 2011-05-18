@@ -14,85 +14,84 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.support;
+package org.springframework.cache.concurrent;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.interceptor.DefaultValueWrapper;
-import org.springframework.util.Assert;
 
 /**
- * Abstract base class delegating most of the {@link Map}-like methods
- * to the underlying cache.
- * 
- * <b>Note:</b>Allows null values to be stored even (for cases where the 
- * underlying cache does not support them) as long as arbitrary serialized
- * objects are supported.
+ * Simple {@link Cache} implementation based on the JDK 1.5+
+ * java.util.concurrent package. Useful for testing or simple caching scenarios.
+ *
+ * <b>Note:</b>As {@link ConcurrentHashMap} (the default implementation used) does not allow null values to be stored 
+ * this class will replace them with a predefined, internal object. This behaviour can be changed through the {@link #ConcurrentMapCache(ConcurrentMap, String, boolean)}
+ * constructor.
  * 
  * @author Costin Leau
  */
-public abstract class AbstractDelegatingCache<K, V> implements Cache<K, V> {
+public class ConcurrentMapCache<K, V> implements Cache<K, V> {
 
 	private static class NullHolder implements Serializable {
 		private static final long serialVersionUID = 1L;
 	}
 
-	public static final Object NULL_HOLDER = new NullHolder();
-
-	private final Map<K, V> delegate;
+	private static final Object NULL_HOLDER = new NullHolder();
+	private final ConcurrentMap<K, V> store;
+	private final String name;
 	private final boolean allowNullValues;
 
-	/**
-	 * Creates a new instance using the given delegate.
-	 * 
-	 * @param <D> map type
-	 * @param delegate map delegate
-	 */
-	public <D extends Map<K, V>> AbstractDelegatingCache(D delegate) {
-		this(delegate, false);
+	public ConcurrentMapCache() {
+		this("");
 	}
 
-	/**
-	 * Creates a new instance using the given delegate.
-	 * 
-	 * @param <D> map type
-	 * @param delegate map delegate
-	 * @param allowNullValues flag indicating whether null values should be replaced or not
-	 */
-	public <D extends Map<K, V>> AbstractDelegatingCache(D delegate, boolean allowNullValues) {
-		Assert.notNull(delegate);
-		this.delegate = delegate;
+	public ConcurrentMapCache(String name) {
+		this(new ConcurrentHashMap<K, V>(), name, true);
+	}
+
+	public ConcurrentMapCache(ConcurrentMap<K, V> delegate, String name, boolean allowNullValues) {
+		this.store = delegate;
+		this.name = name;
 		this.allowNullValues = allowNullValues;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public boolean getAllowNullValues() {
 		return allowNullValues;
 	}
 
+	public ConcurrentMap<K, V> getNativeCache() {
+		return store;
+	}
+
 	public void clear() {
-		delegate.clear();
+		store.clear();
 	}
 
 	public ValueWrapper<V> get(Object key) {
-		V v = delegate.get(key);
+		V v = store.get(key);
 		return (v != null ? new DefaultValueWrapper<V>(filterNull(v)) : null);
 	}
 
 	@SuppressWarnings("unchecked")
 	public void put(K key, V value) {
 		if (allowNullValues && value == null) {
-			Map map = delegate;
+			Map map = store;
 			map.put(key, NULL_HOLDER);
-		}
-		else {
-			delegate.put(key, value);
+		} else {
+			store.put(key, value);
 		}
 	}
 
 	public void evict(Object key) {
-		delegate.remove(key);
+		store.remove(key);
 	}
 
 	protected V filterNull(V val) {
