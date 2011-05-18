@@ -28,14 +28,14 @@ import org.springframework.cache.Cache;
  */
 public class SimpleCacheManager extends AbstractCacheManager {
 
-	private Collection<Cache<?, ?>> caches;
+	private Collection<Cache> caches;
 
 	@Override
-	protected Collection<Cache<?, ?>> loadCaches() {
+	protected Collection<Cache> loadCaches() {
 		return caches;
 	}
 
-	public void setCaches(Collection<Cache<?, ?>> caches) {
+	public void setCaches(Collection<Cache> caches) {
 		this.caches = caches;
 	}
 }

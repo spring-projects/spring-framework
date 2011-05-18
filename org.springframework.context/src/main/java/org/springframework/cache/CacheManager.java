@@ -32,7 +32,7 @@ public interface CacheManager {
 	 * @param name cache identifier - cannot be null
 	 * @return associated cache or null if none is found
 	 */
-	<K, V> Cache<K, V> getCache(String name);
+	Cache getCache(String name);
 
 	/**
 	 * Returns a collection of the caches known by this cache manager. 

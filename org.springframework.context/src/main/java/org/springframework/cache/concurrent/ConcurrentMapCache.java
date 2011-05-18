@@ -34,14 +34,14 @@ import org.springframework.cache.interceptor.DefaultValueWrapper;
  * 
  * @author Costin Leau
  */
-public class ConcurrentMapCache<K, V> implements Cache<K, V> {
+public class ConcurrentMapCache implements Cache {
 
 	private static class NullHolder implements Serializable {
 		private static final long serialVersionUID = 1L;
 	}
 
 	private static final Object NULL_HOLDER = new NullHolder();
-	private final ConcurrentMap<K, V> store;
+	private final ConcurrentMap store;
 	private final String name;
 	private final boolean allowNullValues;
 
@@ -50,10 +50,10 @@ public class ConcurrentMapCache<K, V> implements Cache<K, V> {
 	}
 
 	public ConcurrentMapCache(String name) {
-		this(new ConcurrentHashMap<K, V>(), name, true);
+		this(new ConcurrentHashMap(), name, true);
 	}
 
-	public ConcurrentMapCache(ConcurrentMap<K, V> delegate, String name, boolean allowNullValues) {
+	public ConcurrentMapCache(ConcurrentMap delegate, String name, boolean allowNullValues) {
 		this.store = delegate;
 		this.name = name;
 		this.allowNullValues = allowNullValues;
@@ -67,7 +67,7 @@ public class ConcurrentMapCache<K, V> implements Cache<K, V> {
 		return allowNullValues;
 	}
 
-	public ConcurrentMap<K, V> getNativeCache() {
+	public ConcurrentMap getNativeCache() {
 		return store;
 	}
 
@@ -75,13 +75,12 @@ public class ConcurrentMapCache<K, V> implements Cache<K, V> {
 		store.clear();
 	}
 
-	public ValueWrapper<V> get(Object key) {
-		V v = store.get(key);
-		return (v != null ? new DefaultValueWrapper<V>(filterNull(v)) : null);
+	public ValueWrapper get(Object key) {
+		Object v = store.get(key);
+		return (v != null ? new DefaultValueWrapper(filterNull(v)) : null);
 	}
 
-	@SuppressWarnings("unchecked")
-	public void put(K key, V value) {
+	public void put(Object key, Object value) {
 		if (allowNullValues && value == null) {
 			Map map = store;
 			map.put(key, NULL_HOLDER);
@@ -94,7 +93,7 @@ public class ConcurrentMapCache<K, V> implements Cache<K, V> {
 		store.remove(key);
 	}
 
-	protected V filterNull(V val) {
+	protected Object filterNull(Object val) {
 		if (allowNullValues && val == NULL_HOLDER) {
 			return null;
 		}

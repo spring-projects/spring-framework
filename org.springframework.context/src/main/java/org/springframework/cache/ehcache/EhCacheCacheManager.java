@@ -36,7 +36,7 @@ public class EhCacheCacheManager extends AbstractCacheManager {
 	private net.sf.ehcache.CacheManager cacheManager;
 
 	@Override
-	protected Collection<Cache<?, ?>> loadCaches() {
+	protected Collection<Cache> loadCaches() {
 		Assert.notNull(cacheManager, "a backing Ehcache cache manager is required");
 		Status status = cacheManager.getStatus();
 
@@ -44,7 +44,7 @@ public class EhCacheCacheManager extends AbstractCacheManager {
 				"an 'alive' Ehcache cache manager is required - current cache is " + status.toString());
 
 		String[] names = cacheManager.getCacheNames();
-		Collection<Cache<?, ?>> caches = new LinkedHashSet<Cache<?, ?>>(names.length);
+		Collection<Cache> caches = new LinkedHashSet<Cache>(names.length);
 		
 		for (String name : names) {
 			caches.add(new EhCacheCache(cacheManager.getEhcache(name)));
@@ -53,8 +53,7 @@ public class EhCacheCacheManager extends AbstractCacheManager {
 		return caches;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <K, V> Cache<K, V> getCache(String name) {
+	public Cache getCache(String name) {
 		Cache cache = super.getCache(name);
 		if (cache == null) {
 			// check the Ehcache cache again

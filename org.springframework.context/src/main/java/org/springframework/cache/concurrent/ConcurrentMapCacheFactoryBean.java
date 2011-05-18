@@ -28,19 +28,19 @@ import org.springframework.util.StringUtils;
  * 
  * @author Costin Leau
  */
-public class ConcurrentCacheFactoryBean<K, V> implements FactoryBean<ConcurrentMapCache<K, V>>, BeanNameAware,
+public class ConcurrentMapCacheFactoryBean implements FactoryBean<ConcurrentMapCache>, BeanNameAware,
 		InitializingBean {
 
 	private String name = "";
-	private ConcurrentMapCache<K, V> cache;
+	private ConcurrentMapCache cache;
 
-	private ConcurrentMap<K, V> store;
+	private ConcurrentMap store;
 
 	public void afterPropertiesSet() {
-		cache = (store == null ? new ConcurrentMapCache<K, V>(name) : new ConcurrentMapCache<K, V>(store, name, true));
+		cache = (store == null ? new ConcurrentMapCache(name) : new ConcurrentMapCache(store, name, true));
 	}
 
-	public ConcurrentMapCache<K, V> getObject() throws Exception {
+	public ConcurrentMapCache getObject() throws Exception {
 		return cache;
 	}
 
@@ -62,7 +62,7 @@ public class ConcurrentCacheFactoryBean<K, V> implements FactoryBean<ConcurrentM
 		this.name = name;
 	}
 
-	public void setStore(ConcurrentMap<K, V> store) {
+	public void setStore(ConcurrentMap store) {
 		this.store = store;
 	}
 }

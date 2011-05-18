@@ -23,15 +23,15 @@ import org.springframework.cache.Cache.ValueWrapper;
  * 
  * @author Costin Leau
  */
-public class DefaultValueWrapper<V> implements ValueWrapper<V> {
+public class DefaultValueWrapper<V> implements ValueWrapper {
 
-	private final V value;
+	private final Object value;
 
-	public DefaultValueWrapper(V value) {
+	public DefaultValueWrapper(Object value) {
 		this.value = value;
 	}
 
-	public V get() {
+	public Object get() {
 		return value;
 	}
 }

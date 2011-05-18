@@ -68,5 +68,5 @@ interface CacheExpressionRootObject {
 	 * 
 	 * @return current cache
 	 */
-	Collection<Cache<?,?>> getCaches();
+	Collection<Cache> getCaches();
 }

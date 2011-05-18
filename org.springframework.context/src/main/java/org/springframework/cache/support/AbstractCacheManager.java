@@ -37,11 +37,11 @@ import org.springframework.util.Assert;
 public abstract class AbstractCacheManager implements CacheManager, InitializingBean {
 
 	// fast lookup by name map
-	private final ConcurrentMap<String, Cache<?, ?>> caches = new ConcurrentHashMap<String, Cache<?, ?>>();
+	private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
 	private Collection<String> names;
 
 	public void afterPropertiesSet() {
-		Collection<Cache<?, ?>> cacheSet = loadCaches();
+		Collection<Cache> cacheSet = loadCaches();
 
 		Assert.notEmpty(cacheSet);
 
@@ -50,7 +50,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		// preserve the initial order of the cache names
 		Set<String> cacheNames = new LinkedHashSet<String>(cacheSet.size());
 
-		for (Cache<?, ?> cache : cacheSet) {
+		for (Cache cache : cacheSet) {
 			caches.put(cache.getName(), cache);
 			cacheNames.add(cache.getName());
 		}
@@ -64,20 +64,19 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * 
 	 * @param caches the collection of caches handled by the manager
 	 */
-	protected abstract Collection<Cache<?, ?>> loadCaches();
+	protected abstract Collection<Cache> loadCaches();
 
 	/**
 	 * Returns the internal cache map.
 	 * 
 	 * @return internal cache map
 	 */
-	protected final ConcurrentMap<String, Cache<?, ?>> getCacheMap() {
+	protected final ConcurrentMap<String, Cache> getCacheMap() {
 		return caches;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <K, V> Cache<K, V> getCache(String name) {
-		return (Cache<K, V>) caches.get(name);
+	public Cache getCache(String name) {
+		return caches.get(name);
 	}
 
 	public Collection<String> getCacheNames() {
