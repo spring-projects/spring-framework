@@ -29,7 +29,7 @@ public class ConcurrentCacheTest extends AbstractNativeCacheTest<ConcurrentMap<O
 
 	@Override
 	protected Cache createCache(ConcurrentMap<Object, Object> nativeCache) {
-		return new ConcurrentCache(nativeCache, CACHE_NAME);
+		return new ConcurrentMapCache(nativeCache, CACHE_NAME, true);
 	}
 
 	@Override
