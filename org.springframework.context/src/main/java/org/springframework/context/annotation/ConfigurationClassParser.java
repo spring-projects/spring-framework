@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.Location;
@@ -36,9 +34,7 @@ import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.ResourcePropertySource;
@@ -69,8 +65,6 @@ import org.springframework.util.StringUtils;
  * @see ConfigurationClassBeanDefinitionReader
  */
 class ConfigurationClassParser {
-
-	private static final Log logger = LogFactory.getLog(ConfigurationClassParser.class);
 
 	private final MetadataReaderFactory metadataReaderFactory;
 
@@ -333,12 +327,10 @@ class ConfigurationClassParser {
 
 		public CircularImportProblem(ConfigurationClass attemptedImport, Stack<ConfigurationClass> importStack, AnnotationMetadata metadata) {
 			super(String.format("A circular @Import has been detected: " +
-			             "Illegal attempt by @Configuration class '%s' to import class '%s' as '%s' is " +
-			             "already present in the current import stack [%s]",
-			             importStack.peek().getSimpleName(), attemptedImport.getSimpleName(),
-			             attemptedImport.getSimpleName(), importStack),
-			      new Location(importStack.peek().getResource(), metadata)
-			);
+					"Illegal attempt by @Configuration class '%s' to import class '%s' as '%s' is " +
+					"already present in the current import stack [%s]", importStack.peek().getSimpleName(),
+					attemptedImport.getSimpleName(), attemptedImport.getSimpleName(), importStack),
+					new Location(importStack.peek().getResource(), metadata));
 		}
 	}
 

@@ -196,8 +196,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Find and process all @Configuration classes in the given registry.
 	 */
 	private void processConfigurationClasses(BeanDefinitionRegistry registry) {
-		ConfigurationClassBeanDefinitionReader reader = getConfigurationClassBeanDefinitionReader(registry);
-		processConfigBeanDefinitions(reader, registry);
+		processConfigBeanDefinitions(registry);
 		enhanceConfigurationClasses((ConfigurableListableBeanFactory)registry);
 	}
 
@@ -213,7 +212,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Build and validate a configuration model based on the registry of
 	 * {@link Configuration} classes.
 	 */
-	public void processConfigBeanDefinitions(ConfigurationClassBeanDefinitionReader reader, BeanDefinitionRegistry registry) {
+	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 		Set<BeanDefinitionHolder> configCandidates = new LinkedHashSet<BeanDefinitionHolder>();
 		for (String beanName : registry.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = registry.getBeanDefinition(beanName);
@@ -262,7 +261,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Read the model and create bean definitions based on its content
-		reader.loadBeanDefinitions(parser.getConfigurationClasses());
+		this.getConfigurationClassBeanDefinitionReader(registry).loadBeanDefinitions(parser.getConfigurationClasses());
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
 		if (registry instanceof SingletonBeanRegistry) {
