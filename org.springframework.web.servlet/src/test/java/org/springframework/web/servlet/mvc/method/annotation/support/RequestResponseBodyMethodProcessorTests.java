@@ -33,7 +33,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -217,7 +216,6 @@ public class RequestResponseBodyMethodProcessorTests {
 		return 42;
 	}
 
-	@RequestMapping(produces = {"text/html", "application/xhtml+xml"})
 	@ResponseBody
 	public String handle3() {
 		return null;

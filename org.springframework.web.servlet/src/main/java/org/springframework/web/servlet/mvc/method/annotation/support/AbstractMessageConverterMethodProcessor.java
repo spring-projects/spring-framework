@@ -22,12 +22,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -112,7 +112,7 @@ public abstract class AbstractMessageConverterMethodProcessor
 	 * @param webRequest the web request to create an input message from
 	 * @return the input message
 	 */
-	protected HttpInputMessage createInputMessage(NativeWebRequest webRequest) {
+	protected ServletServerHttpRequest createInputMessage(NativeWebRequest webRequest) {
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		return new ServletServerHttpRequest(servletRequest);
 	}
@@ -123,44 +123,48 @@ public abstract class AbstractMessageConverterMethodProcessor
 	 * @param webRequest the web request to create an output message from
 	 * @return the output message
 	 */
-	protected HttpOutputMessage createOutputMessage(NativeWebRequest webRequest) {
+	protected ServletServerHttpResponse createOutputMessage(NativeWebRequest webRequest) {
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		return new ServletServerHttpResponse(response);
 	}
 
 	/**
-	 * Returns the media types that can be produced:
-	 * <ul>
-	 * 	<li>The set of producible media types specified in the request mappings, or
-	 * 	<li>The set of supported media types by all configured message converters, or
-	 * 	<li>{@link MediaType#ALL}
+	 * Writes the given return value to the given web request. Delegates to
+	 * {@link #writeWithMessageConverters(Object, MethodParameter, ServletServerHttpRequest, ServletServerHttpResponse)}
 	 */
-	@SuppressWarnings("unchecked")
-	protected Set<MediaType> getProducibleMediaTypes(NativeWebRequest webRequest) {
-		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-		Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
-		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			return mediaTypes;
-		}
-		else if (!allSupportedMediaTypes.isEmpty()) {
-			return new HashSet<MediaType>(allSupportedMediaTypes);
-		}
-		else {
-			return Collections.singleton(MediaType.ALL);
-		}
-			
+	protected <T> void writeWithMessageConverters(T returnValue,
+												  MethodParameter returnType,
+												  NativeWebRequest webRequest)
+			throws IOException, HttpMediaTypeNotAcceptableException {
+		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
+		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
+		writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);
 	}
 
+	/**
+	 * Writes the given return type to the given output message.
+	 *
+	 * @param returnValue the value to write to the output message
+	 * @param returnType the type of the value
+	 * @param inputMessage the input messages. Used to inspect the {@code Accept} header.
+	 * @param outputMessage the output message to write to
+	 * @throws IOException thrown in case of I/O errors
+	 * @throws HttpMediaTypeNotAcceptableException thrown when the conditions indicated by {@code Accept} header on
+	 * the request cannot be met by the message converters
+	 */
 	@SuppressWarnings("unchecked")
 	protected <T> void writeWithMessageConverters(T returnValue,
 												  MethodParameter returnType,
-												  HttpInputMessage inputMessage,
-												  HttpOutputMessage outputMessage,
-												  Set<MediaType> producibleMediaTypes)
+												  ServletServerHttpRequest inputMessage,
+												  ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
+
+		Set<MediaType> acceptableMediaTypes = getAcceptableMediaTypes(inputMessage);
+		Set<MediaType> producibleMediaTypes = getProducibleMediaTypes(inputMessage.getServletRequest());
+
 		List<MediaType> mediaTypes = new ArrayList<MediaType>();
-		for (MediaType acceptableMediaType : getAcceptableMediaTypes(inputMessage)) {
+		for (MediaType acceptableMediaType : acceptableMediaTypes) {
 			for (MediaType producibleMediaType : producibleMediaTypes) {
 				if (acceptableMediaType.isCompatibleWith(producibleMediaType)) {
 					mediaTypes.add(getMostSpecificMediaType(acceptableMediaType, producibleMediaType));
@@ -195,6 +199,29 @@ public abstract class AbstractMessageConverterMethodProcessor
 			}
 		}
 		throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
+	}
+
+	/**
+	 * Returns the media types that can be produced:
+	 * <ul>
+	 * 	<li>The set of producible media types specified in the request mappings, or
+	 * 	<li>The set of supported media types by all configured message converters, or
+	 * 	<li>{@link MediaType#ALL}
+	 * </ul>
+	 */
+	@SuppressWarnings("unchecked")
+	protected Set<MediaType> getProducibleMediaTypes(HttpServletRequest request) {
+		Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		if (!CollectionUtils.isEmpty(mediaTypes)) {
+			return mediaTypes;
+		}
+		else if (!allSupportedMediaTypes.isEmpty()) {
+			return new HashSet<MediaType>(allSupportedMediaTypes);
+		}
+		else {
+			return Collections.singleton(MediaType.ALL);
+		}
+
 	}
 
 	private Set<MediaType> getAcceptableMediaTypes(HttpInputMessage inputMessage) {
