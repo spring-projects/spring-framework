@@ -33,10 +33,10 @@ public class DefaultCacheExpressionRootObject implements CacheExpressionRootObje
 	private final Class<?> targetClass;
 	private final String methodName;
 	private final Method method;
-	private final Collection<Cache<?, ?>> caches;
+	private final Collection<Cache> caches;
 	private final Object[] args;
 
-	public DefaultCacheExpressionRootObject(Collection<Cache<?, ?>> caches, Method method, Object[] args,
+	public DefaultCacheExpressionRootObject(Collection<Cache> caches, Method method, Object[] args,
 			Object target, Class<?> targetClass) {
 		Assert.notNull(method, "method is required");
 		Assert.notNull(targetClass, "targetClass is required");
@@ -52,7 +52,7 @@ public class DefaultCacheExpressionRootObject implements CacheExpressionRootObje
 		return methodName;
 	}
 
-	public Collection<Cache<?, ?>> getCaches() {
+	public Collection<Cache> getCaches() {
 		return caches;
 	}
 

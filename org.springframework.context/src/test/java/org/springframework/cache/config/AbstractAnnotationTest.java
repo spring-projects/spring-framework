@@ -133,7 +133,7 @@ public abstract class AbstractAnnotationTest {
 		Object key = new Object();
 		Object r1 = service.name(key);
 		assertSame(r1, service.name(key));
-		Cache<Object, Object> cache = cm.getCache("default");
+		Cache cache = cm.getCache("default");
 		// assert the method name is used
 		assertNotNull(cache.get(keyName));
 	}
@@ -142,7 +142,7 @@ public abstract class AbstractAnnotationTest {
 		Object key = new Object();
 		Object r1 = service.rootVars(key);
 		assertSame(r1, service.rootVars(key));
-		Cache<Object, Object> cache = cm.getCache("default");
+		Cache cache = cm.getCache("default");
 		// assert the method name is used
 		String expectedKey = "rootVarsrootVars" + AopProxyUtils.ultimateTargetClass(service) + service;
 		assertNotNull(cache.get(expectedKey));

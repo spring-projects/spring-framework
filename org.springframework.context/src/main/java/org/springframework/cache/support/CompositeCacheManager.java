@@ -35,8 +35,8 @@ public class CompositeCacheManager implements CacheManager {
 
 	private CacheManager[] cacheManagers;
 
-	public <K, V> Cache<K, V> getCache(String name) {
-		Cache<K, V> cache = null;
+	public Cache getCache(String name) {
+		Cache cache = null;
 		for (CacheManager cacheManager : cacheManagers) {
 			cache = cacheManager.getCache(name);
 			if (cache != null) {

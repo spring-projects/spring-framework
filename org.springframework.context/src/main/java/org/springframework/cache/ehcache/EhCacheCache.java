@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * 
  * @author Costin Leau
  */
-public class EhCacheCache implements Cache<Object, Object> {
+public class EhCacheCache implements Cache {
 
 	private final Ehcache cache;
 
@@ -58,7 +58,7 @@ public class EhCacheCache implements Cache<Object, Object> {
 		cache.removeAll();
 	}
 
-	public ValueWrapper<Object> get(Object key) {
+	public ValueWrapper get(Object key) {
 		Element element = cache.get(key);
 		return (element != null ? new DefaultValueWrapper<Object>(element.getObjectValue()) : null);
 	}

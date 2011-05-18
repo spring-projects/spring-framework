@@ -124,13 +124,13 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				cacheDefinitionSources) : cacheDefinitionSources[0]);
 	}
 
-	protected Collection<Cache<?, ?>> getCaches(CacheOperation operation) {
+	protected Collection<Cache> getCaches(CacheOperation operation) {
 		Set<String> cacheNames = operation.getCacheNames();
 
-		Collection<Cache<?, ?>> caches = new ArrayList<Cache<?, ?>>(cacheNames.size());
+		Collection<Cache> caches = new ArrayList<Cache>(cacheNames.size());
 
 		for (String cacheName : cacheNames) {
-			Cache<Object, Object> cache = cacheManager.getCache(cacheName);
+			Cache cache = cacheManager.getCache(cacheName);
 			if (cache == null) {
 				throw new IllegalArgumentException("Cannot find cache named [" + cacheName + "] for " + operation);
 			}
@@ -145,7 +145,6 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		return new CacheOperationContext(operation, method, args, target, targetClass);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected Object execute(Callable<Object> invocation, Object target, Method method, Object[] args) throws Exception {
 		// get backing class
 		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
@@ -163,7 +162,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		// analyze caching information
 		if (cacheOp != null) {
 			CacheOperationContext context = getOperationContext(cacheOp, method, args, target, targetClass);
-			Collection<Cache<?, ?>> caches = context.getCaches();
+			Collection<Cache> caches = context.getCaches();
 
 			if (context.hasConditionPassed()) {
 				// check operation
@@ -183,9 +182,9 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					// for each cache
 					boolean cacheHit = false;
 
-					for (Iterator<Cache<?, ?>> iterator = caches.iterator(); iterator.hasNext() && !cacheHit;) {
+					for (Iterator<Cache> iterator = caches.iterator(); iterator.hasNext() && !cacheHit;) {
 						Cache cache = iterator.next();
-						Cache.ValueWrapper<Object> wrapper = cache.get(key);
+						Cache.ValueWrapper wrapper = cache.get(key);
 
 						if (wrapper != null) {
 							cacheHit = true;
@@ -255,7 +254,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	protected class CacheOperationContext {
 
 		private CacheOperation operation;
-		private final Collection<Cache<?, ?>> caches;
+		private final Collection<Cache> caches;
 		private final Object target;
 		private final Method method;
 		private final Object[] args;
@@ -307,7 +306,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			return keyGenerator.extract(target, method, args);
 		}
 
-		protected Collection<Cache<?, ?>> getCaches() {
+		protected Collection<Cache> getCaches() {
 			return caches;
 		}
 	}

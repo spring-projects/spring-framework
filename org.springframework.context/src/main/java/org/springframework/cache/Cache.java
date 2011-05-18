@@ -26,18 +26,18 @@ package org.springframework.cache;
  * 
  * @author Costin Leau
  */
-public interface Cache<K, V> {
+public interface Cache {
 
 	/**
 	 * A (wrapper) object representing a cache value.
 	 */
-	interface ValueWrapper<V> {
+	interface ValueWrapper {
 		/**
 		 * Returns the actual value in the cache.
 		 *  
 		 * @return cache value
 		 */
-		V get();
+		Object get();
 	}
 
 	/**
@@ -62,7 +62,7 @@ public interface Cache<K, V> {
 	 * @return the value to which this cache maps the specified key, or
 	 *	       <tt>null</tt> if the cache contains no mapping for this key.
 	 */
-	ValueWrapper<V> get(Object key);
+	ValueWrapper get(Object key);
 
 	/**
 	 * Associates the specified value with the specified key in this cache.
@@ -72,7 +72,7 @@ public interface Cache<K, V> {
 	 * @param key key with which the specified value is to be associated.
 	 * @param value value to be associated with the specified key.
 	 */
-	void put(K key, V value);
+	void put(Object key, Object value);
 
 	/**
 	 * Evicts the mapping for this key from this cache if it is present.
