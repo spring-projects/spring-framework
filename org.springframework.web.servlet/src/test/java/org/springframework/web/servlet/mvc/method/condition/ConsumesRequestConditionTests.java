@@ -116,7 +116,7 @@ public class ConsumesRequestConditionTests {
 	@Test
 	public void combineWithDefault() {
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("text/plain");
-		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("*/*");
+		ConsumesRequestCondition condition2 = new ConsumesRequestCondition();
 
 		ConsumesRequestCondition result = condition1.combine(condition2);
 		assertEquals(condition1, result);

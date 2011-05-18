@@ -25,7 +25,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 
 /**
  * @author Arjen Poutsma
@@ -37,19 +36,8 @@ class MediaTypesRequestCondition<T extends MediaTypesRequestCondition.MediaTypeR
 
 	public MediaTypesRequestCondition(Collection<T> conditions) {
 		super(conditions);
-		Assert.notEmpty(conditions, "'conditions' must not be empty");
 		sortedConditions = new ArrayList<T>(conditions);
 		Collections.sort(sortedConditions);
-	}
-
-	private MediaTypeRequestCondition getMostSpecificCondition(Collection<T> conditions) {
-		List<MediaTypeRequestCondition> conditionList = new ArrayList<MediaTypeRequestCondition>(conditions);
-		Collections.sort(conditionList);
-		return conditionList.get(0);
-	}
-
-	protected MediaTypeRequestCondition getMostSpecificCondition() {
-		return sortedConditions.get(0);
 	}
 
 	protected List<T> getSortedConditions() {
@@ -66,7 +54,6 @@ class MediaTypesRequestCondition<T extends MediaTypesRequestCondition.MediaTypeR
 		}
 		return result;
 	}
-
 
 	/**
 	 * @author Arjen Poutsma

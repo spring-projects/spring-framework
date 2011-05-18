@@ -156,7 +156,7 @@ public class ProducesRequestConditionTests {
 	@Test
 	public void combineWithDefault() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/plain");
-		ProducesRequestCondition condition2 = new ProducesRequestCondition("*/*");
+		ProducesRequestCondition condition2 = new ProducesRequestCondition();
 
 		ProducesRequestCondition result = condition1.combine(condition2);
 		assertEquals(condition1, result);

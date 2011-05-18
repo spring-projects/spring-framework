@@ -309,7 +309,7 @@ public @interface RequestMapping {
 	 * @see org.springframework.http.MediaType
 	 * @see javax.servlet.http.HttpServletRequest#getContentType()
 	 */
-	String[] consumes() default "*/*";
+	String[] consumes() default {};
 
 	/**
 	 * The producible media types of the mapped request, narrowing the primary mapping.
@@ -322,6 +322,6 @@ public @interface RequestMapping {
 	 * this consumes restriction.
 	 * @see org.springframework.http.MediaType
 	 */
-	String[] produces() default "*/*";
+	String[] produces() default {};
 
 }

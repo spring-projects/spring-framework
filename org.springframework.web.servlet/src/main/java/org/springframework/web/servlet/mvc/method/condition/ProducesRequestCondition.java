@@ -50,9 +50,6 @@ public class ProducesRequestCondition
 	}
 
 	private static Set<ProduceRequestCondition> parseConditions(List<String> consumes) {
-		if (consumes.isEmpty()) {
-			consumes = Collections.singletonList("*/*");
-		}
 		Set<ProduceRequestCondition> conditions = new LinkedHashSet<ProduceRequestCondition>(consumes.size());
 		for (String consume : consumes) {
 			conditions.add(new ProduceRequestCondition(consume));
@@ -61,10 +58,10 @@ public class ProducesRequestCondition
 	}
 
 	/**
-	 * Creates an default set of consumes request conditions.
+	 * Creates an empty set of consumes request conditions.
 	 */
 	public ProducesRequestCondition() {
-		this(Collections.singleton(new ProduceRequestCondition(MediaType.ALL, false)));
+		this(Collections.<ProduceRequestCondition>emptySet());
 	}
 
 	/**
@@ -74,6 +71,9 @@ public class ProducesRequestCondition
 	 * @return a new request condition that contains all matching attributes, or {@code null} if not all conditions match
 	 */
 	public ProducesRequestCondition getMatchingCondition(HttpServletRequest request) {
+		if (isEmpty()) {
+			return this;
+		}
 		Set<ProduceRequestCondition> matchingConditions = new LinkedHashSet<ProduceRequestCondition>(getConditions());
 		for (Iterator<ProduceRequestCondition> iterator = matchingConditions.iterator(); iterator.hasNext();) {
 			ProduceRequestCondition condition = iterator.next();
@@ -96,18 +96,7 @@ public class ProducesRequestCondition
 	 * @param other the condition to combine with
 	 */
 	public ProducesRequestCondition combine(ProducesRequestCondition other) {
-		return !other.hasDefaultValue() ? other : this;
-	}
-
-	private boolean hasDefaultValue() {
-		Set<ProduceRequestCondition> conditions = getConditions();
-		if (conditions.size() == 1) {
-			ProduceRequestCondition condition = conditions.iterator().next();
-			return condition.getMediaType().equals(MediaType.ALL);
-		}
-		else {
-			return false;
-		}
+		return !other.isEmpty() ? other : this;
 	}
 
 	public int compareTo(ProducesRequestCondition other, List<MediaType> acceptedMediaTypes) {

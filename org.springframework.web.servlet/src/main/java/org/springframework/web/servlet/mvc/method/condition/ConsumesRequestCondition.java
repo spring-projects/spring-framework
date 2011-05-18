@@ -50,9 +50,6 @@ public class ConsumesRequestCondition
 	}
 
 	private static Set<ConsumeRequestCondition> parseConditions(List<String> consumes) {
-		if (consumes.isEmpty()) {
-			consumes = Collections.singletonList("*/*");
-		}
 		Set<ConsumeRequestCondition> conditions = new LinkedHashSet<ConsumeRequestCondition>(consumes.size());
 		for (String consume : consumes) {
 			conditions.add(new ConsumeRequestCondition(consume));
@@ -64,7 +61,7 @@ public class ConsumesRequestCondition
 	 * Creates a default set of consumes request conditions.
 	 */
 	public ConsumesRequestCondition() {
-		this(Collections.singleton(new ConsumeRequestCondition(MediaType.ALL, false)));
+		this(Collections.<ConsumeRequestCondition>emptySet());
 	}
 
 	/**
@@ -74,6 +71,9 @@ public class ConsumesRequestCondition
 	 * @return a new request condition that contains all matching attributes, or {@code null} if not all conditions match
 	 */
 	public ConsumesRequestCondition getMatchingCondition(HttpServletRequest request) {
+		if (isEmpty()) {
+			return this;
+		}
 		Set<ConsumeRequestCondition> matchingConditions = new LinkedHashSet<ConsumeRequestCondition>(getConditions());
 		for (Iterator<ConsumeRequestCondition> iterator = matchingConditions.iterator(); iterator.hasNext();) {
 			ConsumeRequestCondition condition = iterator.next();
@@ -90,29 +90,41 @@ public class ConsumesRequestCondition
 	}
 
 	/**
-	 * Combines this collection of request condition with another. Returns {@code other}, unless it has the default value
-	 * (i.e. <code>&#42;/&#42;</code>).
+	 * Combines this collection of request condition with another. Returns {@code other}, unless it is empty.
 	 *
 	 * @param other the condition to combine with
 	 */
 	public ConsumesRequestCondition combine(ConsumesRequestCondition other) {
-		return !other.hasDefaultValue() ? other : this;
+		return !other.isEmpty() ? other : this;
 	}
 
-	private boolean hasDefaultValue() {
-		Set<ConsumeRequestCondition> conditions = getConditions();
-		if (conditions.size() == 1) {
-			ConsumeRequestCondition condition = conditions.iterator().next();
-			return condition.getMediaType().equals(MediaType.ALL);
-		}
-		else {
-			return false;
-		}
-	}
 
 	public int compareTo(ConsumesRequestCondition other) {
-		return this.getMostSpecificCondition().compareTo(other.getMostSpecificCondition());
+		MediaTypeRequestCondition thisMostSpecificCondition = this.getMostSpecificCondition();
+		MediaTypeRequestCondition otherMostSpecificCondition = other.getMostSpecificCondition();
+		if (thisMostSpecificCondition == null && otherMostSpecificCondition == null) {
+			return 0;
+		}
+		else if (thisMostSpecificCondition == null) {
+			return 1;
+		}
+		else if (otherMostSpecificCondition == null) {
+			return -1;
+		}
+		else {
+			return thisMostSpecificCondition.compareTo(otherMostSpecificCondition);
+		}
 	}
+
+	private MediaTypeRequestCondition getMostSpecificCondition() {
+		if (!isEmpty()) {
+			return getSortedConditions().get(0);
+		}
+		else {
+			return null;
+		}
+	}
+	
 
 	static class ConsumeRequestCondition extends MediaTypesRequestCondition.MediaTypeRequestCondition {
 

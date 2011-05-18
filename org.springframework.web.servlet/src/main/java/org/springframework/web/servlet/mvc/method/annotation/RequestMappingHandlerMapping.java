@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -180,9 +179,9 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 		String pattern = info.getPatterns().iterator().next();
 		Map<String, String> uriTemplateVariables = pathMatcher.extractUriTemplateVariables(pattern, lookupPath);
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
-	
-		Set<MediaType> mediaTypes = info.getProduces().getMediaTypes();
-		if (mediaTypes.size() > 1 || !MediaType.ALL.equals(mediaTypes.iterator().next())) {
+
+		if (!info.getProduces().isEmpty()) {
+			Set<MediaType> mediaTypes = info.getProduces().getMediaTypes();
 			request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
 		}
 	}

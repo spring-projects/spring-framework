@@ -18,16 +18,9 @@ package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,17 +65,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 								  NativeWebRequest webRequest) throws IOException, HttpMediaTypeNotAcceptableException {
 		mavContainer.setResolveView(false);
 		if (returnValue != null) {
-			HttpInputMessage inputMessage = createInputMessage(webRequest);
-			HttpOutputMessage outputMessage = createOutputMessage(webRequest);
-			Set<MediaType> mediaTypes = getProducibleMediaTypes(webRequest);
-			writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage, mediaTypes);
+			writeWithMessageConverters(returnValue, returnType, webRequest);
 		}
-	}
-
-	@Override
-	protected HttpOutputMessage createOutputMessage(NativeWebRequest webRequest) {
-		HttpServletResponse servletResponse = (HttpServletResponse) webRequest.getNativeResponse();
-		return new ServletServerHttpResponse(servletResponse);
 	}
 
 }

@@ -40,7 +40,7 @@ abstract class RequestConditionComposite<T extends RequestCondition> implements 
 		return conditions;
 	}
 
-	boolean isEmpty() {
+	public boolean isEmpty() {
 		return conditions.isEmpty();
 	}
 

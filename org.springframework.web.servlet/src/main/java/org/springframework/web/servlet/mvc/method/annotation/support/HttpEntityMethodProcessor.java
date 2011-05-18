@@ -22,17 +22,15 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -108,12 +106,13 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			return;
 		}
 
-		HttpOutputMessage outputMessage = createOutputMessage(webRequest);
+		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
+		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 
 		Assert.isInstanceOf(HttpEntity.class, returnValue);
 		HttpEntity<?> responseEntity = (HttpEntity<?>) returnValue;
 		if (responseEntity instanceof ResponseEntity) {
-			((ServerHttpResponse) outputMessage).setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
+			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
 		}
 
 		HttpHeaders entityHeaders = responseEntity.getHeaders();
@@ -123,8 +122,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		
 		Object body = responseEntity.getBody();
 		if (body != null) {
-			Set<MediaType> mediaTypes = getProducibleMediaTypes(webRequest);
-			writeWithMessageConverters(body, returnType, createInputMessage(webRequest), outputMessage, mediaTypes);
+			writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
 		}
 		else {
 			// flush headers to the HttpServletResponse
