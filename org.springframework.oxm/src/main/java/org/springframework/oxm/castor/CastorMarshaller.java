@@ -45,6 +45,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
 
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.MarshallingFailureException;
@@ -80,7 +81,7 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setMappingLocations(Resource[])
  * @since 3.0
  */
-public class CastorMarshaller extends AbstractMarshaller implements InitializingBean {
+public class CastorMarshaller extends AbstractMarshaller implements InitializingBean, BeanClassLoaderAware {
 
 	/**
 	 * The default encoding used for stream access: UTF-8.
@@ -124,6 +125,16 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	private boolean useXSITypeAtRoot = false;
 
 	private Map<String, String> processingInstructions;
+
+	private Map<String, String> namespaceToPackageMapping;
+
+	private ClassLoader classLoader;
+
+	private Object root;
+
+	private boolean reuseObjects = false;
+
+	private boolean clearCollections = false;
 
 	/**
 	 * Set the encoding to be used for stream access.
@@ -201,7 +212,8 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Set whether the Castor {@link Unmarshaller} should ignore elements that do not match a specific field. <p>Default is
+	 * Set whether the Castor {@link Unmarshaller} should ignore elements that do not match a specific field. <p>Default
+	 * is
 	 * <code>false</code>, extra attributes are flagged as an error.
 	 *
 	 * @see org.exolab.castor.xml.Unmarshaller#setIgnoreExtraElements(boolean)
@@ -313,13 +325,56 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Sets the processing instructions that will be used by during marshalling. Keys are the processing targets and values
+	 * Sets the processing instructions that will be used by during marshalling. Keys are the processing targets and
+	 * values
 	 * contain the processing data.
 	 *
 	 * @see org.exolab.castor.xml.Marshaller#addProcessingInstruction(String, String)
 	 */
 	public void setProcessingInstructions(Map<String, String> processingInstructions) {
 		this.processingInstructions = processingInstructions;
+	}
+
+	/**
+	 * Set the namespace to package mappings. Property names are represents the namespaces URI, values are packages.
+	 *
+	 * @see org.exolab.castor.xml.Marshaller#setNamespaceMapping(String, String)
+	 */
+	public void setNamespaceToPackageMapping(Map<String, String> namespaceToPackageMapping) {
+		this.namespaceToPackageMapping = namespaceToPackageMapping;
+	}
+
+	/**
+	 * Sets the expected object for the unmarshaller, into which the source will be unmarshalled.
+	 *
+	 * @see org.exolab.castor.xml.Unmarshaller#setObject(Object)
+	 */
+	public void setObject(Object root) {
+		this.root = root;
+	}
+
+	/**
+	 * Sets whether this unmarshaller should re-use objects. This will be only used when unmarshalling to existing
+	 * object. </p> The default is {@link false}, which means that the objects won't be re-used.
+	 *
+	 * @see org.exolab.castor.xml.Unmarshaller#setReuseObjects(boolean)
+	 */
+	public void setReuseObjects(boolean reuseObjects) {
+		this.reuseObjects = reuseObjects;
+	}
+
+	/**
+	 * Sets whether this unmarshaller should clear collections upon the first use. </p> The default is {@link false},
+	 * which means that marshaller won't clear collections.
+	 *
+	 * @see org.exolab.castor.xml.Unmarshaller#setClearCollections(boolean)
+	 */
+	public void setClearCollections(boolean clearCollections) {
+		this.clearCollections = clearCollections;
+	}
+
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
 	}
 
 	public final void afterPropertiesSet() throws CastorMappingException, IOException {
@@ -439,15 +494,25 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Template method that allows for customizing of the given Castor {@link Marshaller}. </p>The default implementation
-	 * invokes {@link Marshaller#setValidation(boolean)}, {@link Marshaller#setSuppressNamespaces(boolean)}, {@link
-	 * Marshaller#setSuppressXSIType(boolean)}, {@link Marshaller#setMarshalAsDocument(boolean)}, {@link
-	 * Marshaller#setRootElement(String)}, {@link Marshaller#setMarshalExtendedType(boolean)}, {@link
-	 * Marshaller#setNoNamespaceSchemaLocation(String)}, {@link Marshaller#setSchemaLocation(String)} and {@link
-	 * Marshaller#setUseXSITypeAtRoot(boolean)}, with the property set on this marshaller, it also calls {@link
-	 * Marshaller#setNamespaceMapping(String, String)} with the {@linkplain #setNamespaceMappings(java.util.Map) namespace
-	 * mappings} and {@link Marshaller#addProcessingInstruction(String, String)} with the {@linkplain
-	 * #setProcessingInstructions(java.util.Map) processing instructions}.
+	 * Template method that allows for customizing of the given Castor {@link Marshaller}.
+	 *
+	 * </p>The default implementation invokes
+	 * <ol>
+	 * <li>{@link Marshaller#setValidation(boolean)},</li>
+	 * <li>{@link Marshaller#setSuppressNamespaces(boolean)},</li>
+	 * <li>{@link Marshaller#setSuppressXSIType(boolean)}, </li>
+	 * <li>{@link Marshaller#setMarshalAsDocument(boolean)}, </li>
+	 * <li>{@link Marshaller#setRootElement(String)},</li>
+	 * <li>{@link Marshaller#setMarshalExtendedType(boolean)},</li>
+	 * <li>{@link Marshaller#setNoNamespaceSchemaLocation(String)},</li>
+	 * <li>{@link Marshaller#setSchemaLocation(String)} and</li>
+	 * <li>{@link Marshaller#setUseXSITypeAtRoot(boolean)}.</li>
+	 * </ol>
+	 * with the property set on this marshaller.
+	 * It also calls {@link Marshaller#setNamespaceMapping(String, String)}
+	 * with the {@linkplain #setNamespaceMappings(java.util.Map) namespace mappings} and
+	 * {@link Marshaller#addProcessingInstruction(String, String)} with the
+	 * {@linkplain #setProcessingInstructions(java.util.Map) processing instructions}.
 	 */
 	protected void customizeMarshaller(Marshaller marshaller) {
 		marshaller.setValidation(this.validating);
@@ -548,12 +613,21 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Template method that allows for customizing of the given Castor {@link Unmarshaller}. </p> The default
-	 * implementation invokes {@link Unmarshaller#setValidation(boolean)}, {@link Unmarshaller#setWhitespacePreserve(boolean)},
-	 * {@link Unmarshaller#setIgnoreExtraAttributes(boolean)}, {@link Unmarshaller#setIgnoreExtraElements(boolean)}, {@link
-	 * Unmarshaller#setClassLoader(ClassLoader)}, {@link Unmarshaller#setObject(Object)}, {@link
-	 * Unmarshaller#setReuseObjects(boolean)} and {@link Unmarshaller#setClearCollections(boolean)} with the properties set
-	 * on this marshaller, it also calls {@link Unmarshaller#addNamespaceToPackageMapping(String, String)} with the
+	 * Template method that allows for customizing of the given Castor {@link Unmarshaller}.
+	 *
+	 * </p> The default implementation invokes
+	 * <ol>
+	 * <li>{@link Unmarshaller#setValidation(boolean)},
+	 * <li>{@link Unmarshaller#setWhitespacePreserve(boolean)},
+	 * <li>{@link Unmarshaller#setIgnoreExtraAttributes(boolean)},
+	 * <li>{@link Unmarshaller#setIgnoreExtraElements(boolean)},
+	 * <li>{@link Unmarshaller#setClassLoader(ClassLoader)},
+	 * <li>{@link Unmarshaller#setObject(Object)},
+	 * <li>{@link Unmarshaller#setReuseObjects(boolean)} and
+	 * <li>{@link Unmarshaller#setClearCollections(boolean)}
+	 * </ol>
+	 * with the properties set on this marshaller.
+	 * It also calls {@link Unmarshaller#addNamespaceToPackageMapping(String, String)} with the
 	 * {@linkplain #setNamespaceMappings(java.util.Map) namespace to package mapping}.
 	 */
 	protected void customizeUnmarshaller(Unmarshaller unmarshaller) {
@@ -561,11 +635,22 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		unmarshaller.setWhitespacePreserve(this.whitespacePreserve);
 		unmarshaller.setIgnoreExtraAttributes(this.ignoreExtraAttributes);
 		unmarshaller.setIgnoreExtraElements(this.ignoreExtraElements);
+		unmarshaller.setClassLoader(classLoader);
+		unmarshaller.setObject(root);
+		unmarshaller.setReuseObjects(reuseObjects);
+		unmarshaller.setClearCollections(clearCollections);
+		if (namespaceToPackageMapping != null) {
+			for (Map.Entry<String, String> mapping : namespaceToPackageMapping.entrySet()) {
+				unmarshaller.addNamespaceToPackageMapping(mapping.getKey(), mapping.getValue());
+			}
+		}
+
 	}
 
 	/**
 	 * Convert the given <code>XMLException</code> to an appropriate exception from the
-	 * <code>org.springframework.oxm</code> hierarchy. <p> A boolean flag is used to indicate whether this exception occurs
+	 * <code>org.springframework.oxm</code> hierarchy. <p> A boolean flag is used to indicate whether this exception
+	 * occurs
 	 * during marshalling or unmarshalling, since Castor itself does not make this distinction in its exception hierarchy.
 	 *
 	 * @param ex Castor <code>XMLException</code> that occured
