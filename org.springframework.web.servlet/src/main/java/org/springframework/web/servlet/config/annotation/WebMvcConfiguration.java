@@ -146,6 +146,7 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 	}
 
 	private MappedInterceptor[] getMappedInterceptors() {
+		// TODO : prepare and store in instance var ?
 		InterceptorConfigurer configurer = new InterceptorConfigurer();
 		configurers.configureInterceptors(configurer);
 		configurer.addInterceptor(new ConversionServiceExposingInterceptor(conversionService()));

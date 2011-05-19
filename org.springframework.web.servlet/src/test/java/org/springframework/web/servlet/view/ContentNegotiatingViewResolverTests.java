@@ -16,6 +16,15 @@
 
 package org.springframework.web.servlet.view;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,17 +33,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.easymock.EasyMock.*;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
@@ -427,6 +435,26 @@ public class ContentNegotiatingViewResolverTests {
 		assertEquals("Invalid status code set", 406, response.getStatus());
 
 		verify(viewResolverMock, viewMock);
+	}
+
+	@Test
+	public void nestedViewResolverIsNotSpringBean() throws Exception {
+		InternalResourceViewResolver nestedResolver = new InternalResourceViewResolver();
+		nestedResolver.setViewClass(InternalResourceView.class);
+		viewResolver.setViewResolvers(new ArrayList<ViewResolver>(Arrays.asList(nestedResolver)));
+		
+		StaticWebApplicationContext appContext = new StaticWebApplicationContext();
+		appContext.setServletContext(new MockServletContext());
+		appContext.refresh();
+		viewResolver.setApplicationContext(appContext);
+
+		viewResolver.setDefaultContentType(MediaType.TEXT_HTML);
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		View result = viewResolver.resolveViewName(viewName, locale);
+		assertNotNull("Invalid view", result);
 	}
 
 }
