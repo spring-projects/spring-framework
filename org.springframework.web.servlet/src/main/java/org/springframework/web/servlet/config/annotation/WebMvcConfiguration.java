@@ -124,8 +124,15 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 
 	private ApplicationContext applicationContext;
 
+	private List<MappedInterceptor> mappedInterceptors;
+
+	private List<HttpMessageConverter<?>> messageConverters;
+	
 	@Autowired(required = false)
 	public void setConfigurers(List<WebMvcConfigurer> configurers) {
+		if (configurers == null || configurers.isEmpty()) {
+			return;
+		}
 		this.configurers.addWebMvcConfigurers(configurers);
 	}
 
@@ -136,21 +143,23 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
-
+	
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
 		RequestMappingHandlerMapping mapping = new RequestMappingHandlerMapping();
-		mapping.setMappedInterceptors(getMappedInterceptors());
+		mapping.setInterceptors(getMappedInterceptors());
 		mapping.setOrder(0);
 		return mapping;
 	}
-
-	private MappedInterceptor[] getMappedInterceptors() {
-		// TODO : prepare and store in instance var ?
-		InterceptorConfigurer configurer = new InterceptorConfigurer();
-		configurers.configureInterceptors(configurer);
-		configurer.addInterceptor(new ConversionServiceExposingInterceptor(conversionService()));
-		return configurer.getInterceptors();
+	
+	private Object[] getMappedInterceptors() {
+		if (mappedInterceptors == null) {
+			InterceptorConfigurer configurer = new InterceptorConfigurer();
+			configurers.configureInterceptors(configurer);
+			configurer.addInterceptor(new ConversionServiceExposingInterceptor(conversionService()));
+			mappedInterceptors = configurer.getInterceptors();
+		}
+		return mappedInterceptors.toArray();
 	}
 
 	@Bean
@@ -160,7 +169,7 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 		configurers.configureViewControllers(configurer);
 		
 		SimpleUrlHandlerMapping handlerMapping = configurer.getHandlerMapping();
-		handlerMapping.setMappedInterceptors(getMappedInterceptors());
+		handlerMapping.setInterceptors(getMappedInterceptors());
 		return handlerMapping;
 	}
 
@@ -168,7 +177,7 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 	public BeanNameUrlHandlerMapping beanNameHandlerMapping() {
 		BeanNameUrlHandlerMapping mapping = new BeanNameUrlHandlerMapping();
 		mapping.setOrder(2);
-		mapping.setMappedInterceptors(getMappedInterceptors());
+		mapping.setInterceptors(getMappedInterceptors());
 		return mapping;
 	}
 
@@ -190,6 +199,7 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
+		adapter.setMessageConverters(getMessageConverters());
 
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setConversionService(conversionService());
@@ -204,24 +214,28 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 		configurers.addReturnValueHandlers(returnValueHandlers);
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		configurers.configureMessageConverters(converters);
-		if (converters.size() == 0) {
-			addDefaultHttpMessageConverters(converters);
-		}
-		adapter.setMessageConverters(converters);
-
 		return adapter;
 	}
 
-	@Bean(name="mvcConversionService")
+	private List<HttpMessageConverter<?>> getMessageConverters() {
+		if (messageConverters == null) {
+			messageConverters = new ArrayList<HttpMessageConverter<?>>();
+			configurers.configureMessageConverters(messageConverters);
+			if (messageConverters.isEmpty()) {
+				addDefaultHttpMessageConverters(messageConverters);
+			}
+		}
+		return messageConverters;
+	}
+	
+	@Bean(name="webMvcConversionService")
 	public FormattingConversionService conversionService() {
 		FormattingConversionService conversionService = new DefaultFormattingConversionService();
 		configurers.addFormatters(conversionService);
 		return conversionService;
 	}
 
-	@Bean(name="mvcValidator")
+	@Bean(name="webMvcValidator")
 	public Validator validator() {
 		Validator validator = configurers.getValidator();
 		if (validator != null) {
@@ -240,37 +254,30 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 			return (Validator) BeanUtils.instantiate(clazz);
 		}
 		else {
-			return new Validator() {
-				public void validate(Object target, Errors errors) {
-				}
-
-				public boolean supports(Class<?> clazz) {
-					return false;
-				}
-			};
+			return NOOP_VALIDATOR;
 		}
 	}
 
-	private void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> converters) {
+	private void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
 		stringConverter.setWriteAcceptCharset(false);
 
-		converters.add(new ByteArrayHttpMessageConverter());
-		converters.add(stringConverter);
-		converters.add(new ResourceHttpMessageConverter());
-		converters.add(new SourceHttpMessageConverter<Source>());
-		converters.add(new XmlAwareFormHttpMessageConverter());
+		messageConverters.add(new ByteArrayHttpMessageConverter());
+		messageConverters.add(stringConverter);
+		messageConverters.add(new ResourceHttpMessageConverter());
+		messageConverters.add(new SourceHttpMessageConverter<Source>());
+		messageConverters.add(new XmlAwareFormHttpMessageConverter());
 
 		ClassLoader classLoader = getClass().getClassLoader();
 		if (ClassUtils.isPresent("javax.xml.bind.Binder", classLoader)) {
-			converters.add(new Jaxb2RootElementHttpMessageConverter());
+			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
 		if (ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", classLoader)) {
-			converters.add(new MappingJacksonHttpMessageConverter());
+			messageConverters.add(new MappingJacksonHttpMessageConverter());
 		}
 		if (ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", classLoader)) {
-			converters.add(new AtomFeedHttpMessageConverter());
-			converters.add(new RssChannelHttpMessageConverter());
+			messageConverters.add(new AtomFeedHttpMessageConverter());
+			messageConverters.add(new RssChannelHttpMessageConverter());
 		}
 	}
 
@@ -303,16 +310,19 @@ class WebMvcConfiguration implements ApplicationContextAware, ServletContextAwar
 
 	private HandlerExceptionResolver createExceptionHandlerExceptionResolver() throws Exception {
 		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
-		
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		configurers.configureMessageConverters(converters);
-		if (converters.size() == 0) {
-			addDefaultHttpMessageConverters(converters);
-		}
-		resolver.setMessageConverters(converters);
-
+		resolver.setMessageConverters(getMessageConverters());
 		resolver.afterPropertiesSet();
 		return resolver;
 	}
+	
+	private static final Validator NOOP_VALIDATOR = new Validator() {
+
+		public boolean supports(Class<?> clazz) {
+			return false;
+		}
+
+		public void validate(Object target, Errors errors) {
+		}
+	};
 
 }

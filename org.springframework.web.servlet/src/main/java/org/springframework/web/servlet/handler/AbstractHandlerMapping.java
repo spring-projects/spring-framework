@@ -19,28 +19,39 @@ package org.springframework.web.servlet.handler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.Ordered;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.Assert;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping}
- * implementations. Supports ordering, a default handler, and handler interceptors.
+ * implementations. Supports ordering, a default handler, handler interceptors,  
+ * including handler interceptors mapped by path patterns.
  *
  * <p>Note: This base class does <i>not</i> support exposure of the
  * {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}. Support for this attribute
  * is up to concrete subclasses, typically based on request URL mappings.
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 07.04.2003
  * @see #getHandlerInternal
  * @see #setDefaultHandler
+ * @see #setAlwaysUseFullPath
+ * @see #setUrlDecode
+ * @see org.springframework.util.AntPathMatcher
  * @see #setInterceptors
  * @see org.springframework.web.servlet.HandlerInterceptor
  */
@@ -51,10 +62,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private Object defaultHandler;
 
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
+
+	private PathMatcher pathMatcher = new AntPathMatcher();
+
 	private final List<Object> interceptors = new ArrayList<Object>();
 
-	private HandlerInterceptor[] adaptedInterceptors;
+	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<HandlerInterceptor>();
 
+	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
 
 	/**
 	 * Specify the order value for this HandlerMapping bean.
@@ -87,8 +103,68 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
+	 * Set if URL lookup should always use the full path within the current servlet
+	 * context. Else, the path within the current servlet mapping is used if applicable
+	 * (that is, in the case of a ".../*" servlet mapping in web.xml).
+	 * <p>Default is "false".
+	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
+	 */
+	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
+		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
+	}
+
+	/**
+	 * Set if context path and request URI should be URL-decoded. Both are returned
+	 * <i>undecoded</i> by the Servlet API, in contrast to the servlet path.
+	 * <p>Uses either the request encoding or the default encoding according
+	 * to the Servlet spec (ISO-8859-1).
+	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
+	 */
+	public void setUrlDecode(boolean urlDecode) {
+		this.urlPathHelper.setUrlDecode(urlDecode);
+	}
+
+	/**
+	 * Set the UrlPathHelper to use for resolution of lookup paths.
+	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
+	 * or to share common UrlPathHelper settings across multiple HandlerMappings
+	 * and MethodNameResolvers.
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
+		this.urlPathHelper = urlPathHelper;
+	}
+
+	/**
+	 * Return the UrlPathHelper implementation to use for resolution of lookup paths.
+	 */
+	public UrlPathHelper getUrlPathHelper() {
+		return urlPathHelper;
+	}
+
+	/**
+	 * Set the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns. Default is AntPathMatcher.
+	 * @see org.springframework.util.AntPathMatcher
+	 */
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+		this.pathMatcher = pathMatcher;
+	}
+
+	/**
+	 * Return the PathMatcher implementation to use for matching URL paths
+	 * against registered URL patterns.
+	 */
+	public PathMatcher getPathMatcher() {
+		return this.pathMatcher;
+	}
+
+	/**
 	 * Set the interceptors to apply for all handlers mapped by this handler mapping.
-	 * <p>Supported interceptor types are HandlerInterceptor and WebRequestInterceptor.
+	 * <p>Supported interceptor types are HandlerInterceptor, WebRequestInterceptor, and MappedInterceptor. 
+	 * Mapped interceptors apply only to request URLs that match its path patterns.
+	 * Mapped interceptor beans are also detected by type during initialization.
 	 * @param interceptors array of handler interceptors, or <code>null</code> if none
 	 * @see #adaptInterceptor
 	 * @see org.springframework.web.servlet.HandlerInterceptor
@@ -107,6 +183,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	protected void initApplicationContext() throws BeansException {
 		extendInterceptors(this.interceptors);
+		detectMappedInterceptors(this.mappedInterceptors);
 		initInterceptors();
 	}
 
@@ -124,23 +201,41 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Initialize the specified interceptors, adapting them where necessary.
+	 * Detects beans of type {@link MappedInterceptor} and adds them to the list of mapped interceptors.
+	 * This is done in addition to any {@link MappedInterceptor}s that may have been provided via
+	 * {@link #setInterceptors(Object[])}. Subclasses can override this method to change that. 
+	 * 
+	 * @param mappedInterceptors an empty list to add MappedInterceptor types to
+	 */
+	protected void detectMappedInterceptors(List<MappedInterceptor> mappedInterceptors) {
+		mappedInterceptors.addAll(
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(
+						getApplicationContext(),MappedInterceptor.class, true, false).values());
+	}
+
+	/**
+	 * Initialize the specified interceptors, checking for {@link MappedInterceptor}s and adapting 
+	 * HandlerInterceptors where necessary.
 	 * @see #setInterceptors
 	 * @see #adaptInterceptor
 	 */
 	protected void initInterceptors() {
 		if (!this.interceptors.isEmpty()) {
-			this.adaptedInterceptors = new HandlerInterceptor[this.interceptors.size()];
 			for (int i = 0; i < this.interceptors.size(); i++) {
 				Object interceptor = this.interceptors.get(i);
 				if (interceptor == null) {
 					throw new IllegalArgumentException("Entry number " + i + " in interceptors array is null");
 				}
-				this.adaptedInterceptors[i] = adaptInterceptor(interceptor);
+				if (interceptor instanceof MappedInterceptor) {
+					mappedInterceptors.add((MappedInterceptor) interceptor);
+				}
+				else {
+					adaptedInterceptors.add(adaptInterceptor(interceptor));
+				}
 			}
 		}
 	}
-
+	
 	/**
 	 * Adapt the given interceptor object to the HandlerInterceptor interface.
 	 * <p>Supported interceptor types are HandlerInterceptor and WebRequestInterceptor.
@@ -169,10 +264,19 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the array of HandlerInterceptors, or <code>null</code> if none
 	 */
 	protected final HandlerInterceptor[] getAdaptedInterceptors() {
-		return this.adaptedInterceptors;
+		int count = adaptedInterceptors.size();
+		return (count > 0) ? adaptedInterceptors.toArray(new HandlerInterceptor[count]) : null;
 	}
 
-
+	/**
+	 * Return all configured {@link MappedInterceptor}s as an array.
+	 * @return the array of {@link MappedInterceptor}s, or <code>null</code> if none
+	 */
+	protected final MappedInterceptor[] getMappedInterceptors() {
+		int count = mappedInterceptors.size();
+		return (count > 0) ? mappedInterceptors.toArray(new MappedInterceptor[count]) : null;
+	}
+	
 	/**
 	 * Look up a handler for the given request, falling back to the default
 	 * handler if no specific one is found.
@@ -212,7 +316,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	/**
 	 * Build a HandlerExecutionChain for the given handler, including applicable interceptors.
 	 * <p>The default implementation simply builds a standard HandlerExecutionChain with
-	 * the given handler and this handler mapping's common interceptors. Subclasses may
+	 * the given handler, the handler mapping's common interceptors, and any {@link MappedInterceptor}s
+	 * matching to the current request URL. Subclasses may
 	 * override this in order to extend/rearrange the list of interceptors.
 	 * <p><b>NOTE:</b> The passed-in handler object may be a raw handler or a pre-built
 	 * HandlerExecutionChain. This method should handle those two cases explicitly,
@@ -225,14 +330,20 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #getAdaptedInterceptors()
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
-		if (handler instanceof HandlerExecutionChain) {
-			HandlerExecutionChain chain = (HandlerExecutionChain) handler;
-			chain.addInterceptors(getAdaptedInterceptors());
-			return chain;
+		HandlerExecutionChain chain = 
+			(handler instanceof HandlerExecutionChain) ?
+				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler);
+				
+		chain.addInterceptors(getAdaptedInterceptors());
+		
+		String lookupPath = urlPathHelper.getLookupPathForRequest(request);
+		for (MappedInterceptor mappedInterceptor : mappedInterceptors) {
+			if (mappedInterceptor.matches(lookupPath, pathMatcher)) {
+				chain.addInterceptor(mappedInterceptor.getInterceptor());
+			}
 		}
-		else {
-			return new HandlerExecutionChain(handler, getAdaptedInterceptors());
-		}
+		
+		return chain;
 	}
 
 }

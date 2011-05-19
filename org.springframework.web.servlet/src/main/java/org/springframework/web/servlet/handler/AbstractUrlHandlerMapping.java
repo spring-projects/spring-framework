@@ -27,14 +27,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeansException;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerExecutionChain;
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Abstract base class for URL-mapped {@link org.springframework.web.servlet.HandlerMapping}
@@ -54,15 +50,8 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @since 16.04.2003
- * @see #setAlwaysUseFullPath
- * @see #setUrlDecode
- * @see org.springframework.util.AntPathMatcher
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
-
-	private UrlPathHelper urlPathHelper = new UrlPathHelper();
-
-	private PathMatcher pathMatcher = new AntPathMatcher();
 
 	private Object rootHandler;
 
@@ -70,60 +59,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 	private final Map<String, Object> handlerMap = new LinkedHashMap<String, Object>();
 
-	private MappedInterceptors mappedInterceptors;
-
-
-	/**
-	 * Set if URL lookup should always use the full path within the current servlet
-	 * context. Else, the path within the current servlet mapping is used if applicable
-	 * (that is, in the case of a ".../*" servlet mapping in web.xml).
-	 * <p>Default is "false".
-	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
-	 */
-	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
-		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
-	}
-
-	/**
-	 * Set if context path and request URI should be URL-decoded. Both are returned
-	 * <i>undecoded</i> by the Servlet API, in contrast to the servlet path.
-	 * <p>Uses either the request encoding or the default encoding according
-	 * to the Servlet spec (ISO-8859-1).
-	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
-	 */
-	public void setUrlDecode(boolean urlDecode) {
-		this.urlPathHelper.setUrlDecode(urlDecode);
-	}
-
-	/**
-	 * Set the UrlPathHelper to use for resolution of lookup paths.
-	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
-	 * or to share common UrlPathHelper settings across multiple HandlerMappings
-	 * and MethodNameResolvers.
-	 * @see org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver#setUrlPathHelper
-	 */
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
-		this.urlPathHelper = urlPathHelper;
-	}
-
-	/**
-	 * Set the PathMatcher implementation to use for matching URL paths
-	 * against registered URL patterns. Default is AntPathMatcher.
-	 * @see org.springframework.util.AntPathMatcher
-	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
-		Assert.notNull(pathMatcher, "PathMatcher must not be null");
-		this.pathMatcher = pathMatcher;
-	}
-
-	/**
-	 * Return the PathMatcher implementation to use for matching URL paths
-	 * against registered URL patterns.
-	 */
-	public PathMatcher getPathMatcher() {
-		return this.pathMatcher;
-	}
 
 	/**
 	 * Set the root handler for this handler mapping, that is,
@@ -156,19 +91,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		this.lazyInitHandlers = lazyInitHandlers;
 	}
 
-	public void setMappedInterceptors(MappedInterceptor[] mappedInterceptors) {
-		this.mappedInterceptors = new MappedInterceptors(mappedInterceptors);
-	}
-
-	
-	@Override
-	protected void initInterceptors() {
-		super.initInterceptors();
-		if (mappedInterceptors == null) {
-			this.mappedInterceptors = MappedInterceptors.createFromDeclaredBeans(getApplicationContext());
-		}
-	}
-
 	/**
 	 * Look up a handler for the URL path of the given request.
 	 * @param request current HTTP request
@@ -176,7 +98,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	@Override
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
-		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		Object handler = lookupHandler(lookupPath, request);
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
@@ -285,19 +207,6 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 * @throws Exception if validation failed
 	 */
 	protected void validateHandler(Object handler, HttpServletRequest request) throws Exception {
-	}
-
-	@Override
-	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
-		HandlerExecutionChain chain = super.getHandlerExecutionChain(handler, request);
-		if (this.mappedInterceptors != null) {
-			String lookupPath = urlPathHelper.getLookupPathForRequest(request);
-			HandlerInterceptor[] handlerInterceptors = mappedInterceptors.getInterceptors(lookupPath, pathMatcher);
-			if (handlerInterceptors.length > 0) {
-				chain.addInterceptors(handlerInterceptors);
-			}
-		}
-		return chain;
 	}
 	
 	/**
@@ -434,7 +343,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	/**
 	 * Special interceptor for exposing the
 	 * {@link AbstractUrlHandlerMapping#PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE} attribute.
-	 * @link AbstractUrlHandlerMapping#exposePathWithinMapping
+	 * @see AbstractUrlHandlerMapping#exposePathWithinMapping
 	 */
 	private class PathExposingHandlerInterceptor extends HandlerInterceptorAdapter {
 
@@ -459,7 +368,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	/**
 	 * Special interceptor for exposing the
 	 * {@link AbstractUrlHandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE} attribute.
-	 * @link AbstractUrlHandlerMapping#exposePathWithinMapping
+	 * @see AbstractUrlHandlerMapping#exposePathWithinMapping
 	 */
 	private class UriTemplateVariablesHandlerInterceptor extends HandlerInterceptorAdapter {
 

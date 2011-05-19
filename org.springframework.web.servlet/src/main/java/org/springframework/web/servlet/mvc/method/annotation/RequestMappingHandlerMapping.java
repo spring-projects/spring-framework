@@ -25,14 +25,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -41,12 +40,8 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerExecutionChain;
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
-import org.springframework.web.servlet.handler.MappedInterceptor;
-import org.springframework.web.servlet.handler.MappedInterceptors;
 import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
 
 /**
@@ -58,36 +53,6 @@ import org.springframework.web.servlet.mvc.method.condition.RequestConditionFact
  * @since 3.1.0
  */
 public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<RequestMappingInfo> {
-
-	private PathMatcher pathMatcher = new AntPathMatcher();
-
-	private MappedInterceptors mappedInterceptors;
-
-	/**
-	 * Set the PathMatcher implementation to use for matching URL paths against registered URL patterns. Default is
-	 * AntPathMatcher.
-	 *
-	 * @see org.springframework.util.AntPathMatcher
-	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
-		Assert.notNull(pathMatcher, "PathMatcher must not be null");
-		this.pathMatcher = pathMatcher;
-	}
-
-	/**
-	 * Set the {@link MappedInterceptor} instances to use to intercept handler method invocations.
-	 */
-	public void setMappedInterceptors(MappedInterceptor[] mappedInterceptors) {
-		this.mappedInterceptors = new MappedInterceptors(mappedInterceptors);
-	}
-
-	@Override
-	protected void initInterceptors() {
-		super.initInterceptors();
-		if (this.mappedInterceptors == null) {
-			this.mappedInterceptors = MappedInterceptors.createFromDeclaredBeans(getApplicationContext());
-		}
-	}
 
 	/**
 	 * {@inheritDoc} The handler determination in this method is made based on the presence of a type-level {@link
@@ -127,7 +92,7 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 			RequestMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
 			if (typeAnnot != null) {
 				RequestMappingInfo typeMapping = createFromRequestMapping(typeAnnot);
-				return typeMapping.combine(methodMapping, pathMatcher);
+				return typeMapping.combine(methodMapping, getPathMatcher());
 			}
 			else {
 				return methodMapping;
@@ -161,7 +126,7 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo mapping,
 													String lookupPath,
 													HttpServletRequest request) {
-		return mapping.getMatchingRequestMapping(lookupPath, request, pathMatcher);
+		return mapping.getMatchingRequestMapping(lookupPath, request, getPathMatcher());
 	}
 
 	/**
@@ -172,12 +137,18 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 		return new RequestMappingInfoComparator(lookupPath, request);
 	}
 
+	/**
+	 * Exposes URI template variables and producible media types as request attributes.
+	 * 
+	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
+	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
+	 */
 	@Override
 	protected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request) {
 		super.handleMatch(info, lookupPath, request);
 
 		String pattern = info.getPatterns().iterator().next();
-		Map<String, String> uriTemplateVariables = pathMatcher.extractUriTemplateVariables(pattern, lookupPath);
+		Map<String, String> uriTemplateVariables = getPathMatcher().extractUriTemplateVariables(pattern, lookupPath);
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 
 		if (!info.getProduces().isEmpty()) {
@@ -200,7 +171,7 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 		Set<MediaType> producibleMediaTypes = new HashSet<MediaType>();
 		for (RequestMappingInfo info : requestMappingInfos) {
 			for (String pattern : info.getPatterns()) {
-				if (pathMatcher.match(pattern, lookupPath)) {
+				if (getPathMatcher().match(pattern, lookupPath)) {
 					if (!info.getMethods().match(request)) {
 						for (RequestMethod method : info.getMethods().getMethods()) {
 							allowedMethods.add(method.name());
@@ -234,22 +205,6 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 	}
 
 	/**
-	 * Adds mapped interceptors to the handler execution chain.
-	 */
-	@Override
-	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
-		HandlerExecutionChain chain = super.getHandlerExecutionChain(handler, request);
-		if (this.mappedInterceptors != null) {
-			String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
-			HandlerInterceptor[] handlerInterceptors = mappedInterceptors.getInterceptors(lookupPath, pathMatcher);
-			if (handlerInterceptors.length > 0) {
-				chain.addInterceptors(handlerInterceptors);
-			}
-		}
-		return chain;
-	}
-
-	/**
 	 * A comparator for {@link RequestMappingInfo}s. Effective comparison can only be done in the context of a specific
 	 * request. For example not all {@link RequestMappingInfo} patterns may apply to the current request. Therefore an
 	 * HttpServletRequest is required as input.
@@ -267,7 +222,7 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMethodMapping<R
 		private List<MediaType> requestAcceptHeader;
 
 		public RequestMappingInfoComparator(String lookupPath, HttpServletRequest request) {
-			this.patternComparator = pathMatcher.getPatternComparator(lookupPath);
+			this.patternComparator = getPathMatcher().getPatternComparator(lookupPath);
 			String acceptHeader = request.getHeader("Accept");
 			this.requestAcceptHeader = MediaType.parseMediaTypes(acceptHeader);
 			MediaType.sortByQualityValue(this.requestAcceptHeader);
