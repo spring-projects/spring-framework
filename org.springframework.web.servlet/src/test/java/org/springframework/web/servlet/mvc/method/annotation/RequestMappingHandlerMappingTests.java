@@ -140,19 +140,25 @@ public class RequestMappingHandlerMappingTests {
 	}
 	
 	@Test
-	public void mappedInterceptors() {
-		String path = "/handle";
+	public void mappedInterceptors() throws Exception {
+		String path = "/foo";
 		HandlerInterceptor interceptor = new HandlerInterceptorAdapter() {};
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] {path}, interceptor);
 
-		mapping.setMappedInterceptors(new MappedInterceptor[] { mappedInterceptor });
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerSingleton("handler", handler.getClass());
 
-		HandlerExecutionChain chain = mapping.getHandlerExecutionChain(handler, new MockHttpServletRequest("GET", path));
+		mapping = new RequestMappingHandlerMapping();
+		mapping.setInterceptors(new Object[] { mappedInterceptor });
+		mapping.setApplicationContext(context);
+
+		HandlerExecutionChain chain = mapping.getHandler(new MockHttpServletRequest("GET", path));
+		assertNotNull(chain);
 		assertNotNull(chain.getInterceptors());
 		assertSame(interceptor, chain.getInterceptors()[0]);
 
-		chain = mapping.getHandlerExecutionChain(handler, new MockHttpServletRequest("GET", "/invalid"));
-		assertNull(chain.getInterceptors());
+		chain = mapping.getHandler(new MockHttpServletRequest("GET", "/invalid"));
+		assertNull(chain);
 	}
 
 	@SuppressWarnings("unused")

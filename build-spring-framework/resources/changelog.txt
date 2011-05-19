@@ -18,6 +18,7 @@ Changes in version 3.1 M2 (2011-??-??)
 * support for URI template variables in view names with the "redirect:" prefix
 * a flag for extracting the value from single-key models in MappingJacksonJsonView
 * allow bean references in mvc:interceptor namespace elements
+* consolidated the initialization and use of MappedInterceptors in AbstractHandlerMapping
 
 Changes in version 3.1 M1 (2011-02-11)
 --------------------------------------

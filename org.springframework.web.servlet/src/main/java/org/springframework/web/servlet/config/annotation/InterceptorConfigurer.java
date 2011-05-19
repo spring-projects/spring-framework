@@ -118,8 +118,8 @@ public class InterceptorConfigurer {
 	/**
 	 * Returns all registered interceptors.
 	 */
-	protected MappedInterceptor[] getInterceptors() {
-		return mappedInterceptors.toArray(new MappedInterceptor[mappedInterceptors.size()]);
+	protected List<MappedInterceptor> getInterceptors() {
+		return mappedInterceptors;
 	}
 
 }

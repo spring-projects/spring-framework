@@ -16,13 +16,16 @@
 
 package org.springframework.web.servlet.handler;
 
+import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * Holds information about a HandlerInterceptor mapped to a path into the application.
+ * Provides a method to match a request path to the mapped path patterns.
  *
  * @author Keith Donald
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 public final class MappedInterceptor {
@@ -33,9 +36,9 @@ public final class MappedInterceptor {
 
 
 	/**
-	 * Create a new mapped interceptor.
-	 * @param pathPatterns the path patterns
-	 * @param interceptor the interceptor
+	 * Create a new MappedInterceptor instance.
+	 * @param pathPatterns the path patterns to map with a {@code null} value matching to all paths
+	 * @param interceptor the HandlerInterceptor instance to map to the given patterns
 	 */
 	public MappedInterceptor(String[] pathPatterns, HandlerInterceptor interceptor) {
 		this.pathPatterns = pathPatterns;
@@ -43,9 +46,9 @@ public final class MappedInterceptor {
 	}
 
 	/**
-	 * Create a new mapped interceptor.
-	 * @param pathPatterns the path patterns
-	 * @param interceptor the interceptor
+	 * Create a new MappedInterceptor instance.
+	 * @param pathPatterns the path patterns to map with a {@code null} value matching to all paths
+	 * @param interceptor the WebRequestInterceptor instance to map to the given patterns
 	 */
 	public MappedInterceptor(String[] pathPatterns, WebRequestInterceptor interceptor) {
 		this.pathPatterns = pathPatterns;
@@ -66,5 +69,23 @@ public final class MappedInterceptor {
 	public HandlerInterceptor getInterceptor() {
 		return this.interceptor;
 	}
-		
+	
+	/**
+	 * Returns {@code true} if the interceptor applies to the given request path. 
+	 * @param lookupPath the current request path
+	 * @param pathMatcher a path matcher for path pattern matching
+	 */
+	public boolean matches(String lookupPath, PathMatcher pathMatcher) {
+		if (pathPatterns == null) {
+			return true;
+		}
+		else {
+			for (String pathPattern : pathPatterns) {
+				if (pathMatcher.match(pathPattern, lookupPath)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 }

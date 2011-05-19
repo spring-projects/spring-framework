@@ -16,9 +16,12 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,10 +29,11 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.handler.MappedInterceptors;
+import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
@@ -66,15 +70,15 @@ public class InterceptorConfigurerTests {
 	@Test
 	public void addInterceptor() {
 		configurer.addInterceptor(interceptor1);
-		HandlerInterceptor[] interceptors = getInterceptorsForPath(null);
-		assertArrayEquals(new HandlerInterceptor[] {interceptor1}, interceptors);
+		List<HandlerInterceptor> interceptors = getInterceptorsForPath(null);
+		assertEquals(Arrays.asList(interceptor1), interceptors);
 	}
 
 	@Test
 	public void addInterceptors() {
 		configurer.addInterceptors(interceptor1, interceptor2);
-		HandlerInterceptor[] interceptors = getInterceptorsForPath(null);
-		assertArrayEquals(new HandlerInterceptor[] {interceptor1, interceptor2}, interceptors);
+		List<HandlerInterceptor> interceptors = getInterceptorsForPath(null);
+		assertEquals(Arrays.asList(interceptor1, interceptor2), interceptors);
 	}
 
 	@Test
@@ -82,35 +86,35 @@ public class InterceptorConfigurerTests {
 		configurer.mapInterceptor(new String[] {"/path1"}, interceptor1);
 		configurer.mapInterceptor(new String[] {"/path2"}, interceptor2);
 
-		assertArrayEquals(new HandlerInterceptor[] {interceptor1}, getInterceptorsForPath("/path1"));
-		assertArrayEquals(new HandlerInterceptor[] {interceptor2}, getInterceptorsForPath("/path2"));
+		assertEquals(Arrays.asList(interceptor1), getInterceptorsForPath("/path1"));
+		assertEquals(Arrays.asList(interceptor2), getInterceptorsForPath("/path2"));
 	}
 
 	@Test
 	public void mapInterceptors() {
 		configurer.mapInterceptors(new String[] {"/path1"}, interceptor1, interceptor2);
 
-		assertArrayEquals(new HandlerInterceptor[] {interceptor1, interceptor2}, getInterceptorsForPath("/path1"));
-		assertArrayEquals(new HandlerInterceptor[] {}, getInterceptorsForPath("/path2"));
+		assertEquals(Arrays.asList(interceptor1, interceptor2), getInterceptorsForPath("/path1"));
+		assertEquals(Arrays.asList(), getInterceptorsForPath("/path2"));
 	}
 
 	@Test
 	public void addWebRequestInterceptor() throws Exception {
 		configurer.addInterceptor(webRequestInterceptor1);
-		HandlerInterceptor[] interceptors = getInterceptorsForPath(null);
+		List<HandlerInterceptor> interceptors = getInterceptorsForPath(null);
 
-		assertEquals(1, interceptors.length);
-		verifyAdaptedInterceptor(interceptors[0], webRequestInterceptor1);
+		assertEquals(1, interceptors.size());
+		verifyAdaptedInterceptor(interceptors.get(0), webRequestInterceptor1);
 	}
 
 	@Test
 	public void addWebRequestInterceptors() throws Exception {
 		configurer.addInterceptors(webRequestInterceptor1, webRequestInterceptor2);
-		HandlerInterceptor[] interceptors = getInterceptorsForPath(null);
+		List<HandlerInterceptor> interceptors = getInterceptorsForPath(null);
 
-		assertEquals(2, interceptors.length);
-		verifyAdaptedInterceptor(interceptors[0], webRequestInterceptor1);
-		verifyAdaptedInterceptor(interceptors[1], webRequestInterceptor2);
+		assertEquals(2, interceptors.size());
+		verifyAdaptedInterceptor(interceptors.get(0), webRequestInterceptor1);
+		verifyAdaptedInterceptor(interceptors.get(1), webRequestInterceptor2);
 	}
 
 	@Test
@@ -118,30 +122,36 @@ public class InterceptorConfigurerTests {
 		configurer.mapInterceptor(new String[] {"/path1"}, webRequestInterceptor1);
 		configurer.mapInterceptor(new String[] {"/path2"}, webRequestInterceptor2);
 
-		HandlerInterceptor[] interceptors = getInterceptorsForPath("/path1");
-		assertEquals(1, interceptors.length);
-		verifyAdaptedInterceptor(interceptors[0], webRequestInterceptor1);
+		List<HandlerInterceptor> interceptors = getInterceptorsForPath("/path1");
+		assertEquals(1, interceptors.size());
+		verifyAdaptedInterceptor(interceptors.get(0), webRequestInterceptor1);
 
 		interceptors = getInterceptorsForPath("/path2");
-		assertEquals(1, interceptors.length);
-		verifyAdaptedInterceptor(interceptors[0], webRequestInterceptor2);
+		assertEquals(1, interceptors.size());
+		verifyAdaptedInterceptor(interceptors.get(0), webRequestInterceptor2);
 	}
 
 	@Test
 	public void mapWebRequestInterceptor2() throws Exception {
 		configurer.mapInterceptors(new String[] {"/path1"}, webRequestInterceptor1, webRequestInterceptor2);
 
-		HandlerInterceptor[] interceptors = getInterceptorsForPath("/path1");
-		assertEquals(2, interceptors.length);
-		verifyAdaptedInterceptor(interceptors[0], webRequestInterceptor1);
-		verifyAdaptedInterceptor(interceptors[1], webRequestInterceptor2);
+		List<HandlerInterceptor> interceptors = getInterceptorsForPath("/path1");
+		assertEquals(2, interceptors.size());
+		verifyAdaptedInterceptor(interceptors.get(0), webRequestInterceptor1);
+		verifyAdaptedInterceptor(interceptors.get(1), webRequestInterceptor2);
 
-		assertEquals(0, getInterceptorsForPath("/path2").length);
+		assertEquals(0, getInterceptorsForPath("/path2").size());
 	}
 
-	private HandlerInterceptor[] getInterceptorsForPath(String lookupPath) {
-		MappedInterceptors mappedInterceptors = new MappedInterceptors(configurer.getInterceptors());
-		return mappedInterceptors.getInterceptors(lookupPath, new AntPathMatcher());
+	private List<HandlerInterceptor> getInterceptorsForPath(String lookupPath) {
+		PathMatcher pathMatcher = new AntPathMatcher();
+		List<HandlerInterceptor> result = new ArrayList<HandlerInterceptor>();
+		for (MappedInterceptor interceptor : configurer.getInterceptors()) {
+			if (interceptor.matches(lookupPath, pathMatcher)) {
+				result.add(interceptor.getInterceptor());
+			}
+		}
+		return result;
 	}
 
 	private void verifyAdaptedInterceptor(HandlerInterceptor interceptor, TestWebRequestInterceptor webInterceptor)

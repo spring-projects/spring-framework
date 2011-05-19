@@ -16,16 +16,25 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -46,9 +55,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-
 /**
  * A test fixture for WebMvcConfiguration tests.
  *
@@ -67,17 +73,17 @@ public class WebMvcConfigurationTests {
 	}
 
 	@Test
-	public void annotationHandlerAdapter() {
+	public void annotationHandlerAdapter() throws Exception {
+		Capture<List<HttpMessageConverter<?>>> converters = new Capture<List<HttpMessageConverter<?>>>();
 		Capture<FormattingConversionService> conversionService = new Capture<FormattingConversionService>();
 		Capture<List<HandlerMethodArgumentResolver>> resolvers = new Capture<List<HandlerMethodArgumentResolver>>();
 		Capture<List<HandlerMethodReturnValueHandler>> handlers = new Capture<List<HandlerMethodReturnValueHandler>>();
-		Capture<List<HttpMessageConverter<?>>> converters = new Capture<List<HttpMessageConverter<?>>>();
 
+		configurer.configureMessageConverters(capture(converters));
 		expect(configurer.getValidator()).andReturn(null);
 		configurer.addFormatters(capture(conversionService));
 		configurer.addArgumentResolvers(capture(resolvers));
 		configurer.addReturnValueHandlers(capture(handlers));
-		configurer.configureMessageConverters(capture(converters));
 		replay(configurer);
 
 		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
@@ -107,7 +113,8 @@ public class WebMvcConfigurationTests {
 				converters.add(new StringHttpMessageConverter());
 			}
 		});
-		mvcConfiguration.setConfigurers(configurers );
+		mvcConfiguration = new WebMvcConfiguration();
+		mvcConfiguration.setConfigurers(configurers);
 		
 		adapter = mvcConfiguration.requestMappingHandlerAdapter();
 		assertEquals("Only one custom converter should be registered", 1, adapter.getMessageConverters().size());
@@ -187,7 +194,7 @@ public class WebMvcConfigurationTests {
 		hm.setApplicationContext(context);
 		HandlerExecutionChain chain = hm.getHandler(request);
 		assertNotNull("No chain returned", chain);
-		assertNotNull("Expected at one default converter", chain.getInterceptors());
+		assertNotNull("Expected at least one default converter", chain.getInterceptors());
 	}
 	
 	@Controller
