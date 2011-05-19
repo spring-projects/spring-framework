@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletContext;
@@ -34,7 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
@@ -248,15 +249,27 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	@Override
 	protected void initServletContext(ServletContext servletContext) {
+
+		Collection<ViewResolver> matchingBeans =
+			BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), ViewResolver.class).values();
+
 		if (this.viewResolvers == null) {
-			Map<String, ViewResolver> matchingBeans =
-					BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), ViewResolver.class);
 			this.viewResolvers = new ArrayList<ViewResolver>(matchingBeans.size());
-			for (ViewResolver viewResolver : matchingBeans.values()) {
+			for (ViewResolver viewResolver : matchingBeans) {
 				if (this != viewResolver) {
 					this.viewResolvers.add(viewResolver);
 				}
 			}
+		}
+		else {
+			for (int i=0; i < viewResolvers.size(); i++) {
+				if (matchingBeans.contains(viewResolvers.get(i))) {
+					continue;
+				}
+				String name = viewResolvers.get(i).getClass().getName() + i;
+				getApplicationContext().getAutowireCapableBeanFactory().initializeBean(viewResolvers.get(i), name);
+			}
+			
 		}
 		if (this.viewResolvers.isEmpty()) {
 			logger.warn("Did not find any ViewResolvers to delegate to; please configure them using the " +
