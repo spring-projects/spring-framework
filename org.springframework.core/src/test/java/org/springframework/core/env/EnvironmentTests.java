@@ -62,6 +62,15 @@ public class EnvironmentTests {
 	private ConfigurableEnvironment environment = new DefaultEnvironment();
 
 	@Test
+	public void propertySourceOrder() {
+		ConfigurableEnvironment env = new DefaultEnvironment();
+		MutablePropertySources sources = env.getPropertySources();
+		assertThat(sources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)), equalTo(0));
+		assertThat(sources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(1));
+		assertThat(sources.size(), is(2));
+	}
+
+	@Test
 	public void activeProfiles() {
 		assertThat(environment.getActiveProfiles().length, is(0));
 		environment.setActiveProfiles("local", "embedded");
