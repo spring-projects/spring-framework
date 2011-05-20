@@ -65,11 +65,11 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 
 
 	/**
-	 * Return a new {@link DefaultPortletEnvironment}
+	 * Return a new {@link StandardPortletEnvironment}
 	 */
 	@Override
 	protected ConfigurableEnvironment createEnvironment() {
-		return new DefaultPortletEnvironment();
+		return new StandardPortletEnvironment();
 	}
 
 	/**

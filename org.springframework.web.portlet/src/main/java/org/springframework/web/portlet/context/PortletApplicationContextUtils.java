@@ -200,13 +200,13 @@ public abstract class PortletApplicationContextUtils {
 
 		WebApplicationContextUtils.initServletPropertySources(propertySources, servletContext);
 
-		if(portletContext != null && propertySources.contains(DefaultPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME)) {
-			propertySources.replace(DefaultPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME,
-					new PortletContextPropertySource(DefaultPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME, portletContext));
+		if(portletContext != null && propertySources.contains(StandardPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME)) {
+			propertySources.replace(StandardPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME,
+					new PortletContextPropertySource(StandardPortletEnvironment.PORTLET_CONTEXT_PROPERTY_SOURCE_NAME, portletContext));
 		}
-		if(portletConfig != null && propertySources.contains(DefaultPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME)) {
-			propertySources.replace(DefaultPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME,
-					new PortletConfigPropertySource(DefaultPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME, portletConfig));
+		if(portletConfig != null && propertySources.contains(StandardPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME)) {
+			propertySources.replace(StandardPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME,
+					new PortletConfigPropertySource(StandardPortletEnvironment.PORTLET_CONFIG_PROPERTY_SOURCE_NAME, portletConfig));
 		}
 	}
 

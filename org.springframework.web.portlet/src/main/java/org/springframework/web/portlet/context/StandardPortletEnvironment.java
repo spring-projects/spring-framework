@@ -32,16 +32,16 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * applications. All Portlet-related {@code ApplicationContext} classes initialize an instance
  * by default.
  *
- * <p>Contributes {@code ServletContext}-, {@code PortletContext}-, and {@code PortletConfig}-based
- * {@link PropertySource} instances. See the {@link #DefaultPortletEnvironment()} constructor
- * for details.
+ * <p>Contributes {@code ServletContext}-, {@code PortletContext}-, and
+ * {@code PortletConfig}-based {@link PropertySource} instances. See the
+ * {@link #customizePropertySources} method for details.
  *
  * @author Chris Beams
  * @since 3.1
  * @see StandardEnvironment
  * @see StandardServletEnvironment
  */
-public class DefaultPortletEnvironment extends StandardEnvironment {
+public class StandardPortletEnvironment extends StandardEnvironment {
 
 	/** Portlet context init parameters property source name: {@value} */
 	public static final String PORTLET_CONTEXT_PROPERTY_SOURCE_NAME = "portletContextInitParams";
@@ -59,14 +59,14 @@ public class DefaultPortletEnvironment extends StandardEnvironment {
 	 * </ul>
 	 * <p>Properties present in {@value #PORTLET_CONFIG_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #PORTLET_CONTEXT_PROPERTY_SOURCE_NAME},
-	 * which takes precedence over those in
-	 * {@linkplain StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}.
-	 * <p>Properties in any of the above will take precedence over system properties and environment
-	 * variables contributed by the {@link StandardEnvironment} superclass.
+	 * which takes precedence over those in {@linkplain
+	 * StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}.
+	 * <p>Properties in any of the above will take precedence over system properties and
+	 * environment variables contributed by the {@link StandardEnvironment} superclass.
 	 * <p>The property sources are added as stubs for now, and will be
-	 * {@linkplain PortletApplicationContextUtils#initPortletPropertySources fully initialized}
-	 * once the actual {@link PortletConfig}, {@link PortletContext}, and {@link ServletContext}
-	 * objects are available.
+	 * {@linkplain PortletApplicationContextUtils#initPortletPropertySources fully
+	 * initialized} once the actual {@link PortletConfig}, {@link PortletContext}, and
+	 * {@link ServletContext} objects are available.
 	 * @see StandardEnvironment#customizePropertySources
 	 * @see PortletConfigPropertySource
 	 * @see PortletContextPropertySource

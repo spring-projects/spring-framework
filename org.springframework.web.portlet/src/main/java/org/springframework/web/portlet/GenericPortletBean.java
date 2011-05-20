@@ -39,7 +39,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
-import org.springframework.web.portlet.context.DefaultPortletEnvironment;
+import org.springframework.web.portlet.context.StandardPortletEnvironment;
 import org.springframework.web.portlet.context.PortletContextResourceLoader;
 
 /**
@@ -76,7 +76,7 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 	 */
 	private final Set<String> requiredProperties = new HashSet<String>();
 
-	private Environment environment = new DefaultPortletEnvironment();
+	private Environment environment = new StandardPortletEnvironment();
 
 
 	/**
@@ -167,7 +167,7 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Any environment set here overrides the {@link DefaultPortletEnvironment}
+	 * <p>Any environment set here overrides the {@link StandardPortletEnvironment}
 	 * provided by default.
 	 */
 	public void setEnvironment(Environment environment) {
