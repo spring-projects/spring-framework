@@ -22,6 +22,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.core.env.DefaultEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySource.StubPropertySource;
 import org.springframework.web.context.support.DefaultWebEnvironment;
@@ -49,8 +50,8 @@ public class DefaultPortletEnvironment extends DefaultEnvironment {
 	public static final String PORTLET_CONFIG_PROPERTY_SOURCE_NAME = "portletConfigInitParams";
 
 	/**
-	 * Create a new {@code Environment} populated with the property sources contributed by
-	 * superclasses as well as:
+	 * Customize the set of property sources with those contributed by superclasses as
+	 * well as those appropriate for standard portlet-based environments:
 	 * <ul>
 	 *   <li>{@value #PORTLET_CONFIG_PROPERTY_SOURCE_NAME}
 	 *   <li>{@value #PORTLET_CONTEXT_PROPERTY_SOURCE_NAME}
@@ -58,22 +59,25 @@ public class DefaultPortletEnvironment extends DefaultEnvironment {
 	 * </ul>
 	 * <p>Properties present in {@value #PORTLET_CONFIG_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #PORTLET_CONTEXT_PROPERTY_SOURCE_NAME},
-	 * which takes precedence over those in .
-	 * Properties in either will take precedence over system properties and environment
-	 * variables.
+	 * which takes precedence over those in
+	 * {@linkplain DefaultWebEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}.
+	 * <p>Properties in any of the above will take precedence over system properties and environment
+	 * variables contributed by the {@link DefaultEnvironment} superclass.
 	 * <p>The property sources are added as stubs for now, and will be
 	 * {@linkplain PortletApplicationContextUtils#initPortletPropertySources fully initialized}
 	 * once the actual {@link PortletConfig}, {@link PortletContext}, and {@link ServletContext}
 	 * objects are available.
-	 * @see DefaultEnvironment#DefaultEnvironment
+	 * @see DefaultEnvironment#customizePropertySources
 	 * @see PortletConfigPropertySource
 	 * @see PortletContextPropertySource
 	 * @see AbstractRefreshablePortletApplicationContext#initPropertySources
 	 * @see PortletApplicationContextUtils#initPortletPropertySources
 	 */
-	public DefaultPortletEnvironment() {
-		this.getPropertySources().addFirst(new StubPropertySource(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
-		this.getPropertySources().addFirst(new StubPropertySource(PORTLET_CONTEXT_PROPERTY_SOURCE_NAME));
-		this.getPropertySources().addFirst(new StubPropertySource(PORTLET_CONFIG_PROPERTY_SOURCE_NAME));
+	@Override
+	protected void customizePropertySources(MutablePropertySources propertySources) {
+		propertySources.addLast(new StubPropertySource(PORTLET_CONFIG_PROPERTY_SOURCE_NAME));
+		propertySources.addLast(new StubPropertySource(PORTLET_CONTEXT_PROPERTY_SOURCE_NAME));
+		propertySources.addLast(new StubPropertySource(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
+		super.customizePropertySources(propertySources);
 	}
 }

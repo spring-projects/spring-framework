@@ -74,8 +74,92 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	private Set<String> activeProfiles = new LinkedHashSet<String>();
 	private Set<String> defaultProfiles = new LinkedHashSet<String>(this.getReservedDefaultProfiles());
 
-	private MutablePropertySources propertySources = new MutablePropertySources();
-	private ConfigurablePropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
+	private final MutablePropertySources propertySources = new MutablePropertySources();
+	private final ConfigurablePropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
+
+
+	public AbstractEnvironment() {
+		this.customizePropertySources(propertySources);
+	}
+
+	/**
+	 * Customize the set of {@link PropertySource} objects to be searched by this
+	 * {@code Environment} during calls to {@link #getProperty(String)} and related
+	 * methods.
+	 *
+	 * <p>Subclasses that override this method are encouraged to add property
+	 * sources using {@link MutablePropertySources#addLast(PropertySource)} such that
+	 * further subclasses may call {@code super.customizePropertySources()} with
+	 * predictable results. For example:
+	 * <pre class="code">
+	 * public class Level1Environment extends AbstractEnvironment {
+	 *     &#064;Override
+	 *     protected void customizePropertySources(MutablePropertySources propertySources) {
+	 *         super.customizePropertySources(propertySources); // no-op from base class
+	 *         propertySources.addLast(new PropertySourceA(...));
+	 *         propertySources.addLast(new PropertySourceB(...));
+	 *     }
+	 * }
+	 *
+	 * public class Level2Environment extends Level1Environment {
+	 *     &#064;Override
+	 *     protected void customizePropertySources(MutablePropertySources propertySources) {
+	 *         super.customizePropertySources(propertySources); // add all from superclass
+	 *         propertySources.addLast(new PropertySourceC(...));
+	 *         propertySources.addLast(new PropertySourceD(...));
+	 *     }
+	 * }
+	 * </pre>
+	 * In this arrangement, properties will be resolved against sources A, B, C, D in that
+	 * order. That is to say that property source "A" has precedence over property source
+	 * "D". If the {@code Level2Environment} subclass wished to give property sources C
+	 * and D higher precedence than A and B, it could simply call
+	 * {@code super.customizePropertySources} after, rather than before adding its own:
+	 * <pre>
+	 * public class Level2Environment extends Level1Environment {
+	 *     &#064;Override
+	 *     protected void customizePropertySources(MutablePropertySources propertySources) {
+	 *         propertySources.addLast(new PropertySourceC(...));
+	 *         propertySources.addLast(new PropertySourceD(...));
+	 *         super.customizePropertySources(propertySources); // add all from superclass
+	 *     }
+	 * }
+	 * </pre>
+	 * The search order is now C, D, A, B as desired.
+	 *
+	 * <p>Beyond these recommendations, subclasses may use any of the <code>add&#42;</code>,
+	 * {@code remove}, or {@code replace} methods exposed by {@link MutablePropertySources}
+	 * in order to create the exact arrangement of property sources desired.
+	 *
+	 * <p>The base implementation in {@link AbstractEnvironment#customizePropertySources}
+	 * registers no property sources.
+	 *
+	 * <p>Note that clients of any {@link ConfigurableEnvironment} may further customize
+	 * property sources via the {@link #getPropertySources()} accessor, typically within
+	 * an {@link org.springframework.context.ApplicationContextInitializer
+	 * ApplicationContextInitializer}. For example:
+	 * <pre>
+	 * ConfigurableEnvironment env = new StandardEnvironment();
+	 * env.getPropertySources().addLast(new PropertySourceX(...));
+	 * </pre>
+	 *
+	 * @see MutablePropertySources
+	 * @see PropertySourcesPropertyResolver
+	 * @see org.springframework.context.ApplicationContextInitializer
+	 */
+	protected void customizePropertySources(MutablePropertySources propertySources) {
+	}
+
+	/**
+	 * Return the set of reserved default profile names. This implementation returns
+	 * {@value #RESERVED_DEFAULT_PROFILE_NAME}. Subclasses may override in order to
+	 * customize the set of reserved names.
+	 * @see #RESERVED_DEFAULT_PROFILE_NAME
+	 * @see #doGetDefaultProfiles()
+	 */
+	protected Set<String> getReservedDefaultProfiles() {
+		return Collections.singleton(RESERVED_DEFAULT_PROFILE_NAME);
+	}
 
 
 	//---------------------------------------------------------------------
