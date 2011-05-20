@@ -152,11 +152,11 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	}
 
 	/**
-	 * Create and return a new {@link DefaultPortletEnvironment}.
+	 * Create and return a new {@link StandardPortletEnvironment}.
 	 */
 	@Override
 	protected ConfigurableEnvironment createEnvironment() {
-		return new DefaultPortletEnvironment();
+		return new StandardPortletEnvironment();
 	}
 
 	/**

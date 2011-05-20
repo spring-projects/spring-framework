@@ -74,7 +74,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.portlet.context.AbstractRefreshablePortletApplicationContext;
-import org.springframework.web.portlet.context.DefaultPortletEnvironment;
+import org.springframework.web.portlet.context.StandardPortletEnvironment;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 import org.springframework.web.portlet.context.XmlPortletApplicationContext;
 
@@ -556,7 +556,7 @@ public class EnvironmentIntegrationTests {
 	public void staticPortletApplicationContext() {
 		StaticPortletApplicationContext ctx = new StaticPortletApplicationContext();
 
-		assertHasDefaultPortletEnvironment(ctx);
+		assertHasStandardPortletEnvironment(ctx);
 
 		registerEnvironmentBeanDefinition(ctx);
 
@@ -633,16 +633,17 @@ public class EnvironmentIntegrationTests {
 	}
 
 	private void assertHasStandardServletEnvironment(WebApplicationContext ctx) {
-		// ensure a default web environment exists
+		// ensure a default servlet environment exists
 		Environment defaultEnv = ctx.getEnvironment();
 		assertThat(defaultEnv, notNullValue());
 		assertThat(defaultEnv, instanceOf(StandardServletEnvironment.class));
 	}
 
-	private void assertHasDefaultPortletEnvironment(WebApplicationContext ctx) {
+	private void assertHasStandardPortletEnvironment(WebApplicationContext ctx) {
+		// ensure a default portlet environment exists
 		Environment defaultEnv = ctx.getEnvironment();
 		assertThat(defaultEnv, notNullValue());
-		assertThat(defaultEnv, instanceOf(DefaultPortletEnvironment.class));
+		assertThat(defaultEnv, instanceOf(StandardPortletEnvironment.class));
 	}
 
 	private void assertHasEnvironment(ApplicationContext ctx, Environment expectedEnv) {

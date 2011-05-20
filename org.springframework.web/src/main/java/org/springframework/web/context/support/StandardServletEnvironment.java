@@ -45,7 +45,7 @@ import org.springframework.jndi.JndiPropertySource;
  * @author Chris Beams
  * @since 3.1
  * @see StandardEnvironment
- * @see DefaultPortletEnvironment
+ * @see StandardPortletEnvironment
  */
 public class StandardServletEnvironment extends StandardEnvironment {
 
