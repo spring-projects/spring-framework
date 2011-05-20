@@ -40,7 +40,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.support.DefaultWebEnvironment;
+import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
@@ -87,7 +87,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 */
 	private final Set<String> requiredProperties = new HashSet<String>();
 
-	private Environment environment = new DefaultWebEnvironment();
+	private Environment environment = new StandardServletEnvironment();
 
 
 	/**
@@ -182,7 +182,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Any environment set here overrides the {@link DefaultWebEnvironment}
+	 * <p>Any environment set here overrides the {@link StandardServletEnvironment}
 	 * provided by default.
 	 */
 	public void setEnvironment(Environment environment) {

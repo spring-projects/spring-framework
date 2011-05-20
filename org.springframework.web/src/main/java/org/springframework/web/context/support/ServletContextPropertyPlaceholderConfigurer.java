@@ -59,7 +59,7 @@ import org.springframework.web.context.ServletContextAware;
  * @see javax.servlet.ServletContext#getInitParameter(String)
  * @see javax.servlet.ServletContext#getAttribute(String)
  * @deprecated in Spring 3.1 in favor of {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer}
- * in conjunction with {@link org.springframework.web.context.support.DefaultWebEnvironment}.
+ * in conjunction with {@link org.springframework.web.context.support.StandardServletEnvironment}.
  */
 @Deprecated
 public class ServletContextPropertyPlaceholderConfigurer extends PropertyPlaceholderConfigurer

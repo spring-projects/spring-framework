@@ -32,7 +32,7 @@ import org.springframework.core.env.PropertySource;
  * @author Juergen Hoeller
  * @since 3.1
  * @see Context#lookup(String)
- * @see org.springframework.web.context.support.DefaultWebEnvironment
+ * @see org.springframework.web.context.support.StandardServletEnvironment
  */
 public class JndiPropertySource extends PropertySource<Context> {
 

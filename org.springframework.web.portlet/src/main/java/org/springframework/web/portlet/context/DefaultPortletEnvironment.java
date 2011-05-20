@@ -25,7 +25,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySource.StubPropertySource;
-import org.springframework.web.context.support.DefaultWebEnvironment;
+import org.springframework.web.context.support.StandardServletEnvironment;
 
 /**
  * {@link Environment} implementation to be used by {@code Servlet}-based web
@@ -39,7 +39,7 @@ import org.springframework.web.context.support.DefaultWebEnvironment;
  * @author Chris Beams
  * @since 3.1
  * @see StandardEnvironment
- * @see DefaultWebEnvironment
+ * @see StandardServletEnvironment
  */
 public class DefaultPortletEnvironment extends StandardEnvironment {
 
@@ -55,12 +55,12 @@ public class DefaultPortletEnvironment extends StandardEnvironment {
 	 * <ul>
 	 *   <li>{@value #PORTLET_CONFIG_PROPERTY_SOURCE_NAME}
 	 *   <li>{@value #PORTLET_CONTEXT_PROPERTY_SOURCE_NAME}
-	 *   <li>{@linkplain DefaultWebEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}
+	 *   <li>{@linkplain StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}
 	 * </ul>
 	 * <p>Properties present in {@value #PORTLET_CONFIG_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #PORTLET_CONTEXT_PROPERTY_SOURCE_NAME},
 	 * which takes precedence over those in
-	 * {@linkplain DefaultWebEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}.
+	 * {@linkplain StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}.
 	 * <p>Properties in any of the above will take precedence over system properties and environment
 	 * variables contributed by the {@link StandardEnvironment} superclass.
 	 * <p>The property sources are added as stubs for now, and will be
@@ -77,7 +77,7 @@ public class DefaultPortletEnvironment extends StandardEnvironment {
 	protected void customizePropertySources(MutablePropertySources propertySources) {
 		propertySources.addLast(new StubPropertySource(PORTLET_CONFIG_PROPERTY_SOURCE_NAME));
 		propertySources.addLast(new StubPropertySource(PORTLET_CONTEXT_PROPERTY_SOURCE_NAME));
-		propertySources.addLast(new StubPropertySource(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
+		propertySources.addLast(new StubPropertySource(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
 		super.customizePropertySources(propertySources);
 	}
 }

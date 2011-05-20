@@ -27,14 +27,20 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.jndi.JndiPropertySource;
 
-public class DefaultWebEnvironmentTests {
+/**
+ * Unit tests for {@link StandardServletEnvironment}.
+ *
+ * @author Chris Beams
+ * @since 3.1
+ */
+public class StandardServletEnvironmentTests {
 
 	@Test
 	public void propertySourceOrder() {
-		ConfigurableEnvironment env = new DefaultWebEnvironment();
+		ConfigurableEnvironment env = new StandardServletEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
-		assertThat(sources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)), equalTo(0));
-		assertThat(sources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)), equalTo(1));
+		assertThat(sources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)), equalTo(0));
+		assertThat(sources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)), equalTo(1));
 		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)), equalTo(2));
 		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(3));
 		assertThat(sources.size(), is(4));
@@ -43,11 +49,11 @@ public class DefaultWebEnvironmentTests {
 	@Test
 	public void propertySourceOrder_jndiPropertySourceEnabled() {
 		System.setProperty(JndiPropertySource.JNDI_PROPERTY_SOURCE_ENABLED_FLAG, "true");
-		ConfigurableEnvironment env = new DefaultWebEnvironment();
+		ConfigurableEnvironment env = new StandardServletEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
 
-		assertThat(sources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)), equalTo(0));
-		assertThat(sources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)), equalTo(1));
+		assertThat(sources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)), equalTo(0));
+		assertThat(sources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)), equalTo(1));
 		assertThat(sources.precedenceOf(PropertySource.named(JndiPropertySource.JNDI_PROPERTY_SOURCE_NAME)), equalTo(2));
 		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)), equalTo(3));
 		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(4));
@@ -59,11 +65,11 @@ public class DefaultWebEnvironmentTests {
 	@Test
 	public void propertySourceOrder_jndiPropertySourceEnabledIsFalse() {
 		System.setProperty(JndiPropertySource.JNDI_PROPERTY_SOURCE_ENABLED_FLAG, "false");
-		ConfigurableEnvironment env = new DefaultWebEnvironment();
+		ConfigurableEnvironment env = new StandardServletEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
 
-		assertThat(sources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)), equalTo(0));
-		assertThat(sources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)), equalTo(1));
+		assertThat(sources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)), equalTo(0));
+		assertThat(sources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)), equalTo(1));
 		//assertThat(sources.precedenceOf(PropertySource.named(JndiPropertySource.JNDI_PROPERTY_SOURCE_NAME)), equalTo(2));
 		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)), equalTo(2));
 		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(3));

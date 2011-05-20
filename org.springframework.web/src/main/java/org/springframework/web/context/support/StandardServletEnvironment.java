@@ -32,20 +32,22 @@ import org.springframework.jndi.JndiPropertySource;
  * applications. All web-related (servlet-based) {@code ApplicationContext} classes
  * initialize an instance by default.
  *
- * <p>Contributes {@code ServletConfig}- and {@code ServletContext}-based {@link PropertySource}
- * instances. See the {@link #DefaultWebEnvironment()} constructor for details.
+ * <p>Contributes {@code ServletConfig}- and {@code ServletContext}-based
+ * {@link PropertySource} instances. See the {@link #customizePropertySources} method
+ * for details.
  *
  * <p>After initial bootstrapping, property sources will be searched for the presence of a
- * "jndiPropertySourceEnabled" property; if found, a {@link JndiPropertySource} will be added
- * to this environment's {@link PropertySources}, with precedence higher than system properties
- * and environment variables, but lower than that of ServletContext and ServletConfig init params.
+ * "jndiPropertySourceEnabled" property; if found, a {@link JndiPropertySource} will be
+ * added to this environment's {@link PropertySources}, with precedence higher than system
+ * properties and environment variables, but lower than that of ServletContext and
+ * ServletConfig init params.
  *
  * @author Chris Beams
  * @since 3.1
  * @see StandardEnvironment
  * @see DefaultPortletEnvironment
  */
-public class DefaultWebEnvironment extends StandardEnvironment {
+public class StandardServletEnvironment extends StandardEnvironment {
 
 	/** Servlet context init parameters property source name: {@value} */
 	public static final String SERVLET_CONTEXT_PROPERTY_SOURCE_NAME = "servletContextInitParams";
@@ -63,15 +65,17 @@ public class DefaultWebEnvironment extends StandardEnvironment {
 	 * </ul>
 	 * <p>Properties present in {@value #SERVLET_CONFIG_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #SERVLET_CONTEXT_PROPERTY_SOURCE_NAME}.
-	 * <p>Properties in any of the above will take precedence over system properties and environment
-	 * variables contributed by the {@link StandardEnvironment} superclass.
-	 * <p>The {@code Servlet}-related property sources are added as stubs for now, and will be
-	 * {@linkplain WebApplicationContextUtils#initServletPropertySources fully initialized}
-	 * once the actual {@link ServletConfig} and {@link ServletContext} objects are available.
+	 * <p>Properties in any of the above will take precedence over system properties and
+	 * environment variables contributed by the {@link StandardEnvironment} superclass.
+	 * <p>The {@code Servlet}-related property sources are added as stubs for now, and
+	 * will be {@linkplain WebApplicationContextUtils#initServletPropertySources fully
+	 * initialized} once the actual {@link ServletConfig} and {@link ServletContext}
+	 * objects are available.
 	 * <p>If the {@link JndiPropertySource#JNDI_PROPERTY_SOURCE_ENABLED_FLAG "jndiPropertySourceEnabled"}
-	 * property is present in any of the default property sources, a {@link JndiPropertySource} will
-	 * be added as well, with precedence lower than servlet property sources, but higher than system
-	 * properties and environment variables.
+	 * property is present in any of the default property sources, a
+	 * {@link JndiPropertySource} will be added as well, with precedence lower than
+	 * servlet property sources, but higher than system properties and environment
+	 * variables.
 	 * @see StandardEnvironment#customizePropertySources
 	 * @see ServletConfigPropertySource
 	 * @see ServletContextPropertySource

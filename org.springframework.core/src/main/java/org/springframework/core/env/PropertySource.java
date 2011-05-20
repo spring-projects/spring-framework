@@ -205,7 +205,7 @@ public abstract class PropertySource<T> {
 	 * during context refresh.
 	 *
 	 * @see org.springframework.context.support.AbstractApplicationContext#initPropertySources()
-	 * @see org.springframework.web.context.support.DefaultWebEnvironment
+	 * @see org.springframework.web.context.support.StandardServletEnvironment
 	 * @see org.springframework.web.context.support.ServletContextPropertySource
 	 */
 	public static class StubPropertySource extends PropertySource<Object> {
