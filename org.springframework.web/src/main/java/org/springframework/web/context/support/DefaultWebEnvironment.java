@@ -19,7 +19,7 @@ package org.springframework.web.context.support;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -42,10 +42,10 @@ import org.springframework.jndi.JndiPropertySource;
  *
  * @author Chris Beams
  * @since 3.1
- * @see DefaultEnvironment
+ * @see StandardEnvironment
  * @see DefaultPortletEnvironment
  */
-public class DefaultWebEnvironment extends DefaultEnvironment {
+public class DefaultWebEnvironment extends StandardEnvironment {
 
 	/** Servlet context init parameters property source name: {@value} */
 	public static final String SERVLET_CONTEXT_PROPERTY_SOURCE_NAME = "servletContextInitParams";
@@ -64,7 +64,7 @@ public class DefaultWebEnvironment extends DefaultEnvironment {
 	 * <p>Properties present in {@value #SERVLET_CONFIG_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #SERVLET_CONTEXT_PROPERTY_SOURCE_NAME}.
 	 * <p>Properties in any of the above will take precedence over system properties and environment
-	 * variables contributed by the {@link DefaultEnvironment} superclass.
+	 * variables contributed by the {@link StandardEnvironment} superclass.
 	 * <p>The {@code Servlet}-related property sources are added as stubs for now, and will be
 	 * {@linkplain WebApplicationContextUtils#initServletPropertySources fully initialized}
 	 * once the actual {@link ServletConfig} and {@link ServletContext} objects are available.
@@ -72,7 +72,7 @@ public class DefaultWebEnvironment extends DefaultEnvironment {
 	 * property is present in any of the default property sources, a {@link JndiPropertySource} will
 	 * be added as well, with precedence lower than servlet property sources, but higher than system
 	 * properties and environment variables.
-	 * @see DefaultEnvironment#customizePropertySources
+	 * @see StandardEnvironment#customizePropertySources
 	 * @see ServletConfigPropertySource
 	 * @see ServletContextPropertySource
 	 * @see org.springframework.jndi.JndiPropertySource

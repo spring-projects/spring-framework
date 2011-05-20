@@ -91,8 +91,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
 	 * <p>If the the passed-in bean factory also implements {@link EnvironmentCapable} its
 	 * environment will be used by this reader.  Otherwise, the reader will initialize and
-	 * use a {@link DefaultEnvironment}. All ApplicationContext implementations are
-	 * EnvironmentCapable, while normal BeanFactory implementations are not.
+	 * use a {@link org.springframework.core.env.StandardEnvironment}. All
+	 * ApplicationContext implementations are EnvironmentCapable, while normal BeanFactory
+	 * implementations are not.
 	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
 	 * @param useDefaultFilters whether to include the default filters for the

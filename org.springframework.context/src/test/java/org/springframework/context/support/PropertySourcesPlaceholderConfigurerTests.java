@@ -28,7 +28,7 @@ import java.util.Properties;
 import org.junit.Test;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
@@ -233,7 +233,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 
 		System.setProperty("key1", "systemKey1Value");
 		System.setProperty("key2", "systemKey2Value");
-		ppc.setEnvironment(new DefaultEnvironment());
+		ppc.setEnvironment(new StandardEnvironment());
 		ppc.postProcessBeanFactory(bf);
 		System.clearProperty("key1");
 		System.clearProperty("key2");

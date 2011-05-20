@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Chris Beams
  * @since 3.1
- * @see DefaultEnvironment
+ * @see StandardEnvironment
  */
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 

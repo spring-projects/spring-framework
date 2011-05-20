@@ -26,7 +26,7 @@ import org.junit.internal.matchers.TypeSafeMatcher;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -99,7 +99,7 @@ public class ProfileXmlBeanDefinitionTests {
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-			ConfigurableEnvironment env = new DefaultEnvironment();
+			ConfigurableEnvironment env = new StandardEnvironment();
 			env.setDefaultProfiles("custom-default");
 			reader.setEnvironment(env);
 			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_ELIGIBLE_XML, getClass()));
@@ -109,7 +109,7 @@ public class ProfileXmlBeanDefinitionTests {
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-			ConfigurableEnvironment env = new DefaultEnvironment();
+			ConfigurableEnvironment env = new StandardEnvironment();
 			env.setDefaultProfiles("custom-default");
 			reader.setEnvironment(env);
 			reader.loadBeanDefinitions(new ClassPathResource(CUSTOM_DEFAULT_ELIGIBLE_XML, getClass()));
@@ -126,7 +126,7 @@ public class ProfileXmlBeanDefinitionTests {
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-			ConfigurableEnvironment env = new DefaultEnvironment();
+			ConfigurableEnvironment env = new StandardEnvironment();
 			env.setActiveProfiles(DEV_ACTIVE);
 			env.setDefaultProfiles("default");
 			reader.setEnvironment(env);
@@ -136,7 +136,7 @@ public class ProfileXmlBeanDefinitionTests {
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-			ConfigurableEnvironment env = new DefaultEnvironment();
+			ConfigurableEnvironment env = new StandardEnvironment();
 			// env.setActiveProfiles(DEV_ACTIVE);
 			env.setDefaultProfiles("default");
 			reader.setEnvironment(env);
@@ -146,7 +146,7 @@ public class ProfileXmlBeanDefinitionTests {
 		{
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-			ConfigurableEnvironment env = new DefaultEnvironment();
+			ConfigurableEnvironment env = new StandardEnvironment();
 			// env.setActiveProfiles(DEV_ACTIVE);
 			//env.setDefaultProfiles("default");
 			reader.setEnvironment(env);
@@ -159,7 +159,7 @@ public class ProfileXmlBeanDefinitionTests {
 	private BeanDefinitionRegistry beanFactoryFor(String xmlName, String... activeProfiles) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-		DefaultEnvironment env = new DefaultEnvironment();
+		StandardEnvironment env = new StandardEnvironment();
 		env.setActiveProfiles(activeProfiles);
 		reader.setEnvironment(env);
 		reader.loadBeanDefinitions(new ClassPathResource(xmlName, getClass()));

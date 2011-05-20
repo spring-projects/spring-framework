@@ -19,7 +19,7 @@ package org.springframework.core.io;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -58,22 +58,22 @@ public class ResourceEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new instance of the {@link ResourceEditor} class
-	 * using a {@link DefaultResourceLoader} and {@link DefaultEnvironment}.
+	 * using a {@link DefaultResourceLoader} and {@link StandardEnvironment}.
 	 */
 	public ResourceEditor() {
-		this(new DefaultResourceLoader(), new DefaultEnvironment());
+		this(new DefaultResourceLoader(), new StandardEnvironment());
 	}
 
 	/**
 	 * Create a new instance of the {@link ResourceEditor} class
-	 * using the given {@link ResourceLoader} and a {@link DefaultEnvironment}.
+	 * using the given {@link ResourceLoader} and a {@link StandardEnvironment}.
 	 * @param resourceLoader the <code>ResourceLoader</code> to use
 	 * @deprecated as of Spring 3.1 in favor of
 	 * {@link #ResourceEditor(ResourceLoader, PropertyResolver)}
 	 */
 	@Deprecated
 	public ResourceEditor(ResourceLoader resourceLoader) {
-		this(resourceLoader, new DefaultEnvironment(), true);
+		this(resourceLoader, new StandardEnvironment(), true);
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class ResourceEditor extends PropertyEditorSupport {
 	 */
 	@Deprecated
 	public ResourceEditor(ResourceLoader resourceLoader, boolean ignoreUnresolvablePlaceholders) {
-		this(resourceLoader, new DefaultEnvironment(), ignoreUnresolvablePlaceholders);
+		this(resourceLoader, new StandardEnvironment(), ignoreUnresolvablePlaceholders);
 	}
 
 	/**

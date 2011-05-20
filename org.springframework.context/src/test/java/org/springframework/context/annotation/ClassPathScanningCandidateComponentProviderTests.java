@@ -30,7 +30,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
@@ -175,7 +175,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 	@Test
 	public void testWithInactiveProfile() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
-		ConfigurableEnvironment env = new DefaultEnvironment();
+		ConfigurableEnvironment env = new StandardEnvironment();
 		env.setActiveProfiles("other");
 		provider.setEnvironment(env);
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_PROFILE_PACKAGE);
@@ -185,7 +185,7 @@ public class ClassPathScanningCandidateComponentProviderTests {
 	@Test
 	public void testWithActiveProfile() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(true);
-		ConfigurableEnvironment env = new DefaultEnvironment();
+		ConfigurableEnvironment env = new StandardEnvironment();
 		env.setActiveProfiles(ProfileAnnotatedComponent.PROFILE_NAME);
 		provider.setEnvironment(env);
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_PROFILE_PACKAGE);

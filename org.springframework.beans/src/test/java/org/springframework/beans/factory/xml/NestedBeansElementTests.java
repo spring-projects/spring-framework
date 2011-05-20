@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -30,7 +30,7 @@ public class NestedBeansElementTests {
 
 	@Test
 	public void getBean_withActiveProfile() {
-		ConfigurableEnvironment env = new DefaultEnvironment();
+		ConfigurableEnvironment env = new StandardEnvironment();
 		env.setActiveProfiles("dev");
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();

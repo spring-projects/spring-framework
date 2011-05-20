@@ -41,7 +41,7 @@ package org.springframework.core.env;
  *
  * <h4>Example: adding a new property source with highest search priority</h4>
  * <pre class="code">
- *   ConfigurableEnvironment environment = new DefaultEnvironment();
+ *   ConfigurableEnvironment environment = new StandardEnvironment();
  *   MutablePropertySources propertySources = environment.getPropertySources();
  *   Map<String, String> myMap = new HashMap<String, String>();
  *   myMap.put("xyz", "myValue");
@@ -51,14 +51,14 @@ package org.springframework.core.env;
  * <h4>Example: removing the default system properties property source</h4>
  * <pre class="code">
  *   MutablePropertySources propertySources = environment.getPropertySources();
- *   propertySources.remove(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)
+ *   propertySources.remove(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)
  * </pre>
  *
  * <h4>Example: mocking the system environment for testing purposes</h4>
  * <pre class="code">
  *   MutablePropertySources propertySources = environment.getPropertySources();
  *   MockPropertySource mockEnvVars = new MockPropertySource().withProperty("xyz", "myValue");
- *   propertySources.replace(DefaultEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, mockEnvVars);
+ *   propertySources.replace(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, mockEnvVars);
  * </pre>
  *
  * When an {@link Environment} is being used by an ApplicationContext, it is important
@@ -73,7 +73,7 @@ package org.springframework.core.env;
  * @see ConfigurableEnvironment
  * @see org.springframework.web.context.support.DefaultWebEnvironment
  */
-public class DefaultEnvironment extends AbstractEnvironment {
+public class StandardEnvironment extends AbstractEnvironment {
 
 	/** System environment property source name: {@value} */
 	public static final String SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME = "systemEnvironment";
