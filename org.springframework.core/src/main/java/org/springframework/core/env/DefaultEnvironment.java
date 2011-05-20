@@ -83,17 +83,21 @@ public class DefaultEnvironment extends AbstractEnvironment {
 
 
 	/**
-	 * Create a new {@code Environment} populated with property sources in the following order:
+	 * Customize the set of property sources with those appropriate for any standard Java
+	 * environment:
 	 * <ul>
 	 * <li>{@value #SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME}
 	 * <li>{@value #SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME}
 	 * </ul>
 	 * <p>Properties present in {@value #SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME}.
+	 * @see #getSystemProperties()
+	 * @see #getSystemEnvironment()
 	 */
-	public DefaultEnvironment() {
-		getPropertySources().addFirst(new MapPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, getSystemEnvironment()));
-		getPropertySources().addFirst(new MapPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, getSystemProperties()));
+	@Override
+	protected void customizePropertySources(MutablePropertySources propertySources) {
+		propertySources.addLast(new MapPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, getSystemProperties()));
+		propertySources.addLast(new MapPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, getSystemEnvironment()));
 	}
 
 }

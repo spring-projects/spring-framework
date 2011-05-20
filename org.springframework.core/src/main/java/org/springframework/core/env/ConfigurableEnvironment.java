@@ -49,7 +49,19 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	void setDefaultProfiles(String... profiles);
 
 	/**
-	 * Return the {@link PropertySources} for this environment in mutable form
+	 * Return the {@link PropertySources} for this {@code Environment} in mutable form,
+	 * allowing for manipulation of the set of {@link PropertySource} objects that should
+	 * be searched when resolving properties against this {@code Environment} object.
+	 * The various {@link MutablePropertySources} methods such as
+	 * {@link MutablePropertySources#addFirst addFirst},
+	 * {@link MutablePropertySources#addFirst addLast},
+	 * {@link MutablePropertySources#addFirst addBefore} and
+	 * {@link MutablePropertySources#addFirst addAfter} allow for fine-grained control
+	 * over property source ordering. This is useful, for example, in ensuring that
+	 * certain user-defined property sources have search precedence over default property
+	 * sources such as the set of system properties or the set of system environment
+	 * variables.
+	 * @see DefaultEnvironment#DefaultEnvironment()
 	 */
 	MutablePropertySources getPropertySources();
 
