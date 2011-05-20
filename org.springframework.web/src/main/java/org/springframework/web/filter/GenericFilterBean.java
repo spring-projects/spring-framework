@@ -44,7 +44,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.support.DefaultWebEnvironment;
+import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 import org.springframework.web.util.NestedServletException;
 
@@ -91,7 +91,7 @@ public abstract class GenericFilterBean implements
 
 	private String beanName;
 
-	private Environment environment = new DefaultWebEnvironment();
+	private Environment environment = new StandardServletEnvironment();
 
 	private ServletContext servletContext;
 
@@ -109,7 +109,7 @@ public abstract class GenericFilterBean implements
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Any environment set here overrides the {@link DefaultWebEnvironment}
+	 * <p>Any environment set here overrides the {@link StandardServletEnvironment}
 	 * provided by default.
 	 */
 	public void setEnvironment(Environment environment) {

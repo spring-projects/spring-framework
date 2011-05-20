@@ -69,7 +69,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AbstractRefreshableWebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.context.support.DefaultWebEnvironment;
+import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -346,7 +346,7 @@ public class EnvironmentIntegrationTests {
 		GenericWebApplicationContext ctx =
 			new GenericWebApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
 
-		assertHasDefaultWebEnvironment(ctx);
+		assertHasStandardServletEnvironment(ctx);
 
 		ctx.setEnvironment(prodEnv);
 		ctx.refresh();
@@ -390,7 +390,7 @@ public class EnvironmentIntegrationTests {
 	public void staticWebApplicationContext() {
 		StaticWebApplicationContext ctx = new StaticWebApplicationContext();
 
-		assertHasDefaultWebEnvironment(ctx);
+		assertHasStandardServletEnvironment(ctx);
 
 		registerEnvironmentBeanDefinition(ctx);
 
@@ -430,22 +430,22 @@ public class EnvironmentIntegrationTests {
 		ctx.refresh();
 
 		ConfigurableEnvironment environment = ctx.getEnvironment();
-		assertThat(environment, instanceOf(DefaultWebEnvironment.class));
+		assertThat(environment, instanceOf(StandardServletEnvironment.class));
 		MutablePropertySources propertySources = environment.getPropertySources();
-		assertThat(propertySources.contains(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME), is(true));
-		assertThat(propertySources.contains(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME), is(true));
+		assertThat(propertySources.contains(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME), is(true));
+		assertThat(propertySources.contains(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME), is(true));
 
 		// ServletConfig gets precedence
 		assertThat(environment.getProperty("pCommon"), is("pCommonConfigValue"));
-		assertThat(propertySources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),
-				lessThan(propertySources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME))));
+		assertThat(propertySources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),
+				lessThan(propertySources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME))));
 
 		// but all params are available
 		assertThat(environment.getProperty("pContext1"), is("pContext1Value"));
 		assertThat(environment.getProperty("pConfig1"), is("pConfig1Value"));
 
 		// Servlet* PropertySources have precedence over System* PropertySources
-		assertThat(propertySources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),
+		assertThat(propertySources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),
 				lessThan(propertySources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))));
 
 		// Replace system properties with a mock property source for convenience
@@ -470,16 +470,16 @@ public class EnvironmentIntegrationTests {
 		ctx.refresh();
 
 		ConfigurableEnvironment environment = ctx.getEnvironment();
-		assertThat(environment, instanceOf(DefaultWebEnvironment.class));
+		assertThat(environment, instanceOf(StandardServletEnvironment.class));
 		MutablePropertySources propertySources = environment.getPropertySources();
-		assertThat(propertySources.contains(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME), is(true));
+		assertThat(propertySources.contains(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME), is(true));
 
 		// ServletContext params are available
 		assertThat(environment.getProperty("pCommon"), is("pCommonContextValue"));
 		assertThat(environment.getProperty("pContext1"), is("pContext1Value"));
 
 		// Servlet* PropertySources have precedence over System* PropertySources
-		assertThat(propertySources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)),
+		assertThat(propertySources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)),
 				lessThan(propertySources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))));
 
 		// Replace system properties with a mock property source for convenience
@@ -509,20 +509,20 @@ public class EnvironmentIntegrationTests {
 
 		ConfigurableEnvironment environment = ctx.getEnvironment();
 		MutablePropertySources propertySources = environment.getPropertySources();
-		assertThat(propertySources.contains(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME), is(true));
-		assertThat(propertySources.contains(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME), is(true));
+		assertThat(propertySources.contains(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME), is(true));
+		assertThat(propertySources.contains(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME), is(true));
 
 		// ServletConfig gets precedence
 		assertThat(environment.getProperty("pCommon"), is("pCommonConfigValue"));
-		assertThat(propertySources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),
-				lessThan(propertySources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME))));
+		assertThat(propertySources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),
+				lessThan(propertySources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME))));
 
 		// but all params are available
 		assertThat(environment.getProperty("pContext1"), is("pContext1Value"));
 		assertThat(environment.getProperty("pConfig1"), is("pConfig1Value"));
 
 		// Servlet* PropertySources have precedence over System* PropertySources
-		assertThat(propertySources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),
+		assertThat(propertySources.precedenceOf(PropertySource.named(StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),
 				lessThan(propertySources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))));
 
 		// Replace system properties with a mock property source for convenience
@@ -632,11 +632,11 @@ public class EnvironmentIntegrationTests {
 		assertThat(defaultEnv, instanceOf(StandardEnvironment.class));
 	}
 
-	private void assertHasDefaultWebEnvironment(WebApplicationContext ctx) {
+	private void assertHasStandardServletEnvironment(WebApplicationContext ctx) {
 		// ensure a default web environment exists
 		Environment defaultEnv = ctx.getEnvironment();
 		assertThat(defaultEnv, notNullValue());
-		assertThat(defaultEnv, instanceOf(DefaultWebEnvironment.class));
+		assertThat(defaultEnv, instanceOf(StandardServletEnvironment.class));
 	}
 
 	private void assertHasDefaultPortletEnvironment(WebApplicationContext ctx) {

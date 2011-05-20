@@ -118,11 +118,11 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 
 
 	/**
-	 * Create and return a new {@link DefaultWebEnvironment}.
+	 * Create and return a new {@link StandardServletEnvironment}.
 	 */
 	@Override
 	protected ConfigurableEnvironment createEnvironment() {
-		return new DefaultWebEnvironment();
+		return new StandardServletEnvironment();
 	}
 
 	/**
