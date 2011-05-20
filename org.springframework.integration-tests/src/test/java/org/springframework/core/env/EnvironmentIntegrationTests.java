@@ -85,7 +85,7 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
  *
  * Tests all existing BeanFactory and ApplicationContext implementations to
  * ensure that:
- * - a default environment object is always present
+ * - a standard environment object is always present
  * - a custom environment object can be set and retrieved against the factory/context
  * - the {@link EnvironmentAware} interface is respected
  * - the environment object is registered with the container as a singleton
@@ -120,21 +120,21 @@ public class EnvironmentIntegrationTests {
 
 	@Before
 	public void setUp() {
-		prodEnv = new DefaultEnvironment();
+		prodEnv = new StandardEnvironment();
 		prodEnv.setActiveProfiles(PROD_ENV_NAME);
 
-		devEnv = new DefaultEnvironment();
+		devEnv = new StandardEnvironment();
 		devEnv.setActiveProfiles(DEV_ENV_NAME);
 	}
 
 	@Test
-	public void genericApplicationContext_defaultEnv() {
+	public void genericApplicationContext_standardEnv() {
 		ConfigurableApplicationContext ctx =
 			new GenericApplicationContext(newBeanFactoryWithEnvironmentAwareBean());
 
 		ctx.refresh();
 
-		assertHasDefaultEnvironment(ctx);
+		assertHasStandardEnvironment(ctx);
 		assertEnvironmentBeanRegistered(ctx);
 		assertEnvironmentAwareInvoked(ctx, ctx.getEnvironment());
 	}
@@ -199,7 +199,7 @@ public class EnvironmentIntegrationTests {
 	public void genericXmlApplicationContext() {
 		GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
 
-		assertHasDefaultEnvironment(ctx);
+		assertHasStandardEnvironment(ctx);
 
 		ctx.setEnvironment(prodEnv);
 
@@ -249,7 +249,7 @@ public class EnvironmentIntegrationTests {
 	public void annotationConfigApplicationContext_withPojos() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
-		assertHasDefaultEnvironment(ctx);
+		assertHasStandardEnvironment(ctx);
 		ctx.setEnvironment(prodEnv);
 
 		ctx.register(EnvironmentAwareBean.class);
@@ -262,7 +262,7 @@ public class EnvironmentIntegrationTests {
 	public void annotationConfigApplicationContext_withProdEnvAndProdConfigClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
-		assertHasDefaultEnvironment(ctx);
+		assertHasStandardEnvironment(ctx);
 		ctx.setEnvironment(prodEnv);
 
 		ctx.register(ProdConfig.class);
@@ -275,7 +275,7 @@ public class EnvironmentIntegrationTests {
 	public void annotationConfigApplicationContext_withProdEnvAndDevConfigClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
-		assertHasDefaultEnvironment(ctx);
+		assertHasStandardEnvironment(ctx);
 		ctx.setEnvironment(prodEnv);
 
 		ctx.register(DevConfig.class);
@@ -289,7 +289,7 @@ public class EnvironmentIntegrationTests {
 	public void annotationConfigApplicationContext_withDevEnvAndDevConfigClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
-		assertHasDefaultEnvironment(ctx);
+		assertHasStandardEnvironment(ctx);
 		ctx.setEnvironment(devEnv);
 
 		ctx.register(DevConfig.class);
@@ -303,7 +303,7 @@ public class EnvironmentIntegrationTests {
 	public void annotationConfigApplicationContext_withImportedConfigClasses() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
-		assertHasDefaultEnvironment(ctx);
+		assertHasStandardEnvironment(ctx);
 		ctx.setEnvironment(prodEnv);
 
 		ctx.register(Config.class);
@@ -318,7 +318,7 @@ public class EnvironmentIntegrationTests {
 	@Test
 	public void mostSpecificDerivedClassDrivesEnvironment_withDerivedDevEnvAndDerivedDevConfigClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		DefaultEnvironment derivedDevEnv = new DefaultEnvironment();
+		StandardEnvironment derivedDevEnv = new StandardEnvironment();
 		derivedDevEnv.setActiveProfiles(DERIVED_DEV_ENV_NAME);
 		ctx.setEnvironment(derivedDevEnv);
 		ctx.register(DerivedDevConfig.class);
@@ -374,7 +374,7 @@ public class EnvironmentIntegrationTests {
 	public void staticApplicationContext() {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 
-		assertHasDefaultEnvironment(ctx);
+		assertHasStandardEnvironment(ctx);
 
 		registerEnvironmentBeanDefinition(ctx);
 
@@ -446,13 +446,13 @@ public class EnvironmentIntegrationTests {
 
 		// Servlet* PropertySources have precedence over System* PropertySources
 		assertThat(propertySources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),
-				lessThan(propertySources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))));
+				lessThan(propertySources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))));
 
 		// Replace system properties with a mock property source for convenience
-		MockPropertySource mockSystemProperties = new MockPropertySource(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
+		MockPropertySource mockSystemProperties = new MockPropertySource(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
 		mockSystemProperties.setProperty("pCommon", "pCommonSysPropsValue");
 		mockSystemProperties.setProperty("pSysProps1", "pSysProps1Value");
-		propertySources.replace(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, mockSystemProperties);
+		propertySources.replace(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, mockSystemProperties);
 
 		// assert that servletconfig params resolve with higher precedence than sysprops
 		assertThat(environment.getProperty("pCommon"), is("pCommonConfigValue"));
@@ -480,13 +480,13 @@ public class EnvironmentIntegrationTests {
 
 		// Servlet* PropertySources have precedence over System* PropertySources
 		assertThat(propertySources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME)),
-				lessThan(propertySources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))));
+				lessThan(propertySources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))));
 
 		// Replace system properties with a mock property source for convenience
-		MockPropertySource mockSystemProperties = new MockPropertySource(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
+		MockPropertySource mockSystemProperties = new MockPropertySource(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
 		mockSystemProperties.setProperty("pCommon", "pCommonSysPropsValue");
 		mockSystemProperties.setProperty("pSysProps1", "pSysProps1Value");
-		propertySources.replace(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, mockSystemProperties);
+		propertySources.replace(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, mockSystemProperties);
 
 		// assert that servletcontext init params resolve with higher precedence than sysprops
 		assertThat(environment.getProperty("pCommon"), is("pCommonContextValue"));
@@ -523,13 +523,13 @@ public class EnvironmentIntegrationTests {
 
 		// Servlet* PropertySources have precedence over System* PropertySources
 		assertThat(propertySources.precedenceOf(PropertySource.named(DefaultWebEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME)),
-				lessThan(propertySources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))));
+				lessThan(propertySources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))));
 
 		// Replace system properties with a mock property source for convenience
-		MockPropertySource mockSystemProperties = new MockPropertySource(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
+		MockPropertySource mockSystemProperties = new MockPropertySource(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
 		mockSystemProperties.setProperty("pCommon", "pCommonSysPropsValue");
 		mockSystemProperties.setProperty("pSysProps1", "pSysProps1Value");
-		propertySources.replace(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, mockSystemProperties);
+		propertySources.replace(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, mockSystemProperties);
 
 		// assert that servletconfig params resolve with higher precedence than sysprops
 		assertThat(environment.getProperty("pCommon"), is("pCommonConfigValue"));
@@ -540,7 +540,7 @@ public class EnvironmentIntegrationTests {
 	public void resourceAdapterApplicationContext() {
 		ResourceAdapterApplicationContext ctx = new ResourceAdapterApplicationContext(new SimpleBootstrapContext(new SimpleTaskWorkManager()));
 
-		assertHasDefaultEnvironment(ctx);
+		assertHasStandardEnvironment(ctx);
 
 		registerEnvironmentBeanDefinition(ctx);
 
@@ -626,10 +626,10 @@ public class EnvironmentIntegrationTests {
 		assertThat(ctx.containsBean(ENVIRONMENT_BEAN_NAME), is(true));
 	}
 
-	private void assertHasDefaultEnvironment(ApplicationContext ctx) {
+	private void assertHasStandardEnvironment(ApplicationContext ctx) {
 		Environment defaultEnv = ctx.getEnvironment();
 		assertThat(defaultEnv, notNullValue());
-		assertThat(defaultEnv, instanceOf(DefaultEnvironment.class));
+		assertThat(defaultEnv, instanceOf(StandardEnvironment.class));
 	}
 
 	private void assertHasDefaultWebEnvironment(WebApplicationContext ctx) {

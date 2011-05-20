@@ -22,7 +22,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
@@ -54,7 +54,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 
 	private ClassLoader beanClassLoader;
 
-	private Environment environment = new DefaultEnvironment();
+	private Environment environment = new StandardEnvironment();
 
 	private BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
 
@@ -69,7 +69,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
 	 * <p>If the the passed-in bean factory also implements {@link EnvironmentCapable} its
 	 * environment will be used by this reader.  Otherwise, the reader will initialize and
-	 * use a {@link DefaultEnvironment}. All ApplicationContext implementations are
+	 * use a {@link StandardEnvironment}. All ApplicationContext implementations are
 	 * EnvironmentCapable, while normal BeanFactory implementations are not.
 	 * @param registry the BeanFactory to load bean definitions into,
 	 * in the form of a BeanDefinitionRegistry
@@ -93,7 +93,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 			this.environment = ((EnvironmentCapable)this.registry).getEnvironment();
 		}
 		else {
-			this.environment = new DefaultEnvironment();
+			this.environment = new StandardEnvironment();
 		}
 	}
 

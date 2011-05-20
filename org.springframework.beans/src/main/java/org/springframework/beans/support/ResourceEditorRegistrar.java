@@ -34,7 +34,7 @@ import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.Resource;
@@ -64,7 +64,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 
 	/**
 	 * Create a new ResourceEditorRegistrar for the given {@link ResourceLoader}
-	 * using a {@link DefaultEnvironment}.
+	 * using a {@link StandardEnvironment}.
 	 * @param resourceLoader the ResourceLoader (or ResourcePatternResolver)
 	 * to create editors for (usually an ApplicationContext)
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
@@ -74,7 +74,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 */
 	@Deprecated
 	public ResourceEditorRegistrar(ResourceLoader resourceLoader) {
-		this(resourceLoader, new DefaultEnvironment());
+		this(resourceLoader, new StandardEnvironment());
 	}
 
 	/**

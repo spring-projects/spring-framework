@@ -20,7 +20,7 @@ import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 import javax.servlet.ServletContext;
 
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -38,10 +38,10 @@ import org.springframework.web.context.support.DefaultWebEnvironment;
  *
  * @author Chris Beams
  * @since 3.1
- * @see DefaultEnvironment
+ * @see StandardEnvironment
  * @see DefaultWebEnvironment
  */
-public class DefaultPortletEnvironment extends DefaultEnvironment {
+public class DefaultPortletEnvironment extends StandardEnvironment {
 
 	/** Portlet context init parameters property source name: {@value} */
 	public static final String PORTLET_CONTEXT_PROPERTY_SOURCE_NAME = "portletContextInitParams";
@@ -62,12 +62,12 @@ public class DefaultPortletEnvironment extends DefaultEnvironment {
 	 * which takes precedence over those in
 	 * {@linkplain DefaultWebEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}.
 	 * <p>Properties in any of the above will take precedence over system properties and environment
-	 * variables contributed by the {@link DefaultEnvironment} superclass.
+	 * variables contributed by the {@link StandardEnvironment} superclass.
 	 * <p>The property sources are added as stubs for now, and will be
 	 * {@linkplain PortletApplicationContextUtils#initPortletPropertySources fully initialized}
 	 * once the actual {@link PortletConfig}, {@link PortletContext}, and {@link ServletContext}
 	 * objects are available.
-	 * @see DefaultEnvironment#customizePropertySources
+	 * @see StandardEnvironment#customizePropertySources
 	 * @see PortletConfigPropertySource
 	 * @see PortletContextPropertySource
 	 * @see AbstractRefreshablePortletApplicationContext#initPropertySources

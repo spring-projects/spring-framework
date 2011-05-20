@@ -52,7 +52,7 @@ package org.springframework.core.env;
  * <p>Configuration of the environment object must be done through the
  * {@link ConfigurableEnvironment} interface, returned from all
  * {@code AbstractApplicationContext} subclass {@code getEnvironment()} methods. See
- * {@link DefaultEnvironment} for several examples of using the ConfigurableEnvironment
+ * {@link StandardEnvironment} for several examples of using the ConfigurableEnvironment
  * interface to manipulate property sources prior to application context refresh().
  *
  * @author Chris Beams
@@ -61,7 +61,7 @@ package org.springframework.core.env;
  * @see EnvironmentCapable
  * @see ConfigurableEnvironment
  * @see AbstractEnvironment
- * @see DefaultEnvironment
+ * @see StandardEnvironment
  * @see org.springframework.context.EnvironmentAware
  * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment
  * @see org.springframework.context.ConfigurableApplicationContext#setEnvironment

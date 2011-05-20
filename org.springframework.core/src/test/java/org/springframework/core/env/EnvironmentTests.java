@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.junit.Test;
 import org.springframework.mock.env.MockPropertySource;
 
 /**
- * Unit tests for {@link DefaultEnvironment}.
+ * Unit tests for {@link StandardEnvironment}.
  *
  * @author Chris Beams
  */
@@ -60,14 +60,14 @@ public class EnvironmentTests {
 	private static final Object NON_STRING_PROPERTY_NAME = new Object();
 	private static final Object NON_STRING_PROPERTY_VALUE = new Object();
 
-	private ConfigurableEnvironment environment = new DefaultEnvironment();
+	private ConfigurableEnvironment environment = new StandardEnvironment();
 
 	@Test
 	public void propertySourceOrder() {
-		ConfigurableEnvironment env = new DefaultEnvironment();
+		ConfigurableEnvironment env = new StandardEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
-		assertThat(sources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)), equalTo(0));
-		assertThat(sources.precedenceOf(PropertySource.named(DefaultEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(1));
+		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)), equalTo(0));
+		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(1));
 		assertThat(sources.size(), is(2));
 	}
 

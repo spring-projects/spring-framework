@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.Resource;
@@ -64,23 +64,23 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new ResourceArrayPropertyEditor with a default
-	 * {@link PathMatchingResourcePatternResolver} and {@link DefaultEnvironment}.
+	 * {@link PathMatchingResourcePatternResolver} and {@link StandardEnvironment}.
 	 * @see PathMatchingResourcePatternResolver
 	 * @see Environment
 	 */
 	public ResourceArrayPropertyEditor() {
-		this(new PathMatchingResourcePatternResolver(), new DefaultEnvironment(), true);
+		this(new PathMatchingResourcePatternResolver(), new StandardEnvironment(), true);
 	}
 
 	/**
 	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
-	 * and a {@link DefaultEnvironment}.
+	 * and a {@link StandardEnvironment}.
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
 	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, Environment)}
 	 */
 	@Deprecated
 	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver) {
-		this(resourcePatternResolver, new DefaultEnvironment(), true);
+		this(resourcePatternResolver, new StandardEnvironment(), true);
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
-	 * and a {@link DefaultEnvironment}.
+	 * and a {@link StandardEnvironment}.
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
 	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
 	 * if no corresponding system property could be found
@@ -103,7 +103,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 */
 	@Deprecated
 	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, boolean ignoreUnresolvablePlaceholders) {
-		this(resourcePatternResolver, new DefaultEnvironment(), ignoreUnresolvablePlaceholders);
+		this(resourcePatternResolver, new StandardEnvironment(), ignoreUnresolvablePlaceholders);
 	}
 
 	/**

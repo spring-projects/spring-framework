@@ -24,7 +24,7 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 
@@ -42,7 +42,7 @@ public class AnnotatedBeanDefinitionReader {
 
 	private final BeanDefinitionRegistry registry;
 
-	private Environment environment = new DefaultEnvironment();
+	private Environment environment = new StandardEnvironment();
 
 	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 
@@ -70,7 +70,7 @@ public class AnnotatedBeanDefinitionReader {
 	/**
 	 * Set the Environment to use when evaluating whether
 	 * {@link Profile @Profile}-annotated component classes should be registered.
-	 * <p>The default is a {@link DefaultEnvironment}.
+	 * <p>The default is a {@link StandardEnvironment}.
 	 * @see #registerBean(Class, String, Class...)
 	 */
 	public void setEnvironment(Environment environment) {

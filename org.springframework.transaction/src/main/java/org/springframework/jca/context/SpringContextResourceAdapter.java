@@ -32,7 +32,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.StringUtils;
 
 /**
@@ -144,12 +144,12 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	}
 
 	/**
-	 * Return a new {@link DefaultEnvironment}.
+	 * Return a new {@link StandardEnvironment}.
 	 * <p>Subclasses may override this method in order to supply
 	 * a custom {@link ConfigurableEnvironment} implementation.
 	 */
 	protected ConfigurableEnvironment createEnvironment() {
-		return new DefaultEnvironment();
+		return new StandardEnvironment();
 	}
 
 	/**

@@ -29,7 +29,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
@@ -73,7 +73,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Environment environment = new DefaultEnvironment();
+	private Environment environment = new StandardEnvironment();
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -117,7 +117,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	/**
 	 * Set the Environment to use when resolving placeholders and evaluating
 	 * {@link Profile @Profile}-annotated component classes.
-	 * <p>The default is a {@link DefaultEnvironment}
+	 * <p>The default is a {@link StandardEnvironment}
 	 * @param environment the Environment to use
 	 */
 	public void setEnvironment(Environment environment) {

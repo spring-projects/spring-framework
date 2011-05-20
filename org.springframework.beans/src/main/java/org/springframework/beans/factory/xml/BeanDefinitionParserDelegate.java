@@ -59,7 +59,7 @@ import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
-import org.springframework.core.env.DefaultEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -272,13 +272,13 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Create a new BeanDefinitionParserDelegate associated with the
-	 * supplied {@link XmlReaderContext} and a new {@link DefaultEnvironment}.
+	 * supplied {@link XmlReaderContext} and a new {@link StandardEnvironment}.
 	 * @deprecated since Spring 3.1 in favor of
 	 * {@link #BeanDefinitionParserDelegate(XmlReaderContext, Environment)}
 	 */
 	@Deprecated
 	public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
-		this(readerContext, new DefaultEnvironment());
+		this(readerContext, new StandardEnvironment());
 	}
 
 	/**

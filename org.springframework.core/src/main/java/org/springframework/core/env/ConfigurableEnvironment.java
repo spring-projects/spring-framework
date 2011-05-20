@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author Chris Beams
  * @since 3.1
- * @see DefaultEnvironment
+ * @see StandardEnvironment
  * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment
  */
 public interface ConfigurableEnvironment extends Environment, ConfigurablePropertyResolver {
@@ -61,7 +61,7 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * certain user-defined property sources have search precedence over default property
 	 * sources such as the set of system properties or the set of system environment
 	 * variables.
-	 * @see DefaultEnvironment#DefaultEnvironment()
+	 * @see AbstractEnvironment#customizePropertySources
 	 */
 	MutablePropertySources getPropertySources();
 
