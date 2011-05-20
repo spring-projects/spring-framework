@@ -18,45 +18,49 @@ package org.springframework.core.env;
 
 /**
  * Interface representing the environment in which the current application is running.
- * Models two key aspects of the application environment:
- * <ol>
- *   <li>profiles</li>
- *   <li>properties</li>
- * </ol>
+ * Models two key aspects of the application environment: <em>profiles</em> and
+ * <em>properties</em>.
  *
- * A <em>profile</em> is a named, logical group of bean definitions to be registered with the
- * container only if the given profile is <em>active</em>. Beans may be assigned to a profile
- * whether defined in XML or annotations; see the spring-beans 3.1 schema or the {@link
- * org.springframework.context.annotation.Profile @Profile} annotation for syntax details.
- * The role of the Environment object with relation to profiles is in determining which profiles
- * (if any) are currently {@linkplain #getActiveProfiles active}, and which profiles (if any)
- * should be {@linkplain #getDefaultProfiles active by default}.
+ * <p>A <em>profile</em> is a named, logical group of bean definitions to be registered
+ * with the container only if the given profile is <em>active</em>. Beans may be assigned
+ * to a profile whether defined in XML or via annotations; see the spring-beans 3.1 schema
+ * or the {@link org.springframework.context.annotation.Profile @Profile} annotation for
+ * syntax details. The role of the {@code Environment} object with relation to profiles is
+ * in determining which profiles (if any) are currently {@linkplain #getActiveProfiles
+ * active}, and which profiles (if any) should be {@linkplain #getDefaultProfiles active
+ * by default}.
  *
- * <p><em>Properties</em> play an important role in almost all applications, and may originate
- * from a variety of sources: properties files, JVM system properties, system environment
- * variables, JNDI, servlet context parameters, ad-hoc Properties objects, Maps, and so on.
- * The role of the environment object with relation to properties is to provide the user with a
- * convenient service interface for configuring property sources and resolving properties from them.
+ * <p><em>Properties</em> play an important role in almost all applications, and may
+ * originate from a variety of sources: properties files, JVM system properties, system
+ * environment variables, JNDI, servlet context parameters, ad-hoc Properties objects,
+ * Maps, and so on. The role of the environment object with relation to properties is to
+ * provide the user with a convenient service interface for configuring property sources
+ * and resolving properties from them.
  *
  * <p>Beans managed within an ApplicationContext may register to be {@link
- * org.springframework.context.EnvironmentAware EnvironmentAware}, where they can query profile state
- * or resolve properties directly.
+ * org.springframework.context.EnvironmentAware EnvironmentAware} or {@code @Inject} the
+ * {@code Environment} in order to query profile state or resolve properties directly.
  *
- * <p>More commonly, beans will not interact with the Environment directly, but will have ${...}
- * property values replaced by a property placeholder configurer such as {@link
- * org.springframework.context.support.PropertySourcesPlaceholderConfigurer
- * PropertySourcesPlaceholderConfigurer}, which itself is EnvironmentAware, and as of Spring 3.1 is
- * registered by default when using {@code <context:property-placeholder/>}.
+ * <p>In most cases, however, application-level beans should not need to interact with the
+ * {@code Environment} directly but instead may have to have <code>${...}</code> property
+ * values replaced by a property placeholder configurer such as
+ * {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
+ * PropertySourcesPlaceholderConfigurer}, which itself is {@code EnvironmentAware} and
+ * as of Spring 3.1 is registered by default when using
+ * {@code <context:property-placeholder/>}.
  *
- * <p>Configuration of the environment object must be done through the {@link ConfigurableEnvironment}
- * interface, returned from all AbstractApplicationContext subclass getEnvironment() methods. See
- * {@link DefaultEnvironment} for several examples of using the ConfigurableEnvironment interface
- * to manipulate property sources prior to application context refresh().
+ * <p>Configuration of the environment object must be done through the
+ * {@link ConfigurableEnvironment} interface, returned from all
+ * {@code AbstractApplicationContext} subclass {@code getEnvironment()} methods. See
+ * {@link DefaultEnvironment} for several examples of using the ConfigurableEnvironment
+ * interface to manipulate property sources prior to application context refresh().
  *
  * @author Chris Beams
  * @since 3.1
+ * @see PropertyResolver
  * @see EnvironmentCapable
  * @see ConfigurableEnvironment
+ * @see AbstractEnvironment
  * @see DefaultEnvironment
  * @see org.springframework.context.EnvironmentAware
  * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment

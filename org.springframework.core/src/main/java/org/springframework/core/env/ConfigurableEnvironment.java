@@ -31,7 +31,7 @@ import java.util.Map;
 public interface ConfigurableEnvironment extends Environment, ConfigurablePropertyResolver {
 
 	/**
-	 * Specify the set of profiles active for this Environment. Profiles are
+	 * Specify the set of profiles active for this {@code Environment}. Profiles are
 	 * evaluated during container bootstrap to determine whether bean definitions
 	 * should be registered with the container.
 	 *
@@ -66,32 +66,36 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	MutablePropertySources getPropertySources();
 
 	/**
-	 * Return the value of {@link System#getenv()} if allowed by the current {@link SecurityManager},
-	 * otherwise return a map implementation that will attempt to access individual keys using calls to
-	 * {@link System#getenv(String)}.
+	 * Return the value of {@link System#getenv()} if allowed by the current
+	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
+	 * to access individual keys using calls to {@link System#getenv(String)}.
 	 *
-	 * <p>Note that most {@link Environment} implementations will include this system environment map as
-	 * a default {@link PropertySource} to be searched. Therefore, it is recommended that this method not be
-	 * used directly unless bypassing other property sources is expressly intended.
+	 * <p>Note that most {@link Environment} implementations will include this system
+	 * environment map as a default {@link PropertySource} to be searched. Therefore, it
+	 * is recommended that this method not be used directly unless bypassing other
+	 * property sources is expressly intended.
 	 *
-	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw {@link IllegalAccessException};
-	 * in cases where the SecurityManager forbids access to a property, {@code null} will be returned and an
-	 * INFO-level log message will be issued noting the exception.
+	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
+	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
+	 * to a property, {@code null} will be returned and an INFO-level log message will be
+	 * issued noting the exception.
 	 */
 	Map<String, Object> getSystemEnvironment();
 
 	/**
-	 * Return the value of {@link System#getProperties()} if allowed by the current {@link SecurityManager},
-	 * otherwise return a map implementation that will attempt to access individual keys using calls to
-	 * {@link System#getProperty(String)}.
+	 * Return the value of {@link System#getProperties()} if allowed by the current
+	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
+	 * to access individual keys using calls to {@link System#getProperty(String)}.
 	 *
-	 * <p>Note that most {@code Environment} implementations will include this system properties map as a
-	 * default {@link PropertySource} to be searched. Therefore, it is recommended that this method not be
-	 * used directly unless bypassing other property sources is expressly intended.
+	 * <p>Note that most {@code Environment} implementations will include this system
+	 * properties map as a default {@link PropertySource} to be searched. Therefore, it is
+	 * recommended that this method not be used directly unless bypassing other property
+	 * sources is expressly intended.
 	 *
-	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw {@link IllegalAccessException};
-	 * in cases where the SecurityManager forbids access to a property, {@code null} will be returned and an
-	 * INFO-level log message will be issued noting the exception.
+	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
+	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
+	 * to a property, {@code null} will be returned and an INFO-level log message will be
+	 * issued noting the exception.
 	 */
 	Map<String, Object> getSystemProperties();
 

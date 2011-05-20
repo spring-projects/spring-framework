@@ -27,6 +27,9 @@ import org.springframework.util.ClassUtils;
  *
  * @author Chris Beams
  * @since 3.1
+ * @see PropertySource
+ * @see PropertySources
+ * @see AbstractEnvironment
  */
 public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 
