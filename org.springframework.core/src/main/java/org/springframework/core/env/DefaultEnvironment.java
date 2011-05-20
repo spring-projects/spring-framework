@@ -30,7 +30,7 @@ package org.springframework.core.env;
  *
  * That is, if the key "xyz" is present both in the JVM system properties as well as in the
  * set of environment variables for the current process, the value of key "xyz" from system properties
- * will return from a call to {@code environment.getPropertyResolver().getProperty("xyz")}.
+ * will return from a call to {@code environment.getProperty("xyz")}.
  * This ordering is chosen by default because system properties are per-JVM, while environment
  * variables may be the same across many JVMs on a given system.  Giving system properties
  * precedence allows for overriding of environment variables on a per-JVM basis.
