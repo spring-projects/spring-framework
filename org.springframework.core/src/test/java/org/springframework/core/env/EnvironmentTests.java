@@ -30,6 +30,7 @@ import static org.junit.matchers.JUnitMatchers.hasItem;
 import static org.junit.matchers.JUnitMatchers.hasItems;
 import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
 import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME;
+import static org.springframework.core.env.AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME;
 
 import java.lang.reflect.Field;
 import java.security.AccessControlException;
@@ -80,6 +81,16 @@ public class EnvironmentTests {
 	}
 
 	@Test
+	public void reservedDefaultProfile() {
+		assertThat(environment.getDefaultProfiles(), equalTo(new String[]{RESERVED_DEFAULT_PROFILE_NAME}));
+		System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "d0");
+		assertThat(environment.getDefaultProfiles(), equalTo(new String[]{"d0"}));
+		environment.setDefaultProfiles("d1", "d2");
+		assertThat(environment.getDefaultProfiles(), equalTo(new String[]{"d1","d2"}));
+		System.getProperties().remove(DEFAULT_PROFILES_PROPERTY_NAME);
+	}
+
+	@Test
 	public void getActiveProfiles_systemPropertiesEmpty() {
 		assertThat(environment.getActiveProfiles().length, is(0));
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "");
@@ -113,7 +124,7 @@ public class EnvironmentTests {
 
 	@Test
 	public void getDefaultProfiles() {
-		assertThat(environment.getDefaultProfiles().length, is(0));
+		assertThat(environment.getDefaultProfiles(), equalTo(new String[] {RESERVED_DEFAULT_PROFILE_NAME}));
 		environment.getPropertySources().addFirst(new MockPropertySource().withProperty(DEFAULT_PROFILES_PROPERTY_NAME, "pd1"));
 		assertThat(environment.getDefaultProfiles().length, is(1));
 		assertThat(Arrays.asList(environment.getDefaultProfiles()), hasItem("pd1"));
