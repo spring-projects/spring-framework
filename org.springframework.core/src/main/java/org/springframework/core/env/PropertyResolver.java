@@ -21,11 +21,14 @@ package org.springframework.core.env;
  *
  * @author Chris Beams
  * @since 3.1
+ * @see Environment
+ * @see PropertySourcesPropertyResolver
  */
 public interface PropertyResolver {
 
 	/**
-	 * Return whether the given property key is available for resolution.
+	 * Return whether the given property key is available for resolution, i.e.,
+	 * the value for the given key is not {@code null}.
 	 */
 	boolean containsProperty(String key);
 
