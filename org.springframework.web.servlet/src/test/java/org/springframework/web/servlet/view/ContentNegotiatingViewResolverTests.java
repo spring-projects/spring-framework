@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,6 +44,7 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
@@ -118,6 +120,16 @@ public class ContentNegotiatingViewResolverTests {
 				result.get(2));
 		assertEquals("Invalid content type", new MediaType("*", "*", Collections.singletonMap("q", "0.8")),
 				result.get(3));
+	}
+
+	@Test
+	public void getMediaTypeAcceptHeaderWithProduces() {
+		Set<MediaType> producibleTypes = Collections.singleton(MediaType.APPLICATION_XHTML_XML);
+		request.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, producibleTypes);
+		request.addHeader("Accept", "text/html,application/xml;q=0.9,application/xhtml+xml,*/*;q=0.8");
+		List<MediaType> result = viewResolver.getMediaTypes(request);
+		assertEquals("Invalid amount of media types", 1, result.size());
+		assertEquals("Invalid content type", new MediaType("application", "xhtml+xml"), result.get(0));
 	}
 
 	@Test

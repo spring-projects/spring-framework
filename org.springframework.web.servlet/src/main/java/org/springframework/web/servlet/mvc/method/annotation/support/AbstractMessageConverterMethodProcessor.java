@@ -19,15 +19,16 @@ package org.springframework.web.servlet.mvc.method.annotation.support;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -70,8 +71,12 @@ public abstract class AbstractMessageConverterMethodProcessor
 		this.allSupportedMediaTypes = getAllSupportedMediaTypes(messageConverters);
 	}
 
+	/**
+	 * Returns the media types supported by all provided message converters preserving their ordering and 
+	 * further sorting by specificity via {@link MediaType#sortBySpecificity(List)}. 
+	 */
 	private static List<MediaType> getAllSupportedMediaTypes(List<HttpMessageConverter<?>> messageConverters) {
-		Set<MediaType> allSupportedMediaTypes = new HashSet<MediaType>();
+		Set<MediaType> allSupportedMediaTypes = new LinkedHashSet<MediaType>();
 		for (HttpMessageConverter<?> messageConverter : messageConverters) {
 			allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
 		}
@@ -159,22 +164,24 @@ public abstract class AbstractMessageConverterMethodProcessor
 												  ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
-
-		Set<MediaType> acceptableMediaTypes = getAcceptableMediaTypes(inputMessage);
-		Set<MediaType> producibleMediaTypes = getProducibleMediaTypes(inputMessage.getServletRequest());
-
-		List<MediaType> mediaTypes = new ArrayList<MediaType>();
-		for (MediaType acceptableMediaType : acceptableMediaTypes) {
-			for (MediaType producibleMediaType : producibleMediaTypes) {
-				if (acceptableMediaType.isCompatibleWith(producibleMediaType)) {
-					mediaTypes.add(getMostSpecificMediaType(acceptableMediaType, producibleMediaType));
+		List<MediaType> acceptableMediaTypes = getAcceptableMediaTypes(inputMessage);
+		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(inputMessage.getServletRequest());
+		
+		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
+		for (MediaType a : acceptableMediaTypes) {
+			for (MediaType p : producibleMediaTypes) {
+				if (a.isCompatibleWith(p)) {
+					compatibleMediaTypes.add(getMostSpecificMediaType(a, p));
 				}
 			}
 		}
-		if (mediaTypes.isEmpty()) {
+		if (compatibleMediaTypes.isEmpty()) {
 			throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
 		}
+		
+		List<MediaType> mediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
 		MediaType.sortBySpecificity(mediaTypes);
+		
 		MediaType selectedMediaType = null;
 		for (MediaType mediaType : mediaTypes) {
 			if (mediaType.isConcrete()) {
@@ -186,6 +193,7 @@ public abstract class AbstractMessageConverterMethodProcessor
 				break;
 			}
 		}
+		
 		if (selectedMediaType != null) {
 			for (HttpMessageConverter<?> messageConverter : messageConverters) {
 				if (messageConverter.canWrite(returnValue.getClass(), selectedMediaType)) {
@@ -204,36 +212,40 @@ public abstract class AbstractMessageConverterMethodProcessor
 	/**
 	 * Returns the media types that can be produced:
 	 * <ul>
-	 * 	<li>The set of producible media types specified in the request mappings, or
-	 * 	<li>The set of supported media types by all configured message converters, or
+	 * 	<li>The producible media types specified in the request mappings, or
+	 * 	<li>The media types supported by all configured message converters, or
 	 * 	<li>{@link MediaType#ALL}
 	 * </ul>
 	 */
 	@SuppressWarnings("unchecked")
-	protected Set<MediaType> getProducibleMediaTypes(HttpServletRequest request) {
+	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request) {
 		Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			return mediaTypes;
+			return new ArrayList<MediaType>(mediaTypes);
 		}
 		else if (!allSupportedMediaTypes.isEmpty()) {
-			return new HashSet<MediaType>(allSupportedMediaTypes);
+			return allSupportedMediaTypes;
 		}
 		else {
-			return Collections.singleton(MediaType.ALL);
+			return Collections.singletonList(MediaType.ALL);
 		}
 
 	}
 
-	private Set<MediaType> getAcceptableMediaTypes(HttpInputMessage inputMessage) {
-		Set<MediaType> result = new HashSet<MediaType>(inputMessage.getHeaders().getAccept());
-		if (result.isEmpty()) {
-			result.add(MediaType.ALL);
-		}
-		return result;
+	private List<MediaType> getAcceptableMediaTypes(HttpInputMessage inputMessage) {
+		List<MediaType> result = inputMessage.getHeaders().getAccept();
+		return result.isEmpty() ? Collections.singletonList(MediaType.ALL) : result;
 	}
-	
+
+	/**
+	 * Returns the more specific media type using the q-value of the first media type for both.
+	 */
 	private MediaType getMostSpecificMediaType(MediaType type1, MediaType type2) {
-		return MediaType.SPECIFICITY_COMPARATOR.compare(type1, type2) < 0 ? type1 : type2;
+		double quality = type1.getQualityValue();
+		Map<String, String> params = Collections.singletonMap("q", String.valueOf(quality));
+		MediaType t1 = new MediaType(type1, params);
+		MediaType t2 = new MediaType(type2, params);
+		return MediaType.SPECIFICITY_COMPARATOR.compare(t1, t2) <= 0 ? type1 : type2;
 	}
 
 }

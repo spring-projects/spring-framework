@@ -21,10 +21,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -50,6 +52,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.util.UrlPathHelper;
@@ -316,10 +319,24 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		if (!this.ignoreAcceptHeader) {
 			String acceptHeader = request.getHeader(ACCEPT_HEADER);
 			if (StringUtils.hasText(acceptHeader)) {
-				List<MediaType> mediaTypes = MediaType.parseMediaTypes(acceptHeader);
+				List<MediaType> acceptableMediaTypes = MediaType.parseMediaTypes(acceptHeader);
+				List<MediaType> producibleMediaTypes = getProducibleMediaTypes(request);
+
+				Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
+				for (MediaType a : acceptableMediaTypes) {
+					for (MediaType p : producibleMediaTypes) {
+						if (a.isCompatibleWith(p)) {
+							compatibleMediaTypes.add(getMostSpecificMediaType(a, p));
+						}
+					}
+				}
+				
+				List<MediaType> mediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
 				MediaType.sortByQualityValue(mediaTypes);
+
 				if (logger.isDebugEnabled()) {
-					logger.debug("Requested media types are " + mediaTypes + " (based on Accept header)");
+					logger.debug("Requested media types are " + mediaTypes + " based on Accept header types " + 
+							"and producible media types " + producibleMediaTypes + ")");
 				}
 				return mediaTypes;
 			}
@@ -334,6 +351,28 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		else {
 			return Collections.emptyList();
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<MediaType> getProducibleMediaTypes(HttpServletRequest request) {
+		Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		if (!CollectionUtils.isEmpty(mediaTypes)) {
+			return new ArrayList<MediaType>(mediaTypes);
+		}
+		else {
+			return Collections.singletonList(MediaType.ALL);
+		}
+	}
+
+	/**
+	 * Returns the more specific media type using the q-value of the first media type for both.
+	 */
+	private MediaType getMostSpecificMediaType(MediaType type1, MediaType type2) {
+		double quality = type1.getQualityValue();
+		Map<String, String> params = Collections.singletonMap("q", String.valueOf(quality));
+		MediaType t1 = new MediaType(type1, params);
+		MediaType t2 = new MediaType(type2, params);
+		return MediaType.SPECIFICITY_COMPARATOR.compare(t1, t2) <= 0 ? type1 : type2;
 	}
 
 	/**
