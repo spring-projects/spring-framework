@@ -123,10 +123,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return this.propertySources;
 	}
 
-	public ConfigurablePropertyResolver getPropertyResolver() {
-		return this.propertyResolver;
-	}
-
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getSystemEnvironment() {
 		Map<String, ?> systemEnvironment;
