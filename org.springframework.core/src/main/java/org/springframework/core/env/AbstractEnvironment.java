@@ -16,23 +16,28 @@
 
 package org.springframework.core.env;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
+import static org.springframework.util.StringUtils.commaDelimitedListToSet;
+import static org.springframework.util.StringUtils.trimAllWhitespace;
+
 import java.security.AccessControlException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import static org.springframework.util.StringUtils.*;
 
 /**
- * Abstract base class for {@link Environment} implementations.
+ * Abstract base class for {@link Environment} implementations. Supports the notion of
+ * reserved default profile names and enables specifying active and default profiles
+ * through the {@link #ACTIVE_PROFILES_PROPERTY_NAME} and
+ * {@link #DEFAULT_PROFILES_PROPERTY_NAME} properties.
  *
  * @author Chris Beams
  * @since 3.1
@@ -52,10 +57,22 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	public static final String DEFAULT_PROFILES_PROPERTY_NAME = "spring.profiles.default";
 
+	/**
+	 * Name of reserved default profile name: {@value}. If no default profile names are
+	 * explicitly and no active profile names are explictly set, this profile will
+	 * automatically be activated by default.
+	 * @see #getReservedDefaultProfiles
+	 * @see ConfigurableEnvironment#setDefaultProfiles
+	 * @see ConfigurableEnvironment#setActiveProfiles
+	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
+	 * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
+	 */
+	protected static final String RESERVED_DEFAULT_PROFILE_NAME = "default";
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Set<String> activeProfiles = new LinkedHashSet<String>();
-	private Set<String> defaultProfiles = new LinkedHashSet<String>();
+	private Set<String> defaultProfiles = new LinkedHashSet<String>(this.getReservedDefaultProfiles());
 
 	private MutablePropertySources propertySources = new MutablePropertySources();
 	private ConfigurablePropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
@@ -69,6 +86,14 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return StringUtils.toStringArray(doGetActiveProfiles());
 	}
 
+	/**
+	 * Return the set of active profiles as explicitly set through
+	 * {@link #setActiveProfiles} or if the current set of active profiles
+	 * is empty, check for the presence of the {@value #ACTIVE_PROFILES_PROPERTY_NAME}
+	 * property and assign its value to the set of active profiles.
+	 * @see #getActiveProfiles()
+	 * @see #ACTIVE_PROFILES_PROPERTY_NAME
+	 */
 	protected Set<String> doGetActiveProfiles() {
 		if (this.activeProfiles.isEmpty()) {
 			String profiles = this.propertyResolver.getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
@@ -88,16 +113,35 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return StringUtils.toStringArray(doGetDefaultProfiles());
 	}
 
+	/**
+	 * Return the set of default profiles explicitly set via
+	 * {@link #setDefaultProfiles(String...)} or if the current set of default profiles
+	 * consists only of {@linkplain #getReservedDefaultProfiles() reserved default
+	 * profiles}, then check for the presence of the
+	 * {@value #DEFAULT_PROFILES_PROPERTY_NAME} property and assign its value (if any)
+	 * to the set of default profiles.
+	 * @see #AbstractEnvironment()
+	 * @see #getDefaultProfiles()
+	 * @see #DEFAULT_PROFILES_PROPERTY_NAME
+	 * @see #getReservedDefaultProfiles()
+	 */
 	protected Set<String> doGetDefaultProfiles() {
-		if (this.defaultProfiles.isEmpty()) {
-			String profiles = this.propertyResolver.getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
-			if (StringUtils.hasText(profiles)) {
-				this.defaultProfiles = commaDelimitedListToSet(trimAllWhitespace(profiles));
+		if (this.defaultProfiles.equals(this.getReservedDefaultProfiles())) {
+			String defaultProfiles = this.propertyResolver.getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
+			if (defaultProfiles != null) {
+				this.defaultProfiles = commaDelimitedListToSet(trimAllWhitespace(defaultProfiles));
 			}
 		}
 		return this.defaultProfiles;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>Calling this method removes overrides any reserved default profiles
+	 * that may have been added during construction of the environment.
+	 * @see #AbstractEnvironment()
+	 * @see #getReservedDefaultProfiles()
+	 */
 	public void setDefaultProfiles(String... profiles) {
 		this.defaultProfiles.clear();
 		this.defaultProfiles.addAll(Arrays.asList(profiles));

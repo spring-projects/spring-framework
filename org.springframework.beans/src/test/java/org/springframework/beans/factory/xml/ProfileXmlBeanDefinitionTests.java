@@ -120,7 +120,7 @@ public class ProfileXmlBeanDefinitionTests {
 
 	@Test
 	public void testDefaultAndNonDefaultProfile() {
-		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, NONE_ACTIVE), not(containsTargetBean()));
+		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, NONE_ACTIVE), containsTargetBean());
 		assertThat(beanFactoryFor(DEFAULT_ELIGIBLE_XML, "other"), not(containsTargetBean()));
 
 		{
@@ -151,7 +151,7 @@ public class ProfileXmlBeanDefinitionTests {
 			//env.setDefaultProfiles("default");
 			reader.setEnvironment(env);
 			reader.loadBeanDefinitions(new ClassPathResource(DEFAULT_AND_DEV_ELIGIBLE_XML, getClass()));
-			assertThat(beanFactory, not(containsTargetBean()));
+			assertThat(beanFactory, containsTargetBean());
 		}
 	}
 

@@ -66,14 +66,15 @@ package org.springframework.core.env;
 public interface Environment extends PropertyResolver {
 
 	/**
-	 * Return the set of profiles explicitly made active for this environment. Profiles are used for
-	 * creating logical groupings of bean definitions to be registered conditionally, often based on
-	 * deployment environment.  Profiles can be activated by setting {@linkplain
-	 * AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME "spring.profiles.active"} as a system property
-	 * or by calling {@link ConfigurableEnvironment#setActiveProfiles(String...)}.
+	 * Return the set of profiles explicitly made active for this environment. Profiles
+	 * are used for creating logical groupings of bean definitions to be registered
+	 * conditionally, for example based on deployment environment.  Profiles can be
+	 * activated by setting {@linkplain AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
+	 * "spring.profiles.active"} as a system property or by calling
+	 * {@link ConfigurableEnvironment#setActiveProfiles(String...)}.
 	 *
-	 * <p>If no profiles have explicitly been specified as active, then any 'default' profiles will implicitly
-	 * be considered active.
+	 * <p>If no profiles have explicitly been specified as active, then any {@linkplain
+	 * #getDefaultProfiles() default profiles} will automatically be activated.
 	 *
 	 * @see #getDefaultProfiles
 	 * @see ConfigurableEnvironment#setActiveProfiles
@@ -82,18 +83,22 @@ public interface Environment extends PropertyResolver {
 	String[] getActiveProfiles();
 
 	/**
-	 * Return the set of profiles to be active by default when no active profiles have been set explicitly.
+	 * Return the set of profiles to be active by default when no active profiles have
+	 * been set explicitly.
 	 *
 	 * @see #getActiveProfiles
 	 * @see ConfigurableEnvironment#setDefaultProfiles
+	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
 	 */
 	String[] getDefaultProfiles();
 
 	/**
-	 * @return whether one or more of the given profiles is active, or in the case of no explicit active
-	 * profiles, whether one or more of the given profiles is included in the set of default profiles
+	 * @return whether one or more of the given profiles is active, or in the case of no
+	 * explicit active profiles, whether one or more of the given profiles is included in
+	 * the set of default profiles
 	 * @throws IllegalArgumentException unless at least one profile has been specified
-	 * @throws IllegalArgumentException if any profile is the empty string or consists only of whitespace
+	 * @throws IllegalArgumentException if any profile is the empty string or consists
+	 * only of whitespace
 	 * @see #getActiveProfiles
 	 * @see #getDefaultProfiles
 	 */
