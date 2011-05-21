@@ -89,9 +89,18 @@ public interface ClassMetadata {
 	String getSuperClassName();
 
 	/**
-	 * Return the name of all interfaces that the underlying class
+	 * Return the names of all interfaces that the underlying class
 	 * implements, or an empty array if there are none.
 	 */
 	String[] getInterfaceNames();
+
+	/**
+	 * Return the names of all classes declared as members of the class represented by
+	 * this ClassMetadata object. This includes public, protected, default (package)
+	 * access, and private classes and interfaces declared by the class, but excludes
+	 * inherited classes and interfaces. An empty array is returned if no member classes
+	 * or interfaces exist.
+	 */
+	String[] getMemberClassNames();
 
 }

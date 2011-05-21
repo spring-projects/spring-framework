@@ -16,6 +16,9 @@
 
 package org.springframework.core.type.classreading;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.Attribute;
 import org.springframework.asm.ClassVisitor;
@@ -54,7 +57,9 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 	private String superClassName;
 
 	private String[] interfaces;
-	
+
+	private Set<String> memberClassNames = new LinkedHashSet<String>();
+
 
 	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
 		this.className = ClassUtils.convertResourcePathToClassName(name);
@@ -75,9 +80,16 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 	}
 
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-		if (outerName != null && this.className.equals(ClassUtils.convertResourcePathToClassName(name))) {
-			this.enclosingClassName = ClassUtils.convertResourcePathToClassName(outerName);
-			this.independentInnerClass = ((access & Opcodes.ACC_STATIC) != 0);
+		String fqName = ClassUtils.convertResourcePathToClassName(name);
+		String fqOuterName = ClassUtils.convertResourcePathToClassName(outerName);
+		if (outerName != null) {
+			if (this.className.equals(fqName)) {
+				this.enclosingClassName = fqOuterName;
+				this.independentInnerClass = ((access & Opcodes.ACC_STATIC) != 0);
+			}
+			else if (this.className.equals(fqOuterName)) {
+				this.memberClassNames.add(fqName);
+			}
 		}
 	}
 
@@ -151,6 +163,10 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 
 	public String[] getInterfaceNames() {
 		return this.interfaces;
+	}
+
+	public String[] getMemberClassNames() {
+		return this.memberClassNames.toArray(new String[this.memberClassNames.size()]);
 	}
 
 }
