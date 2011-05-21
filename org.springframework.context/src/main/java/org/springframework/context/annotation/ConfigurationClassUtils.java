@@ -79,18 +79,31 @@ abstract class ConfigurationClassUtils {
 		}
 
 		if (metadata != null) {
-			if (metadata.isAnnotated(Configuration.class.getName())) {
+			if (isFullConfigurationCandidate(metadata)) {
 				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 				return true;
 			}
-			else if (metadata.isAnnotated(Component.class.getName()) ||
-					metadata.hasAnnotatedMethods(Bean.class.getName())) {
+			else if (isLiteConfigurationCandidate(metadata)) {
 				beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 				return true;
 			}
 		}
 		return false;
 	}
+
+	public static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
+		return isFullConfigurationCandidate(metadata) || isLiteConfigurationCandidate(metadata);
+	}
+
+	public static boolean isFullConfigurationCandidate(AnnotationMetadata metadata) {
+		return metadata.isAnnotated(Configuration.class.getName());
+	}
+
+	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
+		return metadata.isAnnotated(Component.class.getName()) ||
+				metadata.hasAnnotatedMethods(Bean.class.getName());
+	}
+
 
 	/**
 	 * Determine whether the given bean definition indicates a full @Configuration class.
