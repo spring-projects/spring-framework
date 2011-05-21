@@ -80,9 +80,9 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 	}
 
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-		String fqName = ClassUtils.convertResourcePathToClassName(name);
-		String fqOuterName = ClassUtils.convertResourcePathToClassName(outerName);
 		if (outerName != null) {
+			String fqName = ClassUtils.convertResourcePathToClassName(name);
+			String fqOuterName = ClassUtils.convertResourcePathToClassName(outerName);
 			if (this.className.equals(fqName)) {
 				this.enclosingClassName = fqOuterName;
 				this.independentInnerClass = ((access & Opcodes.ACC_STATIC) != 0);
