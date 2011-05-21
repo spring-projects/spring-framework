@@ -23,15 +23,18 @@ import org.springframework.util.Assert;
 
 /**
  * Standalone application context, accepting annotated classes as input - in particular
- * {@link org.springframework.context.annotation.Configuration @Configuration}-annotated
- * classes, but also plain {@link org.springframework.stereotype.Component @Components}
- * and JSR-330 compliant classes using {@code javax.inject} annotations. Allows for
- * registering classes one by one ({@link #register}) as well as for classpath scanning
- * ({@link #scan}).
+ * {@link Configuration @Configuration}-annotated classes, but also plain
+ * {@link org.springframework.stereotype.Component @Component} types and JSR-330 compliant
+ * classes using {@code javax.inject} annotations. Allows for registering classes one by
+ * one using {@link #register(Class...)} as well as for classpath scanning using
+ * {@link #scan(String...)}.
  *
- * <p>In case of multiple Configuration classes, {@link Bean} methods defined in later
- * classes will override those defined in earlier classes. This can be leveraged to
- * deliberately override certain bean definitions via an extra Configuration class.
+ * <p>In case of multiple {@code @Configuration} classes, @{@link Bean} methods defined in
+ * later classes will override those defined in earlier classes. This can be leveraged to
+ * deliberately override certain bean definitions via an extra {@code @Configuration}
+ * class.
+ *
+ * <p>See @{@link Configuration} Javadoc for usage examples.
  *
  * @author Chris Beams
  * @author Juergen Hoeller

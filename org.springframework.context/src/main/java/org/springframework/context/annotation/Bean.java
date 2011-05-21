@@ -67,8 +67,7 @@ import org.springframework.beans.factory.annotation.Autowire;
  *     &#064;Bean
  *     public static PropertyPlaceholderConfigurer ppc() {
  *         // instantiate, configure and return ppc ...
- *     }
- * </pre>
+ *     }</pre>
  * By marking this method as {@code static}, it can be invoked without causing instantiation of its
  * declaring {@code @Configuration} class, thus avoiding the above-mentioned lifecycle conflicts.
  * Note however that {@code static} {@code @Bean} methods will not be enhanced for scoping and AOP
