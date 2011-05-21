@@ -23,12 +23,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates one or more {@link Configuration @Configuration} classes to import.
+ * Indicates one or more @{@link @Configuration} classes to import.
  *
  * <p>Provides functionality equivalent to the {@code <import/>} element in Spring XML.
- * Only supported for actual {@code @Configuration}-annotated classes.
+ * Only supported for actual {@code @Configuration}-annotated classes and implementations
+ * of the {@link ImportSelector} interface.
  *
- * <p>{@code @Bean} definitions declared in imported {@code @Configuration} classes
+ * <p>{@link Bean @Bean} definitions declared in imported {@code @Configuration} classes
  * should be accessed by using {@link Autowired @Autowired} injection.  Either the bean
  * itself can be autowired, or the configuration class instance declaring the bean can be
  * autowired.  The latter approach allows for explicit, IDE-friendly navigation between
@@ -41,6 +42,7 @@ import java.lang.annotation.Target;
  * @since 3.0
  * @see Configuration
  * @see ImportResource
+ * @see ImportSelector
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
