@@ -17,6 +17,7 @@
 package org.springframework.core.type;
 
 import java.lang.reflect.Modifier;
+import java.util.LinkedHashSet;
 
 import org.springframework.util.Assert;
 
@@ -100,6 +101,14 @@ public class StandardClassMetadata implements ClassMetadata {
 			ifcNames[i] = ifcs[i].getName();
 		}
 		return ifcNames;
+	}
+
+	public String[] getMemberClassNames() {
+		LinkedHashSet<String> memberClassNames = new LinkedHashSet<String>();
+		for (Class<?> nestedClass : this.introspectedClass.getDeclaredClasses()) {
+			memberClassNames.add(nestedClass.getName());
+		}
+		return memberClassNames.toArray(new String[memberClassNames.size()]);
 	}
 
 }
