@@ -232,6 +232,37 @@ import org.springframework.stereotype.Component;
  *     }
  * }</pre>
  *
+ * <h3>With nested {@code @Configuration} classes</h3>
+ * {@code @Configuration} classes may be nested within one another as follows:
+ * <pre class="code">
+ * &#064;Configuration
+ * public class AppConfig {
+ *     &#064;Inject DataSource dataSource;
+ *
+ *     &#064;Bean
+ *     public MyBean myBean() {
+ *         return new MyBean(dataSource);
+ *     }
+ *
+ *     &#064;Configuration
+ *     static class DatabaseConfig {
+ *         &#064;Bean
+ *         DataSource dataSource() {
+ *             return new EmbeddedDatabaseBuilder().build();
+ *         }
+ *     }
+ * }</pre>
+ *
+ * When bootstrapping such an arrangement, only {@code AppConfig} need be registered
+ * against the application context. By virtue of being a nested {@code @Configuration}
+ * class, {@code DatabaseConfig} <em>will be registered automatically</em>. This avoids
+ * the need to use an {@code @Import} annotation when the relationship between
+ * {@code AppConfig} {@code DatabaseConfig} is already implicitly clear.
+ *
+ * <p>Note also that nested {@code @Configuration} classes can be used to good effect
+ * with the {@code @Profile} annotation to provide two options of the same bean to the
+ * enclosing {@code @Configuration} class.
+ *
  * <h2>Configuring lazy initialization</h2>
  * <p>By default, {@code @Bean} methods will be <em>eagerly instantiated</em> at container
  * bootstrap time.  To avoid this, {@code @Configuration} may be used in conjunction with

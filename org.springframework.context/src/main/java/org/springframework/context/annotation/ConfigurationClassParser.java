@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import static org.springframework.context.annotation.ConfigurationClassUtils.isConfigurationCandidate;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -157,6 +159,17 @@ class ConfigurationClassParser {
 	}
 
 	protected void doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
+
+		// recursively process any member (nested) classes first
+		for (String memberClassName : metadata.getMemberClassNames()) {
+			MetadataReader reader = this.metadataReaderFactory.getMetadataReader(memberClassName);
+			AnnotationMetadata memberClassMetadata = reader.getAnnotationMetadata();
+			if (isConfigurationCandidate(memberClassMetadata)) {
+				processConfigurationClass(new ConfigurationClass(reader, null));
+			}
+		}
+
+		// process any @PropertySource annotations
 		Map<String, Object> propertySourceAttributes =
 			metadata.getAnnotationAttributes(org.springframework.context.annotation.PropertySource.class.getName());
 		if (propertySourceAttributes != null) {
@@ -169,6 +182,7 @@ class ConfigurationClassParser {
 			this.propertySources.push(ps);
 		}
 
+		// process any @ComponentScan annotions
 		Map<String, Object> componentScanAttributes = metadata.getAnnotationAttributes(ComponentScan.class.getName());
 		if (componentScanAttributes != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
@@ -188,12 +202,14 @@ class ConfigurationClassParser {
 			}
 		}
 
+		// process any @Import annotations
 		List<Map<String, Object>> allImportAttribs =
 			AnnotationUtils.findAllAnnotationAttributes(Import.class, metadata.getClassName(), true);
 		for (Map<String, Object> importAttribs : allImportAttribs) {
 			processImport(configClass, (String[]) importAttribs.get("value"), true);
 		}
 
+		// process any @ImportResource annotations
 		if (metadata.isAnnotated(ImportResource.class.getName())) {
 			String[] resources = (String[]) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("value");
 			Class<?> readerClass = (Class<?>) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("reader");
@@ -205,6 +221,8 @@ class ConfigurationClassParser {
 				configClass.addImportedResource(resource, readerClass);
 			}
 		}
+
+		// process individual @Bean methods
 		Set<MethodMetadata> beanMethods = metadata.getAnnotatedMethods(Bean.class.getName());
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
