@@ -412,35 +412,6 @@ public class GenericConversionServiceTests {
 		assertNull(conversionService.convert(list, sourceType, targetType));
 	}
 
-	@Test
-	public void emptyMapToMap() throws Exception {
-		conversionService.addConverter(new MapToMapConverter(conversionService));
-		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		Map<String, String> map = new HashMap<String, String>();
-		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
-		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyMapTarget"));
-		assertTrue(conversionService.canConvert(sourceType, targetType));
-		assertEquals(map, conversionService.convert(map, sourceType, targetType));
-	}
-
-	public Map<String, String> emptyMapTarget;
-
-	@Test
-	public void emptyMapToMapDifferentTargetType() throws Exception {
-		conversionService.addConverter(new MapToMapConverter(conversionService));
-		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		Map<String, String> map = new HashMap<String, String>();
-		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
-		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyMapDifferentTarget"));
-		assertTrue(conversionService.canConvert(sourceType, targetType));
-		@SuppressWarnings("unchecked")
-		LinkedHashMap<String, String> result = (LinkedHashMap<String, String>) conversionService.convert(map, sourceType, targetType);
-		assertEquals(map, result);
-		assertEquals(LinkedHashMap.class, result.getClass());
-	}
-
-	public LinkedHashMap<String, String> emptyMapDifferentTarget;
-	
 	private interface MyBaseInterface {
 
 	}

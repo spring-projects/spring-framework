@@ -343,24 +343,33 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Create a copy of this nested type descriptor and apply the specific type information from the indexed object.
+	 * Create a copy of this nested type descriptor and apply the specific type information from the indexed value, if necessary.
 	 * Used to support collection and map indexing scenarios, where the indexer has a reference to the indexed type descriptor but needs to ensure its type actually represents the indexed object type.
-	 * This is necessary to support type conversion during index object binding operations.
+	 * This is necessary to support type conversion during collection and map binding operations where generic information may not be available.
 	 */
 	public TypeDescriptor applyIndexedObject(Object object) {
 		if (object == null) {
 			return this;
 		}
-		// TODO preserve binding context with returned copy
-		// TODO fall back to generic info if collection is empty
-		if (object instanceof Collection<?>) {
-			return new TypeDescriptor(object.getClass(), CollectionUtils.findCommonElementType((Collection<?>) object));
+		if (isCollection() && Object.class.equals(getElementType())) {
+			Collection<?> collection = (Collection<?>) object;
+			if (collection.size() > 0) {
+				return new TypeDescriptor(object.getClass(), CollectionUtils.findCommonElementType((Collection<?>) object), methodParameter, field, fieldNestingLevel, annotations);
+			} else {
+				return this;
+			}
 		}
-		else if (object instanceof Map<?, ?>) {
-			return new TypeDescriptor(object.getClass(), CollectionUtils.findCommonElementType(((Map<?, ?>) object).keySet()), CollectionUtils.findCommonElementType(((Map<?, ?>) object).values()));
+		else if (isMap() && Object.class.equals(getMapKeyType()) && Object.class.equals(getMapValueType())) {
+			Map<?, ?> map = (Map<?, ?>) object;
+			if (map.size() > 0) {
+				return new TypeDescriptor(object.getClass(), CollectionUtils.findCommonElementType(((Map<?, ?>) object).keySet()),
+						CollectionUtils.findCommonElementType(((Map<?, ?>) object).values()), methodParameter, field, fieldNestingLevel, annotations);
+			} else {
+				return this;
+			}
 		}
 		else {
-			return valueOf(object.getClass());
+			return this;
 		}
 	}
 	
@@ -487,6 +496,7 @@ public class TypeDescriptor {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Class<?> resolveCollectionElementType() {
 		if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
@@ -495,10 +505,11 @@ public class TypeDescriptor {
 			return GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.fieldNestingLevel);
 		}
         else {
-			return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection>) this.type);
+			return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection<?>>) this.type);
 		}		
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Class<?> resolveMapKeyType() {
 		if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter);
@@ -507,10 +518,11 @@ public class TypeDescriptor {
 			return GenericCollectionTypeResolver.getMapKeyFieldType(this.field, this.fieldNestingLevel);
 		}
 		else {
-			return GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map>) this.type);
+			return GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map<?, ?>>) this.type);
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private Class<?> resolveMapValueType() {
 		if (this.methodParameter != null) {
 			return GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter);
@@ -519,7 +531,7 @@ public class TypeDescriptor {
 			return GenericCollectionTypeResolver.getMapValueFieldType(this.field, this.fieldNestingLevel);
 		}
 		else {
-			return GenericCollectionTypeResolver.getMapValueType((Class<? extends Map>) this.type);
+			return GenericCollectionTypeResolver.getMapValueType((Class<? extends Map<?, ?>>) this.type);
 		}
 	}
 
@@ -550,7 +562,7 @@ public class TypeDescriptor {
 		}
 		this.elementType = TypeDescriptor.valueOf(elementType);
 	}
-	
+
 	private TypeDescriptor(Class<?> mapType, Class<?> keyType, Class<?> valueType) {
 		this.type = mapType;
 		if (keyType == null) {
@@ -561,6 +573,22 @@ public class TypeDescriptor {
 		}
 		this.mapKeyType = TypeDescriptor.valueOf(keyType);
 		this.mapValueType = TypeDescriptor.valueOf(valueType);
+	}
+
+	private TypeDescriptor(Class<?> collectionType, Class<?> elementType, MethodParameter methodParameter, Field field, int fieldNestingLevel, Annotation[] annotations) {
+		this(collectionType, elementType);
+		this.methodParameter = methodParameter;
+		this.field = field;
+		this.fieldNestingLevel = fieldNestingLevel;
+		this.annotations = annotations;
+	}
+
+	private TypeDescriptor(Class<?> mapType, Class<?> keyType, Class<?> valueType, MethodParameter methodParameter, Field field, int fieldNestingLevel, Annotation[] annotations) {
+		this(mapType, keyType, valueType);
+		this.methodParameter = methodParameter;
+		this.field = field;
+		this.fieldNestingLevel = fieldNestingLevel;
+		this.annotations = annotations;
 	}
 
 	private TypeDescriptor(Class<?> nestedType, Field field, int nestingLevel) {

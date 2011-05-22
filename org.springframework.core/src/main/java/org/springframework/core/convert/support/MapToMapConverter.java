@@ -66,15 +66,22 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		if (source == null) {
 			return null;
 		}
-		Map<?, ?> sourceMap = (Map<?, ?>) source;
-		Map targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
-		for (Object entry : sourceMap.entrySet()) {
-			Map.Entry sourceMapEntry = (Map.Entry) entry;
-			Object sourceKey = sourceMapEntry.getKey();
-			Object sourceValue = sourceMapEntry.getValue();
-			Object targetKey = this.conversionService.convert(sourceKey, sourceType.getMapKeyTypeDescriptor().applyIndexedObject(sourceKey), targetType.getMapKeyTypeDescriptor());
-			Object targetValue = this.conversionService.convert(sourceValue, sourceType.getMapValueTypeDescriptor().applyIndexedObject(sourceValue), targetType.getMapValueTypeDescriptor());
-			targetMap.put(targetKey, targetValue);
+		Map<Object, Object> sourceMap = (Map<Object, Object>) source;
+		Map<Object, Object> targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
+		TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
+		TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
+		if (Object.class.equals(targetKeyType.getType()) && Object.class.equals(targetValueType.getType())) {
+			for (Map.Entry<Object, Object> entry : sourceMap.entrySet()) {
+				targetMap.put(entry.getKey(), entry.getValue());
+			}
+		} else {
+			for (Map.Entry<Object, Object> entry : sourceMap.entrySet()) {
+				Object sourceKey = entry.getKey();
+				Object sourceValue = entry.getValue();
+				Object targetKey = this.conversionService.convert(sourceKey, sourceType.getMapKeyTypeDescriptor().applyIndexedObject(sourceKey), targetType.getMapKeyTypeDescriptor());
+				Object targetValue = this.conversionService.convert(sourceValue, sourceType.getMapValueTypeDescriptor().applyIndexedObject(sourceValue), targetType.getMapValueTypeDescriptor());
+				targetMap.put(targetKey, targetValue);
+			}			
 		}
 		return targetMap;
 	}
