@@ -13,14 +13,12 @@ public class Spr7728Tests
 {
     private CollectionToCollectionConverter theConverter;
     private Vector<String> theSrcVector;
-    private TypeDescriptor theSrcType;
     private TypeDescriptor theTargetType;
 
     @Before
     public void setup()
     {
         theSrcVector = new Vector<String>();
-        theSrcType = TypeDescriptor.forObject(theSrcVector);
         theTargetType = TypeDescriptor.forObject(new ArrayList());
         theConverter = new CollectionToCollectionConverter(new GenericConversionService());
     }
@@ -30,7 +28,6 @@ public class Spr7728Tests
         throws Exception
     {
         theSrcVector.add("Element");
-
         testCollectionConversionToArrayList(theSrcVector);
     }
 
@@ -43,8 +40,7 @@ public class Spr7728Tests
 
     private void testCollectionConversionToArrayList(Collection<String> aSource)
     {
-        Object myConverted = theConverter.convert(aSource, theSrcType, theTargetType);
-
+        Object myConverted = theConverter.convert(aSource, TypeDescriptor.forObject(aSource), theTargetType);
         Assert.assertTrue(myConverted instanceof ArrayList<?>);
         Assert.assertEquals(aSource.size(), ((ArrayList<?>) myConverted).size());
     }
