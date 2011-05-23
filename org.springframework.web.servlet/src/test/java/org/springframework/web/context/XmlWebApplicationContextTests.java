@@ -16,6 +16,9 @@
 
 package org.springframework.web.context;
 
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertThat;
+
 import java.util.Locale;
 
 import javax.servlet.ServletException;
@@ -70,6 +73,10 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		wac.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/test-servlet.xml"});
 		wac.refresh();
 		return wac;
+	}
+
+	public void testEnvironmentInheritance() {
+		assertThat(this.applicationContext.getEnvironment(), sameInstance(this.root.getEnvironment()));
 	}
 
 	/**
