@@ -16,9 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.ConverterRegistry;
-
 /**
  * A specialization of {@link GenericConversionService} configured by default with
  * converters appropriate for most applications.

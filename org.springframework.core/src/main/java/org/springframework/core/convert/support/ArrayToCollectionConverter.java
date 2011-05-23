@@ -52,12 +52,13 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 		return this.conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor());
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}		
 		int length = Array.getLength(source);
-		Collection target = CollectionFactory.createCollection(targetType.getType(), length);
+		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), length);
 		for (int i = 0; i < length; i++) {
 			Object sourceElement = Array.get(source, i);
 			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor());

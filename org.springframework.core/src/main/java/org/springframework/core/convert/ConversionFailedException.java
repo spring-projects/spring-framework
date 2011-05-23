@@ -25,6 +25,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public final class ConversionFailedException extends ConversionException {
 
 	private final TypeDescriptor sourceType;
