@@ -16,12 +16,14 @@
 
 package org.springframework.web.context.support;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.annotation.ScopeMetadataResolver;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.web.context.WebApplicationContext} implementation
@@ -57,14 +59,92 @@ import org.springframework.context.annotation.ScopeMetadataResolver;
  */
 public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext {
 
+	private Class<?>[] annotatedClasses;
+
+	private String[] basePackages;
+
 	/**
-	 * Register a {@link BeanDefinition} for each class specified by {@link #getConfigLocations()},
-	 * or scan each specified package for annotated classes. Enables the default set of
-	 * annotation configuration post processors, such that {@code @Autowired},
-	 * {@code @Required}, and associated annotations can be used.
-	 * <p>Configuration class bean definitions are registered with generated bean definition
-	 * names unless the {@code value} attribute is provided to the stereotype annotation.
-	 * @see #getConfigLocations()
+	 * {@inheritDoc}
+	 * <p>This implementation accepts delimited values in the form of fully-qualified
+	 * class names, (typically of {@code Configuration} classes) or fully-qualified
+	 * packages to scan for annotated classes. During {@link #loadBeanDefinitions}, these
+	 * locations will be processed in their given order, first attempting to load each
+	 * value as a class. If class loading fails (i.e. a {@code ClassNotFoundException}
+	 * occurs), the value is assumed to be a package and scanning is attempted.
+	 * <p>Note that this method exists primarily for compatibility with Spring's
+	 * {@link org.springframework.web.context.ContextLoader} and that if this application
+	 * context is being configured through an
+	 * {@link org.springframework.context.ApplicationContextInitializer}, use of the
+	 * {@link #register} and {@link #scan} methods are preferred.
+	 * @see #register(Class...)
+	 * @see #scan(String...)
+	 * @see #setConfigLocations(String[])
+	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
+	 */
+	@Override
+	public void setConfigLocation(String location) {
+		super.setConfigLocation(location);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation accepts individual location values as fully-qualified class
+	 * names (typically {@code @Configuration} classes) or fully-qualified packages to
+	 * scan. During {@link #loadBeanDefinitions}, these locations will be processed in
+	 * order, first attempting to load values as a class, and upon class loading failure
+	 * the value is assumed to be a package to be scanned.
+	 * <p>Note that this method exists primarily for compatibility with Spring's
+	 * {@link org.springframework.web.context.ContextLoader} and that if this application
+	 * context is being configured through an
+	 * {@link org.springframework.context.ApplicationContextInitializer}, use of the
+	 * {@link #register} and {@link #scan} methods are preferred.
+	 * @see #scan(String...)
+	 * @see #register(Class...)
+	 * @see #setConfigLocation(String)
+	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
+	 */
+	@Override
+	public void setConfigLocations(String[] locations) {
+		super.setConfigLocations(locations);
+	}
+
+	/**
+	 * Set the annotated classes (typically {@code @Configuration} classes)
+	 * for this web application context.
+	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
+	 */
+	public void register(Class<?>... annotatedClasses) {
+		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
+		this.annotatedClasses = annotatedClasses;
+	}
+
+	/**
+	 * Set the base packages to be scanned for annotated classes.
+	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
+	 */
+	public void scan(String... basePackages) {
+		Assert.notEmpty(basePackages, "At least one base package must be specified");
+		this.basePackages = basePackages;
+	}
+
+	/**
+	 * Register a {@link org.springframework.beans.factory.config.BeanDefinition} for
+	 * any classes specified by {@link #register(Class...)} and scan any packages
+	 * specified by {@link #scan(String...)}.
+	 * <p>For any values specified by {@link #setConfigLocation(String)} or
+	 * {@link #setConfigLocations(String[])}, attempt first to load each location as a
+	 * class, registering a {@code BeanDefinition} if class loading is successful,
+	 * and if class loading fails (i.e. a {@code ClassNotFoundException} is raised),
+	 * assume the value is a package and attempt to scan it for annotated classes.
+	 * <p>Enables the default set of annotation configuration post processors, such that
+	 * {@code @Autowired}, {@code @Required}, and associated annotations can be used.
+	 * <p>Configuration class bean definitions are registered with generated bean
+	 * definition names unless the {@code value} attribute is provided to the stereotype
+	 * annotation.
+	 * @see #register(Class...)
+	 * @see #scan(String...)
+	 * @see #setConfigLocation()
+	 * @see #setConfigLocations()
 	 * @see AnnotatedBeanDefinitionReader
 	 * @see ClassPathBeanDefinitionScanner
 	 */
@@ -85,6 +165,22 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 		if (scopeMetadataResolver != null) {
 			reader.setScopeMetadataResolver(scopeMetadataResolver);
 			scanner.setScopeMetadataResolver(scopeMetadataResolver);
+		}
+
+		if (!ObjectUtils.isEmpty(this.annotatedClasses)) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Registering annotated classes: [" +
+						StringUtils.arrayToCommaDelimitedString(this.annotatedClasses) + "]");
+			}
+			reader.register(this.annotatedClasses);
+		}
+
+		if (!ObjectUtils.isEmpty(this.basePackages)) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Scanning base packages: [" +
+						StringUtils.arrayToCommaDelimitedString(this.basePackages) + "]");
+			}
+			scanner.scan(this.basePackages);
 		}
 
 		String[] configLocations = getConfigLocations();
