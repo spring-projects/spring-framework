@@ -16,9 +16,9 @@
 
 package org.springframework.web.context.support;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.junit.Assert.assertNotNull;
 
+import org.junit.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,8 +28,20 @@ import org.springframework.context.annotation.Configuration;
 public class AnnotationConfigWebApplicationContextTests {
 
 	@Test
-	public void testSingleWellFormedConfigLocation() {
-		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
+	public void registerSingleClass() {
+		AnnotationConfigWebApplicationContext ctx =
+			new AnnotationConfigWebApplicationContext();
+		ctx.register(Config.class);
+		ctx.refresh();
+
+		TestBean bean = ctx.getBean(TestBean.class);
+		assertNotNull(bean);
+	}
+
+	@Test
+	public void configLocationWithSingleClass() {
+		AnnotationConfigWebApplicationContext ctx =
+			new AnnotationConfigWebApplicationContext();
 		ctx.setConfigLocation(Config.class.getName());
 		ctx.refresh();
 
@@ -41,7 +53,7 @@ public class AnnotationConfigWebApplicationContextTests {
 	@Configuration
 	static class Config {
 		@Bean
-		public TestBean testBean() {
+		public TestBean myTestBean() {
 			return new TestBean();
 		}
 	}
