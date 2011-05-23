@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,34 +19,47 @@ package org.springframework.web.context.support;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+import org.springframework.context.annotation.AnnotationConfigCapableApplicationContext;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.annotation.ScopeMetadataResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.ContextLoader;
 
 /**
- * {@link org.springframework.web.context.WebApplicationContext} implementation
- * which accepts annotated classes as input - in particular
+ * {@link org.springframework.web.context.WebApplicationContext WebApplicationContext}
+ * implementation which accepts annotated classes as input - in particular
  * {@link org.springframework.context.annotation.Configuration @Configuration}-annotated
- * classes, but also plain {@link org.springframework.stereotype.Component @Components}
- * and JSR-330 compliant classes using {@code javax.inject} annotations. Allows for
- * registering classes one by one (specifying class names as config location) as well
+ * classes, but also plain {@link org.springframework.stereotype.Component @Component}
+ * classes and JSR-330 compliant classes using {@code javax.inject} annotations. Allows
+ * for registering classes one by one (specifying class names as config location) as well
  * as for classpath scanning (specifying base packages as config location).
  *
  * <p>This is essentially the equivalent of
  * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext}
  * for a web environment.
  *
- * <p>To make use of this application context, the "contextClass" context-param for
+ * <p>To make use of this application context, the
+ * {@linkplain ContextLoader#CONTEXT_CLASS_PARAM "contextClass"} context-param for
  * ContextLoader and/or "contextClass" init-param for FrameworkServlet must be set to
  * the fully-qualified name of this class.
  *
  * <p>Unlike {@link XmlWebApplicationContext}, no default configuration class locations
- * are assumed. Rather, it is a requirement to set the "contextConfigLocation"
- * context-param for ContextLoader and/or "contextConfigLocation" init-param for
+ * are assumed. Rather, it is a requirement to set the
+ * {@linkplain ContextLoader#CONFIG_LOCATION_PARAM "contextConfigLocation"}
+ * context-param for {@link ContextLoader} and/or "contextConfigLocation" init-param for
  * FrameworkServlet.  The param-value may contain both fully-qualified
- * class names and base packages to scan for components.
+ * class names and base packages to scan for components. See {@link #loadBeanDefinitions}
+ * for exact details on how these locations are processed.
+ *
+ * <p>As an alternative to setting the "contextConfigLocation" parameter, users may
+ * implement an {@link org.springframework.context.ApplicationContextInitializer
+ * ApplicationContextInitializer} and set the
+ * {@linkplain ContextLoader#CONTEXT_INITIALIZER_CLASSES_PARAM "contextInitializerClasses"}
+ * context-param / init-param. In such cases, users should favor the {@link #refresh()}
+ * and {@link #scan(String...)} methods over the {@link #setConfigLocation(String)}
+ * method, which is primarily for use by {@code ContextLoader}
  *
  * <p>Note: In case of multiple {@code @Configuration} classes, later {@code @Bean}
  * definitions will override ones defined in earlier loaded files. This can be leveraged
@@ -55,13 +68,19 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.0
+ * @see org.springframework.context.annotation.AnnotationConfigCapableApplicationContext
  * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
-public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext {
+public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext
+		implements AnnotationConfigCapableApplicationContext {
 
 	private Class<?>[] annotatedClasses;
 
 	private String[] basePackages;
+
+	private BeanNameGenerator beanNameGenerator;
+
+	private ScopeMetadataResolver scopeMetadataResolver;
 
 	/**
 	 * {@inheritDoc}
@@ -109,9 +128,11 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	}
 
 	/**
-	 * Set the annotated classes (typically {@code @Configuration} classes)
-	 * for this web application context.
+	 * {@inheritDoc}
 	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
+	 * @see #register(Class...)
+	 * @see #setConfigLocation(String)
+	 * @see #refresh()
 	 */
 	public void register(Class<?>... annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
@@ -119,8 +140,11 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	}
 
 	/**
-	 * Set the base packages to be scanned for annotated classes.
+	 * {@inheritDoc}
 	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
+	 * @see #register(Class...)
+	 * @see #setConfigLocation(String)
+	 * @see #refresh()
 	 */
 	public void scan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
@@ -212,6 +236,10 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 		}
 	}
 
+	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
+		this.beanNameGenerator = beanNameGenerator;
+	}
+
 	/**
 	 * Provide a custom {@link BeanNameGenerator} for use with {@link AnnotatedBeanDefinitionReader}
 	 * and/or {@link ClassPathBeanDefinitionScanner}, if any.
@@ -220,7 +248,11 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * @see ClassPathBeanDefinitionScanner#setBeanNameGenerator
 	 */
 	protected BeanNameGenerator getBeanNameGenerator() {
-		return null;
+		return this.beanNameGenerator;
+	}
+
+	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
+		this.scopeMetadataResolver = scopeMetadataResolver;
 	}
 
 	/**
@@ -231,7 +263,6 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * @see ClassPathBeanDefinitionScanner#setScopeMetadataResolver
 	 */
 	protected ScopeMetadataResolver getScopeMetadataResolver() {
-		return null;
+		return this.scopeMetadataResolver;
 	}
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,8 @@ import org.springframework.util.Assert;
  * @see ClassPathBeanDefinitionScanner
  * @see org.springframework.context.support.GenericXmlApplicationContext
  */
-public class AnnotationConfigApplicationContext extends GenericApplicationContext {
+public class AnnotationConfigApplicationContext extends GenericApplicationContext
+		implements AnnotationConfigCapableApplicationContext {
 
 	private final AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(this);
 
@@ -101,8 +102,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	}
 
 	/**
-	 * Set the BeanNameGenerator to use for detected bean classes.
-	 * <p>Default is a {@link AnnotationBeanNameGenerator}.
+	 * {@inheritDoc}
+	 * <p>Any call to this method must occur prior to calls to {@link #register(Class...)}
+	 * and/or {@link #scan(String...)}.
 	 */
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
 		this.reader.setBeanNameGenerator(beanNameGenerator);
@@ -110,37 +112,20 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	}
 
 	/**
-	 * Set the ScopeMetadataResolver to use for detected bean classes.
-	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
+	 * {@inheritDoc}
+	 * <p>Any call to this method must occur prior to calls to {@link #register(Class...)}
+	 * and/or {@link #scan(String...)}.
 	 */
 	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
 		this.reader.setScopeMetadataResolver(scopeMetadataResolver);
 		this.scanner.setScopeMetadataResolver(scopeMetadataResolver);
 	}
 
-	/**
-	 * Register an annotated class to be processed. Allows for programmatically
-	 * building a {@link AnnotationConfigApplicationContext}. Note that
-	 * {@link AnnotationConfigApplicationContext#refresh()} must be called in
-	 * order for the context to fully process the new class.
-	 * <p>Calls to {@link #register} are idempotent; adding the same
-	 * annotated class more than once has no additional effect.
-	 * @param annotatedClasses one or more annotated classes,
-	 * e.g. {@link Configuration @Configuration} classes
-	 * @see #refresh()
-	 */
 	public void register(Class<?>... annotatedClasses) {
 		Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
 		this.reader.register(annotatedClasses);
 	}
 
-	/**
-	 * Perform a scan within the specified base packages.
-	 * Note that {@link AnnotationConfigApplicationContext#refresh()} must be
-	 * called in order for the context to fully process the new class.
-	 * @param basePackages the packages to check for annotated classes
-	 * @see #refresh()
-	 */
 	public void scan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		this.scanner.scan(basePackages);
