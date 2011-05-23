@@ -11,7 +11,7 @@
 		</layout>
 	</appender>
 
-	<logger name="org.springframework.core">
+	<logger name="org.springframework.core.convert">
 		<level value="warn" />
 	</logger>
 
