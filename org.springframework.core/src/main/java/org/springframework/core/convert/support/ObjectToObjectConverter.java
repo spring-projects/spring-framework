@@ -44,8 +44,8 @@ import org.springframework.util.ReflectionUtils;
 final class ObjectToObjectConverter implements ConditionalGenericConverter {
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Class source = sourceType.getObjectType();
-		Class target = targetType.getObjectType();
+		Class<?> source = sourceType.getObjectType();
+		Class<?> target = targetType.getObjectType();
 		return (!source.equals(target) && hasValueOfMethodOrConstructor(target, source));
 	}
 

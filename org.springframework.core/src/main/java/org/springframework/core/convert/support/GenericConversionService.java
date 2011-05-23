@@ -481,10 +481,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 		private final ConvertiblePair typeInfo;
 
-		private final Converter converter;
+		private final Converter<Object, Object> converter;
 
 		public ConverterAdapter(ConvertiblePair typeInfo, Converter<?, ?> converter) {
-			this.converter = converter;
+			this.converter = (Converter<Object, Object>) converter;
 			this.typeInfo = typeInfo;
 		}
 
@@ -511,10 +511,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 		private final ConvertiblePair typeInfo;
 
-		private final ConverterFactory converterFactory;
+		private final ConverterFactory<Object, Object> converterFactory;
 
 		public ConverterFactoryAdapter(ConvertiblePair typeInfo, ConverterFactory<?, ?> converterFactory) {
-			this.converterFactory = converterFactory;
+			this.converterFactory = (ConverterFactory<Object, Object>) converterFactory;
 			this.typeInfo = typeInfo;
 		}
 
