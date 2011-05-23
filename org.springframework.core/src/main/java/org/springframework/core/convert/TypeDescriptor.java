@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.springframework.core.GenericCollectionTypeResolver;
@@ -515,20 +516,51 @@ public class TypeDescriptor {
 		return methodParameter;
 	}
 
-	private static Object findCommonElement(Collection<?> values) {
+	private static CommonElement findCommonElement(Collection<?> values) {
+		Class<?> commonType = null;
 		Object candidate = null;
 		for (Object value : values) {
 			if (value != null) {
 				if (candidate == null) {
+					commonType = value.getClass();
 					candidate = value;
-				} else if (candidate.getClass() != value.getClass()) {
-					return null;
+				} else {
+					commonType = commonType(commonType, value.getClass());
+					if (commonType == Object.class) {
+						return null;
+					}
 				}
 			}
 		}
-		return candidate;
+		return new CommonElement(commonType, candidate);
+	}
+
+	private static Class<?> commonType(Class<?> commonType, Class<?> valueClass) {
+		LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
+		classQueue.addFirst(commonType);
+		while (!classQueue.isEmpty()) {
+			Class<?> currentClass = classQueue.removeLast();
+			if (currentClass.isAssignableFrom(valueClass)) {
+				return currentClass;
+			}
+			Class<?>[] interfaces = currentClass.getInterfaces();
+			for (Class<?> ifc : interfaces) {
+				addInterfaceHierarchy(ifc, classQueue);
+			}
+			if (currentClass.getSuperclass() != null) {
+				classQueue.addFirst(currentClass.getSuperclass());
+			}
+		}
+		throw new IllegalStateException("Should never be invoked");	
 	}
 	
+	private static void addInterfaceHierarchy(Class<?> ifc, LinkedList<Class<?>> classQueue) {
+		classQueue.addFirst(ifc);
+		for (Class<?> inheritedIfc : ifc.getInterfaces()) {
+			addInterfaceHierarchy(inheritedIfc, classQueue);
+		}
+	}
+
 	// internal constructors
 
 	private TypeDescriptor() {
@@ -545,38 +577,61 @@ public class TypeDescriptor {
 		this.fieldNestingLevel = nestingLevel;
 	}
 
-	public TypeDescriptor(Class<?> mapType, Object commonKey, Object commonValue) {
+	public TypeDescriptor(Class<?> mapType, CommonElement commonKey, CommonElement commonValue) {
 		this.type = mapType;
-		this.mapKeyType = applyIndexedObject(commonKey);
-		this.mapValueType = applyIndexedObject(commonValue);
+		this.mapKeyType = applyCommonElement(commonKey);
+		this.mapValueType = applyCommonElement(commonValue);
 	}
 	
-	public TypeDescriptor(Class<?> collectionType, Object commonElement) {
+	public TypeDescriptor(Class<?> collectionType, CommonElement commonElement) {
 		this.type = collectionType;
-		this.elementType = applyIndexedObject(commonElement);
+		this.elementType = applyCommonElement(commonElement);
 	}
 
-	private TypeDescriptor applyIndexedObject(Object object) {
-		if (object == null) {
+	private TypeDescriptor applyCommonElement(CommonElement commonElement) {
+		if (commonElement == null) {
 			return TypeDescriptor.valueOf(Object.class);
 		}
-		if (object instanceof Collection<?>) {
-			Collection<?> collection = (Collection<?>) object;
+		if (commonElement.getValue() instanceof Collection<?>) {
+			Collection<?> collection = (Collection<?>) commonElement.getValue();
 			if (collection.size() == 0) {
 				return TypeDescriptor.valueOf(Object.class);
 			}
-			return new TypeDescriptor(object.getClass(), findCommonElement((Collection<?>) object));			
+			return new TypeDescriptor(commonElement.getType(), findCommonElement(collection));			
 		}
-		else if (object instanceof Map<?, ?>) {
-			Map<?, ?> map = (Map<?, ?>) object;
+		else if (commonElement.getValue() instanceof Map<?, ?>) {
+			Map<?, ?> map = (Map<?, ?>) commonElement.getValue();
 			if (map.size() == 0) {
 				return TypeDescriptor.valueOf(Object.class);				
 			}
-			return new TypeDescriptor(object.getClass(), findCommonElement(map.keySet()), findCommonElement(map.values()));
+			return new TypeDescriptor(commonElement.getType(), findCommonElement(map.keySet()), findCommonElement(map.values()));
 		}
 		else {
-			return TypeDescriptor.valueOf(object.getClass());
+			return TypeDescriptor.valueOf(commonElement.getType());
 		}
 	}
 
+	// inner classes
+	
+	private static class CommonElement {
+		
+		private Class<?> type;
+		
+		private Object value;
+
+		public CommonElement(Class<?> type, Object value) {
+			this.type = type;
+			this.value = value;
+		}
+
+		public Class<?> getType() {
+			return type;
+		}
+
+		public Object getValue() {
+			return value;
+		}
+		
+	}
+	
 }

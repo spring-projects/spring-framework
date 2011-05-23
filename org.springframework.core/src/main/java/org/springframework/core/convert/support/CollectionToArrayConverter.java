@@ -49,11 +49,7 @@ final class CollectionToArrayConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
-		if (Object.class.equals(sourceElementType.getType())) {
-			return true;
-		}		
-		return this.conversionService.canConvert(sourceElementType, targetType.getElementTypeDescriptor());
+		return this.conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor());
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
