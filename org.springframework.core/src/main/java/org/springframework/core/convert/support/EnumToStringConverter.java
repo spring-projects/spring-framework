@@ -19,14 +19,14 @@ package org.springframework.core.convert.support;
 import org.springframework.core.convert.converter.Converter;
 
 /**
- * Simply calls {@link Object#toString()} to convert a source Object to a String.
+ * Simply calls {@link Enum#name()} to convert a source Enum to a String.
  * @author Keith Donald
  * @since 3.0
  */
-final class ObjectToStringConverter implements Converter<Object, String> {
+final class EnumToStringConverter implements Converter<Enum<?>, String> {
 
-	public String convert(Object source) {
-		return source.toString();
+	public String convert(Enum<?> source) {
+		return source.name();
 	}
 
 }

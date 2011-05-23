@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import java.util.Locale;
+
 /**
  * A specialization of {@link GenericConversionService} configured by default with
  * converters appropriate for most applications.
@@ -65,19 +67,28 @@ public class DefaultConversionService extends GenericConversionService {
 		conversionService.addConverter(new StringToPropertiesConverter());
 
 		conversionService.addConverter(new StringToBooleanConverter());
-		conversionService.addConverter(new StringToCharacterConverter());
-		conversionService.addConverter(new StringToLocaleConverter());
-		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		conversionService.addConverter(Boolean.class, String.class, new ObjectToStringConverter());
 
+		conversionService.addConverter(new StringToCharacterConverter());
+		conversionService.addConverter(Character.class, String.class, new ObjectToStringConverter());
+
+		conversionService.addConverter(new StringToLocaleConverter());
+		conversionService.addConverter(Locale.class, String.class, new ObjectToStringConverter());
+		
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		conversionService.addConverter(Number.class, String.class, new ObjectToStringConverter());
+		
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		conversionService.addConverter(Enum.class, String.class, new EnumToStringConverter());
+		
 		conversionService.addConverter(new NumberToCharacterConverter());
 		conversionService.addConverterFactory(new CharacterToNumberFactory());
 
 		conversionService.addConverterFactory(new NumberToNumberConverterFactory());
 
-		conversionService.addConverter(new ObjectToStringConverter());
 		conversionService.addConverter(new ObjectToObjectConverter());
 		conversionService.addConverter(new IdToEntityConverter(conversionService));
+		conversionService.addConverter(new FallbackObjectToStringConverter());
 	}
 
 }

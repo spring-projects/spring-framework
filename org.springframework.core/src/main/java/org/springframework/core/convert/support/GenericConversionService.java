@@ -88,6 +88,17 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			new ConcurrentHashMap<ConverterCacheKey, GenericConverter>();
 
 
+	/**
+	 * Add a converter to the register indexed under the explicit source and target types.
+	 * Allows for a general converter to be reused for multiple distinct source-to-target convertible pairs without having to create a Converter class for each pair.
+	 * Not yet part of the ConverterRegistry interface.
+	 * @since 3.1
+	 */
+	public void addConverter(Class<?> sourceType, Class<?> targetType, Converter<?, ?> converter) {
+		GenericConverter.ConvertiblePair typeInfo = new GenericConverter.ConvertiblePair(sourceType, targetType);
+		addConverter(new ConverterAdapter(typeInfo, converter));
+	}
+	
 	// implementing ConverterRegistry
 
 	public void addConverter(Converter<?, ?> converter) {

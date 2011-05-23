@@ -79,6 +79,9 @@ public class DefaultConversionTests {
 		assertEquals(Boolean.valueOf(true), conversionService.convert("on", Boolean.class));
 		assertEquals(Boolean.valueOf(true), conversionService.convert("yes", Boolean.class));
 		assertEquals(Boolean.valueOf(true), conversionService.convert("1", Boolean.class));
+		assertEquals(Boolean.valueOf(true), conversionService.convert("TRUE", Boolean.class));
+		assertEquals(Boolean.valueOf(true), conversionService.convert("ON", Boolean.class));
+		assertEquals(Boolean.valueOf(true), conversionService.convert("YES", Boolean.class));
 	}
 
 	@Test
@@ -87,6 +90,9 @@ public class DefaultConversionTests {
 		assertEquals(Boolean.valueOf(false), conversionService.convert("off", Boolean.class));
 		assertEquals(Boolean.valueOf(false), conversionService.convert("no", Boolean.class));
 		assertEquals(Boolean.valueOf(false), conversionService.convert("0", Boolean.class));
+		assertEquals(Boolean.valueOf(false), conversionService.convert("FALSE", Boolean.class));
+		assertEquals(Boolean.valueOf(false), conversionService.convert("OFF", Boolean.class));
+		assertEquals(Boolean.valueOf(false), conversionService.convert("NO", Boolean.class));
 	}
 
 	@Test
