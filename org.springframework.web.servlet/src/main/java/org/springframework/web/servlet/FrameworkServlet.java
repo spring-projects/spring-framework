@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -34,6 +35,8 @@ import org.springframework.context.event.SourceFilteringListener;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -71,6 +74,16 @@ import org.springframework.web.util.WebUtils;
  * {@link org.springframework.web.context.ConfigurableWebApplicationContext
  * ConfigurableWebApplicationContext} SPI.
  *
+ * <p>Accepts an optional "contextInitializerClasses" servlet init-param that
+ * specifies one or more {@link org.springframework.context.ApplicationContextInitializer
+ * ApplicationContextInitializer} classes. The managed web application context will be
+ * delegated to these initializers, allowing for additional programmatic configuration,
+ * e.g. adding property sources or activating profiles against the {@linkplain
+ * org.springframework.context.ConfigurableApplicationContext#getEnvironment() context's
+ * environment}. See also {@link org.springframework.web.context.ContextLoader} which
+ * supports a "contextInitializerClasses" context-param with identical semantics for
+ * the "root" web application context.
+ *
  * <p>Passes a "contextConfigLocation" servlet init-param to the context instance,
  * parsing it into potentially multiple file paths which can be separated by any
  * number of commas and spaces, like "test-servlet.xml, myServlet.xml".
@@ -90,9 +103,11 @@ import org.springframework.web.util.WebUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Chris Beams
  * @see #doService
  * @see #setContextClass
  * @see #setContextConfigLocation
+ * @see #setContextInitializerClasses
  * @see #setNamespace
  */
 @SuppressWarnings("serial")
@@ -117,6 +132,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	public static final String SERVLET_CONTEXT_PREFIX = FrameworkServlet.class.getName() + ".CONTEXT.";
 
+	/**
+	 * Any number of these characters are considered delimiters between
+	 * multiple values in a single init-param String value.
+	 * @see #initializeWebApplicationContext
+	 */
+	private String INIT_PARAM_DELIMITERS = ",; \t\n";
 
 	/** ServletContext attribute to find the WebApplicationContext in */
 	private String contextAttribute;
@@ -150,6 +171,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/** Flag used to detect whether onRefresh has already been called */
 	private boolean refreshEventReceived = false;
+
+	private String contextInitializerClasses;
 
 
 	/**
@@ -202,6 +225,15 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	public String getNamespace() {
 		return (this.namespace != null ? this.namespace : getServletName() + DEFAULT_NAMESPACE_SUFFIX);
+	}
+
+	/**
+	 * Specify the set of fully-qualified {@link ApplicationContextInitializer} class
+	 * names, per the optional "contextInitializerClasses" servlet init-param.
+	 * @see #createWebApplicationContext
+	 */
+	public void setContextInitializerClasses(String contextInitializerClasses) {
+		this.contextInitializerClasses = contextInitializerClasses;
 	}
 
 	/**
@@ -442,6 +474,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		wac.addApplicationListener(new SourceFilteringListener(wac, new ContextRefreshListener()));
 
 		postProcessWebApplicationContext(wac);
+
+		initializeWebApplicationContext(wac);
+
 		wac.refresh();
 
 		return wac;
@@ -460,14 +495,50 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 		return createWebApplicationContext((ApplicationContext) parent);
 	}
-	
+
+	/**
+	 * Delegate the WebApplicationContext before it is refreshed to any
+	 * {@link ApplicationContextInitializer} instances specified by the
+	 * "contextInitializerClasses" servlet init-param.
+	 * <p>See also {@link #postProcessWebApplicationContext}, which is designed to allow
+	 * subclasses (as opposed to end-users) to modify the application context, and is
+	 * called immediately after this method.
+	 * @param wac the configured WebApplicationContext (not refreshed yet)
+	 * @see #createWebApplicationContext
+	 * @see #postProcessWebApplicationContext
+	 * @see ConfigurableWebApplicationContext#refresh()
+	 */
+	@SuppressWarnings("unchecked")
+	protected void initializeWebApplicationContext(ConfigurableWebApplicationContext wac) {
+		if (this.contextInitializerClasses != null) {
+			String[] initializerClassNames = StringUtils.tokenizeToStringArray(this.contextInitializerClasses, INIT_PARAM_DELIMITERS);
+			for(String initializerClassName : initializerClassNames) {
+				ApplicationContextInitializer<ConfigurableApplicationContext> initializer = null;
+				try {
+					Class<?> initializerClass = ClassUtils.forName(initializerClassName, wac.getClassLoader());
+					initializer = BeanUtils.instantiateClass(initializerClass, ApplicationContextInitializer.class);
+				} catch (Exception ex) {
+					throw new IllegalArgumentException(
+							String.format("Could not instantiate class [%s] specified via " +
+							"'contextInitializerClasses' init-param", initializerClassName), ex);
+				}
+				initializer.initialize(wac);
+			}
+		}
+	}
+
 	/**
 	 * Post-process the given WebApplicationContext before it is refreshed
 	 * and activated as context for this servlet.
 	 * <p>The default implementation is empty. <code>refresh()</code> will
 	 * be called automatically after this method returns.
+	 * <p>Note that this method is designed to allow subclasses to modify the application
+	 * context, while {@link #initializeWebApplicationContext} is designed to allow
+	 * end-users to modify the context through the use of
+	 * {@link ApplicationContextInitializer}s.
 	 * @param wac the configured WebApplicationContext (not refreshed yet)
 	 * @see #createWebApplicationContext
+	 * @see #initializeWebApplicationContext
 	 * @see ConfigurableWebApplicationContext#refresh()
 	 */
 	protected void postProcessWebApplicationContext(ConfigurableWebApplicationContext wac) {
