@@ -52,7 +52,7 @@ public class MapToMapConverterTests {
 	}
 
 	@Test
-	public void scalarMapNotGenericSource() throws Exception {
+	public void scalarMapNotGenericSourceField() throws Exception {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("1", "9");
 		map.put("2", "37");
@@ -117,6 +117,7 @@ public class MapToMapConverterTests {
 		Map<String, List<String>> map = new HashMap<String, List<String>>();
 		map.put("1", Arrays.asList("9", "12"));
 		map.put("2", Arrays.asList("37", "23"));
+		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		assertTrue(conversionService.canConvert(Map.class, Map.class));
 		assertEquals(map, conversionService.convert(map, Map.class));
@@ -127,7 +128,7 @@ public class MapToMapConverterTests {
 		Map<String, String> map = new HashMap<String, String>();
 		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyMapTarget"));
-		//assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
 		assertEquals(map, conversionService.convert(map, sourceType, targetType));
 	}
 

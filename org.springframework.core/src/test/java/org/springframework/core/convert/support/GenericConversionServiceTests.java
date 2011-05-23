@@ -16,7 +16,16 @@
 
 package org.springframework.core.convert.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -24,9 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -261,8 +268,13 @@ public class GenericConversionServiceTests {
 	@Test
 	public void testListOfList() {
 		GenericConversionService service = new DefaultConversionService();
-		List<List<String>> list = Collections.singletonList(Collections.singletonList("Foo"));
-		assertNotNull(service.convert(list, String.class));
+		List<String> list1 = Arrays.asList("Foo", "Bar");
+		List<String> list2 = Arrays.asList("Baz", "Boop");
+		@SuppressWarnings("unchecked")
+		List<List<String>> list = Arrays.asList(list1, list2);
+		String result = service.convert(list, String.class);
+		assertNotNull(result);
+		assertEquals("Foo,Bar,Baz,Boop", result);
 	}
 
 	@Test
@@ -359,36 +371,6 @@ public class GenericConversionServiceTests {
 	}
 	
 	public static Map<String, Integer> map;
-
-
-	@Test
-	public void emptyListToList() throws Exception {
-		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
-		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		List<String> list = new ArrayList<String>();
-		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
-		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyListTarget"));
-		assertTrue(conversionService.canConvert(sourceType, targetType));
-		assertEquals(list, conversionService.convert(list, sourceType, targetType));
-	}
-
-	public List<Integer> emptyListTarget;
-
-	@Test
-	public void emptyListToListDifferentTargetType() throws Exception {
-		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
-		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		List<String> list = new ArrayList<String>();
-		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
-		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyListDifferentTarget"));
-		assertTrue(conversionService.canConvert(sourceType, targetType));
-		@SuppressWarnings("unchecked")
-		LinkedList<Integer> result = (LinkedList<Integer>) conversionService.convert(list, sourceType, targetType);
-		assertEquals(LinkedList.class, result.getClass());
-		assertTrue(result.isEmpty());
-	}
-
-	public LinkedList<Integer> emptyListDifferentTarget;
 
 	@Test
 	public void emptyListToArray() throws Exception {

@@ -55,13 +55,12 @@ final class ObjectToCollectionConverter implements ConditionalGenericConverter {
 			return null;
 		}
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), 1);
-		TypeDescriptor elementType = targetType.getElementTypeDescriptor();
-		// Avoid potential recursion...
-		if (!Collection.class.isAssignableFrom(elementType.getType())) {
-			target.add(this.conversionService.convert(source, sourceType, elementType));
-		}
-		else {
-			target.add(source);
+		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
+		// Avoid potential recursion....
+		if (targetElementType.isCollection()) {
+			target.add(source);			
+		} else {
+			target.add(this.conversionService.convert(source, sourceType, targetElementType));
 		}
 		return target;
 	}
