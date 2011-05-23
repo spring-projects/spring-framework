@@ -36,15 +36,13 @@ final class StringToBooleanConverter implements Converter<String, Boolean> {
 
 	static {
 		trueValues.add("true");
-		falseValues.add("false");
-
 		trueValues.add("on");
-		falseValues.add("off");
-
 		trueValues.add("yes");
-		falseValues.add("no");
-
 		trueValues.add("1");
+
+		falseValues.add("false");
+		falseValues.add("off");
+		falseValues.add("no");
 		falseValues.add("0");
 	}
 	
@@ -53,7 +51,8 @@ final class StringToBooleanConverter implements Converter<String, Boolean> {
 		if (value.length() == 0) {
 			return null;
 		}
-		else if (trueValues.contains(value)) {
+		value = value.toLowerCase();
+		if (trueValues.contains(value)) {
 			return Boolean.TRUE;
 		}
 		else if (falseValues.contains(value)) {
