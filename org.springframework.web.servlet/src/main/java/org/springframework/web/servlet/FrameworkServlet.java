@@ -18,6 +18,7 @@ package org.springframework.web.servlet;
 
 import java.io.IOException;
 import java.security.Principal;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -50,9 +51,9 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>This class offers the following functionality:
  * <ul>
- * <li>Manages a {@link org.springframework.web.context.WebApplicationContext}
- * instance per servlet. The servlet's configuration is determined by beans
- * in the servlet's namespace.
+ * <li>Manages a {@link org.springframework.web.context.WebApplicationContext
+ * WebApplicationContext} instance per servlet. The servlet's configuration is determined
+ * by beans in the servlet's namespace.
  * <li>Publishes events on request processing, whether or not a request is
  * successfully handled.
  * </ul>
@@ -64,10 +65,11 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>Detects a "contextClass" parameter at the servlet init-param level,
  * falling back to the default context class,
- * {@link org.springframework.web.context.support.XmlWebApplicationContext},
- * if not found. Note that, with the default FrameworkServlet,
- * a custom context class needs to implement the
- * {@link org.springframework.web.context.ConfigurableWebApplicationContext} SPI.
+ * {@link org.springframework.web.context.support.XmlWebApplicationContext
+ * XmlWebApplicationContext}, if not found. Note that, with the default
+ * {@code FrameworkServlet}, a custom context class needs to implement the
+ * {@link org.springframework.web.context.ConfigurableWebApplicationContext
+ * ConfigurableWebApplicationContext} SPI.
  *
  * <p>Passes a "contextConfigLocation" servlet init-param to the context instance,
  * parsing it into potentially multiple file paths which can be separated by any
@@ -93,6 +95,7 @@ import org.springframework.web.util.WebUtils;
  * @see #setContextConfigLocation
  * @see #setNamespace
  */
+@SuppressWarnings("serial")
 public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
@@ -106,7 +109,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Default context class for FrameworkServlet.
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
-	public static final Class DEFAULT_CONTEXT_CLASS = XmlWebApplicationContext.class;
+	public static final Class<?> DEFAULT_CONTEXT_CLASS = XmlWebApplicationContext.class;
 
 	/**
 	 * Prefix for the ServletContext attribute for the WebApplicationContext.
@@ -119,7 +122,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	private String contextAttribute;
 
 	/** WebApplicationContext implementation class to create */
-	private Class contextClass = DEFAULT_CONTEXT_CLASS;
+	private Class<?> contextClass = DEFAULT_CONTEXT_CLASS;
 
 	/** Namespace for this servlet */
 	private String namespace;
@@ -174,14 +177,14 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * interface.
 	 * @see #createWebApplicationContext
 	 */
-	public void setContextClass(Class contextClass) {
+	public void setContextClass(Class<?> contextClass) {
 		this.contextClass = contextClass;
 	}
 
 	/**
 	 * Return the custom context class.
 	 */
-	public Class getContextClass() {
+	public Class<?> getContextClass() {
 		return this.contextClass;
 	}
 
