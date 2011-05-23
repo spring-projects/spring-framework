@@ -376,8 +376,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	// Implementation of ConfigurableApplicationContext interface
 	//---------------------------------------------------------------------
 
+	/**
+	 * {@inheritDoc}
+	 * <p>The parent {@linkplain #getEnvironment() environment} is
+	 * delegated to this (child) context if the parent is a
+	 * {@link ConfigurableApplicationContext} implementation.
+	 */
 	public void setParent(ApplicationContext parent) {
 		this.parent = parent;
+		if (parent instanceof ConfigurableApplicationContext) {
+			this.setEnvironment(((ConfigurableApplicationContext)parent).getEnvironment());
+		}
 	}
 
 	public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor) {

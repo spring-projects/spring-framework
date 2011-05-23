@@ -84,6 +84,15 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 				this.portletContext, this.portletConfig);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>The parent {@linkplain #getEnvironment() environment} is
+	 * delegated to this (child) context if the parent is a
+	 * {@link ConfigurableApplicationContext} implementation.
+	 * <p>The parent {@linkplain #getServletContext() servlet context} is
+	 * delegated to this (child) context if the parent is a {@link WebApplicationContext}
+	 * implementation.
+	 */
 	@Override
 	public void setParent(ApplicationContext parent) {
 		super.setParent(parent);
