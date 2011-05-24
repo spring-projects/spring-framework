@@ -20,8 +20,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -127,8 +129,8 @@ public class TypeDescriptor {
 	 * Use this factory method to introspect a source object's type before asking the conversion system to convert it to some another type.
 	 * Builds in population of nested type descriptors for collection and map objects through object introspection.
 	 * If the object is null, returns {@link TypeDescriptor#NULL}.
-	 * If the object is not a collection, simply calls {@link #valueOf(Class)}.
-	 * If the object is a collection, this factory method will derive the element type(s) by introspecting the collection.
+	 * If the object is not a collection or map, simply calls {@link #valueOf(Class)}.
+	 * If the object is a collection or map, this factory method will derive the element type(s) by introspecting the collection or map.
 	 * @param object the source object
 	 * @return the type descriptor
 	 * @see ConversionService#convert(Object, Class)
@@ -331,7 +333,7 @@ public class TypeDescriptor {
 		}
 		return this.mapValueType;
 	}
-
+	
 	// special case public operations
 
 	/**
@@ -536,6 +538,7 @@ public class TypeDescriptor {
 	}
 
 	private static Class<?> commonType(Class<?> commonType, Class<?> valueClass) {
+		Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
 		LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
 		classQueue.addFirst(commonType);
 		while (!classQueue.isEmpty()) {
@@ -543,21 +546,26 @@ public class TypeDescriptor {
 			if (currentClass.isAssignableFrom(valueClass)) {
 				return currentClass;
 			}
-			Class<?>[] interfaces = currentClass.getInterfaces();
-			for (Class<?> ifc : interfaces) {
-				addInterfaceHierarchy(ifc, classQueue);
-			}
-			if (currentClass.getSuperclass() != null) {
+			Class<?> superClass = currentClass.getSuperclass();
+			if (superClass != null && superClass != Object.class) {
 				classQueue.addFirst(currentClass.getSuperclass());
 			}
+			for (Class<?> interfaceType : currentClass.getInterfaces()) {
+				addInterfaceHierarchy(interfaceType, interfaces);
+			}
 		}
-		throw new IllegalStateException("Should never be invoked");	
+		for (Class<?> interfaceType : interfaces) {
+			if (interfaceType.isAssignableFrom(valueClass)) {
+				return interfaceType;
+			}			
+		}
+		return Object.class;
 	}
-	
-	private static void addInterfaceHierarchy(Class<?> ifc, LinkedList<Class<?>> classQueue) {
-		classQueue.addFirst(ifc);
-		for (Class<?> inheritedIfc : ifc.getInterfaces()) {
-			addInterfaceHierarchy(inheritedIfc, classQueue);
+
+	private static void addInterfaceHierarchy(Class<?> interfaceType, Set<Class<?>> interfaces) {
+		interfaces.add(interfaceType);
+		for (Class<?> inheritedInterface : interfaceType.getInterfaces()) {
+			addInterfaceHierarchy(inheritedInterface, interfaces);
 		}
 	}
 
@@ -577,13 +585,13 @@ public class TypeDescriptor {
 		this.fieldNestingLevel = nestingLevel;
 	}
 
-	public TypeDescriptor(Class<?> mapType, CommonElement commonKey, CommonElement commonValue) {
+	private TypeDescriptor(Class<?> mapType, CommonElement commonKey, CommonElement commonValue) {
 		this.type = mapType;
 		this.mapKeyType = applyCommonElement(commonKey);
 		this.mapValueType = applyCommonElement(commonValue);
 	}
 	
-	public TypeDescriptor(Class<?> collectionType, CommonElement commonElement) {
+	private TypeDescriptor(Class<?> collectionType, CommonElement commonElement) {
 		this.type = collectionType;
 		this.elementType = applyCommonElement(commonElement);
 	}
@@ -633,5 +641,5 @@ public class TypeDescriptor {
 		}
 		
 	}
-	
+
 }

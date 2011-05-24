@@ -20,7 +20,9 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
@@ -334,7 +335,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
 				if (logger.isTraceEnabled()) {
-					logger.trace("Searching for converters indexed by sourceType [" + currentClass.getName() + "]");
+					logger.trace("Searching for converters indexed by source interface [" + currentClass.getName() + "]");
 				}
 				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
 				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
@@ -349,40 +350,62 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			Map<Class<?>, MatchableConverters> objectConverters = getTargetConvertersForSource(Object.class);
 			return getMatchingConverterForTarget(sourceType, targetType, objectConverters);
 		}
-		else {
+		else if (sourceObjectType.isArray()) {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
 			classQueue.addFirst(sourceObjectType);
-			LinkedList<Class<?>> attemptedInterfaces = new LinkedList<Class<?>>();
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
 				if (logger.isTraceEnabled()) {
-					logger.trace("Searching for converters indexed by sourceType [" + currentClass.getName() + "]");
+					logger.trace("Searching for converters indexed by source array type [" + currentClass.getName() + "]");
 				}
 				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
 				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
 				if (converter != null) {
 					return converter;
 				}
-				if (currentClass.isArray()) {
-					Class<?> componentType = ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
-					if (componentType.getSuperclass() != null) {
-						classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
-					}
-					else if (componentType.isInterface()) {
-						classQueue.addFirst(Object[].class);
-					}
+				Class<?> componentType = ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
+				if (componentType.getSuperclass() != null) {
+					classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
 				}
-				else {
-					Class<?>[] interfaces = currentClass.getInterfaces();
-					for (Class<?> ifc : interfaces) {
-						addInterfaceHierarchy(ifc, classQueue, attemptedInterfaces);
-					}
-					if (currentClass.getSuperclass() != null) {
-						classQueue.addFirst(currentClass.getSuperclass());
-					}
+				else if (componentType.isInterface()) {
+					classQueue.addFirst(Object[].class);
 				}
 			}
 			return null;
+		} else {
+			HashSet<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
+			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
+			classQueue.addFirst(sourceObjectType);
+			while (!classQueue.isEmpty()) {
+				Class<?> currentClass = classQueue.removeLast();
+				if (logger.isTraceEnabled()) {
+					logger.trace("Searching for converters indexed by source class [" + currentClass.getName() + "]");
+				}
+				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
+				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
+				if (converter != null) {
+					return converter;
+				}
+				Class<?> superClass = currentClass.getSuperclass();
+				if (superClass != null && superClass != Object.class) {
+					classQueue.addFirst(superClass);
+				}
+				for (Class<?> interfaceType : currentClass.getInterfaces()) {
+					addInterfaceHierarchy(interfaceType, interfaces);
+				}
+			}
+			for (Class<?> interfaceType : interfaces) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Searching for converters indexed by source interface [" + interfaceType.getName() + "]");
+				}
+				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(interfaceType);
+				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
+				if (converter != null) {
+					return converter;
+				}
+			}
+			Map<Class<?>, MatchableConverters> objectConverters = getTargetConvertersForSource(Object.class);
+			return getMatchingConverterForTarget(sourceType, targetType, objectConverters);				
 		}
 	}
 
@@ -403,7 +426,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
 				if (logger.isTraceEnabled()) {
-					logger.trace("and indexed by targetType [" + currentClass.getName() + "]");
+					logger.trace("and indexed by target class [" + currentClass.getName() + "]");
 				}
 				MatchableConverters matchable = converters.get(currentClass);
 				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
@@ -419,51 +442,72 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				logger.trace("and indexed by [java.lang.Object]");
 			}							
 			return matchConverter(converters.get(Object.class), sourceType, targetType);
-		}
-		else {
+		} else if (targetObjectType.isArray()) {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
 			classQueue.addFirst(targetObjectType);
-			LinkedList<Class<?>> attemptedInterfaces = new LinkedList<Class<?>>();			
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
 				if (logger.isTraceEnabled()) {
-					logger.trace("and indexed by targetType [" + currentClass.getName() + "]");
+					logger.trace("and indexed by target array type [" + currentClass.getName() + "]");
 				}				
 				MatchableConverters matchable = converters.get(currentClass);
 				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
 				if (converter != null) {
 					return converter;
 				}
-				if (currentClass.isArray()) {
-					Class<?> componentType = ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
-					if (componentType.getSuperclass() != null) {
-						classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
-					}
-					else if (componentType.isInterface()) {
-						classQueue.addFirst(Object[].class);
-					}
+				Class<?> componentType = ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
+				if (componentType.getSuperclass() != null) {
+					classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
 				}
-				else {
-					Class<?>[] interfaces = currentClass.getInterfaces();
-					for (Class<?> ifc : interfaces) {
-						addInterfaceHierarchy(ifc, classQueue, attemptedInterfaces);
-					}
-					if (currentClass.getSuperclass() != null) {
-						classQueue.addFirst(currentClass.getSuperclass());
-					}
+				else if (componentType.isInterface()) {
+					classQueue.addFirst(Object[].class);
 				}
 			}
 			return null;
 		}
+		else {
+			Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
+			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
+			classQueue.addFirst(targetObjectType);
+			while (!classQueue.isEmpty()) {
+				Class<?> currentClass = classQueue.removeLast();
+				if (logger.isTraceEnabled()) {
+					logger.trace("and indexed by target class [" + currentClass.getName() + "]");
+				}				
+				MatchableConverters matchable = converters.get(currentClass);
+				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
+				if (converter != null) {
+					return converter;
+				}
+				Class<?> superClass = currentClass.getSuperclass();
+				if (superClass != null && superClass != Object.class) {
+					classQueue.addFirst(superClass);
+				}
+				for (Class<?> interfaceType : currentClass.getInterfaces()) {
+					addInterfaceHierarchy(interfaceType, interfaces);
+				}
+			}
+			for (Class<?> interfaceType : interfaces) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("and indexed by target interface [" + interfaceType.getName() + "]");
+				}				
+				MatchableConverters matchable = converters.get(interfaceType);
+				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
+				if (converter != null) {
+					return converter;
+				}
+			}
+			if (logger.isTraceEnabled()) {
+				logger.trace("and indexed by [java.lang.Object]");
+			}							
+			return matchConverter(converters.get(Object.class), sourceType, targetType);				
+		}
 	}
 
-	private void addInterfaceHierarchy(Class<?> interfaceType, LinkedList<Class<?>> classQueue, LinkedList<Class<?>> attemptedInterfaces) {
-		if (!attemptedInterfaces.contains(interfaceType)) {
-			classQueue.addFirst(interfaceType);
-			attemptedInterfaces.add(interfaceType);
-			for (Class<?> inheritedInterface : interfaceType.getInterfaces()) {
-				addInterfaceHierarchy(inheritedInterface, classQueue, attemptedInterfaces);
-			}
+	private void addInterfaceHierarchy(Class<?> interfaceType, Set<Class<?>> interfaces) {
+		interfaces.add(interfaceType);
+		for (Class<?> inheritedInterface : interfaceType.getInterfaces()) {
+			addInterfaceHierarchy(inheritedInterface, interfaces);
 		}
 	}
 
