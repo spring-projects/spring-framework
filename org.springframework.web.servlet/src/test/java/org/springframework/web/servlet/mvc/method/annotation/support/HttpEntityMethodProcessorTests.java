@@ -15,6 +15,18 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.web.servlet.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 import java.lang.reflect.Method;
@@ -24,7 +36,6 @@ import java.util.Collections;
 import org.easymock.Capture;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -41,10 +52,6 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.HandlerMapping;
-
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link HttpEntityMethodProcessor} and mock {@link HttpMessageConverter}.
@@ -164,6 +171,8 @@ public class HttpEntityMethodProcessorTests {
 		MediaType accepted = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Accept", accepted.toString());
 
+		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
+		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(messageConverter.canWrite(String.class, accepted)).andReturn(true);
 		messageConverter.write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
 		replay(messageConverter);
@@ -218,6 +227,8 @@ public class HttpEntityMethodProcessorTests {
 		MediaType accepted = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Accept", accepted.toString());
 
+		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
+		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(messageConverter.canWrite(String.class, accepted)).andReturn(false);
 		replay(messageConverter);
 
@@ -245,6 +256,8 @@ public class HttpEntityMethodProcessorTests {
 		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.ACCEPTED);
 
 		Capture<HttpOutputMessage> outputMessage = new Capture<HttpOutputMessage>();
+		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
+		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).andReturn(true);
 		messageConverter.write(eq("body"), eq(MediaType.TEXT_PLAIN),  capture(outputMessage));
 		replay(messageConverter);

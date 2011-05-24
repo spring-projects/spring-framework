@@ -164,8 +164,10 @@ public abstract class AbstractMessageConverterMethodProcessor
 												  ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
+		Class<?> returnValueClass = returnValue.getClass();
+
 		List<MediaType> acceptableMediaTypes = getAcceptableMediaTypes(inputMessage);
-		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(inputMessage.getServletRequest());
+		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(inputMessage.getServletRequest(), returnValueClass);
 		
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
 		for (MediaType a : acceptableMediaTypes) {
@@ -196,7 +198,7 @@ public abstract class AbstractMessageConverterMethodProcessor
 		
 		if (selectedMediaType != null) {
 			for (HttpMessageConverter<?> messageConverter : messageConverters) {
-				if (messageConverter.canWrite(returnValue.getClass(), selectedMediaType)) {
+				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
 					((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Written [" + returnValue + "] as \"" + selectedMediaType + "\" using [" +
@@ -213,23 +215,28 @@ public abstract class AbstractMessageConverterMethodProcessor
 	 * Returns the media types that can be produced:
 	 * <ul>
 	 * 	<li>The producible media types specified in the request mappings, or
-	 * 	<li>The media types supported by all configured message converters, or
+	 * 	<li>Media types of configured converters that can write the specific return value, or
 	 * 	<li>{@link MediaType#ALL}
 	 * </ul>
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request) {
+	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> returnValueClass) {
 		Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			return new ArrayList<MediaType>(mediaTypes);
 		}
 		else if (!allSupportedMediaTypes.isEmpty()) {
-			return allSupportedMediaTypes;
+			List<MediaType> result = new ArrayList<MediaType>();
+            for (HttpMessageConverter<?> converter : messageConverters) {
+                if (converter.canWrite(returnValueClass, null)) {
+                	result.addAll(converter.getSupportedMediaTypes());
+                }
+            }			
+			return result;
 		}
 		else {
 			return Collections.singletonList(MediaType.ALL);
 		}
-
 	}
 
 	private List<MediaType> getAcceptableMediaTypes(HttpInputMessage inputMessage) {
