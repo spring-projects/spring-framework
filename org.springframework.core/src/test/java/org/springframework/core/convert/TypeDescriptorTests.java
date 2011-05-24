@@ -19,8 +19,10 @@ package org.springframework.core.convert;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +51,110 @@ public class TypeDescriptorTests {
 	public Map<String, Integer> mapField = new HashMap<String, Integer>();
 
 	public Map<String, List<Integer>> nestedMapField = new HashMap<String, List<Integer>>();
+
+	@Test
+	public void forCollection() {
+		List<String> list = new ArrayList<String>();
+		list.add("1");
+		TypeDescriptor desc = TypeDescriptor.forObject(list);
+		assertEquals(String.class, desc.getElementType());
+	}
+
+	@Test
+	public void forCollectionEmpty() {
+		List<String> list = new ArrayList<String>();
+		TypeDescriptor desc = TypeDescriptor.forObject(list);
+		assertNull(desc.getElementType());
+	}
+
+	@Test
+	public void forCollectionSuperClassCommonType() throws SecurityException, NoSuchFieldException {
+		List<Number> list = new ArrayList<Number>();
+		list.add(1);
+		list.add(2L);
+		TypeDescriptor desc = TypeDescriptor.forObject(list);
+		assertEquals(Number.class, desc.getElementType());
+	}
+
+	public List<Long> longs;
+	
+	@Test
+	public void forCollectionNoObviousCommonType() {
+		List<Object> collection = new ArrayList<Object>();
+		List<String> list = new ArrayList<String>();
+		list.add("1");
+		collection.add(list);
+		Map<String, String> map = new HashMap<String, String>();
+		collection.add(map);
+		map.put("1", "2");
+		TypeDescriptor desc = TypeDescriptor.forObject(collection);
+		assertEquals(Cloneable.class, desc.getElementType());
+	}
+
+	@Test
+	public void forCollectionNoCommonType() {
+		List<Object> collection = new ArrayList<Object>();
+		collection.add(new Object());
+		collection.add("1");
+		TypeDescriptor desc = TypeDescriptor.forObject(collection);		
+		assertEquals(Object.class, desc.getElementType());
+	}
+
+	@Test
+	public void forCollectionNested() {
+		List<Object> collection = new ArrayList<Object>();
+		collection.add(Arrays.asList("1", "2"));
+		collection.add(Arrays.asList("3", "4"));
+		TypeDescriptor desc = TypeDescriptor.forObject(collection);
+		assertEquals(Arrays.asList("foo").getClass(), desc.getElementType());
+		assertEquals(String.class, desc.getElementTypeDescriptor().getElementType());
+	}
+
+	@Test
+	public void forMap() {
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("1", "2");
+		TypeDescriptor desc = TypeDescriptor.forObject(map);
+		assertEquals(String.class, desc.getMapKeyType());
+		assertEquals(String.class, desc.getMapValueType());
+	}
+
+	@Test
+	public void forMapEmpty() {
+		Map<String, String> map = new HashMap<String, String>();
+		TypeDescriptor desc = TypeDescriptor.forObject(map);
+		assertNull(desc.getMapKeyType());
+		assertNull(desc.getMapValueType());
+	}
+
+	@Test
+	public void forMapCommonSuperClass() {
+		Map<Number, Number> map = new HashMap<Number, Number>();
+		map.put(1, 2);
+		map.put(2L, 3L);
+		TypeDescriptor desc = TypeDescriptor.forObject(map);
+		assertEquals(Number.class, desc.getMapKeyType());
+		assertEquals(Number.class, desc.getMapValueType());
+	}
+
+	@Test
+	public void forMapNoObviousCommonType() {
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		map.put("1", "2");
+		map.put(2, 2);
+		TypeDescriptor desc = TypeDescriptor.forObject(map);
+		assertEquals(Comparable.class, desc.getMapKeyType());
+		assertEquals(Comparable.class, desc.getMapValueType());
+	}
+
+	@Test
+	public void forMapNested() {
+		Map<Integer, List<String>> map = new HashMap<Integer, List<String>>();
+		map.put(1, Arrays.asList("1, 2"));
+		TypeDescriptor desc = TypeDescriptor.forObject(map);
+		assertEquals(Integer.class, desc.getMapKeyType());
+		assertEquals(String.class, desc.getMapValueTypeDescriptor().getElementType());		
+	}
 	
 	@Test
 	public void listDescriptor() throws Exception {

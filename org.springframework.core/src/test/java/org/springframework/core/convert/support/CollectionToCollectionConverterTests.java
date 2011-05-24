@@ -48,7 +48,7 @@ public class CollectionToCollectionConverterTests {
 		assertEquals((Integer) 37, result.get(1));
 	}
 	
-	public List<Integer> scalarListTarget;
+	public ArrayList<Integer> scalarListTarget;
 
 	@Test
 	public void emptyListToList() throws Exception {
