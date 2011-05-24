@@ -458,14 +458,13 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	private void addInterfaceHierarchy(Class<?> interfaceType, LinkedList<Class<?>> classQueue) {
 		classQueue.addFirst(interfaceType);
-		for (Class<?> implementedInterface : interfaceType.getInterfaces()) {
-			addInterfaceHierarchy(implementedInterface, classQueue);
+		for (Class<?> inheritedInterface : interfaceType.getInterfaces()) {
+			addInterfaceHierarchy(inheritedInterface, classQueue);
 		}
 	}
 
 	private GenericConverter matchConverter(
 			MatchableConverters matchable, TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
-
 		if (matchable == null) {
 			return null;
 		}
