@@ -17,8 +17,10 @@
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +29,9 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -151,6 +155,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		String body = "Foo";
+		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
+		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(messageConverter.canWrite(String.class, accepted)).andReturn(true);
 		messageConverter.write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
 		replay(messageConverter);
@@ -199,6 +205,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		MediaType accepted = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Accept", accepted.toString());
 
+		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
+		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(messageConverter.canWrite(String.class, accepted)).andReturn(false);
 		replay(messageConverter);
 
@@ -207,6 +215,19 @@ public class RequestResponseBodyMethodProcessorTests {
 		fail("Expected exception");
 	}
 
+	@Test
+	public void handleStringReturnValue() throws Exception {
+		List<HttpMessageConverter<?>>converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new ByteArrayHttpMessageConverter());
+		converters.add(new StringHttpMessageConverter());
+		
+		processor = new RequestResponseBodyMethodProcessor(converters);
+		processor.handleReturnValue("Foo", returnTypeString, mavContainer, webRequest);
+		
+		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
+		assertEquals("Foo", servletResponse.getContentAsString());
+	}
+	
 	@ResponseBody
 	public String handle1(@RequestBody String s, int i) {
 		return s;
