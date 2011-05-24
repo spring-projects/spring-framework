@@ -352,6 +352,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		else {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
 			classQueue.addFirst(sourceObjectType);
+			LinkedList<Class<?>> attemptedInterfaces = new LinkedList<Class<?>>();
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
 				if (logger.isTraceEnabled()) {
@@ -374,7 +375,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				else {
 					Class<?>[] interfaces = currentClass.getInterfaces();
 					for (Class<?> ifc : interfaces) {
-						addInterfaceHierarchy(ifc, classQueue);
+						addInterfaceHierarchy(ifc, classQueue, attemptedInterfaces);
 					}
 					if (currentClass.getSuperclass() != null) {
 						classQueue.addFirst(currentClass.getSuperclass());
@@ -395,7 +396,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 
 	private GenericConverter getMatchingConverterForTarget(TypeDescriptor sourceType, TypeDescriptor targetType,
 			Map<Class<?>, MatchableConverters> converters) {
-
 		Class<?> targetObjectType = targetType.getObjectType();
 		if (targetObjectType.isInterface()) {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
@@ -423,6 +423,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		else {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
 			classQueue.addFirst(targetObjectType);
+			LinkedList<Class<?>> attemptedInterfaces = new LinkedList<Class<?>>();			
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
 				if (logger.isTraceEnabled()) {
@@ -445,7 +446,7 @@ public class GenericConversionService implements ConversionService, ConverterReg
 				else {
 					Class<?>[] interfaces = currentClass.getInterfaces();
 					for (Class<?> ifc : interfaces) {
-						addInterfaceHierarchy(ifc, classQueue);
+						addInterfaceHierarchy(ifc, classQueue, attemptedInterfaces);
 					}
 					if (currentClass.getSuperclass() != null) {
 						classQueue.addFirst(currentClass.getSuperclass());
@@ -456,10 +457,13 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	}
 
-	private void addInterfaceHierarchy(Class<?> interfaceType, LinkedList<Class<?>> classQueue) {
-		classQueue.addFirst(interfaceType);
-		for (Class<?> inheritedInterface : interfaceType.getInterfaces()) {
-			addInterfaceHierarchy(inheritedInterface, classQueue);
+	private void addInterfaceHierarchy(Class<?> interfaceType, LinkedList<Class<?>> classQueue, LinkedList<Class<?>> attemptedInterfaces) {
+		if (!attemptedInterfaces.contains(interfaceType)) {
+			classQueue.addFirst(interfaceType);
+			attemptedInterfaces.add(interfaceType);
+			for (Class<?> inheritedInterface : interfaceType.getInterfaces()) {
+				addInterfaceHierarchy(inheritedInterface, classQueue, attemptedInterfaces);
+			}
 		}
 	}
 
