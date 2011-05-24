@@ -166,6 +166,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		if (sourceType == TypeDescriptor.NULL) {
 			Assert.isTrue(source == null, "The value must be null if sourceType == TypeDescriptor.NULL");
 			Object result = convertNullSource(sourceType, targetType);
+			if (result == null) {
+				assertNotPrimitiveTargetType(sourceType, targetType);
+			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Converted to " + StylerUtils.style(result));
 			}			
@@ -178,15 +181,12 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		Assert.isTrue(source == null || sourceType.getObjectType().isInstance(source));
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter == null) {
-			if (source == null || sourceType.isAssignableTo(targetType)) {
-				logger.debug("No converter found - returning assignable source object as-is");
-				return source;
-			}
-			else {
-				throw new ConverterNotFoundException(sourceType, targetType);
-			}
+			return handleConverterNotFound(source, sourceType, targetType);
 		}
 		Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
+		if (result == null) {
+			assertNotPrimitiveTargetType(sourceType, targetType);
+		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Converted to " + StylerUtils.style(result));
 		}
@@ -218,18 +218,12 @@ public class GenericConversionService implements ConversionService, ConverterReg
 	/**
 	 * Template method to convert a null source.
 	 * <p>Default implementation returns <code>null</code>.
-	 * Throws a {@link ConversionFailedException} if the targetType is a primitive type,
-	 * as <code>null</code> cannot be assigned to a primitive type.
 	 * Subclasses may override to return custom null objects for specific target types.
 	 * @param sourceType the sourceType to convert from
 	 * @param targetType the targetType to convert to
 	 * @return the converted null object
 	 */
 	protected Object convertNullSource(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (targetType.isPrimitive()) {
-			throw new ConversionFailedException(sourceType, targetType, null,
-					new IllegalArgumentException("A null value cannot be assigned to a primitive type"));
-		}
 		return null;
 	}
 
@@ -462,10 +456,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		}
 	}
 
-	private void addInterfaceHierarchy(Class<?> ifc, LinkedList<Class<?>> classQueue) {
-		classQueue.addFirst(ifc);
-		for (Class<?> inheritedIfc : ifc.getInterfaces()) {
-			addInterfaceHierarchy(inheritedIfc, classQueue);
+	private void addInterfaceHierarchy(Class<?> interfaceType, LinkedList<Class<?>> classQueue) {
+		classQueue.addFirst(interfaceType);
+		for (Class<?> implementedInterface : interfaceType.getInterfaces()) {
+			addInterfaceHierarchy(implementedInterface, classQueue);
 		}
 	}
 
@@ -481,6 +475,26 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		return matchable.matchConverter(sourceFieldType, targetFieldType);
 	}
 
+	private Object handleConverterNotFound(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			assertNotPrimitiveTargetType(sourceType, targetType);
+			return source;
+		} else if (sourceType.isAssignableTo(targetType)) {
+			logger.debug("No converter found - returning assignable source object as-is");
+			return source;				
+		}
+		else {
+			throw new ConverterNotFoundException(sourceType, targetType);
+		}		
+	}
+	
+	private void assertNotPrimitiveTargetType(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (targetType.isPrimitive()) {
+			throw new ConversionFailedException(sourceType, targetType, null,
+					new IllegalArgumentException("A null value cannot be assigned to a primitive type"));
+		}		
+	}
+	
 	@SuppressWarnings("unchecked")
 	private final class ConverterAdapter implements GenericConverter {
 

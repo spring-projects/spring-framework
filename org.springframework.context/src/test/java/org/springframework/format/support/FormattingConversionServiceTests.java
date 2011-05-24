@@ -39,9 +39,11 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.format.Formatter;
 import org.springframework.format.datetime.joda.DateTimeParser;
 import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
@@ -204,6 +206,24 @@ public class FormattingConversionServiceTests {
 	}
 
 	@Test
+	public void testParseBlankString() throws ParseException {
+		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
+		assertNull(formattingService.convert("     ", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+	}
+
+	@Test(expected=ConversionFailedException.class)
+	public void testParseParserReturnsNull() throws ParseException {
+		formattingService.addFormatterForFieldType(Integer.class, new NullReturningFormatter());
+		assertNull(formattingService.convert("1", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+	}
+
+	@Test(expected=ConversionFailedException.class)
+	public void testParseNullPrimitiveProperty() throws ParseException {
+		formattingService.addFormatterForFieldType(Integer.class, new NumberFormatter());
+		assertNull(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
+	}
+
+	@Test
 	public void testPrintNullDefault() throws ParseException {
 		assertEquals(null, formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class)));
 	}
@@ -221,11 +241,9 @@ public class FormattingConversionServiceTests {
 
 	public static class Model {
 
-		@SuppressWarnings("unused")
 		@org.springframework.format.annotation.DateTimeFormat(style="S-")
 		public Date date;
 		
-		@SuppressWarnings("unused")
 		@org.springframework.format.annotation.DateTimeFormat(pattern="M-d-yy")
 		public List<Date> dates;
 
@@ -241,11 +259,9 @@ public class FormattingConversionServiceTests {
 
 	public static class ModelWithPlaceholders {
 
-		@SuppressWarnings("unused")
 		@org.springframework.format.annotation.DateTimeFormat(style="${dateStyle}")
 		public Date date;
 
-		@SuppressWarnings("unused")
 		@org.springframework.format.annotation.DateTimeFormat(pattern="${datePattern}")
 		public List<Date> dates;
 
@@ -256,6 +272,18 @@ public class FormattingConversionServiceTests {
 		public void setDates(List<Date> dates) {
 			this.dates = dates;
 		}
+	}
+	
+	public static class NullReturningFormatter implements Formatter<Integer> {
+
+		public String print(Integer object, Locale locale) {
+			return null;
+		}
+
+		public Integer parse(String text, Locale locale) throws ParseException {
+			return null;
+		}
+		
 	}
 
 }

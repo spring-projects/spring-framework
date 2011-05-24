@@ -26,7 +26,6 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -60,6 +59,16 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertNullSource() {
 		assertEquals(null, conversionService.convert(null, Integer.class));
+	}
+
+	@Test(expected=ConversionFailedException.class)
+	public void convertNullSourcePrimitiveTarget() {
+		assertEquals(null, conversionService.convert(null, int.class));
+	}
+
+	@Test(expected=ConversionFailedException.class)
+	public void convertNullSourcePrimitiveTargetTypeDescriptor() {
+		assertEquals(null, conversionService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
 	}
 
 	@Test
