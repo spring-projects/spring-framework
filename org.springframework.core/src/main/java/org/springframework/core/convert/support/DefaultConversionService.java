@@ -18,13 +18,16 @@ package org.springframework.core.convert.support;
 
 import java.util.Locale;
 
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.converter.ConverterRegistry;
+
 /**
  * A specialization of {@link GenericConversionService} configured by default with
- * converters appropriate for most applications.
+ * converters appropriate for most environments.
  *
  * <p>Designed for direct instantiation but also exposes the static
- * {@link #addDefaultConverters} utility method for ad hoc use against any
- * {@code GenericConversionService} instance.
+ * {@link #addDefaultConverters(ConverterRegistry)} utility method for ad hoc use against any
+ * {@code ConverterRegistry} instance.
  *
  * @author Chris Beams
  * @since 3.1
@@ -33,62 +36,79 @@ public class DefaultConversionService extends GenericConversionService {
 
 	/**
 	 * Create a new {@code DefaultConversionService} with the set of
-	 * {@linkplain DefaultConversionService#addDefaultConverters default converters}.
+	 * {@linkplain DefaultConversionService#addDefaultConverters(ConverterRegistry) default converters}.
 	 */
 	public DefaultConversionService() {
 		addDefaultConverters(this);
 	}
 
+	// static utility methods
+	
 	/**
 	 * Add converters appropriate for most environments.
-	 * @param conversionService the service to register default formatters against
+	 * @param converterRegistry the registry of converters to add to (must also be castable to ConversionService)
+	 * @throws ClassCastException if the converterRegistry could not be cast to a ConversionService
 	 */
-	public static void addDefaultConverters(GenericConversionService conversionService) {
-		conversionService.addConverter(new ArrayToCollectionConverter(conversionService));
-		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
+	public static void addDefaultConverters(ConverterRegistry converterRegistry) {
+		addScalarConverters(converterRegistry);
+		addCollectionConverters(converterRegistry);
+		addFallbackConverters(converterRegistry);
+	}
+	
+	// internal helpers
+	
+	private static void addScalarConverters(ConverterRegistry converterRegistry) {
+		converterRegistry.addConverter(new StringToBooleanConverter());
+		converterRegistry.addConverter(Boolean.class, String.class, new ObjectToStringConverter());
 
-		conversionService.addConverter(new ArrayToStringConverter(conversionService));
-		conversionService.addConverter(new StringToArrayConverter(conversionService));
+		converterRegistry.addConverterFactory(new StringToNumberConverterFactory());
+		converterRegistry.addConverter(Number.class, String.class, new ObjectToStringConverter());
 
-		conversionService.addConverter(new ArrayToObjectConverter(conversionService));
-		conversionService.addConverter(new ObjectToArrayConverter(conversionService));
-
-		conversionService.addConverter(new CollectionToStringConverter(conversionService));
-		conversionService.addConverter(new StringToCollectionConverter(conversionService));
-
-		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
-		conversionService.addConverter(new ObjectToCollectionConverter(conversionService));
-
-		conversionService.addConverter(new ArrayToArrayConverter(conversionService));
-		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
-		conversionService.addConverter(new MapToMapConverter(conversionService));
-
-		conversionService.addConverter(new PropertiesToStringConverter());
-		conversionService.addConverter(new StringToPropertiesConverter());
-
-		conversionService.addConverter(new StringToBooleanConverter());
-		conversionService.addConverter(Boolean.class, String.class, new ObjectToStringConverter());
-
-		conversionService.addConverter(new StringToCharacterConverter());
-		conversionService.addConverter(Character.class, String.class, new ObjectToStringConverter());
-
-		conversionService.addConverter(new StringToLocaleConverter());
-		conversionService.addConverter(Locale.class, String.class, new ObjectToStringConverter());
+		converterRegistry.addConverterFactory(new NumberToNumberConverterFactory());
 		
-		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		conversionService.addConverter(Number.class, String.class, new ObjectToStringConverter());
-		
-		conversionService.addConverterFactory(new StringToEnumConverterFactory());
-		conversionService.addConverter(Enum.class, String.class, new EnumToStringConverter());
-		
-		conversionService.addConverter(new NumberToCharacterConverter());
-		conversionService.addConverterFactory(new CharacterToNumberFactory());
+		converterRegistry.addConverter(new StringToCharacterConverter());
+		converterRegistry.addConverter(Character.class, String.class, new ObjectToStringConverter());
 
-		conversionService.addConverterFactory(new NumberToNumberConverterFactory());
+		converterRegistry.addConverter(new NumberToCharacterConverter());
+		converterRegistry.addConverterFactory(new CharacterToNumberFactory());
+		
+		converterRegistry.addConverterFactory(new StringToEnumConverterFactory());
+		converterRegistry.addConverter(Enum.class, String.class, new EnumToStringConverter());
+		
+		converterRegistry.addConverter(new StringToLocaleConverter());
+		converterRegistry.addConverter(Locale.class, String.class, new ObjectToStringConverter());
 
-		conversionService.addConverter(new ObjectToObjectConverter());
-		conversionService.addConverter(new IdToEntityConverter(conversionService));
-		conversionService.addConverter(new FallbackObjectToStringConverter());
+		converterRegistry.addConverter(new PropertiesToStringConverter());
+		converterRegistry.addConverter(new StringToPropertiesConverter());
+	}
+
+	private static void addCollectionConverters(ConverterRegistry converterRegistry) {
+		ConversionService conversionService = (ConversionService) converterRegistry;		
+		converterRegistry.addConverter(new ArrayToCollectionConverter(conversionService));
+		converterRegistry.addConverter(new CollectionToArrayConverter(conversionService));
+
+		converterRegistry.addConverter(new ArrayToArrayConverter(conversionService));
+		converterRegistry.addConverter(new CollectionToCollectionConverter(conversionService));
+		converterRegistry.addConverter(new MapToMapConverter(conversionService));		
+
+		converterRegistry.addConverter(new ArrayToStringConverter(conversionService));
+		converterRegistry.addConverter(new StringToArrayConverter(conversionService));
+
+		converterRegistry.addConverter(new ArrayToObjectConverter(conversionService));
+		converterRegistry.addConverter(new ObjectToArrayConverter(conversionService));
+
+		converterRegistry.addConverter(new CollectionToStringConverter(conversionService));
+		converterRegistry.addConverter(new StringToCollectionConverter(conversionService));
+
+		converterRegistry.addConverter(new CollectionToObjectConverter(conversionService));
+		converterRegistry.addConverter(new ObjectToCollectionConverter(conversionService));
+	}
+	
+	private static void addFallbackConverters(ConverterRegistry converterRegistry) {
+		ConversionService conversionService = (ConversionService) converterRegistry;
+		converterRegistry.addConverter(new ObjectToObjectConverter());
+		converterRegistry.addConverter(new IdToEntityConverter(conversionService));
+		converterRegistry.addConverter(new FallbackObjectToStringConverter());		
 	}
 
 }

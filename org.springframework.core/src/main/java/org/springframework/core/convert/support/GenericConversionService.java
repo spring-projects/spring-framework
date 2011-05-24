@@ -88,17 +88,6 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			new ConcurrentHashMap<ConverterCacheKey, GenericConverter>();
 
 
-	/**
-	 * Add a converter to the register indexed under the explicit source and target types.
-	 * Allows for a general converter to be reused for multiple distinct source-to-target convertible pairs without having to create a Converter class for each pair.
-	 * Not yet part of the ConverterRegistry interface.
-	 * @since 3.1
-	 */
-	public void addConverter(Class<?> sourceType, Class<?> targetType, Converter<?, ?> converter) {
-		GenericConverter.ConvertiblePair typeInfo = new GenericConverter.ConvertiblePair(sourceType, targetType);
-		addConverter(new ConverterAdapter(typeInfo, converter));
-	}
-	
 	// implementing ConverterRegistry
 
 	public void addConverter(Converter<?, ?> converter) {
@@ -110,13 +99,9 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		addConverter(new ConverterAdapter(typeInfo, converter));
 	}
 
-	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
-		GenericConverter.ConvertiblePair typeInfo = getRequiredTypeInfo(converterFactory, ConverterFactory.class);
-		if (typeInfo == null) {
-			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetRangeType R which " +
-					"your ConverterFactory<S, R> converts between; declare these generic types.");
-		}
-		addConverter(new ConverterFactoryAdapter(typeInfo, converterFactory));
+	public void addConverter(Class<?> sourceType, Class<?> targetType, Converter<?, ?> converter) {
+		GenericConverter.ConvertiblePair typeInfo = new GenericConverter.ConvertiblePair(sourceType, targetType);
+		addConverter(new ConverterAdapter(typeInfo, converter));
 	}
 	
 	public void addConverter(GenericConverter converter) {
@@ -127,6 +112,15 @@ public class GenericConversionService implements ConversionService, ConverterReg
 		invalidateCache();
 	}
 
+	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
+		GenericConverter.ConvertiblePair typeInfo = getRequiredTypeInfo(converterFactory, ConverterFactory.class);
+		if (typeInfo == null) {
+			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetRangeType R which " +
+					"your ConverterFactory<S, R> converts between; declare these generic types.");
+		}
+		addConverter(new ConverterFactoryAdapter(typeInfo, converterFactory));
+	}
+	
 	public void removeConvertible(Class<?> sourceType, Class<?> targetType) {
 		getSourceConverterMap(sourceType).remove(targetType);
 		invalidateCache();
