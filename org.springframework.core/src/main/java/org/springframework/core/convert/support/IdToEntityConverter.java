@@ -21,6 +21,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Set;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.ClassUtils;
@@ -38,9 +39,9 @@ import org.springframework.util.ReflectionUtils;
  */
 final class IdToEntityConverter implements ConditionalGenericConverter {
 
-	private final GenericConversionService conversionService;
+	private final ConversionService conversionService;
 
-	public IdToEntityConverter(GenericConversionService conversionService) {
+	public IdToEntityConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
@@ -56,7 +57,7 @@ final class IdToEntityConverter implements ConditionalGenericConverter {
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
-			return this.conversionService.convertNullSource(sourceType, targetType);
+			return null;
 		}
 		Method finder = getFinder(targetType.getType());
 		Object id = this.conversionService.convert(
