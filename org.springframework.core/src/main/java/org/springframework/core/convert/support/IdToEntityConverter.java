@@ -51,8 +51,7 @@ final class IdToEntityConverter implements ConditionalGenericConverter {
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Method finder = getFinder(targetType.getType());
-		return (finder != null &&
-				this.conversionService.canConvert(sourceType, TypeDescriptor.valueOf(finder.getParameterTypes()[0])));
+		return finder != null && this.conversionService.canConvert(sourceType, TypeDescriptor.valueOf(finder.getParameterTypes()[0]));
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -60,8 +59,7 @@ final class IdToEntityConverter implements ConditionalGenericConverter {
 			return null;
 		}
 		Method finder = getFinder(targetType.getType());
-		Object id = this.conversionService.convert(
-				source, sourceType, TypeDescriptor.valueOf(finder.getParameterTypes()[0]));
+		Object id = this.conversionService.convert(source, sourceType, TypeDescriptor.valueOf(finder.getParameterTypes()[0]));
 		return ReflectionUtils.invokeMethod(finder, source, id);
 	}
 
@@ -69,8 +67,7 @@ final class IdToEntityConverter implements ConditionalGenericConverter {
 		String finderMethod = "find" + getEntityName(entityClass);
 		Method[] methods = entityClass.getDeclaredMethods();
 		for (Method method : methods) {
-			if (Modifier.isStatic(method.getModifiers()) && method.getParameterTypes().length == 1 &&
-					method.getReturnType().equals(entityClass)) {
+			if (Modifier.isStatic(method.getModifiers()) && method.getParameterTypes().length == 1 && method.getReturnType().equals(entityClass)) {
 				if (method.getName().equals(finderMethod)) {
 					return method;
 				}

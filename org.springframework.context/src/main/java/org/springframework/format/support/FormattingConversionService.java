@@ -36,6 +36,7 @@ import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
+import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -124,10 +125,13 @@ public class FormattingConversionService extends GenericConversionService
 
 		@SuppressWarnings("unchecked")
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			if (source == null) {
+				return "";
+			}
 			if (!sourceType.isAssignableTo(this.printerObjectType)) {
 				source = this.conversionService.convert(source, sourceType, this.printerObjectType);
 			}
-			return (source != null ? this.printer.print(source, LocaleContextHolder.getLocale()) : "");
+			return this.printer.print(source, LocaleContextHolder.getLocale());
 		}
 		
 		private Class<?> resolvePrinterObjectType(Printer<?> printer) {
@@ -159,7 +163,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			String text = (String) source;
-			if (text == null || text.length() == 0) {
+			if (!StringUtils.hasText(text)) {
 				return null;
 			}
 			Object result;
@@ -168,6 +172,9 @@ public class FormattingConversionService extends GenericConversionService
 			}
 			catch (ParseException ex) {
 				throw new IllegalArgumentException("Unable to parse '" + text + "'", ex);
+			}
+			if (result == null) {
+				throw new IllegalStateException("Parsers are not allowed to return null");
 			}
 			TypeDescriptor resultType = TypeDescriptor.valueOf(result.getClass());
 			if (!resultType.isAssignableTo(targetType)) {
