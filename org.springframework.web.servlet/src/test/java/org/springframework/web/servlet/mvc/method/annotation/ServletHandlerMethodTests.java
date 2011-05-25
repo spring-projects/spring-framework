@@ -1007,6 +1007,29 @@ public class ServletHandlerMethodTests {
 	}
 
 	@Test
+	public void consumes() throws ServletException, IOException {
+		initDispatcherServlet(ConsumesController.class, null);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/something");
+		request.setContentType("application/pdf");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("pdf", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/something");
+		request.setContentType("text/html");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("text", response.getContentAsString());
+
+		request = new MockHttpServletRequest("POST", "/something");
+		request.setContentType("application/xml");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(415, response.getStatus());
+	}
+
+	@Test
 	public void negatedContentTypeHeaders() throws ServletException, IOException {
 		initDispatcherServlet(NegatedContentTypeHeadersController.class, null);
 
@@ -1026,6 +1049,41 @@ public class ServletHandlerMethodTests {
 	@Test
 	public void acceptHeaders() throws ServletException, IOException {
 		initDispatcherServlet(AcceptHeadersController.class, null);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "text/html");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("html", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "application/xml");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("xml", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "application/xml, text/html");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("xml", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "text/html;q=0.9, application/xml");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("xml", response.getContentAsString());
+
+		request = new MockHttpServletRequest("GET", "/something");
+		request.addHeader("Accept", "application/msword");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(406, response.getStatus());
+	}
+
+	@Test
+	public void produces() throws ServletException, IOException {
+		initDispatcherServlet(ProducesController.class, null);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/something");
 		request.addHeader("Accept", "text/html");
@@ -2272,6 +2330,20 @@ public class ServletHandlerMethodTests {
 	}
 
 	@Controller
+	public static class ConsumesController {
+
+		@RequestMapping(value = "/something", consumes = "application/pdf")
+		public void handlePdf(Writer writer) throws IOException {
+			writer.write("pdf");
+		}
+
+		@RequestMapping(value = "/something", consumes = "text/*")
+		public void handleHtml(Writer writer) throws IOException {
+			writer.write("text");
+		}
+	}
+
+	@Controller
 	public static class NegatedContentTypeHeadersController {
 
 		@RequestMapping(value = "/something", headers = "content-type=application/pdf")
@@ -2295,6 +2367,20 @@ public class ServletHandlerMethodTests {
 		}
 
 		@RequestMapping(value = "/something", headers = "accept=application/xml")
+		public void handleXml(Writer writer) throws IOException {
+			writer.write("xml");
+		}
+	}
+
+	@Controller
+	public static class ProducesController {
+
+		@RequestMapping(value = "/something", produces = "text/html")
+		public void handleHtml(Writer writer) throws IOException {
+			writer.write("html");
+		}
+
+		@RequestMapping(value = "/something", produces = "application/xml")
 		public void handleXml(Writer writer) throws IOException {
 			writer.write("xml");
 		}
