@@ -117,12 +117,14 @@ public @interface PropertySource {
 	String name() default "";
 
 	/**
-	 * Indicate the resource location of the properties file to be loaded.
+	 * Indicate the resource location(s) of the properties file to be loaded.
 	 * For example, {@code "classpath:/com/myco/app.properties"} or
 	 * {@code "file:/path/to/file"}. Note that resource location wildcards
-	 * are not permitted, and that a location must evaluate to exactly one
-	 * {@code .properties} resource.
+	 * are not permitted, and that each location must evaluate to exactly one
+	 * {@code .properties} resource. Each location will be added to the
+	 * enclosing {@code Environment} as its own property source, and in the order
+	 * declared.
 	 */
-	String value();
+	String[] value();
 
 }
