@@ -174,12 +174,14 @@ class ConfigurationClassParser {
 			metadata.getAnnotationAttributes(org.springframework.context.annotation.PropertySource.class.getName());
 		if (propertySourceAttributes != null) {
 			String name = (String) propertySourceAttributes.get("name");
-			String location = (String) propertySourceAttributes.get("value");
+			String[] locations = (String[]) propertySourceAttributes.get("value");
 			ClassLoader classLoader = this.resourceLoader.getClassLoader();
-			ResourcePropertySource ps = StringUtils.hasText(name) ?
-					new ResourcePropertySource(name, location, classLoader) :
-					new ResourcePropertySource(location, classLoader);
-			this.propertySources.push(ps);
+			for (String location : locations) {
+				ResourcePropertySource ps = StringUtils.hasText(name) ?
+						new ResourcePropertySource(name, location, classLoader) :
+						new ResourcePropertySource(location, classLoader);
+				this.propertySources.push(ps);
+			}
 		}
 
 		// process any @ComponentScan annotions
