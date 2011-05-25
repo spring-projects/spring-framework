@@ -77,6 +77,7 @@ public class StandardServletEnvironment extends StandardEnvironment {
 	 * servlet property sources, but higher than system properties and environment
 	 * variables.
 	 * @see StandardEnvironment#customizePropertySources
+	 * @see org.springframework.core.env.AbstractEnvironment#customizePropertySources
 	 * @see ServletConfigPropertySource
 	 * @see ServletContextPropertySource
 	 * @see org.springframework.jndi.JndiPropertySource

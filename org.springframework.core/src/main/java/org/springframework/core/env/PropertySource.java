@@ -24,19 +24,26 @@ import org.springframework.util.Assert;
  * Abstract base class representing a source of key/value property pairs. The underlying
  * {@linkplain #getSource() source object} may be of any type {@code T} that encapsulates
  * properties. Examples include {@link java.util.Properties} objects, {@link java.util.Map}
- * objects, {@code ServletContext} and {@code ServletConfig} objects (for access to init parameters).
- * Explore the {@code PropertySource} type hierarchy to see provided implementations.
+ * objects, {@code ServletContext} and {@code ServletConfig} objects (for access to init
+ * parameters). Explore the {@code PropertySource} type hierarchy to see provided
+ * implementations.
  *
- * <p>{@code PropertySource} objects are not typically used in isolation, but rather through a
- * {@link PropertySources} object, which aggregates property sources and in conjunction with
- * a {@link PropertyResolver} implementation that can perform precedence-based searches across
- * the set of {@code PropertySources}.
+ * <p>{@code PropertySource} objects are not typically used in isolation, but rather
+ * through a {@link PropertySources} object, which aggregates property sources and in
+ * conjunction with a {@link PropertyResolver} implementation that can perform
+ * precedence-based searches across the set of {@code PropertySources}.
  *
- * <p>{@code PropertySource} identity is determined not based on the content of encapsulated
- * properties, but rather based on the {@link #getName() name} of the {@code PropertySource}
- * alone. This is useful for manipulating {@code PropertySource} objects when in collection
- * contexts. See operations in {@link MutablePropertySources} as well as the
- * {@link #named(String)} and {@link #toString()} methods for details.
+ * <p>{@code PropertySource} identity is determined not based on the content of
+ * encapsulated properties, but rather based on the {@link #getName() name} of the
+ * {@code PropertySource} alone. This is useful for manipulating {@code PropertySource}
+ * objects when in collection contexts. See operations in {@link MutablePropertySources}
+ * as well as the {@link #named(String)} and {@link #toString()} methods for details.
+ *
+ * <p>Note that when working with @{@link
+ * org.springframework.context.annotation.Configuration Configuration} classes that
+ * the @{@link org.springframework.context.annotation.PropertySource PropertySource}
+ * annotation provides a convenient and declarative way of adding property sources to the
+ * enclosing {@code Environment}.
  *
  * @author Chris Beams
  * @since 3.1
@@ -44,6 +51,7 @@ import org.springframework.util.Assert;
  * @see PropertyResolver
  * @see PropertySourcesPropertyResolver
  * @see MutablePropertySources
+ * @see org.springframework.context.annotation.PropertySource
  */
 public abstract class PropertySource<T> {
 

@@ -98,7 +98,8 @@ import org.springframework.stereotype.Component;
  * <h3>Using the {@code Environment} API</h3>
  * Externalized values may be looked up by injecting the Spring
  * {@link org.springframework.core.env.Environment Environment} into a
- * {@code @Configuration} class:
+ * {@code @Configuration} class using the {@code @Autowired} or the {@code @Inject}
+ * annotation:
  * <pre class="code">
  * &#064;Configuration
  * public class AppConfig {

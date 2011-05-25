@@ -68,6 +68,7 @@ public class StandardPortletEnvironment extends StandardEnvironment {
 	 * initialized} once the actual {@link PortletConfig}, {@link PortletContext}, and
 	 * {@link ServletContext} objects are available.
 	 * @see StandardEnvironment#customizePropertySources
+	 * @see org.springframework.core.env.AbstractEnvironment#customizePropertySources
 	 * @see PortletConfigPropertySource
 	 * @see PortletContextPropertySource
 	 * @see AbstractRefreshablePortletApplicationContext#initPropertySources

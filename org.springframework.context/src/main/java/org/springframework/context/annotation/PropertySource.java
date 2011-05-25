@@ -49,10 +49,10 @@ import java.lang.annotation.Target;
  *     }
  * }</pre>
  *
- * Notice that the {@code Environment} object is @{@link Autowired} into the
- * configuration class and then used when populating the {@code TestBean}
- * object. Given the configuration above, a call to {@code testBean.getName()} will
- * return "myTestBean".
+ * Notice that the {@code Environment} object is @{@link
+ * org.springframework.beans.factory.annotation.Autowired Autowired} into the
+ * configuration class and then used when populating the {@code TestBean} object. Given
+ * the configuration above, a call to {@code testBean.getName()} will return "myTestBean".
  *
  * <h3>A note on property overriding with @PropertySource</h3>
  * In cases where a given property key exists in more than one {@code .properties}
@@ -91,13 +91,16 @@ import java.lang.annotation.Target;
  * if the {@code @Configuration} classes above were registered via component-scanning,
  * the ordering is difficult to predict.  In such cases - and if overriding is important -
  * it is recommended that the user fall back to using the programmatic PropertySource API.
- * See {@link org.springframework.core.env.ConfigurableEnvironment ConfigurableEnvironment} and
- * {@link org.springframework.core.env.MutablePropertySources MutablePropertySources} Javadoc
- * for details.
-
+ * See {@link org.springframework.core.env.ConfigurableEnvironment ConfigurableEnvironment}
+ * and * {@link org.springframework.core.env.MutablePropertySources MutablePropertySources}
+ * Javadoc for details.
  *
  * @author Chris Beams
  * @since 3.1
+ * @see Configuration
+ * @see org.springframework.core.env.PropertySource
+ * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
+ * @see org.springframework.core.env.MutablePropertySources
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -105,7 +108,7 @@ import java.lang.annotation.Target;
 public @interface PropertySource {
 
 	/**
-	 * Indicate the name of this PropertySource. If omitted, a name
+	 * Indicate the name of this property source. If omitted, a name
 	 * will be generated based on the description of the underlying
 	 * resource.
 	 * @see org.springframework.core.env.PropertySource#getName()
