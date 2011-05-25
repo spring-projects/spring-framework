@@ -67,7 +67,7 @@ package org.springframework.core.env;
  * {@link org.springframework.context.support.AbstractApplicationContext#refresh()
  * refresh()} method is called. This ensures that all PropertySources are available during
  * the container bootstrap process, including use by
- * {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
+ * {@linkplain org.springframework.context.support.PropertySourcesPlaceholderConfigurer
  * property placeholder configurers}.
  *
  * @author Chris Beams
@@ -93,6 +93,7 @@ public class StandardEnvironment extends AbstractEnvironment {
 	 * </ul>
 	 * <p>Properties present in {@value #SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME}.
+	 * @see AbstractEnvironment#customizePropertySources(MutablePropertySources)
 	 * @see #getSystemProperties()
 	 * @see #getSystemEnvironment()
 	 */
