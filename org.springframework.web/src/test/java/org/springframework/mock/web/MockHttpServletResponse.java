@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletResponse}
- * interface. Supports the Servlet 2.5 API level.
+ * interface. Supports the Servlet 3.0 API level
  *
  * <p>Used for testing the web framework; also useful for testing
  * application controllers.
@@ -292,9 +292,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @param name the name of the header
 	 * @return the associated header value, or <code>null<code> if none
 	 */
-	public Object getHeader(String name) {
+	public String getHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return (header != null ? header.getValue() : null);
+		return (header != null ? header.getValue().toString() : null);
 	}
 
 	/**
@@ -302,9 +302,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @param name the name of the header
 	 * @return the associated header values, or an empty List if none
 	 */
-	public List<Object> getHeaders(String name) {
+	public List<String> getHeaders(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return (header != null ? header.getValues() : Collections.emptyList());
+		return (header != null ? header.getStringValues() : Collections.<String>emptyList());
 	}
 
 	/**

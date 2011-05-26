@@ -43,7 +43,7 @@
 		<dependency org="javax.faces" name="com.springsource.javax.faces" rev="1.2.0.08"
                     conf="provided, faces->compile"/>
 		<dependency org="javax.portlet" name="com.springsource.javax.portlet" rev="2.0.0" conf="provided->compile"/>
-		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="provided->compile"/>
+		<dependency org="javax.servlet" name="javax.servlet" rev="3.0.0.v201103241009" conf="provided->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp" rev="2.1.0"
                     conf="provided, jsp->compile"/>
 		<dependency org="javax.xml.rpc" name="com.springsource.javax.xml.rpc" rev="1.1.0"

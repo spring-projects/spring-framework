@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -30,9 +31,17 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.activation.FileTypeMap;
+import javax.servlet.Filter;
+import javax.servlet.FilterRegistration;
+import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.SessionTrackingMode;
+import javax.servlet.descriptor.JspConfigDescriptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,8 +76,12 @@ import org.springframework.web.util.WebUtils;
  * and XmlWebApplicationContext with an underlying MockServletContext (as long as
  * the MockServletContext has been configured with a FileSystemResourceLoader).
  *
+ * Supports the Servlet 3.0 API level, but throws {@link UnsupportedOperationException}
+ * for all methods introduced in Servlet 3.0.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 1.0.2
  * @see #MockServletContext(org.springframework.core.io.ResourceLoader)
  * @see org.springframework.web.context.support.XmlWebApplicationContext
@@ -359,6 +372,121 @@ public class MockServletContext implements ServletContext {
 		public static String getMimeType(String filePath) {
 			return FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
 		}
+	}
+
+
+	//---------------------------------------------------------------------
+	// Methods introduced in Servlet 3.0
+	//---------------------------------------------------------------------
+
+	public Dynamic addFilter(String arg0, String arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Dynamic addFilter(String arg0, Filter arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Dynamic addFilter(String arg0, Class<? extends Filter> arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void addListener(Class<? extends EventListener> arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void addListener(String arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	public <T extends EventListener> void addListener(T arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	public javax.servlet.ServletRegistration.Dynamic addServlet(String arg0, String arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	public javax.servlet.ServletRegistration.Dynamic addServlet(String arg0,
+			Servlet arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	public javax.servlet.ServletRegistration.Dynamic addServlet(String arg0,
+			Class<? extends Servlet> arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	public <T extends Filter> T createFilter(Class<T> arg0)
+			throws ServletException {
+		throw new UnsupportedOperationException();
+	}
+
+	public <T extends EventListener> T createListener(Class<T> arg0)
+			throws ServletException {
+		throw new UnsupportedOperationException();
+	}
+
+	public <T extends Servlet> T createServlet(Class<T> arg0)
+			throws ServletException {
+		throw new UnsupportedOperationException();
+	}
+
+	public void declareRoles(String... arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	public ClassLoader getClassLoader() {
+		throw new UnsupportedOperationException();
+	}
+
+	public Set<SessionTrackingMode> getDefaultSessionTrackingModes() {
+		throw new UnsupportedOperationException();
+	}
+
+	public int getEffectiveMajorVersion() {
+		throw new UnsupportedOperationException();
+	}
+
+	public int getEffectiveMinorVersion() {
+		throw new UnsupportedOperationException();
+	}
+
+	public Set<SessionTrackingMode> getEffectiveSessionTrackingModes() {
+		throw new UnsupportedOperationException();
+	}
+
+	public FilterRegistration getFilterRegistration(String arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
+		throw new UnsupportedOperationException();
+	}
+
+	public JspConfigDescriptor getJspConfigDescriptor() {
+		throw new UnsupportedOperationException();
+	}
+
+	public ServletRegistration getServletRegistration(String arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	public Map<String, ? extends ServletRegistration> getServletRegistrations() {
+		throw new UnsupportedOperationException();
+	}
+
+	public SessionCookieConfig getSessionCookieConfig() {
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean setInitParameter(String arg0, String arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setSessionTrackingModes(Set<SessionTrackingMode> arg0)
+			throws IllegalStateException, IllegalArgumentException {
+		throw new UnsupportedOperationException();
 	}
 
 }
