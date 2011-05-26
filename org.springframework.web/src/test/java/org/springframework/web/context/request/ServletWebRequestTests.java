@@ -136,7 +136,7 @@ public class ServletWebRequestTests {
 		request.checkNotModified(currentTime);
 
 		assertEquals(200, servletResponse.getStatus());
-		assertEquals(currentTime, servletResponse.getHeader("Last-Modified"));
+		assertEquals(""+currentTime, servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
