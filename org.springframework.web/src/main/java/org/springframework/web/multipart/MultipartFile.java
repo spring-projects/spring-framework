@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,8 @@ public interface MultipartFile {
 	 * <p>This may contain path information depending on the browser used,
 	 * but it typically will not with any other than Opera.
 	 * @return the original filename, or the empty String if no file
-	 * has been chosen in the multipart form
+	 * has been chosen in the multipart form, or <code>null</code>
+	 * if not defined or not available
 	 */
 	String getOriginalFilename();
 
