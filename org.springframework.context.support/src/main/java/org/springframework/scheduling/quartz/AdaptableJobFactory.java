@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scheduling.quartz;
 
 import org.quartz.Job;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
@@ -25,6 +26,8 @@ import org.quartz.spi.TriggerFiredBundle;
  * JobFactory implementation that supports {@link java.lang.Runnable}
  * objects as well as standard Quartz {@link org.quartz.Job} instances.
  *
+ * <p>Compatible with Quartz 1.x as well as Quartz 2.0, as of Spring 3.1.
+ *
  * @author Juergen Hoeller
  * @since 2.0
  * @see DelegatingJob
@@ -32,6 +35,17 @@ import org.quartz.spi.TriggerFiredBundle;
  */
 public class AdaptableJobFactory implements JobFactory {
 
+	/**
+	 * Quartz 2.0 version of newJob: simply delegates to old newJob variant.
+	 * @see #newJob(org.quartz.spi.TriggerFiredBundle)
+	 */
+	public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler) throws SchedulerException {
+		return newJob(bundle);
+	}
+
+	/**
+	 * Quartz 1.x version of newJob: contains actual implementation code.
+	 */
 	public Job newJob(TriggerFiredBundle bundle) throws SchedulerException {
 		try {
 			Object jobObject = createJobInstance(bundle);
