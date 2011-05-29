@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  * Property editor that trims Strings.
  *
  * <p>Optionally allows transforming an empty string into a <code>null</code> value.
- * Needs to be explictly registered, e.g. for command binding.
+ * Needs to be explicitly registered, e.g. for command binding.
  *
  * @author Juergen Hoeller
  * @see org.springframework.validation.DataBinder#registerCustomEditor
