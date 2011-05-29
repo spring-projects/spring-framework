@@ -13,6 +13,7 @@
     <orderEntry type="module" module-name="context" />
     <orderEntry type="module" module-name="context-support" />
     <orderEntry type="module" module-name="core" />
+    <orderEntry type="module" module-name="expression" />
     <orderEntry type="module" module-name="jdbc" />
     <orderEntry type="module" module-name="jms" />
     <orderEntry type="module" module-name="orm" />
@@ -218,11 +219,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.pool/1.4.0/com.springsource.org.apache.commons.pool-1.4.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.pool/1.5.3/com.springsource.org.apache.commons.pool-1.5.3.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.pool/1.4.0/com.springsource.org.apache.commons.pool-sources-1.4.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.pool/1.5.3/com.springsource.org.apache.commons.pool-sources-1.5.3.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -293,11 +294,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/0.9.0/com.springsource.com.sun.syndication-0.9.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-1.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/0.9.0/com.springsource.com.sun.syndication-sources-0.9.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-sources-1.0.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -337,15 +338,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/com.sun.enterprise/com.springsource.com.sun.enterprise.loader/1.0.0/com.springsource.com.sun.enterprise.loader-1.0.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.eclipse.persistence/com.springsource.org.eclipse.persistence.jpa/1.0.1/com.springsource.org.eclipse.persistence.jpa-1.0.1.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -379,11 +371,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa.persistence/1.0.2/com.springsource.org.apache.openjpa.persistence-1.0.2.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-1.1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa.persistence/1.0.2/com.springsource.org.apache.openjpa.persistence-sources-1.0.2.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-sources-1.1.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -455,6 +447,28 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$IVY_CACHE$/org.jboss.javassist/com.springsource.javassist/3.3.0.ga/com.springsource.javassist-sources-3.3.0.ga.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate/3.3.1.GA/com.springsource.org.hibernate-3.3.1.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate/3.3.1.GA/com.springsource.org.hibernate-sources-3.3.1.GA.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.annotations/3.4.0.GA/com.springsource.org.hibernate.annotations-3.4.0.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.annotations/3.4.0.GA/com.springsource.org.hibernate.annotations-sources-3.4.0.GA.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
