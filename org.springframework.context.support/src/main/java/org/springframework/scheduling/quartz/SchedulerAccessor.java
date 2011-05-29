@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -34,7 +35,6 @@ import org.quartz.SchedulerListener;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.quartz.spi.ClassLoadHelper;
-import org.quartz.xml.JobSchedulingDataProcessor;
 
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
@@ -240,9 +240,25 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 			if (this.jobSchedulingDataLocations != null) {
 				ClassLoadHelper clh = new ResourceLoaderClassLoadHelper(this.resourceLoader);
 				clh.initialize();
-				JobSchedulingDataProcessor dataProcessor = new JobSchedulingDataProcessor(clh, true, true);
-				for (String location : this.jobSchedulingDataLocations) {
-					dataProcessor.processFileAndScheduleJobs(location, getScheduler(), this.overwriteExistingJobs);
+				try {
+					// Quartz 1.8 or higher?
+					Class dataProcessorClass = getClass().getClassLoader().loadClass("import org.quartz.xml.XMLSchedulingDataProcessor");
+					logger.debug("Using Quartz 1.8 XMLSchedulingDataProcessor");
+					Object dataProcessor = dataProcessorClass.getConstructor(ClassLoadHelper.class).newInstance(clh);
+					Method processFileAndScheduleJobs = dataProcessorClass.getMethod("processFileAndScheduleJobs", String.class, Scheduler.class);
+					for (String location : this.jobSchedulingDataLocations) {
+						processFileAndScheduleJobs.invoke(dataProcessor, location, getScheduler());
+					}
+				}
+				catch (ClassNotFoundException ex) {
+					// Quartz 1.6
+					Class dataProcessorClass = getClass().getClassLoader().loadClass("import org.quartz.xml.JobSchedulingDataProcessor");
+					logger.debug("Using Quartz 1.6 JobSchedulingDataProcessor");
+					Object dataProcessor = dataProcessorClass.getConstructor(ClassLoadHelper.class, boolean.class, boolean.class).newInstance(clh, true, true);
+					Method processFileAndScheduleJobs = dataProcessorClass.getMethod("processFileAndScheduleJobs", String.class, Scheduler.class, boolean.class);
+					for (String location : this.jobSchedulingDataLocations) {
+						processFileAndScheduleJobs.invoke(dataProcessor, location, getScheduler(), this.overwriteExistingJobs);
+					}
 				}
 			}
 

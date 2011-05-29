@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,9 +74,9 @@ import org.springframework.util.CollectionUtils;
  * automatically apply to Scheduler operations performed within those scopes.
  * Alternatively, you may add transactional advice for the Scheduler itself.
  *
- * <p><b>Note:</b> This version of Spring's SchedulerFactoryBean requires
- * Quartz 1.5.x or 1.6.x. The "jobSchedulingDataLocation" feature requires
- * Quartz 1.6.1 or higher (as of Spring 2.5.5).
+ * <p><b>Note:</b> This version of Spring's SchedulerFactoryBean supports Quartz 1.x,
+ * more specifically Quartz 1.5 or higher. The "jobSchedulingDataLocation" feature
+ * requires Quartz 1.6.1 or higher (as of Spring 2.5.5).
  *
  * @author Juergen Hoeller
  * @since 18.02.2004

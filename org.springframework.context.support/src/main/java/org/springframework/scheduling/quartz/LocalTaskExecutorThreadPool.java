@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,13 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Executor taskExecutor;
+
+
+	public void setInstanceId(String schedInstId) {
+	}
+
+	public void setInstanceName(String schedName) {
+	}
 
 
 	public void initialize() throws SchedulerConfigException {
