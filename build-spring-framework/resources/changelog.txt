@@ -3,12 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1 M2 (2011-??-??)
+Changes in version 3.1 M2 (2011-05-31)
 --------------------------------------
 
-* deprecated AbstractJUnit38SpringContextTests and AbstractTransactionalJUnit38SpringContextTests
 * eliminated @Feature support in favor of @Enable* and framework-provided @Configuration classes
-* introduced @EnableTransactionManagement, @EnableScheduling, and other @Enable* annotations
+* deprecated AbstractJUnit38SpringContextTests and AbstractTransactionalJUnit38SpringContextTests
+* DefaultListableBeanFactory only accepts serialized id references on deserialization
+* added support for a "contextIdPrefix" parameter, adding a UID to internal BeanFactory ids
+* RemoteExporter uses an opaque proxy for 'serviceInterface' exposure (no AOP interfaces exposed)
+* fixed JPA 2.0 timeout hints to correctly specify milliseconds
+* revised cache abstraction to focus on minimal atomic access operations
+* introduced @EnableTransactionManagement, @EnableScheduling, etc
 * introduced @EnableWebMvc to provide default configuration for Spring MVC applications
 * introduced HandlerMethod abstraction representing a Spring MVC controller method
 * added HandlerMapping/HandlerAdapter/HandlerExceptionResolver HandlerMethod-based implementations
@@ -19,11 +24,12 @@ Changes in version 3.1 M2 (2011-??-??)
 * a flag for extracting the value from single-key models in MappingJacksonJsonView
 * allow bean references in mvc:interceptor namespace elements
 * consolidated the initialization and use of MappedInterceptors in AbstractHandlerMapping
+* added Servlet 3.0 based WebApplicationInitializer mechanism for programmatic bootstrapping
+* added Servlet 3.0 based StandardServletMultipartResolver
+
 
 Changes in version 3.1 M1 (2011-02-11)
 --------------------------------------
-
-[SPR-8030] AbstractJUnit38SpringContextTests and AbstractTransactionalJUnit38SpringContextTests are now officially deprecated.
 
 * upgraded to JUnit 4.8.1 and TestNG 5.12.1
 * fixed aspects bundle to declare dependencies for @Async aspect as well
