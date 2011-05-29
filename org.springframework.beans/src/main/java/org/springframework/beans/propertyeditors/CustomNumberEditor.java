@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  */
 public class CustomNumberEditor extends PropertyEditorSupport {
 
-	private final Class numberClass;
+	private final Class<? extends Number> numberClass;
 
 	private final NumberFormat numberFormat;
 
@@ -67,7 +67,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * @see Integer#valueOf
 	 * @see Integer#toString
 	 */
-	public CustomNumberEditor(Class numberClass, boolean allowEmpty) throws IllegalArgumentException {
+	public CustomNumberEditor(Class<? extends Number> numberClass, boolean allowEmpty) throws IllegalArgumentException {
 		this(numberClass, null, allowEmpty);
 	}
 
@@ -85,7 +85,7 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * @see java.text.NumberFormat#parse
 	 * @see java.text.NumberFormat#format
 	 */
-	public CustomNumberEditor(Class numberClass, NumberFormat numberFormat, boolean allowEmpty)
+	public CustomNumberEditor(Class<? extends Number> numberClass, NumberFormat numberFormat, boolean allowEmpty)
 	    throws IllegalArgumentException {
 
 		if (numberClass == null || !Number.class.isAssignableFrom(numberClass)) {
@@ -101,7 +101,6 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * Parse the Number from the given text, using the specified NumberFormat.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (this.allowEmpty && !StringUtils.hasText(text)) {
 			// Treat empty String as null value.
@@ -121,7 +120,6 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 * Coerce a Number value into the required target class, if necessary.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public void setValue(Object value) {
 		if (value instanceof Number) {
 			super.setValue(NumberUtils.convertNumberToTargetClass((Number) value, this.numberClass));
