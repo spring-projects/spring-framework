@@ -125,6 +125,7 @@ import org.springframework.web.util.WebUtils;
  * @see org.springframework.web.servlet.mvc.Controller
  * @see org.springframework.web.context.ContextLoaderListener
  */
+@SuppressWarnings("serial")
 public class DispatcherServlet extends FrameworkServlet {
 
 	/** Well-known name for the MultipartResolver object in the bean factory for this namespace. */
@@ -647,7 +648,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			List<T> strategies = new ArrayList<T>(classNames.length);
 			for (String className : classNames) {
 				try {
-					Class clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
+					Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
 					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add((T) strategy);
 				}
@@ -700,7 +701,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		if (WebUtils.isIncludeRequest(request)) {
 			logger.debug("Taking snapshot of request attributes before include");
 			attributesSnapshot = new HashMap<String, Object>();
-			Enumeration attrNames = request.getAttributeNames();
+			Enumeration<?> attrNames = request.getAttributeNames();
 			while (attrNames.hasMoreElements()) {
 				String attrName = (String) attrNames.nextElement();
 				if (this.cleanupAfterInclude || attrName.startsWith("org.springframework.web.servlet")) {
@@ -1120,13 +1121,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param request current HTTP request
 	 * @param attributesSnapshot the snapshot of the request attributes before the include
 	 */
-	private void restoreAttributesAfterInclude(HttpServletRequest request, Map attributesSnapshot) {
+	private void restoreAttributesAfterInclude(HttpServletRequest request, Map<?,?> attributesSnapshot) {
 		logger.debug("Restoring snapshot of request attributes after include");
 
 		// Need to copy into separate Collection here, to avoid side effects
 		// on the Enumeration when removing attributes.
 		Set<String> attrsToCheck = new HashSet<String>();
-		Enumeration attrNames = request.getAttributeNames();
+		Enumeration<?> attrNames = request.getAttributeNames();
 		while (attrNames.hasMoreElements()) {
 			String attrName = (String) attrNames.nextElement();
 			if (this.cleanupAfterInclude || attrName.startsWith("org.springframework.web.servlet")) {
