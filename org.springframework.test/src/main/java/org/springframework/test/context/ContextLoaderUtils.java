@@ -209,6 +209,58 @@ abstract class ContextLoaderUtils {
 		return locationsList.toArray(new String[locationsList.size()]);
 	}
 
+	/**
+	 * TODO Document resolveActivatedProfiles().
+	 *
+	 * @param clazz
+	 * @return
+	 */
+	static String[] resolveActivatedProfiles(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+
+		Class<ActivateProfiles> annotationType = ActivateProfiles.class;
+		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
+
+		if (declaringClass == null && logger.isDebugEnabled()) {
+			logger.debug(String.format(
+				"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
+				annotationType, clazz));
+		}
+
+		List<String> profilesList = new ArrayList<String>();
+
+		while (declaringClass != null) {
+			ActivateProfiles activateProfiles = declaringClass.getAnnotation(annotationType);
+
+			if (logger.isTraceEnabled()) {
+				logger.trace(String.format("Retrieved @ActivateProfiles [%s] for declaring class [%s].",
+					activateProfiles, declaringClass));
+			}
+
+			String[] profiles = activateProfiles.profiles();
+			String[] valueProfiles = activateProfiles.value();
+
+			if (!ObjectUtils.isEmpty(valueProfiles) && !ObjectUtils.isEmpty(profiles)) {
+				String msg = String.format("Test class [%s] has been configured with @ActivateProfiles' 'value' [%s] "
+						+ "and 'profiles' [%s] attributes. Only one declaration of bean "
+						+ "definition profiles is permitted per @ActivateProfiles annotation.", declaringClass,
+					ObjectUtils.nullSafeToString(valueProfiles), ObjectUtils.nullSafeToString(profiles));
+				logger.error(msg);
+				throw new IllegalStateException(msg);
+			}
+			else if (!ObjectUtils.isEmpty(valueProfiles)) {
+				profiles = valueProfiles;
+			}
+
+			profilesList.addAll(0, Arrays.<String> asList(profiles));
+
+			declaringClass = activateProfiles.inheritProfiles() ? AnnotationUtils.findAnnotationDeclaringClass(
+				annotationType, declaringClass.getSuperclass()) : null;
+		}
+
+		return profilesList.toArray(new String[profilesList.size()]);
+	}
+
 
 	/**
 	 * Strategy interface for resolving application context resource locations.
