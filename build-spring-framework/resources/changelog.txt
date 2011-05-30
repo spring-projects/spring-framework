@@ -6,13 +6,8 @@ http://www.springsource.org
 Changes in version 3.1 M2 (2011-05-31)
 --------------------------------------
 
-* eliminated @Feature support in favor of @Enable* and framework-provided @Configuration classes
-* deprecated AbstractJUnit38SpringContextTests and AbstractTransactionalJUnit38SpringContextTests
-* DefaultListableBeanFactory only accepts serialized id references on deserialization
-* added support for a "contextIdPrefix" parameter, adding a UID to internal BeanFactory ids
-* RemoteExporter uses an opaque proxy for 'serviceInterface' exposure (no AOP interfaces exposed)
-* fixed JPA 2.0 timeout hints to correctly specify milliseconds
 * revised cache abstraction to focus on minimal atomic access operations
+* eliminated @Feature support in favor of @Enable* and framework-provided @Configuration classes
 * introduced @EnableTransactionManagement, @EnableScheduling, etc
 * introduced @EnableWebMvc to provide default configuration for Spring MVC applications
 * introduced HandlerMethod abstraction representing a Spring MVC controller method
@@ -21,11 +16,15 @@ Changes in version 3.1 M2 (2011-05-31)
 * support for automatically adding @PathVariables to the model
 * support for including @PathVariables in data binding
 * support for URI template variables in view names with the "redirect:" prefix
-* a flag for extracting the value from single-key models in MappingJacksonJsonView
+* added a flag for extracting the value from single-key models in MappingJacksonJsonView
 * allow bean references in mvc:interceptor namespace elements
 * consolidated the initialization and use of MappedInterceptors in AbstractHandlerMapping
 * added Servlet 3.0 based WebApplicationInitializer mechanism for programmatic bootstrapping
 * added Servlet 3.0 based StandardServletMultipartResolver
+* fixed JPA 2.0 timeout hints to correctly specify milliseconds
+* RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
+* updated Quartz package to support Quartz 1.8 as well (note: not fully supporting Quartz 2.0 yet)
+* deprecated AbstractJUnit38SpringContextTests and AbstractTransactionalJUnit38SpringContextTests
 
 
 Changes in version 3.1 M1 (2011-02-11)
