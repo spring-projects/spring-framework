@@ -28,17 +28,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.ClassPathResource;
@@ -46,6 +47,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -118,9 +120,15 @@ import org.springframework.web.util.WebUtils;
  * namespace, loading its own application context with mappings, handlers, etc. Only the root application context as
  * loaded by {@link org.springframework.web.context.ContextLoaderListener}, if any, will be shared.
  *
+ * <p>As of Spring 3.1, {@code DispatcherServlet} may now be injected with a web
+ * application context, rather than creating its own internally. This is useful in Servlet
+ * 3.0+ environments, which support programmatic registration of servlet instances. See
+ * {@link #DispatcherServlet(WebApplicationContext)} Javadoc for details.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Chris Beams
  * @see org.springframework.web.HttpRequestHandler
  * @see org.springframework.web.servlet.mvc.Controller
  * @see org.springframework.web.context.ContextLoaderListener
@@ -264,6 +272,70 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** List of ViewResolvers used by this servlet */
 	private List<ViewResolver> viewResolvers;
 
+
+	/**
+	 * Create a new {@code DispatcherServlet} that will create its own internal web
+	 * application context based on defaults and values provided through servlet
+	 * init-params. Typically used in Servlet 2.5 or earlier environments, where the only
+	 * option for servlet registration is through {@code web.xml} which requires the use
+	 * of a no-arg constructor.
+	 * <p>Calling {@link #setContextConfigLocation} (init-param 'contextConfigLocation')
+	 * will dictate which XML files will be loaded by the
+	 * {@linkplain #DEFAULT_CONTEXT_CLASS default XmlWebApplicationContext}
+	 * <p>Calling {@link #setContextClass} (init-param 'contextClass') overrides the
+	 * default {@code XmlWebApplicationContext} and allows for specifying an alternative class,
+	 * such as {@code AnnotationConfigWebApplicationContext}.
+	 * <p>Calling {@link #setContextInitializerClasses} (init-param 'contextInitializerClasses')
+	 * indicates which {@code ApplicationContextInitializer} classes should be used to
+	 * further configure the internal application context prior to refresh().
+	 * @see #DispatcherServlet(WebApplicationContext)
+	 */
+	public DispatcherServlet() {
+		super();
+	}
+
+	/**
+	 * Create a new {@code DispatcherServlet} with the given web application context. This
+	 * constructor is useful in Servlet 3.0+ environments where instance-based registration
+	 * of servlets is possible through the {@link ServletContext#addServlet} API.
+	 * <p>Using this constructor indicates that the following properties / init-params
+	 * will be ignored:
+	 * <ul>
+	 * <li>{@link #setContextClass(Class)} / 'contextClass'</li>
+	 * <li>{@link #setContextConfigLocation(String)} / 'contextConfigLocation'</li>
+	 * <li>{@link #setContextAttribute(String)} / 'contextAttribute'</li>
+	 * <li>{@link #setNamespace(String)} / 'namespace'</li>
+	 * </ul>
+	 * <p>The given web application context may or may not yet be {@linkplain
+	 * ConfigurableApplicationContext#refresh() refreshed}. If it has <strong>not</strong>
+	 * already been refreshed (the recommended approach), then the following will occur:
+	 * <ul>
+	 * <li>If the given context does not already have a {@linkplain
+	 * ConfigurableApplicationContext#setParent parent}, the root application context
+	 * will be set as the parent.</li>
+	 * <li>If the given context has not already been assigned an {@linkplain
+	 * ConfigurableApplicationContext#setId id}, one will be assigned to it</li>
+	 * <li>{@code ServletContext} and {@code ServletConfig} objects will be delegated to
+	 * the application context</li>
+	 * <li>{@link #postProcessWebApplicationContext} will be called</li>
+	 * <li>Any {@code ApplicationContextInitializer}s specified through the
+	 * "contextInitializerClasses" init-param or through the {@link
+	 * #setContextInitializers} property will be applied.</li>
+	 * <li>{@link ConfigurableApplicationContext#refresh refresh()} will be called if the
+	 * context implements {@link ConfigurableApplicationContext}</li>
+	 * </ul>
+	 * If the context has already been refreshed, none of the above will occur, under the
+	 * assumption that the user has performed these actions (or not) per their specific
+	 * needs.
+	 * <p>See {@link org.springframework.web.WebApplicationInitializer} for usage examples.
+	 * @param webApplicationContext the context to use
+	 * @see #initWebApplicationContext
+	 * @see #configureAndRefreshWebApplicationContext
+	 * @see org.springframework.web.WebApplicationInitializer
+	 */
+	public DispatcherServlet(WebApplicationContext webApplicationContext) {
+		super(webApplicationContext);
+	}
 
 	/**
 	 * Set whether to detect all HandlerMapping beans in this servlet's context. Otherwise,
