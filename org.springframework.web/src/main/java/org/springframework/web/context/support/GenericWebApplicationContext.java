@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.support;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -27,16 +28,19 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Subclass of {@link GenericApplicationContext}, suitable for web environments.
  *
- * <p>Implements the {@link WebApplicationContext} interface, but not
+ * <p>Implements the
  * {@link org.springframework.web.context.ConfigurableWebApplicationContext},
- * as it is not intended for declarative setup in <code>web.xml</code>. Instead,
- * it is designed for programmatic setup, for example for building nested contexts.
+ * but is not intended for declarative setup in <code>web.xml</code>. Instead,
+ * it is designed for programmatic setup, for example for building nested contexts or
+ * for use within Spring 3.1 {@link org.springframework.web.WebApplicationInitializer}s.
  *
  * <p><b>If you intend to implement a WebApplicationContext that reads bean definitions
  * from configuration files, consider deriving from AbstractRefreshableWebApplicationContext,
@@ -52,10 +56,11 @@ import org.springframework.web.context.WebApplicationContext;
  * this class detects a ThemeSource bean in the context, with the name "themeSource".
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 1.2
  */
 public class GenericWebApplicationContext extends GenericApplicationContext
-		implements WebApplicationContext, ThemeSource {
+		implements ConfigurableWebApplicationContext, ThemeSource {
 
 	private ServletContext servletContext;
 
@@ -177,6 +182,47 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 
 	public Theme getTheme(String themeName) {
 		return this.themeSource.getTheme(themeName);
+	}
+
+
+	// ---------------------------------------------------------------------
+	// Pseudo-implementation of ConfigurableWebApplicationContext
+	// ---------------------------------------------------------------------
+
+	public void setServletConfig(ServletConfig servletConfig) {
+		// no-op
+	}
+
+	public ServletConfig getServletConfig() {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setNamespace(String namespace) {
+		// no-op
+	}
+
+	public String getNamespace() {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setConfigLocation(String configLocation) {
+		if (StringUtils.hasText(configLocation)) {
+			throw new UnsupportedOperationException(
+					"GenericWebApplicationContext does not support configLocation. Do " +
+					"you still have an 'contextConfigLocations' init-param set?");
+		}
+	}
+
+	public void setConfigLocations(String[] configLocations) {
+		if (!ObjectUtils.isEmpty(configLocations)) {
+			throw new UnsupportedOperationException(
+					"GenericWebApplicationContext does not support configLocations. Do " +
+					"you still have an 'contextConfigLocations' init-param set?");
+		}
+	}
+
+	public String[] getConfigLocations() {
+		throw new UnsupportedOperationException();
 	}
 
 }
