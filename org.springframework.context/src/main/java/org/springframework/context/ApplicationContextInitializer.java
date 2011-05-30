@@ -27,16 +27,16 @@ package org.springframework.context;
  * for declaring a "contextInitializerClasses" context-param and init-param, respectively.
  *
  * <p>{@code ApplicationContextInitializer} processors are encouraged to detect
- * whether Spring's {@link org.springframework.core.Ordered Ordered} or
- * {@link org.springframework.core.PriorityOrdered PriorityOrdered} interfaces are also
- * implemented and sort instances accordingly if so prior to invocation.
+ * whether Spring's {@link org.springframework.core.Ordered Ordered} interface has been
+ * implemented or if the @{@link org.springframework.core.annotation.Order Order}
+ * annotation is present and to sort instances accordingly if so prior to invocation.
  *
  * @author Chris Beams
  * @since 3.1
  * @see org.springframework.web.context.ContextLoader#customizeContext
  * @see org.springframework.web.context.ContextLoader#CONTEXT_INITIALIZER_CLASSES_PARAM
  * @see org.springframework.web.servlet.FrameworkServlet#setContextInitializerClasses
- * @see org.springframework.web.servlet.FrameworkServlet#initializeWebApplicationContext
+ * @see org.springframework.web.servlet.FrameworkServlet#applyInitializers
  */
 public interface ApplicationContextInitializer<C extends ConfigurableApplicationContext> {
 
