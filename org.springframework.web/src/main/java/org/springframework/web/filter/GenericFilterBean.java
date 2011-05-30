@@ -111,6 +111,10 @@ public abstract class GenericFilterBean implements
 	 * {@inheritDoc}
 	 * <p>Any environment set here overrides the {@link StandardServletEnvironment}
 	 * provided by default.
+	 * <p>This {@code Environment} object is used only for resolving placeholders in
+	 * resource paths passed into init-parameters for this filter. If no init-params are
+	 * used, this {@code Environment} can be essentially ignored.
+	 * @see #init(FilterConfig)
 	 */
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
