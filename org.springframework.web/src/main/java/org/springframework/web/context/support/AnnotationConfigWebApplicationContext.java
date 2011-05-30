@@ -37,13 +37,18 @@ import org.springframework.web.context.ContextLoader;
  * as for classpath scanning (specifying base packages as config location).
  *
  * <p>This is essentially the equivalent of
- * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext}
- * for a web environment.
+ * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext
+ * AnnotationConfigApplicationContext} for a web environment.
  *
  * <p>To make use of this application context, the
  * {@linkplain ContextLoader#CONTEXT_CLASS_PARAM "contextClass"} context-param for
  * ContextLoader and/or "contextClass" init-param for FrameworkServlet must be set to
  * the fully-qualified name of this class.
+ *
+ * <p>As of Spring 3.1, this class may also be directly instantiated and injected into
+ * Spring's {@code DispatcherServlet} or {@code ContextLoaderListener} when using the
+ * new {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializer}
+ * code-based alternative to {@code web.xml}. See its Javadoc for details and usage examples.
  *
  * <p>Unlike {@link XmlWebApplicationContext}, no default configuration class locations
  * are assumed. Rather, it is a requirement to set the
