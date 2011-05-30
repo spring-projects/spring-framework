@@ -61,7 +61,7 @@ public @interface ActivateProfiles {
 	String[] profiles() default {};
 
 	/**
-	 * TODO Document inheritLocations.
+	 * TODO Document inheritProfiles.
 	 */
 	boolean inheritProfiles() default true;
 
