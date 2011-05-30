@@ -18,7 +18,8 @@ package org.springframework.web.servlet;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -184,8 +185,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	private String contextInitializerClasses;
 
 	/** Actual ApplicationContextInitializer instances to apply to the context */
-	private TreeSet<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
-		new TreeSet<ApplicationContextInitializer<ConfigurableApplicationContext>>(new AnnotationAwareOrderComparator());
+	private ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
+		new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
 
 	/**
@@ -651,6 +652,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				this.contextInitializers.add(initializer);
 			}
 		}
+
+		Collections.sort(this.contextInitializers, new AnnotationAwareOrderComparator());
 
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
 			initializer.initialize(wac);

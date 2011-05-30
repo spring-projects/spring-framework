@@ -18,6 +18,7 @@ package org.springframework.web.context;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -36,8 +37,8 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
@@ -348,7 +349,7 @@ public class ContextLoader {
 				}
 				catch (ClassNotFoundException ex) {
 					throw new ApplicationContextException(
-							"Failed to load context configurer class [" + className + "]", ex);
+							"Failed to load context initializer class [" + className + "]", ex);
 				}
 			}
 		}
@@ -364,8 +365,9 @@ public class ContextLoader {
 	 * {@linkplain #CONTEXT_INITIALIZER_CLASSES_PARAM context init parameters} and
 	 * {@linkplain ApplicationContextInitializer#initialize invokes each} with the
 	 * given web application context.
-	 * <p>Any {@link Ordered} {@code ApplicationContextInitializer} will be sorted
-	 * appropriately.
+	 * <p>Any {@code ApplicationContextInitializers} implementing
+	 * {@link org.springframework.core.Ordered Ordered} or marked with @{@link
+	 * org.springframework.core.annotation.Order Order} will be sorted appropriately.
 	 * @param servletContext the current servlet context
 	 * @param applicationContext the newly created application context
 	 * @see #createWebApplicationContext(ServletContext, ApplicationContext)
@@ -373,7 +375,7 @@ public class ContextLoader {
 	 * @see ApplicationContextInitializer#initialize(ConfigurableApplicationContext)
 	 */
 	protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
-		List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances =
+		ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances =
 			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
 		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass :
@@ -388,7 +390,7 @@ public class ContextLoader {
 			initializerInstances.add(BeanUtils.instantiateClass(initializerClass));
 		}
 
-		OrderComparator.sort(initializerInstances);
+		Collections.sort(initializerInstances, new AnnotationAwareOrderComparator());
 
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
 			initializer.initialize(applicationContext);
