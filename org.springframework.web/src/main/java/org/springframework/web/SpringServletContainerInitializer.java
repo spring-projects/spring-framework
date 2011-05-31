@@ -19,9 +19,10 @@ package org.springframework.web;
 import static org.springframework.beans.BeanUtils.instantiateClass;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -136,22 +137,21 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	public void onStartup(Set<Class<?>> webAppInitializerClasses,
 	                      ServletContext servletContext) throws ServletException {
 
-		Set<WebApplicationInitializer> initializers =
-			new TreeSet<WebApplicationInitializer>(new AnnotationAwareOrderComparator());
+		ArrayList<WebApplicationInitializer> initializers = new ArrayList<WebApplicationInitializer>();
 
 		for (Class<?> waiClass : webAppInitializerClasses) {
-			if (Modifier.isAbstract(waiClass.getModifiers())) {
-				// the class is not instantiable (i.e. abstract or an interface) -> skip it
-				continue;
+			if (!Modifier.isAbstract(waiClass.getModifiers())) {
+				// the class can be instantiated -> add it
+				initializers.add(instantiateClass(waiClass, WebApplicationInitializer.class));
 			}
-
-			initializers.add(instantiateClass(waiClass, WebApplicationInitializer.class));
 		}
 
 		if (initializers.isEmpty()) {
 			logger.info("Detected no WebApplicationInitializer types on the classpath: exiting.");
 			return;
 		}
+
+		Collections.sort(initializers, new AnnotationAwareOrderComparator());
 
 		logger.info("Delegating ServletContext to the following " +
 				"WebApplicationInitializer instances: " + initializers);
