@@ -291,6 +291,8 @@ public class EnvironmentTests {
 
 	@SuppressWarnings("unchecked")
 	private static Map<String, String> getModifiableSystemEnvironment() {
+
+		// for os x / linux
 		Class<?>[] classes = Collections.class.getDeclaredClasses();
 		Map<String, String> env = System.getenv();
 		for (Class<?> cl : classes) {
@@ -299,12 +301,45 @@ public class EnvironmentTests {
 					Field field = cl.getDeclaredField("m");
 					field.setAccessible(true);
 					Object obj = field.get(env);
-					return (Map<String, String>) obj;
+					if (obj != null) {
+						return (Map<String, String>) obj;
+					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}
 			}
 		}
+
+		// for windows
+		Class<?> processEnvironmentClass;
+		try {
+			processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+		try {
+			Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
+			theCaseInsensitiveEnvironmentField.setAccessible(true);
+			Object obj = theCaseInsensitiveEnvironmentField.get(null);
+			return (Map<String, String>) obj;
+		} catch (NoSuchFieldException e) {
+			// do nothing
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+		try {
+			Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
+			theEnvironmentField.setAccessible(true);
+			Object obj = theEnvironmentField.get(null);
+			return (Map<String, String>) obj;
+		} catch (NoSuchFieldException e) {
+			// do nothing
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
 		throw new IllegalStateException();
 	}
 }
