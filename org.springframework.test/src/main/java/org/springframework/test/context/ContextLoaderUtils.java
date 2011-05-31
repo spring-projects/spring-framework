@@ -254,6 +254,12 @@ abstract class ContextLoaderUtils {
 			}
 
 			if (!ObjectUtils.isEmpty(profiles)) {
+
+				// Preserve the order in which the profiles were declared by
+				// reversing the array. This is necessary since we prepend each
+				// non-empty element to the aggregated list as we traverse the
+				// class hierarchy. Note that the following works because
+				// Arrays.asList() "writes through" to the underlying array.
 				Collections.reverse(Arrays.<String> asList(profiles));
 
 				for (String profile : profiles) {

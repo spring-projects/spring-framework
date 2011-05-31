@@ -37,6 +37,20 @@ public class ContextLoaderUtilsTests {
 	}
 
 	@Test
+	public void resolveActivatedProfilesWithNoProfilesDeclared() {
+		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(NoProfilesDeclared.class);
+		assertNotNull(profiles);
+		assertEquals(0, profiles.length);
+	}
+
+	@Test
+	public void resolveActivatedProfilesWithEmptyProfiles() {
+		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(EmptyProfiles.class);
+		assertNotNull(profiles);
+		assertEquals(0, profiles.length);
+	}
+
+	@Test
 	public void resolveActivatedProfilesWithLocalAnnotation() {
 		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(Foo.class);
 		assertNotNull(profiles);
@@ -72,6 +86,14 @@ public class ContextLoaderUtilsTests {
 
 
 	private static class Enigma {
+	}
+
+	@ActivateProfiles
+	private static class NoProfilesDeclared {
+	}
+
+	@ActivateProfiles({ "    ", "\t" })
+	private static class EmptyProfiles {
 	}
 
 	@ActivateProfiles(profiles = "foo")
