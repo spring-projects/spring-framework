@@ -18,6 +18,7 @@ package org.springframework.test.context;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -252,7 +253,15 @@ abstract class ContextLoaderUtils {
 				profiles = valueProfiles;
 			}
 
-			profilesList.addAll(0, Arrays.<String> asList(profiles));
+			if (!ObjectUtils.isEmpty(profiles)) {
+				Collections.reverse(Arrays.<String> asList(profiles));
+
+				for (String profile : profiles) {
+					if (StringUtils.hasText(profile)) {
+						profilesList.add(0, profile);
+					}
+				}
+			}
 
 			declaringClass = activateProfiles.inheritProfiles() ? AnnotationUtils.findAnnotationDeclaringClass(
 				annotationType, declaringClass.getSuperclass()) : null;
