@@ -24,10 +24,10 @@ import javax.servlet.ServletException;
  * {@link ServletContext} programmatically -- as opposed to (or possibly in conjunction
  * with) the traditional {@code web.xml}-based approach.
  *
- * <p>Implementations of this SPI will be detected automatically by the
- * {@link SpringServletContainerInitializer}, which itself is automatically bootstrapped
- * by Servlet 3.0 container. See {@linkplain SpringServletContainerInitializer its Javadoc}
- * for details on this bootstrapping mechanism.
+ * <p>Implementations of this SPI will be detected automatically by {@link
+ * SpringServletContainerInitializer}, which itself is bootstrapped automatically
+ * by any Servlet 3.0 container. See {@linkplain SpringServletContainerInitializer its
+ * Javadoc} for details on this bootstrapping mechanism.
  *
  * <h2>Example</h2>
  * <h3>The traditional, XML-based approach</h3>
