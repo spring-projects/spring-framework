@@ -40,10 +40,10 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  * {@code web.xml}-based approach.
  *
  * <h2>Mechanism of Operation</h2>
- * This class will be loaded and instantiated and have its {@link #onStartup} method
- * invoked by any Servlet 3.0-compliant container during container startup assuming that
- * the {@code spring-web} module JAR is present on the classpath. This occurs through the
- * JAR Services API {@link ServiceLoader#load(Class)} method detecting the
+ * This class will be loaded and instantiated and have its {@link #onStartup onStartup}
+ * method invoked by any Servlet 3.0-compliant container during container startup assuming
+ * that the {@code spring-web} module JAR is present on the classpath. This occurs through
+ * the JAR Services API {@link ServiceLoader#load(Class)} method detecting the
  * {@code spring-web} module's {@code META-INF/services/javax.servlet.ServletContainerInitializer}
  * service provider configuration file. See the
  * <a href="http://download.oracle.com/javase/6/docs/technotes/guides/jar/jar.html#Service%20Provider">
@@ -66,7 +66,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  * {@code WebApplicationInitializer} implementations. It is then the responsibility of
  * each {@code WebApplicationInitializer} to do the actual work of initializing the
  * {@code ServletContext}. The exact process of delegation is described in detail in the
- * {@link #onStartup} documentation below.
+ * {@link #onStartup onStartup} documentation below.
  *
  * <h2>General Notes</h2>
  * In general, this class should be viewed as <em>supporting infrastructure</em> for
