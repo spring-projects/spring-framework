@@ -17,10 +17,14 @@
 package org.springframework.context.config;
 
 /**
- * TODO SPR-7420: document
+ * Enumeration used to determine whether proxy-based or AspectJ-based advice should be
+ * applied.
  *
  * @author Chris Beams
  * @since 3.1
+ * @see org.springframework.scheduling.annotation.EnableAsync#mode()
+ * @see org.springframework.scheduling.annotation.AsyncConfigurationSelector#selectImports
+ * @see org.springframework.transaction.annotation.EnableTransactionManagement#mode()
  */
 public enum AdviceMode {
 	PROXY,
