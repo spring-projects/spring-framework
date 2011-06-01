@@ -76,7 +76,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
 	 * and a {@link StandardEnvironment}.
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
-	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, Environment)}
+	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, PropertyResolver)}
 	 */
 	@Deprecated
 	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver) {
@@ -85,7 +85,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
-	 * and {@link Environment}.
+	 * and {@link PropertyResolver} (typically an {@link Environment}).
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
 	 * @param propertyResolver the PropertyResolver to use
 	 */
@@ -99,7 +99,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
 	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
 	 * if no corresponding system property could be found
-	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, Environment, boolean)}
+	 * @deprecated as of 3.1 in favor of {@link #ResourceArrayPropertyEditor(ResourcePatternResolver, PropertyResolver, boolean)}
 	 */
 	@Deprecated
 	public ResourceArrayPropertyEditor(ResourcePatternResolver resourcePatternResolver, boolean ignoreUnresolvablePlaceholders) {
@@ -108,7 +108,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new ResourceArrayPropertyEditor with the given {@link ResourcePatternResolver}
-	 * and {@link Environment}.
+	 * and {@link PropertyResolver} (typically an {@link Environment}).
 	 * @param resourcePatternResolver the ResourcePatternResolver to use
 	 * @param propertyResolver the PropertyResolver to use
 	 * @param ignoreUnresolvablePlaceholders whether to ignore unresolvable placeholders
@@ -162,7 +162,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 					catch (IOException ex) {
 						// ignore - might be an unresolved placeholder or non-existing base directory
 						if (logger.isDebugEnabled()) {
-							logger.debug("Could not retrieve resources for pattern '" + pattern + "': " + ex);
+							logger.debug("Could not retrieve resources for pattern '" + pattern + "'", ex);
 						}
 					}
 				}
