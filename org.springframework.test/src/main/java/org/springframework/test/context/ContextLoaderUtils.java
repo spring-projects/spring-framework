@@ -54,9 +54,9 @@ abstract class ContextLoaderUtils {
 
 
 	/**
-	 * Resolves the {@link ContextLoader}
-	 * {@link Class} to use for the supplied {@link Class testClass} and
-	 * then instantiates and returns that <code>ContextLoader</code>.
+	 * Resolves the {@link ContextLoader} {@link Class} to use for the
+	 * supplied {@link Class testClass} and then instantiates and returns
+	 * that <code>ContextLoader</code>.
 	 * 
 	 * <p>If the supplied <code>defaultContextLoaderClassName</code> is
 	 * <code>null</code> or <em>empty</em>, the <em>standard</em>
@@ -68,7 +68,7 @@ abstract class ContextLoaderUtils {
 	 * @param defaultContextLoaderClassName the name of the default
 	 * <code>ContextLoader</code> class to use (may be <code>null</code>)
 	 * @return the resolved <code>ContextLoader</code> for the supplied
-	 * <code>testClass</code> 
+	 * <code>testClass</code> (never <code>null</code>)
 	 * @see #resolveContextLoaderClass(Class, String)
 	 */
 	static ContextLoader resolveContextLoader(Class<?> testClass, String defaultContextLoaderClassName) {
@@ -85,8 +85,9 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Resolve the {@link ContextLoader} {@link Class} to use for the supplied
+	 * Resolves the {@link ContextLoader} {@link Class} to use for the supplied
 	 * {@link Class test class}.
+	 * 
 	 * <ol>
 	 * <li>If the {@link ContextConfiguration#loader() loader} attribute of
 	 * {@link ContextConfiguration &#064;ContextConfiguration} is configured
@@ -98,11 +99,13 @@ abstract class ContextLoaderUtils {
 	 * the class hierarchy, an attempt will be made to load and return the class
 	 * with the supplied <code>defaultContextLoaderClassName</code>.</li>
 	 * </ol>
-	 * @param clazz the class for which to retrieve <code>ContextLoader</code>
+	 * 
+	 * @param clazz the class for which to resolve the <code>ContextLoader</code>
 	 * class; must not be <code>null</code>
 	 * @param defaultContextLoaderClassName the name of the default
 	 * <code>ContextLoader</code> class to use; must not be <code>null</code> or empty
 	 * @return the <code>ContextLoader</code> class to use for the specified class
+	 * (never <code>null</code>)
 	 * @throws IllegalArgumentException if {@link ContextConfiguration
 	 * &#064;ContextConfiguration} is not <em>present</em> on the supplied class
 	 */
@@ -155,7 +158,7 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Retrieve {@link ApplicationContext} resource locations for the supplied
+	 * Resolves {@link ApplicationContext} resource locations for the supplied
 	 * {@link Class class}, using the supplied {@link ContextLoader} to
 	 * {@link ContextLoader#processLocations(Class, String...) process} the
 	 * locations.
@@ -166,12 +169,14 @@ abstract class ContextLoaderUtils {
 	 * Specifically, if the <code>inheritLocations</code> flag is set to
 	 * <code>true</code>, locations defined in the annotated class will be
 	 * appended to the locations defined in superclasses.
+	 * 
 	 * @param contextLoader the ContextLoader to use for processing the
 	 * locations (must not be <code>null</code>)
-	 * @param clazz the class for which to retrieve the resource locations (must
+	 * @param clazz the class for which to resolve the resource locations (must
 	 * not be <code>null</code>)
 	 * @return the list of ApplicationContext resource locations for the
 	 * specified class, including locations from superclasses if appropriate
+	 * (never <code>null</code>)
 	 * @throws IllegalArgumentException if {@link ContextConfiguration
 	 * &#064;ContextConfiguration} is not <em>present</em> on the supplied class
 	 */
@@ -190,7 +195,7 @@ abstract class ContextLoaderUtils {
 			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]", annotationType,
 			clazz));
 
-		List<String> locationsList = new ArrayList<String>();
+		final List<String> locationsList = new ArrayList<String>();
 
 		while (declaringClass != null) {
 			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
@@ -202,25 +207,34 @@ abstract class ContextLoaderUtils {
 
 			String[] resolvedLocations = locationsResolver.resolveLocations(contextConfiguration, declaringClass);
 			String[] processedLocations = contextLoader.processLocations(declaringClass, resolvedLocations);
-			locationsList.addAll(0, Arrays.<String> asList(processedLocations));
+			locationsList.addAll(0, Arrays.asList(processedLocations));
 
 			declaringClass = contextConfiguration.inheritLocations() ? AnnotationUtils.findAnnotationDeclaringClass(
 				annotationType, declaringClass.getSuperclass()) : null;
 		}
 
-		return locationsList.toArray(new String[locationsList.size()]);
+		return StringUtils.toStringArray(locationsList);
 	}
 
 	/**
-	 * TODO Document resolveActiveProfiles().
+	 * Resolves <em>active bean definition profiles</em> for the supplied
+	 * {@link Class class}.
+	 * 
+	 * <p>Note that the {@link ActiveProfiles#inheritProfiles() inheritProfiles}
+	 * flag of {@link ActiveProfiles &#064;ActiveProfiles} will be taken into
+	 * consideration. Specifically, if the <code>inheritProfiles</code> flag is
+	 * set to <code>true</code>, profiles defined in the annotated class will be
+	 * merged with those defined in superclasses.
 	 *
-	 * @param clazz
-	 * @return
+	 * @param clazz the class for which to resolve the active profiles (must
+	 * not be <code>null</code>)
+	 * @return the set of active profiles for the specified class, including
+	 * active profiles from superclasses if appropriate (never <code>null</code>)
 	 */
 	static String[] resolveActiveProfiles(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 
-		Class<ActivateProfiles> annotationType = ActivateProfiles.class;
+		Class<ActiveProfiles> annotationType = ActiveProfiles.class;
 		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
 
 		if (declaringClass == null && logger.isDebugEnabled()) {
@@ -232,20 +246,20 @@ abstract class ContextLoaderUtils {
 		final Set<String> activeProfiles = new LinkedHashSet<String>();
 
 		while (declaringClass != null) {
-			ActivateProfiles activateProfiles = declaringClass.getAnnotation(annotationType);
+			ActiveProfiles annotation = declaringClass.getAnnotation(annotationType);
 
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ActivateProfiles [%s] for declaring class [%s].",
-					activateProfiles, declaringClass));
+				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", activeProfiles,
+					declaringClass));
 			}
 
-			String[] profiles = activateProfiles.profiles();
-			String[] valueProfiles = activateProfiles.value();
+			String[] profiles = annotation.profiles();
+			String[] valueProfiles = annotation.value();
 
 			if (!ObjectUtils.isEmpty(valueProfiles) && !ObjectUtils.isEmpty(profiles)) {
-				String msg = String.format("Test class [%s] has been configured with @ActivateProfiles' 'value' [%s] "
-						+ "and 'profiles' [%s] attributes. Only one declaration of bean "
-						+ "definition profiles is permitted per @ActivateProfiles annotation.", declaringClass,
+				String msg = String.format("Test class [%s] has been configured with @ActiveProfiles' 'value' [%s] "
+						+ "and 'profiles' [%s] attributes. Only one declaration of active bean "
+						+ "definition profiles is permitted per @ActiveProfiles annotation.", declaringClass,
 					ObjectUtils.nullSafeToString(valueProfiles), ObjectUtils.nullSafeToString(profiles));
 				logger.error(msg);
 				throw new IllegalStateException(msg);
@@ -260,7 +274,7 @@ abstract class ContextLoaderUtils {
 				}
 			}
 
-			declaringClass = activateProfiles.inheritProfiles() ? AnnotationUtils.findAnnotationDeclaringClass(
+			declaringClass = annotation.inheritProfiles() ? AnnotationUtils.findAnnotationDeclaringClass(
 				annotationType, declaringClass.getSuperclass()) : null;
 		}
 

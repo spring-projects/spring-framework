@@ -24,9 +24,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * {@code ActivateProfiles} is a class-level annotation that is used to
- * activate the bean definition profiles to use when loading an
- * {@link org.springframework.context.ApplicationContext ApplicationContext}
+ * {@code ActiveProfiles} is a class-level annotation that is used to declare
+ * which <em>active bean definition profiles</em> should be used when loading
+ * an {@link org.springframework.context.ApplicationContext ApplicationContext}
  * for test classes.
  *
  * @author Sam Brannen
@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ActivateProfiles {
+public @interface ActiveProfiles {
 
 	/**
 	 * Alias for {@link #profiles() profiles}.
