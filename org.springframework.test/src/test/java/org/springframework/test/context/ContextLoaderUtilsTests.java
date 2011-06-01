@@ -116,7 +116,7 @@ public class ContextLoaderUtilsTests {
 	private static class EmptyProfiles {
 	}
 
-	@ActiveProfiles({ "foo", "bar", "foo", "bar", "baz" })
+	@ActiveProfiles({ "foo", "bar", "  foo", "bar  ", "baz" })
 	private static class DuplicatedProfiles {
 	}
 

@@ -270,7 +270,7 @@ abstract class ContextLoaderUtils {
 
 			for (String profile : profiles) {
 				if (StringUtils.hasText(profile)) {
-					activeProfiles.add(profile);
+					activeProfiles.add(profile.trim());
 				}
 			}
 
