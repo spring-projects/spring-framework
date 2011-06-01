@@ -24,6 +24,7 @@ Changes in version 3.1 M2 (2011-05-31)
 * fixed JPA 2.0 timeout hints to correctly specify milliseconds
 * RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
 * updated Quartz package to support Quartz 1.8 as well (note: not fully supporting Quartz 2.0 yet)
+* introduced AnnotationConfigContextLoader to provide TestContext support for @Configuration classes
 * deprecated AbstractJUnit38SpringContextTests and AbstractTransactionalJUnit38SpringContextTests
 
 
