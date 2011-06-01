@@ -18,6 +18,10 @@ package org.springframework.test.context;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -51,6 +55,18 @@ public class ContextLoaderUtilsTests {
 	}
 
 	@Test
+	public void resolveActivatedProfilesWithDuplicatedProfiles() {
+		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(DuplicatedProfiles.class);
+		assertNotNull(profiles);
+		assertEquals(3, profiles.length);
+
+		List<String> list = Arrays.asList(profiles);
+		assertTrue(list.contains("foo"));
+		assertTrue(list.contains("bar"));
+		assertTrue(list.contains("baz"));
+	}
+
+	@Test
 	public void resolveActivatedProfilesWithLocalAnnotation() {
 		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(Foo.class);
 		assertNotNull(profiles);
@@ -71,8 +87,10 @@ public class ContextLoaderUtilsTests {
 		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(Bar.class);
 		assertNotNull(profiles);
 		assertEquals(2, profiles.length);
-		assertEquals("foo", profiles[0]);
-		assertEquals("bar", profiles[1]);
+
+		List<String> list = Arrays.asList(profiles);
+		assertTrue(list.contains("foo"));
+		assertTrue(list.contains("bar"));
 	}
 
 	@Test
@@ -80,8 +98,10 @@ public class ContextLoaderUtilsTests {
 		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(Animals.class);
 		assertNotNull(profiles);
 		assertEquals(2, profiles.length);
-		assertEquals("dog", profiles[0]);
-		assertEquals("cat", profiles[1]);
+
+		List<String> list = Arrays.asList(profiles);
+		assertTrue(list.contains("dog"));
+		assertTrue(list.contains("cat"));
 	}
 
 
@@ -94,6 +114,10 @@ public class ContextLoaderUtilsTests {
 
 	@ActivateProfiles({ "    ", "\t" })
 	private static class EmptyProfiles {
+	}
+
+	@ActivateProfiles({ "foo", "bar", "foo", "bar", "baz" })
+	private static class DuplicatedProfiles {
 	}
 
 	@ActivateProfiles(profiles = "foo")
