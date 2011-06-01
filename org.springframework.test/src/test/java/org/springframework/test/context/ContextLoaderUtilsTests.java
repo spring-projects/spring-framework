@@ -34,29 +34,29 @@ import org.junit.Test;
 public class ContextLoaderUtilsTests {
 
 	@Test
-	public void resolveActivatedProfilesWithoutAnnotation() {
-		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(Enigma.class);
+	public void resolveActiveProfilesWithoutAnnotation() {
+		String[] profiles = ContextLoaderUtils.resolveActiveProfiles(Enigma.class);
 		assertNotNull(profiles);
 		assertEquals(0, profiles.length);
 	}
 
 	@Test
-	public void resolveActivatedProfilesWithNoProfilesDeclared() {
-		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(NoProfilesDeclared.class);
+	public void resolveActiveProfilesWithNoProfilesDeclared() {
+		String[] profiles = ContextLoaderUtils.resolveActiveProfiles(NoProfilesDeclared.class);
 		assertNotNull(profiles);
 		assertEquals(0, profiles.length);
 	}
 
 	@Test
-	public void resolveActivatedProfilesWithEmptyProfiles() {
-		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(EmptyProfiles.class);
+	public void resolveActiveProfilesWithEmptyProfiles() {
+		String[] profiles = ContextLoaderUtils.resolveActiveProfiles(EmptyProfiles.class);
 		assertNotNull(profiles);
 		assertEquals(0, profiles.length);
 	}
 
 	@Test
-	public void resolveActivatedProfilesWithDuplicatedProfiles() {
-		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(DuplicatedProfiles.class);
+	public void resolveActiveProfilesWithDuplicatedProfiles() {
+		String[] profiles = ContextLoaderUtils.resolveActiveProfiles(DuplicatedProfiles.class);
 		assertNotNull(profiles);
 		assertEquals(3, profiles.length);
 
@@ -67,24 +67,24 @@ public class ContextLoaderUtilsTests {
 	}
 
 	@Test
-	public void resolveActivatedProfilesWithLocalAnnotation() {
-		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(Foo.class);
+	public void resolveActiveProfilesWithLocalAnnotation() {
+		String[] profiles = ContextLoaderUtils.resolveActiveProfiles(Foo.class);
 		assertNotNull(profiles);
 		assertEquals(1, profiles.length);
 		assertEquals("foo", profiles[0]);
 	}
 
 	@Test
-	public void resolveActivatedProfilesWithInheritedAnnotation() {
-		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(InheritedFoo.class);
+	public void resolveActiveProfilesWithInheritedAnnotation() {
+		String[] profiles = ContextLoaderUtils.resolveActiveProfiles(InheritedFoo.class);
 		assertNotNull(profiles);
 		assertEquals(1, profiles.length);
 		assertEquals("foo", profiles[0]);
 	}
 
 	@Test
-	public void resolveActivatedProfilesWithLocalAndInheritedAnnotations() {
-		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(Bar.class);
+	public void resolveActiveProfilesWithLocalAndInheritedAnnotations() {
+		String[] profiles = ContextLoaderUtils.resolveActiveProfiles(Bar.class);
 		assertNotNull(profiles);
 		assertEquals(2, profiles.length);
 
@@ -94,8 +94,8 @@ public class ContextLoaderUtilsTests {
 	}
 
 	@Test
-	public void resolveActivatedProfilesWithOverriddenAnnotation() {
-		String[] profiles = ContextLoaderUtils.resolveActivatedProfiles(Animals.class);
+	public void resolveActiveProfilesWithOverriddenAnnotation() {
+		String[] profiles = ContextLoaderUtils.resolveActiveProfiles(Animals.class);
 		assertNotNull(profiles);
 		assertEquals(2, profiles.length);
 

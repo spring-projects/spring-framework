@@ -212,12 +212,12 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * TODO Document resolveActivatedProfiles().
+	 * TODO Document resolveActiveProfiles().
 	 *
 	 * @param clazz
 	 * @return
 	 */
-	static String[] resolveActivatedProfiles(Class<?> clazz) {
+	static String[] resolveActiveProfiles(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 
 		Class<ActivateProfiles> annotationType = ActivateProfiles.class;
