@@ -59,7 +59,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	/**
 	 * Name of reserved default profile name: {@value}. If no default profile names are
-	 * explicitly and no active profile names are explictly set, this profile will
+	 * explicitly and no active profile names are explicitly set, this profile will
 	 * automatically be activated by default.
 	 * @see #getReservedDefaultProfiles
 	 * @see ConfigurableEnvironment#setDefaultProfiles
