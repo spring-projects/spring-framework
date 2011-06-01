@@ -70,7 +70,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.context.ApplicationContext
 	 * @deprecated as of Spring 3.1 in favor of
-	 * {@link ResourceEditorRegistrar#ResourceEditorRegistrar(ResourceLoader, Environment)}
+	 * {@link #ResourceEditorRegistrar(ResourceLoader, Environment)}
 	 */
 	@Deprecated
 	public ResourceEditorRegistrar(ResourceLoader resourceLoader) {
@@ -91,16 +91,19 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 
 
 	/**
-	 * Populate the given bean factory with the following resource editors:
-	 * ResourceEditor, InputStreamEditor, FileEditor, URLEditor, ClassEditor, URIEditor.
-	 * <p>In case of a {@link org.springframework.core.io.support.ResourcePatternResolver},
+	 * Populate the given <code>registry</code> with the following resource editors:
+	 * ResourceEditor, InputStreamEditor, InputSourceEditor, FileEditor, URLEditor,
+	 * URIEditor, ClassEditor, ClassArrayEditor.
+	 * <p>If this registrar has been configured with a {@link ResourcePatternResolver},
 	 * a ResourceArrayPropertyEditor will be registered as well.
 	 * @see org.springframework.core.io.ResourceEditor
 	 * @see org.springframework.beans.propertyeditors.InputStreamEditor
+	 * @see org.springframework.beans.propertyeditors.InputSourceEditor
 	 * @see org.springframework.beans.propertyeditors.FileEditor
 	 * @see org.springframework.beans.propertyeditors.URLEditor
-	 * @see org.springframework.beans.propertyeditors.ClassEditor
 	 * @see org.springframework.beans.propertyeditors.URIEditor
+	 * @see org.springframework.beans.propertyeditors.ClassEditor
+	 * @see org.springframework.beans.propertyeditors.ClassArrayEditor
 	 * @see org.springframework.core.io.support.ResourceArrayPropertyEditor
 	 */
 	public void registerCustomEditors(PropertyEditorRegistry registry) {
@@ -126,7 +129,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 * Override default editor, if possible (since that's what we really mean to do here);
 	 * otherwise register as a custom editor.
 	 */
-	private void doRegisterEditor(PropertyEditorRegistry registry, Class requiredType, PropertyEditor editor) {
+	private void doRegisterEditor(PropertyEditorRegistry registry, Class<?> requiredType, PropertyEditor editor) {
 		if (registry instanceof PropertyEditorRegistrySupport) {
 			((PropertyEditorRegistrySupport) registry).overrideDefaultEditor(requiredType, editor);
 		}

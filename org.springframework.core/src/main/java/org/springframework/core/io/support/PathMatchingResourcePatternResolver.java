@@ -84,8 +84,8 @@ import org.springframework.util.StringUtils;
  * "<code>zip:</code>" in WebLogic, "<code>wsjar</code>" in WebSphere", etc.),
  * then a <code>java.io.File</code> is obtained from it, and used to resolve the
  * wildcard by walking the filesystem. In the case of a jar URL, the resolver
- * either gets a <code>java.net.JarURLConnection</code> from it, or manually parse
- * the jar URL, and then traverse the contents of the jar file, to resolve the
+ * either gets a <code>java.net.JarURLConnection</code> from it, or manually parses
+ * the jar URL, and then traverses the contents of the jar file, to resolve the
  * wildcards.
  *
  * <p><b>Implications on portability:</b>
@@ -173,7 +173,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	static {
 		// Detect Equinox OSGi (e.g. on WebSphere 6.1)
 		try {
-			Class fileLocatorClass = PathMatchingResourcePatternResolver.class.getClassLoader().loadClass(
+			Class<?> fileLocatorClass = PathMatchingResourcePatternResolver.class.getClassLoader().loadClass(
 					"org.eclipse.core.runtime.FileLocator");
 			equinoxResolveMethod = fileLocatorClass.getMethod("resolve", URL.class);
 			logger.debug("Found Equinox FileLocator for OSGi bundle URL resolution");
@@ -219,7 +219,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
 	}
-
 
 	/**
 	 * Return the ResourceLoader that this pattern resolver works with.
@@ -286,7 +285,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 	}
 
-
 	/**
 	 * Find all class location resources with the given location via the ClassLoader.
 	 * @param location the absolute path within the classpath
@@ -300,10 +298,10 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		Enumeration resourceUrls = getClassLoader().getResources(path);
+		Enumeration<URL> resourceUrls = getClassLoader().getResources(path);
 		Set<Resource> result = new LinkedHashSet<Resource>(16);
 		while (resourceUrls.hasMoreElements()) {
-			URL url = (URL) resourceUrls.nextElement();
+			URL url = resourceUrls.nextElement();
 			result.add(convertClassLoaderURL(url));
 		}
 		return result.toArray(new Resource[result.size()]);
@@ -384,7 +382,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * <p>The default implementation detects an Equinox OSGi "bundleresource:"
 	 * / "bundleentry:" URL and resolves it into a standard jar file URL that
 	 * can be traversed using Spring's standard jar file traversal algorithm.
-	 * @param original the resource to resolfe
+	 * @param original the resource to resolve
 	 * @return the resolved resource (may be identical to the passed-in resource)
 	 * @throws IOException in case of resolution failure
 	 */
@@ -471,8 +469,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				rootEntryPath = rootEntryPath + "/";
 			}
 			Set<Resource> result = new LinkedHashSet<Resource>(8);
-			for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
-				JarEntry entry = (JarEntry) entries.nextElement();
+			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
+				JarEntry entry = entries.nextElement();
 				String entryPath = entry.getName();
 				if (entryPath.startsWith(rootEntryPath)) {
 					String relativePath = entryPath.substring(rootEntryPath.length());
@@ -604,7 +602,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Recursively retrieve files that match the given pattern,
 	 * adding them to the given result list.
 	 * @param fullPattern the pattern to match against,
-	 * with preprended root directory path
+	 * with prepended root directory path
 	 * @param dir the current directory
 	 * @param result the Set of matching File instances to add to
 	 * @throws IOException if directory contents could not be retrieved
@@ -712,11 +710,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			return VfsPatternUtils.getVisitorAttribute();
 		}
 
-
 		public Set<Resource> getResources() {
 			return this.resources;
 		}
 
+		@SuppressWarnings("unused")
 		public int size() {
 			return this.resources.size();
 		}

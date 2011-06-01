@@ -37,9 +37,9 @@ import org.springframework.core.io.Resource;
  * to <code>Resource</code> array properties. Can also translate a collection
  * or array of location patterns into a merged Resource array.
  *
- * <p>The path may contain <code>${...}</code> placeholders,
- * to be resolved as system properties: e.g. <code>${user.dir}</code>.
- * Unresolvable placeholder are ignored by default.
+ * <p>A path may contain <code>${...}</code> placeholders, to be
+ * resolved as {@link org.springframework.core.env.Environment} properties:
+ * e.g. <code>${user.dir}</code>. Unresolvable placeholders are ignored by default.
  *
  * <p>Delegates to a {@link ResourcePatternResolver},
  * by default using a {@link PathMatchingResourcePatternResolver}.
@@ -123,7 +123,7 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Treat the given text as location pattern and convert it to a Resource array.
+	 * Treat the given text as a location pattern and convert it to a Resource array.
 	 */
 	@Override
 	public void setAsText(String text) {
@@ -138,13 +138,13 @@ public class ResourceArrayPropertyEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * Treat the given value as collection or array and convert it to a Resource array.
-	 * Considers String elements as location patterns, and takes Resource elements as-is.
+	 * Treat the given value as a collection or array and convert it to a Resource array.
+	 * Considers String elements as location patterns and takes Resource elements as-is.
 	 */
 	@Override
 	public void setValue(Object value) throws IllegalArgumentException {
 		if (value instanceof Collection || (value instanceof Object[] && !(value instanceof Resource[]))) {
-			Collection input = (value instanceof Collection ? (Collection) value : Arrays.asList((Object[]) value));
+			Collection<?> input = (value instanceof Collection ? (Collection<?>) value : Arrays.asList((Object[]) value));
 			List<Resource> merged = new ArrayList<Resource>();
 			for (Object element : input) {
 				if (element instanceof String) {
