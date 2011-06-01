@@ -18,8 +18,9 @@ package org.springframework.test.context;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -228,7 +229,7 @@ abstract class ContextLoaderUtils {
 				annotationType, clazz));
 		}
 
-		List<String> profilesList = new ArrayList<String>();
+		final Set<String> activeProfiles = new LinkedHashSet<String>();
 
 		while (declaringClass != null) {
 			ActivateProfiles activateProfiles = declaringClass.getAnnotation(annotationType);
@@ -253,19 +254,9 @@ abstract class ContextLoaderUtils {
 				profiles = valueProfiles;
 			}
 
-			if (!ObjectUtils.isEmpty(profiles)) {
-
-				// Preserve the order in which the profiles were declared by
-				// reversing the array. This is necessary since we prepend each
-				// non-empty element to the aggregated list as we traverse the
-				// class hierarchy. Note that the following works because
-				// Arrays.asList() "writes through" to the underlying array.
-				Collections.reverse(Arrays.<String> asList(profiles));
-
-				for (String profile : profiles) {
-					if (StringUtils.hasText(profile)) {
-						profilesList.add(0, profile);
-					}
+			for (String profile : profiles) {
+				if (StringUtils.hasText(profile)) {
+					activeProfiles.add(profile);
 				}
 			}
 
@@ -273,7 +264,7 @@ abstract class ContextLoaderUtils {
 				annotationType, declaringClass.getSuperclass()) : null;
 		}
 
-		return profilesList.toArray(new String[profilesList.size()]);
+		return StringUtils.toStringArray(activeProfiles);
 	}
 
 
