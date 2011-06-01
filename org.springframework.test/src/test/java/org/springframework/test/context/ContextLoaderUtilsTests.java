@@ -108,30 +108,30 @@ public class ContextLoaderUtilsTests {
 	private static class Enigma {
 	}
 
-	@ActivateProfiles
+	@ActiveProfiles
 	private static class NoProfilesDeclared {
 	}
 
-	@ActivateProfiles({ "    ", "\t" })
+	@ActiveProfiles({ "    ", "\t" })
 	private static class EmptyProfiles {
 	}
 
-	@ActivateProfiles({ "foo", "bar", "foo", "bar", "baz" })
+	@ActiveProfiles({ "foo", "bar", "foo", "bar", "baz" })
 	private static class DuplicatedProfiles {
 	}
 
-	@ActivateProfiles(profiles = "foo")
+	@ActiveProfiles(profiles = "foo")
 	private static class Foo {
 	}
 
 	private static class InheritedFoo extends Foo {
 	}
 
-	@ActivateProfiles("bar")
+	@ActiveProfiles("bar")
 	private static class Bar extends Foo {
 	}
 
-	@ActivateProfiles(profiles = { "dog", "cat" }, inheritProfiles = false)
+	@ActiveProfiles(profiles = { "dog", "cat" }, inheritProfiles = false)
 	private static class Animals extends Bar {
 	}
 
