@@ -91,17 +91,17 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	private boolean configValueEditorsActive = false;
 
-	private Map<Class, PropertyEditor> defaultEditors;
+	private Map<Class<?>, PropertyEditor> defaultEditors;
 
-	private Map<Class, PropertyEditor> overriddenDefaultEditors;
+	private Map<Class<?>, PropertyEditor> overriddenDefaultEditors;
 
-	private Map<Class, PropertyEditor> customEditors;
+	private Map<Class<?>, PropertyEditor> customEditors;
 
 	private Map<String, CustomEditorHolder> customEditorsForPath;
 
 	private Set<PropertyEditor> sharedEditors;
 
-	private Map<Class, PropertyEditor> customEditorCache;
+	private Map<Class<?>, PropertyEditor> customEditorCache;
 
 
 	/**
@@ -152,9 +152,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @param propertyEditor the editor to register
 	 * @see #registerCustomEditor(Class, PropertyEditor)
 	 */
-	public void overrideDefaultEditor(Class requiredType, PropertyEditor propertyEditor) {
+	public void overrideDefaultEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		if (this.overriddenDefaultEditors == null) {
-			this.overriddenDefaultEditors = new HashMap<Class, PropertyEditor>();
+			this.overriddenDefaultEditors = new HashMap<Class<?>, PropertyEditor>();
 		}
 		this.overriddenDefaultEditors.put(requiredType, propertyEditor);
 	}
@@ -166,7 +166,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @return the default editor, or <code>null</code> if none found
 	 * @see #registerDefaultEditors
 	 */
-	public PropertyEditor getDefaultEditor(Class requiredType) {
+	public PropertyEditor getDefaultEditor(Class<?> requiredType) {
 		if (!this.defaultEditorsActive) {
 			return null;
 		}
@@ -186,7 +186,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Actually register the default editors for this registry instance.
 	 */
 	private void createDefaultEditors() {
-		this.defaultEditors = new HashMap<Class, PropertyEditor>(64);
+		this.defaultEditors = new HashMap<Class<?>, PropertyEditor>(64);
 
 		// Simple editors, without parameterization capabilities.
 		// The JDK does not contain a default editor for any of these target types.
@@ -269,11 +269,11 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	// Management of custom editors
 	//---------------------------------------------------------------------
 
-	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
+	public void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		registerCustomEditor(requiredType, null, propertyEditor);
 	}
 
-	public void registerCustomEditor(Class requiredType, String propertyPath, PropertyEditor propertyEditor) {
+	public void registerCustomEditor(Class<?> requiredType, String propertyPath, PropertyEditor propertyEditor) {
 		if (requiredType == null && propertyPath == null) {
 			throw new IllegalArgumentException("Either requiredType or propertyPath is required");
 		}
@@ -285,7 +285,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		}
 		else {
 			if (this.customEditors == null) {
-				this.customEditors = new LinkedHashMap<Class, PropertyEditor>(16);
+				this.customEditors = new LinkedHashMap<Class<?>, PropertyEditor>(16);
 			}
 			this.customEditors.put(requiredType, propertyEditor);
 			this.customEditorCache = null;
@@ -301,7 +301,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @deprecated as of Spring 3.0, in favor of PropertyEditorRegistrars or ConversionService usage
 	 */
 	@Deprecated
-	public void registerSharedEditor(Class requiredType, PropertyEditor propertyEditor) {
+	public void registerSharedEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		registerCustomEditor(requiredType, null, propertyEditor);
 		if (this.sharedEditors == null) {
 			this.sharedEditors = new HashSet<PropertyEditor>();
@@ -319,8 +319,8 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		return (this.sharedEditors != null && this.sharedEditors.contains(propertyEditor));
 	}
 
-	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
-		Class requiredTypeToUse = requiredType;
+	public PropertyEditor findCustomEditor(Class<?> requiredType, String propertyPath) {
+		Class<?> requiredTypeToUse = requiredType;
 		if (propertyPath != null) {
 			if (this.customEditorsForPath != null) {
 				// Check property-specific editor first.
@@ -354,7 +354,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * can be <code>null</code> if not known)
 	 * @return whether a matching custom editor has been found
 	 */
-	public boolean hasCustomEditorForElement(Class elementType, String propertyPath) {
+	public boolean hasCustomEditorForElement(Class<?> elementType, String propertyPath) {
 		if (propertyPath != null && this.customEditorsForPath != null) {
 			for (Map.Entry<String, CustomEditorHolder> entry : this.customEditorsForPath.entrySet()) {
 				if (PropertyAccessorUtils.matchesProperty(entry.getKey(), propertyPath)) {
@@ -379,7 +379,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @return the type of the property, or <code>null</code> if not determinable
 	 * @see BeanWrapper#getPropertyType(String)
 	 */
-	protected Class getPropertyType(String propertyPath) {
+	protected Class<?> getPropertyType(String propertyPath) {
 		return null;
 	}
 
@@ -389,7 +389,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @param requiredType the type to look for
 	 * @return the custom editor, or <code>null</code> if none specific for this property
 	 */
-	private PropertyEditor getCustomEditor(String propertyName, Class requiredType) {
+	private PropertyEditor getCustomEditor(String propertyName, Class<?> requiredType) {
 		CustomEditorHolder holder = this.customEditorsForPath.get(propertyName);
 		return (holder != null ? holder.getPropertyEditor(requiredType) : null);
 	}
@@ -402,7 +402,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @return the custom editor, or <code>null</code> if none found for this type
 	 * @see java.beans.PropertyEditor#getAsText()
 	 */
-	private PropertyEditor getCustomEditor(Class requiredType) {
+	private PropertyEditor getCustomEditor(Class<?> requiredType) {
 		if (requiredType == null || this.customEditors == null) {
 			return null;
 		}
@@ -415,14 +415,14 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			}
 			if (editor == null) {
 				// Find editor for superclass or interface.
-				for (Iterator<Class> it = this.customEditors.keySet().iterator(); it.hasNext() && editor == null;) {
-					Class key = it.next();
+				for (Iterator<Class<?>> it = this.customEditors.keySet().iterator(); it.hasNext() && editor == null;) {
+					Class<?> key = it.next();
 					if (key.isAssignableFrom(requiredType)) {
 						editor = this.customEditors.get(key);
 						// Cache editor for search type, to avoid the overhead
 						// of repeated assignable-from checks.
 						if (this.customEditorCache == null) {
-							this.customEditorCache = new HashMap<Class, PropertyEditor>();
+							this.customEditorCache = new HashMap<Class<?>, PropertyEditor>();
 						}
 						this.customEditorCache.put(requiredType, editor);
 					}
@@ -438,7 +438,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * @param propertyName the name of the property
 	 * @return the property type, or <code>null</code> if not determinable
 	 */
-	protected Class guessPropertyTypeFromEditors(String propertyName) {
+	protected Class<?> guessPropertyTypeFromEditors(String propertyName) {
 		if (this.customEditorsForPath != null) {
 			CustomEditorHolder editorHolder = this.customEditorsForPath.get(propertyName);
 			if (editorHolder == null) {
@@ -467,7 +467,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		String actualPropertyName =
 				(nestedProperty != null ? PropertyAccessorUtils.getPropertyName(nestedProperty) : null);
 		if (this.customEditors != null) {
-			for (Map.Entry<Class, PropertyEditor> entry : this.customEditors.entrySet()) {
+			for (Map.Entry<Class<?>, PropertyEditor> entry : this.customEditors.entrySet()) {
 				target.registerCustomEditor(entry.getKey(), entry.getValue());
 			}
 		}
@@ -529,9 +529,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 		private final PropertyEditor propertyEditor;
 
-		private final Class registeredType;
+		private final Class<?> registeredType;
 
-		private CustomEditorHolder(PropertyEditor propertyEditor, Class registeredType) {
+		private CustomEditorHolder(PropertyEditor propertyEditor, Class<?> registeredType) {
 			this.propertyEditor = propertyEditor;
 			this.registeredType = registeredType;
 		}
@@ -540,11 +540,11 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			return this.propertyEditor;
 		}
 
-		private Class getRegisteredType() {
+		private Class<?> getRegisteredType() {
 			return this.registeredType;
 		}
 
-		private PropertyEditor getPropertyEditor(Class requiredType) {
+		private PropertyEditor getPropertyEditor(Class<?> requiredType) {
 			// Special case: If no required type specified, which usually only happens for
 			// Collection elements, or required type is not assignable to registered type,
 			// which usually only happens for generic properties of type Object -
