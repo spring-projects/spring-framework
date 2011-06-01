@@ -747,7 +747,7 @@ public abstract class StringUtils {
 	 * array elements only included once.
 	 * <p>The order of elements in the original arrays is preserved
 	 * (with the exception of overlapping elements, which are only
-	 * included on their first occurence).
+	 * included on their first occurrence).
 	 * @param array1 the first array (can be <code>null</code>)
 	 * @param array2 the second array (can be <code>null</code>)
 	 * @return the new array (<code>null</code> if both given arrays were <code>null</code>)
