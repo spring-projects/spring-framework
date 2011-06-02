@@ -23,7 +23,6 @@ import java.sql.Types;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.SqlInOutParameter;
 
 /**
  * Oracle specific implementation for the {@link CallMetaDataProvider} interface.

@@ -50,7 +50,6 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private static final Log logger = LogFactory.getLog(ResourceDatabasePopulator.class);
 
-
 	private List<Resource> scripts = new ArrayList<Resource>();
 
 	private String sqlScriptEncoding;
@@ -61,6 +60,14 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private boolean ignoreFailedDrops = false;
 
+	private String separator = null;
+
+	/**
+	 * @param separator the statement separator
+	 */
+	public void setSeparator(String separator) {
+		this.separator = separator;
+	}
 
 	/**
 	 * Add a script to execute to populate the database.
@@ -114,7 +121,6 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		this.ignoreFailedDrops = ignoreFailedDrops;
 	}
 
-
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : this.scripts) {
 			executeSqlScript(connection, applyEncodingIfNecessary(script), this.continueOnError, this.ignoreFailedDrops);
@@ -124,8 +130,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private EncodedResource applyEncodingIfNecessary(Resource script) {
 		if (script instanceof EncodedResource) {
 			return (EncodedResource) script;
-		}
-		else {
+		} else {
 			return new EncodedResource(script, this.sqlScriptEncoding);
 		}
 	}
@@ -140,8 +145,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param continueOnError whether or not to continue without throwing an exception in the event of an error
 	 * @param ignoreFailedDrops whether of not to continue in the event of specifically an error on a <code>DROP</code>
 	 */
-	private void executeSqlScript(Connection connection, EncodedResource resource,
-			boolean continueOnError, boolean ignoreFailedDrops) throws SQLException {
+	private void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
+			boolean ignoreFailedDrops) throws SQLException {
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Executing SQL script from " + resource);
@@ -151,13 +156,15 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		String script;
 		try {
 			script = readScript(resource);
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new CannotReadScriptException(resource, ex);
 		}
-		char delimiter = ';';
-		if (!containsSqlScriptDelimiters(script, delimiter)) {
-			delimiter = '\n';
+		String delimiter = separator;
+		if (delimiter == null) {
+			delimiter = ";";
+			if (!containsSqlScriptDelimiters(script, delimiter)) {
+				delimiter = "\n";
+			}
 		}
 		splitSqlScript(script, delimiter, statements);
 		int lineNumber = 0;
@@ -170,26 +177,22 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					if (logger.isDebugEnabled()) {
 						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
 					}
-				}
-				catch (SQLException ex) {
+				} catch (SQLException ex) {
 					boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
 					if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Failed to execute SQL script statement at line " + lineNumber +
-									" of resource " + resource + ": " + statement, ex);
+							logger.debug("Failed to execute SQL script statement at line " + lineNumber
+									+ " of resource " + resource + ": " + statement, ex);
 						}
-					}
-					else {
+					} else {
 						throw new ScriptStatementFailedException(statement, lineNumber, resource, ex);
 					}
 				}
 			}
-		}
-		finally {
+		} finally {
 			try {
 				stmt.close();
-			}
-			catch (Throwable ex) {
+			} catch (Throwable ex) {
 				logger.debug("Could not close JDBC Statement", ex);
 			}
 		}
@@ -210,8 +213,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		String currentStatement = lnr.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
-			if (StringUtils.hasText(currentStatement) &&
-					(this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
+			if (StringUtils.hasText(currentStatement)
+					&& (this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
 				if (scriptBuilder.length() > 0) {
 					scriptBuilder.append('\n');
 				}
@@ -219,7 +222,19 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 			}
 			currentStatement = lnr.readLine();
 		}
+		maybeAddSeparatorToScript(scriptBuilder);
 		return scriptBuilder.toString();
+	}
+
+	private void maybeAddSeparatorToScript(StringBuilder scriptBuilder) {
+		if (separator==null || separator.trim().length()==separator.length()) {
+			return;
+		}
+		String trimmed = separator.trim();
+		// separator ends in whitespace, so we might want to see if the script is trying to end the same way
+		if (scriptBuilder.lastIndexOf(trimmed)==scriptBuilder.length()-trimmed.length()) {
+			scriptBuilder.append(separator.substring(trimmed.length()));
+		}
 	}
 
 	/**
@@ -227,14 +242,14 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement - typically a ';' character
 	 */
-	private boolean containsSqlScriptDelimiters(String script, char delim) {
+	private boolean containsSqlScriptDelimiters(String script, String delim) {
 		boolean inLiteral = false;
 		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
 			if (content[i] == '\'') {
 				inLiteral = !inLiteral;
 			}
-			if (content[i] == delim && !inLiteral) {
+			if (!inLiteral && script.substring(i).startsWith(delim)) {
 				return true;
 			}
 		}
@@ -248,7 +263,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param delim character delimiting each statement (typically a ';' character)
 	 * @param statements the List that will contain the individual statements
 	 */
-	private void splitSqlScript(String script, char delim, List<String> statements) {
+	private void splitSqlScript(String script, String delim, List<String> statements) {
 		StringBuilder sb = new StringBuilder();
 		boolean inLiteral = false;
 		boolean inEscape = false;
@@ -258,7 +273,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 			if (inEscape) {
 				inEscape = false;
 				sb.append(c);
-				continue;				
+				continue;
 			}
 			// MySQL style escapes
 			if (c == '\\') {
@@ -270,14 +285,14 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 				inLiteral = !inLiteral;
 			}
 			if (!inLiteral) {
-				if (c == delim) {
+				if (script.substring(i).startsWith(delim)) {
 					if (sb.length() > 0) {
 						statements.add(sb.toString());
 						sb = new StringBuilder();
 					}
+					i += delim.length() - 1;
 					continue;
-				}
-				else if (c == '\n' || c == '\t') {
+				} else if (c == '\n' || c == '\t') {
 					c = ' ';
 				}
 			}

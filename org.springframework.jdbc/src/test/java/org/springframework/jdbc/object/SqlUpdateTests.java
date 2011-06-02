@@ -27,7 +27,6 @@ import java.util.Map;
 import org.easymock.MockControl;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.JdbcUpdateAffectedIncorrectNumberOfRowsException;
 import org.springframework.jdbc.core.SqlParameter;

@@ -103,6 +103,84 @@ public class DatabasePopulatorTests {
 	}
 
 	@Test
+	public void testBuildWithMultipleStatements() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-multiple.sql"));
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
+
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+	}
+
+	@Test
+	public void testBuildWithMultipleStatementsLongSeparator() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-endings.sql"));
+		databasePopulator.setSeparator("@@");
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
+
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+	}
+
+	@Test
+	public void testBuildWithMultipleStatementsWhitespaceSeparator() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-whitespace.sql"));
+		databasePopulator.setSeparator("/\n");
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
+
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+	}
+
+	@Test
+	public void testBuildWithMultipleStatementsNewlineSeparator() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-newline.sql"));
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
+
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+	}
+
+	@Test
+	public void testBuildWithMultipleStatementsMultipleNewlineSeparator() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-multi-newline.sql"));
+		databasePopulator.setSeparator("\n\n");
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
+
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+	}
+
+	@Test
 	public void scriptWithEolBetweenTokens() throws Exception {
 		databasePopulator.addScript(resourceLoader.getResource("users-schema.sql"));
 		databasePopulator.addScript(resourceLoader.getResource("users-data.sql"));

@@ -129,6 +129,13 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="separator" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The statement separator in the script (the default is to use ';' if it is present in the script, or '\n' otherwise).
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 	</xsd:complexType>
 
 	<xsd:simpleType name="databaseType">
