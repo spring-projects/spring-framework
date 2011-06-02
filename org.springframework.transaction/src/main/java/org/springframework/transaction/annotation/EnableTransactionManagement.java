@@ -52,7 +52,7 @@ public @interface EnableTransactionManagement {
 	/**
 	 * Indicate the ordering of the execution of the transaction advisor
 	 * when multiple advices are applied at a specific joinpoint.
-	 * The default is to not explicitly order the advisor.
+	 * The default is lowest priority.
 	 */
-	int order() default Ordered.NOT_ORDERED;
+	int order() default Ordered.LOWEST_PRECEDENCE;
 }

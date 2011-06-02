@@ -22,7 +22,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
-import org.springframework.core.Ordered;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
@@ -38,10 +37,7 @@ public class ProxyTransactionManagementConfiguration extends AbstractTransaction
 			new BeanFactoryTransactionAttributeSourceAdvisor();
 		advisor.setTransactionAttributeSource(transactionAttributeSource());
 		advisor.setAdvice(transactionInterceptor());
-		int order = (Integer)this.enableTx.get("order");
-		if (order != Ordered.NOT_ORDERED) {
-			advisor.setOrder(order);
-		}
+		advisor.setOrder(((Integer)this.enableTx.get("order")));
 		return advisor;
 	}
 
