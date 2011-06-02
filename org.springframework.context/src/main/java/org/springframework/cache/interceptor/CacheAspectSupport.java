@@ -68,7 +68,9 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 	private final ExpressionEvaluator evaluator = new ExpressionEvaluator();
 
-	private KeyGenerator<?> keyGenerator = new DefaultKeyGenerator();
+	private KeyGenerator keyGenerator = new DefaultKeyGenerator();
+
+	private volatile boolean initialized = false;
 
 	public void afterPropertiesSet() {
 		if (this.cacheManager == null) {
@@ -78,6 +80,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			throw new IllegalStateException("Either 'cacheDefinitionSource' or 'cacheDefinitionSources' is required: "
 					+ "If there are no cacheable methods, then don't use a cache aspect.");
 		}
+
+		initialized = true;
 	}
 
 	/**
@@ -110,7 +114,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		return keyGenerator;
 	}
 
-	public <K> void setKeyGenerator(KeyGenerator<K> keyGenerator) {
+	public void setKeyGenerator(KeyGenerator keyGenerator) {
 		this.keyGenerator = keyGenerator;
 	}
 
@@ -146,18 +150,25 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	protected Object execute(Callable<Object> invocation, Object target, Method method, Object[] args) throws Exception {
+		// check whether aspect is enabled
+		// to cope with cases where the AJ is pulled in automatically
+
+		if (!initialized) {
+			return invocation.call();
+		}
+
+		boolean log = logger.isTraceEnabled();
+
 		// get backing class
 		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(target);
 
 		if (targetClass == null && target != null) {
 			targetClass = target.getClass();
 		}
-
-		boolean log = logger.isTraceEnabled();
-
 		final CacheOperation cacheOp = getCacheDefinitionSource().getCacheOperation(method, targetClass);
 
 		Object retVal = null;
+
 
 		// analyze caching information
 		if (cacheOp != null) {
@@ -262,7 +273,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		// context passed around to avoid multiple creations
 		private final EvaluationContext evalContext;
 
-		private final KeyGenerator<?> keyGenerator = CacheAspectSupport.this.keyGenerator;
+		private final KeyGenerator keyGenerator = CacheAspectSupport.this.keyGenerator;
 
 		public CacheOperationContext(CacheOperation operation, Method method, Object[] args, Object target,
 				Class<?> targetClass) {
