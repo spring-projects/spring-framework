@@ -281,6 +281,69 @@ abstract class ContextLoaderUtils {
 		return StringUtils.toStringArray(activeProfiles);
 	}
 
+	/**
+	 * TODO Document resolveContextConfigurationAttributes().
+	 *
+	 * @param clazz
+	 * @return
+	 */
+	static List<ContextConfigurationAttributes> resolveContextConfigurationAttributes(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+
+		final List<ContextConfigurationAttributes> attributesList = new ArrayList<ContextConfigurationAttributes>();
+
+		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
+		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
+		Assert.notNull(declaringClass, String.format(
+			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]", annotationType,
+			clazz));
+
+		while (declaringClass != null) {
+			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
+
+			if (logger.isTraceEnabled()) {
+				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
+					contextConfiguration, declaringClass));
+			}
+
+			ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
+				contextConfiguration);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Resolved context configuration attributes: " + attributes);
+			}
+
+			attributesList.add(0, attributes);
+
+			declaringClass = contextConfiguration.inheritLocations() ? AnnotationUtils.findAnnotationDeclaringClass(
+				annotationType, declaringClass.getSuperclass()) : null;
+		}
+
+		return attributesList;
+	}
+
+	/**
+	 * TODO Document buildMergedContextConfiguration().
+	 *
+	 * @param testClass
+	 * @param defaultContextLoaderClassName
+	 * @return
+	 */
+	static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
+			String defaultContextLoaderClassName) {
+
+		ContextLoader contextLoader = resolveContextLoader(testClass, defaultContextLoaderClassName);
+
+		// TODO Merge locations from List<ContextConfigurationAttributes>
+		String[] locations = resolveContextLocations(contextLoader, testClass);
+
+		// TODO Merge classes from List<ContextConfigurationAttributes>
+		Class<?>[] classes = {};
+
+		String[] activeProfiles = resolveActiveProfiles(testClass);
+
+		return new MergedContextConfiguration(testClass, locations, classes, activeProfiles, contextLoader);
+	}
+
 
 	/**
 	 * Strategy interface for resolving application context resource locations.
@@ -317,24 +380,7 @@ abstract class ContextLoaderUtils {
 		 * attributes have been declared
 		 */
 		public String[] resolveLocations(ContextConfiguration contextConfiguration, Class<?> declaringClass) {
-
-			String[] locations = contextConfiguration.locations();
-			String[] valueLocations = contextConfiguration.value();
-
-			if (!ObjectUtils.isEmpty(valueLocations) && !ObjectUtils.isEmpty(locations)) {
-				String msg = String.format(
-					"Test class [%s] has been configured with @ContextConfiguration's 'value' [%s] "
-							+ "and 'locations' [%s] attributes. Only one declaration of resource "
-							+ "locations is permitted per @ContextConfiguration annotation.", declaringClass,
-					ObjectUtils.nullSafeToString(valueLocations), ObjectUtils.nullSafeToString(locations));
-				ContextLoaderUtils.logger.error(msg);
-				throw new IllegalStateException(msg);
-			}
-			else if (!ObjectUtils.isEmpty(valueLocations)) {
-				locations = valueLocations;
-			}
-
-			return locations;
+			return ContextConfigurationAttributes.resolveLocations(declaringClass, contextConfiguration);
 		}
 	}
 
