@@ -16,16 +16,20 @@
 
 package org.springframework.jdbc.config;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.jdbc.datasource.init.CompositeDatabasePopulator;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
@@ -60,21 +64,36 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 	}
 
 	private BeanDefinition createDatabasePopulator(Element element, List<Element> scripts, ParserContext context) {
-		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(ResourceDatabasePopulator.class);
-		builder.addPropertyValue("ignoreFailedDrops", element.getAttribute("ignore-failures").equals("DROPS"));
-		builder.addPropertyValue("continueOnError", element.getAttribute("ignore-failures").equals("ALL"));
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(CompositeDatabasePopulator.class);
 
-		List<String> locations = new ArrayList<String>();
+		boolean ignoreFailedDrops = element.getAttribute("ignore-failures").equals("DROPS");
+		boolean continueOnError = element.getAttribute("ignore-failures").equals("ALL");
+		
+		ManagedList<BeanMetadataElement> delegates = new ManagedList<BeanMetadataElement>();
+
 		for (Element scriptElement : scripts) {
-			String location = scriptElement.getAttribute("location");
-			locations.add(location);
-		}
 
-		// Use a factory bean for the resources so they can be given an order if a pattern is used
-		BeanDefinitionBuilder resourcesFactory = BeanDefinitionBuilder
-				.genericBeanDefinition(SortedResourcesFactoryBean.class);
-		resourcesFactory.addConstructorArgValue(locations);
-		builder.addPropertyValue("scripts", resourcesFactory.getBeanDefinition());
+			BeanDefinitionBuilder delegate = BeanDefinitionBuilder.genericBeanDefinition(ResourceDatabasePopulator.class);
+			delegate.addPropertyValue("ignoreFailedDrops", ignoreFailedDrops);
+			delegate.addPropertyValue("continueOnError", continueOnError);
+	
+			List<String> locations = Arrays.asList(scriptElement.getAttribute("location"));
+			// Use a factory bean for the resources so they can be given an order if a pattern is used
+			BeanDefinitionBuilder resourcesFactory = BeanDefinitionBuilder
+					.genericBeanDefinition(SortedResourcesFactoryBean.class);
+			resourcesFactory.addConstructorArgValue(locations);
+
+			delegate.addPropertyValue("scripts", resourcesFactory.getBeanDefinition());
+			
+			if (StringUtils.hasLength(scriptElement.getAttribute("separator"))) {
+				delegate.addPropertyValue("separator", scriptElement.getAttribute("separator"));
+			}
+			
+			delegates.add(delegate.getBeanDefinition());
+
+		}
+		
+		builder.addPropertyValue("populators", delegates);
 
 		return builder.getBeanDefinition();
 	}

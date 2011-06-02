@@ -1,7 +1,9 @@
 package org.springframework.jdbc.config;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import javax.sql.DataSource;
 
@@ -22,6 +24,7 @@ public class JdbcNamespaceIntegrationTest {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/jdbc/config/jdbc-config.xml");
 		assertCorrectSetup(context, "dataSource", "h2DataSource", "derbyDataSource");
+		context.close();
 	}
 
 	@Test
@@ -30,6 +33,7 @@ public class JdbcNamespaceIntegrationTest {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/jdbc/config/jdbc-config.xml");
 		assertCorrectSetup(context, "derbyDataSource");
+		context.close();
 	}
 
 	@Test
@@ -37,6 +41,15 @@ public class JdbcNamespaceIntegrationTest {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"org/springframework/jdbc/config/jdbc-config-pattern.xml");
 		assertCorrectSetup(context, "dataSource");
+		context.close();
+	}
+
+	@Test
+	public void testCreateWithEndings() throws Exception {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				"org/springframework/jdbc/config/jdbc-initialize-endings-config.xml");
+		assertCorrectSetup(context, 2, "dataSource");
+		context.close();
 	}
 
 	@Test
@@ -58,15 +71,21 @@ public class JdbcNamespaceIntegrationTest {
 	}
 
 	private void assertCorrectSetup(ConfigurableApplicationContext context, String... dataSources) {
+		assertCorrectSetup(context, 1, dataSources);
+	}
+	
+	private void assertCorrectSetup(ConfigurableApplicationContext context, int count, String... dataSources) {
 
 		try {
 			for (String dataSourceName : dataSources) {
 				DataSource dataSource = context.getBean(dataSourceName, DataSource.class);
 				JdbcTemplate t = new JdbcTemplate(dataSource);
-				assertEquals(1, t.queryForInt("select count(*) from T_TEST"));
+				assertEquals(count, t.queryForInt("select count(*) from T_TEST"));
 			}
 		} finally {
 			context.close();
 		}
+
 	}
+
 }

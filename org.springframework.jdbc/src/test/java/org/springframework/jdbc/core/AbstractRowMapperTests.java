@@ -23,8 +23,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.sql.Types;
-
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.apache.commons.logging.LogFactory;
