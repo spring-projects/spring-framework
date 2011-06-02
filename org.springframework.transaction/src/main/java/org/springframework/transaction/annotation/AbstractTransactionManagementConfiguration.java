@@ -27,8 +27,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class providing common structure for enabling Spring's annotation-
- * driven transaction management capability.
+ * Abstract base {@code @Configuration} class providing common structure for enabling
+ * Spring's annotation-driven transaction management capability.
  *
  * @author Chris Beams
  * @since 3.1

@@ -76,6 +76,9 @@
 
 	Transaction semantics such as propagation settings, the isolation level,
 	the rollback rules, etc are all defined in the annotation metadata.
+
+	See org.springframework.transaction.annotation.EnableTransactionManagement Javadoc
+	for information on code-based alternatives to this XML element.
 				]]></xsd:documentation>
 			</xsd:annotation>
 			<xsd:attribute name="transaction-manager" type="xsd:string" default="transactionManager">
