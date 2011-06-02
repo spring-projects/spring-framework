@@ -47,13 +47,15 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Base {@link ConversionService} implementation suitable for use in most environments.
- * Implements {@link ConverterRegistry} as registration API.
+ * Indirectly implements {@link ConverterRegistry} as registration API through the
+ * {@link ConfigurableConversionService} interface.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0
  */
-public class GenericConversionService implements ConversionService, ConverterRegistry {
+public class GenericConversionService implements ConfigurableConversionService {
 
 	private static final GenericConverter NO_OP_CONVERTER = new GenericConverter() {
 		public Set<ConvertiblePair> getConvertibleTypes() {
