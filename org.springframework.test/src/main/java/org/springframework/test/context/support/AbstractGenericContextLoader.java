@@ -20,9 +20,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -44,6 +47,33 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 
 	protected static final Log logger = LogFactory.getLog(AbstractGenericContextLoader.class);
 
+
+	/**
+	 * TODO Document loadContext().
+	 *
+	 * @see org.springframework.test.context.SmartContextLoader#loadContext(org.springframework.test.context.MergedContextConfiguration)
+	 */
+	public final ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration) throws Exception {
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Loading ApplicationContext for merged context configuration [%s].",
+				mergedContextConfiguration));
+		}
+
+		String[] locations = mergedContextConfiguration.getLocations();
+		Assert.notNull(locations, "Can not load an ApplicationContext with a NULL 'locations' array. "
+				+ "Consider annotating your test class with @ContextConfiguration.");
+
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.getEnvironment().setActiveProfiles(mergedContextConfiguration.getActiveProfiles());
+		prepareContext(context);
+		customizeBeanFactory(context.getDefaultListableBeanFactory());
+		loadBeanDefinitions(context, locations);
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+		customizeContext(context);
+		context.refresh();
+		context.registerShutdownHook();
+		return context;
+	}
 
 	/**
 	 * Loads a Spring ApplicationContext from the supplied <code>locations</code>.

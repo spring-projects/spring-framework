@@ -16,7 +16,6 @@
 
 package org.springframework.test.context;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
@@ -43,9 +42,9 @@ public class TestContext extends AttributeAccessorSupport {
 
 	private final ContextCache contextCache;
 
-	private final ContextLoader contextLoader;
+	private final String contextKey;
 
-	private final String[] locations;
+	private final MergedContextConfiguration mergedContextConfiguration;
 
 	private final Class<?> testClass;
 
@@ -88,28 +87,28 @@ public class TestContext extends AttributeAccessorSupport {
 		Assert.notNull(testClass, "Test class must not be null");
 		Assert.notNull(contextCache, "ContextCache must not be null");
 
+		MergedContextConfiguration mergedContextConfiguration;
 		ContextConfiguration contextConfiguration = testClass.getAnnotation(ContextConfiguration.class);
-		ContextLoader contextLoader = null;
-		String[] locations = null;
 
 		if (contextConfiguration == null) {
 			if (logger.isInfoEnabled()) {
 				logger.info(String.format("@ContextConfiguration not found for class [%s]", testClass));
 			}
+			mergedContextConfiguration = new MergedContextConfiguration(testClass, null, null, null, null);
 		}
 		else {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for class [%s]", contextConfiguration,
 					testClass));
 			}
-			contextLoader = ContextLoaderUtils.resolveContextLoader(testClass, defaultContextLoaderClassName);
-			locations = ContextLoaderUtils.resolveContextLocations(contextLoader, testClass);
+			mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
+				defaultContextLoaderClassName);
 		}
 
-		this.testClass = testClass;
 		this.contextCache = contextCache;
-		this.contextLoader = contextLoader;
-		this.locations = locations;
+		this.contextKey = generateContextKey(mergedContextConfiguration);
+		this.mergedContextConfiguration = mergedContextConfiguration;
+		this.testClass = testClass;
 	}
 
 	/**
@@ -118,19 +117,44 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @throws Exception if an error occurs while loading the application context
 	 */
 	private ApplicationContext loadApplicationContext() throws Exception {
-		Assert.notNull(this.contextLoader, "Can not load an ApplicationContext with a NULL 'contextLoader'. "
+		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
+		Assert.notNull(contextLoader, "Can not load an ApplicationContext with a NULL 'contextLoader'. "
 				+ "Consider annotating your test class with @ContextConfiguration.");
-		Assert.notNull(this.locations, "Can not load an ApplicationContext with a NULL 'locations' array. "
-				+ "Consider annotating your test class with @ContextConfiguration.");
-		return this.contextLoader.loadContext(this.locations);
+
+		ApplicationContext applicationContext;
+
+		if (contextLoader instanceof SmartContextLoader) {
+			SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
+			applicationContext = smartContextLoader.loadContext(mergedContextConfiguration);
+		}
+		else {
+			String[] locations = mergedContextConfiguration.getLocations();
+			Assert.notNull(locations, "Can not load an ApplicationContext with a NULL 'locations' array. "
+					+ "Consider annotating your test class with @ContextConfiguration.");
+			applicationContext = contextLoader.loadContext(locations);
+		}
+
+		return applicationContext;
 	}
 
 	/**
-	 * Convert the supplied context <code>key</code> to a String representation
-	 * for use in caching, logging, etc.
+	 * Generates a context <code>key</code> from information stored in the
+	 * {@link MergedContextConfiguration} for this <code>TestContext</code>.
 	 */
-	private String contextKeyString(Serializable key) {
-		return ObjectUtils.nullSafeToString(key);
+	private String generateContextKey(MergedContextConfiguration mergedContextConfiguration) {
+
+		String[] locations = mergedContextConfiguration.getLocations();
+		Class<?>[] classes = mergedContextConfiguration.getClasses();
+		String[] activeProfiles = mergedContextConfiguration.getActiveProfiles();
+		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
+
+		String locationsKey = ObjectUtils.nullSafeToString(locations);
+		String classesKey = ObjectUtils.nullSafeToString(classes);
+		String activeProfilesKey = ObjectUtils.nullSafeToString(activeProfiles);
+		String contextLoaderKey = contextLoader == null ? "null" : contextLoader.getClass().getName();
+
+		return String.format("locations = [%s], classes = [%s], activeProfiles = [%s], contextLoader = [%s]",
+			locationsKey, classesKey, activeProfilesKey, contextLoaderKey);
 	}
 
 	/**
@@ -141,13 +165,12 @@ public class TestContext extends AttributeAccessorSupport {
 	 * application context
 	 */
 	public ApplicationContext getApplicationContext() {
-		synchronized (this.contextCache) {
-			String contextKeyString = contextKeyString(this.locations);
-			ApplicationContext context = this.contextCache.get(contextKeyString);
+		synchronized (contextCache) {
+			ApplicationContext context = contextCache.get(contextKey);
 			if (context == null) {
 				try {
 					context = loadApplicationContext();
-					this.contextCache.put(contextKeyString, context);
+					contextCache.put(contextKey, context);
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException("Failed to load ApplicationContext", ex);
@@ -162,7 +185,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @return the test class (never <code>null</code>)
 	 */
 	public final Class<?> getTestClass() {
-		return this.testClass;
+		return testClass;
 	}
 
 	/**
@@ -172,7 +195,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @see #updateState(Object,Method,Throwable)
 	 */
 	public final Object getTestInstance() {
-		return this.testInstance;
+		return testInstance;
 	}
 
 	/**
@@ -182,7 +205,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	public final Method getTestMethod() {
-		return this.testMethod;
+		return testMethod;
 	}
 
 	/**
@@ -194,7 +217,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	public final Throwable getTestException() {
-		return this.testException;
+		return testException;
 	}
 
 	/**
@@ -204,7 +227,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * replacing a bean definition).
 	 */
 	public void markApplicationContextDirty() {
-		this.contextCache.setDirty(contextKeyString(this.locations));
+		contextCache.setDirty(contextKey);
 	}
 
 	/**
@@ -227,11 +250,11 @@ public class TestContext extends AttributeAccessorSupport {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)//
-		.append("testClass", this.testClass)//
-		.append("locations", this.locations)//
-		.append("testInstance", this.testInstance)//
-		.append("testMethod", this.testMethod)//
-		.append("testException", this.testException)//
+		.append("testClass", testClass)//
+		.append("testInstance", testInstance)//
+		.append("testMethod", testMethod)//
+		.append("testException", testException)//
+		.append("mergedContextConfiguration", mergedContextConfiguration)//
 		.toString();
 	}
 

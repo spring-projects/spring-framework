@@ -25,6 +25,10 @@ import org.springframework.test.context.junit4.annotation.AnnotationConfigSpring
 import org.springframework.test.context.junit4.annotation.DefaultConfigClassesBaseTests;
 import org.springframework.test.context.junit4.annotation.DefaultConfigClassesInheritedTests;
 import org.springframework.test.context.junit4.orm.HibernateSessionFlushingTests;
+import org.springframework.test.context.junit4.profile.annotation.DefaultProfileAnnotationConfigTests;
+import org.springframework.test.context.junit4.profile.annotation.DevProfileAnnotationConfigTests;
+import org.springframework.test.context.junit4.profile.xml.DefaultProfileXmlConfigTests;
+import org.springframework.test.context.junit4.profile.xml.DevProfileXmlConfigTests;
 
 /**
  * <p>
@@ -54,6 +58,10 @@ StandardJUnit4FeaturesTests.class,//
 	AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
 	DefaultConfigClassesBaseTests.class,//
 	DefaultConfigClassesInheritedTests.class,//
+	DefaultProfileAnnotationConfigTests.class,//
+	DevProfileAnnotationConfigTests.class, //
+	DefaultProfileXmlConfigTests.class,//
+	DevProfileXmlConfigTests.class, //
 	ExpectedExceptionSpringRunnerTests.class,//
 	TimedSpringRunnerTests.class,//
 	RepeatedSpringRunnerTests.class,//
