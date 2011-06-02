@@ -16,21 +16,26 @@
 
 package org.springframework.core.convert;
 
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.GenericCollectionTypeResolver;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Context about a type to convert to.
@@ -70,43 +75,41 @@ public class TypeDescriptor {
 	}
 
 
-	private Class<?> type;
+	private final Class<?> type;
 
-	private MethodParameter methodParameter;
+	private final TypeDescriptor elementType;
 
-	private Field field;
+	private final TypeDescriptor mapKeyType;
 
-	private int fieldNestingLevel = 1;
+	private final TypeDescriptor mapValueType;
 
-	private TypeDescriptor elementType;
-
-	private TypeDescriptor mapKeyType;
-
-	private TypeDescriptor mapValueType;
-
-	private Annotation[] annotations;
-
+	private final Annotation[] annotations;
 
 	/**
 	 * Create a new type descriptor from a method or constructor parameter.
-	 * Use this constructor when a target conversion point originates from a method parameter, such as a setter method argument.
-	 * @param methodParameter the MethodParameter to wrap
+	 * Use this constructor when a target conversion point is a method parameter.
+	 * @param methodParameter the method parameter
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
-		Assert.notNull(methodParameter, "MethodParameter must not be null");
-		this.type = methodParameter.getParameterType();
-		this.methodParameter = methodParameter;
+		this(new ParameterDescriptor(methodParameter));
 	}
 
 	/**
 	 * Create a new type descriptor for a field.
-	 * Use this constructor when a target conversion point originates from a field.
-	 * @param field the field to wrap
+	 * Use this constructor when a target conversion point is a field.
+	 * @param field the field
 	 */
 	public TypeDescriptor(Field field) {
-		Assert.notNull(field, "Field must not be null");
-		this.type = field.getType();
-		this.field = field;
+		this(new FieldDescriptor(field));
+	}
+
+	/**
+	 * Create a new type descriptor for a property.
+	 * Use this constructor when a target conversion point is a property.
+	 * @param property the property
+	 */
+	public TypeDescriptor(Class<?> beanClass, PropertyDescriptor property) {
+		this(new BeanPropertyDescriptor(beanClass, property));
 	}
 
 	/**
@@ -122,6 +125,31 @@ public class TypeDescriptor {
 		}
 		TypeDescriptor desc = typeDescriptorCache.get(type);
 		return (desc != null ? desc : new TypeDescriptor(type));
+	}
+
+	/**
+	 * Create a new type descriptor for a java.util.Collection class.
+	 * Useful for supporting conversion of source Collection objects to other types.
+	 * Serves as an alternative to {@link #forObject(Object)} to be used when you cannot rely on Collection element introspection to resolve the element type.
+	 * @param collectionType the collection type, which must implement {@link Collection}.
+	 * @param elementType the collection's element type, used to convert collection elements
+	 * @return the collection type descriptor
+	 */
+	public static TypeDescriptor collection(Class<?> collectionType, TypeDescriptor elementType) {
+		return new TypeDescriptor(collectionType, elementType);
+	}
+
+	/**
+	 * Create a new type descriptor for a java.util.Map class.
+	 * Useful for supporting the conversion of source Map objects to other types.
+	 * Serves as an alternative to {@link #forObject(Object)} to be used when you cannot rely on Map entry introspection to resolve the key and value type.
+	 * @param mapType the map type, which must implement {@link Map}.
+	 * @param keyType the map's key type, used to convert map keys
+	 * @param valueType the map's value type, used to convert map values
+	 * @return the map type descriptor
+	 */
+	public static TypeDescriptor map(Class<?> mapType, TypeDescriptor keyType, TypeDescriptor valueType) {
+		return new TypeDescriptor(mapType, keyType, valueType);
 	}
 	
 	/**
@@ -153,24 +181,47 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Create a new type descriptor for a nested type declared on an array, collection, or map-based method parameter.
-	 * Use this factory method when you've resolved a nested source object such as a collection element or map value and wish to have it converted.
-	 * @param methodParameter the method parameter declaring the collection or map
+	 * Creates a type descriptor for a nested type declared by the method parameter.
+	 * For example, if the methodParameter is a List&lt;String&gt; and the nestingLevel is 1, the nested type descriptor will be String.class.
+	 * If the methodParameter is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class.
+	 * If the methodParameter is a Map<Integer, String> and the nesting level is 1, the nested type descriptor will be String, derived from the map value.
+	 * If the methodParameter is a List<Map<Integer, String>> and the nesting level is 2, the nested type descriptor will be String, derived from the map value.
+	 * @param methodParameter the method parameter
 	 * @return the nested type descriptor
+	 * @throws IllegalArgumentException if the method parameter is not of a collection, array, or map type.
 	 */
-	public static TypeDescriptor forNestedType(MethodParameter methodParameter) {
-		return new TypeDescriptor(resolveNestedType(methodParameter), methodParameter);
+	public static TypeDescriptor nested(MethodParameter methodParameter, int nestingLevel) {
+		return nested(new ParameterDescriptor(methodParameter), nestingLevel);
 	}
 
 	/**
-	 * Create a new type descriptor for a nested type declared on an array, collection, or map-based method parameter.
-	 * Use this factory method when you've resolved a nested source object such as a collection element or map value and wish to have it converted.
-	 * @param nestedType the nested type
-	 * @param methodParameter the method parameter declaring the collection or map
+	 * Creates a type descriptor for a nested type declared by the field.
+	 * For example, if the field is a List&lt;String&gt; and the nestingLevel is 1, the nested type descriptor will be String.class.
+	 * If the field is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class. 
+	 * If the field is a Map<Integer, String> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value. 
+	 * If the field is a List<Map<Integer, String>> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
+	 * @param field the field
+	 * @param nestingLevel the nesting level
 	 * @return the nested type descriptor
+	 * @throws IllegalArgumentException if the field is not of a collection, array, or map type.
 	 */
-	public static TypeDescriptor forNestedType(Class<?> nestedType, MethodParameter methodParameter) {
-		return new TypeDescriptor(nestedType, methodParameter);
+	public static TypeDescriptor nested(Field field, int nestingLevel) {
+		return nested(new FieldDescriptor(field), nestingLevel);
+	}
+
+	/**
+	 * Creates a type descriptor for a nested type declared by the property.
+	 * For example, if the property is a List&lt;String&gt; and the nestingLevel is 1, the nested type descriptor will be String.class.
+	 * If the property is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class. 
+	 * If the field is a Map<Integer, String> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value. 
+	 * If the property is a List<Map<Integer, String>> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
+	 * @param property the property
+	 * @param nestingLevel the nesting level
+	 * @return the nested type descriptor
+	 * @throws IllegalArgumentException if the property is not of a collection, array, or map type.
+	 */
+	public static TypeDescriptor nested(Class<?> beanClass, PropertyDescriptor property, int nestingLevel) {
+		return nested(new BeanPropertyDescriptor(beanClass, property), nestingLevel);
 	}
 
 	/**
@@ -206,10 +257,7 @@ public class TypeDescriptor {
 	/**
 	 * Obtain the annotations associated with the wrapped parameter/field, if any.
 	 */
-	public synchronized Annotation[] getAnnotations() {
-		if (this.annotations == null) {
-			this.annotations = resolveAnnotations();
-		}
+	public Annotation[] getAnnotations() {
 		return this.annotations;
 	}
 
@@ -248,13 +296,6 @@ public class TypeDescriptor {
 		}
 	}
 
-	/**
-	 * A textual representation of the type descriptor (eg. Map<String,Foo>) for use in messages.
-	 */
-	public String asString() {
-		return toString();
-	}
-	
 	// indexable type descriptor operations
 	
 	/**
@@ -273,7 +314,9 @@ public class TypeDescriptor {
 
 	/**
 	 * If this type is an array type or {@link Collection} type, returns the underlying element type.
-	 * Returns <code>null</code> if the type is neither an array or collection.
+	 * Returns <code>null</code> if this type is neither an array or collection.
+	 * Returns Object.class if the element type is for a collection and was not explicitly declared.
+	 * @return the map element type, or <code>null</code> if not a collection or array.
 	 */
 	public Class<?> getElementType() {
 		return getElementTypeDescriptor().getType();
@@ -282,10 +325,7 @@ public class TypeDescriptor {
 	/**
 	 * Return the element type as a type descriptor.
 	 */
-	public synchronized TypeDescriptor getElementTypeDescriptor() {
-		if (this.elementType == null) {
-			this.elementType = resolveElementTypeDescriptor();
-		}
+	public TypeDescriptor getElementTypeDescriptor() {
 		return this.elementType;
 	}
 
@@ -300,7 +340,9 @@ public class TypeDescriptor {
 
 	/**
 	 * Determine the generic key type of the wrapped Map parameter/field, if any.
-	 * @return the generic type, or <code>null</code> if none
+	 * Returns <code>null</code> if this type is not map.
+	 * Returns Object.class if the map's key type was not explicitly declared.
+	 * @return the map key type, or <code>null</code> if not a map.
 	 */
 	public Class<?> getMapKeyType() {
 		return getMapKeyTypeDescriptor().getType();
@@ -309,16 +351,15 @@ public class TypeDescriptor {
 	/**
 	 * Returns map key type as a type descriptor.
 	 */
-	public synchronized TypeDescriptor getMapKeyTypeDescriptor() {
-		if (this.mapKeyType == null) {
-			this.mapKeyType = resolveMapKeyTypeDescriptor();
-		}
+	public TypeDescriptor getMapKeyTypeDescriptor() {
 		return this.mapKeyType;
 	}
 
 	/**
 	 * Determine the generic value type of the wrapped Map parameter/field, if any.
-	 * @return the generic type, or <code>null</code> if none
+	 * Returns <code>null</code> if this type is not map.
+	 * Returns Object.class if the map's value type was not explicitly declared.
+	 * @return the map value type, or <code>null</code> if not a map.
 	 */
 	public Class<?> getMapValueType() {
 		return getMapValueTypeDescriptor().getType();
@@ -327,23 +368,8 @@ public class TypeDescriptor {
 	/**
 	 * Returns map value type as a type descriptor.
 	 */
-	public synchronized TypeDescriptor getMapValueTypeDescriptor() {
-		if (this.mapValueType == null) {
-			this.mapValueType = resolveMapValueTypeDescriptor();
-		}
+	public TypeDescriptor getMapValueTypeDescriptor() {
 		return this.mapValueType;
-	}
-	
-	// special case public operations
-
-	/**
-	 * Exposes the underlying MethodParameter providing context for this TypeDescriptor.
-	 * Used to support legacy code scenarios where callers are already using the MethodParameter API (BeanWrapper).
-	 * In general, favor use of the TypeDescriptor API over the MethodParameter API as it is independent of type context location.
-	 * May be null if no MethodParameter was provided when this TypeDescriptor was constructed.
-	 */
-	public MethodParameter getMethodParameter() {
-		return methodParameter;
 	}
 	
 	// extending Object
@@ -395,128 +421,53 @@ public class TypeDescriptor {
 		}
 	}
 
-	// subclassing hooks
+	// internal constructors
 
-	protected TypeDescriptor(Class<?> nestedType, MethodParameter methodParameter) {
-		this.type = handleUnknownNestedType(nestedType);
-		this.methodParameter = createNestedMethodParameter(methodParameter);
+	private TypeDescriptor(Class<?> type) {
+		this(new ClassDescriptor(type));
+	}
+
+	private TypeDescriptor(AbstractDescriptor descriptor) {
+		this.type = descriptor.getType();
+		this.elementType = descriptor.getElementType();
+		this.mapKeyType = descriptor.getMapKeyType();
+		this.mapValueType = descriptor.getMapValueType();
+		this.annotations = descriptor.getAnnotations();
+	}
+
+	private TypeDescriptor() {
+		this(null, TypeDescriptor.NULL, TypeDescriptor.NULL, TypeDescriptor.NULL);
+	}
+
+	private TypeDescriptor(Class<?> collectionType, TypeDescriptor elementType) {
+		this(collectionType, elementType, TypeDescriptor.NULL, TypeDescriptor.NULL);
+	}
+
+	private TypeDescriptor(Class<?> mapType, TypeDescriptor keyType, TypeDescriptor valueType) {
+		this(mapType, TypeDescriptor.NULL, keyType, valueType);
+	}
+
+	private TypeDescriptor(Class<?> collectionType, CommonElement commonElement) {
+		this(collectionType, fromCommonElement(commonElement), TypeDescriptor.NULL, TypeDescriptor.NULL);
+	}
+
+	private TypeDescriptor(Class<?> mapType, CommonElement commonKey, CommonElement commonValue) {
+		this(mapType, TypeDescriptor.NULL, fromCommonElement(commonKey), fromCommonElement(commonValue));
 	}
 	
-	protected Annotation[] resolveAnnotations() {
-		if (this.field != null) {
-			return this.field.getAnnotations();
-		}
-		else if (this.methodParameter != null) {
-			if (this.methodParameter.getParameterIndex() < 0) {
-				return this.methodParameter.getMethodAnnotations();
-			}
-			else {
-				return this.methodParameter.getParameterAnnotations();
-			}
-		}
-		else {
-			return EMPTY_ANNOTATION_ARRAY;
-		}
+	private TypeDescriptor(Class<?> type, TypeDescriptor elementType, TypeDescriptor mapKeyType, TypeDescriptor mapValueType) {
+		this.type = type;
+		this.elementType = elementType;
+		this.mapKeyType = mapKeyType;
+		this.mapValueType = mapValueType;
+		this.annotations = EMPTY_ANNOTATION_ARRAY;
 	}
 
-	protected TypeDescriptor newNestedTypeDescriptor(Class<?> nestedType, MethodParameter nested) {
-		return new TypeDescriptor(nestedType, nested);
+	private static Annotation[] nullSafeAnnotations(Annotation[] annotations) {
+		return annotations != null ? annotations : EMPTY_ANNOTATION_ARRAY;
 	}
 	
-	protected static Class<?> resolveNestedType(MethodParameter methodParameter) {
-		if (Collection.class.isAssignableFrom(methodParameter.getParameterType())) {
-			return GenericCollectionTypeResolver.getCollectionParameterType(methodParameter);
-		} else if (Map.class.isAssignableFrom(methodParameter.getParameterType())) {
-			return GenericCollectionTypeResolver.getMapValueParameterType(methodParameter);			
-		} else if (methodParameter.getParameterType().isArray()) {
-			return methodParameter.getParameterType().getComponentType();
-		} else {			
-			throw new IllegalStateException("Not a collection, map, or array method parameter type " + methodParameter.getParameterType());
-		}
-	}
-	
-	// internal helpers
-
-	private TypeDescriptor resolveElementTypeDescriptor() {
-		if (isCollection()) {
-			return createNestedTypeDescriptor(resolveCollectionElementType());
-		}
-		else {
-			// TODO: GenericCollectionTypeResolver is not capable of applying nesting levels to array fields;
-			// this means generic info of nested lists or maps stored inside array method parameters or fields is not obtainable
-			return createNestedTypeDescriptor(getType().getComponentType());
-		}
-	}
-
-	private TypeDescriptor resolveMapKeyTypeDescriptor() {
-		return createNestedTypeDescriptor(resolveMapKeyType());
-	}
-
-	private TypeDescriptor resolveMapValueTypeDescriptor() {
-		return createNestedTypeDescriptor(resolveMapValueType());
-	}
-
-	private TypeDescriptor createNestedTypeDescriptor(Class<?> nestedType) {
-		nestedType = handleUnknownNestedType(nestedType);
-		if (this.methodParameter != null) {
-			return newNestedTypeDescriptor(nestedType, createNestedMethodParameter(this.methodParameter));				
-		}
-		else if (this.field != null) {
-			return new TypeDescriptor(nestedType, this.field, this.fieldNestingLevel + 1);
-		}
-		else {
-			return TypeDescriptor.valueOf(nestedType);
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	private Class<?> resolveCollectionElementType() {
-		if (this.methodParameter != null) {
-			return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
-		}
-		else if (this.field != null) {
-			return GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.fieldNestingLevel);
-		}
-        else {
-			return GenericCollectionTypeResolver.getCollectionType((Class<? extends Collection<?>>) this.type);
-		}		
-	}
-	
-	@SuppressWarnings("unchecked")
-	private Class<?> resolveMapKeyType() {
-		if (this.methodParameter != null) {
-			return GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter);
-		}
-		else if (this.field != null) {
-			return GenericCollectionTypeResolver.getMapKeyFieldType(this.field, this.fieldNestingLevel);
-		}
-		else {
-			return GenericCollectionTypeResolver.getMapKeyType((Class<? extends Map<?, ?>>) this.type);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private Class<?> resolveMapValueType() {
-		if (this.methodParameter != null) {
-			return GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter);
-		}
-		else if (this.field != null) {
-			return GenericCollectionTypeResolver.getMapValueFieldType(this.field, this.fieldNestingLevel);
-		}
-		else {
-			return GenericCollectionTypeResolver.getMapValueType((Class<? extends Map<?, ?>>) this.type);
-		}
-	}
-
-	private Class<?> handleUnknownNestedType(Class<?> nestedType) {
-		return nestedType != null ? nestedType : Object.class;
-	}
-
-	private MethodParameter createNestedMethodParameter(MethodParameter parentMethodParameter) {
-		MethodParameter methodParameter = new MethodParameter(parentMethodParameter);
-		methodParameter.increaseNestingLevel();
-		return methodParameter;
-	}
+	// forObject-related internal helpers
 
 	private static CommonElement findCommonElement(Collection<?> values) {
 		Class<?> commonType = null;
@@ -569,34 +520,7 @@ public class TypeDescriptor {
 		}
 	}
 
-	// internal constructors
-
-	private TypeDescriptor() {
-	}
-
-	private TypeDescriptor(Class<?> type) {
-		Assert.notNull(type, "Type must not be null");
-		this.type = type;
-	}
-
-	private TypeDescriptor(Class<?> nestedType, Field field, int nestingLevel) {
-		this.type = nestedType;
-		this.field = field;
-		this.fieldNestingLevel = nestingLevel;
-	}
-
-	private TypeDescriptor(Class<?> mapType, CommonElement commonKey, CommonElement commonValue) {
-		this.type = mapType;
-		this.mapKeyType = applyCommonElement(commonKey);
-		this.mapValueType = applyCommonElement(commonValue);
-	}
-	
-	private TypeDescriptor(Class<?> collectionType, CommonElement commonElement) {
-		this.type = collectionType;
-		this.elementType = applyCommonElement(commonElement);
-	}
-
-	private TypeDescriptor applyCommonElement(CommonElement commonElement) {
+	private static TypeDescriptor fromCommonElement(CommonElement commonElement) {
 		if (commonElement == null) {
 			return TypeDescriptor.valueOf(Object.class);
 		}
@@ -619,7 +543,352 @@ public class TypeDescriptor {
 		}
 	}
 
+	private static TypeDescriptor nested(AbstractDescriptor descriptor, int nestingLevel) {
+		for (int i = 0; i < nestingLevel; i++) {
+			descriptor = descriptor.nested();
+		}
+		return new TypeDescriptor(descriptor);		
+	}
+	
 	// inner classes
+
+	private abstract static class AbstractDescriptor {
+
+		private final Class<?> type;
+
+		public AbstractDescriptor(Class<?> type) {
+			this.type = type;
+		}
+		
+		public Class<?> getType() {
+			return type;		
+		}
+
+		public TypeDescriptor getElementType() {
+			if (isCollection()) {
+				Class<?> elementType = wildcard(getCollectionElementClass());
+				return new TypeDescriptor(nested(elementType, 0));
+			} else if (isArray()) {
+				Class<?> elementType = getType().getComponentType();
+				return new TypeDescriptor(nested(elementType, 0));				
+			} else {
+				return TypeDescriptor.NULL;
+			}
+		}
+		
+		public TypeDescriptor getMapKeyType() {
+			if (isMap()) {
+				Class<?> keyType = wildcard(getMapKeyClass());
+				return new TypeDescriptor(nested(keyType, 0));
+			} else {
+				return TypeDescriptor.NULL;
+			}
+		}
+		
+		public TypeDescriptor getMapValueType() {
+			if (isMap()) {
+				Class<?> valueType = wildcard(getMapValueClass());
+				return new TypeDescriptor(nested(valueType, 1));
+			} else {
+				return TypeDescriptor.NULL;
+			}
+		}
+
+		public abstract Annotation[] getAnnotations();
+
+		public AbstractDescriptor nested() {
+			if (isCollection()) {
+				return nested(wildcard(getCollectionElementClass()), 0);
+			} else if (isArray()) {
+				return nested(getType().getComponentType(), 0);
+			} else if (isMap()) {
+				return nested(wildcard(getMapValueClass()), 1);
+			} else {
+				throw new IllegalStateException("Not a collection, array, or map: cannot resolve nested value types");
+			}
+		}
+		
+		// subclassing hooks
+		
+		protected abstract Class<?> getCollectionElementClass();
+		
+		protected abstract Class<?> getMapKeyClass();
+		
+		protected abstract Class<?> getMapValueClass();
+		
+		protected abstract AbstractDescriptor nested(Class<?> type, int typeIndex);
+		
+		// internal helpers
+		
+		private boolean isCollection() {
+			return Collection.class.isAssignableFrom(getType());
+		}
+		
+		private boolean isArray() {
+			return getType().isArray();
+		}
+		
+		private boolean isMap() {
+			return Map.class.isAssignableFrom(getType());
+		}
+		
+		private Class<?> wildcard(Class<?> type) {
+			return type != null ? type : Object.class;
+		}
+		
+	}
+	
+	private static class FieldDescriptor extends AbstractDescriptor {
+
+		private final Field field;
+
+		private final int nestingLevel;
+
+		public FieldDescriptor(Field field) {
+			this(field.getType(), field, 1, 0);
+		}
+
+		@Override
+		public Annotation[] getAnnotations() {
+			return nullSafeAnnotations(field.getAnnotations());
+		}
+		
+		@Override
+		protected Class<?> getCollectionElementClass() {
+			return GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.nestingLevel);
+		}
+
+		@Override
+		protected Class<?> getMapKeyClass() {
+			return GenericCollectionTypeResolver.getMapKeyFieldType(this.field, this.nestingLevel);
+		}
+
+		@Override
+		protected Class<?> getMapValueClass() {
+			return GenericCollectionTypeResolver.getMapValueFieldType(this.field, this.nestingLevel);
+		}
+
+		@Override
+		protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
+			return new FieldDescriptor(type, this.field, this.nestingLevel + 1, typeIndex);
+		}
+
+		// internal
+		
+		private FieldDescriptor(Class<?> type, Field field, int nestingLevel, int typeIndex) {
+			super(type);
+			this.field = field;
+			this.nestingLevel = nestingLevel;
+		}
+
+	}
+	
+	private static class ParameterDescriptor extends AbstractDescriptor {
+
+		private final MethodParameter methodParameter;
+
+		public ParameterDescriptor(MethodParameter methodParameter) {
+			super(methodParameter.getParameterType());
+			if (methodParameter.getNestingLevel() != 1) {
+				throw new IllegalArgumentException("The MethodParameter argument must have its nestingLevel set to 1");
+			}			
+			this.methodParameter = methodParameter;
+		}
+
+		@Override
+		public Annotation[] getAnnotations() {
+			if (methodParameter.getParameterIndex() == -1) {				
+				return nullSafeAnnotations(methodParameter.getMethodAnnotations());
+			}
+			else {
+				return nullSafeAnnotations(methodParameter.getParameterAnnotations());
+			}
+		}
+		
+		@Override
+		protected Class<?> getCollectionElementClass() {
+			return GenericCollectionTypeResolver.getCollectionParameterType(methodParameter);
+		}
+
+		@Override
+		protected Class<?> getMapKeyClass() {
+			return GenericCollectionTypeResolver.getMapKeyParameterType(methodParameter);
+		}
+
+		@Override
+		protected Class<?> getMapValueClass() {
+			return GenericCollectionTypeResolver.getMapValueParameterType(methodParameter);
+		}
+
+		@Override
+		protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
+			MethodParameter methodParameter = new MethodParameter(this.methodParameter);
+			methodParameter.increaseNestingLevel();
+			methodParameter.setTypeIndexForCurrentLevel(typeIndex);
+			return new ParameterDescriptor(type, methodParameter);
+		}
+
+		// internal
+		
+		private ParameterDescriptor(Class<?> type, MethodParameter methodParameter) {
+			super(type);
+			this.methodParameter = methodParameter;
+		}
+
+	}
+
+	private static class BeanPropertyDescriptor extends AbstractDescriptor {
+
+		private final Class<?> beanClass;
+		
+		private final PropertyDescriptor property;
+
+		private final MethodParameter methodParameter;
+		
+		private final Annotation[] annotations;
+		
+		public BeanPropertyDescriptor(Class<?> beanClass, PropertyDescriptor property) {
+			super(property.getPropertyType());
+			this.beanClass = beanClass;
+			this.property = property;
+			this.methodParameter = resolveMethodParameter();
+			this.annotations = resolveAnnotations();
+		}
+
+		@Override
+		public Annotation[] getAnnotations() {
+			return annotations;
+		}
+		
+		@Override
+		protected Class<?> getCollectionElementClass() {
+			return GenericCollectionTypeResolver.getCollectionParameterType(methodParameter);
+		}
+
+		@Override
+		protected Class<?> getMapKeyClass() {
+			return GenericCollectionTypeResolver.getMapKeyParameterType(methodParameter);
+		}
+
+		@Override
+		protected Class<?> getMapValueClass() {
+			return GenericCollectionTypeResolver.getMapValueParameterType(methodParameter);
+		}
+
+		@Override
+		protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
+			MethodParameter methodParameter = new MethodParameter(this.methodParameter);
+			methodParameter.increaseNestingLevel();
+			methodParameter.setTypeIndexForCurrentLevel(typeIndex);			
+			return new BeanPropertyDescriptor(type, beanClass, property, methodParameter, annotations);
+		}
+		
+		// internal
+
+		private MethodParameter resolveMethodParameter() {
+			if (property.getReadMethod() != null) {
+				MethodParameter parameter = new MethodParameter(property.getReadMethod(), -1);
+				GenericTypeResolver.resolveParameterType(parameter, beanClass);
+				return parameter;
+			} else if (property.getWriteMethod() != null) {
+				MethodParameter parameter = new MethodParameter(property.getWriteMethod(), 0);
+				GenericTypeResolver.resolveParameterType(parameter, beanClass);
+				return parameter;				
+			} else {
+				throw new IllegalArgumentException("Property is neither readable or writeable");
+			}
+		}
+		
+		private Annotation[] resolveAnnotations() {
+			Map<Class<?>, Annotation> annMap = new LinkedHashMap<Class<?>, Annotation>();
+			Method readMethod = this.property.getReadMethod();
+			if (readMethod != null) {
+				for (Annotation ann : readMethod.getAnnotations()) {
+					annMap.put(ann.annotationType(), ann);
+				}
+			}
+			Method writeMethod = this.property.getWriteMethod();
+			if (writeMethod != null) {
+				for (Annotation ann : writeMethod.getAnnotations()) {
+					annMap.put(ann.annotationType(), ann);
+				}
+			}			
+			Field field = getField();
+			if (field != null) {
+				for (Annotation ann : field.getAnnotations()) {
+					annMap.put(ann.annotationType(), ann);
+				}
+			}
+			return annMap.values().toArray(new Annotation[annMap.size()]);			
+		}
+		
+		private Field getField() {
+			String name = this.property.getName();
+			if (!StringUtils.hasLength(name)) {
+				return null;
+			}
+			Class<?> declaringClass = declaringClass();
+			Field field = ReflectionUtils.findField(declaringClass, name);
+			if (field == null) {
+				// Same lenient fallback checking as in CachedIntrospectionResults...
+				field = ReflectionUtils.findField(declaringClass, name.substring(0, 1).toLowerCase() + name.substring(1));
+				if (field == null) {
+					field = ReflectionUtils.findField(declaringClass, name.substring(0, 1).toUpperCase() + name.substring(1));
+				}
+			}
+			return field;
+		}
+		
+		private Class<?> declaringClass() {
+			if (this.property.getReadMethod() != null) {
+				return this.property.getReadMethod().getDeclaringClass();
+			} else {
+				return this.property.getWriteMethod().getDeclaringClass();
+			}
+		}
+		
+		private BeanPropertyDescriptor(Class<?> type, Class<?> beanClass, java.beans.PropertyDescriptor propertyDescriptor, MethodParameter methodParameter, Annotation[] annotations) {
+			super(type);
+			this.beanClass = beanClass;
+			this.property = propertyDescriptor;
+			this.methodParameter = methodParameter;
+			this.annotations = annotations;
+		}
+		
+	}
+	
+	private static class ClassDescriptor extends AbstractDescriptor {
+
+		private ClassDescriptor(Class<?> type) {
+			super(type);
+		}
+
+		@Override
+		public Annotation[] getAnnotations() {
+			return EMPTY_ANNOTATION_ARRAY;
+		}
+
+		@Override
+		protected Class<?> getCollectionElementClass() {
+			return Object.class;
+		}
+
+		@Override
+		protected Class<?> getMapKeyClass() {
+			return Object.class;
+		}
+
+		@Override
+		protected Class<?> getMapValueClass() {
+			return Object.class;
+		}
+
+		@Override
+		protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
+			return new ClassDescriptor(type);
+		}
+		
+	}
 	
 	private static class CommonElement {
 		

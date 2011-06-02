@@ -92,7 +92,10 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		}
 	}
 
-
+	public Class<?> getBeanClass() {
+		return beanClass;
+	}
+	
 	@Override
 	public Method getReadMethod() {
 		return this.readMethod;

@@ -70,7 +70,7 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 		public List Members2 = new ArrayList();
 		public Map<String,Object> officers = new HashMap<String,Object>();
 		
-		public List reverse = new ArrayList<Map<String, Object>>();
+		public List<Map<String, Object>> reverse = new ArrayList<Map<String, Object>>();
 		
 		@SuppressWarnings("unchecked")
 		IEEE() {
