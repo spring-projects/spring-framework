@@ -23,7 +23,6 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -43,7 +42,11 @@ public class DatabasePopulatorTests {
 	private final JdbcTemplate jdbcTemplate = new JdbcTemplate(db);
 
 	private void assertTestDatabaseCreated() {
-		assertEquals("Keith", jdbcTemplate.queryForObject("select NAME from T_TEST", String.class));
+		assertTestDatabaseCreated("Keith");
+	}
+
+	private void assertTestDatabaseCreated(String name) {
+		assertEquals(name, jdbcTemplate.queryForObject("select NAME from T_TEST", String.class));
 	}
 
 	private void assertUsersDatabaseCreated(DataSource db) {
@@ -69,6 +72,34 @@ public class DatabasePopulatorTests {
 		}
 
 		assertTestDatabaseCreated();
+	}
+
+	@Test
+	public void testBuildWithNormalEscapedLiteral() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-escaped-literal.sql"));
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
+
+		assertTestDatabaseCreated("'Keith'");
+	}
+
+	@Test
+	public void testBuildWithMySQLEscapedLiteral() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-mysql-escaped-literal.sql"));
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
+
+		assertTestDatabaseCreated("\\$Keith\\$");
 	}
 
 	@Test

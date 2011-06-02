@@ -251,9 +251,21 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private void splitSqlScript(String script, char delim, List<String> statements) {
 		StringBuilder sb = new StringBuilder();
 		boolean inLiteral = false;
+		boolean inEscape = false;
 		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
 			char c = content[i];
+			if (inEscape) {
+				inEscape = false;
+				sb.append(c);
+				continue;				
+			}
+			// MySQL style escapes
+			if (c == '\\') {
+				inEscape = true;
+				sb.append(c);
+				continue;
+			}
 			if (c == '\'') {
 				inLiteral = !inLiteral;
 			}
