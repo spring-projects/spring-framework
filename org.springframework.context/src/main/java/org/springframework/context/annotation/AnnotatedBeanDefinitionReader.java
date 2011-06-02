@@ -24,9 +24,11 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.EnvironmentCapable;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.util.Assert;
 
 /**
  * Convenient adapter for programmatic registration of annotated bean classes.
@@ -35,6 +37,7 @@ import org.springframework.core.type.AnnotationMetadata;
  *
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.0
  * @see AnnotationConfigApplicationContext#register
  */
@@ -48,17 +51,22 @@ public class AnnotatedBeanDefinitionReader {
 
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
-
 	/**
 	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given bean factory.
 	 * @param registry the {@code BeanFactory} to load bean definitions into,
 	 * in the form of a {@code BeanDefinitionRegistry}
 	 */
 	public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry) {
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
+
+		// Inherit Environment if possible
+		if (this.registry instanceof EnvironmentCapable) {
+			this.environment = ((EnvironmentCapable) this.registry).getEnvironment();
+		}
+
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
-
 
 	/**
 	 * Return the BeanDefinitionRegistry that this scanner operates on.
@@ -82,8 +90,7 @@ public class AnnotatedBeanDefinitionReader {
 	 * <p>The default is a {@link AnnotationBeanNameGenerator}.
 	 */
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
-		this.beanNameGenerator = (beanNameGenerator != null ?
-				beanNameGenerator : new AnnotationBeanNameGenerator());
+		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new AnnotationBeanNameGenerator());
 	}
 
 	/**
@@ -91,10 +98,9 @@ public class AnnotatedBeanDefinitionReader {
 	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
 	 */
 	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
-		this.scopeMetadataResolver = (scopeMetadataResolver != null ?
-				scopeMetadataResolver : new AnnotationScopeMetadataResolver());
+		this.scopeMetadataResolver = (scopeMetadataResolver != null ? scopeMetadataResolver
+				: new AnnotationScopeMetadataResolver());
 	}
-
 
 	public void register(Class<?>... annotatedClasses) {
 		for (Class<?> annotatedClass : annotatedClasses) {
@@ -127,11 +133,9 @@ public class AnnotatedBeanDefinitionReader {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class.equals(qualifier)) {
 					abd.setPrimary(true);
-				}
-				else if (Lazy.class.equals(qualifier)) {
+				} else if (Lazy.class.equals(qualifier)) {
 					abd.setLazyInit(true);
-				}
-				else {
+				} else {
 					abd.addQualifier(new AutowireCandidateQualifier(qualifier));
 				}
 			}

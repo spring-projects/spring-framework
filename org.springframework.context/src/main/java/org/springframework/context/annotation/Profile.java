@@ -68,7 +68,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 public @interface Profile {
 
 	/**
-	 * The set profiles for which this component should be registered.
+	 * The set of profiles for which this component should be registered.
 	 */
 	String[] value();
 
