@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.ResourceTypeAwareContextLoader;
+import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -38,7 +39,7 @@ import org.springframework.util.StringUtils;
  * @see #generateDefaultLocations
  * @see #modifyLocations
  */
-public abstract class AbstractContextLoader implements ResourceTypeAwareContextLoader {
+public abstract class AbstractContextLoader implements SmartContextLoader, ResourceTypeAwareContextLoader {
 
 	/**
 	 * If the supplied <code>locations</code> are <code>null</code> or

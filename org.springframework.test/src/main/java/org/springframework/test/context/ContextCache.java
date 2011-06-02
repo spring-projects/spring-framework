@@ -46,8 +46,7 @@ class ContextCache {
 	/**
 	 * Map of context keys to Spring ApplicationContext instances.
 	 */
-	private final Map<String, ApplicationContext> contextKeyToContextMap =
-			new ConcurrentHashMap<String, ApplicationContext>();
+	private final Map<String, ApplicationContext> contextKeyToContextMap = new ConcurrentHashMap<String, ApplicationContext>();
 
 	private int hitCount;
 
@@ -134,7 +133,7 @@ class ContextCache {
 	}
 
 	/**
-	 * Explicitly add a ApplicationContext instance to the cache under the given key.
+	 * Explicitly add an ApplicationContext instance to the cache under the given key.
 	 * @param key the context key (never <code>null</code>)
 	 * @param context the ApplicationContext instance (never <code>null</code>)
 	 */
@@ -188,11 +187,11 @@ class ContextCache {
 	 * as the {@link #hitCount hit} and {@link #missCount miss} counts.
 	 */
 	public String toString() {
-		return new ToStringCreator(this)
-			.append("size", size())
-			.append("hitCount", getHitCount())
-			.append("missCount",getMissCount())
-			.toString();
+		return new ToStringCreator(this)//
+		.append("size", size())//
+		.append("hitCount", getHitCount())//
+		.append("missCount", getMissCount())//
+		.toString();
 	}
 
 }
