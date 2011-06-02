@@ -25,12 +25,13 @@ import org.springframework.scheduling.annotation.AbstractAsyncConfiguration;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
- * Enables AspectJ-based asynchronous method execution.
+ * {@code @Configuration} class that registers the Spring infrastructure beans necessary
+ * to enable AspectJ-based asynchronous method execution.
  *
  * @author Chris Beams
  * @since 3.1
  * @see EnableAsync
- * @see EnableAsync#mode
+ * @see AsyncConfigurationSelector
  */
 @Configuration
 public class AspectJAsyncConfiguration extends AbstractAsyncConfiguration {

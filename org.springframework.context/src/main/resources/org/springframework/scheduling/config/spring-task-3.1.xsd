@@ -20,8 +20,13 @@
 	<xsd:element name="annotation-driven">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Enables the detection of @Async and @Scheduled annotations on any Spring-managed object. If present,
-	a proxy will be generated for executing the annotated methods asynchronously.
+	Enables the detection of @Async and @Scheduled annotations on any Spring-managed
+	object. If present, a proxy will be generated for executing the annotated methods
+	asynchronously.
+
+	See Javadoc for the org.springframework.scheduling.annotation.EnableAsync and
+	org.springframework.scheduling.annotation.EnableScheduling annotations for information
+	on code-based alternatives to this XML element.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
@@ -77,6 +82,9 @@
 			<xsd:documentation><![CDATA[
 	Defines a ThreadPoolTaskExecutor instance with configurable pool size,
 	queue-capacity, keep-alive, and rejection-policy values.
+
+	See Javadoc for the org.springframework.scheduling.annotation.EnableAsync annotation
+	for information on code-based alternatives to this XML element.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>

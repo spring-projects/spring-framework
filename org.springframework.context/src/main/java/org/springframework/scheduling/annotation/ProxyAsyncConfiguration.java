@@ -27,12 +27,13 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
- * Enables proxy-based asynchronous method execution.
+ * {@code @Configuration} class that registers the Spring infrastructure beans necessary
+ * to enable proxy-based asynchronous method execution.
  *
  * @author Chris Beams
  * @since 3.1
  * @see EnableAsync
- * @see EnableAsync#mode
+ * @see AsyncConfigurationSelector
  */
 @Configuration
 public class ProxyAsyncConfiguration extends AbstractAsyncConfiguration {

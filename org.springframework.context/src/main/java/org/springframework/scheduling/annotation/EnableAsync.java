@@ -29,8 +29,9 @@ import org.springframework.context.config.AdviceMode;
 import org.springframework.core.Ordered;
 
 /**
- * Enables Spring's asynchronous method execution capability. To be used
- * on @{@link Configuration} classes as follows:
+ * Enables Spring's asynchronous method execution capability, similar to functionality
+ * found in Spring's {@code <task:*>} XML namespace. To be used on @{@link Configuration}
+ * classes as follows:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -42,12 +43,17 @@ import org.springframework.core.Ordered;
  *     }
  * }</pre>
  *
- * <p>The various attributes of the annotation control how advice
- * is applied ({@link #mode()}), and if the mode is {@link AdviceMode#PROXY}
- * (the default), the other attributes control the behavior of the proxying.
+ * where {@code MyAsyncBean} is a user-defined type with one or methods annotated
+ * with @{@link Async} (or any custom annotation specified by the {@link #annotation()}
+ * attribute).
  *
- * <p>Note that if the {@linkplain #mode} is set to {@link AdviceMode#ASPECTJ}
- * the {@code org.springframework.aspects} module must be present on the classpath.
+ * <p>The {@link #mode()} attribute controls how advice is applied; if the mode is
+ * {@link AdviceMode#PROXY} (the default), then the other attributes control the behavior
+ * of the proxying.
+ *
+ * <p>Note that if the {@linkplain #mode} is set to {@link AdviceMode#ASPECTJ}, then
+ * the {@link #proxyTargetClass()} attribute is obsolete. Note also that in this case the
+ * {@code spring-aspects} module JAR must be present on the classpath.
  *
  * <p>By default, a {@link org.springframework.core.task.SimpleAsyncTaskExecutor
  * SimpleAsyncTaskExecutor} will be used to process async method invocations. To
@@ -68,11 +74,29 @@ import org.springframework.core.Ordered;
  *     &#064;Override
  *     public Executor getAsyncExecutor() {
  *         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
- *         executor.setThreadNamePrefix("Custom-");
+ *         executor.setCorePoolSize(7);
+ *         executor.setMaxPoolSize(42);
+ *         executor.setQueueCapacity(11);
+ *         executor.setThreadNamePrefix("MyExecutor-");
  *         executor.initialize();
  *         return executor;
  *     }
  * }</pre>
+ *
+ * <p>For reference, the example above can be compared to the following Spring XML
+ * configuration:
+ * <pre class="code">
+ * {@code
+ * <beans>
+ *     <task:annotation-config executor="myExecutor"/>
+ *     <task:executor id="myExecutor" pool-size="7-42" queue-capacity="11"/>
+ *     <bean id="asyncBean" class="com.foo.MyAsyncBean"/>
+ * </beans>
+ * }</pre>
+ * the examples are equivalent save the setting of the <em>thread name prefix</em> of the
+ * Executor; this is because the the {@code task:} namespace {@code executor} element does
+ * not expose such an attribute. This demonstrates how the code-based approach allows for
+ * maximum configurability through direct access to actual componentry.<p>
  *
  * @author Chris Beams
  * @since 3.1
@@ -97,10 +121,11 @@ public @interface EnableAsync {
 	Class<? extends Annotation> annotation() default Annotation.class;
 
 	/**
-	 * Indicate whether class-based (CGLIB) proxies are to be created as opposed
-	 * to standard Java interface-based proxies. The default is {@code false}
+	 * Indicate whether subclass-based (CGLIB) proxies are to be created as opposed
+	 * to standard Java interface-based proxies. The default is {@code false}. <strong>
+	 * Applicable only if {@link #mode()} is set to {@link AdviceMode#PROXY}</strong>.
 	 *
-	 * <p>Note: Class-based proxies require the async {@link #annotation()}
+	 * <p>Note that subclass-based proxies require the async {@link #annotation()}
 	 * to be defined on the concrete class. Annotations in interfaces will
 	 * not work in that case (they will rather only work with interface-based proxies)!
 	 */
@@ -115,7 +140,7 @@ public @interface EnableAsync {
 	/**
 	 * Indicate the order in which the
 	 * {@link org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor}
-	 * should be applied. Defaults to Order.LOWEST_PRIORITY in order to run
+	 * should be applied. The default is {@link Ordered#LOWEST_PRECEDENCE} in order to run
 	 * after all other post-processors, so that it can add an advisor to
 	 * existing proxies rather than double-proxy.
 	 */

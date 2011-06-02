@@ -19,11 +19,11 @@ package org.springframework.scheduling.annotation;
 import java.util.concurrent.Executor;
 
 /**
- * Interface to be implemented by @{@link Configuration} classes
- * annotated with @{@link EnableAsync} that wish to customize the
+ * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
+ * Configuration} classes annotated with @{@link EnableAsync} that wish to customize the
  * {@link Executor} instance used when processing async method invocations.
  *
- * <p>See {@link EnableAsync} for usage examples.
+ * <p>See @{@link EnableAsync} for usage examples.
  *
  * @author Chris Beams
  * @since 3.1
