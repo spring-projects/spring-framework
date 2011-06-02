@@ -140,6 +140,10 @@
 	Note: This tag does not activate processing of Spring's @Transactional or EJB3's
 	@TransactionAttribute annotation. Consider the use of the <tx:annotation-driven>
 	tag for that purpose.
+
+	See Javadoc for org.springframework.context.annotation.AnnotationConfigApplicationContext
+	for information on code-based alternatives to bootstrapping annotation-driven support
+	from XML.
 			]]></xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>
@@ -163,6 +167,9 @@
 	being registered; Spring's PropertyPlaceholderConfigurer will apply to those bean
 	definitions just like to regular bean definitions, but it won't apply to the component
 	scan settings themselves.
+
+	See Javadoc for org.springframework.context.annotation.ComponentScan for information
+	on code-based alternatives to bootstrapping component-scanning from XML.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
