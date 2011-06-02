@@ -27,8 +27,8 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class providing common structure for enabling Spring's asynchronous
- * method execution capability.
+ * Abstract base {@code Configuration} class providing common structure for enabling
+ * Spring's asynchronous method execution capability.
  *
  * @author Chris Beams
  * @since 3.1

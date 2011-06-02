@@ -25,7 +25,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
 /**
- * Select which implementation of {@link AbstractAsyncConfiguration}
+ * Selects which implementation of {@link AbstractAsyncConfiguration}
  * should be used based on the value of {@link EnableAsync#mode} on the
  * importing @{@link Configuration} class.
  *
