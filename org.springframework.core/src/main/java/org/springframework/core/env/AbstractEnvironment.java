@@ -29,7 +29,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -356,11 +356,11 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return this.propertyResolver.resolveRequiredPlaceholders(text);
 	}
 
-	public void setConversionService(ConversionService conversionService) {
+	public void setConversionService(ConfigurableConversionService conversionService) {
 		this.propertyResolver.setConversionService(conversionService);
 	}
 
-	public ConversionService getConversionService() {
+	public ConfigurableConversionService getConversionService() {
 		return this.propertyResolver.getConversionService();
 	}
 

@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
@@ -41,7 +41,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	protected ConversionService conversionService = new DefaultConversionService();
+	protected ConfigurableConversionService conversionService = new DefaultConversionService();
 
 	private PropertyPlaceholderHelper nonStrictHelper;
 	private PropertyPlaceholderHelper strictHelper;
@@ -52,11 +52,11 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private final Set<String> requiredProperties = new LinkedHashSet<String>();
 
-	public ConversionService getConversionService() {
+	public ConfigurableConversionService getConversionService() {
 		return this.conversionService;
 	}
 
-	public void setConversionService(ConversionService conversionService) {
+	public void setConversionService(ConfigurableConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
