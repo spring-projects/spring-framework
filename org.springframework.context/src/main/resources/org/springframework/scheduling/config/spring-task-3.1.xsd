@@ -55,7 +55,9 @@
 	<xsd:element name="scheduler">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Defines a ThreadPoolTaskScheduler instance with configurable pool size.
+	Defines a ThreadPoolTaskScheduler instance with configurable pool size. See Javadoc
+	for the org.springframework.scheduling.annotation.EnableScheduling annotation for
+	information on a code-based alternative to this XML element.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>

@@ -122,25 +122,42 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * public class AppConfig implements SchedulingConfigurer {
  *     &#064;Override
  *     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
- *         taskRegistrar.setScheduler(taskExecutor());
+ *         taskRegistrar.setScheduler(taskScheduler());
  *         taskRegistrar.addTriggerTask(
  *             new Runnable() {
- *                 task().work();
+ *                 myTask().work();
  *             },
  *             new CustomTrigger()
  *         );
  *     }
  *
  *     &#064;Bean
- *     public Executor taskExecutor() {
- *         return Executors.newScheduledThreadPool(100);
+ *     public Executor taskScheduler() {
+ *         return Executors.newScheduledThreadPool(42);
  *     }
  *
  *     &#064;Bean
- *     public MyTask task() {
+ *     public MyTask myTask() {
  *         return new MyTask();
  *     }
  * }</pre>
+ *
+ * <p>For reference, the example above can be compared to the following Spring XML
+ * configuration:
+ * <pre class="code">
+ * {@code
+ * <beans>
+ *     <task:annotation-config scheduler="taskScheduler"/>
+ *     <task:scheduler id="taskScheduler" pool-size="42"/>
+ *     <task:scheduled ref="myTask" method="work" fixed-rate="1000"/>
+ *     <bean id="myTask" class="com.foo.MyAsyncBean"/>
+ * </beans>
+ * }</pre>
+ * the examples are equivalent save that in XML a <em>fixed-rate</em> period is used
+ * instead of a custom <em>{@code Trigger}</em> implementation; this is because the
+ * {@code task:} namespace {@code scheduled} cannot easily expose such support. This is
+ * but one demonstration how the code-based approach allows for maximum configurability
+ * through direct access to actual componentry.<p>
  *
  * @author Chris Beams
  * @since 3.1

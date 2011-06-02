@@ -23,12 +23,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 
 /**
- * Configures a {@link ScheduledAnnotationBeanPostProcessor} bean capable of
- * processing Spring's @{@link Scheduled} annotation.
+ * {@code @Configuration} class that registers a {@link
+ * ScheduledAnnotationBeanPostProcessor} bean capable of processing Spring's @{@link
+ * Scheduled} annotation.
  *
- * <p>This {@code @Configuration} class is automatically imported when using
- * the @{@link EnableScheduling} annotation.  See {@code @EnableScheduling}
- * Javadoc for complete usage details.
+ * <p>This configuration class is automatically imported when using the @{@link
+ * EnableScheduling} annotation.  See {@code @EnableScheduling} Javadoc for complete usage
+ * details.
  *
  * @author Chris Beams
  * @since 3.1
