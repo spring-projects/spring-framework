@@ -36,8 +36,16 @@ import org.springframework.util.Assert;
  * Helper bean for registering tasks with a {@link TaskScheduler},
  * typically using cron expressions.
  *
+ * <p>As of Spring 3.1, {@code ScheduledTaskRegistrar} has a more prominent user-facing
+ * role when used in conjunction with the @{@link
+ * org.springframework.scheduling.annotation.EnableAsync EnableAsync} annotation and its
+ * {@link org.springframework.scheduling.annotation.SchedulingConfigurer
+ * SchedulingConfigurer} callback interface.
+ *
  * @author Juergen Hoeller
  * @since 3.0
+ * @see org.springframework.scheduling.annotation.EnableAsync
+ * @see org.springframework.scheduling.annotation.SchedulingConfigurer
  */
 public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean {
 
@@ -53,7 +61,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 
 	private Map<Runnable, Long> fixedDelayTasks;
 
-	private final Set<ScheduledFuture> scheduledFutures = new LinkedHashSet<ScheduledFuture>();
+	private final Set<ScheduledFuture<?>> scheduledFutures = new LinkedHashSet<ScheduledFuture<?>>();
 
 
 	/**
@@ -194,7 +202,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 
 
 	public void destroy() {
-		for (ScheduledFuture future : this.scheduledFutures) {
+		for (ScheduledFuture<?> future : this.scheduledFutures) {
 			future.cancel(true);
 		}
 		if (this.localExecutor != null) {
