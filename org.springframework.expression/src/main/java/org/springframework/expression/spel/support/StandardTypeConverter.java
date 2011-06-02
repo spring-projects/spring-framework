@@ -66,12 +66,10 @@ public class StandardTypeConverter implements TypeConverter {
 			return this.conversionService.convert(value, sourceType, targetType);
 		}
 		catch (ConverterNotFoundException cenfe) {
-			throw new SpelEvaluationException(cenfe, SpelMessage.TYPE_CONVERSION_ERROR,
-					sourceType.toString(), targetType.asString());
+			throw new SpelEvaluationException(cenfe, SpelMessage.TYPE_CONVERSION_ERROR, sourceType.toString(), targetType.toString());
 		}
 		catch (ConversionException ce) {
-			throw new SpelEvaluationException(ce, SpelMessage.TYPE_CONVERSION_ERROR,
-					sourceType.toString(), targetType.asString());
+			throw new SpelEvaluationException(ce, SpelMessage.TYPE_CONVERSION_ERROR, sourceType.toString(), targetType.toString());
 		}
 	}
 

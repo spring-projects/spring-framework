@@ -90,10 +90,13 @@ public class Indexer extends SpelNodeImpl {
 
 		// Indexing into a Map
 		if (targetObject instanceof Map) {
-			Object possiblyConvertedKey = index;
-			possiblyConvertedKey = state.convertValue(index, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
-			Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
-			return new TypedValue(o, targetObjectTypeDescriptor.getMapValueTypeDescriptor());
+			if (targetObjectTypeDescriptor.isMap()) {
+				Object possiblyConvertedKey = state.convertValue(index, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
+				Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
+				return new TypedValue(o, targetObjectTypeDescriptor.getMapValueTypeDescriptor());
+			} else {
+				return new TypedValue(((Map<?, ?>) targetObject).get(index));				
+			}
 		}
 		
 		if (targetObject == null) {
@@ -158,11 +161,11 @@ public class Indexer extends SpelNodeImpl {
 					}
 				}
 			} catch (AccessException e) {
-				throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.asString());
+				throw new SpelEvaluationException(getStartPosition(), e, SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.toString());
 			}
 		}
 			
-		throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.asString());
+		throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.toString());
 	}
 	
 	@Override
@@ -212,7 +215,7 @@ public class Indexer extends SpelNodeImpl {
 				return;
 			}
 			else {
-				throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.asString());
+				throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.toString());
 			}
 		}
 		
@@ -248,7 +251,7 @@ public class Indexer extends SpelNodeImpl {
 
 		}
 		
-		throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.asString());
+		throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.toString());
 	}
 	
 	/**

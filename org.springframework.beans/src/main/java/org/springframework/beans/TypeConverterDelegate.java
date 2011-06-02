@@ -16,7 +16,6 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -27,13 +26,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.CollectionFactory;
-import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.PropertyTypeDescriptor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -144,9 +140,8 @@ class TypeConverterDelegate {
 
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
-			if (requiredType != null && Collection.class.isAssignableFrom(requiredType) &&
-					convertedValue instanceof String && typeDescriptor.getMethodParameter() != null) {
-				Class elemType = GenericCollectionTypeResolver.getCollectionParameterType(typeDescriptor.getMethodParameter());
+			if (requiredType != null && Collection.class.isAssignableFrom(requiredType) && convertedValue instanceof String) {
+				Class elemType = typeDescriptor.getElementType();
 				if (elemType != null && Enum.class.isAssignableFrom(elemType)) {
 					convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
 				}
@@ -290,10 +285,10 @@ class TypeConverterDelegate {
 	 */
 	protected PropertyEditor findDefaultEditor(Class requiredType, TypeDescriptor typeDescriptor) {
 		PropertyEditor editor = null;
-		if (typeDescriptor instanceof PropertyTypeDescriptor) {
-			PropertyDescriptor pd = ((PropertyTypeDescriptor) typeDescriptor).getPropertyDescriptor();
-			editor = pd.createPropertyEditor(this.targetObject);
-		}
+		//if (typeDescriptor instanceof PropertyTypeDescriptor) {
+			//PropertyDescriptor pd = ((PropertyTypeDescriptor) typeDescriptor).getPropertyDescriptor();
+			//editor = pd.createPropertyEditor(this.targetObject);
+		//}
 		if (editor == null && requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
 			editor = this.propertyEditorRegistry.getDefaultEditor(requiredType);
@@ -464,12 +459,8 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		MethodParameter methodParam = typeDescriptor.getMethodParameter();
-		Class elementType = null;
-		if (methodParam != null) {
-			elementType = GenericCollectionTypeResolver.getCollectionParameterType(methodParam);
-		}
-		if (elementType == null && originalAllowed &&
+		Class elementType = typeDescriptor.getElementType();
+		if (elementType == Object.class && originalAllowed &&
 				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
 			return original;
 		}
@@ -514,14 +505,8 @@ class TypeConverterDelegate {
 		for (; it.hasNext(); i++) {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
-			if (methodParam != null) {
-				methodParam.increaseNestingLevel();
-			}
 			Object convertedElement = convertIfNecessary(
-					indexedPropertyName, null, element, elementType, typeDescriptor);
-			if (methodParam != null) {
-				methodParam.decreaseNestingLevel();
-			}
+					indexedPropertyName, null, element, elementType, typeDescriptor.getElementTypeDescriptor());
 			try {
 				convertedCopy.add(convertedElement);
 			}
@@ -546,14 +531,9 @@ class TypeConverterDelegate {
 			return original;
 		}
 
-		Class keyType = null;
-		Class valueType = null;
-		MethodParameter methodParam = typeDescriptor.getMethodParameter();
-		if (methodParam != null) {
-			keyType = GenericCollectionTypeResolver.getMapKeyParameterType(methodParam);
-			valueType = GenericCollectionTypeResolver.getMapValueParameterType(methodParam);
-		}
-		if (keyType == null && valueType == null && originalAllowed &&
+		Class keyType = typeDescriptor.getMapKeyType();
+		Class valueType = typeDescriptor.getMapValueType();
+		if (keyType == Object.class && valueType == Object.class && originalAllowed &&
 				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
 			return original;
 		}
@@ -599,18 +579,8 @@ class TypeConverterDelegate {
 			Object key = entry.getKey();
 			Object value = entry.getValue();
 			String keyedPropertyName = buildKeyedPropertyName(propertyName, key);
-			if (methodParam != null) {
-				methodParam.increaseNestingLevel();
-				methodParam.setTypeIndexForCurrentLevel(0);
-			}
-			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType, typeDescriptor);
-			if (methodParam != null) {
-				methodParam.setTypeIndexForCurrentLevel(1);
-			}
-			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType, typeDescriptor);
-			if (methodParam != null) {
-				methodParam.decreaseNestingLevel();
-			}
+			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType, typeDescriptor.getMapKeyTypeDescriptor());
+			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType, typeDescriptor.getMapValueTypeDescriptor());
 			try {
 				convertedCopy.put(convertedKey, convertedValue);
 			}

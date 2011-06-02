@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.PropertyTypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -79,8 +78,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			try {
 				// The readerCache will only contain gettable properties (let's not worry about setters for now)
 				PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name, method, null);
-				TypeDescriptor typeDescriptor =
-						new PropertyTypeDescriptor(new MethodParameter(method, -1), propertyDescriptor);
+				TypeDescriptor typeDescriptor = new TypeDescriptor(type, propertyDescriptor);
 				this.readerCache.put(cacheKey, new InvokerPair(method, typeDescriptor));
 				this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 				return true;
@@ -127,8 +125,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					try {
 						// The readerCache will only contain gettable properties (let's not worry about setters for now)
 						PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name, method, null);
-						TypeDescriptor typeDescriptor =
-								new PropertyTypeDescriptor(new MethodParameter(method, -1), propertyDescriptor);
+						TypeDescriptor typeDescriptor = new TypeDescriptor(type, propertyDescriptor);
 						invoker = new InvokerPair(method, typeDescriptor);
 						this.readerCache.put(cacheKey, invoker);
 					}
@@ -191,8 +188,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			catch (IntrospectionException ex) {
 				throw new AccessException("Unable to access property '" + name + "' through setter "+method, ex);
 			}
-			MethodParameter mp = new MethodParameter(method,0);
-			TypeDescriptor typeDescriptor = new PropertyTypeDescriptor(mp, propertyDescriptor);
+			TypeDescriptor typeDescriptor = new TypeDescriptor(type, propertyDescriptor);
 			this.writerCache.put(cacheKey, method);
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;

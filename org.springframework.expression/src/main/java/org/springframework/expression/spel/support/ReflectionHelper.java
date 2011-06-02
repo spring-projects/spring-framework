@@ -29,6 +29,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.MethodInvoker;
 
 /**
  * Utility methods used by the reflection resolver code to discover the appropriate
@@ -104,7 +105,7 @@ public class ReflectionHelper {
 	}
 	
 	/**
-	 * Based on {@link MethodInvoker.getTypeDifferenceWeight} but operates on TypeDescriptors.
+	 * Based on {@link MethodInvoker#getTypeDifferenceWeight(Class[], Object[])} but operates on TypeDescriptors.
 	 */
 	public static int getTypeDifferenceWeight(List<TypeDescriptor> paramTypes, List<TypeDescriptor> argTypes) {
 		int result = 0;
@@ -279,7 +280,7 @@ public class ReflectionHelper {
 			TypeDescriptor targetType;
 			if (varargsPosition != null && argPosition >= varargsPosition) {
 				MethodParameter methodParam = MethodParameter.forMethodOrConstructor(methodOrCtor, varargsPosition);
-				targetType = TypeDescriptor.forNestedType(methodParam);
+				targetType = TypeDescriptor.nested(methodParam, 1);
 			}
 			else {
 				targetType = new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor, argPosition));
@@ -311,7 +312,7 @@ public class ReflectionHelper {
 			TypeDescriptor targetType;
 			if (varargsPosition != null && argPosition >= varargsPosition) {
 				MethodParameter methodParam = new MethodParameter(method, varargsPosition);
-				targetType = TypeDescriptor.forNestedType(methodParam);
+				targetType = TypeDescriptor.nested(methodParam, 1);
 			}
 			else {
 				targetType = new TypeDescriptor(new MethodParameter(method, argPosition));
