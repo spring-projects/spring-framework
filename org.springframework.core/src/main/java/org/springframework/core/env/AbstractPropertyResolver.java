@@ -104,14 +104,26 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		return value;
 	}
 
+	/**
+	 * {@inheritDoc} The default is "${".
+	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_PREFIX
+	 */
 	public void setPlaceholderPrefix(String placeholderPrefix) {
 		this.placeholderPrefix = placeholderPrefix;
 	}
 
+	/**
+	 * {@inheritDoc} The default is "}".
+	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_SUFFIX
+	 */
 	public void setPlaceholderSuffix(String placeholderSuffix) {
 		this.placeholderSuffix = placeholderSuffix;
 	}
 
+	/**
+	 * {@inheritDoc} The default is ":".
+	 * @see org.springframework.util.SystemPropertyUtils#VALUE_SEPARATOR
+	 */
 	public void setValueSeparator(String valueSeparator) {
 		this.valueSeparator = valueSeparator;
 	}
