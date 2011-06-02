@@ -26,6 +26,114 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.config.AdviceMode;
 import org.springframework.core.Ordered;
 
+/**
+ * Enables Spring's annotation-driven transaction management capability, similar to
+ * the support found in Spring's {@code <tx:*>} XML namespace. To be used
+ * on @{@link org.springframework.context.annotation.Configuration Configuration} classes
+ * as follows:
+ * <pre class="code">
+ * &#064;Configuration
+ * &#064;EnableTransactionManagement
+ * public class AppConfig {
+ *     &#064;Bean
+ *     public FooRepository fooRepository() {
+ *         // configure and return a class having &#064;Transactional methods
+ *         return new JdbcFooRepository(dataSource());
+ *     }
+ *
+ *     &#064;Bean
+ *     public DataSource dataSource() {
+ *         // configure and return the necessary JDBC DataSource
+ *     }
+ *
+ *     &#064;Bean
+ *     public PlatformTransactionManager txManager() {
+ *         return new DataSourceTransactionManager(dataSource());
+ *     }
+ * }</pre>
+ *
+ * <p>For reference, the example above can be compared to the following Spring XML
+ * configuration:
+ * <pre class="code">
+ * {@code
+ * <beans>
+ *     <tx:annotation-driven/>
+ *     <bean id="fooRepository" class="com.foo.JdbcFooRepository">
+ *         <constructor-arg ref="dataSource"/>
+ *     </bean>
+ *     <bean id="dataSource" class="com.vendor.VendorDataSource"/>
+ *     <bean id="transactionManager" class="org.sfwk...DataSourceTransactionManager">
+ *         <constructor-arg ref="dataSource"/>
+ *     </bean>
+ * </beans>
+ * }</pre>
+ * In both of the scenarios above, {@code @EnableTransactionManagement} and {@code
+ * <tx:annotation-driven/>} are responsible for registering the necessary Spring
+ * components that power annotation-driven transaction management, such as the
+ * TransactionInterceptor and the proxy- or AspectJ-based advice that weave the
+ * interceptor into the call stack when {@code JdbcFooRepository}'s {@code @Transacational}
+ * methods are invoked.
+ *
+ * <p>A minor difference between the two examples lies in the naming of the {@code
+ * PlatformTransactionManager} bean: In the {@code @Bean} case, the name is
+ * <em>"txManager"</em> (per the name of the method); in the XML case, the name is
+ * <em>"transactionManager"</em>. The {@code <tx:annotation-driven/>} is hard-wired to
+ * look for a bean named "transactionManager" by default, however
+ * {@code @EnableTransactionManagement} is more flexible; it will fall back to a by-type
+ * lookup for any {@code PlatformTransactionManager} bean in the container. Thus the name
+ * can be "txManager", "transactionManager", or "tm": it simply does not matter.
+ *
+ * <p>For those that wish to establish a more direct relationship between
+ * {@code @EnableTransactionManagement} and the exact transaction manager bean to be used,
+ * the {@link TransactionManagementConfigurer} callback interface may be implemented -
+ * notice the {@code implements} clause and the {@code @Override}-annotated method below:
+ * <pre class="code">
+ * &#064;Configuration
+ * &#064;EnableTransactionManagement
+ * public class AppConfig implements TransactionManagementConfigurer {
+ *     &#064;Bean
+ *     public FooRepository fooRepository() {
+ *         // configure and return a class having &#064;Transactional methods
+ *         return new JdbcFooRepository(dataSource());
+ *     }
+ *
+ *     &#064;Bean
+ *     public DataSource dataSource() {
+ *         // configure and return the necessary JDBC DataSource
+ *     }
+ *
+ *     &#064;Bean
+ *     public PlatformTransactionManager txManager() {
+ *         return new DataSourceTransactionManager(dataSource());
+ *     }
+ *
+ *     &#064;Override
+ *     public PlatformTransactionManager annotationDrivenTransactionManager() {
+ *         return txManager();
+ *     }
+ * }</pre>
+ * This approach may be desirable simply because it is more explicit, or it may be
+ * necessary in order to distinguish between two {@code PlatformTransactionManager} beans
+ * present in the same container.  As the name suggests, the
+ * {@code annotationDrivenTransactionManager()} will be the one used for processing
+ * {@code @Transactional} methods. See {@link TransactionManagementConfigurer} Javadoc
+ * for further details.
+ *
+ * <p>The {@link #mode()} attribute controls how advice is applied; if the mode is
+ * {@link AdviceMode#PROXY} (the default), then the other attributes control the behavior
+ * of the proxying.
+ *
+ * <p>Note that if the {@linkplain #mode} is set to {@link AdviceMode#ASPECTJ}, then
+ * the {@link #proxyTargetClass()} attribute is obsolete. Note also that in this case the
+ * {@code spring-aspects} module JAR must be present on the classpath.<p>
+ *
+ * @author Chris Beams
+ * @since 3.1
+ * @see TransactionManagementConfigurer
+ * @see TransactionManagementConfigurationSelector
+ * @see ProxyTransactionManagementConfiguration
+ * @see org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -33,11 +141,12 @@ import org.springframework.core.Ordered;
 public @interface EnableTransactionManagement {
 
 	/**
-	 * Indicate whether class-based (CGLIB) proxies are to be created as opposed
-	 * to standard Java interface-based proxies. The default is {@code false}.
+	 * Indicate whether subclass-based (CGLIB) proxies are to be created as opposed
+	 * to standard Java interface-based proxies. The default is {@code false}. <strong>
+	 * Applicable only if {@link #mode()} is set to {@link AdviceMode#PROXY}</strong>.
 	 *
-	 * <p>Note: Class-based proxies require the {@link Transactional @Transactional}
-	 * annotation to be defined on the concrete class. Annotations in interfaces will
+	 * <p>Note that subclass-based proxies require the {@link Transactional @Transactional}
+	 * to be defined on the concrete class. Annotations in interfaces will
 	 * not work in that case (they will rather only work with interface-based proxies)!
 	 */
 	boolean proxyTargetClass() default false;
@@ -52,7 +161,7 @@ public @interface EnableTransactionManagement {
 	/**
 	 * Indicate the ordering of the execution of the transaction advisor
 	 * when multiple advices are applied at a specific joinpoint.
-	 * The default is lowest priority.
+	 * The default is {@link Ordered#LOWEST_PRECEDENCE}.
 	 */
 	int order() default Ordered.LOWEST_PRECEDENCE;
 }

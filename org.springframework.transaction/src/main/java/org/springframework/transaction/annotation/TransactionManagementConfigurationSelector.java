@@ -23,8 +23,26 @@ import org.springframework.context.config.AdviceMode;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
+/**
+ * Selects which implementation of {@link AbstractTransactionManagementConfiguration}
+ * should be used based on the value of {@link EnableTransactionManagement#mode} on the
+ * importing @{@link Configuration} class.
+ *
+ * @author Chris Beams
+ * @since 3.1
+ * @see EnableTransactionManagement
+ * @see AbstractTransactionManagementConfiguration
+ * @see ProxyTransactionManagementConfiguration
+ * @see org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration
+ */
 public class TransactionManagementConfigurationSelector implements ImportSelector {
 
+	/**
+	 * Import {@link ProxyTransactionManagementConfiguration} if {@link
+	 * EnableTransactionManagement#mode()} equals {@code PROXY}, otherwise import {@link
+	 * org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration
+	 * AspectJTransactionManagementConfiguration}.
+	 */
 	public String[] selectImports(AnnotationMetadata importingClassMetadata) {
 		Map<String, Object> enableTx =
 			importingClassMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName());

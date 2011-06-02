@@ -21,8 +21,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.transaction.annotation.AbstractTransactionManagementConfiguration;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.TransactionManagementConfigurationSelector;
 import org.springframework.transaction.config.TransactionManagementConfigUtils;
 
+/**
+ * {@code @Configuration} class that registers the Spring infrastructure beans necessary
+ * to enable AspectJ-based annotation-driven transaction management.
+ *
+ * @author Chris Beams
+ * @since 3.1
+ * @see EnableTransactionManagement
+ * @see TransactionManagementConfigurationSelector
+ */
 @Configuration
 public class AspectJTransactionManagementConfiguration extends AbstractTransactionManagementConfiguration {
 
