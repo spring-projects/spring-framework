@@ -16,15 +16,30 @@
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -34,17 +49,18 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.validation.DataBinder;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
-
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link RequestResponseBodyMethodProcessor} and mock {@link HttpMessageConverter}.
@@ -60,9 +76,9 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	private MethodParameter paramRequestBodyString;
 	private MethodParameter paramInt;
+	private MethodParameter paramValidBean;
 	private MethodParameter returnTypeString;
 	private MethodParameter returnTypeInt;
-
 	private MethodParameter returnTypeStringProduces;
 
 	private ModelAndViewContainer mavContainer;
@@ -87,10 +103,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		paramRequestBodyString = new MethodParameter(handle, 0);
 		paramInt = new MethodParameter(handle, 1);
 		returnTypeString = new MethodParameter(handle, -1);
-
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle2"), -1);
-
 		returnTypeStringProduces = new MethodParameter(getClass().getMethod("handle3"), -1);
+		paramValidBean = new MethodParameter(getClass().getMethod("handle4", ValidBean.class), 0);
 
 		mavContainer = new ModelAndViewContainer();
 		
@@ -119,7 +134,6 @@ public class RequestResponseBodyMethodProcessorTests {
 		String body = "Foo";
 		expect(messageConverter.canRead(String.class, contentType)).andReturn(true);
 		expect(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).andReturn(body);
-
 		replay(messageConverter);
 
 		Object result = processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
@@ -129,12 +143,50 @@ public class RequestResponseBodyMethodProcessorTests {
 		verify(messageConverter);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Test
+	public void resolveArgumentNotValid() throws Exception {
+		MediaType contentType = MediaType.TEXT_PLAIN;
+		servletRequest.addHeader("Content-Type", contentType.toString());
+
+		HttpMessageConverter<ValidBean> beanConverter = createMock(HttpMessageConverter.class);
+		expect(beanConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		expect(beanConverter.canRead(ValidBean.class, contentType)).andReturn(true);
+		expect(beanConverter.read(eq(ValidBean.class), isA(HttpInputMessage.class))).andReturn(new ValidBean(null));
+		replay(beanConverter);
+
+		processor = new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(beanConverter));
+		try {
+			processor.resolveArgument(paramValidBean, mavContainer, webRequest, new ValidatingBinderFactory());
+			fail("Expected exception");
+		} catch (RequestBodyNotValidException e) {
+			assertEquals("validBean", e.getErrors().getObjectName());
+			assertEquals(1, e.getErrors().getErrorCount());
+			assertNotNull(e.getErrors().getFieldError("name"));
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void resolveArgumentValid() throws Exception {
+		MediaType contentType = MediaType.TEXT_PLAIN;
+		servletRequest.addHeader("Content-Type", contentType.toString());
+
+		HttpMessageConverter<ValidBean> beanConverter = createMock(HttpMessageConverter.class);
+		expect(beanConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		expect(beanConverter.canRead(ValidBean.class, contentType)).andReturn(true);
+		expect(beanConverter.read(eq(ValidBean.class), isA(HttpInputMessage.class))).andReturn(new ValidBean("name"));
+		replay(beanConverter);
+
+		processor = new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(beanConverter));
+		processor.resolveArgument(paramValidBean, mavContainer, webRequest, new ValidatingBinderFactory());
+	}
+	
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNotReadable() throws Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(contentType));
 		expect(messageConverter.canRead(String.class, contentType)).andReturn(false);
 		replay(messageConverter);
 
@@ -242,4 +294,32 @@ public class RequestResponseBodyMethodProcessorTests {
 		return null;
 	}
 
+	public void handle4(@Valid @RequestBody ValidBean b) {
+	}
+	
+	private final class ValidatingBinderFactory implements WebDataBinderFactory {
+		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
+			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+			validator.afterPropertiesSet();
+			WebDataBinder dataBinder = new WebDataBinder(target, objectName);
+			dataBinder.setValidator(validator);
+			return dataBinder;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class ValidBean {
+
+		@NotNull
+		private final String name;
+
+		public ValidBean(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
+	
 }
