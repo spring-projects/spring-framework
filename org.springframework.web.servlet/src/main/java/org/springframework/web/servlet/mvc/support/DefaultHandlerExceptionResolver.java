@@ -16,13 +16,14 @@
 
 package org.springframework.web.servlet.mvc.support;
 
+import java.io.IOException;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.Ordered;
@@ -37,6 +38,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.RequestBodyNotValidException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 /**
@@ -115,6 +117,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof HttpMessageNotWritableException) {
 				return handleHttpMessageNotWritable((HttpMessageNotWritableException) ex, request, response, handler);
+			}
+			else if (ex instanceof RequestBodyNotValidException) {
+				return handleRequestBodyNotValidException((RequestBodyNotValidException) ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerException) {
@@ -311,6 +316,22 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		return new ModelAndView();
+	}
+
+	/**
+	 * Handle the case where the object created from the body of a request has failed validation. The default
+	 * implementation sends an HTTP 500 error along with a message containing the errors.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler, or <code>null</code> if none chosen
+	 * at the time of the exception (for example, if multipart resolution failed)
+	 * @return a ModelAndView to render, or <code>null</code> if handled directly
+	 * @throws Exception an Exception that should be thrown as result of the servlet request
+	 */
+	protected ModelAndView handleRequestBodyNotValidException(RequestBodyNotValidException ex,
+			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+ 		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
 		return new ModelAndView();
 	}
 
