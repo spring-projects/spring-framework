@@ -21,6 +21,7 @@ Changes in version 3.1 M2 (2011-05-31)
 * consolidated the initialization and use of MappedInterceptors in AbstractHandlerMapping
 * added Servlet 3.0 based WebApplicationInitializer mechanism for programmatic bootstrapping
 * added Servlet 3.0 based StandardServletMultipartResolver
+* AnnotatedBeanDefinitionReader now inherits Environment of supplied BeanDefinitionRegistry
 * fixed JPA 2.0 timeout hints to correctly specify milliseconds
 * RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
 * updated Quartz package to support Quartz 1.8 as well (note: not fully supporting Quartz 2.0 yet)
