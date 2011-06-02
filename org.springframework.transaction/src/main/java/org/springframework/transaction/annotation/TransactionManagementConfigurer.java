@@ -20,6 +20,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 public interface TransactionManagementConfigurer {
 
-	PlatformTransactionManager createTransactionManager();
+	PlatformTransactionManager annotationDrivenTransactionManager();
 
 }

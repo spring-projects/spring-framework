@@ -127,7 +127,7 @@ public class EnableTransactionManagementTests {
 			return new CallCountingTransactionManager();
 		}
 
-		public PlatformTransactionManager createTransactionManager() {
+		public PlatformTransactionManager annotationDrivenTransactionManager() {
 			return txManager2();
 		}
 	}

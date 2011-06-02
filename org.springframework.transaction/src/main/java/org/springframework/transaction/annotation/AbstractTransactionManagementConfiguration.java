@@ -58,7 +58,7 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 		}
 
 		TransactionManagementConfigurer configurer = configurers.iterator().next();
-		this.txManager = configurer.createTransactionManager();
+		this.txManager = configurer.annotationDrivenTransactionManager();
 	}
 
 }
