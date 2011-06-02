@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -43,6 +44,16 @@ public class RequestBodyNotValidException extends RuntimeException {
 	 */
 	public Errors getErrors() {
 		return errors;
+	}
+
+	@Override
+	public String getMessage() {
+		StringBuilder sb = new StringBuilder("Request body content validation failed: ");
+		sb.append(errors.getErrorCount()).append(" errors");
+		for (ObjectError error : errors.getAllErrors()) {
+			sb.append('\n').append(error);
+		}
+		return sb.toString();
 	}
 	
 }
