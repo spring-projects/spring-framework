@@ -75,8 +75,12 @@ abstract class ServletAnnotationMappingUtils {
 					boolean negated = separator > 0 && param.charAt(separator - 1) == '!';
 					String key = !negated ? param.substring(0, separator) : param.substring(0, separator - 1);
 					String value = param.substring(separator + 1);
-					if (!value.equals(request.getParameter(key))) {
-						return negated;
+					boolean match = value.equals(request.getParameter(key));
+					if (negated) {
+						match = !match;
+					}
+					if (!match) {
+						return false;
 					}
 				}
 			}

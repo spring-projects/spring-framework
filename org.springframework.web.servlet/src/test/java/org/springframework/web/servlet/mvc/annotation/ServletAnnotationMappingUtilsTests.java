@@ -77,6 +77,34 @@ public class ServletAnnotationMappingUtilsTests {
 		boolean result = ServletAnnotationMappingUtils.checkParameters(params, request);
 		assertFalse("Invalid request method result", result);
 	}
+	
+	@Test
+	public void checkParametersNegatedValueMatch() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		request.addParameter("param1", "value1");
+		String[] params = new String[]{"param1!=foo"};
+		boolean result = ServletAnnotationMappingUtils.checkParameters(params, request);
+		assertTrue("Invalid request method result", result);
+	}
+	
+	@Test
+	public void checkParametersNegatedValueNoMatch() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		request.addParameter("param1", "foo");
+		String[] params = new String[]{"param1!=foo"};
+		boolean result = ServletAnnotationMappingUtils.checkParameters(params, request);
+		assertFalse("Invalid request method result", result);
+	}
+
+	@Test
+	public void checkParametersCompositeNoMatch() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		request.addParameter("param1", "foo");
+		request.addParameter("param2", "foo");
+		String[] params = new String[]{"param1=foo", "param2!=foo"};
+		boolean result = ServletAnnotationMappingUtils.checkParameters(params, request);
+		assertFalse("[SPR-8059] Invalid request method result", result);
+	}
 
 	@Test
 	public void checkHeadersSimpleMatch() {
