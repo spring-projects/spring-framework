@@ -306,6 +306,7 @@ public class TypeDescriptorTests {
 		TypeDescriptor desc = new TypeDescriptor(genericBean.getClass(), property);
 		assertEquals(List.class, desc.getType());
 		assertEquals(Integer.class, desc.getElementType());
+		assertNotNull(desc.getAnnotation(MethodAnnotation1.class));
 	}
 	
 	public static class GenericClass<T> {
@@ -316,7 +317,8 @@ public class TypeDescriptorTests {
 		
 		public void setProperty(T t) {
 		}
-		
+
+		@MethodAnnotation1
 		public List<T> getListProperty() {
 			return null;
 		}
