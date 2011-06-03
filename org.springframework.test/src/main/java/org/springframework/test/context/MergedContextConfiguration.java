@@ -16,8 +16,13 @@
 
 package org.springframework.test.context;
 
+import java.util.Arrays;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * TODO [SPR-8386] Document MergedContextConfiguration.
@@ -40,6 +45,26 @@ public class MergedContextConfiguration {
 	private final ContextLoader contextLoader;
 
 
+	private static String[] processLocations(String[] locations) {
+		return locations == null ? new String[] {} : locations;
+	}
+
+	private static Class<?>[] processClasses(Class<?>[] classes) {
+		return classes == null ? new Class<?>[] {} : classes;
+	}
+
+	private static String[] processActiveProfiles(String[] activeProfiles) {
+		if (activeProfiles == null) {
+			return new String[] {};
+		}
+
+		// Active profiles must be unique and sorted due to cache key generation
+		// in TestContext. Specifically, profile sets {foo,bar} and {bar,foo}
+		// must both result in the same array (e.g., [bar,foo]).
+		SortedSet<String> sortedProfilesSet = new TreeSet<String>(Arrays.asList(activeProfiles));
+		return StringUtils.toStringArray(sortedProfilesSet);
+	}
+
 	/**
 	 * TODO Document MergedContextConfiguration constructor.
 	 *
@@ -52,9 +77,9 @@ public class MergedContextConfiguration {
 	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
 			String[] activeProfiles, ContextLoader contextLoader) {
 		this.testClass = testClass;
-		this.locations = locations;
-		this.classes = classes;
-		this.activeProfiles = activeProfiles;
+		this.locations = processLocations(locations);
+		this.classes = processClasses(classes);
+		this.activeProfiles = processActiveProfiles(activeProfiles);
 		this.contextLoader = contextLoader;
 	}
 
