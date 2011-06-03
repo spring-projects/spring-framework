@@ -38,9 +38,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * Resolves method arguments annotated with @{@link ModelAttribute}. Or if created in default resolution mode,
  * resolves any non-simple type argument even without an @{@link ModelAttribute}. See the constructor for details.
  *
- * <p>A model attribute argument value is obtained from the model or is created using its default constructor.
- * Data binding and optionally validation is then applied through a {@link WebDataBinder} instance. Validation is
- * invoked optionally when the argument is annotated with an {@code @Valid}.
+ * <p>A model attribute argument is obtained from the model or otherwise is created with a default constructor.
+ * Data binding and validation are applied through a {@link WebDataBinder} instance. Validation is applied 
+ * only when the argument is also annotated with {@code @Valid}.
  *
  * <p>Also handles return values from methods annotated with an @{@link ModelAttribute}. The return value is
  * added to the {@link ModelAndViewContainer}.

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -34,6 +35,7 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
@@ -59,6 +61,8 @@ public class ModelFactoryTests {
 	
 	private InvocableHandlerMethod handleMethod;
 
+	private InvocableHandlerMethod handleSessionAttrMethod;
+
 	private SessionAttributesHandler handlerSessionAttributeStore;
 	
 	private SessionAttributeStore sessionAttributeStore;
@@ -69,48 +73,43 @@ public class ModelFactoryTests {
 
 	@Before
 	public void setUp() throws Exception {
-		handleMethod = new InvocableHandlerMethod(handler, handler.getClass().getDeclaredMethod("handle"));
+		Class<?> handlerType = handler.getClass();
+		handleMethod = new InvocableHandlerMethod(handler, handlerType.getDeclaredMethod("handle"));
+		Method method = handlerType.getDeclaredMethod("handleSessionAttr", String.class);
+		handleSessionAttrMethod = new InvocableHandlerMethod(handler, method);
 		sessionAttributeStore = new DefaultSessionAttributeStore();
-		handlerSessionAttributeStore = new SessionAttributesHandler(handler.getClass(), sessionAttributeStore);
+		handlerSessionAttributeStore = new SessionAttributesHandler(handlerType, sessionAttributeStore);
 		mavContainer = new ModelAndViewContainer();
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 	
 	@Test
-	public void createModel() throws Exception {
-		ModelFactory modelFactory = createModelFactory("model", Model.class);
+	public void addAttributeToModel() throws Exception {
+		ModelFactory modelFactory = createModelFactory("modelAttr", Model.class);
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
 		
-		assertEquals(Boolean.TRUE, mavContainer.getAttribute("model"));
+		assertEquals(Boolean.TRUE, mavContainer.getAttribute("modelAttr"));
 	}
 
 	@Test
-	public void createModelWithName() throws Exception {
-		ModelFactory modelFactory = createModelFactory("modelWithName");
+	public void returnAttributeWithName() throws Exception {
+		ModelFactory modelFactory = createModelFactory("modelAttrWithName");
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
 
 		assertEquals(Boolean.TRUE, mavContainer.getAttribute("name"));
 	}
 
 	@Test
-	public void createModelWithDefaultName() throws Exception {
-		ModelFactory modelFactory = createModelFactory("modelWithDefaultName");
+	public void returnAttributeWithNameByConvention() throws Exception {
+		ModelFactory modelFactory = createModelFactory("modelAttrConvention");
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
 
 		assertEquals(Boolean.TRUE, mavContainer.getAttribute("boolean"));
 	}
 
 	@Test
-	public void createModelWithExistingName() throws Exception {
-		ModelFactory modelFactory = createModelFactory("modelWithName");
-		modelFactory.initModel(webRequest, mavContainer, handleMethod);
-
-		assertEquals(Boolean.TRUE, mavContainer.getAttribute("name"));
-	}
-
-	@Test
-	public void createModelWithNullAttribute() throws Exception {
-		ModelFactory modelFactory = createModelFactory("modelWithNullAttribute");
+	public void returnNullAttributeValue() throws Exception {
+		ModelFactory modelFactory = createModelFactory("nullModelAttr");
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
 
 		assertTrue(mavContainer.containsAttribute("name"));
@@ -118,18 +117,33 @@ public class ModelFactoryTests {
 	}
 	
 	@Test
-	public void createModelExistingSessionAttributes() throws Exception {
-		sessionAttributeStore.storeAttribute(webRequest, "sessAttr", "sessAttrValue");
+	public void retrieveAttributeFromSession() throws Exception {
+		sessionAttributeStore.storeAttribute(webRequest, "sessionAttr", "sessionAttrValue");
 
 		// Resolve successfully handler session attribute once
-		assertTrue(handlerSessionAttributeStore.isHandlerSessionAttribute("sessAttr", null));
+		assertTrue(handlerSessionAttributeStore.isHandlerSessionAttribute("sessionAttr", null));
 		
-		ModelFactory modelFactory = createModelFactory("model", Model.class);
+		ModelFactory modelFactory = createModelFactory("modelAttr", Model.class);
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
 
-		assertEquals("sessAttrValue", mavContainer.getAttribute("sessAttr"));
+		assertEquals("sessionAttrValue", mavContainer.getAttribute("sessionAttr"));
 	}
-	
+
+	@Test
+	public void requiredSessionAttribute() throws Exception {
+		ModelFactory modelFactory = new ModelFactory(null, null, handlerSessionAttributeStore);
+
+		try {
+			modelFactory.initModel(webRequest, mavContainer, handleSessionAttrMethod);
+			fail("Expected HttpSessionRequiredException");
+		} catch (HttpSessionRequiredException e) { }
+		
+		sessionAttributeStore.storeAttribute(webRequest, "sessionAttr", "sessionAttrValue");
+		modelFactory.initModel(webRequest, mavContainer, handleSessionAttrMethod);
+
+		assertEquals("sessionAttrValue", mavContainer.getAttribute("sessionAttr"));
+	}
+
 	@Test
 	public void updateBindingResult() throws Exception {
 		String attrName = "attr1";
@@ -170,35 +184,33 @@ public class ModelFactoryTests {
 		return new ModelFactory(Arrays.asList(handlerMethod), null, handlerSessionAttributeStore);
 	}
 	
-	@SessionAttributes("sessAttr")
+	@SessionAttributes("sessionAttr") @SuppressWarnings("unused")
 	private static class ModelHandler {
 		
-		@SuppressWarnings("unused")
 		@ModelAttribute
-		public void model(Model model) {
-			model.addAttribute("model", Boolean.TRUE);
+		public void modelAttr(Model model) {
+			model.addAttribute("modelAttr", Boolean.TRUE);
 		}
 
-		@SuppressWarnings("unused")
 		@ModelAttribute("name")
-		public Boolean modelWithName() {
+		public Boolean modelAttrWithName() {
 			return Boolean.TRUE;
 		}
 
-		@SuppressWarnings("unused")
 		@ModelAttribute
-		public Boolean modelWithDefaultName() {
+		public Boolean modelAttrConvention() {
 			return Boolean.TRUE;
 		}
 
-		@SuppressWarnings("unused")
 		@ModelAttribute("name")
-		public Boolean modelWithNullAttribute() {
+		public Boolean nullModelAttr() {
 			return null;
 		}
 		
-		@SuppressWarnings("unused")
 		public void handle() {
+		}
+
+		public void handleSessionAttr(@ModelAttribute("sessionAttr") String sessionAttr) {
 		}
 	}
 }
