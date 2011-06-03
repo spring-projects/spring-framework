@@ -37,8 +37,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Context about a type to convert to.
- *
+ * Context about a type to convert from or to.
  * @author Keith Donald
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -85,8 +84,8 @@ public class TypeDescriptor {
 	private final Annotation[] annotations;
 
 	/**
-	 * Create a new type descriptor from a method or constructor parameter.
-	 * Use this constructor when a target conversion point is a method parameter.
+	 * Create a new type descriptor from a {@link MethodParameter}.
+	 * Use this constructor when a conversion point is a constructor parameter, method parameter, or method return value. 
 	 * @param methodParameter the method parameter
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
@@ -95,7 +94,7 @@ public class TypeDescriptor {
 
 	/**
 	 * Create a new type descriptor for a field.
-	 * Use this constructor when a target conversion point is a field.
+	 * Use this constructor when a conversion point is a field.
 	 * @param field the field
 	 */
 	public TypeDescriptor(Field field) {
@@ -155,8 +154,8 @@ public class TypeDescriptor {
 	/**
 	 * Create a new type descriptor for an object.
 	 * Use this factory method to introspect a source object's type before asking the conversion system to convert it to some another type.
-	 * Builds in population of nested type descriptors for collection and map objects through object introspection.
-	 * If the object is null, returns {@link TypeDescriptor#NULL}.
+	 * Populates nested type descriptors for collection and map objects through object introspection.
+	 * If the provided object is null, returns {@link TypeDescriptor#NULL}.
 	 * If the object is not a collection or map, simply calls {@link #valueOf(Class)}.
 	 * If the object is a collection or map, this factory method will derive nested element or key/value types by introspecting the collection or map.
 	 * The introspection algorithm derives nested element or key/value types by resolving the "common element type" across the collection or map.
