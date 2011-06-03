@@ -33,12 +33,15 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Utility methods for working with {@link ContextLoader ContextLoaders}
- * and resource locations.
+ * Utility methods for working with {@link ContextLoader ContextLoaders},
+ * resource locations and classes, and active bean definition profiles.
  * 
  * @author Sam Brannen
  * @since 3.1
  * @see ContextLoader
+ * @see ContextConfiguration
+ * @see ActiveProfiles
+ * @see MergedContextConfiguration
  */
 abstract class ContextLoaderUtils {
 
