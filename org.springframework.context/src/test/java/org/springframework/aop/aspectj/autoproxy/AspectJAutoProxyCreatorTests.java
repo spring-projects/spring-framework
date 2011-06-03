@@ -17,6 +17,11 @@
 package org.springframework.aop.aspectj.autoproxy;
 
 import static java.lang.String.format;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
@@ -27,9 +32,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator;
 import org.springframework.aop.aspectj.annotation.AspectMetadata;
@@ -124,9 +127,9 @@ public final class AspectJAutoProxyCreatorTests {
 		}
 		sw.stop();
 
-		// What's a reasonable expectation for _any_ server load?
-		// 4 seconds? 7 seconds?
-		assertStopWatchTimeLimit(sw, 7000);
+		// What's a reasonable expectation for _any_ server or developer machine load?
+		// 9 seconds?
+		assertStopWatchTimeLimit(sw, 9000);
 	}
 
 	@Test
@@ -146,8 +149,8 @@ public final class AspectJAutoProxyCreatorTests {
 		}
 		sw.stop();
 
-		// What's a reasonable expectation for _any_ server load?
-		// 3 seconds? 7 seconds?
+		// What's a reasonable expectation for _any_ server or developer machine load?
+		// 3 seconds?
 		assertStopWatchTimeLimit(sw, 3000);
 	}
 
@@ -168,19 +171,19 @@ public final class AspectJAutoProxyCreatorTests {
 		ac.refresh();
 		sw.stop();
 
-		// What's a reasonable expectation for _any_ server load?
-		// 4 seconds? 7 seconds?
-		assertStopWatchTimeLimit(sw, 7000);
+		// What's a reasonable expectation for _any_ server or developer machine load?
+		// 8 seconds?
+		assertStopWatchTimeLimit(sw, 8000);
 	}
 
 	@Test
 	public void testAspectsAndAdvisorAreAppliedEvenIfComingFromParentFactory() {
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 		GenericApplicationContext childAc = new GenericApplicationContext(ac);
-		// Create a child factory with a bean that should be weaved                                              
+		// Create a child factory with a bean that should be woven                                              
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
-		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", "Adrian")).addPropertyValue(
-				new PropertyValue("age", new Integer(34)));
+		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", "Adrian"))
+				.addPropertyValue(new PropertyValue("age", new Integer(34)));
 		childAc.registerBeanDefinition("adrian2", bd);
 		// Register the advisor auto proxy creator with subclass
 		childAc.registerBeanDefinition(AnnotationAwareAspectJAutoProxyCreator.class.getName(), new RootBeanDefinition(
