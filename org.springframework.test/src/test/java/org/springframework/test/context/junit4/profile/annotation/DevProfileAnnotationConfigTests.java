@@ -30,6 +30,7 @@ import org.springframework.test.context.ActiveProfiles;
 public class DevProfileAnnotationConfigTests extends DefaultProfileAnnotationConfigTests {
 
 	@Test
+	@Override
 	public void employee() {
 		assertNotNull("employee bean should be loaded for the 'dev' profile", employee);
 		assertEquals("John Smith", employee.getName());
