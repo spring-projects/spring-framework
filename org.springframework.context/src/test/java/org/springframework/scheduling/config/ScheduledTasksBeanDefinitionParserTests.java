@@ -18,6 +18,7 @@ package org.springframework.scheduling.config;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -27,6 +28,8 @@ import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 
 /**
@@ -98,12 +101,28 @@ public class ScheduledTasksBeanDefinitionParserTests {
 		assertEquals("*/4 * 9-17 * * MON-FRI", expression);		
 	}
 
+	@Test
+	public void triggerTasks() {
+		Map<Runnable, Trigger> tasks = (Map<Runnable, Trigger>) new DirectFieldAccessor(
+				this.registrar).getPropertyValue("triggerTasks");
+		assertEquals(1, tasks.size());
+		Trigger trigger = tasks.values().iterator().next();
+		assertEquals(TestTrigger.class, trigger.getClass());		
+	}
+
 
 	static class TestBean {
 
 		public void test() {
 		}
+	}
 
+
+	static class TestTrigger implements Trigger {
+
+		public Date nextExecutionTime(TriggerContext triggerContext) {
+			return null;
+		}
 	}
 
 }

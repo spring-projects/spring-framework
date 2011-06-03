@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 		ManagedMap<RuntimeBeanReference, String> cronTaskMap = new ManagedMap<RuntimeBeanReference, String>();
 		ManagedMap<RuntimeBeanReference, String> fixedDelayTaskMap = new ManagedMap<RuntimeBeanReference, String>();
 		ManagedMap<RuntimeBeanReference, String> fixedRateTaskMap = new ManagedMap<RuntimeBeanReference, String>();
+		ManagedMap<RuntimeBeanReference, RuntimeBeanReference> triggerTaskMap = new ManagedMap<RuntimeBeanReference, RuntimeBeanReference>();
 		NodeList childNodes = element.getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node child = childNodes.item(i);
@@ -72,25 +73,35 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 			
 			RuntimeBeanReference runnableBeanRef = new RuntimeBeanReference(
 					createRunnableBean(ref, method, taskElement, parserContext));
+
 			String cronAttribute = taskElement.getAttribute("cron");
-			if (StringUtils.hasText(cronAttribute)) {
+			String fixedDelayAttribute = taskElement.getAttribute("fixed-delay");
+			String fixedRateAttribute = taskElement.getAttribute("fixed-rate");
+			String triggerAttribute = taskElement.getAttribute("trigger");
+
+			boolean hasCronAttribute = StringUtils.hasText(cronAttribute);
+			boolean hasFixedDelayAttribute = StringUtils.hasText(fixedDelayAttribute);
+			boolean hasFixedRateAttribute = StringUtils.hasText(fixedRateAttribute);
+			boolean hasTriggerAttribute = StringUtils.hasText(triggerAttribute);
+
+			if (!(hasCronAttribute | hasFixedDelayAttribute | hasFixedRateAttribute | hasTriggerAttribute)) {
+				parserContext.getReaderContext().error(
+						"exactly one of the 'cron', 'fixed-delay', 'fixed-rate', or 'trigger' attributes is required", taskElement);
+				// Continue with the possible next task element
+				continue;
+			}
+
+			if (hasCronAttribute) {
 				cronTaskMap.put(runnableBeanRef, cronAttribute);
 			}
-			else {
-				String fixedDelayAttribute = taskElement.getAttribute("fixed-delay");
-				if (StringUtils.hasText(fixedDelayAttribute)) {
-					fixedDelayTaskMap.put(runnableBeanRef, fixedDelayAttribute);
-				}
-				else {
-					String fixedRateAttribute = taskElement.getAttribute("fixed-rate");
-					if (!StringUtils.hasText(fixedRateAttribute)) {
-						parserContext.getReaderContext().error(
-								"One of 'cron', 'fixed-delay', or 'fixed-rate' is required", taskElement);
-						// Continue with the possible next task element
-						continue;
-					}
-					fixedRateTaskMap.put(runnableBeanRef, fixedRateAttribute);
-				}
+			if (hasFixedDelayAttribute) {
+				fixedDelayTaskMap.put(runnableBeanRef, fixedDelayAttribute);
+			}
+			if (hasFixedRateAttribute) {
+				fixedRateTaskMap.put(runnableBeanRef, fixedRateAttribute);
+			}
+			if (hasTriggerAttribute) {
+				triggerTaskMap.put(runnableBeanRef, new RuntimeBeanReference(triggerAttribute));
 			}
 		}
 		String schedulerRef = element.getAttribute("scheduler");
@@ -100,6 +111,7 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 		builder.addPropertyValue("cronTasks", cronTaskMap);
 		builder.addPropertyValue("fixedDelayTasks", fixedDelayTaskMap);
 		builder.addPropertyValue("fixedRateTasks", fixedRateTaskMap);
+		builder.addPropertyValue("triggerTasks", triggerTaskMap);
 	}
 
 	private boolean isScheduledElement(Node node, ParserContext parserContext) {
