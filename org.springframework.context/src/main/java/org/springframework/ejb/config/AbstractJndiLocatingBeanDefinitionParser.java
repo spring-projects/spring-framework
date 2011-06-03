@@ -17,6 +17,7 @@
 package org.springframework.ejb.config;
 
 import org.w3c.dom.Element;
+import static org.springframework.beans.factory.xml.BeanDefinitionParserDelegate.*;
 
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -31,6 +32,7 @@ import org.springframework.util.xml.DomUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Oliver Gierke
  * @since 2.0
  */
 abstract class AbstractJndiLocatingBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
@@ -44,7 +46,8 @@ abstract class AbstractJndiLocatingBeanDefinitionParser extends AbstractSimpleBe
 
 	@Override
 	protected boolean isEligibleAttribute(String attributeName) {
-		return (super.isEligibleAttribute(attributeName) && !ENVIRONMENT_REF.equals(attributeName));
+		return (super.isEligibleAttribute(attributeName) && !ENVIRONMENT_REF.equals(attributeName) && !LAZY_INIT_ATTRIBUTE
+				.equals(attributeName));
 	}
 
 	@Override
@@ -61,6 +64,10 @@ abstract class AbstractJndiLocatingBeanDefinitionParser extends AbstractSimpleBe
 				definitionBuilder.addPropertyValue(JNDI_ENVIRONMENT, new RuntimeBeanReference(envRef));
 			}
 		}
-	}
 
+		String lazyInit = element.getAttribute(LAZY_INIT_ATTRIBUTE);
+		if (StringUtils.hasText(lazyInit) && !DEFAULT_VALUE.equals(lazyInit)) {
+			definitionBuilder.setLazyInit(TRUE_VALUE.equals(lazyInit));
+		}
+	}
 }

@@ -205,6 +205,19 @@
 						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:attribute>
+				<xsd:attribute name="lazy-init" default="default" type="beans:defaultable-boolean">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Indicates whether or not this bean is to be lazily initialized.
+	If false, it will be instantiated on startup by bean factories
+	that perform eager initialization of singletons. The default is
+	"false".
+	
+	Note: This attribute will not be inherited by child bean definitions.
+	Hence, it needs to be specified per concrete bean definition.
+	    				]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
 			</xsd:extension>
 		</xsd:complexContent>
 	</xsd:complexType>
