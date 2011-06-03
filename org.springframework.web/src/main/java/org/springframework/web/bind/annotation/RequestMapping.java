@@ -94,7 +94,7 @@ import java.lang.annotation.Target;
  * the Servlet request HTTP contents. The request stream will be
  * converted to the declared method argument type using 
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
- * converters}.
+ * converters}. Such parameters may optionally be annotated with {@code @Valid}.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
  * for access to the Servlet request HTTP headers and contents. The request stream will be
  * converted to the entity body using

@@ -17,6 +17,7 @@ Changes in version 3.1 M2 (2011-05-31)
 * support for including @PathVariables in data binding
 * support for URI template variables in view names with the "redirect:" prefix
 * added a flag for extracting the value from single-key models in MappingJacksonJsonView
+* added support for @Valid with @RequestBody arguments
 * allow bean references in mvc:interceptor namespace elements
 * consolidated the initialization and use of MappedInterceptors in AbstractHandlerMapping
 * added Servlet 3.0 based WebApplicationInitializer mechanism for programmatic bootstrapping

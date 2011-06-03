@@ -49,6 +49,7 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
  * <p>This exception resolver is enabled by default in the {@link org.springframework.web.servlet.DispatcherServlet}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  * @see #handleNoSuchRequestHandlingMethod
  * @see #handleHttpRequestMethodNotSupported
@@ -321,7 +322,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 	/**
 	 * Handle the case where the object created from the body of a request has failed validation. The default
-	 * implementation sends an HTTP 500 error along with a message containing the errors.
+	 * implementation sends an HTTP 400 error along with a message containing the errors.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler, or <code>null</code> if none chosen
