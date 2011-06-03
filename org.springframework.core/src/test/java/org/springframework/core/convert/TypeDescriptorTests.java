@@ -719,7 +719,85 @@ public class TypeDescriptorTests {
 	}
 
 	@Test
-	public void testEquals() throws Exception {
+	public void collection() {
+		TypeDescriptor desc = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Integer.class));
+		assertEquals(List.class, desc.getType());
+		assertEquals(List.class, desc.getObjectType());
+		assertEquals("java.util.List", desc.getName());
+		assertEquals("java.util.List<java.lang.Integer>", desc.toString());
+		assertTrue(!desc.isPrimitive());
+		assertEquals(0, desc.getAnnotations().length);
+		assertTrue(desc.isCollection());
+		assertFalse(desc.isArray());
+		assertEquals(Integer.class, desc.getElementType());
+		assertEquals(TypeDescriptor.valueOf(Integer.class), desc.getElementTypeDescriptor());
+		assertFalse(desc.isMap());
+		assertNull(desc.getMapKeyType());
+		assertEquals(TypeDescriptor.NULL, desc.getMapKeyTypeDescriptor());
+		assertNull(desc.getMapValueType());
+		assertEquals(TypeDescriptor.NULL, desc.getMapValueTypeDescriptor());		
+	}
+
+	@Test
+	public void collectionNested() {
+		TypeDescriptor desc = TypeDescriptor.collection(List.class, TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Integer.class)));
+		assertEquals(List.class, desc.getType());
+		assertEquals(List.class, desc.getObjectType());
+		assertEquals("java.util.List", desc.getName());
+		assertEquals("java.util.List<java.util.List<java.lang.Integer>>", desc.toString());
+		assertTrue(!desc.isPrimitive());
+		assertEquals(0, desc.getAnnotations().length);
+		assertTrue(desc.isCollection());
+		assertFalse(desc.isArray());
+		assertEquals(List.class, desc.getElementType());
+		assertEquals(TypeDescriptor.valueOf(Integer.class), desc.getElementTypeDescriptor().getElementTypeDescriptor());
+		assertFalse(desc.isMap());
+		assertNull(desc.getMapKeyType());
+		assertEquals(TypeDescriptor.NULL, desc.getMapKeyTypeDescriptor());
+		assertNull(desc.getMapValueType());
+		assertEquals(TypeDescriptor.NULL, desc.getMapValueTypeDescriptor());
+	}
+
+	@Test
+	public void map() {
+		TypeDescriptor desc = TypeDescriptor.map(Map.class, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class));
+		assertEquals(Map.class, desc.getType());
+		assertEquals(Map.class, desc.getObjectType());
+		assertEquals("java.util.Map", desc.getName());
+		assertEquals("java.util.Map<java.lang.String, java.lang.Integer>", desc.toString());
+		assertTrue(!desc.isPrimitive());
+		assertEquals(0, desc.getAnnotations().length);
+		assertFalse(desc.isCollection());
+		assertFalse(desc.isArray());
+		assertNull(desc.getElementType());
+		assertEquals(TypeDescriptor.NULL, desc.getElementTypeDescriptor());
+		assertTrue(desc.isMap());
+		assertEquals(String.class, desc.getMapKeyTypeDescriptor().getType());
+		assertEquals(Integer.class, desc.getMapValueTypeDescriptor().getType());
+	}
+
+	@Test
+	public void mapNested() {
+		TypeDescriptor desc = TypeDescriptor.map(Map.class, TypeDescriptor.valueOf(String.class), 
+				TypeDescriptor.map(Map.class, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+		assertEquals(Map.class, desc.getType());
+		assertEquals(Map.class, desc.getObjectType());
+		assertEquals("java.util.Map", desc.getName());
+		assertEquals("java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.Integer>>", desc.toString());
+		assertTrue(!desc.isPrimitive());
+		assertEquals(0, desc.getAnnotations().length);
+		assertFalse(desc.isCollection());
+		assertFalse(desc.isArray());
+		assertNull(desc.getElementType());
+		assertEquals(TypeDescriptor.NULL, desc.getElementTypeDescriptor());
+		assertTrue(desc.isMap());
+		assertEquals(String.class, desc.getMapKeyTypeDescriptor().getType());
+		assertEquals(String.class, desc.getMapValueTypeDescriptor().getMapKeyTypeDescriptor().getType());
+		assertEquals(Integer.class, desc.getMapValueTypeDescriptor().getMapValueTypeDescriptor().getType());
+	}
+
+	@Test
+	public void equals() throws Exception {
 		TypeDescriptor t1 = TypeDescriptor.valueOf(String.class);
 		TypeDescriptor t2 = TypeDescriptor.valueOf(String.class);
 		TypeDescriptor t3 = TypeDescriptor.valueOf(Date.class);

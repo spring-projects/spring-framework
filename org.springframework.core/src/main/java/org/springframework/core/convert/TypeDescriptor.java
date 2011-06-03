@@ -135,6 +135,9 @@ public class TypeDescriptor {
 	 * @return the collection type descriptor
 	 */
 	public static TypeDescriptor collection(Class<?> collectionType, TypeDescriptor elementType) {
+		if (!Collection.class.isAssignableFrom(collectionType)) {
+			throw new IllegalArgumentException("collectionType must be a java.util.Collection");
+		}
 		return new TypeDescriptor(collectionType, elementType);
 	}
 
@@ -148,6 +151,9 @@ public class TypeDescriptor {
 	 * @return the map type descriptor
 	 */
 	public static TypeDescriptor map(Class<?> mapType, TypeDescriptor keyType, TypeDescriptor valueType) {
+		if (!Map.class.isAssignableFrom(mapType)) {
+			throw new IllegalArgumentException("mapType must be a java.util.Map");
+		}
 		return new TypeDescriptor(mapType, keyType, valueType);
 	}
 	
