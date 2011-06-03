@@ -12,10 +12,13 @@
 		<task:scheduled ref="testBean" method="test" fixed-rate="2000"/>
 		<task:scheduled ref="testBean" method="test" fixed-delay="3000"/>
 		<task:scheduled ref="testBean" method="test" cron="*/4 * 9-17 * * MON-FRI"/>
+		<task:scheduled ref="testBean" method="test" trigger="customTrigger"/>
 	</task:scheduled-tasks>
 
 	<task:scheduler id="testScheduler"/>
 
 	<bean id="testBean" class="org.springframework.scheduling.config.ScheduledTasksBeanDefinitionParserTests$TestBean"/>
+
+	<bean id="customTrigger" class="org.springframework.scheduling.config.ScheduledTasksBeanDefinitionParserTests$TestTrigger"/>
 
 </beans>

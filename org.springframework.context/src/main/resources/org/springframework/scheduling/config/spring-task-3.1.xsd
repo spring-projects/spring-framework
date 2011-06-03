@@ -216,6 +216,13 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="trigger" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	A reference to a bean that implements the Trigger interface.
+ 				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 		<xsd:attribute name="ref" type="xsd:string" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
