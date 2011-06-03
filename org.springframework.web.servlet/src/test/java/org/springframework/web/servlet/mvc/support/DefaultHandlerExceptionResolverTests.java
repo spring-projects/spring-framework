@@ -16,22 +16,27 @@
 
 package org.springframework.web.servlet.mvc.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Collections;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
+import org.springframework.beans.TestBean;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.method.annotation.support.RequestBodyNotValidException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 /** @author Arjen Poutsma */
@@ -118,5 +123,17 @@ public class DefaultHandlerExceptionResolverTests {
 		assertEquals("Invalid status code", 500, response.getStatus());
 	}
 
+	@Test
+	public void handleRequestBodyNotValid() {
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(new TestBean(), "testBean");
+		errors.rejectValue("name", "invalid");
+		RequestBodyNotValidException ex = new RequestBodyNotValidException(errors);
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
+		assertEquals("Invalid status code", 400, response.getStatus());
+		assertTrue(response.getErrorMessage().startsWith("Request body content validation failed"));
+		assertTrue(response.getErrorMessage().contains("Field error in object 'testBean' on field 'name'"));
+	}
 
 }
