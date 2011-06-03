@@ -43,7 +43,7 @@ import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 
 /**
- * Combined unit test for {@link AbstractJUnit4SpringContextTests} and
+ * Combined integration test for {@link AbstractJUnit4SpringContextTests} and
  * {@link AbstractTransactionalJUnit4SpringContextTests}.
  * 
  * @author Sam Brannen

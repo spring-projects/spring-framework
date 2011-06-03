@@ -41,7 +41,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
- * Combined unit test for {@link AbstractTestNGSpringContextTests} and
+ * Combined integration test for {@link AbstractTestNGSpringContextTests} and
  * {@link AbstractTransactionalTestNGSpringContextTests}.
  * 
  * @author Sam Brannen

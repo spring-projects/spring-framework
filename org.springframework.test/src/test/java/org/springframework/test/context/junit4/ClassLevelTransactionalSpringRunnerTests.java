@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * JUnit 4 based unit test which verifies support of Spring's
+ * JUnit 4 based integration test which verifies support of Spring's
  * {@link Transactional &#64;Transactional}, {@link NotTransactional
  * &#64;NotTransactional}, {@link TestExecutionListeners
  * &#64;TestExecutionListeners}, and {@link ContextConfiguration

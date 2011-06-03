@@ -25,7 +25,6 @@ import javax.sql.DataSource;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2.5
  * @see Rollback
  */
+@SuppressWarnings("deprecation")
 @ContextConfiguration
 public class RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests extends
 		DefaultRollbackTrueTransactionalSpringRunnerTests {
@@ -50,7 +50,7 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests e
 	@AfterClass
 	public static void verifyFinalTestData() {
 		assertEquals("Verifying the final number of rows in the person table after all tests.", 3,
-				countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	@Before
@@ -58,9 +58,8 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests e
 		clearPersonTable(simpleJdbcTemplate);
 		assertEquals("Adding bob", 1, addPerson(simpleJdbcTemplate, BOB));
 		assertEquals("Verifying the initial number of rows in the person table.", 1,
-				countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(simpleJdbcTemplate));
 	}
-
 
 	@Test
 	@Transactional
@@ -70,7 +69,7 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests e
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table within a transaction.", 3,
-				countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 
