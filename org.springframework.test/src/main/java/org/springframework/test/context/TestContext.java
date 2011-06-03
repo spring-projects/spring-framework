@@ -170,10 +170,22 @@ public class TestContext extends AttributeAccessorSupport {
 			if (context == null) {
 				try {
 					context = loadApplicationContext();
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format(
+							"Storing ApplicationContext for test class [%s] in cache under key [%s].", testClass,
+							contextKey));
+					}
 					contextCache.put(contextKey, context);
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException("Failed to load ApplicationContext", ex);
+				}
+			}
+			else {
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format(
+						"Retrieved ApplicationContext for test class [%s] from cache with key [%s].", testClass,
+						contextKey));
 				}
 			}
 			return context;

@@ -18,9 +18,9 @@ package org.springframework.test.context;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -243,13 +243,16 @@ abstract class ContextLoaderUtils {
 				annotationType, clazz));
 		}
 
-		final Set<String> activeProfiles = new LinkedHashSet<String>();
+		// Active profiles must be sorted due to cache key generation in
+		// TestContext. Specifically, profile sets {foo,bar} and {bar,foo}
+		// must both result in the same array (e.g., [bar,foo]).
+		final SortedSet<String> activeProfiles = new TreeSet<String>();
 
 		while (declaringClass != null) {
 			ActiveProfiles annotation = declaringClass.getAnnotation(annotationType);
 
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", activeProfiles,
+				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,
 					declaringClass));
 			}
 
