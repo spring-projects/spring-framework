@@ -21,14 +21,21 @@ import static org.springframework.test.transaction.TransactionTestUtils.assertIn
 import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
 import static org.testng.Assert.assertEquals;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -149,6 +156,39 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	public void afterTransaction() {
 		assertEquals(deletePerson(YODA), 1, "Deleting yoda");
 		assertNumRowsInPersonTable(1, "after a transactional test method");
+	}
+
+
+	@Configuration
+	static class ContextConfiguration {
+
+		@Bean
+		public Employee employee() {
+			Employee employee = new Employee();
+			employee.setName("John Smith");
+			employee.setAge(42);
+			employee.setCompany("Acme Widgets, Inc.");
+			return employee;
+		}
+
+		@Bean
+		public Pet pet() {
+			return new Pet("Fido");
+		}
+
+		@Bean
+		public PlatformTransactionManager transactionManager() {
+			return new DataSourceTransactionManager(dataSource());
+		}
+
+		@Bean
+		public DataSource dataSource() {
+			return new EmbeddedDatabaseBuilder()//
+			.addScript("classpath:/org/springframework/test/context/testng/schema.sql")//
+			.addScript("classpath:/org/springframework/test/context/testng/data.sql")//
+			.build();
+		}
+
 	}
 
 }
