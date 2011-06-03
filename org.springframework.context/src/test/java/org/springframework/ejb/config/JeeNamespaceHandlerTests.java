@@ -35,6 +35,7 @@ import org.springframework.jndi.JndiObjectFactoryBean;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Oliver Gierke
  */
 public class JeeNamespaceHandlerTests {
 
@@ -127,6 +128,16 @@ public class JeeNamespaceHandlerTests {
 		assertPropertyValue(beanDefinition, "homeInterface", "org.springframework.beans.ITestBean");
 		assertPropertyValue(beanDefinition, "refreshHomeOnConnectFailure", "true");
 		assertPropertyValue(beanDefinition, "cacheSessionBean", "true");
+	}
+
+	@Test
+	public void testLazyInitJndiLookup() throws Exception {
+		BeanDefinition definition = this.beanFactory.getMergedBeanDefinition("lazyDataSource");
+		assertTrue(definition.isLazyInit());
+		definition = this.beanFactory.getMergedBeanDefinition("lazyLocalBean");
+		assertTrue(definition.isLazyInit());
+		definition = this.beanFactory.getMergedBeanDefinition("lazyRemoteBean");
+		assertTrue(definition.isLazyInit());
 	}
 
 	private void assertPropertyValue(BeanDefinition beanDefinition, String propertyName, Object expectedValue) {
