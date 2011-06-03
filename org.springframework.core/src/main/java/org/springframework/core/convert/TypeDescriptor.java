@@ -32,7 +32,6 @@ import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -104,9 +103,10 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Create a new type descriptor for a property.
-	 * Use this constructor when a target conversion point is a property.
-	 * @param property the property
+	 * Create a new type descriptor for a bean property.
+	 * Use this constructor when a target conversion point is a property on a Java class.
+	 * @param beanClass the class that declares the property
+	 * @param property the property descriptor
 	 */
 	public TypeDescriptor(Class<?> beanClass, PropertyDescriptor property) {
 		this(new BeanPropertyDescriptor(beanClass, property));
@@ -158,11 +158,14 @@ public class TypeDescriptor {
 	 * Builds in population of nested type descriptors for collection and map objects through object introspection.
 	 * If the object is null, returns {@link TypeDescriptor#NULL}.
 	 * If the object is not a collection or map, simply calls {@link #valueOf(Class)}.
-	 * If the object is a collection or map, this factory method will derive the element type(s) by introspecting the collection or map.
+	 * If the object is a collection or map, this factory method will derive nested element or key/value types by introspecting the collection or map.
+	 * The introspection algorithm derives nested element or key/value types by resolving the "common element type" across the collection or map.
+	 * For example, if a Collection contained all java.lang.Integer elements, its element type would be java.lang.Integer.
+	 * If a Collection contained several distinct number types all extending from java.lang.Number, its element type would be java.lang.Number.
+	 * If a Collection contained a String and a java.util.Map element, its element type would be java.io.Serializable.
 	 * @param object the source object
 	 * @return the type descriptor
 	 * @see ConversionService#convert(Object, Class)
-	 * @see CollectionUtils#findCommonElementType(Collection)
 	 */
 	public static TypeDescriptor forObject(Object object) {
 		if (object == null) {
@@ -181,12 +184,13 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Creates a type descriptor for a nested type declared by the method parameter.
+	 * Creates a type descriptor for a nested type declared within the method parameter.
 	 * For example, if the methodParameter is a List&lt;String&gt; and the nestingLevel is 1, the nested type descriptor will be String.class.
 	 * If the methodParameter is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class.
 	 * If the methodParameter is a Map<Integer, String> and the nesting level is 1, the nested type descriptor will be String, derived from the map value.
 	 * If the methodParameter is a List<Map<Integer, String>> and the nesting level is 2, the nested type descriptor will be String, derived from the map value.
-	 * @param methodParameter the method parameter
+	 * @param methodParameter the method parameter with a nestingLevel of 1
+	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the method parameter.
 	 * @return the nested type descriptor
 	 * @throws IllegalArgumentException if the method parameter is not of a collection, array, or map type.
 	 */
@@ -195,13 +199,13 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Creates a type descriptor for a nested type declared by the field.
+	 * Creates a type descriptor for a nested type declared within the field.
 	 * For example, if the field is a List&lt;String&gt; and the nestingLevel is 1, the nested type descriptor will be String.class.
 	 * If the field is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class. 
 	 * If the field is a Map<Integer, String> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value. 
 	 * If the field is a List<Map<Integer, String>> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
 	 * @param field the field
-	 * @param nestingLevel the nesting level
+	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the field.
 	 * @return the nested type descriptor
 	 * @throws IllegalArgumentException if the field is not of a collection, array, or map type.
 	 */
@@ -210,13 +214,13 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Creates a type descriptor for a nested type declared by the property.
+	 * Creates a type descriptor for a nested type declared within the property.
 	 * For example, if the property is a List&lt;String&gt; and the nestingLevel is 1, the nested type descriptor will be String.class.
 	 * If the property is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class. 
 	 * If the field is a Map<Integer, String> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value. 
 	 * If the property is a List<Map<Integer, String>> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
 	 * @param property the property
-	 * @param nestingLevel the nesting level
+	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the property.
 	 * @return the nested type descriptor
 	 * @throws IllegalArgumentException if the property is not of a collection, array, or map type.
 	 */
@@ -255,14 +259,16 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Obtain the annotations associated with the wrapped parameter/field, if any.
+	 * The annotations associated with this type descriptor, if any.
+	 * @return the annotations, or an empty array if none.
 	 */
 	public Annotation[] getAnnotations() {
 		return this.annotations;
 	}
 
 	/**
-	 * Obtain the annotation associated with the wrapped parameter/field, if any.
+	 * Obtain the annotation associated with this type descriptor of the specified type.
+	 * @return the annotation, or null if no such annotation exists on this type descriptor.
 	 */
 	public Annotation getAnnotation(Class<? extends Annotation> annotationType) {
 		for (Annotation annotation : getAnnotations()) {
@@ -299,13 +305,6 @@ public class TypeDescriptor {
 	// indexable type descriptor operations
 	
 	/**
-	 * Is this type an array type?
-	 */
-	public boolean isArray() {
-		return getType().isArray();
-	}
-
-	/**
 	 * Is this type a {@link Collection} type?
 	 */
 	public boolean isCollection() {
@@ -313,9 +312,16 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * If this type is an array type or {@link Collection} type, returns the underlying element type.
+	 * Is this type an array type?
+	 */
+	public boolean isArray() {
+		return getType().isArray();
+	}
+
+	/**
+	 * If this type is a {@link Collection} or array, returns the underlying element type.
 	 * Returns <code>null</code> if this type is neither an array or collection.
-	 * Returns Object.class if the element type is for a collection and was not explicitly declared.
+	 * Returns Object.class if this type is a collection and the element type was not explicitly declared.
 	 * @return the map element type, or <code>null</code> if not a collection or array.
 	 */
 	public Class<?> getElementType() {
@@ -323,7 +329,9 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Return the element type as a type descriptor.
+	 * The collection or array element type as a type descriptor.
+	 * Returns {@link TypeDescriptor#NULL} if this type is not a collection or an array.
+	 * Returns TypeDescriptor.valueOf(Object.class) if this type is a collection and the element type is not explicitly declared.
 	 */
 	public TypeDescriptor getElementTypeDescriptor() {
 		return this.elementType;
@@ -339,9 +347,9 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Determine the generic key type of the wrapped Map parameter/field, if any.
+	 * If this type is a {@link Map}, returns the underlying key type.
 	 * Returns <code>null</code> if this type is not map.
-	 * Returns Object.class if the map's key type was not explicitly declared.
+	 * Returns Object.class if this type is a map and its key type was not explicitly declared.
 	 * @return the map key type, or <code>null</code> if not a map.
 	 */
 	public Class<?> getMapKeyType() {
@@ -349,16 +357,18 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Returns map key type as a type descriptor.
+	 * The map key type as a type descriptor.
+	 * Returns {@link TypeDescriptor#NULL} if this type is not a map.
+	 * Returns TypeDescriptor.valueOf(Object.class) if this type is a map and the key type is not explicitly declared.
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor() {
 		return this.mapKeyType;
 	}
 
 	/**
-	 * Determine the generic value type of the wrapped Map parameter/field, if any.
+	 * If this type is a {@link Map}, returns the underlying value type.
 	 * Returns <code>null</code> if this type is not map.
-	 * Returns Object.class if the map's value type was not explicitly declared.
+	 * Returns Object.class if this type is a map and its value type was not explicitly declared.
 	 * @return the map value type, or <code>null</code> if not a map.
 	 */
 	public Class<?> getMapValueType() {
@@ -366,7 +376,9 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Returns map value type as a type descriptor.
+	 * The map value type as a type descriptor.
+	 * Returns {@link TypeDescriptor#NULL} if this type is not a map.
+	 * Returns TypeDescriptor.valueOf(Object.class) if this type is a map and the value type is not explicitly declared.
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor() {
 		return this.mapValueType;
