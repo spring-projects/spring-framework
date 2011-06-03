@@ -237,7 +237,7 @@
           <imagedata align="center" fileref="images/mvc.png" format="PNG" />
         </imageobject>
 
-        <caption><para>The requesting processing workflow in Spring Web MVC
+        <caption><para>The request processing workflow in Spring Web MVC
         (high level)</para></caption>
       </mediaobject></para>
 
@@ -843,7 +843,7 @@ public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId"
         <programlisting language="java">@RequestMapping(value="/owners/{ownerId}/pets/{petId}", method=RequestMethod.GET)
 public String findPet(<emphasis role="bold">@PathVariable</emphasis> String ownerId, <emphasis
             role="bold">@PathVariable</emphasis> String petId, Model model) {
-  Owner owner = ownerService.findOwner(ownderId);  
+  Owner owner = ownerService.findOwner(ownerId);  
   Pet pet = owner.getPet(petId);  
   model.addAttribute("pet", pet);  
   return "displayPet"; 
@@ -3208,21 +3208,22 @@ public class SimpleController {
       </sidebar>
 
       <para>The strategy for generating a name after adding a
-      <interfacename>Set</interfacename>, <interfacename>List</interfacename>
-      or array object is to peek into the collection, take the short class
-      name of the first object in the collection, and use that with
-      <literal>List</literal> appended to the name. Some examples will make
-      the semantics of name generation for collections clearer...</para>
+      <interfacename>Set</interfacename> or a <interfacename>List</interfacename>
+      is to peek into the collection, take the short class name of the first object
+      in the collection, and use that with <literal>List</literal> appended to the
+      name. The same applies to arrays although with arrays it is not necessary to 
+      peek into the array contents. A few examples will make the semantics of name
+      generation for collections clearer:</para>
 
       <itemizedlist>
         <listitem>
-          <para>An <classname>x.y.User[]</classname> array with one or more
+          <para>An <classname>x.y.User[]</classname> array with zero or more
           <classname>x.y.User</classname> elements added will have the name
           <literal>userList</literal> generated.</para>
         </listitem>
 
         <listitem>
-          <para>An <classname>x.y.Foo[]</classname> array with one or more
+          <para>An <classname>x.y.Foo[]</classname> array with zero or more
           <classname>x.y.User</classname> elements added will have the name
           <literal>fooList</literal> generated.</para>
         </listitem>
