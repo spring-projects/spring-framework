@@ -37,7 +37,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  * @since 3.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = DefaultConfigClassesBaseTestsConfig.class)
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = DefaultConfigClassesBaseTests.ContextConfiguration.class)
 public class ExplicitConfigClassesBaseTests {
 
 	@Autowired

@@ -23,6 +23,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
@@ -39,6 +41,20 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class DefaultConfigClassesBaseTests {
+
+	@Configuration
+	static class ContextConfiguration {
+
+		@Bean
+		public Employee employee() {
+			Employee employee = new Employee();
+			employee.setName("John Smith");
+			employee.setAge(42);
+			employee.setCompany("Acme Widgets, Inc.");
+			return employee;
+		}
+	}
+
 
 	@Autowired
 	protected Employee employee;

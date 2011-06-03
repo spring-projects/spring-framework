@@ -123,14 +123,19 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * Returns &quot;Config</code>&quot;; intended to be used as a suffix
-	 * to append to the name of the test class when generating default
-	 * configuration class names.
+	 * Returns &quot;$ContextConfiguration</code>&quot;; intended to be used
+	 * as a suffix to append to the name of the test class when generating
+	 * default configuration class names.
+	 * 
+	 * <p>Note: the use of a dollar sign ($) signifies that the resulting 
+	 * class name refers to a nested <code>static</code> class within the
+	 * test class.
+	 * 
 	 * @see #generateDefaultLocations(Class)
 	 */
 	@Override
 	protected String getResourceSuffix() {
-		return "Config";
+		return "$ContextConfiguration";
 	}
 
 	/**
