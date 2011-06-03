@@ -32,6 +32,7 @@ import org.springframework.test.context.ActiveProfiles;
 public class DevProfileXmlConfigTests extends DefaultProfileXmlConfigTests {
 
 	@Test
+	@Override
 	public void employee() {
 		assertNotNull("employee bean should be loaded for the 'dev' profile", employee);
 		assertEquals("John Smith", employee.getName());
