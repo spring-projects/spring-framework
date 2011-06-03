@@ -32,7 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
  * @author Sam Brannen
  * @since 3.1
  */
-@ContextConfiguration(classes = BeanOverridingDefaultConfigClassesInheritedTestsConfig.class)
+@ContextConfiguration(classes = BeanOverridingDefaultConfigClassesInheritedTests.ContextConfiguration.class)
 public class BeanOverridingExplicitConfigClassesInheritedTests extends ExplicitConfigClassesBaseTests {
 
 	@Test

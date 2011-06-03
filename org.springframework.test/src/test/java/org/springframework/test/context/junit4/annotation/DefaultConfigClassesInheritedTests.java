@@ -22,6 +22,8 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -36,6 +38,16 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @ContextConfiguration
 public class DefaultConfigClassesInheritedTests extends DefaultConfigClassesBaseTests {
+
+	@Configuration
+	static class ContextConfiguration {
+
+		@Bean
+		public Pet pet() {
+			return new Pet("Fido");
+		}
+	}
+
 
 	@Autowired
 	private Pet pet;

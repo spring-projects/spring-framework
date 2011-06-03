@@ -20,6 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
+import org.springframework.beans.Employee;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
@@ -34,6 +37,20 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @ContextConfiguration
 public class BeanOverridingDefaultConfigClassesInheritedTests extends DefaultConfigClassesBaseTests {
+
+	@Configuration
+	static class ContextConfiguration {
+
+		@Bean
+		public Employee employee() {
+			Employee employee = new Employee();
+			employee.setName("Yoda");
+			employee.setAge(900);
+			employee.setCompany("The Force");
+			return employee;
+		}
+	}
+
 
 	@Test
 	@Override
