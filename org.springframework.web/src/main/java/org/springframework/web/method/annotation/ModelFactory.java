@@ -33,6 +33,7 @@ import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -41,10 +42,11 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Provides methods to create and update a model in the context of a given request.
- *  
+ * Contains methods for creating and updating a model. A {@link ModelFactory} is associated with a specific controller
+ * through knowledge of its @{@link ModelAttribute} methods and @{@link SessionAttributes}. 
+ * 
  * <p>{@link #initModel(NativeWebRequest, ModelAndViewContainer, HandlerMethod)} populates the model
- * with handler session attributes and attributes from model attribute methods.
+ * with handler session attributes and by invoking model attribute methods.
  * 
  * <p>{@link #updateModel(NativeWebRequest, ModelAndViewContainer, SessionStatus)} updates
  * the model (usually after the {@link RequestMapping} method has been called) promoting attributes
@@ -70,7 +72,7 @@ public final class ModelFactory {
 	public ModelFactory(List<InvocableHandlerMethod> attributeMethods,
 						WebDataBinderFactory binderFactory,
 						SessionAttributesHandler sessionHandler) {
-		this.attributeMethods = attributeMethods;
+		this.attributeMethods = (attributeMethods != null) ? attributeMethods : new ArrayList<InvocableHandlerMethod>();
 		this.binderFactory = binderFactory;
 		this.sessionHandler = sessionHandler;
 	}
@@ -78,11 +80,11 @@ public final class ModelFactory {
 	/**
 	 * Populate the model for a request with attributes obtained in the following order:
 	 * <ol>
-	 * <li>Add known (i.e. previously accessed) handler session attributes
-	 * <li>Invoke model attribute methods
-	 * <li>Check if any {@link ModelAttribute}-annotated arguments need to be added from the session
+	 * <li>Retrieve "known" (i.e. have been in the model in prior requests) handler session attributes from the session 
+	 * <li>Create attributes by invoking model attribute methods
+	 * <li>Check for not yet known handler session attributes in the session  
 	 * </ol>
-	 * <p>As a general rule model attributes are added only once.
+	 * <p>As a general rule model attributes are added only once following the above order.
 	 * 
 	 * @param request the current request
 	 * @param mavContainer the {@link ModelAndViewContainer} to add model attributes to
@@ -97,7 +99,7 @@ public final class ModelFactory {
 		
 		invokeAttributeMethods(request, mavContainer);
 		
-		addSessionAttributesByName(request, mavContainer, requestMethod);
+		checkMissingSessionAttributes(request, mavContainer, requestMethod);
 	}
 
 	/**
@@ -123,21 +125,26 @@ public final class ModelFactory {
 	}
 	
 	/**
-	 * Check if {@link ModelAttribute}-annotated arguments are handler session attributes and add them from the session. 
+	 * Checks if any {@link ModelAttribute}-annotated handler method arguments are eligible as handler session 
+	 * attributes, as defined by @{@link SessionAttributes}, and are not yet present in the model. 
+	 * If so, attempts to retrieve them from the session and add them to the model.
+	 * 
+	 * @throws HttpSessionRequiredException raised if a handler session attribute could is missing 
 	 */
-	private void addSessionAttributesByName(NativeWebRequest request, ModelAndViewContainer mavContainer, HandlerMethod requestMethod) {
+	private void checkMissingSessionAttributes(NativeWebRequest request, 
+											   ModelAndViewContainer mavContainer, 
+											   HandlerMethod requestMethod) throws HttpSessionRequiredException {
 		for (MethodParameter parameter : requestMethod.getMethodParameters()) {
 			if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
-				continue;
-			}
-			String attrName = getNameForParameter(parameter);
-			if (!mavContainer.containsAttribute(attrName)) {
-				if (sessionHandler.isHandlerSessionAttribute(attrName, parameter.getParameterType())) {
-					Object attrValue = sessionHandler.retrieveAttribute(request, attrName);
-					if (attrValue == null){
-						new HttpSessionRequiredException("Session attribute '" + attrName + "' not found in session");
+				String name = getNameForParameter(parameter);
+				if (!mavContainer.containsAttribute(name)) {
+					if (sessionHandler.isHandlerSessionAttribute(name, parameter.getParameterType())) {
+						Object attrValue = sessionHandler.retrieveAttribute(request, name);
+						if (attrValue == null){
+							throw new HttpSessionRequiredException("Session attribute '" + name + "' not found in session");
+						}
+						mavContainer.addAttribute(name, attrValue);
 					}
-					mavContainer.addAttribute(attrName, attrValue);
 				}
 			}
 		}
