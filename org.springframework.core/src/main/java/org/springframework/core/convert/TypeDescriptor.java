@@ -19,22 +19,13 @@ package org.springframework.core.convert;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 
-import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Context about a type to convert from or to.
@@ -50,7 +41,7 @@ public class TypeDescriptor {
 
 	private static final Map<Class<?>, TypeDescriptor> typeDescriptorCache = new HashMap<Class<?>, TypeDescriptor>();
 
-	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
+	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
 	static {
 		typeDescriptorCache.put(boolean.class, new TypeDescriptor(boolean.class));
@@ -177,11 +168,11 @@ public class TypeDescriptor {
 			return NULL;
 		}
 		if (object instanceof Collection<?>) {
-			return new TypeDescriptor(object.getClass(), findCommonElement((Collection<?>) object));
+			return new TypeDescriptor(object.getClass(), CommonElement.typeDescriptor((Collection<?>) object));
 		}
 		else if (object instanceof Map<?, ?>) {
 			Map<?, ?> map = (Map<?, ?>) object;
-			return new TypeDescriptor(map.getClass(), findCommonElement(map.keySet()), findCommonElement(map.values()));
+			return new TypeDescriptor(map.getClass(), CommonElement.typeDescriptor(map.keySet()), CommonElement.typeDescriptor(map.values()));
 		}
 		else {
 			return valueOf(object.getClass());
@@ -438,13 +429,9 @@ public class TypeDescriptor {
 		}
 	}
 
-	// internal constructors
+	// package private
 
-	private TypeDescriptor(Class<?> type) {
-		this(new ClassDescriptor(type));
-	}
-
-	private TypeDescriptor(AbstractDescriptor descriptor) {
+	TypeDescriptor(AbstractDescriptor descriptor) {
 		this.type = descriptor.getType();
 		this.elementType = descriptor.getElementType();
 		this.mapKeyType = descriptor.getMapKeyType();
@@ -452,26 +439,28 @@ public class TypeDescriptor {
 		this.annotations = descriptor.getAnnotations();
 	}
 
+	TypeDescriptor(Class<?> collectionType, TypeDescriptor elementType) {
+		this(collectionType, elementType, TypeDescriptor.NULL, TypeDescriptor.NULL);
+	}
+
+	TypeDescriptor(Class<?> mapType, TypeDescriptor keyType, TypeDescriptor valueType) {
+		this(mapType, TypeDescriptor.NULL, keyType, valueType);
+	}
+
+	static Annotation[] nullSafeAnnotations(Annotation[] annotations) {
+		return annotations != null ? annotations : EMPTY_ANNOTATION_ARRAY;
+	}
+	
+	// internal constructors
+
+	private TypeDescriptor(Class<?> type) {
+		this(new ClassDescriptor(type));
+	}
+
 	private TypeDescriptor() {
 		this(null, TypeDescriptor.NULL, TypeDescriptor.NULL, TypeDescriptor.NULL);
 	}
 
-	private TypeDescriptor(Class<?> collectionType, TypeDescriptor elementType) {
-		this(collectionType, elementType, TypeDescriptor.NULL, TypeDescriptor.NULL);
-	}
-
-	private TypeDescriptor(Class<?> mapType, TypeDescriptor keyType, TypeDescriptor valueType) {
-		this(mapType, TypeDescriptor.NULL, keyType, valueType);
-	}
-
-	private TypeDescriptor(Class<?> collectionType, CommonElement commonElement) {
-		this(collectionType, fromCommonElement(commonElement), TypeDescriptor.NULL, TypeDescriptor.NULL);
-	}
-
-	private TypeDescriptor(Class<?> mapType, CommonElement commonKey, CommonElement commonValue) {
-		this(mapType, TypeDescriptor.NULL, fromCommonElement(commonKey), fromCommonElement(commonValue));
-	}
-	
 	private TypeDescriptor(Class<?> type, TypeDescriptor elementType, TypeDescriptor mapKeyType, TypeDescriptor mapValueType) {
 		this.type = type;
 		this.elementType = elementType;
@@ -480,86 +469,8 @@ public class TypeDescriptor {
 		this.annotations = EMPTY_ANNOTATION_ARRAY;
 	}
 
-	private static Annotation[] nullSafeAnnotations(Annotation[] annotations) {
-		return annotations != null ? annotations : EMPTY_ANNOTATION_ARRAY;
-	}
+	// internal helpers
 	
-	// forObject-related internal helpers
-
-	private static CommonElement findCommonElement(Collection<?> values) {
-		Class<?> commonType = null;
-		Object candidate = null;
-		for (Object value : values) {
-			if (value != null) {
-				if (candidate == null) {
-					commonType = value.getClass();
-					candidate = value;
-				} else {
-					commonType = commonType(commonType, value.getClass());
-					if (commonType == Object.class) {
-						return null;
-					}
-				}
-			}
-		}
-		return new CommonElement(commonType, candidate);
-	}
-
-	private static Class<?> commonType(Class<?> commonType, Class<?> valueClass) {
-		Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
-		LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
-		classQueue.addFirst(commonType);
-		while (!classQueue.isEmpty()) {
-			Class<?> currentClass = classQueue.removeLast();
-			if (currentClass.isAssignableFrom(valueClass)) {
-				return currentClass;
-			}
-			Class<?> superClass = currentClass.getSuperclass();
-			if (superClass != null && superClass != Object.class) {
-				classQueue.addFirst(currentClass.getSuperclass());
-			}
-			for (Class<?> interfaceType : currentClass.getInterfaces()) {
-				addInterfaceHierarchy(interfaceType, interfaces);
-			}
-		}
-		for (Class<?> interfaceType : interfaces) {
-			if (interfaceType.isAssignableFrom(valueClass)) {
-				return interfaceType;
-			}			
-		}
-		return Object.class;
-	}
-
-	private static void addInterfaceHierarchy(Class<?> interfaceType, Set<Class<?>> interfaces) {
-		interfaces.add(interfaceType);
-		for (Class<?> inheritedInterface : interfaceType.getInterfaces()) {
-			addInterfaceHierarchy(inheritedInterface, interfaces);
-		}
-	}
-
-	private static TypeDescriptor fromCommonElement(CommonElement commonElement) {
-		if (commonElement == null) {
-			return TypeDescriptor.valueOf(Object.class);
-		}
-		if (commonElement.getValue() instanceof Collection<?>) {
-			Collection<?> collection = (Collection<?>) commonElement.getValue();
-			if (collection.size() == 0) {
-				return TypeDescriptor.valueOf(Object.class);
-			}
-			return new TypeDescriptor(commonElement.getType(), findCommonElement(collection));			
-		}
-		else if (commonElement.getValue() instanceof Map<?, ?>) {
-			Map<?, ?> map = (Map<?, ?>) commonElement.getValue();
-			if (map.size() == 0) {
-				return TypeDescriptor.valueOf(Object.class);				
-			}
-			return new TypeDescriptor(commonElement.getType(), findCommonElement(map.keySet()), findCommonElement(map.values()));
-		}
-		else {
-			return TypeDescriptor.valueOf(commonElement.getType());
-		}
-	}
-
 	private static TypeDescriptor nested(AbstractDescriptor descriptor, int nestingLevel) {
 		for (int i = 0; i < nestingLevel; i++) {
 			descriptor = descriptor.nested();
@@ -567,365 +478,4 @@ public class TypeDescriptor {
 		return new TypeDescriptor(descriptor);		
 	}
 	
-	// inner classes
-
-	private abstract static class AbstractDescriptor {
-
-		private final Class<?> type;
-
-		public AbstractDescriptor(Class<?> type) {
-			this.type = type;
-		}
-		
-		public Class<?> getType() {
-			return type;		
-		}
-
-		public TypeDescriptor getElementType() {
-			if (isCollection()) {
-				Class<?> elementType = wildcard(getCollectionElementClass());
-				return new TypeDescriptor(nested(elementType, 0));
-			} else if (isArray()) {
-				Class<?> elementType = getType().getComponentType();
-				return new TypeDescriptor(nested(elementType, 0));				
-			} else {
-				return TypeDescriptor.NULL;
-			}
-		}
-		
-		public TypeDescriptor getMapKeyType() {
-			if (isMap()) {
-				Class<?> keyType = wildcard(getMapKeyClass());
-				return new TypeDescriptor(nested(keyType, 0));
-			} else {
-				return TypeDescriptor.NULL;
-			}
-		}
-		
-		public TypeDescriptor getMapValueType() {
-			if (isMap()) {
-				Class<?> valueType = wildcard(getMapValueClass());
-				return new TypeDescriptor(nested(valueType, 1));
-			} else {
-				return TypeDescriptor.NULL;
-			}
-		}
-
-		public abstract Annotation[] getAnnotations();
-
-		public AbstractDescriptor nested() {
-			if (isCollection()) {
-				return nested(wildcard(getCollectionElementClass()), 0);
-			} else if (isArray()) {
-				return nested(getType().getComponentType(), 0);
-			} else if (isMap()) {
-				return nested(wildcard(getMapValueClass()), 1);
-			} else {
-				throw new IllegalStateException("Not a collection, array, or map: cannot resolve nested value types");
-			}
-		}
-		
-		// subclassing hooks
-		
-		protected abstract Class<?> getCollectionElementClass();
-		
-		protected abstract Class<?> getMapKeyClass();
-		
-		protected abstract Class<?> getMapValueClass();
-		
-		protected abstract AbstractDescriptor nested(Class<?> type, int typeIndex);
-		
-		// internal helpers
-		
-		private boolean isCollection() {
-			return Collection.class.isAssignableFrom(getType());
-		}
-		
-		private boolean isArray() {
-			return getType().isArray();
-		}
-		
-		private boolean isMap() {
-			return Map.class.isAssignableFrom(getType());
-		}
-		
-		private Class<?> wildcard(Class<?> type) {
-			return type != null ? type : Object.class;
-		}
-		
-	}
-	
-	private static class FieldDescriptor extends AbstractDescriptor {
-
-		private final Field field;
-
-		private final int nestingLevel;
-
-		public FieldDescriptor(Field field) {
-			this(field.getType(), field, 1, 0);
-		}
-
-		@Override
-		public Annotation[] getAnnotations() {
-			return nullSafeAnnotations(field.getAnnotations());
-		}
-		
-		@Override
-		protected Class<?> getCollectionElementClass() {
-			return GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.nestingLevel);
-		}
-
-		@Override
-		protected Class<?> getMapKeyClass() {
-			return GenericCollectionTypeResolver.getMapKeyFieldType(this.field, this.nestingLevel);
-		}
-
-		@Override
-		protected Class<?> getMapValueClass() {
-			return GenericCollectionTypeResolver.getMapValueFieldType(this.field, this.nestingLevel);
-		}
-
-		@Override
-		protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
-			return new FieldDescriptor(type, this.field, this.nestingLevel + 1, typeIndex);
-		}
-
-		// internal
-		
-		private FieldDescriptor(Class<?> type, Field field, int nestingLevel, int typeIndex) {
-			super(type);
-			this.field = field;
-			this.nestingLevel = nestingLevel;
-		}
-
-	}
-	
-	private static class ParameterDescriptor extends AbstractDescriptor {
-
-		private final MethodParameter methodParameter;
-
-		public ParameterDescriptor(MethodParameter methodParameter) {
-			super(methodParameter.getParameterType());
-			if (methodParameter.getNestingLevel() != 1) {
-				throw new IllegalArgumentException("The MethodParameter argument must have its nestingLevel set to 1");
-			}			
-			this.methodParameter = methodParameter;
-		}
-
-		@Override
-		public Annotation[] getAnnotations() {
-			if (methodParameter.getParameterIndex() == -1) {				
-				return nullSafeAnnotations(methodParameter.getMethodAnnotations());
-			}
-			else {
-				return nullSafeAnnotations(methodParameter.getParameterAnnotations());
-			}
-		}
-		
-		@Override
-		protected Class<?> getCollectionElementClass() {
-			return GenericCollectionTypeResolver.getCollectionParameterType(methodParameter);
-		}
-
-		@Override
-		protected Class<?> getMapKeyClass() {
-			return GenericCollectionTypeResolver.getMapKeyParameterType(methodParameter);
-		}
-
-		@Override
-		protected Class<?> getMapValueClass() {
-			return GenericCollectionTypeResolver.getMapValueParameterType(methodParameter);
-		}
-
-		@Override
-		protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
-			MethodParameter methodParameter = new MethodParameter(this.methodParameter);
-			methodParameter.increaseNestingLevel();
-			methodParameter.setTypeIndexForCurrentLevel(typeIndex);
-			return new ParameterDescriptor(type, methodParameter);
-		}
-
-		// internal
-		
-		private ParameterDescriptor(Class<?> type, MethodParameter methodParameter) {
-			super(type);
-			this.methodParameter = methodParameter;
-		}
-
-	}
-
-	private static class BeanPropertyDescriptor extends AbstractDescriptor {
-
-		private final Class<?> beanClass;
-		
-		private final PropertyDescriptor property;
-
-		private final MethodParameter methodParameter;
-		
-		private final Annotation[] annotations;
-		
-		public BeanPropertyDescriptor(Class<?> beanClass, PropertyDescriptor property) {
-			super(property.getPropertyType());
-			this.beanClass = beanClass;
-			this.property = property;
-			this.methodParameter = resolveMethodParameter();
-			this.annotations = resolveAnnotations();
-		}
-
-		@Override
-		public Annotation[] getAnnotations() {
-			return annotations;
-		}
-		
-		@Override
-		protected Class<?> getCollectionElementClass() {
-			return GenericCollectionTypeResolver.getCollectionParameterType(methodParameter);
-		}
-
-		@Override
-		protected Class<?> getMapKeyClass() {
-			return GenericCollectionTypeResolver.getMapKeyParameterType(methodParameter);
-		}
-
-		@Override
-		protected Class<?> getMapValueClass() {
-			return GenericCollectionTypeResolver.getMapValueParameterType(methodParameter);
-		}
-
-		@Override
-		protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
-			MethodParameter methodParameter = new MethodParameter(this.methodParameter);
-			methodParameter.increaseNestingLevel();
-			methodParameter.setTypeIndexForCurrentLevel(typeIndex);			
-			return new BeanPropertyDescriptor(type, beanClass, property, methodParameter, annotations);
-		}
-		
-		// internal
-
-		private MethodParameter resolveMethodParameter() {
-			if (property.getReadMethod() != null) {
-				MethodParameter parameter = new MethodParameter(property.getReadMethod(), -1);
-				GenericTypeResolver.resolveParameterType(parameter, beanClass);
-				return parameter;
-			} else if (property.getWriteMethod() != null) {
-				MethodParameter parameter = new MethodParameter(property.getWriteMethod(), 0);
-				GenericTypeResolver.resolveParameterType(parameter, beanClass);
-				return parameter;				
-			} else {
-				throw new IllegalArgumentException("Property is neither readable or writeable");
-			}
-		}
-		
-		private Annotation[] resolveAnnotations() {
-			Map<Class<?>, Annotation> annMap = new LinkedHashMap<Class<?>, Annotation>();
-			Method readMethod = this.property.getReadMethod();
-			if (readMethod != null) {
-				for (Annotation ann : readMethod.getAnnotations()) {
-					annMap.put(ann.annotationType(), ann);
-				}
-			}
-			Method writeMethod = this.property.getWriteMethod();
-			if (writeMethod != null) {
-				for (Annotation ann : writeMethod.getAnnotations()) {
-					annMap.put(ann.annotationType(), ann);
-				}
-			}			
-			Field field = getField();
-			if (field != null) {
-				for (Annotation ann : field.getAnnotations()) {
-					annMap.put(ann.annotationType(), ann);
-				}
-			}
-			return annMap.values().toArray(new Annotation[annMap.size()]);			
-		}
-		
-		private Field getField() {
-			String name = this.property.getName();
-			if (!StringUtils.hasLength(name)) {
-				return null;
-			}
-			Class<?> declaringClass = declaringClass();
-			Field field = ReflectionUtils.findField(declaringClass, name);
-			if (field == null) {
-				// Same lenient fallback checking as in CachedIntrospectionResults...
-				field = ReflectionUtils.findField(declaringClass, name.substring(0, 1).toLowerCase() + name.substring(1));
-				if (field == null) {
-					field = ReflectionUtils.findField(declaringClass, name.substring(0, 1).toUpperCase() + name.substring(1));
-				}
-			}
-			return field;
-		}
-		
-		private Class<?> declaringClass() {
-			if (this.property.getReadMethod() != null) {
-				return this.property.getReadMethod().getDeclaringClass();
-			} else {
-				return this.property.getWriteMethod().getDeclaringClass();
-			}
-		}
-		
-		private BeanPropertyDescriptor(Class<?> type, Class<?> beanClass, java.beans.PropertyDescriptor propertyDescriptor, MethodParameter methodParameter, Annotation[] annotations) {
-			super(type);
-			this.beanClass = beanClass;
-			this.property = propertyDescriptor;
-			this.methodParameter = methodParameter;
-			this.annotations = annotations;
-		}
-		
-	}
-	
-	private static class ClassDescriptor extends AbstractDescriptor {
-
-		private ClassDescriptor(Class<?> type) {
-			super(type);
-		}
-
-		@Override
-		public Annotation[] getAnnotations() {
-			return EMPTY_ANNOTATION_ARRAY;
-		}
-
-		@Override
-		protected Class<?> getCollectionElementClass() {
-			return Object.class;
-		}
-
-		@Override
-		protected Class<?> getMapKeyClass() {
-			return Object.class;
-		}
-
-		@Override
-		protected Class<?> getMapValueClass() {
-			return Object.class;
-		}
-
-		@Override
-		protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
-			return new ClassDescriptor(type);
-		}
-		
-	}
-	
-	private static class CommonElement {
-		
-		private Class<?> type;
-		
-		private Object value;
-
-		public CommonElement(Class<?> type, Object value) {
-			this.type = type;
-			this.value = value;
-		}
-
-		public Class<?> getType() {
-			return type;
-		}
-
-		public Object getValue() {
-			return value;
-		}
-		
-	}
-
 }
