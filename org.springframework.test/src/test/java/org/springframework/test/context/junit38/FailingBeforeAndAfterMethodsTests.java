@@ -38,7 +38,7 @@ import org.springframework.test.context.transaction.BeforeTransaction;
 
 /**
  * <p>
- * JUnit 4 based unit test for verifying that '<em>before</em>' and '<em>after</em>'
+ * JUnit 4 based integration test for verifying that '<em>before</em>' and '<em>after</em>'
  * methods of {@link TestExecutionListener TestExecutionListeners} as well as
  * {@link BeforeTransaction @BeforeTransaction} and
  * {@link AfterTransaction @AfterTransaction} methods can fail a test in a JUnit

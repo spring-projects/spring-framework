@@ -26,14 +26,13 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * JUnit 4 based unit test which verifies proper transactional behavior when the
+ * JUnit 4 based integration test which verifies proper transactional behavior when the
  * {@link TransactionConfiguration#defaultRollback() defaultRollback} attribute
  * of the {@link TransactionConfiguration} annotation is set to <strong><code>true</code></strong>.
  *
@@ -41,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2.5
  * @see TransactionConfiguration
  */
+@SuppressWarnings("deprecation")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @TransactionConfiguration(defaultRollback = true)
@@ -54,7 +54,7 @@ public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractT
 	@AfterClass
 	public static void verifyFinalTestData() {
 		assertEquals("Verifying the final number of rows in the person table after all tests.", originalNumRows,
-				countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	@Before
@@ -62,7 +62,7 @@ public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractT
 		originalNumRows = clearPersonTable(simpleJdbcTemplate);
 		assertEquals("Adding bob", 1, addPerson(simpleJdbcTemplate, BOB));
 		assertEquals("Verifying the initial number of rows in the person table.", 1,
-				countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 	@Test(timeout = 1000)
@@ -72,7 +72,7 @@ public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractT
 		assertEquals("Adding jane", 1, addPerson(simpleJdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(simpleJdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table within a transaction.", 3,
-				countRowsInPersonTable(simpleJdbcTemplate));
+			countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
 

@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
- * JUnit 4 based unit test which verifies support of Spring's
+ * JUnit 4 based integration test which verifies support of Spring's
  * {@link Transactional &#64;Transactional}, {@link TestExecutionListeners
  * &#64;TestExecutionListeners}, and {@link ContextConfiguration
  * &#64;ContextConfiguration} annotations in conjunction with the
@@ -60,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @since 2.5
  * @see ClassLevelTransactionalSpringRunnerTests
  */
+@SuppressWarnings("deprecation")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, DirtiesContextTestExecutionListener.class,

@@ -31,7 +31,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
 import org.springframework.beans.Employee;
 import org.springframework.beans.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
 /**
- * Simple JUnit 4 based unit test which demonstrates how to use JUnit's
+ * Simple JUnit 4 based integration test which demonstrates how to use JUnit's
  * {@link Parameterized} Runner in conjunction with
  * {@link ContextConfiguration @ContextConfiguration}, the
  * {@link DependencyInjectionTestExecutionListener}, and a
@@ -54,7 +53,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
  */
 @RunWith(Parameterized.class)
 @ContextConfiguration
-@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class })
+@TestExecutionListeners({ DependencyInjectionTestExecutionListener.class })
 public class ParameterizedDependencyInjectionTests {
 
 	private static final List<Employee> employees = new ArrayList<Employee>();

@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * Unit tests to verify claims made in <a
+ * Integration tests to verify claims made in <a
  * href="http://jira.springframework.org/browse/SPR-6128"
  * target="_blank">SPR-6128</a>.
  * 

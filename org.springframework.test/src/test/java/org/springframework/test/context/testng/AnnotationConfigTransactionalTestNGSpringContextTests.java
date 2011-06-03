@@ -16,10 +16,10 @@
 
 package org.springframework.test.context.testng;
 
-import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.transaction.TransactionTestUtils.assertInTransaction;
 import static org.springframework.test.transaction.TransactionTestUtils.inTransaction;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import javax.sql.DataSource;
 
@@ -113,11 +113,11 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	@Test
 	@NotTransactional
 	public void autowiringFromConfigClass() {
-		assertNotNull("The employee should have been autowired.", employee);
-		assertEquals("John Smith", employee.getName());
+		assertNotNull(employee, "The employee should have been autowired.");
+		assertEquals(employee.getName(), "John Smith");
 
-		assertNotNull("The pet should have been autowired.", pet);
-		assertEquals("Fido", pet.getName());
+		assertNotNull(pet, "The pet should have been autowired.");
+		assertEquals(pet.getName(), "Fido");
 	}
 
 	@BeforeTransaction

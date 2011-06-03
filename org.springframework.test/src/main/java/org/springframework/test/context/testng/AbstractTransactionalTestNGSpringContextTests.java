@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.junit38.AbstractTransactionalJUnit38SpringContextTests
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  */
+@SuppressWarnings("deprecation")
 @TestExecutionListeners(TransactionalTestExecutionListener.class)
 @Transactional
 public abstract class AbstractTransactionalTestNGSpringContextTests extends AbstractTestNGSpringContextTests {
@@ -93,7 +94,6 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	public void setSqlScriptEncoding(String sqlScriptEncoding) {
 		this.sqlScriptEncoding = sqlScriptEncoding;
 	}
-
 
 	/**
 	 * Count the rows in the given table.
@@ -125,12 +125,11 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and continueOnError was <code>false</code>
 	 */
-	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError)
-			throws DataAccessException {
+	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
-		SimpleJdbcTestUtils.executeSqlScript(
-				this.simpleJdbcTemplate, new EncodedResource(resource, this.sqlScriptEncoding), continueOnError);
+		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, new EncodedResource(resource,
+			this.sqlScriptEncoding), continueOnError);
 	}
 
 }

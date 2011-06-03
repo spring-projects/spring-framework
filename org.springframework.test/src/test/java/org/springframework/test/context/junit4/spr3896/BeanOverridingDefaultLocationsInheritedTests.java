@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 /**
- * JUnit 4 based unit test for verifying support for the
+ * JUnit 4 based integration test for verifying support for the
  * {@link ContextConfiguration#inheritLocations() inheritLocations} flag of
  * {@link ContextConfiguration @ContextConfiguration} indirectly proposed in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3896"
