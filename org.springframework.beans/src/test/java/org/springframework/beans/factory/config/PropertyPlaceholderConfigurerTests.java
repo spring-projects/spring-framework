@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -229,7 +228,6 @@ public class PropertyPlaceholderConfigurerTests {
 		assertThat(bf.getBean(TestBean.class).getSex(), is("${key2}"));
 	}
 
-	@Ignore // fails on windows
 	@Test
 	public void nullValueIsPreserved() {
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
@@ -247,6 +245,7 @@ public class PropertyPlaceholderConfigurerTests {
 
 	@SuppressWarnings("unchecked")
 	private static Map<String, String> getModifiableSystemEnvironment() {
+		// for os x / linux
 		Class<?>[] classes = Collections.class.getDeclaredClasses();
 		Map<String, String> env = System.getenv();
 		for (Class<?> cl : classes) {
@@ -255,12 +254,45 @@ public class PropertyPlaceholderConfigurerTests {
 					Field field = cl.getDeclaredField("m");
 					field.setAccessible(true);
 					Object obj = field.get(env);
-					return (Map<String, String>) obj;
+					if (obj != null && obj.getClass().getName().equals("java.lang.ProcessEnvironment$StringEnvironment")) {
+						return (Map<String, String>) obj;
+					}
 				} catch (Exception ex) {
 					throw new RuntimeException(ex);
 				}
 			}
 		}
+
+		// for windows
+		Class<?> processEnvironmentClass;
+		try {
+			processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+		try {
+			Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
+			theCaseInsensitiveEnvironmentField.setAccessible(true);
+			Object obj = theCaseInsensitiveEnvironmentField.get(null);
+			return (Map<String, String>) obj;
+		} catch (NoSuchFieldException e) {
+			// do nothing
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
+		try {
+			Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
+			theEnvironmentField.setAccessible(true);
+			Object obj = theEnvironmentField.get(null);
+			return (Map<String, String>) obj;
+		} catch (NoSuchFieldException e) {
+			// do nothing
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+
 		throw new IllegalStateException();
 	}
 }
