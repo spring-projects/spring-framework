@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
+ * @see TestContextCacheKeyTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
@@ -51,17 +52,31 @@ public class SpringRunnerContextCacheTests {
 
 
 	/**
-	 * Asserts the statistics of the supplied context cache.
+	 * Asserts the statistics of the context cache in {@link TestContextManager}.
 	 * 
 	 * @param usageScenario the scenario in which the statistics are used
 	 * @param expectedSize the expected number of contexts in the cache
 	 * @param expectedHitCount the expected hit count
 	 * @param expectedMissCount the expected miss count
 	 */
-	public static final void assertContextCacheStatistics(String usageScenario, int expectedSize, int expectedHitCount,
-			int expectedMissCount) {
+	private static final void assertContextCacheStatistics(String usageScenario, int expectedSize,
+			int expectedHitCount, int expectedMissCount) {
+		assertContextCacheStatistics(TestContextManager.contextCache, usageScenario, expectedSize, expectedHitCount,
+			expectedMissCount);
+	}
 
-		ContextCache contextCache = TestContextManager.contextCache;
+	/**
+	 * Asserts the statistics of the supplied context cache.
+	 * 
+	 * @param contextCache the cache to assert against
+	 * @param usageScenario the scenario in which the statistics are used
+	 * @param expectedSize the expected number of contexts in the cache
+	 * @param expectedHitCount the expected hit count
+	 * @param expectedMissCount the expected miss count
+	 */
+	public static final void assertContextCacheStatistics(ContextCache contextCache, String usageScenario,
+			int expectedSize, int expectedHitCount, int expectedMissCount) {
+
 		assertEquals("Verifying number of contexts in cache (" + usageScenario + ").", expectedSize,
 			contextCache.size());
 		assertEquals("Verifying number of cache hits (" + usageScenario + ").", expectedHitCount,
