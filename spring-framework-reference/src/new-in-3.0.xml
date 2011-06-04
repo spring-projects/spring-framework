@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<chapter id="new-in-3">
+<chapter id="new-in-3.0">
   <title>New Features and Enhancements in Spring 3.0</title>
 
   <para>If you have been using the Spring Framework for some time, you will be
@@ -9,7 +9,7 @@
   October 2006, and Spring 2.5, released in November 2007. It is now time for
   a third overhaul resulting in Spring 3.0.</para>
 
-  <sidebar id="new-in-3-intro-java">
+  <sidebar id="new-in-3.0-intro-java">
     <title>Java SE and Java EE Support</title>
 
     <para>The Spring Framework is now based on Java 5, and Java 6 is fully
@@ -19,7 +19,7 @@
     at the same time introducing some early support for Java EE 6.</para>
   </sidebar>
 
-  <section id="new-in-3-intro">
+  <section id="new-in-3.0-intro">
     <title>Java 5</title>
 
     <para>The entire framework code has been revised to take advantage of Java
@@ -43,7 +43,7 @@
     @Asynchronous annotation).</para>
   </section>
 
-  <section id="new-in-3-improved-docs">
+  <section id="new-in-3.0-improved-docs">
     <title>Improved documentation</title>
 
     <para>The Spring reference documentation has also substantially been
@@ -56,14 +56,14 @@
     issue</ulink>.</para>
   </section>
 
-  <section id="new-in-3-new-tutorial">
+  <section id="new-in-3.0-new-tutorial">
     <title>New articles and tutorials</title>
 
     <para>
 		There are many excellent articles and tutorials that show how to get started with Spring 3 features.
 		Read them at the <ulink url="http://www.springsource.org/documentation">Spring Documentation</ulink> page.
 	  </para>
-	  <para id="new-in-3-samples">
+	  <para id="new-in-3.0-samples">
 	  The samples have been improved and updated to take advantage of the new features in Spring 3.
 	  Additionally, the samples have been moved out of the source tree into a dedicated SVN 
 	  <ulink url="https://anonsvn.springframework.org/svn/spring-samples/">repository</ulink> available at:</para>
@@ -81,7 +81,7 @@
 
   </section>
 
-  <section id="new-in-3-modules-build">
+  <section id="new-in-3.0-modules-build">
     <title>New module organization and build system</title>
 
     <para>The framework modules have been revised and are now managed
@@ -153,7 +153,7 @@
       </listitem>
     </itemizedlist>
 
-    <sidebar id="new-in-3-intro-spring-jar">
+    <sidebar id="new-in-3.0-intro-spring-jar">
       <title>Note:</title>
 
       <para>The spring.jar artifact that contained almost the entire framework
@@ -182,7 +182,7 @@
     </itemizedlist>
   </section>
 
-  <section id="new-in-3-features-overview">
+  <section id="new-in-3.0-features-overview">
     <title>Overview of new features</title>
 
     <para>This is a list of new features for Spring 3.0. We will cover these

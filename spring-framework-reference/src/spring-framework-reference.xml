@@ -7,7 +7,7 @@
 
     <productname>Spring Framework</productname>
 
-    <releaseinfo>3.0</releaseinfo>
+    <releaseinfo>3.1</releaseinfo>
 
     <mediaobject>
       <imageobject role="fo">
@@ -238,9 +238,9 @@
   </part>
 
   <part id="spring-whats-new">
-    <title>What's New in Spring 3.0</title>
+    <title>What's New in Spring 3</title>
 
-    <xi:include href="new-in-3.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="new-in-3.0.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   </part>
 
   <part id="spring-core">
