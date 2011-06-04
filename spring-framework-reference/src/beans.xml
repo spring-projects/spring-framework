@@ -548,7 +548,7 @@ List userList service.getUsernameList();
         or id is supplied explicitly, the container generates a unique name for
         that bean. However, if you want to refer to that bean by name, through
         the use of the <literal>ref</literal> element or <link lang=""
-        linkend="beans-servicelocation">Service Location</link> style lookup,
+        linkend="beans-servicelocator">Service Locator</link> style lookup,
         you must provide a name. Motivations for not supplying a name are
         related to using <link linkend="beans-inner-beans">inner beans</link>
         and <link linkend="beans-factory-autowire">autowiring

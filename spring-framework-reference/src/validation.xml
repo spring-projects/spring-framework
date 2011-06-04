@@ -1101,7 +1101,7 @@ public interface ConversionService {
 </bean>]]></programlisting>
 
       <para>It is also common to use a ConversionService within a Spring MVC
-        application. See <xref linkend="format-configuring-FormatterRegistry"/>
+        application. See <xref linkend="format-configuring-FormattingConversionService"/>
         for details on use with
         <literal>&lt;mvc:annotation-driven/&gt;</literal>.</para>
 
@@ -1415,7 +1415,7 @@ public interface FormatterRegistrar {
 	    </para>
 	</section>
       
-    <section id="format-configuring-FormattingConverionService">
+    <section id="format-configuring-FormattingConversionService">
       <title>Configuring Formatting in Spring MVC</title>
 
       <para> In a Spring MVC application, you may configure a custom
