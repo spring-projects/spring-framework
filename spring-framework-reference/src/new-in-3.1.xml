@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="new-in-3.1">
+  <title>New Features and Enhancements in Spring 3.1</title>
+
+  <para>Building on the support introduced in Spring 3.0, Spring 3.1 is
+  currently under development, and at the time of this writing Spring 3.1 M2
+  has just been released.</para>
+
+  <section id="new-in-3.1-features-overview">
+    <title>Overview of new features</title>
+
+    <para>This is a list of new features for Spring 3.1. Most features
+    do not yet have dedicated reference documentation but do have
+    Javadoc. In these cases, fully-qualified classnames are given.</para>
+
+    <section>
+      <title>Cache Abstraction</title>
+      <itemizedlist>
+        <listitem>
+          <para><xref linkend="cache"/></para>
+        </listitem>
+        <listitem>
+          <para><ulink
+          url="http://blog.springsource.com/2011/02/23/spring-3-1-m1-caching/">
+          Cache Abstraction</ulink> (SpringSource team blog)</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+    <section>
+      <title>Bean Definition Profiles</title>
+      <itemizedlist>
+        <listitem>
+          <para><ulink
+          url="http://blog.springsource.com/2011/02/11/spring-framework-3-1-m1-released/">
+          XML profiles</ulink> (SpringSource Team Blog)</para>
+        </listitem>
+        <listitem>
+          <para><ulink
+          url="http://blog.springsource.com/2011/02/14/spring-3-1-m1-introducing-profile/">
+          Introducing @Profile</ulink> (SpringSource Team Blog)</para>
+        </listitem>
+        <listitem>
+          <para>See org.springframework.context.annotation.Configuration Javadoc</para>
+        </listitem>
+        <listitem>
+          <para>See org.springframework.context.annotation.Profile Javadoc</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+    <section>
+      <title>Environment Abstraction</title>
+      <itemizedlist>
+        <listitem>
+          <para><ulink
+          url="http://blog.springsource.com/2011/02/11/spring-framework-3-1-m1-released/">
+          Environment Abstraction</ulink> (SpringSource Team Blog)</para>
+        </listitem>
+        <listitem>
+          <para>See org.springframework.core.env.Environment Javadoc</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+    <section>
+      <title>PropertySource Abstraction</title>
+      <itemizedlist>
+        <listitem>
+          <para><ulink
+          url="http://blog.springsource.com/2011/02/15/spring-3-1-m1-unified-property-management/">
+          Unified Property Management</ulink> (SpringSource Team Blog)</para>
+        </listitem>
+        <listitem>
+          <para>See org.springframework.core.env.Environment Javadoc</para>
+        </listitem>
+        <listitem>
+          <para>See org.springframework.core.env.PropertySource Javadoc</para>
+        </listitem>
+        <listitem>
+          <para>See org.springframework.context.annotation.PropertySource Javadoc</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+    <section>
+      <title>Code equivalents for Spring's XML namespaces</title>
+      <para>Code-based equivalents to popular Spring XML namespace elements such as
+      &lt;tx:annotation-driven/&gt; and &lt;mvc:annotation-driven&gt; have been
+      developed, in the form of <interfacename>@Enable</interfacename> annotations,
+      for use in conjunction with Spring's <interfacename>@Configuration</interfacename>
+      classes.</para>
+      <itemizedlist>
+        <listitem>
+          <para>See org.springframework.scheduling.annotation.Configuration Javadoc</para>
+        </listitem>
+        <listitem>
+          <para>See org.springframework.scheduling.annotation.EnableAsync Javadoc</para>
+        </listitem>
+        <listitem>
+          <para>See org.springframework.scheduling.annotation.EnableScheduling
+          Javadoc</para>
+          <para>See
+          org.springframework.scheduling.annotation.EnableTransactionManagement
+          Javadoc</para>
+        </listitem>
+        <listitem>
+          <para>See org.springframework.scheduling.annotation.EnableWebMvc Javadoc</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+    <section>
+      <title>Builder-style APIs for code-based Hibernate configuration</title>
+      <para><classname>SessionFactoryBuilder</classname> and
+      <classname>AnnotationSessionFactoryBuilder</classname> classes have been designed
+      for use within <interfacename>@Bean</interfacename> methods in
+      <interfacename>@Configuration</interfacename> classes.</para>
+      <itemizedlist>
+        <listitem>
+          <para>See org.springframework.orm.hibernate3.SessionFactoryBuilder Javadoc</para>
+        </listitem>
+        <listitem>
+          <para>See
+          org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBuilder
+          Javadoc</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+    <section>
+      <title>TestContext framework support for @Configuration classes</title>
+      <para>The <interfacename>@ContextConfiguration</interfacename> annotation now
+      supports supplying <interfacename>@Configuration</interfacename> classes for
+      configuring the Spring <classname>TestContext</classname></para>
+      <itemizedlist>
+        <listitem>
+          <para>See org.springframework.test.context.ContextConfiguration Javadoc</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+    <section>
+      <title>c: namespace for more concise constructor injection</title>
+      <itemizedlist>
+        <listitem>
+          <para><xref linkend="beans-c-namespace"/></para>
+        </listitem>
+      </itemizedlist>
+    </section>
+    <section>
+      <title>Support for injection against non-standard JavaBeans setters</title>
+      <para>Prior to Spring 3.1, in order to inject against a property method it had to
+      conform strictly to JavaBeans property signature rules, namely that any 'setter'
+      method must be void-returning.  It is now possible in Spring XML to specify
+      setter methods that return any object type. This is useful when considering
+      designing APIs for method-chaining, where setter methods return a reference to
+      'this'.</para>
+    </section>
+    <section>
+      <title>Support for Servlet 3 code-based configuration of Servlet Container</title>
+      <para>The new <interfacename>WebApplicationInitializer</interfacename> builds atop
+      Servlet 3.0's <interfacename>ServletContainerInitializer</interfacename> support
+      to provide a programmatic alternative to the traditional web.xml.</para>
+      <itemizedlist>
+        <listitem>
+          <para>See org.springframework.web.WebApplicationInitializer Javadoc</para>
+        </listitem>
+        <listitem>
+          <para><ulink url="http://bit.ly/lrDHja">Diff from Spring's Greenhouse
+          reference application</ulink> demonstrating migration from web.xml to
+          <interfacename>WebApplicationInitializer</interfacename></para>
+        </listitem>
+      </itemizedlist>
+    </section>
+    <section>
+      <title>Support for Servlet 3 MultipartResolver</title>
+      <itemizedlist>
+        <listitem>
+          <para>See
+          org.springframework.web.multipart.support.StandardServletMultipartResolver
+          Javadoc</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+</chapter>
