@@ -167,35 +167,23 @@ public class GenericConversionService implements ConfigurableConversionService {
 			logger.debug("Converting value " + StylerUtils.style(source) + " of " + sourceType + " to " + targetType);
 		}
 		if (sourceType == TypeDescriptor.NULL) {
-			Assert.isTrue(source == null, "The value must be null if sourceType == TypeDescriptor.NULL");
-			Object result = convertNullSource(sourceType, targetType);
-			if (result == null) {
-				assertNotPrimitiveTargetType(sourceType, targetType);
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Converted to " + StylerUtils.style(result));
-			}			
-			return result;
+			Assert.isTrue(source == null, "The source must be [null] if sourceType == [null]");
+			return handleResult(sourceType, targetType, convertNullSource(sourceType, targetType));
 		}
 		if (targetType == TypeDescriptor.NULL) {
 			logger.debug("Converted to null");
 			return null;
 		}
-		Assert.isTrue(source == null || sourceType.getObjectType().isInstance(source));
+		if (source != null && !sourceType.getObjectType().isInstance(source)) {
+			throw new IllegalArgumentException("The source to convert from must be an instance of " + sourceType + "; instead it was a " + source.getClass().getName());
+		}
 		GenericConverter converter = getConverter(sourceType, targetType);
-		if (converter == null) {
-			return handleConverterNotFound(source, sourceType, targetType);
+		if (converter != null) {
+			return handleResult(sourceType, targetType, ConversionUtils.invokeConverter(converter, source, sourceType, targetType));
+		}  else {
+			return handleConverterNotFound(source, sourceType, targetType);			
 		}
-		Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
-		if (result == null) {
-			assertNotPrimitiveTargetType(sourceType, targetType);
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Converted to " + StylerUtils.style(result));
-		}
-		return result;
 	}
-
 
 	public String toString() {
 		List<String> converterStrings = new ArrayList<String>();
@@ -325,7 +313,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	private void assertNotNull(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Assert.notNull(sourceType, "The sourceType to convert to is required");
+		Assert.notNull(sourceType, "The sourceType to convert from is required");
 		Assert.notNull(targetType, "The targetType to convert to is required");
 	}
 
@@ -537,6 +525,15 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}		
 	}
 	
+	private Object handleResult(TypeDescriptor sourceType, TypeDescriptor targetType, Object result) {
+		if (result == null) {
+			assertNotPrimitiveTargetType(sourceType, targetType);
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Converted to " + StylerUtils.style(result));
+		}			
+		return result;		
+	}
 	private void assertNotPrimitiveTargetType(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (targetType.isPrimitive()) {
 			throw new ConversionFailedException(sourceType, targetType, null,

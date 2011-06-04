@@ -37,6 +37,7 @@ import java.util.Map;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 
 /**
@@ -62,6 +63,18 @@ public class TypeDescriptorTests {
 	public Map<String, List<Integer>> nestedMapField = new HashMap<String, List<Integer>>();
 
 	@Test
+	public void nullTypeDescriptor() {
+		TypeDescriptor desc = TypeDescriptor.NULL;
+		assertEquals(false, desc.isMap());
+		assertEquals(false, desc.isCollection());
+		assertEquals(false, desc.isArray());
+		assertEquals(null, desc.getType());
+		assertEquals(null, desc.getObjectType());
+		assertEquals(null, desc.getName());
+		assertEquals(0, desc.getAnnotations().length);
+	}
+	
+	@Test
 	public void parameterPrimitive() throws Exception {
 		TypeDescriptor desc = new TypeDescriptor(new MethodParameter(getClass().getMethod("testParameterPrimitive", int.class), 0));
 		assertEquals(int.class, desc.getType());
@@ -70,14 +83,8 @@ public class TypeDescriptorTests {
 		assertEquals("int", desc.toString());
 		assertTrue(desc.isPrimitive());
 		assertEquals(0, desc.getAnnotations().length);
-		assertTrue(!desc.isCollection());
-		assertNull(desc.getElementType());
-		assertEquals(TypeDescriptor.NULL, desc.getElementTypeDescriptor());
-		assertTrue(!desc.isMap());
-		assertNull(desc.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapKeyTypeDescriptor());
-		assertNull(desc.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapValueTypeDescriptor());
+		assertFalse(desc.isCollection());
+		assertFalse(desc.isMap());
 	}
 	
 	public void testParameterPrimitive(int primitive) {
@@ -95,13 +102,7 @@ public class TypeDescriptorTests {
 		assertEquals(0, desc.getAnnotations().length);
 		assertFalse(desc.isCollection());
 		assertFalse(desc.isArray());
-		assertNull(desc.getElementType());
-		assertEquals(TypeDescriptor.NULL, desc.getElementTypeDescriptor());
 		assertFalse(desc.isMap());
-		assertNull(desc.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapKeyTypeDescriptor());
-		assertNull(desc.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapValueTypeDescriptor());
 	}
 	
 	public void testParameterScalar(String value) {
@@ -127,10 +128,6 @@ public class TypeDescriptorTests {
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getElementTypeDescriptor().getMapKeyTypeDescriptor().getType());
 		assertEquals(Enum.class, desc.getElementTypeDescriptor().getElementTypeDescriptor().getMapValueTypeDescriptor().getType());
 		assertFalse(desc.isMap());
-		assertNull(desc.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapKeyTypeDescriptor());
-		assertNull(desc.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapValueTypeDescriptor());
 	}
 
 	public void testParameterList(List<List<Map<Integer, Enum<?>>>> list) {
@@ -152,10 +149,6 @@ public class TypeDescriptorTests {
 		assertEquals(Object.class, desc.getElementType());
 		assertEquals(TypeDescriptor.valueOf(Object.class), desc.getElementTypeDescriptor());
 		assertFalse(desc.isMap());
-		assertNull(desc.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapKeyTypeDescriptor());
-		assertNull(desc.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapValueTypeDescriptor());
 	}
 
 	public void testParameterListNoParamTypes(List list) {
@@ -176,11 +169,7 @@ public class TypeDescriptorTests {
 		assertTrue(desc.isArray());
 		assertEquals(Integer.class, desc.getElementType());
 		assertEquals(TypeDescriptor.valueOf(Integer.class), desc.getElementTypeDescriptor());
-		assertTrue(!desc.isMap());
-		assertNull(desc.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapKeyTypeDescriptor());
-		assertNull(desc.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapValueTypeDescriptor());
+		assertFalse(desc.isMap());
 	}
 
 	public void testParameterArray(Integer[] array) {
@@ -199,8 +188,6 @@ public class TypeDescriptorTests {
 		assertEquals(0, desc.getAnnotations().length);
 		assertFalse(desc.isCollection());
 		assertFalse(desc.isArray());
-		assertNull(desc.getElementType());
-		assertEquals(TypeDescriptor.NULL, desc.getElementTypeDescriptor());
 		assertTrue(desc.isMap());
 		assertEquals(TypeDescriptor.nested(methodParameter, 1), desc.getMapValueTypeDescriptor());
 		assertEquals(TypeDescriptor.nested(methodParameter, 2), desc.getMapValueTypeDescriptor().getElementTypeDescriptor());
@@ -383,12 +370,6 @@ public class TypeDescriptorTests {
 		assertFalse(typeDescriptor.isMap());
 		assertEquals(Integer.class, typeDescriptor.getType());
 		assertEquals(Integer.class, typeDescriptor.getObjectType());
-		assertNull(typeDescriptor.getElementType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getElementTypeDescriptor());		
-		assertNull(typeDescriptor.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getMapKeyTypeDescriptor());
-		assertNull(typeDescriptor.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getMapValueTypeDescriptor());		
 	}
 	
 	public Integer fieldScalar;
@@ -488,12 +469,6 @@ public class TypeDescriptorTests {
 		assertFalse(typeDescriptor.isMap());
 		assertEquals(Integer.class, typeDescriptor.getType());
 		assertEquals(Integer.class, typeDescriptor.getObjectType());
-		assertNull(typeDescriptor.getElementType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getElementTypeDescriptor());		
-		assertNull(typeDescriptor.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getMapKeyTypeDescriptor());
-		assertNull(typeDescriptor.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getMapValueTypeDescriptor());		
 	}
 
 	@Test
@@ -505,12 +480,6 @@ public class TypeDescriptorTests {
 		assertFalse(typeDescriptor.isMap());
 		assertEquals(Integer.TYPE, typeDescriptor.getType());
 		assertEquals(Integer.class, typeDescriptor.getObjectType());
-		assertNull(typeDescriptor.getElementType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getElementTypeDescriptor());		
-		assertNull(typeDescriptor.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getMapKeyTypeDescriptor());
-		assertNull(typeDescriptor.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getMapValueTypeDescriptor());		
 	}
 	
 	@Test
@@ -520,10 +489,6 @@ public class TypeDescriptorTests {
 		assertFalse(typeDescriptor.isCollection());
 		assertFalse(typeDescriptor.isMap());
 		assertEquals(Integer.TYPE, typeDescriptor.getElementType());
-		assertNull(typeDescriptor.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getMapKeyTypeDescriptor());
-		assertNull(typeDescriptor.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getMapValueTypeDescriptor());
 	}
 
 	@Test
@@ -533,10 +498,6 @@ public class TypeDescriptorTests {
 		assertFalse(typeDescriptor.isArray());
 		assertFalse(typeDescriptor.isMap());
 		assertEquals(Object.class, typeDescriptor.getElementType());
-		assertNull(typeDescriptor.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getMapKeyTypeDescriptor());
-		assertNull(typeDescriptor.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, typeDescriptor.getMapValueTypeDescriptor());		
 	}
 
 	@Test
@@ -734,10 +695,6 @@ public class TypeDescriptorTests {
 		assertEquals(Integer.class, desc.getElementType());
 		assertEquals(TypeDescriptor.valueOf(Integer.class), desc.getElementTypeDescriptor());
 		assertFalse(desc.isMap());
-		assertNull(desc.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapKeyTypeDescriptor());
-		assertNull(desc.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapValueTypeDescriptor());		
 	}
 
 	@Test
@@ -754,10 +711,6 @@ public class TypeDescriptorTests {
 		assertEquals(List.class, desc.getElementType());
 		assertEquals(TypeDescriptor.valueOf(Integer.class), desc.getElementTypeDescriptor().getElementTypeDescriptor());
 		assertFalse(desc.isMap());
-		assertNull(desc.getMapKeyType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapKeyTypeDescriptor());
-		assertNull(desc.getMapValueType());
-		assertEquals(TypeDescriptor.NULL, desc.getMapValueTypeDescriptor());
 	}
 
 	@Test
@@ -771,8 +724,6 @@ public class TypeDescriptorTests {
 		assertEquals(0, desc.getAnnotations().length);
 		assertFalse(desc.isCollection());
 		assertFalse(desc.isArray());
-		assertNull(desc.getElementType());
-		assertEquals(TypeDescriptor.NULL, desc.getElementTypeDescriptor());
 		assertTrue(desc.isMap());
 		assertEquals(String.class, desc.getMapKeyTypeDescriptor().getType());
 		assertEquals(Integer.class, desc.getMapValueTypeDescriptor().getType());
@@ -790,8 +741,6 @@ public class TypeDescriptorTests {
 		assertEquals(0, desc.getAnnotations().length);
 		assertFalse(desc.isCollection());
 		assertFalse(desc.isArray());
-		assertNull(desc.getElementType());
-		assertEquals(TypeDescriptor.NULL, desc.getElementTypeDescriptor());
 		assertTrue(desc.isMap());
 		assertEquals(String.class, desc.getMapKeyTypeDescriptor().getType());
 		assertEquals(String.class, desc.getMapValueTypeDescriptor().getMapKeyTypeDescriptor().getType());

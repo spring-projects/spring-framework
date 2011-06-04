@@ -48,14 +48,14 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Class<?> source = sourceType.getObjectType();
-		Class<?> target = targetType.getObjectType();
-		return (!source.equals(target) && hasValueOfMethodOrConstructor(target, source));
+		Class<?> source = sourceType.getType();
+		Class<?> target = targetType.getType();
+		return !source.equals(target) && hasValueOfMethodOrConstructor(target, source);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Class<?> sourceClass = sourceType.getObjectType();
-		Class<?> targetClass = targetType.getObjectType();
+		Class<?> sourceClass = sourceType.getType();
+		Class<?> targetClass = targetType.getType();
 		Method method = getValueOfMethodOn(targetClass, sourceClass);
 		try {
 			if (method != null) {
@@ -79,9 +79,8 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 				") method or Constructor(" + sourceClass.getName() + ") exists on " + targetClass.getName());
 	}
 
-
 	public static boolean hasValueOfMethodOrConstructor(Class<?> targetClass, Class<?> sourceClass) {
-		return (getValueOfMethodOn(targetClass, sourceClass) != null || getConstructor(targetClass, sourceClass) != null);
+		return getValueOfMethodOn(targetClass, sourceClass) != null || getConstructor(targetClass, sourceClass) != null;
 	}
 
 	private static Method getValueOfMethodOn(Class<?> targetClass, Class<?> sourceClass) {

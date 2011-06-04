@@ -168,7 +168,18 @@ public class CollectionToCollectionConverterTests {
 		TypeDescriptor sourceType = TypeDescriptor.forObject(resources);
 		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
+
+	@Test(expected=ConverterNotFoundException.class)
+	public void allNullsNotConvertible() throws Exception {
+		List<Resource> resources = new ArrayList<Resource>();
+		resources.add(null);
+		resources.add(null);
+		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("allNullsNotConvertible")); 
+		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+	}
 	
+	public List<String> allNullsNotConvertible;
+
 	@Test(expected=ConverterNotFoundException.class)
 	public void nothingInCommon() throws Exception {
 		List<Object> resources = new ArrayList<Object>();

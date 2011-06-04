@@ -68,7 +68,12 @@ public class GenericConversionServiceTests {
 
 	@Test(expected=ConversionFailedException.class)
 	public void convertNullSourcePrimitiveTargetTypeDescriptor() {
-		assertEquals(null, conversionService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));
+		conversionService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class));
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void convertNotNullSourceNullSourceTypeDescriptor() {
+		conversionService.convert("3", TypeDescriptor.NULL, TypeDescriptor.valueOf(int.class));
 	}
 
 	@Test
@@ -127,6 +132,11 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertNullTypeDescriptor() {
 		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void convertWrongSourceTypeDescriptor() {
+		conversionService.convert("3", TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(Long.class));
 	}
 
 	@Test

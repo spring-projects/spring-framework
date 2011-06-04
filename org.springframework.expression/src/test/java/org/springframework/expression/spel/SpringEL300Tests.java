@@ -698,6 +698,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	}
 	
 	@Test
+	@Ignore
 	@SuppressWarnings("unchecked")
 	public void testMapOfMap_SPR7244() throws Exception {
         Map<String,Object> map = new LinkedHashMap();
