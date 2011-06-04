@@ -57,10 +57,11 @@ final class CollectionToArrayConverter implements ConditionalGenericConverter {
 			return null;
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
-		Object array = Array.newInstance(targetType.getElementType(), sourceCollection.size());
+		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
+		Object array = Array.newInstance(targetElementType.getType(), sourceCollection.size());
 		int i = 0;
 		for (Object sourceElement : sourceCollection) {
-			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor());
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(), targetElementType);
 			Array.set(array, i++, targetElement);
 		}
 		return array;

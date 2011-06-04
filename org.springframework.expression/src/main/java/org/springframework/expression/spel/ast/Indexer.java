@@ -90,13 +90,9 @@ public class Indexer extends SpelNodeImpl {
 
 		// Indexing into a Map
 		if (targetObject instanceof Map) {
-			if (targetObjectTypeDescriptor.isMap()) {
-				Object possiblyConvertedKey = state.convertValue(index, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
-				Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
-				return new TypedValue(o, targetObjectTypeDescriptor.getMapValueTypeDescriptor());
-			} else {
-				return new TypedValue(((Map<?, ?>) targetObject).get(index));				
-			}
+			Object possiblyConvertedKey = state.convertValue(index, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
+			Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
+			return new TypedValue(o, targetObjectTypeDescriptor.getMapValueTypeDescriptor());
 		}
 		
 		if (targetObject == null) {

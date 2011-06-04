@@ -56,8 +56,7 @@ final class StringToArrayConverter implements ConditionalGenericConverter {
 		Object target = Array.newInstance(targetType.getElementType(), fields.length);
 		for (int i = 0; i < fields.length; i++) {
 			String sourceElement = fields[i];
-			Object targetElement = this.conversionService.convert(sourceElement.trim(),
-					sourceType, targetType.getElementTypeDescriptor());
+			Object targetElement = this.conversionService.convert(sourceElement.trim(), sourceType, targetType.getElementTypeDescriptor());
 			Array.set(target, i, targetElement);
 		}
 		return target;

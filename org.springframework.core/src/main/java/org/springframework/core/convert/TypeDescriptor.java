@@ -36,12 +36,12 @@ import org.springframework.util.ObjectUtils;
  */
 public class TypeDescriptor {
 
+	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
+
 	/** Constant defining a TypeDescriptor for a <code>null</code> value */
 	public static final TypeDescriptor NULL = new TypeDescriptor();
 
 	private static final Map<Class<?>, TypeDescriptor> typeDescriptorCache = new HashMap<Class<?>, TypeDescriptor>();
-
-	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
 	static {
 		typeDescriptorCache.put(boolean.class, new TypeDescriptor(boolean.class));
@@ -237,21 +237,21 @@ public class TypeDescriptor {
 	 * Returns the Object wrapper type if the underlying type is a primitive.
 	 */
 	public Class<?> getObjectType() {
-		return ClassUtils.resolvePrimitiveIfNecessary(getType());
+		return getType() != null ? ClassUtils.resolvePrimitiveIfNecessary(getType()) : null;
 	}
 
 	/**
 	 * Returns the name of this type: the fully qualified class name.
 	 */
 	public String getName() {
-		return ClassUtils.getQualifiedName(getType());
+		return getType() != null ? ClassUtils.getQualifiedName(getType()) : null;
 	}
 
 	/**
 	 * Is this type a primitive type?
 	 */
 	public boolean isPrimitive() {
-		return getType().isPrimitive();
+		return getType() != null && getType().isPrimitive();
 	}
 
 	/**
@@ -304,21 +304,21 @@ public class TypeDescriptor {
 	 * Is this type a {@link Collection} type?
 	 */
 	public boolean isCollection() {
-		return Collection.class.isAssignableFrom(getType());
+		return getType() != null && Collection.class.isAssignableFrom(getType());
 	}
 
 	/**
 	 * Is this type an array type?
 	 */
 	public boolean isArray() {
-		return getType().isArray();
+		return getType() != null && getType().isArray();
 	}
 
 	/**
 	 * If this type is a {@link Collection} or array, returns the underlying element type.
-	 * Returns <code>null</code> if this type is neither an array or collection.
 	 * Returns Object.class if this type is a collection and the element type was not explicitly declared.
 	 * @return the map element type, or <code>null</code> if not a collection or array.
+	 * @throws IllegalStateException if this descriptor is not for a java.util.Collection or Array
 	 */
 	public Class<?> getElementType() {
 		return getElementTypeDescriptor().getType();
@@ -326,11 +326,31 @@ public class TypeDescriptor {
 
 	/**
 	 * The collection or array element type as a type descriptor.
-	 * Returns {@link TypeDescriptor#NULL} if this type is not a collection or an array.
 	 * Returns TypeDescriptor.valueOf(Object.class) if this type is a collection and the element type is not explicitly declared.
+	 * @throws IllegalStateException if this descriptor is not for a java.util.Collection or Array
 	 */
 	public TypeDescriptor getElementTypeDescriptor() {
+		if (!isCollection() && !isArray()) {
+			throw new IllegalStateException("Not a java.util.Collection or Array");
+		}
 		return this.elementType;
+	}
+
+	/**
+	 * Returns a copy of this type descriptor that has its elementType populated from the specified Collection.
+	 * This property will be set by calculating the "common element type" of the specified Collection.
+	 * For example, if the collection contains String elements, the returned TypeDescriptor will have its elementType set to String.
+	 * This method is designed to be used when converting values read from Collection fields or method return values that are not parameterized e.g. Collection vs. Collection<String>
+	 * In this scenario the elementType will be Object.class before invoking this method.
+	 * @param colection the collection to derive the elementType from
+	 * @return a new TypeDescriptor with the resolved elementType property
+	 * @throws IllegalArgumentException if this is not a type descriptor for a java.util.Collection.
+	 */
+	public TypeDescriptor resolveCollectionElementType(Collection<?> collection) {
+		if (!isCollection()) {
+			throw new IllegalStateException("Not a java.util.Collection");
+		}		
+		return new TypeDescriptor(type, CommonElement.typeDescriptor(collection), mapKeyType, mapValueType, annotations);
 	}
 
 	// map type descriptor operations
@@ -339,14 +359,14 @@ public class TypeDescriptor {
 	 * Is this type a {@link Map} type?
 	 */
 	public boolean isMap() {
-		return Map.class.isAssignableFrom(getType());
+		return getType() != null && Map.class.isAssignableFrom(getType());
 	}
 
 	/**
 	 * If this type is a {@link Map}, returns the underlying key type.
-	 * Returns <code>null</code> if this type is not map.
 	 * Returns Object.class if this type is a map and its key type was not explicitly declared.
 	 * @return the map key type, or <code>null</code> if not a map.
+	 * @throws IllegalStateException if this descriptor is not for a java.util.Map
 	 */
 	public Class<?> getMapKeyType() {
 		return getMapKeyTypeDescriptor().getType();
@@ -354,10 +374,13 @@ public class TypeDescriptor {
 
 	/**
 	 * The map key type as a type descriptor.
-	 * Returns {@link TypeDescriptor#NULL} if this type is not a map.
 	 * Returns TypeDescriptor.valueOf(Object.class) if this type is a map and the key type is not explicitly declared.
+	 * @throws IllegalStateException if this descriptor is not for a java.util.Map
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor() {
+		if (!isMap()) {
+			throw new IllegalStateException("Not a map");
+		}
 		return this.mapKeyType;
 	}
 
@@ -366,6 +389,7 @@ public class TypeDescriptor {
 	 * Returns <code>null</code> if this type is not map.
 	 * Returns Object.class if this type is a map and its value type was not explicitly declared.
 	 * @return the map value type, or <code>null</code> if not a map.
+	 * @throws IllegalStateException if this descriptor is not for a java.util.Map
 	 */
 	public Class<?> getMapValueType() {
 		return getMapValueTypeDescriptor().getType();
@@ -373,11 +397,31 @@ public class TypeDescriptor {
 
 	/**
 	 * The map value type as a type descriptor.
-	 * Returns {@link TypeDescriptor#NULL} if this type is not a map.
 	 * Returns TypeDescriptor.valueOf(Object.class) if this type is a map and the value type is not explicitly declared.
+	 * @throws IllegalStateException if this descriptor is not for a java.util.Map
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor() {
+		if (!isMap()) {
+			throw new IllegalStateException("Not a map");
+		}
 		return this.mapValueType;
+	}
+
+	/**
+	 * Returns a copy of this type descriptor that has its mapKeyType and mapValueType properties populated from the specified Map.
+	 * These properties will be set by calculating the "common element type" of the specified Map's keySet and values collection.
+	 * For example, if the Map contains String keys and Integer values, the returned TypeDescriptor will have its mapKeyType set to String and its mapValueType to Integer.
+	 * This method is designed to be used when converting values read from Map fields or method return values that are not parameterized e.g. Map vs. Map<String, Integer>.
+	 * In this scenario the key and value types will be Object.class before invoking this method.
+	 * @param map the map to derive key and value types from
+	 * @return a new TypeDescriptor with the resolved mapKeyType and mapValueType properties
+	 * @throws IllegalArgumentException if this is not a type descriptor for a java.util.Map.
+	 */
+	public TypeDescriptor resolveMapKeyValueTypes(Map<?, ?> map) {
+		if (!isMap()) {
+			throw new IllegalStateException("Not a java.util.Map");
+		}
+		return new TypeDescriptor(type, elementType, CommonElement.typeDescriptor(map.keySet()), CommonElement.typeDescriptor(map.values()), annotations);
 	}
 	
 	// extending Object
@@ -386,20 +430,22 @@ public class TypeDescriptor {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof TypeDescriptor) || obj == TypeDescriptor.NULL) {
+		if (!(obj instanceof TypeDescriptor)) {
 			return false;
 		}
 		TypeDescriptor other = (TypeDescriptor) obj;
-		boolean annotatedTypeEquals = getType().equals(other.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), other.getAnnotations());
-		if (isCollection()) {
-			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getElementType(), other.getElementType());
+		boolean annotatedTypeEquals = ObjectUtils.nullSafeEquals(getType(), other.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), other.getAnnotations());
+		if (!annotatedTypeEquals) {
+			return false;
+		}
+		if (isCollection() || isArray()) {
+			return ObjectUtils.nullSafeEquals(getElementType(), other.getElementType());
 		}
 		else if (isMap()) {
-			return annotatedTypeEquals && ObjectUtils.nullSafeEquals(getMapKeyType(), other.getMapKeyType()) &&
-					ObjectUtils.nullSafeEquals(getMapValueType(), other.getMapValueType());
+			return ObjectUtils.nullSafeEquals(getMapKeyType(), other.getMapKeyType()) && ObjectUtils.nullSafeEquals(getMapValueType(), other.getMapValueType());
 		}
 		else {
-			return annotatedTypeEquals;
+			return true;
 		}
 	}
 
@@ -440,11 +486,11 @@ public class TypeDescriptor {
 	}
 
 	TypeDescriptor(Class<?> collectionType, TypeDescriptor elementType) {
-		this(collectionType, elementType, TypeDescriptor.NULL, TypeDescriptor.NULL);
+		this(collectionType, elementType, TypeDescriptor.NULL, TypeDescriptor.NULL, EMPTY_ANNOTATION_ARRAY);
 	}
 
 	TypeDescriptor(Class<?> mapType, TypeDescriptor keyType, TypeDescriptor valueType) {
-		this(mapType, TypeDescriptor.NULL, keyType, valueType);
+		this(mapType, TypeDescriptor.NULL, keyType, valueType, EMPTY_ANNOTATION_ARRAY);
 	}
 
 	static Annotation[] nullSafeAnnotations(Annotation[] annotations) {
@@ -458,15 +504,15 @@ public class TypeDescriptor {
 	}
 
 	private TypeDescriptor() {
-		this(null, TypeDescriptor.NULL, TypeDescriptor.NULL, TypeDescriptor.NULL);
+		this(null, TypeDescriptor.NULL, TypeDescriptor.NULL, TypeDescriptor.NULL, EMPTY_ANNOTATION_ARRAY);
 	}
 
-	private TypeDescriptor(Class<?> type, TypeDescriptor elementType, TypeDescriptor mapKeyType, TypeDescriptor mapValueType) {
+	private TypeDescriptor(Class<?> type, TypeDescriptor elementType, TypeDescriptor mapKeyType, TypeDescriptor mapValueType, Annotation[] annotations) {
 		this.type = type;
 		this.elementType = elementType;
 		this.mapKeyType = mapKeyType;
 		this.mapValueType = mapValueType;
-		this.annotations = EMPTY_ANNOTATION_ARRAY;
+		this.annotations = annotations;
 	}
 
 	// internal helpers
@@ -477,5 +523,5 @@ public class TypeDescriptor {
 		}
 		return new TypeDescriptor(descriptor);		
 	}
-	
+
 }

@@ -26,6 +26,7 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -205,14 +206,15 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 	
 	
 	@Test
+	@Ignore
 	public void testDictionaryAccess() throws Exception {
 		StandardEvaluationContext societyContext = new StandardEvaluationContext();
 		societyContext.setRootObject(new IEEE());
 		// Officer's Dictionary
-//		Inventor pupin = parser.parseExpression("officers['president']").getValue(societyContext, Inventor.class);
-//
-//		// evaluates to "Idvor"
-//		String city = parser.parseExpression("officers['president'].PlaceOfBirth.city").getValue(societyContext, String.class);
+		Inventor pupin = parser.parseExpression("officers['president']").getValue(societyContext, Inventor.class);
+
+		// evaluates to "Idvor"
+		String city = parser.parseExpression("officers['president'].PlaceOfBirth.city").getValue(societyContext, String.class);
 
 		// setting values
 		Inventor i = parser.parseExpression("officers['advisors'][0]").getValue(societyContext,Inventor.class);
