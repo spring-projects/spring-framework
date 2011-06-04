@@ -98,7 +98,7 @@ public Book findBook(ISBN isbn) {...}]]></programlisting>
 			In fact, depending on the JVM implementation or running conditions, the same hashCode can be reused for different objects, in the same VM instance.</para>
 			
 			<para>To provide a different <emphasis>default</emphasis> key generator, one needs to implement the <interfacename>org.springframework.cache.KeyGenerator</interfacename> interface.
-			Once <link linkend="cache-configuration">configured</link>, the generator will be used for each declaration that doesn not specify its own key generation strategy (see below).
+			Once configured, the generator will be used for each declaration that doesn not specify its own key generation strategy (see below).
 			</para>
 		</section>
 
