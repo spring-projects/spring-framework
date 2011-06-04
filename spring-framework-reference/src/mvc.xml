@@ -589,7 +589,7 @@
     configure access to Servlet or Portlet facilities.</para>
 
     <tip>
-      <para>Available in the <link linkend="new-in-3-samples">samples repository</link>, 
+      <para>Available in the <link linkend="new-in-3.0-samples">samples repository</link>,
       a number of web applications leverage the annotation support described in this section 
       including <emphasis>MvcShowcase</emphasis>, <emphasis>MvcAjax</emphasis>,
       <emphasis>MvcBasic</emphasis>, <emphasis>PetClinic</emphasis>, 

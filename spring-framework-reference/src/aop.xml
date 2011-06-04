@@ -3185,7 +3185,7 @@ public class Account {
       <para>Now that the sales pitch is over, let us first walk through a
       quick example of AspectJ LTW using Spring, followed by detailed
       specifics about elements introduced in the following example. For a
-      complete example, please see the Petclinic <link linkend="new-in-3-samples">sample</link> application.</para>
+      complete example, please see the Petclinic <link linkend="new-in-3.0-samples">sample</link> application.</para>
 
       <section id="aop-aj-ltw-first-example">
         <title>A first example</title>
