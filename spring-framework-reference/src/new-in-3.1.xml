@@ -181,5 +181,75 @@
         </listitem>
       </itemizedlist>
     </section>
+    <section>
+      <title>New HandlerMethod-based Support Classes For Annotated Controller Processing</title>
+      <para>Spring 3.1 introduces a new set of support classes for processing requests
+      with annotated controllers:</para>
+      <itemizedlist>
+        <listitem>RequestMappingHandlerMapping</listitem>
+        <listitem>RequestMappingHandlerAdapter</listitem>
+        <listitem>ExceptionHandlerExceptionResolver</listitem>
+      </itemizedlist>
+      <para>These classes are a replacement for the existing:</para>
+      <itemizedlist>
+      	<listitem>DefaultAnnotationHandlerMapping</listitem>
+      	<listitem>AnnotationMethodHandlerAdapter</listitem>
+      	<listitem>AnnotationMethodHandlerExceptionResolver</listitem>
+      </itemizedlist>
+      <para>The new classes were developed in response to many requests to make 
+      annotation controller support classes more customizable and open for extension. 
+      Whereas previously you could configure a custom annotated controller method 
+      argument resolver, with the new support classes you can customize the 
+      processing for any supported method argument or return value type.</para>
+      <itemizedlist>
+      	<listitem>See org.springframework.web.method.support.HandlerMethodArgumentResolver Javadoc</listitem>
+      	<listitem>See org.springframework.web.method.support.HandlerMethodReturnValueHandler Javadoc</listitem>
+      </itemizedlist>  
+      <para>A second notable difference is the introduction of a
+      <classname>HandlerMethod</classname> abstraction to represent an
+      <interface>@RequestMapping</interface> method. This abstraction is used
+      throughout by the new support classes as the <literal>handler</literal> instance. 
+      For example a <classname>HandlerInterceptor</classname> can cast 
+      the <literal>handler</literal> from <classname>Object</classname> to 
+      <classname>HandlerMethod</classname> and get access to the target 
+      controller method, its annotations, etc.</para>
+      <para>The new classes are enabled by default by the MVC namespace and by 
+      Java-based configuration via <interface>@EnableWebMvc</interface>. The 
+      existing classes will continue to be available but use of the new classes is
+      recommended going forward.</para>
+    </section>
+    <section>
+      <title>Consumes and Produces <interface>@RequestMapping</interface> Conditions</title>
+      <para>Improved support for specifying media types consumed by a method through the 
+      <literal>'Content-Type'</literal> header as well as for producible types specified
+      through the <literal>'Accept'</literal> header.
+      See <xref linkend="mvc-ann-requestmapping-consumes"/> and 
+      <xref linkend="mvc-ann-requestmapping-produces"/>
+      </para>
+    </section>
+	<section>
+	  <title>Working With URI Template Variables In Controller Methods</title>
+	  <para>@PathVariable method arguments are now automatically added to the model. 
+	  If you declare any <interface>@PathVariable</interface> arguments on a 
+	  controller method you no longer need to add them to the model.</para>
+	  <para>Redirect view strings can now be URI templates. 
+	  For example a controller can return <literal>"redirect:/blog/{year}/{month}"</literal>.
+	  The URI template will be expanded with variables from the model, which 
+	  of course includes <interface>@PathVariable</interface> method arguments 
+	  that are now automatically added to the model.</para>
+	  <para>URI template variables are now included in data binding
+	  in addition to request parameters, which are typically used for 
+	  populating a model.</para>
+	</section>
+	<section>
+	  <title>Validation For <interface>@RequestBody</interface> Method Arguments</title>
+	  <para>An <interface>@RequestBody</interface> method argument annotated 
+	  with <interface>@Valid</interface> is now automatically validated with the 
+	  same <classname>Validator</classname> instance used to validate 
+	  an <interface>@ModelAttribute</interface> method argument.
+	  Both the MVC namespace and <interface>@EnableWebMvc</interface> 
+	  automatically configure a JSR-303 <classname>Validator</classname> adapter 
+	  provided a JSR-303 implementation is available on the classpath.</para>
+	</section>
   </section>
 </chapter>
