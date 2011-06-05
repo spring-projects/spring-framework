@@ -30,6 +30,7 @@ import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -131,7 +132,7 @@ class TypeConverterDelegate {
 		// No custom editor but custom ConversionService specified?
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
 		if (editor == null && conversionService != null && convertedValue != null) {
-			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(convertedValue);
+			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
 			TypeDescriptor targetTypeDesc = typeDescriptor;
 			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
 				return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
@@ -458,7 +459,7 @@ class TypeConverterDelegate {
 		if (!originalAllowed && !Collection.class.isAssignableFrom(requiredType)) {
 			return original;
 		}
-
+		typeDescriptor = typeDescriptor.narrow(original);
 		TypeDescriptor elementType = typeDescriptor.getElementType();
 		if (elementType == null && originalAllowed &&
 				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
@@ -530,7 +531,7 @@ class TypeConverterDelegate {
 		if (!originalAllowed && !Map.class.isAssignableFrom(requiredType)) {
 			return original;
 		}
-
+		typeDescriptor = typeDescriptor.narrow(original);
 		TypeDescriptor keyType = typeDescriptor.getMapKeyType();
 		TypeDescriptor valueType = typeDescriptor.getMapValueType();
 		if (keyType == null && valueType == null && originalAllowed &&

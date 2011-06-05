@@ -82,6 +82,12 @@
 				<entry key-ref="trusted-property-injection" value-ref="trusted-factory-method"/>
 			</map>
 		</property>
+		<property name="listProperty">
+			<list>
+				<value>foo</value>
+				<value>bar</value>
+			</list>
+		</property>
 	</bean>
 	
 </beans>

@@ -106,7 +106,7 @@ public class FunctionReference extends SpelNodeImpl {
 		try {
 			ReflectionUtils.makeAccessible(method);
 			Object result = method.invoke(method.getClass(), functionArgs);
-			return new TypedValue(result, new TypeDescriptor(new MethodParameter(method,-1)).narrowType(result));
+			return new TypedValue(result, new TypeDescriptor(new MethodParameter(method,-1)).narrow(result));
 		}
 		catch (Exception ex) {
 			throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.EXCEPTION_DURING_FUNCTION_CALL,

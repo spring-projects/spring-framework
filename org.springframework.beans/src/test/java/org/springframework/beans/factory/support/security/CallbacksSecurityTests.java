@@ -96,12 +96,21 @@ public class CallbacksSecurityTests {
 		public void setProperty(Object value) {
 			checkCurrentContext();
 		}
-
+		
 		public Object getProperty() {
 			checkCurrentContext();
 			return null;
 		}
 
+		public void setListProperty(Object value) {
+			checkCurrentContext();
+		}
+
+		public Object getListProperty() {
+			checkCurrentContext();
+			return null;
+		}
+		
 		private void checkCurrentContext() {
 			assertEquals(expectedName, getCurrentSubjectName());
 		}
