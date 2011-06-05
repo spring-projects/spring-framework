@@ -19,7 +19,6 @@ import java.lang.annotation.Annotation;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.TypeDescriptor.Property;
 
 class BeanPropertyDescriptor extends AbstractDescriptor {
 
