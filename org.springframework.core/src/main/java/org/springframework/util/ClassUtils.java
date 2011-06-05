@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -950,6 +950,19 @@ public abstract class ClassUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * Copy the given Collection into a Class array.
+	 * The Collection must contain Class elements only.
+	 * @param collection the Collection to copy
+	 * @return the Class array (<code>null</code> if the passed-in
+	 * Collection was <code>null</code>)
+	 */
+	public static Class<?>[] toClassArray(Collection<Class<?>> collection) {
+		if (collection == null) {
+			return null;
+		}
+		return collection.toArray(new Class<?>[collection.size()]);
+	}
 
 	/**
 	 * Return all interfaces that the given instance implements as array,
