@@ -70,19 +70,40 @@ import test.beans.TestBean;
 public final class BeanWrapperTests {
 
 	@Test
-	@Ignore
 	public void testNullNestedTypeDescriptor() {
 		Foo foo = new Foo();
 		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
 		wrapper.setConversionService(new DefaultConversionService());
 		wrapper.setAutoGrowNestedPaths(true);
 		wrapper.setPropertyValue("listOfMaps[0]['luckyNumber']", "9");
-		assertEquals(9, foo.listOfMaps.get(0).get("luckyNumber"));
+		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
+	}
+	
+	@Test
+	public void testNullNestedTypeDescriptor2() {
+		Foo foo = new Foo();
+		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
+		wrapper.setConversionService(new DefaultConversionService());
+		wrapper.setAutoGrowNestedPaths(true);
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("favoriteNumber", "9");
+		wrapper.setPropertyValue("list[0]", map);
+		assertEquals(map, foo.list.get(0));
 	}
 	
 	static class Foo {
 		
+		private List list;
+		
 		private List<Map> listOfMaps;
+
+		public List getList() {
+			return list;
+		}
+
+		public void setList(List list) {
+			this.list = list;
+		}
 
 		public List<Map> getListOfMaps() {
 			return listOfMaps;
