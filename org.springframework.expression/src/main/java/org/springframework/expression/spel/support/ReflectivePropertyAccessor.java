@@ -138,7 +138,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (method != null) {
 				try {
 					ReflectionUtils.makeAccessible(method);
-					return new TypedValue(method.invoke(target),invoker.typeDescriptor);
+					Object value = method.invoke(target);
+					return new TypedValue(value, invoker.typeDescriptor.narrow(value));
 				}
 				catch (Exception ex) {
 					throw new AccessException("Unable to access property '" + name + "' through getter", ex);
@@ -147,7 +148,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 
 		if (invoker == null || invoker.member instanceof Field) {
-			Field field = (Field) (invoker==null?null:invoker.member);
+			Field field = (Field) (invoker == null ? null : invoker.member);
 			if (field == null) {
 				field = findField(name, type, target instanceof Class);
 				if (field != null) {
@@ -158,7 +159,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (field != null) {
 				try {
 					ReflectionUtils.makeAccessible(field);
-					return new TypedValue(field.get(target),invoker.typeDescriptor);
+					Object value = field.get(target);
+					return new TypedValue(value, invoker.typeDescriptor.narrow(value));
 				}
 				catch (Exception ex) {
 					throw new AccessException("Unable to access field: " + name, ex);
@@ -183,7 +185,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			// Treat it like a property
 			PropertyDescriptor propertyDescriptor = null;
 			try {
-				propertyDescriptor = new PropertyDescriptor(name,null,method);
+				propertyDescriptor = new PropertyDescriptor(name, null, method);
 			}
 			catch (IntrospectionException ex) {
 				throw new AccessException("Unable to access property '" + name + "' through setter "+method, ex);
