@@ -41,6 +41,7 @@ import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
@@ -402,6 +403,23 @@ public class RequestContext {
 	 */
 	public String getContextUrl(String relativeUrl) {
 		String url = getContextPath() + relativeUrl;
+		if (this.response != null) {
+			url = this.response.encodeURL(url);
+		}
+		return url;
+	}
+
+	/**
+	 * Return a context-aware URl for the given relative URL with placeholders (named keys with braces <code>{}</code>). 
+	 * @param relativeUrl the relative URL part
+	 * @param a map of parameters to insert as placeholders in the url
+	 * @return a URL that points back to the server with an absolute path
+	 * (also URL-encoded accordingly)
+	 */
+	public String getContextUrl(String relativeUrl, Map<String,?> params) {
+		String url = getContextPath() + relativeUrl;
+		UriTemplate template = new UriTemplate(url);
+		url = template.expand(params).toASCIIString();
 		if (this.response != null) {
 			url = this.response.encodeURL(url);
 		}

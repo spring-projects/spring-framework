@@ -86,7 +86,7 @@
  * Takes a relative URL and makes it absolute from the server root by
  * adding the context root for the web application.
  -->
-<#macro url relativeUrl>${springMacroRequestContext.getContextUrl(relativeUrl)}</#macro>
+<#macro url relativeUrl extra...><#if extra?? && extra?size!=0>${springMacroRequestContext.getContextUrl(relativeUrl,extra)}<#else>${springMacroRequestContext.getContextUrl(relativeUrl)}</#if></#macro>
 
 <#--
  * bind

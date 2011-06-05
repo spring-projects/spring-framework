@@ -36,6 +36,9 @@ THEMEARGSWITHDEFAULTMESSAGE
 URL
 <@spring.url "/aftercontext.html"/>
 
+URLPARAMS
+<@spring.url relativeUrl="/aftercontext/{foo}?spam={spam}" foo="bar" spam="bucket"/>
+
 FORM1
 <@spring.formInput "command.name", ""/>
 

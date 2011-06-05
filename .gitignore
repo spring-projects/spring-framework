@@ -8,6 +8,7 @@ bin
 build.sh
 integration-repo
 ivy-cache
+jxl.log
 jmx.log
 org.springframework.jdbc/derby.log
 org.springframework.spring-parent/.classpath
