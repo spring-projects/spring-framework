@@ -125,10 +125,13 @@
       </itemizedlist>
     </section>
     <section>
-      <title>TestContext framework support for @Configuration classes</title>
+      <title>TestContext framework support for @Configuration classes and bean definition profiles</title>
       <para>The <interfacename>@ContextConfiguration</interfacename> annotation now
       supports supplying <interfacename>@Configuration</interfacename> classes for
-      configuring the Spring <classname>TestContext</classname></para>
+      configuring the Spring <classname>TestContext</classname>. In addition, a new
+      <interfacename>@ActiveProfiles</interfacename> annotation has been introduced
+      to support declarative configuration of active bean definition profiles in
+      <interfacename>ApplicationContext</interfacename> integration tests.</para>
       <itemizedlist>
         <listitem>
           <para>See org.springframework.test.context.ContextConfiguration Javadoc</para>
