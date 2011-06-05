@@ -26,6 +26,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -1189,6 +1190,76 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
 	}
 	
+	public void testBatchUpdateWithCollectionOfObjects() throws Exception {
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final List<Integer> ids = new ArrayList<Integer>();
+		ids.add(Integer.valueOf(100));
+		ids.add(Integer.valueOf(200));
+		ids.add(Integer.valueOf(300));
+		final int[] rowsAffected1 = new int[] { 1, 2 };
+		final int[] rowsAffected2 = new int[] { 3 };
+
+		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
+		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
+		mockPreparedStatement.getConnection();
+		ctrlPreparedStatement.setReturnValue(mockConnection);
+		mockPreparedStatement.setInt(1, ids.get(0));
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.addBatch();
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setInt(1, ids.get(1));
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.addBatch();
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.setInt(1, ids.get(2));
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeBatch();
+		ctrlPreparedStatement.setReturnValue(rowsAffected1);
+		mockPreparedStatement.addBatch();
+		ctrlPreparedStatement.setVoidCallable();
+		mockPreparedStatement.executeBatch();
+		ctrlPreparedStatement.setReturnValue(rowsAffected2);
+		if (debugEnabled) {
+			mockPreparedStatement.getWarnings();
+			ctrlPreparedStatement.setReturnValue(null);
+		}
+		mockPreparedStatement.close();
+		ctrlPreparedStatement.setVoidCallable();
+
+		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+		mockDatabaseMetaData.getDatabaseProductName();
+		ctrlDatabaseMetaData.setReturnValue("MySQL");
+		mockDatabaseMetaData.supportsBatchUpdates();
+		ctrlDatabaseMetaData.setReturnValue(true);
+
+		mockConnection.prepareStatement(sql);
+		ctrlConnection.setReturnValue(mockPreparedStatement);
+		mockConnection.getMetaData();
+		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
+
+		ctrlPreparedStatement.replay();
+		ctrlDatabaseMetaData.replay();
+		replay();
+
+		ParameterizedPreparedStatementSetter setter = new ParameterizedPreparedStatementSetter<Integer>() {
+			public void setValues(PreparedStatement ps, Integer argument) throws SQLException {
+				ps.setInt(1, argument.intValue());
+			}
+		};
+
+		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+
+		int[][] actualRowsAffected = template.batchUpdate(sql, ids, 2, setter);
+		assertTrue("executed 2 updates", actualRowsAffected[0].length == 2);
+		assertEquals(rowsAffected1[0], actualRowsAffected[0][0]);
+		assertEquals(rowsAffected1[1], actualRowsAffected[0][1]);
+		assertEquals(rowsAffected2[0], actualRowsAffected[1][0]);
+
+		ctrlPreparedStatement.verify();
+		ctrlDatabaseMetaData.verify();
+	}
+
 	public void testCouldntGetConnectionOrExceptionTranslator() throws SQLException {
 		SQLException sex = new SQLException("foo", "07xxx");
 

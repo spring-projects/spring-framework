@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.core;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -1004,7 +1005,19 @@ public interface JdbcOperations {
 	 * @return an array containing the numbers of rows affected by each update in the batch
 	 */
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes);
-	
+
+	/**
+	 * Execute multiple batches using the supplied SQL statement with the collect of supplied arguments.
+	 * The arguments' values will be set using the ParameterizedPreparedStatementSetter.
+	 * Each batch should be of size indicated in 'batchSize'.
+	 * @param sql the SQL statement to execute.
+	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
+	 * @param argTypes SQL types of the arguments
+	 * (constants from <code>java.sql.Types</code>)
+	 * @return an array containing for each batch another array containing the numbers of rows affected 
+	 * by each update in the batch
+	 */
+	public <T> int[][] batchUpdate(String sql, Collection<T> batchArgs, int batchSize, ParameterizedPreparedStatementSetter<T> pss);
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with callable statements

@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -929,7 +930,59 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) {
 		return BatchUpdateUtils.executeBatchUpdate(sql, batchArgs, argTypes, this);
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.jdbc.core.JdbcOperations#batchUpdate(java.lang.String, java.util.Collection, int, org.springframework.jdbc.core.ParameterizedPreparedStatementSetter)
+	 * 
+	 * Contribution by Nicolas Fabre
+	 */
+	public <T> int[][] batchUpdate(String sql, final Collection<T> batchArgs, final int batchSize, final ParameterizedPreparedStatementSetter<T> pss) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing SQL batch update [" + sql + "] with a batch size of " + batchSize);
+		}
+		return execute(sql, new PreparedStatementCallback<int[][]>() {
+			public int[][] doInPreparedStatement(PreparedStatement ps) throws SQLException {
+				List<int[]> rowsAffected = new ArrayList<int[]>();
+				try {
+					boolean batchSupported = true;
+					if (!JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
+						batchSupported = false;
+						logger.warn("JDBC Driver does not support Batch updates; resorting to single statement execution");
+					}
+					int n = 0;
+					for (T obj : batchArgs) {
+						pss.setValues(ps, obj);
+						n++;
+						if (batchSupported) {
+							ps.addBatch();
+							if (n % batchSize == 0 || n == batchArgs.size()) {
+								if (logger.isDebugEnabled()) {
+									int batchIdx = (n % batchSize == 0) ? n / batchSize : (n / batchSize) + 1;
+									int items = n - ((n % batchSize == 0) ? n / batchSize - 1 : (n / batchSize)) * batchSize;
+									logger.debug("Sending SQL batch update #" + batchIdx + " with " + items + " items");
+								}
+								rowsAffected.add(ps.executeBatch());
+							}
+						}
+						else {
+							int i = ps.executeUpdate();
+							rowsAffected.add(new int[] {i});
+						}
+					}
+					int[][] result = new int[rowsAffected.size()][];
+					for (int i = 0; i < result.length; i++) {
+						result[i] = rowsAffected.get(i);
+					}
+					return result;
+				} finally {
+					if (pss instanceof ParameterDisposer) {
+						((ParameterDisposer) pss).cleanupParameters();
+					}
+				}
+			}
+		});
+	}
 
 	//-------------------------------------------------------------------------
 	// Methods dealing with callable statements
