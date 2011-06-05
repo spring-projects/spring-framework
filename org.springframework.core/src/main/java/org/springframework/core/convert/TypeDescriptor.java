@@ -144,10 +144,12 @@ public class TypeDescriptor {
 	 * If the methodParameter is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class.
 	 * If the methodParameter is a Map<Integer, String> and the nesting level is 1, the nested type descriptor will be String, derived from the map value.
 	 * If the methodParameter is a List<Map<Integer, String>> and the nesting level is 2, the nested type descriptor will be String, derived from the map value.
+	 * Returns null if a nested type cannot be obtained because it was not declared.
+	 * For example, if the method parameter is a List&lt;?&gt;, the nested type descriptor returned will be null.
 	 * @param methodParameter the method parameter with a nestingLevel of 1
 	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the method parameter.
-	 * @return the nested type descriptor
-	 * @throws IllegalArgumentException if the method parameter is not of a collection, array, or map type.
+	 * @return the nested type descriptor at the specified nesting level, or null if it could not be obtained.
+	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types.
 	 */
 	public static TypeDescriptor nested(MethodParameter methodParameter, int nestingLevel) {
 		return nested(new ParameterDescriptor(methodParameter), nestingLevel);
@@ -159,10 +161,12 @@ public class TypeDescriptor {
 	 * If the field is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class. 
 	 * If the field is a Map<Integer, String> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value. 
 	 * If the field is a List<Map<Integer, String>> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
+	 * Returns null if a nested type cannot be obtained because it was not declared.
+	 * For example, if the field is a List&lt;?&gt;, the nested type descriptor returned will be null.
 	 * @param field the field
 	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the field.
-	 * @return the nested type descriptor
-	 * @throws IllegalArgumentException if the field is not of a collection, array, or map type.
+	 * @return the nested type descriptor at the specified nestingLevel, or null if it could not be obtained
+	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types.
 	 */
 	public static TypeDescriptor nested(Field field, int nestingLevel) {
 		return nested(new FieldDescriptor(field), nestingLevel);
@@ -174,10 +178,12 @@ public class TypeDescriptor {
 	 * If the property is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class. 
 	 * If the field is a Map<Integer, String> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value. 
 	 * If the property is a List<Map<Integer, String>> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
+	 * Returns null if a nested type cannot be obtained because it was not declared.
+	 * For example, if the property is a List&lt;?&gt;, the nested type descriptor returned will be null.
 	 * @param property the property
 	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the property.
-	 * @return the nested type descriptor
-	 * @throws IllegalArgumentException if the property is not of a collection, array, or map type.
+	 * @return the nested type descriptor at the specified nestingLevel, or null if it could not be obtained
+	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types.
 	 */
 	public static TypeDescriptor nested(Property property, int nestingLevel) {
 		return nested(new BeanPropertyDescriptor(property), nestingLevel);

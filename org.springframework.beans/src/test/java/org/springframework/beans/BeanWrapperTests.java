@@ -16,6 +16,13 @@
 
 package org.springframework.beans;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.beans.PropertyEditorSupport;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -36,21 +43,22 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.LogFactory;
-import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.junit.Test;
-import test.beans.BooleanTestBean;
-import test.beans.ITestBean;
-import test.beans.IndexedTestBean;
-import test.beans.NumberTestBean;
-import test.beans.TestBean;
-
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
+
+import test.beans.BooleanTestBean;
+import test.beans.ITestBean;
+import test.beans.IndexedTestBean;
+import test.beans.NumberTestBean;
+import test.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -61,6 +69,31 @@ import org.springframework.util.StringUtils;
  */
 public final class BeanWrapperTests {
 
+	@Test
+	@Ignore
+	public void testNullNestedTypeDescriptor() {
+		Foo foo = new Foo();
+		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
+		wrapper.setConversionService(new DefaultConversionService());
+		wrapper.setAutoGrowNestedPaths(true);
+		wrapper.setPropertyValue("listOfMaps[0]['luckyNumber']", "9");
+		assertEquals(9, foo.listOfMaps.get(0).get("luckyNumber"));
+	}
+	
+	static class Foo {
+		
+		private List<Map> listOfMaps;
+
+		public List<Map> getListOfMaps() {
+			return listOfMaps;
+		}
+
+		public void setListOfMaps(List<Map> listOfMaps) {
+			this.listOfMaps = listOfMaps;
+		}
+
+	}
+	
 	@Test
 	public void testIsReadablePropertyNotReadable() {
 		NoRead nr = new NoRead();
