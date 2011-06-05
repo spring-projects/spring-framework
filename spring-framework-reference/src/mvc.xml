@@ -2230,7 +2230,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       <programlisting language="java">@RequestMapping(value = "/files/{path}", method = RequestMethod.POST)
 public String upload(@PathVariable String path, ...) {
     // ...
-    return "redirect:files/{path};
+    return "redirect:files/{path}";
 }
 
 @RequestMapping(value = "/files/{path}", method = RequestMethod.GET)
