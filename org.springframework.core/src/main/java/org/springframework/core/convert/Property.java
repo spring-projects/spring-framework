@@ -131,7 +131,7 @@ public final class Property {
 		MethodParameter read = resolveReadMethodParameter();
 		MethodParameter write = resolveWriteMethodParameter();
 		if (read == null && write == null) {
-			throw new IllegalStateException("Property is neither readable or writeable");				
+			throw new IllegalStateException("Property is neither readable nor writeable");
 		}
 		if (read != null && write != null && !read.getParameterType().equals(write.getParameterType())) {
 			throw new IllegalStateException("Read and write parameter types are not the same");
