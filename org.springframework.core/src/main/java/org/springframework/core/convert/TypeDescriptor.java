@@ -13,19 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.core.convert;
 
-import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Context about a type to convert from or to.
@@ -91,11 +94,10 @@ public class TypeDescriptor {
 	/**
 	 * Create a new type descriptor for a bean property.
 	 * Use this constructor when a target conversion point is a property on a Java class.
-	 * @param beanClass the class that declares the property
-	 * @param property the property descriptor
+	 * @param property the property
 	 */
-	public TypeDescriptor(Class<?> beanClass, PropertyDescriptor property) {
-		this(new BeanPropertyDescriptor(beanClass, property));
+	public TypeDescriptor(Property property) {
+		this(new BeanPropertyDescriptor(property));
 	}
 
 	/**
@@ -140,7 +142,7 @@ public class TypeDescriptor {
 		}
 		return new TypeDescriptor(mapType, keyType, valueType);
 	}
-	
+
 	/**
 	 * Creates a type descriptor for a nested type declared within the method parameter.
 	 * For example, if the methodParameter is a List&lt;String&gt; and the nestingLevel is 1, the nested type descriptor will be String.class.
@@ -182,8 +184,8 @@ public class TypeDescriptor {
 	 * @return the nested type descriptor
 	 * @throws IllegalArgumentException if the property is not of a collection, array, or map type.
 	 */
-	public static TypeDescriptor nested(Class<?> beanClass, PropertyDescriptor property, int nestingLevel) {
-		return nested(new BeanPropertyDescriptor(beanClass, property), nestingLevel);
+	public static TypeDescriptor nested(Property property, int nestingLevel) {
+		return nested(new BeanPropertyDescriptor(property), nestingLevel);
 	}
 
 	/**
@@ -196,7 +198,7 @@ public class TypeDescriptor {
 	public static TypeDescriptor forObject(Object source) {
 		return source != null ? valueOf(source.getClass()) : null;
 	}
-	
+
 	/**
 	 * Determine the declared (non-generic) type of the wrapped parameter/field.
 	 * @return the declared type, or <code>null</code> if this is {@link TypeDescriptor#NULL}
@@ -230,7 +232,7 @@ public class TypeDescriptor {
 		}
 		return new TypeDescriptor(value.getClass(), elementType, mapKeyType, mapValueType, annotations);
 	}
-	
+
 	/**
 	 * Returns the name of this type: the fully qualified class name.
 	 */
@@ -288,7 +290,7 @@ public class TypeDescriptor {
 	}
 
 	// indexable type descriptor operations
-	
+
 	/**
 	 * Is this type a {@link Collection} type?
 	 */
@@ -336,7 +338,7 @@ public class TypeDescriptor {
 	}
 
 	// map type descriptor operations
-	
+
 	/**
 	 * Is this type a {@link Map} type?
 	 */
@@ -406,7 +408,7 @@ public class TypeDescriptor {
 	}
 
 	// extending Object
-	
+
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -415,17 +417,17 @@ public class TypeDescriptor {
 			return false;
 		}
 		TypeDescriptor other = (TypeDescriptor) obj;
-		boolean annotatedTypeEquals = ObjectUtils.nullSafeEquals(getType(), other.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), other.getAnnotations());
+		boolean annotatedTypeEquals = ObjectUtils.nullSafeEquals(getType(), other.getType())
+				&& ObjectUtils.nullSafeEquals(getAnnotations(), other.getAnnotations());
 		if (!annotatedTypeEquals) {
 			return false;
 		}
 		if (isCollection() || isArray()) {
 			return ObjectUtils.nullSafeEquals(getElementType(), other.getElementType());
-		}
-		else if (isMap()) {
-			return ObjectUtils.nullSafeEquals(getMapKeyType(), other.getMapKeyType()) && ObjectUtils.nullSafeEquals(getMapValueType(), other.getMapValueType());
-		}
-		else {
+		} else if (isMap()) {
+			return ObjectUtils.nullSafeEquals(getMapKeyType(), other.getMapKeyType())
+					&& ObjectUtils.nullSafeEquals(getMapValueType(), other.getMapValueType());
+		} else {
 			return true;
 		}
 	}
@@ -444,11 +446,169 @@ public class TypeDescriptor {
 		if (isMap()) {
 			builder.append("<").append(wildcard(getMapKeyType()));
 			builder.append(", ").append(wildcard(getMapValueType())).append(">");
-		}
-		else if (isCollection()) {
+		} else if (isCollection()) {
 			builder.append("<").append(wildcard(getElementType())).append(">");
 		}
 		return builder.toString();
+	}
+
+	// helper public class
+
+	public static final class Property {
+
+		private final Class<?> objectType;
+
+		private final Method readMethod;
+
+		private final Method writeMethod;
+
+		private final String name;
+		
+		private final MethodParameter methodParameter;
+
+		private final Annotation[] annotations;
+
+		public Property(Class<?> objectType, Method readMethod, Method writeMethod) {
+			this.objectType = objectType;
+			this.readMethod = readMethod;
+			this.writeMethod = writeMethod;
+			this.methodParameter = resolveMethodParameter();
+			this.name = resolveName();
+			this.annotations = resolveAnnotations();
+		}
+
+		public Class<?> getObjectType() {
+			return objectType;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public Class<?> getType() {
+			return methodParameter.getParameterType();
+		}
+
+		public Method getReadMethod() {
+			return readMethod;
+		}
+
+		public Method getWriteMethod() {
+			return writeMethod;
+		}
+
+		MethodParameter getMethodParameter() {
+			return methodParameter;
+		}
+
+		Annotation[] getAnnotations() {
+			return annotations;
+		}
+
+		private String resolveName() {
+			if (readMethod != null) {
+				int index = readMethod.getName().indexOf("get");
+				if (index != -1) {
+					index += 3;
+				} else {
+					index = readMethod.getName().indexOf("is");
+					if (index == -1) {
+						throw new IllegalArgumentException("Not a getter method");
+					}
+					index += 2;
+				}
+				return StringUtils.uncapitalize(readMethod.getName().substring(index));
+			} else {
+				int index = writeMethod.getName().indexOf("set") + 3;
+				if (index == -1) {
+					throw new IllegalArgumentException("Not a setter method");
+				}
+				return StringUtils.uncapitalize(writeMethod.getName().substring(index));
+			}
+		}
+
+		private MethodParameter resolveMethodParameter() {
+			MethodParameter read = resolveReadMethodParameter();
+			MethodParameter write = resolveWriteMethodParameter();
+			if (read == null && write == null) {
+				throw new IllegalStateException("Property is neither readable or writeable");				
+			}
+			if (read != null && write != null && !read.getParameterType().equals(write.getParameterType())) {
+				throw new IllegalStateException("Read and write parameter types are not the same");
+			}
+			return read != null ? read : write;
+		}
+		
+		private MethodParameter resolveReadMethodParameter() {
+			if (getReadMethod() == null) {
+				return null;
+			}
+			return resolveParameterType(new MethodParameter(getReadMethod(), -1));			
+		}
+
+		private MethodParameter resolveWriteMethodParameter() {
+			if (getWriteMethod() == null) {
+				return null;
+			}
+			return resolveParameterType(new MethodParameter(getWriteMethod(), 0));			
+		}
+
+		private MethodParameter resolveParameterType(MethodParameter parameter) {
+			// needed to resolve generic property types that parameterized by sub-classes e.g. T getFoo();
+			GenericTypeResolver.resolveParameterType(parameter, getObjectType());
+			return parameter;			
+		}
+		
+		private Annotation[] resolveAnnotations() {
+			Map<Class<?>, Annotation> annMap = new LinkedHashMap<Class<?>, Annotation>();
+			Method readMethod = getReadMethod();
+			if (readMethod != null) {
+				for (Annotation ann : readMethod.getAnnotations()) {
+					annMap.put(ann.annotationType(), ann);
+				}
+			}
+			Method writeMethod = getWriteMethod();
+			if (writeMethod != null) {
+				for (Annotation ann : writeMethod.getAnnotations()) {
+					annMap.put(ann.annotationType(), ann);
+				}
+			}
+			Field field = getField();
+			if (field != null) {
+				for (Annotation ann : field.getAnnotations()) {
+					annMap.put(ann.annotationType(), ann);
+				}
+			}
+			return annMap.values().toArray(new Annotation[annMap.size()]);
+		}
+
+		private Field getField() {
+			String name = getName();
+			if (!StringUtils.hasLength(name)) {
+				return null;
+			}
+			Class<?> declaringClass = declaringClass();
+			Field field = ReflectionUtils.findField(declaringClass, name);
+			if (field == null) {
+				// Same lenient fallback checking as in CachedIntrospectionResults...
+				field = ReflectionUtils.findField(declaringClass,
+						name.substring(0, 1).toLowerCase() + name.substring(1));
+				if (field == null) {
+					field = ReflectionUtils.findField(declaringClass,
+							name.substring(0, 1).toUpperCase() + name.substring(1));
+				}
+			}
+			return field;
+		}
+
+		private Class<?> declaringClass() {
+			if (getReadMethod() != null) {
+				return getReadMethod().getDeclaringClass();
+			} else {
+				return getWriteMethod().getDeclaringClass();
+			}
+		}
+
 	}
 
 	// package private
@@ -464,7 +624,7 @@ public class TypeDescriptor {
 	static Annotation[] nullSafeAnnotations(Annotation[] annotations) {
 		return annotations != null ? annotations : EMPTY_ANNOTATION_ARRAY;
 	}
-	
+
 	// internal constructors
 
 	private TypeDescriptor(Class<?> type) {
@@ -479,7 +639,8 @@ public class TypeDescriptor {
 		this(mapType, null, keyType, valueType, EMPTY_ANNOTATION_ARRAY);
 	}
 
-	private TypeDescriptor(Class<?> type, TypeDescriptor elementType, TypeDescriptor mapKeyType, TypeDescriptor mapValueType, Annotation[] annotations) {
+	private TypeDescriptor(Class<?> type, TypeDescriptor elementType, TypeDescriptor mapKeyType,
+			TypeDescriptor mapValueType, Annotation[] annotations) {
 		this.type = type;
 		this.elementType = elementType;
 		this.mapKeyType = mapKeyType;
@@ -494,7 +655,7 @@ public class TypeDescriptor {
 				return null;
 			}
 		}
-		return new TypeDescriptor(descriptor);		
+		return new TypeDescriptor(descriptor);
 	}
 
 	// internal helpers
@@ -507,7 +668,7 @@ public class TypeDescriptor {
 		if (keyType == null) {
 			return false;
 		}
-		return keyType.isAssignableTo(targetKeyType);		
+		return keyType.isAssignableTo(targetKeyType);
 	}
 
 	private boolean collectionElementsAssignable(TypeDescriptor targetElementType) {
@@ -518,9 +679,9 @@ public class TypeDescriptor {
 		if (elementType == null) {
 			return false;
 		}
-		return elementType.isAssignableTo(targetElementType);				
+		return elementType.isAssignableTo(targetElementType);
 	}
-	
+
 	private boolean mapValuesAssignable(TypeDescriptor targetValueType) {
 		TypeDescriptor valueType = getMapValueType();
 		if (targetValueType == null) {
@@ -529,21 +690,21 @@ public class TypeDescriptor {
 		if (valueType == null) {
 			return false;
 		}
-		return valueType.isAssignableTo(targetValueType);		
+		return valueType.isAssignableTo(targetValueType);
 	}
 
 	private void assertCollectionOrArray() {
 		if (!isCollection() && !isArray()) {
 			throw new IllegalStateException("Not a java.util.Collection or Array");
-		}		
+		}
 	}
-	
+
 	private void assertMap() {
 		if (!isMap()) {
 			throw new IllegalStateException("Not a java.util.Map");
-		}		
+		}
 	}
-	
+
 	private String wildcard(TypeDescriptor nestedType) {
 		return nestedType != null ? nestedType.toString() : "?";
 	}
