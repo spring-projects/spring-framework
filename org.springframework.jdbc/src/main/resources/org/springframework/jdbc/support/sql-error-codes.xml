@@ -232,10 +232,10 @@
 			<value>101,102,103,104,105,106,107,108,109,110,111,112,113,116,120,121,123,207,208,213,257,512</value>
 		</property>
 		<property name="duplicateKeyCodes">
-			<value>2601</value>
+			<value>2601,2615,2626</value>
 		</property>
 		<property name="dataIntegrityViolationCodes">
-			<value>233,423,511,515,530,547,2615,2714</value>
+			<value>233,511,515,530,547,2615,2714</value>
 		</property>
 		<property name="transientDataAccessResourceCodes">
 			<value>921,1105</value>
