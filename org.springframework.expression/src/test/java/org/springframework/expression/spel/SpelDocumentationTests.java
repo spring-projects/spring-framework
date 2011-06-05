@@ -26,7 +26,6 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -206,7 +205,6 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 	
 	
 	@Test
-	@Ignore
 	public void testDictionaryAccess() throws Exception {
 		StandardEvaluationContext societyContext = new StandardEvaluationContext();
 		societyContext.setRootObject(new IEEE());

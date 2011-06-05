@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts an Object to a single-element Array containing the Object.
@@ -31,7 +31,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class ObjectToArrayConverter implements ConditionalGenericConverter {
+final class ObjectToArrayConverter implements GenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -43,16 +43,12 @@ final class ObjectToArrayConverter implements ConditionalGenericConverter {
 		return Collections.singleton(new ConvertiblePair(Object.class, Object[].class));
 	}
 
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType, targetType.getElementTypeDescriptor());
-	}
-
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}
-		Object target = Array.newInstance(targetType.getElementType(), 1);
-		Object targetElement = this.conversionService.convert(source, sourceType, targetType.getElementTypeDescriptor());
+		Object target = Array.newInstance(targetType.getElementType().getType(), 1);
+		Object targetElement = this.conversionService.convert(source, sourceType, targetType.getElementType());
 		Array.set(target, 0, targetElement);
 		return target;
 	}

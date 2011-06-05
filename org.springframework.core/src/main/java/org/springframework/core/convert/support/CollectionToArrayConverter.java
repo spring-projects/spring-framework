@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts a Collection to an array.
@@ -36,7 +36,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class CollectionToArrayConverter implements ConditionalGenericConverter {
+final class CollectionToArrayConverter implements GenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -48,20 +48,15 @@ final class CollectionToArrayConverter implements ConditionalGenericConverter {
 		return Collections.singleton(new ConvertiblePair(Collection.class, Object[].class));
 	}
 
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor());
-	}
-
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		Object array = Array.newInstance(targetElementType.getType(), sourceCollection.size());
+		Object array = Array.newInstance(targetType.getElementType().getType(), sourceCollection.size());
 		int i = 0;
 		for (Object sourceElement : sourceCollection) {
-			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(), targetElementType);
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementType(sourceElement), targetType.getElementType());
 			Array.set(array, i++, targetElement);
 		}
 		return array;

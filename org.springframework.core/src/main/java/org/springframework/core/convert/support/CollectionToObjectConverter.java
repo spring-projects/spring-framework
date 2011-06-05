@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts a Collection to an Object by returning the first collection element after converting it to the desired targetType.
@@ -30,7 +30,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class CollectionToObjectConverter implements ConditionalGenericConverter {
+final class CollectionToObjectConverter implements GenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -42,10 +42,6 @@ final class CollectionToObjectConverter implements ConditionalGenericConverter {
 		return Collections.singleton(new ConvertiblePair(Collection.class, Object.class));
 	}
 
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType);
-	}
-
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
@@ -55,7 +51,7 @@ final class CollectionToObjectConverter implements ConditionalGenericConverter {
 			return null;
 		}
 		Object firstElement = sourceCollection.iterator().next();
-		return this.conversionService.convert(firstElement, sourceType.getElementTypeDescriptor(), targetType);
+		return this.conversionService.convert(firstElement, sourceType.elementType(firstElement), targetType);
 	}
 
 }

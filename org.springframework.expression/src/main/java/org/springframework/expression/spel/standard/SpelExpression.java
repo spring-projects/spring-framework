@@ -103,30 +103,29 @@ public class SpelExpression implements Expression {
 		return ExpressionUtils.convertTypedValue(context, typedResultValue, expectedResultType);
 	}
 
-
 	public Class getValueType() throws EvaluationException {
-		return ast.getValueInternal(new ExpressionState(getEvaluationContext(), configuration)).getTypeDescriptor().getType();
+		return getValueType(getEvaluationContext());
+	}
+
+	public Class getValueType(Object rootObject) throws EvaluationException {
+		return getValueType(getEvaluationContext(), rootObject);
 	}
 
 	public Class getValueType(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		ExpressionState eState = new ExpressionState(context, configuration);
 		TypeDescriptor typeDescriptor = ast.getValueInternal(eState).getTypeDescriptor();
-		return typeDescriptor.getType();
+		return typeDescriptor != null ? typeDescriptor.getType() : null;
 	}
 
 	public Class getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
 		ExpressionState eState = new ExpressionState(context, toTypedValue(rootObject), configuration);
 		TypeDescriptor typeDescriptor = ast.getValueInternal(eState).getTypeDescriptor();
-		return typeDescriptor.getType();
-	}
-
-	public Class getValueType(Object rootObject) throws EvaluationException {
-		return ast.getValueInternal(new ExpressionState(getEvaluationContext(), configuration)).getTypeDescriptor().getType();
+		return typeDescriptor != null ? typeDescriptor.getType() : null;
 	}
 
 	public TypeDescriptor getValueTypeDescriptor() throws EvaluationException {
-		return ast.getValueInternal(new ExpressionState(getEvaluationContext(), configuration)).getTypeDescriptor();
+		return getValueTypeDescriptor(getEvaluationContext());
 	}
 	
 	public TypeDescriptor getValueTypeDescriptor(Object rootObject) throws EvaluationException {
@@ -177,7 +176,6 @@ public class SpelExpression implements Expression {
 		Assert.notNull(context, "The EvaluationContext is required");		
 		ast.setValue(new ExpressionState(context, toTypedValue(rootObject), configuration), value);
 	}
-
 	
 	// impl only
 

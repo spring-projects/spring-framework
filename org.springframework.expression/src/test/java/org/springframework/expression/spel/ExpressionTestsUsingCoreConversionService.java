@@ -16,15 +16,17 @@
 
 package org.springframework.expression.spel;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static junit.framework.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -72,13 +74,13 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		TypeConvertorUsingConversionService tcs = new TypeConvertorUsingConversionService();
 		
 		// ArrayList containing List<Integer> to List<String>
-		Class<?> clazz = typeDescriptorForListOfString.getElementType();
+		Class<?> clazz = typeDescriptorForListOfString.getElementType().getType();
 		assertEquals(String.class,clazz);
 		List l = (List) tcs.convertValue(listOfInteger, TypeDescriptor.forObject(listOfInteger), typeDescriptorForListOfString);
 		assertNotNull(l);
 
 		// ArrayList containing List<String> to List<Integer>
-		clazz = typeDescriptorForListOfInteger.getElementType();
+		clazz = typeDescriptorForListOfInteger.getElementType().getType();
 		assertEquals(Integer.class,clazz);
 		
 		l = (List) tcs.convertValue(listOfString, TypeDescriptor.forObject(listOfString), typeDescriptorForListOfString);

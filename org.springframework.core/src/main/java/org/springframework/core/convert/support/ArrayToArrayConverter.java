@@ -44,10 +44,6 @@ final class ArrayToArrayConverter implements GenericConverter {
 		return Collections.singleton(new ConvertiblePair(Object[].class, Object[].class));
 	}
 
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.helperConverter.matches(sourceType, targetType);
-	}
-
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {		
 		return this.helperConverter.convert(Arrays.asList(ObjectUtils.toObjectArray(source)), sourceType, targetType);
 	}

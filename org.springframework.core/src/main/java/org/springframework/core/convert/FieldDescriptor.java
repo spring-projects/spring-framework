@@ -36,17 +36,17 @@ class FieldDescriptor extends AbstractDescriptor {
 	}
 	
 	@Override
-	protected Class<?> getCollectionElementClass() {
+	protected Class<?> resolveCollectionElementType() {
 		return GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.nestingLevel);
 	}
 
 	@Override
-	protected Class<?> getMapKeyClass() {
+	protected Class<?> resolveMapKeyType() {
 		return GenericCollectionTypeResolver.getMapKeyFieldType(this.field, this.nestingLevel);
 	}
 
 	@Override
-	protected Class<?> getMapValueClass() {
+	protected Class<?> resolveMapValueType() {
 		return GenericCollectionTypeResolver.getMapValueFieldType(this.field, this.nestingLevel);
 	}
 

@@ -73,7 +73,7 @@ public class GenericConversionServiceTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void convertNotNullSourceNullSourceTypeDescriptor() {
-		conversionService.convert("3", TypeDescriptor.NULL, TypeDescriptor.valueOf(int.class));
+		conversionService.convert("3", null, TypeDescriptor.valueOf(int.class));
 	}
 
 	@Test
@@ -124,14 +124,15 @@ public class GenericConversionServiceTests {
 		assertNull(conversionService.convert(null, Integer.class));
 	}
 
+	@Test(expected=IllegalArgumentException.class)
 	public void convertNullTargetClass() {
 		assertNull(conversionService.convert("3", (Class<?>) null));
-		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
+		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), null));
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void convertNullTypeDescriptor() {
-		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), TypeDescriptor.NULL));
+		assertNull(conversionService.convert("3", TypeDescriptor.valueOf(String.class), null));
 	}
 
 	@Test(expected=IllegalArgumentException.class)
@@ -186,7 +187,12 @@ public class GenericConversionServiceTests {
 	@Test
 	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
 		conversionService.addConverter(new ObjectToArrayConverter(conversionService));
-		assertFalse(conversionService.canConvert(String.class, Integer[].class));
+		assertTrue(conversionService.canConvert(String.class, Integer[].class));
+		try {
+			conversionService.convert("3,4,5", Integer[].class);
+		} catch (ConversionFailedException e) {
+			assertTrue(e.getCause() instanceof ConverterNotFoundException);
+		}
 	}
 
 	@Test

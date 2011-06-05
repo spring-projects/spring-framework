@@ -48,9 +48,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Class<?> source = sourceType.getType();
-		Class<?> target = targetType.getType();
-		return !source.equals(target) && hasValueOfMethodOrConstructor(target, source);
+		return !sourceType.equals(targetType) && hasValueOfMethodOrConstructor(targetType.getType(), sourceType.getType());
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -79,16 +77,16 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 				") method or Constructor(" + sourceClass.getName() + ") exists on " + targetClass.getName());
 	}
 
-	public static boolean hasValueOfMethodOrConstructor(Class<?> targetClass, Class<?> sourceClass) {
-		return getValueOfMethodOn(targetClass, sourceClass) != null || getConstructor(targetClass, sourceClass) != null;
+	static boolean hasValueOfMethodOrConstructor(Class<?> clazz, Class<?> sourceParameterType) {
+		return getValueOfMethodOn(clazz, sourceParameterType) != null || getConstructor(clazz, sourceParameterType) != null;
 	}
 
-	private static Method getValueOfMethodOn(Class<?> targetClass, Class<?> sourceClass) {
-		return ClassUtils.getStaticMethod(targetClass, "valueOf", sourceClass);
+	private static Method getValueOfMethodOn(Class<?> clazz, Class<?> sourceParameterType) {
+		return ClassUtils.getStaticMethod(clazz, "valueOf", sourceParameterType);
 	}
 	
-	private static Constructor<?> getConstructor(Class<?> targetClass, Class<?> sourceClass) {
-		return ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
+	private static Constructor<?> getConstructor(Class<?> clazz, Class<?> sourceParameterType) {
+		return ClassUtils.getConstructorIfAvailable(clazz, sourceParameterType);
 	}
 
 }

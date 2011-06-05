@@ -90,9 +90,12 @@ public class Indexer extends SpelNodeImpl {
 
 		// Indexing into a Map
 		if (targetObject instanceof Map) {
-			Object possiblyConvertedKey = state.convertValue(index, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
-			Object o = ((Map<?, ?>) targetObject).get(possiblyConvertedKey);
-			return new TypedValue(o, targetObjectTypeDescriptor.getMapValueTypeDescriptor());
+			Object key = index;
+			if (targetObjectTypeDescriptor.getMapKeyType() != null) {
+				key = state.convertValue(key, targetObjectTypeDescriptor.getMapKeyType());
+			}
+			Object value = ((Map<?, ?>) targetObject).get(key);
+			return new TypedValue(value, targetObjectTypeDescriptor.mapValueType(value));
 		}
 		
 		if (targetObject == null) {
@@ -100,22 +103,22 @@ public class Indexer extends SpelNodeImpl {
 		}
 		
 		// if the object is something that looks indexable by an integer, attempt to treat the index value as a number
-		if ((targetObject instanceof Collection ) || targetObject.getClass().isArray() || targetObject instanceof String) {
-			int idx = (Integer)state.convertValue(index, TypeDescriptor.valueOf(Integer.class));		
+		if (targetObject instanceof Collection || targetObject.getClass().isArray() || targetObject instanceof String) {
+			int idx = (Integer) state.convertValue(index, TypeDescriptor.valueOf(Integer.class));		
 			if (targetObject.getClass().isArray()) {
 				Object arrayElement = accessArrayElement(targetObject, idx);
-				return new TypedValue(arrayElement, targetObjectTypeDescriptor.getElementTypeDescriptor());
+				return new TypedValue(arrayElement, targetObjectTypeDescriptor.elementType(arrayElement));
 			} else if (targetObject instanceof Collection) {
 				Collection c = (Collection) targetObject;
 				if (idx >= c.size()) {
-					if (!growCollection(state, targetObjectTypeDescriptor.getElementType(), idx, c)) {
+					if (!growCollection(state, targetObjectTypeDescriptor, idx, c)) {
 						throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
 					}
 				}
 				int pos = 0;
 				for (Object o : c) {
 					if (pos == idx) {
-						return new TypedValue(o, targetObjectTypeDescriptor.getElementTypeDescriptor());
+						return new TypedValue(o, targetObjectTypeDescriptor.elementType(o));
 					}
 					pos++;
 				}
@@ -181,33 +184,38 @@ public class Indexer extends SpelNodeImpl {
 			throw new SpelEvaluationException(SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 		// Indexing into a Map
-		if (targetObjectTypeDescriptor.isMap()) {
-			Map map = (Map)targetObject;
-			Object possiblyConvertedKey = index;
-			Object possiblyConvertedValue = newValue;
-			possiblyConvertedKey = state.convertValue(index.getValue(), targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
-			possiblyConvertedValue = state.convertValue(newValue, targetObjectTypeDescriptor.getMapValueTypeDescriptor());
-			map.put(possiblyConvertedKey,possiblyConvertedValue);
+		if (targetObject instanceof Map) {
+			Map map = (Map) targetObject;
+			Object key = index.getValue();
+			if (targetObjectTypeDescriptor.getMapKeyType() != null) {
+				key = state.convertValue(index, targetObjectTypeDescriptor.getMapKeyType());
+			}
+			if (targetObjectTypeDescriptor.getMapValueType() != null) {
+				newValue = state.convertValue(newValue, targetObjectTypeDescriptor.getMapValueType());				
+			}
+			map.put(key, newValue);
 			return;
 		}
 
 		if (targetObjectTypeDescriptor.isArray()) {
 			int idx = (Integer)state.convertValue(index, TypeDescriptor.valueOf(Integer.class));
-			setArrayElement(state, contextObject.getValue(), idx, newValue, targetObjectTypeDescriptor.getElementType());
+			setArrayElement(state, contextObject.getValue(), idx, newValue, targetObjectTypeDescriptor.getElementType().getType());
 			return;
 		}
-		else if (targetObjectTypeDescriptor.isCollection()) {
-			int idx = (Integer)state.convertValue(index, TypeDescriptor.valueOf(Integer.class));
+		else if (targetObject instanceof Collection) {
+			int idx = (Integer) state.convertValue(index, TypeDescriptor.valueOf(Integer.class));
 			Collection c = (Collection) targetObject;
 			if (idx >= c.size()) {
-				if (!growCollection(state, targetObjectTypeDescriptor.getElementType(), idx, c)) {
+				if (!growCollection(state, targetObjectTypeDescriptor, idx, c)) {
 					throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
 				}
 			}
 			if (targetObject instanceof List) {
-				List list = (List)targetObject;
-				Object possiblyConvertedValue = state.convertValue(newValue, targetObjectTypeDescriptor.getElementTypeDescriptor());
-				list.set(idx,possiblyConvertedValue);
+				List list = (List) targetObject;
+				if (targetObjectTypeDescriptor.getElementType() != null) {
+					newValue = state.convertValue(newValue, targetObjectTypeDescriptor.getElementType());
+				}
+				list.set(idx, newValue);
 				return;
 			}
 			else {
@@ -217,7 +225,7 @@ public class Indexer extends SpelNodeImpl {
 		
 		// Try and treat the index value as a property of the context object		
 		// TODO could call the conversion service to convert the value to a String		
-		if (index.getTypeDescriptor().getType()==String.class) {
+		if (index.getTypeDescriptor().getType() == String.class) {
 			Class<?> contextObjectClass = getObjectClass(contextObject.getValue());
 			String name = (String)index.getValue();
 			EvaluationContext eContext = state.getEvaluationContext();
@@ -260,20 +268,21 @@ public class Indexer extends SpelNodeImpl {
 	 * @return true if collection growing succeeded, otherwise false
 	 */
 	@SuppressWarnings("unchecked")
-	private boolean growCollection(ExpressionState state, Class<?> elementType, int index,
+	private boolean growCollection(ExpressionState state, TypeDescriptor targetType, int index,
 			Collection collection) {
 		if (state.getConfiguration().isAutoGrowCollections()) {
+			if (targetType.getElementType() == null) {
+				throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);				
+			}
+			TypeDescriptor elementType = targetType.getElementType();
 			Object newCollectionElement = null;
 			try {
-				int newElements = index-collection.size();
-				if (elementType == null || elementType == Object.class) {
-					throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);	
-				}
+				int newElements = index - collection.size();
 				while (newElements>0) {
-					collection.add(elementType.newInstance());
+					collection.add(elementType.getType().newInstance());
 					newElements--;
 				}
-				newCollectionElement = elementType.newInstance();
+				newCollectionElement = elementType.getType().newInstance();
 			}
 			catch (Exception ex) {
 				throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.UNABLE_TO_GROW_COLLECTION);

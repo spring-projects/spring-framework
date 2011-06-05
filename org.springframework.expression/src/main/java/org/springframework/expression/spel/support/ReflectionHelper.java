@@ -30,6 +30,7 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Utility methods used by the reflection resolver code to discover the appropriate
@@ -63,7 +64,7 @@ public class ReflectionHelper {
 			TypeDescriptor expectedArg = expectedArgTypes.get(i);
 			if (!expectedArg.equals(suppliedArg)) {
 				// The user may supply null - and that will be ok unless a primitive is expected
-				if (suppliedArg == TypeDescriptor.NULL) {
+				if (suppliedArg == null) {
 					if (expectedArg.isPrimitive()) {
 						match = null;
 					}
@@ -112,7 +113,7 @@ public class ReflectionHelper {
 		for (int i = 0,max=paramTypes.size(); i < max; i++) {
 			TypeDescriptor argType = argTypes.get(i);
 			TypeDescriptor paramType = paramTypes.get(i);
-			if (argType==TypeDescriptor.NULL) {
+			if (argType == null) {
 				if (paramType.isPrimitive()) {
 					return Integer.MAX_VALUE;
 				}
@@ -120,7 +121,7 @@ public class ReflectionHelper {
 			if (!ClassUtils.isAssignable(paramType.getClass(), argType.getClass())) {
 				return Integer.MAX_VALUE;
 			}
-			if (argType != TypeDescriptor.NULL) {
+			if (argType != null) {
 				Class paramTypeClazz = paramType.getType();
 				if (paramTypeClazz.isPrimitive()) {
 					paramTypeClazz = Object.class;
@@ -174,7 +175,7 @@ public class ReflectionHelper {
 		for (int i = 0; i < argCountUpToVarargs && match != null; i++) {
 			TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
 			TypeDescriptor expectedArg = expectedArgTypes.get(i);
-			if (suppliedArg == TypeDescriptor.NULL) {
+			if (suppliedArg == null) {
 				if (expectedArg.isPrimitive()) {
 					match = null;
 				}
@@ -213,13 +214,13 @@ public class ReflectionHelper {
 		else {
 			// Now... we have the final argument in the method we are checking as a match and we have 0 or more other
 			// arguments left to pass to it.
-			Class varargsParameterType = expectedArgTypes.get(expectedArgTypes.size() - 1).getElementType();
+			Class varargsParameterType = expectedArgTypes.get(expectedArgTypes.size() - 1).getElementType().getType();
 
 			// All remaining parameters must be of this type or convertable to this type
 			for (int i = expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {
 				TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
-				if (varargsParameterType != suppliedArg.getType()) {
-					if (suppliedArg == TypeDescriptor.NULL) {
+				if (!ObjectUtils.nullSafeEquals(varargsParameterType, suppliedArg)) {
+					if (suppliedArg == null) {
 						if (varargsParameterType.isPrimitive()) {
 							match = null;
 						}

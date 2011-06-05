@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.io.ClassPathResource;
@@ -38,7 +39,12 @@ public class CollectionToCollectionConverterTests {
 		list.add("37");
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("scalarListTarget"));
-		assertFalse(conversionService.canConvert(sourceType, targetType));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		try {
+			conversionService.convert(list, sourceType, targetType);
+		} catch (ConversionFailedException e) {
+			assertTrue(e.getCause() instanceof ConverterNotFoundException);
+		}
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(sourceType, targetType));
 		@SuppressWarnings("unchecked")		
@@ -169,7 +175,7 @@ public class CollectionToCollectionConverterTests {
 		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
-	@Test(expected=ConverterNotFoundException.class)
+	@Test
 	public void allNullsNotConvertible() throws Exception {
 		List<Resource> resources = new ArrayList<Resource>();
 		resources.add(null);
@@ -180,7 +186,7 @@ public class CollectionToCollectionConverterTests {
 	
 	public List<String> allNullsNotConvertible;
 
-	@Test(expected=ConverterNotFoundException.class)
+	@Test(expected=ConversionFailedException.class)
 	public void nothingInCommon() throws Exception {
 		List<Object> resources = new ArrayList<Object>();
 		resources.add(new ClassPathResource("test"));

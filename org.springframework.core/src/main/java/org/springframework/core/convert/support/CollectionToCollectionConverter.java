@@ -23,7 +23,7 @@ import java.util.Set;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts from a Collection to another Collection.
@@ -36,7 +36,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class CollectionToCollectionConverter implements ConditionalGenericConverter {
+final class CollectionToCollectionConverter implements GenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -48,12 +48,6 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		return Collections.singleton(new ConvertiblePair(Collection.class, Collection.class));
 	}
 
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		return this.conversionService.canConvert(sourceElementType, targetElementType);
-	}
-	
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
@@ -61,17 +55,15 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
-		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		if (Object.class.equals(targetElementType.getType())) {
-			for (Object sourceElement : sourceCollection) {
-				target.add(sourceElement);
-			}			
+		if (targetType.getElementType() == null) {
+			for (Object element : sourceCollection) {
+				target.add(element);
+			}
 		} else {
 			for (Object sourceElement : sourceCollection) {
-				Object targetElement = this.conversionService.convert(sourceElement, sourceElementType, targetElementType);
+				Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementType(sourceElement), targetType.getElementType());
 				target.add(targetElement);
-			}			
+			}
 		}
 		return target;
 	}
