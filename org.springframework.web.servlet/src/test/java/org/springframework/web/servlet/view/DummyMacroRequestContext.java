@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
+import org.springframework.web.util.UriTemplate;
 
 /**
  * Dummy request context used for VTL and FTL macro tests.
@@ -132,6 +133,14 @@ public class DummyMacroRequestContext {
 	 */
 	public String getContextUrl(String relativeUrl) {
 		return getContextPath() + relativeUrl;
+	}
+
+	/**
+	 * @see org.springframework.web.servlet.support.RequestContext#getContextUrl(String, Map)
+	 */
+	public String getContextUrl(String relativeUrl, Map<String,String> params) {
+		UriTemplate template = new UriTemplate(relativeUrl);
+		return getContextPath() + template.expand(params).toASCIIString();
 	}
 
 	/**
