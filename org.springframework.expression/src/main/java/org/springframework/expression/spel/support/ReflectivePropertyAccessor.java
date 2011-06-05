@@ -16,8 +16,6 @@
 
 package org.springframework.expression.spel.support;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -28,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.TypeDescriptor.Property;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -75,17 +74,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		Method method = findGetterForProperty(name, type, target instanceof Class);
 		if (method != null) {
 			// Treat it like a property
-			try {
-				// The readerCache will only contain gettable properties (let's not worry about setters for now)
-				PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name, method, null);
-				TypeDescriptor typeDescriptor = new TypeDescriptor(type, propertyDescriptor);
-				this.readerCache.put(cacheKey, new InvokerPair(method, typeDescriptor));
-				this.typeDescriptorCache.put(cacheKey, typeDescriptor);
-				return true;
-			}
-			catch (IntrospectionException ex) {
-				throw new AccessException("Unable to access property '" + name + "' through getter " + method, ex);
-			}
+			// The readerCache will only contain gettable properties (let's not worry about setters for now)
+			Property property = new Property(type, method, null);
+			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
+			this.readerCache.put(cacheKey, new InvokerPair(method, typeDescriptor));
+			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
+			return true;
 		}
 		else {
 			Field field = findField(name, type, target instanceof Class);
@@ -122,17 +116,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				if (method != null) {
 					// TODO remove the duplication here between canRead and read
 					// Treat it like a property
-					try {
-						// The readerCache will only contain gettable properties (let's not worry about setters for now)
-						PropertyDescriptor propertyDescriptor = new PropertyDescriptor(name, method, null);
-						TypeDescriptor typeDescriptor = new TypeDescriptor(type, propertyDescriptor);
-						invoker = new InvokerPair(method, typeDescriptor);
-						this.readerCache.put(cacheKey, invoker);
-					}
-					catch (IntrospectionException ex) {
-						throw new AccessException(
-								"Unable to access property '" + name + "' through getter " + method, ex);
-					}
+					// The readerCache will only contain gettable properties (let's not worry about setters for now)
+					Property property = new Property(type, method, null);
+					TypeDescriptor typeDescriptor = new TypeDescriptor(property);
+					invoker = new InvokerPair(method, typeDescriptor);
+					this.readerCache.put(cacheKey, invoker);
 				}
 			}
 			if (method != null) {
@@ -183,14 +171,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		Method method = findSetterForProperty(name, type, target instanceof Class);
 		if (method != null) {
 			// Treat it like a property
-			PropertyDescriptor propertyDescriptor = null;
-			try {
-				propertyDescriptor = new PropertyDescriptor(name, null, method);
-			}
-			catch (IntrospectionException ex) {
-				throw new AccessException("Unable to access property '" + name + "' through setter "+method, ex);
-			}
-			TypeDescriptor typeDescriptor = new TypeDescriptor(type, propertyDescriptor);
+			Property property = new Property(type, null, method);
+			TypeDescriptor typeDescriptor = new TypeDescriptor(property);
 			this.writerCache.put(cacheKey, method);
 			this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 			return true;

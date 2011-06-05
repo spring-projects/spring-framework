@@ -23,7 +23,7 @@ abstract class AbstractDescriptor {
 
 	private final Class<?> type;
 
-	public AbstractDescriptor(Class<?> type) {
+	protected AbstractDescriptor(Class<?> type) {
 		if (type == null) {
 			throw new IllegalArgumentException("type cannot be null");
 		}
@@ -93,15 +93,15 @@ abstract class AbstractDescriptor {
 	// internal helpers
 	
 	private boolean isCollection() {
-		return getType() != null && Collection.class.isAssignableFrom(getType());
+		return Collection.class.isAssignableFrom(getType());
 	}
 	
 	private boolean isArray() {
-		return getType() != null && getType().isArray();
+		return getType().isArray();
 	}
 	
 	private boolean isMap() {
-		return getType() != null && Map.class.isAssignableFrom(getType());
+		return Map.class.isAssignableFrom(getType());
 	}
 	
 }

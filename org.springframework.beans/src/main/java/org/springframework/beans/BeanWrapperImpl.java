@@ -43,6 +43,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.TypeDescriptor.Property;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -369,11 +370,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			if (pd != null) {
 				if (tokens.keys != null) {
 					if (pd.getReadMethod() != null || pd.getWriteMethod() != null) {
-						return TypeDescriptor.nested(nestedBw.getWrappedClass(), pd, tokens.keys.length);
+						return TypeDescriptor.nested(property(pd), tokens.keys.length);
 					}
 				} else {
 					if (pd.getReadMethod() != null || pd.getWriteMethod() != null) {
-						return new TypeDescriptor(nestedBw.getWrappedClass(), pd);
+						return new TypeDescriptor(property(pd));
 					}
 				}
 			}
@@ -493,7 +494,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			throws TypeMismatchException {
 		GenericTypeAwarePropertyDescriptor gpd = (GenericTypeAwarePropertyDescriptor) pd;
 		Class<?> beanClass = gpd.getBeanClass();
-		return convertIfNecessary(propertyName, oldValue, newValue, pd.getPropertyType(), new TypeDescriptor(beanClass, pd));
+		return convertIfNecessary(propertyName, oldValue, newValue, pd.getPropertyType(), new TypeDescriptor(property(pd)));
 	}
 
 
@@ -948,7 +949,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					if (isExtractOldValueForEditor() && arrayIndex < Array.getLength(propValue)) {
 						oldValue = Array.get(propValue, arrayIndex);
 					}
-					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType, TypeDescriptor.nested(getWrappedClass(), pd, tokens.keys.length));
+					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType, TypeDescriptor.nested(property(pd), tokens.keys.length));
 					// TODO review this grow algorithm along side the null gap algorithm for setting lists below ... the two are inconsistent
 					propValue = growArrayIfNecessary(propValue, arrayIndex, actualName);
 					Array.set(propValue, arrayIndex, convertedValue);
@@ -968,7 +969,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				if (isExtractOldValueForEditor() && index < list.size()) {
 					oldValue = list.get(index);
 				}
-				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType, TypeDescriptor.nested(getWrappedClass(), pd, tokens.keys.length));
+				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType, TypeDescriptor.nested(property(pd), tokens.keys.length));
 				if (index < list.size()) {
 					list.set(index, convertedValue);
 				}
@@ -1005,7 +1006,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				// Pass full property name and old value in here, since we want full
 				// conversion ability for map values.
 				Object convertedMapValue = convertIfNecessary(
-						propertyName, oldValue, pv.getValue(), mapValueType, TypeDescriptor.nested(getWrappedClass(), pd, tokens.keys.length));
+						propertyName, oldValue, pv.getValue(), mapValueType, TypeDescriptor.nested(property(pd), tokens.keys.length));
 				map.put(convertedMapKey, convertedMapValue);
 			}
 			else {
@@ -1166,6 +1167,11 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		public String actualName;
 
 		public String[] keys;
+	}
+	
+	private Property property(PropertyDescriptor pd) {
+		GenericTypeAwarePropertyDescriptor typeAware = (GenericTypeAwarePropertyDescriptor) pd;
+		return new Property(typeAware.getBeanClass(), typeAware.getReadMethod(), typeAware.getWriteMethod());
 	}
 
 }
