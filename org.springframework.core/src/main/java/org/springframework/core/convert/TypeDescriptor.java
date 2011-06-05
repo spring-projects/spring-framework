@@ -186,6 +186,13 @@ public class TypeDescriptor {
 		return nested(new BeanPropertyDescriptor(beanClass, property), nestingLevel);
 	}
 
+	/**
+	 * Create a new type descriptor for an object.
+	 * Use this factory method to introspect a source object before asking the conversion system to convert it to some another type.
+	 * If the provided object is null, returns null, else calls {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
+	 * @param object the source object
+	 * @return the type descriptor
+	 */
 	public static TypeDescriptor forObject(Object source) {
 		return source != null ? valueOf(source.getClass()) : null;
 	}
@@ -206,12 +213,24 @@ public class TypeDescriptor {
 		return ClassUtils.resolvePrimitiveIfNecessary(getType());
 	}
 
-	public TypeDescriptor narrowType(Object value) {
+	/**
+	 * Narrows this {@link TypeDescriptor} by setting its type to the class of the provided value.
+	 * If the value is null, no narrowing is performed and this TypeDescriptor is returned unchanged.
+	 * Designed to be called by binding frameworks when they read property, field, or method return values.
+	 * Allows such frameworks to narrow a TypeDescriptor built from a declared property, field, or method return value type.
+	 * For example, a field declared as java.lang.Object would be narrowed to java.util.HashMap if it was set to a java.util.HashMap value.
+	 * The narrowed TypeDescriptor can then be used to convert the HashMap to some other type.
+	 * Annotation and nested type context is preserved by the narrowed copy.
+	 * @param value the value to use for narrowing this type descriptor
+	 * @return this TypeDescriptor narrowed (returns a copy with its type updated to the class of the provided value)
+	 */
+	public TypeDescriptor narrow(Object value) {
 		if (value == null) {
 			return this;
 		}
 		return new TypeDescriptor(value.getClass(), elementType, mapKeyType, mapValueType, annotations);
 	}
+	
 	/**
 	 * Returns the name of this type: the fully qualified class name.
 	 */
@@ -292,15 +311,19 @@ public class TypeDescriptor {
 	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
 	 */
 	public TypeDescriptor getElementType() {
-		if (!isCollection() && !isArray()) {
-			throw new IllegalStateException("Not a java.util.Collection or Array");
-		}
+		assertCollectionOrArray();
 		return this.elementType;
 	}
 
+	/**
+	 * Creates a elementType descriptor from the provided collection or array element.
+	 * @param element the collection or array element
+	 * @return the element type descriptor
+	 */
 	public TypeDescriptor elementType(Object element) {
+		assertCollectionOrArray();
 		if (elementType != null) {
-			return elementType.narrowType(element);
+			return elementType.narrow(element);
 		} else {
 			return element != null ? new TypeDescriptor(element.getClass(), null, null, null, annotations) : null;
 		}
@@ -322,15 +345,19 @@ public class TypeDescriptor {
 	 * @throws IllegalStateException if this type is not a java.util.Map.
 	 */
 	public TypeDescriptor getMapKeyType() {
-		if (!isMap()) {
-			throw new IllegalStateException("Not a map");
-		}
+		assertMap();
 		return this.mapKeyType;
 	}
 
+	/**
+	 * Creates a mapKeyType descriptor from the provided map key.
+	 * @param mapKey the map key
+	 * @return the map key type descriptor
+	 */
 	public TypeDescriptor mapKeyType(Object mapKey) {
+		assertMap();
 		if (mapKeyType != null) {
-			return mapKeyType.narrowType(mapKey);
+			return mapKeyType.narrow(mapKey);
 		} else {
 			return mapKey != null ? new TypeDescriptor(mapKey.getClass(), null, null, null, annotations) : null;
 		}
@@ -343,15 +370,19 @@ public class TypeDescriptor {
 	 * @throws IllegalStateException if this type is not a java.util.Map.
 	 */
 	public TypeDescriptor getMapValueType() {
-		if (!isMap()) {
-			throw new IllegalStateException("Not a map");
-		}
+		assertMap();
 		return this.mapValueType;
 	}
 
+	/**
+	 * Creates a mapValueType descriptor from the provided map value.
+	 * @param mapValue the map value
+	 * @return the map value type descriptor
+	 */
 	public TypeDescriptor mapValueType(Object mapValue) {
+		assertMap();
 		if (mapValueType != null) {
-			return mapValueType.narrowType(mapValue);
+			return mapValueType.narrow(mapValue);
 		} else {
 			return mapValue != null ? new TypeDescriptor(mapValue.getClass(), null, null, null, annotations) : null;
 		}
@@ -481,6 +512,18 @@ public class TypeDescriptor {
 		return valueType.isAssignableTo(targetValueType);		
 	}
 
+	private void assertCollectionOrArray() {
+		if (!isCollection() && !isArray()) {
+			throw new IllegalStateException("Not a java.util.Collection or Array");
+		}		
+	}
+	
+	private void assertMap() {
+		if (!isMap()) {
+			throw new IllegalStateException("Not a java.util.Map");
+		}		
+	}
+	
 	private String wildcard(TypeDescriptor nestedType) {
 		return nestedType != null ? nestedType.toString() : "?";
 	}

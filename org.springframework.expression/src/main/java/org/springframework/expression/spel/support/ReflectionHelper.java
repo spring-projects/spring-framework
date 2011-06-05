@@ -30,7 +30,6 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Utility methods used by the reflection resolver code to discover the appropriate
@@ -219,13 +218,12 @@ public class ReflectionHelper {
 			// All remaining parameters must be of this type or convertable to this type
 			for (int i = expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {
 				TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
-				if (!ObjectUtils.nullSafeEquals(varargsParameterType, suppliedArg)) {
-					if (suppliedArg == null) {
-						if (varargsParameterType.isPrimitive()) {
-							match = null;
-						}
-					}
-					else {
+				if (suppliedArg == null) {
+					if (varargsParameterType.isPrimitive()) {
+						match = null;
+					}					
+				} else {
+					if (varargsParameterType != suppliedArg.getType()) {
 						if (ClassUtils.isAssignable(varargsParameterType, suppliedArg.getType())) {
 							if (match != ArgsMatchKind.REQUIRES_CONVERSION) {
 								match = ArgsMatchKind.CLOSE;

@@ -509,7 +509,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 						ReflectionUtils.makeAccessible((Method) member);
 					}
 					Object value = ((Method) member).invoke(target);
-					return new TypedValue(value, typeDescriptor.narrowType(value));
+					return new TypedValue(value, typeDescriptor.narrow(value));
 				}
 				catch (Exception ex) {
 					throw new AccessException("Unable to access property '" + name + "' through getter", ex);
@@ -521,7 +521,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 						ReflectionUtils.makeAccessible((Field)member);
 					}
 					Object value = ((Field)member).get(target);
-					return new TypedValue(value, typeDescriptor.narrowType(value));
+					return new TypedValue(value, typeDescriptor.narrow(value));
 				}
 				catch (Exception ex) {
 					throw new AccessException("Unable to access field: " + name, ex);
