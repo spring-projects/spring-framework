@@ -133,7 +133,10 @@ public class GenericConversionService implements ConfigurableConversionService {
 	// implementing ConversionService
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-		return canConvert(TypeDescriptor.valueOf(sourceType), TypeDescriptor.valueOf(targetType));
+		if (targetType == null) {
+			throw new IllegalArgumentException("The targetType to convert to cannot be null");
+		}		
+		return canConvert(sourceType != null ? TypeDescriptor.valueOf(sourceType) : null, TypeDescriptor.valueOf(targetType));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -145,6 +148,12 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (targetType == null) {
+			throw new IllegalArgumentException("The targetType to convert to cannot be null");
+		}
+		if (sourceType == null) {
+			return true;
+		}
 		if (logger.isTraceEnabled()) {
 			logger.trace("Checking if I can convert " + sourceType + " to " + targetType);
 		}		

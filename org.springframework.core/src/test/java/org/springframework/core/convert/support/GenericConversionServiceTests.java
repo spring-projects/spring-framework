@@ -51,6 +51,43 @@ public class GenericConversionServiceTests {
 	private GenericConversionService conversionService = new GenericConversionService();
 
 	@Test
+	public void canConvert() {
+		assertFalse(conversionService.canConvert(String.class, Integer.class));
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		assertTrue(conversionService.canConvert(String.class, Integer.class));		
+	}
+	
+	@Test
+	public void canConvertAssignable() {
+		assertTrue(conversionService.canConvert(String.class, String.class));
+		assertTrue(conversionService.canConvert(Integer.class, Number.class));
+		assertTrue(conversionService.canConvert(boolean.class, boolean.class));
+		assertTrue(conversionService.canConvert(boolean.class, Boolean.class));
+	}
+	
+	@Test
+	public void canConvertIllegalArgumentNullTargetType() {
+		try {
+			assertFalse(conversionService.canConvert(String.class, null));
+			fail("Should have failed");
+		} catch (IllegalArgumentException e) {
+			
+		}
+		try {
+			assertFalse(conversionService.canConvert(TypeDescriptor.valueOf(String.class), null));
+			fail("Should have failed");
+		} catch (IllegalArgumentException e) {
+			
+		}
+	}
+	
+	@Test
+	public void canConvertNullSourceType() {
+		assertTrue(conversionService.canConvert(null, Integer.class));
+		assertTrue(conversionService.canConvert(null, TypeDescriptor.valueOf(Integer.class)));
+	}
+	
+	@Test
 	public void convert() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertEquals(new Integer(3), conversionService.convert("3", Integer.class));

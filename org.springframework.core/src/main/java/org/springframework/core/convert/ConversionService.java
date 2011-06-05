@@ -30,6 +30,7 @@ public interface ConversionService {
 	 * @param sourceType the source type to convert from (required)
 	 * @param targetType the target type to convert to (required)
 	 * @return true if a conversion can be performed, false if not
+	 * @throws IllegalArgumentException if targetType is null
 	 */
 	boolean canConvert(Class<?> sourceType, Class<?> targetType);
 
@@ -39,6 +40,7 @@ public interface ConversionService {
 	 * @param targetType the target type to convert to (required)
 	 * @return the converted object, an instance of targetType
 	 * @throws ConversionException if an exception occurred
+	 * @throws IllegalArgumentException if targetType is null
 	 */
 	<T> T convert(Object source, Class<T> targetType);
 	
@@ -49,6 +51,8 @@ public interface ConversionService {
 	 * @param sourceType context about the source type to convert from (required)
 	 * @param targetType context about the target type to convert to (required)
 	 * @return true if a conversion can be performed between the source and target types, false if not
+	 * @throws IllegalArgumentException if targetType is null
+	 * @see TypeDescriptor#forObject(Object)
 	 */
 	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
 
@@ -57,10 +61,13 @@ public interface ConversionService {
 	 * The TypeDescriptors provide additional context about the field locations where conversion will occur, often object property locations.
 	 * This flavor of the convert operation exists mainly for use by a general purpose data mapping framework, and not for use by user code.
 	 * @param source the source object to convert (may be null)
-	 * @param sourceType context about the source type converting from (required)
+	 * @param sourceType context about the source type converting from (may be null if source is null)
 	 * @param targetType context about the target type to convert to (required)
 	 * @return the converted object, an instance of {@link TypeDescriptor#getObjectType() targetType}</code>
 	 * @throws ConversionException if an exception occurred
+	 * @throws IllegalArgumentException if targetType is null
+	 * @throws IllegalArgumentException if sourceType is null but source is not null
+	 * @see TypeDescriptor#forObject(Object)
 	 */
 	Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
 
