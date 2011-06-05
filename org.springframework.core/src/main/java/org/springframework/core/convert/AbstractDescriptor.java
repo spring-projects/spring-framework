@@ -24,9 +24,9 @@ abstract class AbstractDescriptor {
 	private final Class<?> type;
 
 	public AbstractDescriptor(Class<?> type) {
-		//if (type == null) {
-	//		throw new IllegalArgumentException("type cannot be null");
-		//}
+		if (type == null) {
+			throw new IllegalArgumentException("type cannot be null");
+		}
 		this.type = type;
 	}
 	
@@ -68,11 +68,13 @@ abstract class AbstractDescriptor {
 
 	public AbstractDescriptor nested() {
 		if (isCollection()) {
-			return nested(resolveCollectionElementType(), 0);
+			Class<?> elementType = resolveCollectionElementType();
+			return elementType != null ? nested(elementType, 0) : null;
 		} else if (isArray()) {
 			return nested(getType().getComponentType(), 0);
 		} else if (isMap()) {
-			return nested(resolveMapValueType(), 1);
+			Class<?> mapValueType = resolveMapValueType();
+			return mapValueType != null ? nested(mapValueType, 1) : null;
 		} else {
 			throw new IllegalStateException("Not a collection, array, or map: cannot resolve nested value types");
 		}

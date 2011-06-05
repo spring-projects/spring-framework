@@ -316,9 +316,15 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Creates a elementType descriptor from the provided collection or array element.
+	 * If this type is a {@link Collection} or an Array, creates a elementType descriptor from the provided collection or array element.
+	 * Narrows the {@link #getElementType() elementType} property to the class of the provided collection or array element.
+	 * For example, if this describes a java.util.List&lt;java.lang.Number&lt; and the element argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
+	 * If this describes a java.util.List&lt;?&gt; and the element argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
+	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned. 
 	 * @param element the collection or array element
-	 * @return the element type descriptor
+	 * @return a element type descriptor, narrowed to the type of the provided element
+	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
+	 * @see #narrow(Object)
 	 */
 	public TypeDescriptor elementType(Object element) {
 		assertCollectionOrArray();
@@ -350,9 +356,15 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Creates a mapKeyType descriptor from the provided map key.
+	 * If this type is a {@link Map}, creates a mapKeyType descriptor from the provided map key.
+	 * Narrows the {@link #getMapKeyType() mapKeyType} property to the class of the provided map key.
+	 * For example, if this describes a java.util.Map&lt;java.lang.Number, java.lang.String&lt; and the key argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
+	 * If this describes a java.util.Map&lt;?, ?&gt; and the key argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
+	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned. 
 	 * @param mapKey the map key
 	 * @return the map key type descriptor
+	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 * @see #narrow(Object)
 	 */
 	public TypeDescriptor mapKeyType(Object mapKey) {
 		assertMap();
@@ -375,9 +387,14 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Creates a mapValueType descriptor from the provided map value.
+	 * If this type is a {@link Map}, creates a mapValueType descriptor from the provided map value.
+	 * Narrows the {@link #getMapValueType() mapValueType} property to the class of the provided map value.
+	 * For example, if this describes a java.util.Map&lt;java.lang.String, java.lang.Number&lt; and the value argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
+	 * If this describes a java.util.Map&lt;?, ?&gt; and the value argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
+	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned. 
 	 * @param mapValue the map value
 	 * @return the map value type descriptor
+	 * @throws IllegalStateException if this type is not a java.util.Map. 
 	 */
 	public TypeDescriptor mapValueType(Object mapValue) {
 		assertMap();
@@ -473,6 +490,9 @@ public class TypeDescriptor {
 	private static TypeDescriptor nested(AbstractDescriptor descriptor, int nestingLevel) {
 		for (int i = 0; i < nestingLevel; i++) {
 			descriptor = descriptor.nested();
+			if (descriptor == null) {
+				return null;
+			}
 		}
 		return new TypeDescriptor(descriptor);		
 	}

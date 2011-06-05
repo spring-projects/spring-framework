@@ -515,6 +515,12 @@ public class TypeDescriptorTests {
 	}
 
 	@Test(expected=IllegalStateException.class)
+	public void nestedTooManyLevels() throws Exception {
+		TypeDescriptor t1 = TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test4", List.class), 0), 3);
+		assertEquals(String.class, t1.getType());
+	}
+
+	@Test(expected=IllegalStateException.class)
 	public void nestedMethodParameterTypeNotNestable() throws Exception {
 		TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test5", String.class), 0), 2);
 	}
@@ -543,7 +549,20 @@ public class TypeDescriptorTests {
 	public void test5(String param1) {
 		
 	}
-	
+
+	@Test
+	public void nestedNotParameterized() throws Exception {
+		TypeDescriptor t1 = TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test6", List.class), 0), 1);
+		assertEquals(List.class,t1.getType());
+		assertEquals("java.util.List<?>", t1.toString());
+		TypeDescriptor t2 = TypeDescriptor.nested(new MethodParameter(getClass().getMethod("test6", List.class), 0), 2);
+		assertNull(t2);
+	}
+
+	public void test6(List<List> param1) {
+		
+	}
+
 	@Test
 	public void nestedFieldTypeMapTwoLevels() throws Exception {
 		TypeDescriptor t1 = TypeDescriptor.nested(getClass().getField("test4"), 2);

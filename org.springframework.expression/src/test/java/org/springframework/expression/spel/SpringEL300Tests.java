@@ -726,7 +726,6 @@ public class SpringEL300Tests extends ExpressionTestCase {
         String el1 = "ls.![#this.equals('abc')]";
         SpelExpression exp = parser.parseRaw(el1);
         List value = (List)exp.getValue(ctx);
-        System.out.println(value);
         // value is list containing [true,false]
         Assert.assertEquals(Boolean.class,value.get(0).getClass());
         TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
