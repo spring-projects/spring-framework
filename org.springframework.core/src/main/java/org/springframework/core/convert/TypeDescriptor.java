@@ -70,7 +70,7 @@ public class TypeDescriptor {
 
 	/**
 	 * Create a new type descriptor from a {@link MethodParameter}.
-	 * Use this constructor when a conversion point is a constructor parameter, method parameter, or method return value. 
+	 * Use this constructor when a source or target conversion point is a constructor parameter, method parameter, or method return value. 
 	 * @param methodParameter the method parameter
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
@@ -78,8 +78,8 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Create a new type descriptor for a field.
-	 * Use this constructor when a conversion point is a field.
+	 * Create a new type descriptor from a {@link Field}.
+	 * Use this constructor when source or target conversion point is a field.
 	 * @param field the field
 	 */
 	public TypeDescriptor(Field field) {
@@ -87,8 +87,8 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Create a new type descriptor for a bean property.
-	 * Use this constructor when a target conversion point is a property on a Java class.
+	 * Create a new type descriptor from a {@link Property}.
+	 * Use this constructor when a source or target conversion point is a property on a Java class.
 	 * @param property the property
 	 */
 	public TypeDescriptor(Property property) {
@@ -96,9 +96,9 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Create a new type descriptor for the given class.
-	 * Use this to instruct the conversion system to convert to an object to a specific target type, when no type location such as a method parameter or field is available to provide additional conversion context.
-	 * Generally prefer use of {@link #forObject(Object)} for constructing source type descriptors for source objects.
+	 * Create a new type descriptor from the given type.
+	 * Use this to instruct the conversion system to convert an object to a specific target type, when no type location such as a method parameter or field is available to provide additional conversion context.
+	 * Generally prefer use of {@link #forObject(Object)} for constructing type descriptors from source objects, as it handles the null object case.
 	 * @param type the class
 	 * @return the type descriptor
 	 */
@@ -108,9 +108,10 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Create a new type descriptor for a java.util.Collection class.
-	 * Useful for supporting conversion of source Collection objects to other types.
-	 * Serves as an alternative to {@link #forObject(Object)} to be used when you cannot rely on Collection element introspection to resolve the element type.
+	 * Create a new type descriptor from a java.util.Collection type.
+	 * Useful for converting to typed Collections.
+	 * For example, a List&lt;String&gt; could be converted to a List&lt;EmailAddress&gt; by converting to a targetType built with this method.
+	 * The method call to construct such a TypeDescriptor would look something like: collection(List.class, TypeDescriptor.valueOf(EmailAddress.class));
 	 * @param collectionType the collection type, which must implement {@link Collection}.
 	 * @param elementType the collection's element type, used to convert collection elements
 	 * @return the collection type descriptor
@@ -123,9 +124,10 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Create a new type descriptor for a java.util.Map class.
-	 * Useful for supporting the conversion of source Map objects to other types.
-	 * Serves as an alternative to {@link #forObject(Object)} to be used when you cannot rely on Map entry introspection to resolve the key and value type.
+	 * Create a new type descriptor from a java.util.Map type.
+	 * Useful for Converting to typed Maps.
+	 * For example, a Map&lt;String, String&gt; could be converted to a Map&lt;Id, EmailAddress&gt; by converting to a targetType built with this method:
+	 * The method call to construct such a TypeDescriptor would look something like: map(Map.class, TypeDescriptor.valueOf(Id.class), TypeDescriptor.valueOf(EmailAddress.class));
 	 * @param mapType the map type, which must implement {@link Map}.
 	 * @param keyType the map's key type, used to convert map keys
 	 * @param valueType the map's value type, used to convert map values
@@ -201,16 +203,19 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Determine the declared (non-generic) type of the wrapped parameter/field.
-	 * @return the declared type, or <code>null</code> if this is {@link TypeDescriptor#NULL}
+	 * The type of the backing class, method parameter, field, or property described by this TypeDescriptor.
+	 * Returns primitive types as-is.
+	 * See {@link #getObjectType()} for a variation of this operation that resolves primitive types to their corresponding Object types if necessary.
+	 * @return the type, or <code>null</code> if this is {@link TypeDescriptor#NULL}
+	 * @see #getObjectType()
 	 */
 	public Class<?> getType() {
 		return type;
 	}
 
 	/**
-	 * Determine the declared type of the wrapped parameter/field.
-	 * Returns the Object wrapper type if the underlying type is a primitive.
+	 * Variation of {@link #getType()} that accounts for a primitive type by returning its object wrapper type.
+	 * This is useful for conversion service implementations that wish to normalize to object-based types and not work with primitive types directly.
 	 */
 	public Class<?> getObjectType() {
 		return ClassUtils.resolvePrimitiveIfNecessary(getType());

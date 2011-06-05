@@ -35,19 +35,8 @@ public interface ConversionService {
 	boolean canConvert(Class<?> sourceType, Class<?> targetType);
 
 	/**
-	 * Convert the source to targetType.
-	 * @param source the source object to convert (may be null)
-	 * @param targetType the target type to convert to (required)
-	 * @return the converted object, an instance of targetType
-	 * @throws ConversionException if an exception occurred
-	 * @throws IllegalArgumentException if targetType is null
-	 */
-	<T> T convert(Object source, Class<T> targetType);
-	
-	/**
 	 * Returns true if objects of sourceType can be converted to the targetType.
-	 * The TypeDescriptors provide additional context about the field locations where conversion would occur, often object property locations.
-	 * This flavor of the canConvert operation exists mainly for use by a general purpose data mapping framework, and not for use by user code.
+	 * The TypeDescriptors provide additional context about the source and target locations where conversion would occur, often object property locations.
 	 * @param sourceType context about the source type to convert from (required)
 	 * @param targetType context about the target type to convert to (required)
 	 * @return true if a conversion can be performed between the source and target types, false if not
@@ -58,13 +47,22 @@ public interface ConversionService {
 
 	/**
 	 * Convert the source to targetType.
-	 * The TypeDescriptors provide additional context about the field locations where conversion will occur, often object property locations.
-	 * This flavor of the convert operation exists mainly for use by a general purpose data mapping framework, and not for use by user code.
+	 * @param source the source object to convert (may be null)
+	 * @param targetType the target type to convert to (required)
+	 * @return the converted object, an instance of targetType
+	 * @throws ConversionException if a conversion exception occurred
+	 * @throws IllegalArgumentException if targetType is null
+	 */
+	<T> T convert(Object source, Class<T> targetType);
+	
+	/**
+	 * Convert the source to targetType.
+	 * The TypeDescriptors provide additional context about the source and target locations where conversion will occur, often object property locations.
 	 * @param source the source object to convert (may be null)
 	 * @param sourceType context about the source type converting from (may be null if source is null)
 	 * @param targetType context about the target type to convert to (required)
 	 * @return the converted object, an instance of {@link TypeDescriptor#getObjectType() targetType}</code>
-	 * @throws ConversionException if an exception occurred
+	 * @throws ConversionException if a conversion exception occurred
 	 * @throws IllegalArgumentException if targetType is null
 	 * @throws IllegalArgumentException if sourceType is null but source is not null
 	 * @see TypeDescriptor#forObject(Object)
