@@ -17,18 +17,13 @@ package org.springframework.core.convert;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Context about a type to convert from or to.
@@ -453,165 +448,6 @@ public class TypeDescriptor {
 	}
 
 	// helper public class
-
-	public static final class Property {
-
-		private final Class<?> objectType;
-
-		private final Method readMethod;
-
-		private final Method writeMethod;
-
-		private final String name;
-		
-		private final MethodParameter methodParameter;
-
-		private final Annotation[] annotations;
-
-		public Property(Class<?> objectType, Method readMethod, Method writeMethod) {
-			this.objectType = objectType;
-			this.readMethod = readMethod;
-			this.writeMethod = writeMethod;
-			this.methodParameter = resolveMethodParameter();
-			this.name = resolveName();
-			this.annotations = resolveAnnotations();
-		}
-
-		public Class<?> getObjectType() {
-			return objectType;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public Class<?> getType() {
-			return methodParameter.getParameterType();
-		}
-
-		public Method getReadMethod() {
-			return readMethod;
-		}
-
-		public Method getWriteMethod() {
-			return writeMethod;
-		}
-
-		MethodParameter getMethodParameter() {
-			return methodParameter;
-		}
-
-		Annotation[] getAnnotations() {
-			return annotations;
-		}
-
-		private String resolveName() {
-			if (readMethod != null) {
-				int index = readMethod.getName().indexOf("get");
-				if (index != -1) {
-					index += 3;
-				} else {
-					index = readMethod.getName().indexOf("is");
-					if (index == -1) {
-						throw new IllegalArgumentException("Not a getter method");
-					}
-					index += 2;
-				}
-				return StringUtils.uncapitalize(readMethod.getName().substring(index));
-			} else {
-				int index = writeMethod.getName().indexOf("set") + 3;
-				if (index == -1) {
-					throw new IllegalArgumentException("Not a setter method");
-				}
-				return StringUtils.uncapitalize(writeMethod.getName().substring(index));
-			}
-		}
-
-		private MethodParameter resolveMethodParameter() {
-			MethodParameter read = resolveReadMethodParameter();
-			MethodParameter write = resolveWriteMethodParameter();
-			if (read == null && write == null) {
-				throw new IllegalStateException("Property is neither readable or writeable");				
-			}
-			if (read != null && write != null && !read.getParameterType().equals(write.getParameterType())) {
-				throw new IllegalStateException("Read and write parameter types are not the same");
-			}
-			return read != null ? read : write;
-		}
-		
-		private MethodParameter resolveReadMethodParameter() {
-			if (getReadMethod() == null) {
-				return null;
-			}
-			return resolveParameterType(new MethodParameter(getReadMethod(), -1));			
-		}
-
-		private MethodParameter resolveWriteMethodParameter() {
-			if (getWriteMethod() == null) {
-				return null;
-			}
-			return resolveParameterType(new MethodParameter(getWriteMethod(), 0));			
-		}
-
-		private MethodParameter resolveParameterType(MethodParameter parameter) {
-			// needed to resolve generic property types that parameterized by sub-classes e.g. T getFoo();
-			GenericTypeResolver.resolveParameterType(parameter, getObjectType());
-			return parameter;			
-		}
-		
-		private Annotation[] resolveAnnotations() {
-			Map<Class<?>, Annotation> annMap = new LinkedHashMap<Class<?>, Annotation>();
-			Method readMethod = getReadMethod();
-			if (readMethod != null) {
-				for (Annotation ann : readMethod.getAnnotations()) {
-					annMap.put(ann.annotationType(), ann);
-				}
-			}
-			Method writeMethod = getWriteMethod();
-			if (writeMethod != null) {
-				for (Annotation ann : writeMethod.getAnnotations()) {
-					annMap.put(ann.annotationType(), ann);
-				}
-			}
-			Field field = getField();
-			if (field != null) {
-				for (Annotation ann : field.getAnnotations()) {
-					annMap.put(ann.annotationType(), ann);
-				}
-			}
-			return annMap.values().toArray(new Annotation[annMap.size()]);
-		}
-
-		private Field getField() {
-			String name = getName();
-			if (!StringUtils.hasLength(name)) {
-				return null;
-			}
-			Class<?> declaringClass = declaringClass();
-			Field field = ReflectionUtils.findField(declaringClass, name);
-			if (field == null) {
-				// Same lenient fallback checking as in CachedIntrospectionResults...
-				field = ReflectionUtils.findField(declaringClass,
-						name.substring(0, 1).toLowerCase() + name.substring(1));
-				if (field == null) {
-					field = ReflectionUtils.findField(declaringClass,
-							name.substring(0, 1).toUpperCase() + name.substring(1));
-				}
-			}
-			return field;
-		}
-
-		private Class<?> declaringClass() {
-			if (getReadMethod() != null) {
-				return getReadMethod().getDeclaringClass();
-			} else {
-				return getWriteMethod().getDeclaringClass();
-			}
-		}
-
-	}
-
-	// package private
 
 	TypeDescriptor(AbstractDescriptor descriptor) {
 		this.type = descriptor.getType();

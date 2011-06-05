@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.TypeDescriptor.Property;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
