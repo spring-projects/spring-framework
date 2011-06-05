@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="jdbc">
@@ -8,9 +8,9 @@
     <title>Introduction to Spring Framework JDBC</title>
 
     <para>The value-add provided by the Spring Framework JDBC abstraction is
-    perhaps best shown by the sequence of actions outlined in the table
-    below. The table shows what actions Spring will take care of and which
-    actions are the responsibility of you, the application developer.<!--Is this sequence correct, as far as what developer does and doesn't do? Does it adhere to info in the rest of the chapter?
+    perhaps best shown by the sequence of actions outlined in the table below.
+    The table shows what actions Spring will take care of and which actions
+    are the responsibility of you, the application developer.<!--Is this sequence correct, as far as what developer does and doesn't do? Does it adhere to info in the rest of the chapter?
 --><!--How does JDBC know what connection parameters are if a human does not at some point define them?--><!--TR: OK. I have rewritten this as a table indicating who has what responsibility. --></para>
 
     <table align="left" width="">
@@ -1036,7 +1036,8 @@ public class ExecuteAnUpdate {
     <section id="jdbc-auto-genereted-keys">
       <title>Retrieving auto-generated keys</title>
 
-      <para>An <methodname>update()</methodname> convenience method supports<!--Give name of this method. Also indicate *what* is acquiring the primary keys. TR: Changed to *retrieval*. 
+      <para>An <methodname>update()</methodname> convenience method
+      supports<!--Give name of this method. Also indicate *what* is acquiring the primary keys. TR: Changed to *retrieval*. 
 The name of the method is *update*.--> the retrieval of primary keys generated
       by the database. This support is part of the JDBC 3.0 standard; see
       Chapter 13.6 of the specification for details. The method takes a
@@ -1368,7 +1369,7 @@ dataSource.setPassword("");</programlisting>
     <classname>SimpleJdbcTemplate</classname>.</para>
 
     <section id="jdbc-advanced-classic">
-      <title>Batch operations with the JdbcTemplate</title>
+      <title>Basic batch operations with the JdbcTemplate</title>
 
       <para>You accomplish <classname>JdbcTemplate</classname> batch
       processing by implementing two methods of a special interface,
@@ -1418,11 +1419,12 @@ dataSource.setPassword("");</programlisting>
     </section>
 
     <section id="jdbc-advanced-simple">
-      <title>Batch operations with the SimpleJdbcTemplate</title>
+      <title>Batch operations with a List of objects</title>
 
-      <para>The <classname>SimpleJdbcTemplate</classname> provides an
-      alternate way of providing the batch update. Instead of implementing a
-      special batch interface, you provide all parameter values in the call.
+      <para>Both the <classname>JdbcTemplate</classname> and the
+      <classname>NamedParameterJdbcTemplate</classname> provides an alternate
+      way of providing the batch update. Instead of implementing a special
+      batch interface, you provide all parameter values in the call as a list.
       The framework loops over these values and uses an internal prepared
       statement setter. The API varies depending on whether you use named
       parameters. For the named parameters you provide an array of
@@ -1435,15 +1437,15 @@ dataSource.setPassword("");</programlisting>
       <para>This example shows a batch update using named parameters:</para>
 
       <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
-    private SimpleJdbcTemplate simpleJdbcTemplate;
+    private NamedParameterTemplate namedParameterJdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
     public int[] batchUpdate(final List&lt;Actor&gt; actors) {
         SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(actors.toArray());
-        int[] updateCounts = simpleJdbcTemplate.batchUpdate(
+        int[] updateCounts = namedParameterJdbcTemplate.batchUpdate(
             "update t_actor set first_name = :firstName, last_name = :lastName where id = :id",
             batch);
         return updateCounts;
@@ -1459,10 +1461,10 @@ dataSource.setPassword("");</programlisting>
       <para>The same example using classic JDBC "?" placeholders:</para>
 
       <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
-    private SimpleJdbcTemplate simpleJdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
-        this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     public int[] batchUpdate(final List&lt;Actor&gt; actors) {
@@ -1474,17 +1476,79 @@ dataSource.setPassword("");</programlisting>
                     actor.getId()};
             batch.add(values);
         }
-        int[] updateCounts = simpleJdbcTemplate.batchUpdate(
+        int[] updateCounts = jdbcTemplate.batchUpdate(
                 "update t_actor set first_name = ?, last_name = ? where id = ?",
                 batch);
         return updateCounts;
     }
 
     //  ... additional methods
-}</programlisting>All batch update methods return an int array containing the
-      number of affected rows for each batch entry. This count is reported by
-      the JDBC driver. If the count is not available, the JDBC driver returns
-      a -2 value.</para>
+}</programlisting>All of the above batch update methods return an int array
+      containing the number of affected rows for each batch entry. This count
+      is reported by the JDBC driver. If the count is not available, the JDBC
+      driver returns a -2 value.</para>
+    </section>
+
+    <section id="jdbc-advanced-simple">
+      <title>Batch operations with multiple batches</title>
+
+      <para>The last example of a batch update deals with batches that are so
+      large that you want to break them up into several smaller batches. You
+      can of course do this with the methods mentioned above by making
+      multiple calls to the <classname>batchUpdate</classname> method, but
+      there is now a more convenient method. This method takes, in addition to
+      the SQL statement, a Collection of objects containing the parameters,
+      the number of updates to make for each batch and a
+      <classname>ParameterizedPreparedStatementSetter</classname> to set the
+      values for the parameters of the prepared statement. The framework loops
+      over the provided values and breaks the update calls into batches of the
+      size specified. </para>
+
+      <para>This example shows a batch update using a batch size of
+      100:</para>
+
+      <para><programlisting language="java">public class JdbcActorDao implements ActorDao {
+    private JdbcTemplate jdbcTemplate;
+
+    public void setDataSource(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
+
+    public int[][] batchUpdate(final Collection&lt;Actor&gt; actors) {
+        Collection&lt;Object[]&gt; batch = new ArrayList&lt;Object[]&gt;();
+        for (Actor actor : actors) {
+            Object[] values = new Object[] {
+                    actor.getFirstName(),
+                    actor.getLastName(),
+                    actor.getId()};
+            batch.add(values);
+        }
+        int[][] updateCounts = jdbcTemplate.batchUpdate(
+                "update t_actor set first_name = ?, last_name = ? where id = ?",
+                actors,
+                100,
+                new ParameterizedPreparedStatementSetter&lt;Actor&gt;() {
+                    public void setValues(PreparedStatement ps, Actor argument) throws SQLException {
+                        ps.setString(1, argument.getFirstName());
+                        ps.setString(2, argument.getLastName());
+                        ps.setLong(3, argument.getId().longValue());
+ 
+                     }
+                 } );
+        return updateCounts;
+    }
+
+    //  ... additional methods
+}</programlisting>The batch update methods for this call returns an array of
+      int arrays containing an array entry for each batch with an array of the
+      number of affected rows for each update. The top level array's length
+      indicates the number of batches executed and the second level array's
+      length indicates the number of updates in that batch. The number of
+      updates in each batch should be the the batch size provided for all
+      batches except for the last one that might be less, depending on the
+      total number of updat objects provided. The update count for each update
+      stament is the one reported by the JDBC driver. If the count is not
+      available, the JDBC driver returns a -2 value.</para>
     </section>
   </section>
 
@@ -1715,9 +1779,9 @@ END;</programlisting>The <code>in_id</code> parameter contains the
       <para>The <classname>SimpleJdbcCall</classname> is declared in a similar
       manner to the <classname>SimpleJdbcInsert</classname>. You should
       instantiate and configure the class in the initialization method of your
-      data access layer. Compared to the StoredProcedure class, you don't
-      have to create a subclass and you don't have to declare parameters that
-      can be looked up in the database metadata. <!--Reword preceding: You need not subclass *what?* and you declare *what* in init method? TR: Revised, pplease review.-->Following
+      data access layer. Compared to the StoredProcedure class, you don't have
+      to create a subclass and you don't have to declare parameters that can
+      be looked up in the database metadata. <!--Reword preceding: You need not subclass *what?* and you declare *what* in init method? TR: Revised, pplease review.-->Following
       is an example of a SimpleJdbcCall configuration using the above stored
       procedure. The only configuration option, in addition to the
       <classname>DataSource</classname>, is the name of the stored
@@ -2651,9 +2715,9 @@ clobReader.close();</programlisting>
       <para>In addition to the primitive values in the value list, you can
       create a <classname>java.util.List</classname> of object arrays. This
       list would support multiple expressions defined for the <code>in</code>
-      clause such as <code>select * from T_ACTOR where (id, last_name) in
-      ((1, 'Johnson'), (2, 'Harrop'))</code>. This
-      of course requires that your database supports this syntax.</para>
+      clause such as <code>select * from T_ACTOR where (id, last_name) in ((1,
+      'Johnson'), (2, 'Harrop'))</code>. This of course requires that your
+      database supports this syntax.</para>
     </section>
 
     <section id="jdbc-complex-types">
@@ -2815,7 +2879,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       <title>Using HSQL</title>
 
       <para>Spring supports HSQL 1.8.0 and above. HSQL is the default embedded
-      database if no type is specified explicitly. To specify HSQL explicitly, 
+      database if no type is specified explicitly. To specify HSQL explicitly,
       set the <literal>type</literal> attribute of the
       <literal>embedded-database</literal> tag to <literal>HSQL</literal>. If
       you are using the builder API, call the
@@ -2920,8 +2984,7 @@ public class DataAccessUnitTestTemplate {
       existing data, the XML namespace provides a couple more options. The
       first is flag to switch the initialization on and off. This can be set
       according to the environment (e.g. to pull a boolean value from system
-      properties or an environment bean), e.g.
-      <programlisting>&lt;jdbc:initialize-database data-source="dataSource"
+      properties or an environment bean), e.g. <programlisting>&lt;jdbc:initialize-database data-source="dataSource"
     <emphasis role="bold">enabled="#{systemProperties.INITIALIZE_DATABASE}"</emphasis>&gt;
   &lt;jdbc:script location="..."/&gt;
 &lt;/jdbc:initialize-database&gt;</programlisting></para>
@@ -2979,23 +3042,20 @@ public class DataAccessUnitTestTemplate {
         <para>The first option might be easy if the application is in your
         control, and not otherwise. Some suggestions for how to implement this
         are<itemizedlist>
-
             <listitem>
               <para>Make the cache initialize lazily on first usage, which
               improves application startup time</para>
             </listitem>
 
             <listitem>
-              <para>Have your cache or a separate component that
-              initializes the cache implement <code>Lifecycle</code> or 
-              <code>SmartLifecycle</code>.  When the application context
-              starts up a <code>SmartLifecycle</code> can be automatically
-              started if its <code>autoStartup</code> flag is set, 
-              and a <code>Lifecycle</code> can be started
-              manually by calling 
+              <para>Have your cache or a separate component that initializes
+              the cache implement <code>Lifecycle</code> or
+              <code>SmartLifecycle</code>. When the application context starts
+              up a <code>SmartLifecycle</code> can be automatically started if
+              its <code>autoStartup</code> flag is set, and a
+              <code>Lifecycle</code> can be started manually by calling
               <code>ConfigurableApplicationContext.start()</code> on the
-              enclosing context.
-              </para>
+              enclosing context.</para>
             </listitem>
 
             <listitem>
@@ -3003,10 +3063,9 @@ public class DataAccessUnitTestTemplate {
               custom observer mechanism to trigger the cache initialization.
               <code>ContextRefreshedEvent</code> is always published by the
               context when it is ready for use (after all beans have been
-              initialized), so that is often a useful hook (this is
-              how the <code>SmartLifecycle</code> works by default).</para>
+              initialized), so that is often a useful hook (this is how the
+              <code>SmartLifecycle</code> works by default).</para>
             </listitem>
-
           </itemizedlist></para>
 
         <para>The second option can also be easy. Some suggestions on how to
