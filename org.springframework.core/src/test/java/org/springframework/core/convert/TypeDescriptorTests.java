@@ -36,7 +36,6 @@ import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.support.DefaultConversionService;
 
 /**
  * @author Keith Donald
@@ -651,6 +650,74 @@ public class TypeDescriptorTests {
 		assertEquals(String.class, desc.getMapKeyType().getType());
 		assertEquals(String.class, desc.getMapValueType().getMapKeyType().getType());
 		assertEquals(Integer.class, desc.getMapValueType().getMapValueType().getType());
+	}
+
+	@Test
+	public void narrow() {
+		TypeDescriptor desc = TypeDescriptor.valueOf(Number.class);
+		Integer value = new Integer(3);
+		desc = desc.narrow(value);
+		assertEquals(Integer.class, desc.getType());
+	}
+
+	@Test
+	public void elementType() {
+		TypeDescriptor desc = TypeDescriptor.valueOf(List.class);
+		Integer value = new Integer(3);
+		desc = desc.elementType(value);
+		assertEquals(Integer.class, desc.getType());
+	}
+
+	@Test
+	public void elementTypePreserveContext() throws Exception {
+		TypeDescriptor desc = new TypeDescriptor(getClass().getField("listPreserveContext"));
+		assertEquals(Integer.class, desc.getElementType().getElementType().getType());
+		List<Integer> value = new ArrayList<Integer>(3);
+		desc = desc.elementType(value);
+		assertEquals(Integer.class, desc.getElementType().getType());
+		assertNotNull(desc.getAnnotation(FieldAnnotation.class));		
+	}
+	
+	@FieldAnnotation
+	public List<List<Integer>> listPreserveContext;
+
+	@Test
+	public void mapKeyType() {
+		TypeDescriptor desc = TypeDescriptor.valueOf(Map.class);
+		Integer value = new Integer(3);
+		desc = desc.mapKeyType(value);
+		assertEquals(Integer.class, desc.getType());
+	}
+
+	@Test
+	public void mapKeyTypePreserveContext() throws Exception {
+		TypeDescriptor desc = new TypeDescriptor(getClass().getField("mapPreserveContext"));
+		assertEquals(Integer.class, desc.getMapKeyType().getElementType().getType());
+		List<Integer> value = new ArrayList<Integer>(3);
+		desc = desc.mapKeyType(value);
+		assertEquals(Integer.class, desc.getElementType().getType());
+		assertNotNull(desc.getAnnotation(FieldAnnotation.class));
+	}
+
+	@FieldAnnotation
+	public Map<List<Integer>, List<Integer>> mapPreserveContext;
+
+	@Test
+	public void mapValueType() {
+		TypeDescriptor desc = TypeDescriptor.valueOf(Map.class);
+		Integer value = new Integer(3);
+		desc = desc.mapValueType(value);
+		assertEquals(Integer.class, desc.getType());
+	}
+
+	@Test
+	public void mapValueTypePreserveContext() throws Exception {
+		TypeDescriptor desc = new TypeDescriptor(getClass().getField("mapPreserveContext"));
+		assertEquals(Integer.class, desc.getMapValueType().getElementType().getType());
+		List<Integer> value = new ArrayList<Integer>(3);
+		desc = desc.mapValueType(value);
+		assertEquals(Integer.class, desc.getElementType().getType());
+		assertNotNull(desc.getAnnotation(FieldAnnotation.class));		
 	}
 
 	@Test
