@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts a Collection to a comma-delimited String.
@@ -30,7 +30,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class CollectionToStringConverter implements ConditionalGenericConverter {
+final class CollectionToStringConverter implements GenericConverter {
 
 	private static final String DELIMITER = ",";
 
@@ -44,10 +44,6 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 		return Collections.singleton(new ConvertiblePair(Collection.class, String.class));
 	}
 
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType);
-	}
-
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
@@ -56,17 +52,17 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 		if (sourceCollection.size() == 0) {
 			return "";
 		}
-		StringBuilder string = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (Object sourceElement : sourceCollection) {
 			if (i > 0) {
-				string.append(DELIMITER);
+				sb.append(DELIMITER);
 			}
-			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(), targetType);
-			string.append(targetElement);
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementType(sourceElement), targetType);
+			sb.append(targetElement);
 			i++;
 		}
-		return string.toString();
+		return sb.toString();
 	}
 
 }

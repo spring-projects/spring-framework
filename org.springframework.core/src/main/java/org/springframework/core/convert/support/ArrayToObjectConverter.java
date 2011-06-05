@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -32,7 +32,7 @@ import org.springframework.util.ObjectUtils;
  * @author Keith Donald
  * @since 3.0
  */
-final class ArrayToObjectConverter implements ConditionalGenericConverter {
+final class ArrayToObjectConverter implements GenericConverter {
 
 	private final CollectionToObjectConverter helperConverter;
 
@@ -44,10 +44,6 @@ final class ArrayToObjectConverter implements ConditionalGenericConverter {
 		return Collections.singleton(new ConvertiblePair(Object[].class, Object.class));
 	}
 	
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.helperConverter.matches(sourceType, targetType);
-	}
-
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return this.helperConverter.convert(Arrays.asList(ObjectUtils.toObjectArray(source)), sourceType, targetType);
 	}

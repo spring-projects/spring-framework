@@ -29,18 +29,18 @@ class ClassDescriptor extends AbstractDescriptor {
 	}
 
 	@Override
-	protected Class<?> getCollectionElementClass() {
-		return Object.class;
+	protected Class<?> resolveCollectionElementType() {
+		return null;
 	}
 
 	@Override
-	protected Class<?> getMapKeyClass() {
-		return Object.class;
+	protected Class<?> resolveMapKeyType() {
+		return null;
 	}
 
 	@Override
-	protected Class<?> getMapValueClass() {
-		return Object.class;
+	protected Class<?> resolveMapValueType() {
+		return null;
 	}
 
 	@Override

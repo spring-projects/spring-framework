@@ -41,7 +41,7 @@ public interface ConversionService {
 	 * @throws ConversionException if an exception occurred
 	 */
 	<T> T convert(Object source, Class<T> targetType);
-
+	
 	/**
 	 * Returns true if objects of sourceType can be converted to the targetType.
 	 * The TypeDescriptors provide additional context about the field locations where conversion would occur, often object property locations.

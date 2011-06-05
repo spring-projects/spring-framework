@@ -109,7 +109,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (target instanceof Class) {
 				throw new AccessException("Cannot access length on array class itself");
 			}
-			return new TypedValue(Array.getLength(target),TypeDescriptor.valueOf(Integer.TYPE));
+			return new TypedValue(Array.getLength(target));
 		}
 
 		CacheKey cacheKey = new CacheKey(type, name);
@@ -508,7 +508,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					if (needsToBeMadeAccessible) {
 						ReflectionUtils.makeAccessible((Method) member);
 					}
-					return new TypedValue(((Method) member).invoke(target), typeDescriptor);
+					Object value = ((Method) member).invoke(target);
+					return new TypedValue(value, typeDescriptor.narrowType(value));
 				}
 				catch (Exception ex) {
 					throw new AccessException("Unable to access property '" + name + "' through getter", ex);
@@ -519,7 +520,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					if (needsToBeMadeAccessible) {
 						ReflectionUtils.makeAccessible((Field)member);
 					}
-					return new TypedValue(((Field)member).get(target),typeDescriptor);
+					Object value = ((Field)member).get(target);
+					return new TypedValue(value, typeDescriptor.narrowType(value));
 				}
 				catch (Exception ex) {
 					throw new AccessException("Unable to access field: " + name, ex);

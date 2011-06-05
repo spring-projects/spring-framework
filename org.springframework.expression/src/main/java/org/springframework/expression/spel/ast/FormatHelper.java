@@ -41,7 +41,12 @@ public class FormatHelper {
 			if (i > 0) {
 				sb.append(",");
 			}
-			sb.append(formatClassNameForMessage(argumentTypes.get(i).getType()));
+			TypeDescriptor typeDescriptor = argumentTypes.get(i);
+			if (typeDescriptor != null) {
+				sb.append(formatClassNameForMessage(typeDescriptor.getClass()));
+			} else {
+				sb.append(formatClassNameForMessage(null));				
+			}
 		}
 		sb.append(")");
 		return sb.toString();

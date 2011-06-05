@@ -24,6 +24,9 @@ abstract class AbstractDescriptor {
 	private final Class<?> type;
 
 	public AbstractDescriptor(Class<?> type) {
+		//if (type == null) {
+	//		throw new IllegalArgumentException("type cannot be null");
+		//}
 		this.type = type;
 	}
 	
@@ -33,31 +36,31 @@ abstract class AbstractDescriptor {
 
 	public TypeDescriptor getElementType() {
 		if (isCollection()) {
-			Class<?> elementType = wildcard(getCollectionElementClass());
-			return new TypeDescriptor(nested(elementType, 0));
+			Class<?> elementType = resolveCollectionElementType();
+			return elementType != null ? new TypeDescriptor(nested(elementType, 0)) : null;
 		} else if (isArray()) {
 			Class<?> elementType = getType().getComponentType();
 			return new TypeDescriptor(nested(elementType, 0));				
 		} else {
-			return TypeDescriptor.NULL;
+			return null;
 		}
 	}
 	
 	public TypeDescriptor getMapKeyType() {
 		if (isMap()) {
-			Class<?> keyType = wildcard(getMapKeyClass());
-			return new TypeDescriptor(nested(keyType, 0));
+			Class<?> keyType = resolveMapKeyType();
+			return keyType != null ? new TypeDescriptor(nested(keyType, 0)) : null;
 		} else {
-			return TypeDescriptor.NULL;
+			return null;
 		}
 	}
 	
 	public TypeDescriptor getMapValueType() {
 		if (isMap()) {
-			Class<?> valueType = wildcard(getMapValueClass());
-			return new TypeDescriptor(nested(valueType, 1));
+			Class<?> valueType = resolveMapValueType();
+			return valueType != null ? new TypeDescriptor(nested(valueType, 1)) : null;
 		} else {
-			return TypeDescriptor.NULL;
+			return null;
 		}
 	}
 
@@ -65,11 +68,11 @@ abstract class AbstractDescriptor {
 
 	public AbstractDescriptor nested() {
 		if (isCollection()) {
-			return nested(wildcard(getCollectionElementClass()), 0);
+			return nested(resolveCollectionElementType(), 0);
 		} else if (isArray()) {
 			return nested(getType().getComponentType(), 0);
 		} else if (isMap()) {
-			return nested(wildcard(getMapValueClass()), 1);
+			return nested(resolveMapValueType(), 1);
 		} else {
 			throw new IllegalStateException("Not a collection, array, or map: cannot resolve nested value types");
 		}
@@ -77,30 +80,26 @@ abstract class AbstractDescriptor {
 	
 	// subclassing hooks
 	
-	protected abstract Class<?> getCollectionElementClass();
+	protected abstract Class<?> resolveCollectionElementType();
 	
-	protected abstract Class<?> getMapKeyClass();
+	protected abstract Class<?> resolveMapKeyType();
 	
-	protected abstract Class<?> getMapValueClass();
+	protected abstract Class<?> resolveMapValueType();
 	
 	protected abstract AbstractDescriptor nested(Class<?> type, int typeIndex);
 	
 	// internal helpers
 	
 	private boolean isCollection() {
-		return Collection.class.isAssignableFrom(getType());
+		return getType() != null && Collection.class.isAssignableFrom(getType());
 	}
 	
 	private boolean isArray() {
-		return getType().isArray();
+		return getType() != null && getType().isArray();
 	}
 	
 	private boolean isMap() {
-		return Map.class.isAssignableFrom(getType());
-	}
-	
-	private Class<?> wildcard(Class<?> type) {
-		return type != null ? type : Object.class;
+		return getType() != null && Map.class.isAssignableFrom(getType());
 	}
 	
 }

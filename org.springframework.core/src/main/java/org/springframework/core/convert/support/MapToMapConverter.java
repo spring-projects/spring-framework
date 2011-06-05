@@ -23,7 +23,7 @@ import java.util.Set;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts a Map to another Map.
@@ -36,7 +36,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class MapToMapConverter implements ConditionalGenericConverter {
+final class MapToMapConverter implements GenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -48,11 +48,6 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		return Collections.singleton(new ConvertiblePair(Map.class, Map.class));
 	}
 
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType.getMapKeyTypeDescriptor()) && 
-			this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType.getMapValueTypeDescriptor());
-	}
-
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
@@ -60,24 +55,30 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		}
 		Map<Object, Object> sourceMap = (Map<Object, Object>) source;
 		Map<Object, Object> targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
-		TypeDescriptor sourceKeyType = sourceType.getMapKeyTypeDescriptor();
-		TypeDescriptor targetKeyType = targetType.getMapKeyTypeDescriptor();
-		TypeDescriptor sourceValueType = sourceType.getMapValueTypeDescriptor();
-		TypeDescriptor targetValueType = targetType.getMapValueTypeDescriptor();
-		if (Object.class.equals(targetKeyType.getType()) && Object.class.equals(targetValueType.getType())) {
-			for (Map.Entry<Object, Object> entry : sourceMap.entrySet()) {
-				targetMap.put(entry.getKey(), entry.getValue());
-			}
-		} else {
-			for (Map.Entry<Object, Object> entry : sourceMap.entrySet()) {
-				Object sourceKey = entry.getKey();
-				Object sourceValue = entry.getValue();
-				Object targetKey = this.conversionService.convert(sourceKey, sourceKeyType, targetKeyType);
-				Object targetValue = this.conversionService.convert(sourceValue, sourceValueType, targetValueType);
-				targetMap.put(targetKey, targetValue);
-			}			
+		for (Map.Entry<Object, Object> entry : sourceMap.entrySet()) {
+			Object sourceKey = entry.getKey();
+			Object sourceValue = entry.getValue();
+			Object targetKey = convertKey(sourceKey, sourceType, targetType.getMapKeyType());
+			Object targetValue = convertValue(sourceValue, sourceType, targetType.getMapValueType());
+			targetMap.put(targetKey, targetValue);
 		}
 		return targetMap;
 	}
 	
+	// internal helpers
+	
+	private Object convertKey(Object sourceKey, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (targetType == null) {
+			return sourceKey;
+		}
+		return this.conversionService.convert(sourceKey, sourceType.mapKeyType(sourceKey), targetType);
+	}
+
+	private Object convertValue(Object sourceValue, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (targetType == null) {
+			return sourceValue;
+		}
+		return this.conversionService.convert(sourceValue, sourceType.mapValueType(sourceValue), targetType);
+	}
+
 }

@@ -698,7 +698,6 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	}
 	
 	@Test
-	@Ignore
 	@SuppressWarnings("unchecked")
 	public void testMapOfMap_SPR7244() throws Exception {
         Map<String,Object> map = new LinkedHashMap();
@@ -727,10 +726,11 @@ public class SpringEL300Tests extends ExpressionTestCase {
         String el1 = "ls.![#this.equals('abc')]";
         SpelExpression exp = parser.parseRaw(el1);
         List value = (List)exp.getValue(ctx);
+        System.out.println(value);
         // value is list containing [true,false]
         Assert.assertEquals(Boolean.class,value.get(0).getClass());
         TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
-        Assert.assertEquals(Boolean.class,evaluated.getElementType());
+        Assert.assertEquals(null, evaluated.getElementType());
 	}
 	
 	@Test
@@ -743,7 +743,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
         // value is array containing [true,false]
         Assert.assertEquals(Boolean.class,value[0].getClass());
         TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
-        Assert.assertEquals(Boolean.class,evaluated.getElementType());
+        Assert.assertEquals(Boolean.class, evaluated.getElementType().getType());
 	}
 	
 	@Test
@@ -756,7 +756,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
         // value is list containing [true,false]
         Assert.assertEquals(Boolean.class,value.get(0).getClass());
         TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
-        Assert.assertEquals(Boolean.class,evaluated.getElementType());
+        Assert.assertEquals(null, evaluated.getElementType());
 	}
 	
 	static class C {

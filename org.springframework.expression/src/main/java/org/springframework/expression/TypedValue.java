@@ -16,9 +16,6 @@
 
 package org.springframework.expression;
 
-import java.util.Collection;
-import java.util.Map;
-
 import org.springframework.core.convert.TypeDescriptor;
 
 /**
@@ -56,7 +53,7 @@ public class TypedValue {
 	 */
 	public TypedValue(Object value, TypeDescriptor typeDescriptor) {
 		this.value = value;
-		this.typeDescriptor = initTypeDescriptor(value, typeDescriptor);
+		this.typeDescriptor = typeDescriptor;
 	}
 	
 	public Object getValue() {
@@ -75,22 +72,6 @@ public class TypedValue {
 		StringBuilder str = new StringBuilder();
 		str.append("TypedValue: '").append(this.value).append("' of [").append(getTypeDescriptor() + "]");
 		return str.toString();
-	}
-	
-	// interal helpers
-
-	private static TypeDescriptor initTypeDescriptor(Object value, TypeDescriptor typeDescriptor) {
-		if (value == null) {
-			return typeDescriptor;
-		}
-		if (typeDescriptor.isCollection() && Object.class.equals(typeDescriptor.getElementType())) {
-			return typeDescriptor.resolveCollectionElementType((Collection<?>) value);
-		} else if (typeDescriptor.isMap() && Object.class.equals(typeDescriptor.getMapKeyType())
-				&& Object.class.equals(typeDescriptor.getMapValueType())){
-			return typeDescriptor.resolveMapKeyValueTypes((Map<?, ?>) value);
-		} else {
-			return typeDescriptor;
-		}		
 	}
 	
 }

@@ -16,6 +16,9 @@
 
 package org.springframework.expression.spel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -23,9 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -112,7 +113,7 @@ public class SelectionAndProjectionTests {
 		Object value = expression.getValue(context);
 		assertTrue(value.getClass().isArray());
 		TypedValue typedValue = new TypedValue(value);
-		assertEquals(Integer.class, typedValue.getTypeDescriptor().getElementType());
+		assertEquals(Integer.class, typedValue.getTypeDescriptor().getElementType().getType());
 		Integer[] array = (Integer[]) value;
 		assertEquals(5, array.length);
 		assertEquals(new Integer(0), array[0]);
@@ -147,7 +148,7 @@ public class SelectionAndProjectionTests {
 		Object value = expression.getValue(context);
 		assertTrue(value.getClass().isArray());
 		TypedValue typedValue = new TypedValue(value);
-		assertEquals(Integer.class, typedValue.getTypeDescriptor().getElementType());
+		assertEquals(Integer.class, typedValue.getTypeDescriptor().getElementType().getType());
 		Integer[] array = (Integer[]) value;
 		assertEquals(5, array.length);
 		assertEquals(new Integer(0), array[0]);
@@ -249,7 +250,7 @@ public class SelectionAndProjectionTests {
 		Object value = expression.getValue(context);
 		assertTrue(value.getClass().isArray());
 		TypedValue typedValue = new TypedValue(value);
-		assertEquals(Number.class, typedValue.getTypeDescriptor().getElementType());
+		assertEquals(Number.class, typedValue.getTypeDescriptor().getElementType().getType());
 		Number[] array = (Number[]) value;
 		assertEquals(3, array.length);
 		assertEquals(new Integer(5), array[0]);

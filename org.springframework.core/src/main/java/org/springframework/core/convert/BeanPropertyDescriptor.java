@@ -52,17 +52,17 @@ class BeanPropertyDescriptor extends AbstractDescriptor {
 	}
 	
 	@Override
-	protected Class<?> getCollectionElementClass() {
+	protected Class<?> resolveCollectionElementType() {
 		return GenericCollectionTypeResolver.getCollectionParameterType(methodParameter);
 	}
 
 	@Override
-	protected Class<?> getMapKeyClass() {
+	protected Class<?> resolveMapKeyType() {
 		return GenericCollectionTypeResolver.getMapKeyParameterType(methodParameter);
 	}
 
 	@Override
-	protected Class<?> getMapValueClass() {
+	protected Class<?> resolveMapValueType() {
 		return GenericCollectionTypeResolver.getMapValueParameterType(methodParameter);
 	}
 

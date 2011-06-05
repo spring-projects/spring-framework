@@ -12,6 +12,8 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 
 public class MapToMapConverterTests {
@@ -30,7 +32,12 @@ public class MapToMapConverterTests {
 		map.put("2", "37");
 		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("scalarMapTarget"));
-		assertFalse(conversionService.canConvert(sourceType, targetType));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		try {
+			conversionService.convert(map, sourceType, targetType);
+		} catch (ConversionFailedException e) {
+			assertTrue(e.getCause() instanceof ConverterNotFoundException);
+		}
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(sourceType, targetType));
 		@SuppressWarnings("unchecked")		
@@ -58,7 +65,19 @@ public class MapToMapConverterTests {
 		map.put("2", "37");
 		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("notGenericMapSource"));
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("scalarMapTarget"));		
-		assertFalse(conversionService.canConvert(sourceType, targetType));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		try {
+			conversionService.convert(map, sourceType, targetType);
+		} catch (ConversionFailedException e) {
+			assertTrue(e.getCause() instanceof ConverterNotFoundException);
+		}
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		@SuppressWarnings("unchecked")		
+		Map<Integer, Integer> result = (Map<Integer, Integer>) conversionService.convert(map, sourceType, targetType);
+		assertFalse(map.equals(result));
+		assertEquals((Integer) 9, result.get(1));
+		assertEquals((Integer) 37, result.get(2));		
 	}
 	
 	public Map notGenericMapSource;
@@ -70,7 +89,12 @@ public class MapToMapConverterTests {
 		map.put("2", Arrays.asList("37", "23"));
 		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("collectionMapTarget"));
-		assertFalse(conversionService.canConvert(sourceType, targetType));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		try {
+			conversionService.convert(map, sourceType, targetType);
+		} catch (ConversionFailedException e) {
+			assertTrue(e.getCause() instanceof ConverterNotFoundException);
+		}		
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(sourceType, targetType));
@@ -83,8 +107,6 @@ public class MapToMapConverterTests {
 
 	public Map<Integer, List<Integer>> collectionMapTarget;
 
-	public Map<String, List<String>> sourceCollectionMapTarget;
-
 	@Test
 	public void collectionMapSourceTarget() throws Exception {
 		Map<String, List<String>> map = new HashMap<String, List<String>>();
@@ -92,7 +114,12 @@ public class MapToMapConverterTests {
 		map.put("2", Arrays.asList("37", "23"));
 		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("sourceCollectionMapTarget"));
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("collectionMapTarget"));
-		assertFalse(conversionService.canConvert(sourceType, targetType));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		try {
+			conversionService.convert(map, sourceType, targetType);
+		} catch (ConversionFailedException e) {
+			assertTrue(e.getCause() instanceof ConverterNotFoundException);
+		}				
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(sourceType, targetType));
@@ -102,6 +129,8 @@ public class MapToMapConverterTests {
 		assertEquals(Arrays.asList(9, 12), result.get(1));
 		assertEquals(Arrays.asList(37, 23), result.get(2));
 	}
+
+	public Map<String, List<String>> sourceCollectionMapTarget;
 
 	@Test
 	public void collectionMapNotGenericTarget() throws Exception {

@@ -138,18 +138,16 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	@SuppressWarnings("unchecked")
 	public <T> T convert(Object source, Class<T> targetType) {
+		if (targetType == null) {
+			throw new IllegalArgumentException("The targetType to convert to cannot be null");
+		}		
 		return (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));
 	}
 
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		assertNotNull(sourceType, targetType);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Checking if I can convert " + sourceType + " to " + targetType);
 		}		
-		if (sourceType == TypeDescriptor.NULL || targetType == TypeDescriptor.NULL) {
-			logger.trace("Yes, I can convert");
-			return true;
-		}
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter != null) {
 			logger.trace("Yes, I can convert");
@@ -162,20 +160,18 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		assertNotNull(sourceType, targetType);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Converting value " + StylerUtils.style(source) + " of " + sourceType + " to " + targetType);
+		if (targetType == null) {
+			throw new IllegalArgumentException("The targetType to convert to cannot be null");
 		}
-		if (sourceType == TypeDescriptor.NULL) {
+		if (sourceType == null) {
 			Assert.isTrue(source == null, "The source must be [null] if sourceType == [null]");
 			return handleResult(sourceType, targetType, convertNullSource(sourceType, targetType));
 		}
-		if (targetType == TypeDescriptor.NULL) {
-			logger.debug("Converted to null");
-			return null;
-		}
 		if (source != null && !sourceType.getObjectType().isInstance(source)) {
 			throw new IllegalArgumentException("The source to convert from must be an instance of " + sourceType + "; instead it was a " + source.getClass().getName());
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Converting value " + StylerUtils.style(source) + " of " + sourceType + " to " + targetType);
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter != null) {
@@ -236,30 +232,26 @@ public class GenericConversionService implements ConfigurableConversionService {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Matched cached converter " + converter);
 			}
-			return (converter != NO_MATCH ? converter : null);
+			return converter != NO_MATCH ? converter : null;
 		}
 		else {
 			converter = findConverterForClassPair(sourceType, targetType);
+			if (converter == null) {
+				converter = getDefaultConverter(sourceType, targetType);				
+			}
 			if (converter != null) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Caching under " + key);
+					logger.trace("Caching matched Converter under key " + key);
 				}
 				this.converterCache.put(key, converter);
 				return converter;
-			}
-			converter = getDefaultConverter(sourceType, targetType);
-			if (converter != null) {
+			} else {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Caching under " + key);
+					logger.trace("Caching Converter [NO_MATCH] result under key " + key);
 				}
-				this.converterCache.put(key, converter);
-				return converter;				
+				this.converterCache.put(key, NO_MATCH);
+				return null;
 			}
-			if (logger.isTraceEnabled()) {
-				logger.trace("Caching NO_MATCH under " + key);
-			}
-			this.converterCache.put(key, NO_MATCH);
-			return null;
 		}
 	}
 
@@ -310,11 +302,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 			this.converters.put(sourceType, sourceMap);
 		}
 		return sourceMap;
-	}
-
-	private void assertNotNull(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		Assert.notNull(sourceType, "The sourceType to convert from is required");
-		Assert.notNull(targetType, "The targetType to convert to is required");
 	}
 
 	private GenericConverter findConverterForClassPair(TypeDescriptor sourceType, TypeDescriptor targetType) {

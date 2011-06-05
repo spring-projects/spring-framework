@@ -23,7 +23,7 @@ import java.util.Set;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts an Object to a single-element Collection containing the Object.
@@ -33,7 +33,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * @author Juergen Hoeller
  * @since 3.0
  */
-final class ObjectToCollectionConverter implements ConditionalGenericConverter {
+final class ObjectToCollectionConverter implements GenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -45,22 +45,17 @@ final class ObjectToCollectionConverter implements ConditionalGenericConverter {
 		return Collections.singleton(new ConvertiblePair(Object.class, Collection.class));
 	}
 
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType, targetType.getElementTypeDescriptor());
-	}
-
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
 		}
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), 1);
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		// Avoid potential recursion....
-		if (targetElementType.isCollection()) {
+		if (targetType.getElementType() == null || targetType.getElementType().isCollection()) {
 			target.add(source);			
 		} else {
-			target.add(this.conversionService.convert(source, sourceType, targetElementType));
+			Object singleElement = this.conversionService.convert(source, sourceType, targetType.getElementType());
+			target.add(singleElement);
 		}
 		return target;
 	}

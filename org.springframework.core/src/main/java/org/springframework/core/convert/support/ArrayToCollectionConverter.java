@@ -24,7 +24,7 @@ import java.util.Set;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * Converts an Array to a Collection.
@@ -36,7 +36,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class ArrayToCollectionConverter implements ConditionalGenericConverter {
+final class ArrayToCollectionConverter implements GenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -48,10 +48,6 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 		return Collections.singleton(new ConvertiblePair(Object[].class, Collection.class));
 	}
 
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor());
-	}
-
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
@@ -59,9 +55,7 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 		}		
 		int length = Array.getLength(source);
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), length);
-		TypeDescriptor sourceElementType = sourceType.getElementTypeDescriptor();
-		TypeDescriptor targetElementType = targetType.getElementTypeDescriptor();
-		if (Object.class.equals(targetElementType.getType())) {
+		if (targetType.getElementType() == null) {
 			for (int i = 0; i < length; i++) {
 				Object sourceElement = Array.get(source, i);
 				target.add(sourceElement);
@@ -69,7 +63,7 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 		} else {
 			for (int i = 0; i < length; i++) {
 				Object sourceElement = Array.get(source, i);
-				Object targetElement = this.conversionService.convert(sourceElement, sourceElementType, targetElementType);
+				Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementType(sourceElement), targetType.getElementType());
 				target.add(targetElement);
 			}
 		}		
