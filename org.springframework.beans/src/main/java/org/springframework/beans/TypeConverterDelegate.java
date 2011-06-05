@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.type.filter.TypeFilter;
@@ -135,7 +136,11 @@ class TypeConverterDelegate {
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
 			TypeDescriptor targetTypeDesc = typeDescriptor;
 			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
-				return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
+				try {
+					return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
+				} catch (ConversionFailedException e) {
+					// fallback to default conversion logic below
+				}
 			}
 		}
 
