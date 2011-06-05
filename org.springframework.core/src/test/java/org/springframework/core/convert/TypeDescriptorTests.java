@@ -36,6 +36,7 @@ import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 /**
  * @author Keith Donald

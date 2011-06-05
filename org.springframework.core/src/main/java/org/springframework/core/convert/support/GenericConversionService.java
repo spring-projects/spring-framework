@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -139,14 +140,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 		return canConvert(sourceType != null ? TypeDescriptor.valueOf(sourceType) : null, TypeDescriptor.valueOf(targetType));
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> T convert(Object source, Class<T> targetType) {
-		if (targetType == null) {
-			throw new IllegalArgumentException("The targetType to convert to cannot be null");
-		}		
-		return (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));
-	}
-
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (targetType == null) {
 			throw new IllegalArgumentException("The targetType to convert to cannot be null");
@@ -166,6 +159,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 			logger.trace("No, I cannot convert");
 			return false;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T convert(Object source, Class<T> targetType) {
+		if (targetType == null) {
+			throw new IllegalArgumentException("The targetType to convert to cannot be null");
+		}		
+		return (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -190,6 +191,20 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 	}
 
+	/**
+	 * Convenience operation for converting a source object to the specified targetType, where the targetType is a descriptor that provides additional conversion context.
+	 * Simply delegates to {@link #convert(Object, TypeDescriptor, TypeDescriptor)} and encapsulates the construction of the sourceType descriptor using {@link TypeDescriptor#forObject(Object)}.
+	 * @param source the source object
+	 * @param targetType the target type
+	 * @return the converted value
+	 * @throws ConversionException if a conversion exception occurred
+	 * @throws IllegalArgumentException if targetType is null
+	 * @throws IllegalArgumentException if sourceType is null but source is not null
+	 */
+	public Object convert(Object source, TypeDescriptor targetType) {
+		return convert(source, TypeDescriptor.forObject(source), targetType);
+	}
+	
 	public String toString() {
 		List<String> converterStrings = new ArrayList<String>();
 		for (Map<Class<?>, MatchableConverters> targetConverters : this.converters.values()) {

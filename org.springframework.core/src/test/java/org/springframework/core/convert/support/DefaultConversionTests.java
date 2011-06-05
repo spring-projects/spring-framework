@@ -16,7 +16,13 @@
 
 package org.springframework.core.convert.support;
 
-import java.awt.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+
+import java.awt.Color;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractList;
@@ -34,12 +40,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
@@ -51,7 +54,7 @@ import org.springframework.core.convert.converter.ConverterRegistry;
  */
 public class DefaultConversionTests {
 
-	private ConversionService conversionService = new DefaultConversionService();
+	private DefaultConversionService conversionService = new DefaultConversionService();
 
 	@Test
 	public void testStringToCharacter() {
@@ -574,6 +577,16 @@ public class DefaultConversionTests {
 		assertEquals(new Integer(2), bar.get(1));
 		assertEquals(new Integer(3), bar.get(2));
 	}
+	
+	@Test
+	public void collection() {
+		List<String> strings = new ArrayList<String>();
+		strings.add("3");
+		strings.add("9");
+		List<Integer> integers = (List<Integer>) conversionService.convert(strings, TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Integer.class)));
+		assertEquals(new Integer(3), integers.get(0));
+		assertEquals(new Integer(9), integers.get(1));
+	}
 
 	public Map<Integer, FooEnum> genericMap = new HashMap<Integer, FooEnum>();
 
@@ -586,6 +599,16 @@ public class DefaultConversionTests {
 				TypeDescriptor.forObject(foo), new TypeDescriptor(getClass().getField("genericMap")));
 		assertEquals(FooEnum.BAR, map.get(1));
 		assertEquals(FooEnum.BAZ, map.get(2));
+	}
+
+	@Test
+	public void map() {
+		Map<String, String> strings = new HashMap<String, String>();
+		strings.put("3", "9");
+		strings.put("6", "31");
+		Map<Integer, Integer> integers = (Map<Integer, Integer>) conversionService.convert(strings, TypeDescriptor.map(Map.class, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(Integer.class)));
+		assertEquals(new Integer(9), integers.get(3));
+		assertEquals(new Integer(31), integers.get(6));
 	}
 
 	@Test
