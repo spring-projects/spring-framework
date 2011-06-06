@@ -142,7 +142,7 @@
 	tag for that purpose.
 
 	See Javadoc for org.springframework.context.annotation.AnnotationConfigApplicationContext
-	for information on code-based alternatives to bootstrapping annotation-driven support
+	for information on code-based alternatives to bootstrapping annotation-driven support.
 	from XML.
 			]]></xsd:documentation>
 		</xsd:annotation>
@@ -169,7 +169,7 @@
 	scan settings themselves.
 
 	See Javadoc for org.springframework.context.annotation.ComponentScan for information
-	on code-based alternatives to bootstrapping component-scanning from XML.
+	on code-based alternatives to bootstrapping component-scanning.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
@@ -294,6 +294,9 @@
 	bean factory (typically classes annotated with the @Configurable annotation).
 	This will only happen if the AnnotationBeanConfigurerAspect is on the classpath
 	(i.e. spring-aspects.jar), effectively activating "spring-configured" by default.
+
+	See Javadoc for org.springframework.context.annotation.EnableLoadTimeWeaving
+	for information on code-based alternatives to bootstrapping load-time weaving support.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>

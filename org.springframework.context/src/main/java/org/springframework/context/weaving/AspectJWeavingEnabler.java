@@ -16,12 +16,12 @@
 
 package org.springframework.context.weaving;
 
+
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 
 import org.aspectj.weaver.loadtime.ClassPreProcessorAgentAdapter;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -47,6 +47,8 @@ public class AspectJWeavingEnabler
 
 	private LoadTimeWeaver loadTimeWeaver;
 
+	public static final String ASPECTJ_AOP_XML_RESOURCE = "META-INF/aop.xml";
+
 
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
@@ -60,12 +62,14 @@ public class AspectJWeavingEnabler
 		return HIGHEST_PRECEDENCE;
 	}
 
-
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		LoadTimeWeaver weaverToUse = this.loadTimeWeaver;
+		enableAspectJWeaving(this.loadTimeWeaver, this.beanClassLoader);
+	}
+
+	public static void enableAspectJWeaving(LoadTimeWeaver weaverToUse, ClassLoader beanClassLoader) {
 		if (weaverToUse == null) {
 			if (InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
-				weaverToUse = new InstrumentationLoadTimeWeaver(this.beanClassLoader);
+				weaverToUse = new InstrumentationLoadTimeWeaver(beanClassLoader);
 			}
 			else {
 				throw new IllegalStateException("No LoadTimeWeaver available");
@@ -76,18 +80,21 @@ public class AspectJWeavingEnabler
 	}
 
 
-	/*
-	 * Decorator to suppress processing AspectJ classes, hence avoiding potential LinkageErrors.
-	 * OC4J and Tomcat (in Glassfish) definitely need such bypassing of AspectJ classes.
+	/**
+	 * ClassFileTransformer decorator that suppresses processing of AspectJ
+	 * classes in order to avoid potential LinkageErrors. Required especially for OC4J and
+	 * Tomcat (in Glassfish).
+	 *
+	 * @see org.springframework.context.annotation.LoadTimeWeavingConfiguration
 	 */
 	private static class AspectJClassBypassingClassFileTransformer implements ClassFileTransformer {
 
 		private final ClassFileTransformer delegate;
-		
+
 		public AspectJClassBypassingClassFileTransformer(ClassFileTransformer delegate) {
 			this.delegate = delegate;
 		}
-		
+
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
@@ -97,5 +104,4 @@ public class AspectJWeavingEnabler
 			return this.delegate.transform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
 		}
 	}
-
 }
