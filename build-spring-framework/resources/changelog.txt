@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1 M2 (2011-05-31)
+Changes in version 3.1 M2 (2011-06-06)
 --------------------------------------
 
 * revised cache abstraction to focus on minimal atomic access operations
@@ -27,6 +27,8 @@ Changes in version 3.1 M2 (2011-05-31)
 * RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
 * updated Quartz package to support Quartz 1.8 as well (note: not fully supporting Quartz 2.0 yet)
 * introduced AnnotationConfigContextLoader to provide TestContext support for @Configuration classes
+* introduced @ActiveProfiles for declarative configuration of bean definition profiles in tests
+* TestContext generates context cache key based on all applicable configuration metadata
 * deprecated AbstractJUnit38SpringContextTests and AbstractTransactionalJUnit38SpringContextTests
 
 
