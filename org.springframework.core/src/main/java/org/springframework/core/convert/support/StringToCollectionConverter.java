@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Converts a comma-delimited String to a Collection.
+ * If the target collection element type is declared, only matches if String.class can be converted to it.
  *
  * @author Keith Donald
  * @since 3.0
@@ -45,10 +46,11 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (targetType.getElementType() == null) {
+		if (targetType.getElementType() != null) {
+			return this.conversionService.canConvert(sourceType, targetType.getElementType());
+		} else {
 			return true;
 		}
-		return this.conversionService.canConvert(sourceType, targetType.getElementType());
 	}
 
 	@SuppressWarnings("unchecked")

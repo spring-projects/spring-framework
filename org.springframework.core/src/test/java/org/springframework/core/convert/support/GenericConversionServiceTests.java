@@ -16,16 +16,17 @@
 
 package org.springframework.core.convert.support;
 
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -527,5 +528,26 @@ public class GenericConversionServiceTests {
 
 
 	public static Map<String, ?> wildcardMap;
+
+	@Test
+	public void stringToArrayCanConvert() {
+		conversionService.addConverter(new StringToArrayConverter(conversionService));
+		assertFalse(conversionService.canConvert(String.class, Integer[].class));
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		assertTrue(conversionService.canConvert(String.class, Integer[].class));
+	}
+	
+	@Test
+	public void stringToCollectionCanConvert() throws Exception {
+		conversionService.addConverter(new StringToCollectionConverter(conversionService));
+		assertTrue(conversionService.canConvert(String.class, Collection.class));
+		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("stringToCollection"));
+		assertFalse(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));		
+		conversionService.addConverterFactory(new StringToNumberConverterFactory());
+		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));		
+	}
+	
+	public Collection<Integer> stringToCollection;
+	
 
 }

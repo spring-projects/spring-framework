@@ -22,16 +22,17 @@ import java.util.Set;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.StringUtils;
 
 /**
  * Converts a comma-delimited String to an Array.
- *
+ * Only matches if String.class can be converted to the target array element type.
+ * 
  * @author Keith Donald
  * @since 3.0
  */
-final class StringToArrayConverter implements GenericConverter {
+final class StringToArrayConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -43,6 +44,10 @@ final class StringToArrayConverter implements GenericConverter {
 		return Collections.singleton(new ConvertiblePair(String.class, Object[].class));
 	}
 
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.conversionService.canConvert(sourceType, targetType.getElementType());
+	}
+	
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
