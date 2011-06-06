@@ -1368,7 +1368,7 @@ dataSource.setPassword("");</programlisting>
     processing using both the <classname>JdbcTemplate</classname> and the
     <classname>SimpleJdbcTemplate</classname>.</para>
 
-    <section id="jdbc-advanced-classic">
+    <section id="jdbc-batch-classic">
       <title>Basic batch operations with the JdbcTemplate</title>
 
       <para>You accomplish <classname>JdbcTemplate</classname> batch
@@ -1418,7 +1418,7 @@ dataSource.setPassword("");</programlisting>
       you to signal the end of the batch.</para>
     </section>
 
-    <section id="jdbc-advanced-simple">
+    <section id="jdbc-batch-list">
       <title>Batch operations with a List of objects</title>
 
       <para>Both the <classname>JdbcTemplate</classname> and the
@@ -1489,7 +1489,7 @@ dataSource.setPassword("");</programlisting>
       driver returns a -2 value.</para>
     </section>
 
-    <section id="jdbc-advanced-simple">
+    <section id="jdbc-batch-multi">
       <title>Batch operations with multiple batches</title>
 
       <para>The last example of a batch update deals with batches that are so
@@ -1502,7 +1502,7 @@ dataSource.setPassword("");</programlisting>
       <classname>ParameterizedPreparedStatementSetter</classname> to set the
       values for the parameters of the prepared statement. The framework loops
       over the provided values and breaks the update calls into batches of the
-      size specified. </para>
+      size specified.</para>
 
       <para>This example shows a batch update using a batch size of
       100:</para>
