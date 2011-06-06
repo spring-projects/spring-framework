@@ -159,10 +159,9 @@ import javax.servlet.ServletException;
  *
  * <h3>Mapping to '/' under Tomcat</h3>
  * <p>Apache Tomcat maps its internal {@code DefaultServlet} to "/", and on Tomcat versions
- * &lt;= 7.0.14, this servlet mapping <em>cannot be overridden programmatically</em>. This
- * is a <a href="https://issues.apache.org/bugzilla/show_bug.cgi?id=51278">known issue</a>
- * and scheduled to be addressed in the next revision of Tomcat. Overriding the "/"
- * servlet mapping has been tested successfully on GlassFish 3.1.<p>
+ * &lt;= 7.0.14, this servlet mapping <em>cannot be overridden programmatically</em>.
+ * 7.0.15 fixes this issue. Overriding the "/" servlet mapping has also been tested
+ * successfully under GlassFish 3.1.<p>
  *
  * @author Chris Beams
  * @since 3.1
