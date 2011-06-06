@@ -7,7 +7,9 @@ import static org.junit.Assert.assertThat;
 
 import javax.sql.DataSource;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -15,9 +17,14 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 
 public class JdbcNamespaceIntegrationTest {
+
+	@Rule
+	public ExpectedException expected = ExpectedException.none();
 
 	@Test
 	public void testCreateEmbeddedDatabase() throws Exception {
@@ -53,6 +60,22 @@ public class JdbcNamespaceIntegrationTest {
 	}
 
 	@Test
+	public void testCreateAndDestroy() throws Exception {
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+				"org/springframework/jdbc/config/jdbc-destroy-config.xml");
+		try {
+			DataSource dataSource = context.getBean(DataSource.class);
+			JdbcTemplate template = new JdbcTemplate(dataSource);
+			assertEquals(1, template.queryForInt("select count(*) from T_TEST"));
+			context.getBean(DataSourceInitializer.class).destroy();
+			expected.expect(BadSqlGrammarException.class); // Table has been dropped
+			assertEquals(1, template.queryForInt("select count(*) from T_TEST"));
+		} finally {
+			context.close();
+		}
+	}
+
+	@Test
 	public void testMultipleDataSourcesHaveDifferentDatabaseNames() throws Exception {
 
 		DefaultListableBeanFactory factory = new XmlBeanFactory(new ClassPathResource(
@@ -73,14 +96,14 @@ public class JdbcNamespaceIntegrationTest {
 	private void assertCorrectSetup(ConfigurableApplicationContext context, String... dataSources) {
 		assertCorrectSetup(context, 1, dataSources);
 	}
-	
+
 	private void assertCorrectSetup(ConfigurableApplicationContext context, int count, String... dataSources) {
 
 		try {
 			for (String dataSourceName : dataSources) {
 				DataSource dataSource = context.getBean(dataSourceName, DataSource.class);
-				JdbcTemplate t = new JdbcTemplate(dataSource);
-				assertEquals(count, t.queryForInt("select count(*) from T_TEST"));
+				JdbcTemplate template = new JdbcTemplate(dataSource);
+				assertEquals(count, template.queryForInt("select count(*) from T_TEST"));
 			}
 		} finally {
 			context.close();
