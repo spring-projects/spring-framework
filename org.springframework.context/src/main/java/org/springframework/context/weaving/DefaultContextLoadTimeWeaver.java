@@ -61,6 +61,9 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	private LoadTimeWeaver loadTimeWeaver;
 
 
+	public DefaultContextLoadTimeWeaver() {
+	}
+
 	public DefaultContextLoadTimeWeaver(ClassLoader beanClassLoader) {
 		setBeanClassLoader(beanClassLoader);
 	}
