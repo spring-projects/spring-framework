@@ -16,6 +16,7 @@
 
 package org.springframework.http.converter.json;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -135,6 +136,9 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
 		catch (JsonParseException ex) {
+			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
+		}
+		catch (EOFException ex) {
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
 		}
 	}
