@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.util.Assert;
@@ -31,14 +32,15 @@ import org.springframework.util.Assert;
  * @since 3.0
  * @see DatabasePopulator
  */
-public class DataSourceInitializer implements InitializingBean {
+public class DataSourceInitializer implements InitializingBean, DisposableBean {
 
 	private DataSource dataSource;
 
 	private DatabasePopulator databasePopulator;
 
-	private boolean enabled = true;
+	private DatabasePopulator databaseCleaner;
 
+	private boolean enabled = true;
 
 	/**
 	 * The {@link DataSource} to populate when this component is initialized.
@@ -59,6 +61,16 @@ public class DataSourceInitializer implements InitializingBean {
 	}
 
 	/**
+	 * Set a script execution to be run in the bean destruction callback, cleaning up the database and leaving it in 
+	 * a known state for others.
+	 * 
+	 * @param databaseCleaner the database script executor to run on destroy
+	 */
+	public void setDatabaseCleaner(DatabasePopulator databaseCleaner) {
+		this.databaseCleaner = databaseCleaner;
+	}
+
+	/**
 	 * Flag to explicitly enable or disable the database populator.
 	 * @param enabled true if the database populator will be called on startup
 	 */
@@ -66,30 +78,41 @@ public class DataSourceInitializer implements InitializingBean {
 		this.enabled = enabled;
 	}
 
-
 	/**
 	 * Use the populator to set up data in the data source.
 	 */
 	public void afterPropertiesSet() throws Exception {
+		if (this.databasePopulator != null) {
+			execute(this.databasePopulator);
+		}
+	}
+
+	/**
+	 * Use the populator to clean up data in the data source.
+	 */
+	public void destroy() throws Exception {
+		if (this.databaseCleaner != null) {
+			execute(this.databaseCleaner);
+		}
+	}
+
+	private void execute(DatabasePopulator populator) throws Exception {
 		if (this.enabled) {
 			Assert.state(this.dataSource != null, "DataSource must be provided");
-			Assert.state(this.databasePopulator != null, "DatabasePopulator must be provided");
+			Assert.state(populator != null, "DatabasePopulator must be provided");
 			try {
 				Connection connection = this.dataSource.getConnection();
 				try {
-					this.databasePopulator.populate(connection);
-				}
-				finally {
+					populator.populate(connection);
+				} finally {
 					try {
 						connection.close();
-					}
-					catch (SQLException ex) {
+					} catch (SQLException ex) {
 						// ignore
 					}
 				}
-			}
-			catch (Exception ex) {
-				throw new DataAccessResourceFailureException("Failed to populate database", ex);
+			} catch (Exception ex) {
+				throw new DataAccessResourceFailureException("Failed to execute database script", ex);
 			}
 		}
 	}

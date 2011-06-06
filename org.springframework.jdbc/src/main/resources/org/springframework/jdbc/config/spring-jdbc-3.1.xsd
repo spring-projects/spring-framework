@@ -5,8 +5,10 @@
 	targetNamespace="http://www.springframework.org/schema/jdbc"
 	elementFormDefault="qualified" attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.1.xsd" />
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.1.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/beans"
+		schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.1.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/tool"
+		schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.1.xsd" />
 
 	<xsd:element name="embedded-database">
 		<xsd:annotation>
@@ -80,8 +82,10 @@
 				default="true">
 				<xsd:annotation>
 					<xsd:documentation>
-						Is this bean "enabled", meaning the scripts will be executed?
-						Defaults to true, but can be used to switch on and off the initialization depending on the environment.
+						Is this bean "enabled", meaning the scripts will
+						be executed?
+						Defaults to true, but can be used to switch on and off
+						the initialization depending on the environment.
 					</xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -89,7 +93,8 @@
 				default="NONE">
 				<xsd:annotation>
 					<xsd:documentation>
-						Should failed SQL statements be ignored during initialization?
+						Should failed SQL statements be ignored during
+						initialization?
 					</xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -135,6 +140,19 @@
 	The statement separator in the script (the default is to use ';' if it is present in the script, or '\n' otherwise).
 				]]></xsd:documentation>
 			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="execution">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Indicate the timing of the execution of this script.  Use INIT to execute on startup (as a bean initialization) and DESTROY to execute on shutdown (as a bean destruction callback).
+				]]></xsd:documentation>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="INIT" />
+					<xsd:enumeration value="DESTROY" />
+				</xsd:restriction>
+			</xsd:simpleType>
 		</xsd:attribute>
 	</xsd:complexType>
 

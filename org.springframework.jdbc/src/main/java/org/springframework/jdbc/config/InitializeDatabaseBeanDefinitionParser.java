@@ -59,11 +59,12 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 	private void setDatabasePopulator(Element element, ParserContext context, BeanDefinitionBuilder builder) {
 		List<Element> scripts = DomUtils.getChildElementsByTagName(element, "script");
 		if (scripts.size() > 0) {
-			builder.addPropertyValue("databasePopulator", createDatabasePopulator(element, scripts, context));
+			builder.addPropertyValue("databasePopulator", createDatabasePopulator(element, scripts, context, "INIT"));
+			builder.addPropertyValue("databaseCleaner", createDatabasePopulator(element, scripts, context, "DESTROY"));
 		}
 	}
 
-	private BeanDefinition createDatabasePopulator(Element element, List<Element> scripts, ParserContext context) {
+	private BeanDefinition createDatabasePopulator(Element element, List<Element> scripts, ParserContext context, String execution) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(CompositeDatabasePopulator.class);
 
 		boolean ignoreFailedDrops = element.getAttribute("ignore-failures").equals("DROPS");
@@ -72,6 +73,14 @@ public class InitializeDatabaseBeanDefinitionParser extends AbstractBeanDefiniti
 		ManagedList<BeanMetadataElement> delegates = new ManagedList<BeanMetadataElement>();
 
 		for (Element scriptElement : scripts) {
+			
+			String executionAttr = scriptElement.getAttribute("execution");
+			if (!StringUtils.hasText(executionAttr)) {
+				executionAttr = "INIT";
+			}
+			if (!execution.equals(executionAttr)) {
+				continue;
+			}
 
 			BeanDefinitionBuilder delegate = BeanDefinitionBuilder.genericBeanDefinition(ResourceDatabasePopulator.class);
 			delegate.addPropertyValue("ignoreFailedDrops", ignoreFailedDrops);
