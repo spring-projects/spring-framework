@@ -120,7 +120,24 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * @see #setPersistenceUnitManager
 	 */
 	public void setPersistenceXmlLocation(String persistenceXmlLocation) {
-		this.internalPersistenceUnitManager.setPersistenceXmlLocations(new String[] {persistenceXmlLocation});
+		this.internalPersistenceUnitManager.setPersistenceXmlLocation(persistenceXmlLocation);
+	}
+
+	/**
+	 * Set whether to use Spring-based scanning for entity classes in the classpath
+	 * instead of using JPA's standard scanning of jar files with <code>persistence.xml</code>
+	 * markers in them. In case of Spring-based scanning, no <code>persistence.xml</code>
+	 * is necessary; all you need to do is to specify base packages to search here.
+	 * <p>Default is none. Specify packages to search for autodetection of your entity
+	 * classes in the classpath. This is analogous to Spring's component-scan feature
+	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @param packagesToScan one or more base packages to search, analogous to
+	 * Spring's component-scan configuration for regular Spring components
+	 * @see #setPersistenceUnitManager
+	 */
+	public void setPackagesToScan(String[] packagesToScan) {
+		this.internalPersistenceUnitManager.setPackagesToScan(packagesToScan);
 	}
 
 	/**
