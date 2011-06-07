@@ -1,5 +1,5 @@
-SPRING FRAMEWORK 3.1 M2 (May 2011)
-----------------------------------
+SPRING FRAMEWORK 3.1 M2 (June 2011)
+-----------------------------------
 http://www.springframework.org
 
 1. INTRODUCTION
