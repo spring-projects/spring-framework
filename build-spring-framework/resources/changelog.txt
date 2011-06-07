@@ -3,10 +3,13 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1 M2 (2011-06-06)
+Changes in version 3.1 M2 (2011-06-08)
 --------------------------------------
 
-* revised cache abstraction to focus on minimal atomic access operations
+* revised TypeDescriptor signature and implementation for clearer handling of nested generics
+* full support for arbitrary nesting of collections in fields
+* proper type detection in nested collections within arrays
+* AnnotatedBeanDefinitionReader now inherits Environment of supplied BeanDefinitionRegistry
 * eliminated @Feature support in favor of @Enable* and framework-provided @Configuration classes
 * introduced @EnableTransactionManagement, @EnableScheduling, etc
 * introduced @EnableWebMvc to provide default configuration for Spring MVC applications
@@ -22,10 +25,11 @@ Changes in version 3.1 M2 (2011-06-06)
 * consolidated the initialization and use of MappedInterceptors in AbstractHandlerMapping
 * added Servlet 3.0 based WebApplicationInitializer mechanism for programmatic bootstrapping
 * added Servlet 3.0 based StandardServletMultipartResolver
-* AnnotatedBeanDefinitionReader now inherits Environment of supplied BeanDefinitionRegistry
+* added "packagesToScan" feature to LocalContainerEntityManagerFactoryBean (avoiding persistence.xml)
 * fixed JPA 2.0 timeout hints to correctly specify milliseconds
-* RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
+* revised cache abstraction to focus on minimal atomic access operations
 * updated Quartz package to support Quartz 1.8 as well (note: not fully supporting Quartz 2.0 yet)
+* RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
 * introduced AnnotationConfigContextLoader to provide TestContext support for @Configuration classes
 * introduced @ActiveProfiles for declarative configuration of bean definition profiles in tests
 * TestContext generates context cache key based on all applicable configuration metadata
