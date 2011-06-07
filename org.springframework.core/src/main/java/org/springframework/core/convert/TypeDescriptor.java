@@ -279,13 +279,30 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Returns true if an object of this type can be assigned to a reference of the given type.
-	 * @param typeDescriptor the descriptor for the target type
+	 * Returns true if an object of this type descriptor can be assigned to the location described by the given type descriptor.
+	 * For example, valueOf(String.class).isAssignableTo(valueOf(CharSequence.class)) returns true because a String value can be assigned to a CharSequence variable. 
+	 * On the other hand, valueOf(Number.class).isAssignableTo(valueOf(Integer.class)) returns false because, while all Integers are Numbers, not all Numbers are Integers.
+	 * <p>
+	 * For arrays, collections, and maps, element and key/value types are checked if declared.
+	 * For example, a List&lt;String&gt; field value is assignable to a Collection&lt;CharSequence&gt; field, but List&lt;Number&gt; is not assignable to List&lt;Integer&gt;.
 	 * @return true if this type is assignable to the type represented by the provided type descriptor.
 	 * @see #getObjectType()
 	 */
 	public boolean isAssignableTo(TypeDescriptor typeDescriptor) {
-		return typeDescriptor.getObjectType().isAssignableFrom(getObjectType());
+		boolean typesAssignable = typeDescriptor.getObjectType().isAssignableFrom(getObjectType());
+		if (!typesAssignable) {
+			return false;
+		}
+		if (isArray()) {
+			return getElementTypeDescriptor().isAssignableTo(typeDescriptor.getElementTypeDescriptor());
+		} else if (isCollection()) {
+			return isNestedAssignable(getElementTypeDescriptor(), typeDescriptor.getElementTypeDescriptor());
+		} else if (isMap()) {
+			return isNestedAssignable(getMapKeyTypeDescriptor(), typeDescriptor.getMapKeyTypeDescriptor()) &&
+				isNestedAssignable(getMapValueTypeDescriptor(), typeDescriptor.getMapValueTypeDescriptor());
+		} else {	
+			return true;
+		}
 	}
 
 	// indexable type descriptor operations
@@ -534,7 +551,14 @@ public class TypeDescriptor {
 			return value != null ? new TypeDescriptor(value.getClass(), null, null, null, annotations) : null;
 		}		
 	}
-	
+
+	private boolean isNestedAssignable(TypeDescriptor nestedTypeDescriptor, TypeDescriptor otherNestedTypeDescriptor) {
+		if (nestedTypeDescriptor == null || otherNestedTypeDescriptor == null) {
+			return true;
+		}
+		return nestedTypeDescriptor.isAssignableTo(otherNestedTypeDescriptor);
+	}
+
 	private String wildcard(TypeDescriptor typeDescriptor) {
 		return typeDescriptor != null ? typeDescriptor.toString() : "?";
 	}
