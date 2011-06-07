@@ -72,51 +72,11 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 	// internal helpers
 
 	private boolean canConvertKey(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (targetType.getMapKeyTypeDescriptor() == null) {
-			// yes
-			return true;
-		}
-		if (sourceType.getMapKeyTypeDescriptor() == null) {
-			// maybe
-			return true;
-		}
-		boolean canConvert = conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType.getMapKeyTypeDescriptor());
-		if (canConvert) {
-			// yes
-			return true;
-		} else {
-			if (sourceType.getMapKeyTypeDescriptor().getType().isAssignableFrom(targetType.getMapKeyTypeDescriptor().getType())) {
-				// maybe;
-				return true;
-			} else {
-				// no;
-				return false;
-			}
-		}
+		return ConversionUtils.canConvertElements(sourceType.getMapKeyTypeDescriptor(), targetType.getMapKeyTypeDescriptor(), conversionService);
 	}
 	
 	private boolean canConvertValue(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (targetType.getMapValueTypeDescriptor() == null) {
-			// yes
-			return true;
-		}
-		if (sourceType.getMapValueTypeDescriptor() == null) {
-			// maybe
-			return true;
-		}
-		boolean canConvert = conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType.getMapValueTypeDescriptor());
-		if (canConvert) {
-			// yes
-			return true;
-		} else {
-			if (sourceType.getMapValueTypeDescriptor().getType().isAssignableFrom(targetType.getMapValueTypeDescriptor().getType())) {
-				// maybe;
-				return true;
-			} else {
-				// no;
-				return false;
-			}
-		}
+		return ConversionUtils.canConvertElements(sourceType.getMapValueTypeDescriptor(), targetType.getMapValueTypeDescriptor(), conversionService);
 	}
 	
 	private Object convertKey(Object sourceKey, TypeDescriptor sourceType, TypeDescriptor targetType) {
