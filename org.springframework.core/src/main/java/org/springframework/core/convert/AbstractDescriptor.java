@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * @author Keith Donald
+ * @since 3.1
+ */
 abstract class AbstractDescriptor {
 
 	private final Class<?> type;
@@ -37,11 +42,13 @@ abstract class AbstractDescriptor {
 	public TypeDescriptor getElementTypeDescriptor() {
 		if (isCollection()) {
 			Class<?> elementType = resolveCollectionElementType();
-			return elementType != null ? new TypeDescriptor(nested(elementType, 0)) : null;
-		} else if (isArray()) {
+			return (elementType != null ? new TypeDescriptor(nested(elementType, 0)) : null);
+		}
+		else if (isArray()) {
 			Class<?> elementType = getType().getComponentType();
 			return new TypeDescriptor(nested(elementType, 0));				
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -50,7 +57,8 @@ abstract class AbstractDescriptor {
 		if (isMap()) {
 			Class<?> keyType = resolveMapKeyType();
 			return keyType != null ? new TypeDescriptor(nested(keyType, 0)) : null;
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -59,7 +67,8 @@ abstract class AbstractDescriptor {
 		if (isMap()) {
 			Class<?> valueType = resolveMapValueType();
 			return valueType != null ? new TypeDescriptor(nested(valueType, 1)) : null;
-		} else {
+		}
+		else {
 			return null;
 		}
 	}
@@ -70,12 +79,15 @@ abstract class AbstractDescriptor {
 		if (isCollection()) {
 			Class<?> elementType = resolveCollectionElementType();
 			return elementType != null ? nested(elementType, 0) : null;
-		} else if (isArray()) {
+		}
+		else if (isArray()) {
 			return nested(getType().getComponentType(), 0);
-		} else if (isMap()) {
+		}
+		else if (isMap()) {
 			Class<?> mapValueType = resolveMapValueType();
 			return mapValueType != null ? nested(mapValueType, 1) : null;
-		} else {
+		}
+		else {
 			throw new IllegalStateException("Not a collection, array, or map: cannot resolve nested value types");
 		}
 	}
