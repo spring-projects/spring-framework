@@ -44,7 +44,19 @@ final class ObjectToArrayConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return true;
+		boolean canConvert = conversionService.canConvert(sourceType, targetType.getElementTypeDescriptor());
+		if (canConvert) {
+			// yes
+			return true;
+		} else {
+			if (sourceType.getType().isAssignableFrom(targetType.getElementTypeDescriptor().getType())) {
+				// maybe;
+				return true;
+			} else {
+				// no;
+				return false;
+			}
+		}
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

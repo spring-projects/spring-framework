@@ -49,7 +49,23 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return true;
+		if (targetType.getElementTypeDescriptor() == null) {
+			// yes
+			return true;
+		}
+		boolean canConvert = conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor());
+		if (canConvert) {
+			// yes
+			return true;
+		} else {
+			if (sourceType.getElementTypeDescriptor().getType().isAssignableFrom(targetType.getElementTypeDescriptor().getType())) {
+				// maybe;
+				return true;
+			} else {
+				// no;
+				return false;
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")

@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,11 +92,9 @@ public class MethodReference extends SpelNodeImpl {
 				// In the first case we should not retry, in the second case we should see if there is a 
 				// better suited method.
 				
-				// To determine which situation it is, the AccessException will contain a cause - this
-				// will be the exception thrown by the reflective invocation.  Inside this exception there
-				// may or may not be a root cause.  If there is a root cause it is a user created exception.
-				// If there is no root cause it was a reflective invocation problem.
-				
+				// To determine which situation it is, the AccessException will contain a cause.
+				// If the cause is an InvocationTargetException, a user exception was thrown inside the method.
+				// Otherwise the method could not be invoked.
 				throwSimpleExceptionIfPossible(state, ae);
 				
 				// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found
@@ -123,19 +122,17 @@ public class MethodReference extends SpelNodeImpl {
 	 * throw the RuntimeException directly.
 	 */
 	private void throwSimpleExceptionIfPossible(ExpressionState state, AccessException ae) {
-		Throwable causeOfAccessException = ae.getCause();
-		Throwable rootCause = (causeOfAccessException==null?null:causeOfAccessException.getCause());
-		if (rootCause!=null) {
-			// User exception was the root cause - exit now
+		if (ae.getCause() instanceof InvocationTargetException) {
+			Throwable rootCause = ae.getCause().getCause();
 			if (rootCause instanceof RuntimeException) {
-				throw (RuntimeException)rootCause;
+				throw (RuntimeException) rootCause;
 			}
 			else {
-				throw new ExpressionInvocationTargetException( getStartPosition(),
+				throw new ExpressionInvocationTargetException(getStartPosition(),
 						"A problem occurred when trying to execute method '" + this.name +
 						"' on object of type '" + state.getActiveContextObject().getValue().getClass().getName() + "'",
 						rootCause);
-			}
+			}			
 		}
 	}
 
