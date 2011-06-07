@@ -193,7 +193,7 @@ public class NumberFormattingTests {
 		private BigDecimal[] patternArray;
 
 		@NumberFormat(pattern="#,##.00")
-		private List<BigDecimal>[] patternList;
+		private List<BigDecimal> patternList;
 
 		@NumberFormat(pattern="#,##.00")
 		private List<BigDecimal> patternList2;
@@ -246,11 +246,11 @@ public class NumberFormattingTests {
 			this.patternArray = patternArray;
 		}
 
-		public List<BigDecimal>[] getPatternList() {
+		public List<BigDecimal> getPatternList() {
 			return patternList;
 		}
 
-		public void setPatternList(List<BigDecimal>[] patternList) {
+		public void setPatternList(List<BigDecimal> patternList) {
 			this.patternList = patternList;
 		}
 
