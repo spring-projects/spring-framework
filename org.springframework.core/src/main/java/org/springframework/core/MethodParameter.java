@@ -60,12 +60,11 @@ public class MethodParameter {
 	private int nestingLevel = 1;
 
 	/** Map from Integer level to Integer type index */
-	private Map<Integer,Integer> typeIndexesPerLevel;
+	Map<Integer, Integer> typeIndexesPerLevel;
 
 	Map<TypeVariable, Type> typeVariableMap;
 
-	private int hash;
-
+	private int hash = 0;
 
 
 	/**
@@ -440,12 +439,13 @@ public class MethodParameter {
 
 	@Override
 	public int hashCode() {
-		int result = hash;
+		int result = this.hash;
 		if (result == 0) {
 			result = getMember().hashCode();
-			result = 31 * result + parameterIndex;
-			hash = result;
+			result = 31 * result + this.parameterIndex;
+			this.hash = result;
 		}
 		return result;
 	}
+
 }

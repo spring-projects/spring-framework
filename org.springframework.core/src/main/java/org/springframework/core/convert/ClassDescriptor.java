@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert;
 
 import java.lang.annotation.Annotation;
 
+/**
+ * @author Keith Donald
+ * @since 3.1
+ */
 class ClassDescriptor extends AbstractDescriptor {
 
 	ClassDescriptor(Class<?> type) {

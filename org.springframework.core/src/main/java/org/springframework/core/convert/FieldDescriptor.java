@@ -13,22 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 
+/**
+ * @author Keith Donald
+ * @since 3.1
+ */
 class FieldDescriptor extends AbstractDescriptor {
 
 	private final Field field;
 
 	private final int nestingLevel;
 
+	private Map<Integer, Integer> typeIndexesPerLevel;
+
+
 	public FieldDescriptor(Field field) {
-		this(field.getType(), field, 1, 0);
+		super(field.getType());
+		this.field = field;
+		this.nestingLevel = 1;
 	}
+
+	private FieldDescriptor(Class<?> type, Field field, int nestingLevel, int typeIndex, Map<Integer, Integer> typeIndexesPerLevel) {
+		super(type);
+		this.field = field;
+		this.nestingLevel = nestingLevel;
+		this.typeIndexesPerLevel = typeIndexesPerLevel;
+		this.typeIndexesPerLevel.put(nestingLevel, typeIndex);
+	}
+
 
 	@Override
 	public Annotation[] getAnnotations() {
@@ -37,31 +58,25 @@ class FieldDescriptor extends AbstractDescriptor {
 	
 	@Override
 	protected Class<?> resolveCollectionElementType() {
-		return GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.nestingLevel);
+		return GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.nestingLevel, this.typeIndexesPerLevel);
 	}
 
 	@Override
 	protected Class<?> resolveMapKeyType() {
-		return GenericCollectionTypeResolver.getMapKeyFieldType(this.field, this.nestingLevel);
+		return GenericCollectionTypeResolver.getMapKeyFieldType(this.field, this.nestingLevel, this.typeIndexesPerLevel);
 	}
 
 	@Override
 	protected Class<?> resolveMapValueType() {
-		return GenericCollectionTypeResolver.getMapValueFieldType(this.field, this.nestingLevel);
+		return GenericCollectionTypeResolver.getMapValueFieldType(this.field, this.nestingLevel, this.typeIndexesPerLevel);
 	}
 
 	@Override
 	protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
-		return new FieldDescriptor(type, this.field, this.nestingLevel + 1, typeIndex);
-	}
-
-	// internal
-	
-	private FieldDescriptor(Class<?> type, Field field, int nestingLevel, int typeIndex) {
-		super(type);
-		this.field = field;
-		this.nestingLevel = nestingLevel;
-		// TODO typeIndex is not preserved at current nestingLevel is not preserved: see SPR-8394
+		if (this.typeIndexesPerLevel == null) {
+			this.typeIndexesPerLevel = new HashMap<Integer, Integer>(4);
+		}
+		return new FieldDescriptor(type, this.field, this.nestingLevel + 1, typeIndex, this.typeIndexesPerLevel);
 	}
 
 }
