@@ -46,8 +46,8 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (targetType.getElementType() != null) {
-			return this.conversionService.canConvert(sourceType, targetType.getElementType());
+		if (targetType.getElementTypeDescriptor() != null) {
+			return this.conversionService.canConvert(sourceType, targetType.getElementTypeDescriptor());
 		} else {
 			return true;
 		}
@@ -61,13 +61,13 @@ final class StringToCollectionConverter implements ConditionalGenericConverter {
 		String string = (String) source;
 		String[] fields = StringUtils.commaDelimitedListToStringArray(string);
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), fields.length);
-		if (targetType.getElementType() == null) {
+		if (targetType.getElementTypeDescriptor() == null) {
 			for (String field : fields) {
 				target.add(field.trim());
 			}						
 		} else {
 			for (String field : fields) {
-				Object targetElement = this.conversionService.convert(field.trim(), sourceType, targetType.getElementType());
+				Object targetElement = this.conversionService.convert(field.trim(), sourceType, targetType.getElementTypeDescriptor());
 				target.add(targetElement);
 			}			
 		}

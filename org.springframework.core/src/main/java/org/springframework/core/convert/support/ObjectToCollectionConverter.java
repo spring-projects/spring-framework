@@ -51,10 +51,10 @@ final class ObjectToCollectionConverter implements GenericConverter {
 			return null;
 		}
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), 1);
-		if (targetType.getElementType() == null || targetType.getElementType().isCollection()) {
+		if (targetType.getElementTypeDescriptor() == null || targetType.getElementTypeDescriptor().isCollection()) {
 			target.add(source);			
 		} else {
-			Object singleElement = this.conversionService.convert(source, sourceType, targetType.getElementType());
+			Object singleElement = this.conversionService.convert(source, sourceType, targetType.getElementTypeDescriptor());
 			target.add(singleElement);
 		}
 		return target;

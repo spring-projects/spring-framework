@@ -142,7 +142,7 @@ public class Selection extends SpelNodeImpl {
 				return new TypedValue(result);
 			}
 			else {
-				Class<?> elementType = ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementType().getType());
+				Class<?> elementType = ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementTypeDescriptor().getType());
 				Object resultArray = Array.newInstance(elementType, result.size());
 				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
 				return new TypedValue(resultArray);

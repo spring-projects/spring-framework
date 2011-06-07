@@ -34,7 +34,7 @@ abstract class AbstractDescriptor {
 		return type;		
 	}
 
-	public TypeDescriptor getElementType() {
+	public TypeDescriptor getElementTypeDescriptor() {
 		if (isCollection()) {
 			Class<?> elementType = resolveCollectionElementType();
 			return elementType != null ? new TypeDescriptor(nested(elementType, 0)) : null;
@@ -46,7 +46,7 @@ abstract class AbstractDescriptor {
 		}
 	}
 	
-	public TypeDescriptor getMapKeyType() {
+	public TypeDescriptor getMapKeyTypeDescriptor() {
 		if (isMap()) {
 			Class<?> keyType = resolveMapKeyType();
 			return keyType != null ? new TypeDescriptor(nested(keyType, 0)) : null;
@@ -55,7 +55,7 @@ abstract class AbstractDescriptor {
 		}
 	}
 	
-	public TypeDescriptor getMapValueType() {
+	public TypeDescriptor getMapValueTypeDescriptor() {
 		if (isMap()) {
 			Class<?> valueType = resolveMapValueType();
 			return valueType != null ? new TypeDescriptor(nested(valueType, 1)) : null;

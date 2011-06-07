@@ -60,11 +60,11 @@ public class TypeDescriptor {
 
 	private final Class<?> type;
 
-	private final TypeDescriptor elementType;
+	private final TypeDescriptor elementTypeDescriptor;
 
-	private final TypeDescriptor mapKeyType;
+	private final TypeDescriptor mapKeyTypeDescriptor;
 
-	private final TypeDescriptor mapValueType;
+	private final TypeDescriptor mapValueTypeDescriptor;
 
 	private final Annotation[] annotations;
 
@@ -113,14 +113,14 @@ public class TypeDescriptor {
 	 * For example, a List&lt;String&gt; could be converted to a List&lt;EmailAddress&gt; by converting to a targetType built with this method.
 	 * The method call to construct such a TypeDescriptor would look something like: collection(List.class, TypeDescriptor.valueOf(EmailAddress.class));
 	 * @param collectionType the collection type, which must implement {@link Collection}.
-	 * @param elementType the collection's element type, used to convert collection elements
+	 * @param elementTypeDescriptor a descriptor for the collection's element type, used to convert collection elements
 	 * @return the collection type descriptor
 	 */
-	public static TypeDescriptor collection(Class<?> collectionType, TypeDescriptor elementType) {
+	public static TypeDescriptor collection(Class<?> collectionType, TypeDescriptor elementTypeDescriptor) {
 		if (!Collection.class.isAssignableFrom(collectionType)) {
 			throw new IllegalArgumentException("collectionType must be a java.util.Collection");
 		}
-		return new TypeDescriptor(collectionType, elementType);
+		return new TypeDescriptor(collectionType, elementTypeDescriptor);
 	}
 
 	/**
@@ -129,15 +129,15 @@ public class TypeDescriptor {
 	 * For example, a Map&lt;String, String&gt; could be converted to a Map&lt;Id, EmailAddress&gt; by converting to a targetType built with this method:
 	 * The method call to construct such a TypeDescriptor would look something like: map(Map.class, TypeDescriptor.valueOf(Id.class), TypeDescriptor.valueOf(EmailAddress.class));
 	 * @param mapType the map type, which must implement {@link Map}.
-	 * @param keyType the map's key type, used to convert map keys
-	 * @param valueType the map's value type, used to convert map values
+	 * @param keyTypeDescriptor a descriptor for the map's key type, used to convert map keys
+	 * @param valueTypeDescriptor the map's value type, used to convert map values
 	 * @return the map type descriptor
 	 */
-	public static TypeDescriptor map(Class<?> mapType, TypeDescriptor keyType, TypeDescriptor valueType) {
+	public static TypeDescriptor map(Class<?> mapType, TypeDescriptor keyTypeDescriptor, TypeDescriptor valueTypeDescriptor) {
 		if (!Map.class.isAssignableFrom(mapType)) {
 			throw new IllegalArgumentException("mapType must be a java.util.Map");
 		}
-		return new TypeDescriptor(mapType, keyType, valueType);
+		return new TypeDescriptor(mapType, keyTypeDescriptor, valueTypeDescriptor);
 	}
 
 	/**
@@ -151,9 +151,13 @@ public class TypeDescriptor {
 	 * @param methodParameter the method parameter with a nestingLevel of 1
 	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the method parameter.
 	 * @return the nested type descriptor at the specified nesting level, or null if it could not be obtained.
+	 * @throws IllegalArgumentException if the nesting level of the input {@link MethodParameter} argument is not 1.
 	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types.
 	 */
 	public static TypeDescriptor nested(MethodParameter methodParameter, int nestingLevel) {
+		if (methodParameter.getNestingLevel() != 1) {
+			throw new IllegalArgumentException("methodParameter nesting level must be 1: use the nestingLevel parameter to specify the desired nestingLevel for nested type traversal");
+		}
 		return nested(new ParameterDescriptor(methodParameter), nestingLevel);
 	}
 
@@ -236,7 +240,7 @@ public class TypeDescriptor {
 		if (value == null) {
 			return this;
 		}
-		return new TypeDescriptor(value.getClass(), elementType, mapKeyType, mapValueType, annotations);
+		return new TypeDescriptor(value.getClass(), elementTypeDescriptor, mapKeyTypeDescriptor, mapValueTypeDescriptor, annotations);
 	}
 
 	/**
@@ -275,24 +279,13 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Returns true if an object of this type can be assigned to a reference of given targetType.
-	 * @param targetType the target type
-	 * @return true if this type is assignable to the target
+	 * Returns true if an object of this type can be assigned to a reference of the given type.
+	 * @param typeDescriptor the descriptor for the target type
+	 * @return true if this type is assignable to the type represented by the provided type descriptor.
+	 * @see #getObjectType()
 	 */
-	public boolean isAssignableTo(TypeDescriptor targetType) {
-		boolean typesAssignable = targetType.getObjectType().isAssignableFrom(getObjectType());
-		if (!typesAssignable) {
-			return false;
-		}
-		if (isArray() && targetType.isArray()) {
-			return getElementType().isAssignableTo(targetType.getElementType());
-		}
-		if (isCollection() && targetType.isCollection()) {
-			return collectionElementsAssignable(targetType.getElementType());
-		} else if (isMap() && targetType.isMap()) {
-			return mapKeysAssignable(targetType.getMapKeyType()) && mapValuesAssignable(targetType.getMapValueType());
-		}
-		return true;
+	public boolean isAssignableTo(TypeDescriptor typeDescriptor) {
+		return typeDescriptor.getObjectType().isAssignableFrom(getObjectType());
 	}
 
 	// indexable type descriptor operations
@@ -318,14 +311,14 @@ public class TypeDescriptor {
 	 * @return the array component type or Collection element type, or <code>null</code> if this type is a Collection but its element type is not parameterized.
 	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
 	 */
-	public TypeDescriptor getElementType() {
+	public TypeDescriptor getElementTypeDescriptor() {
 		assertCollectionOrArray();
-		return this.elementType;
+		return this.elementTypeDescriptor;
 	}
 
 	/**
-	 * If this type is a {@link Collection} or an Array, creates a elementType descriptor from the provided collection or array element.
-	 * Narrows the {@link #getElementType() elementType} property to the class of the provided collection or array element.
+	 * If this type is a {@link Collection} or an Array, creates a element TypeDescriptor from the provided collection or array element.
+	 * Narrows the {@link #getElementTypeDescriptor() elementType} property to the class of the provided collection or array element.
 	 * For example, if this describes a java.util.List&lt;java.lang.Number&lt; and the element argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
 	 * If this describes a java.util.List&lt;?&gt; and the element argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
 	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned. 
@@ -334,13 +327,8 @@ public class TypeDescriptor {
 	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
 	 * @see #narrow(Object)
 	 */
-	public TypeDescriptor elementType(Object element) {
-		assertCollectionOrArray();
-		if (elementType != null) {
-			return elementType.narrow(element);
-		} else {
-			return element != null ? new TypeDescriptor(element.getClass(), null, null, null, annotations) : null;
-		}
+	public TypeDescriptor elementTypeDescriptor(Object element) {
+		return narrow(element, getElementTypeDescriptor());
 	}
 
 	// map type descriptor operations
@@ -358,14 +346,14 @@ public class TypeDescriptor {
 	 * @return the Map key type, or <code>null</code> if this type is a Map but its key type is not parameterized.
 	 * @throws IllegalStateException if this type is not a java.util.Map.
 	 */
-	public TypeDescriptor getMapKeyType() {
+	public TypeDescriptor getMapKeyTypeDescriptor() {
 		assertMap();
-		return this.mapKeyType;
+		return this.mapKeyTypeDescriptor;
 	}
 
 	/**
-	 * If this type is a {@link Map}, creates a mapKeyType descriptor from the provided map key.
-	 * Narrows the {@link #getMapKeyType() mapKeyType} property to the class of the provided map key.
+	 * If this type is a {@link Map}, creates a mapKey {@link TypeDescriptor} from the provided map key.
+	 * Narrows the {@link #getMapKeyTypeDescriptor() mapKeyType} property to the class of the provided map key.
 	 * For example, if this describes a java.util.Map&lt;java.lang.Number, java.lang.String&lt; and the key argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
 	 * If this describes a java.util.Map&lt;?, ?&gt; and the key argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
 	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned. 
@@ -374,13 +362,8 @@ public class TypeDescriptor {
 	 * @throws IllegalStateException if this type is not a java.util.Map.
 	 * @see #narrow(Object)
 	 */
-	public TypeDescriptor mapKeyType(Object mapKey) {
-		assertMap();
-		if (mapKeyType != null) {
-			return mapKeyType.narrow(mapKey);
-		} else {
-			return mapKey != null ? new TypeDescriptor(mapKey.getClass(), null, null, null, annotations) : null;
-		}
+	public TypeDescriptor mapKeyTypeDescriptor(Object mapKey) {
+		return narrow(mapKey, getMapKeyTypeDescriptor());
 	}
 
 	/**
@@ -389,14 +372,14 @@ public class TypeDescriptor {
 	 * @return the Map value type, or <code>null</code> if this type is a Map but its value type is not parameterized.
 	 * @throws IllegalStateException if this type is not a java.util.Map.
 	 */
-	public TypeDescriptor getMapValueType() {
+	public TypeDescriptor getMapValueTypeDescriptor() {
 		assertMap();
-		return this.mapValueType;
+		return this.mapValueTypeDescriptor;
 	}
 
 	/**
-	 * If this type is a {@link Map}, creates a mapValueType descriptor from the provided map value.
-	 * Narrows the {@link #getMapValueType() mapValueType} property to the class of the provided map value.
+	 * If this type is a {@link Map}, creates a mapValue {@link TypeDescriptor} from the provided map value.
+	 * Narrows the {@link #getMapValueTypeDescriptor() mapValueType} property to the class of the provided map value.
 	 * For example, if this describes a java.util.Map&lt;java.lang.String, java.lang.Number&lt; and the value argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
 	 * If this describes a java.util.Map&lt;?, ?&gt; and the value argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
 	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned. 
@@ -404,13 +387,8 @@ public class TypeDescriptor {
 	 * @return the map value type descriptor
 	 * @throws IllegalStateException if this type is not a java.util.Map. 
 	 */
-	public TypeDescriptor mapValueType(Object mapValue) {
-		assertMap();
-		if (mapValueType != null) {
-			return mapValueType.narrow(mapValue);
-		} else {
-			return mapValue != null ? new TypeDescriptor(mapValue.getClass(), null, null, null, annotations) : null;
-		}
+	public TypeDescriptor mapValueTypeDescriptor(Object mapValue) {
+		return narrow(mapValue, getMapValueTypeDescriptor());		
 	}
 
 	// extending Object
@@ -423,16 +401,14 @@ public class TypeDescriptor {
 			return false;
 		}
 		TypeDescriptor other = (TypeDescriptor) obj;
-		boolean annotatedTypeEquals = ObjectUtils.nullSafeEquals(getType(), other.getType())
-				&& ObjectUtils.nullSafeEquals(getAnnotations(), other.getAnnotations());
+		boolean annotatedTypeEquals = ObjectUtils.nullSafeEquals(getType(), other.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), other.getAnnotations());
 		if (!annotatedTypeEquals) {
 			return false;
 		}
 		if (isCollection() || isArray()) {
-			return ObjectUtils.nullSafeEquals(getElementType(), other.getElementType());
+			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), other.getElementTypeDescriptor());
 		} else if (isMap()) {
-			return ObjectUtils.nullSafeEquals(getMapKeyType(), other.getMapKeyType())
-					&& ObjectUtils.nullSafeEquals(getMapValueType(), other.getMapValueType());
+			return ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), other.getMapKeyTypeDescriptor()) && ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), other.getMapValueTypeDescriptor());
 		} else {
 			return true;
 		}
@@ -450,21 +426,53 @@ public class TypeDescriptor {
 		}
 		builder.append(ClassUtils.getQualifiedName(getType()));
 		if (isMap()) {
-			builder.append("<").append(wildcard(getMapKeyType()));
-			builder.append(", ").append(wildcard(getMapValueType())).append(">");
+			builder.append("<").append(wildcard(getMapKeyTypeDescriptor()));
+			builder.append(", ").append(wildcard(getMapValueTypeDescriptor())).append(">");
 		} else if (isCollection()) {
-			builder.append("<").append(wildcard(getElementType())).append(">");
+			builder.append("<").append(wildcard(getElementTypeDescriptor())).append(">");
 		}
 		return builder.toString();
 	}
 
-	// helper public class
+	// deprecations in Spring 3.1
+	
+	/**
+	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getElementTypeDescriptor() elementTypeDescriptor}.
+	 * @deprecated in Spring 3.1 in favor of {@link #getElementTypeDescriptor()}.
+	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
+	 */
+	@Deprecated
+	public Class<?> getElementType() {
+		return getElementTypeDescriptor().getType();
+	}
+
+	/**
+	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getMapKeyTypeDescriptor() mapKeyTypeDescriptor}.
+	 * @deprecated in Spring 3.1 in favor of {@link #getMapKeyTypeDescriptor()}.
+	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 */
+	@Deprecated
+	public Class<?> getMapKeyType() {
+		return getMapKeyTypeDescriptor().getType();
+	}
+
+	/**
+	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getMapValueTypeDescriptor() mapValueTypeDescriptor}.
+	 * @deprecated in Spring 3.1 in favor of {@link #getMapValueTypeDescriptor()}.
+	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 */
+	@Deprecated
+	public Class<?> getMapValueType() {
+		return getMapValueTypeDescriptor().getType();
+	}
+
+	// package private helpers
 
 	TypeDescriptor(AbstractDescriptor descriptor) {
 		this.type = descriptor.getType();
-		this.elementType = descriptor.getElementType();
-		this.mapKeyType = descriptor.getMapKeyType();
-		this.mapValueType = descriptor.getMapValueType();
+		this.elementTypeDescriptor = descriptor.getElementTypeDescriptor();
+		this.mapKeyTypeDescriptor = descriptor.getMapKeyTypeDescriptor();
+		this.mapValueTypeDescriptor = descriptor.getMapValueTypeDescriptor();
 		this.annotations = descriptor.getAnnotations();
 	}
 
@@ -478,20 +486,20 @@ public class TypeDescriptor {
 		this(new ClassDescriptor(type));
 	}
 
-	private TypeDescriptor(Class<?> collectionType, TypeDescriptor elementType) {
-		this(collectionType, elementType, null, null, EMPTY_ANNOTATION_ARRAY);
+	private TypeDescriptor(Class<?> collectionType, TypeDescriptor elementTypeDescriptor) {
+		this(collectionType, elementTypeDescriptor, null, null, EMPTY_ANNOTATION_ARRAY);
 	}
 
-	private TypeDescriptor(Class<?> mapType, TypeDescriptor keyType, TypeDescriptor valueType) {
-		this(mapType, null, keyType, valueType, EMPTY_ANNOTATION_ARRAY);
+	private TypeDescriptor(Class<?> mapType, TypeDescriptor keyTypeDescriptor, TypeDescriptor valueTypeDescriptor) {
+		this(mapType, null, keyTypeDescriptor, valueTypeDescriptor, EMPTY_ANNOTATION_ARRAY);
 	}
 
-	private TypeDescriptor(Class<?> type, TypeDescriptor elementType, TypeDescriptor mapKeyType,
-			TypeDescriptor mapValueType, Annotation[] annotations) {
+	private TypeDescriptor(Class<?> type, TypeDescriptor elementTypeDescriptor, TypeDescriptor mapKeyTypeDescriptor,
+			TypeDescriptor mapValueTypeDescriptor, Annotation[] annotations) {
 		this.type = type;
-		this.elementType = elementType;
-		this.mapKeyType = mapKeyType;
-		this.mapValueType = mapValueType;
+		this.elementTypeDescriptor = elementTypeDescriptor;
+		this.mapKeyTypeDescriptor = mapKeyTypeDescriptor;
+		this.mapValueTypeDescriptor = mapValueTypeDescriptor;
 		this.annotations = annotations;
 	}
 
@@ -507,39 +515,6 @@ public class TypeDescriptor {
 
 	// internal helpers
 
-	private boolean mapKeysAssignable(TypeDescriptor targetKeyType) {
-		TypeDescriptor keyType = getMapKeyType();
-		if (targetKeyType == null) {
-			return true;
-		}
-		if (keyType == null) {
-			return false;
-		}
-		return keyType.isAssignableTo(targetKeyType);
-	}
-
-	private boolean collectionElementsAssignable(TypeDescriptor targetElementType) {
-		TypeDescriptor elementType = getElementType();
-		if (targetElementType == null) {
-			return true;
-		}
-		if (elementType == null) {
-			return false;
-		}
-		return elementType.isAssignableTo(targetElementType);
-	}
-
-	private boolean mapValuesAssignable(TypeDescriptor targetValueType) {
-		TypeDescriptor valueType = getMapValueType();
-		if (targetValueType == null) {
-			return true;
-		}
-		if (valueType == null) {
-			return false;
-		}
-		return valueType.isAssignableTo(targetValueType);
-	}
-
 	private void assertCollectionOrArray() {
 		if (!isCollection() && !isArray()) {
 			throw new IllegalStateException("Not a java.util.Collection or Array");
@@ -552,8 +527,16 @@ public class TypeDescriptor {
 		}
 	}
 
-	private String wildcard(TypeDescriptor nestedType) {
-		return nestedType != null ? nestedType.toString() : "?";
+	private TypeDescriptor narrow(Object value, TypeDescriptor typeDescriptor) {
+		if (typeDescriptor != null) {
+			return typeDescriptor.narrow(value);
+		} else {
+			return value != null ? new TypeDescriptor(value.getClass(), null, null, null, annotations) : null;
+		}		
+	}
+	
+	private String wildcard(TypeDescriptor typeDescriptor) {
+		return typeDescriptor != null ? typeDescriptor.toString() : "?";
 	}
 
 }

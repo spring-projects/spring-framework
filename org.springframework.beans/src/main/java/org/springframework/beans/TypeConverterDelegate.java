@@ -147,7 +147,7 @@ class TypeConverterDelegate {
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
 			if (requiredType != null && Collection.class.isAssignableFrom(requiredType) && convertedValue instanceof String) {
-				TypeDescriptor elementType = typeDescriptor.getElementType();
+				TypeDescriptor elementType = typeDescriptor.getElementTypeDescriptor();
 				if (elementType != null && Enum.class.isAssignableFrom(elementType.getType())) {
 					convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
 				}
@@ -465,7 +465,7 @@ class TypeConverterDelegate {
 			return original;
 		}
 		typeDescriptor = typeDescriptor.narrow(original);
-		TypeDescriptor elementType = typeDescriptor.getElementType();
+		TypeDescriptor elementType = typeDescriptor.getElementTypeDescriptor();
 		if (elementType == null && originalAllowed &&
 				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
 			return original;
@@ -512,7 +512,7 @@ class TypeConverterDelegate {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
 			Object convertedElement = convertIfNecessary(
-					indexedPropertyName, null, element, elementType != null ? elementType.getType() : null , typeDescriptor.getElementType());
+					indexedPropertyName, null, element, elementType != null ? elementType.getType() : null , typeDescriptor.getElementTypeDescriptor());
 			try {
 				convertedCopy.add(convertedElement);
 			}
@@ -537,8 +537,8 @@ class TypeConverterDelegate {
 			return original;
 		}
 		typeDescriptor = typeDescriptor.narrow(original);
-		TypeDescriptor keyType = typeDescriptor.getMapKeyType();
-		TypeDescriptor valueType = typeDescriptor.getMapValueType();
+		TypeDescriptor keyType = typeDescriptor.getMapKeyTypeDescriptor();
+		TypeDescriptor valueType = typeDescriptor.getMapValueTypeDescriptor();
 		if (keyType == null && valueType == null && originalAllowed &&
 				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
 			return original;
@@ -585,8 +585,8 @@ class TypeConverterDelegate {
 			Object key = entry.getKey();
 			Object value = entry.getValue();
 			String keyedPropertyName = buildKeyedPropertyName(propertyName, key);
-			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType != null ? keyType.getType() : null, typeDescriptor.getMapKeyType());
-			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType!= null ? valueType.getType() : null, typeDescriptor.getMapValueType());
+			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType != null ? keyType.getType() : null, typeDescriptor.getMapKeyTypeDescriptor());
+			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType!= null ? valueType.getType() : null, typeDescriptor.getMapValueTypeDescriptor());
 			try {
 				convertedCopy.put(convertedKey, convertedValue);
 			}

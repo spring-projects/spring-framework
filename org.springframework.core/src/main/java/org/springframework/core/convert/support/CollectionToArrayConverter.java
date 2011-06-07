@@ -53,10 +53,10 @@ final class CollectionToArrayConverter implements GenericConverter {
 			return null;
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
-		Object array = Array.newInstance(targetType.getElementType().getType(), sourceCollection.size());
+		Object array = Array.newInstance(targetType.getElementTypeDescriptor().getType(), sourceCollection.size());
 		int i = 0;
 		for (Object sourceElement : sourceCollection) {
-			Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementType(sourceElement), targetType.getElementType());
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
 			Array.set(array, i++, targetElement);
 		}
 		return array;

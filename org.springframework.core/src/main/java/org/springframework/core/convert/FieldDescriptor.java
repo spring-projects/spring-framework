@@ -61,6 +61,7 @@ class FieldDescriptor extends AbstractDescriptor {
 		super(type);
 		this.field = field;
 		this.nestingLevel = nestingLevel;
+		// TODO typeIndex is not preserved at current nestingLevel is not preserved: see SPR-8394
 	}
 
 }

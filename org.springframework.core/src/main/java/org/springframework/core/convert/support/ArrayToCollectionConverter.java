@@ -55,7 +55,7 @@ final class ArrayToCollectionConverter implements GenericConverter {
 		}		
 		int length = Array.getLength(source);
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), length);
-		if (targetType.getElementType() == null) {
+		if (targetType.getElementTypeDescriptor() == null) {
 			for (int i = 0; i < length; i++) {
 				Object sourceElement = Array.get(source, i);
 				target.add(sourceElement);
@@ -63,7 +63,7 @@ final class ArrayToCollectionConverter implements GenericConverter {
 		} else {
 			for (int i = 0; i < length; i++) {
 				Object sourceElement = Array.get(source, i);
-				Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementType(sourceElement), targetType.getElementType());
+				Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
 				target.add(targetElement);
 			}
 		}		

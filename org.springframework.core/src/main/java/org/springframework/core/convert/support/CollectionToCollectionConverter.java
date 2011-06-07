@@ -55,13 +55,13 @@ final class CollectionToCollectionConverter implements GenericConverter {
 		}
 		Collection<?> sourceCollection = (Collection<?>) source;
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
-		if (targetType.getElementType() == null) {
+		if (targetType.getElementTypeDescriptor() == null) {
 			for (Object element : sourceCollection) {
 				target.add(element);
 			}
 		} else {
 			for (Object sourceElement : sourceCollection) {
-				Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementType(sourceElement), targetType.getElementType());
+				Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
 				target.add(targetElement);
 			}
 		}
