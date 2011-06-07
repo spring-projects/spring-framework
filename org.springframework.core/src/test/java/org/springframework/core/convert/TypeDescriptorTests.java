@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 
 package org.springframework.core.convert;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,9 +27,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Keith Donald
@@ -397,12 +397,11 @@ public class TypeDescriptorTests {
 	}
 
 	@Test
-	@Ignore
 	public void fieldComplexTypeDescriptor() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(TypeDescriptorTests.class.getDeclaredField("arrayOfListOfString"));
 		assertTrue(typeDescriptor.isArray());
-		assertEquals(List.class,typeDescriptor.getElementTypeDescriptor());
-		assertEquals(String.class, typeDescriptor.getElementTypeDescriptor().getElementTypeDescriptor());
+		assertEquals(List.class,typeDescriptor.getElementTypeDescriptor().getType());
+		assertEquals(String.class, typeDescriptor.getElementTypeDescriptor().getElementTypeDescriptor().getType());
 		assertEquals("java.util.List[]",typeDescriptor.toString());
 	}
 
@@ -417,13 +416,11 @@ public class TypeDescriptorTests {
 	}
 
 	@Test
-	@Ignore
 	public void fieldMap() throws Exception {
-		// TODO: SPR-8394: typeIndex handling not currently supported by fields
-		TypeDescriptor desc = new TypeDescriptor(getClass().getField("fieldMap"));
+		TypeDescriptor desc = new TypeDescriptor(TypeDescriptorTests.class.getField("fieldMap"));
 		assertTrue(desc.isMap());
-		assertEquals(Integer.class, desc.getMapKeyTypeDescriptor().getElementTypeDescriptor());
-		assertEquals(Long.class, desc.getMapValueTypeDescriptor().getElementTypeDescriptor());
+		assertEquals(Integer.class, desc.getMapKeyTypeDescriptor().getElementTypeDescriptor().getType());
+		assertEquals(Long.class, desc.getMapValueTypeDescriptor().getElementTypeDescriptor().getType());
 	}
 	
 	public Map<List<Integer>, List<Long>> fieldMap;
