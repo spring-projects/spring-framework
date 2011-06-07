@@ -45,7 +45,23 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return true;
+		if (sourceType.getElementTypeDescriptor() == null) {
+			// maybe
+			return true;
+		}
+		boolean canConvert = conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType);
+		if (canConvert) {
+			// yes
+			return true;
+		} else {
+			if (sourceType.getElementTypeDescriptor().getType().isAssignableFrom(targetType.getType())) {
+				// maybe;
+				return true;
+			} else {
+				// no;
+				return false;
+			}
+		}
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

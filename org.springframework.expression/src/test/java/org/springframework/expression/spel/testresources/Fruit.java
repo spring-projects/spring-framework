@@ -35,6 +35,6 @@ public class Fruit {
 	}
 
 	public String toString() {
-		return "A" + (colorName.startsWith("o") ? "n " : " ") + colorName + " " + name;
+		return "A" + (colorName != null && colorName.startsWith("o") ? "n " : " ") + colorName + " " + name;
 	}
 }

@@ -3,6 +3,7 @@ package org.springframework.core.convert.support;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -114,12 +115,13 @@ public class MapToMapConverterTests {
 		map.put("2", Arrays.asList("37", "23"));
 		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("sourceCollectionMapTarget"));
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("collectionMapTarget"));
-		assertTrue(conversionService.canConvert(sourceType, targetType));
+		assertFalse(conversionService.canConvert(sourceType, targetType));
 		try {
 			conversionService.convert(map, sourceType, targetType);
-		} catch (ConversionFailedException e) {
-			assertTrue(e.getCause() instanceof ConverterNotFoundException);
-		}				
+			fail("Should have failed");
+		} catch (ConverterNotFoundException e) {
+			
+		}
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(sourceType, targetType));

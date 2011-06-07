@@ -268,24 +268,36 @@ public class ReflectionHelper {
 	 * @param converter the type converter to use for attempting conversions
 	 * @param arguments the actual arguments that need conversion
 	 * @param methodOrCtor the target Method or Constructor
-	 * @param argumentsRequiringConversion details which of the input arguments need conversion
+	 * @param argumentsRequiringConversion details which of the input arguments for sure need conversion
 	 * @param varargsPosition the known position of the varargs argument, if any
 	 * @throws EvaluationException if a problem occurs during conversion
 	 */
 	static void convertArguments(TypeConverter converter, Object[] arguments, Object methodOrCtor,
 			int[] argumentsRequiringConversion, Integer varargsPosition) throws EvaluationException {
-
-		for (int argPosition : argumentsRequiringConversion) {
-			TypeDescriptor targetType;
-			if (varargsPosition != null && argPosition >= varargsPosition) {
-				MethodParameter methodParam = MethodParameter.forMethodOrConstructor(methodOrCtor, varargsPosition);
-				targetType = TypeDescriptor.nested(methodParam, 1);
+		if (varargsPosition == null) {
+			for (int i = 0; i < arguments.length; i++) {
+				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor, i));
+				Object argument = arguments[i];
+				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
 			}
-			else {
-				targetType = new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor, argPosition));
+		} else {
+			for (int i = 0; i < varargsPosition; i++) {
+				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor, i));
+				Object argument = arguments[i];
+				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);				
 			}
-			Object argument = arguments[argPosition];
-			arguments[argPosition] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+			MethodParameter methodParam = MethodParameter.forMethodOrConstructor(methodOrCtor, varargsPosition);
+			if (varargsPosition == arguments.length - 1) {
+				TypeDescriptor targetType = new TypeDescriptor(methodParam);				
+				Object argument = arguments[varargsPosition];
+				arguments[varargsPosition] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);					
+			} else {
+				TypeDescriptor targetType = TypeDescriptor.nested(methodParam, 1);
+				for (int i = varargsPosition; i < arguments.length; i++) {
+					Object argument = arguments[i];
+					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);					
+				}
+			}
 		}
 	}
 

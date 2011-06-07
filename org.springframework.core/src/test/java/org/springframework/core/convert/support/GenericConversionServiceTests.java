@@ -225,11 +225,11 @@ public class GenericConversionServiceTests {
 	@Test
 	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
 		conversionService.addConverter(new ObjectToArrayConverter(conversionService));
-		assertTrue(conversionService.canConvert(String.class, Integer[].class));
+		assertFalse(conversionService.canConvert(String.class, Integer[].class));
 		try {
 			conversionService.convert("3,4,5", Integer[].class);
-		} catch (ConversionFailedException e) {
-			assertTrue(e.getCause() instanceof ConverterNotFoundException);
+			fail("should have failed");
+		} catch (ConverterNotFoundException e) {
 		}
 	}
 

@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,15 +124,12 @@ public class ConstructorReference extends SpelNodeImpl {
 				// In the first case we should not retry, in the second case we should see if there is a
 				// better suited method.
 
-				// To determine which situation it is, the AccessException will contain a cause - this
-				// will be the exception thrown by the reflective invocation. Inside this exception there
-				// may or may not be a root cause. If there is a root cause it is a user created exception.
-				// If there is no root cause it was a reflective invocation problem.
-
-				Throwable causeOfAccessException = ae.getCause();
-				Throwable rootCause = (causeOfAccessException == null ? null : causeOfAccessException.getCause());
-				if (rootCause != null) {
+				// To determine which situation it is, the AccessException will contain a cause.
+				// If the cause is an InvocationTargetException, a user exception was thrown inside the constructor.
+				// Otherwise the constructor could not be invoked.
+				if (ae.getCause() instanceof InvocationTargetException) {
 					// User exception was the root cause - exit now
+					Throwable rootCause = ae.getCause().getCause();
 					if (rootCause instanceof RuntimeException) {
 						throw (RuntimeException) rootCause;
 					} else {
@@ -139,7 +137,7 @@ public class ConstructorReference extends SpelNodeImpl {
 						throw new SpelEvaluationException(getStartPosition(), rootCause,
 								SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename, FormatHelper
 										.formatMethodForMessage("", argumentTypes));
-					}
+					}					
 				}
 
 				// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found

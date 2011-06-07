@@ -56,7 +56,7 @@ class ReflectiveConstructorExecutor implements ConstructorExecutor {
 
 	public TypedValue execute(EvaluationContext context, Object... arguments) throws AccessException {
 		try {
-			if (this.argsRequiringConversion != null && arguments != null) {
+			if (arguments != null) {
 				ReflectionHelper.convertArguments(context.getTypeConverter(), arguments,
 						this.ctor, this.argsRequiringConversion, this.varargsPosition);
 			}

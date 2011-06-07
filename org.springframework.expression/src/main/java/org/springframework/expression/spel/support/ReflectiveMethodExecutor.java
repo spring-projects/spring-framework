@@ -57,7 +57,7 @@ class ReflectiveMethodExecutor implements MethodExecutor {
 
 	public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
 		try {
-			if (this.argsRequiringConversion != null && arguments != null) {
+			if (arguments != null) {
 				ReflectionHelper.convertArguments(
 						context.getTypeConverter(), arguments, this.method,
 						this.argsRequiringConversion, this.varargsPosition);
