@@ -58,8 +58,8 @@ final class MapToMapConverter implements GenericConverter {
 		for (Map.Entry<Object, Object> entry : sourceMap.entrySet()) {
 			Object sourceKey = entry.getKey();
 			Object sourceValue = entry.getValue();
-			Object targetKey = convertKey(sourceKey, sourceType, targetType.getMapKeyType());
-			Object targetValue = convertValue(sourceValue, sourceType, targetType.getMapValueType());
+			Object targetKey = convertKey(sourceKey, sourceType, targetType.getMapKeyTypeDescriptor());
+			Object targetValue = convertValue(sourceValue, sourceType, targetType.getMapValueTypeDescriptor());
 			targetMap.put(targetKey, targetValue);
 		}
 		return targetMap;
@@ -71,14 +71,14 @@ final class MapToMapConverter implements GenericConverter {
 		if (targetType == null) {
 			return sourceKey;
 		}
-		return this.conversionService.convert(sourceKey, sourceType.mapKeyType(sourceKey), targetType);
+		return this.conversionService.convert(sourceKey, sourceType.mapKeyTypeDescriptor(sourceKey), targetType);
 	}
 
 	private Object convertValue(Object sourceValue, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (targetType == null) {
 			return sourceValue;
 		}
-		return this.conversionService.convert(sourceValue, sourceType.mapValueType(sourceValue), targetType);
+		return this.conversionService.convert(sourceValue, sourceType.mapValueTypeDescriptor(sourceValue), targetType);
 	}
 
 }

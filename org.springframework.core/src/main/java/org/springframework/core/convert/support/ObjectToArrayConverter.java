@@ -47,8 +47,8 @@ final class ObjectToArrayConverter implements GenericConverter {
 		if (source == null) {
 			return null;
 		}
-		Object target = Array.newInstance(targetType.getElementType().getType(), 1);
-		Object targetElement = this.conversionService.convert(source, sourceType, targetType.getElementType());
+		Object target = Array.newInstance(targetType.getElementTypeDescriptor().getType(), 1);
+		Object targetElement = this.conversionService.convert(source, sourceType, targetType.getElementTypeDescriptor());
 		Array.set(target, 0, targetElement);
 		return target;
 	}

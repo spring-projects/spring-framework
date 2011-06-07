@@ -113,7 +113,7 @@ public class SelectionAndProjectionTests {
 		Object value = expression.getValue(context);
 		assertTrue(value.getClass().isArray());
 		TypedValue typedValue = new TypedValue(value);
-		assertEquals(Integer.class, typedValue.getTypeDescriptor().getElementType().getType());
+		assertEquals(Integer.class, typedValue.getTypeDescriptor().getElementTypeDescriptor().getType());
 		Integer[] array = (Integer[]) value;
 		assertEquals(5, array.length);
 		assertEquals(new Integer(0), array[0]);
@@ -148,7 +148,7 @@ public class SelectionAndProjectionTests {
 		Object value = expression.getValue(context);
 		assertTrue(value.getClass().isArray());
 		TypedValue typedValue = new TypedValue(value);
-		assertEquals(Integer.class, typedValue.getTypeDescriptor().getElementType().getType());
+		assertEquals(Integer.class, typedValue.getTypeDescriptor().getElementTypeDescriptor().getType());
 		Integer[] array = (Integer[]) value;
 		assertEquals(5, array.length);
 		assertEquals(new Integer(0), array[0]);
@@ -250,7 +250,7 @@ public class SelectionAndProjectionTests {
 		Object value = expression.getValue(context);
 		assertTrue(value.getClass().isArray());
 		TypedValue typedValue = new TypedValue(value);
-		assertEquals(Number.class, typedValue.getTypeDescriptor().getElementType().getType());
+		assertEquals(Number.class, typedValue.getTypeDescriptor().getElementTypeDescriptor().getType());
 		Number[] array = (Number[]) value;
 		assertEquals(3, array.length);
 		assertEquals(new Integer(5), array[0]);

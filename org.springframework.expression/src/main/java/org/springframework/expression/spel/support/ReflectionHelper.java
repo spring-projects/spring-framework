@@ -213,7 +213,7 @@ public class ReflectionHelper {
 		else {
 			// Now... we have the final argument in the method we are checking as a match and we have 0 or more other
 			// arguments left to pass to it.
-			Class varargsParameterType = expectedArgTypes.get(expectedArgTypes.size() - 1).getElementType().getType();
+			Class varargsParameterType = expectedArgTypes.get(expectedArgTypes.size() - 1).getElementTypeDescriptor().getType();
 
 			// All remaining parameters must be of this type or convertable to this type
 			for (int i = expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {

@@ -51,7 +51,7 @@ final class CollectionToObjectConverter implements GenericConverter {
 			return null;
 		}
 		Object firstElement = sourceCollection.iterator().next();
-		return this.conversionService.convert(firstElement, sourceType.elementType(firstElement), targetType);
+		return this.conversionService.convert(firstElement, sourceType.elementTypeDescriptor(firstElement), targetType);
 	}
 
 }

@@ -45,7 +45,7 @@ final class StringToArrayConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType, targetType.getElementType());
+		return this.conversionService.canConvert(sourceType, targetType.getElementTypeDescriptor());
 	}
 	
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -54,10 +54,10 @@ final class StringToArrayConverter implements ConditionalGenericConverter {
 		}		
 		String string = (String) source;
 		String[] fields = StringUtils.commaDelimitedListToStringArray(string);
-		Object target = Array.newInstance(targetType.getElementType().getType(), fields.length);
+		Object target = Array.newInstance(targetType.getElementTypeDescriptor().getType(), fields.length);
 		for (int i = 0; i < fields.length; i++) {
 			String sourceElement = fields[i];
-			Object targetElement = this.conversionService.convert(sourceElement.trim(), sourceType, targetType.getElementType());
+			Object targetElement = this.conversionService.convert(sourceElement.trim(), sourceType, targetType.getElementTypeDescriptor());
 			Array.set(target, i, targetElement);
 		}
 		return target;

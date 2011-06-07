@@ -729,7 +729,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
         // value is list containing [true,false]
         Assert.assertEquals(Boolean.class,value.get(0).getClass());
         TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
-        Assert.assertEquals(null, evaluated.getElementType());
+        Assert.assertEquals(null, evaluated.getElementTypeDescriptor());
 	}
 	
 	@Test
@@ -742,7 +742,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
         // value is array containing [true,false]
         Assert.assertEquals(Boolean.class,value[0].getClass());
         TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
-        Assert.assertEquals(Boolean.class, evaluated.getElementType().getType());
+        Assert.assertEquals(Boolean.class, evaluated.getElementTypeDescriptor().getType());
 	}
 	
 	@Test
@@ -755,7 +755,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
         // value is list containing [true,false]
         Assert.assertEquals(Boolean.class,value.get(0).getClass());
         TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
-        Assert.assertEquals(null, evaluated.getElementType());
+        Assert.assertEquals(null, evaluated.getElementTypeDescriptor());
 	}
 	
 	static class C {
