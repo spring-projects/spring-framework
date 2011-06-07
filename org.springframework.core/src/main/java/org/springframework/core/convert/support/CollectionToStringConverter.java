@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Converts a Collection to a comma-delimited String.
@@ -30,7 +30,7 @@ import org.springframework.core.convert.converter.GenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class CollectionToStringConverter implements GenericConverter {
+final class CollectionToStringConverter implements ConditionalGenericConverter {
 
 	private static final String DELIMITER = ",";
 
@@ -42,6 +42,10 @@ final class CollectionToStringConverter implements GenericConverter {
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Collection.class, String.class));
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return true;
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

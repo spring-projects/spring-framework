@@ -23,7 +23,7 @@ import java.util.Set;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Converts a Map to another Map.
@@ -36,7 +36,7 @@ import org.springframework.core.convert.converter.GenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class MapToMapConverter implements GenericConverter {
+final class MapToMapConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -48,6 +48,10 @@ final class MapToMapConverter implements GenericConverter {
 		return Collections.singleton(new ConvertiblePair(Map.class, Map.class));
 	}
 
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return true;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {

@@ -293,11 +293,11 @@ public class TypeDescriptor {
 		if (!typesAssignable) {
 			return false;
 		}
-		if (isArray()) {
+		if (isArray() && typeDescriptor.isArray()) {
 			return getElementTypeDescriptor().isAssignableTo(typeDescriptor.getElementTypeDescriptor());
-		} else if (isCollection()) {
+		} else if (isCollection() && typeDescriptor.isCollection()) {
 			return isNestedAssignable(getElementTypeDescriptor(), typeDescriptor.getElementTypeDescriptor());
-		} else if (isMap()) {
+		} else if (isMap() && typeDescriptor.isMap()) {
 			return isNestedAssignable(getMapKeyTypeDescriptor(), typeDescriptor.getMapKeyTypeDescriptor()) &&
 				isNestedAssignable(getMapValueTypeDescriptor(), typeDescriptor.getMapValueTypeDescriptor());
 		} else {	
