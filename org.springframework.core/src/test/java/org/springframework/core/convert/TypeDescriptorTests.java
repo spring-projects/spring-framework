@@ -759,19 +759,45 @@ public class TypeDescriptorTests {
 	@Test
 	public void isAssignableElementTypes() throws Exception {
 		assertTrue(new TypeDescriptor(getClass().getField("listField")).isAssignableTo(new TypeDescriptor(getClass().getField("listField"))));		
+		assertTrue(new TypeDescriptor(getClass().getField("notGenericList")).isAssignableTo(new TypeDescriptor(getClass().getField("listField"))));
+		assertTrue(new TypeDescriptor(getClass().getField("listField")).isAssignableTo(new TypeDescriptor(getClass().getField("notGenericList"))));
 		assertFalse(new TypeDescriptor(getClass().getField("isAssignableElementTypes")).isAssignableTo(new TypeDescriptor(getClass().getField("listField"))));
 		assertTrue(TypeDescriptor.valueOf(List.class).isAssignableTo(new TypeDescriptor(getClass().getField("listField"))));
 	}
 
+	public List notGenericList;
+	
 	public List<Number> isAssignableElementTypes;
 	
 	@Test
 	public void isAssignableMapKeyValueTypes() throws Exception {
 		assertTrue(new TypeDescriptor(getClass().getField("mapField")).isAssignableTo(new TypeDescriptor(getClass().getField("mapField"))));		
+		assertTrue(new TypeDescriptor(getClass().getField("notGenericMap")).isAssignableTo(new TypeDescriptor(getClass().getField("mapField"))));
+		assertTrue(new TypeDescriptor(getClass().getField("mapField")).isAssignableTo(new TypeDescriptor(getClass().getField("notGenericMap"))));
 		assertFalse(new TypeDescriptor(getClass().getField("isAssignableMapKeyValueTypes")).isAssignableTo(new TypeDescriptor(getClass().getField("mapField"))));		
 		assertTrue(TypeDescriptor.valueOf(Map.class).isAssignableTo(new TypeDescriptor(getClass().getField("mapField"))));
 	}
-	
+
+	public Map notGenericMap;
+
 	public Map<CharSequence, Number> isAssignableMapKeyValueTypes;
 
+	private void assignabilityExamples() {
+		Number num = null;
+		Integer integer = null;
+		num = integer;
+		
+		List list = null;
+		List<String> listString = null;
+		list = listString;
+		listString = list;
+
+		Map map = null;
+		Map<String, String> mapString = null;
+		map = mapString;
+		mapString = map;
+
+		Map<String, String> mapString2 = null;
+		mapString = mapString2;
+	}
 }
