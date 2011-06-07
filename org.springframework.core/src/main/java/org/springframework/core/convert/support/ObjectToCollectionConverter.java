@@ -23,7 +23,7 @@ import java.util.Set;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Converts an Object to a single-element Collection containing the Object.
@@ -33,7 +33,7 @@ import org.springframework.core.convert.converter.GenericConverter;
  * @author Juergen Hoeller
  * @since 3.0
  */
-final class ObjectToCollectionConverter implements GenericConverter {
+final class ObjectToCollectionConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -43,6 +43,10 @@ final class ObjectToCollectionConverter implements GenericConverter {
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object.class, Collection.class));
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return true;
 	}
 
 	@SuppressWarnings("unchecked")

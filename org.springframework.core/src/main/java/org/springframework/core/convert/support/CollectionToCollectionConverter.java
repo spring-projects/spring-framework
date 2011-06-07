@@ -23,7 +23,7 @@ import java.util.Set;
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Converts from a Collection to another Collection.
@@ -36,7 +36,7 @@ import org.springframework.core.convert.converter.GenericConverter;
  * @author Keith Donald
  * @since 3.0
  */
-final class CollectionToCollectionConverter implements GenericConverter {
+final class CollectionToCollectionConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
@@ -46,6 +46,10 @@ final class CollectionToCollectionConverter implements GenericConverter {
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Collection.class, Collection.class));
+	}
+
+	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return true;
 	}
 
 	@SuppressWarnings("unchecked")
