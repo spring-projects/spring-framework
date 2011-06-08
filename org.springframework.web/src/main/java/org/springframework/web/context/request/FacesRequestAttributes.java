@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.context.request;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import javax.faces.application.Application;
+import javax.faces.component.UIViewRoot;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.portlet.PortletSession;
@@ -166,6 +168,9 @@ public class FacesRequestAttributes implements RequestAttributes {
 		else if ("applicationScope".equals(key)) {
 			return getExternalContext().getApplicationMap();
 		}
+		else if ("facesContext".equals(key)) {
+			return getFacesContext();
+		}
 		else if ("cookie".equals(key)) {
 			return getExternalContext().getRequestCookieMap();
 		}
@@ -187,8 +192,29 @@ public class FacesRequestAttributes implements RequestAttributes {
 		else if ("view".equals(key)) {
 			return getFacesContext().getViewRoot();
 		}
-		else if ("facesContext".equals(key)) {
-			return getFacesContext();
+		else if ("viewScope".equals(key)) {
+			try {
+				return ReflectionUtils.invokeMethod(UIViewRoot.class.getMethod("getViewMap"), getFacesContext().getViewRoot());
+			}
+			catch (NoSuchMethodException ex) {
+				throw new IllegalStateException("JSF 2.0 API not available", ex);
+			}
+		}
+		else if ("flash".equals(key)) {
+			try {
+				return ReflectionUtils.invokeMethod(ExternalContext.class.getMethod("getFlash"), getExternalContext());
+			}
+			catch (NoSuchMethodException ex) {
+				throw new IllegalStateException("JSF 2.0 API not available", ex);
+			}
+		}
+		else if ("resource".equals(key)) {
+			try {
+				return ReflectionUtils.invokeMethod(Application.class.getMethod("getResourceHandler"), getFacesContext().getApplication());
+			}
+			catch (NoSuchMethodException ex) {
+				throw new IllegalStateException("JSF 2.0 API not available", ex);
+			}
 		}
 		else {
 			return null;
