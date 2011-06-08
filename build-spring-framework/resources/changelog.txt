@@ -3,6 +3,25 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.0.6 (2011-06-15)
+-------------------------------------
+
+* fixed aspects bundle to declare dependencies for @Async aspect as well
+* fixed JPA 2.0 timeout hints to correctly specify milliseconds
+* updated Quartz package to support Quartz 1.8 as well
+* EhCacheManagerFactoryBean properly closes "ehcache.xml" input stream, if any
+* ProxyCreationContext uses "ThreadLocal.remove()" over "ThreadLocal.set(null)" as well
+* BeanDefinitionVisitor now actually visits factory method names
+* fixed potential InjectionMetadata NPE when using SpringBeanAutowiringInterceptor
+* fixed AbstractBindingResult to avoid NPE in "hashCode()" if target is null
+* Servlet/PortletRequestDataBinder perform unwrapping for MultipartRequest as well
+* fixed several HttpHeaders issues (charset handling, quoting/unquoting)
+* FormHttpMessageConverter correctly processes POST requests
+* ResourceHttpRequestHandler does not set Content-Length header for 304 response
+* LocaleChangeInterceptor validates locale values in order to prevent XSS vulnerability
+* RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
+
+
 Changes in version 3.0.5 (2010-10-20)
 -------------------------------------
 

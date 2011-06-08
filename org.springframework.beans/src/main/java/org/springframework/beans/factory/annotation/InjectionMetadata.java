@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,21 +168,23 @@ public class InjectionMetadata {
 		 */
 		protected boolean checkPropertySkipping(PropertyValues pvs) {
 			if (this.skip == null) {
-				synchronized (pvs) {
-					if (this.skip == null) {
-						if (this.pd != null && pvs != null) {
-							if (pvs.contains(this.pd.getName())) {
-								// Explicit value provided as part of the bean definition.
-								this.skip = true;
-								return true;
-							}
-							else if (pvs instanceof MutablePropertyValues) {
-								((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
+				if (pvs != null) {
+					synchronized (pvs) {
+						if (this.skip == null) {
+							if (this.pd != null) {
+								if (pvs.contains(this.pd.getName())) {
+									// Explicit value provided as part of the bean definition.
+									this.skip = true;
+									return true;
+								}
+								else if (pvs instanceof MutablePropertyValues) {
+									((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
+								}
 							}
 						}
-						this.skip = false;
 					}
 				}
+				this.skip = false;
 			}
 			return this.skip;
 		}

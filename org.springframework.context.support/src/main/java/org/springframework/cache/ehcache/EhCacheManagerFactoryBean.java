@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cache.ehcache;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
@@ -97,23 +98,17 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	public void afterPropertiesSet() throws IOException, CacheException {
 		logger.info("Initializing EHCache CacheManager");
-		if (this.shared) {
-			// Shared CacheManager singleton at the VM level.
-			if (this.configLocation != null) {
-				this.cacheManager = CacheManager.create(this.configLocation.getInputStream());
+		if (this.configLocation != null) {
+			InputStream is = this.configLocation.getInputStream();
+			try {
+				this.cacheManager = (this.shared ? CacheManager.create(is) : new CacheManager(is));
 			}
-			else {
-				this.cacheManager = CacheManager.create();
+			finally {
+				is.close();
 			}
 		}
 		else {
-			// Independent CacheManager instance (the default).
-			if (this.configLocation != null) {
-				this.cacheManager = new CacheManager(this.configLocation.getInputStream());
-			}
-			else {
-				this.cacheManager = new CacheManager();
-			}
+			this.cacheManager = (this.shared ? CacheManager.create() : new CacheManager());
 		}
 		if (this.cacheManagerName != null) {
 			this.cacheManager.setName(this.cacheManagerName);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -529,8 +529,15 @@ public abstract class StringUtils {
 		if (path == null) {
 			return null;
 		}
-		int sepIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
-		return (sepIndex != -1 ? path.substring(sepIndex + 1) : null);
+		int extIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+		if (extIndex == -1) {
+			return null;
+		}
+		int folderIndex = path.lastIndexOf(FOLDER_SEPARATOR);
+		if (folderIndex > extIndex) {
+			return null;
+		}
+		return path.substring(extIndex + 1);
 	}
 
 	/**
@@ -544,8 +551,15 @@ public abstract class StringUtils {
 		if (path == null) {
 			return null;
 		}
-		int sepIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
-		return (sepIndex != -1 ? path.substring(0, sepIndex) : path);
+		int extIndex = path.lastIndexOf(EXTENSION_SEPARATOR);
+		if (extIndex == -1) {
+			return path;
+		}
+		int folderIndex = path.lastIndexOf(FOLDER_SEPARATOR);
+		if (folderIndex > extIndex) {
+			return path;
+		}
+		return path.substring(0, extIndex);
 	}
 
 	/**
@@ -643,7 +657,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Parse the given <code>localeString</code> into a {@link Locale}.
+	 * Parse the given <code>localeString</code> value into a {@link Locale}.
 	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
 	 * @param localeString the locale string, following <code>Locale's</code>
 	 * <code>toString()</code> format ("en", "en_UK", etc);
@@ -651,6 +665,13 @@ public abstract class StringUtils {
 	 * @return a corresponding <code>Locale</code> instance
 	 */
 	public static Locale parseLocaleString(String localeString) {
+		for (int i = 0; i < localeString.length(); i++) {
+			char ch = localeString.charAt(i);
+			if (ch != '_' && ch != ' ' && !Character.isLetterOrDigit(ch)) {
+				throw new IllegalArgumentException(
+						"Locale value \"" + localeString + "\" contains invalid characters");
+			}
+		}
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
 		String language = (parts.length > 0 ? parts[0] : "");
 		String country = (parts.length > 1 ? parts[1] : "");
@@ -726,7 +747,7 @@ public abstract class StringUtils {
 	 * array elements only included once.
 	 * <p>The order of elements in the original arrays is preserved
 	 * (with the exception of overlapping elements, which are only
-	 * included on their first occurence).
+	 * included on their first occurrence).
 	 * @param array1 the first array (can be <code>null</code>)
 	 * @param array2 the second array (can be <code>null</code>)
 	 * @return the new array (<code>null</code> if both given arrays were <code>null</code>)
@@ -1043,12 +1064,12 @@ public abstract class StringUtils {
 	 * @param suffix the String to end each element with
 	 * @return the delimited String
 	 */
-	public static String collectionToDelimitedString(Collection coll, String delim, String prefix, String suffix) {
+	public static String collectionToDelimitedString(Collection<?> coll, String delim, String prefix, String suffix) {
 		if (CollectionUtils.isEmpty(coll)) {
 			return "";
 		}
 		StringBuilder sb = new StringBuilder();
-		Iterator it = coll.iterator();
+		Iterator<?> it = coll.iterator();
 		while (it.hasNext()) {
 			sb.append(prefix).append(it.next()).append(suffix);
 			if (it.hasNext()) {
@@ -1065,7 +1086,7 @@ public abstract class StringUtils {
 	 * @param delim the delimiter to use (probably a ",")
 	 * @return the delimited String
 	 */
-	public static String collectionToDelimitedString(Collection coll, String delim) {
+	public static String collectionToDelimitedString(Collection<?> coll, String delim) {
 		return collectionToDelimitedString(coll, delim, "", "");
 	}
 
@@ -1075,7 +1096,7 @@ public abstract class StringUtils {
 	 * @param coll the Collection to display
 	 * @return the delimited String
 	 */
-	public static String collectionToCommaDelimitedString(Collection coll) {
+	public static String collectionToCommaDelimitedString(Collection<?> coll) {
 		return collectionToDelimitedString(coll, ",");
 	}
 

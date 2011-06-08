@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestWrapper;
+import javax.servlet.ServletResponse;
+import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -365,6 +368,48 @@ public abstract class WebUtils {
 		return mutex;
 	}
 
+
+	/**
+	 * Return an appropriate request object of the specified type, if available,
+	 * unwrapping the given request as far as necessary.
+	 * @param request the servlet request to introspect
+	 * @param requiredType the desired type of request object
+	 * @return the matching request object, or <code>null</code> if none
+	 * of that type is available
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getNativeRequest(ServletRequest request, Class<T> requiredType) {
+		if (requiredType != null) {
+			if (requiredType.isInstance(request)) {
+				return (T) request;
+			}
+			else if (request instanceof ServletRequestWrapper) {
+				return getNativeRequest(((ServletRequestWrapper) request).getRequest(), requiredType);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Return an appropriate response object of the specified type, if available,
+	 * unwrapping the given response as far as necessary.
+	 * @param response the servlet response to introspect
+	 * @param requiredType the desired type of response object
+	 * @return the matching response object, or <code>null</code> if none
+	 * of that type is available
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getNativeResponse(ServletResponse response, Class<T> requiredType) {
+		if (requiredType != null) {
+			if (requiredType.isInstance(response)) {
+				return (T) response;
+			}
+			else if (response instanceof ServletResponseWrapper) {
+				return getNativeResponse(((ServletResponseWrapper) response).getResponse(), requiredType);
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Determine whether the given request is an include request,

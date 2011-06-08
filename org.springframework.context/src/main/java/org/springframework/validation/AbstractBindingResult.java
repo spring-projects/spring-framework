@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.validation;
 import java.beans.PropertyEditor;
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -130,7 +131,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	public String[] resolveMessageCodes(String errorCode, String field) {
-		Class fieldType = getFieldType(field);
+		Class<?> fieldType = getFieldType(field);
 		return getMessageCodesResolver().resolveMessageCodes(
 				errorCode, getObjectName(), fixedField(field), fieldType);
 	}
@@ -236,7 +237,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * @see #getActualFieldValue
 	 */
 	@Override
-	public Class getFieldType(String field) {
+	public Class<?> getFieldType(String field) {
 		Object value = getActualFieldValue(fixedField(field));
 		if (value != null) {
 			return value.getClass();
@@ -268,11 +269,11 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * @see org.springframework.web.servlet.mvc.SimpleFormController
 	 */
 	public Map<String, Object> getModel() {
-		Map<String, Object> model = new HashMap<String, Object>(2);
-		// Errors instance, even if no errors.
-		model.put(MODEL_KEY_PREFIX + getObjectName(), this);
+		Map<String, Object> model = new LinkedHashMap<String, Object>(2);
 		// Mapping from name to target object.
 		model.put(getObjectName(), getTarget());
+		// Errors instance, even if no errors.
+		model.put(MODEL_KEY_PREFIX + getObjectName(), this);
 		return model;
 	}
 
@@ -285,10 +286,10 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 * {@link #getPropertyEditorRegistry() PropertyEditorRegistry}'s
 	 * editor lookup facility, if available.
 	 */
-	public PropertyEditor findEditor(String field, Class valueType) {
+	public PropertyEditor findEditor(String field, Class<?> valueType) {
 		PropertyEditorRegistry editorRegistry = getPropertyEditorRegistry();
 		if (editorRegistry != null) {
-			Class valueTypeToUse = valueType;
+			Class<?> valueTypeToUse = valueType;
 			if (valueTypeToUse == null) {
 				valueTypeToUse = getFieldType(field);
 			}
@@ -337,13 +338,13 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		}
 		BindingResult otherResult = (BindingResult) other;
 		return (getObjectName().equals(otherResult.getObjectName()) &&
-				getTarget().equals(otherResult.getTarget()) &&
+				ObjectUtils.nullSafeEquals(getTarget(), otherResult.getTarget()) &&
 				getAllErrors().equals(otherResult.getAllErrors()));
 	}
 
 	@Override
 	public int hashCode() {
-		return getObjectName().hashCode() * 29 + getTarget().hashCode();
+		return getObjectName().hashCode();
 	}
 
 

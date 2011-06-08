@@ -257,7 +257,7 @@ public abstract class EntityManagerFactoryUtils {
 	public static void applyTransactionTimeout(Query query, EntityManagerFactory emf) {
 		EntityManagerHolder emHolder = (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
 		if (emHolder != null && emHolder.hasTimeout()) {
-			int timeoutValue = emHolder.getTimeToLiveInSeconds();
+			int timeoutValue = (int) emHolder.getTimeToLiveInMillis();
 			query.setHint("javax.persistence.lock.timeout", timeoutValue);
 			query.setHint("javax.persistence.query.timeout", timeoutValue);
 		}

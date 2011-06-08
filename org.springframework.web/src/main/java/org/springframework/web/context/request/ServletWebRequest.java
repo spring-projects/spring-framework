@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,6 @@ import java.security.Principal;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestWrapper;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -31,6 +27,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * {@link WebRequest} adapter for an {@link javax.servlet.http.HttpServletRequest}.
@@ -40,10 +37,16 @@ import org.springframework.util.StringUtils;
  */
 public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {
 
+	private static final String HEADER_ETAG = "ETag";
+
 	private static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
+
+	private static final String HEADER_IF_NONE_MATCH = "If-None-Match";
 
 	private static final String HEADER_LAST_MODIFIED = "Last-Modified";
 
+	private static final String METHOD_GET = "GET";
+	
 
 	private HttpServletResponse response;
 
@@ -86,40 +89,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	@SuppressWarnings("unchecked")
 	public <T> T getNativeRequest(Class<T> requiredType) {
-		if (requiredType != null) {
-			ServletRequest request = getRequest();
-			while (request != null) {
-				if (requiredType.isInstance(request)) {
-					return (T) request;
-				}
-				else if (request instanceof ServletRequestWrapper) {
-					request = ((ServletRequestWrapper) request).getRequest();
-				}
-				else {
-					request = null;
-				}
-			}
-		}
-		return null;
+		return WebUtils.getNativeRequest(getRequest(), requiredType);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T getNativeResponse(Class<T> requiredType) {
-		if (requiredType != null) {
-			ServletResponse response = getResponse();
-			while (response != null) {
-				if (requiredType.isInstance(response)) {
-					return (T) response;
-				}
-				else if (response instanceof ServletResponseWrapper) {
-					response = ((ServletResponseWrapper) response).getResponse();
-				}
-				else {
-					response = null;
-				}
-			}
-		}
-		return null;
+		return WebUtils.getNativeResponse(getResponse(), requiredType);
 	}
 
 
@@ -186,7 +161,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			long ifModifiedSince = getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
 			this.notModified = (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
 			if (this.response != null) {
-				if (this.notModified && "GET".equals(getRequest().getMethod())) {
+				if (this.notModified && METHOD_GET.equals(getRequest().getMethod())) {
 					this.response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 				}
 				else {
