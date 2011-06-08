@@ -13,6 +13,7 @@
     <orderEntry type="module" module-name="context" />
     <orderEntry type="module" module-name="context-support" />
     <orderEntry type="module" module-name="core" />
+    <orderEntry type="module" module-name="expression" />
     <orderEntry type="module" module-name="jdbc" />
     <orderEntry type="module" module-name="jms" />
     <orderEntry type="module" module-name="orm" />
@@ -25,6 +26,7 @@
     <orderEntry type="library" name="AspectJ" level="project" />
     <orderEntry type="library" name="CGLIB" level="project" />
     <orderEntry type="library" name="Commons Logging" level="project" />
+    <orderEntry type="library" name="Commons Pool" level="project" />
     <orderEntry type="library" name="EasyMock" level="project" />
     <orderEntry type="library" name="javax.el" level="project" />
     <orderEntry type="library" name="javax.inject" level="project" />
@@ -216,17 +218,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.pool/1.4.0/com.springsource.org.apache.commons.pool-1.4.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.pool/1.4.0/com.springsource.org.apache.commons.pool-sources-1.4.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.apache.poi/com.springsource.org.apache.poi/3.0.2.FINAL/com.springsource.org.apache.poi-3.0.2.FINAL.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -291,11 +282,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/0.9.0/com.springsource.com.sun.syndication-0.9.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../ivy-cache/repository/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-1.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/0.9.0/com.springsource.com.sun.syndication-sources-0.9.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../ivy-cache/repository/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-sources-1.0.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -335,15 +326,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/com.sun.enterprise/com.springsource.com.sun.enterprise.loader/1.0.0/com.springsource.com.sun.enterprise.loader-1.0.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.eclipse.persistence/com.springsource.org.eclipse.persistence.jpa/1.0.1/com.springsource.org.eclipse.persistence.jpa-1.0.1.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -377,11 +359,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa.persistence/1.0.2/com.springsource.org.apache.openjpa.persistence-1.0.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/../ivy-cache/repository/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-1.1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa.persistence/1.0.2/com.springsource.org.apache.openjpa.persistence-sources-1.0.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/../ivy-cache/repository/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-sources-1.1.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
