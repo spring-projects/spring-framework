@@ -26,6 +26,7 @@
     <orderEntry type="library" name="AspectJ" level="project" />
     <orderEntry type="library" name="CGLIB" level="project" />
     <orderEntry type="library" name="Commons Logging" level="project" />
+    <orderEntry type="library" name="Commons Pool" level="project" />
     <orderEntry type="library" name="EasyMock" level="project" />
     <orderEntry type="library" name="javax.el" level="project" />
     <orderEntry type="library" name="javax.inject" level="project" />
@@ -219,17 +220,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.pool/1.5.3/com.springsource.org.apache.commons.pool-1.5.3.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.pool/1.5.3/com.springsource.org.apache.commons.pool-sources-1.5.3.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.apache.poi/com.springsource.org.apache.poi/3.0.2.FINAL/com.springsource.org.apache.poi-3.0.2.FINAL.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -387,17 +377,6 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$IVY_CACHE$/com.oracle.toplink.essentials/com.springsource.oracle.toplink.essentials/2.0.0.b41-beta2/com.springsource.oracle.toplink.essentials-sources-2.0.0.b41-beta2.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.antlr/com.springsource.antlr/2.7.6/com.springsource.antlr-2.7.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.antlr/com.springsource.antlr/2.7.6/com.springsource.antlr-sources-2.7.6.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
