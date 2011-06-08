@@ -13,17 +13,6 @@
     <orderEntry type="module" module-name="core" />
     <orderEntry type="library" name="Commons Logging" level="project" />
     <orderEntry type="library" name="JUnit" level="project" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.antlr/com.springsource.org.antlr/3.0.1/com.springsource.org.antlr-3.0.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.antlr/com.springsource.org.antlr/3.0.1/com.springsource.org.antlr-sources-3.0.1.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
   </component>
 </module>
 
