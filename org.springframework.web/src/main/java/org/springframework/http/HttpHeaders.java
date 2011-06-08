@@ -318,7 +318,7 @@ public class HttpHeaders implements MultiValueMap<String, String> {
 			Assert.isTrue(eTag.startsWith("\"") || eTag.startsWith("W/"), "Invalid eTag, does not start with W/ or \"");
 			Assert.isTrue(eTag.endsWith("\""), "Invalid eTag, does not end with \"");
 		}
-			set(ETAG, eTag);
+		set(ETAG, eTag);
 	}
 
 	/**

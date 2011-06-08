@@ -567,7 +567,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	@Override
-	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, Class[] typesToMatch) {
+	protected Class predictBeanType(String beanName, RootBeanDefinition mbd, Class... typesToMatch) {
 		Class beanClass;
 		if (mbd.getFactoryMethodName() != null) {
 			beanClass = getTypeForFactoryMethod(beanName, mbd, typesToMatch);

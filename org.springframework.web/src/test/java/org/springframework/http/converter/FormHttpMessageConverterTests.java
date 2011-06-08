@@ -46,7 +46,9 @@ import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public class FormHttpMessageConverterTests {
 
 	private FormHttpMessageConverter converter;
@@ -183,6 +185,5 @@ public class FormHttpMessageConverterTests {
 			return new ByteArrayInputStream(outputMessage.getBodyAsBytes());
 		}
 	}
-
 
 }
