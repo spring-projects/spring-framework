@@ -56,21 +56,22 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private HttpHeaders headers;
 
+
 	/**
-	 * Construct a new instance of the ServletServerHttpRequest based on the given {@link HttpServletRequest}
-	 *
-	 * @param servletRequest the HttpServletRequest
+	 * Construct a new instance of the ServletServerHttpRequest based on the given {@link HttpServletRequest}.
+	 * @param servletRequest the servlet request
 	 */
 	public ServletServerHttpRequest(HttpServletRequest servletRequest) {
 		Assert.notNull(servletRequest, "'servletRequest' must not be null");
 		this.servletRequest = servletRequest;
 	}
 
+
 	/**
 	 * Returns the {@code HttpServletRequest} this object is based on.
 	 */
 	public HttpServletRequest getServletRequest() {
-		return servletRequest;
+		return this.servletRequest;
 	}
 
 	public HttpMethod getMethod() {
@@ -79,9 +80,9 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	public URI getURI() {
 		try {
-			return new URI(servletRequest.getScheme(), null, servletRequest.getServerName(),
-					servletRequest.getServerPort(), servletRequest.getRequestURI(), servletRequest.getQueryString(),
-					null);
+			return new URI(this.servletRequest.getScheme(), null, this.servletRequest.getServerName(),
+					this.servletRequest.getServerPort(), this.servletRequest.getRequestURI(),
+					this.servletRequest.getQueryString(), null);
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(), ex);

@@ -43,7 +43,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	/**
 	 * Construct a new instance of the ServletServerHttpResponse based on the given {@link HttpServletResponse}.
-	 * @param servletResponse the HTTP Servlet response
+	 * @param servletResponse the servlet response
 	 */
 	public ServletServerHttpResponse(HttpServletResponse servletResponse) {
 		Assert.notNull(servletResponse, "'servletResponse' must not be null");
@@ -52,10 +52,10 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 
 	/**
-	 * Returns the {@code HttpServletResponse} this object is based on.
+	 * Return the {@code HttpServletResponse} this object is based on.
 	 */
 	public HttpServletResponse getServletResponse() {
-		return servletResponse;
+		return this.servletResponse;
 	}
 
 	public void setStatusCode(HttpStatus status) {
@@ -63,7 +63,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	public HttpHeaders getHeaders() {
-		return headersWritten ? HttpHeaders.readOnlyHttpHeaders(headers) : this.headers;
+		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	public OutputStream getBody() throws IOException {
