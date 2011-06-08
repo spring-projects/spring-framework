@@ -182,6 +182,20 @@
       </itemizedlist>
     </section>
     <section>
+      <title>JPA EntityManagerFactory bootstrapping without persistence.xml</title>
+      <para>In standard JPA, persistence units get defined through <literal>META-INF/persistence.xml</literal>
+      files in specific jar files which will in turn get searched for <literal>@Entity</literal> classes.
+      In many cases, persistence.xml does not contain more than a unit name and relies on defaults and/or
+      external setup for all other concerns (such as the DataSource to use, etc). For that reason, Spring 3.1
+      provides an alternative: <classname>LocalContainerEntityManagerFactoryBean</classname> accepts a
+      'packagesToScan' property, specifying base packages to scan for <literal>@Entity</literal> classes.
+      This is analogous to <classname>AnnotationSessionFactoryBean</classname>'s property of the same name
+      for native Hibernate setup, and also to Spring's component-scan feature for regular Spring beans.
+      Effectively, this allows for XML-free JPA setup at the mere expense of specifying a base package for
+      entity scanning: a particularly fine match for Spring applications which rely on component scanning
+      for Spring beans as well, possibly even bootstrapped using a code-based Servlet 3.0 initializer.</para>
+    </section>
+    <section>
       <title>New HandlerMethod-based Support Classes For Annotated Controller Processing</title>
       <para>Spring 3.1 introduces a new set of support classes for processing requests
       with annotated controllers:</para>
