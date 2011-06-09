@@ -98,8 +98,15 @@
         <listitem>
           <para>See org.springframework.scheduling.annotation.EnableScheduling
           Javadoc</para>
+        </listitem>
+        <listitem>
           <para>See
           org.springframework.scheduling.annotation.EnableTransactionManagement
+          Javadoc</para>
+        </listitem>
+        <listitem>
+          <para>See
+          org.springframework.scheduling.annotation.EnableLoadTimeWeaving
           Javadoc</para>
         </listitem>
         <listitem>
