@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,13 @@
 
 package org.springframework.jndi;
 
-import static org.junit.Assert.*;
-
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-
+import java.util.logging.Logger;
 import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -36,8 +34,11 @@ import javax.naming.spi.InitialContextFactory;
 import javax.sql.DataSource;
 
 import org.junit.Test;
+
 import org.springframework.mock.jndi.SimpleNamingContext;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
+
+import static org.junit.Assert.*;
 
 
 /**
@@ -250,4 +251,7 @@ class StubDataSource implements DataSource {
 		return null;
 	}
 
+	public Logger getParentLogger() {
+		return null;
+	}
 }
