@@ -18,7 +18,6 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
 
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
@@ -35,14 +34,13 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import com.sun.corba.se.impl.presentation.rmi.ExceptionHandler;
 
 /**
- * Defines options for customizing or adding to the default Spring MVC configuration enabled through the use
- * of @{@link EnableWebMvc}. The @{@link Configuration} class annotated with @{@link EnableWebMvc}
- * is the most obvious place to implement this interface. However all @{@link Configuration} classes and more generally
- * all Spring beans that implement this interface will be detected at startup and given a chance to customize Spring
- * MVC configuration provided it is enabled through @{@link EnableWebMvc}.
- *
- * <p>Implementations of this interface will find it convenient to extend {@link WebMvcConfigurerAdapter} that
- * provides default method implementations and allows overriding only methods of interest.
+ * Defines configuration callback methods for customizing the default Spring MVC configuration enabled through the 
+ * use of @{@link EnableWebMvc}. 
+ * 
+ * <p>Classes annotated with @{@link EnableWebMvc} can implement this interface in order to be called back and 
+ * given a chance to customize the default configuration. The most convenient way to implement this interface is 
+ * by extending from {@link WebMvcConfigurerAdapter}, which provides empty method implementations and allows 
+ * overriding only the callback methods you're interested in.
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
