@@ -20,14 +20,13 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /**
  * Enables default Spring MVC configuration and registers Spring MVC infrastructure components expected by the
- * {@link DispatcherServlet}. To use this annotation simply place it on an application @{@link Configuration} class
- * and that will in turn import default Spring MVC configuration including support for annotated methods
- * in @{@link Controller} classes.
+ * {@link DispatcherServlet}. Add this annotation to an application @{@link Configuration} class. It will in
+ * turn import the @{@link Configuration} class {@link WebMvcConfiguration}, which provides default Spring MVC 
+ * configuration.
  * <pre>
  * &#064;Configuration
  * &#064;EnableWebMvc
@@ -39,11 +38,10 @@ import org.springframework.web.servlet.DispatcherServlet;
  *
  * }
  * </pre>
- * <p>To customize the imported configuration you simply implement {@link WebMvcConfigurer}, or more likely extend
- * {@link WebMvcConfigurerAdapter} overriding selected methods only. The most obvious place to do this is
- * the @{@link Configuration} class that enabled the Spring MVC configuration via @{@link EnableWebMvc}.
- * However any @{@link Configuration} class and more generally any Spring bean can implement {@link WebMvcConfigurer}
- * to be detected and given an opportunity to customize Spring MVC configuration at startup.
+ * <p>To customize the imported configuration implement {@link WebMvcConfigurer}, or more conveniently extend
+ * {@link WebMvcConfigurerAdapter} overriding specific methods. Your @{@link Configuration} class and any other
+ * Spring bean that implements {@link WebMvcConfigurer} will be detected and given an opportunity to customize 
+ * the default Spring MVC configuration through the callback methods on the {@link WebMvcConfigurer} interface.
  * <pre>
  * &#064;Configuration
  * &#064;EnableWebMvc

@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -146,9 +147,18 @@ public class InterceptorConfigurerTests {
 	private List<HandlerInterceptor> getInterceptorsForPath(String lookupPath) {
 		PathMatcher pathMatcher = new AntPathMatcher();
 		List<HandlerInterceptor> result = new ArrayList<HandlerInterceptor>();
-		for (MappedInterceptor interceptor : configurer.getInterceptors()) {
-			if (interceptor.matches(lookupPath, pathMatcher)) {
-				result.add(interceptor.getInterceptor());
+		for (Object i : configurer.getInterceptors()) {
+			if (i instanceof MappedInterceptor) {
+				MappedInterceptor mappedInterceptor = (MappedInterceptor) i;
+				if (mappedInterceptor.matches(lookupPath, pathMatcher)) {
+					result.add(mappedInterceptor.getInterceptor());
+				}
+			}
+			else if (i instanceof HandlerInterceptor){
+				result.add((HandlerInterceptor) i);
+			}
+			else {
+				fail("Unexpected interceptor type: " + i.getClass().getName());
 			}
 		}
 		return result;

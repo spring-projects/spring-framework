@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
@@ -126,7 +127,7 @@ public class WebMvcConfigurationTests {
 		replay(configurer);
 
 		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
-		mvcConfiguration.validator();
+		mvcConfiguration.mvcValidator();
 
 		verify(configurer);
 	}
@@ -137,28 +138,25 @@ public class WebMvcConfigurationTests {
 		replay(configurer);
 
 		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
-		mvcConfiguration.validator();
+		mvcConfiguration.mvcValidator();
 
 		verify(configurer);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void handlerExceptionResolver() throws Exception {
-		Capture<List<HttpMessageConverter<?>>> converters = new Capture<List<HttpMessageConverter<?>>>();
-		Capture<List<HandlerExceptionResolver>> exceptionResolvers = new Capture<List<HandlerExceptionResolver>>();
-
-		configurer.configureMessageConverters(capture(converters));
-		configurer.configureHandlerExceptionResolvers(capture(exceptionResolvers));
+		configurer.configureMessageConverters(isA(List.class));
+		configurer.configureHandlerExceptionResolvers(isA(List.class));
 		replay(configurer);
 
 		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
-		mvcConfiguration.handlerExceptionResolver();
+		List<HandlerExceptionResolver> actual = mvcConfiguration.handlerExceptionResolver().getExceptionResolvers();
 
-		assertEquals(3, exceptionResolvers.getValue().size());
-		assertTrue(exceptionResolvers.getValue().get(0) instanceof ExceptionHandlerExceptionResolver);
-		assertTrue(exceptionResolvers.getValue().get(1) instanceof ResponseStatusExceptionResolver);
-		assertTrue(exceptionResolvers.getValue().get(2) instanceof DefaultHandlerExceptionResolver);
-		assertTrue(converters.getValue().size() > 0);
+		assertEquals(3, actual.size());
+		assertTrue(actual.get(0) instanceof ExceptionHandlerExceptionResolver);
+		assertTrue(actual.get(1) instanceof ResponseStatusExceptionResolver);
+		assertTrue(actual.get(2) instanceof DefaultHandlerExceptionResolver);
 
 		verify(configurer);
 	}
