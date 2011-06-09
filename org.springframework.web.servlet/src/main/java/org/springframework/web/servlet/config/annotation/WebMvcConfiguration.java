@@ -16,21 +16,17 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.support.FormattingConversionService;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 /**
  * Provides default configuration for Spring MVC applications by registering Spring MVC infrastructure components 
@@ -83,21 +79,15 @@ class WebMvcConfiguration extends WebMvcConfigurationSupport {
 	protected void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 		configurers.configureDefaultServletHandling(configurer);
 	}
+	
+	@Override
+	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+		configurers.addArgumentResolvers(argumentResolvers);
+	}
 
 	@Override
-	@Bean
-	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
-		RequestMappingHandlerAdapter adapter = super.requestMappingHandlerAdapter();
-
-		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
-		configurers.addArgumentResolvers(argumentResolvers);
-		adapter.setCustomArgumentResolvers(argumentResolvers);
-
-		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+	protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		configurers.addReturnValueHandlers(returnValueHandlers);
-		adapter.setCustomReturnValueHandlers(returnValueHandlers);
-		
-		return adapter;
 	}
 
 	@Override
@@ -105,31 +95,20 @@ class WebMvcConfiguration extends WebMvcConfigurationSupport {
 		configurers.configureMessageConverters(converters);
 	}
 
-	@Override
-	@Bean
-	public FormattingConversionService mvcConversionService() {
-		FormattingConversionService conversionService = super.mvcConversionService();
-		configurers.addFormatters(conversionService);
-		return conversionService;
-	}
-
-	@Override
-	@Bean
-	public Validator mvcValidator() {
-		Validator validator = configurers.getValidator();
-		return validator != null ? validator : super.mvcValidator();
-	}
-
-	@Bean
-	public HandlerExceptionResolverComposite handlerExceptionResolver() throws Exception {
-		List<HandlerExceptionResolver> resolvers = new ArrayList<HandlerExceptionResolver>();
-		configurers.configureHandlerExceptionResolvers(resolvers);
-
-		HandlerExceptionResolverComposite composite = super.handlerExceptionResolver();
-		if (resolvers.size() != 0) {
-			composite.setExceptionResolvers(resolvers);
-		}
-		return composite;
-	}
 	
+	@Override
+	protected void addFormatters(FormatterRegistry registry) {
+		configurers.addFormatters(registry);
+	}
+
+	@Override
+	protected Validator getValidator() {
+		return configurers.getValidator();
+	}
+
+	@Override
+	protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+		configurers.configureHandlerExceptionResolvers(exceptionResolvers);
+	}
+
 }

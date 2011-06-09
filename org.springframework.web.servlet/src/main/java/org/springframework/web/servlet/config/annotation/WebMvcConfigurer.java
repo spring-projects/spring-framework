@@ -95,16 +95,18 @@ public interface WebMvcConfigurer {
 	void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
 
 	/**
-	 * Configure the Spring MVC interceptors to use. Interceptors can be of type {@link HandlerInterceptor} or
-	 * {@link WebRequestInterceptor}.  They allow requests to be pre/post processed before/after controller
-	 * invocation. Interceptors can be registered to apply to all requests or limited to a set of path patterns.
+	 * Configure the Spring MVC interceptors to use. Interceptors allow requests to be pre- and post-processed 
+	 * before and after controller invocation. They can be registered to apply to all requests or be limited 
+	 * to a set of path patterns.
 	 * @see InterceptorConfigurer
 	 */
 	void configureInterceptors(InterceptorConfigurer configurer);
 
 	/**
-	 * Configure the view controllers to use. A view controller is used to map a URL path directly to a view name.
-	 * This is convenient when a request does not require controller logic.
+	 * Configure view controllers. View controllers provide a direct mapping between a URL path and view name. 
+	 * This is useful when serving requests that don't require application-specific controller logic and can 
+	 * be forwarded directly to a view for rendering.
+	 * @see ViewControllerConfigurer
 	 */
 	void configureViewControllers(ViewControllerConfigurer configurer);
 
@@ -112,6 +114,7 @@ public interface WebMvcConfigurer {
 	 * Configure a handler for serving static resources such as images, js, and, css files through Spring MVC
 	 * including setting cache headers optimized for efficient loading in a web browser. Resources can be served
 	 * out of locations under web application root, from the classpath, and others.
+	 * @see ResourceConfigurer
 	 */
 	void configureResourceHandling(ResourceConfigurer configurer);
 
@@ -120,6 +123,7 @@ public interface WebMvcConfigurer {
 	 * servlet. This is commonly used when the {@link DispatcherServlet} is mapped to "/", which results in
 	 * cleaner URLs (without a servlet prefix) but may need to still allow some requests (e.g. static resources)
 	 * to be handled by the Servlet container's default servlet.
+	 * @see DefaultServletHandlerConfigurer
 	 */
 	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
 
