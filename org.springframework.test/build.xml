@@ -32,7 +32,7 @@
 			</junit>
 
 			<ivy:cachepath resolveId="testng.classpath" pathid="testng.classpath" organisation="org.testng"
-					module="com.springsource.org.testng" revision="${org.testng.version}"
+					module="com.springsource.org.testng" revision="${testng.version}"
 					conf="runtime" type="jar" inline="true" log="download-only"/>
 			<taskdef name="testng" classpathref="testng.classpath" classname="org.testng.TestNGAntTask" />
 			<mkdir dir="${test-results.output.dir}/testng"/>
