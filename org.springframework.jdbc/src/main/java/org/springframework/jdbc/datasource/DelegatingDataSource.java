@@ -124,7 +124,7 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	//---------------------------------------------------------------------
 
 	public Logger getParentLogger() {
-		return Logger.getGlobal();
+		return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	}
 
 }

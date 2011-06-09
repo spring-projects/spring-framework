@@ -229,7 +229,7 @@ public class EmbeddedDatabaseFactory {
 		}
 
 		public Logger getParentLogger() {
-			return Logger.getGlobal();
+			return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		}
 
 		public void shutdown() {
