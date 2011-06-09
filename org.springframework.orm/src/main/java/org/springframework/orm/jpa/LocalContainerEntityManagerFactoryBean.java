@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Spring's component-scan configuration for regular Spring components
 	 * @see #setPersistenceUnitManager
 	 */
-	public void setPackagesToScan(String[] packagesToScan) {
+	public void setPackagesToScan(String... packagesToScan) {
 		this.internalPersistenceUnitManager.setPackagesToScan(packagesToScan);
 	}
 
@@ -166,7 +166,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @see #setPersistenceUnitManager
 	 */
-	public void setPersistenceUnitPostProcessors(PersistenceUnitPostProcessor[] postProcessors) {
+	public void setPersistenceUnitPostProcessors(PersistenceUnitPostProcessor... postProcessors) {
 		this.internalPersistenceUnitManager.setPersistenceUnitPostProcessors(postProcessors);
 	}
 
