@@ -19,7 +19,6 @@ package org.springframework.web.context.support;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
-import org.springframework.context.annotation.AnnotationConfigCapableApplicationContext;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.annotation.ScopeMetadataResolver;
 import org.springframework.util.Assert;
@@ -73,11 +72,9 @@ import org.springframework.web.context.ContextLoader;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.context.annotation.AnnotationConfigCapableApplicationContext
  * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
-public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext
-		implements AnnotationConfigCapableApplicationContext {
+public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext {
 
 	private Class<?>[] annotatedClasses;
 
@@ -133,9 +130,15 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Register one or more annotated classes to be processed.
+	 * Note that {@link #refresh()} must be called in order for the context to fully
+	 * process the new class.
+	 * <p>Calls to {@link #register} are idempotent; adding the same
+	 * annotated class more than once has no additional effect.
+	 * @param annotatedClasses one or more annotated classes,
+	 * e.g. {@link Configuration @Configuration} classes
+	 * @see #scan(String...)
 	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
-	 * @see #register(Class...)
 	 * @see #setConfigLocation(String)
 	 * @see #refresh()
 	 */
@@ -145,7 +148,10 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Perform a scan within the specified base packages.
+	 * Note that {@link #refresh()} must be called in order for the context to
+	 * fully process the new class.
+	 * @param basePackages the packages to check for annotated classes
 	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
 	 * @see #register(Class...)
 	 * @see #setConfigLocation(String)
@@ -256,6 +262,10 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 		return this.beanNameGenerator;
 	}
 
+	/**
+	 * Set the {@link ScopeMetadataResolver} to use for detected bean classes.
+	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
+	 */
 	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
 		this.scopeMetadataResolver = scopeMetadataResolver;
 	}
