@@ -142,7 +142,7 @@ public class DefaultPersistenceUnitManager
 	 * @param persistenceXmlLocations an array of Spring resource Strings
 	 * identifying the location of the <code>persistence.xml</code> files to read
 	 */
-	public void setPersistenceXmlLocations(String[] persistenceXmlLocations) {
+	public void setPersistenceXmlLocations(String... persistenceXmlLocations) {
 		this.persistenceXmlLocations = persistenceXmlLocations;
 	}
 
@@ -177,7 +177,7 @@ public class DefaultPersistenceUnitManager
 	 * classes in the classpath. This is analogous to Spring's component-scan feature
 	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
 	 */
-	public void setPackagesToScan(String[] packagesToScan) {
+	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
 	}
 
@@ -253,7 +253,7 @@ public class DefaultPersistenceUnitManager
 	 * classes and jar files, in addition to the metadata read in from
 	 * <code>persistence.xml</code>.
 	 */
-	public void setPersistenceUnitPostProcessors(PersistenceUnitPostProcessor[] postProcessors) {
+	public void setPersistenceUnitPostProcessors(PersistenceUnitPostProcessor... postProcessors) {
 		this.persistenceUnitPostProcessors = postProcessors;
 	}
 
