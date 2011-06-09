@@ -96,7 +96,7 @@
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock.classextension" rev="2.3.0" conf="test->compile"/>
-		<dependency org="org.junit" name="com.springsource.org.junit" rev="${org.junit.version}" conf="test->runtime"/>
+		<dependency org="org.junit" name="com.springsource.org.junit" rev="${junit.version}" conf="test->runtime"/>
 		<dependency org="org.hamcrest" name="com.springsource.org.hamcrest" rev="1.1.0" conf="test->runtime"/>
 		<dependency org="org.testng" name="com.springsource.org.testng" rev="${org.testng.version}" conf="test->compile"/>
 	</dependencies>
