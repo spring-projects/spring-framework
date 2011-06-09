@@ -46,7 +46,7 @@
 		<dependency org="org.springframework" name="org.springframework.web" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web.portlet" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.web.servlet" rev="latest.integration" conf="optional->compile"/>
-		<dependency org="org.testng" name="com.springsource.org.testng" rev="${org.testng.version}" conf="optional->compile"/>
+		<dependency org="org.testng" name="com.springsource.org.testng" rev="${testng.version}" conf="optional->compile"/>
 	</dependencies>
 
 </ivy-module>
