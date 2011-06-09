@@ -29,6 +29,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.format.Formatter;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -50,6 +53,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -75,8 +80,8 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * 
  * <p>If using @{@link EnableWebMvc} and extending from {@link WebMvcConfigurerAdapter} does not give you the level 
  * of flexibility you need, consider extending directly from this class instead. Remember to add @{@link Configuration}
- * to you subclass and @{@link Bean} to any @{@link Bean} methods you choose to override. A few example reasons for 
- * extending this class include providing a custom {@link MessageCodesResolver}, changing the order of 
+ * to your subclass and @{@link Bean} to any superclass @{@link Bean} methods you choose to override. A few example 
+ * reasons for extending this class include providing a custom {@link MessageCodesResolver}, changing the order of 
  * {@link HandlerMapping} instances, plugging in a variant of any of the beans provided by this class, and so on.
  * 
  * <p>This class registers the following {@link HandlerMapping}s:</p>
@@ -159,7 +164,9 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 	
 	/**
-	 * Override this method to configure handler interceptors including interceptors mapped to path patterns.
+	 * Override this method to configure the Spring MVC interceptors to use. Interceptors allow requests to 
+	 * be pre- and post-processed before and after controller invocation. They can be registered to apply 
+	 * to all requests or be limited to a set of path patterns.
 	 * @see InterceptorConfigurer
 	 */
 	protected void configureInterceptors(InterceptorConfigurer configurer) {
@@ -213,7 +220,9 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Override this method to configure serving static resources such as images and css files through Spring MVC.
+	 * Override this method to configure a handler for serving static resources such as images, js, and, css files 
+	 * through Spring MVC including setting cache headers optimized for efficient loading in a web browser. 
+	 * Resources can be served out of locations under web application root, from the classpath, and others.
 	 * @see ResourceConfigurer
 	 */
 	protected void configureResourceHandling(ResourceConfigurer configurer) {
@@ -232,7 +241,10 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Override this method to configure serving static resources through the Servlet container's default Servlet.
+	 * Override this method to configure a handler for delegating unhandled requests by forwarding to the 
+	 * Servlet container's default servlet. This is commonly used when the {@link DispatcherServlet} is 
+	 * mapped to "/", which results in cleaner URLs (without a servlet prefix) but may need to still allow 
+	 * some requests (e.g. static resources) to be handled by the Servlet container's default servlet.
 	 * @see DefaultServletHandlerConfigurer
 	 */
 	protected void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
@@ -240,7 +252,13 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 
 	/**
 	 * Returns a {@link RequestMappingHandlerAdapter} for processing requests using annotated controller methods.
-	 * Also see {@link #initWebBindingInitializer()} for configuring data binding globally.
+	 * Also see the following other methods as an alternative to overriding this method:
+	 * <ul>
+	 * 	<li>{@link #initWebBindingInitializer()} for configuring data binding globally.
+	 *  <li>{@link #addArgumentResolvers(List)} for adding custom argument resolvers.
+	 * 	<li>{@link #addReturnValueHandlers(List)} for adding custom return value handlers.
+	 * 	<li>{@link #configureMessageConverters(List)} for adding custom message converters.
+	 * </ul>
 	 */
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
@@ -249,9 +267,17 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 		webBindingInitializer.setValidator(mvcValidator());
 		extendWebBindingInitializer(webBindingInitializer);
 		
+		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		addArgumentResolvers(argumentResolvers);
+
+		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		addReturnValueHandlers(returnValueHandlers);
+		
 		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
 		adapter.setMessageConverters(getMessageConverters());
 		adapter.setWebBindingInitializer(webBindingInitializer);
+		adapter.setCustomArgumentResolvers(argumentResolvers);
+		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 		return adapter;
 	}
 
@@ -263,10 +289,30 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
+	 * Override this method to add custom argument resolvers to use in addition to the ones registered by default
+	 * internally by the {@link RequestMappingHandlerAdapter}.
+	 * <p>Generally custom argument resolvers are invoked first. However this excludes default argument resolvers that
+	 * rely on the presence of annotations (e.g. {@code @RequestParameter}, {@code @PathVariable}, etc.). Those 
+	 * argument resolvers are not customizable without configuring RequestMappingHandlerAdapter directly. 
+	 */
+	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	}
+
+	/**
+	 * Override this method to add custom return value handlers to use in addition to the ones registered by default
+	 * internally by the {@link RequestMappingHandlerAdapter}.
+	 * <p>Generally custom return value handlers are invoked first. However this excludes default return value handlers 
+	 * that rely on the presence of annotations (e.g. {@code @ResponseBody}, {@code @ModelAttribute}, etc.). Those 
+	 * handlers are not customizable without configuring RequestMappingHandlerAdapter directly.
+	 */
+	protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	}
+
+	/**
 	 * Provides access to the shared {@link HttpMessageConverter}s used by the 
 	 * {@link RequestMappingHandlerAdapter} and the {@link ExceptionHandlerExceptionResolver}. 
-	 * This method cannot be extended directly, use {@link #configureMessageConverters(List)} add custom converters. 
-	 * Also see {@link #addDefaultHttpMessageConverters(List)} to easily add a set of default converters.
+	 * This method cannot be extended directly, use {@link #configureMessageConverters(List)} add custom converters.
+	 * For the list of message converters added by default see {@link #addDefaultHttpMessageConverters(List)}.
 	 */
 	protected final List<HttpMessageConverter<?>> getMessageConverters() {
 		if (messageConverters == null) {
@@ -282,7 +328,7 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	/**
 	 * Override this method to add custom {@link HttpMessageConverter}s to use with 
 	 * the {@link RequestMappingHandlerAdapter} and the {@link ExceptionHandlerExceptionResolver}.
-	 * If any converters are added, default converters will not be added automatically.
+	 * If any converters are added through this method, default converters are added automatically.
 	 * See {@link #addDefaultHttpMessageConverters(List)} for adding default converters to the list.
 	 * @param messageConverters the list to add converters to
 	 */
@@ -318,21 +364,34 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	
 	/**
 	 * Returns a {@link FormattingConversionService} for use with annotated controller methods and the 
-	 * {@code spring:eval} JSP tag.
+	 * {@code spring:eval} JSP tag. Also see {@link #addFormatters(FormatterRegistry)} as an alternative
+	 * to overriding this method.
 	 */
 	@Bean
 	public FormattingConversionService mvcConversionService() {
-		return new DefaultFormattingConversionService();
+		FormattingConversionService conversionService = new DefaultFormattingConversionService();
+		addFormatters(conversionService);
+		return conversionService;
+	}
+
+	/**
+	 * Override this method to add custom {@link Converter}s and {@link Formatter}s.
+	 */
+	protected void addFormatters(FormatterRegistry registry) {
 	}
 
 	/**
 	 * Returns {@link Validator} for validating {@code @ModelAttribute} and {@code @RequestBody} arguments of 
-	 * annotated controller methods. If a JSR-303 implementation is available on the classpath, the returned
-	 * instance is LocalValidatorFactoryBean. Otherwise a no-op validator is returned.
+	 * annotated controller methods. This method is closed for extension. Use {@link #getValidator()} to 
+	 * provide a custom validator.
 	 */
 	@Bean
-	public Validator mvcValidator() {
-		if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+	Validator mvcValidator() {
+		Validator validator = getValidator();
+		if (validator != null) {
+			return validator;
+		}
+		else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
 			Class<?> clazz;
 			try {
 				String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
@@ -356,6 +415,16 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
+	 * Override this method to provide a custom {@link Validator} type. If this method returns {@code null}, by 
+	 * a check is made for the presence of a JSR-303 implementation on the classpath - if available a  
+	 * {@link org.springframework.validation.beanvalidation.LocalValidatorFactoryBean} instance is created. 
+	 * Otherwise if no JSR-303 implementation is detected, a no-op {@link Validator} is returned instead.
+	 */
+	protected Validator getValidator() {
+		return null;
+	}
+
+	/**
 	 * Returns a {@link HttpRequestHandlerAdapter} for processing requests with {@link HttpRequestHandler}s.
 	 */
 	@Bean
@@ -372,28 +441,51 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Returns a {@link HandlerExceptionResolverComposite} with this chain of exception resolvers:
-	 * <ul>
-	 * 	<li>{@link ExceptionHandlerExceptionResolver} for handling exceptions through @{@link ExceptionHandler} methods.
-	 * 	<li>{@link ResponseStatusExceptionResolver} for exceptions annotated with @{@link ResponseStatus}.
-	 * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring exception types
-	 * </ul>
+	 * Returns a {@link HandlerExceptionResolverComposite} that contains a list of exception resolvers.
+	 * This method is closed for extension. Use {@link #configureHandlerExceptionResolvers(List) to 
+	 * customize the list of exception resolvers.
 	 */
 	@Bean
-	public HandlerExceptionResolverComposite handlerExceptionResolver() throws Exception {
-		ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver = new ExceptionHandlerExceptionResolver();
-		exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
-		exceptionHandlerExceptionResolver.afterPropertiesSet();
-
+	HandlerExceptionResolver handlerExceptionResolver() throws Exception {
 		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<HandlerExceptionResolver>();
-		exceptionResolvers.add(exceptionHandlerExceptionResolver);
-		exceptionResolvers.add(new ResponseStatusExceptionResolver());
-		exceptionResolvers.add(new DefaultHandlerExceptionResolver());
-
+		configureHandlerExceptionResolvers(exceptionResolvers);
+		
+		if (exceptionResolvers.isEmpty()) {
+			addDefaultHandlerExceptionResolvers(exceptionResolvers);
+		}
+		
 		HandlerExceptionResolverComposite composite = new HandlerExceptionResolverComposite();
 		composite.setOrder(0);
 		composite.setExceptionResolvers(exceptionResolvers);
 		return composite;
 	}
 
+	/**
+	 * Override this method to configure the list of {@link HandlerExceptionResolver}s to use for handling 
+	 * unresolved controller exceptions. If any exception resolvers are added through this method, default 
+	 * exception resolvers are not added automatically. For the list of exception resolvers added by 
+	 * default see {@link #addDefaultHandlerExceptionResolvers(List)}.
+	 */
+	protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+	}
+
+	/**
+	 * A method available to subclasses for adding default {@link HandlerExceptionResolver}s.
+	 * <p>Adds the following exception resolvers:
+	 * <ul>
+	 * 	<li>{@link ExceptionHandlerExceptionResolver} for handling exceptions through @{@link ExceptionHandler} methods.
+	 * 	<li>{@link ResponseStatusExceptionResolver} for exceptions annotated with @{@link ResponseStatus}.
+	 * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring exception types
+	 * </ul>
+	 */
+	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+		ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver = new ExceptionHandlerExceptionResolver();
+		exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
+		exceptionHandlerExceptionResolver.afterPropertiesSet();
+
+		exceptionResolvers.add(exceptionHandlerExceptionResolver);
+		exceptionResolvers.add(new ResponseStatusExceptionResolver());
+		exceptionResolvers.add(new DefaultHandlerExceptionResolver());
+	}
+	
 }

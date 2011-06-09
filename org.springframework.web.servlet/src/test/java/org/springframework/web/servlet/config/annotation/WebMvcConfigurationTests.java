@@ -143,20 +143,23 @@ public class WebMvcConfigurationTests {
 		verify(configurer);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void handlerExceptionResolver() throws Exception {
-		configurer.configureMessageConverters(isA(List.class));
-		configurer.configureHandlerExceptionResolvers(isA(List.class));
+		Capture<List<HttpMessageConverter<?>>> converters = new Capture<List<HttpMessageConverter<?>>>();
+		Capture<List<HandlerExceptionResolver>> exceptionResolvers = new Capture<List<HandlerExceptionResolver>>();
+
+		configurer.configureMessageConverters(capture(converters));
+		configurer.configureHandlerExceptionResolvers(capture(exceptionResolvers));
 		replay(configurer);
 
 		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
-		List<HandlerExceptionResolver> actual = mvcConfiguration.handlerExceptionResolver().getExceptionResolvers();
+		mvcConfiguration.handlerExceptionResolver();
 
-		assertEquals(3, actual.size());
-		assertTrue(actual.get(0) instanceof ExceptionHandlerExceptionResolver);
-		assertTrue(actual.get(1) instanceof ResponseStatusExceptionResolver);
-		assertTrue(actual.get(2) instanceof DefaultHandlerExceptionResolver);
+		assertEquals(3, exceptionResolvers.getValue().size());
+		assertTrue(exceptionResolvers.getValue().get(0) instanceof ExceptionHandlerExceptionResolver);
+		assertTrue(exceptionResolvers.getValue().get(1) instanceof ResponseStatusExceptionResolver);
+		assertTrue(exceptionResolvers.getValue().get(2) instanceof DefaultHandlerExceptionResolver);
+		assertTrue(converters.getValue().size() > 0);
 
 		verify(configurer);
 	}
