@@ -115,7 +115,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * "D". If the {@code Level2Environment} subclass wished to give property sources C
 	 * and D higher precedence than A and B, it could simply call
 	 * {@code super.customizePropertySources} after, rather than before adding its own:
-	 * <pre>
+	 * <pre class="code">
 	 * public class Level2Environment extends Level1Environment {
 	 *     &#064;Override
 	 *     protected void customizePropertySources(MutablePropertySources propertySources) {
@@ -138,7 +138,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * property sources via the {@link #getPropertySources()} accessor, typically within
 	 * an {@link org.springframework.context.ApplicationContextInitializer
 	 * ApplicationContextInitializer}. For example:
-	 * <pre>
+	 * <pre class="code">
 	 * ConfigurableEnvironment env = new StandardEnvironment();
 	 * env.getPropertySources().addLast(new PropertySourceX(...));
 	 * </pre>
