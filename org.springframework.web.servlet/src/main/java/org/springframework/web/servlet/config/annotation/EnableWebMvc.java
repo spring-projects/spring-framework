@@ -25,13 +25,13 @@ import org.springframework.web.servlet.DispatcherServlet;
 /**
  * Enables default Spring MVC configuration and registers Spring MVC infrastructure components expected by the
  * {@link DispatcherServlet}. Add this annotation to an application @{@link Configuration} class. It will in
- * turn import the @{@link Configuration} class {@link WebMvcConfiguration}, which provides default Spring MVC 
+ * turn import the @{@link Configuration} class {@link WebMvcConfiguration}, which provides default Spring MVC
  * configuration.
- * <pre>
+ * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
  * &#064;ComponentScan(
- *	basePackageClasses = { MyConfiguration.class },
+ * 	basePackageClasses = { MyConfiguration.class },
  * 	excludeFilters = { @Filter(type = FilterType.ANNOTATION, value = Configuration.class) }
  * )
  * public class MyConfiguration {
@@ -42,7 +42,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * {@link WebMvcConfigurerAdapter} overriding specific methods. Your @{@link Configuration} class and any other
  * Spring bean that implements {@link WebMvcConfigurer} will be detected and given an opportunity to customize 
  * the default Spring MVC configuration through the callback methods on the {@link WebMvcConfigurer} interface.
- * <pre>
+ * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
  * &#064;ComponentScan(

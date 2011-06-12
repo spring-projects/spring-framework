@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * uses {@code @PropertySource} to contribute {@code app.properties} to the
  * {@code Environment}'s set of {@code PropertySources}.
  *
- * <pre>
+ * <pre class="code">
  * &#064;Configuration
  * &#064;PropertySource("classpath:/com/myco/app.properties")
  * public class AppConfig {
@@ -62,7 +62,7 @@ import java.lang.annotation.Target;
  * {@code b.properties}, consider the following two configuration classes
  * that reference them with {@code @PropertySource} annotations:
  *
- * <pre>
+ * <pre class="code">
  * &#064;Configuration
  * &#064;PropertySource("classpath:/com/myco/a.properties")
  * public class ConfigA { }
@@ -74,7 +74,7 @@ import java.lang.annotation.Target;
  *
  * The override ordering depends on the order in which these classes are registered
  * with the application context.
- * <pre>
+ * <pre class="code">
  * AnnotationConfigApplicationContext ctx =
  *     new AnnotationConfigApplicationContext();
  * ctx.register(ConfigA.class);
@@ -92,7 +92,7 @@ import java.lang.annotation.Target;
  * the ordering is difficult to predict.  In such cases - and if overriding is important -
  * it is recommended that the user fall back to using the programmatic PropertySource API.
  * See {@link org.springframework.core.env.ConfigurableEnvironment ConfigurableEnvironment}
- * and * {@link org.springframework.core.env.MutablePropertySources MutablePropertySources}
+ * and {@link org.springframework.core.env.MutablePropertySources MutablePropertySources}
  * Javadoc for details.
  *
  * @author Chris Beams
