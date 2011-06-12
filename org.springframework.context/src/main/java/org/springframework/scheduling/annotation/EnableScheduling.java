@@ -125,7 +125,9 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *         taskRegistrar.setScheduler(taskScheduler());
  *         taskRegistrar.addTriggerTask(
  *             new Runnable() {
- *                 myTask().work();
+ *                 public void run() {
+ *                     myTask().work();
+ *                 }
  *             },
  *             new CustomTrigger()
  *         );
@@ -150,7 +152,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *     <task:annotation-config scheduler="taskScheduler"/>
  *     <task:scheduler id="taskScheduler" pool-size="42"/>
  *     <task:scheduled ref="myTask" method="work" fixed-rate="1000"/>
- *     <bean id="myTask" class="com.foo.MyAsyncBean"/>
+ *     <bean id="myTask" class="com.foo.MyTask"/>
  * </beans>
  * }</pre>
  * the examples are equivalent save that in XML a <em>fixed-rate</em> period is used
