@@ -25,7 +25,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 /**
  * Enables default Spring MVC configuration and registers Spring MVC infrastructure components expected by the
  * {@link DispatcherServlet}. Add this annotation to an application @{@link Configuration} class. It will in
- * turn import the @{@link Configuration} class {@link WebMvcConfiguration}, which provides default Spring MVC
+ * turn import the @{@link Configuration} class {@link DelegatingWebMvcConfiguration}, which provides default Spring MVC
  * configuration.
  * <pre class="code">
  * &#064;Configuration
@@ -76,6 +76,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import(WebMvcConfiguration.class)
+@Import(DelegatingWebMvcConfiguration.class)
 public @interface EnableWebMvc {
 }
