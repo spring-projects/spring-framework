@@ -874,11 +874,13 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				logger.trace("Cleared thread-bound request context: " + request);
 			}
 
-			if (failureCause != null) {
-				this.logger.debug("Could not complete request", failureCause);
-			}
-			else {
-				this.logger.debug("Successfully completed request");
+			if (logger.isDebugEnabled()) {
+				if (failureCause != null) {
+					this.logger.debug("Could not complete request", failureCause);
+				}
+				else {
+					this.logger.debug("Successfully completed request");
+				}
 			}
 			if (this.publishEvents) {
 				// Whether or not we succeeded, publish an event.
