@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ class TypeConverterDelegate {
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
 		if (editor == null && conversionService != null && convertedValue != null) {
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(convertedValue);
-			TypeDescriptor targetTypeDesc = typeDescriptor.forElementType(requiredType);
+			TypeDescriptor targetTypeDesc = typeDescriptor;
 			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
 				return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
 			}

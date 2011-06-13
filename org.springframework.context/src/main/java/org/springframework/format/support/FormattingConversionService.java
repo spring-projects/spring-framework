@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class FormattingConversionService extends GenericConversionService
 					return (sourceType.getAnnotation(annotationType) != null);
 				}
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-					FieldFormatterKey key = new FieldFormatterKey(sourceType.getAnnotation(annotationType), fieldType);
+					FieldFormatterKey key = new FieldFormatterKey(sourceType.getAnnotation(annotationType), sourceType.getType());
 					GenericConverter converter = cachedPrinters.get(key);
 					if (converter == null) {
 						Printer<?> printer = annotationFormatterFactory.getPrinter(key.getAnnotation(), key.getFieldType());
@@ -117,7 +117,7 @@ public class FormattingConversionService extends GenericConversionService
 					return (targetType.getAnnotation(annotationType) != null);
 				}
 				public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-					FieldFormatterKey key = new FieldFormatterKey(targetType.getAnnotation(annotationType), fieldType);
+					FieldFormatterKey key = new FieldFormatterKey(targetType.getAnnotation(annotationType), sourceType.getType());
 					GenericConverter converter = cachedParsers.get(key);
 					if (converter == null) {
 						Parser<?> printer = annotationFormatterFactory.getParser(key.getAnnotation(), key.getFieldType());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
@@ -133,6 +132,8 @@ import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameRes
 import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.NestedServletException;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -1156,6 +1157,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		try {
 			servlet.service(request, response);
+			fail("Didn't fail with due to ambiguous method mapping");
 		}
 		catch (NestedServletException ex) {
 			assertTrue(ex.getCause() instanceof IllegalStateException);
@@ -1815,7 +1817,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
-	public void parameterCsvAsStringArray() throws Exception {
+	public void parameterCsvAsIntegerArray() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
@@ -1835,6 +1837,34 @@ public class ServletAnnotationControllerTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setRequestURI("/integerArray");
+		request.setMethod("POST");
+		request.addParameter("content", "1,2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("1-2", response.getContentAsString());
+	}
+
+	@Test
+	public void parameterCsvAsIntegerSet() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(CsvController.class));
+				RootBeanDefinition csDef = new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
+				RootBeanDefinition wbiDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
+				wbiDef.getPropertyValues().add("conversionService", csDef);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				adapterDef.getPropertyValues().add("webBindingInitializer", wbiDef);
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/integerSet");
 		request.setMethod("POST");
 		request.addParameter("content", "1,2");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -3101,6 +3131,12 @@ public class ServletAnnotationControllerTests {
 		@RequestMapping("/integerArray")
 		public void processCsv(@RequestParam("content") Integer[] content, HttpServletResponse response) throws IOException {
 			response.getWriter().write(StringUtils.arrayToDelimitedString(content, "-"));
+		}
+
+		@RequestMapping("/integerSet")
+		public void processCsv(@RequestParam("content") Set<Integer> content, HttpServletResponse response) throws IOException {
+			assertTrue(content.iterator().next() instanceof Integer);
+			response.getWriter().write(StringUtils.collectionToDelimitedString(content, "-"));
 		}
 	}
 
