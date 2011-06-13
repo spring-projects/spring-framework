@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -312,7 +312,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			else if (methodName.equals("commit") || methodName.equals("rollback")) {
 				this.transactionOpen = false;
 			}
-			else {
+			else if (methodName.startsWith("create")) {
 				this.transactionOpen = true;
 				if (isCacheProducers() && (methodName.equals("createProducer") ||
 						methodName.equals("createSender") || methodName.equals("createPublisher"))) {
@@ -408,11 +408,15 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				}
 			}
 			// Allow for multiple close calls...
-			if (!this.sessionList.contains(proxy)) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Returning cached Session: " + this.target);
+			boolean returned = false;
+			synchronized (this.sessionList) {
+				if (!this.sessionList.contains(proxy)) {
+					this.sessionList.addLast(proxy);
+					returned = true;
 				}
-				this.sessionList.addLast(proxy);
+			}
+			if (returned && logger.isTraceEnabled()) {
+				logger.trace("Returned cached Session: " + this.target);
 			}
 		}
 
