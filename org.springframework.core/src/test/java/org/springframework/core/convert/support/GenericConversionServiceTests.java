@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.DescriptiveResource;
+import org.springframework.core.io.Resource;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -271,9 +272,7 @@ public class GenericConversionServiceTests {
 		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
 		List list = Collections.emptyList();
 		List result = service.convert(list, List.class);
-		assertSame(list, result);
-		result = service.convert(list, list.getClass());
-		assertSame(list, result);
+		assertTrue(result.isEmpty());
 	}
 
 	@Test
@@ -281,9 +280,7 @@ public class GenericConversionServiceTests {
 		GenericConversionService service = ConversionServiceFactory.createDefaultConversionService();
 		Map map = Collections.emptyMap();
 		Map result = service.convert(map, Map.class);
-		assertSame(map, result);
-		result = service.convert(map, map.getClass());
-		assertSame(map, result);
+		assertTrue(result.isEmpty());
 	}
 
 	@Test
