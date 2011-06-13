@@ -54,6 +54,32 @@ import java.lang.annotation.Target;
  * configuration class and then used when populating the {@code TestBean} object. Given
  * the configuration above, a call to {@code testBean.getName()} will return "myTestBean".
  *
+ * <h3>Resolving placeholders within @PropertySource resource locations</h3>
+ * Any ${...} placeholders present in a {@code @PropertySource} {@linkplain #value()
+ * resource location} will be resolved against the set of property sources already
+ * registered against the environment.  For example:
+ * <pre class="code">
+ * &#064;Configuration
+ * &#064;PropertySource("classpath:/com/${my.placeholder:default/path}/app.properties")
+ * public class AppConfig {
+ *     &#064;Autowired
+ *     Environment env;
+ *
+ *     &#064;Bean
+ *     public TestBean testBean() {
+ *         TestBean testBean = new TestBean();
+ *         testBean.setName(env.getProperty("testbean.name"));
+ *         return testBean;
+ *     }
+ * }</pre>
+ *
+ * Assuming that "my.placeholder" is present in one of the property sources already
+ * registered, e.g. system properties or environment variables, the placeholder will
+ * be resolved to the corresponding value. If not, then "default/path" will be used as a
+ * default. Expressing a default value (delimited by colon ":") is optional.  If no
+ * default is specified and a property cannot be resolved, an {@code
+ * IllegalArgumentException} will be thrown.
+ *
  * <h3>A note on property overriding with @PropertySource</h3>
  * In cases where a given property key exists in more than one {@code .properties}
  * file, the last {@code @PropertySource} annotation processed will 'win' and override.
@@ -119,11 +145,14 @@ public @interface PropertySource {
 	/**
 	 * Indicate the resource location(s) of the properties file to be loaded.
 	 * For example, {@code "classpath:/com/myco/app.properties"} or
-	 * {@code "file:/path/to/file"}. Note that resource location wildcards
-	 * are not permitted, and that each location must evaluate to exactly one
-	 * {@code .properties} resource. Each location will be added to the
-	 * enclosing {@code Environment} as its own property source, and in the order
-	 * declared.
+	 * {@code "file:/path/to/file"}.
+	 * <p>Resource location wildcards (e.g. *&#42;/*.properties) are not permitted; each
+	 * location must evaluate to exactly one {@code .properties} resource.
+	 * <p>${...} placeholders will be resolved against any/all property sources already
+	 * registered with the {@code Environment}. See {@linkplain PropertySource above} for
+	 * examples.
+	 * <p>Each location will be added to the enclosing {@code Environment} as its own
+	 * property source, and in the order declared.
 	 */
 	String[] value();
 
