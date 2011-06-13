@@ -829,7 +829,7 @@
                </row>
                <row>
                   <entry>
-                     <para>htmlEncoding</para>
+                     <para>htmlEscape</para>
                   </entry>
                   <entry>
                      <para>false</para>
@@ -929,7 +929,7 @@
                </row>
                <row>
                   <entry>
-                     <para>htmlEncoding</para>
+                     <para>htmlEscape</para>
                   </entry>
                   <entry>
                      <para>false</para>
