@@ -63,14 +63,14 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  */
 public class WebMvcConfigurationTests {
 
-	private WebMvcConfiguration mvcConfiguration;
+	private DelegatingWebMvcConfiguration mvcConfiguration;
 
 	private WebMvcConfigurer configurer;
 
 	@Before
 	public void setUp() {
 		configurer = EasyMock.createMock(WebMvcConfigurer.class);
-		mvcConfiguration = new WebMvcConfiguration();
+		mvcConfiguration = new DelegatingWebMvcConfiguration();
 	}
 
 	@Test
@@ -114,7 +114,7 @@ public class WebMvcConfigurationTests {
 				converters.add(new StringHttpMessageConverter());
 			}
 		});
-		mvcConfiguration = new WebMvcConfiguration();
+		mvcConfiguration = new DelegatingWebMvcConfiguration();
 		mvcConfiguration.setConfigurers(configurers);
 		
 		adapter = mvcConfiguration.requestMappingHandlerAdapter();

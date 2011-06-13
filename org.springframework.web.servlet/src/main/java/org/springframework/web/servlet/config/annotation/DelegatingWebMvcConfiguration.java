@@ -25,22 +25,15 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
-import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * Provides default configuration for Spring MVC applications by registering Spring MVC infrastructure components 
- * to be detected by the {@link DispatcherServlet}. This class is imported whenever @{@link EnableWebMvc} is 
- * added to an @{@link Configuration} class.
+ * A variant of {@link WebMvcConfigurationSupport} that delegates to one or more registered {@link WebMvcConfigurer} 
+ * implementations allowing each of them to customize the default Spring MVC configuration. 
  * 
- * <p>See the base class {@link WebMvcConfigurationSupport} for a list of registered instances. This class is closed
- * for extension. However, the configuration it provides can be customized by having your @{@link Configuration}
- * class implement {@link WebMvcConfigurer} or more conveniently extend from {@link WebMvcConfigurerAdapter}.
+ * <p>This class is automatically imported when @{@link EnableWebMvc} is used on an @{@link Configuration} class.
+ * In turn it detects all implementations of {@link WebMvcConfigurer} via autowiring and in turn delegates to them.  
  * 
- * <p>This class will detect your @{@link Configuration} class and any other @{@link Configuration} classes that 
- * implement {@link WebMvcConfigurer} via autowiring and will allow each of them to participate in the process 
- * of configuring Spring MVC through the configuration callbacks defined in {@link WebMvcConfigurer}.
- *
  * @see EnableWebMvc
  * @see WebMvcConfigurer
  *
@@ -48,7 +41,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  * @since 3.1
  */
 @Configuration
-class WebMvcConfiguration extends WebMvcConfigurationSupport {
+public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 	private final WebMvcConfigurerComposite configurers = new WebMvcConfigurerComposite();
 
@@ -61,53 +54,52 @@ class WebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	protected void configureInterceptors(InterceptorConfigurer configurer) {
+	protected final void configureInterceptors(InterceptorConfigurer configurer) {
 		configurers.configureInterceptors(configurer);
 	}
 
 	@Override
-	protected void configureViewControllers(ViewControllerConfigurer configurer) {
+	protected final void configureViewControllers(ViewControllerConfigurer configurer) {
 		configurers.configureViewControllers(configurer);
 	}
 
 	@Override
-	protected void configureResourceHandling(ResourceConfigurer configurer) {
+	protected final void configureResourceHandling(ResourceConfigurer configurer) {
 		configurers.configureResourceHandling(configurer);
 	}
 
 	@Override
-	protected void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+	protected final void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 		configurers.configureDefaultServletHandling(configurer);
 	}
 	
 	@Override
-	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	protected final void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		configurers.addArgumentResolvers(argumentResolvers);
 	}
 
 	@Override
-	protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	protected final void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		configurers.addReturnValueHandlers(returnValueHandlers);
 	}
 
 	@Override
-	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	protected final void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		configurers.configureMessageConverters(converters);
 	}
 
-	
 	@Override
-	protected void addFormatters(FormatterRegistry registry) {
+	protected final void addFormatters(FormatterRegistry registry) {
 		configurers.addFormatters(registry);
 	}
 
 	@Override
-	protected Validator getValidator() {
+	protected final Validator getValidator() {
 		return configurers.getValidator();
 	}
 
 	@Override
-	protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+	protected final void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		configurers.configureHandlerExceptionResolvers(exceptionResolvers);
 	}
 

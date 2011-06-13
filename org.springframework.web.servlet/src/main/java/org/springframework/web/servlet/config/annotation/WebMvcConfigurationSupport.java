@@ -265,7 +265,7 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 		ConfigurableWebBindingInitializer webBindingInitializer = new ConfigurableWebBindingInitializer();
 		webBindingInitializer.setConversionService(mvcConversionService());
 		webBindingInitializer.setValidator(mvcValidator());
-		extendWebBindingInitializer(webBindingInitializer);
+		configureWebBindingInitializer(webBindingInitializer);
 		
 		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
 		addArgumentResolvers(argumentResolvers);
@@ -285,7 +285,7 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	 * Override this method to customize the {@link ConfigurableWebBindingInitializer} the 
 	 * {@link RequestMappingHandlerAdapter} is configured with.
 	 */
-	protected void extendWebBindingInitializer(ConfigurableWebBindingInitializer webBindingInitializer) {
+	protected void configureWebBindingInitializer(ConfigurableWebBindingInitializer webBindingInitializer) {
 	}
 
 	/**
