@@ -177,6 +177,7 @@ class ConfigurationClassParser {
 			String[] locations = (String[]) propertySourceAttributes.get("value");
 			ClassLoader classLoader = this.resourceLoader.getClassLoader();
 			for (String location : locations) {
+				location = this.environment.resolveRequiredPlaceholders(location);
 				ResourcePropertySource ps = StringUtils.hasText(name) ?
 						new ResourcePropertySource(name, location, classLoader) :
 						new ResourcePropertySource(location, classLoader);

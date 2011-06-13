@@ -93,6 +93,62 @@ public class PropertySourceAnnotationTests {
 		}
 	}
 
+	@Test(expected=IllegalArgumentException.class)
+	public void withUnresolvablePlaceholder() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithUnresolvablePlaceholder.class);
+		ctx.refresh();
+	}
+
+	@Test
+	public void withUnresolvablePlaceholderAndDefault() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithUnresolvablePlaceholderAndDefault.class);
+		ctx.refresh();
+		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("p1TestBean"));
+	}
+
+	@Test
+	public void withResolvablePlaceholder() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithResolvablePlaceholder.class);
+		System.setProperty("path.to.properties", "org/springframework/context/annotation");
+		ctx.refresh();
+		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("p1TestBean"));
+		System.clearProperty("path.to.properties");
+	}
+
+
+	@Configuration
+	@PropertySource(value="classpath:${unresolvable}/p1.properties")
+	static class ConfigWithUnresolvablePlaceholder {
+	}
+
+
+	@Configuration
+	@PropertySource(value="classpath:${unresolvable:org/springframework/context/annotation}/p1.properties")
+	static class ConfigWithUnresolvablePlaceholderAndDefault {
+		@Inject Environment env;
+
+		@Bean
+		public TestBean testBean() {
+			return new TestBean(env.getProperty("testbean.name"));
+		}
+	}
+
+
+	@Configuration
+	@PropertySource(value="classpath:${path.to.properties}/p1.properties")
+	static class ConfigWithResolvablePlaceholder {
+		@Inject Environment env;
+
+		@Bean
+		public TestBean testBean() {
+			return new TestBean(env.getProperty("testbean.name"));
+		}
+	}
+
+
 
 	@Configuration
 	@PropertySource(name="p1", value="classpath:org/springframework/context/annotation/p1.properties")
