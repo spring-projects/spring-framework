@@ -20,4 +20,12 @@
 		</property>
 	</bean>
 
+	<bean class="org.springframework.context.support.ConversionServiceFactoryBeanTests$ComplexConstructorArgument">
+		<constructor-arg>
+			<map>
+				<entry key="mykey" value="java.util.Date"/>
+			</map>
+		</constructor-arg>
+	</bean>
+
 </beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.springframework.context.support;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.ResourceTestBean;
@@ -32,6 +32,8 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -123,4 +125,14 @@ public class ConversionServiceFactoryBeanTests {
 	
 	public static class Baz {
 	}
+
+	public static class ComplexConstructorArgument {
+
+		public ComplexConstructorArgument(Map<String, Class> map) {
+			assertTrue(!map.isEmpty());
+			assertTrue(map.keySet().iterator().next() instanceof String);
+			assertTrue(map.values().iterator().next() instanceof Class);
+		}
+	}
+
 }
