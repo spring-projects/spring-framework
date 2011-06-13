@@ -16,9 +16,6 @@
 
 package org.springframework.format.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +29,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -44,10 +42,13 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.Formatter;
+import org.springframework.format.Printer;
 import org.springframework.format.datetime.joda.DateTimeParser;
 import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory;
 import org.springframework.format.datetime.joda.ReadablePartialPrinter;
 import org.springframework.format.number.NumberFormatter;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -196,7 +197,8 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testParseNull() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
-		assertNull(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+		assertNull(formattingService
+				.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
@@ -225,17 +227,42 @@ public class FormattingConversionServiceTests {
 
 	@Test
 	public void testPrintNullDefault() throws ParseException {
-		assertEquals(null, formattingService.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class)));
+		assertEquals(null, formattingService
+				.convert(null, TypeDescriptor.valueOf(Integer.class), TypeDescriptor.valueOf(String.class)));
 	}
 
 	@Test
 	public void testParseNullDefault() throws ParseException {
-		assertNull(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+		assertNull(formattingService
+				.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
 	@Test
 	public void testParseEmptyStringDefault() throws ParseException {
 		assertNull(formattingService.convert("", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
+	}
+
+	@Test
+	public void testFormatFieldForAnnotationWithSubclassAsFieldType() throws Exception {
+		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory() {
+			public Printer<?> getPrinter(org.springframework.format.annotation.DateTimeFormat annotation, Class<?> fieldType) {
+				assertEquals(MyDate.class, fieldType);
+				return super.getPrinter(annotation, fieldType);
+			}
+		});
+		formattingService.addConverter(new Converter<MyDate, Long>() {
+			public Long convert(MyDate source) {
+				return  source.getTime();
+			}
+		});
+		formattingService.addConverter(new Converter<MyDate, Date>() {
+			public Date convert(MyDate source) {
+				return source;
+			}
+		});
+
+		formattingService.convert(new MyDate(), new TypeDescriptor(ModelWithSubclassField.class.getField("date")),
+				TypeDescriptor.valueOf(String.class));
 	}
 
 
@@ -284,6 +311,17 @@ public class FormattingConversionServiceTests {
 			return null;
 		}
 		
+	}
+
+
+	public static class MyDate extends Date {
+	}
+
+
+	private static class ModelWithSubclassField {
+
+		@org.springframework.format.annotation.DateTimeFormat(style = "S-")
+		public MyDate date;
 	}
 
 }
