@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -475,9 +475,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		con.createSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(txSession, 1);
 		txSession.getTransacted();
-		txSessionControl.setReturnValue(true, 2);
-		txSession.rollback();
-		txSessionControl.setVoidCallable(1);
+		txSessionControl.setReturnValue(true, 1);
 		txSession.commit();
 		txSessionControl.setVoidCallable(1);
 		txSession.close();
@@ -539,9 +537,9 @@ public class SingleConnectionFactoryTests extends TestCase {
 		con.createQueueSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(txSession, 1);
 		txSession.getTransacted();
-		txSessionControl.setReturnValue(true, 2);
+		txSessionControl.setReturnValue(true, 1);
 		txSession.rollback();
-		txSessionControl.setVoidCallable(2);
+		txSessionControl.setVoidCallable(1);
 		txSession.close();
 		txSessionControl.setVoidCallable(1);
 		con.createQueueSession(false, Session.CLIENT_ACKNOWLEDGE);
@@ -601,9 +599,7 @@ public class SingleConnectionFactoryTests extends TestCase {
 		con.createTopicSession(true, Session.AUTO_ACKNOWLEDGE);
 		conControl.setReturnValue(txSession, 1);
 		txSession.getTransacted();
-		txSessionControl.setReturnValue(true, 4);
-		txSession.rollback();
-		txSessionControl.setVoidCallable(2);
+		txSessionControl.setReturnValue(true, 2);
 		txSession.close();
 		txSessionControl.setVoidCallable(1);
 		con.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
