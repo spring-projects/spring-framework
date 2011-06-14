@@ -85,11 +85,14 @@ public class RestTemplateIntegrationTests {
 		contentType = new MediaType("text", "plain", Collections.singletonMap("charset", "utf-8"));
 		jettyContext.addServlet(new ServletHolder(new GetServlet(bytes, contentType)), "/get");
 		jettyContext.addServlet(new ServletHolder(new GetServlet(new byte[0], contentType)), "/get/nothing");
+		jettyContext.addServlet(new ServletHolder(new GetServlet(bytes, null)), "/get/nocontenttype");
 		jettyContext.addServlet(
 				new ServletHolder(new PostServlet(helloWorld, baseUrl + "/post/1", bytes, contentType)),
 				"/post");
-		jettyContext.addServlet(new ServletHolder(new ErrorServlet(404)), "/errors/notfound");
-		jettyContext.addServlet(new ServletHolder(new ErrorServlet(500)), "/errors/server");
+		jettyContext.addServlet(new ServletHolder(new StatusCodeServlet(204)), "/status/nocontent");
+		jettyContext.addServlet(new ServletHolder(new StatusCodeServlet(304)), "/status/notmodified");
+		jettyContext.addServlet(new ServletHolder(new ErrorServlet(404)), "/status/notfound");
+		jettyContext.addServlet(new ServletHolder(new ErrorServlet(500)), "/status/server");
 		jettyContext.addServlet(new ServletHolder(new UriServlet()), "/uri/*");
 		jettyContext.addServlet(new ServletHolder(new MultipartServlet()), "/multipart");
 		jettyServer.start();
@@ -125,7 +128,33 @@ public class RestTemplateIntegrationTests {
 	@Test
 	public void getNoResponse() {
 		String s = template.getForObject(baseUrl + "/get/nothing", String.class);
-		assertEquals("Invalid content", "", s);
+		assertNull("Invalid content", s);
+	}
+	
+	@Test
+	public void getNoContentTypeHeader() throws UnsupportedEncodingException {
+		byte[] bytes = template.getForObject(baseUrl + "/get/nocontenttype", byte[].class);
+		assertArrayEquals("Invalid content", helloWorld.getBytes("UTF-8"), bytes);
+	}
+
+	@Test
+	public void getNoContent() {
+		String s = template.getForObject(baseUrl + "/status/nocontent", String.class);
+		assertNull("Invalid content", s);
+		
+		ResponseEntity<String> entity = template.getForEntity(baseUrl + "/status/nocontent", String.class);
+		assertEquals("Invalid response code", HttpStatus.NO_CONTENT, entity.getStatusCode());
+		assertNull("Invalid content", entity.getBody());
+	}
+
+	@Test
+	public void getNotModified() {
+		String s = template.getForObject(baseUrl + "/status/notmodified", String.class);
+		assertNull("Invalid content", s);
+
+		ResponseEntity<String> entity = template.getForEntity(baseUrl + "/status/notmodified", String.class);
+		assertEquals("Invalid response code", HttpStatus.NOT_MODIFIED, entity.getStatusCode());
+		assertNull("Invalid content", entity.getBody());
 	}
 
 	@Test
@@ -152,7 +181,7 @@ public class RestTemplateIntegrationTests {
 	@Test
 	public void notFound() {
 		try {
-			template.execute(baseUrl + "/errors/notfound", HttpMethod.GET, null, null);
+			template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null);
 			fail("HttpClientErrorException expected");
 		}
 		catch (HttpClientErrorException ex) {
@@ -165,7 +194,7 @@ public class RestTemplateIntegrationTests {
 	@Test
 	public void serverError() {
 		try {
-			template.execute(baseUrl + "/errors/server", HttpMethod.GET, null, null);
+			template.execute(baseUrl + "/status/server", HttpMethod.GET, null, null);
 			fail("HttpServerErrorException expected");
 		}
 		catch (HttpServerErrorException ex) {
@@ -227,7 +256,22 @@ public class RestTemplateIntegrationTests {
 		assertFalse(result.hasBody());
 	}
 
-	/** Servlet that returns and error message for a given status code. */
+	/** Servlet that sets the given status code. */
+	private static class StatusCodeServlet extends GenericServlet {
+
+		private final int sc;
+
+		private StatusCodeServlet(int sc) {
+			this.sc = sc;
+		}
+
+		@Override
+		public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+			((HttpServletResponse) response).setStatus(sc);
+		}
+	}
+
+	/** Servlet that returns an error message for a given status code. */
 	private static class ErrorServlet extends GenericServlet {
 
 		private final int sc;
@@ -256,7 +300,9 @@ public class RestTemplateIntegrationTests {
 		@Override
 		protected void doGet(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
-			response.setContentType(contentType.toString());
+			if (contentType != null) {
+				response.setContentType(contentType.toString());
+			}
 			response.setContentLength(buf.length);
 			FileCopyUtils.copy(buf, response.getOutputStream());
 		}
