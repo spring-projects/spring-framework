@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.method.annotation;
+package org.springframework.web.servlet.mvc.method;
 
 import java.util.ArrayList;
 import java.util.Collection;
