@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,7 +176,14 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Set the package names of packages with the Castor descriptor classes.
+	 * Set the names of package with the Castor descriptor classes.
+	 */
+	public void setTargetPackage(String targetPackage) {
+		this.targetPackages = new String[] {targetPackage};
+	}
+	
+	/**
+	 * Set the names of packages with the Castor descriptor classes.
 	 */
 	public void setTargetPackages(String[] targetPackages) {
 		this.targetPackages = targetPackages;
