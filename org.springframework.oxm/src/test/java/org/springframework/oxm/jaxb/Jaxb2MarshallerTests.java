@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,11 @@ import javax.activation.FileDataSource;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
 import javax.xml.transform.Result;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertFalse;
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.custommonkey.xmlunit.XMLAssert.fail;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -53,6 +49,12 @@ import org.springframework.oxm.jaxb.test.ObjectFactory;
 import org.springframework.oxm.mime.MimeContainer;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ReflectionUtils;
+
+import static org.custommonkey.xmlunit.XMLAssert.assertFalse;
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.custommonkey.xmlunit.XMLAssert.fail;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertTrue;
 
 public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
@@ -105,7 +107,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@Test
-	public void laxyInit() throws Exception {
+	public void lazyInit() throws Exception {
 		marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath(CONTEXT_PATH);
 		marshaller.setLazyInit(true);
@@ -152,7 +154,6 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	@Test
 	public void supportsContextPath() throws Exception {
 		testSupports();
-
 	}
 
 	@Test
@@ -173,6 +174,11 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		Method method = ObjectFactory.class.getDeclaredMethod("createFlight", FlightType.class);
 		assertTrue("Jaxb2Marshaller does not support JAXBElement<FlightsType>",
 				marshaller.supports(method.getGenericReturnType()));
+
+		marshaller.setSupportJaxbElementClass(true);
+		JAXBElement<FlightType> flightTypeJAXBElement = new JAXBElement<FlightType>(new QName("http://springframework.org", "flight"), FlightType.class,
+				new FlightType());
+		assertTrue("Jaxb2Marshaller does not support JAXBElement<FlightsType>", marshaller.supports(flightTypeJAXBElement.getClass()));
 
 		assertFalse("Jaxb2Marshaller supports class not in context path", marshaller.supports(DummyRootElement.class));
 		assertFalse("Jaxb2Marshaller supports type not in context path", marshaller.supports((Type)DummyRootElement.class));
