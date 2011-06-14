@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.6 (2011-06-15)
+Changes in version 3.0.6 (2011-06-20)
 -------------------------------------
 
 * fixed aspects bundle to declare dependencies for @Async aspect as well
@@ -13,13 +13,19 @@ Changes in version 3.0.6 (2011-06-15)
 * ProxyCreationContext uses "ThreadLocal.remove()" over "ThreadLocal.set(null)" as well
 * BeanDefinitionVisitor now actually visits factory method names
 * fixed potential InjectionMetadata NPE when using SpringBeanAutowiringInterceptor
-* fixed AbstractBindingResult to avoid NPE in "hashCode()" if target is null
+* restored original GenericConversionService behavior with respect to empty collections/maps
+* restored original FormattingConversionService behavior with respect to the use of subtypes
+* fixed collection element resolution when using a ConversionService with a DataBinder
 * Servlet/PortletRequestDataBinder perform unwrapping for MultipartRequest as well
+* fixed AbstractBindingResult to avoid NPE in "hashCode()" if target is null
 * fixed several HttpHeaders issues (charset handling, quoting/unquoting)
 * FormHttpMessageConverter correctly processes POST requests
 * ResourceHttpRequestHandler does not set Content-Length header for 304 response
 * LocaleChangeInterceptor validates locale values in order to prevent XSS vulnerability
 * RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
+* fixed NamedParameterJdbcTemplate's handling of arrays as query parameters
+* revised JMS CachedConnectionFactory to avoid unnecessary rollback calls on Session return
+* fixed JMS CachedConnectionFactory to fully synchronize its Session list
 
 
 Changes in version 3.0.5 (2010-10-20)
