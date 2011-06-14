@@ -1,6 +1,6 @@
-SPRING FRAMEWORK 3.0.5 (October 2010)
--------------------------------------
-http://www.springframework.org
+SPRING FRAMEWORK 3.0.6 (June 2011)
+----------------------------------
+http://www.springsource.org
 
 1. INTRODUCTION
 

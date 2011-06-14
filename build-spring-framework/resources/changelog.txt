@@ -7,9 +7,6 @@ Changes in version 3.0.6 (2011-06-20)
 -------------------------------------
 
 * fixed aspects bundle to declare dependencies for @Async aspect as well
-* fixed JPA 2.0 timeout hints to correctly specify milliseconds
-* updated Quartz package to support Quartz 1.8 as well
-* EhCacheManagerFactoryBean properly closes "ehcache.xml" input stream, if any
 * ProxyCreationContext uses "ThreadLocal.remove()" over "ThreadLocal.set(null)" as well
 * BeanDefinitionVisitor now actually visits factory method names
 * fixed potential InjectionMetadata NPE when using SpringBeanAutowiringInterceptor
@@ -23,9 +20,12 @@ Changes in version 3.0.6 (2011-06-20)
 * ResourceHttpRequestHandler does not set Content-Length header for 304 response
 * LocaleChangeInterceptor validates locale values in order to prevent XSS vulnerability
 * RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
-* fixed NamedParameterJdbcTemplate's handling of arrays as query parameters
+* EhCacheManagerFactoryBean properly closes "ehcache.xml" input stream, if any
 * revised JMS CachedConnectionFactory to avoid unnecessary rollback calls on Session return
 * fixed JMS CachedConnectionFactory to fully synchronize its Session list
+* fixed NamedParameterJdbcTemplate's handling of arrays as query parameters
+* fixed JPA 2.0 timeout hints to correctly specify milliseconds
+* updated Quartz package to support Quartz 1.8 as well (note: not supporting Quartz 2.0 yet)
 
 
 Changes in version 3.0.5 (2010-10-20)
