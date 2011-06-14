@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,6 +158,8 @@ public class Jaxb2Marshaller
 
 	private boolean lazyInit = false;
 
+	private boolean supportJaxbElementClass = false;
+
 
 	/**
 	 * Set multiple JAXB context paths. The given array of context paths is converted to a
@@ -301,6 +303,22 @@ public class Jaxb2Marshaller
 		this.lazyInit = lazyInit;
 	}
 
+	/**
+	 * Specify whether the {@link #supports(Class)} returns {@code true} for the {@link JAXBElement} class.
+	 * <p>Default is {@code false}, meaning that {@code supports(Class)} always returns {@code false} for
+	 * {@code JAXBElement} classes (though {@link #supports(Type)} can return {@code true}, since it can obtain the
+	 * type parameters of {@code JAXBElement}).
+	 * <p>This property is typically enabled in combination with usage of classes like
+	 * {@link org.springframework.web.servlet.view.xml.MarshallingView MarshallingView}, since the {@code ModelAndView}
+	 * does not offer type parameter information at runtime.
+	 *
+	 * @see #supports(Class)
+	 * @see #supports(Type)
+	 */
+	public void setSupportJaxbElementClass(boolean supportJaxbElementClass) {
+		this.supportJaxbElementClass = supportJaxbElementClass;
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -394,6 +412,9 @@ public class Jaxb2Marshaller
 
 
 	public boolean supports(Class<?> clazz) {
+		if (supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) {
+			return true;
+		}
 		return supportsInternal(clazz, true);
 	}
 
