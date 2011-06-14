@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,6 +37,9 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 @SuppressWarnings("unchecked")
@@ -168,7 +169,9 @@ public class RestTemplateTests {
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
-		expect(response.getHeaders()).andReturn(responseHeaders);
+		responseHeaders.setContentLength(10);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
 		expect(converter.canRead(String.class, textPlain)).andReturn(true);
 		String expected = "Hello World";
 		expect(converter.read(String.class, response)).andReturn(expected);
@@ -196,7 +199,9 @@ public class RestTemplateTests {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		MediaType contentType = new MediaType("bar", "baz");
 		responseHeaders.setContentType(contentType);
-		expect(response.getHeaders()).andReturn(responseHeaders);
+		responseHeaders.setContentLength(10);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
 		expect(converter.canRead(String.class, contentType)).andReturn(false);
 		response.close();
 
@@ -225,7 +230,9 @@ public class RestTemplateTests {
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
-		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
+		responseHeaders.setContentLength(10);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(3);
 		expect(converter.canRead(String.class, textPlain)).andReturn(true);
 		String expected = "Hello World";
 		expect(converter.read(String.class, response)).andReturn(expected);
@@ -394,7 +401,9 @@ public class RestTemplateTests {
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
-		expect(response.getHeaders()).andReturn(responseHeaders);
+		responseHeaders.setContentLength(10);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
 		Integer expected = 42;
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(expected);
@@ -424,7 +433,9 @@ public class RestTemplateTests {
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
-		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
+		responseHeaders.setContentLength(10);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(3);
 		Integer expected = 42;
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(expected);
@@ -454,7 +465,9 @@ public class RestTemplateTests {
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
-		expect(response.getHeaders()).andReturn(responseHeaders);
+		responseHeaders.setContentLength(10);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(null);
 		response.close();
@@ -479,7 +492,9 @@ public class RestTemplateTests {
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
-		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
+		responseHeaders.setContentLength(10);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(3);
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(null);
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
@@ -598,7 +613,9 @@ public class RestTemplateTests {
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setContentType(textPlain);
-		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
+		responseHeaders.setContentLength(10);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(3);
 		Integer expected = 42;
 		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(expected);
