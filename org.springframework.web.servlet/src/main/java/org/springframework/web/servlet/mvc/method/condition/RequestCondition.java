@@ -19,8 +19,7 @@ package org.springframework.web.servlet.mvc.method.condition;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Defines the contract for conditions that must be met before an incoming request matches a {@link
- * org.springframework.web.servlet.mvc.method.annotation.RequestMappingInfo RequestKey}.
+ * Defines the contract for conditions that must be met given an incoming request.
  *
  * <p>Implementations of this interface are created by the {@link RequestConditionFactory}.
  *

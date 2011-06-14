@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.method.annotation;
+package org.springframework.web.servlet.mvc.method;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -25,6 +26,8 @@ import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -39,13 +42,13 @@ import static org.junit.Assert.*;
  */
 public class RequestMappingInfoComparatorTests {
 
-	private RequestMappingHandlerMapping handlerMapping;
+	private TestRequestMappingInfoHandlerMapping handlerMapping;
 
 	private MockHttpServletRequest request;
 
 	@Before
 	public void setup() {
-		this.handlerMapping = new RequestMappingHandlerMapping();
+		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.request = new MockHttpServletRequest();
 	}
 
@@ -147,6 +150,19 @@ public class RequestMappingInfoComparatorTests {
 
 		assertTrue(comparator.compare(html, xml) > 0);
 		assertTrue(comparator.compare(xml, html) < 0);
+	}
+	
+	private static class TestRequestMappingInfoHandlerMapping extends RequestMappingInfoHandlerMapping {
+
+		@Override
+		protected boolean isHandler(Class<?> beanType) {
+			return false;
+		}
+
+		@Override
+		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+			return null;
+		}
 	}
 
 }

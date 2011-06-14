@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.method.annotation;
+package org.springframework.web.servlet.mvc.method;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -23,12 +23,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -40,6 +42,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.handler.MappedInterceptor;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -48,9 +53,9 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class RequestMappingHandlerMappingTests {
+public class RequestMappingInfoHandlerMappingTests {
 
-	private RequestMappingHandlerMapping mapping;
+	private TestRequestMappingInfoHandlerMapping mapping;
 
 	private Handler handler;
 
@@ -73,7 +78,7 @@ public class RequestMappingHandlerMappingTests {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerSingleton("handler", handler.getClass());
 
-		mapping = new RequestMappingHandlerMapping();
+		mapping = new TestRequestMappingInfoHandlerMapping();
 		mapping.setApplicationContext(context);
 	}
 
@@ -148,7 +153,7 @@ public class RequestMappingHandlerMappingTests {
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.registerSingleton("handler", handler.getClass());
 
-		mapping = new RequestMappingHandlerMapping();
+		mapping = new TestRequestMappingInfoHandlerMapping();
 		mapping.setInterceptors(new Object[] { mappedInterceptor });
 		mapping.setApplicationContext(context);
 
@@ -163,7 +168,6 @@ public class RequestMappingHandlerMappingTests {
 
 	@SuppressWarnings("unused")
 	@Controller
-	@RequestMapping
 	private static class Handler {
 
 		@RequestMapping(value = "/foo", method = RequestMethod.GET)
@@ -180,6 +184,25 @@ public class RequestMappingHandlerMappingTests {
 
 		@RequestMapping(value = "")
 		public void empty() {
+		}
+	}
+
+	private static class TestRequestMappingInfoHandlerMapping extends RequestMappingInfoHandlerMapping {
+
+		@Override
+		protected boolean isHandler(Class<?> beanType) {
+			return AnnotationUtils.findAnnotation(beanType, Controller.class) != null;
+		}
+
+		@Override
+		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+			RequestMapping annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+			return new RequestMappingInfo(Arrays.asList(annotation.value()),
+					RequestConditionFactory.parseMethods(annotation.method()),
+					RequestConditionFactory.parseParams(annotation.params()),
+					RequestConditionFactory.parseHeaders(annotation.headers()),
+					RequestConditionFactory.parseConsumes(annotation.consumes(), annotation.headers()),
+					RequestConditionFactory.parseProduces(annotation.produces(), annotation.headers()));
 		}
 	}
 	
