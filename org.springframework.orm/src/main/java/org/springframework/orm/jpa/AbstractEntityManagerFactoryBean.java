@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -341,9 +341,23 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			this.plusOperations = getJpaDialect().getEntityManagerFactoryPlusOperations(emf);
 			ifcs.add(EntityManagerFactoryPlusOperations.class);
 		}
-		return (EntityManagerFactory) Proxy.newProxyInstance(
-				this.beanClassLoader, ifcs.toArray(new Class[ifcs.size()]),
-				new ManagedEntityManagerFactoryInvocationHandler(this));
+		try {
+			return (EntityManagerFactory) Proxy.newProxyInstance(
+					this.beanClassLoader, ifcs.toArray(new Class[ifcs.size()]),
+					new ManagedEntityManagerFactoryInvocationHandler(this));
+		}
+		catch (IllegalArgumentException ex) {
+			if (this.entityManagerFactoryInterface != null) {
+				throw new IllegalStateException("EntityManagerFactory interface [" + this.entityManagerFactoryInterface +
+						"] seems to conflict with Spring's EntityManagerFactoryInfo mixin - consider resetting the "+
+						"'entityManagerFactoryInterface' property to plain [javax.persistence.EntityManagerFactory]", ex);
+			}
+			else {
+				throw new IllegalStateException("Conflicting EntityManagerFactory interfaces - " +
+						"consider specifying the 'jpaVendorAdapter' or 'entityManagerFactoryInterface' property " +
+						"to select a specific EntityManagerFactory interface to proceed with", ex);
+			}
+		}
 	}
 
 	/**
