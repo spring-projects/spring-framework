@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.orm.jpa.vendor;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.persistence.EntityManager;
@@ -34,11 +35,12 @@ import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for
  * Hibernate EntityManager. Developed against Hibernate 3.3;
- * tested against 3.3, 3.5 and 3.6 (with the latter including
+ * tested against 3.3, 3.5, 3.6 and 4.0 (with the latter including
  * Hibernate EntityManager in the Hibernate core distribution).
  *
  * @author Costin Leau
@@ -144,12 +146,23 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 
 		private final Session session;
 
+		private static volatile Method connectionMethod;
+
 		public HibernateConnectionHandle(Session session) {
 			this.session = session;
 		}
 
 		public Connection getConnection() {
-			return this.session.connection();
+			try {
+				if (connectionMethod == null) {
+					// reflective lookup to bridge between Hibernate 3.x and 4.x
+					connectionMethod = this.session.getClass().getMethod("connection");
+				}
+				return (Connection) ReflectionUtils.invokeMethod(connectionMethod, this.session);
+			}
+			catch (NoSuchMethodException ex) {
+				throw new IllegalStateException("Cannot find connection() method on Hibernate session", ex);
+			}
 		}
 
 		public void releaseConnection(Connection con) {
