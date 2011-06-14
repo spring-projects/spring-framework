@@ -7,5 +7,5 @@
   -->
 <rmi name="org.springframework.remoting.rmi.RmiInvocationWrapper">
 	<cluster clusterable="true"/>
-	<method name="*" idempotent="true"/>
+	<method name="getTargetInterfaceName" idempotent="true"/>
 </rmi>
