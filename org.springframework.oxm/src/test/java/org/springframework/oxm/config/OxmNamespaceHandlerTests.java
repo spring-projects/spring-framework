@@ -1,5 +1,5 @@
 /*
- * Copyright ${YEAR} the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,30 @@
 package org.springframework.oxm.config;
 
 import org.apache.xmlbeans.XmlOptions;
-import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.oxm.castor.CastorMarshaller;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.springframework.oxm.jibx.JibxMarshaller;
 import org.springframework.oxm.xmlbeans.XmlBeansMarshaller;
 
-public class OxmNamespaceHandlerTest {
+import static org.junit.Assert.*;
+
+/**
+ * Tests the {@link OxmNamespaceHandler} class.
+ * 
+ * @author Arjen Poustma
+ * @author Jakub Narloch
+ */
+public class OxmNamespaceHandlerTests {
 
 	private ApplicationContext applicationContext;
 
 	@Before
 	public void createAppContext() throws Exception {
 		applicationContext = new ClassPathXmlApplicationContext("oxmNamespaceHandlerTest.xml", getClass());
-	}
-
-	@Test
-	@Ignore
-	public void jibxMarshaller() throws Exception {
-		applicationContext.getBean("jibxMarshaller", JibxMarshaller.class);
 	}
 
 	@Test
@@ -54,12 +54,37 @@ public class OxmNamespaceHandlerTest {
 
 	@Test
 	public void jaxb2ContextPathMarshaller() throws Exception {
-		applicationContext.getBean("contextPathMarshaller", Jaxb2Marshaller.class);
+		Jaxb2Marshaller jaxb2Marshaller = applicationContext.getBean("jaxb2ContextPathMarshaller", Jaxb2Marshaller.class);
+		assertNotNull(jaxb2Marshaller);
 	}
 
 	@Test
 	public void jaxb2ClassesToBeBoundMarshaller() throws Exception {
-		applicationContext.getBean("classesMarshaller", Jaxb2Marshaller.class);
+		Jaxb2Marshaller jaxb2Marshaller = applicationContext.getBean("jaxb2ClassesMarshaller", Jaxb2Marshaller.class);
+		assertNotNull(jaxb2Marshaller);
 	}
 
+	@Test
+	public void castorEncodingMarshaller() throws Exception {
+		CastorMarshaller castorMarshaller = applicationContext.getBean("castorEncodingMarshaller", CastorMarshaller.class);
+		assertNotNull(castorMarshaller);
+	}
+
+	@Test
+	public void castorTargetClassMarshaller() throws Exception {
+		CastorMarshaller castorMarshaller = applicationContext.getBean("castorTargetClassMarshaller", CastorMarshaller.class);
+		assertNotNull(castorMarshaller);
+	}
+
+	@Test
+	public void castorTargetPackageMarshaller() throws Exception {
+		CastorMarshaller castorMarshaller = applicationContext.getBean("castorTargetPackageMarshaller", CastorMarshaller.class);
+		assertNotNull(castorMarshaller);
+	}
+
+	@Test
+	public void castorMappingLocationMarshaller() throws Exception {
+		CastorMarshaller castorMarshaller = applicationContext.getBean("castorMappingLocationMarshaller", CastorMarshaller.class);
+		assertNotNull(castorMarshaller);
+	}
 }
