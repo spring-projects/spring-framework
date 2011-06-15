@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
 
 /**
@@ -28,6 +29,8 @@ import org.springframework.core.io.Resource;
 public class ResourceTestBean {
 
 	private Resource resource;
+
+	private ContextResource contextResource;
 
 	private InputStream inputStream;
 
@@ -47,20 +50,28 @@ public class ResourceTestBean {
 	}
 
 
-	public void setResource(Resource resource) {
-		this.resource = resource;
-	}
-
-	public void setInputStream(InputStream inputStream) {
-		this.inputStream = inputStream;
-	}
-
 	public Resource getResource() {
 		return resource;
 	}
 
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
+
+	public ContextResource getContextResource() {
+		return contextResource;
+	}
+
+	public void setContextResource(ContextResource contextResource) {
+		this.contextResource = contextResource;
+	}
+
 	public InputStream getInputStream() {
 		return inputStream;
+	}
+
+	public void setInputStream(InputStream inputStream) {
+		this.inputStream = inputStream;
 	}
 
 	public Resource[] getResourceArray() {

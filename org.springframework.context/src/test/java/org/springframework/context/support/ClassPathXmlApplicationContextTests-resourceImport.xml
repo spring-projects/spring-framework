@@ -7,6 +7,9 @@
 		<property name="resource">
 			<value>test.properties</value>
 		</property>
+		<property name="contextResource">
+			<value>testBeans.properties</value>
+		</property>
 		<property name="inputStream">
 			<value>classpath:org/springframework/beans/factory/xml/test.properties</value>
 		</property>
