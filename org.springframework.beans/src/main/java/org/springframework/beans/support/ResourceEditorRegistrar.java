@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
+import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
@@ -84,6 +85,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	public void registerCustomEditors(PropertyEditorRegistry registry) {
 		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader);
 		doRegisterEditor(registry, Resource.class, baseEditor);
+		doRegisterEditor(registry, ContextResource.class, baseEditor);
 		doRegisterEditor(registry, InputStream.class, new InputStreamEditor(baseEditor));
 		doRegisterEditor(registry, InputSource.class, new InputSourceEditor(baseEditor));
 		doRegisterEditor(registry, File.class, new FileEditor(baseEditor));

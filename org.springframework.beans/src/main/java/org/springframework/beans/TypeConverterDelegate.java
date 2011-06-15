@@ -223,7 +223,8 @@ class TypeConverterDelegate {
 				}
 				if (editor != null) {
 					msg.append(": PropertyEditor [").append(editor.getClass().getName()).append(
-							"] returned inappropriate value");
+							"] returned inappropriate value of type [").append(
+							ClassUtils.getDescriptiveType(convertedValue)).append("]");
 					throw new IllegalArgumentException(msg.toString());
 				}
 				else {
