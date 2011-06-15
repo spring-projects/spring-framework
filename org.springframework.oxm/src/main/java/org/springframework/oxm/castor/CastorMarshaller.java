@@ -576,17 +576,6 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	@Override
-	protected final Object unmarshalXmlEventReader(XMLEventReader eventReader) {
-		XMLReader reader = StaxUtils.createXMLReader(eventReader);
-		try {
-			return unmarshalSaxReader(reader, new InputSource());
-		}
-		catch (IOException ex) {
-			throw new UnmarshallingFailureException("Failed to read XML stream", ex);
-		}
-	}
-
-	@Override
 	protected final Object unmarshalSaxReader(XMLReader xmlReader, InputSource inputSource)
 			throws XmlMappingException, IOException {
 
@@ -603,13 +592,22 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	@Override
-	protected final Object unmarshalXmlStreamReader(XMLStreamReader streamReader) {
-		XMLReader reader = StaxUtils.createXMLReader(streamReader);
+	protected final Object unmarshalXmlEventReader(XMLEventReader eventReader) {
 		try {
-			return unmarshalSaxReader(reader, new InputSource());
+			return createUnmarshaller().unmarshal(eventReader);
 		}
-		catch (IOException ex) {
-			throw new UnmarshallingFailureException("Failed to read XML stream", ex);
+		catch (XMLException ex) {
+			throw convertCastorException(ex, false);
+		}
+	}
+
+	@Override
+	protected final Object unmarshalXmlStreamReader(XMLStreamReader streamReader) {
+		try {
+			return createUnmarshaller().unmarshal(streamReader);
+		}
+		catch (XMLException ex) {
+			throw convertCastorException(ex, false);
 		}
 	}
 
