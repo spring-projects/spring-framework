@@ -36,12 +36,9 @@
 					conf="optional, jibx->compile"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1"
 					conf="compile, commons-logging->compile"/>
-		<!--Xerces dependency should be removed when BRITS-259 is fixed-->
-		<dependency org="org.apache.xerces" name="com.springsource.org.apache.xerces" rev="2.8.1"
-					conf="optional, castor->compile"/>
 		<dependency org="org.apache.xmlbeans" name="com.springsource.org.apache.xmlbeans" rev="2.4.0"
 					conf="optional, xmlbeans->compile"/>
-		<dependency org="org.codehaus.castor" name="com.springsource.org.castor" rev="1.2.0"
+		<dependency org="org.codehaus.castor" name="com.springsource.org.castor.xml" rev="1.3.2"
 					conf="optional, castor->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration"
 					conf="compile->compile"/>
