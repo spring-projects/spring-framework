@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,15 +31,14 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UriUtils;
@@ -232,18 +232,23 @@ public class RedirectView extends AbstractUrlBasedView {
 			enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
 		}
 
-		UriTemplate uriTemplate = createUriTemplate(targetUrl, enc);
-		if (uriTemplate.getVariableNames().size() > 0) {
-			targetUrl = new StringBuilder(uriTemplate.expand(model).toString());
-			model = removeKeys(model, uriTemplate.getVariableNames());
+		UriTemplate redirectUri = createUriTemplate(targetUrl, enc);
+		if (redirectUri.getVariableNames().size() > 0) {
+			targetUrl = new StringBuilder(redirectUri.expand(model).toString());
+			model = removeKeys(model, redirectUri.getVariableNames());
 		}
 		if (this.exposeModelAttributes) {
+			List<String> uriTemplateVarNames = getUriTemplateVarNames(request);
+			if (!uriTemplateVarNames.isEmpty()) {
+				model = removeKeys(model, uriTemplateVarNames);
+			}
 			appendQueryProperties(targetUrl, model, enc);
 		}
 
 		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
 	}
 
+	@SuppressWarnings("serial")
 	private UriTemplate createUriTemplate(StringBuilder targetUrl, final String encoding) {
 		return new UriTemplate(targetUrl.toString()) {
 			@Override
@@ -266,6 +271,16 @@ public class RedirectView extends AbstractUrlBasedView {
 			result.remove(key);
 		}
 		return result;
+	}
+
+	/**
+	 * Returns URI template variable names for the current request; or an empty list.
+	 */
+	@SuppressWarnings("unchecked")
+	private List<String> getUriTemplateVarNames(HttpServletRequest request) {
+		String key = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+		Map<String, String> map = (Map<String, String>) request.getAttribute(key);
+		return (map != null) ? new ArrayList<String>(map.keySet()) : Collections.<String>emptyList();
 	}
 
 	/**
