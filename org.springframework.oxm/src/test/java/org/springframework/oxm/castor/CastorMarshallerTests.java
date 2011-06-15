@@ -149,12 +149,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		Assert.assertTrue("CastorMarshaller does not support Flight", marshaller.supports(Flight.class));
 	}
 
-	/**
-	 * Tests the marshal result when the {@link CastorMarshaller#setSuppressNamespaces(boolean)} is set to
-	 * <code>true</code>.
-	 *
-	 * @throws Exception if any error occurs during test
-	 */
 	@Test
 	public void testSuppressNamespacesTrue() throws Exception {
 		getCastorMarshaller().setSuppressNamespaces(true);
@@ -162,12 +156,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 		assertXMLEqual("Marshaller wrote invalid result", SUPPRESSED_NAMESPACE_EXPECTED_STRING, result);
 	}
 
-	/**
-	 * Tests the marshal result when the {@link CastorMarshaller#setSuppressNamespaces(boolean)} is set to
-	 * <code>false</code>.
-	 *
-	 * @throws Exception if any error occurs during test
-	 */
 	@Test
 	public void testSuppressNamespacesFalse() throws Exception {
 		getCastorMarshaller().setSuppressNamespaces(false);
@@ -176,7 +164,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@Test
-	@Ignore("Not working yet")
 	public void testSuppressXsiTypeTrue() throws Exception {
 		CastorObject castorObject = createCastorObject();
 
@@ -187,7 +174,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@Test
-	@Ignore("Not working yet")
 	public void testSuppressXsiTypeFalse() throws Exception {
 		CastorObject castorObject = createCastorObject();
 
@@ -249,7 +235,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@Test
-	@Ignore("Not working yet")
 	public void testUseXsiTypeAsRootTrue() throws Exception {
 		CastorObject castorObject = createCastorObject();
 
@@ -261,7 +246,6 @@ public class CastorMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@Test
-	@Ignore("Not working yet")
 	public void testUseXsiTypeAsRootFalse() throws Exception {
 		CastorObject castorObject = createCastorObject();
 
