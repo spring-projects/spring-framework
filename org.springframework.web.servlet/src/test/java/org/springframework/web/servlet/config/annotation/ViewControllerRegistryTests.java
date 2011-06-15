@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.config.annotation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Map;
 
@@ -26,50 +28,55 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
 
 /**
- * Test fixture with a {@link ViewControllerConfigurer}.
+ * Test fixture with a {@link ViewControllerRegistry}.
  *
  * @author Rossen Stoyanchev
  */
-public class ViewControllerConfigurerTests {
+public class ViewControllerRegistryTests {
 
-	private ViewControllerConfigurer configurer;
+	private ViewControllerRegistry registry;
 
 	@Before
 	public void setUp() {
-		configurer = new ViewControllerConfigurer();
+		registry = new ViewControllerRegistry();
 	}
 
 	@Test
-	public void noMappings() throws Exception {
-		Map<String, ?> urlMap = configurer.getHandlerMapping().getUrlMap();
-		assertTrue(urlMap.isEmpty());
+	public void noViewControllers() throws Exception {
+		assertNull(registry.getHandlerMapping());
 	}
 
 	@Test
-	public void mapViewName() {
-		configurer.mapViewName("/path", "viewName");
-		Map<String, ?> urlMap = configurer.getHandlerMapping().getUrlMap();
-		ParameterizableViewController controller = (ParameterizableViewController) urlMap.get("/path");
-		assertNotNull(controller);
-		assertEquals("viewName", controller.getViewName());
-	}
-
-	@Test
-	public void mapViewNameByConvention() {
-		configurer.mapViewNameByConvention("/path");
-		Map<String, ?> urlMap = configurer.getHandlerMapping().getUrlMap();
+	public void addViewController() {
+		registry.addViewController("/path");
+		Map<String, ?> urlMap = getHandlerMapping().getUrlMap();
 		ParameterizableViewController controller = (ParameterizableViewController) urlMap.get("/path");
 		assertNotNull(controller);
 		assertNull(controller.getViewName());
 	}
 
 	@Test
+	public void addViewControllerWithViewName() {
+		registry.addViewController("/path").setViewName("viewName");
+		Map<String, ?> urlMap = getHandlerMapping().getUrlMap();
+		ParameterizableViewController controller = (ParameterizableViewController) urlMap.get("/path");
+		assertNotNull(controller);
+		assertEquals("viewName", controller.getViewName());
+	}
+	
+	@Test
 	public void order() {
-		SimpleUrlHandlerMapping handlerMapping = configurer.getHandlerMapping();
+		registry.addViewController("/path");
+		SimpleUrlHandlerMapping handlerMapping = getHandlerMapping();
 		assertEquals(1, handlerMapping.getOrder());
 
-		configurer.setOrder(2);
-		handlerMapping = configurer.getHandlerMapping();
+		registry.setOrder(2);
+		handlerMapping = getHandlerMapping();
 		assertEquals(2, handlerMapping.getOrder());
 	}
+
+	private SimpleUrlHandlerMapping getHandlerMapping() {
+		return (SimpleUrlHandlerMapping) registry.getHandlerMapping();
+	}
+
 }

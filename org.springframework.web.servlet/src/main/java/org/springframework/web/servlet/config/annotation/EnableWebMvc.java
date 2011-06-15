@@ -24,9 +24,8 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 /**
  * Enables default Spring MVC configuration and registers Spring MVC infrastructure components expected by the
- * {@link DispatcherServlet}. Add this annotation to an application @{@link Configuration} class. It will in
- * turn import the @{@link Configuration} class {@link DelegatingWebMvcConfiguration}, which provides default Spring MVC
- * configuration.
+ * {@link DispatcherServlet}. Use this annotation on an @{@link Configuration} class. In turn that will
+ * import {@link DelegatingWebMvcConfiguration}, which provides default Spring MVC configuration.
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
@@ -39,9 +38,9 @@ import org.springframework.web.servlet.DispatcherServlet;
  * }
  * </pre>
  * <p>To customize the imported configuration implement {@link WebMvcConfigurer}, or more conveniently extend
- * {@link WebMvcConfigurerAdapter} overriding specific methods. Your @{@link Configuration} class and any other
- * Spring bean that implements {@link WebMvcConfigurer} will be detected and given an opportunity to customize 
- * the default Spring MVC configuration through the callback methods on the {@link WebMvcConfigurer} interface.
+ * {@link WebMvcConfigurerAdapter} overriding specific methods only. Any @{@link Configuration} class that
+ * implements {@link WebMvcConfigurer} will be detected by {@link DelegatingWebMvcConfiguration} and given 
+ * an opportunity to customize the default Spring MVC code-based configuration.
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
@@ -52,7 +51,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * public class MyConfiguration extends WebMvcConfigurerAdapter {
  *
  * 	&#064;Override
- * 	public void registerFormatters(FormatterRegistry formatterRegistry) {
+ * 	public void addFormatters(FormatterRegistry formatterRegistry) {
  * 		formatterRegistry.addConverter(new MyConverter());
  * 	}
  *
@@ -61,7 +60,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * 		converters.add(new MyHttpMessageConverter());
  * 	}
  *
- * 	...
+ * 	// &#064;Override methods ...
  *
  * }
  * </pre>

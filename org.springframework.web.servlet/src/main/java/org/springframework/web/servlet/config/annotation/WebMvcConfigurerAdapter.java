@@ -26,8 +26,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * An abstract class with empty method implementations of {@link WebMvcConfigurer}.
- * Subclasses can override only the methods they need.
+ * An convenient base class with empty method implementations of {@link WebMvcConfigurer}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -81,21 +80,21 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void configureInterceptors(InterceptorConfigurer configurer) {
+	public void addInterceptors(InterceptorRegistry registry) {
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void configureViewControllers(ViewControllerConfigurer configurer) {
+	public void addViewControllers(ViewControllerRegistry registry) {
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public void configureResourceHandling(ResourceConfigurer configurer) {
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 	}
 
 	/**

@@ -18,7 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import javax.servlet.RequestDispatcher;
 
@@ -53,13 +53,14 @@ public class DefaultServletHandlerConfigurerTests {
 
 	@Test
 	public void notEnabled() {
-		assertTrue(configurer.getHandlerMapping().getUrlMap().isEmpty());
+		assertNull(configurer.getHandlerMapping());
 	}
 
 	@Test
 	public void enable() throws Exception {
 		configurer.enable();
-		SimpleUrlHandlerMapping handlerMapping = configurer.getHandlerMapping();
+		SimpleUrlHandlerMapping getHandlerMapping = getHandlerMapping();
+		SimpleUrlHandlerMapping handlerMapping = getHandlerMapping;
 		DefaultServletHttpRequestHandler handler = (DefaultServletHttpRequestHandler) handlerMapping.getUrlMap().get("/**");
 
 		assertNotNull(handler);
@@ -75,7 +76,7 @@ public class DefaultServletHandlerConfigurerTests {
 	@Test
 	public void enableWithServletName() throws Exception {
 		configurer.enable("defaultServlet");
-		SimpleUrlHandlerMapping handlerMapping = configurer.getHandlerMapping();
+		SimpleUrlHandlerMapping handlerMapping = getHandlerMapping();
 		DefaultServletHttpRequestHandler handler = (DefaultServletHttpRequestHandler) handlerMapping.getUrlMap().get("/**");
 
 		assertNotNull(handler);
@@ -97,6 +98,10 @@ public class DefaultServletHandlerConfigurerTests {
 			this.url = url;
 			return new MockRequestDispatcher(url);
 		}
+	}
+
+	private SimpleUrlHandlerMapping getHandlerMapping() {
+		return (SimpleUrlHandlerMapping) configurer.getHandlerMapping();
 	}
 
 }
