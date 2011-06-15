@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,9 @@ public interface TransactionCallback<T> {
 	 * <p>Allows for returning a result object created within the transaction, i.e.
 	 * a domain object or a collection of domain objects. A RuntimeException thrown
 	 * by the callback is treated as application exception that enforces a rollback.
-	 * An exception gets propagated to the caller of the template.
+	 * Any such exception will be propagated to the caller of the template, unless
+	 * there is a problem rolling back, in which case a TransactionException will be
+	 * thrown.
 	 *
 	 * @param status associated transaction status
 	 * @return a result object, or <code>null</code>
