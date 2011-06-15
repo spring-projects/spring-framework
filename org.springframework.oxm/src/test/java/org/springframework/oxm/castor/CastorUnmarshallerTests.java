@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,38 @@ import java.io.IOException;
 import java.io.StringReader;
 import javax.xml.transform.stream.StreamSource;
 
-import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
+import org.springframework.oxm.MarshallingException;
 import org.springframework.oxm.Unmarshaller;
 
+import static org.junit.Assert.*;
+
 /**
+ * Tests the {@link CastorMarshaller} class.
+ *
  * @author Arjen Poutsma
+ * @author Jakub Narloch
  */
 public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
+
+	/**
+	 * Represents the xml with additional attribute that is not mapped in Castor config.
+	 */
+	protected static final String EXTRA_ATTRIBUTES_STRING =
+			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+					"<tns:flight status=\"canceled\"><tns:number>42</tns:number></tns:flight></tns:flights>";
+
+	/**
+	 * Represents the xml with additional element that is not mapped in Castor config.
+	 */
+	protected static final String EXTRA_ELEMENTS_STRING =
+			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+					"<tns:flight><tns:number>42</tns:number><tns:date>2011-06-14</tns:date>" +
+					"</tns:flight></tns:flights>";
 
 	@Override
 	protected void testFlights(Object o) {
@@ -89,5 +110,105 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		assertEquals("Invalid items", 20, (int)item.getQuantity());
 	}
 
+	@Test
+	public void testWhitespacePreserveTrue() throws Exception {
 
+		getCastorUnmarshaller().setWhitespacePreserve(true);
+		Object result = unmarshalFlights();
+		testFlights(result);
+	}
+
+	@Test
+	public void testWhitespacePreserveFalse() throws Exception {
+
+		getCastorUnmarshaller().setWhitespacePreserve(false);
+		Object result = unmarshalFlights();
+		testFlights(result);
+	}
+
+	@Test
+	public void testIgnoreExtraAttributesTrue() throws Exception {
+
+		getCastorUnmarshaller().setIgnoreExtraAttributes(true);
+		Object result = unmarshal(EXTRA_ATTRIBUTES_STRING);
+		testFlights(result);
+	}
+
+	@Test(expected = MarshallingException.class)
+	public void testIgnoreExtraAttributesFalse() throws Exception {
+
+		getCastorUnmarshaller().setIgnoreExtraAttributes(false);
+		unmarshal(EXTRA_ATTRIBUTES_STRING);
+	}
+
+	@Test
+	@Ignore("Not working yet")
+	public void testIgnoreExtraElementsTrue() throws Exception {
+
+		getCastorUnmarshaller().setIgnoreExtraElements(true);
+		getCastorUnmarshaller().setValidating(false);
+		Object result = unmarshal(EXTRA_ELEMENTS_STRING);
+		testFlights(result);
+	}
+
+	@Test(expected = MarshallingException.class)
+	public void testIgnoreExtraElementsFalse() throws Exception {
+
+		getCastorUnmarshaller().setIgnoreExtraElements(false);
+		unmarshal(EXTRA_ELEMENTS_STRING);
+	}
+
+	@Test
+	public void testObject() throws Exception {
+
+		Flights flights = new Flights();
+		getCastorUnmarshaller().setObject(flights);
+		Object result = unmarshalFlights();
+
+		testFlights(result);
+		assertSame("Result Flights is different object.", flights, result);
+	}
+
+	@Test
+	public void testClearCollectionsTrue() throws Exception {
+
+		Flights flights = new Flights();
+		flights.setFlight(new Flight[]{new Flight()});
+		getCastorUnmarshaller().setObject(flights);
+		getCastorUnmarshaller().setClearCollections(true);
+		Object result = unmarshalFlights();
+
+		assertSame("Result Flights is different object.", flights, result);
+		assertEquals("Result Flights has incorrect number of Flight.", 1, ((Flights) result).getFlightCount());
+		testFlights(result);
+	}
+
+	@Test
+	public void testClearCollectionsFalse() throws Exception {
+
+		Flights flights = new Flights();
+		flights.setFlight(new Flight[]{new Flight(), null});
+		getCastorUnmarshaller().setObject(flights);
+		getCastorUnmarshaller().setClearCollections(false);
+		Object result = unmarshalFlights();
+
+		assertSame("Result Flights is different object.", flights, result);
+		assertEquals("Result Flights has incorrect number of Flight.", 3, ((Flights) result).getFlightCount());
+		assertNull("Flight shouldn't have number.", flights.getFlight(0).getNumber());
+		assertNull("Null Flight was expected.", flights.getFlight()[1]);
+		testFlight(flights.getFlight()[2]);
+	}
+
+	private CastorMarshaller getCastorUnmarshaller() {
+		return (CastorMarshaller) unmarshaller;
+	}
+
+	private Object unmarshalFlights() throws Exception {
+		return unmarshal(INPUT_STRING);
+	}
+
+	private Object unmarshal(String xml) throws Exception {
+		StreamSource source = new StreamSource(new StringReader(xml));
+		return unmarshaller.unmarshal(source);
+	}
 }

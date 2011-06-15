@@ -69,17 +69,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.xerces/com.springsource.org.apache.xerces/2.8.1/com.springsource.org.apache.xerces-2.8.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.xerces/com.springsource.org.apache.xerces/2.8.1/com.springsource.org.apache.xerces-sources-2.8.1.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.apache.xmlbeans/com.springsource.org.apache.xmlbeans/2.4.0/com.springsource.org.apache.xmlbeans-2.4.0.jar!/" />
         </CLASSES>
         <JAVADOC />
