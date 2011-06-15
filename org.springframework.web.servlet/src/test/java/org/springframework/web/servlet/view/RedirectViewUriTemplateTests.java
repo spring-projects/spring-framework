@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.servlet.HandlerMapping;
 
 public class RedirectViewUriTemplateTests {
 
@@ -39,7 +40,7 @@ public class RedirectViewUriTemplateTests {
 	}
 
 	@Test
-	public void pathVar() throws Exception {
+	public void uriTemplateVar() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", "bar");
 
@@ -51,7 +52,7 @@ public class RedirectViewUriTemplateTests {
 	}
 	
 	@Test
-	public void pathVarAndArrayParam() throws Exception {
+	public void uriTemplateVarAndArrayParam() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", "bar");
 		model.put("fooArr", new String[] { "baz", "bazz" });
@@ -63,7 +64,7 @@ public class RedirectViewUriTemplateTests {
 	}
 
 	@Test
-	public void pathVarWithObjectConversion() throws Exception {
+	public void uriTemplateVarWithObjectConversion() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", new Long(611));
 
@@ -73,4 +74,22 @@ public class RedirectViewUriTemplateTests {
 		assertEquals("/foo/611", response.getRedirectedUrl());
 	}
 
+	@Test
+	public void doNotAppendUriTemplateVarFromCurrentRequest() throws Exception {
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("name1", "value1");
+		model.put("name2", "value2");
+		model.put("name3", "value3");
+		
+		Map<String, String> uriTemplatVars = new HashMap<String, String>();
+		uriTemplatVars.put("name1", "value1");
+		uriTemplatVars.put("name2", "value2");
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplatVars);
+
+		String url = "http://url.somewhere.com";
+		RedirectView redirectView = new RedirectView(url + "/{name2}");
+		redirectView.renderMergedOutputModel(model, request, response);
+
+		assertEquals(url + "/value2?name3=value3", response.getRedirectedUrl());
+	}
 }
