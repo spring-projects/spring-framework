@@ -66,7 +66,7 @@ import org.springframework.util.xml.StaxUtils;
  * control over the behavior of Castor.
  *
  * <p>If a target class is specified using <code>setTargetClass</code>, the <code>CastorMarshaller</code> can only be
- * used to unmarshall XML that represents that specific class. If you want to unmarshall multiple classes, you have to
+ * used to unmarshal XML that represents that specific class. If you want to unmarshal multiple classes, you have to
  * provide a mapping file using <code>setMappingLocations</code>.
  *
  * <p>Due to limitations of Castor's API, it is required to set the encoding used for writing to output streams. It
@@ -660,7 +660,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 * occurs
 	 * during marshalling or unmarshalling, since Castor itself does not make this distinction in its exception hierarchy.
 	 *
-	 * @param ex Castor <code>XMLException</code> that occured
+	 * @param ex Castor <code>XMLException</code> that occurred
 	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>), or unmarshalling
 	 * (<code>false</code>)
 	 * @return the corresponding <code>XmlMappingException</code>
