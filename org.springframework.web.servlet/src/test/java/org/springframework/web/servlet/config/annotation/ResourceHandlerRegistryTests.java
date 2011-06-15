@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.config.annotation;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,32 +26,34 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 /**
- * Test fixture with a {@link ResourceConfigurer}.
+ * Test fixture with a {@link ResourceHandlerRegistry}.
  *
  * @author Rossen Stoyanchev
  */
-public class ResourceConfigurerTests {
+public class ResourceHandlerRegistryTests {
 
-	private ResourceConfigurer configurer;
+	private ResourceHandlerRegistry registry;
+	
+	private ResourceHandlerRegistration registration;
 
 	private MockHttpServletResponse response;
 
 	@Before
 	public void setUp() {
-		configurer = new ResourceConfigurer(new GenericWebApplicationContext(), new MockServletContext());
-		configurer.addPathMapping("/resources/**");
-		configurer.addResourceLocation("classpath:org/springframework/web/servlet/config/annotation/");
-
+		registry = new ResourceHandlerRegistry(new GenericWebApplicationContext(), new MockServletContext());
+		registration = registry.addResourceHandler("/resources/**");
+		registration.addResourceLocations("classpath:org/springframework/web/servlet/config/annotation/");
 		response = new MockHttpServletResponse();
 	}
 
 	@Test
-	public void noMappings() throws Exception {
-		configurer = new ResourceConfigurer(new GenericWebApplicationContext(), new MockServletContext());
-		assertTrue(configurer.getHandlerMapping().getUrlMap().isEmpty());
+	public void noResourceHandlers() throws Exception {
+		registry = new ResourceHandlerRegistry(new GenericWebApplicationContext(), new MockServletContext());
+		assertNull(registry.getHandlerMapping());
 	}
 
 	@Test
@@ -60,7 +62,7 @@ public class ResourceConfigurerTests {
 		request.setMethod("GET");
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/testStylesheet.css");
 
-		ResourceHttpRequestHandler handler = getResourceHandler("/resources/**");
+		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		handler.handleRequest(request, response);
 
 		assertEquals("test stylesheet content", response.getContentAsString());
@@ -68,22 +70,23 @@ public class ResourceConfigurerTests {
 
 	@Test
 	public void cachePeriod() {
-		assertEquals(-1, getResourceHandler("/resources/**").getCacheSeconds());
+		assertEquals(-1, getHandler("/resources/**").getCacheSeconds());
 
-		configurer.setCachePeriod(0);
-		assertEquals(0, getResourceHandler("/resources/**").getCacheSeconds());
+		registration.setCachePeriod(0);
+		assertEquals(0, getHandler("/resources/**").getCacheSeconds());
 	}
 
 	@Test
 	public void order() {
-		assertEquals(Integer.MAX_VALUE -1, configurer.getHandlerMapping().getOrder());
+		assertEquals(Integer.MAX_VALUE -1, registry.getHandlerMapping().getOrder());
 
-		configurer.setOrder(0);
-		assertEquals(0, configurer.getHandlerMapping().getOrder());
+		registry.setOrder(0);
+		assertEquals(0, registry.getHandlerMapping().getOrder());
 	}
 
-	private ResourceHttpRequestHandler getResourceHandler(String pathPattern) {
-		return (ResourceHttpRequestHandler) configurer.getHandlerMapping().getUrlMap().get(pathPattern);
+	private ResourceHttpRequestHandler getHandler(String pathPattern) {
+		SimpleUrlHandlerMapping handlerMapping = (SimpleUrlHandlerMapping) registry.getHandlerMapping();
+		return (ResourceHttpRequestHandler) handlerMapping.getUrlMap().get(pathPattern);
 	}
 
 }

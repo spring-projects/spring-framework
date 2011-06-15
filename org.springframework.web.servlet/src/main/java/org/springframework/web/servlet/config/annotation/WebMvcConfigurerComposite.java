@@ -74,21 +74,21 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 		}
 	}
 
-	public void configureInterceptors(InterceptorConfigurer configurer) {
+	public void addInterceptors(InterceptorRegistry registry) {
 		for (WebMvcConfigurer delegate : delegates) {
-			delegate.configureInterceptors(configurer);
+			delegate.addInterceptors(registry);
 		}
 	}
 
-	public void configureViewControllers(ViewControllerConfigurer configurer) {
+	public void addViewControllers(ViewControllerRegistry registry) {
 		for (WebMvcConfigurer delegate : delegates) {
-			delegate.configureViewControllers(configurer);
+			delegate.addViewControllers(registry);
 		}
 	}
 
-	public void configureResourceHandling(ResourceConfigurer configurer) {
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		for (WebMvcConfigurer delegate : delegates) {
-			delegate.configureResourceHandling(configurer);
+			delegate.addResourceHandlers(registry);
 		}
 	}
 

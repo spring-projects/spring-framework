@@ -21,75 +21,78 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
+import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 
 /**
- * Helps with configuring a handler for serving static resources by forwarding to the Servlet container's default
- * Servlet. This is commonly used when the {@link DispatcherServlet} is mapped to "/", which results in cleaner
- * URLs (without a servlet prefix) but may need to still allow some requests (e.g. static resources) to be handled
- * by the Servlet container's default servlet.
- *
- * <p>It is important the configured handler remains last in the order of all {@link HandlerMapping} instances in
- * the Spring MVC web application context. That is is the case if relying on @{@link EnableWebMvc}.
- * However, if you register your own HandlerMapping instance sure to set its "order" property to a value lower
- * than that of the {@link DefaultServletHttpRequestHandler}, which is {@link Integer#MAX_VALUE}.
+ * Configures a request handler for serving static resources by forwarding the request to the Servlet container's 
+ * "default" Servlet. This is indended to be used when the Spring MVC {@link DispatcherServlet} is mapped to "/"
+ * thus overriding the Servlet container's default handling of static resources. Since this handler is configured 
+ * at the lowest precedence, effectively it allows all other handler mappings to handle the request, and if none
+ * of them do, this handler can forward it to the "default" Servlet.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  *
- * @see ResourceConfigurer
+ * @see DefaultServletHttpRequestHandler
  */
 public class DefaultServletHandlerConfigurer {
 
-	private DefaultServletHttpRequestHandler requestHandler;
-
 	private final ServletContext servletContext;
 
+	private DefaultServletHttpRequestHandler handler;
+
+	/**
+	 * Create a {@link DefaultServletHandlerConfigurer} instance.
+	 * @param servletContext the ServletContext to use to configure the underlying DefaultServletHttpRequestHandler.
+	 */
 	public DefaultServletHandlerConfigurer(ServletContext servletContext) {
+		Assert.notNull(servletContext, "A ServletContext is required to configure default servlet handling");
 		this.servletContext = servletContext;
 	}
 
 	/**
-	 * Enable forwarding to the Servlet container default servlet. The {@link DefaultServletHttpRequestHandler}
-	 * will try to auto-detect the default Servlet at startup using a list of known names. Alternatively, you can
-	 * specify the name of the default Servlet, see {@link #enable(String)}.
+	 * Enable forwarding to the "default" Servlet. When this method is used the {@link DefaultServletHttpRequestHandler}
+	 * will try to auto-detect the "default" Servlet name. Alternatively, you can specify the name of the default 
+	 * Servlet via {@link #enable(String)}.
+	 * @see DefaultServletHttpRequestHandler
 	 */
 	public void enable() {
 		enable(null);
 	}
 
 	/**
-	 * Enable forwarding to the Servlet container default servlet specifying explicitly the name of the default
-	 * Servlet to forward static resource requests to. This is useful when the default Servlet cannot be detected
-	 * (e.g. when using an unknown container or when it has been manually configured).
+	 * Enable forwarding to the "default" Servlet identified by the given name.
+	 * This is useful when the default Servlet cannot be auto-detected, for example when it has been manually configured.
+	 * @see DefaultServletHttpRequestHandler
 	 */
 	public void enable(String defaultServletName) {
-		requestHandler = new DefaultServletHttpRequestHandler();
-		requestHandler.setDefaultServletName(defaultServletName);
-		requestHandler.setServletContext(servletContext);
+		handler = new DefaultServletHttpRequestHandler();
+		handler.setDefaultServletName(defaultServletName);
+		handler.setServletContext(servletContext);
 	}
 
 	/**
-	 * Return a {@link SimpleUrlHandlerMapping} instance ordered at {@link Integer#MAX_VALUE} containing a
-	 * {@link DefaultServletHttpRequestHandler} mapped to {@code /**}.
+	 * Return a handler mapping instance ordered at {@link Integer#MAX_VALUE} containing the
+	 * {@link DefaultServletHttpRequestHandler} instance mapped to {@code "/**"}; or {@code null} if 
+	 * default servlet handling was not been enabled.
 	 */
-	protected SimpleUrlHandlerMapping getHandlerMapping() {
+	protected AbstractHandlerMapping getHandlerMapping() {
+		if (handler == null) {
+			return null;
+		}
+		
+		Map<String, HttpRequestHandler> urlMap = new HashMap<String, HttpRequestHandler>();
+		urlMap.put("/**", handler);
+
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
 		handlerMapping.setOrder(Integer.MAX_VALUE);
-		handlerMapping.setUrlMap(getUrlMap());
+		handlerMapping.setUrlMap(urlMap);
 		return handlerMapping;
-	}
-
-	private Map<String, HttpRequestHandler> getUrlMap() {
-		Map<String, HttpRequestHandler> urlMap = new HashMap<String, HttpRequestHandler>();
-		if (requestHandler != null) {
-			urlMap.put("/**", requestHandler);
-		}
-		return urlMap ;
 	}
 
 }

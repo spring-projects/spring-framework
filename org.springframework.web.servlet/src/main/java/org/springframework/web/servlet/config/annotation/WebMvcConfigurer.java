@@ -24,23 +24,21 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import com.sun.corba.se.impl.presentation.rmi.ExceptionHandler;
 
 /**
- * Defines configuration callback methods for customizing the default Spring MVC configuration enabled through the 
- * use of @{@link EnableWebMvc}. 
+ * Defines configuration callback methods for customizing the default Spring MVC code-based configuration enabled 
+ * through @{@link EnableWebMvc}. 
  * 
  * <p>Classes annotated with @{@link EnableWebMvc} can implement this interface in order to be called back and 
- * given a chance to customize the default configuration. The most convenient way to implement this interface is 
- * by extending from {@link WebMvcConfigurerAdapter}, which provides empty method implementations and allows 
- * overriding only the callback methods you're interested in.
+ * given a chance to customize the default configuration. The most convenient way to implement this interface 
+ * is to extend {@link WebMvcConfigurerAdapter}, which provides empty method implementations.
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
@@ -56,9 +54,9 @@ public interface WebMvcConfigurer {
 
 	/**
 	 * Configure the list of {@link HttpMessageConverter}s to use when resolving method arguments or handling
-	 * return  values in @{@link RequestMapping} and @{@link ExceptionHandler} methods. 
-	 * Specifying custom converters overrides the converters registered by default.
-	 * @param converters a list to add message converters to
+	 * return values in @{@link RequestMapping} and @{@link ExceptionHandler} methods. 
+	 * Adding converters to the list turns off the default converters that would otherwise be registered by default.
+	 * @param converters a list to add message converters to; initially an empty list.
 	 */
 	void configureMessageConverters(List<HttpMessageConverter<?>> converters);
 
@@ -71,58 +69,56 @@ public interface WebMvcConfigurer {
 
 	/**
 	 * Add custom {@link HandlerMethodArgumentResolver}s to use in addition to the ones registered by default.
-	 * <p>Generally custom argument resolvers are invoked first. However this excludes default argument resolvers that
-	 * rely on the presence of annotations (e.g. {@code @RequestParameter}, {@code @PathVariable}, etc.). Those 
-	 * argument resolvers are not customizable without configuring RequestMappingHandlerAdapter directly. 
-	 * @param argumentResolvers the list of custom converters, initially empty
+	 * <p>Custom argument resolvers are invoked before built-in resolvers except for those that rely on the presence 
+	 * of annotations (e.g. {@code @RequestParameter}, {@code @PathVariable}, etc.). The latter can be customized 
+	 * by configuring the {@link RequestMappingHandlerAdapter} directly. 
+	 * @param argumentResolvers the list of custom converters; initially an empty list.
 	 */
 	void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers);
 
 	/**
-	 * Add custom {@link HandlerMethodReturnValueHandler}s to in addition to the ones registered by default.
-	 * <p>Generally custom return value handlers are invoked first. However this excludes default return value handlers 
-	 * that rely on the presence of annotations (e.g. {@code @ResponseBody}, {@code @ModelAttribute}, etc.). Those 
-	 * handlers are not customizable without configuring RequestMappingHandlerAdapter directly.
-	 * @param returnValueHandlers the list of custom handlers, initially empty
+	 * Add custom {@link HandlerMethodReturnValueHandler}s in addition to the ones registered by default.
+	 * <p>Custom return value handlers are invoked before built-in ones except for those that rely on the presence 
+	 * of annotations (e.g. {@code @ResponseBody}, {@code @ModelAttribute}, etc.). The latter can be customized
+	 * by configuring the {@link RequestMappingHandlerAdapter} directly.
+	 * @param returnValueHandlers the list of custom handlers; initially an empty list.
 	 */
 	void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers);
 
 	/**
 	 * Configure the list of {@link HandlerExceptionResolver}s to use for handling unresolved controller exceptions.
-	 * Specifying exception resolvers overrides the ones registered by default.
-	 * @param exceptionResolvers a list to add exception resolvers to
+	 * Adding resolvers to the list turns off the default resolvers that would otherwise be registered by default.
+	 * @param exceptionResolvers a list to add exception resolvers to; initially an empty list.
 	 */
 	void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
 
 	/**
-	 * Configure the Spring MVC interceptors to use. Interceptors allow requests to be pre- and post-processed 
-	 * before and after controller invocation. They can be registered to apply to all requests or be limited 
-	 * to a set of path patterns.
-	 * @see InterceptorConfigurer
+	 * Add Spring MVC lifecycle interceptors for pre- and post-processing of controller method invocations.
+	 * Interceptors can be registered to apply to all requests or to a set of URL path patterns.
+	 * @see InterceptorRegistry
 	 */
-	void configureInterceptors(InterceptorConfigurer configurer);
+	void addInterceptors(InterceptorRegistry registry);
 
 	/**
-	 * Configure view controllers. View controllers provide a direct mapping between a URL path and view name. 
-	 * This is useful when serving requests that don't require application-specific controller logic and can 
-	 * be forwarded directly to a view for rendering.
-	 * @see ViewControllerConfigurer
+	 * Add view controllers to create a direct mapping between a URL path and view name. This is useful when
+	 * you just want to forward the request to a view such as a JSP without the need for controller logic. 
+	 * @see ViewControllerRegistry
 	 */
-	void configureViewControllers(ViewControllerConfigurer configurer);
+	void addViewControllers(ViewControllerRegistry registry);
 
 	/**
-	 * Configure a handler for serving static resources such as images, js, and, css files through Spring MVC
-	 * including setting cache headers optimized for efficient loading in a web browser. Resources can be served
-	 * out of locations under web application root, from the classpath, and others.
-	 * @see ResourceConfigurer
+	 * Add resource handlers to use to serve static resources such as images, js, and, css files through 
+	 * the Spring MVC {@link DispatcherServlet} including the setting of cache headers optimized for efficient 
+	 * loading in a web browser. Resources can be served out of locations under web application root, 
+	 * from the classpath, and others.
+	 * @see ResourceHandlerRegistry
 	 */
-	void configureResourceHandling(ResourceConfigurer configurer);
+	void addResourceHandlers(ResourceHandlerRegistry registry);
 
 	/**
-	 * Configure a handler for delegating unhandled requests by forwarding to the Servlet container's default
-	 * servlet. This is commonly used when the {@link DispatcherServlet} is mapped to "/", which results in
-	 * cleaner URLs (without a servlet prefix) but may need to still allow some requests (e.g. static resources)
-	 * to be handled by the Servlet container's default servlet.
+	 * Configure a handler for delegating unhandled requests by forwarding to the Servlet container's "default"
+	 * servlet. The use case for this is when the {@link DispatcherServlet} is mapped to "/" thus overriding 
+	 * the Servlet container's default handling of static resources.
 	 * @see DefaultServletHandlerConfigurer
 	 */
 	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);

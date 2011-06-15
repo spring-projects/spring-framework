@@ -62,7 +62,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		loadBeanDefinitions("mvc-config-message-codes-resolver.xml");
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
-		Object initializer = new DirectFieldAccessor(adapter).getPropertyValue("webBindingInitializer");
+		Object initializer = adapter.getWebBindingInitializer();
 		assertNotNull(initializer);
 		MessageCodesResolver resolver = ((ConfigurableWebBindingInitializer) initializer).getMessageCodesResolver();
 		assertNotNull(resolver);

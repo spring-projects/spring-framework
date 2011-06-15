@@ -28,11 +28,13 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * A variant of {@link WebMvcConfigurationSupport} that delegates to one or more registered {@link WebMvcConfigurer} 
- * implementations allowing each of them to customize the default Spring MVC configuration. 
+ * A variant of {@link WebMvcConfigurationSupport} that delegates to one or more registered 
+ * {@link WebMvcConfigurer}s allowing each of them to customize the default Spring MVC 
+ * code-based configuration.
  * 
- * <p>This class is automatically imported when @{@link EnableWebMvc} is used on an @{@link Configuration} class.
- * In turn it detects all implementations of {@link WebMvcConfigurer} via autowiring and in turn delegates to them.  
+ * <p>This class is automatically imported when @{@link EnableWebMvc} is used to annotate
+ * an @{@link Configuration} class. In turn it detects implementations of {@link WebMvcConfigurer}
+ * via autowiring and delegates to them.  
  * 
  * @see EnableWebMvc
  * @see WebMvcConfigurer
@@ -54,18 +56,18 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	protected final void configureInterceptors(InterceptorConfigurer configurer) {
-		configurers.configureInterceptors(configurer);
+	protected final void addInterceptors(InterceptorRegistry registry) {
+		configurers.addInterceptors(registry);
 	}
 
 	@Override
-	protected final void configureViewControllers(ViewControllerConfigurer configurer) {
-		configurers.configureViewControllers(configurer);
+	protected final void addViewControllers(ViewControllerRegistry registry) {
+		configurers.addViewControllers(registry);
 	}
 
 	@Override
-	protected final void configureResourceHandling(ResourceConfigurer configurer) {
-		configurers.configureResourceHandling(configurer);
+	protected final void addResourceHandlers(ResourceHandlerRegistry registry) {
+		configurers.addResourceHandlers(registry);
 	}
 
 	@Override
