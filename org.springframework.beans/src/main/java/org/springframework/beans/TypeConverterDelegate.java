@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -224,7 +224,8 @@ class TypeConverterDelegate {
 				}
 				if (editor != null) {
 					msg.append(": PropertyEditor [").append(editor.getClass().getName()).append(
-							"] returned inappropriate value");
+							"] returned inappropriate value of type [").append(
+							ClassUtils.getDescriptiveType(convertedValue)).append("]");
 					throw new IllegalArgumentException(msg.toString());
 				}
 				else {

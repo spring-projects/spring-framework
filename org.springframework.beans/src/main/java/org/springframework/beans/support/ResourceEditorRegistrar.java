@@ -34,9 +34,10 @@ import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
@@ -109,6 +110,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	public void registerCustomEditors(PropertyEditorRegistry registry) {
 		ResourceEditor baseEditor = new ResourceEditor(this.resourceLoader, this.propertyResolver);
 		doRegisterEditor(registry, Resource.class, baseEditor);
+		doRegisterEditor(registry, ContextResource.class, baseEditor);
 		doRegisterEditor(registry, InputStream.class, new InputStreamEditor(baseEditor));
 		doRegisterEditor(registry, InputSource.class, new InputSourceEditor(baseEditor));
 		doRegisterEditor(registry, File.class, new FileEditor(baseEditor));
