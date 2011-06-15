@@ -16,7 +16,6 @@
 
 package org.springframework.oxm.castor;
 
-/** @author Arjen Poutsma */
 public class CastorObject {
 
 	private String name;
