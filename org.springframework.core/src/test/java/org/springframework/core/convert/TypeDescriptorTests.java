@@ -227,6 +227,14 @@ public class TypeDescriptorTests {
 	}
 
 	@Test
+	public void propertyTypeCovariance() throws Exception {
+		GenericType<Number> genericBean = new NumberType();
+		Property property = new Property(getClass(), genericBean.getClass().getMethod("getProperty", null), genericBean.getClass().getMethod("setProperty", Number.class));		
+		TypeDescriptor desc = new TypeDescriptor(property);
+		assertEquals(Integer.class, desc.getType());
+	}
+
+	@Test
 	public void propertyGenericTypeList() throws Exception {
 		GenericType<Integer> genericBean = new IntegerType();
 		Property property = new Property(getClass(), genericBean.getClass().getMethod("getListProperty", null), genericBean.getClass().getMethod("setListProperty", List.class));		
@@ -239,7 +247,7 @@ public class TypeDescriptorTests {
 		T getProperty();
 	
 		void setProperty(T t);
-		
+
 		List<T> getListProperty();
 		
 		void setListProperty(List<T> t);
@@ -268,6 +276,23 @@ public class TypeDescriptorTests {
 			
 		}
 		
+	}
+
+	public class NumberType implements GenericType<Number> {
+
+		public Integer getProperty() {
+			return null;
+		}
+
+		public void setProperty(Number t) {
+		}
+
+		public List<Number> getListProperty() {
+			return null;
+		}
+
+		public void setListProperty(List<Number> t) {
+		}
 	}
 
 	@Test
