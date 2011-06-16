@@ -50,7 +50,7 @@ import javax.servlet.ServletException;
  *
  * <servlet-mapping>
  *   <servlet-name>dispatcher</servlet-name>
- *   <url-pattern>/main</url-pattern>
+ *   <url-pattern>/</url-pattern>
  * </servlet-mapping>}</pre>
  *
  * <h3>The code-based approach with {@code WebApplicationInitializer}</h3>
@@ -67,7 +67,7 @@ import javax.servlet.ServletException;
  *      ServletRegistration.Dynamic dispatcher =
  *        container.addServlet("dispatcher", new DispatcherServlet(appContext));
  *      dispatcher.setLoadOnStartup(1);
- *      dispatcher.addMapping("/main");
+ *      dispatcher.addMapping("/");
  *    }
  *
  * }</pre>
@@ -126,7 +126,7 @@ import javax.servlet.ServletException;
  *      ServletRegistration.Dynamic dispatcher =
  *        container.addServlet("dispatcher", new DispatcherServlet(dispatcherContext));
  *      dispatcher.setLoadOnStartup(1);
- *      dispatcher.addMapping("/main");
+ *      dispatcher.addMapping("/");
  *    }
  *
  * }</pre>
