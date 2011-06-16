@@ -23,6 +23,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.junit.Ignore;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
 
@@ -42,7 +43,16 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		return JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
 	}
 
-	public void testTestValidConnection() throws Exception {
+	// TODO [SPR-8089] Clean up ignored JMX tests.
+	//
+	// @Ignore should have no effect for JUnit 3.8 tests; however, it appears
+	// that tests on the CI server -- as well as those in Eclipse -- do in
+	// fact get ignored. So we leave @Ignore here so that developers can
+	// easily search for ignored tests.
+	//
+	// Once fixed, renamed to test* instead of ignore*.
+	@Ignore("Requires jmxremote_optional.jar; see comments in AbstractMBeanServerTests for details.")
+	public void ignoreTestValidConnection() throws Exception {
 		JMXConnectorServer connectorServer = getConnectorServer();
 		connectorServer.start();
 
@@ -75,7 +85,16 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		}
 	}
 
-	public void testTestWithLazyConnection() throws Exception {
+	// TODO [SPR-8089] Clean up ignored JMX tests.
+	//
+	// @Ignore should have no effect for JUnit 3.8 tests; however, it appears
+	// that tests on the CI server -- as well as those in Eclipse -- do in
+	// fact get ignored. So we leave @Ignore here so that developers can
+	// easily search for ignored tests.
+	//
+	// Once fixed, renamed to test* instead of ignore*.
+	@Ignore("Requires jmxremote_optional.jar; see comments in AbstractMBeanServerTests for details.")
+	public void ignoreTestWithLazyConnection() throws Exception {
 		MBeanServerConnectionFactoryBean bean = new MBeanServerConnectionFactoryBean();
 		bean.setServiceUrl(SERVICE_URL);
 		bean.setConnectOnStartup(false);
