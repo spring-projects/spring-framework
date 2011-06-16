@@ -133,8 +133,8 @@ public final class Property {
 		if (read == null && write == null) {
 			throw new IllegalStateException("Property is neither readable nor writeable");
 		}
-		if (read != null && write != null && !read.getParameterType().equals(write.getParameterType())) {
-			throw new IllegalStateException("Read and write parameter types are not the same");
+		if (read != null && write != null && !write.getParameterType().isAssignableFrom(read.getParameterType())) {
+			throw new IllegalStateException("Write parameter is not assignable from read parameter");
 		}
 		return read != null ? read : write;
 	}
