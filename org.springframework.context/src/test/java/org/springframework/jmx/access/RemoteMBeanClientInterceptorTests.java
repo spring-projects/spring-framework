@@ -26,9 +26,18 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.junit.Ignore;
+
 /**
  * @author Rob Harrop
  */
+// TODO [SPR-8089] Clean up ignored JMX tests.
+//
+// @Ignore should have no effect for JUnit 3.8 tests; however, it appears
+// that tests on the CI server -- as well as those in Eclipse -- do in
+// fact get ignored. So we leave @Ignore here so that developers can
+// easily search for ignored tests.
+@Ignore("Requires jmxremote_optional.jar; see comments in AbstractMBeanServerTests for details.")
 public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
 
 	private static final String SERVICE_URL = "service:jmx:jmxmp://localhost:9876";
