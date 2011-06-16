@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,12 +58,16 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 	 * Create a new DirectFieldAccessor for the given target object.
 	 * @param target the target object to access
 	 */
-	public DirectFieldAccessor(Object target) {
+	public DirectFieldAccessor(final Object target) {
 		Assert.notNull(target, "Target object must not be null");
 		this.target = target;
 		ReflectionUtils.doWithFields(this.target.getClass(), new ReflectionUtils.FieldCallback() {
 			public void doWith(Field field) {
-				fieldMap.put(field.getName(), field);
+				if (fieldMap.containsKey(field.getName())) {
+					// ignore superclass declarations of fields already found in a subclass
+				} else {
+					fieldMap.put(field.getName(), field);
+				}
 			}
 		});
 		this.typeConverterDelegate = new TypeConverterDelegate(this, target);
@@ -81,7 +85,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 	}
 
 	@Override
-	public Class getPropertyType(String propertyName) throws BeansException {
+	public Class<?> getPropertyType(String propertyName) throws BeansException {
 		Field field = this.fieldMap.get(propertyName);
 		if (field != null) {
 			return field.getType();
