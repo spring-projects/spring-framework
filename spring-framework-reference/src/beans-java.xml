@@ -204,10 +204,10 @@ public class AppConfig {
       &lt;/init-param&gt;
   &lt;/servlet&gt;
 
-  &lt;!-- map all requests for /main/* to the dispatcher servlet --&gt;
+  &lt;!-- map all requests for /app/* to the dispatcher servlet --&gt;
   &lt;servlet-mapping&gt;
       &lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;
-      &lt;url-pattern&gt;/main/*&lt;/url-pattern&gt;
+      &lt;url-pattern&gt;/app/*&lt;/url-pattern&gt;
   &lt;/servlet-mapping&gt;
 &lt;/web-app&gt;</programlisting></para>
     </section>
