@@ -5,8 +5,12 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.annotation.Inherited;
+
 import org.junit.Test;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * Tests regarding overloading and overriding of bean methods.
@@ -52,7 +56,7 @@ public class BeanMethodPolymorphismTests {
 		@Bean Integer anInt() { return 5; }
 		@Bean String aString(Integer dependency) { return "overloaded"+dependency; }
 	}
-	
+
 	/**
 	 * When inheritance is not involved, it is still possible to override a bean method from
 	 * the container's point of view. This is not strictly 'overloading' of a method per se,
@@ -66,6 +70,35 @@ public class BeanMethodPolymorphismTests {
 	@Import(SubConfig.class)
 	static @Configuration class ShadowConfig {
 		@Bean String aString() { return "shadow"; }
+	}
+
+	/**
+	 * Tests that polymorphic Configuration classes need not explicitly redeclare the
+	 * {@link Configuration} annotation. This respects the {@link Inherited} nature
+	 * of the Configuration annotation, even though it's being detected via ASM.
+	 */
+	@Test
+	public void beanMethodsDetectedOnSuperClass() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(Config.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		beanFactory.getBean("testBean", TestBean.class);
+	}
+
+
+	@Configuration
+	static class BaseConfig {
+
+		@Bean
+		public TestBean testBean() {
+			return new TestBean();
+		}
+	}
+
+
+	@Configuration
+	static class Config extends BaseConfig {
 	}
 
 }
