@@ -44,7 +44,7 @@ import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondit
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ProducesRequestCondition extends RequestConditionSupport<ProducesRequestCondition> {
+public class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 
 	private final List<ProduceMediaTypeExpression> expressions;
 
@@ -60,8 +60,8 @@ public class ProducesRequestCondition extends RequestConditionSupport<ProducesRe
 	 * Creates a {@link ProducesRequestCondition} with the given header and produces expressions.
 	 * In addition to produces expressions, {@code "Accept"} header expressions are extracted and treated as
 	 * producible media type expressions.
-	 * @param produces the produces expressions to parse
-	 * @param headers the header expression to parse
+	 * @param produces the produces expressions to parse; if 0, the condition matches to all requests
+	 * @param headers the header expression to parse; if 0, the condition matches to all requests
 	 */
 	public ProducesRequestCondition(String[] produces, String[] headers) {
 		this(parseExpressions(produces, headers));
@@ -119,8 +119,8 @@ public class ProducesRequestCondition extends RequestConditionSupport<ProducesRe
 	}
 
 	@Override
-	protected boolean isLogicalConjunction() {
-		return false;
+	protected String getToStringInfix() {
+		return " || ";
 	}
 
 	/**

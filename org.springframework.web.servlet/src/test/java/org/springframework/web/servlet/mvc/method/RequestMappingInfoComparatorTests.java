@@ -34,7 +34,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.condition.ParamsRequestCondition;
 import org.springframework.web.servlet.mvc.method.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.method.condition.RequestMethodsRequestCondition;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Test fixture with {@link RequestMappingHandlerMapping} testing its {@link RequestMappingInfo} comparator.
@@ -57,8 +56,7 @@ public class RequestMappingInfoComparatorTests {
 	@Test
 	public void moreSpecificPatternWins() {
 		request.setRequestURI("/foo");
-		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
-		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator(lookupPath, request);
+		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator(request);
 		RequestMappingInfo key1 = new RequestMappingInfo(new String[]{"/fo*"});
 		RequestMappingInfo key2 = new RequestMappingInfo(new String[]{"/foo"});
 
@@ -68,8 +66,7 @@ public class RequestMappingInfoComparatorTests {
 	@Test
 	public void equalPatterns() {
 		request.setRequestURI("/foo");
-		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
-		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator(lookupPath, request);
+		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator(request);
 		RequestMappingInfo key1 = new RequestMappingInfo(new String[]{"/foo*"});
 		RequestMappingInfo key2 = new RequestMappingInfo(new String[]{"/foo*"});
 
@@ -79,20 +76,19 @@ public class RequestMappingInfoComparatorTests {
 	@Test
 	public void greaterNumberOfMatchingPatternsWins() throws Exception {
 		request.setRequestURI("/foo.html");
-		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 		RequestMappingInfo key1 = new RequestMappingInfo(new String[]{"/foo", "*.jpeg"});
 		RequestMappingInfo key2 = new RequestMappingInfo(new String[]{"/foo", "*.html"});
-		RequestMappingInfo match1 = handlerMapping.getMatchingMapping(key1, lookupPath, request);
-		RequestMappingInfo match2 = handlerMapping.getMatchingMapping(key2, lookupPath, request);
+		RequestMappingInfo match1 = handlerMapping.getMatchingMapping(key1, request);
+		RequestMappingInfo match2 = handlerMapping.getMatchingMapping(key2, request);
 		List<RequestMappingInfo> matches = asList(match1, match2);
-		Collections.sort(matches, handlerMapping.getMappingComparator(lookupPath, request));
+		Collections.sort(matches, handlerMapping.getMappingComparator(request));
 
 		assertSame(match2.getPatternsCondition(), matches.get(0).getPatternsCondition());
 	}
 
 	@Test
 	public void oneMethodWinsOverNone() {
-		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator("", request);
+		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator(request);
 		RequestMappingInfo key1 = new RequestMappingInfo(null);
 		RequestMappingInfo key2 = new RequestMappingInfo(null, new RequestMethod[] {RequestMethod.GET});
 
@@ -108,7 +104,7 @@ public class RequestMappingInfoComparatorTests {
 						new ParamsRequestCondition("foo"), null, null, null);
 		List<RequestMappingInfo> list = asList(empty, oneMethod, oneMethodOneParam);
 		Collections.shuffle(list);
-		Collections.sort(list, handlerMapping.getMappingComparator("", request));
+		Collections.sort(list, handlerMapping.getMappingComparator(request));
 
 		assertEquals(oneMethodOneParam, list.get(0));
 		assertEquals(oneMethod, list.get(1));
@@ -122,7 +118,7 @@ public class RequestMappingInfoComparatorTests {
 		RequestMappingInfo none = new RequestMappingInfo(null);
 
 		request.addHeader("Accept", "application/xml, text/html");
-		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator("", request);
+		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator(request);
 
 		int result = comparator.compare(html, xml);
 		assertTrue("Invalid comparison result: " + result, result > 0);
@@ -134,14 +130,14 @@ public class RequestMappingInfoComparatorTests {
 
 		request = new MockHttpServletRequest();
 		request.addHeader("Accept", "application/xml, text/*");
-		comparator = handlerMapping.getMappingComparator("", request);
+		comparator = handlerMapping.getMappingComparator(request);
 
 		assertTrue(comparator.compare(html, xml) > 0);
 		assertTrue(comparator.compare(xml, html) < 0);
 
 		request = new MockHttpServletRequest();
 		request.addHeader("Accept", "application/pdf");
-		comparator = handlerMapping.getMappingComparator("", request);
+		comparator = handlerMapping.getMappingComparator(request);
 
 		assertTrue(comparator.compare(html, xml) == 0);
 		assertTrue(comparator.compare(xml, html) == 0);
@@ -149,7 +145,7 @@ public class RequestMappingInfoComparatorTests {
 		// See SPR-7000
 		request = new MockHttpServletRequest();
 		request.addHeader("Accept", "text/html;q=0.9,application/xml");
-		comparator = handlerMapping.getMappingComparator("", request);
+		comparator = handlerMapping.getMappingComparator(request);
 
 		assertTrue(comparator.compare(html, xml) > 0);
 		assertTrue(comparator.compare(xml, html) < 0);

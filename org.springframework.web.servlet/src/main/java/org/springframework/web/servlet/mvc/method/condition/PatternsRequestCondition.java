@@ -41,7 +41,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class PatternsRequestCondition extends RequestConditionSupport<PatternsRequestCondition> {
+public class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 	
 	private final Set<String> patterns; 
 
@@ -62,7 +62,7 @@ public class PatternsRequestCondition extends RequestConditionSupport<PatternsRe
 	 * Creates a new {@link PatternsRequestCondition} with the given URL patterns. 
 	 * Each pattern that is not empty and does not start with "/" is prepended with "/". 
 	 * 
-	 * @param patterns the URL patterns to use; if 0 the condition will match to every request. 
+	 * @param patterns the URL patterns to use; if 0, the condition will match to every request. 
 	 * @param urlPathHelper a {@link UrlPathHelper} for determining the lookup path for a request
 	 * @param pathMatcher a {@link PathMatcher} for pattern path matching
 	 */
@@ -96,7 +96,7 @@ public class PatternsRequestCondition extends RequestConditionSupport<PatternsRe
 		}
 		return result;
 	}
-	
+
 	public Set<String> getPatterns() {
 		return patterns;
 	}
@@ -107,8 +107,8 @@ public class PatternsRequestCondition extends RequestConditionSupport<PatternsRe
 	}
 
 	@Override
-	protected boolean isLogicalConjunction() {
-		return false;
+	protected String getToStringInfix() {
+		return " || ";
 	}
 
 	/**
