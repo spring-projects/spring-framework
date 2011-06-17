@@ -107,7 +107,6 @@ public class FactoryMethodTests {
 	@Test
 	public void testFactoryMethodsWithNullValue() {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		xbf.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 		reader.loadBeanDefinitions(new ClassPathResource("factory-methods.xml", getClass()));
 

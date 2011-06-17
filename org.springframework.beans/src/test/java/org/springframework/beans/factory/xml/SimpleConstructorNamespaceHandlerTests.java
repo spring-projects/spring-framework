@@ -103,7 +103,7 @@ public class SimpleConstructorNamespaceHandlerTests {
 
 	private XmlBeanFactory createFactory(String resourceName) {
 		XmlBeanFactory fact = new XmlBeanFactory(new ClassPathResource(resourceName, getClass()));
-		fact.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		//fact.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		return fact;
 	}
 }
