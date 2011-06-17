@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class XMLEventStreamWriterTest {
+import static org.custommonkey.xmlunit.XMLAssert.*;
+
+public class XMLEventStreamWriterTests {
 
 	private static final String XML =
 			"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2'>content</prefix:child></root>"
