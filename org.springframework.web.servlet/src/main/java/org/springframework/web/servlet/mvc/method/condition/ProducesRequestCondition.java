@@ -16,99 +16,170 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondition.HeaderExpression;
 
 /**
- * Represents a collection of produces conditions, typically obtained from {@link
- * org.springframework.web.bind.annotation.RequestMapping#produces() &#64;RequestMapping.produces()}.
- *
+ * A logical disjunction (' || ') request condition to match requests against producible media type expressions.
+ * 
+ * <p>For details on the syntax of the expressions see {@link RequestMapping#consumes()}. If the condition is 
+ * created with 0 producible media type expressions, it matches to every request.
+ * 
+ * <p>This request condition is also capable of parsing header expressions specifically selecting 'Accept' header
+ * expressions and converting them to prodicuble media type expressions.
+ * 
  * @author Arjen Poutsma
- * @see RequestConditionFactory#parseProduces(String...)
- * @see RequestConditionFactory#parseProduces(String[], String[])
+ * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ProducesRequestCondition
-		extends MediaTypesRequestCondition<ProducesRequestCondition.ProduceRequestCondition> {
+public class ProducesRequestCondition extends RequestConditionSupport<ProducesRequestCondition> {
 
-	ProducesRequestCondition(Collection<ProduceRequestCondition> conditions) {
-		super(conditions);
-	}
-
-
-	ProducesRequestCondition(String... consumes) {
-		this(parseConditions(Arrays.asList(consumes)));
-	}
-
-	private static Set<ProduceRequestCondition> parseConditions(List<String> consumes) {
-		Set<ProduceRequestCondition> conditions = new LinkedHashSet<ProduceRequestCondition>(consumes.size());
-		for (String consume : consumes) {
-			conditions.add(new ProduceRequestCondition(consume));
-		}
-		return conditions;
-	}
+	private final List<ProduceMediaTypeExpression> expressions;
 
 	/**
-	 * Creates an empty set of consumes request conditions.
+	 * Creates a {@link ProducesRequestCondition} with the given producible media type expressions.
+	 * @param produces the expressions to parse; if 0 the condition matches to every request
 	 */
-	public ProducesRequestCondition() {
-		this(Collections.<ProduceRequestCondition>emptySet());
+	public ProducesRequestCondition(String... produces) {
+		this(produces, null);
+	}
+	
+	/**
+	 * Creates a {@link ProducesRequestCondition} with the given header and produces expressions.
+	 * In addition to produces expressions, {@code "Accept"} header expressions are extracted and treated as
+	 * producible media type expressions.
+	 * @param produces the produces expressions to parse
+	 * @param headers the header expression to parse
+	 */
+	public ProducesRequestCondition(String[] produces, String[] headers) {
+		this(parseExpressions(produces, headers));
 	}
 
 	/**
-	 * Returns a new {@code RequestCondition} that contains all conditions of this key that match the request.
-	 *
-	 * @param request the request
-	 * @return a new request condition that contains all matching attributes, or {@code null} if not all conditions match
+	 * A private constructor.
+	 */
+	private ProducesRequestCondition(Collection<ProduceMediaTypeExpression> expressions) {
+		this.expressions = new ArrayList<ProduceMediaTypeExpression>(expressions);
+		Collections.sort(this.expressions);
+	}
+
+	private static Set<ProduceMediaTypeExpression> parseExpressions(String[] produces, String[] headers) {
+		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<ProduceMediaTypeExpression>();
+		if (headers != null) {
+			for (String header : headers) {
+				HeaderExpression expr = new HeaderExpression(header);
+				if ("Accept".equalsIgnoreCase(expr.name)) {
+					for( MediaType mediaType : MediaType.parseMediaTypes(expr.value)) {
+						result.add(new ProduceMediaTypeExpression(mediaType, expr.isNegated));
+					}
+				}
+			}
+		}
+		if (produces != null) {
+			for (String produce : produces) {
+				result.add(new ProduceMediaTypeExpression(produce));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the producible media types contained in all expressions of this condition.
+	 */
+	public Set<MediaType> getMediaTypes() {
+		Set<MediaType> result = new LinkedHashSet<MediaType>();
+		for (ProduceMediaTypeExpression expression : expressions) {
+			result.add(expression.getMediaType());
+		}
+		return result;
+	}
+
+	/**
+	 * Returns true if this condition contains no producible media type expressions.
+	 */
+	public boolean isEmpty() {
+		return expressions.isEmpty();
+	}
+
+	@Override
+	protected Collection<ProduceMediaTypeExpression> getContent() {
+		return expressions;
+	}
+
+	@Override
+	protected boolean isLogicalConjunction() {
+		return false;
+	}
+
+	/**
+	 * Returns the "other" instance if "other" as long as it contains any expressions; or "this" instance otherwise.
+	 * In other words "other" takes precedence over "this" as long as it contains any expressions.
+	 * <p>Example: method-level "produces" overrides type-level "produces" condition. 
+	 */
+	public ProducesRequestCondition combine(ProducesRequestCondition other) {
+		return !other.expressions.isEmpty() ? other : this;
+	}
+
+	/**
+	 * Checks if any of the producible media type expressions match the given request and returns an instance that 
+	 * is guaranteed to contain matching media type expressions only.
+	 * 
+	 * @param request the current request
+	 * 
+	 * @return the same instance if the condition contains no expressions; 
+	 * 		or a new condition with matching expressions; or {@code null} if no expressions match.
 	 */
 	public ProducesRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (isEmpty()) {
 			return this;
 		}
-		Set<ProduceRequestCondition> matchingConditions = new LinkedHashSet<ProduceRequestCondition>(getConditions());
-		for (Iterator<ProduceRequestCondition> iterator = matchingConditions.iterator(); iterator.hasNext();) {
-			ProduceRequestCondition condition = iterator.next();
-			if (!condition.match(request)) {
+		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<ProduceMediaTypeExpression>(expressions);
+		for (Iterator<ProduceMediaTypeExpression> iterator = result.iterator(); iterator.hasNext();) {
+			ProduceMediaTypeExpression expression = iterator.next();
+			if (!expression.match(request)) {
 				iterator.remove();
 			}
 		}
-		if (matchingConditions.isEmpty()) {
-			return null;
-		}
-		else {
-			return new ProducesRequestCondition(matchingConditions);
-		}
+		return (result.isEmpty()) ? null : new ProducesRequestCondition(result);
 	}
 
 	/**
-	 * Combines this collection of request condition with another. Returns {@code other}, unless it has the default
-	 * value (i.e. {@code &#42;/&#42;}).
-	 *
-	 * @param other the condition to combine with
+	 * Returns:
+	 * <ul>
+	 * 	<li>0 if the two conditions have the same number of expressions
+	 * 	<li>Less than 1 if "this" has more in number or more specific producible media type expressions
+	 * 	<li>Greater than 1 if "other" has more in number or more specific producible media type expressions
+	 * </ul>   
+	 * 
+	 * <p>It is assumed that both instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)}
+	 * and each instance contains the matching producible media type expression only or is otherwise empty.
 	 */
-	public ProducesRequestCondition combine(ProducesRequestCondition other) {
-		return !other.isEmpty() ? other : this;
-	}
-
-	public int compareTo(ProducesRequestCondition other, List<MediaType> acceptedMediaTypes) {
+	public int compareTo(ProducesRequestCondition other, HttpServletRequest request) {
+		String acceptHeader = request.getHeader("Accept");
+		List<MediaType> acceptedMediaTypes = MediaType.parseMediaTypes(acceptHeader);
+		MediaType.sortByQualityValue(acceptedMediaTypes);
+		
 		for (MediaType acceptedMediaType : acceptedMediaTypes) {
 			int thisIndex = this.indexOfMediaType(acceptedMediaType);
 			int otherIndex = other.indexOfMediaType(acceptedMediaType);
 			if (thisIndex != otherIndex) {
 				return otherIndex - thisIndex;
 			} else if (thisIndex != -1 && otherIndex != -1) {
-				ProduceRequestCondition thisCondition = this.getSortedConditions().get(thisIndex);
-				ProduceRequestCondition otherCondition = other.getSortedConditions().get(otherIndex);
-				int result = thisCondition.compareTo(otherCondition);
+				ProduceMediaTypeExpression thisExpr = this.expressions.get(thisIndex);
+				ProduceMediaTypeExpression otherExpr = other.expressions.get(otherIndex);
+				int result = thisExpr.compareTo(otherExpr);
 				if (result != 0) {
 					return result;
 				}
@@ -118,29 +189,31 @@ public class ProducesRequestCondition
 	}
 
 	private int indexOfMediaType(MediaType mediaType) {
-		List<ProduceRequestCondition> sortedConditions = getSortedConditions();
-		for (int i = 0; i < sortedConditions.size(); i++) {
-			ProduceRequestCondition condition = sortedConditions.get(i);
-			if (mediaType.includes(condition.getMediaType())) {
+		for (int i = 0; i < expressions.size(); i++) {
+			if (mediaType.includes(expressions.get(i).getMediaType())) {
 				return i;
 			}
 		}
 		return -1;
 	}
 
-	static class ProduceRequestCondition extends MediaTypesRequestCondition.MediaTypeRequestCondition {
+	/**
+	 * Parsing and request matching logic for producible media type expressions.
+	 * @see RequestMapping#produces() 
+	 */
+	static class ProduceMediaTypeExpression extends MediaTypeExpression {
 
-		ProduceRequestCondition(MediaType mediaType, boolean negated) {
+		ProduceMediaTypeExpression(MediaType mediaType, boolean negated) {
 			super(mediaType, negated);
 		}
 
-		ProduceRequestCondition(String expression) {
+		ProduceMediaTypeExpression(String expression) {
 			super(expression);
 		}
 
 		@Override
 		protected boolean match(HttpServletRequest request, MediaType mediaType) {
-			List<MediaType> acceptedMediaTypes = getAccept(request);
+			List<MediaType> acceptedMediaTypes = getAcceptedMediaTypes(request);
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {
 				if (mediaType.isCompatibleWith(acceptedMediaType)) {
 					return true;
@@ -149,7 +222,7 @@ public class ProducesRequestCondition
 			return false;
 		}
 
-		private List<MediaType> getAccept(HttpServletRequest request) {
+		private List<MediaType> getAcceptedMediaTypes(HttpServletRequest request) {
 			String acceptHeader = request.getHeader("Accept");
 			if (StringUtils.hasLength(acceptHeader)) {
 				return MediaType.parseMediaTypes(acceptHeader);
@@ -159,4 +232,5 @@ public class ProducesRequestCondition
 			}
 		}
 	}
+
 }

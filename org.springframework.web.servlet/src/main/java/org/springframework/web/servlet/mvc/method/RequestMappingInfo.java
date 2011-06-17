@@ -16,31 +16,19 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.util.PathMatcher;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.method.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.method.condition.ParamsRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.condition.ProducesRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
 import org.springframework.web.servlet.mvc.method.condition.RequestMethodsRequestCondition;
 
 /**
- * Contains a set of conditions to match to a given request such as URL patterns, HTTP methods, request parameters 
- * and headers. 
- * 
- * <p>Two {@link RequestMappingInfo}s can be combined resulting in a new {@link RequestMappingInfo} with conditions
- * from both. A {@link RequestMappingInfo} can also match itself to an HTTP request resulting in a new 
- * {@link RequestMappingInfo} with the subset of conditions relevant to the request.
+ * Contains request mapping conditions to be matched to a given request.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -48,7 +36,7 @@ import org.springframework.web.servlet.mvc.method.condition.RequestMethodsReques
  */
 public final class RequestMappingInfo {
 
-	private final Set<String> patterns;
+	private final PatternsRequestCondition patternsCondition;
 
 	private final RequestMethodsRequestCondition methodsCondition;
 
@@ -63,24 +51,15 @@ public final class RequestMappingInfo {
 	private int hash;
 
 	/**
-	 * Creates a new {@code RequestMappingInfo} instance with the given URL patterns and HTTP methods.
-	 * 
-	 * <p>Package protected for testing purposes.
+	 * Creates a new {@code RequestMappingInfo} instance.
 	 */
-	RequestMappingInfo(Collection<String> patterns, RequestMethod[] methods) {
-		this(patterns, RequestConditionFactory.parseMethods(methods), null, null, null, null);
-	}
-
-	/**
-	 * Creates a new {@code RequestMappingInfo} instance with a full set of conditions.
-	 */
-	public RequestMappingInfo(Collection<String> patterns,
-							 RequestMethodsRequestCondition methodsCondition,
-							 ParamsRequestCondition paramsCondition,
-							 HeadersRequestCondition headersCondition,
-							 ConsumesRequestCondition consumesCondition,
-							 ProducesRequestCondition producesCondition) {
-		this.patterns = asUnmodifiableSet(prependLeadingSlash(patterns));
+	public RequestMappingInfo(PatternsRequestCondition patternsCondition,
+							  RequestMethodsRequestCondition methodsCondition,
+							  ParamsRequestCondition paramsCondition,
+							  HeadersRequestCondition headersCondition,
+							  ConsumesRequestCondition consumesCondition,
+							  ProducesRequestCondition producesCondition) {
+		this.patternsCondition = patternsCondition != null ? patternsCondition : new PatternsRequestCondition();
 		this.methodsCondition = methodsCondition != null ? methodsCondition : new RequestMethodsRequestCondition();
 		this.paramsCondition = paramsCondition != null ? paramsCondition : new ParamsRequestCondition();
 		this.headersCondition = headersCondition != null ? headersCondition : new HeadersRequestCondition();
@@ -88,67 +67,52 @@ public final class RequestMappingInfo {
 		this.producesCondition = producesCondition != null ? producesCondition : new ProducesRequestCondition();
 	}
 
-	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
-		if (patterns == null) {
-			return Collections.emptySet();
-		}
-		Set<String> result = new LinkedHashSet<String>(patterns.size());
-		for (String pattern : patterns) {
-			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
-				pattern = "/" + pattern;
-			}
-			result.add(pattern);
-		}
-		return result;
-	}
-
-	private static <T> Set<T> asUnmodifiableSet(Collection<T> collection) {
-		if (collection == null) {
-			return Collections.emptySet();
-		}
-		Set<T> result = new LinkedHashSet<T>(collection);
-		return Collections.unmodifiableSet(result);
+	/**
+	 * Package protected, used for testing.
+	 */
+	RequestMappingInfo(String[] patterns, RequestMethod... methods) {
+		this(new PatternsRequestCondition(patterns), new RequestMethodsRequestCondition(methods), null, null, null, null);
 	}
 
 	/**
 	 * Returns the patterns of this request mapping info.
 	 */
-	public Set<String> getPatterns() {
-		return patterns;
+	public PatternsRequestCondition getPatternsCondition() {
+		return patternsCondition;
 	}
 
 	/**
-	 * Returns the request method conditions of this request mapping info.
+	 * Returns the request method condition of this request mapping info.
 	 */
-	public RequestMethodsRequestCondition getMethods() {
+	public RequestMethodsRequestCondition getMethodsCondition() {
 		return methodsCondition;
 	}
 
 	/**
-	 * Returns the request parameters conditions of this request mapping info.
+	 * Returns the request parameters condition of this request mapping info.
 	 */
-	public ParamsRequestCondition getParams() {
+	public ParamsRequestCondition getParamsCondition() {
 		return paramsCondition;
 	}
 
 	/**
-	 * Returns the request headers conditions of this request mapping info.
+	 * Returns the request headers condition of this request mapping info.
 	 */
-	public HeadersRequestCondition getHeaders() {
+	public HeadersRequestCondition getHeadersCondition() {
 		return headersCondition;
 	}
 
 	/**
-	 * Returns the request consumes conditions of this request mapping info.
+	 * Returns the request consumes condition of this request mapping info.
 	 */
-	public ConsumesRequestCondition getConsumes() {
+	public ConsumesRequestCondition getConsumesCondition() {
 		return consumesCondition;
 	}
 
 	/**
-	 * Returns the request produces conditions of this request mapping info.
+	 * Returns the request produces condition of this request mapping info.
 	 */
-	public ProducesRequestCondition getProduces() {
+	public ProducesRequestCondition getProducesCondition() {
 		return producesCondition;
 	}
 
@@ -167,110 +131,44 @@ public final class RequestMappingInfo {
 	 * <li>Consumes are combined as per {@link ConsumesRequestCondition#combine(ConsumesRequestCondition)}.
 	 * </ul>
 	 * @param methodKey the key to combine with
-	 * @param pathMatcher to {@linkplain PathMatcher#combine(String, String) combine} the patterns
 	 * @return a new request mapping info containing conditions from both keys
 	 */
-	public RequestMappingInfo combine(RequestMappingInfo methodKey, PathMatcher pathMatcher) {
-		Set<String> patterns = combinePatterns(this.patterns, methodKey.patterns, pathMatcher);
+	public RequestMappingInfo combine(RequestMappingInfo methodKey) {
+		PatternsRequestCondition patterns = this.patternsCondition.combine(methodKey.patternsCondition);
 		RequestMethodsRequestCondition methods = this.methodsCondition.combine(methodKey.methodsCondition);
 		ParamsRequestCondition params = this.paramsCondition.combine(methodKey.paramsCondition);
 		HeadersRequestCondition headers = this.headersCondition.combine(methodKey.headersCondition);
 		ConsumesRequestCondition consumes = this.consumesCondition.combine(methodKey.consumesCondition);
 		ProducesRequestCondition produces = this.producesCondition.combine(methodKey.producesCondition);
-
+		
 		return new RequestMappingInfo(patterns, methods, params, headers, consumes, produces);
 	}
 
-	private static Set<String> combinePatterns(Collection<String> typePatterns,
-											   Collection<String> methodPatterns,
-											   PathMatcher pathMatcher) {
-		Set<String> result = new LinkedHashSet<String>();
-		if (!typePatterns.isEmpty() && !methodPatterns.isEmpty()) {
-			for (String pattern1 : typePatterns) {
-				for (String pattern2 : methodPatterns) {
-					result.add(pathMatcher.combine(pattern1, pattern2));
-				}
-			}
-		}
-		else if (!typePatterns.isEmpty()) {
-			result.addAll(typePatterns);
-		}
-		else if (!methodPatterns.isEmpty()) {
-			result.addAll(methodPatterns);
-		}
-		else {
-			result.add("");
-		}
-		return result;
-	}
-
 	/**
-	 * Returns a new {@code RequestMappingInfo} that contains all conditions of this key that are relevant to the request.
-	 * <ul>
-	 * <li>The list of URL path patterns is trimmed to contain the patterns that match the URL with matching patterns 
-	 * sorted via {@link PathMatcher#getPatternComparator(String)}. 
-	 * <li>The list of HTTP methods is trimmed to contain only the method of the request. 
-	 * <li>Request parameter and request header conditions are included in full. 
-	 * <li>The list of consumes conditions is trimmed and sorted to match the request "Content-Type" header.
-	 * </ul>   
-	 * @param lookupPath mapping lookup path within the current servlet mapping if applicable
+	 * Returns a new {@code RequestMappingInfo} with conditions relevant to the current request.
+	 * For example the list of URL path patterns is trimmed to contain the patterns that match the URL.
 	 * @param request the current request
-	 * @param pathMatcher to check for matching patterns
 	 * @return a new request mapping info that contains all matching attributes, or {@code null} if not all conditions match
 	 */
-	public RequestMappingInfo getMatchingRequestMapping(String lookupPath, HttpServletRequest request, PathMatcher pathMatcher) {
-		RequestMethodsRequestCondition matchingMethodCondition = methodsCondition.getMatchingCondition(request);
-		ParamsRequestCondition matchingParamsCondition = paramsCondition.getMatchingCondition(request);
-		HeadersRequestCondition matchingHeadersCondition = headersCondition.getMatchingCondition(request);
-		ConsumesRequestCondition matchingConsumesCondition = consumesCondition.getMatchingCondition(request);
-		ProducesRequestCondition matchingProducesCondition = producesCondition.getMatchingCondition(request);
+	public RequestMappingInfo getMatchingRequestMapping(HttpServletRequest request) {
+		RequestMethodsRequestCondition matchingMethod = methodsCondition.getMatchingCondition(request);
+		ParamsRequestCondition matchingParams = paramsCondition.getMatchingCondition(request);
+		HeadersRequestCondition matchingHeaders = headersCondition.getMatchingCondition(request);
+		ConsumesRequestCondition matchingConsumes = consumesCondition.getMatchingCondition(request);
+		ProducesRequestCondition matchingProduces = producesCondition.getMatchingCondition(request);
 
-		if (matchingMethodCondition == null || matchingParamsCondition == null || matchingHeadersCondition == null ||
-				matchingConsumesCondition == null || matchingProducesCondition == null)  {
+		if (matchingMethod == null || matchingParams == null || matchingHeaders == null ||
+				matchingConsumes == null || matchingProduces == null)  {
 			return null;
 		}
-		else {
-			List<String> matchingPatterns = getMatchingPatterns(lookupPath, pathMatcher);
-			if (!matchingPatterns.isEmpty()) {
-				return new RequestMappingInfo(matchingPatterns, matchingMethodCondition, matchingParamsCondition,
-						matchingHeadersCondition, matchingConsumesCondition, matchingProducesCondition);
-			}
-			else {
-				return null;
-			}
-		}
-	}
-
-	private List<String> getMatchingPatterns(String lookupPath, PathMatcher pathMatcher) {
-
-		List<String> matchingPatterns = new ArrayList<String>();
-		for (String pattern : this.patterns) {
-			String matchingPattern = getMatchingPattern(pattern, lookupPath, pathMatcher);
-			if (matchingPattern != null) {
-				matchingPatterns.add(matchingPattern);
-			}
+		
+		PatternsRequestCondition matchingPatterns = patternsCondition.getMatchingCondition(request);
+		if (matchingPatterns != null) {
+			return new RequestMappingInfo(matchingPatterns, matchingMethod,
+					matchingParams, matchingHeaders, matchingConsumes,
+					matchingProduces);
 		}
 
-		Collections.sort(matchingPatterns, pathMatcher.getPatternComparator(lookupPath));
-
-		return matchingPatterns;
-	}
-
-	private String getMatchingPattern(String pattern, String lookupPath, PathMatcher pathMatcher) {
-		if (pattern.equals(lookupPath)) {
-			return pattern;
-		}
-		boolean hasSuffix = pattern.indexOf('.') != -1;
-		if (!hasSuffix && pathMatcher.match(pattern + ".*", lookupPath)) {
-			return pattern + ".*";
-		}
-		if (pathMatcher.match(pattern, lookupPath)) {
-			return pattern;
-		}
-		boolean endsWithSlash = pattern.endsWith("/");
-		if (!endsWithSlash && pathMatcher.match(pattern + "/", lookupPath)) {
-			return pattern +"/";
-		}
 		return null;
 	}
 
@@ -281,7 +179,7 @@ public final class RequestMappingInfo {
 		}
 		if (obj != null && obj instanceof RequestMappingInfo) {
 			RequestMappingInfo other = (RequestMappingInfo) obj;
-			return (this.patterns.equals(other.patterns) &&
+			return (this.patternsCondition.equals(other.patternsCondition) &&
 					this.methodsCondition.equals(other.methodsCondition) &&
 					this.paramsCondition.equals(other.paramsCondition) &&
 					this.headersCondition.equals(other.headersCondition) &&
@@ -295,7 +193,7 @@ public final class RequestMappingInfo {
 	public int hashCode() {
 		int result = hash;
 		if (result == 0) {
-			result = patterns.hashCode();
+			result = patternsCondition.hashCode();
 			result = 31 * result + methodsCondition.hashCode();
 			result = 31 * result + paramsCondition.hashCode();
 			result = 31 * result + headersCondition.hashCode();
@@ -309,7 +207,7 @@ public final class RequestMappingInfo {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("{");
-		builder.append(patterns);
+		builder.append(patternsCondition);
 		builder.append(",methods=").append(methodsCondition);
 		builder.append(",params=").append(paramsCondition);
 		builder.append(",headers=").append(headersCondition);

@@ -19,14 +19,15 @@ package org.springframework.web.servlet.mvc.method.condition;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * A condition that supports simple "name=value" style expressions as documented in {@link
- * org.springframework.web.bind.annotation.RequestMapping#params()} and {@link org.springframework.web.bind.annotation.RequestMapping#headers()}.
+ * Supports "name=value" style expressions as described in: 
+ * {@link org.springframework.web.bind.annotation.RequestMapping#params()} and 
+ * {@link org.springframework.web.bind.annotation.RequestMapping#headers()}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @since 3.1
  */
-abstract class AbstractNameValueCondition<T> implements RequestCondition {
+abstract class AbstractNameValueExpression<T> {
 
 	protected final String name;
 
@@ -34,7 +35,7 @@ abstract class AbstractNameValueCondition<T> implements RequestCondition {
 
 	protected final boolean isNegated;
 
-	AbstractNameValueCondition(String expression) {
+	AbstractNameValueExpression(String expression) {
 		int separator = expression.indexOf('=');
 		if (separator == -1) {
 			this.isNegated = expression.startsWith("!");
@@ -64,6 +65,20 @@ abstract class AbstractNameValueCondition<T> implements RequestCondition {
 	protected abstract boolean matchName(HttpServletRequest request);
 
 	protected abstract boolean matchValue(HttpServletRequest request);
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj != null && obj instanceof AbstractNameValueExpression) {
+			AbstractNameValueExpression<?> other = (AbstractNameValueExpression<?>) obj;
+			return ((this.name.equalsIgnoreCase(other.name)) &&
+					(this.value != null ? this.value.equals(other.value) : other.value == null) &&
+					this.isNegated == other.isNegated);
+		}
+		return false;
+	}
 
 	@Override
 	public int hashCode() {

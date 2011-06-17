@@ -16,13 +16,17 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
-import java.util.Set;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Collection;
 
 import org.junit.Test;
-
 import org.springframework.mock.web.MockHttpServletRequest;
-
-import static org.junit.Assert.*;
+import org.springframework.web.servlet.mvc.method.condition.ConsumesRequestCondition.ConsumeMediaTypeExpression;
 
 /**
  * @author Arjen Poutsma
@@ -31,75 +35,79 @@ public class ConsumesRequestConditionTests {
 
 	@Test
 	public void consumesMatch() {
-		RequestCondition condition = new ConsumesRequestCondition("text/plain");
+		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType("text/plain");
 
-		assertTrue(condition.match(request));
+		assertNotNull(condition.getMatchingCondition(request));
 	}
 	
 	@Test
 	public void negatedConsumesMatch() {
-		RequestCondition condition = new ConsumesRequestCondition("!text/plain");
+		ConsumesRequestCondition condition = new ConsumesRequestCondition("!text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType("text/plain");
 
-		assertFalse(condition.match(request));
+		assertNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void consumesWildcardMatch() {
-		RequestCondition condition = new ConsumesRequestCondition("text/*");
+		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/*");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType("text/plain");
 
-		assertTrue(condition.match(request));
+		assertNotNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void consumesMultipleMatch() {
-		RequestCondition condition = new ConsumesRequestCondition("text/plain", "application/xml");
+		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain", "application/xml");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType("text/plain");
 
-		assertTrue(condition.match(request));
+		assertNotNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void consumesSingleNoMatch() {
-		RequestCondition condition = new ConsumesRequestCondition("text/plain");
+		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType("application/xml");
 
-		assertFalse(condition.match(request));
+		assertNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void compareToSingle() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("text/plain");
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*");
 
-		int result = condition1.compareTo(condition2);
+		int result = condition1.compareTo(condition2, request);
 		assertTrue("Invalid comparison result: " + result, result < 0);
 
-		result = condition2.compareTo(condition1);
+		result = condition2.compareTo(condition1, request);
 		assertTrue("Invalid comparison result: " + result, result > 0);
 	}
 
 	@Test
 	public void compareToMultiple() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("*/*", "text/plain");
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*", "text/plain;q=0.7");
 
-		int result = condition1.compareTo(condition2);
+		int result = condition1.compareTo(condition2, request);
 		assertTrue("Invalid comparison result: " + result, result < 0);
 
-		result = condition2.compareTo(condition1);
+		result = condition2.compareTo(condition1, request);
 		assertTrue("Invalid comparison result: " + result, result > 0);
 	}
 
@@ -126,26 +134,9 @@ public class ConsumesRequestConditionTests {
 	public void parseConsumesAndHeaders() {
 		String[] consumes = new String[] {"text/plain"};
 		String[] headers = new String[]{"foo=bar", "content-type=application/xml,application/pdf"};
-		ConsumesRequestCondition condition = RequestConditionFactory.parseConsumes(consumes, headers);
+		ConsumesRequestCondition condition = new ConsumesRequestCondition(consumes, headers);
 
 		assertConditions(condition, "text/plain", "application/xml", "application/pdf");
-	}
-
-	@Test
-	public void parseConsumesDefault() {
-		String[] consumes = new String[] {"*/*"};
-		String[] headers = new String[0];
-		ConsumesRequestCondition condition = RequestConditionFactory.parseConsumes(consumes, headers);
-
-		assertConditions(condition, "*/*");
-	}
-	@Test
-	public void parseConsumesDefaultAndHeaders() {
-		String[] consumes = new String[] {"*/*"};
-		String[] headers = new String[]{"foo=bar", "content-type=text/plain"};
-		ConsumesRequestCondition condition = RequestConditionFactory.parseConsumes(consumes, headers);
-
-		assertConditions(condition, "text/plain");
 	}
 
 	@Test
@@ -165,12 +156,12 @@ public class ConsumesRequestConditionTests {
 	}
 
 	private void assertConditions(ConsumesRequestCondition condition, String... expected) {
-		Set<ConsumesRequestCondition.ConsumeRequestCondition> conditions = condition.getConditions();
-		assertEquals("Invalid amount of conditions", conditions.size(), expected.length);
+		Collection<ConsumeMediaTypeExpression> expressions = condition.getContent();
+		assertEquals("Invalid amount of conditions", expressions.size(), expected.length);
 		for (String s : expected) {
 			boolean found = false;
-			for (ConsumesRequestCondition.ConsumeRequestCondition requestCondition : conditions) {
-				String conditionMediaType = requestCondition.getMediaType().toString();
+			for (ConsumeMediaTypeExpression expr : expressions) {
+				String conditionMediaType = expr.getMediaType().toString();
 				if (conditionMediaType.equals(s)) {
 					found = true;
 					break;
@@ -181,12 +172,6 @@ public class ConsumesRequestConditionTests {
 				fail("Condition [" + s + "] not found");
 			}
 		}
-
-
-
 	}
-	
-
-
 
 }

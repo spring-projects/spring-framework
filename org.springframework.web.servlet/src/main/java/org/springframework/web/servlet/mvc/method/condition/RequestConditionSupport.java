@@ -17,64 +17,62 @@
 package org.springframework.web.servlet.mvc.method.condition;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
- * Abstract base class for {@link RequestCondition} implementations that wrap other request conditions.
- *
- * @author Arjen Poutsma
+ * Base class for {@link RequestCondition}s. 
+ * 
+ * @author Rossen Stoyanchev
  * @since 3.1
  */
-abstract class RequestConditionComposite<T extends RequestCondition> implements RequestCondition {
-
-	private final Set<T> conditions;
-
-	protected RequestConditionComposite(Collection<T> conditions) {
-		this.conditions = Collections.unmodifiableSet(new LinkedHashSet<T>(conditions));
-	}
-
-	protected Set<T> getConditions() {
-		return conditions;
-	}
-
-	public boolean isEmpty() {
-		return conditions.isEmpty();
-	}
-
+abstract class RequestConditionSupport<This extends RequestConditionSupport<This>> implements RequestCondition<This> {
+	
+	/**
+	 * Returns the individual expressions a request condition is composed of such as 
+	 * URL patterns, HTTP request methods, parameter expressions, etc. 
+	 */
+	protected abstract Collection<?> getContent();
+	
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
 			return true;
 		}
 		if (o != null && getClass().equals(o.getClass())) {
-			RequestConditionComposite other = (RequestConditionComposite) o;
-			return this.conditions.equals(other.conditions);
+			RequestConditionSupport<?> other = (RequestConditionSupport<?>) o;
+			return getContent().equals(other.getContent());
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return conditions.hashCode();
+		return getContent().hashCode();
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("[");
-		String infix = getToStringInfix();
-		for (Iterator<T> iterator = conditions.iterator(); iterator.hasNext();) {
-			RequestCondition condition = iterator.next();
-			builder.append(condition.toString());
+		for (Iterator<?> iterator = getContent().iterator(); iterator.hasNext();) {
+			Object expression = iterator.next();
+			builder.append(expression.toString());
 			if (iterator.hasNext()) {
-				builder.append(infix);
+				if (isLogicalConjunction()) {
+					builder.append(" && ");
+				}
+				else {
+					builder.append(" || ");
+				}
 			}
 		}
 		builder.append("]");
 		return builder.toString();
 	}
 
-	protected abstract String getToStringInfix();
+	/**
+	 * Returns {@code true} if the individual expressions of the condition are combined via logical 
+	 * conjunction (" && "); or {@code false} otherwise.
+	 */
+	protected abstract boolean isLogicalConjunction();
+
 }

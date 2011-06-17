@@ -16,6 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method;
 
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,16 +28,13 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
+import org.springframework.web.servlet.mvc.method.condition.ParamsRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.ProducesRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.RequestMethodsRequestCondition;
 import org.springframework.web.util.UrlPathHelper;
-
-import static java.util.Arrays.*;
-import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link RequestMappingHandlerMapping} testing its {@link RequestMappingInfo} comparator.
@@ -57,8 +59,8 @@ public class RequestMappingInfoComparatorTests {
 		request.setRequestURI("/foo");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator(lookupPath, request);
-		RequestMappingInfo key1 = new RequestMappingInfo(asList("/fo*"), null);
-		RequestMappingInfo key2 = new RequestMappingInfo(asList("/foo"), null);
+		RequestMappingInfo key1 = new RequestMappingInfo(new String[]{"/fo*"});
+		RequestMappingInfo key2 = new RequestMappingInfo(new String[]{"/foo"});
 
 		assertEquals(1, comparator.compare(key1, key2));
 	}
@@ -68,8 +70,8 @@ public class RequestMappingInfoComparatorTests {
 		request.setRequestURI("/foo");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator(lookupPath, request);
-		RequestMappingInfo key1 = new RequestMappingInfo(asList("/foo*"), null);
-		RequestMappingInfo key2 = new RequestMappingInfo(asList("/foo*"), null);
+		RequestMappingInfo key1 = new RequestMappingInfo(new String[]{"/foo*"});
+		RequestMappingInfo key2 = new RequestMappingInfo(new String[]{"/foo*"});
 
 		assertEquals(0, comparator.compare(key1, key2));
 	}
@@ -78,20 +80,20 @@ public class RequestMappingInfoComparatorTests {
 	public void greaterNumberOfMatchingPatternsWins() throws Exception {
 		request.setRequestURI("/foo.html");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
-		RequestMappingInfo key1 = new RequestMappingInfo(asList("/foo", "*.jpeg"), null);
-		RequestMappingInfo key2 = new RequestMappingInfo(asList("/foo", "*.html"), null);
+		RequestMappingInfo key1 = new RequestMappingInfo(new String[]{"/foo", "*.jpeg"});
+		RequestMappingInfo key2 = new RequestMappingInfo(new String[]{"/foo", "*.html"});
 		RequestMappingInfo match1 = handlerMapping.getMatchingMapping(key1, lookupPath, request);
 		RequestMappingInfo match2 = handlerMapping.getMatchingMapping(key2, lookupPath, request);
 		List<RequestMappingInfo> matches = asList(match1, match2);
 		Collections.sort(matches, handlerMapping.getMappingComparator(lookupPath, request));
 
-		assertSame(match2.getPatterns(), matches.get(0).getPatterns());
+		assertSame(match2.getPatternsCondition(), matches.get(0).getPatternsCondition());
 	}
 
 	@Test
 	public void oneMethodWinsOverNone() {
 		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator("", request);
-		RequestMappingInfo key1 = new RequestMappingInfo(null, null);
+		RequestMappingInfo key1 = new RequestMappingInfo(null);
 		RequestMappingInfo key2 = new RequestMappingInfo(null, new RequestMethod[] {RequestMethod.GET});
 
 		assertEquals(1, comparator.compare(key1, key2));
@@ -99,10 +101,11 @@ public class RequestMappingInfoComparatorTests {
 
 	@Test
 	public void methodsAndParams() {
-		RequestMappingInfo empty = new RequestMappingInfo(null, null);
+		RequestMappingInfo empty = new RequestMappingInfo(null);
 		RequestMappingInfo oneMethod = new RequestMappingInfo(null, new RequestMethod[] {RequestMethod.GET});
 		RequestMappingInfo oneMethodOneParam =
-				new RequestMappingInfo(null, RequestConditionFactory.parseMethods(RequestMethod.GET), RequestConditionFactory.parseParams("foo"), null, null, null);
+				new RequestMappingInfo(null, new RequestMethodsRequestCondition(RequestMethod.GET), 
+						new ParamsRequestCondition("foo"), null, null, null);
 		List<RequestMappingInfo> list = asList(empty, oneMethod, oneMethodOneParam);
 		Collections.shuffle(list);
 		Collections.sort(list, handlerMapping.getMappingComparator("", request));
@@ -114,9 +117,9 @@ public class RequestMappingInfoComparatorTests {
 
 	@Test
 	public void produces() {
-		RequestMappingInfo html = new RequestMappingInfo(null, null, null, null, null, RequestConditionFactory.parseProduces("text/html"));
-		RequestMappingInfo xml = new RequestMappingInfo(null, null, null, null, null, RequestConditionFactory.parseProduces("application/xml"));
-		RequestMappingInfo none = new RequestMappingInfo(null, null);
+		RequestMappingInfo html = new RequestMappingInfo(null, null, null, null, null, new ProducesRequestCondition("text/html"));
+		RequestMappingInfo xml = new RequestMappingInfo(null, null, null, null, null, new ProducesRequestCondition("application/xml"));
+		RequestMappingInfo none = new RequestMappingInfo(null);
 
 		request.addHeader("Accept", "application/xml, text/html");
 		Comparator<RequestMappingInfo> comparator = handlerMapping.getMappingComparator("", request);

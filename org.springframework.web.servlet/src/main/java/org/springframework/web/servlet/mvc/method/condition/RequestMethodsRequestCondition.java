@@ -22,132 +22,102 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * Represents a collection of {@link RequestMethod} conditions, typically obtained from {@link
- * org.springframework.web.bind.annotation.RequestMapping#method() @RequestMapping.methods()}.
- *
+ * A logical disjunction (' || ') request condition that matches a request against a set of {@link RequestMethod}s.
+ * 
+ * <p>If the condition is created with 0 HTTP request methods, it matches to every request.
+ * 
  * @author Arjen Poutsma
- * @see RequestConditionFactory#parseMethods(RequestMethod...)
+ * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class RequestMethodsRequestCondition
-		extends LogicalDisjunctionRequestCondition<RequestMethodsRequestCondition.RequestMethodRequestCondition>
-		implements Comparable<RequestMethodsRequestCondition> {
+public class RequestMethodsRequestCondition extends RequestConditionSupport<RequestMethodsRequestCondition> {
 
-	private RequestMethodsRequestCondition(Collection<RequestMethodRequestCondition> conditions) {
-		super(conditions);
-	}
-
-	RequestMethodsRequestCondition(RequestMethod... methods) {
-		this(parseConditions(Arrays.asList(methods)));
-	}
-
-	private static Set<RequestMethodRequestCondition> parseConditions(List<RequestMethod> methods) {
-		Set<RequestMethodRequestCondition> conditions =
-				new LinkedHashSet<RequestMethodRequestCondition>(methods.size());
-		for (RequestMethod method : methods) {
-			conditions.add(new RequestMethodRequestCondition(method));
-		}
-		return conditions;
-	}
-
+	private final Set<RequestMethod> methods;
 
 	/**
-	 * Creates an empty set of method request conditions.
+	 * Create a {@link RequestMethodsRequestCondition} with the given {@link RequestMethod}s.
+	 * @param requestMethods 0 or more HTTP request methods; if 0 the condition will match to every request.
 	 */
-	public RequestMethodsRequestCondition() {
-		this(Collections.<RequestMethodRequestCondition>emptySet());
+	public RequestMethodsRequestCondition(RequestMethod... requestMethods) {
+		this(asList(requestMethods));
 	}
+
+	private static List<RequestMethod> asList(RequestMethod... requestMethods) {
+		return requestMethods != null ? Arrays.asList(requestMethods) : Collections.<RequestMethod>emptyList();
+	}
+	
+	/**
+	 * Private constructor.
+	 */
+	private RequestMethodsRequestCondition(Collection<RequestMethod> requestMethods) {
+		this.methods = Collections.unmodifiableSet(new LinkedHashSet<RequestMethod>(requestMethods));
+	} 
 
 	/**
 	 * Returns all {@link RequestMethod}s contained in this condition.
 	 */
 	public Set<RequestMethod> getMethods() {
-		Set<RequestMethod> result = new LinkedHashSet<RequestMethod>();
-		for (RequestMethodRequestCondition condition : getConditions()) {
-			result.add(condition.getMethod());
-		}
-		return result;
+		return methods;
 	}
 
-	public int compareTo(RequestMethodsRequestCondition other) {
-		return other.getConditions().size() - this.getConditions().size();
+	@Override
+	protected Collection<RequestMethod> getContent() {
+		return methods;
 	}
 
+	@Override
+	protected boolean isLogicalConjunction() {
+		return false;
+	}
+	
 	/**
-	 * Returns a new {@code RequestMethodsRequestCondition} that contains all conditions that match the request.
-	 *
-	 * @param request the request
-	 * @return a new request condition that contains all matching attributes, or {@code null} if not all conditions match
-	 */
-	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (isEmpty()) {
-			return this;
-		}
-		else {
-			if (match(request)) {
-				return new RequestMethodsRequestCondition(RequestMethod.valueOf(request.getMethod()));
-			}
-			else {
-				return null;
-			}
-		}
-
-	}
-
-	/**
-	 * Combines this collection of request method conditions with another by combining all methods into a logical OR.
-	 *
-	 * @param other the condition to combine with
+	 * Returns a new instance with a union of the HTTP request methods from "this" and the "other" instance.
 	 */
 	public RequestMethodsRequestCondition combine(RequestMethodsRequestCondition other) {
-		Set<RequestMethodRequestCondition> conditions =
-				new LinkedHashSet<RequestMethodRequestCondition>(getConditions());
-		conditions.addAll(other.getConditions());
-		return new RequestMethodsRequestCondition(conditions);
+		Set<RequestMethod> set = new LinkedHashSet<RequestMethod>(this.methods);
+		set.addAll(other.methods);
+		return new RequestMethodsRequestCondition(set);
 	}
 
-	static class RequestMethodRequestCondition implements RequestCondition {
-
-		private final RequestMethod method;
-
-		RequestMethodRequestCondition(RequestMethod method) {
-			this.method = method;
+	/**
+	 * Checks if any of the HTTP request methods match the given request and returns an instance that 
+	 * contain the matching request method.  
+	 * @param request the current request
+	 * @return the same instance if the condition contains no request method; 
+	 * 		or a new condition with the matching request method; or {@code null} if no request methods match.
+	 */
+	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
+		if (methods.isEmpty()) {
+			return this;
 		}
-
-		RequestMethod getMethod() {
-			return method;
-		}
-
-		public boolean match(HttpServletRequest request) {
-			RequestMethod method = RequestMethod.valueOf(request.getMethod());
-			return this.method.equals(method);
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
+		RequestMethod incomingRequestMethod = RequestMethod.valueOf(request.getMethod());
+		for (RequestMethod method : methods) {
+			if (method.equals(incomingRequestMethod)) {
+				return new RequestMethodsRequestCondition(method);
 			}
-			if (obj != null && obj instanceof RequestMethodRequestCondition) {
-				RequestMethodRequestCondition other = (RequestMethodRequestCondition) obj;
-				return this.method.equals(other.method);
-			}
-			return false;
 		}
-
-		@Override
-		public int hashCode() {
-			return method.hashCode();
-		}
-
-		@Override
-		public String toString() {
-			return method.toString();
-		}
+		return null;
 	}
+
+	/**
+	 * Returns:
+	 * <ul>
+	 * 	<li>0 if the two conditions contain the same number of HTTP request methods.
+	 * 	<li>Less than 1 if "this" instance has an HTTP request method but "other" doesn't.
+	 * 	<li>Greater than 1 "other" has an HTTP request method but "this" doesn't.
+	 * </ul>   
+	 * 
+	 * <p>It is assumed that both instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)} 
+	 * and therefore each instance contains the matching HTTP request method only or is otherwise empty.
+	 */
+	public int compareTo(RequestMethodsRequestCondition other, HttpServletRequest request) {
+		return other.methods.size() - this.methods.size();
+	}
+
 }

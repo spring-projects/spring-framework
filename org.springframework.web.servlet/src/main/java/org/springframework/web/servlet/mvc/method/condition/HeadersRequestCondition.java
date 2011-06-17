@@ -16,79 +16,117 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.web.bind.annotation.RequestMapping;
+
 /**
- * Represents a collection of header request conditions, typically obtained from {@link
- * org.springframework.web.bind.annotation.RequestMapping#headers()  @RequestMapping.headers()}.
- *
+ * A logical conjunction (' && ') request condition that matches a request against a set of header expressions.
+ * 
+ * <p>For details on the syntax of the expressions see {@link RequestMapping#headers()}. If the condition is
+ * created with 0 header expressions, it will match to every request.
+ * 
+ * <p>Note: when parsing header expressions, {@code "Accept"} and {@code "Content-Type"} header expressions 
+ * are filtered out. Those should be converted and used as "produces" and "consumes" conditions instead. 
+ * See the constructors for {@link ProducesRequestCondition} and {@link ConsumesRequestCondition}.
+ * 
  * @author Arjen Poutsma
- * @see RequestConditionFactory#parseHeaders(String...)
+ * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class HeadersRequestCondition
-		extends LogicalConjunctionRequestCondition<HeadersRequestCondition.HeaderRequestCondition>
-		implements Comparable<HeadersRequestCondition> {
+public class HeadersRequestCondition extends RequestConditionSupport<HeadersRequestCondition> {
 
-	HeadersRequestCondition(Collection<HeaderRequestCondition> conditions) {
-		super(conditions);
+	private final Set<HeaderExpression> expressions;
+
+	/**
+	 * Create a {@link HeadersRequestCondition} with the given header expressions. 
+	 * 
+	 * <p>Note: {@code "Accept"} and {@code "Content-Type"} header expressions are filtered out. 
+	 * Those should be converted and used as "produces" and "consumes" conditions instead. 
+	 * See the constructors for {@link ProducesRequestCondition} and {@link ConsumesRequestCondition}.
+	 * 
+	 * @param headers 0 or more header expressions; if 0 the condition will match to every request.
+	 */
+	public HeadersRequestCondition(String... headers) {
+		this(parseExpressions(headers));
 	}
-
-	HeadersRequestCondition(String... headers) {
-		this(parseConditions(Arrays.asList(headers)));
+	
+	private HeadersRequestCondition(Collection<HeaderExpression> conditions) {
+		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<HeaderExpression>(conditions));
 	}
-
-	private static Set<HeaderRequestCondition> parseConditions(Collection<String> params) {
-		Set<HeaderRequestCondition> conditions = new LinkedHashSet<HeaderRequestCondition>(params.size());
-		for (String param : params) {
-			conditions.add(new HeaderRequestCondition(param));
+	
+	private static Collection<HeaderExpression> parseExpressions(String... headers) {
+		Set<HeaderExpression> expressions = new LinkedHashSet<HeaderExpression>();
+		if (headers != null) {
+			for (String header : headers) {
+				HeaderExpression expr = new HeaderExpression(header);
+				if ("Accept".equalsIgnoreCase(expr.name) || "Content-Type".equalsIgnoreCase(expr.name)) {
+					continue;
+				}
+				expressions.add(expr);
+			}
 		}
-		return conditions;
+		return expressions;
+	}
+
+	@Override
+	protected Collection<HeaderExpression> getContent() {
+		return expressions;
+	}
+
+	@Override
+	protected boolean isLogicalConjunction() {
+		return true;
 	}
 
 	/**
-	 * Creates an empty set of header request conditions.
-	 */
-	public HeadersRequestCondition() {
-		this(Collections.<HeaderRequestCondition>emptySet());
-	}
-
-	/**
-	 * Returns a new {@code RequestCondition} that contains all conditions that match the request.
-	 *
-	 * @param request the request
-	 * @return a new request condition that contains all matching attributes, or {@code null} if not all conditions match
-	 */
-	public HeadersRequestCondition getMatchingCondition(HttpServletRequest request) {
-		return match(request) ? this : null;
-	}
-
-
-	/**
-	 * Combines this collection of request condition with another by combining all header request conditions into a
-	 * logical AND.
-	 *
-	 * @param other the condition to combine with
+	 * Returns a new instance with the union of the header expressions from "this" and the "other" instance.
 	 */
 	public HeadersRequestCondition combine(HeadersRequestCondition other) {
-		Set<HeaderRequestCondition> conditions = new LinkedHashSet<HeaderRequestCondition>(getConditions());
-		conditions.addAll(other.getConditions());
-		return new HeadersRequestCondition(conditions);
+		Set<HeaderExpression> set = new LinkedHashSet<HeaderExpression>(this.expressions);
+		set.addAll(other.expressions);
+		return new HeadersRequestCondition(set);
+	}
+	
+	/**
+	 * Returns "this" instance if the request matches to all header expressions; or {@code null} otherwise.
+	 */
+	public HeadersRequestCondition getMatchingCondition(HttpServletRequest request) {
+		for (HeaderExpression expression : expressions) {
+			if (!expression.match(request)) {
+				return null;
+			}
+		}
+		return this;
 	}
 
-
-	public int compareTo(HeadersRequestCondition other) {
-		return other.getConditions().size() - this.getConditions().size();
+	/**
+	 * Returns:
+	 * <ul>
+	 * 	<li>0 if the two conditions have the same number of header expressions
+	 * 	<li>Less than 1 if "this" instance has more header expressions
+	 * 	<li>Greater than 1 if the "other" instance has more header expressions
+	 * </ul>   
+	 * 
+	 * <p>It is assumed that both instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)}
+	 * and each instance contains the matching header expression only or is otherwise empty.
+	 */
+	public int compareTo(HeadersRequestCondition other, HttpServletRequest request) {
+		return other.expressions.size() - this.expressions.size();
 	}
 
-	static class HeaderRequestCondition extends AbstractNameValueCondition<String> {
+	/**
+	 * Parsing and request matching logic for header expressions. 
+	 * @see RequestMapping#headers()
+	 */
+	static class HeaderExpression extends AbstractNameValueExpression<String> {
 
-		public HeaderRequestCondition(String expression) {
+		public HeaderExpression(String expression) {
 			super(expression);
 		}
 
@@ -108,27 +146,11 @@ public class HeadersRequestCondition
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj != null && obj instanceof HeaderRequestCondition) {
-				HeaderRequestCondition other = (HeaderRequestCondition) obj;
-				return ((this.name.equalsIgnoreCase(other.name)) &&
-						(this.value != null ? this.value.equals(other.value) : other.value == null) &&
-						this.isNegated == other.isNegated);
-			}
-			return false;
-		}
-
-		@Override
 		public int hashCode() {
 			int result = name.toLowerCase().hashCode();
 			result = 31 * result + (value != null ? value.hashCode() : 0);
 			result = 31 * result + (isNegated ? 1 : 0);
 			return result;
 		}
-
-
-	}
+	}	
 }

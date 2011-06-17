@@ -30,29 +30,29 @@ public class RequestMethodsRequestConditionTests {
 
 	@Test
 	public void methodMatch() {
-		RequestCondition condition = new RequestMethodsRequestCondition(RequestMethod.GET);
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(RequestMethod.GET);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 
-		assertTrue(condition.match(request));
+		assertNotNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void methodNoMatch() {
-		RequestCondition condition = new RequestMethodsRequestCondition(RequestMethod.GET);
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(RequestMethod.GET);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/foo");
 
-		assertFalse(condition.match(request));
+		assertNull(condition.getMatchingCondition(request));
 	}
 	
 	@Test
 	public void multipleMethodsMatch() {
-		RequestCondition condition = new RequestMethodsRequestCondition(RequestMethod.GET, RequestMethod.POST);
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(RequestMethod.GET, RequestMethod.POST);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 
-		assertTrue(condition.match(request));
+		assertNotNull(condition.getMatchingCondition(request));
 	}
 
 
@@ -62,16 +62,18 @@ public class RequestMethodsRequestConditionTests {
 		RequestMethodsRequestCondition condition2 = new RequestMethodsRequestCondition(RequestMethod.POST);
 		RequestMethodsRequestCondition condition3 = new RequestMethodsRequestCondition();
 
-		int result = condition1.compareTo(condition2);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		
+		int result = condition1.compareTo(condition2, request);
 		assertTrue("Invalid comparison result: " + result, result < 0);
 
-		result = condition2.compareTo(condition1);
+		result = condition2.compareTo(condition1, request);
 		assertTrue("Invalid comparison result: " + result, result > 0);
 
-		result = condition2.compareTo(condition3);
+		result = condition2.compareTo(condition3, request);
 		assertTrue("Invalid comparison result: " + result, result < 0);
 
-		result = condition1.compareTo(condition1);
+		result = condition1.compareTo(condition1, request);
 		assertEquals("Invalid comparison result ", 0, result);
 	}
 
@@ -81,7 +83,7 @@ public class RequestMethodsRequestConditionTests {
 		RequestMethodsRequestCondition condition2 = new RequestMethodsRequestCondition(RequestMethod.POST);
 
 		RequestMethodsRequestCondition result = condition1.combine(condition2);
-		assertEquals(2, result.getConditions().size());
+		assertEquals(2, result.getContent().size());
 	}
 
 

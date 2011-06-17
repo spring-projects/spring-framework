@@ -16,13 +16,17 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
-import java.util.Set;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Collection;
 
 import org.junit.Test;
-
 import org.springframework.mock.web.MockHttpServletRequest;
-
-import static org.junit.Assert.*;
+import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondition.HeaderExpression;
 
 /**
  * @author Arjen Poutsma
@@ -40,81 +44,83 @@ public class HeadersRequestConditionTests {
 
 	@Test
 	public void headerPresent() {
-		RequestCondition condition = new HeadersRequestCondition("accept");
+		HeadersRequestCondition condition = new HeadersRequestCondition("accept");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Accept", "");
 
-		assertTrue(condition.match(request));
+		assertNotNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void headerPresentNoMatch() {
-		RequestCondition condition = new HeadersRequestCondition("foo");
+		HeadersRequestCondition condition = new HeadersRequestCondition("foo");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("bar", "");
 
-		assertFalse(condition.match(request));
+		assertNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void headerNotPresent() {
-		RequestCondition condition = new HeadersRequestCondition("!accept");
+		HeadersRequestCondition condition = new HeadersRequestCondition("!accept");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
-		assertTrue(condition.match(request));
+		assertNotNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void headerValueMatch() {
-		RequestCondition condition = new HeadersRequestCondition("foo=bar");
+		HeadersRequestCondition condition = new HeadersRequestCondition("foo=bar");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("foo", "bar");
 
-		assertTrue(condition.match(request));
+		assertNotNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void headerValueNoMatch() {
-		RequestCondition condition = new HeadersRequestCondition("foo=bar");
+		HeadersRequestCondition condition = new HeadersRequestCondition("foo=bar");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("foo", "bazz");
 
-		assertFalse(condition.match(request));
+		assertNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void headerCaseSensitiveValueMatch() {
-		RequestCondition condition = new HeadersRequestCondition("foo=Bar");
+		HeadersRequestCondition condition = new HeadersRequestCondition("foo=Bar");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("foo", "bar");
 
-		assertFalse(condition.match(request));
+		assertNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void headerValueMatchNegated() {
-		RequestCondition condition = new HeadersRequestCondition("foo!=bar");
+		HeadersRequestCondition condition = new HeadersRequestCondition("foo!=bar");
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("foo", "baz");
 
-		assertTrue(condition.match(request));
+		assertNotNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
 	public void compareTo() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+
 		HeadersRequestCondition condition1 = new HeadersRequestCondition("foo", "bar", "baz");
 		HeadersRequestCondition condition2 = new HeadersRequestCondition("foo", "bar");
 
-		int result = condition1.compareTo(condition2);
+		int result = condition1.compareTo(condition2, request);
 		assertTrue("Invalid comparison result: " + result, result < 0);
 
-		result = condition2.compareTo(condition1);
+		result = condition2.compareTo(condition1, request);
 		assertTrue("Invalid comparison result: " + result, result > 0);
 	}
 
@@ -125,7 +131,7 @@ public class HeadersRequestConditionTests {
 		HeadersRequestCondition condition2 = new HeadersRequestCondition("foo=baz");
 
 		HeadersRequestCondition result = condition1.combine(condition2);
-		Set<HeadersRequestCondition.HeaderRequestCondition> conditions = result.getConditions();
+		Collection<HeaderExpression> conditions = result.getContent();
 		assertEquals(2, conditions.size());
 	}
 
