@@ -44,13 +44,13 @@ import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondit
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ConsumesRequestCondition extends RequestConditionSupport<ConsumesRequestCondition> {
+public class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
 
 	private final List<ConsumeMediaTypeExpression> expressions;
 
 	/**
 	 * Creates a {@link ConsumesRequestCondition} with the given consumable media type expressions.
-	 * @param consumes the expressions to parse; if 0 the condition matches to every request
+	 * @param consumes the expressions to parse; if 0, the condition matches to every request
 	 */
 	public ConsumesRequestCondition(String... consumes) {
 		this(consumes, null);
@@ -60,8 +60,8 @@ public class ConsumesRequestCondition extends RequestConditionSupport<ConsumesRe
 	 * Creates a {@link ConsumesRequestCondition} with the given header and consumes expressions.
 	 * In addition to consume expressions, {@code "Content-Type"} header expressions are extracted 
 	 * and treated as consumable media type expressions.
-	 * @param consumes the consumes expressions to parse; 0 matches to all requests
-	 * @param headers the header expression to parse; 0 matches to all requests
+	 * @param consumes the consumes expressions to parse; if 0, the condition matches to all requests
+	 * @param headers the header expression to parse; if 0, the condition matches to all requests
 	 */
 	public ConsumesRequestCondition(String[] consumes, String[] headers) {
 		this(parseExpressions(consumes, headers));
@@ -119,12 +119,12 @@ public class ConsumesRequestCondition extends RequestConditionSupport<ConsumesRe
 	}
 
 	@Override
-	protected boolean isLogicalConjunction() {
-		return false;
+	protected String getToStringInfix() {
+		return " || ";
 	}
 
 	/**
-	 * Returns the "other" instance as long as it contains any expressions; or "this" instance otherwise.
+	 * Returns the "other" instance provided it contains expressions; returns "this" instance otherwise.
 	 * In other words "other" takes precedence over "this" as long as it has expressions.
 	 * <p>Example: method-level "consumes" overrides type-level "consumes" condition. 
 	 */
@@ -133,13 +133,13 @@ public class ConsumesRequestCondition extends RequestConditionSupport<ConsumesRe
 	}
 
 	/**
-	 * Checks if any of the consumable media type expressions match the given request and returns an instance that 
-	 * is guaranteed to contain matching media type expressions only.
+	 * Checks if any of the consumable media type expressions match the given request and returns an 
+	 * instance that is guaranteed to contain matching media type expressions only.
 	 * 
 	 * @param request the current request
 	 * 
 	 * @return the same instance if the condition contains no expressions; 
-	 * 		or a new condition with matching expressions; or {@code null} if no expressions match.
+	 * 		or a new condition with matching expressions only; or {@code null} if no expressions match.
 	 */
 	public ConsumesRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (isEmpty()) {

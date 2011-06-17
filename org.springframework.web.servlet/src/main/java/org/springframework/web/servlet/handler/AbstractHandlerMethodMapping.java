@@ -257,14 +257,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		List<Match> matches = new ArrayList<Match>();
 		
 		for (T mapping : mappings) {
-			T match = getMatchingMapping(mapping, lookupPath, request);
+			T match = getMatchingMapping(mapping, request);
 			if (match != null) {
 				matches.add(new Match(match, handlerMethods.get(mapping)));
 			}
 		}
 
 		if (!matches.isEmpty()) {
-			Comparator<Match> comparator = new MatchComparator(getMappingComparator(lookupPath, request));
+			Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
 			Collections.sort(matches, comparator);
 
 			if (logger.isTraceEnabled()) {
@@ -309,20 +309,18 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * will contain only 1).
 	 *
 	 * @param mapping the mapping to get a match for
-	 * @param lookupPath mapping lookup path within the current servlet mapping if applicable
 	 * @param request the current HTTP servlet request
 	 * @return a matching mapping, or {@code null} if the given mapping does not match the request
 	 */
-	protected abstract T getMatchingMapping(T mapping, String lookupPath, HttpServletRequest request);
+	protected abstract T getMatchingMapping(T mapping, HttpServletRequest request);
 
 	/**
 	 * Returns a comparator to sort request mappings with. The returned comparator should sort 'better' matches higher.
 	 *
-	 * @param lookupPath mapping lookup path within the current servlet mapping if applicable
 	 * @param request the current HTTP servlet request
 	 * @return the comparator
 	 */
-	protected abstract Comparator<T> getMappingComparator(String lookupPath, HttpServletRequest request);
+	protected abstract Comparator<T> getMappingComparator(HttpServletRequest request);
 
 	/**
 	 * Invoked when no match was found. Default implementation returns {@code null}.

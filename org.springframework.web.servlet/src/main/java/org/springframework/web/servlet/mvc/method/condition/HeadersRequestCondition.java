@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class HeadersRequestCondition extends RequestConditionSupport<HeadersRequestCondition> {
+public class HeadersRequestCondition extends AbstractRequestCondition<HeadersRequestCondition> {
 
 	private final Set<HeaderExpression> expressions;
 
@@ -50,7 +50,7 @@ public class HeadersRequestCondition extends RequestConditionSupport<HeadersRequ
 	 * Those should be converted and used as "produces" and "consumes" conditions instead. 
 	 * See the constructors for {@link ProducesRequestCondition} and {@link ConsumesRequestCondition}.
 	 * 
-	 * @param headers 0 or more header expressions; if 0 the condition will match to every request.
+	 * @param headers 0 or more header expressions; if 0, the condition will match to every request.
 	 */
 	public HeadersRequestCondition(String... headers) {
 		this(parseExpressions(headers));
@@ -80,8 +80,8 @@ public class HeadersRequestCondition extends RequestConditionSupport<HeadersRequ
 	}
 
 	@Override
-	protected boolean isLogicalConjunction() {
-		return true;
+	protected String getToStringInfix() {
+		return " && ";
 	}
 
 	/**

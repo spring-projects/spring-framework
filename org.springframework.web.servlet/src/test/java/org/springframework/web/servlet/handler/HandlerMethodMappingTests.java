@@ -31,6 +31,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Test for {@link AbstractHandlerMethodMapping}.
@@ -89,10 +90,13 @@ public class HandlerMethodMappingTests {
 
 	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<String> {
 
+		private UrlPathHelper pathHelper = new UrlPathHelper();
+		
 		private PathMatcher pathMatcher = new AntPathMatcher();
 
 		@Override
-		protected String getMatchingMapping(String pattern, String lookupPath, HttpServletRequest request) {
+		protected String getMatchingMapping(String pattern, HttpServletRequest request) {
+			String lookupPath = pathHelper.getLookupPathForRequest(request);
 			return pathMatcher.match(pattern, lookupPath) ? pattern : null;
 		}
 
@@ -103,7 +107,8 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected Comparator<String> getMappingComparator(String lookupPath, HttpServletRequest request) {
+		protected Comparator<String> getMappingComparator(HttpServletRequest request) {
+			String lookupPath = pathHelper.getLookupPathForRequest(request);
 			return pathMatcher.getPatternComparator(lookupPath);
 		}
 

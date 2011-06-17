@@ -27,7 +27,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
-import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -53,34 +52,47 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		while (mappings.size() > 1) {
 			RequestMappingInfo mapping = mappings.remove(0);
 			for (RequestMappingInfo otherMapping : mappings) {
-				// further validate mapping conditions
+				// TODO: further validate mapping conditions
 			}
 		}
 	}
 
+	/**
+	 * Get the URL paths associated with this {@link RequestMappingInfo}.
+	 */
 	@Override
 	protected Set<String> getMappingPaths(RequestMappingInfo mapping) {
-		return mapping.getPatternsCondition().getPatterns();
+		Set<String> paths = new HashSet<String>();
+		for (String pattern : mapping.getPatternsCondition().getPatterns()) {
+			if (!getPathMatcher().isPattern(pattern)) {
+				paths.add(pattern);
+			}
+		}
+		return paths;
 	}
 
 	/**
-	 * Returns a new {@link RequestMappingInfo} with attributes matching to the current request or {@code null}.
-	 *
-	 * @see RequestMappingInfo#getMatchingRequestMapping(String, HttpServletRequest, PathMatcher)
+	 * Checks if the given RequestMappingInfo matches the current request and returns a potentially new 
+	 * RequestMappingInfo instances tailored to the current request, for example containing the subset
+	 * of URL patterns or media types that match the request.
+	 *  
+	 * @returns a RequestMappingInfo instance in case of a match; or {@code null} in case of no match. 
 	 */
 	@Override
-	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo mapping,
-													String lookupPath,
-													HttpServletRequest request) {
-		return mapping.getMatchingRequestMapping(request);
+	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo mapping, HttpServletRequest request) {
+		return mapping.getMatchingRequestMappingInfo(request);
 	}
 
 	/**
-	 * Returns a {@link Comparator} that can be used to sort and select the best matching {@link RequestMappingInfo}.
+	 * Returns a {@link Comparator} for sorting {@link RequestMappingInfo} in the context of the given request.
 	 */
 	@Override
-	protected Comparator<RequestMappingInfo> getMappingComparator(String lookupPath, HttpServletRequest request) {
-		return new RequestMappingInfoComparator(request);
+	protected Comparator<RequestMappingInfo> getMappingComparator(final HttpServletRequest request) {
+		return new Comparator<RequestMappingInfo>() {
+			public int compare(RequestMappingInfo info, RequestMappingInfo otherInfo) {
+				return info.compareTo(otherInfo, request);
+			}
+		};
 	}
 
 	/**
@@ -106,29 +118,32 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	/**
 	 * Iterates all {@link RequestMappingInfo}s looking for mappings that match by URL but not by HTTP method.
 	 *
-	 * @throws HttpRequestMethodNotSupportedException if there are matches by URL but not by HTTP method
+	 * @throws HttpRequestMethodNotSupportedException 
+	 * 		if there are matches by URL but not by HTTP method
+	 * @throws HttpMediaTypeNotAcceptableException 
+	 * 		if there are matches by URL but the consumable media types don't match the 'Content-Type' header
+	 * @throws HttpMediaTypeNotAcceptableException 
+	 * 		if there are matches by URL but the producible media types don't match the 'Accept' header
 	 */
 	@Override
-	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos,
-										  String lookupPath,
+	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos, 
+										  String lookupPath, 
 										  HttpServletRequest request) throws ServletException {
 		Set<String> allowedMethods = new HashSet<String>(6);
 		Set<MediaType> consumableMediaTypes = new HashSet<MediaType>();
 		Set<MediaType> producibleMediaTypes = new HashSet<MediaType>();
 		for (RequestMappingInfo info : requestMappingInfos) {
-			for (String pattern : info.getPatternsCondition().getPatterns()) {
-				if (getPathMatcher().match(pattern, lookupPath)) {
-					if (info.getMethodsCondition().getMatchingCondition(request) == null) {
-						for (RequestMethod method : info.getMethodsCondition().getMethods()) {
-							allowedMethods.add(method.name());
-						}
+			if (info.getPatternsCondition().getMatchingCondition(request) != null) {
+				if (info.getMethodsCondition().getMatchingCondition(request) == null) {
+					for (RequestMethod method : info.getMethodsCondition().getMethods()) {
+						allowedMethods.add(method.name());
 					}
-					if (info.getConsumesCondition().getMatchingCondition(request) == null) {
-						consumableMediaTypes.addAll(info.getConsumesCondition().getMediaTypes());
-					}
-					if (info.getProducesCondition().getMatchingCondition(request) == null) {
-						producibleMediaTypes.addAll(info.getProducesCondition().getMediaTypes());
-					}
+				}
+				if (info.getConsumesCondition().getMatchingCondition(request) == null) {
+					consumableMediaTypes.addAll(info.getConsumesCondition().getMediaTypes());
+				}
+				if (info.getProducesCondition().getMatchingCondition(request) == null) {
+					producibleMediaTypes.addAll(info.getProducesCondition().getMediaTypes());
 				}
 			}
 		}
@@ -147,47 +162,6 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 		else {
 			return null;
-		}
-	}
-
-	/**
-	 * A comparator for {@link RequestMappingInfo}s. Effective comparison can only be done in the context 
-	 * of a specific request. For example only a subset of URL patterns may apply to the current request.
-	 */
-	private class RequestMappingInfoComparator implements Comparator<RequestMappingInfo> {
-
-		private final HttpServletRequest request;
-
-		public RequestMappingInfoComparator(HttpServletRequest request) {
-			this.request = request;
-		}
-
-		public int compare(RequestMappingInfo mapping, RequestMappingInfo otherMapping) {
-			int result = mapping.getPatternsCondition().compareTo(otherMapping.getPatternsCondition(), request);
-			if (result != 0) {
-				return result;
-			}
-			result = mapping.getParamsCondition().compareTo(otherMapping.getParamsCondition(), request);
-			if (result != 0) {
-				return result;
-			}
-			result = mapping.getHeadersCondition().compareTo(otherMapping.getHeadersCondition(), request);
-			if (result != 0) {
-				return result;
-			}
-			result = mapping.getConsumesCondition().compareTo(otherMapping.getConsumesCondition(), request);
-			if (result != 0) {
-				return result;
-			}
-			result = mapping.getProducesCondition().compareTo(otherMapping.getProducesCondition(), request);
-			if (result != 0) {
-				return result;
-			}
-			result = mapping.getMethodsCondition().compareTo(otherMapping.getMethodsCondition(), request);
-			if (result != 0) {
-				return result;
-			}
-			return 0;
 		}
 	}
 

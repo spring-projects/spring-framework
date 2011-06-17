@@ -25,11 +25,11 @@ import java.util.Iterator;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-abstract class RequestConditionSupport<This extends RequestConditionSupport<This>> implements RequestCondition<This> {
+abstract class AbstractRequestCondition<T extends AbstractRequestCondition<T>> implements RequestCondition<T> {
 	
 	/**
-	 * Returns the individual expressions a request condition is composed of such as 
-	 * URL patterns, HTTP request methods, parameter expressions, etc. 
+	 * Returns the discrete expressions a request condition is composed of such as URL patterns, 
+	 * HTTP request methods, parameter expressions, etc.
 	 */
 	protected abstract Collection<?> getContent();
 	
@@ -39,7 +39,7 @@ abstract class RequestConditionSupport<This extends RequestConditionSupport<This
 			return true;
 		}
 		if (o != null && getClass().equals(o.getClass())) {
-			RequestConditionSupport<?> other = (RequestConditionSupport<?>) o;
+			AbstractRequestCondition<?> other = (AbstractRequestCondition<?>) o;
 			return getContent().equals(other.getContent());
 		}
 		return false;
@@ -57,12 +57,7 @@ abstract class RequestConditionSupport<This extends RequestConditionSupport<This
 			Object expression = iterator.next();
 			builder.append(expression.toString());
 			if (iterator.hasNext()) {
-				if (isLogicalConjunction()) {
-					builder.append(" && ");
-				}
-				else {
-					builder.append(" || ");
-				}
+				builder.append(getToStringInfix());
 			}
 		}
 		builder.append("]");
@@ -73,6 +68,6 @@ abstract class RequestConditionSupport<This extends RequestConditionSupport<This
 	 * Returns {@code true} if the individual expressions of the condition are combined via logical 
 	 * conjunction (" && "); or {@code false} otherwise.
 	 */
-	protected abstract boolean isLogicalConjunction();
+	protected abstract String getToStringInfix();
 
 }

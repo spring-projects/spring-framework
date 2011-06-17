@@ -36,13 +36,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class RequestMethodsRequestCondition extends RequestConditionSupport<RequestMethodsRequestCondition> {
+public class RequestMethodsRequestCondition extends AbstractRequestCondition<RequestMethodsRequestCondition> {
 
 	private final Set<RequestMethod> methods;
 
 	/**
-	 * Create a {@link RequestMethodsRequestCondition} with the given {@link RequestMethod}s.
-	 * @param requestMethods 0 or more HTTP request methods; if 0 the condition will match to every request.
+	 * Create a {@link RequestMethodsRequestCondition} with the given request methods.
+	 * @param requestMethods 0 or more HTTP request methods; if, 0 the condition will match to every request.
 	 */
 	public RequestMethodsRequestCondition(RequestMethod... requestMethods) {
 		this(asList(requestMethods));
@@ -72,8 +72,8 @@ public class RequestMethodsRequestCondition extends RequestConditionSupport<Requ
 	}
 
 	@Override
-	protected boolean isLogicalConjunction() {
-		return false;
+	protected String getToStringInfix() {
+		return " || ";
 	}
 	
 	/**

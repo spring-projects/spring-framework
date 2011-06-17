@@ -24,11 +24,13 @@ import javax.servlet.http.HttpServletRequest;
  * <p>Request conditions can be combined (e.g. type + method-level conditions), matched to a request, 
  * or compared to each other to determine if one matches the request better.
  * 
+ * @param <T> The type of objects that this RequestCondition can be compared to and combined with.
+ * 
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @since 3.1
  */
-public interface RequestCondition<This extends RequestCondition<This>> {
+public interface RequestCondition<T> {
 
 	/**
 	 * Defines the rules for combining "this" condition (i.e. the current instance) with another condition.
@@ -36,7 +38,7 @@ public interface RequestCondition<This extends RequestCondition<This>> {
 	 * 
 	 * @returns a request condition instance that is the result of combining the two condition instances.
 	 */
-	This combine(This other);
+	T combine(T other);
 
 	/**
 	 * Checks if this condition matches the provided request and returns a potentially new request condition 
@@ -45,13 +47,13 @@ public interface RequestCondition<This extends RequestCondition<This>> {
 	 * 
 	 * @return a condition instance in case of a match; or {@code null} if there is no match.
 	 */
-	This getMatchingCondition(HttpServletRequest request);
+	T getMatchingCondition(HttpServletRequest request);
 
 	/**
 	 * Compares "this" condition (i.e. the current instance) with another condition in the context of a request. 
-	 * <p>Note: it is assumed instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)} 
+	 * <p>Note: it is assumed both instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)} 
 	 * to ensure they have content relevant to current request only.
 	 */
-	int compareTo(This other, HttpServletRequest request);
+	int compareTo(T other, HttpServletRequest request);
 	
 }

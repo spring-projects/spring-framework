@@ -37,7 +37,7 @@ import org.springframework.web.servlet.mvc.method.condition.RequestMethodsReques
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
- * @since 3.1.0
+ * @since 3.1
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping {
 
@@ -62,20 +62,18 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Override
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		RequestMapping annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-		if (annotation != null) {
-			RequestMappingInfo methodMapping = createFromRequestMapping(annotation);
-			RequestMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
-			if (typeAnnot != null) {
-				RequestMappingInfo typeMapping = createFromRequestMapping(typeAnnot);
-				return typeMapping.combine(methodMapping);
-			}
-			else {
-				return methodMapping;
-			}
+		RequestMapping methodAnnotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+		if (methodAnnotation == null) {
+			return null;
+		}
+		RequestMappingInfo methodInfo = createFromRequestMapping(methodAnnotation);
+		RequestMapping typeAnnotation = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
+		if (typeAnnotation != null) {
+			RequestMappingInfo typeInfo = createFromRequestMapping(typeAnnotation);
+			return typeInfo.combine(methodInfo);
 		}
 		else {
-			return null;
+			return methodInfo;
 		}
 	}
 
@@ -88,5 +86,5 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
 				new ProducesRequestCondition(annotation.produces(), annotation.headers()));
 	}
-
+	
 }

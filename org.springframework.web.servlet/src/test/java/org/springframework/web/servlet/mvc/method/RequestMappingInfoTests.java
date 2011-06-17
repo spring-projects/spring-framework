@@ -87,34 +87,34 @@ public class RequestMappingInfoTests {
 	@Test
 	public void matchPatternsToRequest() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
-		RequestMappingInfo match = createFromPatterns("/foo").getMatchingRequestMapping(request);
+		RequestMappingInfo match = createFromPatterns("/foo").getMatchingRequestMappingInfo(request);
 
 		assertNotNull(match);
 
 		request = new MockHttpServletRequest("GET", "/foo/bar");
-		match = createFromPatterns("/foo/*").getMatchingRequestMapping(request);
+		match = createFromPatterns("/foo/*").getMatchingRequestMappingInfo(request);
 
 		assertNotNull("Pattern match", match);
 
 		request = new MockHttpServletRequest("GET", "/foo.html");
-		match = createFromPatterns("/foo").getMatchingRequestMapping(request);
+		match = createFromPatterns("/foo").getMatchingRequestMappingInfo(request);
 
 		assertNotNull("Implicit match by extension", match);
 		assertEquals("Contains matched pattern", "/foo.*", match.getPatternsCondition().getPatterns().iterator().next());
 
 		request = new MockHttpServletRequest("GET", "/foo/");
-		match = createFromPatterns("/foo").getMatchingRequestMapping(request);
+		match = createFromPatterns("/foo").getMatchingRequestMappingInfo(request);
 
 		assertNotNull("Implicit match by trailing slash", match);
 		assertEquals("Contains matched pattern", "/foo/", match.getPatternsCondition().getPatterns().iterator().next());
 
 		request = new MockHttpServletRequest("GET", "/foo.html");
-		match = createFromPatterns("/foo.jpg").getMatchingRequestMapping(request);
+		match = createFromPatterns("/foo.jpg").getMatchingRequestMappingInfo(request);
 
 		assertNull("Implicit match ignored if pattern has extension", match);
 
 		request = new MockHttpServletRequest("GET", "/foo.html");
-		match = createFromPatterns("/foo.jpg").getMatchingRequestMapping(request);
+		match = createFromPatterns("/foo.jpg").getMatchingRequestMappingInfo(request);
 
 		assertNull("Implicit match ignored on pattern with trailing slash", match);
 	}
@@ -124,17 +124,17 @@ public class RequestMappingInfoTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 
 		RequestMappingInfo key = createFromPatterns("/foo");
-		RequestMappingInfo match = createFromPatterns("/foo").getMatchingRequestMapping(request);
+		RequestMappingInfo match = createFromPatterns("/foo").getMatchingRequestMappingInfo(request);
 
 		assertNotNull("No method matches any method", match);
 
 		key = new RequestMappingInfo(new String[]{"/foo"}, GET);
-		match = key.getMatchingRequestMapping(request);
+		match = key.getMatchingRequestMappingInfo(request);
 
 		assertNotNull("Exact match", match);
 
 		key = new RequestMappingInfo(new String[]{"/foo"}, POST);
-		match = key.getMatchingRequestMapping(request);
+		match = key.getMatchingRequestMappingInfo(request);
 
 		assertNull("No match", match);
 	}
@@ -144,13 +144,13 @@ public class RequestMappingInfoTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 
 		RequestMappingInfo key = new RequestMappingInfo(new String[] {"/foo*", "/bar"}, GET, POST);
-		RequestMappingInfo match = key.getMatchingRequestMapping(request);
+		RequestMappingInfo match = key.getMatchingRequestMappingInfo(request);
 		RequestMappingInfo expected = new RequestMappingInfo(new String[] {"/foo*"}, GET);
 
 		assertEquals("Matching RequestKey contains matched patterns and methods only", expected, match);
 
 		key = createFromPatterns("/**", "/foo*", "/foo");
-		match = key.getMatchingRequestMapping(request);
+		match = key.getMatchingRequestMappingInfo(request);
 		expected = createFromPatterns("/foo", "/foo*", "/**");
 
 		assertEquals("Matched patterns are sorted with best match at the top", expected, match);
@@ -165,14 +165,14 @@ public class RequestMappingInfoTests {
 				new RequestMappingInfo(
 						new PatternsRequestCondition("/foo"), null, 
 						new ParamsRequestCondition("foo=bar"), null, null, null);
-		RequestMappingInfo match = key.getMatchingRequestMapping(request);
+		RequestMappingInfo match = key.getMatchingRequestMappingInfo(request);
 
 		assertNotNull(match);
 
 		key = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, 
 				new ParamsRequestCondition("foo!=bar"), null, null, null);
-		match = key.getMatchingRequestMapping(request);
+		match = key.getMatchingRequestMappingInfo(request);
 
 		assertNull(match);
 	}
@@ -186,14 +186,14 @@ public class RequestMappingInfoTests {
 				new RequestMappingInfo(
 						new PatternsRequestCondition("/foo"), null, null, 
 						new HeadersRequestCondition("foo=bar"), null, null);
-		RequestMappingInfo match = key.getMatchingRequestMapping(request);
+		RequestMappingInfo match = key.getMatchingRequestMappingInfo(request);
 
 		assertNotNull(match);
 
 		key = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, 
 				new HeadersRequestCondition("foo!=bar"), null, null);
-		match = key.getMatchingRequestMapping(request);
+		match = key.getMatchingRequestMappingInfo(request);
 
 		assertNull(match);
 	}
@@ -207,14 +207,14 @@ public class RequestMappingInfoTests {
 			new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, null,
 				new ConsumesRequestCondition("text/plain"), null);
-		RequestMappingInfo match = key.getMatchingRequestMapping(request);
+		RequestMappingInfo match = key.getMatchingRequestMappingInfo(request);
 
 		assertNotNull(match);
 
 		key = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, null,
 				new ConsumesRequestCondition("application/xml"), null);
-		match = key.getMatchingRequestMapping(request);
+		match = key.getMatchingRequestMappingInfo(request);
 
 		assertNull(match);
 	}
@@ -228,14 +228,14 @@ public class RequestMappingInfoTests {
 			new RequestMappingInfo(
 					new PatternsRequestCondition("/foo"), null, null, null, null, 
 					new ProducesRequestCondition("text/plain"));
-		RequestMappingInfo match = key.getMatchingRequestMapping(request);
+		RequestMappingInfo match = key.getMatchingRequestMappingInfo(request);
 
 		assertNotNull(match);
 
 		key = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, null, null,
 				new ProducesRequestCondition("application/xml"));
-		match = key.getMatchingRequestMapping(request);
+		match = key.getMatchingRequestMappingInfo(request);
 
 		assertNull(match);
 	}

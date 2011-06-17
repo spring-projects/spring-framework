@@ -36,14 +36,14 @@ import org.springframework.web.util.WebUtils;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ParamsRequestCondition extends RequestConditionSupport<ParamsRequestCondition> {
+public class ParamsRequestCondition extends AbstractRequestCondition<ParamsRequestCondition> {
 
 	private final Set<ParamExpression> expressions;
 	
 	/**
 	 * Create a {@link ParamsRequestCondition} with the given param expressions. 
 	 * 
-	 * @param params 0 or more param expressions; if 0 the condition will match to every request.
+	 * @param params 0 or more param expressions; if 0, the condition will match to every request.
 	 */
 	public ParamsRequestCondition(String... params) {
 		this(parseExpressions(params));
@@ -69,8 +69,8 @@ public class ParamsRequestCondition extends RequestConditionSupport<ParamsReques
 	}
 
 	@Override
-	protected boolean isLogicalConjunction() {
-		return true;
+	protected String getToStringInfix() {
+		return " && ";
 	}
 
 	/**
