@@ -70,16 +70,16 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private static final String SCRIPT_INTERFACES_ATTRIBUTE = "script-interfaces";
 
 	private static final String REFRESH_CHECK_DELAY_ATTRIBUTE = "refresh-check-delay";
-	
-	private static final String CUSTOMIZER_REF_ATTRIBUTE = "customizer-ref";
 
+	private static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
+
+	private static final String CUSTOMIZER_REF_ATTRIBUTE = "customizer-ref";
 
 	/**
 	 * The {@link org.springframework.scripting.ScriptFactory} class that this
 	 * parser instance will create bean definitions for.
 	 */
 	private final String scriptFactoryClassName;
-
 
 	/**
 	 * Create a new instance of this parser, creating bean definitions for the
@@ -89,7 +89,6 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	public ScriptBeanDefinitionParser(String scriptFactoryClassName) {
 		this.scriptFactoryClassName = scriptFactoryClassName;
 	}
-
 
 	/**
 	 * Parses the dynamic object element and returns the resulting bean definition.
@@ -110,7 +109,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClassName(this.scriptFactoryClassName);
 		bd.setSource(parserContext.extractSource(element));
-
+		bd.setAttribute(ScriptFactoryPostProcessor.LANGUAGE_ATTRIBUTE, element.getLocalName());
+		
 		// Determine bean scope.
 		String scope = element.getAttribute(SCOPE_ATTRIBUTE);
 		if (StringUtils.hasLength(scope)) {
@@ -123,8 +123,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// Only "byType" and "byName" supported, but maybe other default inherited...
 		if (autowireMode == GenericBeanDefinition.AUTOWIRE_AUTODETECT) {
 			autowireMode = GenericBeanDefinition.AUTOWIRE_BY_TYPE;
-		}
-		else if (autowireMode == GenericBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+		} else if (autowireMode == GenericBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
 			autowireMode = GenericBeanDefinition.AUTOWIRE_NO;
 		}
 		bd.setAutowireMode(autowireMode);
@@ -134,31 +133,34 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		bd.setDependencyCheck(parserContext.getDelegate().getDependencyCheck(dependencyCheck));
 
 		// Retrieve the defaults for bean definitions within this parser context
-		BeanDefinitionDefaults beanDefinitionDefaults =
-				parserContext.getDelegate().getBeanDefinitionDefaults();
+		BeanDefinitionDefaults beanDefinitionDefaults = parserContext.getDelegate().getBeanDefinitionDefaults();
 
 		// Determine init method and destroy method.
 		String initMethod = element.getAttribute(INIT_METHOD_ATTRIBUTE);
 		if (StringUtils.hasLength(initMethod)) {
 			bd.setInitMethodName(initMethod);
-		}
-		else if (beanDefinitionDefaults.getInitMethodName() != null) {
+		} else if (beanDefinitionDefaults.getInitMethodName() != null) {
 			bd.setInitMethodName(beanDefinitionDefaults.getInitMethodName());
 		}
 
 		String destroyMethod = element.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 		if (StringUtils.hasLength(destroyMethod)) {
 			bd.setDestroyMethodName(destroyMethod);
-		}
-		else if (beanDefinitionDefaults.getDestroyMethodName() != null) {
+		} else if (beanDefinitionDefaults.getDestroyMethodName() != null) {
 			bd.setDestroyMethodName(beanDefinitionDefaults.getDestroyMethodName());
 		}
 
 		// Attach any refresh metadata.
 		String refreshCheckDelay = element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
 		if (StringUtils.hasText(refreshCheckDelay)) {
-			bd.setAttribute(
-					ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, new Long(refreshCheckDelay));
+			bd.setAttribute(ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, new Long(refreshCheckDelay));
+		}
+
+		// Attach any proxy target class metadata.
+		String proxyTargetClass = element.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE);
+		if (StringUtils.hasText(proxyTargetClass)) {
+			Boolean flag = new Boolean(proxyTargetClass);
+			bd.setAttribute(ScriptFactoryPostProcessor.PROXY_TARGET_CLASS_ATTRIBUTE, flag);
 		}
 
 		// Add constructor arguments.
@@ -168,14 +170,13 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		if (element.hasAttribute(SCRIPT_INTERFACES_ATTRIBUTE)) {
 			cav.addIndexedArgumentValue(constructorArgNum++, element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE));
 		}
-		
+
 		// This is used for Groovy. It's a bean reference to a customizer bean.
 		if (element.hasAttribute(CUSTOMIZER_REF_ATTRIBUTE)) {
 			String customizerBeanName = element.getAttribute(CUSTOMIZER_REF_ATTRIBUTE);
 			if (!StringUtils.hasText(customizerBeanName)) {
 				parserContext.getReaderContext().error("Attribute 'customizer-ref' has empty value", element);
-			}
-			else {
+			} else {
 				cav.addIndexedArgumentValue(constructorArgNum++, new RuntimeBeanReference(customizerBeanName));
 			}
 		}
@@ -197,15 +198,12 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		if (hasScriptSource && !elements.isEmpty()) {
 			readerContext.error("Only one of 'script-source' and 'inline-script' should be specified.", element);
 			return null;
-		}
-		else if (hasScriptSource) {
+		} else if (hasScriptSource) {
 			return element.getAttribute(SCRIPT_SOURCE_ATTRIBUTE);
-		}
-		else if (!elements.isEmpty()) {
+		} else if (!elements.isEmpty()) {
 			Element inlineElement = (Element) elements.get(0);
 			return "inline:" + DomUtils.getTextValue(inlineElement);
-		}
-		else {
+		} else {
 			readerContext.error("Must specify either 'script-source' or 'inline-script'.", element);
 			return null;
 		}

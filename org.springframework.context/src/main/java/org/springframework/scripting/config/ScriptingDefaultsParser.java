@@ -19,6 +19,7 @@ package org.springframework.scripting.config;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
@@ -31,6 +32,8 @@ public class ScriptingDefaultsParser implements BeanDefinitionParser {
 
 	private static final String REFRESH_CHECK_DELAY_ATTRIBUTE = "refresh-check-delay";
 
+	private static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
+
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		BeanDefinition bd = 
@@ -38,6 +41,10 @@ public class ScriptingDefaultsParser implements BeanDefinitionParser {
 		String refreshCheckDelay = element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
 		if (StringUtils.hasText(refreshCheckDelay)) {
 			bd.getPropertyValues().add("defaultRefreshCheckDelay", new Long(refreshCheckDelay));
+		}
+		String proxyTargetClass = element.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE);
+		if (StringUtils.hasText(proxyTargetClass)) {
+			bd.getPropertyValues().add("defaultProxyTargetClass", new TypedStringValue(proxyTargetClass, Boolean.class));
 		}
 		return null;
 	}

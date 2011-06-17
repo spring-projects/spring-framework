@@ -45,6 +45,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
@@ -135,8 +136,8 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @since 2.0
  */
-public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
-		implements BeanClassLoaderAware, BeanFactoryAware, ResourceLoaderAware, DisposableBean, Ordered {
+public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProcessorAdapter implements
+		BeanClassLoaderAware, BeanFactoryAware, ResourceLoaderAware, DisposableBean, Ordered {
 
 	/**
 	 * The {@link org.springframework.core.io.Resource}-style prefix that denotes
@@ -146,18 +147,25 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 */
 	public static final String INLINE_SCRIPT_PREFIX = "inline:";
 
-	public static final String REFRESH_CHECK_DELAY_ATTRIBUTE =
-			Conventions.getQualifiedAttributeName(ScriptFactoryPostProcessor.class, "refreshCheckDelay");
+	public static final String REFRESH_CHECK_DELAY_ATTRIBUTE = Conventions.getQualifiedAttributeName(
+			ScriptFactoryPostProcessor.class, "refreshCheckDelay");
+
+	public static final String PROXY_TARGET_CLASS_ATTRIBUTE = Conventions.getQualifiedAttributeName(
+			ScriptFactoryPostProcessor.class, "proxyTargetClass");
+
+	public static final String LANGUAGE_ATTRIBUTE = Conventions.getQualifiedAttributeName(
+			ScriptFactoryPostProcessor.class, "language");
 
 	private static final String SCRIPT_FACTORY_NAME_PREFIX = "scriptFactory.";
 
 	private static final String SCRIPTED_OBJECT_NAME_PREFIX = "scriptedObject.";
 
-
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private long defaultRefreshCheckDelay = -1;
+
+	private boolean defaultProxyTargetClass = false;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
@@ -169,7 +177,6 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 
 	/** Map from bean name String to ScriptSource object */
 	private final Map<String, ScriptSource> scriptSourceCache = new HashMap<String, ScriptSource>();
-
 
 	/**
 	 * Set the delay between refresh checks, in milliseconds.
@@ -183,14 +190,22 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		this.defaultRefreshCheckDelay = defaultRefreshCheckDelay;
 	}
 
+	/**
+	 * Flag to signal that refreshable proxies should be created to proxy the target class not its interfaces. 
+	 * @param defaultProxyTargetClass the flag value to set
+	 */
+	public void setDefaultProxyTargetClass(boolean defaultProxyTargetClass) {
+		this.defaultProxyTargetClass = defaultProxyTargetClass;
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
-			throw new IllegalStateException("ScriptFactoryPostProcessor doesn't work with a BeanFactory " +
-					"which does not implement ConfigurableBeanFactory: " + beanFactory.getClass());
+			throw new IllegalStateException("ScriptFactoryPostProcessor doesn't work with a BeanFactory "
+					+ "which does not implement ConfigurableBeanFactory: " + beanFactory.getClass());
 		}
 		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
 
@@ -217,7 +232,6 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		return Integer.MIN_VALUE;
 	}
 
-
 	@Override
 	public Class predictBeanType(Class beanClass, String beanName) {
 		// We only apply special treatment to ScriptFactory implementations here.
@@ -233,18 +247,15 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			prepareScriptBeans(bd, scriptFactoryBeanName, scriptedObjectBeanName);
 
 			ScriptFactory scriptFactory = this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
-			ScriptSource scriptSource =
-					getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
+			ScriptSource scriptSource = getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
 			Class[] interfaces = scriptFactory.getScriptInterfaces();
 
 			Class scriptedType = scriptFactory.getScriptedObjectType(scriptSource);
 			if (scriptedType != null) {
 				return scriptedType;
-			}
-			else if (!ObjectUtils.isEmpty(interfaces)) {
+			} else if (!ObjectUtils.isEmpty(interfaces)) {
 				return (interfaces.length == 1 ? interfaces[0] : createCompositeInterface(interfaces));
-			}
-			else {
+			} else {
 				if (bd.isSingleton()) {
 					Object bean = this.scriptBeanFactory.getBean(scriptedObjectBeanName);
 					if (bean != null) {
@@ -252,15 +263,14 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 					}
 				}
 			}
-		}
-		catch (Exception ex) {
-			if (ex instanceof BeanCreationException &&
-					((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
+		} catch (Exception ex) {
+			if (ex instanceof BeanCreationException
+					&& ((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Could not determine scripted object type for bean '" + beanName + "': " + ex.getMessage());
+					logger.trace("Could not determine scripted object type for bean '" + beanName + "': "
+							+ ex.getMessage());
 				}
-			}
-			else {
+			} else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Could not determine scripted object type for bean '" + beanName + "'", ex);
 				}
@@ -283,8 +293,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		prepareScriptBeans(bd, scriptFactoryBeanName, scriptedObjectBeanName);
 
 		ScriptFactory scriptFactory = this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
-		ScriptSource scriptSource =
-				getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
+		ScriptSource scriptSource = getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
 		boolean isFactoryBean = false;
 		try {
 			Class scriptedObjectType = scriptFactory.getScriptedObjectType(scriptSource);
@@ -292,19 +301,25 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			if (scriptedObjectType != null) {
 				isFactoryBean = FactoryBean.class.isAssignableFrom(scriptedObjectType);
 			}
-		}
-		catch (Exception ex) {
-			throw new BeanCreationException(
-					beanName, "Could not determine scripted object type for " + scriptFactory, ex);
+		} catch (Exception ex) {
+			throw new BeanCreationException(beanName, "Could not determine scripted object type for " + scriptFactory,
+					ex);
 		}
 
 		long refreshCheckDelay = resolveRefreshCheckDelay(bd);
 		if (refreshCheckDelay >= 0) {
 			Class[] interfaces = scriptFactory.getScriptInterfaces();
-			RefreshableScriptTargetSource ts = new RefreshableScriptTargetSource(
-					this.scriptBeanFactory, scriptedObjectBeanName, scriptFactory, scriptSource, isFactoryBean);
+			RefreshableScriptTargetSource ts = new RefreshableScriptTargetSource(this.scriptBeanFactory,
+					scriptedObjectBeanName, scriptFactory, scriptSource, isFactoryBean);
+			boolean proxyTargetClass = resolveProxyTargetClass(bd);
+			String language = (String) bd.getAttribute(LANGUAGE_ATTRIBUTE);
+			if (proxyTargetClass && (language==null || !language.equals("groovy"))) {
+				throw new BeanDefinitionValidationException(
+						"Cannot use proxyTargetClass=true with script beans where language is not groovy (found "
+								+ language + ")");
+			}
 			ts.setRefreshCheckDelay(refreshCheckDelay);
-			return createRefreshableProxy(ts, interfaces);
+			return createRefreshableProxy(ts, interfaces, proxyTargetClass);
 		}
 
 		if (isFactoryBean) {
@@ -312,7 +327,6 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		}
 		return this.scriptBeanFactory.getBean(scriptedObjectBeanName);
 	}
-
 
 	/**
 	 * Prepare the script beans in the internal BeanFactory that this
@@ -322,18 +336,18 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @param scriptFactoryBeanName the name of the internal ScriptFactory bean
 	 * @param scriptedObjectBeanName the name of the internal scripted object bean
 	 */
-	protected void prepareScriptBeans(
-			BeanDefinition bd, String scriptFactoryBeanName, String scriptedObjectBeanName) {
+	protected void prepareScriptBeans(BeanDefinition bd, String scriptFactoryBeanName, String scriptedObjectBeanName) {
 
 		// Avoid recreation of the script bean definition in case of a prototype.
 		synchronized (this.scriptBeanFactory) {
 			if (!this.scriptBeanFactory.containsBeanDefinition(scriptedObjectBeanName)) {
 
-				this.scriptBeanFactory.registerBeanDefinition(
-						scriptFactoryBeanName, createScriptFactoryBeanDefinition(bd));
-				ScriptFactory scriptFactory = this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
-				ScriptSource scriptSource =
-						getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
+				this.scriptBeanFactory.registerBeanDefinition(scriptFactoryBeanName,
+						createScriptFactoryBeanDefinition(bd));
+				ScriptFactory scriptFactory = this.scriptBeanFactory
+						.getBean(scriptFactoryBeanName, ScriptFactory.class);
+				ScriptSource scriptSource = getScriptSource(scriptFactoryBeanName,
+						scriptFactory.getScriptSourceLocator());
 				Class<?>[] interfaces = scriptFactory.getScriptInterfaces();
 
 				Class<?>[] scriptedInterfaces = interfaces;
@@ -342,8 +356,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 					scriptedInterfaces = ObjectUtils.addObjectToArray(interfaces, configInterface);
 				}
 
-				BeanDefinition objectBd = createScriptedObjectBeanDefinition(
-						bd, scriptFactoryBeanName, scriptSource, scriptedInterfaces);
+				BeanDefinition objectBd = createScriptedObjectBeanDefinition(bd, scriptFactoryBeanName, scriptSource,
+						scriptedInterfaces);
 				long refreshCheckDelay = resolveRefreshCheckDelay(bd);
 				if (refreshCheckDelay >= 0) {
 					objectBd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
@@ -369,16 +383,29 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		Object attributeValue = beanDefinition.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
 		if (attributeValue instanceof Number) {
 			refreshCheckDelay = ((Number) attributeValue).longValue();
-		}
-		else if (attributeValue instanceof String) {
+		} else if (attributeValue instanceof String) {
 			refreshCheckDelay = Long.parseLong((String) attributeValue);
-		}
-		else if (attributeValue != null) {
-			throw new BeanDefinitionStoreException(
-					"Invalid refresh check delay attribute [" + REFRESH_CHECK_DELAY_ATTRIBUTE +
-					"] with value [" + attributeValue + "]: needs to be of type Number or String");
+		} else if (attributeValue != null) {
+			throw new BeanDefinitionStoreException("Invalid refresh check delay attribute ["
+					+ REFRESH_CHECK_DELAY_ATTRIBUTE + "] with value [" + attributeValue
+					+ "]: needs to be of type Number or String");
 		}
 		return refreshCheckDelay;
+	}
+
+	protected boolean resolveProxyTargetClass(BeanDefinition beanDefinition) {
+		boolean proxyTargetClass = this.defaultProxyTargetClass;
+		Object attributeValue = beanDefinition.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE);
+		if (attributeValue instanceof Boolean) {
+			proxyTargetClass = ((Boolean) attributeValue).booleanValue();
+		} else if (attributeValue instanceof String) {
+			proxyTargetClass = new Boolean((String) attributeValue);
+		} else if (attributeValue != null) {
+			throw new BeanDefinitionStoreException("Invalid refresh check delay attribute ["
+					+ REFRESH_CHECK_DELAY_ATTRIBUTE + "] with value [" + attributeValue
+					+ "]: needs to be of type Number or String");
+		}
+		return proxyTargetClass;
 	}
 
 	/**
@@ -425,13 +452,12 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @param resourceLoader the ResourceLoader to use (if necessary)
 	 * @return the ScriptSource instance
 	 */
-	protected ScriptSource convertToScriptSource(
-			String beanName, String scriptSourceLocator, ResourceLoader resourceLoader) {
+	protected ScriptSource convertToScriptSource(String beanName, String scriptSourceLocator,
+			ResourceLoader resourceLoader) {
 
 		if (scriptSourceLocator.startsWith(INLINE_SCRIPT_PREFIX)) {
 			return new StaticScriptSource(scriptSourceLocator.substring(INLINE_SCRIPT_PREFIX.length()), beanName);
-		}
-		else {
+		} else {
 			return new ResourceScriptSource(resourceLoader.getResource(scriptSourceLocator));
 		}
 	}
@@ -457,7 +483,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 			String propertyName = pv.getName();
 			Class propertyType = BeanUtils.findPropertyType(propertyName, interfaces);
 			String setterName = "set" + StringUtils.capitalize(propertyName);
-			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] {Type.getType(propertyType)});
+			Signature signature = new Signature(setterName, Type.VOID_TYPE, new Type[] { Type.getType(propertyType) });
 			maker.add(signature, new Type[0]);
 		}
 		if (bd instanceof AbstractBeanDefinition) {
@@ -498,8 +524,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @return the extracted ScriptFactory bean definition
 	 * @see org.springframework.scripting.ScriptFactory#getScriptedObject
 	 */
-	protected BeanDefinition createScriptedObjectBeanDefinition(
-			BeanDefinition bd, String scriptFactoryBeanName, ScriptSource scriptSource, Class[] interfaces) {
+	protected BeanDefinition createScriptedObjectBeanDefinition(BeanDefinition bd, String scriptFactoryBeanName,
+			ScriptSource scriptSource, Class[] interfaces) {
 
 		GenericBeanDefinition objectBd = new GenericBeanDefinition(bd);
 		objectBd.setFactoryBeanName(scriptFactoryBeanName);
@@ -518,22 +544,26 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @return the generated proxy
 	 * @see RefreshableScriptTargetSource
 	 */
-	protected Object createRefreshableProxy(TargetSource ts, Class[] interfaces) {
+	protected Object createRefreshableProxy(TargetSource ts, Class[] interfaces, boolean proxyTargetClass) {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTargetSource(ts);
+		ClassLoader classLoader = this.beanClassLoader;
 
 		if (interfaces == null) {
 			interfaces = ClassUtils.getAllInterfacesForClass(ts.getTargetClass(), this.beanClassLoader);
 		}
 		proxyFactory.setInterfaces(interfaces);
+		if (proxyTargetClass) {
+			classLoader = null; // Force use of Class.getClassLoader()
+			proxyFactory.setProxyTargetClass(proxyTargetClass);
+		}
 
 		DelegatingIntroductionInterceptor introduction = new DelegatingIntroductionInterceptor(ts);
 		introduction.suppressInterface(TargetSource.class);
 		proxyFactory.addAdvice(introduction);
 
-		return proxyFactory.getProxy(this.beanClassLoader);
+		return proxyFactory.getProxy(classLoader);
 	}
-
 
 	/**
 	 * Destroy the inner bean factory (used for scripts) on shutdown.
