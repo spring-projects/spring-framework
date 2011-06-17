@@ -30,28 +30,49 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="groovy" type="customizableScriptType">
+	<xsd:element name="groovy">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	A Spring bean backed by a Groovy class definition.
 			]]></xsd:documentation>
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="customizableScriptType">
+				<xsd:attributeGroup ref="defaultableAttributes"/>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="jruby" type="dynamicScriptType">
+	<xsd:element name="jruby">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	A Spring bean backed by a JRuby class definition.
 			]]></xsd:documentation>
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="dynamicScriptType">
+				<xsd:attributeGroup ref="vanillaScriptAttributes"/>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="bsh" type="dynamicScriptType">
+	<xsd:element name="bsh">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	A Spring bean backed by a BeanShell script.
 			]]></xsd:documentation>
 		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="dynamicScriptType">
+				<xsd:attributeGroup ref="vanillaScriptAttributes"/>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
 	</xsd:element>
 
 	<!-- Script Types -->
@@ -77,7 +98,6 @@
 						</xsd:annotation>
 					</xsd:element>
 				</xsd:sequence>
-				<xsd:attributeGroup ref="defaultableAttributes"/>
 				<xsd:attribute name="script-source" type="xsd:string">
 					<xsd:annotation>
 						<xsd:documentation source="java:org.springframework.core.io.Resource"><![CDATA[
@@ -185,7 +205,7 @@
 		</xsd:complexContent>
 	</xsd:complexType>
 
-	<xsd:attributeGroup name="defaultableAttributes">
+	<xsd:attributeGroup name="vanillaScriptAttributes">
 		<xsd:attribute name="refresh-check-delay" type="xsd:long">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
@@ -194,6 +214,20 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+	</xsd:attributeGroup>
+
+	<xsd:attributeGroup name="defaultableAttributes">
+		<xsd:attribute name="proxy-target-class" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Flag to tell the bean factory that if this bean is proxied it should be done using the target class type, 
+	not its interfaces.  A refreshable script is normally proxied, so often this is useful in conjunction with 
+	refresh-check-delay.  Defaults to false requiring no additional library dependencies, but hiding behaviour in the
+	bean that is not defined in an interface.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attributeGroup ref="vanillaScriptAttributes"></xsd:attributeGroup>
 	</xsd:attributeGroup>
 
 </xsd:schema>

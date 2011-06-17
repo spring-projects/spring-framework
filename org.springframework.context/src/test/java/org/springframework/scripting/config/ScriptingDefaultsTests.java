@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import junit.framework.TestCase;
 
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.AbstractRefreshableTargetSource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -32,7 +33,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class ScriptingDefaultsTests extends TestCase {
 
 	private static final String CONFIG =
-			"org/springframework/scripting/config/scriptingDefaultsTests.xml";
+		"org/springframework/scripting/config/scriptingDefaultsTests.xml";
+
+	private static final String PROXY_CONFIG =
+		"org/springframework/scripting/config/scriptingDefaultsProxyTargetClassTests.xml";
 
 
 	public void testDefaultRefreshCheckDelay() throws Exception {
@@ -71,6 +75,12 @@ public class ScriptingDefaultsTests extends TestCase {
 		ITestBean testBean = (ITestBean) context.getBean("testBean");
 		ITestBean otherBean = (ITestBean) context.getBean("otherBean");
 		assertEquals(otherBean, testBean.getOtherBean());
+	}
+
+	public void testDefaultProxyTargetClass() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(PROXY_CONFIG);
+		Object testBean = context.getBean("testBean");
+		assertTrue(AopUtils.isCglibProxy(testBean));
 	}
 
 }

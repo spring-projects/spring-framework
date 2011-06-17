@@ -16,7 +16,13 @@
 
 package org.springframework.scripting.groovy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import groovy.lang.DelegatingMetaClass;
 import groovy.lang.GroovyObject;
 
@@ -178,8 +184,7 @@ public class GroovyScriptFactoryTests {
 		try {
 			new ClassPathXmlApplicationContext("org/springframework/scripting/groovy/groovyBrokenContext.xml");
 			fail("Should throw exception for broken script file");
-		}
-		catch (NestedRuntimeException ex) {
+		} catch (NestedRuntimeException ex) {
 			assertTrue("Wrong root cause: " + ex, ex.contains(ScriptCompilationException.class));
 		}
 	}
@@ -194,12 +199,12 @@ public class GroovyScriptFactoryTests {
 		script.suggestedClassName();
 		mock.setReturnValue("someName");
 		mock.replay();
-		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
+		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX
+				+ badScript);
 		try {
-			factory.getScriptedObject(script, new Class[]{});
+			factory.getScriptedObject(script, new Class[] {});
 			fail("Must have thrown a ScriptCompilationException (no public no-arg ctor in scripted class).");
-		}
-		catch (ScriptCompilationException expected) {
+		} catch (ScriptCompilationException expected) {
 			assertTrue(expected.contains(InstantiationException.class));
 		}
 		mock.verify();
@@ -215,12 +220,12 @@ public class GroovyScriptFactoryTests {
 		script.suggestedClassName();
 		mock.setReturnValue("someName");
 		mock.replay();
-		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
+		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX
+				+ badScript);
 		try {
-			factory.getScriptedObject(script, new Class[]{});
+			factory.getScriptedObject(script, new Class[] {});
 			fail("Must have thrown a ScriptCompilationException (no oublic no-arg ctor in scripted class).");
-		}
-		catch (ScriptCompilationException expected) {
+		} catch (ScriptCompilationException expected) {
 			assertTrue(expected.contains(IllegalAccessException.class));
 		}
 		mock.verify();
@@ -254,8 +259,7 @@ public class GroovyScriptFactoryTests {
 		try {
 			new GroovyScriptFactory(null);
 			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
+		} catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -264,8 +268,7 @@ public class GroovyScriptFactoryTests {
 		try {
 			new GroovyScriptFactory("");
 			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
+		} catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -274,8 +277,7 @@ public class GroovyScriptFactoryTests {
 		try {
 			new GroovyScriptFactory("\n   ");
 			fail("Must have thrown exception by this point.");
-		}
-		catch (IllegalArgumentException expected) {
+		} catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -284,8 +286,7 @@ public class GroovyScriptFactoryTests {
 		try {
 			new ClassPathXmlApplicationContext("lwspBadGroovyContext.xml", getClass());
 			fail("Must have thrown a BeanCreationException ('inline:' prefix was preceded by whitespace");
-		}
-		catch (BeanCreationException expected) {
+		} catch (BeanCreationException expected) {
 			assertTrue(expected.contains(FileNotFoundException.class));
 		}
 	}
@@ -312,12 +313,12 @@ public class GroovyScriptFactoryTests {
 		try {
 			factory.getScriptedObject(null, null);
 			fail("Must have thrown a NullPointerException as per contract ('null' ScriptSource supplied");
-		}
-		catch (NullPointerException expected) {
+		} catch (NullPointerException expected) {
 		}
 	}
 
-	@Ignore // see http://build.springframework.org/browse/SPR-TRUNKQUICK-908
+	@Ignore
+	// see http://build.springframework.org/browse/SPR-TRUNKQUICK-908
 	@Test
 	public void testResourceScriptFromTag() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
@@ -376,6 +377,32 @@ public class GroovyScriptFactoryTests {
 	}
 
 	@Test
+	// Test for SPR-6268
+	public void testRefreshableFromTagProxyTargetClass() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd-proxy-target-class.xml",
+				getClass());
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("refreshableMessenger"));
+
+		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
+
+		assertTrue(AopUtils.isAopProxy(messenger));
+		assertTrue(messenger instanceof Refreshable);
+		assertEquals("Hello World!", messenger.getMessage());
+
+		assertTrue(ctx.getBeansOfType(ConcreteMessenger.class).values().contains(messenger));
+	}
+
+	@Test
+	// Test for SPR-6268
+	public void testProxyTargetClassNotAllowedIfNotGroovy() throws Exception {
+		try {
+			new ClassPathXmlApplicationContext("jruby-with-xsd-proxy-target-class.xml", getClass());
+		} catch (BeanCreationException e) {
+			assertTrue(e.getMessage().contains("Cannot use proxyTargetClass=true"));
+		}
+	}
+
+	@Test
 	public void testAnonymousScriptDetected() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Map beans = ctx.getBeansOfType(Messenger.class);
@@ -404,8 +431,7 @@ public class GroovyScriptFactoryTests {
 		try {
 			ctx.getBean("bean3");
 			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
+		} catch (BeanCreationException ex) {
 			// expected
 			assertTrue(ex.contains(UnsatisfiedDependencyException.class));
 		}
@@ -424,8 +450,7 @@ public class GroovyScriptFactoryTests {
 	private void testMetaClass(final String xmlFile) {
 		// expect the exception we threw in the custom metaclass to show it got invoked
 		try {
-			ApplicationContext ctx =
-					new ClassPathXmlApplicationContext(xmlFile);
+			ApplicationContext ctx = new ClassPathXmlApplicationContext(xmlFile);
 			Calculator calc = (Calculator) ctx.getBean("delegatingCalculator");
 			calc.add(1, 2);
 			fail("expected IllegalStateException");
@@ -454,7 +479,6 @@ public class GroovyScriptFactoryTests {
 		assertEquals("test", result);
 	}
 
-
 	public static class TestCustomizer implements GroovyObjectCustomizer {
 
 		public void customize(GroovyObject goo) {
@@ -462,8 +486,7 @@ public class GroovyScriptFactoryTests {
 				public Object invokeMethod(Object arg0, String mName, Object[] arg2) {
 					if (mName.indexOf("Missing") != -1) {
 						throw new IllegalStateException("Gotcha");
-					}
-					else {
+					} else {
 						return super.invokeMethod(arg0, mName, arg2);
 					}
 				}
