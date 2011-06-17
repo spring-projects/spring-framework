@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,7 +60,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 	@Override
 	protected Set<String> getMappingPaths(RequestMappingInfo mapping) {
-		return mapping.getPatterns();
+		return mapping.getPatternsCondition().getPatterns();
 	}
 
 	/**
@@ -73,7 +72,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo mapping,
 													String lookupPath,
 													HttpServletRequest request) {
-		return mapping.getMatchingRequestMapping(lookupPath, request, getPathMatcher());
+		return mapping.getMatchingRequestMapping(request);
 	}
 
 	/**
@@ -81,7 +80,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 */
 	@Override
 	protected Comparator<RequestMappingInfo> getMappingComparator(String lookupPath, HttpServletRequest request) {
-		return new RequestMappingInfoComparator(lookupPath, request);
+		return new RequestMappingInfoComparator(request);
 	}
 
 	/**
@@ -94,12 +93,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request) {
 		super.handleMatch(info, lookupPath, request);
 
-		String pattern = info.getPatterns().iterator().next();
+		String pattern = info.getPatternsCondition().getPatterns().iterator().next();
 		Map<String, String> uriTemplateVariables = getPathMatcher().extractUriTemplateVariables(pattern, lookupPath);
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 
-		if (!info.getProduces().isEmpty()) {
-			Set<MediaType> mediaTypes = info.getProduces().getMediaTypes();
+		if (!info.getProducesCondition().isEmpty()) {
+			Set<MediaType> mediaTypes = info.getProducesCondition().getMediaTypes();
 			request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
 		}
 	}
@@ -117,18 +116,18 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		Set<MediaType> consumableMediaTypes = new HashSet<MediaType>();
 		Set<MediaType> producibleMediaTypes = new HashSet<MediaType>();
 		for (RequestMappingInfo info : requestMappingInfos) {
-			for (String pattern : info.getPatterns()) {
+			for (String pattern : info.getPatternsCondition().getPatterns()) {
 				if (getPathMatcher().match(pattern, lookupPath)) {
-					if (!info.getMethods().match(request)) {
-						for (RequestMethod method : info.getMethods().getMethods()) {
+					if (info.getMethodsCondition().getMatchingCondition(request) == null) {
+						for (RequestMethod method : info.getMethodsCondition().getMethods()) {
 							allowedMethods.add(method.name());
 						}
 					}
-					if (!info.getConsumes().match(request)) {
-						consumableMediaTypes.addAll(info.getConsumes().getMediaTypes());
+					if (info.getConsumesCondition().getMatchingCondition(request) == null) {
+						consumableMediaTypes.addAll(info.getConsumesCondition().getMediaTypes());
 					}
-					if (!info.getProduces().match(request)) {
-						producibleMediaTypes.addAll(info.getProduces().getMediaTypes());
+					if (info.getProducesCondition().getMatchingCondition(request) == null) {
+						producibleMediaTypes.addAll(info.getProducesCondition().getMediaTypes());
 					}
 				}
 			}
@@ -152,77 +151,44 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * A comparator for {@link RequestMappingInfo}s. Effective comparison can only be done in the context of a specific
-	 * request. For example not all {@link RequestMappingInfo} patterns may apply to the current request. Therefore an
-	 * HttpServletRequest is required as input.
-	 *
-	 * <p>Furthermore, the following assumptions are made about the input RequestMappings: <ul><li>Each RequestMappingInfo
-	 * has been fully matched to the request <li>The RequestMappingInfo contains matched patterns only <li>Patterns are
-	 * ordered with the best matching pattern at the top </ul>
-	 *
-	 * @see RequestMappingInfoHandlerMapping#getMatchingMapping(RequestMappingInfo, String, HttpServletRequest)
+	 * A comparator for {@link RequestMappingInfo}s. Effective comparison can only be done in the context 
+	 * of a specific request. For example only a subset of URL patterns may apply to the current request.
 	 */
 	private class RequestMappingInfoComparator implements Comparator<RequestMappingInfo> {
 
-		private Comparator<String> patternComparator;
+		private final HttpServletRequest request;
 
-		private List<MediaType> requestAcceptHeader;
-
-		public RequestMappingInfoComparator(String lookupPath, HttpServletRequest request) {
-			this.patternComparator = getPathMatcher().getPatternComparator(lookupPath);
-			String acceptHeader = request.getHeader("Accept");
-			this.requestAcceptHeader = MediaType.parseMediaTypes(acceptHeader);
-			MediaType.sortByQualityValue(this.requestAcceptHeader);
+		public RequestMappingInfoComparator(HttpServletRequest request) {
+			this.request = request;
 		}
 
 		public int compare(RequestMappingInfo mapping, RequestMappingInfo otherMapping) {
-			int result = comparePatterns(mapping.getPatterns(), otherMapping.getPatterns());
+			int result = mapping.getPatternsCondition().compareTo(otherMapping.getPatternsCondition(), request);
 			if (result != 0) {
 				return result;
 			}
-			result = mapping.getParams().compareTo(otherMapping.getParams());
+			result = mapping.getParamsCondition().compareTo(otherMapping.getParamsCondition(), request);
 			if (result != 0) {
 				return result;
 			}
-			result = mapping.getHeaders().compareTo(otherMapping.getHeaders());
+			result = mapping.getHeadersCondition().compareTo(otherMapping.getHeadersCondition(), request);
 			if (result != 0) {
 				return result;
 			}
-			result = mapping.getConsumes().compareTo(otherMapping.getConsumes());
+			result = mapping.getConsumesCondition().compareTo(otherMapping.getConsumesCondition(), request);
 			if (result != 0) {
 				return result;
 			}
-			result = mapping.getProduces().compareTo(otherMapping.getProduces(), this.requestAcceptHeader);
+			result = mapping.getProducesCondition().compareTo(otherMapping.getProducesCondition(), request);
 			if (result != 0) {
 				return result;
 			}
-			result = mapping.getMethods().compareTo(otherMapping.getMethods());
+			result = mapping.getMethodsCondition().compareTo(otherMapping.getMethodsCondition(), request);
 			if (result != 0) {
 				return result;
 			}
 			return 0;
 		}
-
-		private int comparePatterns(Set<String> patterns, Set<String> otherPatterns) {
-			Iterator<String> iterator = patterns.iterator();
-			Iterator<String> iteratorOther = otherPatterns.iterator();
-			while (iterator.hasNext() && iteratorOther.hasNext()) {
-				int result = patternComparator.compare(iterator.next(), iteratorOther.next());
-				if (result != 0) {
-					return result;
-				}
-			}
-			if (iterator.hasNext()) {
-				return -1;
-			}
-			else if (iteratorOther.hasNext()) {
-				return 1;
-			}
-			else {
-				return 0;
-			}
-		}
-
 	}
 
 }

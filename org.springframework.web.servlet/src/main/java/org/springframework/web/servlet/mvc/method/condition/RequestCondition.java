@@ -19,23 +19,39 @@ package org.springframework.web.servlet.mvc.method.condition;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Defines the contract for conditions that must be met given an incoming request.
- *
- * <p>Implementations of this interface are created by the {@link RequestConditionFactory}.
- *
+ * The contract for request conditions.
+ * 
+ * <p>Request conditions can be combined (e.g. type + method-level conditions), matched to a request, 
+ * or compared to each other to determine if one matches the request better.
+ * 
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
- * @see RequestConditionFactory
  * @since 3.1
  */
-public interface RequestCondition {
+public interface RequestCondition<This extends RequestCondition<This>> {
 
 	/**
-	 * Indicates whether this condition matches against the given servlet request.
-	 *
-	 * @param request the request
-	 * @return {@code true} if this condition matches the request; {@code false} otherwise
+	 * Defines the rules for combining "this" condition (i.e. the current instance) with another condition.
+	 * <p>Example: combine type- and method-level request mapping conditions. 
+	 * 
+	 * @returns a request condition instance that is the result of combining the two condition instances.
 	 */
-	boolean match(HttpServletRequest request);
+	This combine(This other);
 
+	/**
+	 * Checks if this condition matches the provided request and returns a potentially new request condition 
+	 * with content tailored to the current request. For example a condition with URL patterns might return 
+	 * a new condition that contains matching patterns sorted with best matching patterns on top.
+	 * 
+	 * @return a condition instance in case of a match; or {@code null} if there is no match.
+	 */
+	This getMatchingCondition(HttpServletRequest request);
+
+	/**
+	 * Compares "this" condition (i.e. the current instance) with another condition in the context of a request. 
+	 * <p>Note: it is assumed instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)} 
+	 * to ensure they have content relevant to current request only.
+	 */
+	int compareTo(This other, HttpServletRequest request);
+	
 }

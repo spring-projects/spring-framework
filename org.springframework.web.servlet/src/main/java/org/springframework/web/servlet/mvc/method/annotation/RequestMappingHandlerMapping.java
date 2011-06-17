@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
@@ -25,7 +24,12 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
-import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
+import org.springframework.web.servlet.mvc.method.condition.ConsumesRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.ParamsRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.PatternsRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.ProducesRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.RequestMethodsRequestCondition;
 
 /**
  * A sub-class of {@link RequestMappingInfoHandlerMapping} that prepares {@link RequestMappingInfo}s 
@@ -64,7 +68,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			RequestMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
 			if (typeAnnot != null) {
 				RequestMappingInfo typeMapping = createFromRequestMapping(typeAnnot);
-				return typeMapping.combine(methodMapping, getPathMatcher());
+				return typeMapping.combine(methodMapping);
 			}
 			else {
 				return methodMapping;
@@ -75,13 +79,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		}
 	}
 
-	private static RequestMappingInfo createFromRequestMapping(RequestMapping annotation) {
-		return new RequestMappingInfo(Arrays.asList(annotation.value()),
-				RequestConditionFactory.parseMethods(annotation.method()),
-				RequestConditionFactory.parseParams(annotation.params()),
-				RequestConditionFactory.parseHeaders(annotation.headers()),
-				RequestConditionFactory.parseConsumes(annotation.consumes(), annotation.headers()),
-				RequestConditionFactory.parseProduces(annotation.produces(), annotation.headers()));
+	private RequestMappingInfo createFromRequestMapping(RequestMapping annotation) {
+		return new RequestMappingInfo(
+				new PatternsRequestCondition(annotation.value(), getUrlPathHelper(), getPathMatcher()),
+				new RequestMethodsRequestCondition(annotation.method()),
+				new ParamsRequestCondition(annotation.params()),
+				new HeadersRequestCondition(annotation.headers()),
+				new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
+				new ProducesRequestCondition(annotation.produces(), annotation.headers()));
 	}
 
 }

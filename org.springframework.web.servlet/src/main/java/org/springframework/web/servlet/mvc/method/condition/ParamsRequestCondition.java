@@ -16,80 +16,106 @@
 
 package org.springframework.web.servlet.mvc.method.condition;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Represents a collection of parameter request conditions, typically obtained from {@link
- * org.springframework.web.bind.annotation.RequestMapping#params() @RequestMapping.params()}.
- *
+ * A logical conjunction (' && ') request condition that matches a request against a set parameter expressions.
+ * 
+ * <p>For details on the syntax of the expressions see {@link RequestMapping#params()}. If the condition is
+ * created with 0 parameter expressions, it will match to every request.
+ * 
  * @author Arjen Poutsma
- * @see RequestConditionFactory#parseParams(String...)
+ * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ParamsRequestCondition
-		extends LogicalConjunctionRequestCondition<ParamsRequestCondition.ParamRequestCondition>
-		implements Comparable<ParamsRequestCondition> {
+public class ParamsRequestCondition extends RequestConditionSupport<ParamsRequestCondition> {
 
-	private ParamsRequestCondition(Collection<ParamRequestCondition> conditions) {
-		super(conditions);
+	private final Set<ParamExpression> expressions;
+	
+	/**
+	 * Create a {@link ParamsRequestCondition} with the given param expressions. 
+	 * 
+	 * @param params 0 or more param expressions; if 0 the condition will match to every request.
+	 */
+	public ParamsRequestCondition(String... params) {
+		this(parseExpressions(params));
+	}
+	
+	private ParamsRequestCondition(Collection<ParamExpression> conditions) {
+		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<ParamExpression>(conditions));
 	}
 
-	ParamsRequestCondition(String... params) {
-		this(parseConditions(Arrays.asList(params)));
-	}
-
-	private static Set<ParamRequestCondition> parseConditions(List<String> params) {
-		Set<ParamRequestCondition> conditions = new LinkedHashSet<ParamRequestCondition>(params.size());
-		for (String param : params) {
-			conditions.add(new ParamRequestCondition(param));
+	private static Collection<ParamExpression> parseExpressions(String... params) {
+		Set<ParamExpression> expressions = new LinkedHashSet<ParamExpression>();
+		if (params != null) {
+			for (String header : params) {
+				expressions.add(new ParamExpression(header));
+			}
 		}
-		return conditions;
+		return expressions;
+	}
+
+	@Override
+	protected Collection<ParamExpression> getContent() {
+		return expressions;
+	}
+
+	@Override
+	protected boolean isLogicalConjunction() {
+		return true;
 	}
 
 	/**
-	 * Creates an empty set of parameter request conditions.
-	 */
-	public ParamsRequestCondition() {
-		this(Collections.<ParamRequestCondition>emptySet());
-	}
-
-	/**
-	 * Returns a new {@code RequestCondition} that contains all conditions that match the request.
-	 *
-	 * @param request the request
-	 * @return a new request condition that contains all matching attributes, or {@code null} if not all conditions match
-	 */
-	public ParamsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		return match(request) ? this : null;
-	}
-
-	/**
-	 * Combines this collection of request condition with another by combining all parameter request conditions into a
-	 * logical AND.
-	 *
-	 * @param other the condition to combine with
+	 * Returns a new instance with the union of the param expressions from "this" and the "other" instance.
 	 */
 	public ParamsRequestCondition combine(ParamsRequestCondition other) {
-		Set<ParamRequestCondition> conditions = new LinkedHashSet<ParamRequestCondition>(getConditions());
-		conditions.addAll(other.getConditions());
-		return new ParamsRequestCondition(conditions);
+		Set<ParamExpression> set = new LinkedHashSet<ParamExpression>(this.expressions);
+		set.addAll(other.expressions);
+		return new ParamsRequestCondition(set);
 	}
 
-	public int compareTo(ParamsRequestCondition other) {
-		return other.getConditions().size() - this.getConditions().size();
+	/**
+	 * Returns "this" instance if the request matches to all parameter expressions; or {@code null} otherwise.
+	 */
+	public ParamsRequestCondition getMatchingCondition(HttpServletRequest request) {
+		for (ParamExpression expression : expressions) {
+			if (!expression.match(request)) {
+				return null;
+			}
+		}
+		return this;
 	}
 
-	static class ParamRequestCondition extends AbstractNameValueCondition<String> {
+	/**
+	 * Returns:
+	 * <ul>
+	 * 	<li>0 if the two conditions have the same number of parameter expressions
+	 * 	<li>Less than 1 if "this" instance has more parameter expressions
+	 * 	<li>Greater than 1 if the "other" instance has more parameter expressions
+	 * </ul>   
+	 * 
+	 * <p>It is assumed that both instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)} 
+	 * and each instance contains the matching parameter expressions only or is otherwise empty.
+	 */
+	public int compareTo(ParamsRequestCondition other, HttpServletRequest request) {
+		return other.expressions.size() - this.expressions.size();
+	}
 
-		ParamRequestCondition(String expression) {
+	/**
+	 * Parsing and request matching logic for parameter expressions.
+	 * @see RequestMapping#params() 
+	 */
+	static class ParamExpression extends AbstractNameValueExpression<String> {
+
+		ParamExpression(String expression) {
 			super(expression);
 		}
 
@@ -107,20 +133,6 @@ public class ParamsRequestCondition
 		protected boolean matchValue(HttpServletRequest request) {
 			return value.equals(request.getParameter(name));
 		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj != null && obj instanceof ParamRequestCondition) {
-				ParamRequestCondition other = (ParamRequestCondition) obj;
-				return ((this.name.equals(other.name)) &&
-						(this.value != null ? this.value.equals(other.value) : other.value == null) &&
-						this.isNegated == other.isNegated);
-			}
-			return false;
-		}
-
 	}
+
 }

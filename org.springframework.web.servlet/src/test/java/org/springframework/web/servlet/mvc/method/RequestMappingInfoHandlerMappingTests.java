@@ -24,7 +24,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.Before;
@@ -42,9 +41,13 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.springframework.web.servlet.handler.MappedInterceptor;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.servlet.mvc.method.condition.RequestConditionFactory;
+import org.springframework.web.servlet.mvc.method.condition.ConsumesRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.ParamsRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.PatternsRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.ProducesRequestCondition;
+import org.springframework.web.servlet.mvc.method.condition.RequestMethodsRequestCondition;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -129,7 +132,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void uriTemplateVariables() {
-		RequestMappingInfo key = new RequestMappingInfo(Arrays.asList("/{path1}/{path2}"), null);
+		RequestMappingInfo key = new RequestMappingInfo(new String[] {"/{path1}/{path2}"});
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 
@@ -197,12 +200,13 @@ public class RequestMappingInfoHandlerMappingTests {
 		@Override
 		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 			RequestMapping annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-			return new RequestMappingInfo(Arrays.asList(annotation.value()),
-					RequestConditionFactory.parseMethods(annotation.method()),
-					RequestConditionFactory.parseParams(annotation.params()),
-					RequestConditionFactory.parseHeaders(annotation.headers()),
-					RequestConditionFactory.parseConsumes(annotation.consumes(), annotation.headers()),
-					RequestConditionFactory.parseProduces(annotation.produces(), annotation.headers()));
+			return new RequestMappingInfo(
+					new PatternsRequestCondition(annotation.value(), getUrlPathHelper(), getPathMatcher()),
+					new RequestMethodsRequestCondition(annotation.method()),
+					new ParamsRequestCondition(annotation.params()),
+					new HeadersRequestCondition(annotation.headers()),
+					new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
+					new ProducesRequestCondition(annotation.produces(), annotation.headers()));
 		}
 	}
 	
