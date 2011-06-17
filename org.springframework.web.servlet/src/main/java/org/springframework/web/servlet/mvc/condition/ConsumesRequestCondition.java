@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.method.condition;
+package org.springframework.web.servlet.mvc.condition;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondition.HeaderExpression;
+import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
 
 /**
  * A logical disjunction (' || ') request condition to match requests against consumable media type expressions.

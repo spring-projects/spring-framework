@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.method.condition;
+package org.springframework.web.servlet.mvc.condition;
 
 import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 
 import static org.junit.Assert.*;
 

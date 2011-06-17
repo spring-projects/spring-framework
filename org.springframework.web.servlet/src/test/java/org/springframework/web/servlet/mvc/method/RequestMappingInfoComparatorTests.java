@@ -30,10 +30,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
+import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
+import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.servlet.mvc.method.condition.ParamsRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.ProducesRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.RequestMethodsRequestCondition;
 
 /**
  * Test fixture with {@link RequestMappingHandlerMapping} testing its {@link RequestMappingInfo} comparator.

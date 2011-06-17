@@ -19,14 +19,14 @@ package org.springframework.web.servlet.mvc.method;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.method.condition.ConsumesRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.CustomRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.ParamsRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.PatternsRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.ProducesRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.RequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.RequestMethodsRequestCondition;
+import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
+import org.springframework.web.servlet.mvc.condition.CustomRequestCondition;
+import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
+import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
+import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
+import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
+import org.springframework.web.servlet.mvc.condition.RequestCondition;
+import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 
 /**
  * A RequestMapingInfo encapsulates and operates on the following request mapping conditions:

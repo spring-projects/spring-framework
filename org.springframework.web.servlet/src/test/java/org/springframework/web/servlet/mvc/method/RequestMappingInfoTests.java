@@ -24,11 +24,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.servlet.mvc.method.condition.ConsumesRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.HeadersRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.ParamsRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.PatternsRequestCondition;
-import org.springframework.web.servlet.mvc.method.condition.ProducesRequestCondition;
+import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
+import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
+import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
+import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
+import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 
 /**
  * Test fixture for {@link RequestMappingInfo} tests.
