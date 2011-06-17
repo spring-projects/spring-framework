@@ -30,7 +30,7 @@ import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.easymock.MockControl;
+import org.easymock.EasyMock;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
@@ -42,6 +42,7 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.NestedRuntimeException;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.scripting.Calculator;
 import org.springframework.scripting.CallCounter;
 import org.springframework.scripting.ConfigurableMessenger;
@@ -50,6 +51,7 @@ import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Rob Harrop
@@ -191,14 +193,11 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testScriptedClassThatDoesNotHaveANoArgCtor() throws Exception {
-		MockControl mock = MockControl.createControl(ScriptSource.class);
-		ScriptSource script = (ScriptSource) mock.getMock();
-		script.getScriptAsString();
+		ScriptSource script = EasyMock.createMock(ScriptSource.class);
 		final String badScript = "class Foo { public Foo(String foo) {}}";
-		mock.setReturnValue(badScript);
-		script.suggestedClassName();
-		mock.setReturnValue("someName");
-		mock.replay();
+		EasyMock.expect(script.getScriptAsString()).andReturn(badScript);
+		EasyMock.expect(script.suggestedClassName()).andReturn("someName");
+		EasyMock.replay(script);
 		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX
 				+ badScript);
 		try {
@@ -207,19 +206,16 @@ public class GroovyScriptFactoryTests {
 		} catch (ScriptCompilationException expected) {
 			assertTrue(expected.contains(InstantiationException.class));
 		}
-		mock.verify();
+		EasyMock.verify(script);
 	}
 
 	@Test
 	public void testScriptedClassThatHasNoPublicNoArgCtor() throws Exception {
-		MockControl mock = MockControl.createControl(ScriptSource.class);
-		ScriptSource script = (ScriptSource) mock.getMock();
-		script.getScriptAsString();
+		ScriptSource script = EasyMock.createMock(ScriptSource.class);
 		final String badScript = "class Foo { protected Foo() {}}";
-		mock.setReturnValue(badScript);
-		script.suggestedClassName();
-		mock.setReturnValue("someName");
-		mock.replay();
+		EasyMock.expect(script.getScriptAsString()).andReturn(badScript);
+		EasyMock.expect(script.suggestedClassName()).andReturn("someName");
+		EasyMock.replay(script);
 		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX
 				+ badScript);
 		try {
@@ -228,7 +224,7 @@ public class GroovyScriptFactoryTests {
 		} catch (ScriptCompilationException expected) {
 			assertTrue(expected.contains(IllegalAccessException.class));
 		}
-		mock.verify();
+		EasyMock.verify(script);
 	}
 
 	@Test
@@ -240,6 +236,7 @@ public class GroovyScriptFactoryTests {
 
 		// Check can cast to GroovyObject
 		GroovyObject goo = (GroovyObject) messenger;
+		assertNotNull(goo);
 	}
 
 	@Test
@@ -293,18 +290,15 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testGetScriptedObjectDoesNotChokeOnNullInterfacesBeingPassedIn() throws Exception {
-		MockControl mock = MockControl.createControl(ScriptSource.class);
-		ScriptSource scriptSource = (ScriptSource) mock.getMock();
-		scriptSource.getScriptAsString();
-		mock.setReturnValue("class Bar {}");
-		scriptSource.suggestedClassName();
-		mock.setReturnValue("someName");
-		mock.replay();
+		ScriptSource script = EasyMock.createMock(ScriptSource.class);
+		EasyMock.expect(script.getScriptAsString()).andReturn("class Bar {}");
+		EasyMock.expect(script.suggestedClassName()).andReturn("someName");
+		EasyMock.replay(script);
 
 		GroovyScriptFactory factory = new GroovyScriptFactory("a script source locator (doesn't matter here)");
-		Object scriptedObject = factory.getScriptedObject(scriptSource, null);
+		Object scriptedObject = factory.getScriptedObject(script, null);
 		assertNotNull(scriptedObject);
-		mock.verify();
+		EasyMock.verify(script);
 	}
 
 	@Test
@@ -390,6 +384,9 @@ public class GroovyScriptFactoryTests {
 		assertEquals("Hello World!", messenger.getMessage());
 
 		assertTrue(ctx.getBeansOfType(ConcreteMessenger.class).values().contains(messenger));
+		
+		// Check that AnnotationUtils works with concrete proxied script classes
+		assertNotNull(AnnotationUtils.findAnnotation(messenger.getClass(), Component.class));
 	}
 
 	@Test
