@@ -60,9 +60,9 @@ public class MergedContextConfiguration {
 			return new String[] {};
 		}
 
-		// Active profiles must be unique and sorted due to cache key generation
-		// in TestContext. Specifically, profile sets {foo,bar} and {bar,foo}
-		// must both result in the same array (e.g., [bar,foo]).
+		// Active profiles must be unique and sorted in order to support proper
+		// cache key generation. Specifically, profile sets {foo,bar} and
+		// {bar,foo} must both result in the same array (e.g., [bar,foo]).
 		SortedSet<String> sortedProfilesSet = new TreeSet<String>(Arrays.asList(activeProfiles));
 		return StringUtils.toStringArray(sortedProfilesSet);
 	}
