@@ -34,13 +34,13 @@ public class ContextConfigurationAttributes {
 
 	private final Class<?> declaringClass;
 
-	private final String[] locations;
+	private String[] locations;
 
-	private final Class<?>[] classes;
+	private Class<?>[] classes;
 
 	private final boolean inheritLocations;
 
-	private final Class<? extends ContextLoader> contextLoader;
+	private final Class<? extends ContextLoader> contextLoaderClass;
 
 
 	/**
@@ -72,9 +72,6 @@ public class ContextConfigurationAttributes {
 
 	/**
 	 * TODO Document ContextConfigurationAttributes constructor.
-	 *
-	 * @param declaringClass
-	 * @param contextConfiguration
 	 */
 	public ContextConfigurationAttributes(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
 		this(declaringClass, resolveLocations(declaringClass, contextConfiguration), contextConfiguration.classes(),
@@ -83,20 +80,14 @@ public class ContextConfigurationAttributes {
 
 	/**
 	 * TODO Document ContextConfigurationAttributes constructor.
-	 *
-	 * @param declaringClass
-	 * @param locations
-	 * @param classes
-	 * @param inheritLocations
-	 * @param contextLoader
 	 */
 	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
-			boolean inheritLocations, Class<? extends ContextLoader> contextLoader) {
+			boolean inheritLocations, Class<? extends ContextLoader> contextLoaderClass) {
 		this.declaringClass = declaringClass;
 		this.locations = locations;
 		this.classes = classes;
 		this.inheritLocations = inheritLocations;
-		this.contextLoader = contextLoader;
+		this.contextLoaderClass = contextLoaderClass;
 	}
 
 	/**
@@ -114,10 +105,24 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
+	 * TODO Document setLocations().
+	 */
+	public void setLocations(String[] locations) {
+		this.locations = locations;
+	}
+
+	/**
 	 * TODO Document getClasses().
 	 */
 	public Class<?>[] getClasses() {
 		return this.classes;
+	}
+
+	/**
+	 * TODO Document setClasses().
+	 */
+	public void setClasses(Class<?>[] classes) {
+		this.classes = classes;
 	}
 
 	/**
@@ -128,10 +133,10 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
-	 * TODO Document getContextLoader().
+	 * TODO Document getContextLoaderClass().
 	 */
-	public Class<? extends ContextLoader> getContextLoader() {
-		return this.contextLoader;
+	public Class<? extends ContextLoader> getContextLoaderClass() {
+		return this.contextLoaderClass;
 	}
 
 	/**
@@ -144,7 +149,7 @@ public class ContextConfigurationAttributes {
 		.append("locations", ObjectUtils.nullSafeToString(this.locations))//
 		.append("classes", ObjectUtils.nullSafeToString(this.classes))//
 		.append("inheritLocations", this.inheritLocations)//
-		.append("contextLoader", this.contextLoader)//
+		.append("contextLoaderClass", this.contextLoaderClass)//
 		.toString();
 	}
 
