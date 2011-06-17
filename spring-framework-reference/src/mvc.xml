@@ -1895,7 +1895,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
         Calendar cal = Calendar.getInstance();
         int hour = cal.get(HOUR_OF_DAY);
-        if (openingTime &lt;= hour &lt; closingTime) {
+        if (openingTime &lt;= hour &#38;&#38; hour &lt; closingTime) {
             return true;
         } else {
             response.sendRedirect("http://host.com/outsideOfficeHours.html");
