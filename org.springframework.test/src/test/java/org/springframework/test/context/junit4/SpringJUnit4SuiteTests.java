@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,11 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.springframework.test.context.ClassLevelDirtiesContextTests;
 import org.springframework.test.context.SpringRunnerContextCacheTests;
 import org.springframework.test.context.junit4.annotation.AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests;
+import org.springframework.test.context.junit4.annotation.BeanOverridingDefaultConfigClassesInheritedTests;
+import org.springframework.test.context.junit4.annotation.BeanOverridingExplicitConfigClassesInheritedTests;
 import org.springframework.test.context.junit4.annotation.DefaultConfigClassesBaseTests;
 import org.springframework.test.context.junit4.annotation.DefaultConfigClassesInheritedTests;
+import org.springframework.test.context.junit4.annotation.ExplicitConfigClassesInheritedTests;
 import org.springframework.test.context.junit4.orm.HibernateSessionFlushingTests;
 import org.springframework.test.context.junit4.profile.annotation.DefaultProfileAnnotationConfigTests;
 import org.springframework.test.context.junit4.profile.annotation.DevProfileAnnotationConfigTests;
@@ -31,20 +34,16 @@ import org.springframework.test.context.junit4.profile.xml.DefaultProfileXmlConf
 import org.springframework.test.context.junit4.profile.xml.DevProfileXmlConfigTests;
 
 /**
- * <p>
- * JUnit 4 based test suite for tests involving {@link SpringJUnit4ClassRunner}
- * and the <em>Spring TestContext Framework</em>.
- * </p>
- * <p>
- * This test suite serves a dual purpose of verifying that tests run with
- * {@link SpringJUnit4ClassRunner} can be used in conjunction with JUnit 4's
+ * JUnit test suite for tests involving {@link SpringJUnit4ClassRunner} and the
+ * <em>Spring TestContext Framework</em>.
+ * 
+ * <p>This test suite serves a dual purpose of verifying that tests run with
+ * {@link SpringJUnit4ClassRunner} can be used in conjunction with JUnit's
  * {@link Suite} runner.
- * </p>
- * <p>
- * Note that tests included in this suite will be executed at least twice if run
- * from an automated build process, test runner, etc. that is configured to run
- * tests based on a &quot;*Tests.class&quot; pattern match.
- * </p>
+ * 
+ * <p>Note that tests included in this suite will be executed at least twice if
+ * run from an automated build process, test runner, etc. that is configured to
+ * run tests based on a &quot;*Tests.class&quot; pattern match.
  * 
  * @author Sam Brannen
  * @since 2.5
@@ -58,6 +57,9 @@ StandardJUnit4FeaturesTests.class,//
 	AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
 	DefaultConfigClassesBaseTests.class,//
 	DefaultConfigClassesInheritedTests.class,//
+	BeanOverridingDefaultConfigClassesInheritedTests.class,//
+	ExplicitConfigClassesInheritedTests.class,//
+	BeanOverridingExplicitConfigClassesInheritedTests.class,//
 	DefaultProfileAnnotationConfigTests.class,//
 	DevProfileAnnotationConfigTests.class, //
 	DefaultProfileXmlConfigTests.class,//

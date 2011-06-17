@@ -38,6 +38,7 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  */
 public class ContextLoaderUtilsTests {
 
+	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[] {};
 	private static final String[] EMPTY_STRING_ARRAY = new String[] {};
 
 
@@ -48,7 +49,7 @@ public class ContextLoaderUtilsTests {
 		assertArrayEquals(expectedLocations, attributes.getLocations());
 		assertArrayEquals(expectedClasses, attributes.getClasses());
 		assertEquals(expectedInheritLocations, attributes.isInheritLocations());
-		assertEquals(expectedContextLoaderClass, attributes.getContextLoader());
+		assertEquals(expectedContextLoaderClass, attributes.getContextLoaderClass());
 	}
 
 	private void assertFooAttributes(ContextConfigurationAttributes attributes) {
@@ -62,12 +63,14 @@ public class ContextLoaderUtilsTests {
 	}
 
 	private void assertMergedContextConfiguration(MergedContextConfiguration mergedConfig, Class<?> expectedTestClass,
-			String[] expectedLocations, Class<? extends ContextLoader> expectedContextLoaderClass) {
+			String[] expectedLocations, Class<?>[] expectedClasses,
+			Class<? extends ContextLoader> expectedContextLoaderClass) {
 		assertNotNull(mergedConfig);
 		assertEquals(expectedTestClass, mergedConfig.getTestClass());
 		assertNotNull(mergedConfig.getLocations());
 		assertArrayEquals(expectedLocations, mergedConfig.getLocations());
 		assertNotNull(mergedConfig.getClasses());
+		assertArrayEquals(expectedClasses, mergedConfig.getClasses());
 		assertNotNull(mergedConfig.getActiveProfiles());
 		assertEquals(expectedContextLoaderClass, mergedConfig.getContextLoader().getClass());
 	}
@@ -82,7 +85,7 @@ public class ContextLoaderUtilsTests {
 		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(BareAnnotations.class);
 		assertNotNull(attributesList);
 		assertEquals(1, attributesList.size());
-		assertAttributes(attributesList.get(0), BareAnnotations.class, EMPTY_STRING_ARRAY, new Class<?>[] {},
+		assertAttributes(attributesList.get(0), BareAnnotations.class, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY,
 			ContextLoader.class, true);
 	}
 
@@ -117,7 +120,7 @@ public class ContextLoaderUtilsTests {
 			mergedConfig,
 			testClass,
 			new String[] { "classpath:/org/springframework/test/context/ContextLoaderUtilsTests$BareAnnotations-context.xml" },
-			GenericXmlContextLoader.class);
+			EMPTY_CLASS_ARRAY, GenericXmlContextLoader.class);
 	}
 
 	@Test
@@ -126,31 +129,28 @@ public class ContextLoaderUtilsTests {
 		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass, null);
 
 		assertMergedContextConfiguration(mergedConfig, testClass, new String[] { "classpath:/foo.xml" },
-			GenericXmlContextLoader.class);
+			new Class<?>[] { FooConfig.class }, GenericXmlContextLoader.class);
 	}
 
 	@Test
-	public void buildMergedContextConfigurationWithLocalAnnotationAndOverriddenContexLoader() {
+	public void buildMergedContextConfigurationWithLocalAnnotationAndOverriddenContextLoader() {
 		Class<?> testClass = Foo.class;
 		Class<? extends ContextLoader> expectedContextLoaderClass = GenericPropertiesContextLoader.class;
 		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
 			expectedContextLoaderClass.getName());
 
 		assertMergedContextConfiguration(mergedConfig, testClass, new String[] { "classpath:/foo.xml" },
-			expectedContextLoaderClass);
+			new Class<?>[] { FooConfig.class }, expectedContextLoaderClass);
 	}
 
 	@Test
 	public void buildMergedContextConfigurationWithLocalAndInheritedAnnotations() {
 		Class<?> testClass = Bar.class;
+		String[] expectedLocations = new String[] { "/foo.xml", "/bar.xml" };
+		Class<?>[] expectedClasses = new Class<?>[] { FooConfig.class, BarConfig.class };
+
 		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass, null);
-
-		// TODO Assert @Configuration classes instead of locations
-		String[] expectedLocations = new String[] {
-			"org.springframework.test.context.ContextLoaderUtilsTests$FooConfig",
-			"org.springframework.test.context.ContextLoaderUtilsTests$BarConfig" };
-
-		assertMergedContextConfiguration(mergedConfig, testClass, expectedLocations,
+		assertMergedContextConfiguration(mergedConfig, testClass, expectedLocations, expectedClasses,
 			AnnotationConfigContextLoader.class);
 	}
 

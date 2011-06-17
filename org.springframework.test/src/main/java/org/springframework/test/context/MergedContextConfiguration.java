@@ -44,6 +44,8 @@ public class MergedContextConfiguration {
 
 	private final ContextLoader contextLoader;
 
+	private final String contextKey;
+
 
 	private static String[] processLocations(String[] locations) {
 		return locations == null ? new String[] {} : locations;
@@ -66,13 +68,22 @@ public class MergedContextConfiguration {
 	}
 
 	/**
+	 * Generates a context <code>key</code> from the supplied values.
+	 */
+	private static String generateContextKey(String[] locations, Class<?>[] classes, String[] activeProfiles,
+			ContextLoader contextLoader) {
+
+		String locationsKey = ObjectUtils.nullSafeToString(locations);
+		String classesKey = ObjectUtils.nullSafeToString(classes);
+		String activeProfilesKey = ObjectUtils.nullSafeToString(activeProfiles);
+		String contextLoaderKey = contextLoader == null ? "null" : contextLoader.getClass().getName();
+
+		return String.format("locations = [%s], classes = [%s], activeProfiles = [%s], contextLoader = [%s]",
+			locationsKey, classesKey, activeProfilesKey, contextLoaderKey);
+	}
+
+	/**
 	 * TODO Document MergedContextConfiguration constructor.
-	 *
-	 * @param testClass
-	 * @param locations
-	 * @param classes
-	 * @param activeProfiles
-	 * @param contextLoader
 	 */
 	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
 			String[] activeProfiles, ContextLoader contextLoader) {
@@ -81,6 +92,7 @@ public class MergedContextConfiguration {
 		this.classes = processClasses(classes);
 		this.activeProfiles = processActiveProfiles(activeProfiles);
 		this.contextLoader = contextLoader;
+		this.contextKey = generateContextKey(this.locations, this.classes, this.activeProfiles, this.contextLoader);
 	}
 
 	/**
@@ -119,6 +131,13 @@ public class MergedContextConfiguration {
 	}
 
 	/**
+	 * TODO Document getContextKey().
+	 */
+	public String getContextKey() {
+		return this.contextKey;
+	}
+
+	/**
 	 * TODO Document overridden toString().
 	 */
 	@Override
@@ -129,6 +148,7 @@ public class MergedContextConfiguration {
 		.append("classes", ObjectUtils.nullSafeToString(this.classes))//
 		.append("activeProfiles", ObjectUtils.nullSafeToString(this.activeProfiles))//
 		.append("contextLoader", this.contextLoader)//
+		.append("contextKey", this.contextKey)//
 		.toString();
 	}
 

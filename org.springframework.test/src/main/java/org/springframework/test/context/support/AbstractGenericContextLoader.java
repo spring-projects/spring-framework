@@ -20,12 +20,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.util.Assert;
+import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.StringUtils;
 
 /**
@@ -49,25 +48,21 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 
 
 	/**
-	 * TODO Document loadContext().
+	 * TODO Document loadContext(MergedContextConfiguration).
 	 *
-	 * @see org.springframework.test.context.SmartContextLoader#loadContext(org.springframework.test.context.MergedContextConfiguration)
+	 * @see SmartContextLoader#loadContext(MergedContextConfiguration)
 	 */
-	public final ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration) throws Exception {
+	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration)
+			throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Loading ApplicationContext for merged context configuration [%s].",
 				mergedContextConfiguration));
 		}
-
-		String[] locations = mergedContextConfiguration.getLocations();
-		Assert.notNull(locations, "Can not load an ApplicationContext with a NULL 'locations' array. "
-				+ "Consider annotating your test class with @ContextConfiguration.");
-
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.getEnvironment().setActiveProfiles(mergedContextConfiguration.getActiveProfiles());
 		prepareContext(context);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
-		loadBeanDefinitions(context, locations);
+		loadBeanDefinitions(context, mergedContextConfiguration);
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		customizeContext(context);
 		context.refresh();
@@ -84,7 +79,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * prepare the context.</li>
 	 * <li>Calls {@link #customizeBeanFactory(DefaultListableBeanFactory)} to
 	 * allow for customizing the context's <code>DefaultListableBeanFactory</code>.</li>
-	 * <li>Delegates to {@link #loadBeanDefinitions(GenericApplicationContext, String...)}
+	 * <li>TODO Update/revert documentation... Delegates to {@link #loadBeanDefinitions(GenericApplicationContext, String...)}
 	 * to populate the context from the specified config locations.</li>
 	 * <li>Delegates to {@link AnnotationConfigUtils} for
 	 * {@link AnnotationConfigUtils#registerAnnotationConfigProcessors registering}
@@ -106,7 +101,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		GenericApplicationContext context = new GenericApplicationContext();
 		prepareContext(context);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
-		loadBeanDefinitions(context, locations);
+		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		customizeContext(context);
 		context.refresh();
@@ -154,12 +149,13 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * and override this method to provide a custom strategy for loading or
 	 * registering bean definitions.
 	 * @param context the context into which the bean definitions should be loaded
-	 * @param locations the resource locations from which to load the bean definitions
+	 * @param mergedContextConfiguration TODO Document parameters.
 	 * @since 3.1
 	 * @see #loadContext
 	 */
-	protected void loadBeanDefinitions(GenericApplicationContext context, String... locations) {
-		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
+	protected void loadBeanDefinitions(GenericApplicationContext context,
+			MergedContextConfiguration mergedContextConfiguration) {
+		createBeanDefinitionReader(context).loadBeanDefinitions(mergedContextConfiguration.getLocations());
 	}
 
 	/**
@@ -167,7 +163,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * loading bean definitions into the supplied {@link GenericApplicationContext context}.
 	 * @param context the context for which the BeanDefinitionReader should be created
 	 * @return a BeanDefinitionReader for the supplied context
-	 * @see #loadBeanDefinitions
+	 * @see #loadContext(String...)
 	 * @see BeanDefinitionReader
 	 */
 	protected abstract BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context);

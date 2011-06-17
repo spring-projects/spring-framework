@@ -27,7 +27,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  * Unit tests for verifying proper behavior of the {@link ContextCache} in 
- * conjunction with cache keys generated in {@link TestContext}.
+ * conjunction with cache keys used in {@link TestContext}.
  * 
  * @author Sam Brannen
  * @since 3.1

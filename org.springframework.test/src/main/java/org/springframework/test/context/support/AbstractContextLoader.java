@@ -18,8 +18,8 @@ package org.springframework.test.context.support;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
-import org.springframework.test.context.ResourceTypeAwareContextLoader;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -39,7 +39,17 @@ import org.springframework.util.StringUtils;
  * @see #generateDefaultLocations
  * @see #modifyLocations
  */
-public abstract class AbstractContextLoader implements SmartContextLoader, ResourceTypeAwareContextLoader {
+public abstract class AbstractContextLoader implements SmartContextLoader {
+
+	/**
+	 * TODO Document processContextConfigurationAttributes().
+	 */
+	public void processContextConfigurationAttributes(ContextConfigurationAttributes configAttributes) {
+		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(),
+			configAttributes.getLocations());
+
+		configAttributes.setLocations(processedLocations);
+	}
 
 	/**
 	 * If the supplied <code>locations</code> are <code>null</code> or
@@ -141,14 +151,5 @@ public abstract class AbstractContextLoader implements SmartContextLoader, Resou
 	 * @see #generateDefaultLocations(Class)
 	 */
 	protected abstract String getResourceSuffix();
-
-	/**
-	 * The default implementation returns {@link ResourceType#LOCATIONS}.
-	 * <p>Can be overridden by subclasses.
-	 * @since 3.1
-	 */
-	public ResourceType getResourceType() {
-		return ResourceType.LOCATIONS;
-	}
 
 }

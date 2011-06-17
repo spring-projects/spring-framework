@@ -27,11 +27,12 @@ import org.springframework.context.ApplicationContext;
 public interface SmartContextLoader extends ContextLoader {
 
 	/**
+	 * TODO Document processContextConfigurationAttributes().
+	 */
+	void processContextConfigurationAttributes(ContextConfigurationAttributes configAttributes);
+
+	/**
 	 * TODO Document loadContext().
-	 *
-	 * @param mergedContextConfiguration
-	 * @return
-	 * @throws Exception
 	 */
 	ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration) throws Exception;
 

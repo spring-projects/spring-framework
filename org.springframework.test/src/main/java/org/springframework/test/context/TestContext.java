@@ -24,11 +24,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
- * TestContext encapsulates the context in which a test is executed, agnostic of
- * the actual testing framework in use.
+ * <code>TestContext</code> encapsulates the context in which a test is executed,
+ * agnostic of the actual testing framework in use.
  * 
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -41,8 +40,6 @@ public class TestContext extends AttributeAccessorSupport {
 	private static final Log logger = LogFactory.getLog(TestContext.class);
 
 	private final ContextCache contextCache;
-
-	private final String contextKey;
 
 	private final MergedContextConfiguration mergedContextConfiguration;
 
@@ -69,8 +66,8 @@ public class TestContext extends AttributeAccessorSupport {
 	 * and {@link ContextCache context cache} and parse the corresponding
 	 * {@link ContextConfiguration &#064;ContextConfiguration} annotation, if
 	 * present.
-	 * <p>If the supplied class name for the default ContextLoader is
-	 * <code>null</code> or <em>empty</em> and no <code>ContextLoader</code>
+	 * <p>If the supplied class name for the default <code>ContextLoader</code>
+	 * is <code>null</code> or <em>empty</em> and no <code>ContextLoader</code>
 	 * class is explicitly supplied via the
 	 * <code>&#064;ContextConfiguration</code> annotation, a
 	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
@@ -106,14 +103,13 @@ public class TestContext extends AttributeAccessorSupport {
 		}
 
 		this.contextCache = contextCache;
-		this.contextKey = generateContextKey(mergedContextConfiguration);
 		this.mergedContextConfiguration = mergedContextConfiguration;
 		this.testClass = testClass;
 	}
 
 	/**
 	 * Load an <code>ApplicationContext</code> for this test context using the
-	 * configured <code>ContextLoader</code> and resource locations.
+	 * configured <code>ContextLoader</code> and configuration attributes.
 	 * @throws Exception if an error occurs while loading the application context
 	 */
 	private ApplicationContext loadApplicationContext() throws Exception {
@@ -138,26 +134,6 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * Generates a context <code>key</code> from information stored in the
-	 * {@link MergedContextConfiguration} for this <code>TestContext</code>.
-	 */
-	private String generateContextKey(MergedContextConfiguration mergedContextConfiguration) {
-
-		String[] locations = mergedContextConfiguration.getLocations();
-		Class<?>[] classes = mergedContextConfiguration.getClasses();
-		String[] activeProfiles = mergedContextConfiguration.getActiveProfiles();
-		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
-
-		String locationsKey = ObjectUtils.nullSafeToString(locations);
-		String classesKey = ObjectUtils.nullSafeToString(classes);
-		String activeProfilesKey = ObjectUtils.nullSafeToString(activeProfiles);
-		String contextLoaderKey = contextLoader == null ? "null" : contextLoader.getClass().getName();
-
-		return String.format("locations = [%s], classes = [%s], activeProfiles = [%s], contextLoader = [%s]",
-			locationsKey, classesKey, activeProfilesKey, contextLoaderKey);
-	}
-
-	/**
 	 * Get the {@link ApplicationContext application context} for this test
 	 * context, possibly cached.
 	 * @return the application context
@@ -165,6 +141,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * application context
 	 */
 	public ApplicationContext getApplicationContext() {
+		String contextKey = mergedContextConfiguration.getContextKey();
 		synchronized (contextCache) {
 			ApplicationContext context = contextCache.get(contextKey);
 			if (context == null) {
@@ -239,7 +216,9 @@ public class TestContext extends AttributeAccessorSupport {
 	 * replacing a bean definition).
 	 */
 	public void markApplicationContextDirty() {
-		contextCache.setDirty(contextKey);
+		synchronized (contextCache) {
+			contextCache.setDirty(mergedContextConfiguration.getContextKey());
+		}
 	}
 
 	/**
