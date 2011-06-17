@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.xml.stream.Location;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.Comment;
 import javax.xml.stream.events.Namespace;
 import javax.xml.stream.events.ProcessingInstruction;
 import javax.xml.stream.events.StartDocument;
@@ -73,6 +74,9 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 	public String getText() {
 		if (event.isCharacters()) {
 			return event.asCharacters().getData();
+		}
+		else if (event.getEventType() == XMLEvent.COMMENT) {
+			return ((Comment) event).getText();
 		}
 		else {
 			throw new IllegalStateException();
