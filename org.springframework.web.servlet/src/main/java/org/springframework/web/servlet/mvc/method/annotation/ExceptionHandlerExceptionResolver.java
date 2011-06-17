@@ -264,12 +264,23 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		ExceptionMethodMapping mapping = exceptionMethodMappingCache.get(handlerType);
 		if (mapping == null) {
 			Set<Method> methods = HandlerMethodSelector.selectMethods(handlerType, EXCEPTION_HANDLER_METHODS);
+			extendExceptionHandlerMethods(methods, handlerType);
 			mapping = new ExceptionMethodMapping(methods);
 			exceptionMethodMappingCache.put(handlerType, mapping);
 		}
 		return mapping;
 	}
 
+	/**
+	 * Extension hook that subclasses can override to register additional @{@link ExceptionHandler} methods 
+	 * by controller type. By default only @{@link ExceptionHandler} methods from the same controller are
+	 * included. 
+	 * @param methods the list of @{@link ExceptionHandler} methods detected in the controller allowing to add more 
+	 * @param handlerType the controller type to which the @{@link ExceptionHandler} methods will apply
+	 */
+	protected void extendExceptionHandlerMethods(Set<Method> methods, Class<?> handlerType) {
+	}
+	
 	/**
 	 * MethodFilter that matches {@link ExceptionHandler @ExceptionHandler} methods.
 	 */
