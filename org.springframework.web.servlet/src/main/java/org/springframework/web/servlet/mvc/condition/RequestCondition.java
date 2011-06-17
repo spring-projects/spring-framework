@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.method.condition;
+package org.springframework.web.servlet.mvc.condition;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -41,7 +41,7 @@ public interface RequestCondition<T> {
 	T combine(T other);
 
 	/**
-	 * Checks if this condition matches the provided request and returns a potentially new request condition 
+	 * Checks if this condition matches the given request and returns a potentially new request condition 
 	 * with content tailored to the current request. For example a condition with URL patterns might return 
 	 * a new condition that contains matching patterns sorted with best matching patterns on top.
 	 * 
