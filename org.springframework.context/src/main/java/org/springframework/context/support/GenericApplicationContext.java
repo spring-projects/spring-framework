@@ -101,7 +101,6 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	public GenericApplicationContext() {
 		this.beanFactory = new DefaultListableBeanFactory();
-		this.beanFactory.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		this.beanFactory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
 	}
 

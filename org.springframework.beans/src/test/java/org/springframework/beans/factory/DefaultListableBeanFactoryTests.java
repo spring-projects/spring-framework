@@ -1350,7 +1350,6 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testAutowireBeanByTypeWithTwoMatchesAndParameterNameDiscovery() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		lbf.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
 		lbf.registerBeanDefinition("test", bd);
