@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context;
+package org.springframework.test.context.support;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * TODO [SPR-8386] Document SmartContextLoader.
- *
  * @author Sam Brannen
  * @since 3.1
  */
-public interface SmartContextLoader extends ContextLoader {
+public class FooConfigInnerClassTestCase {
 
-	/**
-	 * TODO Document processContextConfiguration().
-	 */
-	void processContextConfiguration(ContextConfigurationAttributes configAttributes);
+	@Configuration
+	static class FooConfig {
 
-	/**
-	 * TODO Document loadContext().
-	 */
-	ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception;
+		@Bean
+		public String foo() {
+			return "foo";
+		}
+	}
 
 }

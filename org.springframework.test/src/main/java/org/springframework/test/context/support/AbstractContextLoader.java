@@ -42,9 +42,9 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
 	/**
-	 * TODO Document processContextConfigurationAttributes().
+	 * TODO Document processContextConfiguration().
 	 */
-	public void processContextConfigurationAttributes(ContextConfigurationAttributes configAttributes) {
+	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(),
 			configAttributes.getLocations());
 
