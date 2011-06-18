@@ -26,10 +26,10 @@ import org.springframework.context.annotation.Configuration;
  * @since 3.1
  * @see AnnotationConfigContextLoaderTests
  */
-public class ContextConfigurationInnerClassTestCase {
+public class AnnotatedFooConfigInnerClassTestCase {
 
 	@Configuration
-	static class ContextConfiguration {
+	static class FooConfig {
 
 		@Bean
 		public String foo() {
