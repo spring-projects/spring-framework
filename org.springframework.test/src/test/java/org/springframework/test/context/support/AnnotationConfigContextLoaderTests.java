@@ -32,18 +32,30 @@ public class AnnotationConfigContextLoaderTests {
 	private final AnnotationConfigContextLoader contextLoader = new AnnotationConfigContextLoader();
 
 
-	@Test
-	public void generateDefaultConfigurationClassesWithFailure() {
-		Class<?>[] defaultLocations = contextLoader.generateDefaultConfigurationClasses(FooConfigInnerClassTestCase.class);
-		assertNotNull(defaultLocations);
-		assertEquals("FooConfigInnerClassTestCase.FooConfig should NOT be found", 0, defaultLocations.length);
-	}
+	// Developer's note: AnnotationConfigContextLoader currently generates a
+	// default config class named exactly ContextConfiguration, which is a
+	// static inner class of the test class itself.
 
 	@Test
-	public void generateDefaultConfigurationClassesWithSuccess() {
+	public void generateDefaultConfigurationClassesForAnnotatedInnerClassNamedContextConfiguration() {
 		Class<?>[] defaultLocations = contextLoader.generateDefaultConfigurationClasses(ContextConfigurationInnerClassTestCase.class);
 		assertNotNull(defaultLocations);
 		assertEquals("ContextConfigurationInnerClassTestCase.ContextConfiguration should be found", 1,
+			defaultLocations.length);
+	}
+
+	@Test
+	public void generateDefaultConfigurationClassesForAnnotatedInnerClass() {
+		Class<?>[] defaultLocations = contextLoader.generateDefaultConfigurationClasses(AnnotatedFooConfigInnerClassTestCase.class);
+		assertNotNull(defaultLocations);
+		assertEquals("AnnotatedFooConfigInnerClassTestCase.FooConfig should NOT be found", 0, defaultLocations.length);
+	}
+
+	@Test
+	public void generateDefaultConfigurationClassesForNonAnnotatedInnerClass() {
+		Class<?>[] defaultLocations = contextLoader.generateDefaultConfigurationClasses(PlainVanillaFooConfigInnerClassTestCase.class);
+		assertNotNull(defaultLocations);
+		assertEquals("PlainVanillaFooConfigInnerClassTestCase.FooConfig should NOT be found", 0,
 			defaultLocations.length);
 	}
 
