@@ -52,17 +52,16 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 *
 	 * @see SmartContextLoader#loadContext(MergedContextConfiguration)
 	 */
-	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration)
-			throws Exception {
+	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Loading ApplicationContext for merged context configuration [%s].",
-				mergedContextConfiguration));
+				mergedConfig));
 		}
 		GenericApplicationContext context = new GenericApplicationContext();
-		context.getEnvironment().setActiveProfiles(mergedContextConfiguration.getActiveProfiles());
+		context.getEnvironment().setActiveProfiles(mergedConfig.getActiveProfiles());
 		prepareContext(context);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
-		loadBeanDefinitions(context, mergedContextConfiguration);
+		loadBeanDefinitions(context, mergedConfig);
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		customizeContext(context);
 		context.refresh();
@@ -149,13 +148,12 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * and override this method to provide a custom strategy for loading or
 	 * registering bean definitions.
 	 * @param context the context into which the bean definitions should be loaded
-	 * @param mergedContextConfiguration TODO Document parameters.
+	 * @param mergedConfig TODO Document parameters.
 	 * @since 3.1
 	 * @see #loadContext
 	 */
-	protected void loadBeanDefinitions(GenericApplicationContext context,
-			MergedContextConfiguration mergedContextConfiguration) {
-		createBeanDefinitionReader(context).loadBeanDefinitions(mergedContextConfiguration.getLocations());
+	protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
+		createBeanDefinitionReader(context).loadBeanDefinitions(mergedConfig.getLocations());
 	}
 
 	/**

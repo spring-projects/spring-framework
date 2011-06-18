@@ -310,7 +310,7 @@ abstract class ContextLoaderUtils {
 			if (contextLoader instanceof SmartContextLoader) {
 				SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
 				// TODO Decide on mutability of locations and classes properties
-				smartContextLoader.processContextConfigurationAttributes(configAttributes);
+				smartContextLoader.processContextConfiguration(configAttributes);
 				locationsList.addAll(Arrays.asList(configAttributes.getLocations()));
 				classesList.addAll(Arrays.asList(configAttributes.getClasses()));
 			}

@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -43,14 +44,12 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 
 
 	/**
-	 * TODO Document overridden processContextConfigurationAttributes().
-	 *
-	 * @see org.springframework.test.context.SmartContextLoader#processContextConfigurationAttributes
+	 * TODO Document overridden processContextConfiguration().
 	 */
-	public void processContextConfigurationAttributes(ContextConfigurationAttributes configAttributes) {
+	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && isGenerateDefaultClasses()) {
-			Class<?>[] defaultConfigurationClasses = generateDefaultConfigurationClasses(configAttributes.getDeclaringClass());
-			configAttributes.setClasses(defaultConfigurationClasses);
+			Class<?>[] defaultConfigClasses = generateDefaultConfigurationClasses(configAttributes.getDeclaringClass());
+			configAttributes.setClasses(defaultConfigClasses);
 		}
 	}
 
@@ -87,6 +86,8 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 
 	/**
 	 * TODO Document isGenerateDefaultClasses().
+	 * <p>
+	 * TODO Consider renaming to a generic boolean generatesDefaults() method and moving to SmartContextLoader.
 	 */
 	protected boolean isGenerateDefaultClasses() {
 		return true;
@@ -101,7 +102,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * class name refers to a nested <code>static</code> class within the
 	 * test class.
 	 * 
-	 * @see #generateDefaultLocations(Class)
+	 * @see #generateDefaultConfigurationClasses(Class)
 	 */
 	protected String getConfigurationClassNameSuffix() {
 		return "$ContextConfiguration";
@@ -118,10 +119,18 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 
 		List<Class<?>> configClasses = new ArrayList<Class<?>>();
 		try {
-			configClasses.add((Class<?>) getClass().getClassLoader().loadClass(className));
+			Class<?> configClass = (Class<?>) getClass().getClassLoader().loadClass(className);
+			if (configClass.isAnnotationPresent(Configuration.class)) {
+				configClasses.add(configClass);
+			}
+			else {
+				logger.warn(String.format(
+					"Found candidate configuration class [%s], but it is not annotated with @Configuration.", className));
+			}
 		}
 		catch (ClassNotFoundException e) {
-			logger.warn(String.format("Cannot load @Configuration class with generated class name [%s].", className), e);
+			logger.warn(String.format(
+				"Cannot load @Configuration class with generated class name [%s]: class not found", className));
 		}
 
 		return configClasses.toArray(new Class<?>[configClasses.size()]);

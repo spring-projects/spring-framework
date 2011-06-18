@@ -34,13 +34,13 @@ public class ContextConfigurationAttributes {
 
 	private final Class<?> declaringClass;
 
-	private String[] locations;
-
-	private Class<?>[] classes;
-
 	private final boolean inheritLocations;
 
 	private final Class<? extends ContextLoader> contextLoaderClass;
+
+	private String[] locations;
+
+	private Class<?>[] classes;
 
 
 	/**
@@ -98,6 +98,20 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
+	 * TODO Document isInheritLocations().
+	 */
+	public boolean isInheritLocations() {
+		return this.inheritLocations;
+	}
+
+	/**
+	 * TODO Document getContextLoaderClass().
+	 */
+	public Class<? extends ContextLoader> getContextLoaderClass() {
+		return this.contextLoaderClass;
+	}
+
+	/**
 	 * TODO Document getLocations().
 	 */
 	public String[] getLocations() {
@@ -123,20 +137,6 @@ public class ContextConfigurationAttributes {
 	 */
 	public void setClasses(Class<?>[] classes) {
 		this.classes = classes;
-	}
-
-	/**
-	 * TODO Document isInheritLocations().
-	 */
-	public boolean isInheritLocations() {
-		return this.inheritLocations;
-	}
-
-	/**
-	 * TODO Document getContextLoaderClass().
-	 */
-	public Class<? extends ContextLoader> getContextLoaderClass() {
-		return this.contextLoaderClass;
 	}
 
 	/**
