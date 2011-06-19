@@ -9,6 +9,7 @@ Changes in version 3.1 RC1 (2011-07-xx)
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
 * revised JMS CachedConnectionFactory to avoid unnecessary rollback calls on Session return
 * fixed JMS CachedConnectionFactory to fully synchronize its Session list
+* AnnotationConfigContextLoader now supports default configuration classes with arbitrary names
 
 
 Changes in version 3.1 M2 (2011-06-08)
