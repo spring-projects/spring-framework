@@ -41,6 +41,22 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
+	// --- SmartContextLoader -----------------------------------------------
+
+	/**
+	 * Determine whether or not <em>default</em> resource locations should be
+	 * generated if the <code>locations</code> provided to
+	 * {@link #processLocations(Class,String...) processLocations()} are
+	 * <code>null</code> or empty.
+	 * <p>Can be overridden by subclasses to change the default behavior.
+	 * @return always <code>true</code> by default
+	 *
+	 * @see SmartContextLoader#generatesDefaults
+	 */
+	public boolean generatesDefaults() {
+		return isGenerateDefaultLocations();
+	}
+
 	/**
 	 * TODO Document processContextConfiguration().
 	 */
@@ -50,6 +66,8 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 
 		configAttributes.setLocations(processedLocations);
 	}
+
+	// --- ContextLoader -------------------------------------------------------
 
 	/**
 	 * If the supplied <code>locations</code> are <code>null</code> or

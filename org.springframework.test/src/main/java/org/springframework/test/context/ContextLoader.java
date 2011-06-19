@@ -20,6 +20,10 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Strategy interface for loading an {@link ApplicationContext application context}.
+ * 
+ * <p><b>Note</b>: as of Spring 3.1, consider implementing {@link SmartContextLoader}
+ * instead of this interface in order to provide support for configuration classes
+ * and active bean definition profiles.
  *
  * <p>Clients of a ContextLoader should call
  * {@link #processLocations(Class,String...) processLocations()} prior to
@@ -41,6 +45,7 @@ import org.springframework.context.ApplicationContext;
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
+ * @see SmartContextLoader
  */
 public interface ContextLoader {
 

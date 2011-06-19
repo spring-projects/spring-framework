@@ -100,7 +100,7 @@ abstract class ContextLoaderUtils {
 	 * 
 	 * @param testClass the test class for which the <code>ContextLoader</code>
 	 * should be resolved (must not be <code>null</code>)
-	 * @param configAttributesList TODO Document parameter
+	 * @param configAttributesList TODO Document configAttributesList parameter
 	 * @param defaultContextLoaderClassName the name of the default
 	 * <code>ContextLoader</code> class to use (may be <code>null</code>)
 	 * 
@@ -141,7 +141,7 @@ abstract class ContextLoaderUtils {
 	 * 
 	 * @param testClass the class for which to resolve the <code>ContextLoader</code>
 	 * class; must not be <code>null</code>
-	 * @param configAttributesList TODO Document parameter
+	 * @param configAttributesList TODO Document configAttributesList parameter
 	 * @param defaultContextLoaderClassName the name of the default
 	 * <code>ContextLoader</code> class to use; must not be <code>null</code> or empty
 	 * 
