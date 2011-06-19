@@ -14,42 +14,44 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.condition;
+package org.springframework.web.servlet.mvc.method;
 
 import java.util.Collection;
 import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
+import org.springframework.web.servlet.mvc.condition.RequestCondition;
+
 /**
- * Wraps and delegates operations to a custom {@link RequestCondition} whose type is not known and even its 
- * presence is not guaranteed ahead of time. The main purpose of this class is to ensure a type-safe and 
- * null-safe way of combining and comparing custom request conditions.
+ * Wraps and delegates operations to a {@link RequestCondition} whose type is not known ahead of time. The main goal 
+ * is to provide type-safe and null-safe way of comparing and combining optional custom {@link RequestCondition}s.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public final class CustomRequestCondition extends AbstractRequestCondition<CustomRequestCondition> {
+final class CustomRequestCondition extends AbstractRequestCondition<CustomRequestCondition> {
 
 	@SuppressWarnings("rawtypes")
 	private final RequestCondition customCondition;
 	
 	/**
-	 * Creates a {@link CustomRequestCondition} that wraps the given {@link RequestCondition} instance. 
-	 * @param requestCondition the custom request condition to wrap
+	 * Creates an instance that wraps the given custom request condition. 
+	 * @param requestCondition the custom request condition
 	 */
-	public CustomRequestCondition(RequestCondition<?> requestCondition) {
+	CustomRequestCondition(RequestCondition<?> requestCondition) {
 		this.customCondition = requestCondition;
 	}
 
 	/**
-	 * Creates an empty {@link CustomRequestCondition}.
+	 * Creates an instance that does not wrap any custom request condition.
 	 */
-	public CustomRequestCondition() {
+	CustomRequestCondition() {
 		this(null);
 	}
 
-	public RequestCondition<?> getRequestCondition() {
+	public RequestCondition<?> getCondition() {
 		return customCondition;
 	}
 
@@ -60,7 +62,7 @@ public final class CustomRequestCondition extends AbstractRequestCondition<Custo
 
 	@Override
 	protected String getToStringInfix() {
-		return "";
+		return " ";
 	}
 
 	/**

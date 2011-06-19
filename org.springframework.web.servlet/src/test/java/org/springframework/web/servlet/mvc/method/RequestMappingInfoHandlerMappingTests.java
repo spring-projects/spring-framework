@@ -24,7 +24,10 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +89,16 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
+	public void getMappingPathPatterns() throws Exception {
+		RequestMappingInfo info = new RequestMappingInfo(
+				new PatternsRequestCondition("/foo/*", "/foo", "/bar/*", "/bar"), null, null, null, null, null, null);
+		Set<String> paths = mapping.getMappingPathPatterns(info);
+		HashSet<String> expected = new HashSet<String>(Arrays.asList("/foo/*", "/foo", "/bar/*", "/bar"));
+
+		assertEquals(expected, paths);
+	}
+
+	@Test
 	public void directMatch() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		HandlerMethod hm = (HandlerMethod) mapping.getHandler(request).getHandler();
@@ -132,7 +145,8 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void uriTemplateVariables() {
-		RequestMappingInfo key = new RequestMappingInfo(new String[] {"/{path1}/{path2}"});
+		PatternsRequestCondition patterns = new PatternsRequestCondition("/{path1}/{path2}");
+		RequestMappingInfo key = new RequestMappingInfo(patterns, null, null, null, null, null, null);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 
@@ -206,7 +220,7 @@ public class RequestMappingInfoHandlerMappingTests {
 					new ParamsRequestCondition(annotation.params()),
 					new HeadersRequestCondition(annotation.headers()),
 					new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
-					new ProducesRequestCondition(annotation.produces(), annotation.headers()));
+					new ProducesRequestCondition(annotation.produces(), annotation.headers()), null);
 		}
 	}
 	

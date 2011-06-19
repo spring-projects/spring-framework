@@ -204,16 +204,18 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			logger.info("Mapped \"" + mapping + "\" onto " + handlerMethod);
 		}
 		
-		Set<String> paths = getMappingPaths(mapping);
-		for (String path : paths) {
-			urlMap.add(path, mapping);
+		Set<String> patterns = getMappingPathPatterns(mapping);
+		for (String pattern : patterns) {
+			if (!getPathMatcher().isPattern(pattern)) {
+				urlMap.add(pattern, mapping);
+			}
 		}
 	}
 
 	/**
 	 * Get the URL paths associated with the given mapping. 
 	 */
-	protected abstract Set<String> getMappingPaths(T mapping);
+	protected abstract Set<String> getMappingPathPatterns(T mapping);
 
 	@Override
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
