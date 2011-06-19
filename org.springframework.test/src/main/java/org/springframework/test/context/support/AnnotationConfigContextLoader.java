@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.support;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,81 +32,81 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Concrete implementation of {@link AbstractGenericContextLoader} which
- * registers bean definitions from
+ * Concrete implementation of {@link AbstractGenericContextLoader} that loads
+ * bean definitions from
  * {@link org.springframework.context.annotation.Configuration configuration classes}.
+ * 
+ * <p>Note: <code>AnnotationConfigContextLoader</code> supports
+ * {@link org.springframework.context.annotation.Configuration configuration classes}
+ * rather than the String-based resource locations defined by the legacy
+ * {@link org.springframework.test.context.ContextLoader ContextLoader} API. Thus,
+ * although <code>AnnotationConfigContextLoader</code> extends
+ * <code>AbstractGenericContextLoader</code>, <code>AnnotationConfigContextLoader</code>
+ * does <em>not</em> support any String-based methods defined by
+ * <code>AbstractContextLoader</code> or <code>AbstractGenericContextLoader</code>.
+ * Consequently, <code>AnnotationConfigContextLoader</code> should chiefly be
+ * considered a {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
+ * rather than a {@link org.springframework.test.context.ContextLoader ContextLoader}. 
  * 
  * @author Sam Brannen
  * @since 3.1
+ * @see #generateDefaultConfigurationClasses
+ * @see #loadBeanDefinitions
  */
 public class AnnotationConfigContextLoader extends AbstractGenericContextLoader {
 
 	private static final Log logger = LogFactory.getLog(AnnotationConfigContextLoader.class);
 
 
+	// --- SmartContextLoader -----------------------------------------------
+
 	/**
 	 * TODO Document overridden processContextConfiguration().
+	 *
+	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration
+	 * @see #generatesDefaults
+	 * @see #generateDefaultConfigurationClasses
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
-		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && isGenerateDefaultClasses()) {
+		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && generatesDefaults()) {
 			Class<?>[] defaultConfigClasses = generateDefaultConfigurationClasses(configAttributes.getDeclaringClass());
 			configAttributes.setClasses(defaultConfigClasses);
 		}
 	}
 
-	/**
-	 * TODO Update documentation regarding SmartContextLoader SPI.
-	 * 
-	 * <p>
-	 * Registers {@link org.springframework.context.annotation.Configuration configuration classes}
-	 * in the supplied {@link GenericApplicationContext context} from the specified
-	 * class names.
-	 * 
-	 * <p>Each class name must be the <em>fully qualified class name</em> of an
-	 * annotated configuration class, component, or feature specification. An
-	 * {@link AnnotatedBeanDefinitionReader} is used to register the appropriate
-	 * bean definitions.
-	 * 
-	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}
-	 * since <code>AnnotatedBeanDefinitionReader</code> is not an instance of
-	 * {@link BeanDefinitionReader}.
-	 * 
-	 * @param context the context in which the configuration classes should be registered
-	 * @param classNames the names of configuration classes to register in the context
-	 * @throws IllegalArgumentException if a supplied class name does not represent a class
-	 */
-	@Override
-	protected void loadBeanDefinitions(GenericApplicationContext context,
-			MergedContextConfiguration mergedContextConfiguration) {
-		Class<?>[] configClasses = mergedContextConfiguration.getClasses();
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering configuration classes: " + ObjectUtils.nullSafeToString(configClasses));
-		}
-		new AnnotatedBeanDefinitionReader(context).register(configClasses);
+	// --- AnnotationConfigContextLoader ---------------------------------------
+
+	private boolean isStaticNonPrivateAndNonFinal(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		int modifiers = clazz.getModifiers();
+		return (Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers));
 	}
 
 	/**
-	 * TODO Document isGenerateDefaultClasses().
-	 * <p>
-	 * TODO Consider renaming to a generic boolean generatesDefaults() method and moving to SmartContextLoader.
+	 * Determine if the supplied {@link Class} meets the criteria for being considered
+	 * as a <em>default configuration class</em> candidate.
+	 * <p>Specifically, such candidates:
+	 * <ul>
+	 * <li>must not be <code>null</code></li>
+	 * <li>must not be <code>private</code></li>
+	 * <li>must not be <code>final</code></li>
+	 * <li>must be <code>static</code></li>
+	 * <li>must be annotated with {@code @Configuration}</li>
+	 * </ul>
+	 * 
+	 * @param clazz the class the check
+	 * @return <code>true</code> if the supplied class meets the candidate criteria
 	 */
-	protected boolean isGenerateDefaultClasses() {
+	private boolean isDefaultConfigurationClassCandidate(Class<?> clazz) {
+		return clazz != null && isStaticNonPrivateAndNonFinal(clazz) && clazz.isAnnotationPresent(Configuration.class);
+	}
+
+	/**
+	 * TODO Document generatesDefaults().
+	 */
+	// TODO Consider moving to SmartContextLoader SPI.
+	protected boolean generatesDefaults() {
 		return true;
-	}
-
-	/**
-	 * Returns &quot;$ContextConfiguration</code>&quot;; intended to be used
-	 * as a suffix to append to the name of the test class when generating
-	 * default configuration class names.
-	 * 
-	 * <p>Note: the use of a dollar sign ($) signifies that the resulting 
-	 * class name refers to a nested <code>static</code> class within the
-	 * test class.
-	 * 
-	 * @see #generateDefaultConfigurationClasses(Class)
-	 */
-	protected String getConfigurationClassNameSuffix() {
-		return "$ContextConfiguration";
 	}
 
 	/**
@@ -113,49 +114,42 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 */
 	protected Class<?>[] generateDefaultConfigurationClasses(Class<?> declaringClass) {
 		Assert.notNull(declaringClass, "Declaring class must not be null");
-		String suffix = getConfigurationClassNameSuffix();
-		Assert.hasText(suffix, "Configuration class name suffix must not be empty");
-		String className = declaringClass.getName() + suffix;
 
 		List<Class<?>> configClasses = new ArrayList<Class<?>>();
-		try {
-			Class<?> configClass = (Class<?>) getClass().getClassLoader().loadClass(className);
-			if (configClass.isAnnotationPresent(Configuration.class)) {
+
+		for (Class<?> configClass : declaringClass.getDeclaredClasses()) {
+			if (isDefaultConfigurationClassCandidate(configClass)) {
 				configClasses.add(configClass);
 			}
 			else {
-				logger.warn(String.format(
-					"Found candidate configuration class [%s], but it is not annotated with @Configuration.", className));
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format(
+						"Ignoring class [%s]; it must be static, non-private, non-final, and annotated "
+								+ "with @Configuration to be considered a default configuration class.",
+						configClass.getName()));
+				}
 			}
 		}
-		catch (ClassNotFoundException e) {
+
+		if (configClasses.isEmpty()) {
 			logger.warn(String.format(
-				"Cannot load @Configuration class with generated class name [%s]: class not found", className));
+				"Test class [%s] does not declare any static, non-private, non-final, inner classes annotated "
+						+ "with @Configuration that can be used as a default configuration class.", declaringClass));
 		}
 
 		return configClasses.toArray(new Class<?>[configClasses.size()]);
 	}
 
-	/**
-	 * TODO Document overridden createBeanDefinitionReader().
-	 */
-	@Override
-	protected BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
-		throw new UnsupportedOperationException(
-			"AnnotationConfigContextLoader does not support the createBeanDefinitionReader(GenericApplicationContext) method");
-	}
+	// --- AbstractContextLoader -----------------------------------------------
 
 	/**
-	 * TODO Document overridden generateDefaultLocations().
-	 */
-	@Override
-	protected String[] generateDefaultLocations(Class<?> clazz) {
-		throw new UnsupportedOperationException(
-			"AnnotationConfigContextLoader does not support the generateDefaultLocations(Class) method");
-	}
-
-	/**
-	 * TODO Document overridden modifyLocations().
+	 * <code>AnnotationConfigContextLoader</code> should be used as a
+	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
+	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
+	 * Consequently, this method is not supported.
+	 *
+	 * @see AbstractContextLoader#modifyLocations
+	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	protected String[] modifyLocations(Class<?> clazz, String... locations) {
@@ -164,12 +158,77 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * TODO Document overridden getResourceSuffix().
+	 * <code>AnnotationConfigContextLoader</code> should be used as a
+	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
+	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
+	 * Consequently, this method is not supported.
+	 *
+	 * @see AbstractContextLoader#generateDefaultLocations
+	 * @throws UnsupportedOperationException
+	 */
+	@Override
+	protected String[] generateDefaultLocations(Class<?> clazz) {
+		throw new UnsupportedOperationException(
+			"AnnotationConfigContextLoader does not support the generateDefaultLocations(Class) method");
+	}
+
+	/**
+	 * <code>AnnotationConfigContextLoader</code> should be used as a 
+	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
+	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
+	 * Consequently, this method is not supported.
+	 *
+	 * @see AbstractContextLoader#getResourceSuffix
+	 * @throws UnsupportedOperationException
 	 */
 	@Override
 	protected String getResourceSuffix() {
 		throw new UnsupportedOperationException(
 			"AnnotationConfigContextLoader does not support the getResourceSuffix() method");
+	}
+
+	// --- AbstractGenericContextLoader ----------------------------------------
+
+	/**
+	 * Register {@link org.springframework.context.annotation.Configuration configuration classes}
+	 * in the supplied {@link GenericApplicationContext context} from the classes
+	 * in the supplied {@link MergedContextConfiguration}.
+	 * 
+	 * <p>Each class must represent an annotated configuration class or component. An
+	 * {@link AnnotatedBeanDefinitionReader} is used to register the appropriate
+	 * bean definitions.
+	 * 
+	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}
+	 * since <code>AnnotatedBeanDefinitionReader</code> is not an instance of
+	 * {@link BeanDefinitionReader}.
+	 * 
+	 * @param context the context in which the configuration classes should be registered
+	 * @param mergedConfig the merged configuration from which the classes should be retrieved
+	 * @see AbstractGenericContextLoader#loadBeanDefinitions
+	 */
+	@Override
+	protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
+		Class<?>[] configClasses = mergedConfig.getClasses();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Registering configuration classes: " + ObjectUtils.nullSafeToString(configClasses));
+		}
+		new AnnotatedBeanDefinitionReader(context).register(configClasses);
+	}
+
+	/**
+	 * <code>AnnotationConfigContextLoader</code> should be used as a 
+	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
+	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
+	 * Consequently, this method is not supported.
+	 *
+	 * @see #loadBeanDefinitions
+	 * @see AbstractGenericContextLoader#createBeanDefinitionReader
+	 * @throws UnsupportedOperationException
+	 */
+	@Override
+	protected BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
+		throw new UnsupportedOperationException(
+			"AnnotationConfigContextLoader does not support the createBeanDefinitionReader(GenericApplicationContext) method");
 	}
 
 }

@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.support;
 
-import org.springframework.context.annotation.Bean;
-
 /**
  * Not an actual <em>test case</em>.
  * 
@@ -29,11 +27,6 @@ public class PlainVanillaFooConfigInnerClassTestCase {
 
 	// Intentionally NOT annotated with @Configuration
 	static class FooConfig {
-
-		@Bean
-		public String foo() {
-			return "foo";
-		}
 	}
 
 }

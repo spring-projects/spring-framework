@@ -25,10 +25,16 @@ import org.springframework.context.annotation.Configuration;
  * @since 3.1
  * @see AnnotationConfigContextLoaderTests
  */
-public class ContextConfigurationInnerClassTestCase {
+public class NonStaticConfigInnerClassesTestCase {
 
+	// Intentionally not static
 	@Configuration
-	static class ContextConfiguration {
+	class FooConfig {
+	}
+
+	// Intentionally not static
+	@Configuration
+	class BarConfig {
 	}
 
 }
