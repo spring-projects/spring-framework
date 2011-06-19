@@ -84,7 +84,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				new ParamsRequestCondition(annotation.params()),
 				new HeadersRequestCondition(annotation.headers()),
 				new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
-				new ProducesRequestCondition(annotation.produces(), annotation.headers()));
+				new ProducesRequestCondition(annotation.produces(), annotation.headers()), null);
 	}
 	
 }

@@ -16,13 +16,14 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -56,6 +57,14 @@ public class RequestMethodsRequestConditionTests {
 		assertNotNull(condition.getMatchingCondition(request));
 	}
 
+	@Test
+	public void noMethodsMatchAll() {
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition();
+
+		assertNotNull(condition.getMatchingCondition(new MockHttpServletRequest("GET", "")));
+		assertNotNull(condition.getMatchingCondition(new MockHttpServletRequest("POST", "")));
+		assertNotNull(condition.getMatchingCondition(new MockHttpServletRequest("HEAD", "")));
+	}
 
 	@Test
 	public void compareTo() {

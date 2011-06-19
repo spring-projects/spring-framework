@@ -118,7 +118,7 @@ public class HandlerMethodMappingTests {
 		}
 
 		@Override
-		protected Set<String> getMappingPaths(String key) {
+		protected Set<String> getMappingPathPatterns(String key) {
 			return new HashSet<String>();
 		}
 	}

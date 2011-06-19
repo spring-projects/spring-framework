@@ -25,10 +25,10 @@ import java.util.Iterator;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-abstract class AbstractRequestCondition<T extends AbstractRequestCondition<T>> implements RequestCondition<T> {
+public abstract class AbstractRequestCondition<T extends AbstractRequestCondition<T>> implements RequestCondition<T> {
 	
 	/**
-	 * Returns the discrete expressions a request condition is composed of such as URL patterns, 
+	 * Returns the discrete items a request condition is composed of such as URL patterns, 
 	 * HTTP request methods, parameter expressions, etc.
 	 */
 	protected abstract Collection<?> getContent();
@@ -65,8 +65,8 @@ abstract class AbstractRequestCondition<T extends AbstractRequestCondition<T>> i
 	}
 
 	/**
-	 * Returns {@code true} if the individual expressions of the condition are combined via logical 
-	 * conjunction (" && "); or {@code false} otherwise.
+	 * The notation to use when printing discrete items of content in the toString() method.
+	 * For example URL patterns use " || " while parameter expressions use " && ".
 	 */
 	protected abstract String getToStringInfix();
 

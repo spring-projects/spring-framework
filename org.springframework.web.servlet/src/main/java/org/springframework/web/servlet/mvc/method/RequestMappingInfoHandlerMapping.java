@@ -48,27 +48,21 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 	@Override
 	protected void handlerMethodsInitialized(Map<RequestMappingInfo, HandlerMethod> handlerMethods) {
-		List<RequestMappingInfo> mappings = new ArrayList<RequestMappingInfo>(handlerMethods.keySet());
-		while (mappings.size() > 1) {
-			RequestMappingInfo mapping = mappings.remove(0);
-			for (RequestMappingInfo otherMapping : mappings) {
-				// TODO: further validate mapping conditions
+		List<RequestMappingInfo> infos = new ArrayList<RequestMappingInfo>(handlerMethods.keySet());
+		while (infos.size() > 1) {
+			RequestMappingInfo info1 = infos.remove(0);
+			for (RequestMappingInfo info2 : infos) {
+				// TODO: validate duplicate consumable and producible media types
 			}
 		}
 	}
 
 	/**
-	 * Get the URL paths associated with this {@link RequestMappingInfo}.
+	 * Get the URL path patterns associated with this {@link RequestMappingInfo}.
 	 */
 	@Override
-	protected Set<String> getMappingPaths(RequestMappingInfo mapping) {
-		Set<String> paths = new HashSet<String>();
-		for (String pattern : mapping.getPatternsCondition().getPatterns()) {
-			if (!getPathMatcher().isPattern(pattern)) {
-				paths.add(pattern);
-			}
-		}
-		return paths;
+	protected Set<String> getMappingPathPatterns(RequestMappingInfo info) {
+		return info.getPatternsCondition().getPatterns();
 	}
 
 	/**
@@ -79,8 +73,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * @returns a RequestMappingInfo instance in case of a match; or {@code null} in case of no match. 
 	 */
 	@Override
-	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo mapping, HttpServletRequest request) {
-		return mapping.getMatchingRequestMappingInfo(request);
+	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo info, HttpServletRequest request) {
+		return info.getMatchingInfo(request);
 	}
 
 	/**
@@ -89,8 +83,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	@Override
 	protected Comparator<RequestMappingInfo> getMappingComparator(final HttpServletRequest request) {
 		return new Comparator<RequestMappingInfo>() {
-			public int compare(RequestMappingInfo info, RequestMappingInfo otherInfo) {
-				return info.compareTo(otherInfo, request);
+			public int compare(RequestMappingInfo info1, RequestMappingInfo info2) {
+				return info1.compareTo(info2, request);
 			}
 		};
 	}
