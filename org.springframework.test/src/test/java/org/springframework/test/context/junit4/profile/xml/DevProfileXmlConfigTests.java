@@ -23,8 +23,6 @@ import org.junit.Test;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * TODO Document DefaultProfileXmlConfigTests.
- * 
  * @author Sam Brannen
  * @since 3.1
  */

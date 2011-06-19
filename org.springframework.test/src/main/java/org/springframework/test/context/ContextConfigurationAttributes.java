@@ -22,11 +22,15 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.ObjectUtils;
 
 /**
- * TODO [SPR-8386] Document ContextConfigurationAttributes.
+ * <code>ContextConfigurationAttributes</code> encapsulates the context 
+ * configuration attributes declared on a test class via
+ * {@link ContextConfiguration @ContextConfiguration}.
  * 
  * @author Sam Brannen
  * @since 3.1
  * @see ContextConfiguration
+ * @see SmartContextLoader
+ * @see MergedContextConfiguration
  */
 public class ContextConfigurationAttributes {
 
@@ -34,17 +38,17 @@ public class ContextConfigurationAttributes {
 
 	private final Class<?> declaringClass;
 
-	private final boolean inheritLocations;
-
-	private final Class<? extends ContextLoader> contextLoaderClass;
-
 	private String[] locations;
 
 	private Class<?>[] classes;
 
+	private final boolean inheritLocations;
+
+	private final Class<? extends ContextLoader> contextLoaderClass;
+
 
 	/**
-	 * Resolves resource locations from the {@link ContextConfiguration#locations() locations}
+	 * Resolve resource locations from the {@link ContextConfiguration#locations() locations}
 	 * and {@link ContextConfiguration#value() value} attributes of the supplied
 	 * {@link ContextConfiguration} annotation.
 	 * 
@@ -71,7 +75,11 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
-	 * TODO Document ContextConfigurationAttributes constructor.
+	 * Construct a new {@link ContextConfigurationAttributes} instance for the
+	 * supplied {@link ContextConfiguration @ContextConfiguration} annotation and
+	 * the {@link Class test class} that declared it.
+	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
+	 * @param contextConfiguration the annotation from which to retrieve the attributes 
 	 */
 	public ContextConfigurationAttributes(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
 		this(declaringClass, resolveLocations(declaringClass, contextConfiguration), contextConfiguration.classes(),
@@ -79,7 +87,16 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
-	 * TODO Document ContextConfigurationAttributes constructor.
+	 * Construct a new {@link ContextConfigurationAttributes} instance for the
+	 * {@link Class test class} that declared the
+	 * {@link ContextConfiguration @ContextConfiguration} annotation and its
+	 * corresponding attributes.
+	 * 
+	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
+	 * @param locations the resource locations declared via {@code @ContextConfiguration}
+	 * @param classes the configuration classes declared via {@code @ContextConfiguration}
+	 * @param inheritLocations the <code>inheritLocations</code> flag declared via {@code @ContextConfiguration}
+	 * @param contextLoaderClass the {@code ContextLoader} class declared via {@code @ContextConfiguration}
 	 */
 	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
 			boolean inheritLocations, Class<? extends ContextLoader> contextLoaderClass) {
@@ -91,56 +108,84 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
-	 * TODO Document getDeclaringClass().
+	 * Get the {@link Class class} that declared the
+	 * {@link ContextConfiguration @ContextConfiguration} annotation.
+	 * @return the declaring class; never <code>null</code>
 	 */
 	public Class<?> getDeclaringClass() {
 		return this.declaringClass;
 	}
 
 	/**
-	 * TODO Document isInheritLocations().
-	 */
-	public boolean isInheritLocations() {
-		return this.inheritLocations;
-	}
-
-	/**
-	 * TODO Document getContextLoaderClass().
-	 */
-	public Class<? extends ContextLoader> getContextLoaderClass() {
-		return this.contextLoaderClass;
-	}
-
-	/**
-	 * TODO Document getLocations().
+	 * Get the resource locations that were declared via
+	 * {@link ContextConfiguration @ContextConfiguration}.
+	 * <p>Note: this is a mutable property. The returned value may therefore
+	 * represent a <em>processed</em> value that does not match the original value 
+	 * declared via {@link ContextConfiguration @ContextConfiguration}.
+	 * @return the resource locations; potentially <code>null</code> or <em>empty</em>
+	 * @see ContextConfiguration#value
+	 * @see ContextConfiguration#locations
+	 * @see #setLocations()
 	 */
 	public String[] getLocations() {
 		return this.locations;
 	}
 
 	/**
-	 * TODO Document setLocations().
+	 * Set the <em>processed</em> resource locations, effectively overriding the
+	 * original value declared via {@link ContextConfiguration @ContextConfiguration}.
+	 * @see #getLocations()
 	 */
 	public void setLocations(String[] locations) {
 		this.locations = locations;
 	}
 
 	/**
-	 * TODO Document getClasses().
+	 * Get the configuration classes that were declared via
+	 * {@link ContextConfiguration @ContextConfiguration}.
+	 * <p>Note: this is a mutable property. The returned value may therefore
+	 * represent a <em>processed</em> value that does not match the original value 
+	 * declared via {@link ContextConfiguration @ContextConfiguration}.
+	 * @return the configuration classes; potentially <code>null</code> or <em>empty</em>
+	 * @see ContextConfiguration#classes
+	 * @see #setClasses()
 	 */
 	public Class<?>[] getClasses() {
 		return this.classes;
 	}
 
 	/**
-	 * TODO Document setClasses().
+	 * Set the <em>processed</em> configuration classes, effectively overriding the
+	 * original value declared via {@link ContextConfiguration @ContextConfiguration}.
+	 * @see #getClasses()
 	 */
 	public void setClasses(Class<?>[] classes) {
 		this.classes = classes;
 	}
 
 	/**
-	 * TODO Document overridden toString().
+	 * Get the <code>inheritLocations</code> flag that was declared via
+	 * {@link ContextConfiguration @ContextConfiguration}.
+	 * @return the <code>inheritLocations</code> flag
+	 * @see ContextConfiguration#inheritLocations
+	 */
+	public boolean isInheritLocations() {
+		return this.inheritLocations;
+	}
+
+	/**
+	 * Get the <code>ContextLoader</code> class that was declared via
+	 * {@link ContextConfiguration @ContextConfiguration}.
+	 * @return the <code>ContextLoader</code> class
+	 * @see ContextConfiguration#loader
+	 */
+	public Class<? extends ContextLoader> getContextLoaderClass() {
+		return this.contextLoaderClass;
+	}
+
+	/**
+	 * Provide a String representation of the context configuration attributes
+	 * and declaring class.
 	 */
 	@Override
 	public String toString() {

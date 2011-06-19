@@ -102,14 +102,6 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * TODO Document generatesDefaults().
-	 */
-	// TODO Consider defining generatesDefaults() in the SmartContextLoader SPI.
-	protected boolean generatesDefaults() {
-		return true;
-	}
-
-	/**
 	 * TODO Document generateDefaultConfigurationClasses().
 	 */
 	protected Class<?>[] generateDefaultConfigurationClasses(Class<?> declaringClass) {
