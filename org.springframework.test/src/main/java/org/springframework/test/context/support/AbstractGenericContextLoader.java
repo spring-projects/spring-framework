@@ -148,7 +148,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * and override this method to provide a custom strategy for loading or
 	 * registering bean definitions.
 	 * @param context the context into which the bean definitions should be loaded
-	 * @param mergedConfig TODO Document parameters.
+	 * @param mergedConfig TODO Document mergedConfig parameter.
 	 * @since 3.1
 	 * @see #loadContext
 	 */

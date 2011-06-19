@@ -21,7 +21,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
- * Concrete implementation of {@link AbstractGenericContextLoader} which reads
+ * Concrete implementation of {@link AbstractGenericContextLoader} that reads
  * bean definitions from XML resources.
  *
  * @author Sam Brannen

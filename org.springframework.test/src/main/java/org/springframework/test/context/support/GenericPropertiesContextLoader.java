@@ -23,7 +23,7 @@ import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.support.GenericApplicationContext;
 
 /**
- * Concrete implementation of {@link AbstractGenericContextLoader} which reads
+ * Concrete implementation of {@link AbstractGenericContextLoader} that reads
  * bean definitions from Java {@link Properties} resources.
  *
  * @author Sam Brannen
