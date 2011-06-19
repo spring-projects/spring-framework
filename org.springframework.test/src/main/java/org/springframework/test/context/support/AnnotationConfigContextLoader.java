@@ -94,7 +94,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * <li>must be annotated with {@code @Configuration}</li>
 	 * </ul>
 	 * 
-	 * @param clazz the class the check
+	 * @param clazz the class to check
 	 * @return <code>true</code> if the supplied class meets the candidate criteria
 	 */
 	private boolean isDefaultConfigurationClassCandidate(Class<?> clazz) {
@@ -104,7 +104,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	/**
 	 * TODO Document generatesDefaults().
 	 */
-	// TODO Consider moving to SmartContextLoader SPI.
+	// TODO Consider defining generatesDefaults() in the SmartContextLoader SPI.
 	protected boolean generatesDefaults() {
 		return true;
 	}
