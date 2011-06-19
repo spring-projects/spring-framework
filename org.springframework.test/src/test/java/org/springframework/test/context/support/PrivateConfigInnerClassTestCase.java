@@ -25,10 +25,12 @@ import org.springframework.context.annotation.Configuration;
  * @since 3.1
  * @see AnnotationConfigContextLoaderTests
  */
-public class ContextConfigurationInnerClassTestCase {
+public class PrivateConfigInnerClassTestCase {
 
+	// Intentionally private
+	@SuppressWarnings("unused")
 	@Configuration
-	static class ContextConfiguration {
+	private static class PrivateConfig {
 	}
 
 }

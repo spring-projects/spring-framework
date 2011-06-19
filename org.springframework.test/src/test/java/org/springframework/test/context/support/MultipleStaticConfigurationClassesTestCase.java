@@ -25,10 +25,14 @@ import org.springframework.context.annotation.Configuration;
  * @since 3.1
  * @see AnnotationConfigContextLoaderTests
  */
-public class ContextConfigurationInnerClassTestCase {
+public class MultipleStaticConfigurationClassesTestCase {
 
 	@Configuration
-	static class ContextConfiguration {
+	static class ConfigA {
+	}
+
+	@Configuration
+	static class ConfigB {
 	}
 
 }

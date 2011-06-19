@@ -25,10 +25,11 @@ import org.springframework.context.annotation.Configuration;
  * @since 3.1
  * @see AnnotationConfigContextLoaderTests
  */
-public class ContextConfigurationInnerClassTestCase {
+public class FinalConfigInnerClassTestCase {
 
+	// Intentionally FINAL.
 	@Configuration
-	static class ContextConfiguration {
+	static final class Config {
 	}
 
 }
