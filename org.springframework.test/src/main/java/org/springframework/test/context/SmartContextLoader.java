@@ -73,7 +73,7 @@ public interface SmartContextLoader extends ContextLoader {
 	 * <em>preemptively</em> verify that a generated default actually exists.
 	 * @return <code>true</code> if this <code>SmartContextLoader</code>
 	 * generates default configuration locations or classes
-	 * @see #processContextConfiguration
+	 * @see #processContextConfiguration(ContextConfigurationAttributes)
 	 */
 	boolean generatesDefaults();
 
@@ -91,7 +91,7 @@ public interface SmartContextLoader extends ContextLoader {
 	 * <code>locations</code> or <code>classes</code> property empty signals that
 	 * this <code>SmartContextLoader</code> was not able to generate defaults.
 	 * @param configAttributes the context configuration attributes to process
-	 * @see #generatesDefaults
+	 * @see #generatesDefaults()
 	 */
 	void processContextConfiguration(ContextConfigurationAttributes configAttributes);
 
