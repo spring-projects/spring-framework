@@ -33,7 +33,10 @@
       implementing the <interfacename>Ordered</interfacename> interface too. For
       further details, consult the Javadoc for the
       <interfacename>BeanPostProcessor</interfacename> and
-      <interfacename>Ordered</interfacename> interfaces.</para>
+      <interfacename>Ordered</interfacename> interfaces. See also the note below on
+      <link linkend="beans-factory-programmatically-registering-beanpostprocessors">
+      programmatic registration of <interfacename>BeanPostProcessors</interfacename>
+      </link></para>
 
     <note>
       <para><literal>BeanPostProcessor</literal>s operate on bean (or object)
@@ -80,6 +83,29 @@
       post-processors so that they can be called later upon bean creation.
       Bean post-processors can be deployed in the container just like any other
       beans.</para>
+
+    <anchor id="beans-factory-programmatically-registering-beanpostprocessors"/>
+    <note>
+      <title>Programmatically registering <interfacename>BeanPostProcessors
+        </interfacename></title>
+      <para>
+         While the recommended approach for <interfacename>BeanPostProcessor
+         </interfacename> registration is through <interfacename>ApplicationContext
+         </interfacename> auto-detection (as described above), it is also
+         possible to register them <emphasis>programmatically</emphasis>
+         against an <interfacename>ApplicationContext</interfacename> using the
+         <methodname>addBeanPostProcessor</methodname> method. This can be useful
+         when needing to evaluate conditional logic before registration, or even
+         for copying bean post processors across contexts in a hierarchy.  Note
+         however that <interfacename>BeanPostProcessors</interfacename> added
+         programmatically <emphasis>do not respect the <interfacename>Ordered
+         </interfacename> interface</emphasis>. Here it is the <emphasis>order of
+         registration</emphasis> that dictates the order of execution.  Note also
+         that <interfacename>BeanPostProcessors</interfacename> registered
+         programmatically are always processed before those registered through
+         auto-detection, regardless of any explicit ordering.
+      </para>
+    </note>
 
     <note>
       <title><interfacename>BeanPostProcessors</interfacename> and AOP
