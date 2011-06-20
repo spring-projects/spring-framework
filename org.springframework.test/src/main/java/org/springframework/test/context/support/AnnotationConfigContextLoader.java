@@ -50,8 +50,9 @@ import org.springframework.util.ObjectUtils;
  * 
  * @author Sam Brannen
  * @since 3.1
- * @see #generateDefaultConfigurationClasses
- * @see #loadBeanDefinitions
+ * @see #processContextConfiguration()
+ * @see #generateDefaultConfigurationClasses()
+ * @see #loadBeanDefinitions()
  */
 public class AnnotationConfigContextLoader extends AbstractGenericContextLoader {
 
@@ -61,11 +62,17 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	// --- SmartContextLoader -----------------------------------------------
 
 	/**
-	 * TODO Document overridden processContextConfiguration().
-	 *
+	 * Process configuration classes in the supplied {@link ContextConfigurationAttributes}.
+	 * <p>If the configuration classes are <code>null</code> or empty and
+	 * {@link #generatesDefaults()} returns <code>true</code>, this
+	 * <code>SmartContextLoader</code> will attempt to
+	 * {@link #generateDefaultConfigurationClasses generate default configuration classes}.
+	 * Otherwise, properties in the supplied configuration attributes will not
+	 * be modified.
+	 * @param configAttributes the context configuration attributes to process
 	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration()
-	 * @see #generatesDefaults
-	 * @see #generateDefaultConfigurationClasses
+	 * @see #generatesDefaults()
+	 * @see #generateDefaultConfigurationClasses()
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && generatesDefaults()) {
@@ -83,8 +90,8 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * Determine if the supplied {@link Class} meets the criteria for being considered
-	 * as a <em>default configuration class</em> candidate.
+	 * Determine if the supplied {@link Class} meets the criteria for being
+	 * considered as a <em>default configuration class</em> candidate.
 	 * <p>Specifically, such candidates:
 	 * <ul>
 	 * <li>must not be <code>null</code></li>
@@ -93,7 +100,6 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * <li>must be <code>static</code></li>
 	 * <li>must be annotated with {@code @Configuration}</li>
 	 * </ul>
-	 * 
 	 * @param clazz the class to check
 	 * @return <code>true</code> if the supplied class meets the candidate criteria
 	 */
@@ -102,20 +108,22 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * TODO Complete JavaDoc for generateDefaultConfigurationClasses().
-	 * 
+	 * Generate the default configuration class array for the supplied test class.
+	 * <p>The generated class array will contain all static inner classes of
+	 * the supplied class that meet the requirements for {@code @Configuration}
+	 * class implementations as specified in the documentation for
+	 * {@link Configuration @Configuration}.
 	 * <p>The implementation of this method adheres to the contract defined in the
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
 	 * SPI. Specifically, this method will <em>preemptively</em> verify that the
 	 * generated default configuration classes exist <b>and</b> that such classes
-	 * comply with the constraints required of {@link Configuration @Configuration}
-	 * class implementations. If a candidate configuration class does meet these
-	 * requirements, this method will log a warning and potentially return an empty
-	 * array.
-	 *
-	 * @param declaringClass the test class that declared
-	 * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
-	 * @return
+	 * comply with the constraints required of {@code @Configuration} class
+	 * implementations. If a candidate configuration class does meet these
+	 * requirements, this method will log a warning, and the candidate class will
+	 * be ignored.
+	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
+	 * @return an array of default configuration classes, potentially empty but
+	 * never <code>null</code>
 	 */
 	protected Class<?>[] generateDefaultConfigurationClasses(Class<?> declaringClass) {
 		Assert.notNull(declaringClass, "Declaring class must not be null");
@@ -152,7 +160,6 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
-	 *
 	 * @see AbstractContextLoader#modifyLocations
 	 * @throws UnsupportedOperationException
 	 */
@@ -167,7 +174,6 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
-	 *
 	 * @see AbstractContextLoader#generateDefaultLocations
 	 * @throws UnsupportedOperationException
 	 */
@@ -182,7 +188,6 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
-	 *
 	 * @see AbstractContextLoader#getResourceSuffix
 	 * @throws UnsupportedOperationException
 	 */
@@ -198,15 +203,12 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * Register {@link org.springframework.context.annotation.Configuration configuration classes}
 	 * in the supplied {@link GenericApplicationContext context} from the classes
 	 * in the supplied {@link MergedContextConfiguration}.
-	 * 
 	 * <p>Each class must represent an annotated configuration class or component. An
 	 * {@link AnnotatedBeanDefinitionReader} is used to register the appropriate
 	 * bean definitions.
-	 * 
 	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}
 	 * since <code>AnnotatedBeanDefinitionReader</code> is not an instance of
 	 * {@link BeanDefinitionReader}.
-	 * 
 	 * @param context the context in which the configuration classes should be registered
 	 * @param mergedConfig the merged configuration from which the classes should be retrieved
 	 * @see AbstractGenericContextLoader#loadBeanDefinitions
@@ -225,7 +227,6 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
-	 *
 	 * @see #loadBeanDefinitions
 	 * @see AbstractGenericContextLoader#createBeanDefinitionReader
 	 * @throws UnsupportedOperationException
