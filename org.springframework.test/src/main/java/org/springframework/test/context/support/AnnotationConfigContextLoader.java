@@ -63,7 +63,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	/**
 	 * TODO Document overridden processContextConfiguration().
 	 *
-	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration
+	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration()
 	 * @see #generatesDefaults
 	 * @see #generateDefaultConfigurationClasses
 	 */
@@ -102,7 +102,20 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * TODO Document generateDefaultConfigurationClasses().
+	 * TODO Complete JavaDoc for generateDefaultConfigurationClasses().
+	 * 
+	 * <p>The implementation of this method adheres to the contract defined in the
+	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
+	 * SPI. Specifically, this method will <em>preemptively</em> verify that the
+	 * generated default configuration classes exist <b>and</b> that such classes
+	 * comply with the constraints required of {@link Configuration @Configuration}
+	 * class implementations. If a candidate configuration class does meet these
+	 * requirements, this method will log a warning and potentially return an empty
+	 * array.
+	 *
+	 * @param declaringClass the test class that declared
+	 * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
+	 * @return
 	 */
 	protected Class<?>[] generateDefaultConfigurationClasses(Class<?> declaringClass) {
 		Assert.notNull(declaringClass, "Declaring class must not be null");
