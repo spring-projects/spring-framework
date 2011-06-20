@@ -20,12 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,8 +33,6 @@ import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
@@ -53,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Test various scenarios for detecting method-level and method parameter annotations depending 
@@ -90,13 +86,10 @@ public class HandlerMethodAnnotationDetectionTests {
 	}
 
 	private RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
-//	private DefaultAnnotationHandlerMapping handlerMapping = new DefaultAnnotationHandlerMapping();
 
 	private RequestMappingHandlerAdapter handlerAdapter = new RequestMappingHandlerAdapter();
-//	AnnotationMethodHandlerAdapter handlerAdapter = new AnnotationMethodHandlerAdapter();
 
 	private ExceptionHandlerExceptionResolver exceptionResolver = new ExceptionHandlerExceptionResolver();
-//	private AnnotationMethodHandlerExceptionResolver exceptionResolver = new AnnotationMethodHandlerExceptionResolver();
 
 	public HandlerMethodAnnotationDetectionTests(Class<?> controllerType, boolean useAutoProxy) {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
@@ -105,45 +98,39 @@ public class HandlerMethodAnnotationDetectionTests {
 			DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
 			autoProxyCreator.setBeanFactory(context.getBeanFactory());
 			context.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
-			context.getBeanFactory().registerSingleton("advsr", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+			context.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 		}
 		context.refresh();
 		
 		handlerMapping.setApplicationContext(context);
-
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
-		messageConverters.add(new MappingJacksonHttpMessageConverter());
-
-		handlerAdapter.setMessageConverters(messageConverters);
 		handlerAdapter.afterPropertiesSet();
-//		handlerAdapter.setMessageConverters(messageConverters.toArray(new HttpMessageConverter<?>[messageConverters.size()]));
-//		handlerAdapter.setApplicationContext(context);
-
-		exceptionResolver.setMessageConverters(messageConverters);
 		exceptionResolver.afterPropertiesSet();
-//		exceptionResolver.setMessageConverters(messageConverters.toArray(new HttpMessageConverter<?>[messageConverters.size()]));
 	}
 
 	@Test
 	public void testRequestMappingMethod() throws Exception {
+		String datePattern = "MM:dd:yyyy";
+		SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
+		String dateA = "11:01:2011";
+		String dateB = "11:02:2011";
+		
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/path1/path2");
-		request.setParameter("datePattern", "MM:dd:yyyy");
-		request.addHeader("dateA", "11:01:2011");
-		request.addHeader("dateB", "11:02:2011");
-		request.addHeader("Accept", "application/json");
+		request.setParameter("datePattern", datePattern);
+		request.addHeader("header1", dateA);
+		request.addHeader("header2", dateB);
 		
 		HandlerExecutionChain chain = handlerMapping.getHandler(request);
 		assertNotNull(chain);
 
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		handlerAdapter.handle(request, response, chain.getHandler());
-		assertEquals("application/json", response.getHeader("Content-Type"));
-		assertEquals("{\"dateA\":1320105600000,\"dateB\":1320192000000}", response.getContentAsString());
+		ModelAndView mav = handlerAdapter.handle(request, new MockHttpServletResponse(), chain.getHandler());
 
-		response = new MockHttpServletResponse();
+		assertEquals(mav.getModel().get("attr1"), dateFormat.parse(dateA));
+		assertEquals(mav.getModel().get("attr2"), dateFormat.parse(dateB));
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		exceptionResolver.resolveException(request, response, chain.getHandler(), new Exception("failure"));
-		assertEquals("application/json", response.getHeader("Content-Type"));
-		assertEquals("\"failure\"", response.getContentAsString());
+		assertEquals("text/plain;charset=ISO-8859-1", response.getHeader("Content-Type"));
+		assertEquals("failure", response.getContentAsString());
 	}
 
 	
@@ -154,21 +141,20 @@ public class HandlerMethodAnnotationDetectionTests {
 	static class SimpleController {
 
 		@InitBinder
-		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern) {
-			CustomDateEditor dateEditor = new CustomDateEditor(new SimpleDateFormat(thePattern), false);
+		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String pattern) {
+			CustomDateEditor dateEditor = new CustomDateEditor(new SimpleDateFormat(pattern), false);
 			dataBinder.registerCustomEditor(Date.class, dateEditor);
 		}
 
 		@ModelAttribute
-		public void initModel(@RequestHeader("dateA") Date date, Model model) {
-			model.addAttribute("dateA", date);
+		public void initModel(@RequestHeader("header1") Date date, Model model) {
+			model.addAttribute("attr1", date);
 		}
 
-		@RequestMapping(value="/path1/path2", method=RequestMethod.POST, produces="application/json")
-		@ResponseBody
-		public Map<String, Object> handle(@RequestHeader("dateB") Date date, Model model) throws Exception {
-			model.addAttribute("dateB", date);
-			return model.asMap();
+		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
+		@ModelAttribute("attr2")
+		public Date handle(@RequestHeader("header2") Date date) throws Exception {
+			return date;
 		}
 		
 		@ExceptionHandler(Exception.class)
@@ -183,14 +169,14 @@ public class HandlerMethodAnnotationDetectionTests {
 	static abstract class MappingAbstractClass {
 
 		@InitBinder
-		public abstract void initBinder(WebDataBinder dataBinder, String thePattern);
+		public abstract void initBinder(WebDataBinder dataBinder, String pattern);
 
 		@ModelAttribute
 		public abstract void initModel(Date date, Model model);
 
-		@RequestMapping(value="/path1/path2", method=RequestMethod.POST, produces="application/json")
-		@ResponseBody
-		public abstract Map<String, Object> handle(Date date, Model model) throws Exception;
+		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
+		@ModelAttribute("attr2")
+		public abstract Date handle(Date date, Model model) throws Exception;
 		
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
@@ -204,18 +190,17 @@ public class HandlerMethodAnnotationDetectionTests {
 	 */
 	static class AbstractClassController extends MappingAbstractClass {
 
-		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern) {
-			CustomDateEditor dateEditor = new CustomDateEditor(new SimpleDateFormat(thePattern), false);
+		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String pattern) {
+			CustomDateEditor dateEditor = new CustomDateEditor(new SimpleDateFormat(pattern), false);
 			dataBinder.registerCustomEditor(Date.class, dateEditor);
 		}
 
-		public void initModel(@RequestHeader("dateA") Date date, Model model) {
-			model.addAttribute("dateA", date);
+		public void initModel(@RequestHeader("header1") Date date, Model model) {
+			model.addAttribute("attr1", date);
 		}
 
-		public Map<String, Object> handle(@RequestHeader("dateB") Date date, Model model) throws Exception {
-			model.addAttribute("dateB", date);
-			return model.asMap();
+		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
+			return date;
 		}
 		
 		public String handleException(Exception exception) {
@@ -231,11 +216,11 @@ public class HandlerMethodAnnotationDetectionTests {
 		void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern);
 
 		@ModelAttribute
-		void initModel(@RequestHeader("dateA") Date date, Model model);
+		void initModel(@RequestHeader("header1") Date date, Model model);
 
-		@RequestMapping(value="/path1/path2", method=RequestMethod.POST, produces="application/json")
-		@ResponseBody
-		Map<String, Object> handle(@RequestHeader("dateB") Date date, Model model) throws Exception;
+		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
+		@ModelAttribute("attr2")
+		Date handle(@RequestHeader("header2") Date date, Model model) throws Exception;
 		
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
@@ -258,13 +243,12 @@ public class HandlerMethodAnnotationDetectionTests {
 			dataBinder.registerCustomEditor(Date.class, dateEditor);
 		}
 
-		public void initModel(@RequestHeader("dateA") Date date, Model model) {
-			model.addAttribute("dateA", date);
+		public void initModel(@RequestHeader("header1") Date date, Model model) {
+			model.addAttribute("attr1", date);
 		}
 
-		public Map<String, Object> handle(@RequestHeader("dateB") Date date, Model model) throws Exception {
-			model.addAttribute("dateB", date);
-			return model.asMap();
+		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
+			return date;
 		}
 		
 		public String handleException(Exception exception) {
@@ -282,9 +266,9 @@ public class HandlerMethodAnnotationDetectionTests {
 		@ModelAttribute
 		public abstract void initModel(B date, Model model);
 
-		@RequestMapping(value="/path1/path2", method=RequestMethod.POST, produces="application/json")
-		@ResponseBody
-		public abstract Map<String, Object> handle(C date, Model model) throws Exception;
+		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
+		@ModelAttribute("attr2")
+		public abstract Date handle(C date, Model model) throws Exception;
 		
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
@@ -303,13 +287,12 @@ public class HandlerMethodAnnotationDetectionTests {
 			dataBinder.registerCustomEditor(Date.class, dateEditor);
 		}
 
-		public void initModel(@RequestHeader("dateA") Date date, Model model) {
-			model.addAttribute("dateA", date);
+		public void initModel(@RequestHeader("header1") Date date, Model model) {
+			model.addAttribute("attr1", date);
 		}
 
-		public Map<String, Object> handle(@RequestHeader("dateB") Date date, Model model) throws Exception {
-			model.addAttribute("dateB", date);
-			return model.asMap();
+		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
+			return date;
 		}
 		
 		public String handleException(Exception exception) {
@@ -327,9 +310,9 @@ public class HandlerMethodAnnotationDetectionTests {
 		@ModelAttribute
 		void initModel(B date, Model model);
 
-		@RequestMapping(value="/path1/path2", method=RequestMethod.POST, produces="application/json")
-		@ResponseBody
-		Map<String, Object> handle(C date, Model model) throws Exception;
+		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
+		@ModelAttribute("attr2")
+		Date handle(C date, Model model) throws Exception;
 		
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
@@ -352,15 +335,14 @@ public class HandlerMethodAnnotationDetectionTests {
 		}
 
 		@ModelAttribute
-		public void initModel(@RequestHeader("dateA") Date date, Model model) {
-			model.addAttribute("dateA", date);
+		public void initModel(@RequestHeader("header1") Date date, Model model) {
+			model.addAttribute("attr1", date);
 		}
 
-		@RequestMapping(value="/path1/path2", method=RequestMethod.POST, produces="application/json")
-		@ResponseBody
-		public Map<String, Object> handle(@RequestHeader("dateB") Date date, Model model) throws Exception {
-			model.addAttribute("dateB", date);
-			return model.asMap();
+		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
+		@ModelAttribute("attr2")
+		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
+			return date;
 		}
 		
 		@ExceptionHandler(Exception.class)
@@ -386,15 +368,14 @@ public class HandlerMethodAnnotationDetectionTests {
 		}
 
 		@ModelAttribute
-		public void initModel(@RequestHeader("dateA") Date date, Model model) {
-			model.addAttribute("dateA", date);
+		public void initModel(@RequestHeader("header1") Date date, Model model) {
+			model.addAttribute("attr1", date);
 		}
 
-		@ResponseBody
-		@RequestMapping(value="/path2", method=RequestMethod.POST, produces="application/json")
-		public Map<String, Object> handle(@RequestHeader("dateB") Date date, Model model) throws Exception {
-			model.addAttribute("dateB", date);
-			return model.asMap();
+		@RequestMapping(value="/path2", method=RequestMethod.POST)
+		@ModelAttribute("attr2")
+		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
+			return date;
 		}
 		
 		@ExceptionHandler(Exception.class)
