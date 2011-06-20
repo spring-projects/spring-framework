@@ -41,24 +41,25 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
+	private static final String SLASH = "/";
+
+
 	// --- SmartContextLoader -----------------------------------------------
 
 	/**
-	 * Determine whether or not <em>default</em> resource locations should be
-	 * generated if the <code>locations</code> provided to
-	 * {@link #processLocations(Class,String...) processLocations()} are
-	 * <code>null</code> or empty.
-	 * <p>Can be overridden by subclasses to change the default behavior.
-	 * @return always <code>true</code> by default
+	 * TODO Document generatesDefaults() implementation.
 	 *
-	 * @see SmartContextLoader#generatesDefaults
+	 * @see org.springframework.test.context.SmartContextLoader#generatesDefaults()
+	 * @see #isGenerateDefaultLocations()
 	 */
 	public boolean generatesDefaults() {
 		return isGenerateDefaultLocations();
 	}
 
 	/**
-	 * TODO Document processContextConfiguration().
+	 * TODO Document processContextConfiguration() implementation.
+	 * 
+	 * @see #processLocations(Class, String...)
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(),
@@ -110,7 +111,11 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		Assert.notNull(clazz, "Class must not be null");
 		String suffix = getResourceSuffix();
 		Assert.hasText(suffix, "Resource suffix must not be empty");
-		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + "/"
+
+		// TODO Adhere to SmartContextLoader contract: verify existence of
+		// default and return an empty array if non-existent, in which case a
+		// warning should be logged as well.
+		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + SLASH
 				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix };
 	}
 
@@ -135,12 +140,12 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		String[] modifiedLocations = new String[locations.length];
 		for (int i = 0; i < locations.length; i++) {
 			String path = locations[i];
-			if (path.startsWith("/")) {
+			if (path.startsWith(SLASH)) {
 				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
 			}
 			else if (!ResourcePatternUtils.isUrl(path)) {
-				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + "/"
-						+ StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + "/" + path);
+				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH
+						+ StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);
 			}
 			else {
 				modifiedLocations[i] = StringUtils.cleanPath(path);

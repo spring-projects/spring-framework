@@ -31,8 +31,8 @@ import java.lang.annotation.Target;
  *
  * @author Sam Brannen
  * @since 3.1
+ * @see SmartContextLoader
  * @see ContextConfiguration
- * @see ContextLoader
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.annotation.Profile
  */

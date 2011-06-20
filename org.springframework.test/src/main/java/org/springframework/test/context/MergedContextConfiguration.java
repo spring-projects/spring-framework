@@ -25,15 +25,32 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * TODO [SPR-8386] Document MergedContextConfiguration.
+ * <code>MergedContextConfiguration</code> encapsulates the <em>merged</em>
+ * context configuration declared on a test class and all of its superclasses
+ * via {@link ContextConfiguration @ContextConfiguration} and
+ * {@link ActiveProfiles @ActiveProfiles}.
+ * 
+ * <p>Merged resource locations, configuration classes, and active profiles
+ * represent all declared values in the test class hierarchy taking into
+ * consideration the semantics of the
+ * {@link ContextConfiguration#inheritLocations inheritLocations} and
+ * {@link ActiveProfiles#inheritProfiles inheritProfiles} flags in
+ * {@code @ContextConfiguration} and {@code @ActiveProfiles}, respectively.
+ * 
+ * <p>A {@link SmartContextLoader} uses <code>MergedContextConfiguration</code>
+ * to load an {@link org.springframework.context.ApplicationContext ApplicationContext}.
  * 
  * @author Sam Brannen
  * @since 3.1
  * @see ContextConfiguration
  * @see ActiveProfiles
  * @see ContextConfigurationAttributes
+ * @see SmartContextLoader#loadContext(MergedContextConfiguration)
  */
 public class MergedContextConfiguration {
+
+	private static final String[] EMPTY_STRING_ARRAY = new String[] {};
+	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[] {};
 
 	private final Class<?> testClass;
 
@@ -49,16 +66,16 @@ public class MergedContextConfiguration {
 
 
 	private static String[] processLocations(String[] locations) {
-		return locations == null ? new String[] {} : locations;
+		return locations == null ? EMPTY_STRING_ARRAY : locations;
 	}
 
 	private static Class<?>[] processClasses(Class<?>[] classes) {
-		return classes == null ? new Class<?>[] {} : classes;
+		return classes == null ? EMPTY_CLASS_ARRAY : classes;
 	}
 
 	private static String[] processActiveProfiles(String[] activeProfiles) {
 		if (activeProfiles == null) {
-			return new String[] {};
+			return EMPTY_STRING_ARRAY;
 		}
 
 		// Active profiles must be unique and sorted in order to support proper
@@ -69,7 +86,7 @@ public class MergedContextConfiguration {
 	}
 
 	/**
-	 * Generates a context <code>key</code> from the supplied values.
+	 * Generate a context <em>key</em> from the supplied values.
 	 */
 	private static String generateContextKey(String[] locations, Class<?>[] classes, String[] activeProfiles,
 			ContextLoader contextLoader) {
@@ -84,7 +101,18 @@ public class MergedContextConfiguration {
 	}
 
 	/**
-	 * TODO Document MergedContextConfiguration constructor.
+	 * Create a new <code>MergedContextConfiguration</code> instance for the
+	 * supplied {@link Class test class}, resource locations, configuration
+	 * classes, active profiles, and {@link ContextLoader}.
+	 * <p>If a <code>null</code> value is supplied for <code>locations</code>,
+	 * <code>classes</code>, or <code>activeProfiles</code> an empty array will
+	 * be stored instead. Furthermore, active profiles will be sorted, and duplicate
+	 * profiles will be removed. 
+	 * @param testClass the test class for which the configuration was merged
+	 * @param locations the merged resource locations
+	 * @param classes the merged configuration classes
+	 * @param activeProfiles the merged active bean definition profiles
+	 * @param contextLoader the resolved <code>ContextLoader</code>
 	 */
 	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
 			String[] activeProfiles, ContextLoader contextLoader) {
@@ -97,49 +125,60 @@ public class MergedContextConfiguration {
 	}
 
 	/**
-	 * TODO Document getTestClass().
+	 * Get the {@link Class test class} associated with this
+	 * <code>MergedContextConfiguration</code>.
 	 */
 	public Class<?> getTestClass() {
 		return this.testClass;
 	}
 
 	/**
-	 * TODO Document getLocations().
+	 * Get the merged resource locations for the
+	 * {@link #getTestClass() test class}.
 	 */
 	public String[] getLocations() {
 		return this.locations;
 	}
 
 	/**
-	 * TODO Document getClasses().
+	 * Get the merged configuration classes for the
+	 * {@link #getTestClass() test class}.
 	 */
 	public Class<?>[] getClasses() {
 		return this.classes;
 	}
 
 	/**
-	 * TODO Document getActiveProfiles().
+	 * Get the merged active bean definition profiles for the
+	 * {@link #getTestClass() test class}.
 	 */
 	public String[] getActiveProfiles() {
 		return this.activeProfiles;
 	}
 
 	/**
-	 * TODO Document getContextLoader().
+	 * Get the resolved {@link ContextLoader} for the
+	 * {@link #getTestClass() test class}.
 	 */
 	public ContextLoader getContextLoader() {
 		return this.contextLoader;
 	}
 
 	/**
-	 * TODO Document getContextKey().
+	 * Get the unique context key for all properties of this
+	 * <code>MergedContextConfiguration</code> excluding the
+	 * {@link #getTestClass() test class}. 
+	 * <p>Intended to be used for caching an 
+	 * {@link org.springframework.context.ApplicationContext ApplicationContext}
+	 * that was loaded using properties of this <code>MergedContextConfiguration</code>.
 	 */
 	public String getContextKey() {
 		return this.contextKey;
 	}
 
 	/**
-	 * TODO Document overridden toString().
+	 * Provide a String representation of the test class, merged context
+	 * configuration, and context key.
 	 */
 	@Override
 	public String toString() {
