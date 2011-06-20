@@ -29,7 +29,7 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 3.1
  * @see ContextConfiguration
- * @see SmartContextLoader
+ * @see SmartContextLoader#processContextConfiguration(ContextConfigurationAttributes)
  * @see MergedContextConfiguration
  */
 public class ContextConfigurationAttributes {
