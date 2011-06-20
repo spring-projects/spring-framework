@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils.MethodFilter;
@@ -149,17 +150,19 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param handler the bean name of a handler or a handler instance
 	 */
 	protected void detectHandlerMethods(final Object handler) {
-		final Class<?> handlerType = (handler instanceof String) ? 
+		Class<?> handlerType = (handler instanceof String) ? 
 				getApplicationContext().getType((String) handler) : handler.getClass();
+
+		final Class<?> userType = ClassUtils.getUserClass(handlerType);
 				
-		Set<Method> methods = HandlerMethodSelector.selectMethods(handlerType, new MethodFilter() {
+		Set<Method> methods = HandlerMethodSelector.selectMethods(userType, new MethodFilter() {
 			public boolean matches(Method method) {
-				return getMappingForMethod(method, handlerType) != null;
+				return getMappingForMethod(method, userType) != null;
 			}
 		});
 		
 		for (Method method : methods) {
-			T mapping = getMappingForMethod(method, handlerType);
+			T mapping = getMappingForMethod(method, userType);
 			registerHandlerMethod(handler, method, mapping);
 		}
 	}
