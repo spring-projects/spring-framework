@@ -16,21 +16,29 @@
 
 package org.springframework.beans.factory.xml;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 import org.junit.Test;
-import org.xml.sax.InputSource;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -64,6 +72,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
+import org.xml.sax.InputSource;
 
 /**
  * Miscellaneous tests for XML bean definitions.
@@ -1129,8 +1138,8 @@ public final class XmlBeanFactoryTests {
 		xbf.getBean("resource2", ResourceTestBean.class);
 	}
 
-	public @Test void testFileSystemResourceWithImport() {
-		String file = getClass().getResource(RESOURCE_CONTEXT.getPath()).getFile();
+	public @Test void testFileSystemResourceWithImport() throws URISyntaxException {
+		String file = getClass().getResource(RESOURCE_CONTEXT.getPath()).toURI().getPath();
 		XmlBeanFactory xbf = new XmlBeanFactory(new FileSystemResource(file));
 		// comes from "resourceImport.xml"
 		xbf.getBean("resource1", ResourceTestBean.class);
