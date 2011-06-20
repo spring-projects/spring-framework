@@ -16,7 +16,10 @@
 
 package org.springframework.test.context.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
@@ -29,9 +32,16 @@ import org.springframework.util.StringUtils;
 
 /**
  * Abstract application context loader, which provides a basis for all concrete
- * implementations of the {@link ContextLoader} strategy. Provides a
+ * implementations of the {@link ContextLoader} SPI. Provides a
  * <em>Template Method</em> based approach for {@link #processLocations processing}
- * locations.
+ * resource locations.
+ * 
+ * <p>As of Spring 3.1, <code>AbstractContextLoader</code> also provides a basis
+ * for all concrete implementations of the {@link SmartContextLoader} SPI. For
+ * backwards compatibility with the {@code ContextLoader} SPI, 
+ * {@link #processContextConfiguration()} delegates to
+ * {@link #processLocations()}, and {@link #generatesDefaults()} delegates to
+ * {@link #isGenerateDefaultLocations()}. 
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -41,14 +51,18 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
+	private static final Log logger = LogFactory.getLog(AbstractContextLoader.class);
+
+	private static final String[] EMPTY_STRING_ARRAY = new String[] {};
 	private static final String SLASH = "/";
 
 
 	// --- SmartContextLoader -----------------------------------------------
 
 	/**
-	 * TODO Document generatesDefaults() implementation.
-	 *
+	 * For backwards compatibility with the {@link ContextLoader} SPI, the
+	 * default implementation simply delegates to
+	 * {@link #isGenerateDefaultLocations()}.
 	 * @see org.springframework.test.context.SmartContextLoader#generatesDefaults()
 	 * @see #isGenerateDefaultLocations()
 	 */
@@ -57,14 +71,22 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	}
 
 	/**
-	 * TODO Document processContextConfiguration() implementation.
-	 * 
-	 * @see #processLocations(Class, String...)
+	 * For backwards compatibility with the {@link ContextLoader} SPI, the
+	 * default implementation simply delegates to {@link #processLocations()},
+	 * passing it the {@link ContextConfigurationAttributes#getDeclaringClass()
+	 * declaring class} and {@link ContextConfigurationAttributes#getLocations()
+	 * resource locations} retrieved from the supplied
+	 * {@link ContextConfigurationAttributes configuration attributes}. The
+	 * processed locations are then
+	 * {@link ContextConfigurationAttributes#setLocations(String[]) set} in
+	 * the supplied configuration attributes.
+	 * <p>Can be overridden in subclasses &mdash; for example, to process
+	 * configuration classes instead of resource locations.
+	 * @see #processLocations()
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(),
 			configAttributes.getLocations());
-
 		configAttributes.setLocations(processedLocations);
 	}
 
@@ -72,7 +94,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 
 	/**
 	 * If the supplied <code>locations</code> are <code>null</code> or
-	 * <em>empty</em> and {@link #isGenerateDefaultLocations()} is
+	 * <em>empty</em> and {@link #isGenerateDefaultLocations()} returns
 	 * <code>true</code>, default locations will be
 	 * {@link #generateDefaultLocations(Class) generated} for the specified
 	 * {@link Class class} and the configured
@@ -83,10 +105,12 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * used when generating default locations
 	 * @param locations the unmodified locations to use for loading the
 	 * application context (can be <code>null</code> or empty)
-	 * @return an array of application context resource locations
-	 * @see #generateDefaultLocations
-	 * @see #modifyLocations
-	 * @see org.springframework.test.context.ContextLoader#processLocations
+	 * @return a processed array of application context resource locations
+	 * @see #isGenerateDefaultLocations()
+	 * @see #generateDefaultLocations()
+	 * @see #modifyLocations()
+	 * @see org.springframework.test.context.ContextLoader#processLocations()
+	 * @see #processContextConfiguration()
 	 */
 	public final String[] processLocations(Class<?> clazz, String... locations) {
 		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ? generateDefaultLocations(clazz)
@@ -101,6 +125,11 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * &quot;classpath:/com/example/MyTest<code>&lt;suffix&gt;</code>&quot;,
 	 * where <code>&lt;suffix&gt;</code> is the value of the
 	 * {@link #getResourceSuffix() resource suffix} string.
+	 * <p>As of Spring 3.1, the implementation of this method adheres to the
+	 * contract defined in the {@link SmartContextLoader} SPI. Specifically, 
+	 * this method will <em>preemptively</em> verify that the generated default
+	 * location actually exists. If it does not exist, this method will log a
+	 * warning and return an empty array.
 	 * <p>Subclasses can override this method to implement a different
 	 * <em>default location generation</em> strategy.
 	 * @param clazz the class for which the default locations are to be generated
@@ -111,12 +140,17 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		Assert.notNull(clazz, "Class must not be null");
 		String suffix = getResourceSuffix();
 		Assert.hasText(suffix, "Resource suffix must not be empty");
+		String resourcePath = SLASH + ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
 
-		// TODO Adhere to SmartContextLoader contract: verify existence of
-		// default and return an empty array if non-existent, in which case a
-		// warning should be logged as well.
-		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + SLASH
-				+ ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix };
+		if (!new ClassPathResource(resourcePath, clazz).exists()) {
+			logger.warn(String.format(
+				"Cannot generate default resource location for test class [%s]: classpath resource [%s] does not exist.",
+				clazz.getName(), resourcePath));
+			return EMPTY_STRING_ARRAY;
+		}
+
+		// else
+		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath };
 	}
 
 	/**
@@ -157,8 +191,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	/**
 	 * Determine whether or not <em>default</em> resource locations should be
 	 * generated if the <code>locations</code> provided to
-	 * {@link #processLocations(Class,String...) processLocations()} are
-	 * <code>null</code> or empty.
+	 * {@link #processLocations()} are <code>null</code> or empty.
 	 * <p>Can be overridden by subclasses to change the default behavior.
 	 * @return always <code>true</code> by default
 	 */
@@ -171,7 +204,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * locations when generating default locations.
 	 * <p>Must be implemented by subclasses.
 	 * @return the resource suffix; should not be <code>null</code> or empty
-	 * @see #generateDefaultLocations(Class)
+	 * @see #generateDefaultLocations()
 	 */
 	protected abstract String getResourceSuffix();
 

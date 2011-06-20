@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
@@ -63,35 +62,41 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 	@Parameters
 	public static Collection<Object[]> contextConfigurationLocationsData() {
 		@ContextConfiguration
-		class ClasspathDefaultLocationsTestCase {
+		class ClasspathNonExistentDefaultLocationsTestCase {
 		}
-	
-		@ContextConfiguration(locations = { "context1.xml", "context2.xml" })
+
+		@ContextConfiguration
+		class ClasspathExistentDefaultLocationsTestCase {
+		}
+
+		@ContextConfiguration({ "context1.xml", "context2.xml" })
 		class ImplicitClasspathLocationsTestCase {
 		}
-	
-		@ContextConfiguration(locations = { "classpath:context.xml" })
+
+		@ContextConfiguration("classpath:context.xml")
 		class ExplicitClasspathLocationsTestCase {
 		}
-	
-		@ContextConfiguration(locations = { "file:/testing/directory/context.xml" })
+
+		@ContextConfiguration("file:/testing/directory/context.xml")
 		class ExplicitFileLocationsTestCase {
 		}
-	
-		@ContextConfiguration(locations = { "http://example.com/context.xml" })
+
+		@ContextConfiguration("http://example.com/context.xml")
 		class ExplicitUrlLocationsTestCase {
 		}
-	
-		@ContextConfiguration(locations = { "context1.xml", "classpath:context2.xml", "/context3.xml",
+
+		@ContextConfiguration({ "context1.xml", "classpath:context2.xml", "/context3.xml",
 			"file:/testing/directory/context.xml", "http://example.com/context.xml" })
 		class ExplicitMixedPathTypesLocationsTestCase {
 		}
 
 		return Arrays.asList(new Object[][] {
 
+			{ ClasspathNonExistentDefaultLocationsTestCase.class, new String[] {} },
+
 			{
-				ClasspathDefaultLocationsTestCase.class,
-				new String[] { "classpath:/org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$1ClasspathDefaultLocationsTestCase-context.xml" } },
+				ClasspathExistentDefaultLocationsTestCase.class,
+				new String[] { "classpath:/org/springframework/test/context/support/GenericXmlContextLoaderResourceLocationsTests$1ClasspathExistentDefaultLocationsTestCase-context.xml" } },
 
 			{
 				ImplicitClasspathLocationsTestCase.class,
@@ -118,7 +123,7 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 
 		final ContextConfiguration contextConfig = this.testClass.getAnnotation(ContextConfiguration.class);
 		final ContextLoader contextLoader = new GenericXmlContextLoader();
-		final String[] configuredLocations = (String[]) AnnotationUtils.getValue(contextConfig, "locations");
+		final String[] configuredLocations = (String[]) AnnotationUtils.getValue(contextConfig);
 		final String[] processedLocations = contextLoader.processLocations(this.testClass, configuredLocations);
 
 		if (logger.isDebugEnabled()) {
@@ -129,8 +134,7 @@ public class GenericXmlContextLoaderResourceLocationsTests {
 		}
 
 		assertArrayEquals("Verifying locations for test [" + this.testClass + "].", this.expectedLocations,
-				processedLocations);
+			processedLocations);
 	}
-
 
 }
