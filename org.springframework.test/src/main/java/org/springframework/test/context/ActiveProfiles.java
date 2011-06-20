@@ -32,6 +32,7 @@ import java.lang.annotation.Target;
  * @author Sam Brannen
  * @since 3.1
  * @see SmartContextLoader
+ * @see MergedContextConfiguration
  * @see ContextConfiguration
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.annotation.Profile
@@ -52,7 +53,7 @@ public @interface ActiveProfiles {
 	String[] value() default {};
 
 	/**
-	 * The list of bean definition profiles to activate.
+	 * The bean definition profiles to activate.
 	 * 
 	 * <p>This attribute may <strong>not</strong> be used in conjunction
 	 * with {@link #value}, but it may be used <em>instead</em> of
@@ -61,7 +62,46 @@ public @interface ActiveProfiles {
 	String[] profiles() default {};
 
 	/**
-	 * TODO Document inheritProfiles.
+	 * Whether or not bean definition profiles from superclasses should be
+	 * <em>inherited</em>.
+	 *
+	 * <p>The default value is <code>true</code>, which means that an annotated
+	 * class will <em>inherit</em> bean definition profiles defined by an
+	 * annotated superclass. Specifically, the bean definition profiles for an
+	 * annotated class will be appended to the list of bean definition profiles
+	 * defined by an annotated superclass. Thus, subclasses have the option of
+	 * <em>extending</em> the list of bean definition profiles.
+	 *
+	 * <p>If <code>inheritProfiles</code> is set to <code>false</code>, the bean
+	 * definition profiles for the annotated class will <em>shadow</em> and
+	 * effectively replace any bean definition profiles defined by a superclass.
+	 *
+	 * <p>In the following examples, the {@code ApplicationContext} for
+	 * {@code BaseTest} will be loaded using only the &quot;base&quot;
+	 * bean definition profile; beans defined in the &quot;extended&quot; profile
+	 * will therefore not be loaded. In contrast, the {@code ApplicationContext}
+	 * for {@code ExtendedTest} will be loaded using the &quot;base&quot;
+	 * <strong>and</strong> &quot;extended&quot; bean definition profiles.
+	 * <pre class="code">
+	 * &#064;ActiveProfiles(&quot;base&quot;)
+	 * &#064;ContextConfiguration
+	 * public class BaseTest {
+	 *     // ...
+	 * }
+	 * 
+	 * &#064;ActiveProfiles(&quot;extended&quot;)
+	 * &#064;ContextConfiguration
+	 * public class ExtendedTest extends BaseTest {
+	 *     // ...
+	 * }
+	 * </pre>
+	 *
+	 * <p>Note: {@code @ActiveProfiles} can be used when loading an 
+	 * {@code ApplicationContext} from path-based resource locations or
+	 * configuration classes.
+	 * @see ContextConfiguration#locations
+	 * @see ContextConfiguration#classes
+	 * @see ContextConfiguration#inheritLocations
 	 */
 	boolean inheritProfiles() default true;
 
