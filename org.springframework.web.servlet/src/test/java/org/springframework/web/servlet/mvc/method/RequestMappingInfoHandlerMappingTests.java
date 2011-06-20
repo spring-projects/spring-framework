@@ -33,9 +33,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
@@ -132,7 +136,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 	
 	@Test
-	public void methodNotAllowed() throws Exception {
+	public void requestMethodNotAllowed() throws Exception {
 		try {
 			MockHttpServletRequest request = new MockHttpServletRequest("POST", "/bar");
 			mapping.getHandler(request);
@@ -140,6 +144,46 @@ public class RequestMappingInfoHandlerMappingTests {
 		}
 		catch (HttpRequestMethodNotSupportedException ex) {
 			assertArrayEquals("Invalid supported methods", new String[]{"GET", "HEAD"}, ex.getSupportedMethods());
+		}
+	}
+	
+	@Test
+	public void mediaTypeNotSupported() throws Exception {
+		testMediaTypeNotSupported("/person/1");
+		testMediaTypeNotSupported("/person/1/");	// SPR-8462
+		testMediaTypeNotSupported("/person/1.json");
+	}
+
+	private void testMediaTypeNotSupported(String url) throws Exception {
+		try {
+			MockHttpServletRequest request = new MockHttpServletRequest("PUT", url);
+			request.setContentType("application/json");
+			mapping.getHandler(request);
+			fail("HttpMediaTypeNotSupportedException expected");
+		}
+		catch (HttpMediaTypeNotSupportedException ex) {
+			assertEquals("Invalid supported consumable media types", 
+					Arrays.asList(new MediaType("application", "xml")), ex.getSupportedMediaTypes());
+		}
+	}
+	
+	@Test
+	public void mediaTypeNotAccepted() throws Exception {
+		testMediaTypeNotAccepted("/persons");
+		testMediaTypeNotAccepted("/persons/");	// SPR-8462
+		testMediaTypeNotAccepted("/persons.json");
+	}
+
+	private void testMediaTypeNotAccepted(String url) throws Exception {
+		try {
+			MockHttpServletRequest request = new MockHttpServletRequest("GET", url);
+			request.addHeader("Accept", "application/json");
+			mapping.getHandler(request);
+			fail("HttpMediaTypeNotAcceptableException expected");
+		}
+		catch (HttpMediaTypeNotAcceptableException ex) {
+			assertEquals("Invalid supported producible media types", 
+					Arrays.asList(new MediaType("application", "xml")), ex.getSupportedMediaTypes());
 		}
 	}
 
@@ -201,6 +245,15 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		@RequestMapping(value = "")
 		public void empty() {
+		}
+
+		@RequestMapping(value = "/person/{id}", method = RequestMethod.PUT, consumes="application/xml")
+		public void consumes(@RequestBody String text) {
+		}
+
+		@RequestMapping(value = "/persons", produces="application/xml")
+		public String produces() {
+			return "";
 		}
 	}
 

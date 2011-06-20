@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,17 +44,6 @@ import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
  * @since 3.1.0
  */
 public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMethodMapping<RequestMappingInfo> {
-
-	@Override
-	protected void handlerMethodsInitialized(Map<RequestMappingInfo, HandlerMethod> handlerMethods) {
-		List<RequestMappingInfo> infos = new ArrayList<RequestMappingInfo>(handlerMethods.keySet());
-		while (infos.size() > 1) {
-			RequestMappingInfo info1 = infos.remove(0);
-			for (RequestMappingInfo info2 : infos) {
-				// TODO: validate duplicate consumable and producible media types
-			}
-		}
-	}
 
 	/**
 	 * Get the URL path patterns associated with this {@link RequestMappingInfo}.
