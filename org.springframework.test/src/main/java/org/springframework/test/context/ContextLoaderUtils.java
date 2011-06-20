@@ -32,12 +32,14 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Utility methods for working with {@link ContextLoader ContextLoaders},
- * resource locations and classes, and active bean definition profiles.
+ * Utility methods for working with {@link ContextLoader ContextLoaders} and
+ * {@link SmartContextLoader SmartContextLoaders} and resolving resource locations,
+ * configuration classes, and active bean definition profiles.
  * 
  * @author Sam Brannen
  * @since 3.1
  * @see ContextLoader
+ * @see SmartContextLoader
  * @see ContextConfiguration
  * @see ContextConfigurationAttributes
  * @see ActiveProfiles
@@ -47,11 +49,31 @@ abstract class ContextLoaderUtils {
 
 	private static final Log logger = LogFactory.getLog(ContextLoaderUtils.class);
 
-	private static final String STANDARD_DEFAULT_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.GenericXmlContextLoader";
+	private static final String DEFAULT_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.GenericXmlContextLoader";
 
+
+	private ContextLoaderUtils() {
+		/* no-op */
+	}
 
 	/**
-	 * TODO Document resolveContextConfigurationAttributes().
+	 * Resolve the list of {@link ContextConfigurationAttributes configuration
+	 * attributes} for the supplied {@link Class class} and its superclasses.
+	 * <p>Note that the {@link ContextConfiguration#inheritLocations
+	 * inheritLocations} flag of {@link ContextConfiguration
+	 * &#064;ContextConfiguration} will be taken into consideration.
+	 * Specifically, if the <code>inheritLocations</code> flag is set to
+	 * <code>true</code>, configuration attributes defined in the annotated
+	 * class will be appended to the configuration attributes defined in
+	 * superclasses.
+	 * @param clazz the class for which to resolve the configuration attributes (must
+	 * not be <code>null</code>)
+	 * @return the list of configuration attributes for the specified class,
+	 * including configuration attributes from superclasses if appropriate
+	 * (never <code>null</code>)
+	 * @throws IllegalArgumentException if the supplied class is <code>null</code>
+	 * or if {@link ContextConfiguration &#064;ContextConfiguration} is not
+	 * <em>present</em> on the supplied class
 	 */
 	static List<ContextConfigurationAttributes> resolveContextConfigurationAttributes(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -88,25 +110,24 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Resolves the {@link ContextLoader} {@link Class} to use for the
-	 * supplied {@link Class testClass} and then instantiates and returns
-	 * that <code>ContextLoader</code>.
-	 * 
+	 * Resolve the {@link ContextLoader} {@link Class class} to use for the
+	 * supplied {@link Class testClass} and {@link ContextConfigurationAttributes}
+	 * and then instantiate and return that {@code ContextLoader}.
 	 * <p>If the supplied <code>defaultContextLoaderClassName</code> is
 	 * <code>null</code> or <em>empty</em>, the <em>standard</em>
-	 * default context loader class name ({@value #STANDARD_DEFAULT_CONTEXT_LOADER_CLASS_NAME})
+	 * default context loader class name {@value #DEFAULT_CONTEXT_LOADER_CLASS_NAME}
 	 * will be used. For details on the class resolution process, see
-	 * {@link #resolveContextLoaderClass(Class, String)}.
-	 * 
-	 * @param testClass the test class for which the <code>ContextLoader</code>
+	 * {@link #resolveContextLoaderClass()}.
+	 * @param testClass the test class for which the {@code ContextLoader}
 	 * should be resolved (must not be <code>null</code>)
-	 * @param configAttributesList TODO Document configAttributesList parameter
+	 * @param configAttributesList the resolved configuration attributes for the
+	 * test class hierarchy
 	 * @param defaultContextLoaderClassName the name of the default
-	 * <code>ContextLoader</code> class to use (may be <code>null</code>)
-	 * 
-	 * @return the resolved <code>ContextLoader</code> for the supplied
+	 * {@code ContextLoader} class to use (may be <code>null</code>)
+	 * @return the resolved {@code ContextLoader} for the supplied
 	 * <code>testClass</code> (never <code>null</code>)
-	 * @see #resolveContextLoaderClass(Class, String)
+	 * @see #resolveContextLoaderClass()
+	 * @see #resolveContextConfigurationAttributes()
 	 */
 	static ContextLoader resolveContextLoader(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributesList, String defaultContextLoaderClassName) {
@@ -114,7 +135,7 @@ abstract class ContextLoaderUtils {
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be null or empty");
 
 		if (!StringUtils.hasText(defaultContextLoaderClassName)) {
-			defaultContextLoaderClassName = STANDARD_DEFAULT_CONTEXT_LOADER_CLASS_NAME;
+			defaultContextLoaderClassName = DEFAULT_CONTEXT_LOADER_CLASS_NAME;
 		}
 
 		Class<? extends ContextLoader> contextLoaderClass = resolveContextLoaderClass(testClass, configAttributesList,
@@ -124,31 +145,33 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Resolves the {@link ContextLoader} {@link Class} to use for the supplied
-	 * {@link Class test class}.
-	 * 
+	 * Resolve the {@link ContextLoader} {@link Class} to use for the supplied
+	 * {@link ContextConfigurationAttributes} list.
+	 * <p>This method will iterate over the supplied configuration attributes
+	 * and execute the following algorithm:
 	 * <ol>
-	 * <li>If the {@link ContextConfiguration#loader() loader} attribute of
-	 * {@link ContextConfiguration &#064;ContextConfiguration} is configured
-	 * with an explicit class, that class will be returned.</li>
-	 * <li>If a <code>loader</code> class is not specified, the class hierarchy
-	 * will be traversed to find a parent class annotated with
-	 * <code>&#064;ContextConfiguration</code>; go to step #1.</li>
-	 * <li>If no explicit <code>loader</code> class is found after traversing
-	 * the class hierarchy, an attempt will be made to load and return the class
-	 * with the supplied <code>defaultContextLoaderClassName</code>.</li>
+	 * <li>If {@link ContextConfigurationAttributes#getContextLoaderClass()}
+	 * returns an explicit implementation class, that class will be returned.</li>
+	 * <li>If an explicit {@code ContextLoader} implementation class is not
+	 * specified, the next {@link ContextConfigurationAttributes} instance in
+	 * the supplied list will be processed; go to step #1.</li>
+	 * <li>If no explicit <code>loader</code> class is found after processing
+	 * all {@link ContextConfigurationAttributes} instances, an attempt will be
+	 * made to load and return the class with the supplied
+	 * <code>defaultContextLoaderClassName</code>.</li>
 	 * </ol>
-	 * 
-	 * @param testClass the class for which to resolve the <code>ContextLoader</code>
-	 * class; must not be <code>null</code>
-	 * @param configAttributesList TODO Document configAttributesList parameter
+	 * @param testClass the class for which to resolve the {@code ContextLoader}
+	 * class; used solely for logging purposes; must not be <code>null</code>
+	 * @param configAttributesList the resolved configuration attributes for the
+	 * test class hierarchy; must not be <code>null</code> or empty
 	 * @param defaultContextLoaderClassName the name of the default
-	 * <code>ContextLoader</code> class to use; must not be <code>null</code> or empty
-	 * 
-	 * @return the <code>ContextLoader</code> class to use for the specified class
+	 * {@code ContextLoader} class to use; must not be <code>null</code> or empty
+	 * @return the {@code ContextLoader} class to use for the specified class
 	 * (never <code>null</code>)
-	 * @throws IllegalArgumentException if {@link ContextConfiguration
-	 * &#064;ContextConfiguration} is not <em>present</em> on the supplied class
+	 * @throws IllegalArgumentException if {@code @ContextConfiguration} is not
+	 * <em>present</em> on the supplied test class
+	 * @see #resolveContextLoader()
+	 * @see #resolveContextConfigurationAttributes()
 	 */
 	@SuppressWarnings("unchecked")
 	static Class<? extends ContextLoader> resolveContextLoaderClass(Class<?> testClass,
@@ -191,20 +214,18 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Resolves <em>active bean definition profiles</em> for the supplied
-	 * {@link Class class}.
-	 * 
-	 * <p>Note that the {@link ActiveProfiles#inheritProfiles() inheritProfiles}
+	 * Resolve <em>active bean definition profiles</em> for the supplied {@link Class}.
+	 * <p>Note that the {@link ActiveProfiles#inheritProfiles inheritProfiles}
 	 * flag of {@link ActiveProfiles &#064;ActiveProfiles} will be taken into
 	 * consideration. Specifically, if the <code>inheritProfiles</code> flag is
 	 * set to <code>true</code>, profiles defined in the annotated class will be
 	 * merged with those defined in superclasses.
-	 *
 	 * @param clazz the class for which to resolve the active profiles (must
 	 * not be <code>null</code>)
-	 * 
 	 * @return the set of active profiles for the specified class, including
 	 * active profiles from superclasses if appropriate (never <code>null</code>)
+	 * @see org.springframework.test.context.ActiveProfiles
+	 * @see org.springframework.context.annotation.Profile
 	 */
 	static String[] resolveActiveProfiles(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -256,34 +277,21 @@ abstract class ContextLoaderUtils {
 		return StringUtils.toStringArray(activeProfiles);
 	}
 
-	/*
-	 * Resolves {@link ApplicationContext} resource locations for the supplied
-	 * {@link Class class}, using the supplied {@link ContextLoader} to {@link
-	 * ContextLoader#processLocations(Class, String...) process} the locations.
-	 * 
-	 * <p>Note that the {@link ContextConfiguration#inheritLocations()
-	 * inheritLocations} flag of {@link ContextConfiguration
-	 * &#064;ContextConfiguration} will be taken into consideration.
-	 * Specifically, if the <code>inheritLocations</code> flag is set to
-	 * <code>true</code>, locations defined in the annotated class will be
-	 * appended to the locations defined in superclasses.
-	 * 
-	 * @param contextLoader the ContextLoader to use for processing the
-	 * locations (must not be <code>null</code>)
-	 * 
-	 * @param clazz the class for which to resolve the resource locations (must
-	 * not be <code>null</code>)
-	 * 
-	 * @return the list of ApplicationContext resource locations for the
-	 * specified class, including locations from superclasses if appropriate
-	 * (never <code>null</code>)
-	 * 
-	 * @throws IllegalArgumentException if {@link ContextConfiguration
-	 * &#064;ContextConfiguration} is not <em>present</em> on the supplied class
-	 */
-
 	/**
-	 * TODO Document buildMergedContextConfiguration().
+	 * Build the {@link MergedContextConfiguration merged context configuration}
+	 * for the supplied {@link Class testClass} and
+	 * <code>defaultContextLoaderClassName</code>.
+	 * @param testClass the test class for which the {@code MergedContextConfiguration}
+	 * should be built (must not be <code>null</code>)
+	 * @param defaultContextLoaderClassName the name of the default
+	 * {@code ContextLoader} class to use (may be <code>null</code>)
+	 * @return the merged context configuration
+	 * @see #resolveContextConfigurationAttributes()
+	 * @see #resolveContextLoader()
+	 * @see SmartContextLoader#processContextConfiguration()
+	 * @see ContextLoader#processLocations()
+	 * @see #resolveActiveProfiles()
+	 * @see MergedContextConfiguration
 	 */
 	static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
 			String defaultContextLoaderClassName) {
