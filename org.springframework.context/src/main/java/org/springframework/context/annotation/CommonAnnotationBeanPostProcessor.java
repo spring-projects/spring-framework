@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -58,6 +59,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
@@ -343,40 +345,41 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 							}
 						}
 						for (Method method : targetClass.getDeclaredMethods()) {
-							if (webServiceRefClass != null && method.isAnnotationPresent(webServiceRefClass) &&
-									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-								if (Modifier.isStatic(method.getModifiers())) {
-									throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
-								}
-								if (method.getParameterTypes().length != 1) {
-									throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
-								}
-								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-								currElements.add(new WebServiceRefElement(method, pd));
-							}
-							else if (ejbRefClass != null && method.isAnnotationPresent(ejbRefClass) &&
-									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-								if (Modifier.isStatic(method.getModifiers())) {
-									throw new IllegalStateException("@EJB annotation is not supported on static methods");
-								}
-								if (method.getParameterTypes().length != 1) {
-									throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
-								}
-								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-								currElements.add(new EjbRefElement(method, pd));
-							}
-							else if (method.isAnnotationPresent(Resource.class) &&
-									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-								if (Modifier.isStatic(method.getModifiers())) {
-									throw new IllegalStateException("@Resource annotation is not supported on static methods");
-								}
-								Class<?>[] paramTypes = method.getParameterTypes();
-								if (paramTypes.length != 1) {
-									throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
-								}
-								if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
+							method = BridgeMethodResolver.findBridgedMethod(method);
+							Method mostSpecificMethod = BridgeMethodResolver.findBridgedMethod(ClassUtils.getMostSpecificMethod(method, clazz));
+							if (method.equals(mostSpecificMethod)) {
+								if (webServiceRefClass != null && method.isAnnotationPresent(webServiceRefClass)) {
+									if (Modifier.isStatic(method.getModifiers())) {
+										throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
+									}
+									if (method.getParameterTypes().length != 1) {
+										throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
+									}
 									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
-									currElements.add(new ResourceElement(method, pd));
+									currElements.add(new WebServiceRefElement(method, pd));
+								}
+								else if (ejbRefClass != null && method.isAnnotationPresent(ejbRefClass)) {
+									if (Modifier.isStatic(method.getModifiers())) {
+										throw new IllegalStateException("@EJB annotation is not supported on static methods");
+									}
+									if (method.getParameterTypes().length != 1) {
+										throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
+									}
+									PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+									currElements.add(new EjbRefElement(method, pd));
+								}
+								else if (method.isAnnotationPresent(Resource.class)) {
+									if (Modifier.isStatic(method.getModifiers())) {
+										throw new IllegalStateException("@Resource annotation is not supported on static methods");
+									}
+									Class<?>[] paramTypes = method.getParameterTypes();
+									if (paramTypes.length != 1) {
+										throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
+									}
+									if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
+										PropertyDescriptor pd = BeanUtils.findPropertyForMethod(method);
+										currElements.add(new ResourceElement(method, pd));
+									}
 								}
 							}
 						}
