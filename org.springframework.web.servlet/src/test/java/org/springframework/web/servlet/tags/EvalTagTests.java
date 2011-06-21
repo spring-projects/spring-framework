@@ -17,9 +17,14 @@
 package org.springframework.web.servlet.tags;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
@@ -127,6 +132,31 @@ public class EvalTagTests extends AbstractTagTests {
 		assertEquals("not the bean object", context.getAttribute("foo"));
 	}
 
+	public void testEnvironmentAccess() throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("key.foo", "value.foo");
+		GenericApplicationContext wac = (GenericApplicationContext)
+		context.getRequest().getAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		wac.getEnvironment().getPropertySources().addFirst(new MapPropertySource("mapSource", map));
+		wac.getDefaultListableBeanFactory().registerSingleton("bean2", context.getRequest().getAttribute("bean"));
+		tag.setExpression("@environment['key.foo']");
+		int action = tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
+		action = tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals("value.foo", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
+	}
+
+	public void testMapAccess() throws Exception {
+		tag.setExpression("bean.map.key");
+		int action = tag.doStartTag();
+		assertEquals(Tag.EVAL_BODY_INCLUDE, action);
+		action = tag.doEndTag();
+		assertEquals(Tag.EVAL_PAGE, action);
+		assertEquals("value", ((MockHttpServletResponse) context.getResponse()).getContentAsString());
+	}
+
+
 
 	public static class Bean {
 		
@@ -153,6 +183,12 @@ public class EvalTagTests extends AbstractTagTests {
 
 		public String js() {
 			return "function foo() { alert(\"hi\") }";
+		}
+
+		public Map<String, Object> getMap() {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("key", "value");
+			return map;
 		}
 	}
 

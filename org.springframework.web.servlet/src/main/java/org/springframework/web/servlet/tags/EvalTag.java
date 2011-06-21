@@ -17,11 +17,14 @@
 package org.springframework.web.servlet.tags;
 
 import java.io.IOException;
+
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.el.VariableResolver;
 
 import org.springframework.context.expression.BeanFactoryResolver;
+import org.springframework.context.expression.EnvironmentAccessor;
+import org.springframework.context.expression.MapAccessor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -135,6 +138,8 @@ public class EvalTag extends HtmlEscapingAwareTag {
 	private EvaluationContext createEvaluationContext(PageContext pageContext) {
 		StandardEvaluationContext context = new StandardEvaluationContext();
 		context.addPropertyAccessor(new JspPropertyAccessor(pageContext));
+		context.addPropertyAccessor(new MapAccessor());
+		context.addPropertyAccessor(new EnvironmentAccessor());
 		context.setBeanResolver(new BeanFactoryResolver(getRequestContext().getWebApplicationContext()));
 		ConversionService conversionService = getConversionService(pageContext);
 		if (conversionService != null) {
