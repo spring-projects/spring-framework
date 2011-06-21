@@ -885,14 +885,8 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
 		request.addParameter("view", "other");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		try {
-			servlet.service(request, response);
-			fail("Should have failed because of type-level parameter constraint not met");
-		}
-		catch (ServletException ex) {
-			// expected
-			ex.printStackTrace();
-		}
+		servlet.service(request, response);
+		assertEquals(400, response.getStatus());
 
 		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
 		request.addParameter("active", "true");
@@ -905,14 +899,8 @@ public class ServletAnnotationControllerTests {
 		request.addParameter("view", "my");
 		request.addParameter("lang", "de");
 		response = new MockHttpServletResponse();
-		try {
-			servlet.service(request, response);
-			fail("Should have failed because of type-level parameter constraint not met");
-		}
-		catch (ServletException ex) {
-			// expected
-			ex.printStackTrace();
-		}
+		servlet.service(request, response);
+		assertEquals(400, response.getStatus());
 
 		request = new MockHttpServletRequest(servletContext, "GET", "/myPath.do");
 		request.addParameter("view", "my");
