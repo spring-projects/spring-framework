@@ -35,6 +35,7 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestBodyNotValidException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
@@ -90,6 +91,16 @@ public class DefaultHandlerExceptionResolverTests {
 	@Test
 	public void handleMissingServletRequestParameter() {
 		MissingServletRequestParameterException ex = new MissingServletRequestParameterException("foo", "bar");
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
+		assertEquals("Invalid status code", 400, response.getStatus());
+	}
+
+	@Test
+	public void handleServletRequestBindingException() {
+		String message = "Missing required value - header, cookie, or pathvar";
+		ServletRequestBindingException ex = new ServletRequestBindingException(message);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());

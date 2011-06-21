@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ValueConstants;
@@ -70,8 +71,10 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
-		throw new IllegalStateException("Could not find the URL template variable [" + name + "]");
+	protected void handleMissingValue(String name, MethodParameter param) throws ServletRequestBindingException {
+		String paramType = param.getParameterType().getName();
+		throw new ServletRequestBindingException(
+				"Missing URI template variable '" + name + "' for method parameter type [" + paramType + "]");
 	}
 
 	@Override

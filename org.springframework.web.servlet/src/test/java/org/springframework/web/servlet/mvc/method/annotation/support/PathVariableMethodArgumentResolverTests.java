@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -85,7 +86,7 @@ public class PathVariableMethodArgumentResolverTests {
 		assertEquals("PathVariable not added to the model", "value", mavContainer.getAttribute("name"));
 	}
 	
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = ServletRequestBindingException.class)
 	public void handleMissingValue() throws Exception {
 		resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null);
 		fail("Unresolved path variable should lead to exception.");
