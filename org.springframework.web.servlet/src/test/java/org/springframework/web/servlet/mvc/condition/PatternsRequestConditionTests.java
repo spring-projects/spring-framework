@@ -97,21 +97,39 @@ public class PatternsRequestConditionTests {
 	}
 
 	@Test
-	public void matchImplicitByExtension() { 
-		PatternsRequestCondition condition = new PatternsRequestCondition("/foo");
-		PatternsRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/foo.html"));
+	public void matchSuffixPattern() { 
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.html");
+		
+		PatternsRequestCondition condition = new PatternsRequestCondition("/{foo}");
+		PatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertNotNull(match);
-		assertEquals("/foo.*", match.getPatterns().iterator().next());
+		assertEquals("/{foo}.*", match.getPatterns().iterator().next());
+
+		condition = new PatternsRequestCondition(new String[] {"/{foo}"}, null, null, false);
+		match = condition.getMatchingCondition(request);
+
+		assertNotNull(match);
+		assertEquals("/{foo}", match.getPatterns().iterator().next());
 	}
 
 	@Test
-	public void matchImplicitTrailingSlash() {
+	public void matchTrailingSlash() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/");
+		
 		PatternsRequestCondition condition = new PatternsRequestCondition("/foo");
-		PatternsRequestCondition match = condition.getMatchingCondition(new MockHttpServletRequest("GET", "/foo/"));
+		PatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertNotNull(match);
 		assertEquals("/foo/", match.getPatterns().iterator().next());
+		
+		boolean useSuffixPatternMatch = false;
+		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, null, useSuffixPatternMatch);
+		match = condition.getMatchingCondition(request);
+
+		assertNotNull(match);
+		assertEquals("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)", 
+				"/foo/", match.getPatterns().iterator().next());
 	}
 
 	@Test
