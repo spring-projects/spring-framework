@@ -44,7 +44,7 @@ import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.Hea
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
+public final class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
 
 	private final List<ConsumeMediaTypeExpression> expressions;
 

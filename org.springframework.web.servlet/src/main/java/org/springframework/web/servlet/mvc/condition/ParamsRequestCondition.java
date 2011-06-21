@@ -36,7 +36,7 @@ import org.springframework.web.util.WebUtils;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ParamsRequestCondition extends AbstractRequestCondition<ParamsRequestCondition> {
+public final class ParamsRequestCondition extends AbstractRequestCondition<ParamsRequestCondition> {
 
 	private final Set<ParamExpression> expressions;
 	

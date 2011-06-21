@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class RequestMethodsRequestCondition extends AbstractRequestCondition<RequestMethodsRequestCondition> {
+public final class RequestMethodsRequestCondition extends AbstractRequestCondition<RequestMethodsRequestCondition> {
 
 	private final Set<RequestMethod> methods;
 

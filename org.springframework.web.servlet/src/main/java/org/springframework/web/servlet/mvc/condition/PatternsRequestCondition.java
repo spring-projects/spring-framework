@@ -41,7 +41,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
+public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 	
 	private final Set<String> patterns; 
 
@@ -49,14 +49,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	
 	private final PathMatcher pathMatcher;
 
-	/**
-	 * Creates a new {@link PatternsRequestCondition} with the given URL patterns.
-	 * Each pattern that is not empty and does not start with "/" is prepended with "/".
-	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request. 
-	 */
-	public PatternsRequestCondition(String... patterns) {
-		this(patterns, new UrlPathHelper(), new AntPathMatcher());
-	}
+	private final boolean useSuffixPatternMatch;
 
 	/**
 	 * Creates a new {@link PatternsRequestCondition} with the given URL patterns. 
@@ -65,9 +58,22 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * @param patterns the URL patterns to use; if 0, the condition will match to every request. 
 	 * @param urlPathHelper a {@link UrlPathHelper} for determining the lookup path for a request
 	 * @param pathMatcher a {@link PathMatcher} for pattern path matching
+	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*")
 	 */
-	public PatternsRequestCondition(String[] patterns, UrlPathHelper urlPathHelper, PathMatcher pathMatcher) {
-		this(asList(patterns), urlPathHelper, pathMatcher);
+	public PatternsRequestCondition(String[] patterns, 
+									UrlPathHelper urlPathHelper, 
+									PathMatcher pathMatcher, 
+									boolean useSuffixPatternMatch) {
+		this(asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch);
+	}
+
+	/**
+	 * Creates a new {@link PatternsRequestCondition} with the given URL patterns.
+	 * Each pattern that is not empty and does not start with "/" is prepended with "/".
+	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request. 
+	 */
+	public PatternsRequestCondition(String... patterns) {
+		this(patterns, null, null, true);
 	}
 
 	private static List<String> asList(String... patterns) {
@@ -77,10 +83,14 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	/**
 	 * Private constructor.
 	 */
-	private PatternsRequestCondition(Collection<String> patterns, UrlPathHelper urlPathHelper, PathMatcher pathMatcher) {
+	private PatternsRequestCondition(Collection<String> patterns, 
+									 UrlPathHelper urlPathHelper, 
+									 PathMatcher pathMatcher, 
+									 boolean useSuffixPatternMatch) {
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
-		this.urlPathHelper = urlPathHelper;
-		this.pathMatcher = pathMatcher;
+		this.urlPathHelper = urlPathHelper != null ? urlPathHelper : new UrlPathHelper();
+		this.pathMatcher = pathMatcher != null ? pathMatcher : new AntPathMatcher();
+		this.useSuffixPatternMatch = useSuffixPatternMatch;
 	}
 
 	private static Set<String> prependLeadingSlash(Collection<String> patterns) {
@@ -139,7 +149,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 		else {
 			result.add("");
 		}
-		return new PatternsRequestCondition(result, urlPathHelper, pathMatcher);
+		return new PatternsRequestCondition(result, urlPathHelper, pathMatcher, useSuffixPatternMatch);
 	}
 
 	/**
@@ -172,16 +182,19 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 			}
 		}
 		Collections.sort(matches, pathMatcher.getPatternComparator(lookupPath));
-		return matches.isEmpty() ? null : new PatternsRequestCondition(matches, urlPathHelper, pathMatcher);
+		return matches.isEmpty() ? null : 
+			new PatternsRequestCondition(matches, urlPathHelper, pathMatcher, useSuffixPatternMatch);
 	}
 
 	private String getMatchingPattern(String pattern, String lookupPath) {
 		if (pattern.equals(lookupPath)) {
 			return pattern;
 		}
-		boolean hasSuffix = pattern.indexOf('.') != -1;
-		if (!hasSuffix && pathMatcher.match(pattern + ".*", lookupPath)) {
-			return pattern + ".*";
+		if (useSuffixPatternMatch) {
+			boolean hasSuffix = pattern.indexOf('.') != -1;
+			if (!hasSuffix && pathMatcher.match(pattern + ".*", lookupPath)) {
+				return pattern + ".*";
+			}
 		}
 		if (pathMatcher.match(pattern, lookupPath)) {
 			return pattern;

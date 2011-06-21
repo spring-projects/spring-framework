@@ -44,7 +44,7 @@ import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.Hea
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
+public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 
 	private final List<ProduceMediaTypeExpression> expressions;
 

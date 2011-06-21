@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class HeadersRequestCondition extends AbstractRequestCondition<HeadersRequestCondition> {
+public final class HeadersRequestCondition extends AbstractRequestCondition<HeadersRequestCondition> {
 
 	private final Set<HeaderExpression> expressions;
 

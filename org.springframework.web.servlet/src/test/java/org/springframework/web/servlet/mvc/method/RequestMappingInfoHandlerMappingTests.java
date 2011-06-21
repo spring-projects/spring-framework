@@ -268,7 +268,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
 			RequestMapping annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 			return new RequestMappingInfo(
-					new PatternsRequestCondition(annotation.value(), getUrlPathHelper(), getPathMatcher()),
+					new PatternsRequestCondition(annotation.value(), getUrlPathHelper(), getPathMatcher(), true),
 					new RequestMethodsRequestCondition(annotation.method()),
 					new ParamsRequestCondition(annotation.params()),
 					new HeadersRequestCondition(annotation.headers()),

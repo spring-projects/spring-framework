@@ -37,7 +37,7 @@ import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondit
  * 	<li>{@link ProducesRequestCondition}</li>
  * </ul>
  * 
- * Optionally a custom request condition may also be provided. 
+ * Optionally a custom request condition may be provided. 
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -78,6 +78,14 @@ public final class RequestMappingInfo {
 		this.consumesCondition = consumes != null ? consumes : new ConsumesRequestCondition();
 		this.producesCondition = produces != null ? produces : new ProducesRequestCondition();
 		this.customCondition = custom != null ? new CustomRequestCondition(custom) : new CustomRequestCondition();
+	}
+
+	/**
+	 * Re-create a {@link RequestMappingInfo} with the given custom {@link RequestCondition}.
+	 */
+	public RequestMappingInfo(RequestMappingInfo info, RequestCondition<?> customRequestCondition) {
+		this(info.patternsCondition, info.methodsCondition, info.paramsCondition, info.headersCondition,
+				info.consumesCondition, info.producesCondition, customRequestCondition);
 	}
 
 	/**
