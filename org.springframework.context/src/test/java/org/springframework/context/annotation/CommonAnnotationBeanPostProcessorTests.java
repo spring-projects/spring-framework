@@ -240,7 +240,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		TestBean tb4 = new TestBean();
 		bf.registerSingleton("testBean4", tb4);
 		NestedTestBean tb6 = new NestedTestBean();
-		bf.registerSingleton("value", new Object());
+		bf.registerSingleton("value", "5");
 		bf.registerSingleton("xy", tb6);
 		bf.registerAlias("xy", "testBean9");
 
