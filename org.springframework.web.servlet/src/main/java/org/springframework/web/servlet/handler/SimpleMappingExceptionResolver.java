@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -89,11 +90,19 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * @see #setDefaultStatusCode(int)
 	 */
 	public void setStatusCodes(Properties statusCodes) {
-		for (Enumeration enumeration = statusCodes.propertyNames(); enumeration.hasMoreElements();) {
+		for (Enumeration<?> enumeration = statusCodes.propertyNames(); enumeration.hasMoreElements();) {
 			String viewName = (String) enumeration.nextElement();
 			Integer statusCode = new Integer(statusCodes.getProperty(viewName));
 			this.statusCodes.put(viewName, statusCode);
 		}
+	}
+
+	/**
+	 * Returns the HTTP status codes provided via {@link #setStatusCodes(Properties)}.
+	 * Keys are view names; values are status codes.
+	 */
+	public Map<String, Integer> getStatusCodes() {
+		return Collections.unmodifiableMap(statusCodes);
 	}
 
 	/**
@@ -189,7 +198,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 		String viewName = null;
 		String dominantMapping = null;
 		int deepest = Integer.MAX_VALUE;
-		for (Enumeration names = exceptionMappings.propertyNames(); names.hasMoreElements();) {
+		for (Enumeration<?> names = exceptionMappings.propertyNames(); names.hasMoreElements();) {
 			String exceptionMapping = (String) names.nextElement();
 			int depth = getDepth(exceptionMapping, ex);
 			if (depth >= 0 && depth < deepest) {
@@ -214,7 +223,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 		return getDepth(exceptionMapping, ex.getClass(), 0);
 	}
 
-	private int getDepth(String exceptionMapping, Class exceptionClass, int depth) {
+	private int getDepth(String exceptionMapping, Class<?> exceptionClass, int depth) {
 		if (exceptionClass.getName().contains(exceptionMapping)) {
 			// Found it!
 			return depth;
