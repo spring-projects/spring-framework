@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
@@ -42,6 +41,8 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.util.SerializationTestUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -229,6 +230,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ExtendedResourceInjectionBean.class));
 		bf.registerBeanDefinition("annotatedBean2", new RootBeanDefinition(NamedResourceInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean3", new RootBeanDefinition(ConvertedResourceInjectionBean.class));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 		TestBean tb2 = new TestBean();
@@ -238,6 +240,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		TestBean tb4 = new TestBean();
 		bf.registerSingleton("testBean4", tb4);
 		NestedTestBean tb6 = new NestedTestBean();
+		bf.registerSingleton("value", new Object());
 		bf.registerSingleton("xy", tb6);
 		bf.registerAlias("xy", "testBean9");
 
@@ -254,6 +257,9 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		NamedResourceInjectionBean bean2 = (NamedResourceInjectionBean) bf.getBean("annotatedBean2");
 		assertSame(tb6, bean2.testBean);
+
+		ConvertedResourceInjectionBean bean3 = (ConvertedResourceInjectionBean) bf.getBean("annotatedBean3");
+		assertSame(5, bean3.value);
 
 		bf.destroySingletons();
 		assertTrue(bean.destroyCalled);
@@ -588,6 +594,13 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		@Resource(name="testBean9")
 		private INestedTestBean testBean;
+	}
+
+
+	private static class ConvertedResourceInjectionBean {
+
+		@Resource(name="value")
+		private int value;
 	}
 
 
