@@ -86,9 +86,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		RequestMapping methodAnnot = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 		if (methodAnnot != null) {
 			RequestMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
-			RequestMappingInfo methodInfo = createRequestMappingInfo(methodAnnot, handlerType, method);
+			RequestMappingInfo methodInfo = createRequestMappingInfo(methodAnnot, true, method, handlerType);
 			if (typeAnnot != null) {
-				RequestMappingInfo typeInfo = createRequestMappingInfo(typeAnnot, handlerType, method);
+				RequestMappingInfo typeInfo = createRequestMappingInfo(typeAnnot, false, method, handlerType);
 				return typeInfo.combine(methodInfo);
 			}
 			else {
@@ -106,11 +106,15 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * {@link RequestMappingInfo}s are combined via {@link RequestMappingInfo#combine(RequestMappingInfo)}.
 	 * 
 	 * @param annot a type- or a method-level {@link RequestMapping} annotation
-	 * @param handlerType the handler type
+	 * @param isMethodAnnotation {@code true} if this is a method annotation; {@code false} if it is a type annotation
 	 * @param method the method with which the created RequestMappingInfo will be combined
+	 * @param handlerType the handler type
 	 * @return a {@link RequestMappingInfo} instance; never {@code null}
 	 */
-	protected RequestMappingInfo createRequestMappingInfo(RequestMapping annot, Class<?> handlerType, Method method) {
+	RequestMappingInfo createRequestMappingInfo(RequestMapping annot, 
+												boolean isMethodAnnotation, 
+												Method method, 
+												Class<?> handlerType) {
 		return new RequestMappingInfo(
 				new PatternsRequestCondition(annot.value(), getUrlPathHelper(), getPathMatcher(), useSuffixPatternMatch),
 				new RequestMethodsRequestCondition(annot.method()),
