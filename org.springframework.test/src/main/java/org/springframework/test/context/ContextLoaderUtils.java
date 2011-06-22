@@ -16,6 +16,9 @@
 
 package org.springframework.test.context;
 
+import static org.springframework.beans.BeanUtils.instantiateClass;
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,8 +27,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -83,7 +84,7 @@ abstract class ContextLoaderUtils {
 		Class<? extends ContextLoader> contextLoaderClass = resolveContextLoaderClass(testClass,
 			defaultContextLoaderClassName);
 
-		return (ContextLoader) BeanUtils.instantiateClass(contextLoaderClass);
+		return instantiateClass(contextLoaderClass, ContextLoader.class);
 	}
 
 	/**
@@ -117,7 +118,7 @@ abstract class ContextLoaderUtils {
 		Assert.hasText(defaultContextLoaderClassName, "Default ContextLoader class name must not be null or empty");
 
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, testClass);
+		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, testClass);
 		Assert.notNull(declaringClass, String.format(
 			"Could not find an 'annotation declaring class' for annotation type [%s] and test class [%s]",
 			annotationType, testClass));
@@ -141,8 +142,7 @@ abstract class ContextLoaderUtils {
 				return contextLoaderClass;
 			}
 
-			declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType,
-				declaringClass.getSuperclass());
+			declaringClass = findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass());
 		}
 
 		try {
@@ -184,7 +184,7 @@ abstract class ContextLoaderUtils {
 		final List<ContextConfigurationAttributes> attributesList = new ArrayList<ContextConfigurationAttributes>();
 
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
+		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, clazz);
 		Assert.notNull(declaringClass, String.format(
 			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]", annotationType,
 			clazz));
@@ -205,8 +205,8 @@ abstract class ContextLoaderUtils {
 
 			attributesList.add(0, attributes);
 
-			declaringClass = contextConfiguration.inheritLocations() ? AnnotationUtils.findAnnotationDeclaringClass(
-				annotationType, declaringClass.getSuperclass()) : null;
+			declaringClass = contextConfiguration.inheritLocations() ? findAnnotationDeclaringClass(annotationType,
+				declaringClass.getSuperclass()) : null;
 		}
 
 		return attributesList;
@@ -230,7 +230,7 @@ abstract class ContextLoaderUtils {
 		Assert.notNull(clazz, "Class must not be null");
 
 		Class<ActiveProfiles> annotationType = ActiveProfiles.class;
-		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(annotationType, clazz);
+		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, clazz);
 
 		if (declaringClass == null && logger.isDebugEnabled()) {
 			logger.debug(String.format(
@@ -269,8 +269,8 @@ abstract class ContextLoaderUtils {
 				}
 			}
 
-			declaringClass = annotation.inheritProfiles() ? AnnotationUtils.findAnnotationDeclaringClass(
-				annotationType, declaringClass.getSuperclass()) : null;
+			declaringClass = annotation.inheritProfiles() ? findAnnotationDeclaringClass(annotationType,
+				declaringClass.getSuperclass()) : null;
 		}
 
 		return StringUtils.toStringArray(activeProfiles);
