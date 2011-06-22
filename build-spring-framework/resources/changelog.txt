@@ -3,13 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.6 (2011-06-20)
+Changes in version 3.0.6 (2011-06-27)
 -------------------------------------
 
 * fixed aspects bundle to declare dependencies for @Async aspect as well
 * ProxyCreationContext uses "ThreadLocal.remove()" over "ThreadLocal.set(null)" as well
+* DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
+* DefaultListableBeanFactory's getBean(name, type) attempts type conversion if necessary
 * BeanDefinitionVisitor now actually visits factory method names
 * fixed potential InjectionMetadata NPE when using SpringBeanAutowiringInterceptor
+* restored support for String-to-ContextResource conversion
 * restored original GenericConversionService behavior with respect to empty collections/maps
 * restored original FormattingConversionService behavior with respect to the use of subtypes
 * fixed collection element resolution when using a ConversionService with a DataBinder
@@ -20,6 +23,7 @@ Changes in version 3.0.6 (2011-06-20)
 * ResourceHttpRequestHandler does not set Content-Length header for 304 response
 * LocaleChangeInterceptor validates locale values in order to prevent XSS vulnerability
 * RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
+* refined WebLogic RMI descriptor to only mark 'getTargetInterfaceName' method as idempotent
 * EhCacheManagerFactoryBean properly closes "ehcache.xml" input stream, if any
 * revised JMS CachedConnectionFactory to avoid unnecessary rollback calls on Session return
 * fixed JMS CachedConnectionFactory to fully synchronize its Session list
