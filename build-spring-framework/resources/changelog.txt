@@ -6,9 +6,13 @@ http://www.springsource.org
 Changes in version 3.1 RC1 (2011-07-xx)
 ---------------------------------------
 
+* support for Hibernate 4.0 as a JPA provider (using Spring's HibernateJpaVendorAdapter)
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
+* DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
+* DefaultListableBeanFactory's getBean(name, type) attempts type conversion if necessary
 * revised JMS CachedConnectionFactory to avoid unnecessary rollback calls on Session return
 * fixed JMS CachedConnectionFactory to fully synchronize its Session list
+* refined WebLogic RMI descriptor to only mark 'getTargetInterfaceName' method as idempotent
 * AnnotationConfigContextLoader now supports default configuration classes with arbitrary names
 
 
