@@ -16,9 +16,11 @@
 
 package org.springframework.web.servlet.view.json;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,7 +28,6 @@ import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializerFactory;
-
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
@@ -38,8 +39,9 @@ import org.springframework.web.servlet.view.AbstractView;
  * href="http://jackson.codehaus.org/">Jackson's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes) will be
- * encoded as JSON. For cases where the contents of the map need to be filtered, users may specify a specific set of
- * model attributes to encode via the {@link #setRenderedAttributes(Set) renderedAttributes} property.
+ * encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON alone via 
+ * {@link #setExtractValueFromSingleKeyModel(boolean)}. Or you can select specific model attributes to be encoded
+ * as JSON via ... TODO 
  *
  * @author Jeremy Grelle
  * @author Arjen Poutsma
@@ -60,7 +62,7 @@ public class MappingJacksonJsonView extends AbstractView {
 
 	private boolean prefixJson = false;
 
-	private Set<String> renderedAttributes;
+	private Set<String> modelKeys;
 
 	private boolean extractValueFromSingleKeyModel = false;
 
@@ -96,7 +98,7 @@ public class MappingJacksonJsonView extends AbstractView {
 	}
 
 	/**
-	 * Indicates whether the JSON output by this view should be prefixed with "{@code {} &&}". Default is false.
+	 * Indicates whether the JSON output by this view should be prefixed with <tt>"{} && "</tt>. Default is false.
 	 *
 	 * <p> Prefixing the JSON string in this manner is used to help prevent JSON Hijacking. The prefix renders the string
 	 * syntactically invalid as a script so that it cannot be hijacked. This prefix does not affect the evaluation of JSON,
@@ -105,20 +107,45 @@ public class MappingJacksonJsonView extends AbstractView {
 	public void setPrefixJson(boolean prefixJson) {
 		this.prefixJson = prefixJson;
 	}
+	
+	/**
+	 * Sets the attribute in the model that should be rendered by this view. 
+	 * When set, all other model attributes will be ignored.
+	 */
+	public void setModelKey(String modelKey) {
+		this.modelKeys = Collections.singleton(modelKey);
+	}
+	
+	/**
+	 * Sets the attributes in the model that should be rendered by this view. 
+	 * When set, all other model attributes will be ignored.
+	 */
+	public void setModelKeys(Set<String> modelKeys) {
+		this.modelKeys = modelKeys;
+	}
 
 	/**
 	 * Returns the attributes in the model that should be rendered by this view.
 	 */
-	public Set<String> getRenderedAttributes() {
-		return renderedAttributes;
+	public Set<String> getModelKeys() {
+		return modelKeys;
 	}
 
 	/**
-	 * Sets the attributes in the model that should be rendered by this view. When set, all other model attributes will be
-	 * ignored.
+	 * Sets the attributes in the model that should be rendered by this view. 
+	 * When set, all other model attributes will be ignored.
+	 * @deprecated use {@link #setModelKeys(Set)} instead
 	 */
 	public void setRenderedAttributes(Set<String> renderedAttributes) {
-		this.renderedAttributes = renderedAttributes;
+		this.modelKeys = renderedAttributes;
+	}
+
+	/**
+	 * Returns the attributes in the model that should be rendered by this view.
+	 * @deprecated use {@link #getModelKeys()} instead
+	 */
+	public Set<String> getRenderedAttributes() {
+		return modelKeys;
 	}
 
 	/**
@@ -180,7 +207,7 @@ public class MappingJacksonJsonView extends AbstractView {
 	protected Object filterModel(Map<String, Object> model) {
 		Map<String, Object> result = new HashMap<String, Object>(model.size());
 		Set<String> renderedAttributes =
-				!CollectionUtils.isEmpty(this.renderedAttributes) ? this.renderedAttributes : model.keySet();
+				!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet();
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
 			if (!(entry.getValue() instanceof BindingResult) && renderedAttributes.contains(entry.getKey())) {
 				result.put(entry.getKey(), entry.getValue());
