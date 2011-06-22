@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -943,6 +943,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	//---------------------------------------------------------------------
 	// Serialization support
 	//---------------------------------------------------------------------
+
+	protected Object readResolve() throws ObjectStreamException {
+		throw new NotSerializableException("DefaultListableBeanFactory itself is not deserializable - " +
+				"just a SerializedBeanFactoryReference is");
+	}
 
 	protected Object writeReplace() throws ObjectStreamException {
 		if (this.serializationId != null) {
