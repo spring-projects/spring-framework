@@ -32,6 +32,7 @@ import org.junit.Test;
  * @author Seth Ladd
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class AntPathMatcherTests {
 
@@ -335,7 +336,7 @@ public class AntPathMatcherTests {
 	}
 
 	@Test
-	public void extractUriTemplateVariablesCustomRegex() {
+	public void extractUriTemplateVariablesRegex() {
 		Map<String, String> result = pathMatcher
 				.extractUriTemplateVariables("{symbolicName:[\\w\\.]+}-{version:[\\w\\.]+}.jar",
 						"com.example-1.0.0.jar");
@@ -347,7 +348,46 @@ public class AntPathMatcherTests {
 		assertEquals("com.example", result.get("symbolicName"));
 		assertEquals("1.0.0", result.get("version"));
 	}
+	
+	// SPR-7787
+	
+	@Test
+	public void extractUriTemplateVarsRegexQualifiers() {
+		Map<String, String> result = pathMatcher.extractUriTemplateVariables(
+				"{symbolicName:[\\p{L}\\.]+}-sources-{version:[\\p{N}\\.]+}.jar", 
+				"com.example-sources-1.0.0.jar");
+		assertEquals("com.example", result.get("symbolicName"));
+		assertEquals("1.0.0", result.get("version"));
 
+		result = pathMatcher.extractUriTemplateVariables(
+				"{symbolicName:[\\w\\.]+}-sources-{version:[\\d\\.]+}-{year:\\d{4}}{month:\\d{2}}{day:\\d{2}}.jar",
+				"com.example-sources-1.0.0-20100220.jar");
+		assertEquals("com.example", result.get("symbolicName"));
+		assertEquals("1.0.0", result.get("version"));
+		assertEquals("2010", result.get("year"));
+		assertEquals("02", result.get("month"));
+		assertEquals("20", result.get("day"));
+
+		result = pathMatcher.extractUriTemplateVariables(
+				"{symbolicName:[\\p{L}\\.]+}-sources-{version:[\\p{N}\\.\\{\\}]+}.jar",
+				"com.example-sources-1.0.0.{12}.jar");
+		assertEquals("com.example", result.get("symbolicName"));
+		assertEquals("1.0.0.{12}", result.get("version"));
+	}
+
+	// SPR-8455
+	
+	@Test
+	public void extractUriTemplateVarsRegexCapturingGroups() {
+		try {
+			pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar");
+			fail("Expected exception");
+		} catch (IllegalArgumentException e) {
+			assertTrue("Expected helpful message on the use of capturing groups", 
+					e.getMessage().contains("The number of capturing groups in the pattern"));
+		}
+	}
+	
 	@Test
 	public void combine() {
 		assertEquals("", pathMatcher.combine(null, null));

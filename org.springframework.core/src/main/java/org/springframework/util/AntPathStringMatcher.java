@@ -24,17 +24,18 @@ import java.util.regex.Pattern;
 
 /**
  * Package-protected helper class for {@link AntPathMatcher}. Tests whether or not a string matches against a pattern
- * using a regular expression.
+ * via a {@link Pattern}.
  *
  * <p>The pattern may contain special characters: '*' means zero or more characters; '?' means one and only one
- * character; '{' and '}' indicate a URI template pattern.
+ * character; '{' and '}' indicate a URI template pattern. For example <tt>/users/{user}</tt>.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
 class AntPathStringMatcher {
 
-	private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{([^/]+?)\\}");
+	private static final Pattern GLOB_PATTERN = Pattern.compile("\\?|\\*|\\{((?:\\{[^/]+?\\}|[^/{}]|\\\\[{}])+?)\\}");
 
 	private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
@@ -103,6 +104,11 @@ class AntPathStringMatcher {
 		Matcher matcher = pattern.matcher(str);
 		if (matcher.matches()) {
 			if (uriTemplateVariables != null) {
+				// SPR-8455
+				Assert.isTrue(variableNames.size() == matcher.groupCount(), 
+						"The number of capturing groups in the pattern segment " + pattern + 
+						" does not match the number of URI template variables it defines, which can occur if " + 
+						" capturing groups are used in a URI template regex. Use non-capturing groups instead.");
 				for (int i = 1; i <= matcher.groupCount(); i++) {
 					String name = this.variableNames.get(i - 1);
 					String value = matcher.group(i);
