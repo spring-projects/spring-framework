@@ -16,6 +16,13 @@
 
 package org.springframework.web.servlet.view.json;
 
+import static org.easymock.EasyMock.createMock;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,14 +38,11 @@ import org.codehaus.jackson.map.SerializerFactory;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.ser.BeanSerializerFactory;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.validation.BindingResult;
@@ -153,7 +157,8 @@ public class MappingJacksonJsonViewTest {
 	public void renderWithCustomSerializerLocatedByFactory() throws Exception {
 
 		SerializerFactory factory = new DelegatingSerializerFactory();
-		ObjectMapper mapper = new ObjectMapper(factory);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setSerializerFactory(factory);
 		view.setObjectMapper(mapper);
 
 		Object bean = new TestBeanSimple();
@@ -178,7 +183,7 @@ public class MappingJacksonJsonViewTest {
 		attrs.add("baz");
 		attrs.add("nil");
 
-		view.setRenderedAttributes(attrs);
+		view.setModelKeys(attrs);
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", "foo");
 		model.put("bar", "bar");
@@ -207,6 +212,7 @@ public class MappingJacksonJsonViewTest {
 		assertSame(bean, actual);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void filterTwoKeyModel() throws Exception {
 		view.setExtractValueFromSingleKeyModel(true);
