@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
@@ -62,7 +63,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
  * that autowires annotated fields, setter methods and arbitrary config methods.
  * Such members to be injected are detected through a Java 5 annotation:
- * by default, Spring's {@link Autowired} annotation.
+ * by default, Spring's @{@link Autowired} and @{@link Value} annotations.
  *
  * <p>Only one constructor (at max) of any given bean class may carry this
  * annotation with the 'required' parameter set to <code>true</code>, 
@@ -83,21 +84,23 @@ import org.springframework.util.ReflectionUtils;
  * a special case of such a general config method. Such config methods
  * do not have to be public.
  *
- * <p>Also supports JSR-330's {@link javax.inject.Inject} annotation, if available.
+ * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation, if
+ * available.
  *
  * <p>Note: A default AutowiredAnnotationBeanPostProcessor will be registered
  * by the "context:annotation-config" and "context:component-scan" XML tags.
  * Remove or turn off the default annotation configuration there if you intend
  * to specify a custom AutowiredAnnotationBeanPostProcessor bean definition.
- * <p><b>NOTE:</b> Annotation injection will be performed <i>before</i> XML injection; thus
- * the latter configuration will override the former for properties wired through
- * both approaches. 
- * 
+ * <p><b>NOTE:</b> Annotation injection will be performed <i>before</i> XML injection;
+ * thus the latter configuration will override the former for properties wired through
+ * both approaches.
+ *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired
+ * @see Value
  */
 public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
 		implements MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
@@ -115,8 +118,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private ConfigurableListableBeanFactory beanFactory;
 
-	private final Map<Class<?>, Constructor[]> candidateConstructorsCache =
-			new ConcurrentHashMap<Class<?>, Constructor[]>();
+	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache =
+			new ConcurrentHashMap<Class<?>, Constructor<?>[]>();
 
 	private final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
 			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
@@ -305,7 +308,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 
-	private InjectionMetadata findAutowiringMetadata(Class clazz) {
+	private InjectionMetadata findAutowiringMetadata(Class<?> clazz) {
 		// Quick check on the concurrent map first, with minimal locking.
 		InjectionMetadata metadata = this.injectionMetadataCache.get(clazz);
 		if (metadata == null) {
@@ -320,7 +323,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		return metadata;
 	}
 
-	private InjectionMetadata buildAutowiringMetadata(Class clazz) {
+	private InjectionMetadata buildAutowiringMetadata(Class<?> clazz) {
 		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
 		Class<?> targetClass = clazz;
 
@@ -368,6 +371,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private Annotation findAutowiredAnnotation(AccessibleObject ao) {
 		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
+			if (ao instanceof Method) {
+				ao = BridgeMethodResolver.findBridgedMethod((Method) ao);
+			}
 			Annotation annotation = ao.getAnnotation(type);
 			if (annotation != null) {
 				return annotation;
@@ -534,7 +540,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					arguments = resolveCachedArguments(beanName);
 				}
 				else {
-					Class[] paramTypes = method.getParameterTypes();
+					Class<?>[] paramTypes = method.getParameterTypes();
 					arguments = new Object[paramTypes.length];
 					DependencyDescriptor[] descriptors = new DependencyDescriptor[paramTypes.length];
 					Set<String> autowiredBeanNames = new LinkedHashSet<String>(paramTypes.length);
