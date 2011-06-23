@@ -790,7 +790,7 @@ public class ClinicController {
         <title>URI Template Patterns</title>
 
         <para><emphasis>URI templates</emphasis> can be used for convenient access to selected
-        segments of a URL in a <interfacename>@RequestMapping</interfacename> method.</para>
+        parts of a URL in a <interfacename>@RequestMapping</interfacename> method.</para>
 
 		<para>A URI Template is a URI-like string, containing one or more
 		variable names. When you substitute values for these variables, the
@@ -801,8 +801,8 @@ public class ClinicController {
 		<emphasis>userId</emphasis>. Assigning the value <emphasis>fred</emphasis> to the variable 
 		yields <code>http://www.example.com/users/fred</code>.</para>
 		
-        <para>In Spring MVC you can apply the <interfacename>@PathVariable</interfacename> annotation
-        to a method argument to indicate that it is bound to the value of a URI template variable:</para>
+        <para>In Spring MVC you can use the <interfacename>@PathVariable</interfacename> annotation on
+        a method argument to bind it to the value of a URI template variable:</para>
 
         <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
 public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ownerId, Model model) {
@@ -815,30 +815,31 @@ public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ow
         <para>The URI Template "<literal>/owners/{ownerId}</literal>"
         specifies the variable name <literal>ownerId</literal>. When the
         controller handles this request, the value of <literal>ownerId</literal> 
-        is set to the value found in the appropriate segment of the URI.
+        is set to the value found in the appropriate part of the URI.
         For example, when a request comes in for <code>/owners/fred</code>, the value 
-        <literal>fred</literal> is bound to the <literal>ownerId</literal> method argument.</para>
+        of <literal>ownerId</literal> is <literal>fred</literal>.</para>
 
         <tip>
-	        <para>The matching of method parameter names to URI Template variable
-	        names can only be done if your code is compiled with debugging
-	        enabled. This is normally the case, however, if you do not have debugging enabled, 
-	        you will need to specify the name of the URI Template variable as follows:</para>
-	
-	        <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
-public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId") String ownerId, Model model) {
-  // implementation omitted
-}</programlisting>
-	
-			<para>You can do the same if you want the names of URI template variable and the method argument to differ:</para>
-	
+	        <para>To process the @PathVariable annotation, Spring MVC needs to find the 
+	        matching URI template variable by name. You can specify it in the annotation:</para>
+
 	        <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
 public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId") String theOwner, Model model) {
   // implementation omitted
 }</programlisting>
+
+			<para>Or if the URI template variable name matches the method argument name 
+			you can omit that detail. As long as your code is not compiled without debugging
+	        information, Spring MVC will match the method argument name to the URI template variable name:</para>
+	
+	        <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
+public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ownerId, Model model) {
+  // implementation omitted
+}</programlisting>
+	
 		</tip>
 
-        <para>A method can have multiple <interfacename>@PathVariable</interfacename> annotations:</para>
+        <para>A method can have any number of <interfacename>@PathVariable</interfacename> annotations:</para>
 
         <programlisting language="java">@RequestMapping(value="/owners/{ownerId}/pets/{petId}", method=RequestMethod.GET)
 public String findPet(<emphasis role="bold">@PathVariable</emphasis> String ownerId, <emphasis
@@ -865,14 +866,36 @@ public class RelativePathUriTemplateController {
 }
 </programlisting>
 
-		<para><interfacename>@PathVariable</interfacename> method arguments can be of
+		<para>A <interfacename>@PathVariable</interfacename> argument can be of
           <emphasis role="bold">any simple type</emphasis> such as int, long, Date, etc. 
           Spring automatically converts to the appropriate type or throws a 
           <classname>TypeMismatchException</classname> if it fails to do so. 
-          This type conversion process can be customized through a data binder. 
+          You can also register support for parsing additional data types.
           See <xref linkend="mvc-ann-typeconversion"/> and <xref linkend="mvc-ann-webdatabinder" />.
 		</para>
 
+      </section>
+
+      <section id="mvc-ann-requestmapping-uri-templates-regex">
+        <title>URI Template Patterns with Regular Expressions</title>
+        
+        <para>Sometimes you need more precision in defining URI template variables. 
+        Consider the URL <code>"/spring-web/spring-web-3.0.5.jar"</code>.
+        How do you break it down into multiple parts?</para>
+        
+        <para>The <interfacename>@RequestMapping</interfacename> annotation supports the 
+        use of regular expressions in URI template variables.
+        The syntax is <code>{varName:regex}</code> where the first part defines the 
+        variable name and the second - the regular expression.For example:</para>
+
+        <programlisting language="java">
+@RequestMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\d\.\d\.\d}.{extension:\.[a-z]}")
+  public void handle(@PathVariable String version, @PathVariable String extension) {    
+    // ...
+  }
+}
+</programlisting>
+        
       </section>
 
       <section id="mvc-ann-requestmapping-patterns">
@@ -1737,6 +1760,43 @@ public class MyFormController {
 </programlisting>
         </section>
       </section>
+      <section id="mvc-ann-lastmodified">
+        <title>Support for the 'Last-Modified' Response Header To Facilitate Content Caching</title>
+        
+        <para>An <interfacename>@RequestMapping</interfacename> method may wish 
+        to support <literal>'Last-Modified'</literal> HTTP requests, 
+        as defined in the contract for the Servlet API's 
+        <literal>getLastModified</literal> method, to facilitate content caching.
+        This involves calculating a lastModified <literal>long</literal> 
+        value for a given request, comparing it against the 
+        <literal>'If-Modified-Since'</literal> request header value, and 
+        potentially returning a response with status code 304 (Not Modified).
+	  	An annotated controller method can achieve that as follows:</para>
+	  
+        <programlisting language="java">
+@RequestMapping
+public String myHandleMethod(WebRequest webRequest, Model model) {
+
+    long lastModified = // 1. application-specific calculation
+
+    if (request.checkNotModified(lastModified)) {
+        // 2. shortcut exit - no further processing necessary
+        return null;
+     }
+
+    // 3. or otherwise further request processing, actually preparing content
+    model.addAttribute(...);
+    return "myViewName";
+}
+</programlisting>	  
+		<para>There are two key elements to note: 
+		calling <code>request.checkNotModified(lastModified)</code> 
+		and returning <literal>null</literal>. The former sets 
+		the response status to 304 before it returns <literal>true</literal>.
+		The latter, in combination with the former, causes 
+		Spring MVC to do no further processing of the request.  
+		</para>	  
+	  </section>      
     </section>
   </section>
 

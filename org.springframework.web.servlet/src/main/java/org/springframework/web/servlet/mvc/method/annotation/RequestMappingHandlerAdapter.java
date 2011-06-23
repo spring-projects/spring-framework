@@ -56,6 +56,7 @@ import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.annotation.ModelFactory;
@@ -76,6 +77,7 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
@@ -432,6 +434,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 				Void.TYPE.equals(methodReturnType.getParameterType()));
 	}
 
+	/**
+	 * This method always returns -1 since {@link HandlerMethod} does not implement {@link LastModified}.
+	 * Instead an @{@link RequestMapping} method, calculate the lastModified value, and call 
+	 * {@link WebRequest#checkNotModified(long)}, and return {@code null} if that returns {@code true}.
+	 * @see WebRequest#checkNotModified(long)
+	 */
 	@Override
 	protected long getLastModifiedInternal(HttpServletRequest request, HandlerMethod handlerMethod) {
 		return -1;

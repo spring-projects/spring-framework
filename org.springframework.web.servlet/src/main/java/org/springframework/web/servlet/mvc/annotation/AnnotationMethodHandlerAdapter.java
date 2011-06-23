@@ -103,11 +103,14 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.MethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
@@ -440,6 +443,13 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		return mav;
 	}
 
+	/**
+	 * This method always returns -1 since an annotated controller can have many methods, each
+	 * requiring separate lastModified calculations. Instead an @{@link RequestMapping} method 
+	 * can calculate the lastModified value, call {@link WebRequest#checkNotModified(long)} to
+	 * check it, and return {@code null} if that returns {@code true}.
+	 * @see WebRequest#checkNotModified(long)
+	 */
 	public long getLastModified(HttpServletRequest request, Object handler) {
 		return -1;
 	}
