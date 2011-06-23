@@ -17,7 +17,6 @@
 package org.springframework.web.method.annotation.support;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.ui.ModelMap;
@@ -50,9 +49,9 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 								  WebDataBinderFactory binderFactory) throws Exception {
 		ModelMap model = mavContainer.getModel();
 		if (model.size() > 0) {
-			List<String> keys = new ArrayList<String>(model.keySet());
-			String lastKey = keys.get(model.size()-1);
-			if (isBindingResultKey(lastKey)) {
+			int lastIndex = model.size()-1;
+			String lastKey = new ArrayList<String>(model.keySet()).get(lastIndex);
+			if (lastKey.startsWith(BindingResult.MODEL_KEY_PREFIX)) {
 				return model.get(lastKey);
 			}
 		}
@@ -61,7 +60,4 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 				+ "without preceding model attribute. Check your handler method signature!");
 	}
 
-	private boolean isBindingResultKey(String key) {
-		return key.startsWith(BindingResult.MODEL_KEY_PREFIX);
-	}
 }

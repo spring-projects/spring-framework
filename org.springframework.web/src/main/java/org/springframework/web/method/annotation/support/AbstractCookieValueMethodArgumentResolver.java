@@ -18,6 +18,7 @@ package org.springframework.web.method.annotation.support;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
 
@@ -57,10 +58,10 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 	}
 
 	@Override
-	protected void handleMissingValue(String cookieName, MethodParameter parameter) {
-		String paramTypeName = parameter.getParameterType().getName();
-		throw new IllegalStateException(
-				"Missing cookie named '" + cookieName + "' for method parameter type [" + paramTypeName + "]");
+	protected void handleMissingValue(String cookieName, MethodParameter param) throws ServletRequestBindingException {
+		String paramType = param.getParameterType().getName();
+		throw new ServletRequestBindingException(
+				"Missing cookie named '" + cookieName + "' for method parameter type [" + paramType + "]");
 	}
 
 	private static class CookieValueNamedValueInfo extends NamedValueInfo {

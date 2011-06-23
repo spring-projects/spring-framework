@@ -20,6 +20,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -137,12 +139,10 @@ public class RequestHeaderMethodArgumentResolverTests {
 		assertEquals("/bar", result);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = ServletRequestBindingException.class)
 	public void notFound() throws Exception {
-		Object result = resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
-
-		assertTrue(result instanceof String);
-		assertEquals("Invalid result", "bar", result);
+		resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
+		fail("Expected exception");
 	}
 
 	public void params(@RequestHeader(value = "name", defaultValue = "bar") String param1,

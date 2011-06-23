@@ -165,7 +165,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * Attempt to resolve a method parameter from the list of provided argument values.
 	 */
 	private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
-		if (providedArgs == null) {
+		if (providedArgs == null || parameter.hasParameterAnnotations()) {
 			return null;
 		}
 		for (Object providedArg : providedArgs) {
