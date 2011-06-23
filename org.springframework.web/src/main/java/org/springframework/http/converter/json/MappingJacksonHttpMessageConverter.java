@@ -25,6 +25,7 @@ import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
@@ -136,6 +137,9 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
 		catch (JsonParseException ex) {
+			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
+		}
+		catch (JsonMappingException ex) {
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
 		}
 		catch (EOFException ex) {
