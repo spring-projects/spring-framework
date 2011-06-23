@@ -16,6 +16,10 @@
 
 package org.springframework.http.converter.json;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -25,10 +29,8 @@ import java.util.Map;
 
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
@@ -114,7 +116,7 @@ public class MappingJacksonHttpMessageConverterTests {
 		assertEquals("Foo", result.get("string"));
 		assertEquals(42, result.get("number"));
 		assertEquals(42D, (Double) result.get("fraction"), 0D);
-		List array = new ArrayList();
+		List<String> array = new ArrayList<String>();
 		array.add("Foo");
 		array.add("Bar");
 		assertEquals(array, result.get("array"));
@@ -164,7 +166,13 @@ public class MappingJacksonHttpMessageConverterTests {
 		converter.read(MyBean.class, inputMessage);
 	}
 
-
+	@Test(expected = HttpMessageNotReadableException.class)
+	public void readValidJsonWithUnknownProperty() throws IOException {
+		String body = "{\"string\":\"string\",\"unknownProperty\":\"value\"}";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
+		converter.read(MyBean.class, inputMessage);
+	}
 
 	public static class MyBean {
 
