@@ -19,6 +19,7 @@ package org.springframework.web.method.annotation.support;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 
@@ -29,6 +30,7 @@ import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -81,12 +83,10 @@ public class CookieValueMethodArgumentResolverTests {
 		assertEquals("Invalid result", "bar", result);
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test(expected = ServletRequestBindingException.class)
 	public void notFound() throws Exception {
-		Object result = resolver.resolveArgument(paramNamedCookie, null, webRequest, null);
-
-		assertTrue(result instanceof String);
-		assertEquals("Invalid result", "bar", result);
+		resolver.resolveArgument(paramNamedCookie, null, webRequest, null);
+		fail("Expected exception");
 	}
 
 	private static class TestCookieValueMethodArgumentResolver extends AbstractCookieValueMethodArgumentResolver {
