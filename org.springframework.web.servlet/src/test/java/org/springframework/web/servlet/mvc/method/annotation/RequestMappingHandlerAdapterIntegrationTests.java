@@ -88,8 +88,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebA
  *
  * <p>If you wish to add high-level tests, consider the following other "integration"-style tests:
  * <ul>
- * 	<li>{@link HandlerMethodAdapterAnnotationDetectionTests}
- * 	<li>{@link HandlerMethodMappingAnnotationDetectionTests}
+ * 	<li>{@link HandlerMethodAnnotationDetectionTests}
  * 	<li>{@link ServletHandlerMethodTests}
  * </ul>
  *
@@ -293,7 +292,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 						 	@ModelAttribute OtherUser otherUser,
 						 	Model model) throws Exception {
 
-			model.addAttribute("cookie", cookie).addAttribute("header", header)
+			model.addAttribute("cookie", cookie).addAttribute("pathvar", pathvar).addAttribute("header", header)
 					.addAttribute("systemHeader", systemHeader).addAttribute("headerMap", headerMap)
 					.addAttribute("dateParam", dateParam).addAttribute("paramMap", paramMap)
 					.addAttribute("paramByConvention", paramByConvention).addAttribute("value", value)

@@ -51,11 +51,21 @@ public class MarshallingViewTests {
 	}
 
 	@Test
+	public void isExposePathVars() {
+		assertEquals("Must not expose path variables", false, view.isExposePathVariables());
+	}
+
+	@Test
+	public void isExposePathVarsDefaultConstructor() {
+		assertEquals("Must not expose path variables", false, new MarshallingView().isExposePathVariables());
+	}
+
+	@Test
 	public void renderModelKey() throws Exception {
 		Object toBeMarshalled = new Object();
 		String modelKey = "key";
 		view.setModelKey(modelKey);
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put(modelKey, toBeMarshalled);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -76,7 +86,7 @@ public class MarshallingViewTests {
 		Object toBeMarshalled = new Object();
 		String modelKey = "key";
 		view.setModelKey("invalidKey");
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put(modelKey, toBeMarshalled);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -97,7 +107,7 @@ public class MarshallingViewTests {
 	@Test
 	public void renderNullModelValue() throws Exception {
 		String modelKey = "key";
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put(modelKey, null);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -120,7 +130,7 @@ public class MarshallingViewTests {
 		Object toBeMarshalled = new Object();
 		String modelKey = "key";
 		view.setModelKey(modelKey);
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put(modelKey, toBeMarshalled);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -143,7 +153,7 @@ public class MarshallingViewTests {
 	public void renderNoModelKey() throws Exception {
 		Object toBeMarshalled = new Object();
 		String modelKey = "key";
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put(modelKey, toBeMarshalled);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -163,7 +173,7 @@ public class MarshallingViewTests {
 	public void testRenderUnsupportedModel() throws Exception {
 		Object toBeMarshalled = new Object();
 		String modelKey = "key";
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put(modelKey, toBeMarshalled);
 
 		MockHttpServletRequest request = new MockHttpServletRequest();

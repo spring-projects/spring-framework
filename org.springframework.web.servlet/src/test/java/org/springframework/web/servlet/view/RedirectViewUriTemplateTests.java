@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.View;
 
 public class RedirectViewUriTemplateTests {
 
@@ -84,7 +84,7 @@ public class RedirectViewUriTemplateTests {
 		Map<String, String> uriTemplatVars = new HashMap<String, String>();
 		uriTemplatVars.put("name1", "value1");
 		uriTemplatVars.put("name2", "value2");
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplatVars);
+		request.setAttribute(View.PATH_VARIABLES, uriTemplatVars);
 
 		String url = "http://url.somewhere.com";
 		RedirectView redirectView = new RedirectView(url + "/{name2}");

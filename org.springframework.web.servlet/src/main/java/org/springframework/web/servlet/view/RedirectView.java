@@ -238,9 +238,9 @@ public class RedirectView extends AbstractUrlBasedView {
 			model = removeKeys(model, redirectUri.getVariableNames());
 		}
 		if (this.exposeModelAttributes) {
-			List<String> uriTemplateVarNames = getUriTemplateVarNames(request);
-			if (!uriTemplateVarNames.isEmpty()) {
-				model = removeKeys(model, uriTemplateVarNames);
+			List<String> pathVarNames = getPathVarNames(request);
+			if (!pathVarNames.isEmpty()) {
+				model = removeKeys(model, pathVarNames);
 			}
 			appendQueryProperties(targetUrl, model, enc);
 		}
@@ -274,12 +274,12 @@ public class RedirectView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Returns URI template variable names for the current request; or an empty list.
+	 * Returns the names of PathVariable for the current request; or an empty list.
 	 */
 	@SuppressWarnings("unchecked")
-	private List<String> getUriTemplateVarNames(HttpServletRequest request) {
-		String key = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		Map<String, String> map = (Map<String, String>) request.getAttribute(key);
+	private List<String> getPathVarNames(HttpServletRequest request) {
+		String key = View.PATH_VARIABLES;
+		Map<String, Object> map = (Map<String, Object>) request.getAttribute(key);
 		return (map != null) ? new ArrayList<String>(map.keySet()) : Collections.<String>emptyList();
 	}
 
@@ -307,7 +307,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		boolean first = (getUrl().indexOf('?') < 0);
 		for (Map.Entry<String, Object> entry : queryProperties(model).entrySet()) {
 			Object rawValue = entry.getValue();
-			Iterator valueIter;
+			Iterator<Object> valueIter;
 			if (rawValue != null && rawValue.getClass().isArray()) {
 				valueIter = Arrays.asList(ObjectUtils.toObjectArray(rawValue)).iterator();
 			}

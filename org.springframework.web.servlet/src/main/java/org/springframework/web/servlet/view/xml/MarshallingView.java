@@ -18,6 +18,7 @@ package org.springframework.web.servlet.view.xml;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -58,6 +59,7 @@ public class MarshallingView extends AbstractView {
 	 */
 	public MarshallingView() {
 		setContentType(DEFAULT_CONTENT_TYPE);
+		setExposePathVariables(false);
 	}
 
 	/**
@@ -67,6 +69,7 @@ public class MarshallingView extends AbstractView {
 		Assert.notNull(marshaller, "'marshaller' must not be null");
 		setContentType(DEFAULT_CONTENT_TYPE);
 		this.marshaller = marshaller;
+		setExposePathVariables(false);
 	}
 
 	/**
@@ -93,8 +96,9 @@ public class MarshallingView extends AbstractView {
 	}
 
 	@Override
-	protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	protected void renderMergedOutputModel(Map<String, Object> model, 
+										   HttpServletRequest request, 
+										   HttpServletResponse response) throws Exception {
 		Object toBeMarshalled = locateToBeMarshalled(model);
 		if (toBeMarshalled == null) {
 			throw new ServletException("Unable to locate object to be marshalled in model: " + model);
@@ -119,7 +123,7 @@ public class MarshallingView extends AbstractView {
 	 *                          supported by the marshaller
 	 * @see #setModelKey(String)
 	 */
-	protected Object locateToBeMarshalled(Map model) throws ServletException {
+	protected Object locateToBeMarshalled(Map<String, Object> model) throws ServletException {
 		if (this.modelKey != null) {
 			Object o = model.get(this.modelKey);
 			if (o == null) {
