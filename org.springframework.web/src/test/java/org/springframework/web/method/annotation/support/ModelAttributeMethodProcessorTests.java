@@ -83,7 +83,7 @@ public class ModelAttributeMethodProcessorTests {
 	
 	@Before
 	public void setUp() throws Exception {
-		processor = new ModelAttributeMethodProcessor(true);
+		processor = new ModelAttributeMethodProcessor(false);
 
 		Method method = ModelAttributeHandler.class.getDeclaredMethod("modelAttribute", 
 				TestBean.class, Errors.class, int.class, TestBean.class, TestBean.class);
@@ -103,68 +103,86 @@ public class ModelAttributeMethodProcessorTests {
 	}
 
 	@Test
-	public void supportParameter() throws Exception {
-		processor = new ModelAttributeMethodProcessor(true);
+	public void supportedParameters() throws Exception {
+		// Only @ModelAttribute arguments
 		assertTrue(processor.supportsParameter(paramNamedValidModelAttr));
-		assertTrue(processor.supportsParameter(paramErrors));
-		assertFalse(processor.supportsParameter(paramInt));
 		assertTrue(processor.supportsParameter(paramModelAttr));
-		assertTrue(processor.supportsParameter(paramNonSimpleType));
 		
-		processor = new ModelAttributeMethodProcessor(false);
-		assertTrue(processor.supportsParameter(paramNamedValidModelAttr));
 		assertFalse(processor.supportsParameter(paramErrors));
 		assertFalse(processor.supportsParameter(paramInt));
-		assertTrue(processor.supportsParameter(paramModelAttr));
 		assertFalse(processor.supportsParameter(paramNonSimpleType));
 	}
 	
 	@Test
-	public void supportsReturnType() throws Exception {
+	public void supportedParametersInDefaultResolutionMode() throws Exception {
 		processor = new ModelAttributeMethodProcessor(true);
-		assertTrue(processor.supportsReturnType(returnParamNamedModelAttr));
-		assertFalse(processor.supportsReturnType(returnParamNonSimpleType));
+		
+		// Only non-simple types, even if not annotated
+		assertTrue(processor.supportsParameter(paramNamedValidModelAttr));
+		assertTrue(processor.supportsParameter(paramErrors));
+		assertTrue(processor.supportsParameter(paramModelAttr));
+		assertTrue(processor.supportsParameter(paramNonSimpleType));
 
+		assertFalse(processor.supportsParameter(paramInt));
+	}
+	
+	@Test
+	public void supportedReturnTypes() throws Exception {
 		processor = new ModelAttributeMethodProcessor(false);
 		assertTrue(processor.supportsReturnType(returnParamNamedModelAttr));
 		assertFalse(processor.supportsReturnType(returnParamNonSimpleType));
 	}
 	
 	@Test
-	public void shouldValidate() throws Exception {
-		assertTrue(processor.shouldValidate(null, paramNamedValidModelAttr));
-		assertFalse(processor.shouldValidate(null, paramNonSimpleType));
+	public void supportedReturnTypesInDefaultResolutionMode() throws Exception {
+		processor = new ModelAttributeMethodProcessor(true);
+		assertTrue(processor.supportsReturnType(returnParamNamedModelAttr));
+		assertFalse(processor.supportsReturnType(returnParamNonSimpleType));
+	}
+	
+	@Test
+	public void validationApplicable() throws Exception {
+		assertTrue(processor.isValidationApplicable(null, paramNamedValidModelAttr));
+	}
+	
+	@Test
+	public void validationNotApplicable() throws Exception {
+		assertFalse(processor.isValidationApplicable(null, paramNonSimpleType));
 	}
 
 	@Test
-	public void failOnError() throws Exception {
-		assertFalse("Shouldn't failOnError with BindingResult", processor.failOnError(null, paramNamedValidModelAttr));
-		assertTrue("Should failOnError without BindingResult", processor.failOnError(null, paramNonSimpleType));
+	public void bindExceptionRequired() throws Exception {
+		assertTrue(processor.isBindExceptionRequired(null, paramNonSimpleType));
 	}
 
 	@Test
-	public void createBinderFromModelAttribute() throws Exception {
-		createBinderFromModelAttr("attrName", paramNamedValidModelAttr);
-		createBinderFromModelAttr("testBean", paramModelAttr);
-		createBinderFromModelAttr("testBean", paramNonSimpleType);
+	public void bindExceptionNotRequired() throws Exception {
+		assertFalse(processor.isBindExceptionRequired(null, paramNamedValidModelAttr));
 	}
 
-	private void createBinderFromModelAttr(String expectedAttrName, MethodParameter param) throws Exception {
+	@Test
+	public void getAttributeFromModel() throws Exception {
+		testGetAttributeFromModel("attrName", paramNamedValidModelAttr);
+		testGetAttributeFromModel("testBean", paramModelAttr);
+		testGetAttributeFromModel("testBean", paramNonSimpleType);
+	}
+
+	private void testGetAttributeFromModel(String expectedAttributeName, MethodParameter param) throws Exception {
 		Object target = new TestBean();
-		mavContainer.addAttribute(expectedAttrName, target);
+		mavContainer.addAttribute(expectedAttributeName, target);
 
 		WebDataBinder dataBinder = new WebRequestDataBinder(target);
-		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
-		expect(binderFactory.createBinder(webRequest, target, expectedAttrName)).andReturn(dataBinder);
-		replay(binderFactory);
+		WebDataBinderFactory factory = createMock(WebDataBinderFactory.class);
+		expect(factory.createBinder(webRequest, target, expectedAttributeName)).andReturn(dataBinder);
+		replay(factory);
 		
-		processor.resolveArgument(param, mavContainer, webRequest, binderFactory);
+		processor.resolveArgument(param, mavContainer, webRequest, factory);
 		
-		verify(binderFactory);
+		verify(factory);
 	}
 
 	@Test
-	public void createBinderWithAttributeConstructor() throws Exception {
+	public void createAttribute() throws Exception {
 		WebDataBinder dataBinder = new WebRequestDataBinder(null);
 
 		WebDataBinderFactory factory = createMock(WebDataBinderFactory.class);
@@ -177,7 +195,7 @@ public class ModelAttributeMethodProcessorTests {
 	}
 
 	@Test
-	public void bindAndValidate() throws Exception {
+	public void automaticValidation() throws Exception {
 		Object target = new TestBean();
 		mavContainer.addAttribute("attrName", target);
 		
@@ -193,7 +211,7 @@ public class ModelAttributeMethodProcessorTests {
 	}
 	
 	@Test(expected=BindException.class)
-	public void bindAndFail() throws Exception {
+	public void bindException() throws Exception {
 		Object target = new TestBean();
 		mavContainer.getModel().addAttribute(target);
 
