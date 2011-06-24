@@ -18,11 +18,12 @@ package org.springframework.web.method.annotation.support;
 
 import java.lang.annotation.Annotation;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.DataBinder;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -50,6 +51,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
 
+	protected Log logger = LogFactory.getLog(this.getClass());
+	
 	private final boolean useDefaultResolution;
 	
 	/**
@@ -82,24 +85,31 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * default constructor. Data binding and optionally validation is then applied through a {@link WebDataBinder}
 	 * instance. Validation is invoked optionally when the method parameter is annotated with an {@code @Valid}.
 	 *
-	 * @throws Exception if a {@link WebDataBinder} could not be created or if data binding and validation result in
-	 * an error and the next method parameter is not of type {@link Errors} or {@link BindingResult}.
+	 * @throws BindException if data binding and validation result in an error and the next method parameter 
+	 * is neither of type {@link Errors} nor {@link BindingResult}.
+	 * @throws Exception if a {@link WebDataBinder} could not be created.
 	 */
 	public final Object resolveArgument(MethodParameter parameter,
 										ModelAndViewContainer mavContainer,
-										NativeWebRequest webRequest,
+										NativeWebRequest request,
 										WebDataBinderFactory binderFactory) throws Exception {
-		WebDataBinder binder = createDataBinder(parameter, mavContainer, webRequest, binderFactory);
+		String name = ModelFactory.getNameForParameter(parameter);
+		Object target = (mavContainer.containsAttribute(name)) ?
+				mavContainer.getAttribute(name) : createAttribute(name, parameter, binderFactory, request);
+				
+		WebDataBinder binder = binderFactory.createBinder(request, target, name);
 
 		if (binder.getTarget() != null) {
-			doBind(binder, webRequest);
-
-			if (shouldValidate(binder, parameter)) {
+			bindRequestParameters(binder, request);
+			
+			if (isValidationApplicable(binder, parameter)) {
 				binder.validate();
 			}
-
-			if (failOnError(binder, parameter) && binder.getBindingResult().hasErrors()) {
-				throw new BindException(binder.getBindingResult());
+			
+			if (binder.getBindingResult().hasErrors()) {
+				if (isBindExceptionRequired(binder, parameter)) {
+					throw new BindException(binder.getBindingResult());
+				}
 			}
 		}
 
@@ -109,23 +119,22 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	}
 
 	/**
-	 * Creates a {@link WebDataBinder} for a target object.
+	 * Creates an instance of the specified model attribute. This method is invoked only if the attribute is
+	 * not available in the model. This default implementation uses the no-argument constructor. 
+	 * Subclasses can override to provide additional means of creating the model attribute.
+	 * 
+	 * @param attributeName the name of the model attribute
+	 * @param parameter the method argument declaring the model attribute
+	 * @param binderFactory a factory for creating {@link WebDataBinder} instances
+	 * @param request the current request
+	 * @return the created model attribute; never {@code null}
+	 * @throws Exception raised in the process of creating the instance
 	 */
-	private WebDataBinder createDataBinder(MethodParameter parameter,
-										   ModelAndViewContainer mavContainer,
-										   NativeWebRequest webRequest,
-										   WebDataBinderFactory binderFactory) throws Exception {
-		String attrName = ModelFactory.getNameForParameter(parameter);
-		
-		Object target;
-		if (mavContainer.containsAttribute(attrName)) {
-			target = mavContainer.getAttribute(attrName);
-		}
-		else {
-			target = BeanUtils.instantiateClass(parameter.getParameterType());
-		}
-		
-		return binderFactory.createBinder(webRequest, target, attrName);
+	protected Object createAttribute(String attributeName, 
+									 MethodParameter parameter, 
+									 WebDataBinderFactory binderFactory, 
+									 NativeWebRequest request) throws Exception {
+		return BeanUtils.instantiateClass(parameter.getParameterType());
 	}
 	
 	/**
@@ -134,17 +143,17 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @param binder the binder with the target object to apply request values to
 	 * @param request the current request
 	 */
-	protected void doBind(WebDataBinder binder, NativeWebRequest request) {
+	protected void bindRequestParameters(WebDataBinder binder, NativeWebRequest request) {
 		((WebRequestDataBinder) binder).bind(request);
 	}
 
 	/**
-	 * Whether to validate the target object of the given {@link WebDataBinder} instance.
+	 * Whether to validate the model attribute inside the given data binder instance.
 	 * @param binder the data binder containing the validation candidate
-	 * @param parameter the method argument for which data binding is performed
-	 * @return true if {@link DataBinder#validate()} should be invoked, false otherwise.
+	 * @param parameter the method argument declaring the validation candidate
+	 * @return {@code true} if validation should be applied, {@code false} otherwise.
 	 */
-	protected boolean shouldValidate(WebDataBinder binder, MethodParameter parameter) {
+	protected boolean isValidationApplicable(WebDataBinder binder, MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation annot : annotations) {
 			if ("Valid".equals(annot.annotationType().getSimpleName())) {
@@ -160,7 +169,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @param parameter the method argument for which data binding is performed
 	 * @return true if the binding or validation errors should result in a {@link BindException}, false otherwise.
 	 */
-	protected boolean failOnError(WebDataBinder binder, MethodParameter parameter) {
+	protected boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter parameter) {
 		int i = parameter.getParameterIndex();
 		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
 		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));

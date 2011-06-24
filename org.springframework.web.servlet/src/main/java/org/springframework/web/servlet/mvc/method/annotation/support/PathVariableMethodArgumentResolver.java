@@ -64,9 +64,9 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
-		String key = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		int scope = RequestAttributes.SCOPE_REQUEST;
-		Map<String, String> uriTemplateVars = (Map<String, String>) request.getAttribute(key, scope);
+		Map<String, String> uriTemplateVars = 
+			(Map<String, String>) request.getAttribute(
+					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 		return (uriTemplateVars != null) ? uriTemplateVars.get(name) : null;
 	}
 
