@@ -73,6 +73,7 @@ public class MappingJacksonJsonView extends AbstractView {
 	 */
 	public MappingJacksonJsonView() {
 		setContentType(DEFAULT_CONTENT_TYPE);
+		setExposePathVariables(false);
 	}
 
 	/**

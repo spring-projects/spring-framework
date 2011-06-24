@@ -16,6 +16,11 @@
 
 package org.springframework.web.servlet.view;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -23,12 +28,12 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockRequestDispatcher;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.servlet.View;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -52,7 +57,7 @@ public class InternalResourceViewTests extends TestCase {
 	}
 
 	public void testForward() throws Exception {
-		HashMap model = new HashMap();
+		HashMap<String, Object> model = new HashMap<String, Object>();
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
@@ -77,8 +82,8 @@ public class InternalResourceViewTests extends TestCase {
 		view.render(model, request, response);
 		assertEquals(url, response.getForwardedUrl());
 
-		Set keys = model.keySet();
-		for (Iterator it = keys.iterator(); it.hasNext();) {
+		Set<String> keys = model.keySet();
+		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
 			String key = (String) it.next();
 			assertEquals(model.get(key), request.getAttribute(key));
 		}
@@ -91,7 +96,7 @@ public class InternalResourceViewTests extends TestCase {
 	}
 
 	public void testForwardWithForwardAttributesPresent() throws Exception {
-		HashMap model = new HashMap();
+		HashMap<String, Object> model = new HashMap<String, Object>();
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
@@ -122,8 +127,8 @@ public class InternalResourceViewTests extends TestCase {
 		view.render(model, request, response);
 		assertEquals(url, response.getForwardedUrl());
 
-		Set keys = model.keySet();
-		for (Iterator it = keys.iterator(); it.hasNext();) {
+		Set<String> keys = model.keySet();
+		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
 			String key = (String) it.next();
 			assertEquals(model.get(key), request.getAttribute(key));
 		}
@@ -136,25 +141,26 @@ public class InternalResourceViewTests extends TestCase {
 	}
 
 	public void testAlwaysInclude() throws Exception {
-		HashMap model = new HashMap();
+		HashMap<String, Object> model = new HashMap<String, Object>();
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
 
 		String url = "forward-to";
 
-		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
-		Set keys = model.keySet();
-		for (Iterator iter = keys.iterator(); iter.hasNext();) {
+		HttpServletRequest request = createMock(HttpServletRequest.class);
+		request.getAttribute(View.PATH_VARIABLES);
+		expectLastCall().andReturn(null);
+		Set<String> keys = model.keySet();
+		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
 			String key = (String) iter.next();
 			request.setAttribute(key, model.get(key));
-			reqControl.setVoidCallable(1);
+			expectLastCall().times(1);
 		}
 
 		request.getRequestDispatcher(url);
-		reqControl.setReturnValue(new MockRequestDispatcher(url));
-		reqControl.replay();
+		expectLastCall().andReturn(new MockRequestDispatcher(url));
+		replay(request);
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		InternalResourceView v = new InternalResourceView();
@@ -164,31 +170,32 @@ public class InternalResourceViewTests extends TestCase {
 		// Can now try multiple tests
 		v.render(model, request, response);
 		assertEquals(url, response.getIncludedUrl());
-		reqControl.verify();
+		verify(request);
 	}
 
 	public void testIncludeOnAttribute() throws Exception {
-		HashMap model = new HashMap();
+		HashMap<String, Object> model = new HashMap<String, Object>();
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
 
 		String url = "forward-to";
 
-		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
-		Set keys = model.keySet();
-		for (Iterator iter = keys.iterator(); iter.hasNext();) {
+		HttpServletRequest request = createMock(HttpServletRequest.class);
+		request.getAttribute(View.PATH_VARIABLES);
+		expectLastCall().andReturn(null);
+		Set<String> keys = model.keySet();
+		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
 			String key = (String) iter.next();
 			request.setAttribute(key, model.get(key));
-			reqControl.setVoidCallable(1);
+			expectLastCall().times(1);
 		}
 
 		request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
-		reqControl.setReturnValue("somepath");
+		expectLastCall().andReturn("somepath");
 		request.getRequestDispatcher(url);
-		reqControl.setReturnValue(new MockRequestDispatcher(url));
-		reqControl.replay();
+		expectLastCall().andReturn(new MockRequestDispatcher(url));
+		replay(request);
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		InternalResourceView v = new InternalResourceView();
@@ -197,31 +204,32 @@ public class InternalResourceViewTests extends TestCase {
 		// Can now try multiple tests
 		v.render(model, request, response);
 		assertEquals(url, response.getIncludedUrl());
-		reqControl.verify();
+		verify(request);
 	}
 
 	public void testIncludeOnCommitted() throws Exception {
-		HashMap model = new HashMap();
+		HashMap<String, Object> model = new HashMap<String, Object>();
 		Object obj = new Integer(1);
 		model.put("foo", "bar");
 		model.put("I", obj);
 
 		String url = "forward-to";
 
-		MockControl reqControl = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) reqControl.getMock();
-		Set keys = model.keySet();
-		for (Iterator iter = keys.iterator(); iter.hasNext();) {
+		HttpServletRequest request = createMock(HttpServletRequest.class);
+		request.getAttribute(View.PATH_VARIABLES);
+		expectLastCall().andReturn(null);
+		Set<String> keys = model.keySet();
+		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
 			String key = (String) iter.next();
 			request.setAttribute(key, model.get(key));
-			reqControl.setVoidCallable(1);
+			expectLastCall().times(1);
 		}
 
 		request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
-		reqControl.setReturnValue(null);
+		expectLastCall().andReturn(null);
 		request.getRequestDispatcher(url);
-		reqControl.setReturnValue(new MockRequestDispatcher(url));
-		reqControl.replay();
+		expectLastCall().andReturn(new MockRequestDispatcher(url));
+		replay(request);
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setCommitted(true);
@@ -231,7 +239,7 @@ public class InternalResourceViewTests extends TestCase {
 		// Can now try multiple tests
 		v.render(model, request, response);
 		assertEquals(url, response.getIncludedUrl());
-		reqControl.verify();
+		verify(request);
 	}
 
 }

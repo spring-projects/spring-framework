@@ -70,6 +70,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/** Map of static attributes, keyed by attribute name (String) */
 	private final Map<String, Object> staticAttributes = new HashMap<String, Object>();
 
+	/** Whether or not the view should add path variables in the model */
+	private boolean exposePathVariables = true;
 
 	/**
 	 * Set the view's name. Helpful for traceability.
@@ -216,10 +218,31 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * manipulating the Map but rather just for checking the contents.
 	 * @return the static attributes in this view
 	 */
-	public Map getStaticAttributes() {
+	public Map<String, Object> getStaticAttributes() {
 		return Collections.unmodifiableMap(this.staticAttributes);
 	}
 
+	/**
+	 * Whether to add path variables in the model or not. 
+	 * <p>Path variables are commonly bound to URI template variables through the {@code @PathVariable} 
+	 * annotation. They're are effectively URI template variables with type conversion applied to 
+	 * them to derive typed Object values. Such values are frequently needed in views for 
+	 * constructing links to the same and other URLs. 
+	 * <p>Path variables added to the model override static attributes (see {@link #setAttributes(Properties)}) 
+	 * but not attributes already present in the model. 
+	 * <p>By default this flag is set to {@code true}. Concrete view types can override this. 
+	 * @param exposePathVariables {@code true} to expose path variables, and {@code false} otherwise. 
+	 */
+	public void setExposePathVariables(boolean exposePathVariables) {
+		this.exposePathVariables = exposePathVariables;
+	}
+
+	/**
+	 * Returns the value of the flag indicating whether path variables should be added to the model or not.
+	 */
+	public boolean isExposePathVariables() {
+		return exposePathVariables;
+	}
 
 	/**
 	 * Prepares the view given the specified model, merging it with static
@@ -232,11 +255,20 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 			logger.trace("Rendering view with name '" + this.beanName + "' with model " + model +
 				" and static attributes " + this.staticAttributes);
 		}
+		
+		@SuppressWarnings("unchecked")
+		Map<String, Object> pathVars = this.exposePathVariables ?
+			(Map<String, Object>) request.getAttribute(View.PATH_VARIABLES) : null;
 
 		// Consolidate static and dynamic model attributes.
-		Map<String, Object> mergedModel =
-				new HashMap<String, Object>(this.staticAttributes.size() + (model != null ? model.size() : 0));
+		int size = this.staticAttributes.size();
+		size += (model != null) ? model.size() : 0;
+		size += (pathVars != null) ? pathVars.size() : 0;
+		Map<String, Object> mergedModel = new HashMap<String, Object>(size);
 		mergedModel.putAll(this.staticAttributes);
+		if (pathVars != null) {
+			mergedModel.putAll(pathVars);
+		}
 		if (model != null) {
 			mergedModel.putAll(model);
 		}

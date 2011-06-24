@@ -75,6 +75,11 @@ public class MappingJacksonJsonViewTest {
 	}
 
 	@Test
+	public void isExposePathVars() {
+		assertEquals("Must not expose path variables", false, view.isExposePathVariables());
+	}
+
+	@Test
 	public void renderSimpleMap() throws Exception {
 
 		Map<String, Object> model = new HashMap<String, Object>();

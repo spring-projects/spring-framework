@@ -45,11 +45,18 @@ public interface View {
 
 	/**
 	 * Name of the {@link HttpServletRequest} attribute that contains the response status code.
-	 * <p>Note: This attribute is not required to be supported by all
-	 * View implementations.
+	 * <p>Note: This attribute is not required to be supported by all View implementations.
 	 */
 	String RESPONSE_STATUS_ATTRIBUTE = View.class.getName() + ".responseStatus";
 
+	/**
+	 * Name of the {@link HttpServletRequest} attribute that contains a Map with path variables.
+	 * The map consists of String-based URI template variable names as keys and their corresponding 
+	 * Object-based values -- extracted from segments of the URL and type converted.  
+	 * 
+	 * <p>Note: This attribute is not required to be supported by all View implementations.
+	 */
+	String PATH_VARIABLES = View.class.getName() + ".pathVariables";
 
 	/**
 	 * Return the content type of the view, if predetermined.

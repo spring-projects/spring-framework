@@ -17,14 +17,19 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
@@ -42,9 +47,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.annotation.UriTemplateServletAnnotationControllerTests;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * The origin of this test class is {@link UriTemplateServletAnnotationControllerTests} with the tests in this class
@@ -77,6 +85,29 @@ public class UriTemplateServletHandlerMethodTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("test-42-21-other", response.getContentAsString());
+	}
+
+	@Test
+	public void pathVarsInModel() throws Exception {
+		final Map<String, Object> pathVars = new HashMap<String, Object>();
+		pathVars.put("hotel", "42");
+		pathVars.put("booking", 21);
+		pathVars.put("other", "other");
+		
+		WebApplicationContext wac = 
+			initDispatcherServlet(ViewRenderingController.class, new BeanDefinitionRegistrar() {
+				public void register(GenericWebApplicationContext context) {
+					RootBeanDefinition beanDef = new RootBeanDefinition(ModelValidatingViewResolver.class);
+					beanDef.getConstructorArgumentValues().addGenericArgumentValue(pathVars);
+					context.registerBeanDefinition("viewResolver", beanDef);
+				}
+			});
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21-other");
+		servlet.service(request, new MockHttpServletResponse());
+		
+		ModelValidatingViewResolver resolver = wac.getBean(ModelValidatingViewResolver.class);
+		assertEquals(3, resolver.validatedAttrCount);
 	}
 
 	@Test
@@ -350,6 +381,17 @@ public class UriTemplateServletHandlerMethodTests {
 	}
 
 	@Controller
+	public static class ViewRenderingController {
+
+		@RequestMapping("/hotels/{hotel}/bookings/{booking}-{other}")
+		public void handle(@PathVariable("hotel") String hotel, @PathVariable int booking, @PathVariable String other) {
+			assertEquals("Invalid path variable value", "42", hotel);
+			assertEquals("Invalid path variable value", 21, booking);
+		}
+
+	}
+
+	@Controller
 	public static class BindingUriTemplateController {
 
 		@InitBinder
@@ -588,18 +630,47 @@ public class UriTemplateServletHandlerMethodTests {
 		}
 	}
 
+	public static class ModelValidatingViewResolver implements ViewResolver {
+
+		private final Map<String, Object> attrsToValidate;
+		
+		int validatedAttrCount;
+		
+		public ModelValidatingViewResolver(Map<String, Object> attrsToValidate) {
+			this.attrsToValidate = attrsToValidate;
+		}
+
+		public View resolveViewName(final String viewName, Locale locale) throws Exception {
+			return new AbstractView () {
+				public String getContentType() {
+					return null;
+				}
+				@Override
+				protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
+						HttpServletResponse response) throws Exception {
+					for (String key : attrsToValidate.keySet()) {
+						assertTrue("Model should contain attribute named " + key, model.containsKey(key));
+						assertEquals(attrsToValidate.get(key), model.get(key));
+						validatedAttrCount++;
+					}
+				}
+			};
+		}
+	}
+	
 	private interface BeanDefinitionRegistrar {
 		public void register(GenericWebApplicationContext context);
 	}
 
 	@SuppressWarnings("serial")
-	private void initDispatcherServlet(final Class<?> controllerClass, final BeanDefinitionRegistrar registrar)
+	private WebApplicationContext initDispatcherServlet(final Class<?> controllerClass, final BeanDefinitionRegistrar registrar)
 			throws ServletException {
-
+		
+		final GenericWebApplicationContext wac = new GenericWebApplicationContext();
+		
 		servlet = new DispatcherServlet() {
 			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
 				
 				Class<?> mappingType = RequestMappingHandlerMapping.class;
@@ -625,7 +696,10 @@ public class UriTemplateServletHandlerMethodTests {
 				return wac;
 			}
 		};
+		
 		servlet.init(new MockServletConfig());
+		
+		return wac;
 	}
 
 // @Ignore("ControllerClassNameHandlerMapping")	

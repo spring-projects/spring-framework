@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -35,7 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.mvc.method.annotation.support.PathVariableMethodArgumentResolver;
+import org.springframework.web.servlet.View;
 
 /**
  * Test fixture with {@link PathVariableMethodArgumentResolver}.
@@ -76,14 +77,40 @@ public class PathVariableMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveStringArgument() throws Exception {
+	public void resolveArgument() throws Exception {
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
 		uriTemplateVars.put("name", "value");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
 		String result = (String) resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null);
 		assertEquals("PathVariable not resolved correctly", "value", result);
-		assertEquals("PathVariable not added to the model", "value", mavContainer.getAttribute("name"));
+		
+		@SuppressWarnings("unchecked")
+		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(View.PATH_VARIABLES);
+		assertNotNull(pathVars);
+		assertEquals(1, pathVars.size());
+		assertEquals("value", pathVars.get("name"));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void resolveArgumentWithExistingPathVars() throws Exception {
+		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		uriTemplateVars.put("name", "value");
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+
+		Map<String, Object> pathVars = new HashMap<String, Object>();
+		uriTemplateVars.put("oldName", "oldValue");
+		request.setAttribute(View.PATH_VARIABLES, uriTemplateVars);
+
+		String result = (String) resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null);
+		assertEquals("PathVariable not resolved correctly", "value", result);
+		
+		pathVars = (Map<String, Object>) request.getAttribute(View.PATH_VARIABLES);
+		assertNotNull(pathVars);
+		assertEquals(2, pathVars.size());
+		assertEquals("value", pathVars.get("name"));
+		assertEquals("oldValue", pathVars.get("oldName"));
 	}
 	
 	@Test(expected = ServletRequestBindingException.class)

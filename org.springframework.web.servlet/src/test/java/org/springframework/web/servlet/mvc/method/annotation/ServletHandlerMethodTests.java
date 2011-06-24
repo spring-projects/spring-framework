@@ -698,11 +698,6 @@ public class ServletHandlerMethodTests {
 		assertNotNull(deserialized.session);
 	}
 
-
-	
-
-	
-
 	@Test
 	public void relativePathDispatchingController() throws Exception {
 		initDispatcherServlet(MyRelativePathDispatchingController.class, null);

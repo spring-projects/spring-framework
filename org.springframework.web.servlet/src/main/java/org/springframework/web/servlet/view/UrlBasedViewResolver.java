@@ -121,6 +121,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/** Map of static attributes, keyed by attribute name (String) */
 	private final Map<String, Object> staticAttributes = new HashMap<String, Object>();
 
+	private Boolean exposePathVariables;
 
 	/**
 	 * Set the view class that should be used to create views.
@@ -337,6 +338,22 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		return this.order;
 	}
 
+	/**
+	 * Whether views resolved by this resolver should add path variables the model or not.
+	 * The default setting is to allow each View decide (see {@link AbstractView#setExposePathVariables(boolean)}.
+	 * However, you can use this property to override that. 
+	 * @param exposePathVariables
+	 * 	<ul>
+	 * 		<li>{@code true} - all Views resolved by this resolver will expose path variables
+	 * 		<li>{@code false} - no Views resolved by this resolver will expose path variables
+	 * 		<li>{@code null} - individual Views can decide for themselves (this is used by the default) 
+	 * 	<ul> 
+	 * 	@see AbstractView#setExposePathVariables(boolean)
+	 */
+	public void setExposePathVariables(Boolean exposePathVariables) {
+		this.exposePathVariables = exposePathVariables;
+	}
+
 	@Override
 	protected void initApplicationContext() {
 		super.initApplicationContext();
@@ -344,7 +361,6 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 			throw new IllegalArgumentException("Property 'viewClass' is required");
 		}
 	}
-
 
 	/**
 	 * This implementation returns just the view name,
@@ -444,6 +460,9 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		}
 		view.setRequestContextAttribute(getRequestContextAttribute());
 		view.setAttributesMap(getAttributesMap());
+		if (this.exposePathVariables != null) {
+			view.setExposePathVariables(exposePathVariables);
+		}
 		return view;
 	}
 

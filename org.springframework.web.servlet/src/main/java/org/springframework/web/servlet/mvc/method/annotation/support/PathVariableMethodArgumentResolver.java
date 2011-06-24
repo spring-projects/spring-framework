@@ -16,9 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.ServletException;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -30,6 +29,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.annotation.support.AbstractNamedValueMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.View;
 
 /**
  * Resolves method arguments annotated with an @{@link PathVariable}.
@@ -78,14 +78,20 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void handleResolvedValue(Object arg, 
 									   String name, 
 									   MethodParameter parameter,
 									   ModelAndViewContainer mavContainer, 
-									   NativeWebRequest webRequest) {
-		if (mavContainer != null) {
-			mavContainer.addAttribute(name, arg);
+									   NativeWebRequest request) {
+		String key = View.PATH_VARIABLES;
+		int scope = RequestAttributes.SCOPE_REQUEST;
+		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(key, scope);
+		if (pathVars == null) {
+			pathVars = new HashMap<String, Object>();
+			request.setAttribute(key, pathVars, scope);
 		}
+		pathVars.put(name, arg);
 	}
 
 	private static class PathVariableNamedValueInfo extends NamedValueInfo {

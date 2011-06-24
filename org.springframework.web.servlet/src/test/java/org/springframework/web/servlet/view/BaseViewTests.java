@@ -15,6 +15,10 @@
  */
 
 package org.springframework.web.servlet.view;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,13 +32,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.View;
 
 /**
  * Tests for AbstractView. Not called AbstractViewTests as
@@ -45,21 +49,21 @@ import org.springframework.web.context.WebApplicationContext;
 public class BaseViewTests extends TestCase {
 
 	public void testRenderWithoutStaticAttributes() throws Exception {
-		MockControl mc = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
+		
+		WebApplicationContext wac = createMock(WebApplicationContext.class);
 		wac.getServletContext();
-		mc.setReturnValue(new MockServletContext());
-		mc.replay();
+		expectLastCall().andReturn(new MockServletContext());
+		replay(wac);
 
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
-		TestView tv = new TestView(request, response, wac);
+		TestView tv = new TestView(wac);
 		
 		// Check superclass handles duplicate init
 		tv.setApplicationContext(wac);		
 		tv.setApplicationContext(wac);
 		
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", "bar");
 		model.put("something", new Object());
 		tv.render(model, request, response);
@@ -68,22 +72,21 @@ public class BaseViewTests extends TestCase {
 		checkContainsAll(model, tv.model);
 		
 		assertTrue(tv.inited);
-		mc.verify();
+		verify(wac);
 	}
 	
 	/**
 	 * Test attribute passing, NOT CSV parsing.
 	 */
 	public void testRenderWithStaticAttributesNoCollision() throws Exception {
-		MockControl mc = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
+		WebApplicationContext wac = createMock(WebApplicationContext.class);
 		wac.getServletContext();
-		mc.setReturnValue(new MockServletContext());
-		mc.replay();
+		expectLastCall().andReturn(new MockServletContext());
+		replay(wac);
 
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
-		TestView tv = new TestView(request, response, wac);
+		TestView tv = new TestView(wac);
 	
 		tv.setApplicationContext(wac);
 		Properties p = new Properties();	
@@ -91,8 +94,8 @@ public class BaseViewTests extends TestCase {
 		p.setProperty("something", "else");
 		tv.setAttributes(p);	
 	
-		Map model = new HashMap();
-		model.put("one", new HashMap());
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("one", new HashMap<Object, Object>());
 		model.put("two", new Object());
 		tv.render(model, request, response);
 
@@ -101,19 +104,52 @@ public class BaseViewTests extends TestCase {
 		checkContainsAll(p, tv.model);
 	
 		assertTrue(tv.inited);
-		mc.verify();
+		verify(wac);
 	}
-	
-	public void testDynamicModelOverridesStaticAttributesIfCollision() throws Exception {
-		MockControl mc = MockControl.createControl(WebApplicationContext.class);
-		WebApplicationContext wac = (WebApplicationContext) mc.getMock();
+
+	public void testPathVarsOverrideStaticAttributes() throws Exception {
+		WebApplicationContext wac = createMock(WebApplicationContext.class);
 		wac.getServletContext();
-		mc.setReturnValue(new MockServletContext());
-		mc.replay();
+		expectLastCall().andReturn(new MockServletContext());
+		replay(wac);
 
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
-		TestView tv = new TestView(request, response, wac);
+
+		TestView tv = new TestView(wac);
+		tv.setApplicationContext(wac);
+		
+		Properties p = new Properties();	
+		p.setProperty("one", "bar");
+		p.setProperty("something", "else");
+		tv.setAttributes(p);	
+		
+		Map<String, Object> pathVars = new HashMap<String, Object>();
+		pathVars.put("one", new HashMap<Object, Object>());
+		pathVars.put("two", new Object());
+		request.setAttribute(View.PATH_VARIABLES, pathVars);
+		
+		tv.render(new HashMap<String, Object>(), request, response);
+
+		// Check it contains all
+		checkContainsAll(pathVars, tv.model);
+		assertTrue(tv.model.size() == 3);
+		// will have old something from properties
+		assertTrue(tv.model.get("something").equals("else"));
+
+		assertTrue(tv.inited);
+		verify(wac);
+	}
+	
+	public void testDynamicModelOverridesStaticAttributesIfCollision() throws Exception {
+		WebApplicationContext wac = createMock(WebApplicationContext.class);
+		wac.getServletContext();
+		expectLastCall().andReturn(new MockServletContext());
+		replay(wac);
+
+		HttpServletRequest request = new MockHttpServletRequest();
+		HttpServletResponse response = new MockHttpServletResponse();
+		TestView tv = new TestView(wac);
 
 		tv.setApplicationContext(wac);
 		Properties p = new Properties();	
@@ -121,8 +157,8 @@ public class BaseViewTests extends TestCase {
 		p.setProperty("something", "else");
 		tv.setAttributes(p);	
 
-		Map model = new HashMap();
-		model.put("one", new HashMap());
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("one", new HashMap<Object, Object>());
 		model.put("two", new Object());
 		tv.render(model, request, response);
 
@@ -133,7 +169,40 @@ public class BaseViewTests extends TestCase {
 		assertTrue(tv.model.get("something").equals("else"));
 
 		assertTrue(tv.inited);
-		mc.verify();
+		verify(wac);
+	}
+
+	public void testDynamicModelOverridesPathVariables() throws Exception {
+		WebApplicationContext wac = createMock(WebApplicationContext.class);
+		wac.getServletContext();
+		expectLastCall().andReturn(new MockServletContext());
+		replay(wac);
+
+		TestView tv = new TestView(wac);
+		tv.setApplicationContext(wac);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		Map<String, Object> pathVars = new HashMap<String, Object>();
+		pathVars.put("one", "bar");
+		pathVars.put("something", "else");
+		request.setAttribute(View.PATH_VARIABLES, pathVars);
+
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("one", new HashMap<Object, Object>());
+		model.put("two", new Object());
+
+		tv.render(model, request, response);
+
+		// Check it contains all
+		checkContainsAll(model, tv.model);
+		assertEquals(3, tv.model.size());
+		// will have old something from path variables
+		assertTrue(tv.model.get("something").equals("else"));
+
+		assertTrue(tv.inited);
+		verify(wac);
 	}
 	
 	public void testIgnoresNullAttributes() {
@@ -170,7 +239,7 @@ public class BaseViewTests extends TestCase {
 	
 	public void testAttributeCSVParsingValidWithWeirdCharacters() {
 		AbstractView v = new ConcreteView();
-		String fooval = "owfie   fue&3[][[[2 \n\n \r  \t 8£3";
+		String fooval = "owfie   fue&3[][[[2 \n\n \r  \t 8ï¿½3";
 		// Also tests empty value
 		String kingval = "";
 		v.setAttributesCSV("foo=(" + fooval + "),king={" + kingval + "},f1=[we]");
@@ -224,9 +293,10 @@ public class BaseViewTests extends TestCase {
 	 * @param expected
 	 * @param actual
 	 */
-	private void checkContainsAll(Map expected, Map actual) {
-		Set keys = expected.keySet();
-		for (Iterator iter = keys.iterator(); iter.hasNext();) {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void checkContainsAll(Map expected, Map<String, Object> actual) {
+		Set<String> keys = expected.keySet();
+		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
 			String key = (String) iter.next();
 			//System.out.println("Checking model key " + key);
 			assertTrue("Value for model key '" + key + "' must match", actual.get(key) == expected.get(key));			
@@ -239,7 +309,7 @@ public class BaseViewTests extends TestCase {
 	 */
 	private class ConcreteView extends AbstractView {
 		// Do-nothing concrete subclass
-		protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
+		protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 			throw new UnsupportedOperationException();
 		}
@@ -250,21 +320,17 @@ public class BaseViewTests extends TestCase {
 	 * behaviour
 	 */
 	private class TestView extends AbstractView {
-		private HttpServletRequest request;
-		private HttpServletResponse response;
 		private WebApplicationContext wac;
 		public boolean inited;
 		
 		/** Captured model in render */
-		public Map model;
+		public Map<String, Object> model;
 		
-		public TestView(HttpServletRequest request, HttpServletResponse response, WebApplicationContext wac) {
-			this.request = request;
-			this.response = response;
+		public TestView(WebApplicationContext wac) {
 			this.wac = wac;
 			
 		}
-		protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response)
+		protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 				// do nothing
 				this.model = model;
