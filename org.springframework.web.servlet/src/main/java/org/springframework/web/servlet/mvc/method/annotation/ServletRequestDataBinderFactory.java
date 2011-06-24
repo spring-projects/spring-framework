@@ -22,18 +22,17 @@ import java.util.Map;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.method.annotation.InitBinderDataBinderFactory;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * An {@link InitBinderDataBinderFactory} variation instantiating a data binder of type
- * {@link ServletRequestDataBinder} and further extending it with the ability to add URI template variables
- * to the values used in data binding.
+ * Creates a {@link ServletRequestDataBinder} instance and extends it with the ability to include 
+ * URI template variables in the values used for data binding purposes.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -41,62 +40,44 @@ import org.springframework.web.servlet.HandlerMapping;
 public class ServletRequestDataBinderFactory extends InitBinderDataBinderFactory {
 
 	/**
-	 * Create an {@link ServletRequestDataBinderFactory} instance.
-	 * @param initBinderMethods init binder methods to use to initialize new data binders.
-	 * @param bindingInitializer a WebBindingInitializer to use to initialize created data binder instances.
+	 * Create a new instance.
+	 * @param binderMethods {@link InitBinder} methods to initialize new data binder instances with
+	 * @param iitializer a global initializer to initialize new data binder instances with
 	 */
-	public ServletRequestDataBinderFactory(List<InvocableHandlerMethod> initBinderMethods,
-										   WebBindingInitializer bindingInitializer) {
-		super(initBinderMethods, bindingInitializer);
-	}
-
-	/**
-	 * Returns the more specific {@link ServletRequestDataBinder} created by {@link #createBinderInstance(Object, String)}.
-	 */
-	@Override
-	public ServletRequestDataBinder createBinder(NativeWebRequest request, Object target, String objectName)
-			throws Exception {
-		return (ServletRequestDataBinder) super.createBinder(request, target, objectName);
+	public ServletRequestDataBinderFactory(List<InvocableHandlerMethod> binderMethods, WebBindingInitializer iitializer) {
+		super(binderMethods, iitializer);
 	}
 	
 	/**
-	 * {@inheritDoc}
-	 * <p>This method creates a {@link ServletRequestDataBinder} instance that also adds URI template variables to
-	 * the values used in data binding.
-	 * <p>Subclasses wishing to override this method to provide their own ServletRequestDataBinder type can use the
-	 * {@link #addUriTemplateVariables(MutablePropertyValues)} method to include URI template variables as follows:
-	 * <pre>
-	 * return new CustomServletRequestDataBinder(target, objectName) {
-	 *    protected void doBind(MutablePropertyValues mpvs) {
-	 *        addUriTemplateVariables(mpvs);
-	 *        super.doBind(mpvs);
-	 *    }
-	 * };
-	 * </pre>
+	 * Creates a {@link ServletRequestDataBinder} instance extended with the ability to add 
+	 * URI template variables the values used for data binding.
 	 */
 	@Override
-	protected WebDataBinder createBinderInstance(Object target, String objectName) {
+	protected WebDataBinder createBinderInstance(Object target, String objectName, final NativeWebRequest request) {
 		return new ServletRequestDataBinder(target, objectName) {
 
 			protected void doBind(MutablePropertyValues mpvs) {
-				addUriTemplateVariables(mpvs);
+				addUriTemplateVars(mpvs, request);
 				super.doBind(mpvs);
 			}
 		};
 	}
 
 	/**
-	 * Adds URI template variables to the given property values.
-	 * @param mpvs the PropertyValues to add URI template variables to
+	 * Adds URI template variables to the the property values used for data binding.
+	 * @param mpvs the PropertyValues to use for data binding
 	 */
 	@SuppressWarnings("unchecked")
-	protected void addUriTemplateVariables(MutablePropertyValues mpvs) {
-		RequestAttributes requestAttrs = RequestContextHolder.getRequestAttributes();
-		if (requestAttrs != null) {
-			String key = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-			int scope = RequestAttributes.SCOPE_REQUEST;
-			Map<String, String> uriTemplateVars = (Map<String, String>) requestAttrs.getAttribute(key, scope);
-			mpvs.addPropertyValues(uriTemplateVars);
+	protected final void addUriTemplateVars(MutablePropertyValues mpvs, NativeWebRequest request) {
+		Map<String, String> uriTemplateVars = 
+			(Map<String, String>) request.getAttribute(
+					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+		if (uriTemplateVars != null){
+			for (String name : uriTemplateVars.keySet()) {
+				if (!mpvs.contains(name)) {
+					mpvs.addPropertyValue(name, uriTemplateVars.get(name));
+				}
+			}
 		}
 	}
 
