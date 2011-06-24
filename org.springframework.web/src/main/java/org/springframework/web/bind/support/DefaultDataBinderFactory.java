@@ -20,45 +20,58 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * A {@link WebDataBinderFactory} that creates {@link WebDataBinder} and initializes them 
- * with a {@link WebBindingInitializer}.
+ * Creates a {@link WebRequestDataBinder} and initializes it through a {@link WebBindingInitializer}.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class DefaultDataBinderFactory implements WebDataBinderFactory {
 
-	private final WebBindingInitializer bindingInitializer;
+	private final WebBindingInitializer initializer;
 
 	/**
 	 * Create {@link DefaultDataBinderFactory} instance.
-	 * @param bindingInitializer a {@link WebBindingInitializer} to initialize new data binder instances with
+	 * @param initializer a global initializer to initialize new data binder instances with
 	 */
-	public DefaultDataBinderFactory(WebBindingInitializer bindingInitializer) {
-		this.bindingInitializer = bindingInitializer;
+	public DefaultDataBinderFactory(WebBindingInitializer initializer) {
+		this.initializer = initializer;
 	}
 
 	/**
 	 * Create a new {@link WebDataBinder} for the given target object and initialize it through 
 	 * a {@link WebBindingInitializer}. 
 	 */
-	public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
-		WebDataBinder dataBinder = createBinderInstance(target, objectName);
+	public final WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
+		WebDataBinder dataBinder = createBinderInstance(target, objectName, webRequest);
 
-		if (bindingInitializer != null) {
-			this.bindingInitializer.initBinder(dataBinder, webRequest);
+		if (initializer != null) {
+			this.initializer.initBinder(dataBinder, webRequest);
 		}
 
+		initBinder(dataBinder, webRequest);
+		
 		return dataBinder;
 	}
 
 	/**
-	 * Create a {@link WebDataBinder} instance.
-	 * @param target the object to create a data binder for, or {@code null} if creating a binder for a simple type
+	 * Extension hook that subclasses can use to create a data binder of a specific type. 
+	 * The default implementation creates a {@link WebRequestDataBinder}.
+	 * @param target the data binding target object; or {@code null} for type conversion on simple objects.
 	 * @param objectName the name of the target object 
+	 * @param webRequest the current request
 	 */
-	protected WebDataBinder createBinderInstance(Object target, String objectName) {
+	protected WebDataBinder createBinderInstance(Object target, String objectName, NativeWebRequest webRequest) {
 		return new WebRequestDataBinder(target, objectName);
+	}
+
+	/**
+	 * Extension hook that subclasses can override to initialize further the data binder.
+	 * Will be invoked after the data binder is initialized through the {@link WebBindingInitializer}. 
+	 * @param dataBinder the data binder instance to customize
+	 * @param webRequest the current request
+	 * @throws Exception if initialization fails
+	 */
+	protected void initBinder(WebDataBinder dataBinder, NativeWebRequest webRequest) throws Exception {
 	}
 
 }

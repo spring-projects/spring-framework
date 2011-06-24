@@ -73,5 +73,32 @@ public class ServletRequestDataBinderFactoryTests {
 		assertEquals("nameValue", target.getName());
 		assertEquals(25, target.getAge());
 	}
-	
+
+	@Test
+	public void requestParamsOverrideUriTemplateVars() throws Exception {
+		request.addParameter("age", "35");
+		
+		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		uriTemplateVars.put("name", "nameValue");
+		uriTemplateVars.put("age", "25");
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+		
+		TestBean target = new TestBean();
+		WebDataBinder binder = binderFactory.createBinder(webRequest, target, "");
+		((ServletRequestDataBinder) binder).bind(request);
+
+		assertEquals("nameValue", target.getName());
+		assertEquals(35, target.getAge());
+	}
+
+	@Test
+	public void noUriTemplateVars() throws Exception {
+		TestBean target = new TestBean();
+		WebDataBinder binder = binderFactory.createBinder(webRequest, target, "");
+		((ServletRequestDataBinder) binder).bind(request);
+
+		assertEquals(null, target.getName());
+		assertEquals(0, target.getAge());
+	}
+
 }
