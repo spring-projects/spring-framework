@@ -48,7 +48,7 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	 * conversions on properties.
 	 * <p><strong>Note:</strong> as an alternative to fully replacing the {@code
 	 * ConversionService}, consider adding or removing individual {@code Converter}
-	 * intstances by drilling into {@link #getConversionService()} and calling methods
+	 * instances by drilling into {@link #getConversionService()} and calling methods
 	 * such as {@code #addConverter}.
 	 * @see PropertyResolver#getProperty(String, Class)
 	 * @see #getConversionService()
