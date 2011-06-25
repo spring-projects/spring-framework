@@ -150,12 +150,11 @@ import javax.servlet.ServletException;
  * <p>{@code WEB-INF/web.xml} and {@code WebApplicationInitializer} use are not mutually
  * exclusive; for example, web.xml can register one servlet, and a {@code
  * WebApplicationInitializer} can register another. An initializer can even
- * <em>modify</em> registrations performed in {@code web.xml} through the
- * {@link ServletContext#getServletRegistration(String)} method and its similiars.
- * <strong>However, if {@code WEB-INF/web.xml} is present in the application, its
- * {@code version} attribute must be set to "3.0" or greater, otherwise {@code
- * ServletContainerInitializer} bootstrapping will be ignored by the servlet container.
- * </strong>
+ * <em>modify</em> registrations performed in {@code web.xml} through methods such as
+ * {@link ServletContext#getServletRegistration(String)}. <strong>However, if
+ * {@code WEB-INF/web.xml} is present in the application, its {@code version} attribute
+ * must be set to "3.0" or greater, otherwise {@code ServletContainerInitializer}
+ * bootstrapping will be ignored by the servlet container.</strong>
  *
  * <h3>Mapping to '/' under Tomcat</h3>
  * <p>Apache Tomcat maps its internal {@code DefaultServlet} to "/", and on Tomcat versions
