@@ -50,8 +50,6 @@ abstract class ContextLoaderUtils {
 
 	private static final Log logger = LogFactory.getLog(ContextLoaderUtils.class);
 
-	// private static final String DEFAULT_CONTEXT_LOADER_CLASS_NAME =
-	// "org.springframework.test.context.support.GenericXmlContextLoader";
 	private static final String DEFAULT_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.DelegatingSmartContextLoader";
 
 

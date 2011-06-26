@@ -96,8 +96,8 @@ public class MergedContextConfiguration {
 		String activeProfilesKey = ObjectUtils.nullSafeToString(activeProfiles);
 		String contextLoaderKey = contextLoader == null ? "null" : contextLoader.getClass().getName();
 
-		return String.format("locations = [%s], classes = [%s], activeProfiles = [%s], contextLoader = [%s]",
-			locationsKey, classesKey, activeProfilesKey, contextLoaderKey);
+		return String.format("locations = %s, classes = %s, activeProfiles = %s, contextLoader = %s", locationsKey,
+			classesKey, activeProfilesKey, contextLoaderKey);
 	}
 
 	/**
