@@ -70,7 +70,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 
 		for (SmartContextLoader loader : candidates) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Delegating to loader [%s] to process context configuration [%s].",
+				logger.debug(String.format("Delegating to %s to process context configuration [%s].",
 					loader.getClass().getName(), configAttributes));
 			}
 
@@ -120,8 +120,8 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 
 		for (SmartContextLoader loader : candidates) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Delegating to loader [%s] to load context from [%s].",
-					loader.getClass().getName(), mergedConfig));
+				logger.debug(String.format("Delegating to %s to load context from [%s].", loader.getClass().getName(),
+					mergedConfig));
 			}
 
 			// Ask each loader if it can load a context from the mergedConfig.
@@ -132,7 +132,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 			}
 		}
 
-		throw new IllegalStateException(String.format("None of the candidate SmartContextLoaders [%s] "
+		throw new IllegalStateException(String.format("None of the candidate SmartContextLoaders %s "
 				+ "was able to load an ApplicationContext from [%s].", candidates, mergedConfig));
 	}
 
