@@ -23,6 +23,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
+import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -88,6 +89,13 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(),
 			configAttributes.getLocations());
 		configAttributes.setLocations(processedLocations);
+	}
+
+	/**
+	 * TODO Document default supports(MergedContextConfiguration) implementation.
+	 */
+	public boolean supports(MergedContextConfiguration mergedConfig) {
+		return !ObjectUtils.isEmpty(mergedConfig.getLocations());
 	}
 
 	// --- ContextLoader -------------------------------------------------------

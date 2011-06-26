@@ -81,6 +81,14 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 		}
 	}
 
+	/**
+	 * TODO Document overridden supports(MergedContextConfiguration) implementation.
+	 */
+	@Override
+	public boolean supports(MergedContextConfiguration mergedConfig) {
+		return ObjectUtils.isEmpty(mergedConfig.getLocations()) && !ObjectUtils.isEmpty(mergedConfig.getClasses());
+	}
+
 	// --- AnnotationConfigContextLoader ---------------------------------------
 
 	private boolean isStaticNonPrivateAndNonFinal(Class<?> clazz) {

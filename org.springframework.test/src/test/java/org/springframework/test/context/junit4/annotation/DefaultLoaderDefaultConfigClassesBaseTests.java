@@ -27,23 +27,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.context.support.DelegatingSmartContextLoader;
 
 /**
  * Integration tests that verify support for configuration classes in
- * the Spring TestContext Framework.
- * 
- * <p>Configuration will be loaded from {@link DefaultConfigClassesBaseTests.ContextConfiguration}.
+ * the Spring TestContext Framework in conjunction with the
+ * {@link DelegatingSmartContextLoader}.
  * 
  * @author Sam Brannen
  * @since 3.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-public class DefaultConfigClassesBaseTests {
+@ContextConfiguration
+public class DefaultLoaderDefaultConfigClassesBaseTests {
 
 	@Configuration
-	static class ContextConfiguration {
+	static class Config {
 
 		@Bean
 		public Employee employee() {

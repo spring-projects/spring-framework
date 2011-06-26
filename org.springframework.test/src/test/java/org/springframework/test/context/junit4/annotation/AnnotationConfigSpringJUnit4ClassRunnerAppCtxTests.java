@@ -18,7 +18,6 @@ package org.springframework.test.context.junit4.annotation;
 
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTests;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 /**
  * Integration tests that verify support for configuration classes in
@@ -34,7 +33,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  * @author Sam Brannen
  * @since 3.1
  */
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = PojoAndStringConfig.class, inheritLocations = false)
+@ContextConfiguration(classes = PojoAndStringConfig.class, inheritLocations = false)
 public class AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {
 	/* all tests are in the parent class. */
 }

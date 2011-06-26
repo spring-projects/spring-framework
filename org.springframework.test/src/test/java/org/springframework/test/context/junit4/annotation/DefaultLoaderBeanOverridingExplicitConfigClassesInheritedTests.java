@@ -20,43 +20,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-import org.springframework.beans.Pet;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.support.DelegatingSmartContextLoader;
 
 /**
  * Integration tests that verify support for configuration classes in
- * the Spring TestContext Framework.
- * 
- * <p>Configuration will be loaded from {@link DefaultConfigClassesBaseTests.ContextConfiguration}
- * and {@link DefaultConfigClassesInheritedTests.ContextConfiguration}.
+ * the Spring TestContext Framework in conjunction with the
+ * {@link DelegatingSmartContextLoader}.
  * 
  * @author Sam Brannen
  * @since 3.1
  */
-@ContextConfiguration
-public class DefaultConfigClassesInheritedTests extends DefaultConfigClassesBaseTests {
-
-	@Configuration
-	static class ContextConfiguration {
-
-		@Bean
-		public Pet pet() {
-			return new Pet("Fido");
-		}
-	}
-
-
-	@Autowired
-	private Pet pet;
-
+@ContextConfiguration(classes = DefaultLoaderBeanOverridingDefaultConfigClassesInheritedTests.Config.class)
+public class DefaultLoaderBeanOverridingExplicitConfigClassesInheritedTests extends
+		DefaultLoaderExplicitConfigClassesBaseTests {
 
 	@Test
-	public void verifyPetSetFromExtendedContextConfig() {
-		assertNotNull("The pet should have been autowired.", this.pet);
-		assertEquals("Fido", this.pet.getName());
+	@Override
+	public void verifyEmployeeSetFromBaseContextConfig() {
+		assertNotNull("The employee should have been autowired.", this.employee);
+		assertEquals("The employee bean should have been overridden.", "Yoda", this.employee.getName());
 	}
 
 }
