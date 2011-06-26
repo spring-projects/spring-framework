@@ -96,6 +96,14 @@ public interface SmartContextLoader extends ContextLoader {
 	void processContextConfiguration(ContextConfigurationAttributes configAttributes);
 
 	/**
+	 * TODO Document supports(MergedContextConfiguration).
+	 *
+	 * @param mergedConfig
+	 * @return
+	 */
+	boolean supports(MergedContextConfiguration mergedConfig);
+
+	/**
 	 * Loads a new {@link ApplicationContext context} based on the supplied
 	 * {@link MergedContextConfiguration merged context configuration},
 	 * configures the context, and finally returns the context in a fully

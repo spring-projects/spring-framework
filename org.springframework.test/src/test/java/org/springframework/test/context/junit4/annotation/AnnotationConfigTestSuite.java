@@ -34,8 +34,15 @@ AnnotationConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
 	DefaultConfigClassesBaseTests.class,//
 	DefaultConfigClassesInheritedTests.class,//
 	BeanOverridingDefaultConfigClassesInheritedTests.class,//
+	ExplicitConfigClassesBaseTests.class,//
+	ExplicitConfigClassesInheritedTests.class,//
 	BeanOverridingExplicitConfigClassesInheritedTests.class,//
-	ExplicitConfigClassesInheritedTests.class //
+	DefaultLoaderDefaultConfigClassesBaseTests.class,//
+	DefaultLoaderDefaultConfigClassesInheritedTests.class,//
+	DefaultLoaderBeanOverridingDefaultConfigClassesInheritedTests.class,//
+	DefaultLoaderExplicitConfigClassesBaseTests.class,//
+	DefaultLoaderExplicitConfigClassesInheritedTests.class,//
+	DefaultLoaderBeanOverridingExplicitConfigClassesInheritedTests.class //
 })
 public class AnnotationConfigTestSuite {
 }

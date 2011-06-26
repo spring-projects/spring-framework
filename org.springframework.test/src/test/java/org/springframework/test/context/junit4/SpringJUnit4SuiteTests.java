@@ -26,6 +26,13 @@ import org.springframework.test.context.junit4.annotation.BeanOverridingDefaultC
 import org.springframework.test.context.junit4.annotation.BeanOverridingExplicitConfigClassesInheritedTests;
 import org.springframework.test.context.junit4.annotation.DefaultConfigClassesBaseTests;
 import org.springframework.test.context.junit4.annotation.DefaultConfigClassesInheritedTests;
+import org.springframework.test.context.junit4.annotation.DefaultLoaderBeanOverridingDefaultConfigClassesInheritedTests;
+import org.springframework.test.context.junit4.annotation.DefaultLoaderBeanOverridingExplicitConfigClassesInheritedTests;
+import org.springframework.test.context.junit4.annotation.DefaultLoaderDefaultConfigClassesBaseTests;
+import org.springframework.test.context.junit4.annotation.DefaultLoaderDefaultConfigClassesInheritedTests;
+import org.springframework.test.context.junit4.annotation.DefaultLoaderExplicitConfigClassesBaseTests;
+import org.springframework.test.context.junit4.annotation.DefaultLoaderExplicitConfigClassesInheritedTests;
+import org.springframework.test.context.junit4.annotation.ExplicitConfigClassesBaseTests;
 import org.springframework.test.context.junit4.annotation.ExplicitConfigClassesInheritedTests;
 import org.springframework.test.context.junit4.orm.HibernateSessionFlushingTests;
 import org.springframework.test.context.junit4.profile.annotation.DefaultProfileAnnotationConfigTests;
@@ -58,12 +65,19 @@ StandardJUnit4FeaturesTests.class,//
 	DefaultConfigClassesBaseTests.class,//
 	DefaultConfigClassesInheritedTests.class,//
 	BeanOverridingDefaultConfigClassesInheritedTests.class,//
+	ExplicitConfigClassesBaseTests.class,//
 	ExplicitConfigClassesInheritedTests.class,//
 	BeanOverridingExplicitConfigClassesInheritedTests.class,//
+	DefaultLoaderDefaultConfigClassesBaseTests.class,//
+	DefaultLoaderDefaultConfigClassesInheritedTests.class,//
+	DefaultLoaderBeanOverridingDefaultConfigClassesInheritedTests.class,//
+	DefaultLoaderExplicitConfigClassesBaseTests.class,//
+	DefaultLoaderExplicitConfigClassesInheritedTests.class,//
+	DefaultLoaderBeanOverridingExplicitConfigClassesInheritedTests.class,//
 	DefaultProfileAnnotationConfigTests.class,//
-	DevProfileAnnotationConfigTests.class, //
+	DevProfileAnnotationConfigTests.class,//
 	DefaultProfileXmlConfigTests.class,//
-	DevProfileXmlConfigTests.class, //
+	DevProfileXmlConfigTests.class,//
 	ExpectedExceptionSpringRunnerTests.class,//
 	TimedSpringRunnerTests.class,//
 	RepeatedSpringRunnerTests.class,//

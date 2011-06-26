@@ -23,38 +23,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.context.support.DelegatingSmartContextLoader;
 
 /**
  * Integration tests that verify support for configuration classes in
- * the Spring TestContext Framework.
- * 
- * <p>Configuration will be loaded from {@link DefaultConfigClassesBaseTests.ContextConfiguration}.
+ * the Spring TestContext Framework in conjunction with the
+ * {@link DelegatingSmartContextLoader}.
  * 
  * @author Sam Brannen
  * @since 3.1
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
-public class DefaultConfigClassesBaseTests {
-
-	@Configuration
-	static class ContextConfiguration {
-
-		@Bean
-		public Employee employee() {
-			Employee employee = new Employee();
-			employee.setName("John Smith");
-			employee.setAge(42);
-			employee.setCompany("Acme Widgets, Inc.");
-			return employee;
-		}
-	}
-
+@ContextConfiguration(classes = DefaultLoaderDefaultConfigClassesBaseTests.Config.class)
+public class DefaultLoaderExplicitConfigClassesBaseTests {
 
 	@Autowired
 	protected Employee employee;
@@ -62,7 +45,7 @@ public class DefaultConfigClassesBaseTests {
 
 	@Test
 	public void verifyEmployeeSetFromBaseContextConfig() {
-		assertNotNull("The employee field should have been autowired.", this.employee);
+		assertNotNull("The employee should have been autowired.", this.employee);
 		assertEquals("John Smith", this.employee.getName());
 	}
 

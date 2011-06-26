@@ -26,6 +26,7 @@ import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.util.ObjectUtils;
 
 /**
  * TODO Document DelegatingSmartContextLoader.
@@ -62,6 +63,11 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 	 * TODO Document processContextConfiguration() implementation.
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
+
+		final String[] originalLocations = configAttributes.getLocations();
+		final Class<?>[] originalClasses = configAttributes.getClasses();
+		final boolean emptyResources = ObjectUtils.isEmpty(originalLocations) && ObjectUtils.isEmpty(originalClasses);
+
 		for (SmartContextLoader loader : candidates) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Delegating to loader [%s] to process context configuration [%s].",
@@ -73,7 +79,9 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 			// If the original locations and classes are not empty, there's no
 			// need to bother with default generation checks; just let each
 			// loader process the configuration.
-			//
+			if (!emptyResources) {
+				loader.processContextConfiguration(configAttributes);
+			}
 			// Otherwise, if a loader claims to generate defaults, let it
 			// process the configuration, and then verify that it actually did
 			// generate defaults.
@@ -83,9 +91,26 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 			// 1) stop iterating
 			// 2) mark the current loader as the winning candidate (?)
 			// 3) log an info message.
-
-			loader.processContextConfiguration(configAttributes);
+			else {
+				if (loader.generatesDefaults()) {
+					loader.processContextConfiguration(configAttributes);
+				}
+			}
 		}
+		// If any loader claims to generate defaults but none actually did,
+		// throw an exception.
+	}
+
+	/**
+	 * TODO Document supports(MergedContextConfiguration) implementation.
+	 */
+	public boolean supports(MergedContextConfiguration mergedConfig) {
+		for (SmartContextLoader loader : candidates) {
+			if (loader.supports(mergedConfig)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -99,21 +124,16 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 					loader.getClass().getName(), mergedConfig));
 			}
 
-			// TODO Implement loadContext(MergedContextConfiguration).
-			//
-			// Ask each loader if it _can_ load a context from the mergedConfig.
+			// Ask each loader if it can load a context from the mergedConfig.
 			// If a loader can, let it; otherwise, continue iterating over all
 			// remaining candidates.
-			//
-			// If no candidate can load a context from the mergedConfig, throw
-			// an exception.
+			if (loader.supports(mergedConfig)) {
+				return loader.loadContext(mergedConfig);
+			}
 		}
 
-		// TODO Implement delegation logic.
-		//
-		// Proof of concept: ensuring that hard-coded delegation to
-		// GenericXmlContextLoader works "as is".
-		return candidates.get(0).loadContext(mergedConfig);
+		throw new IllegalStateException(String.format("None of the candidate SmartContextLoaders [%s] "
+				+ "was able to load an ApplicationContext from [%s].", candidates, mergedConfig));
 	}
 
 	// --- ContextLoader -------------------------------------------------------
