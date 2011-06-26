@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * for test classes.
  * 
  * <p>Prior to Spring 3.1, only path-based resource locations were supported.
- * As of Spring 3.1 {@link #loader context loaders} may choose to support
+ * As of Spring 3.1, {@link #loader context loaders} may choose to support
  * either path-based or class-based resources (but not both). Consequently
  * {@code @ContextConfiguration} can be used to declare either path-based
  * resource locations (via the {@link #locations} or {@link #value}
@@ -40,7 +40,9 @@ import java.lang.annotation.Target;
  * @author Sam Brannen
  * @since 2.5
  * @see ContextLoader
+ * @see SmartContextLoader
  * @see org.springframework.context.ApplicationContext
+ * @see ActiveProfiles
  */
 @Documented
 @Inherited
@@ -62,20 +64,26 @@ public @interface ContextConfiguration {
 	 * The resource locations to use for loading an
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * 
-	 * <p>Check out the javadoc for {@link org.springframework.test.context.support.AbstractContextLoader#modifyLocations AbstractContextLoader.modifyLocations()}
-	 * for details on how a location String will be interpreted at runtime,
-	 * in particular in case of a relative path. Also, check out the documentation on
-	 * {@link org.springframework.test.context.support.AbstractContextLoader#generateDefaultLocations AbstractContextLoader.generateDefaultLocations()}
-	 * for details on the default locations that are going to be used if none are specified.
+	 * <p>Check out the javadoc for
+	 * {@link org.springframework.test.context.support.AbstractContextLoader#modifyLocations
+	 * AbstractContextLoader.modifyLocations()} for details on how a location
+	 * String will be interpreted at runtime, in particular in case of a relative
+	 * path. Also, check out the documentation on
+	 * {@link org.springframework.test.context.support.AbstractContextLoader#generateDefaultLocations
+	 * AbstractContextLoader.generateDefaultLocations()} for details on the default
+	 * locations that are going to be used if none are specified.
 	 * 
 	 * <p>Note that the above-mentioned default rules only apply for a standard
-	 * {@link org.springframework.test.context.support.AbstractContextLoader AbstractContextLoader} subclass
-	 * such as {@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader}
-	 * which is the effective default implementation used at runtime.
+	 * {@link org.springframework.test.context.support.AbstractContextLoader
+	 * AbstractContextLoader} subclass such as
+	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
+	 * GenericXmlContextLoader} which is the effective default implementation
+	 * used at runtime.
 	 * 
-	 * <p>This attribute may <strong>not</strong> be used in conjunction
-	 * with {@link #value} or {@link #classes}, but it may be used
-	 * instead of {@link #value}.
+	 * <p>This attribute may <strong>not</strong> be used in conjunction with
+	 * {@link #value} or {@link #classes}, but it may be used instead of
+	 * {@link #value}.
+	 * @since 2.5
 	 */
 	String[] locations() default {};
 
@@ -85,13 +93,15 @@ public @interface ContextConfiguration {
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * 
 	 * <p>To enable support for configuration class processing, an appropriate
-	 * {@link ContextLoader} must be {@link #loader configured}.
-	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader AnnotationConfigContextLoader}
-	 * is one such loader provided by the Spring Framework.
+	 * {@link SmartContextLoader} must be {@link #loader configured}.
+	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader
+	 * AnnotationConfigContextLoader} is one such loader provided by the Spring Framework.
 	 * 
 	 * <p>Check out the javadoc for
-	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader#generateDefaultLocations AnnotationConfigContextLoader.generateDefaultLocations()}
-	 * for details on the default configuration classes that will be used if none are specified.
+	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader#generateDefaultConfigurationClasses
+	 * AnnotationConfigContextLoader.generateDefaultConfigurationClasses()}
+	 * for details on the default configuration classes that will be used if none
+	 * are specified.
 	 * 
 	 * <p>Note that this attribute may <strong>not</strong> be used in
 	 * conjunction with {@link #locations} or {@link #value}.
@@ -158,22 +168,27 @@ public @interface ContextConfiguration {
 	 *     // ...
 	 * }
 	 * </pre>
+	 * @since 2.5
 	 */
 	boolean inheritLocations() default true;
 
+	// TODO Update regarding default --> DelegatingSmartContextLoader
 	/**
-	 * The type of {@link ContextLoader} to use for loading an
-	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
+	 * The type of {@link ContextLoader} (or {@link SmartContextLoader}) to use
+	 * for loading an {@link org.springframework.context.ApplicationContext
+	 * ApplicationContext}.
 	 * 
 	 * <p>If not specified, the loader will be inherited from the first superclass
-	 * which is annotated with <code>&#064;ContextConfiguration</code> and specifies
-	 * an explicit loader. If no class in the hierarchy specifies an explicit
+	 * that is annotated with {@code @ContextConfiguration} and specifies an
+	 * explicit loader. If no class in the hierarchy specifies an explicit
 	 * loader, a default loader will be used instead.
 	 * 
 	 * <p>The default concrete implementation chosen at runtime will be
-	 * {@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader}.
-	 * Also check out {@link org.springframework.test.context.support.AbstractContextLoader AbstractContextLoader}'s
-	 * javadoc for details on the default behavior there.
+	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
+	 * GenericXmlContextLoader}. Also check out
+	 * {@link org.springframework.test.context.support.AbstractContextLoader
+	 * AbstractContextLoader}'s javadoc for details on the default behavior there.
+	 * @since 2.5
 	 */
 	Class<? extends ContextLoader> loader() default ContextLoader.class;
 
