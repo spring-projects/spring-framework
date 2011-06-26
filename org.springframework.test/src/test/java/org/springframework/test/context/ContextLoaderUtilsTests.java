@@ -27,8 +27,8 @@ import java.util.List;
 import org.junit.Test;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.context.support.DelegatingSmartContextLoader;
 import org.springframework.test.context.support.GenericPropertiesContextLoader;
-import org.springframework.test.context.support.GenericXmlContextLoader;
 
 /**
  * Unit tests for {@link ContextLoaderUtils}.
@@ -120,7 +120,7 @@ public class ContextLoaderUtilsTests {
 			mergedConfig,
 			testClass,
 			new String[] { "classpath:/org/springframework/test/context/ContextLoaderUtilsTests$BareAnnotations-context.xml" },
-			EMPTY_CLASS_ARRAY, GenericXmlContextLoader.class);
+			EMPTY_CLASS_ARRAY, DelegatingSmartContextLoader.class);
 	}
 
 	@Test
@@ -129,7 +129,7 @@ public class ContextLoaderUtilsTests {
 		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass, null);
 
 		assertMergedContextConfiguration(mergedConfig, testClass, new String[] { "classpath:/foo.xml" },
-			new Class<?>[] { FooConfig.class }, GenericXmlContextLoader.class);
+			new Class<?>[] { FooConfig.class }, DelegatingSmartContextLoader.class);
 	}
 
 	@Test
