@@ -19,6 +19,7 @@ package org.springframework.test.context;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -55,14 +56,15 @@ public class ContextConfigurationAttributes {
 	 * @throws IllegalStateException if both the locations and value attributes have been declared
 	 */
 	static String[] resolveLocations(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
+		Assert.notNull(declaringClass, "declaringClass must not be null");
 
 		String[] locations = contextConfiguration.locations();
 		String[] valueLocations = contextConfiguration.value();
 
 		if (!ObjectUtils.isEmpty(valueLocations) && !ObjectUtils.isEmpty(locations)) {
-			String msg = String.format("Test class [%s] has been configured with @ContextConfiguration's 'value' [%s] "
-					+ "and 'locations' [%s] attributes. Only one declaration of resource "
-					+ "locations is permitted per @ContextConfiguration annotation.", declaringClass,
+			String msg = String.format("Test class [%s] has been configured with @ContextConfiguration's 'value' %s "
+					+ "and 'locations' %s attributes. Only one declaration of resource "
+					+ "locations is permitted per @ContextConfiguration annotation.", declaringClass.getName(),
 				ObjectUtils.nullSafeToString(valueLocations), ObjectUtils.nullSafeToString(locations));
 			logger.error(msg);
 			throw new IllegalStateException(msg);
