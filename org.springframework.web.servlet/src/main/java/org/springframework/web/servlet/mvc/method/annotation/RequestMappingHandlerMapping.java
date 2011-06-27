@@ -111,10 +111,10 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param handlerType the handler type
 	 * @return a {@link RequestMappingInfo} instance; never {@code null}
 	 */
-	RequestMappingInfo createRequestMappingInfo(RequestMapping annot, 
-												boolean isMethodAnnotation, 
-												Method method, 
-												Class<?> handlerType) {
+	protected RequestMappingInfo createRequestMappingInfo(RequestMapping annot, 
+														  boolean isMethodAnnotation, 
+														  Method method, 
+														  Class<?> handlerType) {
 		return new RequestMappingInfo(
 				new PatternsRequestCondition(annot.value(), getUrlPathHelper(), getPathMatcher(), useSuffixPatternMatch),
 				new RequestMethodsRequestCondition(annot.method()),

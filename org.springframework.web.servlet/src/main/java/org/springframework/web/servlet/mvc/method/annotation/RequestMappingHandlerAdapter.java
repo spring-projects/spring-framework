@@ -122,9 +122,9 @@ import org.springframework.web.util.WebUtils;
 public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter implements BeanFactoryAware,
 		InitializingBean {
 
-	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
+	private List<? extends HandlerMethodArgumentResolver> customArgumentResolvers;
 
-	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
+	private List<? extends HandlerMethodReturnValueHandler> customReturnValueHandlers;
 	
 	private List<ModelAndViewResolver> modelAndViewResolvers;
 
@@ -179,7 +179,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * <p>An existing {@link WebArgumentResolver} can either adapted with {@link ServletWebArgumentResolverAdapter}
 	 * or preferably converted to a {@link HandlerMethodArgumentResolver} instead.
 	 */
-	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setCustomArgumentResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
 	}
 	
@@ -189,7 +189,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * {@link #setCustomArgumentResolvers(List)}, which does not override default registrations.
 	 * @param argumentResolvers argument resolvers for {@link RequestMapping} and {@link ModelAttribute} methods
 	 */
-	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setArgumentResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
 			this.argumentResolvers.addResolvers(argumentResolvers);
@@ -202,7 +202,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * {@link #setCustomArgumentResolvers(List)}, which does not override default registrations.
 	 * @param argumentResolvers argument resolvers for {@link InitBinder} methods
 	 */
-	public void setInitBinderArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setInitBinderArgumentResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			this.initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
 			this.initBinderArgumentResolvers.addResolvers(argumentResolvers);
@@ -216,7 +216,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * and others. Those handlers can only be customized via {@link #setReturnValueHandlers(List)}.
 	 * @param returnValueHandlers custom return value handlers for {@link RequestMapping} methods
 	 */
-	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	public void setCustomReturnValueHandlers(List<? extends HandlerMethodReturnValueHandler> returnValueHandlers) {
 		this.customReturnValueHandlers = returnValueHandlers;
 	}
 
@@ -226,7 +226,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * {@link #setCustomReturnValueHandlers(List)}, which does not override default registrations.
 	 * @param returnValueHandlers the return value handlers for {@link RequestMapping} methods
 	 */
-	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	public void setReturnValueHandlers(List<? extends HandlerMethodReturnValueHandler> returnValueHandlers) {
 		if (returnValueHandlers != null) {
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
 			this.returnValueHandlers.addHandlers(returnValueHandlers);
@@ -340,10 +340,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	private void initArgumentResolvers() {
-		if (argumentResolvers == null) {
-			argumentResolvers = new HandlerMethodArgumentResolverComposite();
+		if (argumentResolvers != null) {
+			return;
 		}
-		
+
+		argumentResolvers = new HandlerMethodArgumentResolverComposite();
+
 		// Annotation-based resolvers
 		argumentResolvers.addResolver(new RequestParamMethodArgumentResolver(beanFactory, false));
 		argumentResolvers.addResolver(new RequestParamMapMethodArgumentResolver());
@@ -371,9 +373,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	private void initInitBinderArgumentResolvers() {
-		if (initBinderArgumentResolvers == null) {
-			initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
+		if (initBinderArgumentResolvers != null) {
+			return;
 		}
+
+		initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
 
 		// Annotation-based resolvers
 		initBinderArgumentResolvers.addResolver(new RequestParamMethodArgumentResolver(beanFactory, false));
@@ -382,7 +386,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		initBinderArgumentResolvers.addResolver(new ExpressionValueMethodArgumentResolver(beanFactory));
 
 		// Custom resolvers
-		argumentResolvers.addResolvers(customArgumentResolvers);
+		initBinderArgumentResolvers.addResolvers(customArgumentResolvers);
 
 		// Type-based resolvers
 		initBinderArgumentResolvers.addResolver(new ServletRequestMethodArgumentResolver());
@@ -393,10 +397,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 	
 	private void initReturnValueHandlers() {
-		if (returnValueHandlers == null) {
-			returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+		if (returnValueHandlers != null) {
+			return;
 		}
-		
+
+		returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
+
 		// Annotation-based handlers
 		returnValueHandlers.addHandler(new RequestResponseBodyMethodProcessor(messageConverters));
 		returnValueHandlers.addHandler(new ModelAttributeMethodProcessor(false));

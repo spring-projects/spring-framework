@@ -102,7 +102,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	/**
 	 * Add the given {@link HandlerMethodArgumentResolver}s.
 	 */
-	public void addResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	public void addResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
 				this.argumentResolvers.add(resolver);

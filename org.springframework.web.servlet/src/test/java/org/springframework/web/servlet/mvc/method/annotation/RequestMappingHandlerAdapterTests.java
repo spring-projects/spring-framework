@@ -20,15 +20,29 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.support.ModelMethodProcessor;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
+import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 
 /**
  * Fine-grained {@link RequestMappingHandlerAdapter} unit tests.
@@ -36,8 +50,8 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
  * <p>For higher-level adapter tests see:
  * <ul>
  * <li>{@link ServletHandlerMethodTests}
+ * <li>{@link HandlerMethodAnnotationDetectionTests}
  * <li>{@link RequestMappingHandlerAdapterIntegrationTests}
- * <li>{@link HandlerMethodAdapterAnnotationDetectionTests}
  * </ul>
  *
  * @author Rossen Stoyanchev
@@ -54,7 +68,6 @@ public class RequestMappingHandlerAdapterTests {
 	public void setup() throws Exception {
 		this.handlerAdapter = new RequestMappingHandlerAdapter();
 		this.handlerAdapter.setApplicationContext(new GenericWebApplicationContext());
-		this.handlerAdapter.afterPropertiesSet();
 
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
@@ -62,6 +75,7 @@ public class RequestMappingHandlerAdapterTests {
 
 	@Test
 	public void cacheControlWithoutSessionAttributes() throws Exception {
+		handlerAdapter.afterPropertiesSet();
 		handlerAdapter.setCacheSeconds(100);
 		handlerAdapter.handle(request, response, handlerMethod(new SimpleHandler(), "handle"));
 
@@ -70,17 +84,131 @@ public class RequestMappingHandlerAdapterTests {
 
 	@Test
 	public void cacheControlWithSessionAttributes() throws Exception {
+		handlerAdapter.afterPropertiesSet();
 		handlerAdapter.setCacheSeconds(100);
 		handlerAdapter.handle(request, response, handlerMethod(new SessionAttributeHandler(), "handle"));
 
 		assertEquals("no-cache", response.getHeader("Cache-Control"));
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void setArgumentResolvers() {
+		List<HandlerMethodArgumentResolver> expected  = new ArrayList<HandlerMethodArgumentResolver>();
+		expected.add(new ServletRequestMethodArgumentResolver());
+		handlerAdapter.setArgumentResolvers(expected);
+		handlerAdapter.afterPropertiesSet();
+		
+		HandlerMethodArgumentResolverComposite composite = (HandlerMethodArgumentResolverComposite) 
+			new DirectFieldAccessor(handlerAdapter).getPropertyValue("argumentResolvers");
+
+		List<HandlerMethodArgumentResolver> actual = (List<HandlerMethodArgumentResolver>)
+			new DirectFieldAccessor(composite).getPropertyValue("argumentResolvers");
+		
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void setInitBinderArgumentResolvers() {
+		List<HandlerMethodArgumentResolver> expected  = new ArrayList<HandlerMethodArgumentResolver>();
+		expected.add(new ServletRequestMethodArgumentResolver());
+		handlerAdapter.setInitBinderArgumentResolvers(expected);
+		handlerAdapter.afterPropertiesSet();
+		
+		HandlerMethodArgumentResolverComposite composite = (HandlerMethodArgumentResolverComposite) 
+			new DirectFieldAccessor(handlerAdapter).getPropertyValue("initBinderArgumentResolvers");
+
+		List<HandlerMethodArgumentResolver> actual = (List<HandlerMethodArgumentResolver>)
+			new DirectFieldAccessor(composite).getPropertyValue("argumentResolvers");
+		
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void setReturnValueHandlers() {
+		List<HandlerMethodReturnValueHandler> expected  = new ArrayList<HandlerMethodReturnValueHandler>();
+		expected.add(new ModelMethodProcessor());
+		handlerAdapter.setReturnValueHandlers(expected);
+		handlerAdapter.afterPropertiesSet();
+		
+		HandlerMethodReturnValueHandlerComposite composite = (HandlerMethodReturnValueHandlerComposite) 
+			new DirectFieldAccessor(handlerAdapter).getPropertyValue("returnValueHandlers");
+
+		List<HandlerMethodReturnValueHandler> actual = (List<HandlerMethodReturnValueHandler>)
+			new DirectFieldAccessor(composite).getPropertyValue("returnValueHandlers");
+		
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void setCustomArgumentResolvers() {
+		TestHanderMethodArgumentResolver resolver = new TestHanderMethodArgumentResolver();
+		handlerAdapter.setCustomArgumentResolvers(Arrays.asList(resolver));
+		handlerAdapter.afterPropertiesSet();
+		
+		HandlerMethodArgumentResolverComposite composite = (HandlerMethodArgumentResolverComposite) 
+			new DirectFieldAccessor(handlerAdapter).getPropertyValue("argumentResolvers");
+
+		List<HandlerMethodArgumentResolver> actual = (List<HandlerMethodArgumentResolver>)
+			new DirectFieldAccessor(composite).getPropertyValue("argumentResolvers");
+		
+		assertTrue(actual.contains(resolver));
+		
+		composite = (HandlerMethodArgumentResolverComposite) 
+		new DirectFieldAccessor(handlerAdapter).getPropertyValue("initBinderArgumentResolvers");
+
+		actual = (List<HandlerMethodArgumentResolver>)
+		new DirectFieldAccessor(composite).getPropertyValue("argumentResolvers");
+
+		assertTrue(actual.contains(resolver));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void setCustomReturnValueHandlers() {
+		TestHandlerMethodReturnValueHandler handler = new TestHandlerMethodReturnValueHandler();
+		handlerAdapter.setCustomReturnValueHandlers(Arrays.asList(handler));
+		handlerAdapter.afterPropertiesSet();
+		
+		HandlerMethodReturnValueHandlerComposite composite = (HandlerMethodReturnValueHandlerComposite) 
+			new DirectFieldAccessor(handlerAdapter).getPropertyValue("returnValueHandlers");
+
+		List<HandlerMethodReturnValueHandler> actual = (List<HandlerMethodReturnValueHandler>)
+			new DirectFieldAccessor(composite).getPropertyValue("returnValueHandlers");
+		
+		assertTrue(actual.contains(handler));
+	}
+	
 	private HandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes) throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
 		return new InvocableHandlerMethod(handler, method);
 	}
 
+	private final class TestHanderMethodArgumentResolver implements HandlerMethodArgumentResolver {
+		public boolean supportsParameter(MethodParameter parameter) {
+			return false;
+		}
+
+		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+				NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+			return null;
+		}
+	}
+
+	private final class TestHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler{
+
+		public boolean supportsReturnType(MethodParameter returnType) {
+			return false;
+		}
+
+		public void handleReturnValue(Object returnValue, MethodParameter returnType,
+				ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
+		}
+	}
+	
 	private static class SimpleHandler {
 
 		@SuppressWarnings("unused")
