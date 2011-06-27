@@ -16,14 +16,13 @@
 
 package org.springframework.core.convert.support;
 
-import java.util.Arrays;
+import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.Set;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Converts an Array to an Object by returning the first array element after converting it to the desired targetType.
@@ -34,10 +33,10 @@ import org.springframework.util.ObjectUtils;
  */
 final class ArrayToObjectConverter implements ConditionalGenericConverter {
 
-	private final CollectionToObjectConverter helperConverter;
+	private final ConversionService conversionService;
 
 	public ArrayToObjectConverter(ConversionService conversionService) {
-		this.helperConverter = new CollectionToObjectConverter(conversionService);
+		this.conversionService = conversionService;
 	}
 
 	public Set<ConvertiblePair> getConvertibleTypes() {
@@ -45,11 +44,21 @@ final class ArrayToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.helperConverter.matches(sourceType, targetType);
+		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(), targetType, conversionService);
 	}
 	
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.helperConverter.convert(Arrays.asList(ObjectUtils.toObjectArray(source)), sourceType, targetType);
+		if (source == null) {
+			return null;
+		}
+		if (sourceType.isAssignableTo(targetType)) {
+			return source;
+		}
+		if (Array.getLength(source) == 0) {
+			return null;
+		}
+		Object firstElement = Array.get(source, 0);
+		return this.conversionService.convert(firstElement, sourceType.elementTypeDescriptor(firstElement), targetType);
 	}
 
 }

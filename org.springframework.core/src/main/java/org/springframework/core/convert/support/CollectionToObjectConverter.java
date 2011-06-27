@@ -50,6 +50,9 @@ final class CollectionToObjectConverter implements ConditionalGenericConverter {
 		if (source == null) {
 			return null;
 		}
+		if (sourceType.isAssignableTo(targetType)) {
+			return source;
+		}
 		Collection<?> sourceCollection = (Collection<?>) source;
 		if (sourceCollection.size() == 0) {
 			return null;
