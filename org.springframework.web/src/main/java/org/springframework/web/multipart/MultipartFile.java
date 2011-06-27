@@ -19,6 +19,7 @@ package org.springframework.web.multipart;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 
 /**
  * A representation of an uploaded file received in a multipart request.
@@ -100,5 +101,29 @@ public interface MultipartFile {
 	 * in the filesystem and is not available anymore for another transfer
 	 */
 	void transferTo(File dest) throws IOException, IllegalStateException;
+
+	/**
+	 * Return the first value associated with the given header name, if any.
+	 * @param name the name of the header
+	 * @return the first header value, or <code>null</code> if no such header was found
+	 * @since 3.1
+	 */
+	String getHeader(String name);
+
+	/**
+	 * Return all values associated with the given header name, if any.
+	 * @param name the name of the header
+	 * @return the header values as an array, or <code>null</code> if no such header was found
+	 * @since 3.1
+	 */
+	String[] getHeaders(String name);
+
+	/**
+	 * Return an {@link java.util.Iterator} of Strings containing the
+	 * names of headers associated with this file.
+	 * @return the names of the headers
+	 * @since 3.1
+	 */
+	Iterator<String> getHeaderNames(String name);
 
 }
