@@ -1468,94 +1468,224 @@ public ResponseEntity&lt;String&gt; handle(HttpEntity&lt;byte[]&gt; requestEntit
         linkend="rest-message-conversion">Message Converters</link>.</para>
       </section>
 
-      <section id="mvc-ann-modelattrib">
-        <title>Command and Form Objects</title>
-
-        <para>The <classname>@ModelAttribute</classname> annotation is central to 
-        working with command and form objects. It has a couple of usage scenarios
-        described in this section.
-        </para>
+      <section id="mvc-ann-modelattrib-methods">
+        <title>Using <interfacename>@ModelAttribute</interfacename> on a controller method</title>
         
-        <para>The main scenario is using <classname>@ModelAttribute</classname> on
-        a method parameter in order to get access to data received from a form submission
-        or from request parameters. For example an object of type 
-        <classname>Person</classname> with fields <literal>firstName</literal>
-        and <literal>lastName</literal> will be populated accordingly assuming
-        the presence of either form or query string parameters with matching names:
-        e.g. <literal>firstName=Rod</literal> and <literal>lastName=Johnson</literal>.
-        Below is an example of a <classname>@ModelAttribute</classname>-annotated 
-        method parameter.</para>
+        <para>The <interfacename>@ModelAttribute</interfacename> annotation can be used on a 
+        method or on a method argument. This section explains its usage on a method while the 
+        next section explains its usage on a method argument.</para>
         
-        <programlisting language="java">@Controller
-@RequestMapping("/owners/{ownerId}/pets/{petId}/edit")
-@SessionAttributes("pet")
-public class EditPetForm {
-
-    @RequestMapping(method = RequestMethod.POST)
-    public String processSubmit(
-            <emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>,
-            BindingResult result, SessionStatus status) {
-
-    }
-
-}</programlisting>
-
-        <para>Before invoking the method, Spring MVC will create a <classname>Pet</classname> 
-        instance, populate it using request parameters, and also add it to the model 
-        under the name <literal>pet</literal>.
-        The <classname>Pet</classname> instance may have been created using the
-        default constructor (if available), it may have been obtained from the HTTP session in
-        conjunction with use of <classname>@SessionAttributes</classname> (see the next section), or
-        it may have been created by another <classname>@ModelAttribute</classname>-annotated method 
-        in the same class. A <classname>@ModelAttribute</classname>-annotated method 
-        is the second scenario for using the annotation.</para>
+        <para>An <interfacename>@ModelAttribute</interfacename> on a method indicates a method 
+        for adding model attributes. A few examples:</para>
         
-        <para>When used at the method level a <classname>@ModelAttribute</classname> 
-        contributes one or more objects to the model. See the <literal>populatePetTypes()</literal> 
-        method in the following example:</para>
+        <programlisting language="java">@ModelAttribute
+public void populateModel(Model model) {
+    model.addAttribute("types", this.clinic.getPetTypes();
+    // add more attributes ...
+}
 
-        <programlisting language="java">@Controller
-@RequestMapping("/owners/{ownerId}/pets/{petId}/edit")
-@SessionAttributes("pet")
-public class EditPetForm {
+@ModelAttribute
+public void addAccount(@RequestParam String number, Model model) {
+    Account account = accountManager.findAccount(number);
+    model.addAttribute(account);
+}
 
-    <lineannotation>// ...</lineannotation>
+@ModelAttribute
+public Account addAccount(@RequestParam String number) {
+    return accountManager.findAccount(number);
+}
+</programlisting>        
 
-    <emphasis role="bold">@ModelAttribute("types")</emphasis>
-    public Collection&lt;PetType&gt; populatePetTypes() {
-        return this.clinic.getPetTypes();
-    }
+        <para><interfacename>@ModelAttribute</interfacename> methods are not associated
+        with any request mappings. Simply they are invoked prior 
+        to the invocation of every 
+        <interfacename>@RequestMapping</interfacename> method in the same controller.
+        In terms of method arguments they support the same argument types as 
+        <interfacename>@RequestMapping</interfacename> methods, hence allowing access to request 
+        parameters, path variables, and so on -- see <xref linkend="mvc-ann-arguments"/>
+        for a complete listing.</para>
 
-    @RequestMapping(method = RequestMethod.POST)
-    public String processSubmit(
-            <emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>,
-            BindingResult result, SessionStatus status) {
+        <para>There are two common use cases for <interfacename>@ModelAttribute</interfacename>
+        methods. One, is to add commonly needed model attributes - see the first example 
+        above where the model is populated with pet types to be shown in a drop-down. 
+        The second use case is to pre-load a command object - see the second and third 
+        examples above with the Account object (more on command objects in the next section).</para>
 
-        new PetValidator().validate(pet, result);
-        if (result.hasErrors()) {
-            return "petForm";
-        }
-        else {
-            this.clinic.storePet(pet);
-            status.setComplete();
-            return "redirect:owner.do?ownerId=" + pet.getOwner().getId();
-        }
-    }
+		<para>Note the two styles of <interfacename>@ModelAttribute</interfacename> methods.
+		In one style, the method accepts a <classname>Model</classname> and adds any number 
+		of model attributes to it. In the second style, the method adds an attribute implicitly 
+		by having it as its return value. That results in the object being added as an
+		attribute to the model. You can choose between the two styles depending on 
+		whether you need to add one model attribute or multiple.</para>
 
-}</programlisting>
+        <para>A controller can have any number of <interfacename>@ModelAttribute</interfacename> 
+        methods. All such methods are invoked before <interfacename>@RequestMapping</interfacename> 
+        methods within the same controller each contributing model attributes.</para>
+		
+		<para>What happens when a model attribute name is not explicitly provided? In such cases
+		a default name is assigned to the model attribute.
+		For example if the method returns an object of type <classname>Account</classname>,
+		the default name used is "account". However, you can also change it to something else
+		through the value of the <interfacename>@ModelAttribute</interfacename> annotation. 
+		Or if adding attributes directly to the <classname>Model</classname>, use the 
+		appropriate overloaded <literal>addAttribute(..)</literal> method providing
+		both the attribute name and the attribute value.</para>
 
-        <para><classname>@ModelAttribute</classname> methods are
-        executed <emphasis>before</emphasis> the chosen
-        <classname>@RequestMapping</classname> annotated handler method.
-        They effectively pre-populate the model with specific
-        attributes, often loaded from a database. Such an attribute can then
-        be accessed through a <classname>@ModelAttribute</classname>-annotated
-        <classname>@RequestMapping</classname> parameter.
-        An <classname>@ModelAttribute</classname> method can contain the same 
-        method arguments as documented previously for 
-        <classname>@RequestMapping</classname> methods.</para>
-
+		<para>Lastly the <interfacename>@ModelAttribute</interfacename> annotation can also 
+		be used directly on an <interfacename>@RequestMapping</interfacename> method. In this 
+		cause, the return value of the <interfacename>@RequestMapping</interfacename> method 
+		will be added as a model attribute and the view name will be derived using 
+		a convention -- see <xref linkend="mvc-coc-r2vnt"/>.</para>
+		
       </section>
+
+      <section id="mvc-ann-modelattrib-method-args">
+        <title>Using <interfacename>@ModelAttribute</interfacename> on a controller method argument</title>
+        
+        <para>As explained in the previous section an <interfacename>@ModelAttribute</interfacename>
+        annotation can be used on a method or on a method argument. When used on a method argument,
+        the <interfacename>@ModelAttribute</interfacename> annotation indicates a command object. A command
+        object is an object with properties (e.g. <classname>Account</classname> rather than 
+        a simple type like <literal>int</literal> or <literal>String</literal>) that is used to 
+        populate a form or reversely to be populated with the data from an HTML form. 
+        As you will see command objects can significantly automate the process of
+        working with forms -- rather than dealing with individual form
+        parameters one at a time you'll be have them in a one command object.</para>
+        
+        <para>To be more precise annotating a method argument with 
+        <interfacename>@ModelAttribute</interfacename> means 3 things:
+        <orderedlist>
+        	<listitem>The command object should be located and/or instantiated.</listitem>
+        	<listitem>It should be populated with request parameters from the current request.</listitem>
+        	<listitem>The object should be added to the model.</listitem>
+        </orderedlist>
+        See the following example:
+        </para>
+
+        <programlisting language="java">
+@RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
+public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>) {
+   
+}</programlisting>
+       
+        <para>The <interfacename>@ModelAttribute</interfacename> annotation
+        designates "pet" as a command object. But where does the object come from? There are two options.
+        It may have been added to the model by an <interfacename>@ModelAttribute</interfacename> 
+        method as explained in the previous section. Or otherwise if it's not already in the model, it
+        is instantiated through the default constructor. Typically if the object needs to be retrieved
+        from a database first, you can create an <interfacename>@ModelAttribute</interfacename>
+        method to do that. Or otherwise rely on the default constructor. If multiple methods in the
+        controller work on the same object, you can have it stored in the HTTP session between requests.
+        That is explained in <xref linkend="mvc-ann-sessionattrib"/>.</para>
+        
+        <note>
+        	<title>Using a URI template variable to retrieve a command object</title>
+        	
+        	<para>There is one other more advanced way of instantiating a command object.
+        	It is useful when the command object can be retrieved based on a URI template
+        	variable. Here is an example:</para>
+
+	        <programlisting language="java">
+@RequestMapping(value="/accounts/{account}", method = RequestMethod.PUT)
+public String save(@ModelAttribute("account") Account account) {
+
+}</programlisting>
+			<para>The name of the model attribute "account" matches to the name of a URI 
+			template variable. Assuming there is a registered 
+			<classname>Converter&lt;String, Account&gt;</classname>
+			or <classname>PropertyEditor</classname> that can turn a <literal>String</literal>
+			account number into an <classname>Account</classname> instance, those will be used
+			to provision the command object and have it added to the model. 
+			If such a Converter or PropertyEditor does not exist, however the default 
+			constructor will still be used.</para>
+        </note>
+        
+      </section>
+
+      <section id="mvc-ann-modelattrib-data-binding">
+        <title>Data binding and validation with <interfacename>@ModelAttribute</interfacename></title>
+
+		<para>As mentioned in the previous section an <interfacename>@ModelAttribute</interfacename> 
+		annotation means 3 things:
+        <orderedlist>
+        	<listitem>The command object should be located and/or instantiated.</listitem>
+        	<listitem>It should be populated with request parameters from the current request.</listitem>
+        	<listitem>The object should be added to the model.</listitem>
+        </orderedlist>
+		In this section we'll focus on the second: data binding and validation.</para>
+		
+		<para>After the command object has been provisioned using one of the methods described in the
+		previous section, the next step is to apply data binding and validation.
+		Spring's <classname>WebDataBinder</classname> does that by matching request parameters -- 
+		usually form data fields but can also be query string parameters -- to command object 
+		properties, including properties of nested objects, and populates those properties
+		accordingly also applying type conversion as necessary.
+		For example an object of type <classname>Person</classname> with 
+		properties <literal>firstName</literal> and <literal>age</literal>
+		will be populated assuming the presence of such named form fields.
+		As a result of data binding the command object is populated with the form data.</para>
+		
+		<para>There are various ways to customize the data binding process. 
+		For example you may wish to specify required fields, allowed and disallowed 
+		fields, or extend type conversion. 
+		See <xref linkend="mvc-ann-webdatabinder"/> and also <xref linkend="validation"/>.</para>
+
+		<para>As a result of data binding there may be errors such as missing required
+		fields or type conversion errors. To check for such errors 
+		add a <classname>BindingResult</classname> argument immediately following
+		the <interfacename>@ModelAttribute</interfacename> argment:</para>
+		
+        <programlisting language="java">
+@RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
+public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>, BindingResult result) {
+        
+    if (result.hasErrors()) {
+        return "petForm";
+    } 
+    
+    // ...       
+
+}</programlisting>
+		
+		<para><classname>BindingResult</classname> allows you to check if errors were found in 
+		which case it's common to return to the same form where the errors
+		can be rendered with the help of Spring's <literal>&lt;errors&gt;</literal> form tag.</para>
+		
+		<para>In addition to data binding you can apply validation using your own custom 
+		validator passing the same <classname>BindingResult</classname> that was used to record
+		data binding errors. That allows for data binding and validation errors to be accumulated
+		in one place and subsequently reported back to the user: </para>
+
+        <programlisting language="java">
+@RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
+public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>, BindingResult result) {
+
+    new PetValidator().validate(pet, result);
+    if (result.hasErrors()) {
+        return "petForm";
+    }
+    
+    // ...
+}</programlisting>
+
+		<para>Or you can have validation invoked automatically by adding the  
+		JSR-303 <interfacename>@Valid</interfacename> annotation:</para>
+		
+        <programlisting language="java">
+@RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
+public String processSubmit(<emphasis role="bold">@Valid @ModelAttribute("pet") Pet pet</emphasis>, BindingResult result) {
+
+    if (result.hasErrors()) {
+        return "petForm";
+    }
+    
+    // ...
+}</programlisting>
+		
+		<para>See <xref linkend="validation-beanvalidation"/> and 
+		<xref linkend="validation" /> for details on how to configure and use Spring's Validation support.</para>
+
+	  </section>
 
       <section id="mvc-ann-sessionattrib">
         <title>Specifying attributes to store in a session with
