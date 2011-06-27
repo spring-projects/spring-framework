@@ -388,7 +388,7 @@ public class DefaultConversionTests {
 	@Test
 	public void convertArrayToObject() {
 		Object[] array = new Object[] { 3L };
-		Object result = conversionService.convert(array, Object.class);
+		Object result = conversionService.convert(array, Long.class);
 		assertEquals(3L, result);
 	}
 
@@ -397,6 +397,13 @@ public class DefaultConversionTests {
 		String[] array = new String[] { "3" };
 		Integer result = conversionService.convert(array, Integer.class);
 		assertEquals(new Integer(3), result);
+	}
+
+	@Test
+	public void convertArrayToObjectAssignableTargetType() {
+		Long[] array = new Long[] { 3L };
+		Long[] result = (Long[]) conversionService.convert(array, Object.class);
+		assertEquals(array, result);
 	}
 
 	@Test
@@ -491,6 +498,14 @@ public class DefaultConversionTests {
 		assertEquals(new Integer(3), result);
 	}
 
+	@Test
+	public void convertCollectionToObjectAssignableTarget() throws Exception {
+		Collection<String> source = new ArrayList<String>();
+		source.add("foo");
+		Object result = conversionService.convert(source, new TypeDescriptor(getClass().getField("assignableTarget")));
+		assertEquals(source, result);
+	}
+	
 	@Test
 	public void convertObjectToCollection() {
 		List<String> result = (List<String>) conversionService.convert(3L, List.class);
@@ -670,7 +685,9 @@ public class DefaultConversionTests {
 	public void convertObjectToObjectNoValueOFMethodOrConstructor() {
 		conversionService.convert(new Long(3), SSN.class);
 	}
-
+	
+	public Object assignableTarget;
+	
 	private static class SSN {
 		
 		private String value;
