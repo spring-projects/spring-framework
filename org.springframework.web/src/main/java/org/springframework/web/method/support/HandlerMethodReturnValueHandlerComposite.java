@@ -101,7 +101,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}s.
 	 */
-	public void addHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	public void addHandlers(List<? extends HandlerMethodReturnValueHandler> returnValueHandlers) {
 		if (returnValueHandlers != null) {
 			for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
 				this.returnValueHandlers.add(handler);
