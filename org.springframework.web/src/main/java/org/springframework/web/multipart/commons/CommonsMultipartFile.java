@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Iterator;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -33,16 +35,14 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * MultipartFile implementation for Jakarta Commons FileUpload.
  *
- * <p><b>NOTE:</b> As of Spring 2.0, this class requires Commons FileUpload 1.1
- * or higher. The implementation does not use any deprecated FileUpload 1.0 API
- * anymore, to be compatible with future Commons FileUpload releases.
- *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
  * @since 29.09.2003
  * @see CommonsMultipartResolver
  */
 public class CommonsMultipartFile implements MultipartFile, Serializable {
+
+	private static final String CONTENT_TYPE = "Content-Type";
 
 	protected static final Log logger = LogFactory.getLog(CommonsMultipartFile.class);
 
@@ -189,6 +189,28 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		else {
 			return "on disk";
 		}
+	}
+
+	public String getHeader(String name) {
+		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
+			return this.fileItem.getContentType();
+		}
+		else {
+			return null;
+		}
+	}
+
+	public String[] getHeaders(String name) {
+		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
+			return new String[] {this.fileItem.getContentType()};
+		}
+		else {
+			return null;
+		}
+	}
+
+	public Iterator<String> getHeaderNames(String name) {
+		return Collections.singleton(CONTENT_TYPE).iterator();
 	}
 
 }

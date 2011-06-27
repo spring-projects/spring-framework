@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
@@ -29,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -148,6 +150,19 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 
 		public void transferTo(File dest) throws IOException, IllegalStateException {
 			this.part.write(dest.getPath());
+		}
+
+		public String getHeader(String name) {
+			return this.part.getHeader(name);
+		}
+
+		public String[] getHeaders(String name) {
+			Collection<String> headers = this.part.getHeaders(name);
+			return (headers != null ? StringUtils.toStringArray(headers) : null);
+		}
+
+		public Iterator<String> getHeaderNames(String name) {
+			return this.part.getHeaderNames().iterator();
 		}
 	}
 

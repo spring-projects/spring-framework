@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Iterator;
 
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -29,15 +31,17 @@ import org.springframework.web.multipart.MultipartFile;
  * Mock implementation of the {@link org.springframework.web.multipart.MultipartFile}
  * interface.
  *
- * <p>Useful in conjunction with a {@link org.springframework.mock.web.MockMultipartHttpServletRequest}
+ * <p>Useful in conjunction with a {@link MockMultipartHttpServletRequest}
  * for testing application controllers that access multipart uploads.
  *
  * @author Juergen Hoeller
  * @author Eric Crampton
  * @since 2.0
- * @see org.springframework.mock.web.MockMultipartHttpServletRequest
+ * @see MockMultipartHttpServletRequest
  */
 public class MockMultipartFile implements MultipartFile {
+
+	private static final String CONTENT_TYPE = "Content-Type";
 
 	private final String name;
 
@@ -61,7 +65,7 @@ public class MockMultipartFile implements MultipartFile {
 	 * Create a new MockMultipartFile with the given content.
 	 * @param name the name of the file
 	 * @param contentStream the content of the file as stream
-	 * @throws java.io.IOException if reading from the stream failed
+	 * @throws IOException if reading from the stream failed
 	 */
 	public MockMultipartFile(String name, InputStream contentStream) throws IOException {
 		this(name, "", null, FileCopyUtils.copyToByteArray(contentStream));
@@ -88,7 +92,7 @@ public class MockMultipartFile implements MultipartFile {
 	 * @param originalFilename the original filename (as on the client's machine)
 	 * @param contentType the content type (if known)
 	 * @param contentStream the content of the file as stream
-	 * @throws java.io.IOException if reading from the stream failed
+	 * @throws IOException if reading from the stream failed
 	 */
 	public MockMultipartFile(String name, String originalFilename, String contentType, InputStream contentStream)
 			throws IOException {
@@ -127,6 +131,28 @@ public class MockMultipartFile implements MultipartFile {
 
 	public void transferTo(File dest) throws IOException, IllegalStateException {
 		FileCopyUtils.copy(this.content, dest);
+	}
+
+	public String getHeader(String name) {
+		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
+			return this.contentType;
+		}
+		else {
+			return null;
+		}
+	}
+
+	public String[] getHeaders(String name) {
+		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
+			return new String[] {this.contentType};
+		}
+		else {
+			return null;
+		}
+	}
+
+	public Iterator<String> getHeaderNames(String name) {
+		return Collections.singleton(CONTENT_TYPE).iterator();
 	}
 
 }
