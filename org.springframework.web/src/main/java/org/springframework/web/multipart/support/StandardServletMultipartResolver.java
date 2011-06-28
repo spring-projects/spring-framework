@@ -161,7 +161,7 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 			return (headers != null ? StringUtils.toStringArray(headers) : null);
 		}
 
-		public Iterator<String> getHeaderNames(String name) {
+		public Iterator<String> getHeaderNames() {
 			return this.part.getHeaderNames().iterator();
 		}
 	}

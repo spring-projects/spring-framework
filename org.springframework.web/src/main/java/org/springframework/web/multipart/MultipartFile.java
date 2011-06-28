@@ -124,6 +124,6 @@ public interface MultipartFile {
 	 * @return the names of the headers
 	 * @since 3.1
 	 */
-	Iterator<String> getHeaderNames(String name);
+	Iterator<String> getHeaderNames();
 
 }
