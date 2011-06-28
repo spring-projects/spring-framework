@@ -151,7 +151,7 @@ public class MockMultipartFile implements MultipartFile {
 		}
 	}
 
-	public Iterator<String> getHeaderNames(String name) {
+	public Iterator<String> getHeaderNames() {
 		return Collections.singleton(CONTENT_TYPE).iterator();
 	}
 
