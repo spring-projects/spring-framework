@@ -52,6 +52,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -65,6 +67,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
@@ -244,6 +247,18 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertEquals("headerValue", response.getHeader("header"));
 	}
 
+	@Test
+	public void handleRequestPart() throws Exception {
+		MockMultipartHttpServletRequest multipartRequest = new MockMultipartHttpServletRequest();
+		multipartRequest.addFile(new MockMultipartFile("requestPart", "", "text/plain", "content".getBytes("UTF-8")));
+
+		HandlerMethod handlerMethod = handlerMethod("handleRequestPart", String.class, Model.class);
+		ModelAndView mav = handlerAdapter.handle(multipartRequest, response, handlerMethod);
+		
+		assertNotNull(mav);
+		assertEquals("content", mav.getModelMap().get("requestPart"));
+	}
+	
 	private HandlerMethod handlerMethod(String methodName, Class<?>... paramTypes) throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
 		return new InvocableHandlerMethod(handler, method);
@@ -316,6 +331,10 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 			responseHeaders.set("header", "headerValue");
 			String responseBody = "Handled requestBody=[" + new String(httpEntity.getBody(), "UTF-8") + "]";
 			return new ResponseEntity<String>(responseBody, responseHeaders, HttpStatus.ACCEPTED);
+		}
+		
+		public void handleRequestPart(@RequestPart String requestPart, Model model) {
+			model.addAttribute("requestPart", requestPart);
 		}
 	}
 

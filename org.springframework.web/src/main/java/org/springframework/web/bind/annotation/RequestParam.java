@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  * @see RequestMapping
  * @see RequestHeader
  * @see CookieValue
- * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter
  * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
 @Target(ElementType.PARAMETER)

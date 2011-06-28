@@ -29,6 +29,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,7 +105,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		returnTypeString = new MethodParameter(handle, -1);
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle2"), -1);
 		returnTypeStringProduces = new MethodParameter(getClass().getMethod("handle3"), -1);
-		paramValidBean = new MethodParameter(getClass().getMethod("handle4", ValidBean.class), 0);
+		paramValidBean = new MethodParameter(getClass().getMethod("handle4", SimpleBean.class), 0);
 
 		mavContainer = new ModelAndViewContainer();
 		
@@ -142,43 +143,38 @@ public class RequestResponseBodyMethodProcessorTests {
 		verify(messageConverter);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void resolveArgumentNotValid() throws Exception {
-		MediaType contentType = MediaType.TEXT_PLAIN;
-		servletRequest.addHeader("Content-Type", contentType.toString());
-
-		HttpMessageConverter<ValidBean> beanConverter = createMock(HttpMessageConverter.class);
-		expect(beanConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		expect(beanConverter.canRead(ValidBean.class, contentType)).andReturn(true);
-		expect(beanConverter.read(eq(ValidBean.class), isA(HttpInputMessage.class))).andReturn(new ValidBean(null));
-		replay(beanConverter);
-
-		processor = new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(beanConverter));
 		try {
-			processor.resolveArgument(paramValidBean, mavContainer, webRequest, new ValidatingBinderFactory());
+			testResolveArgumentWithValidation(new SimpleBean(null));
 			fail("Expected exception");
 		} catch (RequestBodyNotValidException e) {
-			assertEquals("validBean", e.getErrors().getObjectName());
+			assertEquals("simpleBean", e.getErrors().getObjectName());
 			assertEquals(1, e.getErrors().getErrorCount());
 			assertNotNull(e.getErrors().getFieldError("name"));
 		}
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Test
 	public void resolveArgumentValid() throws Exception {
+		testResolveArgumentWithValidation(new SimpleBean("name"));
+	}
+
+	private void testResolveArgumentWithValidation(SimpleBean simpleBean) throws IOException, Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
-		HttpMessageConverter<ValidBean> beanConverter = createMock(HttpMessageConverter.class);
+		@SuppressWarnings("unchecked")
+		HttpMessageConverter<SimpleBean> beanConverter = createMock(HttpMessageConverter.class);
 		expect(beanConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		expect(beanConverter.canRead(ValidBean.class, contentType)).andReturn(true);
-		expect(beanConverter.read(eq(ValidBean.class), isA(HttpInputMessage.class))).andReturn(new ValidBean("name"));
+		expect(beanConverter.canRead(SimpleBean.class, contentType)).andReturn(true);
+		expect(beanConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).andReturn(simpleBean);
 		replay(beanConverter);
 
 		processor = new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(beanConverter));
 		processor.resolveArgument(paramValidBean, mavContainer, webRequest, new ValidatingBinderFactory());
+		
+		verify(beanConverter);
 	}
 	
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
@@ -293,7 +289,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		return null;
 	}
 
-	public void handle4(@Valid @RequestBody ValidBean b) {
+	public void handle4(@Valid @RequestBody SimpleBean b) {
 	}
 	
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
@@ -307,12 +303,12 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	@SuppressWarnings("unused")
-	private static class ValidBean {
+	private static class SimpleBean {
 
 		@NotNull
 		private final String name;
 
-		public ValidBean(String name) {
+		public SimpleBean(String name) {
 			this.name = name;
 		}
 

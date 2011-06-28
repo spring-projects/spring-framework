@@ -33,14 +33,16 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
  * Resolves method arguments annotated with @{@link RequestBody} and handles return values from methods 
  * annotated with {@link ResponseBody}. 
  * 
- * <p>An @{@link RequestBody} method argument will be validated if annotated with {@code @Valid}. A 
- * {@link Validator} instance can be configured globally in XML configuration with the Spring MVC namespace 
- * or in Java-based configuration with @{@link EnableWebMvc}.
+ * <p>An @{@link RequestBody} method argument will be validated if annotated with {@code @Valid}. In case of 
+ * validation failure, a {@link RequestBodyNotValidException} is thrown and can be handled automatically through
+ * the {@link DefaultHandlerExceptionResolver}. A {@link Validator} can be configured globally in XML configuration 
+ * with the Spring MVC namespace or in Java-based configuration with @{@link EnableWebMvc}.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -65,9 +67,9 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 								  NativeWebRequest webRequest,
 								  WebDataBinderFactory binderFactory) throws Exception {
 		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getParameterType());
-		if (shouldValidate(parameter, arg)) {
-			String argName = Conventions.getVariableNameForParameter(parameter);
-			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, argName);
+		if (isValidationApplicable(arg, parameter)) {
+			String name = Conventions.getVariableNameForParameter(parameter);
+			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
 			binder.validate();
 			Errors errors = binder.getBindingResult();
 			if (errors.hasErrors()) {
@@ -80,11 +82,11 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	/**
 	 * Whether to validate the given @{@link RequestBody} method argument. The default implementation checks 
 	 * if the parameter is also annotated with {@code @Valid}.
-	 * @param parameter the method argument for which to check if validation is needed 
-	 * @param argumentValue the method argument value (instantiated with a message converter)
+	 * @param argumentValue the validation candidate
+	 * @param parameter the method argument declaring the validation candidate
 	 * @return {@code true} if validation should be invoked, {@code false} otherwise.
 	 */
-	protected boolean shouldValidate(MethodParameter parameter, Object argumentValue) {
+	protected boolean isValidationApplicable(Object argumentValue, MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation annot : annotations) {
 			if ("Valid".equals(annot.annotationType().getSimpleName())) {

@@ -40,6 +40,7 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestBodyNotValidException;
+import org.springframework.web.servlet.mvc.method.annotation.support.RequestPartNotValidException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 /**
@@ -128,6 +129,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof RequestBodyNotValidException) {
 				return handleRequestBodyNotValidException((RequestBodyNotValidException) ex, request, response, handler);
+			}
+			else if (ex instanceof RequestPartNotValidException) {
+				return handleRequestPartNotValidException((RequestPartNotValidException) ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerException) {
@@ -339,8 +343,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
-	 * Handle the case where the object created from the body of a request has failed validation. The default
-	 * implementation sends an HTTP 400 error along with a message containing the errors.
+	 * Handle the case where the object created from the body of a request has failed validation. 
+	 * The default implementation sends an HTTP 400 error along with a message containing the errors.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
@@ -353,4 +357,19 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 		return new ModelAndView();
 	}
 
+	/**
+	 * Handle the case where the object created from the part of a multipart request has failed validation. 
+	 * The default implementation sends an HTTP 400 error along with a message containing the errors.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler
+	 * @return an empty ModelAndView indicating the exception was handled
+	 * @throws IOException potentially thrown from response.sendError()
+	 */
+	protected ModelAndView handleRequestPartNotValidException(RequestPartNotValidException ex,
+			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+ 		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+		return new ModelAndView();
+	}
+	
 }

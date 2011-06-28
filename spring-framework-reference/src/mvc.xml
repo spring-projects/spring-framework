@@ -1110,6 +1110,14 @@ public class RelativePathUriTemplateController {
             </listitem>
 
             <listitem>
+              <para><interfacename>@RequestPart</interfacename> annotated parameters
+              for access to the content of a "multipart/form-data" request part. 
+              Parameter values are converted to the declared method argument type using
+              <interfacename>HttpMessageConverter</interfacename>s. See <xref
+              linkend="mvc-ann-requestpart" />.</para>
+            </listitem>
+
+            <listitem>
               <para><classname>HttpEntity&lt;?&gt;</classname> parameters
               for access to the Servlet request HTTP headers and contents. The request stream will be
               converted to the entity body using
@@ -1398,7 +1406,7 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         validator is configured automatically assuming a JSR-303 implementation is available 
         on the classpath. If validation fails a <classname>RequestBodyNotValidException</classname>
         is raised. The exception is handled by the <classname>DefaultHandlerExceptionResolver</classname>
-        and results in a <literal>500</literal> error send back to the client along with
+        and results in a <literal>400</literal> error sent back to the client along with
         a message containing the validation errors.</para>
 
         <note>
@@ -1406,6 +1414,67 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
           configuring message converters and a validator through the MVC namespace.</para>
         </note>
       </section>
+
+      <section id="mvc-ann-requestpart">
+        <title>Mapping the content of a part of a "multipart/form-data" request with the 
+        <interfacename>@RequestPart</interfacename> annotation</title>
+
+        <para>A "multipart/form-data" request contains a series of parts each with its own
+        headers and content. It is commonly used for handling file uploads on a form --
+        see <xref linkend="mvc-multipart"/> -- but can also be used to send or receive 
+        a request with multiple types of content.</para>
+        
+        <para>The <interfacename>@RequestPart</interfacename> annotation works very similarly to the
+        <interfacename>@RequestBody</interfacename> annotation except instead of looking in the 
+        body of the HTTP request, it binds the method parameter to the content of one of the
+        parts of a "multipart/form-data" request. Here is an exampe:</para>
+        
+        <programlisting language="java">
+@RequestMapping(value="/configurations", method = RequestMethod.POST)
+public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData metadata</emphasis>) {
+
+    <lineannotation>// ...</lineannotation>
+
+}
+</programlisting>        
+
+		<para>The actual request may look like this:</para>
+		
+        <programlisting language="xml">
+POST /configurations
+Content-Type: multipart/mixed
+ 
+--edt7Tfrdusa7r3lNQc79vXuhIIMlatb7PQg7Vp
+Content-Disposition: form-data; name="meta-data"
+Content-Type: application/json; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+ 
+{
+  "name": "value"
+}
+--edt7Tfrdusa7r3lNQc79vXuhIIMlatb7PQg7Vp
+Content-Disposition: form-data; name="file-data"; filename="file.properties"
+Content-Type: text/xml
+Content-Transfer-Encoding: 8bit
+... File Data ...
+		</programlisting>
+    
+    	<para>In the above example, the <literal>metadata</literal> argument is bound to the content 
+    	of the first part of the request called <literal>"meta-data"</literal> containing JSON content.
+    	In this case we specified the name of the request part in the 
+    	<interfacename>@RequestPart</interfacename> annotation but we might have been able to leave it
+    	out if the name of the method argument matched the request part name.</para>
+    	
+    	<para>Just like with <interfacename>@RequestBody</interfacename> you convert the content of
+    	the request part to the method argument type by using an 
+    	<classname>HttpMessageConverter</classname>. Also you can add <literal>@Valid</literal> 
+    	to the method argument to have the resulting object automatically validated. 
+    	If validation fails a <classname>RequestPartNotValidException</classname> is raised. 
+    	The exception is handled by the <classname>DefaultHandlerExceptionResolver</classname> and 
+    	results in a <literal>400</literal> error sent back to the client along with a message 
+    	containing the validation errors.</para>
+        
+	  </section>
 
       <section id="mvc-ann-responsebody">
         <title>Mapping the response body with the <interfacename>@ResponseBody</interfacename>
