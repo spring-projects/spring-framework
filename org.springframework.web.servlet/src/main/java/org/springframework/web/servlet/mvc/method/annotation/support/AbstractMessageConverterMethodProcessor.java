@@ -27,8 +27,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -36,90 +34,27 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * A base class for resolving method argument values by reading from the body of a request with {@link
- * HttpMessageConverter}s and for handling method return values by writing to the response with {@link
- * HttpMessageConverter}s.
+ * Extends {@link AbstractMessageConverterMethodArgumentResolver} with the ability to handle method return 
+ * values by writing to the response with {@link HttpMessageConverter}s.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public abstract class AbstractMessageConverterMethodProcessor
-		implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
+public abstract class AbstractMessageConverterMethodProcessor extends AbstractMessageConverterMethodArgumentResolver
+		implements HandlerMethodReturnValueHandler {
 
 	private static final MediaType MEDIA_TYPE_APPLICATION = new MediaType("application");
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private final List<HttpMessageConverter<?>> messageConverters;
-
-	private final List<MediaType> allSupportedMediaTypes;
-
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
-		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
-		this.messageConverters = messageConverters;
-		this.allSupportedMediaTypes = getAllSupportedMediaTypes(messageConverters);
-	}
-
-	/**
-	 * Returns the media types supported by all provided message converters preserving their ordering and 
-	 * further sorting by specificity via {@link MediaType#sortBySpecificity(List)}. 
-	 */
-	private static List<MediaType> getAllSupportedMediaTypes(List<HttpMessageConverter<?>> messageConverters) {
-		Set<MediaType> allSupportedMediaTypes = new LinkedHashSet<MediaType>();
-		for (HttpMessageConverter<?> messageConverter : messageConverters) {
-			allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
-		}
-		List<MediaType> result = new ArrayList<MediaType>(allSupportedMediaTypes);
-		MediaType.sortBySpecificity(result);
-		return Collections.unmodifiableList(result);
-	}
-
-	@SuppressWarnings("unchecked")
-	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest,
-												   MethodParameter methodParam,
-												   Class<T> paramType)
-			throws IOException, HttpMediaTypeNotSupportedException {
-
-		HttpInputMessage inputMessage = createInputMessage(webRequest);
-
-		MediaType contentType = inputMessage.getHeaders().getContentType();
-		if (contentType == null) {
-			contentType = MediaType.APPLICATION_OCTET_STREAM;
-		}
-
-		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-			if (messageConverter.canRead(paramType, contentType)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Reading [" + paramType.getName() + "] as \"" + contentType + "\" using [" +
-							messageConverter + "]");
-				}
-				return ((HttpMessageConverter<T>) messageConverter).read(paramType, inputMessage);
-			}
-		}
-
-		throw new HttpMediaTypeNotSupportedException(contentType, allSupportedMediaTypes);
-	}
-
-	/**
-	 * Creates a new {@link HttpInputMessage} from the given {@link NativeWebRequest}.
-	 *
-	 * @param webRequest the web request to create an input message from
-	 * @return the input message
-	 */
-	protected ServletServerHttpRequest createInputMessage(NativeWebRequest webRequest) {
-		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		return new ServletServerHttpRequest(servletRequest);
+		super(messageConverters);
 	}
 
 	/**

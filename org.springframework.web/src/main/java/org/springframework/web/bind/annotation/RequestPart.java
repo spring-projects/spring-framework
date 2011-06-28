@@ -23,18 +23,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation which indicates that a method parameter should be bound to the web request body. Supported for annotated
- * handler methods in Servlet environments.
+ * Annotation that indicates a method parameter should be bound to the content of a part of a "multipart/form-data" request.
+ * Supported for annotated handler methods in Servlet environments.
  *
+ * @author Rossen Stoyanchev
  * @author Arjen Poutsma
- * @see RequestHeader
- * @see ResponseBody
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter
- * @since 3.0
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
+ * @since 3.1
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RequestBody {
+public @interface RequestPart {
 
+	/**
+	 * The name of the part in the "multipart/form-data" request to bind to.
+	 */
+	String value() default "";
+	
 }

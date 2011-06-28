@@ -95,6 +95,11 @@ import java.lang.annotation.Target;
  * converted to the declared method argument type using 
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}. Such parameters may optionally be annotated with {@code @Valid}.
+ * <li>{@link RequestPart @RequestPart} annotated parameters for access to the content
+ * of a part of "multipart/form-data" request. The request part stream will be
+ * converted to the declared method argument type using 
+ * {@linkplain org.springframework.http.converter.HttpMessageConverter message
+ * converters}. Such parameters may optionally be annotated with {@code @Valid}.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
  * for access to the Servlet request HTTP headers and contents. The request stream will be
  * converted to the entity body using

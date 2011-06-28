@@ -84,6 +84,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMeth
 import org.springframework.web.servlet.mvc.method.annotation.support.HttpEntityMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ModelAndViewMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.support.PathVariableMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.RequestPartMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestResponseBodyMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletCookieValueMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletModelAttributeMethodProcessor;
@@ -352,6 +353,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		argumentResolvers.addResolver(new PathVariableMethodArgumentResolver());
 		argumentResolvers.addResolver(new ServletModelAttributeMethodProcessor(false));
 		argumentResolvers.addResolver(new RequestResponseBodyMethodProcessor(messageConverters));
+		argumentResolvers.addResolver(new RequestPartMethodArgumentResolver(messageConverters));
 		argumentResolvers.addResolver(new RequestHeaderMethodArgumentResolver(beanFactory));
 		argumentResolvers.addResolver(new RequestHeaderMapMethodArgumentResolver());
 		argumentResolvers.addResolver(new ServletCookieValueMethodArgumentResolver(beanFactory));

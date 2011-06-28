@@ -102,7 +102,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		if (binder.getTarget() != null) {
 			bindRequestParameters(binder, request);
 			
-			if (isValidationApplicable(binder, parameter)) {
+			if (isValidationApplicable(binder.getTarget(), parameter)) {
 				binder.validate();
 			}
 			
@@ -148,12 +148,12 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	}
 
 	/**
-	 * Whether to validate the model attribute inside the given data binder instance.
-	 * @param binder the data binder containing the validation candidate
+	 * Whether to validate the given model attribute argument value.
+	 * @param argumentValue the validation candidate
 	 * @param parameter the method argument declaring the validation candidate
 	 * @return {@code true} if validation should be applied, {@code false} otherwise.
 	 */
-	protected boolean isValidationApplicable(WebDataBinder binder, MethodParameter parameter) {
+	protected boolean isValidationApplicable(Object argumentValue, MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation annot : annotations) {
 			if ("Valid".equals(annot.annotationType().getSimpleName())) {
