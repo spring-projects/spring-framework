@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -60,14 +61,8 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest) throws Exception {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
-		if (handler != null) {
-			handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
-		}
-		else {
-			throw new IllegalStateException(
-					"No suitable HandlerMethodReturnValueHandler found. " +
-					"supportsReturnType(MethodParameter) should have been called previously");
-		}
+		Assert.notNull(handler, "Unknown return value type [" + returnType.getParameterType().getName() + "]");
+		handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 	}
 
 	/**

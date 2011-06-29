@@ -141,7 +141,8 @@ public final class ModelFactory {
 					if (sessionHandler.isHandlerSessionAttribute(name, parameter.getParameterType())) {
 						Object attrValue = sessionHandler.retrieveAttribute(request, name);
 						if (attrValue == null){
-							throw new HttpSessionRequiredException("Session attribute '" + name + "' not found in session");
+							throw new HttpSessionRequiredException(
+									"Session attribute '" + name + "' not found in session: " + requestMethod);
 						}
 						mavContainer.addAttribute(name, attrValue);
 					}

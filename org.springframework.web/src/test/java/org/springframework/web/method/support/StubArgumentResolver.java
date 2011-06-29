@@ -24,7 +24,8 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Resolves a method argument using a stub value and records resolved parameters.
+ * Supports parameters of a given type and resolves them using a stub value.
+ * Also records the resolved parameter value.
  * 
  * @author Rossen Stoyanchev
  */
@@ -36,8 +37,8 @@ public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 	
 	private List<MethodParameter> resolvedParameters = new ArrayList<MethodParameter>();
 
-	public StubArgumentResolver(Class<?> parameterType, Object stubValue) {
-		this.parameterType = parameterType;
+	public StubArgumentResolver(Class<?> supportedParameterType, Object stubValue) {
+		this.parameterType = supportedParameterType;
 		this.stubValue = stubValue;
 	}
 

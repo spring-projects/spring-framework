@@ -15,7 +15,7 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
-
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -27,6 +27,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -44,8 +46,6 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletResp
  * @author Rossen Stoyanchev
  */
 public class ServletInvocableHandlerMethodTests {
-
-	private final Object handler = new Handler();
 
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
@@ -67,11 +67,11 @@ public class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void setResponseStatus() throws Exception {
-		returnValueHandlers.addHandler(new ExceptionThrowingReturnValueHandler());
-		handlerMethod("responseStatus").invokeAndHandle(webRequest, mavContainer);
+	public void nullReturnValueResponseStatus() throws Exception {
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("responseStatus");
+		handlerMethod.invokeAndHandle(webRequest, mavContainer);
 
-		assertFalse("Null return value with an @ResponseStatus should result in 'no view resolution'",
+		assertFalse("Null return value + @ResponseStatus should result in 'no view resolution'",
 				mavContainer.isResolveView());
 
 		assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
@@ -79,53 +79,59 @@ public class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void checkNoViewResolutionWithHttpServletResponse() throws Exception {
+	public void nullReturnValueHttpServletResponseArg() throws Exception {
 		argumentResolvers.addResolver(new ServletResponseMethodArgumentResolver());
-		returnValueHandlers.addHandler(new ExceptionThrowingReturnValueHandler());
-		handlerMethod("httpServletResponse", HttpServletResponse.class).invokeAndHandle(webRequest, mavContainer);
 
-		assertFalse("Null return value with an HttpServletResponse argument should result in 'no view resolution'",
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("httpServletResponse", HttpServletResponse.class);
+		handlerMethod.invokeAndHandle(webRequest, mavContainer);
+
+		assertFalse("Null return value + HttpServletResponse arg should result in 'no view resolution'",
 				mavContainer.isResolveView());
 	}
 
 	@Test
-	public void checkNoViewResolutionWithRequestNotModified() throws Exception {
-		returnValueHandlers.addHandler(new ExceptionThrowingReturnValueHandler());
-		
+	public void nullReturnValueRequestNotModified() throws Exception {
 		webRequest.getNativeRequest(MockHttpServletRequest.class).addHeader("If-Modified-Since", 10 * 1000 * 1000);
 		int lastModifiedTimestamp = 1000 * 1000;
 		webRequest.checkNotModified(lastModifiedTimestamp);
 		
-		handlerMethod("notModified").invokeAndHandle(webRequest, mavContainer);
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("notModified");
+		handlerMethod.invokeAndHandle(webRequest, mavContainer);
 
-		assertFalse("Null return value with a 'not modified' request should result in 'no view resolution'",
+		assertFalse("Null return value + 'not modified' request should result in 'no view resolution'",
 				mavContainer.isResolveView());
 	}
+	
+	@Test
+	public void exceptionWhileHandlingReturnValue() throws Exception {
+		returnValueHandlers.addHandler(new ExceptionRaisingReturnValueHandler());
 
-	private ServletInvocableHandlerMethod handlerMethod(String methodName, Class<?>...paramTypes)
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("handle");
+		try {
+			handlerMethod.invokeAndHandle(webRequest, mavContainer);
+			fail("Expected exception");
+		} catch (HttpMessageNotWritableException ex) {
+			// Expected..
+			// Allow HandlerMethodArgumentResolver exceptions to propagate..
+		}
+	}
+
+	private ServletInvocableHandlerMethod getHandlerMethod(String methodName, Class<?>... argTypes) 
 			throws NoSuchMethodException {
-		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
-		ServletInvocableHandlerMethod handlerMethod = new ServletInvocableHandlerMethod(handler, method);
+		Method method = Handler.class.getDeclaredMethod(methodName, argTypes);
+		ServletInvocableHandlerMethod handlerMethod = new ServletInvocableHandlerMethod(new Handler(), method);
 		handlerMethod.setHandlerMethodArgumentResolvers(argumentResolvers);
 		handlerMethod.setHandlerMethodReturnValueHandlers(returnValueHandlers);
 		return handlerMethod;
 	}
 
-	private static class ExceptionThrowingReturnValueHandler implements HandlerMethodReturnValueHandler {
-
-		public boolean supportsReturnType(MethodParameter returnType) {
-			return true;
-		}
-
-		public void handleReturnValue(Object returnValue, MethodParameter returnType,
-				ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
-			throw new IllegalStateException("Should never be invoked");
-		}
-	}
-	
 	@SuppressWarnings("unused")
 	private static class Handler {
-		
+
+		public String handle() {
+			return "view";
+		}
+
 		@ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "400 Bad Request")
 		public void responseStatus() {
 		}
@@ -134,6 +140,19 @@ public class ServletInvocableHandlerMethodTests {
 		}
 		
 		public void notModified() {
+		}
+		
+	}
+
+	private static class ExceptionRaisingReturnValueHandler implements HandlerMethodReturnValueHandler {
+
+		public boolean supportsReturnType(MethodParameter returnType) {
+			return true;
+		}
+
+		public void handleReturnValue(Object returnValue, MethodParameter returnType,
+				ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
+			throw new HttpMessageNotWritableException("oops, can't write");
 		}
 	}
 

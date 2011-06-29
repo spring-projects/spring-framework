@@ -142,25 +142,52 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
-			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
+			parameter.initParameterNameDiscovery(parameterNameDiscoverer);
 			GenericTypeResolver.resolveParameterType(parameter, getBean().getClass());
 
 			args[i] = resolveProvidedArgument(parameter, providedArgs);
 			if (args[i] != null) {
 				continue;
 			}
-			if (this.argumentResolvers.supportsParameter(parameter)) {
-				args[i] = this.argumentResolvers.resolveArgument(parameter, mavContainer, request, dataBinderFactory);
+
+			if (argumentResolvers.supportsParameter(parameter)) {
+				try {
+					args[i] = argumentResolvers.resolveArgument(parameter, mavContainer, request, dataBinderFactory);
+					continue;
+				} catch (Exception ex) {
+					if (logger.isTraceEnabled()) {
+						logger.trace(getArgumentResolutionErrorMessage("Error resolving argument", i), ex);
+					}
+					throw ex;
+				}
 			}
-			else {
-				throw new IllegalStateException("Cannot resolve argument index=" + parameter.getParameterIndex() + ""
-						+ ", name=" + parameter.getParameterName() + ", type=" + parameter.getParameterType()
-						+ " in method " + toString());
+
+			if (args[i] == null) {
+				String msg = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
+				throw new IllegalStateException(msg);
 			}
 		}
 		return args;
 	}
 
+	private String getArgumentResolutionErrorMessage(String message, int index) {
+		MethodParameter param = getMethodParameters()[index];
+		message += " [" + index + "] [type=" + param.getParameterType().getName() + "]";
+		return getDetailedErrorMessage(message);
+	}
+
+	/**
+	 * Adds HandlerMethod details such as the controller type and method signature to the given error message.
+	 * @param message error message to append the HandlerMethod details to
+	 */
+	protected String getDetailedErrorMessage(String message) {
+		StringBuilder sb = new StringBuilder(message).append("\n");
+		sb.append("HandlerMethod details: \n");
+		sb.append("Controller [").append(getBeanType().getName()).append("]\n");
+		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
+		return sb.toString();
+	}
+	
 	/**
 	 * Attempt to resolve a method parameter from the list of provided argument values.
 	 */
@@ -177,55 +204,50 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 	
 	/**
-	 * Invoke this handler method with the given argument values.
+	 * Invoke the handler method with the given argument values.
 	 */
 	private Object invoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(this.getBridgedMethod());
 		try {
 			return getBridgedMethod().invoke(getBean(), args);
 		}
-		catch (IllegalArgumentException ex) {
-			handleIllegalArgumentException(ex, args);
-			throw ex;
+		catch (IllegalArgumentException e) {
+			String msg = getInvocationErrorMessage(e.getMessage(), args);
+			throw new IllegalArgumentException(msg, e);
 		}
-		catch (InvocationTargetException ex) {
-			handleInvocationTargetException(ex);
-			throw new IllegalStateException(
-					"Unexpected exception thrown by method - " + ex.getTargetException().getClass().getName() + ": " +
-							ex.getTargetException().getMessage());
-		}
-	}
-
-	private void handleIllegalArgumentException(IllegalArgumentException ex, Object... args) {
-		StringBuilder builder = new StringBuilder(ex.getMessage());
-		builder.append(" :: method=").append(getBridgedMethod().toGenericString());
-		builder.append(" :: invoked with handler type=").append(getBeanType().getName());
-		
-		if (args != null &&  args.length > 0) {
-			builder.append(" and argument types ");
-			for (int i = 0; i < args.length; i++) {
-				String argClass = (args[i] != null) ? args[i].getClass().toString() : "null";
-				builder.append(" : arg[").append(i).append("] ").append(argClass);
+		catch (InvocationTargetException e) { 
+			// Unwrap for HandlerExceptionResolvers ...
+			Throwable targetException = e.getTargetException();
+			if (targetException instanceof RuntimeException) {
+				throw (RuntimeException) targetException;
+			}
+			else if (targetException instanceof Error) {
+				throw (Error) targetException;
+			}
+			else if (targetException instanceof Exception) {
+				throw (Exception) targetException;
+			}
+			else {
+				String msg = getInvocationErrorMessage("Failed to invoke controller method", args);
+				throw new IllegalStateException(msg, targetException);
 			}
 		}
-		else {
-			builder.append(" and 0 arguments");
-		}
-		
-		throw new IllegalArgumentException(builder.toString(), ex);
 	}
 	
-	private void handleInvocationTargetException(InvocationTargetException ex) throws Exception {
-		Throwable targetException = ex.getTargetException();
-		if (targetException instanceof RuntimeException) {
-			throw (RuntimeException) targetException;
+	private String getInvocationErrorMessage(String message, Object[] resolvedArgs) {
+		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(message));
+		sb.append("Resolved arguments: \n");
+		for (int i=0; i < resolvedArgs.length; i++) {
+			sb.append("[").append(i).append("] ");
+			if (resolvedArgs[i] == null) {
+				sb.append("[null] \n");
+			}
+			else {
+				sb.append("[type=").append(resolvedArgs[i].getClass().getName()).append("] ");
+				sb.append("[value=").append(resolvedArgs[i]).append("]\n");
+			}
 		}
-		if (targetException instanceof Error) {
-			throw (Error) targetException;
-		}
-		if (targetException instanceof Exception) {
-			throw (Exception) targetException;
-		}
+		return sb.toString();
 	}
-	
+
 }

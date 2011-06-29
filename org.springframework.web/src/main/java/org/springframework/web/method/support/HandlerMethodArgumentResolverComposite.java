@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -61,14 +62,8 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws Exception {
 		HandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);
-		if (resolver != null) {
-			return resolver.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
-		}
-		else {
-			throw new IllegalStateException(
-					"No suitable HandlerMethodArgumentResolver found. " + 
-					"supportsParameter(MethodParameter) should have been called previously.");
-		}
+		Assert.notNull(resolver, "Unknown parameter type [" + parameter.getParameterType().getName() + "]");
+		return resolver.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
 	}
 
 	/**

@@ -17,89 +17,223 @@
 package org.springframework.web.method.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.MethodParameter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
- * Test fixture with {@link InvocableHandlerMethod}.
+ * Test fixture for {@link InvocableHandlerMethod} unit tests.
  * 
  * @author Rossen Stoyanchev
  */
 public class InvocableHandlerMethodTests {
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers;
+	private InvocableHandlerMethod handleMethod;
 
 	private NativeWebRequest webRequest;
 
 	@Before
 	public void setUp() throws Exception {
-		argumentResolvers = new HandlerMethodArgumentResolverComposite();
+		Method method = Handler.class.getDeclaredMethod("handle", Integer.class, String.class);
+		this.handleMethod = new InvocableHandlerMethod(new Handler(), method);
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest(), new MockHttpServletResponse());
 	}
 
 	@Test
-	public void resolveArgument() throws Exception {
-		StubArgumentResolver intResolver = addResolver(Integer.class, 99);
-		StubArgumentResolver strResolver = addResolver(String.class, "value");
-		InvocableHandlerMethod method = invocableHandlerMethod("handle", Integer.class, String.class);
-		Object returnValue = method.invokeForRequest(webRequest, null);
+	public void resolveArg() throws Exception {
+		StubArgumentResolver intResolver = new StubArgumentResolver(Integer.class, 99);
+		StubArgumentResolver stringResolver = new StubArgumentResolver(String.class, "value");
+
+		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
+		composite.addResolver(intResolver);
+		composite.addResolver(stringResolver);
+		handleMethod.setHandlerMethodArgumentResolvers(composite);
 		
-		assertEquals("Integer resolver not invoked", 1, intResolver.getResolvedParameters().size());
-		assertEquals("String resolver not invoked", 1, strResolver.getResolvedParameters().size());
-		assertEquals("Invalid return value", "99-value", returnValue);
+		Object returnValue = handleMethod.invokeForRequest(webRequest, null);
+		
+		assertEquals(1, intResolver.getResolvedParameters().size());
+		assertEquals(1, stringResolver.getResolvedParameters().size());
+		assertEquals("99-value", returnValue);
+		
+		assertEquals("intArg", intResolver.getResolvedParameters().get(0).getParameterName());
+		assertEquals("stringArg", stringResolver.getResolvedParameters().get(0).getParameterName());
+	}
+
+	@Test
+	public void resolveNullArg() throws Exception {
+		StubArgumentResolver intResolver = new StubArgumentResolver(Integer.class, null);
+		StubArgumentResolver stringResolver = new StubArgumentResolver(String.class, null);
+
+		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
+		composite.addResolver(intResolver);
+		composite.addResolver(stringResolver);
+		handleMethod.setHandlerMethodArgumentResolvers(composite);
+		
+		Object returnValue = handleMethod.invokeForRequest(webRequest, null);
+		
+		assertEquals(1, intResolver.getResolvedParameters().size());
+		assertEquals(1, stringResolver.getResolvedParameters().size());
+		assertEquals("null-null", returnValue);
+	}
+
+	@Test
+	public void cannotResolveArg() throws Exception {
+		try {
+			handleMethod.invokeForRequest(webRequest, null);
+			fail("Expected exception");
+		} catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().contains("No suitable resolver for argument [0] [type=java.lang.Integer]"));
+		}
+	}
+
+	@Test
+	public void resolveProvidedArg() throws Exception {
+		Object returnValue = handleMethod.invokeForRequest(webRequest, null, 99, "value");
+
+		assertEquals(String.class, returnValue.getClass());
+		assertEquals("99-value", returnValue);
+	}
+
+	@Test
+	public void resolveProvidedArgFirst() throws Exception {
+		StubArgumentResolver intResolver = new StubArgumentResolver(Integer.class, 1);
+		StubArgumentResolver stringResolver = new StubArgumentResolver(String.class, "value1");
+
+		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
+		composite.addResolver(intResolver);
+		composite.addResolver(stringResolver);
+		handleMethod.setHandlerMethodArgumentResolvers(composite);
+
+		Object returnValue = handleMethod.invokeForRequest(webRequest, null, 2, "value2");
+
+		assertEquals("2-value2", returnValue);
 	}
 	
 	@Test
-	public void resolveProvidedArgument() throws Exception {
-		InvocableHandlerMethod method = invocableHandlerMethod("handle", Integer.class, String.class);
-		Object returnValue = method.invokeForRequest(webRequest, null, 99, "value");
-
-		assertEquals("Expected raw return value with no handlers registered", String.class, returnValue.getClass());
-		assertEquals("Provided argument values were not resolved", "99-value", returnValue);
+	public void exceptionInResolvingArg() throws Exception {
+		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
+		composite.addResolver(new ExceptionRaisingArgumentResolver());
+		handleMethod.setHandlerMethodArgumentResolvers(composite);
+		
+		try {
+			handleMethod.invokeForRequest(webRequest, null);
+			fail("Expected exception");
+		} catch (HttpMessageNotReadableException ex) {
+			// Expected..
+			// Allow HandlerMethodArgumentResolver exceptions to propagate..
+		}
 	}
 
 	@Test
-	public void discoverParameterName() throws Exception {
-		StubArgumentResolver resolver = addResolver(Integer.class, 99);
-		InvocableHandlerMethod method = invocableHandlerMethod("parameterNameDiscovery", Integer.class);
-		method.invokeForRequest(webRequest, null);
-		
-		assertEquals("intArg", resolver.getResolvedParameters().get(0).getParameterName());
+	public void illegalArgumentException() throws Exception {
+		StubArgumentResolver intResolver = new StubArgumentResolver(Integer.class, "__invalid__");
+		StubArgumentResolver stringResolver = new StubArgumentResolver(String.class, "value");
+
+		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
+		composite.addResolver(intResolver);
+		composite.addResolver(stringResolver);
+		handleMethod.setHandlerMethodArgumentResolvers(composite);
+
+		try {
+			handleMethod.invokeForRequest(webRequest, null);
+			fail("Expected exception");
+		} catch (IllegalArgumentException ex) {
+			assertNotNull("Exception not wrapped", ex.getCause());
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+			assertTrue(ex.getMessage().contains("Controller ["));
+			assertTrue(ex.getMessage().contains("Method ["));
+			assertTrue(ex.getMessage().contains("Resolved arguments: "));
+			assertTrue(ex.getMessage().contains("[0] [type=java.lang.String] [value=__invalid__]"));
+			assertTrue(ex.getMessage().contains("[1] [type=java.lang.String] [value=value"));
+		}
 	}
 
-	private StubArgumentResolver addResolver(Class<?> parameterType, Object stubValue) {
-		StubArgumentResolver resolver = new StubArgumentResolver(parameterType, stubValue);
-		argumentResolvers.addResolver(resolver);
-		return resolver;
+	@Test
+	public void invocationTargetException() throws Exception {
+		Throwable expected = new RuntimeException("error");
+		try {
+			invokeExceptionRaisingHandler(expected);
+		} catch (RuntimeException actual) {
+			assertSame(expected, actual);
+		}
+
+		expected = new Error("error");
+		try {
+			invokeExceptionRaisingHandler(expected);
+		} catch (Error actual) {
+			assertSame(expected, actual);
+		}
+
+		expected = new Exception("error");
+		try {
+			invokeExceptionRaisingHandler(expected);
+		} catch (Exception actual) {
+			assertSame(expected, actual);
+		}
+
+		expected = new Throwable("error");
+		try {
+			invokeExceptionRaisingHandler(expected);
+		} catch (IllegalStateException actual) {
+			assertNotNull(actual.getCause());
+			assertSame(expected, actual.getCause());
+			assertTrue(actual.getMessage().contains("Failed to invoke controller method"));
+		}
+	}
+
+	private void invokeExceptionRaisingHandler(Throwable expected) throws Exception {
+		Method method = ExceptionRaisingHandler.class.getDeclaredMethod("raiseException");
+		Object handler = new ExceptionRaisingHandler(expected);
+		new InvocableHandlerMethod(handler, method).invokeForRequest(webRequest, null);
+		fail("Expected exception");
 	}
 	
-	private InvocableHandlerMethod invocableHandlerMethod(String methodName, Class<?>... paramTypes)
-			throws Exception {
-		Method method = Handler.class.getDeclaredMethod(methodName, paramTypes);
-		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod(new Handler(), method);
-		handlerMethod.setHandlerMethodArgumentResolvers(argumentResolvers);
-		return handlerMethod;
-	}
-
+	@SuppressWarnings("unused")
 	private static class Handler {
 		
-		@SuppressWarnings("unused")
 		public String handle(Integer intArg, String stringArg) {
 			return intArg + "-" + stringArg;
 		}
-	
-		@SuppressWarnings("unused")
-		@RequestMapping
-		public void parameterNameDiscovery(Integer intArg) {
-		}
 	}
 
+	@SuppressWarnings("unused")
+	private static class ExceptionRaisingHandler {
+		
+		private final Throwable t;
+
+		public ExceptionRaisingHandler(Throwable t) {
+			this.t = t;
+		}
+		
+		public void raiseException() throws Throwable {
+			throw t;
+		}
+		
+	}
+	
+	private static class ExceptionRaisingArgumentResolver implements HandlerMethodArgumentResolver {
+
+		public boolean supportsParameter(MethodParameter parameter) {
+			return true;
+		}
+
+		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+				NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+			throw new HttpMessageNotReadableException("oops, can't read");
+		}
+	}
+	
 }

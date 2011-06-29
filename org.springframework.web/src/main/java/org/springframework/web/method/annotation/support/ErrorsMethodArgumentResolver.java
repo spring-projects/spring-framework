@@ -56,8 +56,9 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 			}
 		}
 
-		throw new IllegalStateException("Errors/BindingResult argument declared "
-				+ "without preceding model attribute. Check your handler method signature!");
+		throw new IllegalStateException(
+				"An Errors/BindingResult argument must follow a model attribute argument. " +
+				"Check your handler method signature: " + parameter.getMethod());
 	}
 
 }

@@ -74,7 +74,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 		assertNull("Shouldn't have use the 2nd registered handler", h2.getReturnValue());
 	}
 	
-	@Test(expected=IllegalStateException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void noSuitableReturnValueHandler() throws Exception {
 		registerHandler(Integer.class);
 		this.handlers.handleReturnValue("value", paramStr, null, null);

@@ -93,10 +93,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 									  ModelAndViewContainer mavContainer,
 									  Object...providedArgs) throws Exception {
 
-		if (!returnValueHandlers.supportsReturnType(getReturnType())) {
-			throw new IllegalStateException("No suitable HandlerMethodReturnValueHandler for method " + toString());
-		}
-
 		Object returnValue = invokeForRequest(request, mavContainer, providedArgs);
 
 		setResponseStatus((ServletWebRequest) request);
@@ -110,9 +106,25 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		mavContainer.setResolveView(true);
 
-		returnValueHandlers.handleReturnValue(returnValue, getReturnType(), mavContainer, request);
+		try {
+			returnValueHandlers.handleReturnValue(returnValue, getReturnType(), mavContainer, request);
+		} catch (Exception ex) {
+			if (logger.isTraceEnabled()) {
+				logger.trace(getReturnValueHandlingErrorMessage("Error handling return value", returnValue), ex);
+			}
+			throw ex;
+		}
 	}
 
+	private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
+		StringBuilder sb = new StringBuilder(message);
+		if (returnValue != null) {
+			sb.append(" [type=" + returnValue.getClass().getName() + "] ");
+		}
+		sb.append("[value=" + returnValue + "]");
+		return getDetailedErrorMessage(sb.toString());
+	}
+	
 	/**
 	 * Set the response status according to the {@link ResponseStatus} annotation.
 	 */

@@ -65,24 +65,24 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 
 	public Object resolveArgument(MethodParameter parameter, 
 								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest, 
+								  NativeWebRequest request, 
 								  WebDataBinderFactory binderFactory) throws Exception {
 
-		ServletRequest servletRequest = webRequest.getNativeRequest(ServletRequest.class);
-		MultipartHttpServletRequest multipartServletRequest = 
+		ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
+		MultipartHttpServletRequest multipartRequest = 
 			WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
-		if (multipartServletRequest == null) {
+		if (multipartRequest == null) {
 			throw new IllegalStateException(
-					"Current request is not of type " + MultipartRequest.class.getName());
+					"Current request is not of type [" + MultipartRequest.class.getName() + "]: " + request);
 		}
 		
 		String partName = getPartName(parameter);
-		HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(multipartServletRequest, partName);
+		HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(multipartRequest, partName);
 
 		Object arg = readWithMessageConverters(inputMessage, parameter, parameter.getParameterType());
 		
 		if (isValidationApplicable(arg, parameter)) {
-			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, partName);
+			WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
 			binder.validate();
 			Errors errors = binder.getBindingResult();
 			if (errors.hasErrors()) {

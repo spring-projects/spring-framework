@@ -144,8 +144,6 @@ public class DefaultHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 400, response.getStatus());
-		assertTrue(response.getErrorMessage().startsWith("Request body content validation failed"));
-		assertTrue(response.getErrorMessage().contains("Field error in object 'testBean' on field 'name'"));
 	}
 
 	@Test
@@ -157,7 +155,5 @@ public class DefaultHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 400, response.getStatus());
-		assertTrue(response.getErrorMessage().startsWith("Validation of the content of request part"));
-		assertTrue(response.getErrorMessage().contains("Field error in object 'testBean' on field 'name'"));
 	}
 }
