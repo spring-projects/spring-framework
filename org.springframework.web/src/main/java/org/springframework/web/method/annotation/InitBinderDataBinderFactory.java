@@ -64,7 +64,7 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 			}
 			Object returnValue = binderMethod.invokeForRequest(request, null, binder);
 			if (returnValue != null) {
-				throw new IllegalStateException("This @InitBinder method does not return void: " + binderMethod);
+				throw new IllegalStateException("@InitBinder methods should return void: " + binderMethod);
 			}
 		}
 	}

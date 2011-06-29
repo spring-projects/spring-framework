@@ -344,7 +344,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 	/**
 	 * Handle the case where the object created from the body of a request has failed validation. 
-	 * The default implementation sends an HTTP 400 error along with a message containing the errors.
+	 * The default implementation sends an HTTP 400 error.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
@@ -353,13 +353,13 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView handleRequestBodyNotValidException(RequestBodyNotValidException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
- 		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+ 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();
 	}
 
 	/**
 	 * Handle the case where the object created from the part of a multipart request has failed validation. 
-	 * The default implementation sends an HTTP 400 error along with a message containing the errors.
+	 * The default implementation sends an HTTP 400 error.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
@@ -368,7 +368,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView handleRequestPartNotValidException(RequestPartNotValidException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
- 		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+ 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();
 	}
 	

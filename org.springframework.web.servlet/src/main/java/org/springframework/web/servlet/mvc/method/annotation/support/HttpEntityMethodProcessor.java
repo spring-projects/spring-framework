@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation.support;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -74,9 +75,9 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		return new HttpEntity<Object>(body, inputMessage.getHeaders());
 	}
 
-	private Class<?> getHttpEntityType(MethodParameter methodParam) {
-		Assert.isAssignable(HttpEntity.class, methodParam.getParameterType());
-		ParameterizedType type = (ParameterizedType) methodParam.getGenericParameterType();
+	private Class<?> getHttpEntityType(MethodParameter parameter) {
+		Assert.isAssignable(HttpEntity.class, parameter.getParameterType());
+		ParameterizedType type = (ParameterizedType) parameter.getGenericParameterType();
 		if (type.getActualTypeArguments().length == 1) {
 			Type typeArgument = type.getActualTypeArguments()[0];
 			if (typeArgument instanceof Class) {
@@ -91,8 +92,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				}
 			}
 		}
-		throw new IllegalArgumentException(
-				"HttpEntity parameter (" + methodParam.getParameterName() + ") is not parameterized");
+		throw new IllegalArgumentException("HttpEntity parameter (" + parameter.getParameterName() + ") "
+				+ "in method " + parameter.getMethod() + "is not parameterized");
 	}
 
 	public void handleReturnValue(Object returnValue, 

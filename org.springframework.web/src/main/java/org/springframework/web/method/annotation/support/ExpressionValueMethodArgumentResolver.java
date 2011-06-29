@@ -66,7 +66,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
-		throw new UnsupportedOperationException("Did not expect to handle a missing value: an @Value is never required");
+		throw new UnsupportedOperationException("@Value is never required: " + parameter.getMethod());
 	}
 
 	private static class ExpressionValueNamedValueInfo extends NamedValueInfo {

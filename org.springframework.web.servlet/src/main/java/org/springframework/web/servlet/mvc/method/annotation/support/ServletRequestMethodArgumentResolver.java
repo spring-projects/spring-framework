@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Locale;
 
@@ -101,8 +102,9 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			return request.getReader();
 		}
 		else {
-			// should not happen
-			throw new UnsupportedOperationException();
+			// should never happen..
+			Method method = parameter.getMethod();
+			throw new UnsupportedOperationException("Unknown parameter type: " + paramType + " in method: " + method);
 		}
 	}
 	

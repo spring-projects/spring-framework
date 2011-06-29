@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation.support;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.lang.reflect.Method;
 
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
@@ -66,25 +67,26 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 		mavContainer.setResolveView(false);
 
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
-		Class<?> parameterType = parameter.getParameterType();
+		Class<?> paramType = parameter.getParameterType();
 
-		if (ServletResponse.class.isAssignableFrom(parameterType)) {
-			Object nativeResponse = webRequest.getNativeResponse(parameterType);
+		if (ServletResponse.class.isAssignableFrom(paramType)) {
+			Object nativeResponse = webRequest.getNativeResponse(paramType);
 			if (nativeResponse == null) {
 				throw new IllegalStateException(
-						"Current response is not of type [" + parameterType.getName() + "]: " + response);
+						"Current response is not of type [" + paramType.getName() + "]: " + response);
 			}
 			return nativeResponse;
 		}
-		else if (OutputStream.class.isAssignableFrom(parameterType)) {
+		else if (OutputStream.class.isAssignableFrom(paramType)) {
 			return response.getOutputStream();
 		}
-		else if (Writer.class.isAssignableFrom(parameterType)) {
+		else if (Writer.class.isAssignableFrom(paramType)) {
 			return response.getWriter();
 		}
 		else {
 			// should not happen
-			throw new UnsupportedOperationException();
+			Method method = parameter.getMethod();
+			throw new UnsupportedOperationException("Unknown parameter type: " + paramType + " in method: " + method);
 		}
 	}
 	

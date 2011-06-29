@@ -101,8 +101,10 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 			return;
 		}
 		else {
-			// should not happen
-			throw new UnsupportedOperationException();
+			// should not happen..
+			Method method = returnType.getMethod();
+			String returnTypeName = returnType.getParameterType().getName();
+			throw new UnsupportedOperationException("Unknown return type: " + returnTypeName + " in method: " + method);
 		}
 	}
 

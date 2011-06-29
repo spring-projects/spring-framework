@@ -73,7 +73,7 @@ public class HandlerMethodArgumentResolverCompositeTests {
 		assertEquals("Didn't use the first registered resolver", Integer.valueOf(1), resolvedValue);
 	}
 	
-	@Test(expected=IllegalStateException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void noSuitableArgumentResolver() throws Exception {
 		this.resolvers.resolveArgument(paramStr, null, null, null);
 	}

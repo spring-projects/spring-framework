@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
+import java.lang.reflect.Method;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -62,7 +64,9 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 		}
 		else {
 			// should not happen
-			throw new UnsupportedOperationException();
+			Method method = returnType.getMethod();
+			String returnTypeName = returnType.getParameterType().getName();
+			throw new UnsupportedOperationException("Unknown return type: " + returnTypeName + " in method: " + method);
 		}
 	}
 
