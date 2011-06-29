@@ -139,10 +139,12 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 
 		ArrayList<WebApplicationInitializer> initializers = new ArrayList<WebApplicationInitializer>();
 
-		for (Class<?> waiClass : webAppInitializerClasses) {
-			if (!Modifier.isAbstract(waiClass.getModifiers())) {
-				// the class can be instantiated -> add it
-				initializers.add(instantiateClass(waiClass, WebApplicationInitializer.class));
+		if (webAppInitializerClasses != null) {
+			for (Class<?> waiClass : webAppInitializerClasses) {
+				if (!Modifier.isAbstract(waiClass.getModifiers())) {
+					// the class can be instantiated -> add it
+					initializers.add(instantiateClass(waiClass, WebApplicationInitializer.class));
+				}
 			}
 		}
 
