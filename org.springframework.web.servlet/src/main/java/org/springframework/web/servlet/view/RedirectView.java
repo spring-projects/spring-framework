@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UriUtils;
@@ -46,10 +45,13 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * <p>View that redirects to an absolute, context relative, or current request
- * relative URL. By default all primitive model attributes (or collections
- * thereof) are exposed as HTTP query parameters, but this behavior can be changed
- * by overriding the {@link #isEligibleProperty(String, Object)} method.
- *
+ * relative URL. The URL may be a URI template in which case the URI template 
+ * variables will be replaced with values available in the model. By default 
+ * all primitive model attributes (or collections thereof), not used to fill
+ * in URI tempate variables, are exposed as HTTP query parameters, but this 
+ * behavior can be changed by overriding the 
+ * {@link #isEligibleProperty(String, Object)} method.
+ * 
  * <p>A URL for this view is supposed to be a HTTP redirect URL, i.e.
  * suitable for HttpServletResponse's <code>sendRedirect</code> method, which
  * is what actually does the redirect if the HTTP 1.0 flag is on, or via sending
@@ -215,7 +217,18 @@ public class RedirectView extends AbstractUrlBasedView {
 	protected void renderMergedOutputModel(
 			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
+		String targetUrl = createTargetUrl(model, request);
+		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
+	}
 
+	/**
+	 * Creates the target URL by checking if the redirect string is a URI template first, 
+	 * expanding it with the given model, and then optionally appending simple type model 
+	 * attributes as query String parameters.
+	 */
+	protected final String createTargetUrl(Map<String, Object> model, HttpServletRequest request)
+			throws UnsupportedEncodingException {
+		
 		// Prepare target URL.
 		StringBuilder targetUrl = new StringBuilder();
 		if (this.contextRelative && getUrl().startsWith("/")) {
@@ -237,6 +250,7 @@ public class RedirectView extends AbstractUrlBasedView {
 			targetUrl = new StringBuilder(redirectUri.expand(model).toString());
 			model = removeKeys(model, redirectUri.getVariableNames());
 		}
+		
 		if (this.exposeModelAttributes) {
 			List<String> pathVarNames = getPathVarNames(request);
 			if (!pathVarNames.isEmpty()) {
@@ -244,8 +258,8 @@ public class RedirectView extends AbstractUrlBasedView {
 			}
 			appendQueryProperties(targetUrl, model, enc);
 		}
-
-		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
+		
+		return targetUrl.toString();
 	}
 
 	@SuppressWarnings("serial")
@@ -278,8 +292,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 */
 	@SuppressWarnings("unchecked")
 	private List<String> getPathVarNames(HttpServletRequest request) {
-		String key = View.PATH_VARIABLES;
-		Map<String, Object> map = (Map<String, Object>) request.getAttribute(key);
+		Map<String, Object> map = (Map<String, Object>) request.getAttribute(View.PATH_VARIABLES);
 		return (map != null) ? new ArrayList<String>(map.keySet()) : Collections.<String>emptyList();
 	}
 

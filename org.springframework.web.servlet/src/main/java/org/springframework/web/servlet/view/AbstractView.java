@@ -256,6 +256,18 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 				" and static attributes " + this.staticAttributes);
 		}
 		
+		Map<String, Object> mergedModel = createMergedOutputModel(model, request, response);
+
+		prepareResponse(request, response);
+		renderMergedOutputModel(mergedModel, request, response);
+	}
+
+	/**
+	 * Creates a combined output Map (never <code>null</code>) that includes dynamic values and static attributes. 
+	 * Dynamic values take precedence over static attributes.
+	 */
+	protected Map<String, Object> createMergedOutputModel(Map<String, ?> model, HttpServletRequest request,
+			HttpServletResponse response) {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> pathVars = this.exposePathVariables ?
 			(Map<String, Object>) request.getAttribute(View.PATH_VARIABLES) : null;
@@ -277,9 +289,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 		if (this.requestContextAttribute != null) {
 			mergedModel.put(this.requestContextAttribute, createRequestContext(request, response, mergedModel));
 		}
-
-		prepareResponse(request, response);
-		renderMergedOutputModel(mergedModel, request, response);
+		
+		return mergedModel;
 	}
 
 	/**
