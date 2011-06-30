@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.util.Assert;
@@ -29,11 +30,21 @@ import org.springframework.util.Assert;
  * Composite {@link CacheManager} implementation that iterates
  * over a given collection of {@link CacheManager} instances.
  * 
+ * Allows {@link NoOpCacheManager} to be automatically added to the list for handling
+ * the cache declarations without a backing store.
+ * 
  * @author Costin Leau
  */
-public class CompositeCacheManager implements CacheManager {
+public class CompositeCacheManager implements InitializingBean, CacheManager {
 
-	private CacheManager[] cacheManagers;
+	private List<CacheManager> cacheManagers;
+	private boolean noOpManager = false;
+
+	public void afterPropertiesSet() {
+		if (noOpManager) {
+			cacheManagers.add(new NoOpCacheManager());
+		}
+	}
 
 	public Cache getCache(String name) {
 		Cache cache = null;
@@ -55,8 +66,20 @@ public class CompositeCacheManager implements CacheManager {
 		return Collections.unmodifiableCollection(names);
 	}
 
-	public void setCacheManagers(CacheManager[] cacheManagers) {
+	public void setCacheManagers(Collection<CacheManager> cacheManagers) {
 		Assert.notEmpty(cacheManagers, "non-null/empty array required");
-		this.cacheManagers = cacheManagers.clone();
+		this.cacheManagers = new ArrayList<CacheManager>();
+		this.cacheManagers.addAll(cacheManagers);
+	}
+
+	/**
+	 * Indicates whether a {@link NoOpCacheManager} will be added at the end of the manager lists.
+	 * Any cache requests not handled by the configured cache managers will be automatically handled
+	 * by the {@link NoOpCacheManager}.
+	 * 
+	 * @param add whether a {@link NoOpCacheManager} instance will be added or not
+	 */
+	public void setAddNoOpCache(boolean add) {
+		this.noOpManager = add;
 	}
 }
