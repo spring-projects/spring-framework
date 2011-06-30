@@ -383,6 +383,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 	</section>
   </section>
   
+  
   <section id="cache-store-configuration">
 	<title>Configuring the cache storage</title>
 	
@@ -427,6 +428,27 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 
 		<para>This setup bootstraps ehcache library inside Spring IoC (through bean <literal>ehcache</literal>) which is then wired into the dedicated <interfacename>CacheManager</interfacename>
 		implementation. Note the entire ehcache-specific configuration is read from the resource <literal>ehcache.xml</literal>.</para>
+	</section>
+	
+	<section id="cache-store-configuration-noop">
+		<title>Dealing with caches without a backing store</title>
+	
+		<para>Sometimes when switching environments or doing testing, one might have cache declarations without an actual backing cache configured. As this is an invalid configuration, at runtime an
+		exception will be through since the caching infrastructure is unable to find a suitable store. In situations like this, rather then removing the cache declarations (which can prove tedious),
+		one can wire in a simple, dummy cache that performs no caching - that is, forces the cached methods to be executed every time:</para>
+
+		<programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.support.CompositeCacheManager">
+		<property name="cacheManagers"><list>
+		   <ref bean="jdkCache"/>
+		   <ref bean="gemfireCache"/>
+		</list></property>
+		<property name="addNoOpCache" value="true"/>
+</bean>]]></programlisting>
+		
+		<para>The <literal>CompositeCacheManager</literal> above chains multiple <literal>CacheManager</literal>s and aditionally, through the <literal>addNoOpManager</literal> flag, adds a 
+		<emphasis>no op</emphasis> cache that for all the definitions not handled by the configured cache managers. That is, every cache definition not found in either <literal>jdkCache</literal>
+		or <literal>gemfireCache</literal> (configured above) will be handled by the no op cache, which will not store any information causing the target method to be executed every time.
+		</para>
 	</section>
 	
   </section>
