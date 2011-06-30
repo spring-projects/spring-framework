@@ -16,8 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import java.util.Enumeration;
-
 import javax.servlet.ServletConfig;
 
 import org.springframework.core.env.EnumerablePropertySource;
@@ -38,10 +36,9 @@ public class ServletConfigPropertySource extends EnumerablePropertySource<Servle
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public String[] getPropertyNames() {
 		return CollectionUtils.toArray(
-				(Enumeration<String>)this.source.getInitParameterNames(), EMPTY_NAMES_ARRAY);
+				this.source.getInitParameterNames(), EMPTY_NAMES_ARRAY);
 	}
 
 	@Override
