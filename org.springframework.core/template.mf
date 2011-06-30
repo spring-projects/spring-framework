@@ -11,6 +11,7 @@ Import-Template:
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.springframework.asm.*;version=${spring.osgi.range};resolution:=optional,
  org.apache.log4j.*;version="[1.2.15, 2.0.0)";resolution:=optional,
+ joptsimple.*;version="[3.0.0, 4.0.0)";resolution:=optional,
  org.aspectj.*;version=${aj.osgi.range};resolution:=optional,
  org.xml.sax.*;version="0";resolution:=optional,
  org.w3c.dom.*;version="0";resolution:=optional
