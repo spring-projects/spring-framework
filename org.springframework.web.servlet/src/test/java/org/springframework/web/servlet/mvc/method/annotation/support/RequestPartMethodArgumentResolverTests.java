@@ -23,6 +23,7 @@ import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -71,6 +72,7 @@ public class RequestPartMethodArgumentResolverTests {
 	private MethodParameter paramRequestPart;
 	private MethodParameter paramNamedRequestPart;
 	private MethodParameter paramValidRequestPart;
+	private MethodParameter paramMultipartFile;
 	private MethodParameter paramInt;
 
 	private NativeWebRequest webRequest;
@@ -82,12 +84,14 @@ public class RequestPartMethodArgumentResolverTests {
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
-		Method handle = getClass().getMethod("handle", SimpleBean.class, SimpleBean.class, SimpleBean.class, Integer.TYPE);
+		Method handle = getClass().getMethod("handle", 
+				SimpleBean.class, SimpleBean.class, SimpleBean.class, MultipartFile.class, Integer.TYPE);
 		paramRequestPart = new MethodParameter(handle, 0);
 		paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
 		paramNamedRequestPart = new MethodParameter(handle, 1);
 		paramValidRequestPart = new MethodParameter(handle, 2);
-		paramInt = new MethodParameter(handle, 3);
+		paramMultipartFile = new MethodParameter(handle, 3);
+		paramInt = new MethodParameter(handle, 4);
 
 		messageConverter = createMock(HttpMessageConverter.class);
 		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
@@ -119,6 +123,13 @@ public class RequestPartMethodArgumentResolverTests {
 		testResolveArgument(new SimpleBean("foo"), paramNamedRequestPart);
 	}
 
+	@Test 
+	public void resolveMultipartFile() throws Exception {
+		Object actual = resolver.resolveArgument(paramMultipartFile, null, webRequest, null);
+		assertNotNull(actual);
+		assertSame(multipartFile, actual);
+	}
+	
 	@Test
 	public void resolveRequestPartNotValid() throws Exception {
 		try {
@@ -156,6 +167,7 @@ public class RequestPartMethodArgumentResolverTests {
 	public void handle(@RequestPart SimpleBean requestPart, 
 					   @RequestPart("requestPart") SimpleBean namedRequestPart, 
 					   @Valid @RequestPart("requestPart") SimpleBean validRequestPart, 
+					   @RequestPart("requestPart") MultipartFile multipartFile,
 					   int i) {
 	}
 
