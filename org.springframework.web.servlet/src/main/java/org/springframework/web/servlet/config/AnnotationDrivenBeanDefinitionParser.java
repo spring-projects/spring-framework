@@ -45,7 +45,6 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
-import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
@@ -62,10 +61,10 @@ import org.w3c.dom.Element;
  *
  * <p>Responsible for:
  * <ol>
- * <li>Registering a DefaultAnnotationHandlerMapping bean for mapping HTTP Servlet Requests to @Controller methods
- * using @RequestMapping annotations.
- * <li>Registering a AnnotationMethodHandlerAdapter bean for invoking annotated @Controller methods.
- * Will configure the HandlerAdapter's <code>webBindingInitializer</code> property for centrally configuring
+ * <li>Registering a {@code DefaultAnnotationHandlerMapping} bean for mapping HTTP Servlet Requests to {@code @Controller} methods
+ * using {@code @RequestMapping} annotations.
+ * <li>Registering an {@code AnnotationMethodHandlerAdapter} bean for invoking annotated {@code @Controller} methods.
+ * Will configure the {@code HandlerAdapter}'s <code>webBindingInitializer</code> property for centrally configuring
  * {@code @Controller} {@code DataBinder} instances:
  * <ul>
  * <li>Configures the conversionService if specified, otherwise defaults to a fresh {@link ConversionService} instance
