@@ -25,8 +25,11 @@ import javax.naming.NamingException;
 import org.springframework.core.env.PropertySource;
 
 /**
- * {@link PropertySource} implementation that reads properties from
- * a JNDI {@link Context}.
+ * {@link PropertySource} implementation that reads properties from a JNDI
+ * {@link Context}. All properties retrieved through {@link #getProperty(String)} will
+ * automatically be prefixed with "java:comp/env/" when executing the actual
+ * {@link Context#lookup(String)} call. This default can be overridden using
+ * {@link #setJndiPrefix(String)} property.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -86,14 +89,21 @@ public class JndiPropertySource extends PropertySource<Context> {
 	}
 
 	/**
-	 * Look up and return the given name from the source JNDI {@link Context}.
+	 * {@inheritDoc}
+	 * <p>This implementation looks up and returns the given name from the source JNDI
+	 * {@link Context}. If a {@link NamingException} is thrown during the call to
+	 * {@link Context#lookup(String)}, returns {@code null} and issue a DEBUG-level log
+	 * statement with the exception message.
 	 */
 	@Override
-	public Object getProperty(String name) throws JndiLookupFailureException {
+	public Object getProperty(String name) {
 		try {
-			return this.source.lookup(name);
+			Object value = this.source.lookup(name);
+			logger.debug("Context#lookup(" + name + ") returned: [" + value + "]");
+			return value;
 		} catch (NamingException ex) {
-			throw new JndiLookupFailureException("unable to look up name" + name, ex);
+			logger.debug("Context#lookup(" + name + ") threw NamingException with message: " + ex.getMessage());
+			return null;
 		}
 	}
 
