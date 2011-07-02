@@ -43,12 +43,6 @@ public class JndiPropertySource extends PropertySource<Context> {
 	public static final String JNDI_PROPERTY_SOURCE_NAME = "jndiPropertySource";
 
 	/**
-	 * Name of property used to determine if a {@link JndiPropertySource}
-	 * should be registered by default: {@value}
-	 */
-	public static final String JNDI_PROPERTY_SOURCE_ENABLED_FLAG = "jndiPropertySourceEnabled";
-
-	/**
 	 * Create a new {@code JndiPropertySource} with the default name
 	 * {@value #JNDI_PROPERTY_SOURCE_NAME} and create a new {@link InitialContext}
 	 * as the source object.

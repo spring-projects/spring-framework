@@ -19,6 +19,7 @@ package org.springframework.web.context.support;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.springframework.web.context.support.StandardServletEnvironment.JNDI_PROPERTY_SOURCE_ENABLED_FLAG;
 
 import org.junit.Test;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -48,7 +49,7 @@ public class StandardServletEnvironmentTests {
 
 	@Test
 	public void propertySourceOrder_jndiPropertySourceEnabled() {
-		System.setProperty(JndiPropertySource.JNDI_PROPERTY_SOURCE_ENABLED_FLAG, "true");
+		System.setProperty(JNDI_PROPERTY_SOURCE_ENABLED_FLAG, "true");
 		ConfigurableEnvironment env = new StandardServletEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
 
@@ -59,12 +60,12 @@ public class StandardServletEnvironmentTests {
 		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(4));
 		assertThat(sources.size(), is(5));
 
-		System.clearProperty(JndiPropertySource.JNDI_PROPERTY_SOURCE_ENABLED_FLAG);
+		System.clearProperty(JNDI_PROPERTY_SOURCE_ENABLED_FLAG);
 	}
 
 	@Test
 	public void propertySourceOrder_jndiPropertySourceEnabledIsFalse() {
-		System.setProperty(JndiPropertySource.JNDI_PROPERTY_SOURCE_ENABLED_FLAG, "false");
+		System.setProperty(JNDI_PROPERTY_SOURCE_ENABLED_FLAG, "false");
 		ConfigurableEnvironment env = new StandardServletEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
 
@@ -75,6 +76,6 @@ public class StandardServletEnvironmentTests {
 		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)), equalTo(3));
 		assertThat(sources.size(), is(4));
 
-		System.clearProperty(JndiPropertySource.JNDI_PROPERTY_SOURCE_ENABLED_FLAG);
+		System.clearProperty(JNDI_PROPERTY_SOURCE_ENABLED_FLAG);
 	}
 }

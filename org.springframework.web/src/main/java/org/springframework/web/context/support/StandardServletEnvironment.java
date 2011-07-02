@@ -56,6 +56,13 @@ public class StandardServletEnvironment extends StandardEnvironment {
 	public static final String SERVLET_CONFIG_PROPERTY_SOURCE_NAME = "servletConfigInitParams";
 
 	/**
+	 * Name of property used to determine if a {@link JndiPropertySource}
+	 * should be registered by default: {@value}
+	 */
+	public static final String JNDI_PROPERTY_SOURCE_ENABLED_FLAG = "jndiPropertySourceEnabled";
+
+
+	/**
 	 * Customize the set of property sources with those contributed by superclasses as
 	 * well as those appropriate for standard servlet-based environments:
 	 * <ul>
@@ -90,7 +97,7 @@ public class StandardServletEnvironment extends StandardEnvironment {
 		propertySources.addLast(new StubPropertySource(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
 		super.customizePropertySources(propertySources);
 
-		if (this.getProperty(JndiPropertySource.JNDI_PROPERTY_SOURCE_ENABLED_FLAG, boolean.class, false)) {
+		if (this.getProperty(JNDI_PROPERTY_SOURCE_ENABLED_FLAG, boolean.class, false)) {
 			propertySources.addAfter(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, new JndiPropertySource());
 		}
 	}
