@@ -188,7 +188,7 @@ import org.springframework.util.StringUtils;
 public abstract class CommandLinePropertySource<T> extends PropertySource<T> {
 
 	/** The default name given to {@link CommandLinePropertySource} instances: {@value} */
-	public static final String DEFAULT_COMMAND_LINE_PROPERTY_SOURCE_NAME = "commandLineArgs";
+	public static final String COMMAND_LINE_PROPERTY_SOURCE_NAME = "commandLineArgs";
 
 	/** The default name of the property representing non-option arguments: {@value} */
 	public static final String DEFAULT_NON_OPTION_ARGS_PROPERTY_NAME = "nonOptionArgs";
@@ -197,10 +197,10 @@ public abstract class CommandLinePropertySource<T> extends PropertySource<T> {
 
 	/**
 	 * Create a new {@code CommandLinePropertySource} having the default name {@value
-	 * #DEFAULT_COMMAND_LINE_PROPERTY_SOURCE_NAME} and backed by the given source object.
+	 * #COMMAND_LINE_PROPERTY_SOURCE_NAME} and backed by the given source object.
 	 */
 	public CommandLinePropertySource(T source) {
-		super(DEFAULT_COMMAND_LINE_PROPERTY_SOURCE_NAME, source);
+		super(COMMAND_LINE_PROPERTY_SOURCE_NAME, source);
 	}
 
 	/**
