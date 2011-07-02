@@ -22,13 +22,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -396,12 +393,8 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 				if (factoryKey != null) {
 					beanFactory = bfg.definition.getBean(factoryKey, BeanFactory.class);
 				}
-				else if (bfg.definition instanceof ListableBeanFactory) {
-					beanFactory = BeanFactoryUtils.beanOfType((ListableBeanFactory) bfg.definition, BeanFactory.class);
-				}
 				else {
-					throw new IllegalStateException(
-							"Factory key is null, and underlying factory is not a ListableBeanFactory: " + bfg.definition);
+					beanFactory = bfg.definition.getBean(BeanFactory.class);
 				}
 				return new CountingBeanFactoryReference(beanFactory, bfg.definition);
 			}
