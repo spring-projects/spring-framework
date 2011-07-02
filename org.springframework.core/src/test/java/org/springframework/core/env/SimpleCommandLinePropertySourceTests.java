@@ -37,7 +37,7 @@ public class SimpleCommandLinePropertySourceTests {
 	public void withDefaultName() {
 		PropertySource<?> ps = new SimpleCommandLinePropertySource();
 		assertThat(ps.getName(),
-				equalTo(CommandLinePropertySource.DEFAULT_COMMAND_LINE_PROPERTY_SOURCE_NAME));
+				equalTo(CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME));
 	}
 
 	@Test

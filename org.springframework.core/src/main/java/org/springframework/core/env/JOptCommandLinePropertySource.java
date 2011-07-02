@@ -57,7 +57,7 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 	/**
 	 * Create a new {@code JOptCommandLinePropertySource} having the default name
 	 * and backed by the given {@code OptionSet}.
-	 * @see CommandLinePropertySource#DEFAULT_COMMAND_LINE_PROPERTY_SOURCE_NAME
+	 * @see CommandLinePropertySource#COMMAND_LINE_PROPERTY_SOURCE_NAME
 	 * @see CommandLinePropertySource#CommandLinePropertySource(Object)
 	 */
 	public JOptCommandLinePropertySource(OptionSet options) {

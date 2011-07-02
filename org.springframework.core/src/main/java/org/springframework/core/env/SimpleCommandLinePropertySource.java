@@ -80,7 +80,7 @@ public class SimpleCommandLinePropertySource extends CommandLinePropertySource<C
 	/**
 	 * Create a new {@code SimpleCommandLinePropertySource} having the default name
 	 * and backed by the given {@code String[]} of command line arguments.
-	 * @see CommandLinePropertySource#DEFAULT_COMMAND_LINE_PROPERTY_SOURCE_NAME
+	 * @see CommandLinePropertySource#COMMAND_LINE_PROPERTY_SOURCE_NAME
 	 * @see CommandLinePropertySource#CommandLinePropertySource(Object)
 	 */
 	public SimpleCommandLinePropertySource(String... args) {
