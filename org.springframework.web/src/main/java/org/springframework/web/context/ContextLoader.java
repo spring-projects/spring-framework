@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
@@ -91,12 +91,17 @@ import org.springframework.util.StringUtils;
 public class ContextLoader {
 
 	/**
-	 * Config param for the root WebApplicationContext implementation class to
-	 * use: {@value}
+	 * Config param for the root WebApplicationContext implementation class to use: {@value}
 	 * @see #determineContextClass(ServletContext)
 	 * @see #createWebApplicationContext(ServletContext, ApplicationContext)
 	 */
 	public static final String CONTEXT_CLASS_PARAM = "contextClass";
+
+	/**
+	 * Config param for the root WebApplicationContext id,
+	 * to be used as serialization id for the underlying BeanFactory: {@value}
+	 */
+	public static final String CONTEXT_ID_PARAM = "contextId";
 
 	/**
 	 * Config param for which {@link ApplicationContextInitializer} classes to use
@@ -348,21 +353,20 @@ public class ContextLoader {
 		if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
 			// The application context id is still set to its original default value
 			// -> assign a more useful id based on available information
-			if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-				// Servlet <= 2.4: resort to name specified in web.xml, if any.
-				String servletContextName = sc.getServletContextName();
-				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-						ObjectUtils.getDisplayString(servletContextName));
+			String idParam = sc.getInitParameter(CONTEXT_ID_PARAM);
+			if (idParam != null) {
+				wac.setId(idParam);
 			}
 			else {
-				// Servlet 2.5's getContextPath available!
-				try {
-					String contextPath = (String) ServletContext.class.getMethod("getContextPath").invoke(sc);
+				// Generate default id...
+				if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+					// Servlet <= 2.4: resort to name specified in web.xml, if any.
 					wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-							ObjectUtils.getDisplayString(contextPath));
+							ObjectUtils.getDisplayString(sc.getServletContextName()));
 				}
-				catch (Exception ex) {
-					throw new IllegalStateException("Failed to invoke Servlet 2.5 getContextPath method", ex);
+				else {
+					wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
+							ObjectUtils.getDisplayString(sc.getContextPath()));
 				}
 			}
 		}
