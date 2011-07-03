@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.6 (2011-06-27)
+Changes in version 3.0.6 (2011-07-07)
 -------------------------------------
 
 * fixed aspects bundle to declare dependencies for @Async aspect as well
@@ -16,12 +16,15 @@ Changes in version 3.0.6 (2011-06-27)
 * restored original GenericConversionService behavior with respect to empty collections/maps
 * restored original FormattingConversionService behavior with respect to the use of subtypes
 * fixed collection element resolution when using a ConversionService with a DataBinder
+* DataBinder uses a default limit of 256 for array/collection auto-growing
+* added "autoGrowNestedPaths" property to ConfigurableWebBindingInitializer
 * Servlet/PortletRequestDataBinder perform unwrapping for MultipartRequest as well
 * fixed AbstractBindingResult to avoid NPE in "hashCode()" if target is null
 * fixed several HttpHeaders issues (charset handling, quoting/unquoting)
 * FormHttpMessageConverter correctly processes POST requests
 * ResourceHttpRequestHandler does not set Content-Length header for 304 response
 * LocaleChangeInterceptor validates locale values in order to prevent XSS vulnerability
+* ContextLoader and FrameworkServlet support "contextId" parameter for custom serialization id
 * RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
 * refined WebLogic RMI descriptor to only mark 'getTargetInterfaceName' method as idempotent
 * EhCacheManagerFactoryBean properly closes "ehcache.xml" input stream, if any
