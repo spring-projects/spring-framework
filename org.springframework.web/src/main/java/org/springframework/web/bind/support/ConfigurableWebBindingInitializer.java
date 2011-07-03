@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import org.springframework.web.context.request.WebRequest;
  */
 public class ConfigurableWebBindingInitializer implements WebBindingInitializer {
 
+	private boolean autoGrowNestedPaths = true;
+
 	private boolean directFieldAccess = false;
 
 	private MessageCodesResolver messageCodesResolver;
@@ -54,12 +56,42 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 
 
 	/**
+	 * Set whether a binder should attempt to "auto-grow" a nested path that contains a null value.
+	 * <p>If "true", a null path location will be populated with a default object value and traversed
+	 * instead of resulting in an exception. This flag also enables auto-growth of collection elements
+	 * when accessing an out-of-bounds index.
+	 * <p>Default is "true" on a standard DataBinder. Note that this feature is only supported
+	 * for bean property access (DataBinder's default mode), not for field access.
+	 * @see #initBeanPropertyAccess()
+	 * @see org.springframework.validation.DataBinder#setAutoGrowNestedPaths
+	 */
+	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
+		this.autoGrowNestedPaths = autoGrowNestedPaths;
+	}
+
+	/**
+	 * Return whether a binder should attempt to "auto-grow" a nested path that contains a null value.
+	 */
+	public boolean isAutoGrowNestedPaths() {
+		return this.autoGrowNestedPaths;
+	}
+
+	/**
 	 * Set whether to use direct field access instead of bean property access.
 	 * <p>Default is <code>false</code>, using bean property access.
-	 * Switch this to <code>true</code> for enforcing direct field access.
+	 * Switch this to <code>true</code> in order to enforce direct field access.
+	 * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
+	 * @see org.springframework.validation.DataBinder#initBeanPropertyAccess()
 	 */
 	public final void setDirectFieldAccess(boolean directFieldAccess) {
 		this.directFieldAccess = directFieldAccess;
+	}
+
+	/**
+	 * Return whether to use direct field access instead of bean property access.
+	 */
+	public boolean isDirectFieldAccess() {
+		return directFieldAccess;
 	}
 
 	/**
@@ -150,6 +182,7 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 
 
 	public void initBinder(WebDataBinder binder, WebRequest request) {
+		binder.setAutoGrowNestedPaths(this.autoGrowNestedPaths);
 		if (this.directFieldAccess) {
 			binder.initDirectFieldAccess();
 		}
