@@ -1501,10 +1501,10 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(testBean, "testBean");
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.add("stringArray[4]", "");
+		mpvs.add("friends[4]", "");
 		binder.bind(mpvs);
 
-		assertEquals(5, testBean.getStringArray().length);
+		assertEquals(5, testBean.getFriends().size());
 	}
 
 	public void testAutoGrowBeyondDefaultLimit() throws Exception {
@@ -1512,7 +1512,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(testBean, "testBean");
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.add("stringArray[256]", "");
+		mpvs.add("friends[256]", "");
 		try {
 			binder.bind(mpvs);
 			fail("Should have thrown InvalidPropertyException");
@@ -1529,10 +1529,10 @@ public class DataBinderTests extends TestCase {
 		binder.setAutoGrowCollectionLimit(10);
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.add("stringArray[4]", "");
+		mpvs.add("friends[4]", "");
 		binder.bind(mpvs);
 
-		assertEquals(5, testBean.getStringArray().length);
+		assertEquals(5, testBean.getFriends().size());
 	}
 
 	public void testAutoGrowBeyondCustomLimit() throws Exception {
@@ -1541,7 +1541,7 @@ public class DataBinderTests extends TestCase {
 		binder.setAutoGrowCollectionLimit(10);
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.add("stringArray[16]", "");
+		mpvs.add("friends[16]", "");
 		try {
 			binder.bind(mpvs);
 			fail("Should have thrown InvalidPropertyException");
