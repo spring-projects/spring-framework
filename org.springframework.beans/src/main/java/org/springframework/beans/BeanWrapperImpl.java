@@ -990,10 +990,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					oldValue = list.get(index);
 				}
 				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType, TypeDescriptor.nested(property(pd), tokens.keys.length));
-				if (index < size) {
-					list.set(index, convertedValue);
-				}
-				else if (index >= size && index < this.autoGrowCollectionLimit) {
+				if (index >= size && index < this.autoGrowCollectionLimit) {
 					for (int i = size; i < index; i++) {
 						try {
 							list.add(null);
@@ -1006,6 +1003,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						}
 					}
 					list.add(convertedValue);
+				}
+				else {
+					list.set(index, convertedValue);
 				}
 			}
 			else if (propValue instanceof Map) {
