@@ -34,6 +34,7 @@ import org.springframework.beans.BeanWithObjectProperty;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
@@ -1487,13 +1488,68 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.add("name", name);
 		mpvs.add("beanName", beanName);
-
 		binder.bind(mpvs);
 
 		assertEquals(name, testBean.getName());
 		String[] disallowedFields = binder.getBindingResult().getSuppressedFields();
 		assertEquals(1, disallowedFields.length);
 		assertEquals("beanName", disallowedFields[0]);
+	}
+
+	public void testAutoGrowWithinDefaultLimit() throws Exception {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.add("stringArray[4]", "");
+		binder.bind(mpvs);
+
+		assertEquals(5, testBean.getStringArray().length);
+	}
+
+	public void testAutoGrowBeyondDefaultLimit() throws Exception {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.add("stringArray[256]", "");
+		try {
+			binder.bind(mpvs);
+			fail("Should have thrown InvalidPropertyException");
+		}
+		catch (InvalidPropertyException ex) {
+			// expected
+			assertTrue(ex.getRootCause() instanceof IndexOutOfBoundsException);
+		}
+	}
+
+	public void testAutoGrowWithinCustomLimit() throws Exception {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		binder.setAutoGrowCollectionLimit(10);
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.add("stringArray[4]", "");
+		binder.bind(mpvs);
+
+		assertEquals(5, testBean.getStringArray().length);
+	}
+
+	public void testAutoGrowBeyondCustomLimit() throws Exception {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		binder.setAutoGrowCollectionLimit(10);
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.add("stringArray[16]", "");
+		try {
+			binder.bind(mpvs);
+			fail("Should have thrown InvalidPropertyException");
+		}
+		catch (InvalidPropertyException ex) {
+			// expected
+			assertTrue(ex.getRootCause() instanceof IndexOutOfBoundsException);
+		}
 	}
 
 
