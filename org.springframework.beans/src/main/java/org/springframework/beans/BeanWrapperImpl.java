@@ -1005,7 +1005,13 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					list.add(convertedValue);
 				}
 				else {
-					list.set(index, convertedValue);
+					try {
+						list.set(index, convertedValue);
+					}
+					catch (IndexOutOfBoundsException ex) {
+						throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+								"Invalid list index in property path '" + propertyName + "'", ex);
+					}
 				}
 			}
 			else if (propValue instanceof Map) {
