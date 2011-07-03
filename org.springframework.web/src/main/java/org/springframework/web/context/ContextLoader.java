@@ -77,10 +77,17 @@ import org.springframework.util.ObjectUtils;
 public class ContextLoader {
 
 	/**
-	 * Config param for the root WebApplicationContext implementation class to
-	 * use: "<code>contextClass</code>"
+	 * Config param for the root WebApplicationContext implementation class to use:
+	 * "<code>contextClass</code>"
 	 */
 	public static final String CONTEXT_CLASS_PARAM = "contextClass";
+
+	/**
+	 * Config param for the root WebApplicationContext id,
+	 * to be used as serialization id for the underlying BeanFactory:
+	 * "<code>contextId</code>"
+	 */
+	public static final String CONTEXT_ID_PARAM = "contextId";
 
 	/**
 	 * Name of servlet context parameter (i.e., "<code>contextConfigLocation</code>")
@@ -251,21 +258,20 @@ public class ContextLoader {
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 
 		// Assign the best possible id value.
-		if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-			// Servlet <= 2.4: resort to name specified in web.xml, if any.
-			String servletContextName = sc.getServletContextName();
-			wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-					ObjectUtils.getDisplayString(servletContextName));
+		String idParam = sc.getInitParameter(CONTEXT_ID_PARAM);
+		if (idParam != null) {
+			wac.setId(idParam);
 		}
 		else {
-			// Servlet 2.5's getContextPath available!
-			try {
-				String contextPath = (String) ServletContext.class.getMethod("getContextPath").invoke(sc);
+			// Generate default id...
+			if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+				// Servlet <= 2.4: resort to name specified in web.xml, if any.
 				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
-						ObjectUtils.getDisplayString(contextPath));
+						ObjectUtils.getDisplayString(sc.getServletContextName()));
 			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Failed to invoke Servlet 2.5 getContextPath method", ex);
+			else {
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
+						ObjectUtils.getDisplayString(sc.getContextPath()));
 			}
 		}
 

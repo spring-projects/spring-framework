@@ -33,6 +33,7 @@ import org.springframework.context.event.SourceFilteringListener;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -121,6 +122,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/** WebApplicationContext implementation class to create */
 	private Class contextClass = DEFAULT_CONTEXT_CLASS;
 
+	/** WebApplicationContext id to assign */
+	private String contextId;
+
 	/** Namespace for this servlet */
 	private String namespace;
 
@@ -183,6 +187,21 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	public Class getContextClass() {
 		return this.contextClass;
+	}
+
+	/**
+	 * Specify a custom WebApplicationContext id,
+	 * to be used as serialization id for the underlying BeanFactory.
+	 */
+	public void setContextId(String contextId) {
+		this.contextId = contextId;
+	}
+
+	/**
+	 * Return the custom WebApplicationContext id, if any.
+	 */
+	public String getContextId() {
+		return this.contextId;
 	}
 
 	/**
@@ -413,22 +432,28 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 
 		// Assign the best possible id value.
-		ServletContext sc = getServletContext();
-		if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
-			// Servlet <= 2.4: resort to name specified in web.xml, if any.
-			String servletContextName = sc.getServletContextName();
-			if (servletContextName != null) {
-				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName +
-						"." + getServletName());
-			}
-			else {
-				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getServletName());
-			}
+		if (this.contextId != null) {
+			wac.setId(this.contextId);
 		}
 		else {
-			// Servlet 2.5's getContextPath available!
-			wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + sc.getContextPath() +
-					"/" + getServletName());
+			// Generate default id...
+			ServletContext sc = getServletContext();
+			if (sc.getMajorVersion() == 2 && sc.getMinorVersion() < 5) {
+				// Servlet <= 2.4: resort to name specified in web.xml, if any.
+				String servletContextName = sc.getServletContextName();
+				if (servletContextName != null) {
+					wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + servletContextName +
+							"." + getServletName());
+				}
+				else {
+					wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getServletName());
+				}
+			}
+			else {
+				// Servlet 2.5's getContextPath available!
+				wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX +
+						ObjectUtils.getDisplayString(sc.getContextPath()) + "/" + getServletName());
+			}
 		}
 
 		wac.setParent(parent);
