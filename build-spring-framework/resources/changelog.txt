@@ -10,10 +10,14 @@ Changes in version 3.1 RC1 (2011-07-xx)
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
 * DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
 * DefaultListableBeanFactory's getBean(name, type) attempts type conversion if necessary
+* DataBinder uses a default limit of 256 for array/collection auto-growing
+* added "autoGrowNestedPaths" property to ConfigurableWebBindingInitializer
+* added headers support to MultipartFile abstraction (actually supported on Servlet 3.0)
+* ContextLoader and FrameworkServlet support "contextId" parameter for custom serialization id
+* AnnotationConfigContextLoader now supports default configuration classes with arbitrary names
 * revised JMS CachedConnectionFactory to avoid unnecessary rollback calls on Session return
 * fixed JMS CachedConnectionFactory to fully synchronize its Session list
 * refined WebLogic RMI descriptor to only mark 'getTargetInterfaceName' method as idempotent
-* AnnotationConfigContextLoader now supports default configuration classes with arbitrary names
 
 
 Changes in version 3.1 M2 (2011-06-08)
