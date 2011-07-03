@@ -48,10 +48,12 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.jboss.vfs/com.springsource.org.jboss.virtual/2.1.0.GA/com.springsource.org.jboss.virtual-2.1.0.GA.jar!/" />
+          <root url="jar://$IVY_CACHE$/net.sourceforge.jopt-simple/com.springsource.joptsimple/3.0.0/com.springsource.joptsimple-3.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/net.sourceforge.jopt-simple/com.springsource.joptsimple/3.0.0/com.springsource.joptsimple-sources-3.0.0.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
   </component>
