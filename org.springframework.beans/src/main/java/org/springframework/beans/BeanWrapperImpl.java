@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,6 +120,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	private boolean autoGrowNestedPaths = false;
 
+	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
+
 
 	/**
 	 * Create new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
@@ -184,6 +186,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		setWrappedInstance(object, nestedPath, superBw.getWrappedInstance());
 		setExtractOldValueForEditor(superBw.isExtractOldValueForEditor());
 		setAutoGrowNestedPaths(superBw.isAutoGrowNestedPaths());
+		setAutoGrowCollectionLimit(superBw.getAutoGrowCollectionLimit());
 		setConversionService(superBw.getConversionService());
 		setSecurityContext(superBw.acc);
 	}
@@ -251,20 +254,36 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 	/**
-	 * If this BeanWrapper should "auto grow" nested paths.
-	 * When true, auto growth is triggered on nested paths when null values are encountered.
-	 * When true, auto growth is triggered on collection properties when out of bounds indexes are accessed.
-	 * Default is false.
+	 * Set whether this BeanWrapper should attempt to "auto-grow" a nested path that contains a null value.
+	 * <p>If "true", a null path location will be populated with a default object value and traversed
+	 * instead of resulting in a {@link NullValueInNestedPathException}. Turning this flag on also
+	 * enables auto-growth of collection elements when accessing an out-of-bounds index.
+	 * <p>Default is "false" on a plain BeanWrapper.
 	 */
 	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
 		this.autoGrowNestedPaths = autoGrowNestedPaths;
 	}
 
 	/**
-	 * If this BeanWrapper should "auto grow" nested paths.
+	 * Return whether "auto-growing" of nested paths has been activated.
 	 */
 	public boolean isAutoGrowNestedPaths() {
 		return this.autoGrowNestedPaths;
+	}
+
+	/**
+	 * Specify a limit for array and collection auto-growing.
+	 * <p>Default is unlimited on a plain BeanWrapper.
+	 */
+	public void setAutoGrowCollectionLimit(int autoGrowCollectionLimit) {
+		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
+	}
+
+	/**
+	 * Return the limit for array and collection auto-growing.
+	 */
+	public int getAutoGrowCollectionLimit() {
+		return this.autoGrowCollectionLimit;
 	}
 
 	/**
@@ -594,7 +613,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		setPropertyValue(tokens, pv);
 		return pv.getValue();
 	}
-	
+
 	private PropertyValue createDefaultPropertyValue(PropertyTokenHolder tokens) {
 		Class type = getPropertyType(tokens.canonicalName);
 		if (type == null) {
@@ -604,7 +623,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		Object defaultValue = newValue(type, tokens.canonicalName);
 		return new PropertyValue(tokens.canonicalName, defaultValue);
 	}
-	
+
 	private Object newValue(Class<?> type, String name) {
 		try {
 			if (type.isArray()) {
@@ -634,7 +653,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
 		}
 	}
-	
+
 	/**
 	 * Create a new nested BeanWrapper instance.
 	 * <p>Default implementation creates a BeanWrapperImpl instance.
@@ -834,15 +853,16 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			return array;
 		}
 		int length = Array.getLength(array);
-		if (index >= length) {
+		if (index >= length && index < this.autoGrowCollectionLimit) {
 			Class<?> componentType = array.getClass().getComponentType();
 			Object newArray = Array.newInstance(componentType, index + 1);
 			System.arraycopy(array, 0, newArray, 0, length);
 			for (int i = length; i < Array.getLength(newArray); i++) {
 				Array.set(newArray, i, newValue(componentType, name));
 			}
+			// TODO this is not efficient because conversion may create a copy ... set directly because we know it is assignable.
 			setPropertyValue(name, newArray);
-			return newArray;
+			return getPropertyValue(name);
 		}
 		else {
 			return array;
@@ -856,7 +876,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		if (!this.autoGrowNestedPaths) {
 			return;
 		}
-		if (index >= collection.size()) {
+		int size = collection.size();
+		if (index >= size && index < this.autoGrowCollectionLimit) {
 			Class elementType = GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod(), nestingLevel);
 			if (elementType != null) {
 				for (int i = collection.size(); i < index + 1; i++) {
@@ -932,13 +953,13 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						"Cannot access indexed value in property referenced " +
 						"in indexed property path '" + propertyName + "': returned null");
 			}
-			else if (propValue.getClass().isArray()) {
+			if (propValue.getClass().isArray()) {
 				PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
 				Class requiredType = propValue.getClass().getComponentType();
 				int arrayIndex = Integer.parseInt(key);
 				Object oldValue = null;
 				try {
-					if (isExtractOldValueForEditor()) {
+					if (isExtractOldValueForEditor() && arrayIndex < Array.getLength(propValue)) {
 						oldValue = Array.get(propValue, arrayIndex);
 					}
 					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
@@ -956,28 +977,35 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						pd.getReadMethod(), tokens.keys.length);
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
+				int size = list.size();
 				Object oldValue = null;
-				if (isExtractOldValueForEditor() && index < list.size()) {
+				if (isExtractOldValueForEditor() && index < size) {
 					oldValue = list.get(index);
 				}
 				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
 						new PropertyTypeDescriptor(pd, new MethodParameter(pd.getReadMethod(), -1), requiredType));
-				if (index < list.size()) {
-					list.set(index, convertedValue);
-				}
-				else if (index >= list.size()) {
-					for (int i = list.size(); i < index; i++) {
+				if (index >= size && index < this.autoGrowCollectionLimit) {
+					for (int i = size; i < index; i++) {
 						try {
 							list.add(null);
 						}
 						catch (NullPointerException ex) {
 							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 									"Cannot set element with index " + index + " in List of size " +
-									list.size() + ", accessed using property path '" + propertyName +
+									size + ", accessed using property path '" + propertyName +
 									"': List does not support filling up gaps with null elements");
 						}
 					}
 					list.add(convertedValue);
+				}
+				else {
+					try {
+						list.set(index, convertedValue);
+					}
+					catch (IndexOutOfBoundsException ex) {
+						throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+								"Invalid list index in property path '" + propertyName + "'", ex);
+					}
 				}
 			}
 			else if (propValue instanceof Map) {

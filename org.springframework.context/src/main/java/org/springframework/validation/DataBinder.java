@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,6 +105,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	/** Default object name used for binding: "target" */
 	public static final String DEFAULT_OBJECT_NAME = "target";
 
+	/** Default limit for array and collection growing: 256 */
+	public static final int DEFAULT_AUTO_GROW_COLLECTION_LIMIT = 256;
+
 
 	/**
 	 * We'll create a lot of DataBinder instances: Let's use a static logger.
@@ -126,6 +129,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	private boolean ignoreInvalidFields = false;
 
 	private boolean autoGrowNestedPaths = true;
+
+	private int autoGrowCollectionLimit = DEFAULT_AUTO_GROW_COLLECTION_LIMIT;
 
 	private String[] allowedFields;
 
@@ -200,6 +205,22 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
+	 * Specify the limit for array and collection auto-growing.
+	 * <p>Default is 256, preventing OutOfMemoryErrors in case of large indexes.
+	 * Raise this limit if your auto-growing needs are unusually high.
+	 */
+	public void setAutoGrowCollectionLimit(int autoGrowCollectionLimit) {
+		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
+	}
+
+	/**
+	 * Return the current limit for array and collection auto-growing.
+	 */
+	public int getAutoGrowCollectionLimit() {
+		return this.autoGrowCollectionLimit;
+	}
+
+	/**
 	 * Initialize standard JavaBean property access for this DataBinder.
 	 * <p>This is the default; an explicit call just leads to eager initialization.
 	 * @see #initDirectFieldAccess()
@@ -207,7 +228,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	public void initBeanPropertyAccess() {
 		Assert.state(this.bindingResult == null,
 				"DataBinder is already initialized - call initBeanPropertyAccess before other configuration methods");
-		this.bindingResult = new BeanPropertyBindingResult(getTarget(), getObjectName(), isAutoGrowNestedPaths());
+		this.bindingResult = new BeanPropertyBindingResult(
+				getTarget(), getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
 		if (this.conversionService != null) {
 			this.bindingResult.initConversion(this.conversionService);
 		}
@@ -509,17 +531,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return this.conversionService;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void registerCustomEditor(Class requiredType, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, propertyEditor);
 	}
 
-	@SuppressWarnings("unchecked")
 	public void registerCustomEditor(Class requiredType, String field, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, field, propertyEditor);
 	}
 
-	@SuppressWarnings("unchecked")
 	public PropertyEditor findCustomEditor(Class requiredType, String propertyPath) {
 		return getPropertyEditorRegistry().findCustomEditor(requiredType, propertyPath);
 	}
@@ -700,8 +719,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @throws BindException if there were any errors in the bind operation
 	 * @see BindingResult#getModel()
 	 */
-	@SuppressWarnings("unchecked")
-	public Map close() throws BindException {
+	public Map<?, ?> close() throws BindException {
 		if (getBindingResult().hasErrors()) {
 			throw new BindException(getBindingResult());
 		}

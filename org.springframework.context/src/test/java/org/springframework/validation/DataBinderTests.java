@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.beans.BeanWithObjectProperty;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.IndexedTestBean;
+import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
@@ -1486,13 +1487,68 @@ public class DataBinderTests extends TestCase {
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.add("name", name);
 		mpvs.add("beanName", beanName);
-
 		binder.bind(mpvs);
 
 		assertEquals(name, testBean.getName());
 		String[] disallowedFields = binder.getBindingResult().getSuppressedFields();
 		assertEquals(1, disallowedFields.length);
 		assertEquals("beanName", disallowedFields[0]);
+	}
+
+	public void testAutoGrowWithinDefaultLimit() throws Exception {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.add("friends[4]", "");
+		binder.bind(mpvs);
+
+		assertEquals(5, testBean.getFriends().size());
+	}
+
+	public void testAutoGrowBeyondDefaultLimit() throws Exception {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.add("friends[256]", "");
+		try {
+			binder.bind(mpvs);
+			fail("Should have thrown InvalidPropertyException");
+		}
+		catch (InvalidPropertyException ex) {
+			// expected
+			assertTrue(ex.getRootCause() instanceof IndexOutOfBoundsException);
+		}
+	}
+
+	public void testAutoGrowWithinCustomLimit() throws Exception {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		binder.setAutoGrowCollectionLimit(10);
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.add("friends[4]", "");
+		binder.bind(mpvs);
+
+		assertEquals(5, testBean.getFriends().size());
+	}
+
+	public void testAutoGrowBeyondCustomLimit() throws Exception {
+		TestBean testBean = new TestBean();
+		DataBinder binder = new DataBinder(testBean, "testBean");
+		binder.setAutoGrowCollectionLimit(10);
+
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.add("friends[16]", "");
+		try {
+			binder.bind(mpvs);
+			fail("Should have thrown InvalidPropertyException");
+		}
+		catch (InvalidPropertyException ex) {
+			// expected
+			assertTrue(ex.getRootCause() instanceof IndexOutOfBoundsException);
+		}
 	}
 
 

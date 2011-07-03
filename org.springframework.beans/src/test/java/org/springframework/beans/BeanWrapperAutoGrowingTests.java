@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.beans;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -115,6 +116,19 @@ public class BeanWrapperAutoGrowingTests {
 		assertNotNull(wrapper.getPropertyValue("list[1]"));
 		assertNotNull(wrapper.getPropertyValue("list[2]"));
 		assertNotNull(wrapper.getPropertyValue("list[3]"));
+	}
+
+	@Test
+	public void getPropertyValueAutoGrowListFailsAgainstLimit() {
+		wrapper.setAutoGrowCollectionLimit(2);
+		try {
+			assertNotNull(wrapper.getPropertyValue("list[4]"));
+			fail("Should have thrown InvalidPropertyException");
+		}
+		catch (InvalidPropertyException ex) {
+			// expected
+			assertTrue(ex.getRootCause() instanceof IndexOutOfBoundsException);
+		}
 	}
 
 	@Test

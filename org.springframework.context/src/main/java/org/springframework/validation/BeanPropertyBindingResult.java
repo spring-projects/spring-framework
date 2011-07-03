@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 
 	private final boolean autoGrowNestedPaths;
 
+	private final int autoGrowCollectionLimit;
+
 	private transient BeanWrapper beanWrapper;
 
 
@@ -55,7 +57,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	 * @param objectName the name of the target object
 	 */
 	public BeanPropertyBindingResult(Object target, String objectName) {
-		this(target, objectName, true);
+		this(target, objectName, true, Integer.MAX_VALUE);
 	}
 
 	/**
@@ -63,11 +65,13 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 	 * @param target the target bean to bind onto
 	 * @param objectName the name of the target object
 	 * @param autoGrowNestedPaths whether to "auto-grow" a nested path that contains a null value
+	 * @param autoGrowCollectionLimit the limit for array and collection auto-growing
 	 */
-	public BeanPropertyBindingResult(Object target, String objectName, boolean autoGrowNestedPaths) {
+	public BeanPropertyBindingResult(Object target, String objectName, boolean autoGrowNestedPaths, int autoGrowCollectionLimit) {
 		super(objectName);
 		this.target = target;
 		this.autoGrowNestedPaths = autoGrowNestedPaths;
+		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
 	}
 
 
@@ -87,6 +91,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 			this.beanWrapper = createBeanWrapper();
 			this.beanWrapper.setExtractOldValueForEditor(true);
 			this.beanWrapper.setAutoGrowNestedPaths(this.autoGrowNestedPaths);
+			this.beanWrapper.setAutoGrowCollectionLimit(this.autoGrowCollectionLimit);
 		}
 		return this.beanWrapper;
 	}
