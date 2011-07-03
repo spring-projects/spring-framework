@@ -611,7 +611,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		setPropertyValue(tokens, pv);
 		return getPropertyValue(tokens);
 	}
-	
+
 	private PropertyValue createDefaultPropertyValue(PropertyTokenHolder tokens) {
 		Class<?> type = getPropertyTypeDescriptor(tokens.canonicalName).getType();
 		if (type == null) {
@@ -621,7 +621,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		Object defaultValue = newValue(type, tokens.canonicalName);
 		return new PropertyValue(tokens.canonicalName, defaultValue);
 	}
-	
+
 	private Object newValue(Class<?> type, String name) {
 		try {
 			if (type.isArray()) {
@@ -652,7 +652,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
 		}
 	}
-	
+
 	/**
 	 * Create a new nested BeanWrapper instance.
 	 * <p>Default implementation creates a BeanWrapperImpl instance.
@@ -859,7 +859,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			for (int i = length; i < Array.getLength(newArray); i++) {
 				Array.set(newArray, i, newValue(componentType, name));
 			}
-			// TODO this is not efficient because conversion may create a copy ... set directly because we know its assignable.
+			// TODO this is not efficient because conversion may create a copy ... set directly because we know it is assignable.
 			setPropertyValue(name, newArray);
 			return getPropertyValue(name);
 		}
@@ -971,8 +971,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						oldValue = Array.get(propValue, arrayIndex);
 					}
 					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType, TypeDescriptor.nested(property(pd), tokens.keys.length));
-					// TODO review this grow algorithm along side the null gap algorithm for setting lists below ... the two are inconsistent
-					propValue = growArrayIfNecessary(propValue, arrayIndex, actualName);
 					Array.set(propValue, arrayIndex, convertedValue);
 				}
 				catch (IndexOutOfBoundsException ex) {
@@ -986,23 +984,24 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						pd.getReadMethod(), tokens.keys.length);
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
+				int size = list.size();
 				Object oldValue = null;
-				if (isExtractOldValueForEditor() && index < list.size()) {
+				if (isExtractOldValueForEditor() && index < size) {
 					oldValue = list.get(index);
 				}
 				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType, TypeDescriptor.nested(property(pd), tokens.keys.length));
-				if (index < list.size()) {
+				if (index < size) {
 					list.set(index, convertedValue);
 				}
-				else if (index >= list.size()) {
-					for (int i = list.size(); i < index; i++) {
+				else if (index >= size && index < this.autoGrowCollectionLimit) {
+					for (int i = size; i < index; i++) {
 						try {
 							list.add(null);
 						}
 						catch (NullPointerException ex) {
 							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 									"Cannot set element with index " + index + " in List of size " +
-									list.size() + ", accessed using property path '" + propertyName +
+									size + ", accessed using property path '" + propertyName +
 									"': List does not support filling up gaps with null elements");
 						}
 					}
