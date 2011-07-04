@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 
 	private Session session;
 
-	private String protocol = DEFAULT_PROTOCOL;
+	private String protocol;
 
 	private String host;
 
@@ -333,7 +333,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	public void send(MimeMessage mimeMessage) throws MailException {
-		send(new MimeMessage[] { mimeMessage });
+		send(new MimeMessage[] {mimeMessage});
 	}
 
 	public void send(MimeMessage[] mimeMessages) throws MailException {
@@ -449,7 +449,14 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * @see #getProtocol()
 	 */
 	protected Transport getTransport(Session session) throws NoSuchProviderException {
-		return session.getTransport(getProtocol());
+		String protocol	= getProtocol();
+		if (protocol == null) {
+			protocol = session.getProperty("mail.transport.protocol");
+			if (protocol == null) {
+				protocol = DEFAULT_PROTOCOL;
+			}
+		}
+		return session.getTransport(protocol);
 	}
 
 }
