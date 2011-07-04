@@ -3,11 +3,12 @@ Bundle-Name: Spring Transaction
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Package: 
- com.ibm.ws.Transaction;version="0";resolution:=optional,
+ com.ibm.websphere.uow.*;version="0";resolution:=optional,
+ com.ibm.wsspi.uow.*;version="0";resolution:=optional,
  oracle.j2ee.transaction;version="0";resolution:=optional,
+ org.jboss.resource.work;version="0";resolution:=optional,
  weblogic.transaction;version="0";resolution:=optional
 Import-Template: 
- com.ibm.wsspi.uow.*;version="[6.0.2.17, 6.1.0)";resolution:=optional,
  javax.ejb.*;version="[3.0.0, 4.0.0)";resolution:=optional,
  javax.management.*;version="0";resolution:=optional,
  javax.naming.*;version="0";resolution:=optional,
