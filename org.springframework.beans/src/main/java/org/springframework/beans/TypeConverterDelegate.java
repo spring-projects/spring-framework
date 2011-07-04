@@ -21,6 +21,7 @@ import java.beans.PropertyEditor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -460,11 +461,20 @@ class TypeConverterDelegate {
 	protected Collection convertToTypedCollection(
 			Collection original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 
-		boolean originalAllowed = requiredType.isInstance(original);
-		if (!originalAllowed && !Collection.class.isAssignableFrom(requiredType)) {
+		if (!Collection.class.isAssignableFrom(requiredType)) {
 			return original;
 		}
 
+		boolean approximable = CollectionFactory.isApproximableCollectionType(requiredType);
+		if (!approximable && !canCreateCopy(requiredType)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Custom Collection type [" + original.getClass().getName() +
+						"] does not allow for creating a copy - injecting original Collection as-is");
+			}
+			return original;
+		}
+
+		boolean originalAllowed = requiredType.isInstance(original);
 		MethodParameter methodParam = typeDescriptor.getMethodParameter();
 		Class elementType = null;
 		if (methodParam != null) {
@@ -489,14 +499,14 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot access Collection of type [" + original.getClass().getName() +
-						"] - injecting original Collection as-is", ex);
+						"] - injecting original Collection as-is: " + ex);
 			}
 			return original;
 		}
 
 		Collection convertedCopy;
 		try {
-			if (CollectionFactory.isApproximableCollectionType(requiredType)) {
+			if (approximable) {
 				convertedCopy = CollectionFactory.createApproximateCollection(original, original.size());
 			}
 			else {
@@ -506,7 +516,7 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot create copy of Collection type [" + original.getClass().getName() +
-						"] - injecting original Collection as-is", ex);
+						"] - injecting original Collection as-is: " + ex);
 			}
 			return original;
 		}
@@ -529,7 +539,7 @@ class TypeConverterDelegate {
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Collection type [" + original.getClass().getName() +
-							"] seems to be read-only - injecting original Collection as-is", ex);
+							"] seems to be read-only - injecting original Collection as-is: " + ex);
 				}
 				return original;
 			}
@@ -542,11 +552,20 @@ class TypeConverterDelegate {
 	protected Map convertToTypedMap(
 			Map original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 
-		boolean originalAllowed = requiredType.isInstance(original);
-		if (!originalAllowed && !Map.class.isAssignableFrom(requiredType)) {
+		if (!Map.class.isAssignableFrom(requiredType)) {
 			return original;
 		}
 
+		boolean approximable = CollectionFactory.isApproximableMapType(requiredType);
+		if (!approximable && !canCreateCopy(requiredType)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Custom Map type [" + original.getClass().getName() +
+						"] does not allow for creating a copy - injecting original Map as-is");
+			}
+			return original;
+		}
+
+		boolean originalAllowed = requiredType.isInstance(original);
 		Class keyType = null;
 		Class valueType = null;
 		MethodParameter methodParam = typeDescriptor.getMethodParameter();
@@ -573,14 +592,14 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot access Map of type [" + original.getClass().getName() +
-						"] - injecting original Map as-is", ex);
+						"] - injecting original Map as-is: " + ex);
 			}
 			return original;
 		}
 
 		Map convertedCopy;
 		try {
-			if (CollectionFactory.isApproximableMapType(requiredType)) {
+			if (approximable) {
 				convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
 			}
 			else {
@@ -590,7 +609,7 @@ class TypeConverterDelegate {
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot create copy of Map type [" + original.getClass().getName() +
-						"] - injecting original Map as-is", ex);
+						"] - injecting original Map as-is: " + ex);
 			}
 			return original;
 		}
@@ -618,7 +637,7 @@ class TypeConverterDelegate {
 			catch (Throwable ex) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Map type [" + original.getClass().getName() +
-							"] seems to be read-only - injecting original Map as-is", ex);
+							"] seems to be read-only - injecting original Map as-is: " + ex);
 				}
 				return original;
 			}
@@ -637,6 +656,11 @@ class TypeConverterDelegate {
 		return (propertyName != null ?
 				propertyName + PropertyAccessor.PROPERTY_KEY_PREFIX + key + PropertyAccessor.PROPERTY_KEY_SUFFIX :
 				null);
+	}
+
+	private boolean canCreateCopy(Class requiredType) {
+		return (!requiredType.isInterface() && !Modifier.isAbstract(requiredType.getModifiers()) &&
+				Modifier.isPublic(requiredType.getModifiers()) && ClassUtils.hasConstructor(requiredType));
 	}
 
 }
