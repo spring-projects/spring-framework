@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,8 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 	private BootstrapCacheLoader bootstrapCacheLoader;
 
 	private Set<CacheEventListener> cacheEventListeners;
+
+	private boolean disabled = false;
 
 	private String beanName;
 
@@ -266,6 +268,14 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 		this.cacheEventListeners = cacheEventListeners;
 	}
 
+	/**
+	 * Set whether this cache should be marked as disabled.
+	 * @see net.sf.ehcache.Cache#setDisabled
+	 */
+	public void setDisabled(boolean disabled) {
+		this.disabled = disabled;
+	}
+
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
@@ -331,7 +341,9 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 				cache.getCacheEventNotificationService().registerListener(listener);
 			}
 		}
-
+		if (this.disabled) {
+			cache.setDisabled(true);
+		}
 		return cache;
 	}
 
