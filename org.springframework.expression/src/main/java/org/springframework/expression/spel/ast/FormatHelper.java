@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,9 @@ public class FormatHelper {
 			}
 			TypeDescriptor typeDescriptor = argumentTypes.get(i);
 			if (typeDescriptor != null) {
-				sb.append(formatClassNameForMessage(typeDescriptor.getClass()));
-			} else {
+				sb.append(formatClassNameForMessage(typeDescriptor.getType()));
+			}
+			else {
 				sb.append(formatClassNameForMessage(null));				
 			}
 		}
@@ -53,8 +54,8 @@ public class FormatHelper {
 	}
 
 	/**
-	 * Produce a nice string for a given class object. For example a string array will have the formatted name
-	 * "java.lang.String[]".
+	 * Produce a nice string for a given class object.
+	 * For example, a string array will have the formatted name "java.lang.String[]".
 	 * @param clazz The class whose name is to be formatted
 	 * @return a formatted string suitable for message inclusion
 	 */
