@@ -815,12 +815,6 @@ public void testProcessRepeatedly() {
 
         <listitem>
           <para><emphasis
-          role="bold"><interfacename>@Provider</interfacename></emphasis>
-          (javax.inject) <emphasis>if JSR-330 is present</emphasis></para>
-        </listitem>
-
-        <listitem>
-          <para><emphasis
           role="bold"><interfacename>@PersistenceContext</interfacename></emphasis>
           (javax.persistence) <emphasis>if JPA is present</emphasis></para>
         </listitem>
