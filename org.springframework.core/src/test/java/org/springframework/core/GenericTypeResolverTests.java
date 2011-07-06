@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Juergen Hoeller
@@ -46,6 +47,14 @@ public class GenericTypeResolverTests {
 		assertEquals(Collection.class, GenericTypeResolver.resolveTypeArgument(MyCollectionSuperclassType.class, MySuperclassType.class));
 	}
 
+	@Test
+	public void testMethodReturnType() {
+		assertEquals(Integer.class, GenericTypeResolver.resolveReturnTypeArgument(ReflectionUtils.findMethod(MyTypeWithMethods.class, "integer"), MyInterfaceType.class));
+		assertEquals(String.class, GenericTypeResolver.resolveReturnTypeArgument(ReflectionUtils.findMethod(MyTypeWithMethods.class, "string"), MyInterfaceType.class));
+		assertEquals(null, GenericTypeResolver.resolveReturnTypeArgument(ReflectionUtils.findMethod(MyTypeWithMethods.class, "raw"), MyInterfaceType.class));
+		assertEquals(null, GenericTypeResolver.resolveReturnTypeArgument(ReflectionUtils.findMethod(MyTypeWithMethods.class, "object"), MyInterfaceType.class));
+	}
+
 
 	public interface MyInterfaceType<T> {
 	}
@@ -64,6 +73,14 @@ public class GenericTypeResolverTests {
 	}
 
 	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
+	}
+
+	public class MyTypeWithMethods {
+		public MyInterfaceType<Integer> integer() { return null; }
+		public MySimpleInterfaceType string() { return null; }
+		public Object object() { return null; }
+		@SuppressWarnings("rawtypes")
+		public MyInterfaceType raw() { return null; }
 	}
 
 }
