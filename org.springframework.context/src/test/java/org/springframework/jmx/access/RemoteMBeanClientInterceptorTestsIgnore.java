@@ -38,7 +38,7 @@ import org.junit.Ignore;
 // fact get ignored. So we leave @Ignore here so that developers can
 // easily search for ignored tests.
 @Ignore("Requires jmxremote_optional.jar; see comments in AbstractMBeanServerTests for details.")
-public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
+public class RemoteMBeanClientInterceptorTestsIgnore extends MBeanClientInterceptorTests {
 
 	private static final String SERVICE_URL = "service:jmx:jmxmp://localhost:9876";
 
