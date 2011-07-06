@@ -63,7 +63,7 @@ public abstract class AopUtils {
 	 */
 	public static boolean isAopProxy(Object object) {
 		return (object instanceof SpringProxy &&
-				(Proxy.isProxyClass(object.getClass()) || isCglibProxyClass(object.getClass())));
+				(Proxy.isProxyClass(object.getClass()) || ClassUtils.isCglibProxyClass(object.getClass())));
 	}
 
 	/**
@@ -76,27 +76,34 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Check whether the given object is a CGLIB proxy.
+	 * Check whether the given object is a CGLIB proxy. Goes beyond the implementation
+	 * in {@link ClassUtils#isCglibProxy(Object)} by checking also to see if the given
+	 * object is an instance of {@link SpringProxy}.
 	 * @param object the object to check
+	 * @see ClassUtils#isCglibProxy(Object)
 	 */
 	public static boolean isCglibProxy(Object object) {
-		return (object instanceof SpringProxy && isCglibProxyClass(object.getClass()));
+		return (object instanceof SpringProxy && ClassUtils.isCglibProxy(object));
 	}
 
 	/**
 	 * Check whether the specified class is a CGLIB-generated class.
 	 * @param clazz the class to check
+	 * @deprecated as of Spring 3.1 in favor of {@link ClassUtils#isCglibProxyClass(Class)}
 	 */
+	@Deprecated
 	public static boolean isCglibProxyClass(Class<?> clazz) {
-		return (clazz != null && isCglibProxyClassName(clazz.getName()));
+		return ClassUtils.isCglibProxyClass(clazz);
 	}
 
 	/**
 	 * Check whether the specified class name is a CGLIB-generated class.
 	 * @param className the class name to check
+	 * @deprecated as of Spring 3.1 in favor of {@link ClassUtils#isCglibProxyClassName(String)}
 	 */
+	@Deprecated
 	public static boolean isCglibProxyClassName(String className) {
-		return (className != null && className.contains(ClassUtils.CGLIB_CLASS_SEPARATOR));
+		return ClassUtils.isCglibProxyClassName(className);
 	}
 
 	/**
