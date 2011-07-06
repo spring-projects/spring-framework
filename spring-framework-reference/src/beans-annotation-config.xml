@@ -39,21 +39,18 @@
     annotations is a common means of extending the Spring IoC container. For
     example, Spring 2.0 introduced the possibility of enforcing required
     properties with the <link linkend="beans-required-annotation"
-    >@Required</link> annotation. As of Spring 2.5, it is now possible to follow
+    >@Required</link> annotation. Spring 2.5 made it possible to follow
     that same general approach to drive Spring's dependency injection.
     Essentially, the <interfacename>@Autowired</interfacename> annotation
     provides the same capabilities as described in <xref
     linkend="beans-factory-autowire"/> but with more fine-grained control and
-    wider applicability. Spring 2.5 also adds support for JSR-250 annotations
-    such as <interfacename>@Resource</interfacename>,
-    <interfacename>@PostConstruct</interfacename>, and
-    <interfacename>@PreDestroy</interfacename>. Spring 3.0 adds support for
+    wider applicability. Spring 2.5 also added support for JSR-250 annotations
+    such as <interfacename>@PostConstruct</interfacename>, and
+    <interfacename>@PreDestroy</interfacename>. Spring 3.0 added support for
     JSR-330 (Dependency Injection for Java) annotations contained in the
-    javax.inject package such as <classname>@Inject</classname>,
-    <literal>@Qualifier, @Named, and @Provider</literal> if the JSR330 jar is
-    present on the classpath. Use of these annotations also requires that
-    certain <interfacename>BeanPostProcessors</interfacename> be registered
-    within the Spring container. <note> Annotation injection is performed
+    javax.inject package such as <classname>@Inject</classname> and
+    <literal> @Named</literal>. Details about those annotations can be found in the <link linkend="beans-standard-annotations"
+    >relevant section</link>. <note> Annotation injection is performed
     <emphasis>before</emphasis> XML injection, thus the latter configuration
     will override the former for properties wired through both approaches.
     </note> As always, you can register them as individual bean definitions, but
@@ -127,21 +124,13 @@
   </section>
 
   <section id="beans-autowired-annotation">
-    <title><interfacename>@Autowired and @Inject</interfacename></title>
+    <title><interfacename>@Autowired</interfacename></title>
 
     <para>As expected, you can apply the
       <interfacename>@Autowired</interfacename> annotation to "traditional"
       setter methods:</para>
 
-    <note>
-      <para>JSR 330's @Inject annotation can be used in place of Spring's
-        <interfacename>@Autowired</interfacename> in the examples below.
-        <interfacename>@Inject</interfacename> does not have a required property
-        unlike Spring's <interfacename>@Autowired</interfacename> annotation
-        which has a <literal>required</literal> property to indicate if the
-        value being injected is optional. This behavior is enabled automatically
-        if you have the JSR 330 JAR on the classpath.</para>
-    </note>
+    
 
     <programlisting language="java">public class SimpleMovieLister {
 
@@ -155,6 +144,13 @@
   <lineannotation>// ...</lineannotation>
 }</programlisting>
 
+	<note>
+      <para>JSR 330's @Inject annotation can be used in place of Spring's
+        <interfacename>@Autowired</interfacename> annotation in the examples below. See <link linkend="beans-standard-annotations"
+    >here</link> for more details</para>
+    </note>
+    
+    
     <para>You can also apply the annotation to methods with arbitrary names
       and/or multiple arguments:</para>
 
@@ -324,14 +320,6 @@
       matches so that a specific bean is chosen for each argument. In the
       simplest case, this can be a plain descriptive value:</para>
 
-    <note>
-      <para>JSR 330's <interfacename>@Qualifier</interfacename> annotation can
-        only be applied as a meta-annotation unlike Spring's @Qualifier which
-        takes a string property to discriminate among multiple injection
-        candidates and can be placed on annotations as well as types, fields,
-        methods, constructors, and parameters.</para>
-    </note>
-
     <programlisting language="java">public class MovieRecommender {
 
   @Autowired
@@ -444,13 +432,6 @@
       annotation and provide the <interfacename>@Qualifier</interfacename>
       annotation within your definition:</para>
 
-    <note>
-      <para>You can use JSR 330's <interfacename>@Qualifier
-        </interfacename>annotation in the manner described below in place of
-        Spring's <interfacename>@Qualifier</interfacename> annotation. This
-        behavior is enabled automatically if you have the JSR 330 jar on the
-        classpath.</para>
-    </note>
 
     <programlisting language="java">@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
