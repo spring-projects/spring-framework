@@ -373,12 +373,6 @@ public class FactoryMethodComponent {
       <literal>name</literal> value will thereby provide that name to the
       corresponding bean definition.</para>
 
-    <note>
-      <para>JSR 330's @Named annotation can be used as a means to both detect
-        components and to provide them with a name. This behavior is enabled
-        automatically if you have the JSR 330 JAR on the classpath.</para>
-    </note>
-
     <para>If such an annotation contains no <literal>name</literal> value or for
       any other detected component (such as those discovered by custom filters),
       the default bean name generator returns the uncapitalized non-qualified
