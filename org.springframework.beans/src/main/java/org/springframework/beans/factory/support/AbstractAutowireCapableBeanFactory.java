@@ -21,6 +21,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -68,6 +71,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -651,7 +655,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * This implementation checks the FactoryBean's <code>getObjectType</code> method
+	 * This implementation attempts to query the FactoryBean's generic parameter metadata
+	 * if present to determin the object type. If not present, i.e. the FactoryBean is
+	 * declared as a raw type, checks the FactoryBean's <code>getObjectType</code> method
 	 * on a plain instance of the FactoryBean, without bean properties applied yet.
 	 * If this doesn't return a type yet, a full creation of the FactoryBean is
 	 * used as fallback (through delegation to the superclass's implementation).
@@ -660,14 +666,34 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * it will be fully created to check the type of its exposed object.
 	 */
 	@Override
-	protected Class getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
-		FactoryBean fb = (mbd.isSingleton() ?
+	protected Class<?> getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
+		Class<?> objectType = null;
+		String factoryBeanName = mbd.getFactoryBeanName();
+		String factoryMethodName = mbd.getFactoryMethodName();
+		if (factoryBeanName != null && factoryMethodName != null) {
+			// Try to obtain the FactoryBean's object type without instantiating it at all.
+			BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
+			if (fbDef instanceof AbstractBeanDefinition) {
+				Class<?> fbClass = ((AbstractBeanDefinition)fbDef).getBeanClass();
+				if (ClassUtils.isCglibProxyClass(fbClass)) {
+					// CGLIB subclass methods hide generic parameters. look at the superclass.
+					fbClass = fbClass.getSuperclass();
+				}
+				Method m = ReflectionUtils.findMethod(fbClass, factoryMethodName);
+				objectType = GenericTypeResolver.resolveReturnTypeArgument(m, FactoryBean.class);
+				if (objectType != null) {
+					return objectType;
+				}
+			}
+		}
+
+		FactoryBean<?> fb = (mbd.isSingleton() ?
 				getSingletonFactoryBeanForTypeCheck(beanName, mbd) :
 				getNonSingletonFactoryBeanForTypeCheck(beanName, mbd));
 
 		if (fb != null) {
 			// Try to obtain the FactoryBean's object type from this early stage of the instance.
-			Class objectType = getTypeForFactoryBean(fb);
+			objectType = getTypeForFactoryBean(fb);
 			if (objectType != null) {
 				return objectType;
 			}
