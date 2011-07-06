@@ -21,7 +21,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.context.ApplicationContext;
@@ -29,6 +28,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.util.ClassUtils;
 
 import test.beans.TestBean;
 
@@ -54,7 +54,7 @@ public class ImportedConfigurationClassEnhancementTests {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClasses);
 		Config config = ctx.getBean(Config.class);
 		assertTrue("autowired config class has not been enhanced",
-				AopUtils.isCglibProxyClass(config.autowiredConfig.getClass()));
+				ClassUtils.isCglibProxy(config.autowiredConfig));
 	}
 	
 	
