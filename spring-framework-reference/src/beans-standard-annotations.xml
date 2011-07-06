@@ -8,7 +8,7 @@
   Those annotations are scanned in the same way as the Spring annotations. You just need to have the relevant jars in your classpath.
   </para>
   <note>
-  If you are using Maven, the <interfacename>javax.inject</interfacename> artifact is available on the standard Maven repository (<ulink url="http://repo1.maven.org/maven2/javax/inject/javax.inject/1/">http://repo1.maven.org/maven2/javax/inject/javax.inject/1/</ulink>). You just need to add the following dependency to your file pom.xml:
+  If you are using Maven, the <interfacename>javax.inject</interfacename> artifact is available on the standard Maven repository (<ulink url="http://repo1.maven.org/maven2/javax/inject/javax.inject/1/">http://repo1.maven.org/maven2/javax/inject/javax.inject/1/</ulink>). You can add the following dependency to your file pom.xml:
   <programlisting language="xml">
 		&lt;dependency&gt;
 			&lt;groupId&gt;javax.inject&lt;/groupId&gt;
