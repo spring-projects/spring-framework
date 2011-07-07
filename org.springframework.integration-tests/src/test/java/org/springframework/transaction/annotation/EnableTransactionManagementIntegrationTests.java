@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,9 +33,14 @@ import org.junit.Test;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.config.AdviceMode;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -150,6 +156,38 @@ public class EnableTransactionManagementIntegrationTests {
 		assertThat(txManager2.begun, equalTo(0));
 		assertThat(txManager2.commits, equalTo(0));
 		assertThat(txManager2.rollbacks, equalTo(0));
+	}
+
+	@Test
+	public void apcEscalation() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(EnableTxAndCachingConfig.class);
+		ctx.refresh();
+	}
+
+
+	@Configuration
+	@EnableTransactionManagement
+	@ImportResource("org/springframework/transaction/annotation/enable-caching.xml")
+	static class EnableTxAndCachingConfig {
+		@Bean
+		public PlatformTransactionManager txManager() {
+			return new CallCountingTransactionManager();
+		}
+
+		@Bean
+		public FooRepository fooRepository() {
+			return new DummyFooRepository();
+		}
+	
+		@Bean
+		public CacheManager cacheManager() {
+			SimpleCacheManager mgr = new SimpleCacheManager();
+			ArrayList<Cache> caches = new ArrayList<Cache>();
+			caches.add(new ConcurrentMapCache());
+			mgr.setCaches(caches);
+			return mgr;
+		}
 	}
 
 
