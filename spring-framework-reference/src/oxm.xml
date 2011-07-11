@@ -311,7 +311,7 @@ public class Application {
        	<para>
        		Marshallers could be configured more concisely using tags from the OXM namespace.
        		To make these tags available, the appropriate schema has to be referenced first in the preamble of the XML configuration file.
-       		The emboldened text	in the below snippet references the OXM schema:
+       		Note the 'oxm' related text below:
        	</para>
        	<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
