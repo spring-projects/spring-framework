@@ -84,6 +84,8 @@ class ConfigurationClassParser {
 
 	private final ResourceLoader resourceLoader;
 
+	private final BeanDefinitionRegistry registry;
+
 	private final ComponentScanAnnotationParser componentScanParser;
 
 
@@ -98,8 +100,9 @@ class ConfigurationClassParser {
 		this.problemReporter = problemReporter;
 		this.environment = environment;
 		this.resourceLoader = resourceLoader;
-
-		this.componentScanParser = new ComponentScanAnnotationParser(this.resourceLoader, this.environment, registry);
+		this.registry = registry;
+		this.componentScanParser =
+			new ComponentScanAnnotationParser(this.resourceLoader, this.environment, this.registry);
 	}
 
 
@@ -245,7 +248,8 @@ class ConfigurationClassParser {
 					// the candidate class is an ImportSelector -> delegate to it to determine imports
 					try {
 						ImportSelector selector = BeanUtils.instantiateClass(Class.forName(candidate), ImportSelector.class);
-						processImport(configClass, selector.selectImports(importingClassMetadata), false);
+						ImportSelector.Context context = new ImportSelector.Context(importingClassMetadata, this.registry);
+						processImport(configClass, selector.selectImports(context), false);
 					} catch (ClassNotFoundException ex) {
 						throw new IllegalStateException(ex);
 					}

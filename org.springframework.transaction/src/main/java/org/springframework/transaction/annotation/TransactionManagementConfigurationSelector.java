@@ -18,6 +18,9 @@ package org.springframework.transaction.annotation;
 
 import java.util.Map;
 
+import org.springframework.aop.config.AopConfigUtils;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.config.AdviceMode;
 import org.springframework.core.type.AnnotationMetadata;
@@ -38,12 +41,19 @@ import org.springframework.util.Assert;
 public class TransactionManagementConfigurationSelector implements ImportSelector {
 
 	/**
-	 * Import {@link ProxyTransactionManagementConfiguration} if {@link
-	 * EnableTransactionManagement#mode()} equals {@code PROXY}, otherwise import {@link
-	 * org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration
+	 * {@inheritDoc}
+	 * <p>This implementation selects {@link ProxyTransactionManagementConfiguration} if
+	 * {@link EnableTransactionManagement#mode()} equals {@code PROXY}, and  otherwise selects
+	 * {@link org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration
 	 * AspectJTransactionManagementConfiguration}.
+	 * <p>If {@code #mode()} equals {@code PROXY}, an auto-proxy creator bean definition
+	 * will also be added to the enclosing {@link BeanDefinitionRegistry} and escalated
+	 * if necessary through the usual {@link AopConfigUtils} family of methods.
 	 */
-	public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+	public String[] selectImports(ImportSelector.Context context) {
+		AnnotationMetadata importingClassMetadata = context.getImportingClassMetadata();
+		BeanDefinitionRegistry registry = context.getBeanDefinitionRegistry();
+
 		Map<String, Object> enableTx =
 			importingClassMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName());
 		Assert.notNull(enableTx,
@@ -52,7 +62,11 @@ public class TransactionManagementConfigurationSelector implements ImportSelecto
 
 		switch ((AdviceMode) enableTx.get("mode")) {
 			case PROXY:
-				return new String[] {ProxyTransactionManagementConfiguration.class.getName()};
+				AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
+				if ((Boolean)enableTx.get("proxyTargetClass")) {
+					AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
+				}
+				return new String[] { ProxyTransactionManagementConfiguration.class.getName() };
 			case ASPECTJ:
 				return new String[] {"org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration"};
 			default:

@@ -39,12 +39,15 @@ import org.springframework.util.Assert;
 public class AsyncConfigurationSelector implements ImportSelector {
 
 	/**
-	 * Import {@link ProxyAsyncConfiguration} if {@link EnableAsync#mode()} equals
-	 * {@code PROXY}, otherwise import
+	 * {@inheritDoc}
+	 * <p>This implementation selects {@link ProxyAsyncConfiguration} if
+	 * {@link EnableAsync#mode()} equals {@code PROXY}, and otherwise selects
 	 * {@link org.springframework.scheduling.aspectj.AspectJAsyncConfiguration
-	 * AspectJAsyncConfiguration}.
+	 * AspectJAsyncConfiguration}. No additional {@code BeanDefinition}s are registered
+	 * in either case.
 	 */
-	public String[] selectImports(AnnotationMetadata importingClassMetadata) {
+	public String[] selectImports(ImportSelector.Context context) {
+		AnnotationMetadata importingClassMetadata = context.getImportingClassMetadata();
 		Map<String, Object> enableAsync =
 			importingClassMetadata.getAnnotationAttributes(EnableAsync.class.getName());
 		Assert.notNull(enableAsync,
