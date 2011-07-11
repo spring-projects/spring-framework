@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.annotation;
 
-import org.springframework.aop.config.AopConfigUtils;
-import org.springframework.aop.framework.autoproxy.InfrastructureAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,12 +65,4 @@ public class ProxyTransactionManagementConfiguration extends AbstractTransaction
 		return interceptor;
 	}
 
-	// TODO: deal with escalation of APCs
-	@Bean(name=AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME)
-	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
-	public InfrastructureAdvisorAutoProxyCreator apc() {
-		InfrastructureAdvisorAutoProxyCreator apc = new InfrastructureAdvisorAutoProxyCreator();
-		apc.setProxyTargetClass((Boolean) this.enableTx.get("proxyTargetClass"));
-		return apc;
-	}
 }
