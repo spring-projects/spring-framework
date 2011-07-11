@@ -16,7 +16,9 @@
 
 package org.springframework.orm.jpa;
 
+import java.io.IOException;
 import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
@@ -361,6 +363,25 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	/**
+	 * Delegate an incoming invocation from the proxy, dispatching to EntityManagerFactoryInfo /
+	 * EntityManagerFactoryPlusOperations / the native EntityManagerFactory accordingly.
+	 */
+	Object invokeProxyMethod(Method method, Object[] args) throws Throwable {
+		if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
+			return method.invoke(this, args);
+		}
+		else if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
+			return method.invoke(this.plusOperations, args);
+		}
+		Object retVal = method.invoke(this.nativeEntityManagerFactory, args);
+		if (retVal instanceof EntityManager) {
+			EntityManager rawEntityManager = (EntityManager) retVal;
+			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this);
+		}
+		return retVal;
+	}
+
+	/**
 	 * Subclasses must implement this method to create the EntityManagerFactory
 	 * that will be returned by the <code>getObject()</code> method.
 	 * @return EntityManagerFactory instance returned by this FactoryBean
@@ -427,19 +448,9 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	// Serialization support
 	//---------------------------------------------------------------------
 
-	Object invokeProxyMethod(Method method, Object[] args) throws Throwable {
-		if (method.getDeclaringClass().isAssignableFrom(EntityManagerFactoryInfo.class)) {
-			return method.invoke(this, args);
-		}
-		else if (method.getDeclaringClass().equals(EntityManagerFactoryPlusOperations.class)) {
-			return method.invoke(this.plusOperations, args);
-		}
-		Object retVal = method.invoke(this.nativeEntityManagerFactory, args);
-		if (retVal instanceof EntityManager) {
-			EntityManager rawEntityManager = (EntityManager) retVal;
-			retVal = ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this);
-		}
-		return retVal;
+	private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+		throw new NotSerializableException("An EntityManagerFactoryBean itself is not deserializable - " +
+				"just a SerializedEntityManagerFactoryBeanReference is");
 	}
 
 	protected Object writeReplace() throws ObjectStreamException {
