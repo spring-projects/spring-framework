@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,20 +30,22 @@ import org.springframework.util.Assert;
  * {@link ClientHttpRequestFactory} implementation that uses standard J2SE facilities.
  *
  * @author Arjen Poutsma
+ * @since 3.0
  * @see java.net.HttpURLConnection
  * @see CommonsClientHttpRequestFactory
- * @since 3.0
  */
 public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 	private Proxy proxy;
 
+
 	/**
-	 * Sets the {@link Proxy} to use for this request factory.
+	 * Set the {@link Proxy} to use for this request factory.
 	 */
 	public void setProxy(Proxy proxy) {
 		this.proxy = proxy;
 	}
+
 
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpURLConnection connection = openConnection(uri.toURL(), proxy);
@@ -53,16 +55,15 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 
 	/**
 	 * Opens and returns a connection to the given URL.
-	 * <p>The default implementation uses the given {@linkplain #setProxy(java.net.Proxy) proxy} - if any - to open a
-	 * connection.
-	 *
+	 * <p>The default implementation uses the given {@linkplain #setProxy(java.net.Proxy) proxy} -
+	 * if any - to open a connection.
 	 * @param url the URL to open a connection to
 	 * @param proxy the proxy to use, may be {@code null}
 	 * @return the opened connection
 	 * @throws IOException in case of I/O errors
 	 */
 	protected HttpURLConnection openConnection(URL url, Proxy proxy) throws IOException {
-		URLConnection urlConnection = proxy != null ? url.openConnection(proxy) : url.openConnection();
+		URLConnection urlConnection = (proxy != null ? url.openConnection(proxy) : url.openConnection());
 		Assert.isInstanceOf(HttpURLConnection.class, urlConnection);
 		return (HttpURLConnection) urlConnection;
 	}
@@ -70,7 +71,6 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	/**
 	 * Template method for preparing the given {@link HttpURLConnection}.
 	 * <p>The default implementation prepares the connection for input and output, and sets the HTTP method.
-	 *
 	 * @param connection the connection to prepare
 	 * @param httpMethod the HTTP request method ({@code GET}, {@code POST}, etc.)
 	 * @throws IOException in case of I/O errors
