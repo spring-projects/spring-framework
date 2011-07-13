@@ -248,7 +248,7 @@ class ConfigurationClassParser {
 					// the candidate class is an ImportSelector -> delegate to it to determine imports
 					try {
 						ImportSelector selector = BeanUtils.instantiateClass(Class.forName(candidate), ImportSelector.class);
-						ImportSelector.Context context = new ImportSelector.Context(importingClassMetadata, this.registry);
+						ImportSelectorContext context = new ImportSelectorContext(importingClassMetadata, this.registry);
 						processImport(configClass, selector.selectImports(context), false);
 					} catch (ClassNotFoundException ex) {
 						throw new IllegalStateException(ex);

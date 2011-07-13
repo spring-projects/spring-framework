@@ -19,6 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.util.Map;
 
 import org.springframework.context.annotation.AnnotationConfigUtils;
+import org.springframework.context.annotation.ImportSelectorContext;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.config.AdviceMode;
 import org.springframework.core.type.AnnotationMetadata;
@@ -46,7 +47,7 @@ public class AsyncConfigurationSelector implements ImportSelector {
 	 * AspectJAsyncConfiguration}. No additional {@code BeanDefinition}s are registered
 	 * in either case.
 	 */
-	public String[] selectImports(ImportSelector.Context context) {
+	public String[] selectImports(ImportSelectorContext context) {
 		AnnotationMetadata importingClassMetadata = context.getImportingClassMetadata();
 		Map<String, Object> enableAsync =
 			importingClassMetadata.getAnnotationAttributes(EnableAsync.class.getName());

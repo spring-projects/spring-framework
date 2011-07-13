@@ -16,17 +16,14 @@
 
 package org.springframework.context.annotation;
 
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.core.type.AnnotationMetadata;
-
 /**
  * Interface to be implemented by types that determine which @{@link Configuration}
  * class(es) should be imported based on a given selection criteria, usually one or more
  * annotation attributes.
  *
  * <p>In certain cases, an {@code ImportSelector} may register additional bean definitions
- * through the {@link BeanDefinitionRegistry} available in the
- * {@code Context} provided to the {@link #selectImports} method.
+ * through the {@code BeanDefinitionRegistry} available in the
+ * {@link ImportSelectorContext} provided to the {@link #selectImports} method.
  *
  * @author Chris Beams
  * @since 3.1
@@ -40,37 +37,9 @@ public interface ImportSelector {
 	 * the {@code AnnotationMetadata} of the importing {@code @Configuration} class and
 	 * optionally register any {@code BeanDefinition}s necessary to support the selected
 	 * classes.
-	 * @param context containing the AnnotationMetadata of the importing @{@link
-	 * Configuration} class and the enclosing {@link BeanDefinitionRegistry}.
+	 * @param context containing the {@code AnnotationMetadata} of the importing @{@link
+	 * Configuration} class and the enclosing {@code BeanDefinitionRegistry}.
 	 */
-	String[] selectImports(Context context);
-
-
-	/**
-	 * Context object holding the {@link AnnotationMetadata} of the {@code @Configuration}
-	 * class that imported this {@link ImportSelector} as well as the enclosing
-	 * {@link BeanDefinitionRegistry} to allow for conditional bean definition
-	 * registration when necessary.
-	 *
-	 * @author Chris Beams
-	 * @since 3.1
-	 */
-	static class Context {
-		private final AnnotationMetadata importingClassMetadata;
-		private final BeanDefinitionRegistry registry;
-
-		public Context(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-			this.importingClassMetadata = importingClassMetadata;
-			this.registry = registry;
-		}
-
-		public AnnotationMetadata getImportingClassMetadata() {
-			return this.importingClassMetadata;
-		}
-
-		public BeanDefinitionRegistry getBeanDefinitionRegistry() {
-			return registry;
-		}
-	}
+	String[] selectImports(ImportSelectorContext context);
 
 }
