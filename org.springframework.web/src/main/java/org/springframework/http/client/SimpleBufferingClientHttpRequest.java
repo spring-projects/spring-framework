@@ -35,11 +35,12 @@ import org.springframework.util.FileCopyUtils;
  * @since 3.0
  * @see SimpleClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
  */
-final class BufferingSimpleClientHttpRequest extends AbstractBufferingClientHttpRequest {
+final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	private final HttpURLConnection connection;
 
-	BufferingSimpleClientHttpRequest(HttpURLConnection connection) {
+
+	SimpleBufferingClientHttpRequest(HttpURLConnection connection) {
 		this.connection = connection;
 	}
 
@@ -69,9 +70,7 @@ final class BufferingSimpleClientHttpRequest extends AbstractBufferingClientHttp
 		if (this.connection.getDoOutput()) {
 			this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
 		}
-
 		this.connection.connect();
-
 		if (this.connection.getDoOutput()) {
 			FileCopyUtils.copy(bufferedOutput, this.connection.getOutputStream());
 		}

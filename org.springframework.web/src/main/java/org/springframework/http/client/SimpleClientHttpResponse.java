@@ -26,8 +26,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpResponse} implementation that uses standard J2SE facilities.
- * Obtained via {@link BufferingSimpleClientHttpRequest#execute()} and
- * {@link StreamingSimpleClientHttpRequest#execute()}.
+ * Obtained via {@link SimpleBufferingClientHttpRequest#execute()} and
+ * {@link SimpleStreamingClientHttpRequest#execute()}.
  *
  * @author Arjen Poutsma
  * @since 3.0

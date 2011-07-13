@@ -40,7 +40,7 @@ public class BufferingClientHttpRequestFactory extends AbstractClientHttpRequest
 			throws IOException {
 		ClientHttpRequest request = requestFactory.createRequest(uri, httpMethod);
 		if (shouldBuffer(uri, httpMethod)) {
-			return new BufferingClientHttpRequest(request);
+			return new BufferingClientHttpRequestWrapper(request);
 		}
 		else {
 			return request;

@@ -30,26 +30,19 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
-	private boolean executed = false;
-
 	private final HttpHeaders headers = new HttpHeaders();
 
+	private boolean executed = false;
+
+
 	public final HttpHeaders getHeaders() {
-		return executed ? HttpHeaders.readOnlyHttpHeaders(headers) : this.headers;
+		return (this.executed ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	public final OutputStream getBody() throws IOException {
 		checkExecuted();
 		return getBodyInternal(this.headers);
 	}
-
-	/**
-	 * Abstract template method that returns the body.
-	 *
-	 * @param headers the HTTP headers
-	 * @return the body output stream
-	 */
-	protected abstract OutputStream getBodyInternal(HttpHeaders headers) throws IOException;
 
 	public final ClientHttpResponse execute() throws IOException {
 		checkExecuted();
@@ -62,13 +55,19 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		Assert.state(!this.executed, "ClientHttpRequest already executed");
 	}
 
+
+	/**
+	 * Abstract template method that returns the body.
+	 * @param headers the HTTP headers
+	 * @return the body output stream
+	 */
+	protected abstract OutputStream getBodyInternal(HttpHeaders headers) throws IOException;
+
 	/**
 	 * Abstract template method that writes the given headers and content to the HTTP request.
-	 *
 	 * @param headers the HTTP headers
 	 * @return the response object for the executed request
 	 */
 	protected abstract ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException;
-
 
 }

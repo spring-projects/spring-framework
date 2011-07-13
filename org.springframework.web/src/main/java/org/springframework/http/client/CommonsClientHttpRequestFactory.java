@@ -60,7 +60,7 @@ public class CommonsClientHttpRequestFactory implements ClientHttpRequestFactory
 	 * {@link HttpClient} that uses a default {@link MultiThreadedHttpConnectionManager}.
 	 */
 	public CommonsClientHttpRequestFactory() {
-		httpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
+		this.httpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
 		this.setReadTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS);
 	}
 
