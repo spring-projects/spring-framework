@@ -23,7 +23,7 @@ import org.springframework.cache.Cache.ValueWrapper;
  * 
  * @author Costin Leau
  */
-public class DefaultValueWrapper<V> implements ValueWrapper {
+public class DefaultValueWrapper implements ValueWrapper {
 
 	private final Object value;
 
