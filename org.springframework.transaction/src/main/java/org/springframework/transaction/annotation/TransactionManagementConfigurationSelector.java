@@ -21,6 +21,7 @@ import java.util.Map;
 import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportSelectorContext;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.context.config.AdviceMode;
 import org.springframework.core.type.AnnotationMetadata;
@@ -50,7 +51,7 @@ public class TransactionManagementConfigurationSelector implements ImportSelecto
 	 * will also be added to the enclosing {@link BeanDefinitionRegistry} and escalated
 	 * if necessary through the usual {@link AopConfigUtils} family of methods.
 	 */
-	public String[] selectImports(ImportSelector.Context context) {
+	public String[] selectImports(ImportSelectorContext context) {
 		AnnotationMetadata importingClassMetadata = context.getImportingClassMetadata();
 		BeanDefinitionRegistry registry = context.getBeanDefinitionRegistry();
 

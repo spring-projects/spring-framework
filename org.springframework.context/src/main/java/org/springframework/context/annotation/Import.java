@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,26 +23,26 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates one or more @{@link @Configuration} classes to import.
+ * Indicates one or more @{@link Configuration} classes to import.
  *
  * <p>Provides functionality equivalent to the {@code <import/>} element in Spring XML.
  * Only supported for actual {@code @Configuration}-annotated classes and implementations
  * of the {@link ImportSelector} interface.
  *
- * <p>{@link Bean @Bean} definitions declared in imported {@code @Configuration} classes
- * should be accessed by using {@link Autowired @Autowired} injection.  Either the bean
- * itself can be autowired, or the configuration class instance declaring the bean can be
- * autowired.  The latter approach allows for explicit, IDE-friendly navigation between
+ * <p>@{@link Bean} definitions declared in imported {@code @Configuration} classes
+ * should be accessed by using @{@link Autowired} injection.  Either the bean itself can
+ * be autowired, or the configuration class instance declaring the bean can be autowired.
+ * The latter approach allows for explicit, IDE-friendly navigation between
  * {@code @Configuration} class methods.
  *
  * <p>If XML or other non-{@code @Configuration} bean definition resources need to be
- * imported, use {@link ImportResource @ImportResource}
+ * imported, use @{@link ImportResource}
  *
  * @author Chris Beams
  * @since 3.0
  * @see Configuration
- * @see ImportResource
  * @see ImportSelector
+ * @see ImportResource
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -50,7 +50,7 @@ import java.lang.annotation.Target;
 public @interface Import {
 
 	/**
-	 * The {@link Configuration} class or classes to import.
+	 * The @{@link Configuration} and/or {@link ImportSelector} classes to import.
 	 */
 	Class<?>[] value();
 }
