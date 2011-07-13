@@ -25,43 +25,45 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * Simple implementation of {@link ClientHttpResponse} that reads the request's body into memory, thus allowing for
- * multiple invocations of {@link #getBody()}.
+ * Simple implementation of {@link ClientHttpResponse} that reads the request's body into memory,
+ * thus allowing for multiple invocations of {@link #getBody()}.
  *
  * @author Arjen Poutsma
  * @since 3.1
  */
-class BufferingClientHttpResponse implements ClientHttpResponse {
+final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 
 	private final ClientHttpResponse response;
 
 	private byte[] body;
 
-	BufferingClientHttpResponse(ClientHttpResponse response) {
+
+	BufferingClientHttpResponseWrapper(ClientHttpResponse response) {
 		this.response = response;
 	}
 
+
 	public HttpStatus getStatusCode() throws IOException {
-		return response.getStatusCode();
+		return this.response.getStatusCode();
 	}
 
 	public String getStatusText() throws IOException {
-		return response.getStatusText();
+		return this.response.getStatusText();
 	}
 
 	public HttpHeaders getHeaders() {
-		return response.getHeaders();
+		return this.response.getHeaders();
 	}
 
 	public InputStream getBody() throws IOException {
-		if (body == null) {
-			body = FileCopyUtils.copyToByteArray(response.getBody());
+		if (this.body == null) {
+			this.body = FileCopyUtils.copyToByteArray(this.response.getBody());
 		}
-		return new ByteArrayInputStream(body);
+		return new ByteArrayInputStream(this.body);
 	}
 
 	public void close() {
-		response.close();
+		this.response.close();
 	}
 
 }

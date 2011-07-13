@@ -31,29 +31,32 @@ import org.springframework.util.FileCopyUtils;
  * @author Arjen Poutsma
  * @since 3.1
  */
-class BufferingClientHttpRequest extends AbstractBufferingClientHttpRequest {
+final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHttpRequest {
 
 	private final ClientHttpRequest request;
 
-	BufferingClientHttpRequest(ClientHttpRequest request) {
+
+	BufferingClientHttpRequestWrapper(ClientHttpRequest request) {
 		Assert.notNull(request, "'request' must not be null");
 		this.request = request;
 	}
 
+
 	public HttpMethod getMethod() {
-		return request.getMethod();
+		return this.request.getMethod();
 	}
 
 	public URI getURI() {
-		return request.getURI();
+		return this.request.getURI();
 	}
 
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
-		request.getHeaders().putAll(headers);
-		OutputStream body = request.getBody();
+		this.request.getHeaders().putAll(headers);
+		OutputStream body = this.request.getBody();
 		FileCopyUtils.copy(bufferedOutput, body);
-		ClientHttpResponse response = request.execute();
-		return new BufferingClientHttpResponse(response);
+		ClientHttpResponse response = this.request.execute();
+		return new BufferingClientHttpResponseWrapper(response);
 	}
+
 }

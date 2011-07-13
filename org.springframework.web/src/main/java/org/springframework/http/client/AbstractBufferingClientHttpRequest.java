@@ -28,7 +28,7 @@ import org.springframework.http.HttpHeaders;
  * @author Arjen Poutsma
  * @since 3.0.6
  */
-public abstract class AbstractBufferingClientHttpRequest extends AbstractClientHttpRequest {
+abstract class AbstractBufferingClientHttpRequest extends AbstractClientHttpRequest {
 
 	private ByteArrayOutputStream bufferedOutput = new ByteArrayOutputStream();
 

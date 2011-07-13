@@ -36,7 +36,7 @@ import org.springframework.http.HttpMethod;
  * @since 3.0
  * @see SimpleClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
  */
-public class StreamingSimpleClientHttpRequest extends AbstractClientHttpRequest {
+final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final HttpURLConnection connection;
 
@@ -44,7 +44,8 @@ public class StreamingSimpleClientHttpRequest extends AbstractClientHttpRequest 
 
 	private OutputStream body;
 
-	StreamingSimpleClientHttpRequest(HttpURLConnection connection, int chunkSize) {
+
+	SimpleStreamingClientHttpRequest(HttpURLConnection connection, int chunkSize) {
 		this.connection = connection;
 		this.chunkSize = chunkSize;
 	}
@@ -64,13 +65,13 @@ public class StreamingSimpleClientHttpRequest extends AbstractClientHttpRequest 
 
 	@Override
 	protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
-		if (body == null) {
+		if (this.body == null) {
 			int contentLength = (int) headers.getContentLength();
 			if (contentLength >= 0) {
 				this.connection.setFixedLengthStreamingMode(contentLength);
 			}
 			else {
-				this.connection.setChunkedStreamingMode(chunkSize);
+				this.connection.setChunkedStreamingMode(this.chunkSize);
 			}
 			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 				String headerName = entry.getKey();
@@ -81,14 +82,14 @@ public class StreamingSimpleClientHttpRequest extends AbstractClientHttpRequest 
 			this.connection.connect();
 			this.body = this.connection.getOutputStream();
 		}
-		return new NonClosingOutputStream(body);
+		return new NonClosingOutputStream(this.body);
 	}
 
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
 		try {
-			if (body != null) {
-				body.close();
+			if (this.body != null) {
+				this.body.close();
 			}
 		}
 		catch (IOException ex) {
@@ -96,6 +97,7 @@ public class StreamingSimpleClientHttpRequest extends AbstractClientHttpRequest 
 		}
 		return new SimpleClientHttpResponse(this.connection);
 	}
+
 
 	private static class NonClosingOutputStream extends FilterOutputStream {
 
@@ -107,6 +109,5 @@ public class StreamingSimpleClientHttpRequest extends AbstractClientHttpRequest 
 		public void close() throws IOException {
 		}
 	}
-
 
 }
