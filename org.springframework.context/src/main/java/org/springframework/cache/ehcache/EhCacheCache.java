@@ -60,7 +60,7 @@ public class EhCacheCache implements Cache {
 
 	public ValueWrapper get(Object key) {
 		Element element = cache.get(key);
-		return (element != null ? new DefaultValueWrapper<Object>(element.getObjectValue()) : null);
+		return (element != null ? new DefaultValueWrapper(element.getObjectValue()) : null);
 	}
 
 	public void put(Object key, Object value) {
