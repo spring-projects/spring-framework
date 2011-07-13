@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,10 +66,15 @@ final class SimpleClientHttpRequest extends AbstractClientHttpRequest {
 				this.connection.addRequestProperty(headerName, headerValue);
 			}
 		}
+
+		if (this.connection.getDoOutput()) {
+			this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
+		}
 		this.connection.connect();
-		if (bufferedOutput.length > 0) {
+		if (this.connection.getDoOutput()) {
 			FileCopyUtils.copy(bufferedOutput, this.connection.getOutputStream());
 		}
+
 		return new SimpleClientHttpResponse(this.connection);
 	}
 

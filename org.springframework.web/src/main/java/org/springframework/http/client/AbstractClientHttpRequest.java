@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 
 	public final HttpHeaders getHeaders() {
-		return executed ? HttpHeaders.readOnlyHttpHeaders(headers) : this.headers;
+		return (this.executed ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	public final OutputStream getBody() throws IOException {
@@ -49,7 +49,11 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	public final ClientHttpResponse execute() throws IOException {
 		checkExecuted();
-		ClientHttpResponse result = executeInternal(this.headers, this.bufferedOutput.toByteArray());
+		byte[] bytes = this.bufferedOutput.toByteArray();
+		if (this.headers.getContentLength() == -1) {
+			this.headers.setContentLength(bytes.length);
+		}
+		ClientHttpResponse result = executeInternal(this.headers, bytes);
 		this.executed = true;
 		return result;
 	}
