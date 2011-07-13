@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -102,9 +103,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private boolean setMetadataReaderFactoryCalled = false;
 
-	private boolean postProcessBeanDefinitionRegistryCalled = false;
+	private final Set<Integer> registriesPostProcessed = new HashSet<Integer>();
 
-	private boolean postProcessBeanFactoryCalled = false;
+	private final Set<Integer> factoriesPostProcessed = new HashSet<Integer>();
 
 	private Environment environment;
 
@@ -163,15 +164,16 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 */
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
 		BeanDefinitionReaderUtils.registerWithGeneratedName(new RootBeanDefinition(ImportAwareBeanPostProcessor.class), registry);
-		if (this.postProcessBeanDefinitionRegistryCalled) {
+		int registryID = System.identityHashCode(registry);
+		if (this.registriesPostProcessed.contains(registryID)) {
 			throw new IllegalStateException(
-					"postProcessBeanDefinitionRegistry already called for this post-processor");
+					"postProcessBeanDefinitionRegistry already called for this post-processor against " + registry);
 		}
-		if (this.postProcessBeanFactoryCalled) {
+		if (this.factoriesPostProcessed.contains(registryID)) {
 			throw new IllegalStateException(
-					"postProcessBeanFactory already called for this post-processor");
+					"postProcessBeanFactory already called for this post-processor against " + registry);
 		}
-		this.postProcessBeanDefinitionRegistryCalled = true;
+		this.registriesPostProcessed.add(registryID);
 		processConfigurationClasses(registry);
 	}
 
@@ -180,12 +182,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * by replacing them with CGLIB-enhanced subclasses.
 	 */
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		if (this.postProcessBeanFactoryCalled) {
+		int factoryID = System.identityHashCode(beanFactory);
+		if (this.factoriesPostProcessed.contains(factoryID)) {
 			throw new IllegalStateException(
-					"postProcessBeanFactory already called for this post-processor");
+					"postProcessBeanFactory already called for this post-processor against " + beanFactory);
 		}
-		this.postProcessBeanFactoryCalled = true;
-		if (!this.postProcessBeanDefinitionRegistryCalled) {
+		this.factoriesPostProcessed.add(factoryID);
+		if (!this.registriesPostProcessed.contains(factoryID)) {
 			// BeanDefinitionRegistryPostProcessor hook apparently not supported...
 			// Simply call processConfigurationClasses lazily at this point then.
 			processConfigurationClasses((BeanDefinitionRegistry)beanFactory);
