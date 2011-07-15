@@ -49,8 +49,8 @@ import org.springframework.util.StringUtils;
  */
 public class MergedContextConfiguration {
 
-	private static final String[] EMPTY_STRING_ARRAY = new String[] {};
-	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[] {};
+	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
 
 	private final Class<?> testClass;
 
@@ -86,6 +86,13 @@ public class MergedContextConfiguration {
 	}
 
 	/**
+	 * Generate a null-safe {@link String} representation of the supplied {@link ContextLoader}.
+	 */
+	private static String nullSafeToString(ContextLoader contextLoader) {
+		return contextLoader == null ? "null" : contextLoader.getClass().getName();
+	}
+
+	/**
 	 * Generate a context <em>key</em> from the supplied values.
 	 */
 	private static String generateContextKey(String[] locations, Class<?>[] classes, String[] activeProfiles,
@@ -94,7 +101,7 @@ public class MergedContextConfiguration {
 		String locationsKey = ObjectUtils.nullSafeToString(locations);
 		String classesKey = ObjectUtils.nullSafeToString(classes);
 		String activeProfilesKey = ObjectUtils.nullSafeToString(activeProfiles);
-		String contextLoaderKey = contextLoader == null ? "null" : contextLoader.getClass().getName();
+		String contextLoaderKey = nullSafeToString(contextLoader);
 
 		return String.format("locations = %s, classes = %s, activeProfiles = %s, contextLoader = %s", locationsKey,
 			classesKey, activeProfilesKey, contextLoaderKey);
@@ -187,7 +194,7 @@ public class MergedContextConfiguration {
 		.append("locations", ObjectUtils.nullSafeToString(this.locations))//
 		.append("classes", ObjectUtils.nullSafeToString(this.classes))//
 		.append("activeProfiles", ObjectUtils.nullSafeToString(this.activeProfiles))//
-		.append("contextLoader", this.contextLoader)//
+		.append("contextLoader", nullSafeToString(contextLoader))//
 		.append("contextKey", this.contextKey)//
 		.toString();
 	}

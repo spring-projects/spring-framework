@@ -95,7 +95,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * TODO Document default supports(MergedContextConfiguration) implementation.
 	 */
 	public boolean supports(MergedContextConfiguration mergedConfig) {
-		return !ObjectUtils.isEmpty(mergedConfig.getLocations());
+		return !ObjectUtils.isEmpty(mergedConfig.getLocations()) && ObjectUtils.isEmpty(mergedConfig.getClasses());
 	}
 
 	// --- ContextLoader -------------------------------------------------------

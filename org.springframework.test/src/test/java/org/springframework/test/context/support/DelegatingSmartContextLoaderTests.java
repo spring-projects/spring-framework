@@ -16,7 +16,11 @@
 
 package org.springframework.test.context.support;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
+import org.springframework.test.context.MergedContextConfiguration;
 
 /**
  * Unit tests for {@link DelegatingSmartContextLoader}.
@@ -26,14 +30,17 @@ import org.junit.Test;
  */
 public class DelegatingSmartContextLoaderTests {
 
-	private DelegatingSmartContextLoader loader = new DelegatingSmartContextLoader();
+	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
+	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+	private final DelegatingSmartContextLoader loader = new DelegatingSmartContextLoader();
 
 
 	// --- SmartContextLoader --------------------------------------------------
 
 	@Test
 	public void generatesDefaults() {
-		// TODO test generateDefaults().
+		assertTrue(loader.generatesDefaults());
 	}
 
 	@Test
@@ -42,8 +49,31 @@ public class DelegatingSmartContextLoaderTests {
 	}
 
 	@Test
-	public void supports() {
-		// TODO test supports().
+	public void doesNotSupportEmptyConfig() {
+		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
+		assertFalse(loader.supports(mergedConfig));
+	}
+
+	@Test
+	public void doesNotSupportLocationsAndConfigurationClasses() {
+		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(),
+			new String[] { "foo.xml" }, new Class<?>[] { getClass() }, EMPTY_STRING_ARRAY, loader);
+		assertFalse(loader.supports(mergedConfig));
+	}
+
+	@Test
+	public void supportsLocations() {
+		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(),
+			new String[] { "foo.xml" }, EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
+		assertTrue(loader.supports(mergedConfig));
+	}
+
+	@Test
+	public void supportsConfigurationClasses() {
+		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			new Class<?>[] { getClass() }, EMPTY_STRING_ARRAY, loader);
+		assertTrue(loader.supports(mergedConfig));
 	}
 
 	@Test
@@ -55,12 +85,12 @@ public class DelegatingSmartContextLoaderTests {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void processLocations() {
-		loader.processLocations(getClass(), new String[0]);
+		loader.processLocations(getClass(), EMPTY_STRING_ARRAY);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void loadContextFromLocations() throws Exception {
-		loader.loadContext(new String[0]);
+		loader.loadContext(EMPTY_STRING_ARRAY);
 	}
 
 }
