@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,12 @@ public class TestContextManagerTests {
 
 	protected static final Log logger = LogFactory.getLog(TestContextManagerTests.class);
 
-	private TestContextManager testContextManager = null;
+	private final TestContextManager testContextManager = new TestContextManager(ExampleTestCase.class);
 
+
+	private Method getTestMethod() throws NoSuchMethodException {
+		return ExampleTestCase.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
+	}
 
 	/**
 	 * Asserts the <em>execution order</em> of 'before' and 'after' test method
@@ -108,16 +112,10 @@ public class TestContextManagerTests {
 
 	@Before
 	public void setUpTestContextManager() throws Throwable {
-
-		final Method testMethod = ExampleTestCase.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
-		this.testContextManager = new TestContextManager(ExampleTestCase.class);
-		this.testContextManager.registerTestExecutionListeners(new NamedTestExecutionListener(FIRST),
-			new NamedTestExecutionListener(SECOND), new NamedTestExecutionListener(THIRD));
-
-		assertEquals("Verifying the number of registered TestExecutionListeners.", 6,
+		assertEquals("Verifying the number of registered TestExecutionListeners.", 3,
 			this.testContextManager.getTestExecutionListeners().size());
 
-		this.testContextManager.beforeTestMethod(new ExampleTestCase(), testMethod);
+		this.testContextManager.beforeTestMethod(new ExampleTestCase(), getTestMethod());
 	}
 
 	/**
@@ -133,13 +131,11 @@ public class TestContextManagerTests {
 
 	@After
 	public void tearDownTestContextManager() throws Throwable {
-		final Method testMethod = ExampleTestCase.class.getDeclaredMethod("exampleTestMethod", (Class<?>[]) null);
-		this.testContextManager.afterTestMethod(new ExampleTestCase(), testMethod, null);
-		this.testContextManager = null;
+		this.testContextManager.afterTestMethod(new ExampleTestCase(), getTestMethod(), null);
 	}
 
 
-	@ContextConfiguration
+	@TestExecutionListeners({ FirstTel.class, SecondTel.class, ThirdTel.class })
 	private static class ExampleTestCase {
 
 		@SuppressWarnings("unused")
@@ -158,18 +154,39 @@ public class TestContextManagerTests {
 		}
 
 		@Override
-		public void afterTestMethod(final TestContext testContext) {
-			afterTestMethodCalls.add(this.name);
-		}
-
-		@Override
 		public void beforeTestMethod(final TestContext testContext) {
 			beforeTestMethodCalls.add(this.name);
 		}
 
 		@Override
+		public void afterTestMethod(final TestContext testContext) {
+			afterTestMethodCalls.add(this.name);
+		}
+
+		@Override
 		public String toString() {
 			return new ToStringCreator(this).append("name", this.name).toString();
+		}
+	}
+
+	private static class FirstTel extends NamedTestExecutionListener {
+
+		public FirstTel() {
+			super(FIRST);
+		}
+	}
+
+	private static class SecondTel extends NamedTestExecutionListener {
+
+		public SecondTel() {
+			super(SECOND);
+		}
+	}
+
+	private static class ThirdTel extends NamedTestExecutionListener {
+
+		public ThirdTel() {
+			super(THIRD);
 		}
 	}
 

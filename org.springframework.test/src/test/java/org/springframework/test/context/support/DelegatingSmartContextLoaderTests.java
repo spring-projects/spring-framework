@@ -30,8 +30,8 @@ import org.springframework.test.context.MergedContextConfiguration;
  */
 public class DelegatingSmartContextLoaderTests {
 
-	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
 
 	private final DelegatingSmartContextLoader loader = new DelegatingSmartContextLoader();
 
@@ -46,6 +46,12 @@ public class DelegatingSmartContextLoaderTests {
 	@Test
 	public void processContextConfiguration() {
 		// TODO test processContextConfiguration().
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void doesNotSupportNullConfig() {
+		MergedContextConfiguration mergedConfig = null;
+		loader.supports(mergedConfig);
 	}
 
 	@Test
@@ -74,6 +80,19 @@ public class DelegatingSmartContextLoaderTests {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
 			new Class<?>[] { getClass() }, EMPTY_STRING_ARRAY, loader);
 		assertTrue(loader.supports(mergedConfig));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void loadContextWithNullConfig() throws Exception {
+		MergedContextConfiguration mergedConfig = null;
+		loader.loadContext(mergedConfig);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void loadContextWithoutLocationsAndConfigurationClasses() throws Exception {
+		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
+		loader.loadContext(mergedConfig);
 	}
 
 	@Test
