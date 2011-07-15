@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.mock.web;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -35,24 +36,24 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
- * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
- * interface. Supports the Servlet 2.5 API level.
- * <p>
- * Used for testing the web framework; also useful for testing application
- * controllers.
- * 
+ * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
+ *
+ * <p>Compatible with Servlet 2.5 and partially with Servlet 3.0 (notable exceptions:
+ * the <code>getPart(s)</code> and <code>startAsync</code> families of methods).
+ *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Rick Evans
@@ -92,6 +93,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
 	private boolean active = true;
+
 
 	// ---------------------------------------------------------------------
 	// ServletRequest properties
@@ -133,6 +135,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private String localAddr = DEFAULT_SERVER_ADDR;
 
 	private int localPort = DEFAULT_SERVER_PORT;
+
 
 	// ---------------------------------------------------------------------
 	// HttpServletRequest properties
@@ -180,7 +183,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Create a new MockHttpServletRequest with a default
 	 * {@link MockServletContext}.
-	 * 
 	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest() {
@@ -190,7 +192,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Create a new MockHttpServletRequest with a default
 	 * {@link MockServletContext}.
-	 * 
 	 * @param method the request method (may be <code>null</code>)
 	 * @param requestURI the request URI (may be <code>null</code>)
 	 * @see #setMethod
@@ -203,7 +204,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Create a new MockHttpServletRequest.
-	 * 
 	 * @param servletContext the ServletContext that the request runs in (may be
 	 * <code>null</code> to use a default MockServletContext)
 	 * @see MockServletContext
@@ -214,7 +214,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Create a new MockHttpServletRequest.
-	 * 
 	 * @param servletContext the ServletContext that the request runs in (may be
 	 * <code>null</code> to use a default MockServletContext)
 	 * @param method the request method (may be <code>null</code>)
@@ -229,6 +228,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.requestURI = requestURI;
 		this.locales.add(Locale.ENGLISH);
 	}
+
 
 	// ---------------------------------------------------------------------
 	// Lifecycle methods
@@ -273,6 +273,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			throw new IllegalStateException("Request is not active anymore");
 		}
 	}
+
 
 	// ---------------------------------------------------------------------
 	// ServletRequest interface
@@ -603,6 +604,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		return this.localPort;
 	}
 
+
 	// ---------------------------------------------------------------------
 	// HttpServletRequest interface
 	// ---------------------------------------------------------------------
@@ -625,18 +627,15 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Add a header entry for the given name.
-	 * <p>
-	 * If there was no entry for that header name before, the value will be used
+	 * <p>If there was no entry for that header name before, the value will be used
 	 * as-is. In case of an existing entry, a String array will be created,
 	 * adding the given value (more specifically, its toString representation)
 	 * as further element.
-	 * <p>
-	 * Multiple values can only be stored as list of Strings, following the
+	 * <p>Multiple values can only be stored as list of Strings, following the
 	 * Servlet spec (see <code>getHeaders</code> accessor). As alternative to
 	 * repeated <code>addHeader</code> calls for individual elements, you can
 	 * use a single call with an entire array or Collection of values as
 	 * parameter.
-	 * 
 	 * @see #getHeaderNames
 	 * @see #getHeader
 	 * @see #getHeaders
@@ -680,20 +679,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
-	public String getHeader(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return (header != null ? header.getValue().toString() : null);
-	}
-
-	public Enumeration<String> getHeaders(String name) {
-		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<String>());
-	}
-
-	public Enumeration<String> getHeaderNames() {
-		return Collections.enumeration(this.headers.keySet());
-	}
-
 	public int getIntHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		Object value = (header != null ? header.getValue() : null);
@@ -709,6 +694,20 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		else {
 			return -1;
 		}
+	}
+
+	public String getHeader(String name) {
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		return (header != null ? header.getStringValue() : null);
+	}
+
+	public Enumeration<String> getHeaders(String name) {
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<String>());
+	}
+
+	public Enumeration<String> getHeaderNames() {
+		return Collections.enumeration(this.headers.keySet());
 	}
 
 	public void setMethod(String method) {
@@ -760,7 +759,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public boolean isUserInRole(String role) {
-		return this.userRoles.contains(role);
+		return (this.userRoles.contains(role) || (this.servletContext instanceof MockServletContext &&
+				((MockServletContext) this.servletContext).getDeclaredRoles().contains(role)));
 	}
 
 	public void setUserPrincipal(Principal userPrincipal) {
@@ -853,6 +853,20 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public boolean isRequestedSessionIdFromUrl() {
 		return isRequestedSessionIdFromURL();
+	}
+
+	public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+		return (this.userPrincipal != null && this.remoteUser != null && this.authType != null);
+	}
+
+	public void login(String username, String password) throws ServletException {
+		throw new ServletException("Username-password authentication not supported - override the login method");
+	}
+
+	public void logout() throws ServletException {
+		this.userPrincipal = null;
+		this.remoteUser = null;
+		this.authType = null;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,19 +38,15 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Mock implementation of the {@link javax.servlet.http.HttpServletResponse}
- * interface. Supports the Servlet 2.5 API level.
+ * Mock implementation of the {@link javax.servlet.http.HttpServletResponse} interface.
  *
- * <p>Used for testing the web framework; also useful for testing
- * application controllers.
+ * <p>Compatible with Servlet 2.5 as well as Servlet 3.0.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 1.0.2
  */
 public class MockHttpServletResponse implements HttpServletResponse {
-
-	public static final int DEFAULT_SERVER_PORT = 80;
 
 	private static final String CHARSET_PREFIX = "charset=";
 
@@ -280,10 +276,43 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return the names of all specified headers as a Set of Strings.
+	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
 	 * @return the <code>Set</code> of header name <code>Strings</code>, or an empty <code>Set</code> if none
 	 */
 	public Set<String> getHeaderNames() {
 		return this.headers.keySet();
+	}
+
+	/**
+	 * Return the primary value for the given header as a String, if any.
+	 * Will return the first value in case of multiple values.
+	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
+	 * As of Spring 3.1, it returns a stringified value for Servlet 3.0 compatibility.
+	 * Consider using {@link #getHeaderValue(String)} for raw Object access.
+	 * @param name the name of the header
+	 * @return the associated header value, or <code>null<code> if none
+	 */
+	public String getHeader(String name) {
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		return (header != null ? header.getStringValue() : null);
+	}
+
+	/**
+	 * Return all values for the given header as a List of Strings.
+	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
+	 * As of Spring 3.1, it returns a List of stringified values for Servlet 3.0 compatibility.
+	 * Consider using {@link #getHeaderValues(String)} for raw Object access.
+	 * @param name the name of the header
+	 * @return the associated header values, or an empty List if none
+	 */
+	public List<String> getHeaders(String name) {
+		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
+		if (header != null) {
+			return header.getStringValues();
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	/**
@@ -292,7 +321,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @param name the name of the header
 	 * @return the associated header value, or <code>null<code> if none
 	 */
-	public Object getHeader(String name) {
+	public Object getHeaderValue(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		return (header != null ? header.getValue() : null);
 	}
@@ -302,9 +331,14 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @param name the name of the header
 	 * @return the associated header values, or an empty List if none
 	 */
-	public List<Object> getHeaders(String name) {
+	public List<Object> getHeaderValues(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return (header != null ? header.getValues() : Collections.emptyList());
+		if (header != null) {
+			return header.getValues();
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	/**

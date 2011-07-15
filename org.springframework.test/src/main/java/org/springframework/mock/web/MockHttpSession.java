@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -34,11 +33,9 @@ import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.
- * Supports the Servlet 2.4 API level.
- * <p>
- * Used for testing the web framework; also useful for testing application
- * controllers.
- * 
+ *
+ * <p>Compatible with Servlet 2.5 as well as Servlet 3.0.
+ *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Mark Fisher
@@ -46,8 +43,6 @@ import org.springframework.util.Assert;
  */
 @SuppressWarnings("deprecation")
 public class MockHttpSession implements HttpSession {
-
-	public static final String SESSION_COOKIE_NAME = "JSESSION";
 
 	private static int nextId = 1;
 
