@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * called through reflection) from the load-time weaver.
  * 
  * @author Costin Leau
+ * @since 3.1
  */
 class WebSphereClassLoaderAdapter {
 
@@ -58,14 +59,14 @@ class WebSphereClassLoaderAdapter {
 			addPreDefinePlugin = classLoader.getClass().getMethod("addPreDefinePlugin", wsPreProcessorClass);
 			transformerList = wsCompoundClassLoaderClass.getDeclaredField(PLUGINS_FIELD);
 			transformerList.setAccessible(true);
-
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new IllegalStateException(
 					"Could not initialize WebSphere LoadTimeWeaver because WebSphere 7 API classes are not available",
 					ex);
 		}
-		Assert.isInstanceOf(wsCompoundClassLoaderClass, classLoader, "ClassLoader must be instance of ["
-				+ COMPOUND_CLASS_LOADER_NAME + "]");
+		Assert.isInstanceOf(wsCompoundClassLoaderClass, classLoader,
+				"ClassLoader must be instance of [" + COMPOUND_CLASS_LOADER_NAME + "]");
 		this.classLoader = classLoader;
 	}
 
@@ -81,9 +82,11 @@ class WebSphereClassLoaderAdapter {
 					new Class[] { this.wsPreProcessorClass }, adapter);
 			this.addPreDefinePlugin.invoke(this.classLoader, adapterInstance);
 
-		} catch (InvocationTargetException ex) {
+		}
+		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("WebSphere addPreDefinePlugin method threw exception", ex.getCause());
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new IllegalStateException("Could not invoke WebSphere addPreDefinePlugin method", ex);
 		}
 	}
@@ -96,10 +99,13 @@ class WebSphereClassLoaderAdapter {
 			List list = (List) transformerList.get(loader);
 			list.clear();
 			return loader;
-		} catch (InvocationTargetException ex) {
+		}
+		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("WebSphere CompoundClassLoader constructor failed", ex.getCause());
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new IllegalStateException("Could not construct WebSphere CompoundClassLoader", ex);
 		}
 	}
+
 }
