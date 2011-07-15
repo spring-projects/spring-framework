@@ -27,6 +27,9 @@
 	<logger name="org.springframework.test.context.support.AnnotationConfigContextLoader">
 		<level value="warn" />
 	</logger>
+	<logger name="org.springframework.test.context.support">
+		<level value="warn" />
+	</logger>
 
 	<!-- Root Logger -->
 	<root>
