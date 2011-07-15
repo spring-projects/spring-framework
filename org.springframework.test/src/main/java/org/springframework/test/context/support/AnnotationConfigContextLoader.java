@@ -138,16 +138,16 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 
 		List<Class<?>> configClasses = new ArrayList<Class<?>>();
 
-		for (Class<?> configClass : declaringClass.getDeclaredClasses()) {
-			if (isDefaultConfigurationClassCandidate(configClass)) {
-				configClasses.add(configClass);
+		for (Class<?> candidate : declaringClass.getDeclaredClasses()) {
+			if (isDefaultConfigurationClassCandidate(candidate)) {
+				configClasses.add(candidate);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format(
 						"Ignoring class [%s]; it must be static, non-private, non-final, and annotated "
 								+ "with @Configuration to be considered a default configuration class.",
-						configClass.getName()));
+						candidate.getName()));
 				}
 			}
 		}
