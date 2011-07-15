@@ -55,7 +55,7 @@ public class ContextConfigurationAttributes {
 	 * 
 	 * @throws IllegalStateException if both the locations and value attributes have been declared
 	 */
-	static String[] resolveLocations(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
+	private static String[] resolveLocations(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
 		Assert.notNull(declaringClass, "declaringClass must not be null");
 
 		String[] locations = contextConfiguration.locations();
@@ -163,6 +163,18 @@ public class ContextConfigurationAttributes {
 	 */
 	public void setClasses(Class<?>[] classes) {
 		this.classes = classes;
+	}
+
+	/**
+	 * Determine if this {@code ContextConfigurationAttributes} instance has 
+	 * either path-based resource locations or class-based resources.
+	 * @return <code>true</code> if neither the {@link #getLocations() locations}
+	 * nor the {@link #getClasses() classes} array is empty
+	 * @see #getLocations()
+	 * @see #getClasses()
+	 */
+	public boolean hasResources() {
+		return !ObjectUtils.isEmpty(getLocations()) && !ObjectUtils.isEmpty(getClasses());
 	}
 
 	/**

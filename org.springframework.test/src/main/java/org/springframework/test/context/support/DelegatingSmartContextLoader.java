@@ -27,7 +27,6 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * TODO Document DelegatingSmartContextLoader.
@@ -61,37 +60,29 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 	}
 
 	/**
-	 * TODO Document emptyResources().
-	 */
-	private boolean emptyResources(ContextConfigurationAttributes configAttributes) {
-		return ObjectUtils.isEmpty(configAttributes.getLocations())
-				&& ObjectUtils.isEmpty(configAttributes.getClasses());
-	}
-
-	/**
 	 * TODO Document processContextConfiguration() implementation.
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 
-		final boolean emptyResources = emptyResources(configAttributes);
+		final boolean hasResources = configAttributes.hasResources();
 
 		for (SmartContextLoader loader : candidates) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Delegating to %s to process context configuration [%s].",
+				logger.debug(String.format("Potentially delegating to %s to process context configuration [%s].",
 					loader.getClass().getName(), configAttributes));
 			}
 
 			// If the original locations and classes were not empty, there's no
 			// need to bother with default generation checks; just let each
 			// loader process the configuration.
-			if (!emptyResources) {
+			if (hasResources) {
 				loader.processContextConfiguration(configAttributes);
 			}
 			// Otherwise, if the loader claims to generate defaults, let it
 			// process the configuration.
 			else if (loader.generatesDefaults()) {
 				loader.processContextConfiguration(configAttributes);
-				if (!emptyResources(configAttributes) && logger.isInfoEnabled()) {
+				if (configAttributes.hasResources() && logger.isInfoEnabled()) {
 					logger.info(String.format("SmartContextLoader candidate %s "
 							+ "generated defaults for context configuration [%s].", loader, configAttributes));
 				}
@@ -100,7 +91,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 
 		// If any loader claims to generate defaults but none actually did,
 		// throw an exception.
-		if (generatesDefaults() && emptyResources(configAttributes)) {
+		if (generatesDefaults() && !configAttributes.hasResources()) {
 			throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s "
 					+ "was able to generate defaults for context configuration [%s].", candidates, configAttributes));
 		}
@@ -128,10 +119,8 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 		Assert.notNull(mergedConfig, "mergedConfig must not be null");
 
 		for (SmartContextLoader loader : candidates) {
-
 			// Ask each loader if it can load a context from the mergedConfig.
-			// If a loader can, let it; otherwise, continue iterating over all
-			// remaining candidates.
+			// If it can, let it; otherwise, keep iterating.
 			if (loader.supports(mergedConfig)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("Delegating to %s to load context from [%s].",
