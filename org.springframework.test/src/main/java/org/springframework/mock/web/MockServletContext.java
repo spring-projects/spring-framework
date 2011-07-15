@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,19 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.ServletContext} interface.
+ *
+ * <p>Compatible with Servlet 2.5 and partially with Servlet 3.0. Can be configured to
+ * expose a specific version through {@link #setMajorVersion}/{@link #setMinorVersion};
+ * default is 2.5. Note that Servlet 3.0 support is limited: servlet, filter and listener
+ * registration methods are not supported; neither is cookie or JSP configuration.
+ * We generally do not recommend to unit-test your ServletContainerInitializers and
+ * WebApplicationInitializers which is where those registration methods would be used.
  *
  * <p>Used for testing the Spring web framework; only rarely necessary for testing
  * application controllers. As long as application components don't explicitly
@@ -90,7 +98,13 @@ public class MockServletContext implements ServletContext {
 
 	private String contextPath = "";
 
+	private int majorVersion = 2;
+
 	private int minorVersion = 5;
+
+	private int effectiveMajorVersion = 2;
+
+	private int effectiveMinorVersion = 5;
 
 	private final Map<String, ServletContext> contexts = new HashMap<String, ServletContext>();
 
@@ -99,6 +113,8 @@ public class MockServletContext implements ServletContext {
 	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
 	private String servletContextName = "MockServletContext";
+
+	private final Set<String> declaredRoles = new HashSet<String>();
 
 
 	/**
@@ -179,19 +195,36 @@ public class MockServletContext implements ServletContext {
 		return this.contexts.get(contextPath);
 	}
 
+	public void setMajorVersion(int majorVersion) {
+		this.majorVersion = majorVersion;
+	}
+
 	public int getMajorVersion() {
-		return 2;
+		return this.majorVersion;
 	}
 
 	public void setMinorVersion(int minorVersion) {
-		if (minorVersion < 3 || minorVersion > 5) {
-			throw new IllegalArgumentException("Only Servlet minor versions between 3 and 5 are supported");
-		}
 		this.minorVersion = minorVersion;
 	}
 
 	public int getMinorVersion() {
 		return this.minorVersion;
+	}
+
+	public void setEffectiveMajorVersion(int effectiveMajorVersion) {
+		this.effectiveMajorVersion = effectiveMajorVersion;
+	}
+
+	public int getEffectiveMajorVersion() {
+		return this.effectiveMajorVersion;
+	}
+
+	public void setEffectiveMinorVersion(int effectiveMinorVersion) {
+		this.effectiveMinorVersion = effectiveMinorVersion;
+	}
+
+	public int getEffectiveMinorVersion() {
+		return this.effectiveMinorVersion;
 	}
 
 	public String getMimeType(String filePath) {
@@ -309,13 +342,22 @@ public class MockServletContext implements ServletContext {
 		return this.initParameters.get(name);
 	}
 
+	public Enumeration<String> getInitParameterNames() {
+		return Collections.enumeration(this.initParameters.keySet());
+	}
+
+	public boolean setInitParameter(String name, String value) {
+		Assert.notNull(name, "Parameter name must not be null");
+		if (this.initParameters.containsKey(name)) {
+			return false;
+		}
+		this.initParameters.put(name, value);
+		return true;
+	}
+
 	public void addInitParameter(String name, String value) {
 		Assert.notNull(name, "Parameter name must not be null");
 		this.initParameters.put(name, value);
-	}
-
-	public Enumeration<String> getInitParameterNames() {
-		return Collections.enumeration(this.initParameters.keySet());
 	}
 
 	public Object getAttribute(String name) {
@@ -348,6 +390,22 @@ public class MockServletContext implements ServletContext {
 
 	public String getServletContextName() {
 		return this.servletContextName;
+	}
+
+	public ClassLoader getClassLoader() {
+		return ClassUtils.getDefaultClassLoader();
+	}
+
+	public void declareRoles(String... roleNames) {
+		Assert.notNull(roleNames, "Role names array must not be null");
+		for (String roleName : roleNames) {
+			Assert.hasLength(roleName, "Role name must not be empty");
+			this.declaredRoles.add(roleName);
+		}
+	}
+
+	public Set<String> getDeclaredRoles() {
+		return Collections.unmodifiableSet(this.declaredRoles);
 	}
 
 
