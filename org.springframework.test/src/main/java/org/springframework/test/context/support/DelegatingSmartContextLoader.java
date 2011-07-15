@@ -119,20 +119,20 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
 
 		for (SmartContextLoader loader : candidates) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Delegating to %s to load context from [%s].", loader.getClass().getName(),
-					mergedConfig));
-			}
 
 			// Ask each loader if it can load a context from the mergedConfig.
 			// If a loader can, let it; otherwise, continue iterating over all
 			// remaining candidates.
 			if (loader.supports(mergedConfig)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Delegating to %s to load context from [%s].",
+						loader.getClass().getName(), mergedConfig));
+				}
 				return loader.loadContext(mergedConfig);
 			}
 		}
 
-		throw new IllegalStateException(String.format("None of the candidate SmartContextLoaders %s "
+		throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s "
 				+ "was able to load an ApplicationContext from [%s].", candidates, mergedConfig));
 	}
 
