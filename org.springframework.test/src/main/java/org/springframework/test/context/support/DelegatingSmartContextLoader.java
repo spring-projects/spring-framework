@@ -91,7 +91,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 
 		// If any loader claims to generate defaults but none actually did,
 		// throw an exception.
-		if (originallyHadResources && generatesDefaults() && !configAttributes.hasResources()) {
+		if (generatesDefaults() && !originallyHadResources && !configAttributes.hasResources()) {
 			throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s "
 					+ "was able to generate defaults for context configuration [%s].", candidates, configAttributes));
 		}
