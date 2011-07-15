@@ -64,7 +64,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 
-		final boolean hasResources = configAttributes.hasResources();
+		final boolean originallyHadResources = configAttributes.hasResources();
 
 		for (SmartContextLoader loader : candidates) {
 			if (logger.isDebugEnabled()) {
@@ -75,7 +75,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 			// If the original locations and classes were not empty, there's no
 			// need to bother with default generation checks; just let each
 			// loader process the configuration.
-			if (hasResources) {
+			if (originallyHadResources) {
 				loader.processContextConfiguration(configAttributes);
 			}
 			// Otherwise, if the loader claims to generate defaults, let it
@@ -91,7 +91,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 
 		// If any loader claims to generate defaults but none actually did,
 		// throw an exception.
-		if (generatesDefaults() && !configAttributes.hasResources()) {
+		if (originallyHadResources && generatesDefaults() && !configAttributes.hasResources()) {
 			throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s "
 					+ "was able to generate defaults for context configuration [%s].", candidates, configAttributes));
 		}
