@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,15 @@ import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.env.Environment;
 import org.springframework.util.StringValueResolver;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor}
  * implementation that passes the ApplicationContext to beans that
- * implement the {@link ResourceLoaderAware}, {@link MessageSourceAware},
- * {@link ApplicationEventPublisherAware} and/or
- * {@link ApplicationContextAware} interfaces.
- * 
- * <p>Also delegates the ApplicationContext {@link Environment} instance
- * to beans that implement {@link EnvironmentAware}.
- * 
+ * implement the {@link EnvironmentAware}, {@link EmbeddedValueResolverAware},
+ * {@link ResourceLoaderAware}, {@link ApplicationEventPublisherAware},
+ * {@link MessageSourceAware} and/or {@link ApplicationContextAware} interfaces.
+ *
  * <p>Implemented interfaces are satisfied in order of their mention above.
  *
  * <p>Application contexts will automatically register this with their
@@ -53,11 +49,12 @@ import org.springframework.util.StringValueResolver;
  * @author Costin Leau
  * @author Chris Beams
  * @since 10.10.2003
- * @see org.springframework.context.ResourceLoaderAware
- * @see org.springframework.context.MessageSourceAware
- * @see org.springframework.context.ApplicationEventPublisherAware
- * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.EnvironmentAware
+ * @see org.springframework.context.EmbeddedValueResolverAware
+ * @see org.springframework.context.ResourceLoaderAware
+ * @see org.springframework.context.ApplicationEventPublisherAware
+ * @see org.springframework.context.MessageSourceAware
+ * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.support.AbstractApplicationContext#refresh()
  */
 class ApplicationContextAwareProcessor implements BeanPostProcessor {
@@ -77,7 +74,8 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		AccessControlContext acc = null;
 
 		if (System.getSecurityManager() != null &&
-				(bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware ||
+				(bean instanceof EnvironmentAware || bean instanceof EmbeddedValueResolverAware ||
+						bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware ||
 						bean instanceof MessageSourceAware || bean instanceof ApplicationContextAware)) {
 			acc = this.applicationContext.getBeanFactory().getAccessControlContext();
 		}
@@ -99,6 +97,9 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	
 	private void invokeAwareInterfaces(Object bean) {
 		if (bean instanceof Aware) {
+			if (bean instanceof EnvironmentAware) {
+				((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
+			}
 			if (bean instanceof EmbeddedValueResolverAware) {
 				((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(
 						new EmbeddedValueResolver(this.applicationContext.getBeanFactory()));
@@ -114,9 +115,6 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 			}
 			if (bean instanceof ApplicationContextAware) {
 				((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
-			}
-			if (bean instanceof EnvironmentAware) {
-				((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
 			}
 		}
 	}
