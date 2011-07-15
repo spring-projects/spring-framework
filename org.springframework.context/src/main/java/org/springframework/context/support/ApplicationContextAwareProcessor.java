@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ import org.springframework.util.StringValueResolver;
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor}
  * implementation that passes the ApplicationContext to beans that
- * implement the {@link ResourceLoaderAware}, {@link MessageSourceAware},
- * {@link ApplicationEventPublisherAware} and/or
+ * implement the {@link EmbeddedValueResolverAware}, {@link ResourceLoaderAware},
+ * {@link MessageSourceAware}, {@link ApplicationEventPublisherAware} and/or
  * {@link ApplicationContextAware} interfaces.
- * If all of them are implemented, they are satisfied in the given order.
+ *
+ * <p>Implemented interfaces are satisfied in order of their mention above.
  *
  * <p>Application contexts will automatically register this with their
  * underlying bean factory. Applications do not use this directly.
@@ -45,6 +46,7 @@ import org.springframework.util.StringValueResolver;
  * @author Juergen Hoeller
  * @author Costin Leau
  * @since 10.10.2003
+ * @see org.springframework.context.EmbeddedValueResolverAware
  * @see org.springframework.context.ResourceLoaderAware
  * @see org.springframework.context.MessageSourceAware
  * @see org.springframework.context.ApplicationEventPublisherAware
@@ -68,7 +70,8 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		AccessControlContext acc = null;
 
 		if (System.getSecurityManager() != null &&
-				(bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware ||
+				(bean instanceof EmbeddedValueResolverAware ||
+						bean instanceof ResourceLoaderAware || bean instanceof ApplicationEventPublisherAware ||
 						bean instanceof MessageSourceAware || bean instanceof ApplicationContextAware)) {
 			acc = this.applicationContext.getBeanFactory().getAccessControlContext();
 		}
