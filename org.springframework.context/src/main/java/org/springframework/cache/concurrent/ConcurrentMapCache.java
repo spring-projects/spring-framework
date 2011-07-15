@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.interceptor.DefaultValueWrapper;
+import org.springframework.cache.support.DefaultValueWrapper;
 
 /**
  * Simple {@link Cache} implementation based on the JDK 1.5+

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.interceptor;
+package org.springframework.cache.support;
 
 import org.springframework.cache.Cache.ValueWrapper;
 

@@ -21,7 +21,7 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.interceptor.DefaultValueWrapper;
+import org.springframework.cache.support.DefaultValueWrapper;
 import org.springframework.util.Assert;
 
 /**
