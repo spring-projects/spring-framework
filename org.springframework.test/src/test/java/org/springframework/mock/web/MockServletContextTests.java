@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package org.springframework.mock.web;
 
-import static org.junit.Assert.*;
-
 import java.util.Set;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -89,16 +89,4 @@ public class MockServletContextTests {
 		assertEquals(4, sc.getMinorVersion());
 	}
 
-	@Test
-	public void testIllegalMinorVersion() {
-		MockServletContext sc = new MockServletContext();
-		assertEquals(5, sc.getMinorVersion());
-		try {
-			sc.setMinorVersion(2);
-			fail("expected expection for illegal argument");
-		}
-		catch (IllegalArgumentException iae) {
-			// expected
-		}
-	}
 }
