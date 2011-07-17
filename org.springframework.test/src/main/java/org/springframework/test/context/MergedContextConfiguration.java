@@ -136,7 +136,7 @@ public class MergedContextConfiguration {
 	 * <code>MergedContextConfiguration</code>.
 	 */
 	public Class<?> getTestClass() {
-		return this.testClass;
+		return testClass;
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class MergedContextConfiguration {
 	 * {@link #getTestClass() test class}.
 	 */
 	public String[] getLocations() {
-		return this.locations;
+		return locations;
 	}
 
 	/**
@@ -152,7 +152,7 @@ public class MergedContextConfiguration {
 	 * {@link #getTestClass() test class}.
 	 */
 	public Class<?>[] getClasses() {
-		return this.classes;
+		return classes;
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class MergedContextConfiguration {
 	 * {@link #getTestClass() test class}.
 	 */
 	public String[] getActiveProfiles() {
-		return this.activeProfiles;
+		return activeProfiles;
 	}
 
 	/**
@@ -168,7 +168,7 @@ public class MergedContextConfiguration {
 	 * {@link #getTestClass() test class}.
 	 */
 	public ContextLoader getContextLoader() {
-		return this.contextLoader;
+		return contextLoader;
 	}
 
 	/**
@@ -180,7 +180,7 @@ public class MergedContextConfiguration {
 	 * that was loaded using properties of this <code>MergedContextConfiguration</code>.
 	 */
 	public String getContextKey() {
-		return this.contextKey;
+		return contextKey;
 	}
 
 	/**
@@ -190,12 +190,12 @@ public class MergedContextConfiguration {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)//
-		.append("testClass", this.testClass)//
-		.append("locations", ObjectUtils.nullSafeToString(this.locations))//
-		.append("classes", ObjectUtils.nullSafeToString(this.classes))//
-		.append("activeProfiles", ObjectUtils.nullSafeToString(this.activeProfiles))//
+		.append("testClass", testClass)//
+		.append("locations", ObjectUtils.nullSafeToString(locations))//
+		.append("classes", ObjectUtils.nullSafeToString(classes))//
+		.append("activeProfiles", ObjectUtils.nullSafeToString(activeProfiles))//
 		.append("contextLoader", nullSafeToString(contextLoader))//
-		.append("contextKey", this.contextKey)//
+		.append("contextKey", contextKey)//
 		.toString();
 	}
 

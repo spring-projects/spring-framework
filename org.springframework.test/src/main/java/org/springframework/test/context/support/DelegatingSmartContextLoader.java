@@ -66,34 +66,50 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 
 		final boolean originallyHadResources = configAttributes.hasResources();
 
-		for (SmartContextLoader loader : candidates) {
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Potentially delegating to %s to process context configuration [%s].",
-					loader.getClass().getName(), configAttributes));
-			}
-
-			// If the original locations and classes were not empty, there's no
-			// need to bother with default generation checks; just let each
-			// loader process the configuration.
-			if (originallyHadResources) {
-				loader.processContextConfiguration(configAttributes);
-			}
-			// Otherwise, if the loader claims to generate defaults, let it
-			// process the configuration.
-			else if (loader.generatesDefaults()) {
-				loader.processContextConfiguration(configAttributes);
-				if (configAttributes.hasResources() && logger.isInfoEnabled()) {
-					logger.info(String.format("SmartContextLoader candidate %s "
-							+ "generated defaults for context configuration [%s].", loader, configAttributes));
+		// If the original locations and classes were not empty, there's no
+		// need to bother with default generation checks; just let each
+		// loader process the configuration.
+		if (originallyHadResources) {
+			for (SmartContextLoader loader : candidates) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Delegating to %s to process context configuration [%s].",
+						loader.getClass().getName(), configAttributes));
 				}
+				loader.processContextConfiguration(configAttributes);
 			}
 		}
+		else if (generatesDefaults()) {
+			for (SmartContextLoader loader : candidates) {
+				boolean defaultResourcesAlreadyGenerated = configAttributes.hasResources();
+				// If defaults haven't already been generated and the loader
+				// claims to generate defaults, let it process the
+				// configuration.
+				if (!defaultResourcesAlreadyGenerated && loader.generatesDefaults()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format(
+							"Delegating to %s to generate defaults for context configuration [%s].",
+							loader.getClass().getName(), configAttributes));
+					}
 
-		// If any loader claims to generate defaults but none actually did,
-		// throw an exception.
-		if (generatesDefaults() && !originallyHadResources && !configAttributes.hasResources()) {
-			throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s "
-					+ "was able to generate defaults for context configuration [%s].", candidates, configAttributes));
+					loader.processContextConfiguration(configAttributes);
+
+					if (configAttributes.hasResources()) {
+						if (logger.isInfoEnabled()) {
+							logger.info(String.format("SmartContextLoader candidate %s "
+									+ "generated defaults for context configuration [%s].", loader, configAttributes));
+						}
+					}
+				}
+			}
+
+			// If any loader claims to generate defaults but none actually did,
+			// throw an exception.
+			if (!configAttributes.hasResources()) {
+				throw new IllegalStateException(
+					String.format("None of the SmartContextLoader candidates %s "
+							+ "was able to generate defaults for context configuration [%s].", candidates,
+						configAttributes));
+			}
 		}
 	}
 
