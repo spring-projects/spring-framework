@@ -102,6 +102,10 @@ public class ContextConfigurationAttributes {
 	 */
 	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
 			boolean inheritLocations, Class<? extends ContextLoader> contextLoaderClass) {
+
+		Assert.notNull(declaringClass, "declaringClass must not be null");
+		Assert.notNull(contextLoaderClass, "contextLoaderClass must not be null");
+
 		this.declaringClass = declaringClass;
 		this.locations = locations;
 		this.classes = classes;
@@ -115,7 +119,7 @@ public class ContextConfigurationAttributes {
 	 * @return the declaring class; never <code>null</code>
 	 */
 	public Class<?> getDeclaringClass() {
-		return this.declaringClass;
+		return declaringClass;
 	}
 
 	/**
@@ -130,7 +134,7 @@ public class ContextConfigurationAttributes {
 	 * @see #setLocations()
 	 */
 	public String[] getLocations() {
-		return this.locations;
+		return locations;
 	}
 
 	/**
@@ -153,7 +157,7 @@ public class ContextConfigurationAttributes {
 	 * @see #setClasses()
 	 */
 	public Class<?>[] getClasses() {
-		return this.classes;
+		return classes;
 	}
 
 	/**
@@ -184,7 +188,7 @@ public class ContextConfigurationAttributes {
 	 * @see ContextConfiguration#inheritLocations
 	 */
 	public boolean isInheritLocations() {
-		return this.inheritLocations;
+		return inheritLocations;
 	}
 
 	/**
@@ -194,7 +198,7 @@ public class ContextConfigurationAttributes {
 	 * @see ContextConfiguration#loader
 	 */
 	public Class<? extends ContextLoader> getContextLoaderClass() {
-		return this.contextLoaderClass;
+		return contextLoaderClass;
 	}
 
 	/**
@@ -204,11 +208,11 @@ public class ContextConfigurationAttributes {
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)//
-		.append("declaringClass", this.declaringClass)//
-		.append("locations", ObjectUtils.nullSafeToString(this.locations))//
-		.append("classes", ObjectUtils.nullSafeToString(this.classes))//
-		.append("inheritLocations", this.inheritLocations)//
-		.append("contextLoaderClass", this.contextLoaderClass)//
+		.append("declaringClass", declaringClass.getName())//
+		.append("locations", ObjectUtils.nullSafeToString(locations))//
+		.append("classes", ObjectUtils.nullSafeToString(classes))//
+		.append("inheritLocations", inheritLocations)//
+		.append("contextLoaderClass", contextLoaderClass.getName())//
 		.toString();
 	}
 

@@ -37,7 +37,8 @@ import org.springframework.context.ApplicationContext;
  * {@link #processContextConfiguration(ContextConfigurationAttributes) processContextConfiguration()}
  * should be merged for all classes in the hierarchy of the root test class and
  * then supplied to {@link #loadContext(MergedContextConfiguration) loadContext()}.
- * Even though <code>SmartContextLoader</code> extends <code>ContextLoader</code>,
+ * 
+ * <p>Even though <code>SmartContextLoader</code> extends <code>ContextLoader</code>,
  * clients should favor <code>SmartContextLoader</code>-specific methods over those
  * defined in <code>ContextLoader</code>, particularly because a
  * <code>SmartContextLoader</code> may choose not to support methods defined in
@@ -63,9 +64,8 @@ public interface SmartContextLoader extends ContextLoader {
 
 	/**
 	 * Determines if this <code>SmartContextLoader</code> generates default resource
-	 * locations or
-	 * {@link org.springframework.context.annotation.Configuration configuration classes}
-	 * if the <code>locations</code> or <code>classes</code>
+	 * locations or {@link org.springframework.context.annotation.Configuration
+	 * configuration classes} if the <code>locations</code> or <code>classes</code>
 	 * present in the {@link ContextConfigurationAttributes} provided to
 	 * {@link #processContextConfiguration()} are <code>null</code> or empty.
 	 * <p>Returning a value of <code>true</code> signals not only that this
