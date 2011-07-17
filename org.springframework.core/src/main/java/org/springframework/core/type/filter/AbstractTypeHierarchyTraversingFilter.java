@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.springframework.core.type.classreading.MetadataReader;
  * Type filter that is aware of traversing over hierarchy.
  * 
  * <p>This filter is useful when matching needs to be made based on potentially the
- * whole class/interface hierarchy. The algorithm employed uses succeed-fast
- * strategy i.e. if at anytime a match is declared, no further processing is
+ * whole class/interface hierarchy. The algorithm employed uses a succeed-fast
+ * strategy: if at any time a match is declared, no further processing is
  * carried out.
  * 
  * @author Ramnivas Laddad
