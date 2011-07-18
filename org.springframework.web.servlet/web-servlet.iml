@@ -28,31 +28,13 @@
     <orderEntry type="library" name="javax.validation" level="project" />
     <orderEntry type="library" name="JUnit" level="project" />
     <orderEntry type="module-library">
-      <library name="Tiles 2.2.1">
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/../../../java/tiles-2.2.1" />
-          <root url="jar://$MODULE_DIR$/../../../java/tiles-2.2.1/lib/optional/ognl-2.7.3.jar!/" />
-          <root url="jar://$MODULE_DIR$/../../../java/tiles-2.2.1/lib/optional/mvel2-2.0.11.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/../../../java/tiles-2.2.1/src/tiles-api/src/main/java" />
-          <root url="file://$MODULE_DIR$/../../../java/tiles-2.2.1/src/tiles-core/src/main/java" />
-          <root url="file://$MODULE_DIR$/../../../java/tiles-2.2.1/src/tiles-extras/src/main/java" />
-          <root url="file://$MODULE_DIR$/../../../java/tiles-2.2.1/src/tiles-servlet/src/main/java" />
-          <root url="file://$MODULE_DIR$/../../../java/tiles-2.2.1/src/tiles-el/src/main/java" />
-        </SOURCES>
-        <jarDirectory url="file://$MODULE_DIR$/../../../java/tiles-2.2.1" recursive="false" />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/javax.servlet/com.springsource.javax.servlet/2.5.0/com.springsource.javax.servlet-2.5.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/javax.servlet/javax.servlet/3.0.0.v201103241009/javax.servlet-3.0.0.v201103241009.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/javax.servlet/com.springsource.javax.servlet/2.5.0/com.springsource.javax.servlet-sources-2.5.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/javax.servlet/javax.servlet/3.0.0.v201103241009/javax.servlet-sources-3.0.0.v201103241009.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -330,11 +312,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.validator/4.0.0.GA/com.springsource.org.hibernate.validator-4.0.0.GA.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.validator/4.1.0.GA/com.springsource.org.hibernate.validator-4.1.0.GA.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.validator/4.0.0.GA/com.springsource.org.hibernate.validator-sources-4.0.0.GA.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.validator/4.1.0.GA/com.springsource.org.hibernate.validator-sources-4.1.0.GA.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
