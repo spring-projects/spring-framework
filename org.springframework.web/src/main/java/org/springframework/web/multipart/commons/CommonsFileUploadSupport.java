@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -291,7 +291,7 @@ public abstract class CommonsFileUploadSupport {
 		}
 		MediaType contentType = MediaType.parseMediaType(contentTypeHeader);
 		Charset charset = contentType.getCharSet();
-		return charset != null ? charset.name() : defaultEncoding;
+		return (charset != null ? charset.name() : defaultEncoding);
 	}
 
 
