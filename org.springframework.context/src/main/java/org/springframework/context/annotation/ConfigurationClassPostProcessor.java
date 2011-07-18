@@ -174,7 +174,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					"postProcessBeanFactory already called for this post-processor against " + registry);
 		}
 		this.registriesPostProcessed.add(registryID);
-		processConfigurationClasses(registry);
+		processConfigBeanDefinitions(registry);
 	}
 
 	/**
@@ -191,16 +191,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (!this.registriesPostProcessed.contains(factoryID)) {
 			// BeanDefinitionRegistryPostProcessor hook apparently not supported...
 			// Simply call processConfigurationClasses lazily at this point then.
-			processConfigurationClasses((BeanDefinitionRegistry)beanFactory);
+			processConfigBeanDefinitions((BeanDefinitionRegistry)beanFactory);
 		}
-	}
-
-	/**
-	 * Find and process all @Configuration classes in the given registry.
-	 */
-	private void processConfigurationClasses(BeanDefinitionRegistry registry) {
-		processConfigBeanDefinitions(registry);
-		enhanceConfigurationClasses((ConfigurableListableBeanFactory)registry);
+		enhanceConfigurationClasses(beanFactory);
 	}
 
 	private ConfigurationClassBeanDefinitionReader getConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry) {
