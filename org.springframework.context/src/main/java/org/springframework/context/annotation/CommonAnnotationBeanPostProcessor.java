@@ -35,7 +35,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -96,12 +95,12 @@ import org.springframework.util.StringUtils;
  * specify both a local bean name and a global JNDI name for fallback retrieval.
  * The target beans can be plain POJOs as well as EJB 3 Session Beans in this case.
  *
- * <p>The common annotations supported by this post-processor are available
- * in Java 6 (JDK 1.6) as well as in Java EE 5 (which provides a standalone jar for
+ * <p>The common annotations supported by this post-processor are available in
+ * Java 6 (JDK 1.6) as well as in Java EE 5/6 (which provides a standalone jar for
  * its common annotations as well, allowing for use in any Java 5 based application).
  * Hence, this post-processor works out of the box on JDK 1.6, and requires the
  * JSR-250 API jar (and optionally the JAX-WS API jar and/or the EJB 3 API jar)
- * to be added to the classpath on JDK 1.5 (when running outside of Java EE 5).
+ * to be added to the classpath on JDK 1.5 (when running outside of Java EE 5/6).
  *
  * <p>For default usage, resolving resource names as Spring bean names,
  * simply define the following in your application context:

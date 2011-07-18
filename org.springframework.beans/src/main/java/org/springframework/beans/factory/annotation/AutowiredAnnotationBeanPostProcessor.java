@@ -62,8 +62,11 @@ import org.springframework.util.ReflectionUtils;
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
  * that autowires annotated fields, setter methods and arbitrary config methods.
- * Such members to be injected are detected through a Java 5 annotation:
- * by default, Spring's @{@link Autowired} and @{@link Value} annotations.
+ * Such members to be injected are detected through a Java 5 annotation: by default,
+ * Spring's {@link Autowired @Autowired} and {@link Value @Value} annotations.
+ *
+ * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation,
+ * if available, as a direct alternative to Spring's own <code>@Autowired</code>.
  *
  * <p>Only one constructor (at max) of any given bean class may carry this
  * annotation with the 'required' parameter set to <code>true</code>, 
@@ -78,14 +81,10 @@ import org.springframework.util.ReflectionUtils;
  * <p>Fields are injected right after construction of a bean, before any
  * config methods are invoked. Such a config field does not have to be public.
  *
- * <p>Config methods may have an arbitrary name and any number of arguments;
- * each of those arguments will be autowired with a matching bean in the
- * Spring container. Bean property setter methods are effectively just
- * a special case of such a general config method. Such config methods
- * do not have to be public.
- *
- * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation, if
- * available.
+ * <p>Config methods may have an arbitrary name and any number of arguments; each of
+ * those arguments will be autowired with a matching bean in the Spring container.
+ * Bean property setter methods are effectively just a special case of such a
+ * general config method. Config methods do not have to be public.
  *
  * <p>Note: A default AutowiredAnnotationBeanPostProcessor will be registered
  * by the "context:annotation-config" and "context:component-scan" XML tags.
@@ -372,7 +371,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private Annotation findAutowiredAnnotation(AccessibleObject ao) {
 		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
 			if (ao instanceof Method) {
-				ao = BridgeMethodResolver.findBridgedMethod((Method)ao);
+				ao = BridgeMethodResolver.findBridgedMethod((Method) ao);
 			}
 			Annotation annotation = ao.getAnnotation(type);
 			if (annotation != null) {
