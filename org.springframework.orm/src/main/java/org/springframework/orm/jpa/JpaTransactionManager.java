@@ -184,7 +184,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Set the JDBC DataSource that this instance should manage transactions for.
-     * The DataSource should match the one used by the JPA EntityManagerFactory:
+	 * The DataSource should match the one used by the JPA EntityManagerFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the EntityManagerFactory uses a known DataSource as connection factory,
 	 * the DataSource will be autodetected: You can still explictly specify the
