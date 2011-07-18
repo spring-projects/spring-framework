@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.util.CollectionUtils;
  * supporting this transaction management mechanism.
  *
  * <p>This transaction manager is appropriate for applications that use a single
- * JPA EntityManagerFactory for  transactional data access. JTA (usually through
+ * JPA EntityManagerFactory for transactional data access. JTA (usually through
  * {@link org.springframework.transaction.jta.JtaTransactionManager}) is necessary
  * for accessing multiple transactional resources within the same transaction.
  * Note that you need to configure your JPA provider accordingly in order to make
@@ -184,7 +184,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Set the JDBC DataSource that this instance should manage transactions for.
-   * The DataSource should match the one used by the JPA EntityManagerFactory:
+     * The DataSource should match the one used by the JPA EntityManagerFactory:
 	 * for example, you could specify the same JNDI DataSource for both.
 	 * <p>If the EntityManagerFactory uses a known DataSource as connection factory,
 	 * the DataSource will be autodetected: You can still explictly specify the
