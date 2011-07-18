@@ -26,6 +26,7 @@ import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -95,6 +96,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ProblemReporter problemReporter = new FailFastProblemReporter();
 
+	private Environment environment;
+
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
@@ -106,8 +109,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	private final Set<Integer> registriesPostProcessed = new HashSet<Integer>();
 
 	private final Set<Integer> factoriesPostProcessed = new HashSet<Integer>();
-
-	private Environment environment;
 
 	private ConfigurationClassBeanDefinitionReader reader;
 
@@ -141,6 +142,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		this.setMetadataReaderFactoryCalled = true;
 	}
 
+	public void setEnvironment(Environment environment) {
+		Assert.notNull(environment, "Environment must not be null");
+		this.environment = environment;
+	}
+
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
@@ -153,27 +159,22 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 	}
 
-	public void setEnvironment(Environment environment) {
-		Assert.notNull(environment, "Environment must not be null");
-		this.environment = environment;
-	}
-
 
 	/**
 	 * Derive further bean definitions from the configuration classes in the registry.
 	 */
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
 		BeanDefinitionReaderUtils.registerWithGeneratedName(new RootBeanDefinition(ImportAwareBeanPostProcessor.class), registry);
-		int registryID = System.identityHashCode(registry);
-		if (this.registriesPostProcessed.contains(registryID)) {
+		int registryId = System.identityHashCode(registry);
+		if (this.registriesPostProcessed.contains(registryId)) {
 			throw new IllegalStateException(
 					"postProcessBeanDefinitionRegistry already called for this post-processor against " + registry);
 		}
-		if (this.factoriesPostProcessed.contains(registryID)) {
+		if (this.factoriesPostProcessed.contains(registryId)) {
 			throw new IllegalStateException(
 					"postProcessBeanFactory already called for this post-processor against " + registry);
 		}
-		this.registriesPostProcessed.add(registryID);
+		this.registriesPostProcessed.add(registryId);
 		processConfigBeanDefinitions(registry);
 	}
 
@@ -182,16 +183,16 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * by replacing them with CGLIB-enhanced subclasses.
 	 */
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		int factoryID = System.identityHashCode(beanFactory);
-		if (this.factoriesPostProcessed.contains(factoryID)) {
+		int factoryId = System.identityHashCode(beanFactory);
+		if (this.factoriesPostProcessed.contains(factoryId)) {
 			throw new IllegalStateException(
 					"postProcessBeanFactory already called for this post-processor against " + beanFactory);
 		}
-		this.factoriesPostProcessed.add(factoryID);
-		if (!this.registriesPostProcessed.contains(factoryID)) {
+		this.factoriesPostProcessed.add((factoryId));
+		if (!this.registriesPostProcessed.contains((factoryId))) {
 			// BeanDefinitionRegistryPostProcessor hook apparently not supported...
 			// Simply call processConfigurationClasses lazily at this point then.
-			processConfigBeanDefinitions((BeanDefinitionRegistry)beanFactory);
+			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
 		}
 		enhanceConfigurationClasses(beanFactory);
 	}
@@ -327,9 +328,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				String importingClass = importRegistry.getImportingClassFor(bean.getClass().getSuperclass().getName());
 				if (importingClass != null) {
 					try {
-						AnnotationMetadata metadata = new SimpleMetadataReaderFactory().getMetadataReader(importingClass).getAnnotationMetadata();
+						AnnotationMetadata metadata =
+								new SimpleMetadataReaderFactory().getMetadataReader(importingClass).getAnnotationMetadata();
 						((ImportAware) bean).setImportMetadata(metadata);
-					} catch (IOException ex) {
+					}
+					catch (IOException ex) {
 						// should never occur -> at this point we know the class is present anyway
 						throw new IllegalStateException(ex);
 					}
@@ -349,4 +352,5 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			return Ordered.HIGHEST_PRECEDENCE;
 		}
 	}
+
 }
