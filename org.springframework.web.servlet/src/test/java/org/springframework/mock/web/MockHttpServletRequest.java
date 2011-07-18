@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.mock.web;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -27,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -34,19 +36,28 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
- * interface. Supports the Servlet 2.5 API level.
+ * interface. Supports the Servlet 2.5 API level; throws
+ * {@link UnsupportedOperationException} for all methods introduced in Servlet 3.0.
  *
  * <p>Used for testing the web framework; also useful for testing
  * application controllers.
@@ -55,6 +66,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * @author Rod Johnson
  * @author Rick Evans
  * @author Mark Fisher
+ * @author Chris Beams
  * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest {
@@ -134,6 +146,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private int localPort = DEFAULT_SERVER_PORT;
 
+	private Map<String, Part> parts = new HashMap<String, Part>();
 
 	//---------------------------------------------------------------------
 	// HttpServletRequest properties
@@ -845,6 +858,59 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public boolean isRequestedSessionIdFromUrl() {
 		return isRequestedSessionIdFromURL();
+	}
+
+
+	//---------------------------------------------------------------------
+	// Methods introduced in Servlet 3.0
+	//---------------------------------------------------------------------
+
+	public AsyncContext getAsyncContext() {
+		throw new UnsupportedOperationException();
+	}
+
+	public DispatcherType getDispatcherType() {
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean isAsyncSupported() {
+		throw new UnsupportedOperationException();
+	}
+
+	public AsyncContext startAsync() {
+		throw new UnsupportedOperationException();
+	}
+
+	public AsyncContext startAsync(ServletRequest arg0, ServletResponse arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean isAsyncStarted() {
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean authenticate(HttpServletResponse arg0) throws IOException, ServletException {
+		throw new UnsupportedOperationException();
+	}
+	
+	public void addPart(Part part) {
+		parts.put(part.getName(), part);
+	}
+
+	public Part getPart(String key) throws IOException, IllegalStateException, ServletException {
+		return parts.get(key);
+	}
+
+	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
+		return parts.values();
+	}
+
+	public void login(String arg0, String arg1) throws ServletException {
+		throw new UnsupportedOperationException();
+	}
+
+	public void logout() throws ServletException {
+		throw new UnsupportedOperationException();
 	}
 
 }

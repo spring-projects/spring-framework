@@ -18,11 +18,14 @@ package org.springframework.web.servlet.mvc.condition;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.web.bind.annotation.RequestMapping;
+
 /**
  * The contract for request conditions.
  * 
- * <p>Request conditions can be combined (e.g. type + method-level conditions), matched to a request, 
- * or compared to each other to determine if one matches the request better.
+ * <p>Request conditions can be combined via {@link #combine(Object)}, matched to a request via 
+ * {@link #getMatchingCondition(HttpServletRequest)}, and compared to each other via 
+ * {@link #compareTo(Object, HttpServletRequest)} to determine which matches a request more closely.
  * 
  * @param <T> The type of objects that this RequestCondition can be compared to and combined with.
  * 
@@ -33,9 +36,10 @@ import javax.servlet.http.HttpServletRequest;
 public interface RequestCondition<T> {
 
 	/**
-	 * Defines the rules for combining "this" condition (i.e. the current instance) with another condition.
-	 * <p>Example: combine type- and method-level request mapping conditions. 
+	 * Defines the rules for combining this condition (i.e. the current instance) with another condition.
+	 * For example combining type- and method-level {@link RequestMapping} conditions. 
 	 * 
+	 * @param other the condition to combine with.
 	 * @returns a request condition instance that is the result of combining the two condition instances.
 	 */
 	T combine(T other);
@@ -50,9 +54,9 @@ public interface RequestCondition<T> {
 	T getMatchingCondition(HttpServletRequest request);
 
 	/**
-	 * Compares "this" condition (i.e. the current instance) with another condition in the context of a request. 
-	 * <p>Note: it is assumed both instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)} 
-	 * to ensure they have content relevant to current request only.
+	 * Compares this condition to another condition in the context of a specific request. This method assumes 
+	 * both instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)} to ensure they 
+	 * have content relevant to current request only.
 	 */
 	int compareTo(T other, HttpServletRequest request);
 	

@@ -16,20 +16,44 @@
 
 package org.springframework.web.bind.annotation;
 
+import java.beans.PropertyEditor;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartResolver;
+
 /**
- * Annotation that indicates a method parameter should be bound to the content of a part of a "multipart/form-data" request.
- * Supported for annotated handler methods in Servlet environments.
- *
+ * Annotation that can be used to associate the part of a "multipart/form-data" request 
+ * with a method argument. Supported method argument types include {@link MultipartFile}
+ * in conjunction with Spring's {@link MultipartResolver} abstraction, 
+ * {@code javax.servlet.http.Part} in conjunction with Servlet 3.0 multipart requests,
+ * or otherwise for any other method argument, the content of the part is passed through an 
+ * {@link HttpMessageConverter} taking into consideration the 'Content-Type' header 
+ * of the request part. This is analogous to what @{@link RequestBody} does to resolve 
+ * an argument based on the content of a non-multipart regular request.
+ * 
+ * <p>Note that @{@link RequestParam} annotation can also be used to associate the 
+ * part of a "multipart/form-data" request with a method argument supporting the same
+ * method argument types. The main difference is that when the method argument is not a
+ * String, @{@link RequestParam} relies on type conversion via a registered 
+ * {@link Converter} or {@link PropertyEditor} while @{@link RequestPart} relies
+ * on {@link HttpMessageConverter}s taking into consideration the 'Content-Type' header
+ * of the request part. @{@link RequestParam} is likely to be used with name-value form 
+ * fields while @{@link RequestPart} is likely to be used with parts containing more
+ * complex content (e.g. JSON, XML). 
+ * 
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
  * @since 3.1
+ * 
+ * @see RequestParam
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
@@ -40,5 +64,13 @@ public @interface RequestPart {
 	 * The name of the part in the "multipart/form-data" request to bind to.
 	 */
 	String value() default "";
+	
+	/**
+	 * Whether the part is required.
+	 * <p>Default is <code>true</code>, leading to an exception thrown in case
+	 * of the part missing in the request. Switch this to <code>false</code>
+	 * if you prefer a <code>null</value> in case of the part missing.
+	 */
+	boolean required() default true;
 	
 }

@@ -62,11 +62,10 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebA
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
 
 /**
- * An {@link AbstractHandlerMethodExceptionResolver} that looks for an {@link ExceptionHandler}-annotated method
- * that can handle a thrown exception. If a match is found the exception-handling method is invoked to finish
- * processing the request.
+ * An {@link AbstractHandlerMethodExceptionResolver} that supports using {@link ExceptionHandler}-annotated methods
+ * to resolve exceptions.
  *
- * <p>{@link ExceptionMethodMapping} is a key contributing class storing method-to-exception type mappings extracted
+ * <p>{@link ExceptionMethodMapping} is a key contributing class that stores method-to-exception mappings extracted
  * from {@link ExceptionHandler} annotations or from the list of method arguments on the exception-handling method.
  * {@link ExceptionMethodMapping} assists with actually locating a method for a thrown exception.
  *

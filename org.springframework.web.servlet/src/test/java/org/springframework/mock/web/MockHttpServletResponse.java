@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -292,9 +293,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @param name the name of the header
 	 * @return the associated header value, or <code>null<code> if none
 	 */
-	public Object getHeader(String name) {
+	public String getHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return (header != null ? header.getValue() : null);
+		return (header != null ? header.getValue().toString() : null);
 	}
 
 	/**
@@ -302,9 +303,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * @param name the name of the header
 	 * @return the associated header values, or an empty List if none
 	 */
-	public List<Object> getHeaders(String name) {
+	public List<String> getHeaders(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return (header != null ? header.getValues() : Collections.emptyList());
+		return (header != null ? header.getStringValues() : Collections.<String>emptyList());
 	}
 
 	/**

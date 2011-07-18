@@ -40,7 +40,7 @@
 		<dependency org="org.freemarker" name="com.springsource.freemarker" rev="2.3.15"
                     conf="optional, freemarker->compile"/>
 		<dependency org="javax.el" name="com.springsource.javax.el" rev="1.0.0" conf="provided->compile"/>
-		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="provided->compile"/>
+		<dependency org="javax.servlet" name="javax.servlet" rev="3.0.0.v201103241009" conf="provided->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp" rev="2.1.0" conf="provided->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp.jstl" rev="1.1.2"
                     conf="provided->compile"/>
@@ -53,13 +53,21 @@
 		<dependency org="org.apache.poi" name="com.springsource.org.apache.poi" rev="3.0.2.FINAL"
                     conf="optional, poi->compile"/>
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles" rev="2.1.2.osgi"
-                    conf="optional, tiles->compile"/>
-		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.core" rev="2.1.2.osgi"
-                    conf="optional, tiles->compile"/>
+                    conf="optional, tiles->compile">
+            <exclude org="javax.servlet" name="com.springsource.javax.servlet" />
+        </dependency>
+		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.core" rev="2.1.2.osgi" 
+					conf="optional, tiles->compile">
+            <exclude org="javax.servlet" name="com.springsource.javax.servlet" />
+        </dependency>
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.jsp" rev="2.1.2"
-                    conf="optional, tiles->compile"/>
+                    conf="optional, tiles->compile">
+            <exclude org="javax.servlet" name="com.springsource.javax.servlet" />
+        </dependency>
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.servlet" rev="2.1.2"
-                    conf="optional, tiles->compile"/>
+                    conf="optional, tiles->compile">
+            <exclude org="javax.servlet" name="com.springsource.javax.servlet" />
+        </dependency>
 		<dependency org="org.apache.velocity" name="com.springsource.org.apache.velocity" rev="1.5.0"
                     conf="optional, velocity->compile"/>
 		<dependency org="org.apache.velocity" name="com.springsource.org.apache.velocity.tools.view" rev="1.4.0"

@@ -24,7 +24,6 @@ import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,17 +31,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
  * Resolves method arguments annotated with @{@link RequestBody} and handles return values from methods 
  * annotated with {@link ResponseBody}. 
  * 
- * <p>An @{@link RequestBody} method argument will be validated if annotated with {@code @Valid}. In case of 
- * validation failure, a {@link RequestBodyNotValidException} is thrown and can be handled automatically through
- * the {@link DefaultHandlerExceptionResolver}. A {@link Validator} can be configured globally in XML configuration 
- * with the Spring MVC namespace or in Java-based configuration with @{@link EnableWebMvc}.
+ * <p>An @{@link RequestBody} method argument will be validated if annotated with {@code @Valid}. 
+ * In case of validation failure, a {@link RequestBodyNotValidException} is thrown and handled 
+ * automatically in {@link DefaultHandlerExceptionResolver}. 
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev

@@ -207,7 +207,7 @@ public class DispatcherServletTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		simpleDispatcherServlet.service(request, response);
 		assertTrue("Not forwarded", response.getForwardedUrl() == null);
-		assertEquals(new Long(98), response.getHeader("Last-Modified"));
+		assertEquals("98", response.getHeader("Last-Modified"));
 	}
 
 	public void testUnknownRequest() throws Exception {
@@ -280,7 +280,7 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue(request.getAttribute("test3") != null);
 		assertTrue(request.getAttribute("test3x") != null);
 		assertTrue(request.getAttribute("test3y") != null);
-		assertEquals(new Long(99), response.getHeader("Last-Modified"));
+		assertEquals("99", response.getHeader("Last-Modified"));
 	}
 
 	public void testExistingMultipartRequest() throws Exception {

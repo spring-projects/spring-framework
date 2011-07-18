@@ -60,10 +60,11 @@ public class ResourceHttpRequestHandlerTests {
 		handler.handleRequest(request, response);
 		assertEquals("text/css", response.getContentType());
 		assertEquals(17, response.getContentLength());
-		assertTrue(((Long)response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
+		assertTrue(Long.valueOf(response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
 		assertEquals("max-age=3600, must-revalidate", response.getHeader("Cache-Control"));
 		assertTrue(response.containsHeader("Last-Modified"));
-		assertEquals(response.getHeader("Last-Modified"), new ClassPathResource("test/foo.css", getClass()).getFile().lastModified());
+		assertEquals(Long.valueOf(response.getHeader("Last-Modified")).longValue(), 
+				new ClassPathResource("test/foo.css", getClass()).getFile().lastModified());
 		assertEquals("h1 { color:red; }", response.getContentAsString());
 	}
 	
@@ -75,10 +76,11 @@ public class ResourceHttpRequestHandlerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
 		assertEquals("text/html", response.getContentType());
-		assertTrue(((Long)response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
+		assertTrue(Long.valueOf(response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
 		assertEquals("max-age=3600, must-revalidate", response.getHeader("Cache-Control"));
 		assertTrue(response.containsHeader("Last-Modified"));
-		assertEquals(response.getHeader("Last-Modified"), new ClassPathResource("test/foo.html", getClass()).getFile().lastModified());
+		assertEquals(Long.valueOf(response.getHeader("Last-Modified")).longValue(), 
+				new ClassPathResource("test/foo.html", getClass()).getFile().lastModified());
 	}
 	
 	@Test
@@ -90,10 +92,11 @@ public class ResourceHttpRequestHandlerTests {
 		handler.handleRequest(request, response);
 		assertEquals("text/css", response.getContentType());
 		assertEquals(17, response.getContentLength());
-		assertTrue(((Long)response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
+		assertTrue(Long.valueOf(response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
 		assertEquals("max-age=3600, must-revalidate", response.getHeader("Cache-Control"));
 		assertTrue(response.containsHeader("Last-Modified"));
-		assertEquals(response.getHeader("Last-Modified"), new ClassPathResource("testalternatepath/baz.css", getClass()).getFile().lastModified());
+		assertEquals(Long.valueOf(response.getHeader("Last-Modified")).longValue(), 
+				new ClassPathResource("testalternatepath/baz.css", getClass()).getFile().lastModified());
 		assertEquals("h1 { color:red; }", response.getContentAsString());
 	}
 	

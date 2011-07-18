@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.condition;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -32,13 +33,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
 
 /**
- * A logical disjunction (' || ') request condition to match requests against producible media type expressions.
+ * A logical disjunction (' || ') request condition to match requests against producible 
+ * media type expressions.
  * 
- * <p>For details on the syntax of the expressions see {@link RequestMapping#consumes()}. If the condition is 
- * created with 0 producible media type expressions, it matches to every request.
+ * <p>For details on the syntax of the expressions see {@link RequestMapping#consumes()}. 
+ * If the condition is created without media type expressions, it matches to every request.
  * 
- * <p>This request condition is also capable of parsing header expressions specifically selecting 'Accept' header
- * expressions and converting them to prodicuble media type expressions.
+ * <p>This request condition is also capable of parsing header expressions by selecting 
+ * 'Accept' header expressions and converting them to prodicuble media type expressions.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
