@@ -136,7 +136,10 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			}
 		}
 
-		checkMissingRequiredValue(arg, partName, parameter);
+		if (arg == null) {
+			handleMissingValue(partName, parameter);
+		}
+		
 		return arg;
 	}
 
@@ -170,19 +173,18 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	}
 	
 	/**
-	 * Raises a {@link ServletRequestBindingException} if the method parameter is required 
-	 * and the resolved argument value is null.
+	 * Invoked if the resolved argument value is {@code null}. The default implementation raises 
+	 * a {@link ServletRequestBindingException} if the method parameter is required.
+	 * @param partName the name used to look up the request part
+	 * @param param the method argument
 	 */
-	protected void checkMissingRequiredValue(Object argumentValue, String partName, MethodParameter parameter)
-			throws ServletRequestBindingException {
-		if (argumentValue == null) {
-			RequestPart annot = parameter.getParameterAnnotation(RequestPart.class);
-			boolean isRequired = (annot != null) ? annot.required() : true;
-			if (isRequired) {
-				String paramType = parameter.getParameterType().getName();
-				throw new ServletRequestBindingException(
-						"Missing request part '" + partName + "' for method parameter type [" + paramType + "]");
-			}
+	protected void handleMissingValue(String partName, MethodParameter param) throws ServletRequestBindingException {
+		RequestPart annot = param.getParameterAnnotation(RequestPart.class);
+		boolean isRequired = (annot != null) ? annot.required() : true;
+		if (isRequired) {
+			String paramType = param.getParameterType().getName();
+			throw new ServletRequestBindingException(
+					"Missing request part '" + partName + "' for method parameter type [" + paramType + "]");
 		}
 	}
 	

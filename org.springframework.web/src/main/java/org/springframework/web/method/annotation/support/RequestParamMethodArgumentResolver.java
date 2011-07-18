@@ -17,6 +17,7 @@
 package org.springframework.web.method.annotation.support;
 
 import java.beans.PropertyEditor;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.StringUtils;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.util.WebUtils;
 
@@ -124,29 +127,59 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
 	@Override
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
+
+		Object arg;
 		
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		MultipartHttpServletRequest multipartRequest = 
 			WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
 
-		if (multipartRequest != null) {
-			List<MultipartFile> files = multipartRequest.getFiles(name);
-			if (!files.isEmpty()) {
-				return (files.size() == 1 ? files.get(0) : files);
+		if (MultipartFile.class.equals(parameter.getParameterType())) {
+			assertMultipartRequest(multipartRequest, webRequest);
+			arg = multipartRequest.getFile(name);
+		}
+		else if (isMultipartFileCollection(parameter)) {
+			assertMultipartRequest(multipartRequest, webRequest);
+			arg = multipartRequest.getFiles(name);
+		}
+		else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
+			arg = servletRequest.getPart(name);
+		}
+		else {
+			arg = null;
+			if (multipartRequest != null) {
+				List<MultipartFile> files = multipartRequest.getFiles(name);
+				if (!files.isEmpty()) {
+					arg = (files.size() == 1 ? files.get(0) : files);
+				}
+			}
+			if (arg == null) {
+				String[] paramValues = webRequest.getParameterValues(name);
+				if (paramValues != null) {
+					arg = paramValues.length == 1 ? paramValues[0] : paramValues;
+				}
 			}
 		}
 		
-		if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
-			return servletRequest.getPart(name);
+		return arg;
+	}
+
+	private void assertMultipartRequest(MultipartHttpServletRequest multipartRequest, NativeWebRequest request) {
+		if (multipartRequest == null) {
+			throw new IllegalStateException("Current request is not of type [" + MultipartRequest.class.getName()
+					+ "]: " + request + ". Do you have a MultipartResolver configured?");
 		}
-		
-		String[] paramValues = webRequest.getParameterValues(name);
-		if (paramValues != null) {
-			return paramValues.length == 1 ? paramValues[0] : paramValues;
+	}
+	
+	private boolean isMultipartFileCollection(MethodParameter parameter) {
+		Class<?> paramType = parameter.getParameterType();
+		if (Collection.class.equals(paramType) || List.class.isAssignableFrom(paramType)){
+			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
+			if (valueType != null && valueType.equals(MultipartFile.class)) {
+				return true;
+			}
 		}
-		else {
-			return null;
-		}
+		return false;
 	}
 
 	@Override
