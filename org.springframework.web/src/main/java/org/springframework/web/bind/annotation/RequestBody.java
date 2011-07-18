@@ -22,9 +22,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.http.converter.HttpMessageConverter;
+
 /**
- * Annotation which indicates that a method parameter should be bound to the web request body. Supported for annotated
- * handler methods in Servlet environments.
+ * Annotation indicating a method parameter should be bound to the body of the web request. 
+ * The body of the request is passed through an {@link HttpMessageConverter} to resolve the 
+ * method argument depending on the content type of the request. Optionally, automatic 
+ * validation can be applied by annotating the argument with {@code @Valid}.
+ * 
+ * <p>Supported for annotated handler methods in Servlet environments.
  *
  * @author Arjen Poutsma
  * @see RequestHeader

@@ -146,7 +146,7 @@ public class RequestMappingHandlerAdapterTests {
 	@SuppressWarnings("unchecked")
 	public void setCustomArgumentResolvers() {
 		TestHanderMethodArgumentResolver resolver = new TestHanderMethodArgumentResolver();
-		handlerAdapter.setCustomArgumentResolvers(Arrays.asList(resolver));
+		handlerAdapter.setCustomArgumentResolvers(Arrays.<HandlerMethodArgumentResolver>asList(resolver));
 		handlerAdapter.afterPropertiesSet();
 		
 		HandlerMethodArgumentResolverComposite composite = (HandlerMethodArgumentResolverComposite) 
@@ -170,7 +170,7 @@ public class RequestMappingHandlerAdapterTests {
 	@SuppressWarnings("unchecked")
 	public void setCustomReturnValueHandlers() {
 		TestHandlerMethodReturnValueHandler handler = new TestHandlerMethodReturnValueHandler();
-		handlerAdapter.setCustomReturnValueHandlers(Arrays.asList(handler));
+		handlerAdapter.setCustomReturnValueHandlers(Arrays.<HandlerMethodReturnValueHandler>asList(handler));
 		handlerAdapter.afterPropertiesSet();
 		
 		HandlerMethodReturnValueHandlerComposite composite = (HandlerMethodReturnValueHandlerComposite) 

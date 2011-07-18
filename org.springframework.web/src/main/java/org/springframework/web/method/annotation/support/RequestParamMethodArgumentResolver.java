@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -33,19 +34,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartRequest;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.util.WebUtils;
 
 /**
- * Resolves method arguments annotated with @{@link RequestParam}. 
+ * Resolves method arguments annotated with @{@link RequestParam}, arguments of 
+ * type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver} 
+ * abstraction, and arguments of type {@code javax.servlet.http.Part} in conjunction 
+ * with Servlet 3.0 multipart requests. This resolver can also be created in default 
+ * resolution mode in which simple types (int, long, etc.) not annotated 
+ * with @{@link RequestParam} are also treated as request parameters with the 
+ * parameter name derived from the argument name.
  * 
- * <p>If the method parameter type is {@link Map}, the request parameter name is resolved and then converted 
- * to a {@link Map} via type conversion assuming a suitable {@link PropertyEditor} or {@link Converter} is 
- * registered. Alternatively, see {@link RequestParamMapMethodArgumentResolver} for access to all request 
- * parameters in a {@link Map}. 
- * 
- * <p>If this class is created with default resolution mode on, simple types not annotated 
- * with @{@link RequestParam} are also treated as request parameters with the parameter name based 
- * on the method argument name. See the class constructor for more details.
+ * <p>If the method parameter type is {@link Map}, the request parameter name is used to 
+ * resolve the request parameter String value. The value is then converted to a {@link Map} 
+ * via type conversion assuming a suitable {@link Converter} or {@link PropertyEditor} has 
+ * been registered. If a request parameter name is not specified with a {@link Map} method 
+ * parameter type, the {@link RequestParamMapMethodArgumentResolver} is used instead 
+ * providing access to all request parameters in the form of a map.
  * 
  * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved request header values that 
  * don't yet match the method parameter type.
@@ -72,6 +79,18 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		this.useDefaultResolution = useDefaultResolution;
 	}
 
+	/**
+	 * Supports the following:
+	 * <ul>
+	 * 	<li>@RequestParam method arguments. This excludes the case where a parameter is of type 
+	 * 		{@link Map} and the annotation does not specify a request parameter name. See 
+	 * 		{@link RequestParamMapMethodArgumentResolver} instead for such parameters.
+	 * 	<li>Arguments of type {@link MultipartFile} even if not annotated.
+	 * 	<li>Arguments of type {@code javax.servlet.http.Part} even if not annotated.
+	 * </ul>
+	 * 
+	 * <p>In default resolution mode, simple type arguments not annotated with @RequestParam are also supported.
+	 */
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		RequestParam requestParamAnnot = parameter.getParameterAnnotation(RequestParam.class);
@@ -79,6 +98,12 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			if (Map.class.isAssignableFrom(paramType)) {
 				return StringUtils.hasText(requestParamAnnot.value());
 			}
+			return true;
+		}
+		else if (MultipartFile.class.equals(paramType)) {
+			return true;
+		}
+		else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
 			return true;
 		}
 		else if (this.useDefaultResolution) {
@@ -99,14 +124,22 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
 	@Override
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
-		MultipartRequest multipartRequest = webRequest.getNativeRequest(MultipartRequest.class);
+		
+		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+		MultipartHttpServletRequest multipartRequest = 
+			WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
+
 		if (multipartRequest != null) {
 			List<MultipartFile> files = multipartRequest.getFiles(name);
 			if (!files.isEmpty()) {
 				return (files.size() == 1 ? files.get(0) : files);
 			}
 		}
-
+		
+		if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
+			return servletRequest.getPart(name);
+		}
+		
 		String[] paramValues = webRequest.getParameterValues(name);
 		if (paramValues != null) {
 			return paramValues.length == 1 ? paramValues[0] : paramValues;

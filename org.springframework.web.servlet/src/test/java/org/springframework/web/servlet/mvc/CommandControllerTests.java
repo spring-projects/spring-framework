@@ -144,7 +144,7 @@ public class CommandControllerTests extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
+		assertTrue("Correct expires header", response.getHeader("Expires").equals("1"));
 		List cacheControl = response.getHeaders("Cache-Control");
 		assertTrue("Correct cache control", cacheControl.contains("no-cache"));
 		assertTrue("Correct cache control", cacheControl.contains("no-store"));
@@ -170,7 +170,7 @@ public class CommandControllerTests extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
+		assertTrue("Correct expires header", response.getHeader("Expires").equals("1"));
 		assertTrue("No cache control", response.getHeader("Cache-Control") == null);
 	}
 
@@ -259,7 +259,7 @@ public class CommandControllerTests extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		mc.handleRequest(request, response);
-		assertTrue("Correct expires header", response.getHeader("Expires").equals(new Long(1)));
+		assertTrue("Correct expires header", response.getHeader("Expires").equals("1"));
 		List cacheControl = response.getHeaders("Cache-Control");
 		assertTrue("Correct cache control", cacheControl.contains("no-cache"));
 		assertTrue("Correct cache control", cacheControl.contains("no-store"));

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -52,7 +53,6 @@ import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.SimpleSessionStatus;
-import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -90,7 +90,6 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletCook
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletModelAttributeMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
 import org.springframework.web.util.WebUtils;
 
@@ -103,29 +102,30 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>{@link InvocableHandlerMethod} is the key contributor that helps with the invocation of handler
  * methods of all types resolving their arguments through registered {@link HandlerMethodArgumentResolver}s.
- * {@link ServletInvocableHandlerMethod} on the other hand adds handling of the return value for {@link RequestMapping}
- * methods through registered {@link HandlerMethodReturnValueHandler}s resulting in a {@link ModelAndView}.
+ * {@link ServletInvocableHandlerMethod} on the other hand adds handling of the return value for 
+ * {@link RequestMapping} methods through registered {@link HandlerMethodReturnValueHandler}s 
+ * resulting in a {@link ModelAndView}.
  *
  * <p>{@link ModelFactory} is another contributor that assists with the invocation of all {@link ModelAttribute}
  * methods to populate a model while {@link ServletRequestDataBinderFactory} assists with the invocation of
  * {@link InitBinder} methods for initializing data binder instances when needed.
  *
- * <p>This class is the central point that assembles all of mentioned contributors and invokes the actual
+ * <p>This class is the central point that assembles all mentioned contributors and invokes the actual
  * {@link RequestMapping} handler method through a {@link ServletInvocableHandlerMethod}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
- * @see InvocableHandlerMethod
- * @see ServletInvocableHandlerMethod
  * @see HandlerMethodArgumentResolver
  * @see HandlerMethodReturnValueHandler
+ * @see #setCustomArgumentResolvers(List)
+ * @see #setCustomReturnValueHandlers(List)
  */
 public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter implements BeanFactoryAware,
 		InitializingBean {
 
-	private List<? extends HandlerMethodArgumentResolver> customArgumentResolvers;
+	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
-	private List<? extends HandlerMethodReturnValueHandler> customReturnValueHandlers;
+	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
 	
 	private List<ModelAndViewResolver> modelAndViewResolvers;
 
@@ -146,16 +146,16 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache =
 		new ConcurrentHashMap<Class<?>, SessionAttributesHandler>();
 
-	private final Map<Class<?>, Set<Method>> modelAttributeMethodCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
-
-	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
-
-	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
-	
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
 	private HandlerMethodArgumentResolverComposite initBinderArgumentResolvers;
 	
+	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
+
+	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
+
+	private final Map<Class<?>, Set<Method>> modelAttributeMethodCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
+
 	/**
 	 * Create a {@link RequestMappingHandlerAdapter} instance.
 	 */
@@ -177,10 +177,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * <p>Generally custom argument resolvers are invoked first. However this excludes 
 	 * default argument resolvers that rely on the presence of annotations (e.g. {@code @RequestParameter}, 
 	 * {@code @PathVariable}, etc.) Those resolvers can only be customized via {@link #setArgumentResolvers(List)}
-	 * <p>An existing {@link WebArgumentResolver} can either adapted with {@link ServletWebArgumentResolverAdapter}
-	 * or preferably converted to a {@link HandlerMethodArgumentResolver} instead.
 	 */
-	public void setCustomArgumentResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
 	}
 	
@@ -190,7 +188,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * {@link #setCustomArgumentResolvers(List)}, which does not override default registrations.
 	 * @param argumentResolvers argument resolvers for {@link RequestMapping} and {@link ModelAttribute} methods
 	 */
-	public void setArgumentResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
 			this.argumentResolvers.addResolvers(argumentResolvers);
@@ -203,7 +201,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * {@link #setCustomArgumentResolvers(List)}, which does not override default registrations.
 	 * @param argumentResolvers argument resolvers for {@link InitBinder} methods
 	 */
-	public void setInitBinderArgumentResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
+	public void setInitBinderArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			this.initBinderArgumentResolvers = new HandlerMethodArgumentResolverComposite();
 			this.initBinderArgumentResolvers.addResolvers(argumentResolvers);
@@ -217,7 +215,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * and others. Those handlers can only be customized via {@link #setReturnValueHandlers(List)}.
 	 * @param returnValueHandlers custom return value handlers for {@link RequestMapping} methods
 	 */
-	public void setCustomReturnValueHandlers(List<? extends HandlerMethodReturnValueHandler> returnValueHandlers) {
+	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		this.customReturnValueHandlers = returnValueHandlers;
 	}
 
@@ -227,7 +225,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * {@link #setCustomReturnValueHandlers(List)}, which does not override default registrations.
 	 * @param returnValueHandlers the return value handlers for {@link RequestMapping} methods
 	 */
-	public void setReturnValueHandlers(List<? extends HandlerMethodReturnValueHandler> returnValueHandlers) {
+	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		if (returnValueHandlers != null) {
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
 			this.returnValueHandlers.addHandlers(returnValueHandlers);
@@ -236,10 +234,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 	/**
 	 * Set custom {@link ModelAndViewResolver}s to use to handle the return values of {@link RequestMapping} methods.
-	 * <p>Custom {@link ModelAndViewResolver}s are provided for backward compatibility and are invoked at the very,
-	 * from the {@link DefaultMethodReturnValueHandler}, after all standard {@link HandlerMethodReturnValueHandler}s
-	 * have been given a chance. This is because {@link ModelAndViewResolver}s do not have a method to indicate
-	 * if they support a given return type or not. For this reason it is recommended to use
+	 * <p>Custom {@link ModelAndViewResolver}s are provided for backward compatibility and are invoked at the end,
+	 * in {@link DefaultMethodReturnValueHandler}, after all standard {@link HandlerMethodReturnValueHandler}s.
+	 * This is because {@link ModelAndViewResolver}s do not have a method to indicate if they support a given 
+	 * return type or not. For this reason it is recommended to use
 	 * {@link HandlerMethodReturnValueHandler} and {@link #setCustomReturnValueHandlers(List)} instead.
 	 */
 	public void setModelAndViewResolvers(List<ModelAndViewResolver> modelAndViewResolvers) {
@@ -443,7 +441,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * This method always returns -1 since {@link HandlerMethod} does not implement {@link LastModified}.
+	 * {@inheritDoc}
+	 * <p>This implementation always returns -1 since {@link HandlerMethod} does not implement {@link LastModified}.
 	 * Instead an @{@link RequestMapping} method, calculate the lastModified value, and call 
 	 * {@link WebRequest#checkNotModified(long)}, and return {@code null} if that returns {@code true}.
 	 * @see WebRequest#checkNotModified(long)
@@ -510,13 +509,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		SessionStatus sessionStatus = new SimpleSessionStatus();
-		
+
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		
 		modelFactory.initModel(webRequest, mavContainer, requestMethod);
 		
 		requestMethod.invokeAndHandle(webRequest, mavContainer, sessionStatus);
-
 		modelFactory.updateModel(webRequest, mavContainer, sessionStatus);
 		
 		if (!mavContainer.isResolveView()) {
@@ -548,7 +545,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			binderMethod.setHandlerMethodArgumentResolvers(this.initBinderArgumentResolvers);
 			binderMethod.setDataBinderFactory(new DefaultDataBinderFactory(this.webBindingInitializer));
 			binderMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-
 			initBinderMethods.add(binderMethod);
 		}
 

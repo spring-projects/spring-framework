@@ -5,11 +5,6 @@
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.aop"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.beans"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.oxm"/>
 	<classpathentry kind="var" path="IVY_CACHE/com.caucho/com.springsource.com.caucho/3.2.1/com.springsource.com.caucho-3.2.1.jar" sourcepath="/IVY_CACHE/com.caucho/com.springsource.com.caucho/3.2.1/com.springsource.com.caucho-sources-3.2.1.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-1.0.0.jar" sourcepath="/IVY_CACHE/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-sources-1.0.0.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/com.thoughtworks.xstream"/>
@@ -39,5 +34,10 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.8.1/com.springsource.org.junit-4.8.1.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.8.1/com.springsource.org.junit-sources-4.8.1.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.mortbay.jetty/com.springsource.org.mortbay.jetty.server/6.1.9/com.springsource.org.mortbay.jetty.server-6.1.9.jar" sourcepath="/IVY_CACHE/org.mortbay.jetty/com.springsource.org.mortbay.jetty.server/6.1.9/com.springsource.org.mortbay.jetty.server-sources-6.1.9.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.mortbay.jetty/com.springsource.org.mortbay.util/6.1.9/com.springsource.org.mortbay.util-6.1.9.jar" sourcepath="/IVY_CACHE/org.mortbay.jetty/com.springsource.org.mortbay.util/6.1.9/com.springsource.org.mortbay.util-sources-6.1.9.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.aop"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.beans"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.context"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.springframework.oxm"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

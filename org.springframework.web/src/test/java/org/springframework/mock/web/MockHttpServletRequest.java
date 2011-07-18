@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -145,6 +146,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private int localPort = DEFAULT_SERVER_PORT;
 
+	private Map<String, Part> parts = new HashMap<String, Part>();
 
 	//---------------------------------------------------------------------
 	// HttpServletRequest properties
@@ -890,13 +892,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public boolean authenticate(HttpServletResponse arg0) throws IOException, ServletException {
 		throw new UnsupportedOperationException();
 	}
+	
+	public void addPart(Part part) {
+		parts.put(part.getName(), part);
+	}
 
-	public Part getPart(String arg0) throws IOException, IllegalStateException, ServletException {
-		throw new UnsupportedOperationException();
+	public Part getPart(String key) throws IOException, IllegalStateException, ServletException {
+		return parts.get(key);
 	}
 
 	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
-		throw new UnsupportedOperationException();
+		return parts.values();
 	}
 
 	public void login(String arg0, String arg1) throws ServletException {
