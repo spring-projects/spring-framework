@@ -29,16 +29,16 @@ import java.security.ProtectionDomain;
  * 
  * @author Costin Leau
  */
-class JBossTranslatorAdapter implements InvocationHandler {
+class JBossMCTranslatorAdapter implements InvocationHandler {
 
 	private final ClassFileTransformer transformer;
 
 	/**
-	 * Creates a new {@link JBossTranslatorAdapter}.
+	 * Creates a new {@link JBossMCTranslatorAdapter}.
 	 * @param transformer the {@link ClassFileTransformer} to be adapted (must
 	 * not be <code>null</code>)
 	 */
-	public JBossTranslatorAdapter(ClassFileTransformer transformer) {
+	public JBossMCTranslatorAdapter(ClassFileTransformer transformer) {
 		this.transformer = transformer;
 	}
 
