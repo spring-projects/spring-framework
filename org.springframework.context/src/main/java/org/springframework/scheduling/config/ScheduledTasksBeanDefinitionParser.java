@@ -50,6 +50,7 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+		builder.setLazyInit(false); // lazy scheduled tasks are a contradiction in terms -> force to false
 		ManagedMap<RuntimeBeanReference, String> cronTaskMap = new ManagedMap<RuntimeBeanReference, String>();
 		ManagedMap<RuntimeBeanReference, String> fixedDelayTaskMap = new ManagedMap<RuntimeBeanReference, String>();
 		ManagedMap<RuntimeBeanReference, String> fixedRateTaskMap = new ManagedMap<RuntimeBeanReference, String>();
