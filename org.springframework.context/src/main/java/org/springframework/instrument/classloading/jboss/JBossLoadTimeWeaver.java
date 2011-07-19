@@ -25,6 +25,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link LoadTimeWeaver} implementation for JBoss's instrumentable ClassLoader.
+ * Currently supports JBoss 5, 6 and 7 (since Spring 3.1).
  *
  * <p><b>NOTE:</b> Requires JBoss AS version 5.0.0 or higher.
  * <p><b>NOTE:</b> On JBoss 6.0.0, to avoid the container loading the classes before
@@ -41,8 +42,7 @@ import org.springframework.util.ClassUtils;
  */
 public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 
-	private final JBossClassLoaderAdapter classLoader;
-
+	private final JBossClassLoaderAdapter adapter;
 
 	/**
 	 * Create a new instance of the {@link JBossLoadTimeWeaver} class using
@@ -61,16 +61,25 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	 */
 	public JBossLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
-		this.classLoader = new JBossClassLoaderAdapter(classLoader);
+		String loaderClassName = classLoader.getClass().getName();
+
+		if (loaderClassName.startsWith("org.jboss.classloader")) {
+			// JBoss AS 5 or JBoss AS 6
+			this.adapter = new JBossMCAdapter(classLoader);
+		} else if (loaderClassName.startsWith("org.jboss.modules")) {
+			// JBoss AS 7
+			this.adapter = new JBossModulesAdapter(classLoader);
+		} else {
+			throw new IllegalArgumentException("Unexpected classloader type: " + loaderClassName);
+		}
 	}
 
-
 	public void addTransformer(ClassFileTransformer transformer) {
-		this.classLoader.addTransformer(transformer);
+		this.adapter.addTransformer(transformer);
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {
-		return this.classLoader.getClassLoader();
+		return this.adapter.getInstrumentableClassLoader();
 	}
 
 	public ClassLoader getThrowawayClassLoader() {
