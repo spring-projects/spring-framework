@@ -19,10 +19,12 @@ package org.springframework.core.convert.support;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -30,6 +32,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StopWatch;
@@ -377,6 +380,29 @@ public class GenericConversionServiceTests {
 	}
 	
 	public static Map<String, Integer> map;
+
+	@Test
+	public void testConvertiblePairsInSet() throws Exception {
+		Set<GenericConverter.ConvertiblePair> set = new HashSet<GenericConverter.ConvertiblePair>();
+		set.add(new GenericConverter.ConvertiblePair(Number.class, String.class));
+		assert set.contains(new GenericConverter.ConvertiblePair(Number.class, String.class));
+	}
+
+	@Test
+	public void testConvertiblePairEqualsAndHash() throws Exception {
+		GenericConverter.ConvertiblePair pair = new GenericConverter.ConvertiblePair(Number.class, String.class);
+		GenericConverter.ConvertiblePair pairEqual = new GenericConverter.ConvertiblePair(Number.class, String.class);
+		assertEquals(pair, pairEqual);
+		assertEquals(pair.hashCode(), pairEqual.hashCode());
+	}
+
+	@Test
+	public void testConvertiblePairDifferentEqualsAndHash() throws Exception {
+		GenericConverter.ConvertiblePair pair = new GenericConverter.ConvertiblePair(Number.class, String.class);
+		GenericConverter.ConvertiblePair pairOpposite = new GenericConverter.ConvertiblePair(String.class, Number.class);
+		assertFalse(pair.equals(pairOpposite));
+		assertFalse(pair.hashCode() == pairOpposite.hashCode());
+	}
 
 
 	private interface MyBaseInterface {
