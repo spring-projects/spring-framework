@@ -53,13 +53,9 @@
 		<dependency org="org.apache.poi" name="com.springsource.org.apache.poi" rev="3.0.2.FINAL"
                     conf="optional, poi->compile"/>
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles" rev="2.1.2.osgi"
-                    conf="optional, tiles->compile">
-            <exclude org="javax.servlet" name="com.springsource.javax.servlet" />
-        </dependency>
+                    conf="optional, tiles->compile"/>
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.core" rev="2.1.2.osgi" 
-					conf="optional, tiles->compile">
-            <exclude org="javax.servlet" name="com.springsource.javax.servlet" />
-        </dependency>
+					conf="optional, tiles->compile"/>
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.jsp" rev="2.1.2"
                     conf="optional, tiles->compile">
             <exclude org="javax.servlet" name="com.springsource.javax.servlet" />
