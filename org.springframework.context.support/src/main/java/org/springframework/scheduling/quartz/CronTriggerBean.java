@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,9 @@ import org.springframework.util.Assert;
  * to automatically register a trigger for the corresponding JobDetail,
  * instead of registering the JobDetail separately.
  *
- * <p><b>NOTE:</b> This convenience subclass does not work with trigger
- * persistence in Quartz 1.6, due to a change in Quartz's trigger handling.
- * Use Quartz 1.5 if you rely on trigger persistence based on this class,
- * or the standard Quartz {@link org.quartz.CronTrigger} class instead.
+ * <p><b>NOTE: This convenience subclass does not work against Quartz 2.0.</b>
+ * Use Quartz 2.0's native <code>CronTriggerImpl</code> class or the new
+ * Quartz 2.0 builder API instead.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
