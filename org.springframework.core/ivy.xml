@@ -31,7 +31,6 @@
 		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="net.sourceforge.jopt-simple" name="com.springsource.joptsimple" rev="3.0.0" conf="optional->compile"/>
 		<!-- test dependencies -->
-		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="${junit.version}" conf="test->runtime"/>
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.custommonkey.xmlunit" name="com.springsource.org.custommonkey.xmlunit" rev="1.2.0" conf="test->compile"/>
