@@ -16,17 +16,21 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.lang.reflect.Method;
+
 import org.quartz.Job;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
 
+import org.springframework.util.ReflectionUtils;
+
 /**
  * JobFactory implementation that supports {@link java.lang.Runnable}
  * objects as well as standard Quartz {@link org.quartz.Job} instances.
  *
- * <p>Compatible with Quartz 1.x as well as Quartz 2.0, as of Spring 3.1.
+ * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0, as of Spring 3.1.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -65,7 +69,12 @@ public class AdaptableJobFactory implements JobFactory {
 	 * @throws Exception if job instantiation failed
 	 */
 	protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
-		return bundle.getJobDetail().getJobClass().newInstance();
+		// Reflectively adapting to differences between Quartz 1.x and Quartz 2.0...
+		Method getJobDetail = bundle.getClass().getMethod("getJobDetail");
+		Object jobDetail = ReflectionUtils.invokeMethod(getJobDetail, bundle);
+		Method getJobClass = jobDetail.getClass().getMethod("getJobClass");
+		Class jobClass = (Class) ReflectionUtils.invokeMethod(getJobClass, jobDetail);
+		return jobClass.newInstance();
 	}
 
 	/**

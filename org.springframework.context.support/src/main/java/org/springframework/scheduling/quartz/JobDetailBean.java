@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,10 @@ import org.springframework.context.ApplicationContextAware;
  * <p><code>JobDetail</code> itself is already a JavaBean but lacks
  * sensible defaults. This class uses the Spring bean name as job name,
  * and the Quartz default group ("DEFAULT") as job group if not specified.
+ *
+ * <p><b>NOTE: This convenience subclass does not work against Quartz 2.0.</b>
+ * Use Quartz 2.0's native <code>JobDetailImpl</code> class or the new
+ * Quartz 2.0 builder API instead.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004

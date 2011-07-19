@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,16 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.lang.reflect.Method;
+
+import org.quartz.JobDataMap;
 import org.quartz.SchedulerContext;
 import org.quartz.spi.TriggerFiredBundle;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Subclass of {@link AdaptableJobFactory} that also supports Spring-style
@@ -32,6 +36,8 @@ import org.springframework.beans.PropertyAccessorFactory;
  * <p>Applies scheduler context, job data map and trigger data map entries
  * as bean property values. If no matching bean property is found, the entry
  * is by default simply ignored. This is analogous to QuartzJobBean's behavior.
+ *
+ * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0, as of Spring 3.1.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -68,15 +74,15 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 	 */
 	@Override
 	protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
-		Object job = bundle.getJobDetail().getJobClass().newInstance();
+		Object job = super.createJobInstance(bundle);
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(job);
 		if (isEligibleForPropertyPopulation(bw.getWrappedInstance())) {
 			MutablePropertyValues pvs = new MutablePropertyValues();
 			if (this.schedulerContext != null) {
 				pvs.addPropertyValues(this.schedulerContext);
 			}
-			pvs.addPropertyValues(bundle.getJobDetail().getJobDataMap());
-			pvs.addPropertyValues(bundle.getTrigger().getJobDataMap());
+			pvs.addPropertyValues(getJobDetailDataMap(bundle));
+			pvs.addPropertyValues(getTriggerDataMap(bundle));
 			if (this.ignoredUnknownProperties != null) {
 				for (String propName : this.ignoredUnknownProperties) {
 					if (pvs.contains(propName) && !bw.isWritableProperty(propName)) {
@@ -102,6 +108,22 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 	 */
 	protected boolean isEligibleForPropertyPopulation(Object jobObject) {
 		return (!(jobObject instanceof QuartzJobBean));
+	}
+
+	// Reflectively adapting to differences between Quartz 1.x and Quartz 2.0...
+	private JobDataMap getJobDetailDataMap(TriggerFiredBundle bundle) throws Exception {
+		Method getJobDetail = bundle.getClass().getMethod("getJobDetail");
+		Object jobDetail = ReflectionUtils.invokeMethod(getJobDetail, bundle);
+		Method getJobDataMap = jobDetail.getClass().getMethod("getJobDataMap");
+		return (JobDataMap) ReflectionUtils.invokeMethod(getJobDataMap, jobDetail);
+	}
+
+	// Reflectively adapting to differences between Quartz 1.x and Quartz 2.0...
+	private JobDataMap getTriggerDataMap(TriggerFiredBundle bundle) throws Exception {
+		Method getTrigger = bundle.getClass().getMethod("getTrigger");
+		Object trigger = ReflectionUtils.invokeMethod(getTrigger, bundle);
+		Method getJobDataMap = trigger.getClass().getMethod("getJobDataMap");
+		return (JobDataMap) ReflectionUtils.invokeMethod(getJobDataMap, trigger);
 	}
 
 }

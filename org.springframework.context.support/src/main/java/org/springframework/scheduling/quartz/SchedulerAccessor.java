@@ -42,6 +42,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Common base class for accessing a Quartz Scheduler, i.e. for registering jobs,
@@ -50,13 +51,30 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * <p>For concrete usage, check out the {@link SchedulerFactoryBean} and
  * {@link SchedulerAccessorBean} classes.
  *
+ * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0, as of Spring 3.1.
+ *
  * @author Juergen Hoeller
  * @since 2.5.6
  */
 public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
-	protected final Log logger = LogFactory.getLog(getClass());
+	private static Class<?> jobKeyClass;
 
+	private static Class<?> triggerKeyClass;
+
+	static {
+		try {
+			jobKeyClass = Class.forName("org.quartz.JobKey");
+			triggerKeyClass = Class.forName("org.quartz.TriggerKey");
+		}
+		catch (ClassNotFoundException ex) {
+			jobKeyClass = null;
+			triggerKeyClass = null;
+		}
+	}
+
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private boolean overwriteExistingJobs = false;
 
@@ -68,7 +86,6 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	private List<Trigger> triggers;
 
-
 	private SchedulerListener[] schedulerListeners;
 
 	private JobListener[] globalJobListeners;
@@ -78,7 +95,6 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	private TriggerListener[] globalTriggerListeners;
 
 	private TriggerListener[] triggerListeners;
-
 
 	private PlatformTransactionManager transactionManager;
 
@@ -322,8 +338,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * @see #setOverwriteExistingJobs
 	 */
 	private boolean addJobToScheduler(JobDetail jobDetail) throws SchedulerException {
-		if (this.overwriteExistingJobs ||
-		    getScheduler().getJobDetail(jobDetail.getName(), jobDetail.getGroup()) == null) {
+		if (this.overwriteExistingJobs || !jobDetailExists(jobDetail)) {
 			getScheduler().addJob(jobDetail, true);
 			return true;
 		}
@@ -341,7 +356,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * @see #setOverwriteExistingJobs
 	 */
 	private boolean addTriggerToScheduler(Trigger trigger) throws SchedulerException {
-		boolean triggerExists = (getScheduler().getTrigger(trigger.getName(), trigger.getGroup()) != null);
+		boolean triggerExists = triggerExists(trigger);
 		if (!triggerExists || this.overwriteExistingJobs) {
 			// Check if the Trigger is aware of an associated JobDetail.
 			if (trigger instanceof JobDetailAwareTrigger) {
@@ -361,12 +376,12 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 								ex.getMessage() + " - can safely be ignored");
 					}
 					if (this.overwriteExistingJobs) {
-						getScheduler().rescheduleJob(trigger.getName(), trigger.getGroup(), trigger);
+						rescheduleJob(trigger);
 					}
 				}
 			}
 			else {
-				getScheduler().rescheduleJob(trigger.getName(), trigger.getGroup(), trigger);
+				rescheduleJob(trigger);
 			}
 			return true;
 		}
@@ -376,34 +391,116 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	}
 
 
+	// Reflectively adapting to differences between Quartz 1.x and Quartz 2.0...
+	private boolean jobDetailExists(JobDetail jobDetail) throws SchedulerException {
+		if (jobKeyClass != null) {
+			try {
+				Method getJobDetail = Scheduler.class.getMethod("getJobDetail", jobKeyClass);
+				Object key = ReflectionUtils.invokeMethod(JobDetail.class.getMethod("getKey"), jobDetail);
+				return (ReflectionUtils.invokeMethod(getJobDetail, getScheduler(), key) != null);
+			}
+			catch (NoSuchMethodException ex) {
+				throw new IllegalStateException("Inconsistent Quartz 2.0 API: " + ex);
+			}
+		}
+		else {
+			return (getScheduler().getJobDetail(jobDetail.getName(), jobDetail.getGroup()) != null);
+		}
+	}
+
+	// Reflectively adapting to differences between Quartz 1.x and Quartz 2.0...
+	private boolean triggerExists(Trigger trigger) throws SchedulerException {
+		if (triggerKeyClass != null) {
+			try {
+				Method getTrigger = Scheduler.class.getMethod("getTrigger", triggerKeyClass);
+				Object key = ReflectionUtils.invokeMethod(Trigger.class.getMethod("getKey"), trigger);
+				return (ReflectionUtils.invokeMethod(getTrigger, getScheduler(), key) != null);
+			}
+			catch (NoSuchMethodException ex) {
+				throw new IllegalStateException("Inconsistent Quartz 2.0 API: " + ex);
+			}
+		}
+		else {
+			return (getScheduler().getTrigger(trigger.getName(), trigger.getGroup()) != null);
+		}
+	}
+
+	// Reflectively adapting to differences between Quartz 1.x and Quartz 2.0...
+	private void rescheduleJob(Trigger trigger) throws SchedulerException {
+		if (triggerKeyClass != null) {
+			try {
+				Method rescheduleJob = Scheduler.class.getMethod("rescheduleJob", triggerKeyClass, Trigger.class);
+				Object key = ReflectionUtils.invokeMethod(Trigger.class.getMethod("getKey"), trigger);
+				ReflectionUtils.invokeMethod(rescheduleJob, getScheduler(), key, trigger);
+			}
+			catch (NoSuchMethodException ex) {
+				throw new IllegalStateException("Inconsistent Quartz 2.0 API: " + ex);
+			}
+		}
+		else {
+			getScheduler().rescheduleJob(trigger.getName(), trigger.getGroup(), trigger);
+		}
+	}
+
+
 	/**
 	 * Register all specified listeners with the Scheduler.
 	 */
 	protected void registerListeners() throws SchedulerException {
-		if (this.schedulerListeners != null) {
-			for (SchedulerListener listener : this.schedulerListeners) {
-				getScheduler().addSchedulerListener(listener);
+		Object target;
+		boolean quartz2;
+		try {
+			Method getListenerManager = Scheduler.class.getMethod("getListenerManager");
+			target = ReflectionUtils.invokeMethod(getListenerManager, getScheduler());
+			quartz2 = true;
+		}
+		catch (NoSuchMethodException ex) {
+			target = getScheduler();
+			quartz2 = false;
+		}
+
+		try {
+			if (this.schedulerListeners != null) {
+				Method addSchedulerListener = target.getClass().getMethod("addSchedulerListener", SchedulerListener.class);
+				for (SchedulerListener listener : this.schedulerListeners) {
+					ReflectionUtils.invokeMethod(addSchedulerListener, target, listener);
+				}
+			}
+			if (this.globalJobListeners != null) {
+				Method addJobListener = target.getClass().getMethod(
+						(quartz2 ? "addJobListener" : "addGlobalJobListener"), JobListener.class);
+				for (JobListener listener : this.globalJobListeners) {
+					ReflectionUtils.invokeMethod(addJobListener, target, listener);
+				}
+			}
+			if (this.jobListeners != null) {
+				for (JobListener listener : this.jobListeners) {
+					if (quartz2) {
+						throw new IllegalStateException("Non-global JobListeners not supported on Quartz 2 - " +
+								"manually register a Matcher against the Quartz ListenerManager instead");
+					}
+					getScheduler().addJobListener(listener);
+				}
+			}
+			if (this.globalTriggerListeners != null) {
+				Method addTriggerListener = target.getClass().getMethod(
+						(quartz2 ? "addTriggerListener" : "addGlobalTriggerListener"), TriggerListener.class);
+				for (TriggerListener listener : this.globalTriggerListeners) {
+					ReflectionUtils.invokeMethod(addTriggerListener, target, listener);
+				}
+			}
+			if (this.triggerListeners != null) {
+				for (TriggerListener listener : this.triggerListeners) {
+					if (quartz2) {
+						throw new IllegalStateException("Non-global TriggerListeners not supported on Quartz 2 - " +
+								"manually register a Matcher against the Quartz ListenerManager instead");
+					}
+					getScheduler().addTriggerListener(listener);
+				}
 			}
 		}
-		if (this.globalJobListeners != null) {
-			for (JobListener listener : this.globalJobListeners) {
-				getScheduler().addGlobalJobListener(listener);
-			}
-		}
-		if (this.jobListeners != null) {
-			for (JobListener listener : this.jobListeners) {
-				getScheduler().addJobListener(listener);
-			}
-		}
-		if (this.globalTriggerListeners != null) {
-			for (TriggerListener listener : this.globalTriggerListeners) {
-				getScheduler().addGlobalTriggerListener(listener);
-			}
-		}
-		if (this.triggerListeners != null) {
-			for (TriggerListener listener : this.triggerListeners) {
-				getScheduler().addTriggerListener(listener);
-			}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Expected Quartz API not present: " + ex);
 		}
 	}
 
