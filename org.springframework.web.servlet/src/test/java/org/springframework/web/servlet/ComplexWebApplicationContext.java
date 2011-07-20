@@ -37,6 +37,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpHeaders;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.WebApplicationContext;
@@ -48,7 +49,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
+import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.handler.SimpleServletHandlerAdapter;
 import org.springframework.web.servlet.handler.SimpleServletPostProcessor;
@@ -433,7 +434,14 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 				throw new IllegalStateException("Already resolved");
 			}
 			request.setAttribute("resolved", Boolean.TRUE);
-			return new DefaultMultipartHttpServletRequest(request);
+			return new AbstractMultipartHttpServletRequest(request) {
+				public HttpHeaders getMultipartHeaders(String paramOrFileName) {
+					return null;
+				}
+				public String getMultipartContentType(String paramOrFileName) {
+					return null;
+				}
+			};
 		}
 
 		public void cleanupMultipart(MultipartHttpServletRequest request) {
