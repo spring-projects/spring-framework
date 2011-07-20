@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getElementTypeDescriptor(), targetType);
+		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(), targetType, this.conversionService);
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -56,18 +56,17 @@ final class CollectionToStringConverter implements ConditionalGenericConverter {
 		if (sourceCollection.size() == 0) {
 			return "";
 		}
-		StringBuilder string = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (Object sourceElement : sourceCollection) {
 			if (i > 0) {
-				string.append(DELIMITER);
+				sb.append(DELIMITER);
 			}
-			Object targetElement = this.conversionService.convert(
-					sourceElement, sourceType.getElementTypeDescriptor(sourceElement), targetType);
-			string.append(targetElement);
+			Object targetElement = this.conversionService.convert(sourceElement, sourceType.getElementTypeDescriptor(sourceElement), targetType);
+			sb.append(targetElement);
 			i++;
 		}
-		return string.toString();
+		return sb.toString();
 	}
 
 }

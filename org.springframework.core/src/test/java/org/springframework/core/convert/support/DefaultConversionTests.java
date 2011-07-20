@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.convert.support;
 
+import java.awt.Color;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractList;
@@ -33,13 +34,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConverterRegistry;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -75,6 +80,9 @@ public class DefaultConversionTests {
 		assertEquals(Boolean.valueOf(true), conversionService.convert("on", Boolean.class));
 		assertEquals(Boolean.valueOf(true), conversionService.convert("yes", Boolean.class));
 		assertEquals(Boolean.valueOf(true), conversionService.convert("1", Boolean.class));
+		assertEquals(Boolean.valueOf(true), conversionService.convert("TRUE", Boolean.class));
+		assertEquals(Boolean.valueOf(true), conversionService.convert("ON", Boolean.class));
+		assertEquals(Boolean.valueOf(true), conversionService.convert("YES", Boolean.class));
 	}
 
 	@Test
@@ -83,6 +91,9 @@ public class DefaultConversionTests {
 		assertEquals(Boolean.valueOf(false), conversionService.convert("off", Boolean.class));
 		assertEquals(Boolean.valueOf(false), conversionService.convert("no", Boolean.class));
 		assertEquals(Boolean.valueOf(false), conversionService.convert("0", Boolean.class));
+		assertEquals(Boolean.valueOf(false), conversionService.convert("FALSE", Boolean.class));
+		assertEquals(Boolean.valueOf(false), conversionService.convert("OFF", Boolean.class));
+		assertEquals(Boolean.valueOf(false), conversionService.convert("NO", Boolean.class));
 	}
 
 	@Test
@@ -287,6 +298,24 @@ public class DefaultConversionTests {
 	}
 
 	@Test
+	public void testSpr7766() throws Exception {
+		ConverterRegistry registry = ((ConverterRegistry) conversionService);
+		registry.addConverter(new ColorConverter());
+		List<Color> colors = (List<Color>) conversionService.convert(new String[] { "ffffff", "#000000" }, TypeDescriptor.valueOf(String[].class), new TypeDescriptor(new MethodParameter(getClass().getMethod("handlerMethod", List.class), 0)));
+		assertEquals(2, colors.size());
+		assertEquals(Color.WHITE, colors.get(0));
+		assertEquals(Color.BLACK, colors.get(1));
+	}
+
+	public class ColorConverter implements Converter<String, Color> {
+		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
+	}
+
+	public void handlerMethod(List<Color> color) {
+
+	}
+
+	@Test
 	public void convertArrayToCollectionImpl() {
 		LinkedList<?> result = conversionService.convert(new String[] { "1", "2", "3" }, LinkedList.class);
 		assertEquals("1", result.get(0));
@@ -357,7 +386,7 @@ public class DefaultConversionTests {
 	@Test
 	public void convertArrayToObject() {
 		Object[] array = new Object[] { 3L };
-		Object result = conversionService.convert(array, Object.class);
+		Object result = conversionService.convert(array, Long.class);
 		assertEquals(3L, result);
 	}
 
@@ -366,6 +395,13 @@ public class DefaultConversionTests {
 		String[] array = new String[] { "3" };
 		Integer result = conversionService.convert(array, Integer.class);
 		assertEquals(new Integer(3), result);
+	}
+
+	@Test
+	public void convertArrayToObjectAssignableTargetType() {
+		Long[] array = new Long[] { 3L };
+		Long[] result = (Long[]) conversionService.convert(array, Object.class);
+		assertEquals(array, result);
 	}
 
 	@Test
@@ -458,6 +494,14 @@ public class DefaultConversionTests {
 		List<String> list = Collections.singletonList("3");
 		Integer result = conversionService.convert(list, Integer.class);
 		assertEquals(new Integer(3), result);
+	}
+
+	@Test
+	public void convertCollectionToObjectAssignableTarget() throws Exception {
+		Collection<String> source = new ArrayList<String>();
+		source.add("foo");
+		Object result = conversionService.convert(source, TypeDescriptor.forObject(source), new TypeDescriptor(getClass().getField("assignableTarget")));
+		assertEquals(source, result);
 	}
 
 	@Test
@@ -620,6 +664,8 @@ public class DefaultConversionTests {
 		conversionService.convert(new Long(3), SSN.class);
 	}
 
+	public Object assignableTarget;
+
 	private static class SSN {
 		
 		private String value;
@@ -708,4 +754,5 @@ public class DefaultConversionTests {
 			return new TestEntity(id);
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -32,7 +32,7 @@ import org.springframework.util.ObjectUtils;
  * @author Keith Donald
  * @since 3.0
  */
-final class ArrayToArrayConverter implements GenericConverter {
+final class ArrayToArrayConverter implements ConditionalGenericConverter {
 
 	private final CollectionToArrayConverter helperConverter;
 

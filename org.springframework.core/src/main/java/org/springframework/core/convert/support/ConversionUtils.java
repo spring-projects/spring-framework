@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package org.springframework.core.convert.support;
 
-import java.util.Map;
-
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 
@@ -43,24 +42,27 @@ abstract class ConversionUtils {
 		}
 	}
 
-	public static TypeDescriptor[] getMapEntryTypes(Map<?, ?> sourceMap) {
-		Class<?> keyType = null;
-		Class<?> valueType = null;
-		for (Object entry : sourceMap.entrySet()) {
-			Map.Entry<?, ?> mapEntry = (Map.Entry<?, ?>) entry;
-			Object key = mapEntry.getKey();
-			if (keyType == null && key != null) {
-				keyType = key.getClass();
-			}
-			Object value = mapEntry.getValue();
-			if (valueType == null && value != null) {
-				valueType = value.getClass();
-			}
-			if (keyType!= null && valueType != null) {
-				break;
-			}
+	public static boolean canConvertElements(TypeDescriptor sourceElementType, TypeDescriptor targetElementType, ConversionService conversionService) {
+		if (targetElementType == null) {
+			// yes
+			return true;
 		}
-		return new TypeDescriptor[] { TypeDescriptor.valueOf(keyType), TypeDescriptor.valueOf(valueType) };
+		if (sourceElementType == null) {
+			// maybe
+			return true;
+		}
+		if (conversionService.canConvert(sourceElementType, targetElementType)) {
+			// yes
+			return true;
+		}
+		else if (sourceElementType.getType().isAssignableFrom(targetElementType.getType())) {
+			// maybe;
+			return true;
+		}
+		else {
+			// no;
+			return false;
+		}
 	}
 
 }

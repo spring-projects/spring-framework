@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,24 +36,23 @@ final class StringToBooleanConverter implements Converter<String, Boolean> {
 
 	static {
 		trueValues.add("true");
-		falseValues.add("false");
-
 		trueValues.add("on");
-		falseValues.add("off");
-
 		trueValues.add("yes");
-		falseValues.add("no");
-
 		trueValues.add("1");
+
+		falseValues.add("false");
+		falseValues.add("off");
+		falseValues.add("no");
 		falseValues.add("0");
 	}
 	
 	public Boolean convert(String source) {
 		String value = source.trim();
-		if (value.length() == 0) {
+		if ("".equals(value)) {
 			return null;
 		}
-		else if (trueValues.contains(value)) {
+		value = value.toLowerCase();
+		if (trueValues.contains(value)) {
 			return Boolean.TRUE;
 		}
 		else if (falseValues.contains(value)) {
