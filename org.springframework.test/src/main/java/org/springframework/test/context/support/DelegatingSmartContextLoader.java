@@ -87,7 +87,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 				if (!defaultResourcesAlreadyGenerated && loader.generatesDefaults()) {
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format(
-							"Delegating to %s to generate defaults for context configuration [%s].",
+							"Delegating to %s to detect defaults for context configuration [%s].",
 							loader.getClass().getName(), configAttributes));
 					}
 
@@ -96,7 +96,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 					if (configAttributes.hasResources()) {
 						if (logger.isInfoEnabled()) {
 							logger.info(String.format("SmartContextLoader candidate %s "
-									+ "generated defaults for context configuration [%s].", loader, configAttributes));
+									+ "detected defaults for context configuration [%s].", loader, configAttributes));
 						}
 					}
 				}
@@ -105,10 +105,8 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 			// If any loader claims to generate defaults but none actually did,
 			// throw an exception.
 			if (!configAttributes.hasResources()) {
-				throw new IllegalStateException(
-					String.format("None of the SmartContextLoader candidates %s "
-							+ "was able to generate defaults for context configuration [%s].", candidates,
-						configAttributes));
+				throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s "
+						+ "was able to detect defaults for context configuration [%s].", candidates, configAttributes));
 			}
 		}
 	}

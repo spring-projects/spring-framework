@@ -152,7 +152,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 
 		if (!new ClassPathResource(resourcePath, clazz).exists()) {
 			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Cannot generate default resource locations for test class [%s]: "
+				logger.info(String.format("Could not detect default resource locations for test class [%s]: "
 						+ "classpath resource [%s] does not exist.", clazz.getName(), resourcePath));
 			}
 			return EMPTY_STRING_ARRAY;
