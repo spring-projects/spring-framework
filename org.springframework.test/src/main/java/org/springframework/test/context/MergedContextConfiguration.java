@@ -16,6 +16,7 @@
 
 package org.springframework.test.context;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -25,7 +26,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * <code>MergedContextConfiguration</code> encapsulates the <em>merged</em>
+ * {@code MergedContextConfiguration} encapsulates the <em>merged</em>
  * context configuration declared on a test class and all of its superclasses
  * via {@link ContextConfiguration @ContextConfiguration} and
  * {@link ActiveProfiles @ActiveProfiles}.
@@ -37,8 +38,13 @@ import org.springframework.util.StringUtils;
  * {@link ActiveProfiles#inheritProfiles inheritProfiles} flags in
  * {@code @ContextConfiguration} and {@code @ActiveProfiles}, respectively.
  * 
- * <p>A {@link SmartContextLoader} uses <code>MergedContextConfiguration</code>
+ * <p>A {@link SmartContextLoader} uses {@code MergedContextConfiguration}
  * to load an {@link org.springframework.context.ApplicationContext ApplicationContext}.
+ * 
+ * <p>{@code MergedContextConfiguration} is also used by the {@link TestContext}
+ * as the context cache key for caching an
+ * {@link org.springframework.context.ApplicationContext ApplicationContext}
+ * that was loaded using properties of this {@code MergedContextConfiguration}.
  * 
  * @author Sam Brannen
  * @since 3.1
@@ -47,22 +53,18 @@ import org.springframework.util.StringUtils;
  * @see ContextConfigurationAttributes
  * @see SmartContextLoader#loadContext(MergedContextConfiguration)
  */
-public class MergedContextConfiguration {
+public class MergedContextConfiguration implements Serializable {
+
+	private static final long serialVersionUID = -3290560718464957422L;
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
 
 	private final Class<?> testClass;
-
 	private final String[] locations;
-
 	private final Class<?>[] classes;
-
 	private final String[] activeProfiles;
-
 	private final ContextLoader contextLoader;
-
-	private final String contextKey;
 
 
 	private static String[] processLocations(String[] locations) {
@@ -86,29 +88,16 @@ public class MergedContextConfiguration {
 	}
 
 	/**
-	 * Generate a null-safe {@link String} representation of the supplied {@link ContextLoader}.
+	 * Generate a null-safe {@link String} representation of the supplied
+	 * {@link ContextLoader} based solely on the fully qualified name of the
+	 * loader or &quot;null&quot; if the supplied loaded is <code>null</code>.
 	 */
 	private static String nullSafeToString(ContextLoader contextLoader) {
 		return contextLoader == null ? "null" : contextLoader.getClass().getName();
 	}
 
 	/**
-	 * Generate a context <em>key</em> from the supplied values.
-	 */
-	private static String generateContextKey(String[] locations, Class<?>[] classes, String[] activeProfiles,
-			ContextLoader contextLoader) {
-
-		String locationsKey = ObjectUtils.nullSafeToString(locations);
-		String classesKey = ObjectUtils.nullSafeToString(classes);
-		String activeProfilesKey = ObjectUtils.nullSafeToString(activeProfiles);
-		String contextLoaderKey = nullSafeToString(contextLoader);
-
-		return String.format("locations = %s, classes = %s, activeProfiles = %s, contextLoader = %s", locationsKey,
-			classesKey, activeProfilesKey, contextLoaderKey);
-	}
-
-	/**
-	 * Create a new <code>MergedContextConfiguration</code> instance for the
+	 * Create a new {@code MergedContextConfiguration} instance for the
 	 * supplied {@link Class test class}, resource locations, configuration
 	 * classes, active profiles, and {@link ContextLoader}.
 	 * <p>If a <code>null</code> value is supplied for <code>locations</code>,
@@ -128,12 +117,11 @@ public class MergedContextConfiguration {
 		this.classes = processClasses(classes);
 		this.activeProfiles = processActiveProfiles(activeProfiles);
 		this.contextLoader = contextLoader;
-		this.contextKey = generateContextKey(this.locations, this.classes, this.activeProfiles, this.contextLoader);
 	}
 
 	/**
 	 * Get the {@link Class test class} associated with this
-	 * <code>MergedContextConfiguration</code>.
+	 * {@code MergedContextConfiguration}.
 	 */
 	public Class<?> getTestClass() {
 		return testClass;
@@ -172,20 +160,59 @@ public class MergedContextConfiguration {
 	}
 
 	/**
-	 * Get the unique context key for all properties of this
-	 * <code>MergedContextConfiguration</code> excluding the
-	 * {@link #getTestClass() test class}. 
-	 * <p>Intended to be used for caching an 
-	 * {@link org.springframework.context.ApplicationContext ApplicationContext}
-	 * that was loaded using properties of this <code>MergedContextConfiguration</code>.
+	 * Generate a unique hash code for all properties of this
+	 * {@code MergedContextConfiguration} excluding the
+	 * {@link #getTestClass() test class}.
 	 */
-	public String getContextKey() {
-		return contextKey;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(locations);
+		result = prime * result + Arrays.hashCode(classes);
+		result = prime * result + Arrays.hashCode(activeProfiles);
+		result = prime * result + nullSafeToString(contextLoader).hashCode();
+		return result;
 	}
 
 	/**
-	 * Provide a String representation of the test class, merged context
-	 * configuration, and context key.
+	 * TODO Document equals() implementation.
+	 *
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof MergedContextConfiguration)) {
+			return false;
+		}
+
+		final MergedContextConfiguration that = (MergedContextConfiguration) obj;
+
+		if (!Arrays.equals(this.locations, that.locations)) {
+			return false;
+		}
+		if (!Arrays.equals(this.classes, that.classes)) {
+			return false;
+		}
+		if (!Arrays.equals(this.activeProfiles, that.activeProfiles)) {
+			return false;
+		}
+		if (!nullSafeToString(this.contextLoader).equals(nullSafeToString(that.contextLoader))) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Provide a String representation of the {@link #getTestClass() test class},
+	 * {@link #getLocations() locations}, {@link #getClasses() configuration classes},
+	 * {@link #getActiveProfiles() active profiles}, and the name of the
+	 * {@link #getContextLoader() ContextLoader}.
 	 */
 	@Override
 	public String toString() {
@@ -195,7 +222,6 @@ public class MergedContextConfiguration {
 		.append("classes", ObjectUtils.nullSafeToString(classes))//
 		.append("activeProfiles", ObjectUtils.nullSafeToString(activeProfiles))//
 		.append("contextLoader", nullSafeToString(contextLoader))//
-		.append("contextKey", contextKey)//
 		.toString();
 	}
 

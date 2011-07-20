@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.test.context;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,8 +28,8 @@ import org.springframework.util.Assert;
  * Cache for Spring {@link ApplicationContext ApplicationContexts}
  * in a test environment.
  *
- * <p>Maintains a cache of {@link ApplicationContext contexts} by
- * {@link Serializable serializable} key. This has significant performance
+ * <p>Maintains a cache of {@link ApplicationContext contexts} keyed by
+ * {@link MergedContextConfiguration} instances. This has significant performance
  * benefits if initializing the context would take time. While initializing a
  * Spring context itself is very quick, some beans in a context, such as a
  * {@link org.springframework.orm.hibernate3.LocalSessionFactoryBean LocalSessionFactoryBean}
@@ -46,7 +45,7 @@ class ContextCache {
 	/**
 	 * Map of context keys to Spring ApplicationContext instances.
 	 */
-	private final Map<String, ApplicationContext> contextKeyToContextMap = new ConcurrentHashMap<String, ApplicationContext>();
+	private final Map<MergedContextConfiguration, ApplicationContext> contextMap = new ConcurrentHashMap<MergedContextConfiguration, ApplicationContext>();
 
 	private int hitCount;
 
@@ -57,7 +56,7 @@ class ContextCache {
 	 * Clears all contexts from the cache.
 	 */
 	void clear() {
-		this.contextKeyToContextMap.clear();
+		this.contextMap.clear();
 	}
 
 	/**
@@ -73,9 +72,9 @@ class ContextCache {
 	 * Return whether there is a cached context for the given key.
 	 * @param key the context key (never <code>null</code>)
 	 */
-	boolean contains(String key) {
+	boolean contains(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
-		return this.contextKeyToContextMap.containsKey(key);
+		return this.contextMap.containsKey(key);
 	}
 
 	/**
@@ -87,9 +86,9 @@ class ContextCache {
 	 * or <code>null</code> if not found in the cache.
 	 * @see #remove
 	 */
-	ApplicationContext get(String key) {
+	ApplicationContext get(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
-		ApplicationContext context = this.contextKeyToContextMap.get(key);
+		ApplicationContext context = this.contextMap.get(key);
 		if (context == null) {
 			incrementMissCount();
 		}
@@ -137,10 +136,10 @@ class ContextCache {
 	 * @param key the context key (never <code>null</code>)
 	 * @param context the ApplicationContext instance (never <code>null</code>)
 	 */
-	void put(String key, ApplicationContext context) {
+	void put(MergedContextConfiguration key, ApplicationContext context) {
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(context, "ApplicationContext must not be null");
-		this.contextKeyToContextMap.put(key, context);
+		this.contextMap.put(key, context);
 	}
 
 	/**
@@ -150,8 +149,8 @@ class ContextCache {
 	 * or <code>null</code> if not found in the cache.
 	 * @see #setDirty
 	 */
-	ApplicationContext remove(String key) {
-		return this.contextKeyToContextMap.remove(key);
+	ApplicationContext remove(MergedContextConfiguration key) {
+		return this.contextMap.remove(key);
 	}
 
 	/**
@@ -165,7 +164,7 @@ class ContextCache {
 	 * @param key the context key (never <code>null</code>)
 	 * @see #remove
 	 */
-	void setDirty(String key) {
+	void setDirty(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
 		ApplicationContext context = remove(key);
 		if (context instanceof ConfigurableApplicationContext) {
@@ -179,7 +178,7 @@ class ContextCache {
 	 * <tt>Integer.MAX_VALUE</tt>.
 	 */
 	int size() {
-		return this.contextKeyToContextMap.size();
+		return this.contextMap.size();
 	}
 
 	/**
