@@ -108,6 +108,9 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 				throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s "
 						+ "was able to detect defaults for context configuration [%s].", candidates, configAttributes));
 			}
+
+			// TODO Throw exception if defaults were generated for both
+			// locations and configuration classes.
 		}
 	}
 
