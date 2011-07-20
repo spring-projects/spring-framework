@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -49,7 +48,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest;
+import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.handler.SimpleServletHandlerAdapter;
 import org.springframework.web.servlet.handler.SimpleServletPostProcessor;
@@ -434,8 +433,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 				throw new IllegalStateException("Already resolved");
 			}
 			request.setAttribute("resolved", Boolean.TRUE);
-			return new AbstractMultipartHttpServletRequest(request) {
-			};
+			return new DefaultMultipartHttpServletRequest(request);
 		}
 
 		public void cleanupMultipart(MultipartHttpServletRequest request) {

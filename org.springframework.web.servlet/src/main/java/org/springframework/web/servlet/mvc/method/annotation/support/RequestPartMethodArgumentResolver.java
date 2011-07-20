@@ -39,7 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.RequestPartServletServerHttpRequest;
+import org.springframework.web.multipart.support.RequestPartServletServerHttpRequest;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.util.WebUtils;
 
@@ -123,9 +123,8 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			arg = servletRequest.getPart(partName);
 		}
 		else {
-			HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(multipartRequest, partName);
+			HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, partName);
 			arg = readWithMessageConverters(inputMessage, parameter, parameter.getParameterType());
-			
 			if (isValidationApplicable(arg, parameter)) {
 				WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
 				binder.validate();

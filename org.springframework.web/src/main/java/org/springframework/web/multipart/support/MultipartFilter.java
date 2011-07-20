@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,10 @@ import org.springframework.web.multipart.MultipartResolver;
  * on each request, to avoid initialization order issues (when using ContextLoaderServlet,
  * the root application context will get initialized <i>after</i> this filter).
  *
+ * <p>If no MultipartResolver bean is found, this filter falls back to a default
+ * MultipartResolver: {@link StandardServletMultipartResolver} for Servlet 3.0,
+ * based on a multipart-config section in <code>web.xml</code>.
+ *
  * <p>MultipartResolver lookup is customizable: Override this filter's
  * <code>lookupMultipartResolver</code> method to use a custom MultipartResolver
  * instance, for example if not using a Spring web application context.
@@ -60,6 +64,8 @@ import org.springframework.web.multipart.MultipartResolver;
 public class MultipartFilter extends OncePerRequestFilter {
 
 	public static final String DEFAULT_MULTIPART_RESOLVER_BEAN_NAME = "filterMultipartResolver";
+
+	private final MultipartResolver defaultMultipartResolver = new StandardServletMultipartResolver();
 
 	private String multipartResolverBeanName = DEFAULT_MULTIPART_RESOLVER_BEAN_NAME;
 
@@ -122,7 +128,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 	/**
 	 * Look up the MultipartResolver that this filter should use,
 	 * taking the current HTTP request as argument.
-	 * <p>Default implementation delegates to the <code>lookupMultipartResolver</code>
+	 * <p>The default implementation delegates to the <code>lookupMultipartResolver</code>
 	 * without arguments.
 	 * @return the MultipartResolver to use
 	 * @see #lookupMultipartResolver()
@@ -140,11 +146,17 @@ public class MultipartFilter extends OncePerRequestFilter {
 	 * @return the MultipartResolver instance, or <code>null</code> if none found
 	 */
 	protected MultipartResolver lookupMultipartResolver() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Using MultipartResolver '" + getMultipartResolverBeanName() + "' for MultipartFilter");
+		WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+		String beanName = getMultipartResolverBeanName();
+		if (wac != null && wac.containsBean(beanName)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using MultipartResolver '" + beanName + "' for MultipartFilter");
+			}
+			return wac.getBean(beanName, MultipartResolver.class);
 		}
-		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-		return wac.getBean(getMultipartResolverBeanName(), MultipartResolver.class);
+		else {
+			return this.defaultMultipartResolver;
+		}
 	}
 
 }

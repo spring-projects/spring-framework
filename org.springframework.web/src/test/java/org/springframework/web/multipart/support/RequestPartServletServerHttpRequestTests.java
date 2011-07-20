@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.web.multipart;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+package org.springframework.web.multipart.support;
 
 import java.net.URI;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -31,9 +28,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 
+import static org.junit.Assert.*;
+
 /**
- * Test fixture for {@link RequestPartServletServerHttpRequest} unit tests.
- * 
  * @author Rossen Stoyanchev
  */
 public class RequestPartServletServerHttpRequestTests {

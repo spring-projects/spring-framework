@@ -16,23 +16,12 @@
 
 package org.springframework.web.multipart.support;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartException;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 
@@ -56,9 +45,6 @@ import org.springframework.web.multipart.MultipartResolver;
  */
 public class StandardServletMultipartResolver implements MultipartResolver {
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
-
 	public boolean isMultipart(HttpServletRequest request) {
 		// Same check as in Commons FileUpload...
 		if (!"post".equals(request.getMethod().toLowerCase())) {
@@ -80,89 +66,7 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 			}
 		}
 		catch (Exception ex) {
-			logger.warn("Failed to perform cleanup of multipart items", ex);
-		}
-	}
-
-
-	/**
-	 * Spring MultipartHttpServletRequest adapter, wrapping a Servlet 3.0 HttpServletRequest
-	 * and its Part objects. Parameters get exposed through the native request's getParameter
-	 * methods - without any custom processing on our side.
-	 */
-	private static class StandardMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
-
-		public StandardMultipartHttpServletRequest(HttpServletRequest request) throws MultipartException {
-			super(request);
-			try {
-				Collection<Part> parts = request.getParts();
-				MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<String, MultipartFile>(parts.size());
-				for (Part part : parts) {
-					files.add(part.getName(), new StandardMultipartFile(part));
-				}
-				setMultipartFiles(files);
-			}
-			catch (Exception ex) {
-				throw new MultipartException("Could not parse multipart servlet request", ex);
-			}
-		}
-	}
-
-
-	/**
-	 * Spring MultipartFile adapter, wrapping a Servlet 3.0 Part object.
-	 */
-	private static class StandardMultipartFile implements MultipartFile {
-
-		private final Part part;
-
-		public StandardMultipartFile(Part part) {
-			this.part = part;
-		}
-
-		public String getName() {
-			return this.part.getName();
-		}
-
-		public String getOriginalFilename() {
-			return null;  // not supported in Servlet 3.0 - switch to Commons FileUpload if you need this
-		}
-
-		public String getContentType() {
-			return this.part.getContentType();
-		}
-
-		public boolean isEmpty() {
-			return (this.part.getSize() == 0);
-		}
-
-		public long getSize() {
-			return this.part.getSize();
-		}
-
-		public byte[] getBytes() throws IOException {
-			return FileCopyUtils.copyToByteArray(this.part.getInputStream());
-		}
-
-		public InputStream getInputStream() throws IOException {
-			return this.part.getInputStream();
-		}
-
-		public void transferTo(File dest) throws IOException, IllegalStateException {
-			this.part.write(dest.getPath());
-		}
-
-		public String getHeader(String name) {
-			return this.part.getHeader(name);
-		}
-
-		public String[] getHeaders(String name) {
-			Collection<String> headers = this.part.getHeaders(name);
-			return (headers != null ? StringUtils.toStringArray(headers) : null);
-		}
-
-		public Iterator<String> getHeaderNames() {
-			return this.part.getHeaderNames().iterator();
+			LogFactory.getLog(getClass()).warn("Failed to perform cleanup of multipart items", ex);
 		}
 	}
 

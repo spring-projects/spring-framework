@@ -60,7 +60,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.RequestPartServletServerHttpRequest;
+import org.springframework.web.multipart.support.RequestPartServletServerHttpRequest;
 
 /**
  * Test fixture with {@link RequestPartMethodArgumentResolver} and mock {@link HttpMessageConverter}.
