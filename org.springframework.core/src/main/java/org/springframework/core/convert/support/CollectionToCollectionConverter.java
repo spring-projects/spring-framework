@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,8 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 			for (Object element : sourceCollection) {
 				target.add(element);
 			}
-		} else {
+		}
+		else {
 			for (Object sourceElement : sourceCollection) {
 				Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
 				target.add(targetElement);

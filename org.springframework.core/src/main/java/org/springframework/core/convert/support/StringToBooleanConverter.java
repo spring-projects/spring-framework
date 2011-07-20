@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ final class StringToBooleanConverter implements Converter<String, Boolean> {
 	
 	public Boolean convert(String source) {
 		String value = source.trim();
-		if (value.length() == 0) {
+		if ("".equals(value)) {
 			return null;
 		}
 		value = value.toLowerCase();
