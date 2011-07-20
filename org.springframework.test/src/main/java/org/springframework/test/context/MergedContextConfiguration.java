@@ -176,9 +176,11 @@ public class MergedContextConfiguration implements Serializable {
 	}
 
 	/**
-	 * TODO Document equals() implementation.
-	 *
-	 * @see java.lang.Object#equals(java.lang.Object)
+	 * Determine if the supplied object is equal to this {@code MergedContextConfiguration}
+	 * instance by comparing both object's {@link #getLocations() locations},
+	 * {@link #getClasses() configuration classes}, {@link #getActiveProfiles()
+	 * active profiles}, and the fully qualified names of their
+	 * {@link #getContextLoader() ContextLoaders}.
 	 */
 	@Override
 	public boolean equals(Object obj) {
