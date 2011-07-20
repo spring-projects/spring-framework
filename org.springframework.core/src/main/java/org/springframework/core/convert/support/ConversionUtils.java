@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ abstract class ConversionUtils {
 			throw new ConversionFailedException(sourceType, targetType, source, ex);
 		}
 	}
-	
+
 	public static boolean canConvertElements(TypeDescriptor sourceElementType, TypeDescriptor targetElementType, ConversionService conversionService) {
 		if (targetElementType == null) {
 			// yes
@@ -51,19 +51,18 @@ abstract class ConversionUtils {
 			// maybe
 			return true;
 		}
-		boolean canConvert = conversionService.canConvert(sourceElementType, targetElementType);
-		if (canConvert) {
+		if (conversionService.canConvert(sourceElementType, targetElementType)) {
 			// yes
 			return true;
-		} else {
-			if (sourceElementType.getType().isAssignableFrom(targetElementType.getType())) {
-				// maybe;
-				return true;
-			} else {
-				// no;
-				return false;
-			}
-		}		
+		}
+		else if (sourceElementType.getType().isAssignableFrom(targetElementType.getType())) {
+			// maybe;
+			return true;
+		}
+		else {
+			// no;
+			return false;
+		}
 	}
 
 }
