@@ -61,6 +61,7 @@ public class TestContext extends AttributeAccessorSupport {
 		this(testClass, contextCache, null);
 	}
 
+	// TODO Update regarding default --> DelegatingSmartContextLoader
 	/**
 	 * Construct a new test context for the supplied {@link Class test class}
 	 * and {@link ContextCache context cache} and parse the corresponding
@@ -141,18 +142,17 @@ public class TestContext extends AttributeAccessorSupport {
 	 * application context
 	 */
 	public ApplicationContext getApplicationContext() {
-		String contextKey = mergedContextConfiguration.getContextKey();
 		synchronized (contextCache) {
-			ApplicationContext context = contextCache.get(contextKey);
+			ApplicationContext context = contextCache.get(mergedContextConfiguration);
 			if (context == null) {
 				try {
 					context = loadApplicationContext();
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format(
 							"Storing ApplicationContext for test class [%s] in cache under key [%s].", testClass,
-							contextKey));
+							mergedContextConfiguration));
 					}
-					contextCache.put(contextKey, context);
+					contextCache.put(mergedContextConfiguration, context);
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException("Failed to load ApplicationContext", ex);
@@ -162,7 +162,7 @@ public class TestContext extends AttributeAccessorSupport {
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format(
 						"Retrieved ApplicationContext for test class [%s] from cache with key [%s].", testClass,
-						contextKey));
+						mergedContextConfiguration));
 				}
 			}
 			return context;
@@ -217,7 +217,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 */
 	public void markApplicationContextDirty() {
 		synchronized (contextCache) {
-			contextCache.setDirty(mergedContextConfiguration.getContextKey());
+			contextCache.setDirty(mergedContextConfiguration);
 		}
 	}
 
