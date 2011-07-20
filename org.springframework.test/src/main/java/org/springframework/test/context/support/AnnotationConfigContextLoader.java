@@ -154,7 +154,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 
 		if (configClasses.isEmpty()) {
 			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Cannot generate default configuration classes for test class [%s]: "
+				logger.info(String.format("Could not detect default configuration classes for test class [%s]: "
 						+ "%s does not declare any static, non-private, non-final, inner classes "
 						+ "annotated with @Configuration.", declaringClass.getName(), declaringClass.getSimpleName()));
 			}
