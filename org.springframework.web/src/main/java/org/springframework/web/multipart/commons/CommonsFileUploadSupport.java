@@ -217,6 +217,7 @@ public abstract class CommonsFileUploadSupport {
 	protected MultipartParsingResult parseFileItems(List<FileItem> fileItems, String encoding) {
 		MultiValueMap<String, MultipartFile> multipartFiles = new LinkedMultiValueMap<String, MultipartFile>();
 		Map<String, String[]> multipartParameters = new HashMap<String, String[]>();
+		Map<String, String> multipartParameterContentTypes = new HashMap<String, String>();
 
 		// Extract multipart files and multipart parameters.
 		for (FileItem fileItem : fileItems) {
@@ -248,6 +249,7 @@ public abstract class CommonsFileUploadSupport {
 					String[] newParam = StringUtils.addStringToArray(curParam, value);
 					multipartParameters.put(fileItem.getFieldName(), newParam);
 				}
+				multipartParameterContentTypes.put(fileItem.getFieldName(), fileItem.getContentType());
 			}
 			else {
 				// multipart file field
@@ -260,7 +262,7 @@ public abstract class CommonsFileUploadSupport {
 				}
 			}
 		}
-		return new MultipartParsingResult(multipartFiles, multipartParameters);
+		return new MultipartParsingResult(multipartFiles, multipartParameters, multipartParameterContentTypes);
 	}
 
 	/**
@@ -305,28 +307,25 @@ public abstract class CommonsFileUploadSupport {
 
 		private final Map<String, String[]> multipartParameters;
 
-		/**
-		 * Create a new MultipartParsingResult.
-		 * @param mpFiles Map of field name to MultipartFile instance
-		 * @param mpParams Map of field name to form field String value
-		 */
-		public MultipartParsingResult(MultiValueMap<String, MultipartFile> mpFiles, Map<String, String[]> mpParams) {
+		private final Map<String, String> multipartParameterContentTypes;
+
+		public MultipartParsingResult(MultiValueMap<String, MultipartFile> mpFiles,
+				Map<String, String[]> mpParams, Map<String, String> mpParamContentTypes) {
 			this.multipartFiles = mpFiles;
 			this.multipartParameters = mpParams;
+			this.multipartParameterContentTypes = mpParamContentTypes;
 		}
 
-		/**
-		 * Return the multipart files as Map of field name to MultipartFile instance.
-		 */
 		public MultiValueMap<String, MultipartFile> getMultipartFiles() {
 			return this.multipartFiles;
 		}
 
-		/**
-		 * Return the multipart parameters as Map of field name to form field String value.
-		 */
 		public Map<String, String[]> getMultipartParameters() {
 			return this.multipartParameters;
+		}
+
+		public Map<String, String> getMultipartParameterContentTypes() {
+			return this.multipartParameterContentTypes;
 		}
 	}
 

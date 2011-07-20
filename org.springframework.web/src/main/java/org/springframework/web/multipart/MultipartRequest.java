@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,5 +74,12 @@ public interface MultipartRequest {
 	 * @since 3.0
 	 */
 	MultiValueMap<String, MultipartFile> getMultiFileMap();
+
+	/**
+	 * Determine the content type of the specified request part.
+	 * @param paramOrFileName the name of the part
+	 * @return the associated content type, or <code>null</code> if not defined
+	 */
+	String getMultipartContentType(String paramOrFileName);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package org.springframework.mock.web;
 
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -87,6 +90,42 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 
 	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
 		return new LinkedMultiValueMap<String, MultipartFile>(this.multipartFiles);
+	}
+
+	public String getMultipartContentType(String paramOrFileName) {
+		MultipartFile file = getFile(paramOrFileName);
+		if (file != null) {
+			return file.getContentType();
+		}
+		else {
+			return null;
+		}
+	}
+
+	public HttpMethod getRequestMethod() {
+		return HttpMethod.valueOf(getMethod());
+	}
+
+	public HttpHeaders getRequestHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		Enumeration<String> headerNames = getHeaderNames();
+		while (headerNames.hasMoreElements()) {
+			String headerName = headerNames.nextElement();
+			headers.put(headerName, Collections.list(getHeaders(headerName)));
+		}
+		return headers;
+	}
+
+	public HttpHeaders getMultipartHeaders(String paramOrFileName) {
+		String contentType = getMultipartContentType(paramOrFileName);
+		if (contentType != null) {
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Content-Type", contentType);
+			return headers;
+		}
+		else {
+			return null;
+		}
 	}
 
 }

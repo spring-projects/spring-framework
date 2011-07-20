@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.portlet;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -481,7 +482,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			files.set("someFile", new MockMultipartFile("someFile", "someContent".getBytes()));
 			Map<String, String[]> params = new HashMap<String, String[]>();
 			params.put("someParam", new String[] {"someParam"});
-			return new DefaultMultipartActionRequest(request, files, params);
+			return new DefaultMultipartActionRequest(request, files, params, Collections.<String, String>emptyMap());
 		}
 
 		public void cleanupMultipart(MultipartActionRequest request) {

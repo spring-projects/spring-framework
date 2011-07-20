@@ -41,8 +41,6 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class MockMultipartFile implements MultipartFile {
 
-	private static final String CONTENT_TYPE = "Content-Type";
-
 	private final String name;
 
 	private String originalFilename;
@@ -131,28 +129,6 @@ public class MockMultipartFile implements MultipartFile {
 
 	public void transferTo(File dest) throws IOException, IllegalStateException {
 		FileCopyUtils.copy(this.content, dest);
-	}
-
-	public String getHeader(String name) {
-		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.contentType;
-		}
-		else {
-			return null;
-		}
-	}
-
-	public String[] getHeaders(String name) {
-		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return new String[] {this.contentType};
-		}
-		else {
-			return null;
-		}
-	}
-
-	public Iterator<String> getHeaderNames() {
-		return Collections.singleton(CONTENT_TYPE).iterator();
 	}
 
 }

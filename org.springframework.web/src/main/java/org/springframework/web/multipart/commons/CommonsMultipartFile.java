@@ -42,8 +42,6 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class CommonsMultipartFile implements MultipartFile, Serializable {
 
-	private static final String CONTENT_TYPE = "Content-Type";
-
 	protected static final Log logger = LogFactory.getLog(CommonsMultipartFile.class);
 
 	private final FileItem fileItem;
@@ -189,28 +187,6 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		else {
 			return "on disk";
 		}
-	}
-
-	public String getHeader(String name) {
-		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return this.fileItem.getContentType();
-		}
-		else {
-			return null;
-		}
-	}
-
-	public String[] getHeaders(String name) {
-		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
-			return new String[] {this.fileItem.getContentType()};
-		}
-		else {
-			return null;
-		}
-	}
-
-	public Iterator<String> getHeaderNames() {
-		return Collections.singleton(CONTENT_TYPE).iterator();
 	}
 
 }

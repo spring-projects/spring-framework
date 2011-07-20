@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Default implementation of the
@@ -40,7 +41,11 @@ import org.springframework.util.MultiValueMap;
  */
 public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
+	private static final String CONTENT_TYPE = "Content-Type";
+
 	private Map<String, String[]> multipartParameters;
+
+	private Map<String, String> multipartParameterContentTypes;
 
 
 	/**
@@ -50,12 +55,13 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	 * @param mpParams a map of the parameters to expose,
 	 * with Strings as keys and String arrays as values
 	 */
-	public DefaultMultipartHttpServletRequest(
-			HttpServletRequest request, MultiValueMap<String, MultipartFile> mpFiles, Map<String, String[]> mpParams) {
+	public DefaultMultipartHttpServletRequest(HttpServletRequest request, MultiValueMap<String, MultipartFile> mpFiles,
+			Map<String, String[]> mpParams, Map<String, String> mpParamContentTypes) {
 
 		super(request);
 		setMultipartFiles(mpFiles);
 		setMultipartParameters(mpParams);
+		setMultipartParameterContentTypes(mpParamContentTypes);
 	}
 
 	/**
@@ -105,6 +111,28 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 		return paramMap;
 	}
 
+	public String getMultipartContentType(String paramOrFileName) {
+		MultipartFile file = getFile(paramOrFileName);
+		if (file != null) {
+			return file.getContentType();
+		}
+		else {
+			return getMultipartParameterContentTypes().get(paramOrFileName);
+		}
+	}
+
+	public HttpHeaders getMultipartHeaders(String paramOrFileName) {
+		String contentType = getMultipartContentType(paramOrFileName);
+		if (contentType != null) {
+			HttpHeaders headers = new HttpHeaders();
+			headers.add(CONTENT_TYPE, contentType);
+			return headers;
+		}
+		else {
+			return null;
+		}
+	}
+
 
 	/**
 	 * Set a Map with parameter names as keys and String array objects as values.
@@ -124,6 +152,26 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 			initializeMultipart();
 		}
 		return this.multipartParameters;
+	}
+
+	/**
+	 * Set a Map with parameter names as keys and content type Strings as values.
+	 * To be invoked by subclasses on initialization.
+	 */
+	protected final void setMultipartParameterContentTypes(Map<String, String> multipartParameterContentTypes) {
+		this.multipartParameterContentTypes = multipartParameterContentTypes;
+	}
+
+	/**
+	 * Obtain the multipart parameter content type Map for retrieval,
+	 * lazily initializing it if necessary.
+	 * @see #initializeMultipart()
+	 */
+	protected Map<String, String> getMultipartParameterContentTypes() {
+		if (this.multipartParameterContentTypes == null) {
+			initializeMultipart();
+		}
+		return this.multipartParameterContentTypes;
 	}
 
 }

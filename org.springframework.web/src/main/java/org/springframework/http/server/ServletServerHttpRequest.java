@@ -44,13 +44,14 @@ import org.springframework.util.Assert;
  */
 public class ServletServerHttpRequest implements ServerHttpRequest {
 
-	private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
+	protected static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
-	private static final String POST_METHOD = "POST";
+	protected static final String FORM_CHARSET = "UTF-8";
 
-	private static final String PUT_METHOD = "PUT";
+	private static final String METHOD_POST = "POST";
 
-	private static final String FORM_CHARSET = "UTF-8";
+	private static final String METHOD_PUT = "PUT";
+
 
 	private final HttpServletRequest servletRequest;
 
@@ -115,7 +116,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private boolean isFormSubmittal(HttpServletRequest request) {
 		return FORM_CONTENT_TYPE.equals(request.getContentType()) &&
-				(POST_METHOD.equalsIgnoreCase(request.getMethod()) || PUT_METHOD.equalsIgnoreCase(request.getMethod()));
+				(METHOD_POST.equalsIgnoreCase(request.getMethod()) || METHOD_PUT.equalsIgnoreCase(request.getMethod()));
 	}
 
 	private InputStream getFormBody(HttpServletRequest request) throws IOException {
