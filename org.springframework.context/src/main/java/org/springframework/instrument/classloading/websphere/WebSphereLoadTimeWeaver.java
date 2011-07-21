@@ -23,9 +23,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link LoadTimeWeaver} implementation for WebSphere instrumentable classloader.
- *
- * <p><b>NOTE:</b> Requires WebSphere Application Server version 7.0.0 or higher.
+ * {@link LoadTimeWeaver} implementation for WebSphere's instrumentable ClassLoader.
+ * Compatible with WebSphere 7 as well as 8.
  *
  * @author Costin Leau
  * @since 3.1
