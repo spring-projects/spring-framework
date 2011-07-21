@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,14 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link LoadTimeWeaver} implementation for JBoss's instrumentable ClassLoader.
+ * Supports JBoss AS 5 and 6.
  *
- * <p><b>NOTE:</b> Requires JBoss AS version 5.0.0 or higher.
- * 
- * <p>Thanks to Ales Justin and Marius Bogoevici for the initial prototype.</p> 
+ * <p><b>NOTE:</b> On JBoss 6.0, to avoid the container loading the classes before the
+ * application actually starts, one needs to add a <tt>WEB-INF/jboss-scanning.xml</tt>
+ * file to the application archive - with the following content:
+ * <pre>&lt;scanning xmlns="urn:jboss:scanning:1.0"/&gt;</pre>
+ *
+ * <p>Thanks to Ales Justin and Marius Bogoevici for the initial prototype.
  * 
  * @author Costin Leau
  * @since 3.0
@@ -70,4 +74,5 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}
+
 }
