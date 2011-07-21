@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,8 @@ public abstract class RemoteInvocationSerializingExporter extends RemoteInvocati
 
 	private String contentType = CONTENT_TYPE_SERIALIZED_OBJECT;
 
+	private boolean acceptProxyClasses = true;
+
 	private Object proxy;
 
 
@@ -70,10 +72,25 @@ public abstract class RemoteInvocationSerializingExporter extends RemoteInvocati
 	}
 
 	/**
-	 * Return the content type to use for sending remote invocation  responses.
+	 * Return the content type to use for sending remote invocation responses.
 	 */
 	public String getContentType() {
 		return this.contentType;
+	}
+
+	/**
+	 * Set whether to accept deserialization of proxy classes.
+	 * <p>Default is "true". May be deactivated as a security measure.
+	 */
+	public void setAcceptProxyClasses(boolean acceptProxyClasses) {
+		this.acceptProxyClasses = acceptProxyClasses;
+	}
+
+	/**
+	 * Return whether to accept deserialization of proxy classes.
+	 */
+	public boolean isAcceptProxyClasses() {
+		return this.acceptProxyClasses;
 	}
 
 
@@ -102,7 +119,7 @@ public abstract class RemoteInvocationSerializingExporter extends RemoteInvocati
 	 * @throws java.io.IOException if creation of the ObjectInputStream failed
 	 */
 	protected ObjectInputStream createObjectInputStream(InputStream is) throws IOException {
-		return new CodebaseAwareObjectInputStream(is, getBeanClassLoader(), null);
+		return new CodebaseAwareObjectInputStream(is, getBeanClassLoader(), isAcceptProxyClasses());
 	}
 
 	/**
