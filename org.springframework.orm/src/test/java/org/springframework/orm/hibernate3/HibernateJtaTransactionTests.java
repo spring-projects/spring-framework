@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.SessionImplementor;
-import org.junit.Ignore;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.MockJtaTransaction;
@@ -52,7 +51,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @author Juergen Hoeller
  * @since 05.03.2005
  */
-@Ignore // getting errors on mocks
 public class HibernateJtaTransactionTests extends TestCase {
 
 	public void testJtaTransactionCommit() throws Exception {
@@ -1588,7 +1586,7 @@ public class HibernateJtaTransactionTests extends TestCase {
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 6);
 
