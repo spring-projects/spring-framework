@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.multipart.MultipartFile;
@@ -85,35 +86,38 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	/**
 	 * Supports the following:
 	 * <ul>
-	 * 	<li>@RequestParam method arguments. This excludes the case where a parameter is of type 
-	 * 		{@link Map} and the annotation does not specify a request parameter name. See 
-	 * 		{@link RequestParamMapMethodArgumentResolver} instead for such parameters.
-	 * 	<li>Arguments of type {@link MultipartFile} even if not annotated.
-	 * 	<li>Arguments of type {@code javax.servlet.http.Part} even if not annotated.
+	 * 	<li>@RequestParam-annotated method arguments. 
+	 * 		This excludes {@link Map} parameters where the annotation does not specify a name value.
+	 * 		See {@link RequestParamMapMethodArgumentResolver} instead for such parameters.
+	 * 	<li>Arguments of type {@link MultipartFile} unless annotated with {@link RequestPart}.
+	 * 	<li>Arguments of type {@code javax.servlet.http.Part} unless annotated with {@link RequestPart}.
+	 * 	<li>In default resolution mode, simple type arguments even if not with @RequestParam.
 	 * </ul>
-	 * 
-	 * <p>In default resolution mode, simple type arguments not annotated with @RequestParam are also supported.
 	 */
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
-		RequestParam requestParamAnnot = parameter.getParameterAnnotation(RequestParam.class);
-		if (requestParamAnnot != null) {
+		if (parameter.hasParameterAnnotation(RequestParam.class)) {
 			if (Map.class.isAssignableFrom(paramType)) {
-				return StringUtils.hasText(requestParamAnnot.value());
+				String paramName = parameter.getParameterAnnotation(RequestParam.class).value();
+				return StringUtils.hasText(paramName);
 			}
-			return true;
-		}
-		else if (MultipartFile.class.equals(paramType)) {
-			return true;
-		}
-		else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
-			return true;
-		}
-		else if (this.useDefaultResolution) {
-			return BeanUtils.isSimpleProperty(paramType);
+			else {
+				return true;
+			}
 		}
 		else {
-			return false;
+			if (parameter.hasParameterAnnotation(RequestPart.class)) {
+				return false;
+			}
+			else if (MultipartFile.class.equals(paramType) || "javax.servlet.http.Part".equals(paramType.getName())) {
+				return true;
+			}
+			else if (this.useDefaultResolution) {
+				return BeanUtils.isSimpleProperty(paramType);
+			}
+			else {
+				return false;
+			}
 		}
 	}
 
