@@ -28,12 +28,12 @@ import org.springframework.util.ClassUtils;
  * Autodetects the specific JBoss version at runtime: currently supports
  * JBoss AS 5, 6 and 7 (as of Spring 3.1).
  *
- * <p><b>NOTE:</b> On JBoss 6.0, to avoid the container loading the classes before
- * the application actually starts, one needs to add <tt>WEB-INF/jboss-scanning.xml</tt>
- * to her archive with the following content:
+ * <p><b>NOTE:</b> On JBoss 6.0, to avoid the container loading the classes before the
+ * application actually starts, one needs to add a <tt>WEB-INF/jboss-scanning.xml</tt>
+ * file to the application archive - with the following content:
  * <pre>&lt;scanning xmlns="urn:jboss:scanning:1.0"/&gt;</pre>
  *
- * <p>Thanks to Ales Justin and Marius Bogoevici for the initial prototype.</p> 
+ * <p>Thanks to Ales Justin and Marius Bogoevici for the initial prototype.
  *
  * @author Costin Leau
  * @since 3.0
