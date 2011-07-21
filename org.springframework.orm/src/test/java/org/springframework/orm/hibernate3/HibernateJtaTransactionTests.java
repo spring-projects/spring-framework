@@ -1685,7 +1685,6 @@ public class HibernateJtaTransactionTests {
 		sfiControl.verify();
 	}
 
-	@Ignore("getting error on UserTransaction mock")
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void testJtaSessionSynchronizationWithSpringTransactionLaterOn() throws Exception {
@@ -1695,7 +1694,7 @@ public class HibernateJtaTransactionTests {
 		TransactionManager tm = (TransactionManager) tmControl.getMock();
 		MockJtaTransaction transaction = new MockJtaTransaction();
 		ut.getStatus();
-		utControl.setReturnValue(Status.STATUS_ACTIVE, 2);
+		utControl.setReturnValue(Status.STATUS_ACTIVE, 1);
 		tm.getTransaction();
 		tmControl.setReturnValue(transaction, 6);
 
