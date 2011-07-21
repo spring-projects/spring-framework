@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,14 @@ import org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeav
  * "<code>loadTimeWeaver</code>"; the most convenient way to achieve this is
  * Spring's <code>&lt;context:load-time-weaver&gt;</code> XML tag.
  *
- * <p>This class implements a runtime environment check for obtaining the
- * appropriate weaver implementation: As of Spring 2.5, it detects Sun's
- * GlassFish, Oracle's OC4J, BEA's WebLogic 10,
+ * <p>This class implements a runtime environment check for obtaining
+ * the appropriate weaver implementation: As of Spring 3.0, it detects
+ * Oracle WebLogic 10, Oracle OC4J 10, GlassFish 3, JBoss AS 5 and 6,
  * {@link InstrumentationSavingAgent Spring's VM agent} and any
  * {@link ClassLoader} supported by Spring's {@link ReflectiveLoadTimeWeaver}
  * (for example the
- * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}).
+ * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}
+ * for Tomcat 5, 6 and 7).
  *
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
