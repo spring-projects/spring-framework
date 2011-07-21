@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.lang.reflect.Proxy;
@@ -36,16 +37,33 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 
 	private final ClassLoader classLoader;
 
+	private final boolean acceptProxyClasses;
+
 
 	/**
 	 * Create a new ConfigurableObjectInputStream for the given InputStream and ClassLoader.
-	 * @param	in the InputStream to read from
+	 * @param in the InputStream to read from
 	 * @param classLoader the ClassLoader to use for loading local classes
 	 * @see java.io.ObjectInputStream#ObjectInputStream(java.io.InputStream)
 	 */
 	public ConfigurableObjectInputStream(InputStream in, ClassLoader classLoader) throws IOException {
+		this(in, classLoader, true);
+	}
+
+	/**
+	 * Create a new ConfigurableObjectInputStream for the given InputStream and ClassLoader.
+	 * @param in the InputStream to read from
+	 * @param classLoader the ClassLoader to use for loading local classes
+	 * @param acceptProxyClasses whether to accept deserialization of proxy classes
+	 * (may be deactivated as a security measure)
+	 * @see java.io.ObjectInputStream#ObjectInputStream(java.io.InputStream)
+	 */
+	public ConfigurableObjectInputStream(
+			InputStream in, ClassLoader classLoader, boolean acceptProxyClasses) throws IOException {
+
 		super(in);
 		this.classLoader = classLoader;
+		this.acceptProxyClasses = acceptProxyClasses;
 	}
 
 
@@ -68,6 +86,9 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 
 	@Override
 	protected Class resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
+		if (!this.acceptProxyClasses) {
+			throw new NotSerializableException("Not allowed to accept serialized proxy classes");
+		}
 		if (this.classLoader != null) {
 			// Use the specified ClassLoader to resolve local proxy classes.
 			Class[] resolvedInterfaces = new Class[interfaces.length];
