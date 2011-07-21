@@ -29,7 +29,7 @@
       <para>Some methods in the core classes of Spring Web MVC are marked
       <literal>final</literal>. As a developer you cannot override these
       methods to supply your own behavior. This has not been done arbitrarily,
-      but specifically with this principal in mind.</para>
+      but specifically with this principle in mind.</para>
 
       <para>For an explanation of this principle, refer to <emphasis>Expert
       Spring Web MVC and Web Flow</emphasis> by Seth Ladd and others;
