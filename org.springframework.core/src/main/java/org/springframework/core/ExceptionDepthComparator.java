@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class ExceptionDepthComparator implements Comparator<Class<? extends Thro
 		}
 		// If we've gone as far as we can go and haven't found it...
 		if (Throwable.class.equals(exceptionToMatch)) {
-			return -1;
+			return Integer.MAX_VALUE;
 		}
 		return getDepth(declaredException, exceptionToMatch.getSuperclass(), depth + 1);
 	}
