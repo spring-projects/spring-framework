@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,9 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, 
 		MethodInvocation mi = invocation.get();
 		if (mi == null)
 			throw new IllegalStateException(
-					"No MethodInvocation found: Check that an AOP invocation is in progress, " +
-					"and that the ExposeInvocationInterceptor is in the interceptor chain.");
+					"No MethodInvocation found: Check that an AOP invocation is in progress, and that the " +
+					"ExposeInvocationInterceptor is upfront in the interceptor chain. Specifically, note that " +
+					"advices with order HIGHEST_PRECEDENCE will execute before ExposeInvocationInterceptor!");
 		return mi;
 	}
 
