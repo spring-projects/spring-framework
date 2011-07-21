@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,24 +25,23 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link LoadTimeWeaver} implementation for JBoss's instrumentable ClassLoader.
- * Currently supports JBoss 5, 6 and 7 (since Spring 3.1).
+ * Autodetects the specific JBoss version at runtime: currently supports
+ * JBoss AS 5, 6 and 7 (as of Spring 3.1).
  *
- * <p><b>NOTE:</b> Requires JBoss AS version 5.0.0 or higher.
- * <p><b>NOTE:</b> On JBoss 6.0.0, to avoid the container loading the classes before
+ * <p><b>NOTE:</b> On JBoss 6.0, to avoid the container loading the classes before
  * the application actually starts, one needs to add <tt>WEB-INF/jboss-scanning.xml</tt>
  * to her archive with the following content:
- * <pre>
- *   &lt;scanning xmlns="urn:jboss:scanning:1.0"/&gt;
- * </pre>
- * 
+ * <pre>&lt;scanning xmlns="urn:jboss:scanning:1.0"/&gt;</pre>
+ *
  * <p>Thanks to Ales Justin and Marius Bogoevici for the initial prototype.</p> 
- * 
+ *
  * @author Costin Leau
  * @since 3.0
  */
 public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 
 	private final JBossClassLoaderAdapter adapter;
+
 
 	/**
 	 * Create a new instance of the {@link JBossLoadTimeWeaver} class using
@@ -66,13 +65,16 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 		if (loaderClassName.startsWith("org.jboss.classloader")) {
 			// JBoss AS 5 or JBoss AS 6
 			this.adapter = new JBossMCAdapter(classLoader);
-		} else if (loaderClassName.startsWith("org.jboss.modules")) {
+		}
+		else if (loaderClassName.startsWith("org.jboss.modules")) {
 			// JBoss AS 7
 			this.adapter = new JBossModulesAdapter(classLoader);
-		} else {
-			throw new IllegalArgumentException("Unexpected classloader type: " + loaderClassName);
+		}
+		else {
+			throw new IllegalArgumentException("Unexpected ClassLoader type: " + loaderClassName);
 		}
 	}
+
 
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.adapter.addTransformer(transformer);
@@ -85,4 +87,5 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}
+
 }
