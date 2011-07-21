@@ -109,6 +109,10 @@
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.1.0.GA" conf="test->runtime"/>
 		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="${slf4j.version}" conf="test->runtime"/>
 		<dependency org="org.joda" name="com.springsource.org.joda.time" rev="1.6.0" conf="test->runtime"/>
+		<dependency org="org.mortbay.jetty" name="com.springsource.org.mortbay.jetty.server" rev="6.1.9"
+                    conf="test->compile"/>
+		<dependency org="org.apache.httpcomponents" name="com.springsource.org.apache.httpcomponents.httpclient" rev="4.1.1"
+                    conf="test->compile"/>
 	</dependencies>
 
 </ivy-module>

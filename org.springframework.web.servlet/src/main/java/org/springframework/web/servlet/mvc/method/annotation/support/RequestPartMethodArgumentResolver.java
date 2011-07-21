@@ -31,6 +31,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -79,23 +80,28 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	/**
 	 * Supports the following:
 	 * <ul>
-	 * 	<li>@RequestPart method arguments.
-	 * 	<li>Arguments of type {@link MultipartFile} even if not annotated.
-	 * 	<li>Arguments of type {@code javax.servlet.http.Part} even if not annotated.
+	 * 	<li>@RequestPart-annotated method arguments.
+	 * 	<li>Arguments of type {@link MultipartFile} unless annotated with {@link RequestParam}.
+	 * 	<li>Arguments of type {@code javax.servlet.http.Part} unless annotated with {@link RequestParam}.
 	 * </ul>
 	 */
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (parameter.hasParameterAnnotation(RequestPart.class)) {
 			return true;
 		}
-		else if (MultipartFile.class.equals(parameter.getParameterType())) {
-			return true;
-		}
-		else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
-			return true;
-		}
 		else {
-			return false;
+			if (parameter.hasParameterAnnotation(RequestParam.class)){
+				return false;
+			}
+			else if (MultipartFile.class.equals(parameter.getParameterType())) {
+				return true;
+			}
+			else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 	}
 
