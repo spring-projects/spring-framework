@@ -3,13 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1 RC1 (2011-07-xx)
+Changes in version 3.1 RC1 (2011-08-xx)
 ---------------------------------------
 
-* support for Hibernate 4.0 as a JPA provider (using Spring's HibernateJpaVendorAdapter)
+* updated Quartz support package for full Quartz 2.0 support (compatibility with Quartz 1.5+)
+* updated JBossLoadTimeWeaver to automatically detect and support JBoss AS 7 as well
+* support for load-time weaving on WebSphere 7 and 8
+* support for Hibernate 4.0 beta as a JPA provider
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
 * DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
 * DefaultListableBeanFactory's getBean(name, type) attempts type conversion if necessary
+* ConfigurationClassPostProcessor supports use of same processor instance with several factories
 * DataBinder uses a default limit of 256 for array/collection auto-growing
 * added "autoGrowNestedPaths" property to ConfigurableWebBindingInitializer
 * added headers support to MultipartFile abstraction (actually supported on Servlet 3.0)
@@ -17,7 +21,18 @@ Changes in version 3.1 RC1 (2011-07-xx)
 * AnnotationConfigContextLoader now supports default configuration classes with arbitrary names
 * revised JMS CachedConnectionFactory to avoid unnecessary rollback calls on Session return
 * fixed JMS CachedConnectionFactory to fully synchronize its Session list
+* added "acceptProxyClasses" flag to RemoteInvocationSerializingExporter
 * refined WebLogic RMI descriptor to only mark 'getTargetInterfaceName' method as idempotent
+* JavaMailSenderImpl detects and respects "mail.transport.protocol" property in existing Session
+* added "disabled" property to EhCacheFactoryBean
+* fixed @ExceptionHandler exception type matching (ExceptionDepthComparator)
+* added "getMultipartContentType(String)" method to MultipartRequest interface
+* added RequestPartServletServerHttpRequest and corresponding @RequestPart support in Spring MVC
+* revised Servlet 3.0 based StandardServletMultipartResolver for correct param/file distinction
+* MultipartFilter uses a Servlet 3.0 based StandardServletMultipartResolver by default
+* extended Servlet API mocks for Servlet 3.0 forward compatibility as far as possible
+* made MockHttpServletResponse compatible with Servlet 3.0 getHeader(s) method returning Strings
+* added getHeaderValue(s) method to MockHttpServletResponse for raw value access
 
 
 Changes in version 3.1 M2 (2011-06-08)
@@ -26,6 +41,7 @@ Changes in version 3.1 M2 (2011-06-08)
 * revised TypeDescriptor signature and implementation for clearer handling of nested generics
 * full support for arbitrary nesting of collections in fields
 * proper type detection in nested collections within arrays
+* collection/array conversion returns original collection if possible (instead of first element)
 * AnnotatedBeanDefinitionReader now inherits Environment of supplied BeanDefinitionRegistry
 * eliminated @Feature support in favor of @Enable* and framework-provided @Configuration classes
 * introduced @EnableTransactionManagement, @EnableScheduling, etc
