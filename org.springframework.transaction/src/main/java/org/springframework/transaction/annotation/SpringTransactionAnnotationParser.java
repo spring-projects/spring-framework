@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.transaction.annotation;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
@@ -35,15 +35,7 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 public class SpringTransactionAnnotationParser implements TransactionAnnotationParser, Serializable {
 
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
-		Transactional ann = ae.getAnnotation(Transactional.class);
-		if (ann == null) {
-			for (Annotation metaAnn : ae.getAnnotations()) {
-				ann = metaAnn.annotationType().getAnnotation(Transactional.class);
-				if (ann != null) {
-					break;
-				}
-			}
-		}
+		Transactional ann = AnnotationUtils.getAnnotation(ae, Transactional.class);
 		if (ann != null) {
 			return parseTransactionAnnotation(ann);
 		}

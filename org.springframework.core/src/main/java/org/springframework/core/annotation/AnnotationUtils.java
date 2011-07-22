@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.annotation;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +60,26 @@ public abstract class AnnotationUtils {
 
 	private static final Map<Class<?>, Boolean> annotatedInterfaceCache = new WeakHashMap<Class<?>, Boolean>();
 
+
+	/**
+	 * Get a single {@link Annotation} of <code>annotationType</code> from the supplied
+	 * Method, Constructor or Field.
+	 * @param ae the Method, Constructor or Field to look for annotations on
+	 * @param annotationType the annotation class to look for
+	 * @return the annotations found
+	 */
+	public static <T extends Annotation> T getAnnotation(AnnotatedElement ae, Class<T> annotationType) {
+		T ann = ae.getAnnotation(annotationType);
+		if (ann == null) {
+			for (Annotation metaAnn : ae.getAnnotations()) {
+				ann = metaAnn.annotationType().getAnnotation(annotationType);
+				if (ann != null) {
+					break;
+				}
+			}
+		}
+		return ann;
+	}
 
 	/**
 	 * Get all {@link Annotation Annotations} from the supplied {@link Method}.
