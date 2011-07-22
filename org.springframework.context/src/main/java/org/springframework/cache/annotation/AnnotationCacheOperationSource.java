@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,29 +37,28 @@ import org.springframework.util.Assert;
  * This class may also serve as base class for a custom CacheOperationSource.
  *
  * @author Costin Leau
+ * @since 3.1
  */
 @SuppressWarnings("serial")
-public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperationSource implements
-		Serializable {
+public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperationSource
+		implements Serializable {
 
 	private final boolean publicMethodsOnly;
 
 	private final Set<CacheAnnotationParser> annotationParsers;
 
+
 	/**
-	 * Create a default AnnotationCacheOperationSource, supporting
-	 * public methods that carry the <code>Cacheable</code> and <code>CacheEvict</code>
-	 * annotations.
+	 * Create a default AnnotationCacheOperationSource, supporting public methods
+	 * that carry the <code>Cacheable</code> and <code>CacheEvict</code> annotations.
 	 */
 	public AnnotationCacheOperationSource() {
 		this(true);
 	}
 
 	/**
-	 * Create a custom AnnotationCacheOperationSource, supporting
-	 * public methods that carry the <code>Cacheable</code> and 
-	 * <code>CacheEvict</code> annotations.
-	 *  
+	 * Create a default AnnotationCacheOperationSource, supporting public methods
+	 * that carry the <code>Cacheable</code> and <code>CacheEvict</code> annotations.
 	 * @param publicMethodsOnly whether to support only annotated public methods
 	 * typically for use with proxy-based AOP), or protected/private methods as well
 	 * (typically used with AspectJ class weaving)
@@ -67,7 +66,7 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	public AnnotationCacheOperationSource(boolean publicMethodsOnly) {
 		this.publicMethodsOnly = publicMethodsOnly;
 		this.annotationParsers = new LinkedHashSet<CacheAnnotationParser>(1);
-		this.annotationParsers.add(new SpringCachingAnnotationParser());
+		this.annotationParsers.add(new SpringCacheAnnotationParser());
 	}
 
 	/**
@@ -81,6 +80,7 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 		Collections.addAll(parsers, annotationParsers);
 		this.annotationParsers = parsers;
 	}
+
 
 	@Override
 	protected CacheOperation findCacheOperation(Class<?> clazz) {
@@ -120,4 +120,5 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	protected boolean allowPublicMethodsOnly() {
 		return this.publicMethodsOnly;
 	}
+
 }

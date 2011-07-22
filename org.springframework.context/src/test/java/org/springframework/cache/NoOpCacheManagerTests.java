@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.cache.support.NoOpCacheManager;
 
-public class NoOpCacheManagerTest {
+public class NoOpCacheManagerTests {
 
 	private CacheManager manager;
 

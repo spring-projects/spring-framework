@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ import org.springframework.util.ObjectUtils;
  * <p>This implementation caches attributes by method after they are first used.
  * If it is ever desirable to allow dynamic changing of cacheable attributes
  * (which is very unlikely), caching could be made configurable.
-
+ *
  * @author Costin Leau
- * @see org.springframework.transaction.interceptor.AbstractFallbackTransactionAttributeSource
+ * @since 3.1
  */
 public abstract class AbstractFallbackCacheOperationSource implements CacheOperationSource {
 
@@ -66,6 +66,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
 	final Map<Object, CacheOperation> attributeCache = new ConcurrentHashMap<Object, CacheOperation>();
+
 
 	/**
 	 * Determine the caching attribute for this method invocation.
@@ -157,6 +158,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		return null;
 	}
 
+
 	/**
 	 * Subclasses need to implement this to return the caching attribute
 	 * for the given method, if any.
@@ -183,8 +185,9 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		return false;
 	}
 
+
 	/**
-	 * Default cache key for the CacheOperationDefinition cache.
+	 * Default cache key for the CacheOperation cache.
 	 */
 	private static class DefaultCacheKey {
 
@@ -215,4 +218,5 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 			return this.method.hashCode() * 29 + (this.targetClass != null ? this.targetClass.hashCode() : 0);
 		}
 	}
+
 }

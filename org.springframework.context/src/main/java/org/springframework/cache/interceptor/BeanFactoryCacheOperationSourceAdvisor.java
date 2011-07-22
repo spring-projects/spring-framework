@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,18 +25,20 @@ import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
  * cache advice bean for methods that are cacheable.
  * 
  * @author Costin Leau
+ * @since 3.1
  */
 @SuppressWarnings("serial")
 public class BeanFactoryCacheOperationSourceAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 
-	private CacheOperationSource cacheDefinitionSource;
+	private CacheOperationSource cacheOperationSource;
 
 	private final CacheOperationSourcePointcut pointcut = new CacheOperationSourcePointcut() {
 		@Override
 		protected CacheOperationSource getCacheOperationSource() {
-			return cacheDefinitionSource;
+			return cacheOperationSource;
 		}
 	};
+
 
 	/**
 	 * Set the cache operation attribute source which is used to find cache
@@ -44,8 +46,8 @@ public class BeanFactoryCacheOperationSourceAdvisor extends AbstractBeanFactoryP
 	 * set on the cache interceptor itself.
 	 * @see CacheInterceptor#setCacheAttributeSource
 	 */
-	public void setCacheDefinitionSource(CacheOperationSource cacheDefinitionSource) {
-		this.cacheDefinitionSource = cacheDefinitionSource;
+	public void setCacheOperationSource(CacheOperationSource cacheOperationSource) {
+		this.cacheOperationSource = cacheOperationSource;
 	}
 
 	/**
@@ -59,4 +61,5 @@ public class BeanFactoryCacheOperationSourceAdvisor extends AbstractBeanFactoryP
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}
+
 }

@@ -14,29 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.cache;
+package org.springframework.cache.support;
 
-import java.util.Collection;
+import org.springframework.cache.Cache.ValueWrapper;
 
 /**
- * A manager for a set of {@link Cache}s.
+ * Straightforward implementation of {@link org.springframework.cache.Cache.ValueWrapper}.
  *
  * @author Costin Leau
  * @since 3.1
  */
-public interface CacheManager {
+public class ValueWrapperImpl implements ValueWrapper {
 
-	/**
-	 * Return the cache associated with the given name.
-	 * @param name cache identifier (must not be <code>null</code>)
-	 * @return associated cache, or <code>null</code> if none is found
-	 */
-	Cache getCache(String name);
+	private final Object value;
 
-	/**
-	 * Return a collection of the caches known by this cache manager.
-	 * @return names of caches known by the cache manager.
-	 */
-	Collection<String> getCacheNames();
+	public ValueWrapperImpl(Object value) {
+		this.value = value;
+	}
+
+	public Object get() {
+		return this.value;
+	}
 
 }

@@ -17,11 +17,11 @@
 	
 	<bean id="cacheInterceptor" class="org.springframework.cache.interceptor.CacheInterceptor">
 		<property name="cacheManager" ref="cacheManager"/>
-		<property name="cacheDefinitionSources" ref="annotationSource"/>
+		<property name="cacheOperationSources" ref="annotationSource"/>
 	</bean>
 	
 	<bean id="advisor" class="org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor">
-		<property name="cacheDefinitionSource" ref="annotationSource"/>
+		<property name="cacheOperationSource" ref="annotationSource"/>
 		<property name="adviceBeanName" value="cacheInterceptor"/>
 	</bean>
 	

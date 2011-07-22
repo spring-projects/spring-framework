@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,73 +16,67 @@
 
 package org.springframework.cache;
 
-
 /**
  * Interface that defines the common cache operations.
- * 
+ *
  * <b>Note:</b> Due to the generic use of caching, it is recommended that 
  * implementations allow storage of <tt>null</tt> values (for example to 
- * cache methods that return null).
- * 
+ * cache methods that return <code>null</code>).
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 public interface Cache {
+
+	/**
+	 * Return the cache name.
+	 */
+	String getName();
+
+	/**
+	 * Return the the underlying native cache provider.
+	 */
+	Object getNativeCache();
+
+	/**
+	 * Return the value to which this cache maps the specified key. Returns
+	 * <code>null</code> if the cache contains no mapping for this key.
+	 * @param key key whose associated value is to be returned.
+	 * @return the value to which this cache maps the specified key,
+	 * or <code>null</code> if the cache contains no mapping for this key
+	 */
+	ValueWrapper get(Object key);
+
+	/**
+	 * Associate the specified value with the specified key in this cache.
+	 * <p>If the cache previously contained a mapping for this key, the old
+	 * value is replaced by the specified value.
+	 * @param key the key with which the specified value is to be associated
+	 * @param value the value to be associated with the specified key
+	 */
+	void put(Object key, Object value);
+
+	/**
+	 * Evict the mapping for this key from this cache if it is present.
+	 * @param key the key whose mapping is to be removed from the cache
+	 */
+	void evict(Object key);
+
+	/**
+	 * Remove all mappings from the cache.
+	 */
+	void clear();
+
 
 	/**
 	 * A (wrapper) object representing a cache value.
 	 */
 	interface ValueWrapper {
+
 		/**
-		 * Returns the actual value in the cache.
-		 *  
-		 * @return cache value
+		 * Return the actual value in the cache.
 		 */
 		Object get();
 	}
 
-	/**
-	 * Returns the cache name.
-	 * 
-	 * @return the cache name.
-	 */
-	String getName();
-
-	/**
-	 * Returns the the native, underlying cache provider.
-	 * 
-	 * @return the underlying native cache provider.
-	 */
-	Object getNativeCache();
-
-	/**
-	 * Returns the value to which this cache maps the specified key. Returns
-	 * <tt>null</tt> if the cache contains no mapping for this key.
-	 * 
-	 * @param key key whose associated value is to be returned.
-	 * @return the value to which this cache maps the specified key, or
-	 *	       <tt>null</tt> if the cache contains no mapping for this key.
-	 */
-	ValueWrapper get(Object key);
-
-	/**
-	 * Associates the specified value with the specified key in this cache.
-	 * If the cache previously contained a mapping for this key, the old 
-	 * value is replaced by the specified value.
-	 *
-	 * @param key key with which the specified value is to be associated.
-	 * @param value value to be associated with the specified key.
-	 */
-	void put(Object key, Object value);
-
-	/**
-	 * Evicts the mapping for this key from this cache if it is present.
-	 *
-	 * @param key key whose mapping is to be removed from the cache.
-	 */
-	void evict(Object key);
-
-	/**
-	 * Removes all mappings from the cache.
-	 */
-	void clear();
 }

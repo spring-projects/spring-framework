@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.support;
+package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
 
-import org.springframework.cache.KeyGenerator;
+import org.springframework.cache.interceptor.KeyGenerator;
 
 /**
- * Default key generator. Returns 0 if no param is given, the param itself if only one is given or a hash code computed
- * from all given params hash code. Uses a constant (53) for null objects.
- * 
+ * Default key generator. Returns 0 if no param is given, the param itself if
+ * only one is given or a hash code computed from all given params hash code.
+ * Uses a constant (53) for <code>null</code> objects.
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 public class DefaultKeyGenerator implements KeyGenerator {
 
@@ -32,17 +34,14 @@ public class DefaultKeyGenerator implements KeyGenerator {
 		if (params.length == 1) {
 			return (params[0] == null ? 53 : params[0]);
 		}
-
 		if (params.length == 0) {
 			return 0;
 		}
-
 		int hashCode = 17;
-
 		for (Object object : params) {
 			hashCode = 31 * hashCode + (object == null ? 53 : object.hashCode());
 		}
-
 		return Integer.valueOf(hashCode);
 	}
+
 }

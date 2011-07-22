@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,53 +20,62 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.springframework.cache.Cache;
+import org.springframework.util.Assert;
 
 /**
- * Interface describing the root object used during the expression evaluation.
- * 
+ * Class describing the root object used during the expression evaluation.
+ *
  * @author Costin Leau
+ * @since 3.1
  */
-interface CacheExpressionRootObject {
+class CacheExpressionRootObject {
 
-	/**
-	 * Returns the name of the method being cached.
-	 * 
-	 * @return name of the cached method.
-	 */
-	String getMethodName();
+	private final Collection<Cache> caches;
 
-	/**
-	 * Returns the method being cached.
-	 * 
-	 * @return method being cached
-	 */
-	Method getMethod();
+	private final Method method;
 
-	/**
-	 * Returns the parameters for this invocation.
-	 * 
-	 * @return params for this invocation.
-	 */
-	Object[] getParams();
+	private final Object[] args;
 
-	/**
-	 * Returns the target instance being cached.
-	 * 
-	 * @return target instance
-	 */
-	Object getTarget();
+	private final Object target;
 
-	/**
-	 * Returns the target class.
-	 * 
-	 * @return target class
-	 */
-	Class<?> getTargetClass();
+	private final Class<?> targetClass;
 
-	/**
-	 * Returns the caches against which the method is executed.
-	 * 
-	 * @return current cache
-	 */
-	Collection<Cache> getCaches();
+
+	public CacheExpressionRootObject(
+			Collection<Cache> caches, Method method, Object[] args, Object target, Class<?> targetClass) {
+
+		Assert.notNull(method, "Method is required");
+		Assert.notNull(targetClass, "targetClass is required");
+		this.method = method;
+		this.target = target;
+		this.targetClass = targetClass;
+		this.args = args;
+		this.caches = caches;
+	}
+
+
+	public Collection<Cache> getCaches() {
+		return this.caches;
+	}
+
+	public Method getMethod() {
+		return this.method;
+	}
+
+	public String getMethodName() {
+		return this.method.getName();
+	}
+
+	public Object[] getArgs() {
+		return this.args;
+	}
+
+	public Object getTarget() {
+		return this.target;
+	}
+
+	public Class<?> getTargetClass() {
+		return this.targetClass;
+	}
+
 }

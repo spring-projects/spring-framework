@@ -29,11 +29,12 @@ import org.springframework.cache.CacheManager;
 /**
  * A basic, no operation {@link CacheManager} implementation suitable for disabling caching, 
  * typically used for backing cache declarations without an actual backing store.
- * 
- * Will simply accept any items into the cache not actually storing them.
- * 
- * @see CompositeCacheManager
+ *
+ * <p>Will simply accept any items into the cache not actually storing them.
+ *
  * @author Costin Leau
+ * @since 3.1
+ * @see CompositeCacheManager
  */
 public class NoOpCacheManager implements CacheManager {
 

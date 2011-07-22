@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,26 @@ import java.util.Collection;
 import org.springframework.cache.Cache;
 
 /**
- * Simple cache manager working against a given collection of caches. Useful for testing or simple
- * caching declarations. 
- * 
+ * Simple cache manager working against a given collection of caches.
+ * Useful for testing or simple caching declarations.
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 public class SimpleCacheManager extends AbstractCacheManager {
 
 	private Collection<Cache> caches;
 
-	@Override
-	protected Collection<Cache> loadCaches() {
-		return caches;
-	}
-
+	/**
+	 * Specify the collection of Cache instances to use for this CacheManager.
+	 */
 	public void setCaches(Collection<Cache> caches) {
 		this.caches = caches;
 	}
+
+	@Override
+	protected Collection<Cache> loadCaches() {
+		return this.caches;
+	}
+
 }

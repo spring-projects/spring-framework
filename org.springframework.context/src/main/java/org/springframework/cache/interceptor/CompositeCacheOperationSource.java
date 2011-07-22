@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,40 +24,42 @@ import org.springframework.util.Assert;
 /**
  * Composite {@link CacheOperationSource} implementation that iterates
  * over a given array of {@link CacheOperationSource} instances.
- * 
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 @SuppressWarnings("serial")
 public class CompositeCacheOperationSource implements CacheOperationSource, Serializable {
 
-	private final CacheOperationSource[] cacheDefinitionSources;
+	private final CacheOperationSource[] cacheOperationSources;
+
 
 	/**
-	 * Create a new CompositeCachingDefinitionSource for the given sources.
-	 * @param cacheDefinitionSourcess the CacheDefinitionSource instances to combine
+	 * Create a new CompositeCacheOperationSource for the given sources.
+	 * @param cacheOperationSources the CacheOperationSource instances to combine
 	 */
-	public CompositeCacheOperationSource(CacheOperationSource[] cacheDefinitionSources) {
-		Assert.notNull(cacheDefinitionSources, "cacheDefinitionSource array must not be null");
-		this.cacheDefinitionSources = cacheDefinitionSources;
+	public CompositeCacheOperationSource(CacheOperationSource... cacheOperationSources) {
+		Assert.notEmpty(cacheOperationSources, "cacheOperationSources array must not be empty");
+		this.cacheOperationSources = cacheOperationSources;
 	}
 
+
 	/**
-	 * Return the CacheDefinitionSource instances that this
-	 * CompositeCachingDefinitionSource combines.
+	 * Return the CacheOperationSource instances that this CompositeCachingDefinitionSource combines.
 	 */
-	public final CacheOperationSource[] getCacheDefinitionSources() {
-		return this.cacheDefinitionSources;
+	public final CacheOperationSource[] getCacheOperationSources() {
+		return this.cacheOperationSources;
 	}
 
 
 	public CacheOperation getCacheOperation(Method method, Class<?> targetClass) {
-		for (CacheOperationSource source : cacheDefinitionSources) {
+		for (CacheOperationSource source : this.cacheOperationSources) {
 			CacheOperation definition = source.getCacheOperation(method, targetClass);
 			if (definition != null) {
 				return definition;
 			}
 		}
-
 		return null;
 	}
+
 }

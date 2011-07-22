@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,28 @@
 package org.springframework.cache.interceptor;
 
 /**
- * Class describing an 'evict' operation.  
- * 
+ * Class describing a cache 'evict' operation.
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 public class CacheEvictOperation extends CacheOperation {
 
 	private boolean cacheWide = false;
 
-	public boolean isCacheWide() {
-		return cacheWide;
-	}
-
 	public void setCacheWide(boolean cacheWide) {
 		this.cacheWide = cacheWide;
+	}
+
+	public boolean isCacheWide() {
+		return this.cacheWide;
 	}
 
 	@Override
 	protected StringBuilder getOperationDescription() {
 		StringBuilder sb = super.getOperationDescription();
 		sb.append(",");
-		sb.append(cacheWide);
+		sb.append(this.cacheWide);
 		return sb;
 	}
 }

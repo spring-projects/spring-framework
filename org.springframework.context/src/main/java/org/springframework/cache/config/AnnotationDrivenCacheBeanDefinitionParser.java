@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cache.config;
 
-import static org.springframework.context.annotation.AnnotationConfigUtils.*;
+import org.w3c.dom.Element;
 
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -29,7 +29,8 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor;
 import org.springframework.cache.interceptor.CacheInterceptor;
-import org.w3c.dom.Element;
+
+import static org.springframework.context.annotation.AnnotationConfigUtils.*;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
@@ -43,6 +44,7 @@ import org.w3c.dom.Element;
  * will result in class-based proxies being created.
  * 
  * @author Costin Leau
+ * @since 3.1
  */
 class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser {
 
@@ -111,7 +113,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 			if (!parserContext.getRegistry().containsBeanDefinition(CACHE_ADVISOR_BEAN_NAME)) {
 				Object eleSource = parserContext.extractSource(element);
 
-				// Create the CacheDefinitionSource definition.
+				// Create the CacheOperationSource definition.
 				RootBeanDefinition sourceDef = new RootBeanDefinition(AnnotationCacheOperationSource.class);
 				sourceDef.setSource(eleSource);
 				sourceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -122,14 +124,14 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				interceptorDef.setSource(eleSource);
 				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				registerCacheManagerProperty(element, interceptorDef);
-				interceptorDef.getPropertyValues().add("cacheDefinitionSources", new RuntimeBeanReference(sourceName));
+				interceptorDef.getPropertyValues().add("cacheOperationSource", new RuntimeBeanReference(sourceName));
 				String interceptorName = parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
 
 				// Create the CacheAdvisor definition.
 				RootBeanDefinition advisorDef = new RootBeanDefinition(BeanFactoryCacheOperationSourceAdvisor.class);
 				advisorDef.setSource(eleSource);
 				advisorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-				advisorDef.getPropertyValues().add("cacheDefinitionSource", new RuntimeBeanReference(sourceName));
+				advisorDef.getPropertyValues().add("cacheOperationSource", new RuntimeBeanReference(sourceName));
 				advisorDef.getPropertyValues().add("adviceBeanName", interceptorName);
 				if (element.hasAttribute("order")) {
 					advisorDef.getPropertyValues().add("order", element.getAttribute("order"));
@@ -145,4 +147,5 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 			}
 		}
 	}
+
 }

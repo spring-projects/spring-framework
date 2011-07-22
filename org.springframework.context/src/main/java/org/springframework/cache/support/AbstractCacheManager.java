@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,57 +29,50 @@ import org.springframework.cache.CacheManager;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class implementing the common CacheManager methods. Useful for 'static' environments where the
- * backing caches do not change.
- * 
+ * Abstract base class implementing the common CacheManager methods.
+ * Useful for 'static' environments where the backing caches do not change.
+ *
  * @author Costin Leau
+ * @author Juergen Hoeller
+ * @since 3.1
  */
 public abstract class AbstractCacheManager implements CacheManager, InitializingBean {
 
-	// fast lookup by name map
-	private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
-	private Collection<String> names;
+	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>();
+
+	private Set<String> cacheNames = new LinkedHashSet<String>();
+
 
 	public void afterPropertiesSet() {
-		Collection<Cache> cacheSet = loadCaches();
-
-		Assert.notEmpty(cacheSet);
-
-		caches.clear();
+		Collection<Cache> caches = loadCaches();
+		Assert.notEmpty(caches, "loadCaches must not return an empty Collection");
+		this.cacheMap.clear();
 
 		// preserve the initial order of the cache names
-		Set<String> cacheNames = new LinkedHashSet<String>(cacheSet.size());
-
-		for (Cache cache : cacheSet) {
-			caches.put(cache.getName(), cache);
-			cacheNames.add(cache.getName());
+		for (Cache cache : caches) {
+			this.cacheMap.put(cache.getName(), cache);
+			this.cacheNames.add(cache.getName());
 		}
-
-		names = Collections.unmodifiableSet(cacheNames);
 	}
 
-	/**
-	 * Loads the caches into the cache manager. Occurs at startup.
-	 * The returned collection should not be null.
-	 * 
-	 * @param caches the collection of caches handled by the manager
-	 */
-	protected abstract Collection<Cache> loadCaches();
-
-	/**
-	 * Returns the internal cache map.
-	 * 
-	 * @return internal cache map
-	 */
-	protected final ConcurrentMap<String, Cache> getCacheMap() {
-		return caches;
+	protected final void addCache(Cache cache) {
+		this.cacheMap.put(cache.getName(), cache);
+		this.cacheNames.add(cache.getName());
 	}
 
 	public Cache getCache(String name) {
-		return caches.get(name);
+		return this.cacheMap.get(name);
 	}
 
 	public Collection<String> getCacheNames() {
-		return names;
+		return Collections.unmodifiableSet(this.cacheNames);
 	}
+
+
+	/**
+	 * Load the caches for this cache manager. Occurs at startup.
+	 * The returned collection must not be null.
+	 */
+	protected abstract Collection<Cache> loadCaches();
+
 }

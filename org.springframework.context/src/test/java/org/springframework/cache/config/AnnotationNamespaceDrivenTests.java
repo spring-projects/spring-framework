@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.cache;
+package org.springframework.cache.config;
 
-import java.lang.reflect.Method;
 
 /**
- * Cache 'key' extractor. Used for creating a key based on the given method
- * (used as context) and its parameters.
- * 
  * @author Costin Leau
  */
-public interface KeyGenerator {
+public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
 
-	Object extract(Object target, Method method, Object... params);
+	@Override
+	protected String getConfig() {
+		return "/org/springframework/cache/config/annotationDrivenCacheNamespace.xml";
+	}
+
 }
