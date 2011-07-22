@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 
 /**
- * Concrete AspectJ cache aspect using Spring {@link Cacheable} annotation
- * for JDK 1.5+.
- * 
+ * Concrete AspectJ cache aspect using Spring's {@link Cacheable} annotation.
+ *
  * <p>When using this aspect, you <i>must</i> annotate the implementation class
  * (and/or methods within that class), <i>not</i> the interface (if any) that
  * the class implements. AspectJ follows Java's rule that annotations on 
@@ -37,8 +36,9 @@ import org.springframework.cache.annotation.Cacheable;
  * Any method may be annotated (regardless of visibility).
  * Annotating non-public methods directly is the only way
  * to get caching demarcation for the execution of such operations.
- * 
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 public aspect AnnotationCacheAspect extends AbstractCacheAspect {
 
@@ -83,4 +83,5 @@ public aspect AnnotationCacheAspect extends AbstractCacheAspect {
 		(executionOfAnyPublicMethodInAtCacheableType() || executionOfAnyPublicMethodInAtCacheEvictType()
 		 || executionOfCacheableMethod() || executionOfCacheEvictMethod())
 		 && this(cachedObject);
+
 }

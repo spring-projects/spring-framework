@@ -13,7 +13,7 @@
 	
 	<bean id="cacheAspect" class="org.springframework.cache.aspectj.AnnotationCacheAspect" factory-method="aspectOf">
 		<property name="cacheManager" ref="cacheManager"/>
-		<property name="cacheDefinitionSources" ref="annotationSource"/>
+		<property name="cacheOperationSource" ref="annotationSource"/>
 	</bean>
 	
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
