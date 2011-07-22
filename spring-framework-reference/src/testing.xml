@@ -1110,19 +1110,10 @@ public class ExtendedTest extends BaseTest {
         <interfacename>@ContextConfiguration</interfacename>. You may use setter
         injection, field injection, or both, depending on which annotations
         you choose and whether you place them on setter methods or fields. For
-        consistency with the annotation support introduced in Spring 2.5, you
+        consistency with the annotation support introduced in Spring 3.0, you
         can use Spring's <interfacename>@Autowired</interfacename> annotation
-        or the <interfacename>@Resource</interfacename> annotation from JSR
-        250. As of Spring 3.0 you may alternatively use the 
-        <interfacename>@Inject</interfacename> annotation from JSR 330. For
-        example, if you prefer <link
-        linkend="beans-factory-autowire"><emphasis>autowiring by
-        type</emphasis></link>, annotate your setter methods or fields with
-        <interfacename>@Autowired</interfacename> or
-        <interfacename>@Inject</interfacename>. If you prefer to have your
-        dependencies injected <emphasis>by name</emphasis>, annotate your
-        setter methods or fields with
-        <interfacename>@Resource</interfacename>.</para>
+        or the <interfacename>@Inject</interfacename> annotation from JSR
+        300. </para>
 
         <tip>
           <para>The TestContext framework does not instrument the manner in
@@ -1132,27 +1123,24 @@ public class ExtendedTest extends BaseTest {
           effect for test classes.</para>
         </tip>
 
-        <para>Because <interfacename>@Autowired</interfacename> performs <link
+        <para>Because <interfacename>@Autowired</interfacename> used solely performs <link
         linkend="beans-factory-autowire"><emphasis>autowiring by
         type</emphasis></link>, if you have multiple bean definitions of the
         same type, you cannot rely on this approach for those particular
-        beans. In that case, you can use
-        <interfacename>@Resource</interfacename> for injection <emphasis>by
-        name</emphasis>. Alternatively, if your test class has access to its
-        <classname>ApplicationContext</classname>, you can perform an explicit
-        lookup by using (for example) a call to
-        <methodname>applicationContext.getBean("titleRepository")</methodname>. A
-        third option is to use <interfacename>@Autowired</interfacename> in
+        beans. In that case, you can use <interfacename>@Autowired</interfacename> in
         conjunction with <interfacename>@Qualifier</interfacename>. As of 
         Spring 3.0 you may also choose to use 
         <interfacename>@Inject</interfacename> in conjunction with 
-        <interfacename>@Named</interfacename>.</para>
+        <interfacename>@Named</interfacename>.
+        Alternatively, if your test class has access to its
+        <classname>ApplicationContext</classname>, you can perform an explicit
+        lookup by using (for example) a call to
+        <methodname>applicationContext.getBean("titleRepository")</methodname>. </para>
 
         <para>If you do not want dependency injection applied to your test
         instances, simply do not annotate fields or setter methods with
-        <interfacename>@Autowired</interfacename>,
-        <interfacename>@Inject</interfacename> or
-        <interfacename>@Resource</interfacename>. Alternatively, you can
+        <interfacename>@Autowired</interfacename> or
+        <interfacename>@Inject</interfacename>. Alternatively, you can
         disable dependency injection altogether by explicitly configuring your
         class with <interfacename>@TestExecutionListeners</interfacename> and
         omitting
@@ -1161,10 +1149,9 @@ public class ExtendedTest extends BaseTest {
 
         <para>Consider the scenario of testing a
         <classname>HibernateTitleRepository</classname> class, as outlined in the <link
-        linkend="integration-testing-goals">Goals</link> section. The next four
-        code listings demonstrate the use of <interfacename>@Autowired</interfacename>
-        and <interfacename>@Resource</interfacename> on fields and
-        setter methods. The application context configuration is presented
+        linkend="integration-testing-goals">Goals</link> section. The next two
+        code listings demonstrate the use of <interfacename>@Autowired</interfacename> on fields 
+        and setter methods. The application context configuration is presented
         after all sample code listings.</para>
 
         <note>
@@ -1227,49 +1214,7 @@ public class HibernateTitleRepositoryTests {
     }
 }</programlisting>
 
-        <para>The following is an example of using <interfacename>@Resource</interfacename>
-        for field injection.</para>
-
-        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
-<emphasis role="bold">@ContextConfiguration("repository-config.xml")</emphasis>
-public class HibernateTitleRepositoryTests {
-
-    <lineannotation>// this instance will be dependency injected <emphasis
-              role="bold">by name</emphasis></lineannotation>
-    <emphasis role="bold">@Resource</emphasis>
-    private HibernateTitleRepository titleRepository;
-
-    @Test
-    public void loadTitle() {
-        Title title = titleRepository.loadTitle(new Long(10));
-        assertNotNull(title);
-    }
-}</programlisting>
-
-        <para>Here is an example of using <interfacename>@Resource</interfacename>
-        for setter injection.</para>
-
-        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// specifies the Spring configuration to load for this test fixture</lineannotation>
-<emphasis role="bold">@ContextConfiguration("repository-config.xml")</emphasis>
-public class HibernateTitleRepositoryTests {
-
-    <lineannotation>// this instance will be dependency injected <emphasis
-              role="bold">by name</emphasis></lineannotation>
-    private HibernateTitleRepository titleRepository;
-    
-    <emphasis role="bold">@Resource</emphasis>
-    public void setTitleRepository(HibernateTitleRepository titleRepository) {
-        this.titleRepository = titleRepository;
-    }
-
-    @Test
-    public void loadTitle() {
-        Title title = titleRepository.loadTitle(new Long(10));
-        assertNotNull(title);
-    }
-}</programlisting>
+        
 
         <para>The preceding code listings use the same XML context file
         referenced by the <interfacename>@ContextConfiguration</interfacename>
@@ -1325,26 +1270,7 @@ public class HibernateTitleRepositoryTests {
           also point to a specific bean by name there (as shown above,
           assuming that "myDataSource" is the bean id).</para>
 
-          <para>Alternatively, consider using the
-          <interfacename>@Resource</interfacename> annotation on such
-          overridden setter methods. This allows you to specify the name of
-          the target bean explicitly, but without type matching semantics.
-          In contrast to the solution above that combined 
-          <interfacename>@Autowired</interfacename> and
-          <interfacename>@Qualifier</interfacename>, using 
-          <interfacename>@Resource</interfacename> results in the 
-          selection of a bean with that specific name, regardless of
-          how many beans of the given type exist in the context.</para>
-
-          <programlisting language="java"><lineannotation>// ...</lineannotation>
-
-    <emphasis role="bold">@Resource("myDataSource")</emphasis>
-    @Override
-    public void setDataSource(DataSource dataSource) {
-        super.setDataSource(dataSource);
-    }
-
-<lineannotation>// ...</lineannotation></programlisting>
+          
         </note>
       </section>
 

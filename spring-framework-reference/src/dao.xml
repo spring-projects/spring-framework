@@ -87,7 +87,7 @@ public class SomeMovieFinder implements MovieFinder {
     <interfacename>DataSource</interfacename>; a JPA-based repository will need
     access to an <interfacename>EntityManager</interfacename>. The easiest way
     to accomplish this is to have this resource dependency injected using one of
-    the <interfacename>@Autowired,</interfacename>
+    the <interfacename>@Autowired,</interfacename>, <interfacename>@Inject</interfacename>,
     <interfacename>@Resource</interfacename> or
     <interfacename>@PersistenceContext</interfacename> annotations. Here is an
     example for a JPA repository:</para>

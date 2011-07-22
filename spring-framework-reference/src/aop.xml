@@ -2869,8 +2869,8 @@ public class Account {
       autowiring by type or by name respectively. As an alternative, as of
       Spring 2.5 it is preferable to specify explicit, annotation-driven 
       dependency injection for your <interfacename>@Configurable</interfacename> 
-      beans by using <interfacename>@Autowired</interfacename> and
-      <interfacename>@Resource</interfacename> at the field or method level (see 
+      beans by using <interfacename>@Autowired</interfacename> or
+      <interfacename>@Inject</interfacename> at the field or method level (see 
       <xref linkend="beans-annotation-config" /> for further details).</para>
 
       <para>Finally you can enable Spring dependency checking for the object
