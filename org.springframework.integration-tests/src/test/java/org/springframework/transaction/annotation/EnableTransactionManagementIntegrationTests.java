@@ -184,7 +184,7 @@ public class EnableTransactionManagementIntegrationTests {
 		public CacheManager cacheManager() {
 			SimpleCacheManager mgr = new SimpleCacheManager();
 			ArrayList<Cache> caches = new ArrayList<Cache>();
-			caches.add(new ConcurrentMapCache());
+			caches.add(new ConcurrentMapCache(""));
 			mgr.setCaches(caches);
 			return mgr;
 		}
