@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,25 @@ package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
 
-
 /**
  * Interface used by CacheInterceptor. Implementations know
  * how to source cache operation attributes, whether from configuration,
  * metadata attributes at source level, or anywhere else.
- * 
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 public interface CacheOperationSource {
 
 	/**
-	 * Return the cache operation definition for this method.
-	 * Return null if the method is not cacheable.
-	 * @param method method
-	 * @param targetClass target class. May be <code>null</code>, in which
-	 * case the declaring class of the method must be used.
+	 * Return the cache operation definition for this method,
+	 * or <code>null</code> if the method is not cacheable.
+	 * @param method the method to introspect
+	 * @param targetClass the target class (may be <code>null</code>,
+	 * in which case the declaring class of the method must be used)
 	 * @return {@link CacheOperation} the matching cache operation,
 	 * or <code>null</code> if none found
 	 */
 	CacheOperation getCacheOperation(Method method, Class<?> targetClass);
+
 }

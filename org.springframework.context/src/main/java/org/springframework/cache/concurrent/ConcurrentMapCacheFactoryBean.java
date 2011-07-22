@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,45 +24,78 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.StringUtils;
 
 /**
- * Factory bean for easy configuration of {@link ConcurrentMapCache} through Spring.
- * 
+ * {@link FactoryBean} for easy configuration of a {@link ConcurrentMapCache}
+ * when used within a Spring container. Can be configured through bean properties;
+ * uses the assigned Spring bean name as the default cache name.
+ *
+ * <p>Useful for testing or simple caching scenarios, typically in combination
+ * with {@link org.springframework.cache.support.SimpleCacheManager} or
+ * dynamically through {@link ConcurrentMapCacheManager}.
+ *
  * @author Costin Leau
+ * @author Juergen Hoeller
+ * @since 3.1
  */
-public class ConcurrentMapCacheFactoryBean implements FactoryBean<ConcurrentMapCache>, BeanNameAware,
-		InitializingBean {
+public class ConcurrentMapCacheFactoryBean
+		implements FactoryBean<ConcurrentMapCache>, BeanNameAware, InitializingBean {
 
 	private String name = "";
+
+	private ConcurrentMap<Object, Object> store;
+
+	private boolean allowNullValues = true;
+
 	private ConcurrentMapCache cache;
 
-	private ConcurrentMap store;
 
-	public void afterPropertiesSet() {
-		cache = (store == null ? new ConcurrentMapCache(name) : new ConcurrentMapCache(store, name, true));
+	/**
+	 * Specify the name of the cache.
+	 * <p>Default is "" (empty String).
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public ConcurrentMapCache getObject() throws Exception {
-		return cache;
+	/**
+	 * Specify the ConcurrentMap to use as an internal store
+	 * (possibly pre-populated).
+	 * <p>Default is a standard {@link java.util.concurrent.ConcurrentHashMap}.
+	 */
+	public void setStore(ConcurrentMap<Object, Object> store) {
+		this.store = store;
+	}
+
+	/**
+	 * Set whether to allow <code>null</code> values
+	 * (adapting them to an internal null holder value).
+	 * <p>Default is "true".
+	 */
+	public void setAllowNullValues(boolean allowNullValues) {
+		this.allowNullValues = allowNullValues;
+	}
+
+	public void setBeanName(String beanName) {
+		if (!StringUtils.hasLength(this.name)) {
+			setName(beanName);
+		}
+	}
+
+	public void afterPropertiesSet() {
+		this.cache = (this.store != null ? new ConcurrentMapCache(this.name, this.store, this.allowNullValues) :
+				new ConcurrentMapCache(this.name, this.allowNullValues));
+	}
+
+
+	public ConcurrentMapCache getObject() {
+		return this.cache;
 	}
 
 	public Class<?> getObjectType() {
-		return (cache != null ? cache.getClass() : ConcurrentMapCache.class);
+		return ConcurrentMapCache.class;
 	}
 
 	public boolean isSingleton() {
 		return true;
 	}
 
-	public void setBeanName(String beanName) {
-		if (!StringUtils.hasText(name)) {
-			setName(beanName);
-		}
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setStore(ConcurrentMap store) {
-		this.store = store;
-	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean {
 	 * @param cacheDefinitionSources cache definition sources
 	 */
 	public void setCacheDefinitionSources(CacheOperationSource... cacheDefinitionSources) {
-		this.cachingInterceptor.setCacheDefinitionSources(cacheDefinitionSources);
+		this.cachingInterceptor.setCacheOperationSources(cacheDefinitionSources);
 	}
 
 }

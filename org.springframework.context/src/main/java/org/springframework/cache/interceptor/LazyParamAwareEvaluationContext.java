@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,21 +28,27 @@ import org.springframework.util.ObjectUtils;
  * Evaluation context class that adds a method parameters as SpEL variables,
  * in a lazy manner. The lazy nature eliminates unneeded parsing of classes
  * byte code for parameter discovery.
- * 
- * To limit the creation of objects, an ugly constructor is used (rather then a
- * dedicated 'closure'-like class for deferred execution).
- * 
+ *
+ * <p>To limit the creation of objects, an ugly constructor is used (rather then
+ * a dedicated 'closure'-like class for deferred execution).
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 
 	private final ParameterNameDiscoverer paramDiscoverer;
+
 	private final Method method;
+
 	private final Object[] args;
-	private Class<?> targetClass;
-	private Map<Method, Method> methodCache;
+
+	private final Class<?> targetClass;
+
+	private final Map<Method, Method> methodCache;
 
 	private boolean paramLoaded = false;
+
 
 	LazyParamAwareEvaluationContext(Object rootObject, ParameterNameDiscoverer paramDiscoverer, Method method,
 			Object[] args, Class<?> targetClass, Map<Method, Method> methodCache) {
@@ -55,6 +61,7 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 		this.methodCache = methodCache;
 	}
 
+
 	/**
 	 * Load the param information only when needed.
 	 */
@@ -64,42 +71,41 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 		if (variable != null) {
 			return variable;
 		}
-
-		if (!paramLoaded) {
-			paramLoaded = true;
+		if (!this.paramLoaded) {
 			loadArgsAsVariables();
+			this.paramLoaded = true;
 			variable = super.lookupVariable(name);
 		}
-
 		return variable;
 	}
 
 	private void loadArgsAsVariables() {
 		// shortcut if no args need to be loaded
-		if (ObjectUtils.isEmpty(args)) {
+		if (ObjectUtils.isEmpty(this.args)) {
 			return;
 		}
 
-		Method targetMethod = methodCache.get(method);
+		Method targetMethod = this.methodCache.get(this.method);
 		if (targetMethod == null) {
-			targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+			targetMethod = AopUtils.getMostSpecificMethod(this.method, this.targetClass);
 			if (targetMethod == null) {
-				targetMethod = method;
+				targetMethod = this.method;
 			}
-			methodCache.put(method, targetMethod);
+			this.methodCache.put(this.method, targetMethod);
 		}
 
 		// save arguments as indexed variables
-		for (int i = 0; i < args.length; i++) {
-			super.setVariable("p" + i, args[i]);
+		for (int i = 0; i < this.args.length; i++) {
+			setVariable("p" + i, this.args[i]);
 		}
 
-		String[] parameterNames = paramDiscoverer.getParameterNames(targetMethod);
+		String[] parameterNames = this.paramDiscoverer.getParameterNames(targetMethod);
 		// save parameter names (if discovered)
 		if (parameterNames != null) {
 			for (int i = 0; i < parameterNames.length; i++) {
-				super.setVariable(parameterNames[i], args[i]);
+				setVariable(parameterNames[i], this.args[i]);
 			}
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,86 +17,129 @@
 package org.springframework.cache.concurrent;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.support.DefaultValueWrapper;
+import org.springframework.cache.support.ValueWrapperImpl;
 
 /**
- * Simple {@link Cache} implementation based on the JDK 1.5+
- * java.util.concurrent package. Useful for testing or simple caching scenarios.
+ * Simple {@link Cache} implementation based on the core JDK
+ * <code>java.util.concurrent</code> package.
  *
- * <b>Note:</b>As {@link ConcurrentHashMap} (the default implementation used) does not allow null values to be stored 
- * this class will replace them with a predefined, internal object. This behaviour can be changed through the {@link #ConcurrentMapCache(ConcurrentMap, String, boolean)}
- * constructor.
- * 
+ * <p>Useful for testing or simple caching scenarios, typically in combination
+ * with {@link org.springframework.cache.support.SimpleCacheManager} or
+ * dynamically through {@link ConcurrentMapCacheManager}.
+ *
+ * <p><b>Note:</b> As {@link ConcurrentHashMap} (the default implementation used)
+ * does not allow for <code>null</code> values to be stored, this class will replace
+ * them with a predefined internal object. This behavior can be changed through the
+ * {@link #ConcurrentMapCache(String, ConcurrentMap, boolean)} constructor.
+ *
  * @author Costin Leau
+ * @author Juergen Hoeller
+ * @since 3.1
  */
 public class ConcurrentMapCache implements Cache {
 
-	private static class NullHolder implements Serializable {
-		private static final long serialVersionUID = 1L;
-	}
-
 	private static final Object NULL_HOLDER = new NullHolder();
-	private final ConcurrentMap store;
+
 	private final String name;
+
+	private final ConcurrentMap<Object, Object> store;
+
 	private final boolean allowNullValues;
 
-	public ConcurrentMapCache() {
-		this("");
-	}
 
+	/**
+	 * Create a new ConcurrentMapCache with the specified name.
+	 * @param name the name of the cache
+	 */
 	public ConcurrentMapCache(String name) {
-		this(new ConcurrentHashMap(), name, true);
+		this(name, new ConcurrentHashMap<Object, Object>(), true);
 	}
 
-	public ConcurrentMapCache(ConcurrentMap delegate, String name, boolean allowNullValues) {
-		this.store = delegate;
+	/**
+	 * Create a new ConcurrentMapCache with the specified name.
+	 * @param name the name of the cache
+	 */
+	public ConcurrentMapCache(String name, boolean allowNullValues) {
+		this(name, new ConcurrentHashMap<Object, Object>(), allowNullValues);
+	}
+
+	/**
+	 * Create a new ConcurrentMapCache with the specified name and the
+	 * given internal ConcurrentMap to use.
+	 * @param name the name of the cache
+	 * @param store the ConcurrentMap to use as an internal store
+	 * @param allowNullValues whether to allow <code>null</code> values
+	 * (adapting them to an internal null holder value)
+	 */
+	public ConcurrentMapCache(String name, ConcurrentMap<Object, Object> store, boolean allowNullValues) {
 		this.name = name;
+		this.store = store;
 		this.allowNullValues = allowNullValues;
 	}
 
-	public String getName() {
-		return name;
-	}
 
-	public boolean getAllowNullValues() {
-		return allowNullValues;
+	public String getName() {
+		return this.name;
 	}
 
 	public ConcurrentMap getNativeCache() {
-		return store;
+		return this.store;
 	}
 
-	public void clear() {
-		store.clear();
+	public boolean isAllowNullValues() {
+		return this.allowNullValues;
 	}
 
 	public ValueWrapper get(Object key) {
-		Object v = store.get(key);
-		return (v != null ? new DefaultValueWrapper(filterNull(v)) : null);
+		Object value = this.store.get(key);
+		return (value != null ? new ValueWrapperImpl(fromStoreValue(value)) : null);
 	}
 
 	public void put(Object key, Object value) {
-		if (allowNullValues && value == null) {
-			Map map = store;
-			map.put(key, NULL_HOLDER);
-		} else {
-			store.put(key, value);
-		}
+		this.store.put(key, toStoreValue(value));
 	}
 
 	public void evict(Object key) {
-		store.remove(key);
+		this.store.remove(key);
 	}
 
-	protected Object filterNull(Object val) {
-		if (allowNullValues && val == NULL_HOLDER) {
+	public void clear() {
+		this.store.clear();
+	}
+
+
+	/**
+	 * Convert the given value from the internal store to a user value
+	 * returned from the get method (adapting <code>null</code>).
+	 * @param userValue the store value
+	 * @return the value to return to the user
+	 */
+	protected Object fromStoreValue(Object storeValue) {
+		if (this.allowNullValues && storeValue == NULL_HOLDER) {
 			return null;
 		}
-		return val;
+		return storeValue;
 	}
+
+	/**
+	 * Convert the given user value, as passed into the put method,
+	 * to a value in the internal store (adapting <code>null</code>).
+	 * @param userValue the given user value
+	 * @return the value to store
+	 */
+	protected Object toStoreValue(Object userValue) {
+		if (this.allowNullValues && userValue == null) {
+			return NULL_HOLDER;
+		}
+		return userValue;
+	}
+
+
+	private static class NullHolder implements Serializable {
+	}
+
 }

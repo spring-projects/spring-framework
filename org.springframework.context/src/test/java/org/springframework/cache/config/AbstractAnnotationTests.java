@@ -31,7 +31,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * 
  * @author Costin Leau
  */
-public abstract class AbstractAnnotationTest {
+public abstract class AbstractAnnotationTests {
 
 	protected ApplicationContext ctx;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,53 +21,57 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.support.DefaultValueWrapper;
+import org.springframework.cache.support.ValueWrapperImpl;
 import org.springframework.util.Assert;
 
 /**
  * {@link Cache} implementation on top of an {@link Ehcache} instance.
- * 
+ *
  * @author Costin Leau
+ * @author Juergen Hoeller
+ * @since 3.1
  */
 public class EhCacheCache implements Cache {
 
 	private final Ehcache cache;
 
+
 	/**
-	 * Creates a {@link EhCacheCache} instance.
-	 * 
+	 * Create an {@link EhCacheCache} instance.
 	 * @param ehcache backing Ehcache instance
 	 */
 	public EhCacheCache(Ehcache ehcache) {
-		Assert.notNull(ehcache, "non null ehcache required");
+		Assert.notNull(ehcache, "Ehcache must not be null");
 		Status status = ehcache.getStatus();
-		Assert.isTrue(Status.STATUS_ALIVE.equals(status), "an 'alive' ehcache is required - current cache is "
-				+ status.toString());
+		Assert.isTrue(Status.STATUS_ALIVE.equals(status),
+				"An 'alive' Ehcache is required - current cache is " + status.toString());
 		this.cache = ehcache;
 	}
 
+
 	public String getName() {
-		return cache.getName();
+		return this.cache.getName();
 	}
 
 	public Ehcache getNativeCache() {
-		return cache;
+		return this.cache;
 	}
 
 	public void clear() {
-		cache.removeAll();
+		this.cache.removeAll();
 	}
 
 	public ValueWrapper get(Object key) {
-		Element element = cache.get(key);
-		return (element != null ? new DefaultValueWrapper(element.getObjectValue()) : null);
+		Element element = this.cache.get(key);
+		return (element != null ? new ValueWrapperImpl(element.getObjectValue()) : null);
 	}
 
 	public void put(Object key, Object value) {
-		cache.put(new Element(key, value));
+		this.cache.put(new Element(key, value));
 	}
 
 	public void evict(Object key) {
-		cache.remove(key);
+		this.cache.remove(key);
 	}
+
 }

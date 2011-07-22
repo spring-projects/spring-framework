@@ -27,7 +27,7 @@ import org.springframework.cache.Cache;
  * 
  * @author Costin Leau
  */
-public abstract class AbstractNativeCacheTest<T> {
+public abstract class AbstractNativeCacheTests<T> {
 
 	protected T nativeCache;
 	protected Cache cache;

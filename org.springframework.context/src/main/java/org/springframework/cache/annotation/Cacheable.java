@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,12 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation indicating that a method (or all the methods on a class) can be cached.
- * The method arguments and signature are used for computing the key while the return instance
- * as the cache value.
- * 
+ *
+ * <p>The method arguments and signature are used for computing the key while the
+ * returned instance is used as the cache value.
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

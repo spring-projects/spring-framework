@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.concurrent.Callable;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.util.ReflectionUtils;
+
 /**
  * AOP Alliance MethodInterceptor for declarative cache
  * management using the common Spring caching infrastructure
@@ -34,8 +36,10 @@ import org.aopalliance.intercept.MethodInvocation;
  * in the correct order.
  *
  * <p>CacheInterceptors are thread-safe.
- * 
+ *
  * @author Costin Leau
+ * @author Juergen Hoeller
+ * @since 3.1
  */
 @SuppressWarnings("serial")
 public class CacheInterceptor extends CacheAspectSupport implements MethodInterceptor, Serializable {
@@ -44,19 +48,18 @@ public class CacheInterceptor extends CacheAspectSupport implements MethodInterc
 		Method method = invocation.getMethod();
 
 		Callable<Object> aopAllianceInvocation = new Callable<Object>() {
-
 			public Object call() throws Exception {
 				try {
 					return invocation.proceed();
-				} catch (Throwable th) {
-					if (th instanceof Exception) {
-						throw (Exception) th;
-					}
-					throw (Error) th;
+				}
+				catch (Throwable ex) {
+					ReflectionUtils.rethrowException(ex);
+					return null;
 				}
 			}
 		};
 
 		return execute(aopAllianceInvocation, invocation.getThis(), method, invocation.getArguments());
 	}
+
 }

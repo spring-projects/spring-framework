@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@ import java.lang.annotation.Target;
 /**
  * Annotation indicating that a method (or all methods on a class) trigger(s)
  * a cache invalidate operation.
- *  
+ *
  * @author Costin Leau
+ * @since 3.1
  */
-@Target( { ElementType.METHOD, ElementType.TYPE })
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
@@ -44,24 +45,22 @@ public @interface CacheEvict {
 
 	/**
 	 * Spring Expression Language (SpEL) attribute for computing the key dynamically.
-	 * <p/>
-	 * Default is "" meaning all method parameters are considered as a key.
+	 * <p>Default is "", meaning all method parameters are considered as a key.
 	 */
 	String key() default "";
 
 	/**
 	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching. 
-	 * <p/>
-	 * Default is "" meaning the method is always cached.
+	 * <p>Default is "", meaning the method is always cached.
 	 */
 	String condition() default "";
 
 	/**
 	 * Whether or not all the entries inside the cache(s) are removed or not. By
 	 * default, only the value under the associated key is removed.
-	 * 
-	 * Note that specifying setting this parameter to true and specifying a
+	 * <p>Note that specifying setting this parameter to true and specifying a
 	 * {@link CacheKey key} is not allowed.
 	 */
 	boolean allEntries() default false;
+
 }

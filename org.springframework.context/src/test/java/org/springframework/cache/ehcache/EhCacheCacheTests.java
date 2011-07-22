@@ -22,14 +22,14 @@ import net.sf.ehcache.Element;
 
 import org.junit.Test;
 import org.springframework.cache.Cache;
-import org.springframework.cache.vendor.AbstractNativeCacheTest;
+import org.springframework.cache.vendor.AbstractNativeCacheTests;
 
 /**
  * Integration test for EhCache cache.
  * 
  * @author Costin Leau
  */
-public class EhCacheCacheTest extends AbstractNativeCacheTest<Ehcache> {
+public class EhCacheCacheTests extends AbstractNativeCacheTests<Ehcache> {
 
 	@Override
 	protected Ehcache createNativeCache() throws Exception {

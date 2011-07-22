@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2010-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.support;
+package org.springframework.cache.config;
 
-import org.springframework.cache.Cache.ValueWrapper;
 
 /**
- * Default implementation for {@link org.springframework.cache.Cache.ValueWrapper}.
- * 
  * @author Costin Leau
  */
-public class DefaultValueWrapper implements ValueWrapper {
+public class AnnotationTests extends AbstractAnnotationTests {
 
-	private final Object value;
-
-	public DefaultValueWrapper(Object value) {
-		this.value = value;
-	}
-
-	public Object get() {
-		return value;
+	@Override
+	protected String getConfig() {
+		return "/org/springframework/cache/config/annotationDrivenCacheConfig.xml";
 	}
 }

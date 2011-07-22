@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,51 +27,55 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Utility class handling the SpEL expression parsing.
  * Meant to be used as a reusable, thread-safe component.
- * 
- * Performs internal caching for performance reasons. 
- * 
+ *
+ * <p>Performs internal caching for performance reasons.
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 class ExpressionEvaluator {
 
 	private SpelExpressionParser parser = new SpelExpressionParser();
+
 	// shared param discoverer since it caches data internally
 	private ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
 	private Map<Method, Expression> conditionCache = new ConcurrentHashMap<Method, Expression>();
+
 	private Map<Method, Expression> keyCache = new ConcurrentHashMap<Method, Expression>();
+
 	private Map<Method, Method> targetMethodCache = new ConcurrentHashMap<Method, Method>();
 
-	EvaluationContext createEvaluationContext(Collection<Cache> caches, Method method, Object[] args,
-			Object target, Class<?> targetClass) {
-		DefaultCacheExpressionRootObject rootObject = new DefaultCacheExpressionRootObject(caches, method, args,
-				target, targetClass);
-		StandardEvaluationContext evaluationContext = new LazyParamAwareEvaluationContext(rootObject,
-				paramNameDiscoverer, method, args, targetClass, targetMethodCache);
 
-		return evaluationContext;
+	public EvaluationContext createEvaluationContext(
+			Collection<Cache> caches, Method method, Object[] args, Object target, Class<?> targetClass) {
+
+		CacheExpressionRootObject rootObject =
+				new CacheExpressionRootObject(caches, method, args, target, targetClass);
+		return new LazyParamAwareEvaluationContext(rootObject,
+				this.paramNameDiscoverer, method, args, targetClass, this.targetMethodCache);
 	}
 
-	boolean condition(String conditionExpression, Method method, EvaluationContext evalContext) {
-		Expression condExp = conditionCache.get(method);
+	public boolean condition(String conditionExpression, Method method, EvaluationContext evalContext) {
+		Expression condExp = this.conditionCache.get(method);
 		if (condExp == null) {
-			condExp = parser.parseExpression(conditionExpression);
-			conditionCache.put(method, condExp);
+			condExp = this.parser.parseExpression(conditionExpression);
+			this.conditionCache.put(method, condExp);
 		}
 		return condExp.getValue(evalContext, boolean.class);
 	}
 
-	Object key(String keyExpression, Method method, EvaluationContext evalContext) {
-		Expression keyExp = keyCache.get(method);
+	public Object key(String keyExpression, Method method, EvaluationContext evalContext) {
+		Expression keyExp = this.keyCache.get(method);
 		if (keyExp == null) {
-			keyExp = parser.parseExpression(keyExpression);
-			keyCache.put(method, keyExp);
+			keyExp = this.parser.parseExpression(keyExpression);
+			this.keyCache.put(method, keyExp);
 		}
 		return keyExp.getValue(evalContext);
 	}
+
 }
