@@ -18,6 +18,7 @@ package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
 import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -142,7 +143,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 					HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
 		}
 
-		if (!StringUtils.hasText(path) || path.contains("WEB-INF") || path.contains("META-INF")) {
+		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Ignoring invalid resource path [" + path + "]");
 			}
@@ -172,6 +173,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		return null;
 	}
 
+	/**
+	 * Returns {@code true} if the given path is not a valid resource path.
+	 * The default implementation rejects paths containing "WEB-INF" or "META-INF" as well as paths with
+	 * relative paths ("../") that result in access of a parent directory. 
+	 */
+	protected boolean isInvalidPath(String path) {
+		return (path.contains("WEB-INF") || path.contains("META-INF") || StringUtils.cleanPath(path).startsWith(".."));
+	}
+	
 	/**
 	 * Determine an appropriate media type for the given resource.
 	 * @param resource the resource to check

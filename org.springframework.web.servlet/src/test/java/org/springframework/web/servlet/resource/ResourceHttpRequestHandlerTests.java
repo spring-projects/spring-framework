@@ -123,6 +123,22 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
+	public void getResourceViaDirectoryTraversal() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("GET");
+
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "../testsecret/secret.txt");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		handler.handleRequest(request, response);
+		assertEquals(404, response.getStatus());
+
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "test/../../testsecret/secret.txt");
+		response = new MockHttpServletResponse();
+		handler.handleRequest(request, response);
+		assertEquals(404, response.getStatus());
+	}
+
+	@Test
 	public void notModified() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/foo.css");
