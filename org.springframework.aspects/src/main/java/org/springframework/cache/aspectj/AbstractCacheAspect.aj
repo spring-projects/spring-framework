@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,9 @@ import org.springframework.cache.interceptor.CacheOperationSource;
  * <p><b>NB:</b> If a method implements an interface that is itself
  * cache annotated, the relevant Spring cache definition
  * will <i>not</i> be resolved.
-
+ *
  * @author Costin Leau
+ * @since 3.1
  */
 public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 
@@ -50,7 +51,7 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 	 * cache metadata for each joinpoint.
 	 */
 	protected AbstractCacheAspect(CacheOperationSource... cos) {
-		setCacheDefinitionSources(cos);
+		setCacheOperationSources(cos);
 	}
 
 	@SuppressAjWarnings("adviceDidNotMatch")
@@ -59,7 +60,6 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 		Method method = methodSignature.getMethod();
 
 		Callable<Object> ajInvocation = new Callable<Object>() {
-
 			public Object call() {
 				return proceed(cachedObject);
 			}
@@ -67,7 +67,8 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 
 		try {
 			return execute(ajInvocation, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new UnsupportedOperationException("Should not throw exception", ex);
 		}
 	}
@@ -78,4 +79,5 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 	 * will be retrieved using Spring's {@link CacheOperationSource} interface.
 	 */
 	protected abstract pointcut cacheMethodExecution(Object cachedObject);
+
 }
