@@ -20,8 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Iterator;
 
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -97,7 +95,6 @@ public class MockMultipartFile implements MultipartFile {
 
 		this(name, originalFilename, contentType, FileCopyUtils.copyToByteArray(contentStream));
 	}
-
 
 	public String getName() {
 		return this.name;
