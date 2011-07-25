@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa.support;
 
 import java.io.IOException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -27,9 +26,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -47,10 +47,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * as for non-transactional read-only execution.
  *
  * <p>Looks up the EntityManagerFactory in Spring's root web application context.
- * Supports a "entityManagerFactoryBeanName" filter init-param in <code>web.xml</code>;
- * the default bean name is "entityManagerFactory". Looks up the EntityManagerFactory
- * on each request, to avoid initialization order issues (when using ContextLoaderServlet,
- * the root application context will get initialized <i>after</i> this filter).
+ * Supports an "entityManagerFactoryBeanName" filter init-param in <code>web.xml</code>;
+ * the default bean name is "entityManagerFactory". As an alternative, the
+ * "persistenceUnitName" init-param allows for retrieval by logical unit name
+ * (as specified in <code>persistence.xml</code>).
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -63,15 +63,28 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 
-	public static final String DEFAULT_PERSISTENCE_MANAGER_FACTORY_BEAN_NAME = "entityManagerFactory";
+	/**
+	 * Default EntityManagerFactory bean name: "entityManagerFactory".
+	 * Only applies when no "persistenceUnitName" param has been specified.
+	 * @see #setEntityManagerFactoryBeanName
+	 * @see #setPersistenceUnitName
+	 */
+	public static final String DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME = "entityManagerFactory";
 
-	private String entityManagerFactoryBeanName = DEFAULT_PERSISTENCE_MANAGER_FACTORY_BEAN_NAME;
+	private String entityManagerFactoryBeanName;
+
+	private String persistenceUnitName;
+
+	private volatile EntityManagerFactory entityManagerFactory;
 
 
 	/**
 	 * Set the bean name of the EntityManagerFactory to fetch from Spring's
-	 * root application context. Default is "entityManagerFactory".
-	 * @see #DEFAULT_PERSISTENCE_MANAGER_FACTORY_BEAN_NAME
+	 * root application context.
+	 * <p>Default is "entityManagerFactory". Note that this default only applies
+	 * when no "persistenceUnitName" param has been specified.
+	 * @see #setPersistenceUnitName
+	 * @see #DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME
 	 */
 	public void setEntityManagerFactoryBeanName(String entityManagerFactoryBeanName) {
 		this.entityManagerFactoryBeanName = entityManagerFactoryBeanName;
@@ -83,6 +96,27 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 */
 	protected String getEntityManagerFactoryBeanName() {
 		return this.entityManagerFactoryBeanName;
+	}
+
+	/**
+	 * Set the name of the persistence unit to access the EntityManagerFactory for.
+	 * <p>This is an alternative to specifying the EntityManagerFactory by bean name,
+	 * resolving it by its persistence unit name instead. If no bean name and no persistence
+	 * unit name have been specified, we'll check whether a bean exists for the default
+	 * bean name "entityManagerFactory"; if not, a default EntityManagerFactory will
+	 * be retrieved through finding a single unique bean of type EntityManagerFactory.
+	 * @see #setEntityManagerFactoryBeanName
+	 * @see #DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME
+	 */
+	public void setPersistenceUnitName(String persistenceUnitName) {
+		this.persistenceUnitName = persistenceUnitName;
+	}
+
+	/**
+	 * Return the name of the persistence unit to access the EntityManagerFactory for, if any.
+	 */
+	protected String getPersistenceUnitName() {
+		return this.persistenceUnitName;
 	}
 
 
@@ -126,29 +160,39 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Look up the EntityManagerFactory that this filter should use,
 	 * taking the current HTTP request as argument.
-	 * <p>Default implementation delegates to the <code>lookupEntityManagerFactory</code>
-	 * without arguments.
+	 * <p>The default implementation delegates to the <code>lookupEntityManagerFactory</code>
+	 * without arguments, caching the EntityManagerFactory reference once obtained.
 	 * @return the EntityManagerFactory to use
 	 * @see #lookupEntityManagerFactory()
 	 */
 	protected EntityManagerFactory lookupEntityManagerFactory(HttpServletRequest request) {
-		return lookupEntityManagerFactory();
+		if (this.entityManagerFactory == null) {
+			this.entityManagerFactory = lookupEntityManagerFactory();
+		}
+		return this.entityManagerFactory;
 	}
 
 	/**
 	 * Look up the EntityManagerFactory that this filter should use.
-	 * The default implementation looks for a bean with the specified name
+	 * <p>The default implementation looks for a bean with the specified name
 	 * in Spring's root application context.
 	 * @return the EntityManagerFactory to use
 	 * @see #getEntityManagerFactoryBeanName
 	 */
 	protected EntityManagerFactory lookupEntityManagerFactory() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Using EntityManagerFactory '" + getEntityManagerFactoryBeanName() +
-					"' for OpenEntityManagerInViewFilter");
-		}
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-		return wac.getBean(getEntityManagerFactoryBeanName(), EntityManagerFactory.class);
+		String emfBeanName = getEntityManagerFactoryBeanName();
+		String puName = getPersistenceUnitName();
+		if (StringUtils.hasLength(emfBeanName)) {
+			return wac.getBean(emfBeanName, EntityManagerFactory.class);
+		}
+		else if (!StringUtils.hasLength(puName) && wac.containsBean(DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME)) {
+			return wac.getBean(DEFAULT_ENTITY_MANAGER_FACTORY_BEAN_NAME, EntityManagerFactory.class);
+		}
+		else {
+			// Includes fallback search for single EntityManagerFactory bean by type.
+			return EntityManagerFactoryUtils.findEntityManagerFactory(wac, puName);
+		}
 	}
 
 	/**

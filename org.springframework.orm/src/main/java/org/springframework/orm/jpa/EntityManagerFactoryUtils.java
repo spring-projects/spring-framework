@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Helper class featuring methods for JPA EntityManager handling,
@@ -80,7 +81,8 @@ public abstract class EntityManagerFactoryUtils {
 	 * the persistence unit name will be matched against the Spring bean name,
 	 * assuming that the EntityManagerFactory bean names follow that convention.
 	 * @param beanFactory the ListableBeanFactory to search
-	 * @param unitName the name of the persistence unit (never empty)
+	 * @param unitName the name of the persistence unit (may be <code>null</code> or empty,
+	 * in which case a single bean of type EntityManagerFactory will be searched for)
 	 * @return the EntityManagerFactory
 	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
 	 * @see EntityManagerFactoryInfo#getPersistenceUnitName()
@@ -89,22 +91,25 @@ public abstract class EntityManagerFactoryUtils {
 			ListableBeanFactory beanFactory, String unitName) throws NoSuchBeanDefinitionException {
 
 		Assert.notNull(beanFactory, "ListableBeanFactory must not be null");
-		Assert.hasLength(unitName, "Unit name must not be empty");
-
-		// See whether we can find an EntityManagerFactory with matching persistence unit name.
-		String[] candidateNames =
-				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, EntityManagerFactory.class);
-		for (String candidateName : candidateNames) {
-			EntityManagerFactory emf = (EntityManagerFactory) beanFactory.getBean(candidateName);
-			if (emf instanceof EntityManagerFactoryInfo) {
-				if (unitName.equals(((EntityManagerFactoryInfo) emf).getPersistenceUnitName())) {
-					return emf;
+		if (StringUtils.hasLength(unitName)) {
+			// See whether we can find an EntityManagerFactory with matching persistence unit name.
+			String[] candidateNames =
+					BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, EntityManagerFactory.class);
+			for (String candidateName : candidateNames) {
+				EntityManagerFactory emf = (EntityManagerFactory) beanFactory.getBean(candidateName);
+				if (emf instanceof EntityManagerFactoryInfo) {
+					if (unitName.equals(((EntityManagerFactoryInfo) emf).getPersistenceUnitName())) {
+						return emf;
+					}
 				}
 			}
+			// No matching persistence unit found - simply take the EntityManagerFactory
+			// with the persistence unit name as bean name (by convention).
+			return beanFactory.getBean(unitName, EntityManagerFactory.class);
 		}
-		// No matching persistence unit found - simply take the EntityManagerFactory
-		// with the persistence unit name as bean name (by convention).
-		return beanFactory.getBean(unitName, EntityManagerFactory.class);
+		else {
+			return BeanFactoryUtils.beanOfType(beanFactory, EntityManagerFactory.class);
+		}
 	}
 
 	/**

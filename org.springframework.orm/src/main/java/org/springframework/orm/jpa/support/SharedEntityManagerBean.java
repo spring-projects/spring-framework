@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 	 * @see javax.persistence.EntityManager
 	 */
 	public void setEntityManagerInterface(Class<? extends EntityManager> entityManagerInterface) {
-		Assert.notNull(entityManagerInterface, "entityManagerInterface must not be null");
+		Assert.notNull(entityManagerInterface, "'entityManagerInterface' must not be null");
 		Assert.isAssignable(EntityManager.class, entityManagerInterface);
 		this.entityManagerInterface = entityManagerInterface;
 	}
@@ -76,7 +76,7 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 	public final void afterPropertiesSet() {
 		EntityManagerFactory emf = getEntityManagerFactory();
 		if (emf == null) {
-			throw new IllegalArgumentException("entityManagerFactory is required");
+			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
 		}
 		Class[] ifcs = null;
 		if (emf instanceof EntityManagerFactoryInfo) {
