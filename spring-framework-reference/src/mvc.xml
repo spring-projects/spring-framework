@@ -1538,166 +1538,139 @@ public ResponseEntity&lt;String&gt; handle(HttpEntity&lt;byte[]&gt; requestEntit
       </section>
 
       <section id="mvc-ann-modelattrib-methods">
-        <title>Using <interfacename>@ModelAttribute</interfacename> on a controller method</title>
+        <title>Using <interfacename>@ModelAttribute</interfacename> on a method</title>
         
-        <para>The <interfacename>@ModelAttribute</interfacename> annotation can be used on a 
-        method or on a method argument. This section explains its usage on a method while the 
-        next section explains its usage on a method argument.</para>
+        <para>The <interfacename>@ModelAttribute</interfacename> annotation can be used on 
+        methods or on method arguments. This section explains its usage on methods while the 
+        next section explains its usage on method arguments.</para>
         
-        <para>An <interfacename>@ModelAttribute</interfacename> on a method indicates a method 
-        for adding model attributes. A few examples:</para>
+        <para>An <interfacename>@ModelAttribute</interfacename> on a method indicates the purpose
+        of that method is to add one or more model attributes. Such methods support the same 
+        argument types as <interfacename>@RequestMapping</interfacename> methods but cannot
+        be mapped directly to requests. Instead <interfacename>@ModelAttribute</interfacename>
+        methods in a controller are invoked before <interfacename>@RequestMapping</interfacename> 
+        methods, within the same controller. A couple of examples:</para>
         
-        <programlisting language="java">@ModelAttribute
-public void populateModel(Model model) {
-    model.addAttribute("types", this.clinic.getPetTypes();
-    // add more attributes ...
-}
-
-@ModelAttribute
-public void addAccount(@RequestParam String number, Model model) {
-    Account account = accountManager.findAccount(number);
-    model.addAttribute(account);
-}
+        <programlisting language="java">
+// Add one attribute
+// The return value of the method is added to the model under the name "account"
+// You can customize the name via @ModelAttribute("myAccount")
 
 @ModelAttribute
 public Account addAccount(@RequestParam String number) {
     return accountManager.findAccount(number);
 }
+
+// Add multiple attributes
+
+@ModelAttribute
+public void populateModel(@RequestParam String number, Model model) {
+    model.addAttribute(accountManager.findAccount(number));
+    // add more ...
+}
 </programlisting>        
 
-        <para><interfacename>@ModelAttribute</interfacename> methods are not associated
-        with any request mappings. Simply they are invoked prior 
-        to the invocation of every 
-        <interfacename>@RequestMapping</interfacename> method in the same controller.
-        In terms of method arguments they support the same argument types as 
-        <interfacename>@RequestMapping</interfacename> methods, hence allowing access to request 
-        parameters, path variables, and so on -- see <xref linkend="mvc-ann-arguments"/>
-        for a complete listing.</para>
-
-        <para>There are two common use cases for <interfacename>@ModelAttribute</interfacename>
-        methods. One, is to add commonly needed model attributes - see the first example 
-        above where the model is populated with pet types to be shown in a drop-down. 
-        The second use case is to pre-load a command object - see the second and third 
-        examples above with the Account object (more on command objects in the next section).</para>
+        <para><interfacename>@ModelAttribute</interfacename> methods are used to populate 
+        the model with commonly needed attributes for example to fill a drop-down with 
+        states or with pet types, or to retrieve a command object like Account in order
+        to use it to represent the data on an HTML form. The latter case is further 
+        discussed in the next section.</para>
 
 		<para>Note the two styles of <interfacename>@ModelAttribute</interfacename> methods.
-		In one style, the method accepts a <classname>Model</classname> and adds any number 
-		of model attributes to it. In the second style, the method adds an attribute implicitly 
-		by having it as its return value. That results in the object being added as an
-		attribute to the model. You can choose between the two styles depending on 
-		whether you need to add one model attribute or multiple.</para>
+		In the first, the method adds an attribute implicitly 
+		by returning it. In the second, the method accepts a <classname>Model</classname> 
+		and adds any number of model attributes to it. 
+		You can choose between the two styles depending on your needs.</para>
 
         <para>A controller can have any number of <interfacename>@ModelAttribute</interfacename> 
         methods. All such methods are invoked before <interfacename>@RequestMapping</interfacename> 
-        methods within the same controller each contributing model attributes.</para>
+        methods of the same controller.</para>
 		
-		<para>What happens when a model attribute name is not explicitly provided? In such cases
-		a default name is assigned to the model attribute.
-		For example if the method returns an object of type <classname>Account</classname>,
-		the default name used is "account". However, you can also change it to something else
-		through the value of the <interfacename>@ModelAttribute</interfacename> annotation. 
-		Or if adding attributes directly to the <classname>Model</classname>, use the 
-		appropriate overloaded <literal>addAttribute(..)</literal> method providing
-		both the attribute name and the attribute value.</para>
+		<tip>
+			<para>What happens when a model attribute name is not explicitly specified? 
+			In such cases a default name is assigned to the model attribute based on its type.
+			For example if the method returns an object of type <classname>Account</classname>,
+			the default name used is "account". You can change that through
+			the value of the <interfacename>@ModelAttribute</interfacename> annotation. 
+			If adding attributes directly to the <classname>Model</classname>, use the 
+			appropriate overloaded <literal>addAttribute(..)</literal> method - i.e.
+			with or without an attribute name.</para>
+		</tip>
 
-		<para>Lastly the <interfacename>@ModelAttribute</interfacename> annotation can also 
-		be used directly on an <interfacename>@RequestMapping</interfacename> method. In this 
-		cause, the return value of the <interfacename>@RequestMapping</interfacename> method 
-		will be added as a model attribute and the view name will be derived using 
-		a convention -- see <xref linkend="mvc-coc-r2vnt"/>.</para>
+		<para>The <interfacename>@ModelAttribute</interfacename> annotation can be used on
+		<interfacename>@RequestMapping</interfacename> methods as well. In that case 
+		the return value of the <interfacename>@RequestMapping</interfacename> method 
+		is interpreted as a model attribute rather than as a view name. 
+		The view name is derived from view name conventions instead much like for methods
+		returning void -- see <xref linkend="mvc-coc-r2vnt"/>.</para>
 		
       </section>
 
       <section id="mvc-ann-modelattrib-method-args">
-        <title>Using <interfacename>@ModelAttribute</interfacename> on a controller method argument</title>
+        <title>Using <interfacename>@ModelAttribute</interfacename> on a method argument</title>
         
-        <para>As explained in the previous section an <interfacename>@ModelAttribute</interfacename>
-        annotation can be used on a method or on a method argument. When used on a method argument,
-        the <interfacename>@ModelAttribute</interfacename> annotation indicates a command object. A command
-        object is an object with properties (e.g. <classname>Account</classname> rather than 
-        a simple type like <literal>int</literal> or <literal>String</literal>) that is used to 
-        populate a form or reversely to be populated with the data from an HTML form. 
-        As you will see command objects can significantly automate the process of
-        working with forms -- rather than dealing with individual form
-        parameters one at a time you'll be have them in a one command object.</para>
+        <para>As explained in the previous section <interfacename>@ModelAttribute</interfacename>
+        can be used on methods or on method arguments. This section explains its usage on 
+        method arguments.</para>
         
-        <para>To be more precise annotating a method argument with 
-        <interfacename>@ModelAttribute</interfacename> means 3 things:
-        <orderedlist>
-        	<listitem>The command object should be located and/or instantiated.</listitem>
-        	<listitem>It should be populated with request parameters from the current request.</listitem>
-        	<listitem>The object should be added to the model.</listitem>
-        </orderedlist>
-        See the following example:
+        <para>An <interfacename>@ModelAttribute</interfacename> on a method argument indicates
+        the argument should be retrieved from the model. If not present in the model, the argument
+        should be instantiated first and then added to the model. Once present in the model, the
+        argument's fields should be populated from all request parameters that have matching names.
+        This is known as data binding in Spring MVC, a very useful mechanism that saves you from 
+        having to parse each form field individually.
         </para>
 
         <programlisting language="java">
 @RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
-public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>) {
+public String processSubmit(<emphasis role="bold">@ModelAttribute Pet pet</emphasis>) {
    
 }</programlisting>
        
-        <para>The <interfacename>@ModelAttribute</interfacename> annotation
-        designates "pet" as a command object. But where does the object come from? There are two options.
-        It may have been added to the model by an <interfacename>@ModelAttribute</interfacename> 
-        method as explained in the previous section. Or otherwise if it's not already in the model, it
-        is instantiated through the default constructor. Typically if the object needs to be retrieved
-        from a database first, you can create an <interfacename>@ModelAttribute</interfacename>
-        method to do that. Or otherwise rely on the default constructor. If multiple methods in the
-        controller work on the same object, you can have it stored in the HTTP session between requests.
-        That is explained in <xref linkend="mvc-ann-sessionattrib"/>.</para>
+        <para>Given the above example where can the Pet instance come from? 
+        There are several options: </para>
         
-        <note>
-        	<title>Using a URI template variable to retrieve a command object</title>
-        	
-        	<para>There is one other more advanced way of instantiating a command object.
-        	It is useful when the command object can be retrieved based on a URI template
-        	variable. Here is an example:</para>
+        <itemizedlist>
+        	<listitem>It may already be in the model due to use of 
+        		<interfacename>@SessionAttributes</interfacename> 
+        		-- see <xref linkend="mvc-ann-sessionattrib"/>.</listitem>
+        	<listitem>It may already be in the model due to an 
+        		<interfacename>@ModelAttribute</interfacename> method in the same 
+        		controller -- as explained in the previous section.</listitem>
+        	<listitem>It may be retrieved based on a URI template variable
+        		and type converter (explained in more detail below).</listitem>
+        	<listitem>It may be instantiated using its default constructor.</listitem>
+        </itemizedlist>
+        
+       	<para>An <interfacename>@ModelAttribute</interfacename> method is a common
+       	way to to retrieve an attribute from the database, which may optionally be
+       	stored between requests through the use of 
+       	<interfacename>@SessionAttributes</interfacename>.
+       	In some cases it may be convenient to retrieve the attribute by using 
+       	an URI template variable and a type converter. Here is an example:</para>
 
-	        <programlisting language="java">
+        <programlisting language="java">
 @RequestMapping(value="/accounts/{account}", method = RequestMethod.PUT)
 public String save(@ModelAttribute("account") Account account) {
 
 }</programlisting>
-			<para>The name of the model attribute "account" matches to the name of a URI 
-			template variable. Assuming there is a registered 
-			<classname>Converter&lt;String, Account&gt;</classname>
-			or <classname>PropertyEditor</classname> that can turn a <literal>String</literal>
-			account number into an <classname>Account</classname> instance, those will be used
-			to provision the command object and have it added to the model. 
-			If such a Converter or PropertyEditor does not exist, however the default 
-			constructor will still be used.</para>
-        </note>
+
+		<para>In this example the name of the model attribute (i.e. "account") 
+		matches the name of a URI template variable. If you register 
+		<classname>Converter&lt;String, Account&gt;</classname>
+		(or <classname>PropertyEditor</classname>) that can turn the 
+		<literal>String</literal>-based account into an <classname>Account</classname>
+		instance, then the above example will work without the need for an
+		<interfacename>@ModelAttribute</interfacename> method.</para>
         
-      </section>
-
-      <section id="mvc-ann-modelattrib-data-binding">
-        <title>Data binding and validation with <interfacename>@ModelAttribute</interfacename></title>
-
-		<para>As mentioned in the previous section an <interfacename>@ModelAttribute</interfacename> 
-		annotation means 3 things:
-        <orderedlist>
-        	<listitem>The command object should be located and/or instantiated.</listitem>
-        	<listitem>It should be populated with request parameters from the current request.</listitem>
-        	<listitem>The object should be added to the model.</listitem>
-        </orderedlist>
-		In this section we'll focus on the second: data binding and validation.</para>
-		
-		<para>After the command object has been provisioned using one of the methods described in the
-		previous section, the next step is to apply data binding and validation.
-		Spring's <classname>WebDataBinder</classname> does that by matching request parameters -- 
-		usually form data fields but can also be query string parameters -- to command object 
-		properties, including properties of nested objects, and populates those properties
-		accordingly also applying type conversion as necessary.
-		For example an object of type <classname>Person</classname> with 
-		properties <literal>firstName</literal> and <literal>age</literal>
-		will be populated assuming the presence of such named form fields.
-		As a result of data binding the command object is populated with the form data.</para>
-		
-		<para>There are various ways to customize the data binding process. 
-		For example you may wish to specify required fields, allowed and disallowed 
-		fields, or extend type conversion. 
-		See <xref linkend="mvc-ann-webdatabinder"/> and also <xref linkend="validation"/>.</para>
+		<para>The next step is data binding. The <classname>WebDataBinder</classname> 
+		class matches request parameter names -- including query string parameters and
+		form fields -- to model attribute fields by name. Matching fields are populated
+		after type conversion (from String to the target field type) has been applied
+		where necessary.
+		Data binding and validation are covered in <xref linkend="validation"/>.
+		Customizing the data binding process for a controller level is covered in 
+		<xref linkend="mvc-ann-webdatabinder"/>.</para>
 
 		<para>As a result of data binding there may be errors such as missing required
 		fields or type conversion errors. To check for such errors 
@@ -1716,11 +1689,11 @@ public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet
 
 }</programlisting>
 		
-		<para><classname>BindingResult</classname> allows you to check if errors were found in 
-		which case it's common to return to the same form where the errors
-		can be rendered with the help of Spring's <literal>&lt;errors&gt;</literal> form tag.</para>
+		<para>With a <classname>BindingResult</classname> you can check if errors were found in 
+		which case it's common to render the same form where the errors
+		can be shown with the help of Spring's <literal>&lt;errors&gt;</literal> form tag.</para>
 		
-		<para>In addition to data binding you can apply validation using your own custom 
+		<para>In addition to data binding you can also invoke validation using your own custom 
 		validator passing the same <classname>BindingResult</classname> that was used to record
 		data binding errors. That allows for data binding and validation errors to be accumulated
 		in one place and subsequently reported back to the user: </para>
@@ -1752,13 +1725,13 @@ public String processSubmit(<emphasis role="bold">@Valid @ModelAttribute("pet") 
 }</programlisting>
 		
 		<para>See <xref linkend="validation-beanvalidation"/> and 
-		<xref linkend="validation" /> for details on how to configure and use Spring's Validation support.</para>
+		<xref linkend="validation" /> for details on how to configure and use validation.</para>
 
 	  </section>
 
       <section id="mvc-ann-sessionattrib">
-        <title>Specifying attributes to store in a session with
-        <classname>@SessionAttributes</classname></title>
+        <title>Using <classname>@SessionAttributes</classname> to store model attributes
+        	in the HTTP session between requests</title>
 
         <para>The type-level <classname>@SessionAttributes</classname>
         annotation declares session attributes used by a specific handler.
@@ -1786,7 +1759,49 @@ public class EditPetForm {
           </para>
         </note>
       </section>
+      
+      <section id="mvc-ann-form-urlencoded-data">
+        <title>Working with <literal>application/x-www-form-urlencoded</literal> data</title>
 
+		<para>The previous sections covered use of <interfacename>@ModelAttribute</interfacename> 
+		to support form submission requests from browser clients. The same annotation is 
+		recommended for use with requests from non-browser clients as well. However there is 
+		one notable difference when it comes to working with HTTP PUT requests.	
+		Browsers can submit form data via HTTP GET or HTTP POST. Non-browser 
+		clients can also submit forms via HTTP PUT. This presents a challenge because the Servlet 
+		specification requires the <literal>ServletRequest.getParameter*()</literal> family 
+		of methods to support form field access only for HTTP POST, not for HTTP PUT.
+		</para>
+      
+      	<para>To support HTTP PUT requests, the <literal>spring-web</literal> module provides 
+      	the filter <classname>HttpPutFormContentFilter</classname>, which can be configured
+      	in <filename>web.xml</filename>:</para>
+      	
+        <programlisting language="xml">
+&lt;filter&gt;
+  &lt;filter-name&gt;httpPutFormFilter&lt;/filter-name&gt;
+  &lt;filter-class&gt;org.springframework.web.filter.HttpPutFormContentFilter&lt;/filter-class&gt;
+&lt;/filter&gt;
+
+&lt;filter-mapping&gt;
+  &lt;filter-name&gt;httpPutFormFilter&lt;/filter-name&gt;
+  &lt;servlet-name&gt;dispatcherServlet&lt;/servlet-name&gt;
+&lt;/filter-mapping&gt;
+
+&lt;servlet&gt;
+  &lt;servlet-name&gt;dispatcherServlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+&lt;/servlet&gt;
+</programlisting>      	
+
+		<para>The above filter intercepts HTTP PUT requests with content type 
+		<literal>application/x-www-form-urlencoded</literal>, reads the form data from the 
+		body of the request, and wraps the <classname>ServletRequest</classname> in order 
+		to make the form data available through the <literal>ServletRequest.getParameter*()</literal> 
+		family of methods.</para>
+
+	  </section>
+	  
       <section id="mvc-ann-cookievalue">
         <title>Mapping cookie values with the @CookieValue annotation</title>
 
