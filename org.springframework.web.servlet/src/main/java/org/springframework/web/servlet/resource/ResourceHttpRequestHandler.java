@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * for serving static resources.
 	 */
 	public void setLocations(List<Resource> locations) {
-		Assert.notEmpty(locations, "Location list must not be empty");
+		Assert.notEmpty(locations, "Locations list must not be empty");
 		this.locations = locations;
 	}
 
@@ -142,7 +142,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 					HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
 		}
 
-		if (!StringUtils.hasText(path) || path.contains("WEB-INF") || path.contains("META-INF")) {
+		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Ignoring invalid resource path [" + path + "]");
 			}
@@ -170,6 +170,17 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Validates the given path: returns {@code true} if the given path is not a valid resource path.
+	 * <p>The default implementation rejects paths containing "WEB-INF" or "META-INF" as well as paths
+	 * with relative paths ("../") that result in access of a parent directory.
+	 * @param path the path to validate
+	 * @return {@code true} if the path has been recognized as invalid, {@code false} otherwise
+	 */
+	protected boolean isInvalidPath(String path) {
+		return (path.contains("WEB-INF") || path.contains("META-INF") || StringUtils.cleanPath(path).startsWith(".."));
 	}
 
 	/**

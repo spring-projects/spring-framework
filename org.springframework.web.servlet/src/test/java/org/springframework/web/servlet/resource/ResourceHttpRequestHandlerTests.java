@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,6 +30,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerMapping;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -117,6 +118,22 @@ public class ResourceHttpRequestHandlerTests {
 		handler.handleRequest(request, response);
 		assertEquals("text/javascript", response.getContentType());
 		assertEquals("function foo() { console.log(\"hello world\"); }", response.getContentAsString());
+	}
+
+	@Test
+	public void getResourceViaDirectoryTraversal() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("GET");
+
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "../testsecret/secret.txt");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		handler.handleRequest(request, response);
+		assertEquals(404, response.getStatus());
+
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "test/../../testsecret/secret.txt");
+		response = new MockHttpServletResponse();
+		handler.handleRequest(request, response);
+		assertEquals(404, response.getStatus());
 	}
 
 	@Test
