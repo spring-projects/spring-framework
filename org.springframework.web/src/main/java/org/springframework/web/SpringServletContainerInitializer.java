@@ -16,21 +16,17 @@
 
 package org.springframework.web;
 
-import static org.springframework.beans.BeanUtils.instantiateClass;
-
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
-
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
@@ -94,14 +90,13 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  * recommendations.<p>
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see #onStartup(Set, ServletContext)
  * @see WebApplicationInitializer
  */
 @HandlesTypes(WebApplicationInitializer.class)
 public class SpringServletContainerInitializer implements ServletContainerInitializer {
-
-	private static final Log logger = LogFactory.getLog(SpringServletContainerInitializer.class);
 
 	/**
 	 * Delegate the {@code ServletContext} to any {@link WebApplicationInitializer}
@@ -129,39 +124,43 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	 * or any other Servlet API componentry such as filters.
 	 *
 	 * @param webAppInitializerClasses all implementations of
-	 * {@link WebApplicationInitializer} found on the application classpath.
+	 * {@link WebApplicationInitializer} found on the application classpath
 	 * @param servletContext the servlet context to be initialized
 	 * @see WebApplicationInitializer#onStartup(ServletContext)
 	 * @see AnnotationAwareOrderComparator
 	 */
-	public void onStartup(Set<Class<?>> webAppInitializerClasses,
-	                      ServletContext servletContext) throws ServletException {
+	public void onStartup(Set<Class<?>> webAppInitializerClasses, ServletContext servletContext)
+			throws ServletException {
 
-		ArrayList<WebApplicationInitializer> initializers = new ArrayList<WebApplicationInitializer>();
+		List<WebApplicationInitializer> initializers = new LinkedList<WebApplicationInitializer>();
 
 		if (webAppInitializerClasses != null) {
 			for (Class<?> waiClass : webAppInitializerClasses) {
-				if (!Modifier.isAbstract(waiClass.getModifiers())) {
-					// the class can be instantiated -> add it
-					initializers.add(instantiateClass(waiClass, WebApplicationInitializer.class));
+				// Be defensive: Some servlet containers provide us with invalid classes,
+				// no matter what @HandlesTypes says...
+				if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
+						WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
+					try {
+						initializers.add((WebApplicationInitializer) waiClass.newInstance());
+					}
+					catch (Throwable ex) {
+						throw new ServletException("Failed to instantiate WebApplicationInitializer class", ex);
+					}
 				}
 			}
 		}
 
 		if (initializers.isEmpty()) {
-			logger.info("Detected no WebApplicationInitializer types on the classpath: exiting.");
+			servletContext.log("No Spring WebApplicationInitializer types detected on classpath");
 			return;
 		}
 
 		Collections.sort(initializers, new AnnotationAwareOrderComparator());
-
-		logger.info("Delegating ServletContext to the following " +
-				"WebApplicationInitializer instances: " + initializers);
+		servletContext.log("Spring WebApplicationInitializers detected on classpath: " + initializers);
 
 		for (WebApplicationInitializer initializer : initializers) {
 			initializer.onStartup(servletContext);
 		}
-
 	}
 
 }
