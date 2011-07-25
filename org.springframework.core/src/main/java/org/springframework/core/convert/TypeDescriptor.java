@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,13 +80,13 @@ public class TypeDescriptor {
 
 	private Object value;
 
-	private TypeDescriptor elementType;
+	private volatile TypeDescriptor elementType;
 
-	private TypeDescriptor mapKeyType;
+	private volatile TypeDescriptor mapKeyType;
 
-	private TypeDescriptor mapValueType;
+	private volatile TypeDescriptor mapValueType;
 
-	private Annotation[] annotations;
+	private volatile Annotation[] annotations;
 
 
 	/**
@@ -266,7 +266,7 @@ public class TypeDescriptor {
 	/**
 	 * Return the element type as a type descriptor.
 	 */
-	public synchronized TypeDescriptor getElementTypeDescriptor() {
+	public TypeDescriptor getElementTypeDescriptor() {
 		if (this.elementType == null) {
 			this.elementType = forElementType(resolveElementType());
 		}
@@ -309,7 +309,7 @@ public class TypeDescriptor {
 	/**
 	 * Returns map key type as a type descriptor.
 	 */
-	public synchronized TypeDescriptor getMapKeyTypeDescriptor() {
+	public TypeDescriptor getMapKeyTypeDescriptor() {
 		if (this.mapKeyType == null) {
 			this.mapKeyType = forElementType(resolveMapKeyType());
 		}
@@ -317,7 +317,7 @@ public class TypeDescriptor {
 	}
 
 	/**
-	 * Return the map key type as a type descriptor. If the key type is null
+	 * Return the map key type as a type descriptor. If the key type is <code>null</code>
 	 * (cannot be determined), the type descriptor is derived from the key argument.
 	 * @param key the key
 	 * @return the map key type descriptor
@@ -338,7 +338,7 @@ public class TypeDescriptor {
 	/**
 	 * Returns map value type as a type descriptor.
 	 */
-	public synchronized TypeDescriptor getMapValueTypeDescriptor() {
+	public TypeDescriptor getMapValueTypeDescriptor() {
 		if (this.mapValueType == null) {
 			this.mapValueType = forElementType(resolveMapValueType());
 		}
@@ -359,7 +359,7 @@ public class TypeDescriptor {
 	/**
 	 * Obtain the annotations associated with the wrapped parameter/field, if any.
 	 */
-	public synchronized Annotation[] getAnnotations() {
+	public Annotation[] getAnnotations() {
 		if (this.annotations == null) {
 			this.annotations = resolveAnnotations();
 		}
