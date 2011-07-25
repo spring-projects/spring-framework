@@ -26,7 +26,11 @@ import javax.persistence.PersistenceException;
 import javax.persistence.RollbackException;
 import javax.sql.DataSource;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.datasource.ConnectionHandle;
@@ -105,9 +109,11 @@ import org.springframework.util.CollectionUtils;
  * @see org.springframework.transaction.jta.JtaTransactionManager
  */
 public class JpaTransactionManager extends AbstractPlatformTransactionManager
-		implements ResourceTransactionManager, InitializingBean {
+		implements ResourceTransactionManager, BeanFactoryAware, InitializingBean {
 
 	private EntityManagerFactory entityManagerFactory;
+
+	private String persistenceUnitName;
 
 	private final Map<String, Object> jpaPropertyMap = new HashMap<String, Object>();
 
@@ -138,6 +144,10 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Set the EntityManagerFactory that this instance should manage transactions for.
+	 * <p>Alternatively, specify the persistence unit name of the target EntityManagerFactory.
+	 * By default, a default EntityManagerFactory will be retrieved through finding a
+	 * single unique bean of type EntityManagerFactory in the containing BeanFactory.
+	 * @see #setPersistenceUnitName
 	 */
 	public void setEntityManagerFactory(EntityManagerFactory emf) {
 		this.entityManagerFactory = emf;
@@ -148,6 +158,25 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	public EntityManagerFactory getEntityManagerFactory() {
 		return this.entityManagerFactory;
+	}
+
+	/**
+	 * Set the name of the persistence unit to manage transactions for.
+	 * <p>This is an alternative to specifying the EntityManagerFactory by direct reference,
+	 * resolving it by its persistence unit name instead. If no EntityManagerFactory and
+	 * no persistence unit name have been specified, a default EntityManagerFactory will
+	 * be retrieved through finding a single unique bean of type EntityManagerFactory.
+	 * @see #setEntityManagerFactory
+	 */
+	public void setPersistenceUnitName(String persistenceUnitName) {
+		this.persistenceUnitName = persistenceUnitName;
+	}
+
+	/**
+	 * Return the name of the persistence unit to manage transactions for, if any.
+	 */
+	public String getPersistenceUnitName() {
+		return this.persistenceUnitName;
 	}
 
 	/**
@@ -248,13 +277,29 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
+	 * Retrieves an EntityManagerFactory by persistence unit name, if none set explicitly.
+	 * Falls back to a default EntityManagerFactory bean if no persistence unit specified.
+	 * @see #setPersistenceUnitName
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		if (getEntityManagerFactory() == null) {
+			if (!(beanFactory instanceof ListableBeanFactory)) {
+				throw new IllegalStateException("Cannot retrieve EntityManagerFactory by persistence unit name " +
+						"in a non-listable BeanFactory: " + beanFactory);
+			}
+			ListableBeanFactory lbf = (ListableBeanFactory) beanFactory;
+			setEntityManagerFactory(EntityManagerFactoryUtils.findEntityManagerFactory(lbf, getPersistenceUnitName()));
+		}
+	}
+
+	/**
 	 * Eagerly initialize the JPA dialect, creating a default one
 	 * for the specified EntityManagerFactory if none set.
 	 * Auto-detect the EntityManagerFactory's DataSource, if any.
 	 */
 	public void afterPropertiesSet() {
 		if (getEntityManagerFactory() == null) {
-			throw new IllegalArgumentException("Property 'entityManagerFactory' is required");
+			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
 		}
 		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) getEntityManagerFactory();
