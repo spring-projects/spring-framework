@@ -342,6 +342,28 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.mortbay.jetty/com.springsource.org.mortbay.jetty.server/6.1.9/com.springsource.org.mortbay.jetty.server-6.1.9.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.mortbay.jetty/com.springsource.org.mortbay.jetty.server/6.1.9/com.springsource.org.mortbay.jetty.server-sources-6.1.9.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.mortbay.jetty/com.springsource.org.mortbay.util/6.1.9/com.springsource.org.mortbay.util-6.1.9.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.mortbay.jetty/com.springsource.org.mortbay.util/6.1.9/com.springsource.org.mortbay.util-sources-6.1.9.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
   <component name="copyright">
     <Base>
