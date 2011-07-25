@@ -506,18 +506,6 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	}
 
 	/**
-	 * Subclasses can override this method to perform custom initialization
-	 * of the Configuration instance used for SessionFactory creation.
-	 * The properties of this Builder will be applied to
-	 * the Configuration object that gets returned here.
-	 * <p>The default implementation creates a new Configuration instance.
-	 * A custom implementation could prepare the instance in a specific way,
-	 * or use a custom Configuration subclass.
-	 * @return the Configuration instance
-	 * @throws HibernateException in case of Hibernate initialization errors
-	 * @see org.hibernate.cfg.Configuration#Configuration()
-	 */
-	/**
 	 * Instantiate and return an instance of the {@link Configuration} class
 	 * type for this builder. Subclasses may override in order to customize
 	 * instantiation logic, but clients should use {@link #doWithConfiguration}
@@ -698,7 +686,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 				new HibernateCallback<Object>() {
 					@SuppressWarnings("deprecation")
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						Dialect dialect = ((SessionFactoryImplementor)session.getSessionFactory()).getDialect();
+						Dialect dialect = ((SessionFactoryImplementor) session.getSessionFactory()).getDialect();
 						String[] sql = configuration.generateSchemaCreationScript(dialect);
 						executeSchemaScript(session.connection(), sql);
 						return null;
@@ -749,7 +737,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 					public Void doInHibernate(Session session) throws HibernateException, SQLException {
 						@SuppressWarnings("deprecation")
 						Connection conn = session.connection();
-						Dialect dialect = ((SessionFactoryImplementor)session.getSessionFactory()).getDialect();
+						Dialect dialect = ((SessionFactoryImplementor) session.getSessionFactory()).getDialect();
 						DatabaseMetadata metadata = new DatabaseMetadata(conn, dialect);
 						String[] sql = configuration.generateSchemaUpdateScript(dialect, metadata);
 						executeSchemaScript(conn, sql);
@@ -799,7 +787,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 				new HibernateCallback<Object>() {
 					@SuppressWarnings("deprecation")
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						Dialect dialect = ((SessionFactoryImplementor)session.getSessionFactory()).getDialect();
+						Dialect dialect = ((SessionFactoryImplementor) session.getSessionFactory()).getDialect();
 						DatabaseMetadata metadata = new DatabaseMetadata(session.connection(), dialect);
 						configuration.validateSchema(dialect, metadata);
 						return null;
@@ -841,7 +829,7 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 			new HibernateCallback<Object>() {
 				@SuppressWarnings("deprecation")
 				public Void doInHibernate(Session session) throws HibernateException, SQLException {
-					Dialect dialect = ((SessionFactoryImplementor)session.getSessionFactory()).getDialect();
+					Dialect dialect = ((SessionFactoryImplementor) session.getSessionFactory()).getDialect();
 					String[] sql = configuration.generateDropSchemaScript(dialect);
 					executeSchemaScript(session.connection(), sql);
 					return null;
