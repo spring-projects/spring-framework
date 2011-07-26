@@ -20,7 +20,7 @@ import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial", "deprecation" })
 public class TestProxyFactoryBean extends AbstractSingletonProxyFactoryBean implements BeanFactoryAware {
 
 	@Override
