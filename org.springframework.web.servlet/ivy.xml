@@ -102,8 +102,6 @@
                     conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.orm" rev="latest.integration"
                     conf="test->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.1.GA" 
-                    conf="test->compile"/>
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="provided->runtime"/>
 		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.GA" conf="test->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.1.0.GA" conf="test->runtime"/>
