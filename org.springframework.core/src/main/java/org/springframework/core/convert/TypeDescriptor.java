@@ -295,12 +295,15 @@ public class TypeDescriptor {
 		}
 		if (isArray() && typeDescriptor.isArray()) {
 			return getElementTypeDescriptor().isAssignableTo(typeDescriptor.getElementTypeDescriptor());
-		} else if (isCollection() && typeDescriptor.isCollection()) {
+		}
+		else if (isCollection() && typeDescriptor.isCollection()) {
 			return isNestedAssignable(getElementTypeDescriptor(), typeDescriptor.getElementTypeDescriptor());
-		} else if (isMap() && typeDescriptor.isMap()) {
+		}
+		else if (isMap() && typeDescriptor.isMap()) {
 			return isNestedAssignable(getMapKeyTypeDescriptor(), typeDescriptor.getMapKeyTypeDescriptor()) &&
 				isNestedAssignable(getMapValueTypeDescriptor(), typeDescriptor.getMapValueTypeDescriptor());
-		} else {	
+		}
+		else {
 			return true;
 		}
 	}
@@ -424,9 +427,11 @@ public class TypeDescriptor {
 		}
 		if (isCollection() || isArray()) {
 			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), other.getElementTypeDescriptor());
-		} else if (isMap()) {
+		}
+		else if (isMap()) {
 			return ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), other.getMapKeyTypeDescriptor()) && ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), other.getMapValueTypeDescriptor());
-		} else {
+		}
+		else {
 			return true;
 		}
 	}
@@ -445,7 +450,8 @@ public class TypeDescriptor {
 		if (isMap()) {
 			builder.append("<").append(wildcard(getMapKeyTypeDescriptor()));
 			builder.append(", ").append(wildcard(getMapValueTypeDescriptor())).append(">");
-		} else if (isCollection()) {
+		}
+		else if (isCollection()) {
 			builder.append("<").append(wildcard(getElementTypeDescriptor())).append(">");
 		}
 		return builder.toString();
@@ -547,7 +553,8 @@ public class TypeDescriptor {
 	private TypeDescriptor narrow(Object value, TypeDescriptor typeDescriptor) {
 		if (typeDescriptor != null) {
 			return typeDescriptor.narrow(value);
-		} else {
+		}
+		else {
 			return value != null ? new TypeDescriptor(value.getClass(), null, null, null, annotations) : null;
 		}		
 	}
