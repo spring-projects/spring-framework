@@ -213,6 +213,7 @@
     </resourceExtensions>
     <wildcardResourcePatterns>
       <entry name="*.properties" />
+      <entry name="*.txt" />
       <entry name="*.xml" />
       <entry name="*.gif" />
       <entry name="*.png" />
