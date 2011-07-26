@@ -219,6 +219,8 @@
       <entry name="*.jpeg" />
       <entry name="*.jpg" />
       <entry name="*.html" />
+      <entry name="*.css" />
+      <entry name="*.js" />
       <entry name="*.dtd" />
       <entry name="*.xsd" />
       <entry name="*.tld" />
