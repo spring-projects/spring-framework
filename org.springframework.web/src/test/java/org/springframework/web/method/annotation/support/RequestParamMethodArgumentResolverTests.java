@@ -16,6 +16,7 @@
 
 package org.springframework.web.method.annotation.support;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -219,6 +220,14 @@ public class RequestParamMethodArgumentResolverTests {
 
 		assertTrue(result instanceof String);
 		assertEquals("plainValue", result);
+	}
+
+	// SPR-8561
+	
+	@Test
+	public void resolveSimpleTypeParamToNull() throws Exception {
+		Object result = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, null);
+		assertNull(result);
 	}
 
 	public void params(@RequestParam(value = "name", defaultValue = "bar") String param1,

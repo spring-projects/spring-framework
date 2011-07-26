@@ -194,7 +194,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	private class RequestParamNamedValueInfo extends NamedValueInfo {
 
 		private RequestParamNamedValueInfo() {
-			super("", true, ValueConstants.DEFAULT_NONE);
+			super("", false, ValueConstants.DEFAULT_NONE);
 		}
 		
 		private RequestParamNamedValueInfo(RequestParam annotation) {
