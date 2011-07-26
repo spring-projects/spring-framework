@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -116,6 +117,7 @@ import org.springframework.web.servlet.mvc.multiaction.MethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.WebContentGenerator;
+import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
@@ -587,7 +589,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 						if (!typeLevelPattern.startsWith("/")) {
 							typeLevelPattern = "/" + typeLevelPattern;
 						}
-						if (isPathMatchInternal(typeLevelPattern, lookupPath)) {
+						if (getMatchingPattern(typeLevelPattern, lookupPath) != null) {
 							if (mappingInfo.matches(request)) {
 								match = true;
 								mappingInfo.addMatchedPattern(typeLevelPattern);
@@ -695,8 +697,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 						typeLevelPattern = "/" + typeLevelPattern;
 					}
 					String combinedPattern = pathMatcher.combine(typeLevelPattern, methodLevelPattern);
-					if (isPathMatchInternal(combinedPattern, lookupPath)) {
-						return combinedPattern;
+					String matchingPattern = getMatchingPattern(combinedPattern, lookupPath);
+					if (matchingPattern != null) {
+						return matchingPattern;
 					}
 				}
 				return null;
@@ -704,30 +707,30 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			String bestMatchingPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
 			if (StringUtils.hasText(bestMatchingPattern) && bestMatchingPattern.endsWith("*")) {
 				String combinedPattern = pathMatcher.combine(bestMatchingPattern, methodLevelPattern);
-				if (!combinedPattern.equals(bestMatchingPattern) &&
-						(isPathMatchInternal(combinedPattern, lookupPath))) {
-					return combinedPattern;
+				String matchingPattern = getMatchingPattern(combinedPattern, lookupPath);
+				if ((matchingPattern != null) && !matchingPattern.equals(bestMatchingPattern)) {
+					return matchingPattern;
 				}
 			}
-			if (isPathMatchInternal(methodLevelPattern, lookupPath)) {
-				return methodLevelPattern;
-			}
-			return null;
+			return getMatchingPattern(methodLevelPattern, lookupPath);
 		}
 
-		private boolean isPathMatchInternal(String pattern, String lookupPath) {
-			if (pattern.equals(lookupPath) || pathMatcher.match(pattern, lookupPath)) {
-				return true;
+		private String getMatchingPattern(String pattern, String lookupPath) {
+			if (pattern.equals(lookupPath)) {
+				return pattern;
 			}
 			boolean hasSuffix = pattern.indexOf('.') != -1;
 			if (!hasSuffix && pathMatcher.match(pattern + ".*", lookupPath)) {
-				return true;
+				return pattern + ".*";
+			}
+			if (pathMatcher.match(pattern, lookupPath)) {
+				return pattern;
 			}
 			boolean endsWithSlash = pattern.endsWith("/");
 			if (!endsWithSlash && pathMatcher.match(pattern + "/", lookupPath)) {
-				return true;
+				return pattern + "/";
 			}
-			return false;
+			return null;
 		}
 
 		@SuppressWarnings("unchecked")

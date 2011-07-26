@@ -51,6 +51,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.annotation.UriTemplateServletAnnotationControllerTests;
+import org.springframework.web.servlet.mvc.annotation.UriTemplateServletAnnotationControllerTests.VariableNamesController;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.view.AbstractView;
 
@@ -318,6 +319,19 @@ public class UriTemplateServletHandlerMethodTests {
 		response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("bar-bar", response.getContentAsString());
+	}
+
+	/*
+	 * See SPR-8543
+	 */
+	@Test
+	public void variableNamesWithUrlExtension() throws Exception {
+		initDispatcherServlet(VariableNamesController.class, null);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/foo.json");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("foo-foo", response.getContentAsString());
 	}
 
 	/*
