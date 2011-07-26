@@ -16,7 +16,6 @@
 
 package org.springframework.cache.interceptor;
 
-import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
 
 /**
@@ -26,17 +25,17 @@ import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
  * with a separate {@link CachingInterceptor} definition.
  *
  * <p>This class is intended to cover the <i>typical</i> case of declarative
- * transaction demarcation: namely, wrapping a singleton target object with a
- * caching proxy, proxying all the interfaces that the target implements.
+ * caching: namely, wrapping a singleton target object with a caching proxy,
+ * proxying all the interfaces that the target implements.
  * 
  * @author Costin Leau
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see CachingInterceptor
  */
+@SuppressWarnings("serial")
 public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean {
 
 	private final CacheInterceptor cachingInterceptor = new CacheInterceptor();
-	private Pointcut pointcut;
 
 	@Override
 	protected Object createMainInterceptor() {

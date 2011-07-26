@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,13 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		implements FactoryBean<Object>, BeanClassLoaderAware, InitializingBean {
 
 	private Object target;
 
-	private Class[] proxyInterfaces;
+	private Class<?>[] proxyInterfaces;
 
 	private Object[] preInterceptors;
 
@@ -77,7 +78,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	 * out which interfaces need proxying by analyzing the target,
 	 * proxying all the interfaces that the target object implements.
 	 */
-	public void setProxyInterfaces(Class[] proxyInterfaces) {
+	public void setProxyInterfaces(Class<?>[] proxyInterfaces) {
 		this.proxyInterfaces = proxyInterfaces;
 	}
 
