@@ -55,7 +55,6 @@ public class OpenPersistenceManagerInViewTests extends TestCase {
 
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
-		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		pmf.getPersistenceManager();
 		pmfControl.setReturnValue(pm, 1);
