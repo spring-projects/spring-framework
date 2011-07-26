@@ -27,8 +27,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.ClassUtils;
 
 /**
- * Convenient proxy factory bean superclass for proxy factory
- * beans that create only singletons.
+ * Convenient superclass for proxy-creating
+ * {@link org.springframework.beans.factory.FactoryBean FactoryBean} types that produce
+ * only singleton-scoped objects.
  * 
  * <p>Manages pre- and post-interceptors (references, rather than
  * interceptor names, as in {@link ProxyFactoryBean}) and provides
@@ -36,7 +37,13 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @since 2.0
+ * @deprecated as of Spring 3.1 following the deprecation of its only implementation
+ * ({@link org.springframework.transaction.interceptor.TransactionProxyFactoryBean
+ * TransactionProxyFactoryBean}) and generally in favor of providing such functionality
+ * via Spring XML namespaces, e.g. {@code tx:} or {@code @Enable}&#042; annotations, e.g.
+ * {@code @EnableTransactionManagement}.
  */
+@Deprecated
 @SuppressWarnings("serial")
 public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		implements FactoryBean<Object>, BeanClassLoaderAware, InitializingBean {
