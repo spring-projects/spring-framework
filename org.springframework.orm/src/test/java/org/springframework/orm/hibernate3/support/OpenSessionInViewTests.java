@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,21 @@
 
 package org.springframework.orm.hibernate3.support;
 
-import junit.framework.TestCase;
-
-import org.easymock.MockControl;
-import org.hibernate.classic.Session;
-import org.hibernate.SessionFactory;
-
 import java.io.IOException;
 import java.sql.Connection;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.transaction.TransactionManager;
 
-
+import junit.framework.TestCase;
+import org.easymock.MockControl;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.classic.Session;
 import org.hibernate.engine.SessionFactoryImplementor;
 
 import org.springframework.mock.web.MockFilterConfig;
@@ -50,9 +46,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 
 /**
  * @author Juergen Hoeller
@@ -70,16 +65,12 @@ public class OpenSessionInViewTests extends TestCase {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
 		
-
-		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
-		rawInterceptor.setSessionFactory(sf);
-		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
+		interceptor.setSessionFactory(sf);
 
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
-		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		
 		//expect(mockStorage.size()).andReturn(expectedValue);
 
 		//expect(sf.openSession()).andReturn(session);
@@ -93,24 +84,24 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.setVoidCallable(1);
 		sfControl.replay();
 		sessionControl.replay();
-		interceptor.preHandle(request, response, "handler");
+		interceptor.preHandle(new ServletWebRequest(request));
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 
 		// check that further invocations simply participate
-		interceptor.preHandle(request, response, "handler");
+		interceptor.preHandle(new ServletWebRequest(request));
 
 		assertEquals(session, SessionFactoryUtils.getSession(sf, false));
 
-		interceptor.preHandle(request, response, "handler");
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.preHandle(new ServletWebRequest(request));
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
-		interceptor.preHandle(request, response, "handler");
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.preHandle(new ServletWebRequest(request));
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
 		sfControl.verify();
 		sessionControl.verify();
@@ -119,7 +110,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.reset();
 		sfControl.replay();
 		sessionControl.replay();
-		interceptor.postHandle(request, response, "handler", null);
+		interceptor.postHandle(new ServletWebRequest(request), null);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 		sfControl.verify();
 		sessionControl.verify();
@@ -130,7 +121,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		sfControl.verify();
 		sessionControl.verify();
@@ -147,9 +138,8 @@ public class OpenSessionInViewTests extends TestCase {
 		tm.getTransaction();
 		tmControl.setReturnValue(null, 2);
 
-		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
-		rawInterceptor.setSessionFactory(sf);
-		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
+		interceptor.setSessionFactory(sf);
 
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
@@ -168,24 +158,24 @@ public class OpenSessionInViewTests extends TestCase {
 		sfControl.replay();
 		sessionControl.replay();
 
-		interceptor.preHandle(request, response, "handler");
+		interceptor.preHandle(new ServletWebRequest(request));
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 
 		// check that further invocations simply participate
-		interceptor.preHandle(request, response, "handler");
+		interceptor.preHandle(new ServletWebRequest(request));
 
 		assertEquals(session, SessionFactoryUtils.getSession(sf, false));
 
-		interceptor.preHandle(request, response, "handler");
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.preHandle(new ServletWebRequest(request));
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
-		interceptor.preHandle(request, response, "handler");
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.preHandle(new ServletWebRequest(request));
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
 		sfControl.verify();
 		sessionControl.verify();
@@ -194,7 +184,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.reset();
 		sfControl.replay();
 		sessionControl.replay();
-		interceptor.postHandle(request, response, "handler", null);
+		interceptor.postHandle(new ServletWebRequest(request), null);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 		sfControl.verify();
 		sessionControl.verify();
@@ -205,7 +195,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		sfControl.verify();
 		sessionControl.verify();
@@ -217,10 +207,9 @@ public class OpenSessionInViewTests extends TestCase {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
 
-		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
-		rawInterceptor.setSessionFactory(sf);
-		rawInterceptor.setFlushMode(HibernateAccessor.FLUSH_AUTO);
-		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
+		interceptor.setSessionFactory(sf);
+		interceptor.setFlushMode(HibernateAccessor.FLUSH_AUTO);
 
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
@@ -232,7 +221,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.setReturnValue(sf);
 		sfControl.replay();
 		sessionControl.replay();
-		interceptor.preHandle(request, response, "handler");
+		interceptor.preHandle(new ServletWebRequest(request));
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 		sfControl.verify();
 		sessionControl.verify();
@@ -243,7 +232,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.setVoidCallable(1);
 		sfControl.replay();
 		sessionControl.replay();
-		interceptor.postHandle(request, response, "handler", null);
+		interceptor.postHandle(new ServletWebRequest(request), null);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 		sfControl.verify();
 		sessionControl.verify();
@@ -254,7 +243,7 @@ public class OpenSessionInViewTests extends TestCase {
 		sessionControl.setReturnValue(null, 1);
 		sfControl.replay();
 		sessionControl.replay();
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		sfControl.verify();
 		sessionControl.verify();
@@ -266,10 +255,9 @@ public class OpenSessionInViewTests extends TestCase {
 		MockControl sessionControl = MockControl.createControl(Session.class);
 		Session session = (Session) sessionControl.getMock();
 
-		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
-		rawInterceptor.setSessionFactory(sf);
-		rawInterceptor.setSingleSession(false);
-		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
+		interceptor.setSessionFactory(sf);
+		interceptor.setSingleSession(false);
 
 		MockServletContext sc = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(sc);
@@ -284,23 +272,23 @@ public class OpenSessionInViewTests extends TestCase {
 		sfControl.replay();
 		sessionControl.replay();
 
-		interceptor.preHandle(request, response, "handler");
+		interceptor.preHandle(new ServletWebRequest(request));
 		org.hibernate.Session sess = SessionFactoryUtils.getSession(sf, true);
 		SessionFactoryUtils.releaseSession(sess, sf);
 
 		// check that further invocations simply participate
-		interceptor.preHandle(request, response, "handler");
+		interceptor.preHandle(new ServletWebRequest(request));
 
-		interceptor.preHandle(request, response, "handler");
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.preHandle(new ServletWebRequest(request));
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
-		interceptor.preHandle(request, response, "handler");
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.preHandle(new ServletWebRequest(request));
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
 		sfControl.verify();
 		sessionControl.verify();
@@ -312,8 +300,8 @@ public class OpenSessionInViewTests extends TestCase {
 		sfControl.replay();
 		sessionControl.replay();
 
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 		sfControl.verify();
 		sessionControl.verify();
 	}
@@ -433,11 +421,10 @@ public class OpenSessionInViewTests extends TestCase {
 		MockFilterConfig filterConfig2 = new MockFilterConfig(wac.getServletContext(), "filter2");
 		filterConfig2.addInitParameter("sessionFactoryBeanName", "mySessionFactory");
 
-		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
-		rawInterceptor.setSessionFactory(sf);
-		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
+		interceptor.setSessionFactory(sf);
 
-		interceptor.preHandle(request, response, "handler");
+		interceptor.preHandle(new ServletWebRequest(request));
 
 		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
 		filter.init(filterConfig);
@@ -454,8 +441,8 @@ public class OpenSessionInViewTests extends TestCase {
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 		assertNotNull(request.getAttribute("invoked"));
 
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
 		sfControl.verify();
 		sessionControl.verify();
@@ -616,12 +603,11 @@ public class OpenSessionInViewTests extends TestCase {
 		filterConfig2.addInitParameter("singleSession", "false");
 		filterConfig2.addInitParameter("sessionFactoryBeanName", "mySessionFactory");
 
-		OpenSessionInViewInterceptor rawInterceptor = new OpenSessionInViewInterceptor();
-		rawInterceptor.setSessionFactory(sf);
-		rawInterceptor.setSingleSession(false);
-		HandlerInterceptor interceptor = new WebRequestHandlerInterceptorAdapter(rawInterceptor);
+		OpenSessionInViewInterceptor interceptor = new OpenSessionInViewInterceptor();
+		interceptor.setSessionFactory(sf);
+		interceptor.setSingleSession(false);
 
-		interceptor.preHandle(request, response, "handler");
+		interceptor.preHandle(new ServletWebRequest(request));
 
 		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
 		filter.init(filterConfig);
@@ -661,8 +647,8 @@ public class OpenSessionInViewTests extends TestCase {
 		filter.doFilter(request, response, filterChain2);
 		assertNotNull(request.getAttribute("invoked"));
 
-		interceptor.postHandle(request, response, "handler", null);
-		interceptor.afterCompletion(request, response, "handler", null);
+		interceptor.postHandle(new ServletWebRequest(request), null);
+		interceptor.afterCompletion(new ServletWebRequest(request), null);
 
 		sfControl.verify();
 		sessionControl.verify();
