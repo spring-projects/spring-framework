@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,18 @@ import org.springframework.transaction.PlatformTransactionManager;
  * {@link org.springframework.aop.framework.ProxyFactoryBean}
  * with a separate {@link TransactionInterceptor} definition.
  *
- * <p>This class is intended to cover the <i>typical</i> case of declarative
+ * <p><strong>HISTORICAL NOTE:</strong>This class was originally intended to cover the
+ * typical case of declarative
  * transaction demarcation: namely, wrapping a singleton target object with a
- * transactional proxy, proxying all the interfaces that the target implements.
+ * transactional proxy, proxying all the interfaces that the target implements. However,
+ * in Spring versions 2.0 and beyond, the functionality provided here is superseded
+ * by the more convenient {@code tx:} XML namespace. See the <a href="http://bit.ly/qUwvwz">
+ * declarative transaction management</a> section of the Spring reference documentation to
+ * understand the modern options for managing transactions in Spring applications.
+ * <strong>While this class has been deprecated starting with Spring 3.1, its use remains
+ * valid and supported</strong>. The deprecation serves as a strong reminder to users that
+ * simpler and superior approaches are available. What follows is the original
+ * (pre-deprecation) documentation.
  *
  * <p>There are three main properties that need to be specified:
  * <ul>
@@ -71,36 +80,44 @@ import org.springframework.transaction.PlatformTransactionManager;
  * This reduces the per-bean definition effort to a minimum.
  *
  * <pre code="class">
- * &lt;bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
- *     abstract="true"&gt;
- *   &lt;property name="transactionManager" ref="transactionManager"/&gt;
- *   &lt;property name="transactionAttributes"&gt;
- *     &lt;props&gt;
- *       &lt;prop key="insert*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
- *       &lt;prop key="update*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
- *       &lt;prop key="*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
- *     &lt;/props&gt;
- *   &lt;/property&gt;
- * &lt;/bean&gt;
+ * {@code
+ * <bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+ *     abstract="true">
+ *   <property name="transactionManager" ref="transactionManager"/>
+ *   <property name="transactionAttributes">
+ *     <props>
+ *       <prop key="insert*">PROPAGATION_REQUIRED</prop>
+ *       <prop key="update*">PROPAGATION_REQUIRED</prop>
+ *       <prop key="*">PROPAGATION_REQUIRED,readOnly</prop>
+ *     </props>
+ *   </property>
+ * </bean>
  *
- * &lt;bean id="myProxy" parent="baseTransactionProxy"&gt;
- *   &lt;property name="target" ref="myTarget"/&gt;
- * &lt;/bean&gt;
+ * <bean id="myProxy" parent="baseTransactionProxy">
+ *   <property name="target" ref="myTarget"/>
+ * </bean>
  *
- * &lt;bean id="yourProxy" parent="baseTransactionProxy"&gt;
- *   &lt;property name="target" ref="yourTarget"/&gt;
- * &lt;/bean&gt;</pre>
+ * <bean id="yourProxy" parent="baseTransactionProxy">
+ *   <property name="target" ref="yourTarget"/>
+ * </bean>}</pre>
  *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
  * @author Rod Johnson
+ * @author Chris Beams
  * @since 21.08.2003
  * @see #setTransactionManager
  * @see #setTarget
  * @see #setTransactionAttributes
  * @see TransactionInterceptor
  * @see org.springframework.aop.framework.ProxyFactoryBean
+ * @deprecated as of Spring 3.1 in favor of the {@code tx:} XML namespace as well as the
+ * {@link org.springframework.transaction.annotation.Transactional @Transactional} and
+ * {@link org.springframework.transaction.annotation.EnableTransactionManagement @EnableTransactionManagement}
+ * annotations
  */
+@Deprecated
+@SuppressWarnings("serial")
 public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 		implements BeanFactoryAware {
 
