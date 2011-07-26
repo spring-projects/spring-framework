@@ -49,6 +49,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Mark Fisher
+ * @author Chris Beams
  * @since 2.0
  * @see java.lang.reflect.Method#getAnnotations()
  * @see java.lang.reflect.Method#getAnnotation(Class)
@@ -62,11 +63,13 @@ public abstract class AnnotationUtils {
 
 
 	/**
-	 * Get a single {@link Annotation} of <code>annotationType</code> from the supplied
-	 * Method, Constructor or Field.
-	 * @param ae the Method, Constructor or Field to look for annotations on
-	 * @param annotationType the annotation class to look for
-	 * @return the annotations found
+	 * Get a single {@link Annotation} of {@code annotationType} from the supplied
+	 * Method, Constructor or Field. Meta-annotations will be searched if the annotation
+	 * is not declared locally on the supplied element.
+	 * @param ae the Method, Constructor or Field from which to get the annotation
+	 * @param annotationType the annotation class to look for, both locally and as a meta-annotation
+	 * @return the matching annotation or {@code null} if not found
+	 * @since 3.1
 	 */
 	public static <T extends Annotation> T getAnnotation(AnnotatedElement ae, Class<T> annotationType) {
 		T ann = ae.getAnnotation(annotationType);
@@ -358,6 +361,7 @@ public abstract class AnnotationUtils {
 	 * @param targetAnnotation the annotation to search for, both locally and as a meta-annotation
 	 * @param annotatedClassName the class to search
 	 * @param classValuesAsString whether class attributes should be returned as strings
+	 * @since 3.1
 	 * @see {@link #findAllAnnotationAttributes(Class, String)}
 	 */
 	public static List<Map<String, Object>> findAllAnnotationAttributes(
@@ -397,6 +401,7 @@ public abstract class AnnotationUtils {
 	 * ordered last in the list.
 	 * @param targetAnnotation the annotation to search for, both locally and as a meta-annotation
 	 * @param annotatedClassName the class to search
+	 * @since 3.1
 	 * @see {@link #findAllAnnotationAttributes(Class, String, boolean)}
 	 */
 	public static List<Map<String, Object>> findAllAnnotationAttributes(
