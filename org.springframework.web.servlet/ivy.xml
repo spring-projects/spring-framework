@@ -22,7 +22,6 @@
 		<conf name="poi" extends="runtime" description="JARs needed to create beans for Poi"/>
 		<conf name="tiles" extends="runtime" description="JARs neeeded to create beans for Tiles"/>
 		<conf name="velocity" extends="runtime" description="JARs needed to create beans for Velocity"/>
-		<conf name="hibernate" extends="runtime" description="JARs needed to use Hibernate"/>
 	</configurations>
 
 	<publications>
