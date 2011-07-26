@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
@@ -137,6 +138,14 @@ public class ResourceHttpRequestHandlerTests {
 		response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
 		assertEquals(404, response.getStatus());
+		
+		handler.setLocations(Arrays.<Resource>asList(new ClassPathResource("testsecret/", getClass())));
+		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "secret.txt");
+		response = new MockHttpServletResponse();
+		handler.handleRequest(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals("text/plain", response.getContentType());
+		assertEquals("big secret", response.getContentAsString());
 	}
 
 	@Test

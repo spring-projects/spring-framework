@@ -341,6 +341,19 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	/*
+	 * See SPR-8543
+	 */
+	@Test
+	public void variableNamesWithUrlExtension() throws Exception {
+		initServlet(VariableNamesController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/foo.json");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("foo-foo", response.getContentAsString());
+	}
+
+	/*
 	 * See SPR-6906
 	 */
 	@Test
