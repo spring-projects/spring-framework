@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,36 @@
 
 package org.springframework.web.util;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Alef Arendsen
  * @author Martin Kersten
  * @author Rick Evans
  */
-public class HtmlUtilsTests extends TestCase {
+public class HtmlUtilsTests {
 
+	@Test
 	public void testHtmlEscape() {
-		String unescaped = "\"This is a quote";
+		String unescaped = "\"This is a quote'";
 		String escaped = HtmlUtils.htmlEscape(unescaped);
-		assertEquals("&quot;This is a quote", escaped);
+		assertEquals("&quot;This is a quote&#39;", escaped);
 		escaped = HtmlUtils.htmlEscapeDecimal(unescaped);
-		assertEquals("&#34;This is a quote", escaped);
+		assertEquals("&#34;This is a quote&#39;", escaped);
 		escaped = HtmlUtils.htmlEscapeHex(unescaped);
-		assertEquals("&#x22;This is a quote", escaped);
+		assertEquals("&#x22;This is a quote&#x27;", escaped);
 	}
 
+	@Test
 	public void testHtmlUnescape() {
-		String escaped = "&quot;This is a quote";
+		String escaped = "&quot;This is a quote&#39;";
 		String unescaped = HtmlUtils.htmlUnescape(escaped);
-		assertEquals(unescaped, "\"This is a quote");
+		assertEquals(unescaped, "\"This is a quote'");
 	}
 
+	@Test
 	public void testEncodeIntoHtmlCharacterSet() {
 		assertNull("A null string should be converted to a null string",
 				HtmlUtils.htmlEscape(null));
@@ -66,6 +71,7 @@ public class HtmlUtilsTests extends TestCase {
 				"&#977;", HtmlUtils.htmlEscapeDecimal("" + (char) 977));
 	}
 
+	@Test
 	public void testDecodeFromHtmlCharacterSet() {
 		assertNull("A null string should be converted to a null string",
 				HtmlUtils.htmlUnescape(null));
