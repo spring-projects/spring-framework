@@ -50,8 +50,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
+import org.springframework.web.bind.support.FlashStatus;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.bind.support.SimpleFlashStatus;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -59,6 +61,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
+import org.springframework.web.method.annotation.FlashAttributesHandler;
 import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.annotation.SessionAttributesHandler;
 import org.springframework.web.method.annotation.support.ErrorsMethodArgumentResolver;
@@ -145,6 +148,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache =
 		new ConcurrentHashMap<Class<?>, SessionAttributesHandler>();
+
+	private final Map<Class<?>, FlashAttributesHandler> flashAttributesHandlerCache =
+		new ConcurrentHashMap<Class<?>, FlashAttributesHandler>();
 
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
@@ -481,19 +487,27 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * Whether the given handler type defines any handler-specific session attributes via {@link SessionAttributes}.
-	 * Also initializes the sessionAttributesHandlerCache for the given handler type.
+	 * Whether the given handler type defines any handler-specific session attributes 
+	 * via {@link SessionAttributes}.
 	 */
 	private boolean hasSessionAttributes(Class<?> handlerType) {
-		SessionAttributesHandler handler = null;
+		SessionAttributesHandler sessionAttrsHandler = null;
 		synchronized(this.sessionAttributesHandlerCache) {
-			handler = this.sessionAttributesHandlerCache.get(handlerType);
-			if (handler == null) {
-				handler = new SessionAttributesHandler(handlerType, sessionAttributeStore);
-				this.sessionAttributesHandlerCache.put(handlerType, handler);
+			sessionAttrsHandler = this.sessionAttributesHandlerCache.get(handlerType);
+			if (sessionAttrsHandler == null) {
+				sessionAttrsHandler = new SessionAttributesHandler(handlerType, sessionAttributeStore);
+				this.sessionAttributesHandlerCache.put(handlerType, sessionAttrsHandler);
 			}
 		}
-		return handler.hasSessionAttributes();
+		FlashAttributesHandler flashAttrsHandler = null;
+		synchronized(this.flashAttributesHandlerCache) {
+			flashAttrsHandler = this.flashAttributesHandlerCache.get(handlerType);
+			if (flashAttrsHandler == null) {
+				flashAttrsHandler = new FlashAttributesHandler(handlerType);
+				this.flashAttributesHandlerCache.put(handlerType, flashAttrsHandler);
+			}
+		}
+		return sessionAttrsHandler.hasSessionAttributes() || flashAttrsHandler.hasFlashAttributes();
 	}
 
 	/**
@@ -509,12 +523,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		SessionStatus sessionStatus = new SimpleSessionStatus();
+		FlashStatus flashStatus = new SimpleFlashStatus();
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		modelFactory.initModel(webRequest, mavContainer, requestMethod);
 		
-		requestMethod.invokeAndHandle(webRequest, mavContainer, sessionStatus);
-		modelFactory.updateModel(webRequest, mavContainer, sessionStatus);
+		requestMethod.invokeAndHandle(webRequest, mavContainer, sessionStatus, flashStatus);
+		modelFactory.updateModel(webRequest, mavContainer, sessionStatus, flashStatus);
 		
 		if (!mavContainer.isResolveView()) {
 			return null;
@@ -569,7 +584,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			modelAttrMethods.add(attrMethod);
 		}
 
-		return new ModelFactory(modelAttrMethods, binderFactory, sessionAttributesHandlerCache.get(handlerType));
+		SessionAttributesHandler sessionAttrsHandler = sessionAttributesHandlerCache.get(handlerType);
+		FlashAttributesHandler flashAttrsHandler = flashAttributesHandlerCache.get(handlerType);
+		
+		return new ModelFactory(modelAttrMethods, binderFactory, sessionAttrsHandler, flashAttrsHandler);
 	}
 
 	private ServletInvocableHandlerMethod createRequestMappingMethod(HandlerMethod handlerMethod,

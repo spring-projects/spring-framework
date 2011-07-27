@@ -42,7 +42,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * 
  * @author Rossen Stoyanchev
  */
-public class HandlerSessionAttributeStoreTests {
+public class SessionAttributesHandlerTests {
 
 	private Class<?> handlerType = SessionAttributeHandler.class;
 	
@@ -77,7 +77,7 @@ public class HandlerSessionAttributeStoreTests {
 		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("attr1", null));
 		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("attr3", TestBean.class));
 
-		Map<String, ?> attributes = sessionAttributesHandler.retrieveHandlerSessionAttributes(request);
+		Map<String, ?> attributes = sessionAttributesHandler.retrieveAttributes(request);
 
 		assertEquals(new HashSet<String>(asList("attr1", "attr3")), attributes.keySet());
 	}
@@ -92,7 +92,7 @@ public class HandlerSessionAttributeStoreTests {
 		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("attr1", null));
 		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("attr3", TestBean.class));
 
-		sessionAttributesHandler.cleanupHandlerSessionAttributes(request);
+		sessionAttributesHandler.cleanupAttributes(request);
 		
 		assertNull(sessionAttributeStore.retrieveAttribute(request, "attr1"));
 		assertNotNull(sessionAttributeStore.retrieveAttribute(request, "attr2"));
@@ -111,7 +111,7 @@ public class HandlerSessionAttributeStoreTests {
 		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("attr2", null));
 		assertTrue(sessionAttributesHandler.isHandlerSessionAttribute("attr3", TestBean.class));
 		
-		sessionAttributesHandler.storeHandlerSessionAttributes(request, model);
+		sessionAttributesHandler.storeAttributes(request, model);
 		
 		assertEquals("value1", sessionAttributeStore.retrieveAttribute(request, "attr1"));
 		assertEquals("value2", sessionAttributeStore.retrieveAttribute(request, "attr2"));

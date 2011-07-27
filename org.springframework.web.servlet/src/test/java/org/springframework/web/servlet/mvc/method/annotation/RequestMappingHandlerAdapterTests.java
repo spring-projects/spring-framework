@@ -49,7 +49,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequ
  *
  * <p>For higher-level adapter tests see:
  * <ul>
- * <li>{@link ServletHandlerMethodTests}
+ * <li>{@link ServletAnnotationControllerHandlerMethodTests}
  * <li>{@link HandlerMethodAnnotationDetectionTests}
  * <li>{@link RequestMappingHandlerAdapterIntegrationTests}
  * </ul>
