@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private static final Log logger = LogFactory.getLog(ResourceDatabasePopulator.class);
 
+
 	private List<Resource> scripts = new ArrayList<Resource>();
 
 	private String sqlScriptEncoding;
@@ -61,6 +62,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private boolean ignoreFailedDrops = false;
 
 	private String separator = null;
+
 
 	/**
 	 * @param separator the statement separator
@@ -121,6 +123,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		this.ignoreFailedDrops = ignoreFailedDrops;
 	}
 
+
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : this.scripts) {
 			executeSqlScript(connection, applyEncodingIfNecessary(script), this.continueOnError, this.ignoreFailedDrops);
@@ -130,7 +133,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	private EncodedResource applyEncodingIfNecessary(Resource script) {
 		if (script instanceof EncodedResource) {
 			return (EncodedResource) script;
-		} else {
+		}
+		else {
 			return new EncodedResource(script, this.sqlScriptEncoding);
 		}
 	}
@@ -177,22 +181,26 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					if (logger.isDebugEnabled()) {
 						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
 					}
-				} catch (SQLException ex) {
+				}
+				catch (SQLException ex) {
 					boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
 					if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Failed to execute SQL script statement at line " + lineNumber
 									+ " of resource " + resource + ": " + statement, ex);
 						}
-					} else {
+					}
+					else {
 						throw new ScriptStatementFailedException(statement, lineNumber, resource, ex);
 					}
 				}
 			}
-		} finally {
+		}
+		finally {
 			try {
 				stmt.close();
-			} catch (Throwable ex) {
+			}
+			catch (Throwable ex) {
 				logger.debug("Could not close JDBC Statement", ex);
 			}
 		}
@@ -213,8 +221,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		String currentStatement = lnr.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
-			if (StringUtils.hasText(currentStatement)
-					&& (this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
+			if (StringUtils.hasText(currentStatement) &&
+					this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix)) {
 				if (scriptBuilder.length() > 0) {
 					scriptBuilder.append('\n');
 				}
@@ -227,13 +235,16 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	private void maybeAddSeparatorToScript(StringBuilder scriptBuilder) {
-		if (separator==null || separator.trim().length()==separator.length()) {
+		if (this.separator == null) {
 			return;
 		}
-		String trimmed = separator.trim();
+		String trimmed = this.separator.trim();
+		if (trimmed.length() == this.separator.length()) {
+			return;
+		}
 		// separator ends in whitespace, so we might want to see if the script is trying to end the same way
-		if (scriptBuilder.lastIndexOf(trimmed)==scriptBuilder.length()-trimmed.length()) {
-			scriptBuilder.append(separator.substring(trimmed.length()));
+		if (scriptBuilder.lastIndexOf(trimmed) == scriptBuilder.length() - trimmed.length()) {
+			scriptBuilder.append(this.separator.substring(trimmed.length()));
 		}
 	}
 
@@ -292,7 +303,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					}
 					i += delim.length() - 1;
 					continue;
-				} else if (c == '\n' || c == '\t') {
+				}
+				else if (c == '\n' || c == '\t') {
 					c = ' ';
 				}
 			}
