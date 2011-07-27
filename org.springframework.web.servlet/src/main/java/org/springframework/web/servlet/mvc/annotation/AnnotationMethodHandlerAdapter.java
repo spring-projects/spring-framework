@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -103,7 +104,6 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerMapping;
@@ -183,7 +183,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 	private BeanExpressionContext expressionContext;
 
-	private final Map<Class<?>, ServletHandlerMethodResolver> methodResolverCache = new ConcurrentHashMap<Class<?>, ServletHandlerMethodResolver>();
+	private final Map<Class<?>, ServletHandlerMethodResolver> methodResolverCache =
+			new ConcurrentHashMap<Class<?>, ServletHandlerMethodResolver>();
 
 	private final Map<Class<?>, Boolean> sessionAnnotatedClassesCache = new ConcurrentHashMap<Class<?>, Boolean>();
 
@@ -393,12 +394,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			throws Exception {
 
 		Class<?> clazz = ClassUtils.getUserClass(handler);
-		Boolean annotated = sessionAnnotatedClassesCache.get(clazz);
+		Boolean annotated = this.sessionAnnotatedClassesCache.get(clazz);
 
 		if (annotated == null) {
-			annotated = Boolean.valueOf(AnnotationUtils.findAnnotation(handler
-					.getClass(), SessionAttributes.class) != null);
-			sessionAnnotatedClassesCache.put(clazz, annotated);
+			annotated = (AnnotationUtils.findAnnotation(handler.getClass(), SessionAttributes.class) != null);
+			this.sessionAnnotatedClassesCache.put(clazz, annotated);
 		}
 
 		if (annotated) {
@@ -442,29 +442,34 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	}
 
 	/**
-	 * This method always returns -1 since an annotated controller can have many methods, each
-	 * requiring separate lastModified calculations. Instead an @{@link RequestMapping} method 
-	 * can calculate the lastModified value, call {@link WebRequest#checkNotModified(long)} to
-	 * check it, and return {@code null} if that returns {@code true}.
-	 * @see WebRequest#checkNotModified(long)
+	 * This method always returns -1 since an annotated controller can have many methods,
+	 * each requiring separate lastModified calculations. Instead, an
+	 * @{@link RequestMapping}-annotated method can calculate the lastModified value, call
+	 * {@link org.springframework.web.context.request.WebRequest#checkNotModified(long)}
+	 * to check it, and return {@code null} if that returns {@code true}.
+	 * @see org.springframework.web.context.request.WebRequest#checkNotModified(long)
 	 */
 	public long getLastModified(HttpServletRequest request, Object handler) {
 		return -1;
 	}
+
 
 	/**
 	 * Build a HandlerMethodResolver for the given handler type.
 	 */
 	private ServletHandlerMethodResolver getMethodResolver(Object handler) {
 		Class handlerClass = ClassUtils.getUserClass(handler);
-		synchronized (this.methodResolverCache) {
-			ServletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
-			if (resolver == null) {
-				resolver = new ServletHandlerMethodResolver(handlerClass);
-				this.methodResolverCache.put(handlerClass, resolver);
+		ServletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
+		if (resolver == null) {
+			synchronized (this.methodResolverCache) {
+				resolver = this.methodResolverCache.get(handlerClass);
+				if (resolver == null) {
+					resolver = new ServletHandlerMethodResolver(handlerClass);
+					this.methodResolverCache.put(handlerClass, resolver);
+				}
 			}
-			return resolver;
 		}
+		return resolver;
 	}
 
 
@@ -481,8 +486,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * @see ServletRequestDataBinder#bind(javax.servlet.ServletRequest)
 	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, org.springframework.core.MethodParameter) 
 	 */
-	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object target, String objectName)
-			throws Exception {
+	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object target, String objectName) throws Exception {
 		return new ServletRequestDataBinder(target, objectName);
 	}
 
@@ -516,7 +520,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 */
 	private class ServletHandlerMethodResolver extends HandlerMethodResolver {
 
-		private final Map<Method, RequestMappingInfo> mappings = new ConcurrentHashMap<Method, RequestMappingInfo>();
+		private final Map<Method, RequestMappingInfo> mappings = new HashMap<Method, RequestMappingInfo>();
 
 		private ServletHandlerMethodResolver(Class<?> handlerType) {
 			init(handlerType);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.ClientDataRequest;
@@ -152,7 +151,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 	private BeanExpressionContext expressionContext;
 
-	private final Map<Class<?>, PortletHandlerMethodResolver> methodResolverCache = new ConcurrentHashMap<Class<?>, PortletHandlerMethodResolver>();
+	private final Map<Class<?>, PortletHandlerMethodResolver> methodResolverCache =
+			new ConcurrentHashMap<Class<?>, PortletHandlerMethodResolver>();
 
 
 	/**
@@ -302,6 +302,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 	}
 
+
 	protected ModelAndView doHandle(PortletRequest request, PortletResponse response, Object handler) throws Exception {
 		ExtendedModelMap implicitModel = null;
 
@@ -393,16 +394,18 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 */
 	private PortletHandlerMethodResolver getMethodResolver(Object handler) {
 		Class handlerClass = ClassUtils.getUserClass(handler);
-		synchronized (this.methodResolverCache) {
-			PortletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
-			if (resolver == null) {
-				resolver = new PortletHandlerMethodResolver(handlerClass);
-				this.methodResolverCache.put(handlerClass, resolver);
+		PortletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
+		if (resolver == null) {
+			synchronized (this.methodResolverCache) {
+				resolver = this.methodResolverCache.get(handlerClass);
+				if (resolver == null) {
+					resolver = new PortletHandlerMethodResolver(handlerClass);
+					this.methodResolverCache.put(handlerClass, resolver);
+				}
 			}
-			return resolver;
 		}
+		return resolver;
 	}
-
 
 	/**
 	 * Template method for creating a new PortletRequestDataBinder instance.
@@ -417,9 +420,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * @see PortletRequestDataBinder#bind(javax.portlet.PortletRequest)
 	 * @see PortletRequestDataBinder#convertIfNecessary(Object, Class, MethodParameter)
 	 */
-	protected PortletRequestDataBinder createBinder(
-			PortletRequest request, Object target, String objectName) throws Exception {
-
+	protected PortletRequestDataBinder createBinder(PortletRequest request, Object target, String objectName) throws Exception {
 		return new PortletRequestDataBinder(target, objectName);
 	}
 
