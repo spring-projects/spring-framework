@@ -1217,7 +1217,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 
         <programlisting language="xml">&lt;!-- freemarker macros have to be imported into a namespace.  We strongly
 recommend sticking to 'spring' --&gt;
-&lt;#import "spring.ftl" as spring /&gt;
+&lt;#import "/spring.ftl" as spring /&gt;
 &lt;html&gt;
 ...
 &lt;form action="" method="POST"&gt;

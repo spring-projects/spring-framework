@@ -59,7 +59,7 @@ import org.springframework.web.context.ServletContextAware;
  * in spring.jar) like this:
  *
  * <pre>
- * &lt;#import "spring.ftl" as spring/&gt;
+ * &lt;#import "/spring.ftl" as spring/&gt;
  * &lt;@spring.bind "person.age"/&gt;
  * age is ${spring.status.value}</pre>
  *
