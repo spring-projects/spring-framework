@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
+import org.springframework.web.bind.support.SimpleFlashStatus;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -63,8 +64,10 @@ public class ModelFactoryTests {
 
 	private InvocableHandlerMethod handleSessionAttrMethod;
 
-	private SessionAttributesHandler handlerSessionAttributeStore;
-	
+	private SessionAttributesHandler sessionAttrsHandler;
+
+	private FlashAttributesHandler flashAttrsHandler;
+
 	private SessionAttributeStore sessionAttributeStore;
 
 	private ModelAndViewContainer mavContainer;
@@ -78,13 +81,14 @@ public class ModelFactoryTests {
 		Method method = handlerType.getDeclaredMethod("handleSessionAttr", String.class);
 		handleSessionAttrMethod = new InvocableHandlerMethod(handler, method);
 		sessionAttributeStore = new DefaultSessionAttributeStore();
-		handlerSessionAttributeStore = new SessionAttributesHandler(handlerType, sessionAttributeStore);
+		sessionAttrsHandler = new SessionAttributesHandler(handlerType, sessionAttributeStore);
+		flashAttrsHandler = new FlashAttributesHandler(handlerType);
 		mavContainer = new ModelAndViewContainer();
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 	
 	@Test
-	public void addAttributeToModel() throws Exception {
+	public void modelAttributeMethod() throws Exception {
 		ModelFactory modelFactory = createModelFactory("modelAttr", Model.class);
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
 		
@@ -92,7 +96,7 @@ public class ModelFactoryTests {
 	}
 
 	@Test
-	public void returnAttributeWithName() throws Exception {
+	public void modelAttributeMethodWithSpecifiedName() throws Exception {
 		ModelFactory modelFactory = createModelFactory("modelAttrWithName");
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
 
@@ -100,7 +104,7 @@ public class ModelFactoryTests {
 	}
 
 	@Test
-	public void returnAttributeWithNameByConvention() throws Exception {
+	public void modelAttributeMethodWithNameByConvention() throws Exception {
 		ModelFactory modelFactory = createModelFactory("modelAttrConvention");
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
 
@@ -108,7 +112,7 @@ public class ModelFactoryTests {
 	}
 
 	@Test
-	public void returnNullAttributeValue() throws Exception {
+	public void modelAttributeMethodWithNullReturnValue() throws Exception {
 		ModelFactory modelFactory = createModelFactory("nullModelAttr");
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
 
@@ -117,11 +121,11 @@ public class ModelFactoryTests {
 	}
 	
 	@Test
-	public void retrieveAttributeFromSession() throws Exception {
+	public void sessionAttribute() throws Exception {
 		sessionAttributeStore.storeAttribute(webRequest, "sessionAttr", "sessionAttrValue");
 
 		// Resolve successfully handler session attribute once
-		assertTrue(handlerSessionAttributeStore.isHandlerSessionAttribute("sessionAttr", null));
+		assertTrue(sessionAttrsHandler.isHandlerSessionAttribute("sessionAttr", null));
 		
 		ModelFactory modelFactory = createModelFactory("modelAttr", Model.class);
 		modelFactory.initModel(webRequest, mavContainer, handleMethod);
@@ -131,7 +135,7 @@ public class ModelFactoryTests {
 
 	@Test
 	public void requiredSessionAttribute() throws Exception {
-		ModelFactory modelFactory = new ModelFactory(null, null, handlerSessionAttributeStore);
+		ModelFactory modelFactory = new ModelFactory(null, null, sessionAttrsHandler, flashAttrsHandler);
 
 		try {
 			modelFactory.initModel(webRequest, mavContainer, handleSessionAttrMethod);
@@ -145,24 +149,53 @@ public class ModelFactoryTests {
 	}
 
 	@Test
-	public void updateBindingResult() throws Exception {
+	public void updateModelBindingResultKeys() throws Exception {
 		String attrName = "attr1";
 		Object attrValue = new Object();
 		mavContainer.addAttribute(attrName, attrValue);
 		
 		WebDataBinder dataBinder = new WebDataBinder(attrValue, attrName);
-
 		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
 		expect(binderFactory.createBinder(webRequest, attrValue, attrName)).andReturn(dataBinder);
 		replay(binderFactory);
 		
-		ModelFactory modelFactory = new ModelFactory(null, binderFactory, handlerSessionAttributeStore);
-		modelFactory.updateModel(webRequest, mavContainer, new SimpleSessionStatus());
+		ModelFactory modelFactory = new ModelFactory(null, binderFactory, sessionAttrsHandler, flashAttrsHandler);
+		modelFactory.updateModel(webRequest, mavContainer, new SimpleSessionStatus(), new SimpleFlashStatus());
 
 		assertEquals(attrValue, mavContainer.getModel().remove(attrName));
 		assertSame(dataBinder.getBindingResult(), mavContainer.getModel().remove(bindingResultKey(attrName)));
 		assertEquals(0, mavContainer.getModel().size());
 		
+		verify(binderFactory);
+	}
+
+	@Test
+	public void updateModelSessionStatusComplete() throws Exception {
+		String attrName = "sessionAttr";
+		String attrValue = "sessionAttrValue";
+		
+		mavContainer.addAttribute(attrName, attrValue);
+		sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
+		
+		// Resolve successfully handler session attribute once
+		assertTrue(sessionAttrsHandler.isHandlerSessionAttribute(attrName, null));
+
+		WebDataBinder dataBinder = new WebDataBinder(attrValue, attrName);
+		WebDataBinderFactory binderFactory = createMock(WebDataBinderFactory.class);
+		expect(binderFactory.createBinder(webRequest, attrValue, attrName)).andReturn(dataBinder);
+		replay(binderFactory);
+
+		SimpleSessionStatus status = new SimpleSessionStatus();
+		status.setComplete();
+		
+		// TODO: test with active FlashStatus
+
+		ModelFactory modelFactory = new ModelFactory(null, binderFactory, sessionAttrsHandler, flashAttrsHandler);
+		modelFactory.updateModel(webRequest, mavContainer, status, new SimpleFlashStatus());
+
+		assertEquals(attrValue, mavContainer.getAttribute(attrName));
+		assertNull(sessionAttributeStore.retrieveAttribute(webRequest, attrName));
+
 		verify(binderFactory);
 	}
 	
@@ -181,7 +214,7 @@ public class ModelFactoryTests {
 		handlerMethod.setDataBinderFactory(null);
 		handlerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
 		
-		return new ModelFactory(Arrays.asList(handlerMethod), null, handlerSessionAttributeStore);
+		return new ModelFactory(Arrays.asList(handlerMethod), null, sessionAttrsHandler, flashAttrsHandler);
 	}
 	
 	@SessionAttributes("sessionAttr") @SuppressWarnings("unused")

@@ -28,16 +28,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockServletConfig;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -46,45 +45,51 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.annotation.UriTemplateServletAnnotationControllerTests;
-import org.springframework.web.servlet.mvc.annotation.UriTemplateServletAnnotationControllerTests.VariableNamesController;
-import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.view.AbstractView;
 
 /**
- * The origin of this test class is {@link UriTemplateServletAnnotationControllerTests} with the tests in this class
- * adapted to run against the HandlerMethod infrastructure rather than against the DefaultAnnotationHandlerMapping,
- * the AnnotationMethodHandlerAdapter, and the AnnotationMethodHandlerExceptionResolver. Tests that are not supported
- * are listed at the bottom.
- *
+ * The origin of this test class is {@link UriTemplateServletAnnotationControllerTests}. 
+ * 
+ * Tests in this class run against the {@link HandlerMethod} infrastructure:
+ * <ul>
+ * 	<li>RequestMappingHandlerMapping 
+ * 	<li>RequestMappingHandlerAdapter 
+ * 	<li>ExceptionHandlerExceptionResolver
+ * </ul>
+ * 
+ * <p>Rather than against the existing infrastructure:
+ * <ul>
+ * 	<li>DefaultAnnotationHandlerMapping
+ * 	<li>AnnotationMethodHandlerAdapter
+ * 	<li>AnnotationMethodHandlerExceptionResolver
+ * </ul> 
+ * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class UriTemplateServletHandlerMethodTests {
-
-	private DispatcherServlet servlet;
+public class UriTemplateServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
 
 	@Test
 	public void simple() throws Exception {
-		initDispatcherServlet(SimpleUriTemplateController.class, null);
+		initServletWithControllers(SimpleUriTemplateController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("test-42", response.getContentAsString());
 	}
 
 	@Test
 	public void multiple() throws Exception {
-		initDispatcherServlet(MultipleUriTemplateController.class, null);
+		initServletWithControllers(MultipleUriTemplateController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21-other");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("test-42-21-other", response.getContentAsString());
 	}
 
@@ -96,16 +101,16 @@ public class UriTemplateServletHandlerMethodTests {
 		pathVars.put("other", "other");
 		
 		WebApplicationContext wac = 
-			initDispatcherServlet(ViewRenderingController.class, new BeanDefinitionRegistrar() {
-				public void register(GenericWebApplicationContext context) {
+			initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
+				public void initialize(GenericWebApplicationContext context) {
 					RootBeanDefinition beanDef = new RootBeanDefinition(ModelValidatingViewResolver.class);
 					beanDef.getConstructorArgumentValues().addGenericArgumentValue(pathVars);
 					context.registerBeanDefinition("viewResolver", beanDef);
 				}
-			});
+			}, ViewRenderingController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21-other");
-		servlet.service(request, new MockHttpServletResponse());
+		getServlet().service(request, new MockHttpServletResponse());
 		
 		ModelValidatingViewResolver resolver = wac.getBean(ModelValidatingViewResolver.class);
 		assertEquals(3, resolver.validatedAttrCount);
@@ -113,153 +118,153 @@ public class UriTemplateServletHandlerMethodTests {
 
 	@Test
 	public void binding() throws Exception {
-		initDispatcherServlet(BindingUriTemplateController.class, null);
+		initServletWithControllers(BindingUriTemplateController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/dates/2008-11-18");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals(200, response.getStatus());
 
 		request = new MockHttpServletRequest("GET", "/hotels/42/dates/2008-foo-bar");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals(400, response.getStatus());
 
-		initDispatcherServlet(NonBindingUriTemplateController.class, null);
+		initServletWithControllers(NonBindingUriTemplateController.class);
 		request = new MockHttpServletRequest("GET", "/hotels/42/dates/2008-foo-bar");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals(500, response.getStatus());
 	}
 
 	@Test
 	public void ambiguous() throws Exception {
-		initDispatcherServlet(AmbiguousUriTemplateController.class, null);
+		initServletWithControllers(AmbiguousUriTemplateController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/new");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("specific", response.getContentAsString());
 	}
 
 	@Test
 	public void relative() throws Exception {
-		initDispatcherServlet(RelativePathUriTemplateController.class, null);
+		initServletWithControllers(RelativePathUriTemplateController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("test-42-21", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/hotels/42/bookings/21.html");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("test-42-21", response.getContentAsString());
 	}
 
 	@Test
 	public void extension() throws Exception {
-		initDispatcherServlet(SimpleUriTemplateController.class, null);
+		initServletWithControllers(SimpleUriTemplateController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42.xml");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("test-42", response.getContentAsString());
 
 	}
 
 	@Test
 	public void typeConversionError() throws Exception {
-		initDispatcherServlet(SimpleUriTemplateController.class, null);
+		initServletWithControllers(SimpleUriTemplateController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.xml");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("Invalid response status code", HttpServletResponse.SC_BAD_REQUEST, response.getStatus());
 	}
 
 	@Test
 	public void explicitSubPath() throws Exception {
-		initDispatcherServlet(ExplicitSubPathController.class, null);
+		initServletWithControllers(ExplicitSubPathController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("test-42", response.getContentAsString());
 	}
 
 	@Test
 	public void implicitSubPath() throws Exception {
-		initDispatcherServlet(ImplicitSubPathController.class, null);
+		initServletWithControllers(ImplicitSubPathController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/42");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("test-42", response.getContentAsString());
 	}
 
 	@Test
 	public void crud() throws Exception {
-		initDispatcherServlet(CrudController.class, null);
+		initServletWithControllers(CrudController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("list", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/hotels/");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("list", response.getContentAsString());
 
 		request = new MockHttpServletRequest("POST", "/hotels");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("create", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/hotels/42");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("show-42", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/hotels/42/");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("show-42", response.getContentAsString());
 
 		request = new MockHttpServletRequest("PUT", "/hotels/42");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("createOrUpdate-42", response.getContentAsString());
 
 		request = new MockHttpServletRequest("DELETE", "/hotels/42");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("remove-42", response.getContentAsString());
 	}
 
 	@Test
 	public void methodNotSupported() throws Exception {
-		initDispatcherServlet(MethodNotAllowedController.class, null);
+		initServletWithControllers(MethodNotAllowedController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels/1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals(200, response.getStatus());
 
 		request = new MockHttpServletRequest("POST", "/hotels/1");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals(405, response.getStatus());
 
 		request = new MockHttpServletRequest("GET", "/hotels");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals(200, response.getStatus());
 
 		request = new MockHttpServletRequest("POST", "/hotels");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals(405, response.getStatus());
 
 
@@ -267,26 +272,26 @@ public class UriTemplateServletHandlerMethodTests {
 
 	@Test
 	public void multiPaths() throws Exception {
-		initDispatcherServlet(MultiPathController.class, null);
+		initServletWithControllers(MultiPathController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/category/page/5");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("handle4-page-5", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/category/page/5.html");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("handle4-page-5", response.getContentAsString());
 	}
 
 	@Test
 	public void customRegex() throws Exception {
-		initDispatcherServlet(CustomRegexController.class, null);
+		initServletWithControllers(CustomRegexController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/42");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("test-42", response.getContentAsString());
 	}
 
@@ -295,11 +300,11 @@ public class UriTemplateServletHandlerMethodTests {
 	 */
 	@Test
 	public void menuTree() throws Exception {
-		initDispatcherServlet(MenuTreeController.class, null);
+		initServletWithControllers(MenuTreeController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/book/menu/type/M5");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("M5", response.getContentAsString());
 	}
 
@@ -308,16 +313,16 @@ public class UriTemplateServletHandlerMethodTests {
 	 */
 	@Test
 	public void variableNames() throws Exception {
-		initDispatcherServlet(VariableNamesController.class, null);
+		initServletWithControllers(VariableNamesController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/foo");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("foo-foo", response.getContentAsString());
 
 		request = new MockHttpServletRequest("DELETE", "/test/bar");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("bar-bar", response.getContentAsString());
 	}
 
@@ -326,11 +331,11 @@ public class UriTemplateServletHandlerMethodTests {
 	 */
 	@Test
 	public void variableNamesWithUrlExtension() throws Exception {
-		initDispatcherServlet(VariableNamesController.class, null);
+		initServletWithControllers(VariableNamesController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/foo.json");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("foo-foo", response.getContentAsString());
 	}
 
@@ -339,26 +344,26 @@ public class UriTemplateServletHandlerMethodTests {
 	 */
 	@Test
 	public void doIt() throws Exception {
-		initDispatcherServlet(Spr6978Controller.class, null);
+		initServletWithControllers(Spr6978Controller.class);
 		
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/100");
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("loadEntity:foo:100", response.getContentAsString());
 
 		request = new MockHttpServletRequest("POST", "/foo/100");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("publish:foo:100", response.getContentAsString());
 
 		request = new MockHttpServletRequest("GET", "/module/100");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("loadModule:100", response.getContentAsString());
 
 		request = new MockHttpServletRequest("POST", "/module/100");
 		response = new MockHttpServletResponse();
-		servlet.service(request, response);
+		getServlet().service(request, response);
 		assertEquals("publish:module:100", response.getContentAsString());
 
 	}
@@ -672,50 +677,6 @@ public class UriTemplateServletHandlerMethodTests {
 		}
 	}
 	
-	private interface BeanDefinitionRegistrar {
-		public void register(GenericWebApplicationContext context);
-	}
-
-	@SuppressWarnings("serial")
-	private WebApplicationContext initDispatcherServlet(final Class<?> controllerClass, final BeanDefinitionRegistrar registrar)
-			throws ServletException {
-		
-		final GenericWebApplicationContext wac = new GenericWebApplicationContext();
-		
-		servlet = new DispatcherServlet() {
-			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
-				
-				Class<?> mappingType = RequestMappingHandlerMapping.class;
-				wac.registerBeanDefinition("handlerMapping", new RootBeanDefinition(mappingType));
-				
-				Class<?> adapterType = RequestMappingHandlerAdapter.class;
-				wac.registerBeanDefinition("handlerAdapter", new RootBeanDefinition(adapterType));
-				
-				Class<?> resolverType = ExceptionHandlerExceptionResolver.class;
-				wac.registerBeanDefinition("requestMappingResolver", new RootBeanDefinition(resolverType));
-				
-				resolverType = ResponseStatusExceptionResolver.class;
-				wac.registerBeanDefinition("responseStatusResolver", new RootBeanDefinition(resolverType));
-				
-				resolverType = DefaultHandlerExceptionResolver.class;
-				wac.registerBeanDefinition("defaultResolver", new RootBeanDefinition(resolverType));
-
-				if (registrar != null) {
-					registrar.register(wac);
-				}
-
-				wac.refresh();
-				return wac;
-			}
-		};
-		
-		servlet.init(new MockServletConfig());
-		
-		return wac;
-	}
-
 // @Ignore("ControllerClassNameHandlerMapping")	
 //	public void controllerClassName() throws Exception {
 

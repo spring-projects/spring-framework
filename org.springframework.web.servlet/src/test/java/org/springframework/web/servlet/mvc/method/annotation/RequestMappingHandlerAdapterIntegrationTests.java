@@ -92,7 +92,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebA
  * <p>If you wish to add high-level tests, consider the following other "integration"-style tests:
  * <ul>
  * 	<li>{@link HandlerMethodAnnotationDetectionTests}
- * 	<li>{@link ServletHandlerMethodTests}
+ * 	<li>{@link ServletAnnotationControllerHandlerMethodTests}
  * </ul>
  *
  * @author Rossen Stoyanchev
