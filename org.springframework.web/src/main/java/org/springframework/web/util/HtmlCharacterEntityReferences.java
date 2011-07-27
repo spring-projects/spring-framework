@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import org.springframework.util.Assert;
  */
 class HtmlCharacterEntityReferences {
 
+	private static final String PROPERTIES_FILE = "HtmlCharacterEntityReferences.properties";
+
 	static final char REFERENCE_START = '&';
 
 	static final String DECIMAL_REFERENCE_START = "&#";
@@ -49,12 +51,9 @@ class HtmlCharacterEntityReferences {
 	static final char CHAR_NULL = (char) -1;
 
 
-	private static final String PROPERTIES_FILE = "HtmlCharacterEntityReferences.properties";
-
-
 	private final String[] characterToEntityReferenceMap = new String[3000];
 
-	private final Map entityReferenceToCharacterMap = new HashMap(252);
+	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<String, Character>(252);
 
 
 	/**
@@ -63,7 +62,7 @@ class HtmlCharacterEntityReferences {
 	public HtmlCharacterEntityReferences() {
 		Properties entityReferences = new Properties();
 
-		// Load refeence definition file.
+		// Load reference definition file
 		InputStream is = HtmlCharacterEntityReferences.class.getResourceAsStream(PROPERTIES_FILE);
 		if (is == null) {
 			throw new IllegalStateException(
@@ -82,7 +81,7 @@ class HtmlCharacterEntityReferences {
 					"Failed to parse reference definition file [HtmlCharacterEntityReferences.properties]: " +  ex.getMessage());
 		}
 
-		// Parse reference definition properites.
+		// Parse reference definition properties
 		Enumeration keys = entityReferences.propertyNames();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
@@ -95,6 +94,7 @@ class HtmlCharacterEntityReferences {
 			this.entityReferenceToCharacterMap.put(reference, new Character((char) referredChar));
 		}
 	}
+
 
 	/**
 	 * Return the number of supported entity references.
@@ -128,7 +128,7 @@ class HtmlCharacterEntityReferences {
 	 * Return the char mapped to the given entityReference or -1.
 	 */
 	public char convertToCharacter(String entityReference) {
-		Character referredCharacter = (Character) this.entityReferenceToCharacterMap.get(entityReference);
+		Character referredCharacter = this.entityReferenceToCharacterMap.get(entityReference);
 		if (referredCharacter != null) {
 			return referredCharacter.charValue();
 		}
