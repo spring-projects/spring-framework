@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,19 @@ import java.io.StreamTokenizer;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Martin Kersten
  * @author Juergen Hoeller
  */
-public class HtmlCharacterEntityReferencesTests extends TestCase {
+public class HtmlCharacterEntityReferencesTests {
 
 	private static final String DTD_FILE = "HtmlCharacterEntityReferences.dtd";
 
+	@Test
 	public void testSupportsAllCharacterEntityReferencesDefinedByHtml() {
 		HtmlCharacterEntityReferences entityReferences = new HtmlCharacterEntityReferences();
 		Map referenceCharactersMap = getReferenceCharacterMap();
@@ -49,8 +52,12 @@ public class HtmlCharacterEntityReferencesTests extends TestCase {
 						entityReferences.isMappedToReference((char) character));
 				assertEquals("The reference of unicode character " + character + " should be entity " + referenceName,
 						fullReference, entityReferences.convertToReference((char) character));
-				assertEquals("The entity reference [" + referenceName + "] should be mapped to unicode character " + character,
-						(char) character, entityReferences.convertToCharacter(referenceName));
+				assertEquals("The entity reference [" + referenceName + "] should be mapped to unicode character " +
+						character, (char) character, entityReferences.convertToCharacter(referenceName));
+			}
+			else if (character == 39) {
+				assertTrue(entityReferences.isMappedToReference((char) character));
+				assertEquals("&#39;", entityReferences.convertToReference((char) character));
 			}
 			else {
 				assertFalse("The unicode character " + character + " should not be mapped to a reference",
@@ -61,17 +68,17 @@ public class HtmlCharacterEntityReferencesTests extends TestCase {
 		}
 
 		assertEquals("The registered entity count of entityReferences should match the number of entity references",
-				referenceCharactersMap.size(), entityReferences.getSupportedReferenceCount());
-		assertEquals("The HTML 4.0 Standard defines 252 entity references so do entityReferences",
-				252, entityReferences.getSupportedReferenceCount());
+				referenceCharactersMap.size() + 1, entityReferences.getSupportedReferenceCount());
+		assertEquals("The HTML 4.0 Standard defines 252+1 entity references so do entityReferences",
+				252 + 1, entityReferences.getSupportedReferenceCount());
 
-		assertEquals("Invalid entity reference names should not be convertable",
+		assertEquals("Invalid entity reference names should not be convertible",
 				(char) -1, entityReferences.convertToCharacter("invalid"));
 	}
 
 	private Map getReferenceCharacterMap() {
 		CharacterEntityResourceIterator entityIterator = new CharacterEntityResourceIterator();
-		Map referencedCharactersMap = new HashMap();
+		Map<Integer, String> referencedCharactersMap = new HashMap<Integer, String>();
 		while (entityIterator.hasNext()) {
 			int character = entityIterator.getReferredCharacter();
 			String entityName = entityIterator.nextEntry();
@@ -103,7 +110,7 @@ public class HtmlCharacterEntityReferencesTests extends TestCase {
 		}
 
 		public boolean hasNext() {
-			return (currentEntityName != null ? true : readNextEntity());
+			return (currentEntityName != null || readNextEntity());
 		}
 
 		public String nextEntry() {

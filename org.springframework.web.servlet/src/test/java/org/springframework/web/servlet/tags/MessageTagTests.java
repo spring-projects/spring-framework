@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.tags;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
@@ -347,7 +346,7 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.setHtmlEscape("true");
 		tag.setJavaScriptEscape("true");
 		assertTrue("Correct doStartTag return value", tag.doStartTag() == Tag.EVAL_BODY_INCLUDE);
-		assertEquals("Correct message", "\\' test &amp; text \\\\", message.toString());
+		assertEquals("Correct message", "&#39; test &amp; text \\\\", message.toString());
 	}
 
 	public void testMessageWithVarAndScope() throws JspException {
