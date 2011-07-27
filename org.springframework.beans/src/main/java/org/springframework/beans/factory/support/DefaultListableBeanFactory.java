@@ -543,7 +543,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Considers all beans as eligible for metdata caching
+	 * Considers all beans as eligible for metadata caching
 	 * if the factory's configuration has been marked as frozen.
 	 * @see #freezeConfiguration()
 	 */
@@ -556,9 +556,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Pre-instantiating singletons in " + this);
 		}
-
 		synchronized (this.beanDefinitionMap) {
-			for (String beanName : this.beanDefinitionNames) {
+			// Iterate over a copy to allow for init methods which in turn register new bean definitions.
+			// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
+			List<String> beanNames = new ArrayList<String>(this.beanDefinitionNames);
+			for (String beanName : beanNames) {
 				RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 				if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
 					if (isFactoryBean(beanName)) {
@@ -572,7 +574,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							}, getAccessControlContext());
 						}
 						else {
-							isEagerInit = factory instanceof SmartFactoryBean && ((SmartFactoryBean) factory).isEagerInit(); 
+							isEagerInit = (factory instanceof SmartFactoryBean &&
+									((SmartFactoryBean) factory).isEagerInit());
 						}
 						if (isEagerInit) {
 							getBean(beanName);
@@ -666,8 +669,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			destroySingleton(beanName);
 		}
 
-		// Reset all bean definitions that have the given bean as parent
-		// (recursively).
+		// Reset all bean definitions that have the given bean as parent (recursively).
 		for (String bdName : this.beanDefinitionNames) {
 			if (!beanName.equals(bdName)) {
 				BeanDefinition bd = this.beanDefinitionMap.get(bdName);
