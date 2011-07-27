@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -430,9 +430,18 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		return mav;
 	}
 
+	/**
+	 * This method always returns -1 since an annotated controller can have many methods,
+	 * each requiring separate lastModified calculations. Instead, an
+	 * @{@link RequestMapping}-annotated method can calculate the lastModified value, call
+	 * {@link org.springframework.web.context.request.WebRequest#checkNotModified(long)}
+	 * to check it, and return {@code null} if that returns {@code true}.
+	 * @see org.springframework.web.context.request.WebRequest#checkNotModified(long)
+	 */
 	public long getLastModified(HttpServletRequest request, Object handler) {
 		return -1;
 	}
+
 
 	/**
 	 * Build a HandlerMethodResolver for the given handler type.
@@ -463,8 +472,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * @see ServletRequestDataBinder#bind(javax.servlet.ServletRequest)
 	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, org.springframework.core.MethodParameter) 
 	 */
-	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object target, String objectName)
-			throws Exception {
+	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object target, String objectName) throws Exception {
 		return new ServletRequestDataBinder(target, objectName);
 	}
 
@@ -620,21 +628,20 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 			else {
 				if (!allowedMethods.isEmpty()) {
-					throw new HttpRequestMethodNotSupportedException(request.getMethod(),
-							StringUtils.toStringArray(allowedMethods));
+					throw new HttpRequestMethodNotSupportedException(request.getMethod(), StringUtils.toStringArray(allowedMethods));
 				}
-				throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(),
-						request.getParameterMap());
+				throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(), request.getParameterMap());
 			}
 		}
 
 		/**
 		 * Determines the combined pattern for the given methodLevelPattern and path.
-		 * <p>Uses the following algorithm: <ol>
+		 * <p>Uses the following algorithm:
+		 * <ol>
 		 * <li>If there is a type-level mapping with path information, it is {@linkplain
 		 * PathMatcher#combine(String, String) combined} with the method-level pattern.</li>
-		 * <li>If there is a {@linkplain HandlerMapping#BEST_MATCHING_PATTERN_ATTRIBUTE best matching pattern} in the
-		 * request, it is combined with the method-level pattern.</li>
+		 * <li>If there is a {@linkplain HandlerMapping#BEST_MATCHING_PATTERN_ATTRIBUTE best matching pattern}
+		 * in the request, it is combined with the method-level pattern.</li>
 		 * <li>Otherwise, the method-level pattern is returned.</li>
 		 * </ol>
 		 */
@@ -646,8 +653,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 						typeLevelPattern = "/" + typeLevelPattern;
 					}
 					String combinedPattern = pathMatcher.combine(typeLevelPattern, methodLevelPattern);
-					if (isPathMatchInternal(combinedPattern, lookupPath)) {
-						return combinedPattern;
+					String matchingPattern = getMatchingPattern(combinedPattern, lookupPath);
+					if (matchingPattern != null) {
+						return matchingPattern;
 					}
 				}
 				return null;
@@ -655,44 +663,44 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			String bestMatchingPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
 			if (StringUtils.hasText(bestMatchingPattern) && bestMatchingPattern.endsWith("*")) {
 				String combinedPattern = pathMatcher.combine(bestMatchingPattern, methodLevelPattern);
-				if (!combinedPattern.equals(bestMatchingPattern) &&
-						(isPathMatchInternal(combinedPattern, lookupPath))) {
-					return combinedPattern;
+				String matchingPattern = getMatchingPattern(combinedPattern, lookupPath);
+				if (matchingPattern != null && !matchingPattern.equals(bestMatchingPattern)) {
+					return matchingPattern;
 				}
 			}
-			if (isPathMatchInternal(methodLevelPattern, lookupPath)) {
-				return methodLevelPattern;
+			return getMatchingPattern(methodLevelPattern, lookupPath);
+		}
+
+		private String getMatchingPattern(String pattern, String lookupPath) {
+			if (pattern.equals(lookupPath)) {
+				return pattern;
+			}
+			boolean hasSuffix = pattern.indexOf('.') != -1;
+			if (!hasSuffix) {
+				String patternWithSuffix = pattern + ".*";
+				if (pathMatcher.match(patternWithSuffix, lookupPath)) {
+					return patternWithSuffix;
+				}
+			}
+			if (pathMatcher.match(pattern, lookupPath)) {
+				return pattern;
+			}
+			boolean endsWithSlash = pattern.endsWith("/");
+			if (!endsWithSlash) {
+				String patternWithSlash = pattern + "/";
+				if (pathMatcher.match(patternWithSlash, lookupPath)) {
+					return patternWithSlash;
+				}
 			}
 			return null;
 		}
 
-		private boolean isPathMatchInternal(String pattern, String lookupPath) {
-			if (pattern.equals(lookupPath) || pathMatcher.match(pattern, lookupPath)) {
-				return true;
-			}
-			boolean hasSuffix = pattern.indexOf('.') != -1;
-			if (!hasSuffix && pathMatcher.match(pattern + ".*", lookupPath)) {
-				return true;
-			}
-			boolean endsWithSlash = pattern.endsWith("/");
-			if (!endsWithSlash && pathMatcher.match(pattern + "/", lookupPath)) {
-				return true;
-			}
-			return false;
-		}
-
 		@SuppressWarnings("unchecked")
-		private void extractHandlerMethodUriTemplates(String mappedPattern,
-				String lookupPath,
-				HttpServletRequest request) {
-
+		private void extractHandlerMethodUriTemplates(String mappedPattern, String lookupPath, HttpServletRequest request) {
 			Map<String, String> variables =
 					(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-
 			int patternVariableCount = StringUtils.countOccurrencesOf(mappedPattern, "{");
-			
-			if ( (variables == null || patternVariableCount != variables.size())  
-					&& pathMatcher.match(mappedPattern, lookupPath)) {
+			if ((variables == null || patternVariableCount != variables.size()) && pathMatcher.match(mappedPattern, lookupPath)) {
 				variables = pathMatcher.extractUriTemplateVariables(mappedPattern, lookupPath);
 				request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, variables);
 			}
