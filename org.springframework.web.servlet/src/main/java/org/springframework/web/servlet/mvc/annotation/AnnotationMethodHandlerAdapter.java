@@ -394,14 +394,13 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			throws Exception {
 
 		Class<?> clazz = ClassUtils.getUserClass(handler);
-		Boolean annotated = this.sessionAnnotatedClassesCache.get(clazz);
-
-		if (annotated == null) {
-			annotated = (AnnotationUtils.findAnnotation(handler.getClass(), SessionAttributes.class) != null);
-			this.sessionAnnotatedClassesCache.put(clazz, annotated);
+		Boolean annotatedWithSessionAttributes = this.sessionAnnotatedClassesCache.get(clazz);
+		if (annotatedWithSessionAttributes == null) {
+			annotatedWithSessionAttributes = (AnnotationUtils.findAnnotation(clazz, SessionAttributes.class) != null);
+			this.sessionAnnotatedClassesCache.put(clazz, annotatedWithSessionAttributes);
 		}
 
-		if (annotated) {
+		if (annotatedWithSessionAttributes) {
 			// Always prevent caching in case of session attribute management.
 			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
 			// Prepare cached set of session attributes names.

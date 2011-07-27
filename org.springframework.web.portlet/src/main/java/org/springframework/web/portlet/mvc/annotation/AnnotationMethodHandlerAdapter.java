@@ -59,7 +59,6 @@ import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -418,7 +417,6 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * @return the PortletRequestDataBinder instance to use
 	 * @throws Exception in case of invalid state or arguments
 	 * @see PortletRequestDataBinder#bind(javax.portlet.PortletRequest)
-	 * @see PortletRequestDataBinder#convertIfNecessary(Object, Class, MethodParameter)
 	 */
 	protected PortletRequestDataBinder createBinder(PortletRequest request, Object target, String objectName) throws Exception {
 		return new PortletRequestDataBinder(target, objectName);
