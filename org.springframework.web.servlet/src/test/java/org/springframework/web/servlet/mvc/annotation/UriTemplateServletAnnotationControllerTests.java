@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
@@ -43,7 +42,12 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping;
 
-/** @author Arjen Poutsma */
+import static org.junit.Assert.*;
+
+/**
+ * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
+ */
 public class UriTemplateServletAnnotationControllerTests {
 
 	private DispatcherServlet servlet;
@@ -309,9 +313,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("test-42", response.getContentAsString());
 	}
 
-	/*
-	 * See SPR-6640 
-	 */
+	// SPR-6640
 	@Test
 	public void menuTree() throws Exception {
 		initServlet(MenuTreeController.class);
@@ -322,9 +324,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("M5", response.getContentAsString());
 	}
 
-	/*
-	 * See SPR-6876
-	 */
+	// SPR-6876
 	@Test
 	public void variableNames() throws Exception {
 		initServlet(VariableNamesController.class);
@@ -340,9 +340,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("bar-bar", response.getContentAsString());
 	}
 
-	/*
-	 * See SPR-8543
-	 */
+	// SPR-8543
 	@Test
 	public void variableNamesWithUrlExtension() throws Exception {
 		initServlet(VariableNamesController.class);
@@ -353,9 +351,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("foo-foo", response.getContentAsString());
 	}
 
-	/*
-	 * See SPR-6906
-	 */
+	// SPR-6906
 	@Test
 	public void controllerClassName() throws Exception {
 		servlet = new DispatcherServlet() {
@@ -389,9 +385,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("plain-bar", response.getContentAsString());
 	}
 
-	/*
-	 * See SPR-6978
-	 */
+	// SPR-6978
 	@Test
 	public void doIt() throws Exception {
 		initServlet(Spr6978Controller.class);
@@ -419,10 +413,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 
-
-	/*
-	 * Controllers
-	 */
+	// Controllers
 
 	@Controller
 	public static class SimpleUriTemplateController {
@@ -561,7 +552,6 @@ public class UriTemplateServletAnnotationControllerTests {
 
 	}
 
-
 	@Controller
 	@RequestMapping("hotels")
 	public static class CrudController {
@@ -688,6 +678,5 @@ public class UriTemplateServletAnnotationControllerTests {
 			writer.write("publish:" + type + ":" + id);
 		}
 	}
-
 
 }

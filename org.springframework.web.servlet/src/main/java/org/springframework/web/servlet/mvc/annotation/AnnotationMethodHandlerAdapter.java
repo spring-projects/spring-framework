@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -105,19 +104,16 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestScope;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.LastModified;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.MethodNameResolver;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.WebContentGenerator;
-import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
@@ -663,11 +659,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 			else {
 				if (!allowedMethods.isEmpty()) {
-					throw new HttpRequestMethodNotSupportedException(request.getMethod(),
-							StringUtils.toStringArray(allowedMethods));
+					throw new HttpRequestMethodNotSupportedException(request.getMethod(), StringUtils.toStringArray(allowedMethods));
 				}
-				throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(),
-						request.getParameterMap());
+				throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(), request.getParameterMap());
 			}
 		}
 
@@ -675,17 +669,17 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (!hasTypeLevelMapping() || ObjectUtils.isEmpty(getTypeLevelMapping().value())) {
 				return false;
 			}
-			return (Boolean) request.getAttribute(
-							HandlerMapping.INTROSPECT_TYPE_LEVEL_MAPPING);
+			return (Boolean) request.getAttribute(HandlerMapping.INTROSPECT_TYPE_LEVEL_MAPPING);
 		}
 
 		/**
 		 * Determines the combined pattern for the given methodLevelPattern and path.
-		 * <p>Uses the following algorithm: <ol>
+		 * <p>Uses the following algorithm:
+		 * <ol>
 		 * <li>If there is a type-level mapping with path information, it is {@linkplain
 		 * PathMatcher#combine(String, String) combined} with the method-level pattern.</li>
-		 * <li>If there is a {@linkplain HandlerMapping#BEST_MATCHING_PATTERN_ATTRIBUTE best matching pattern} in the
-		 * request, it is combined with the method-level pattern.</li>
+		 * <li>If there is a {@linkplain HandlerMapping#BEST_MATCHING_PATTERN_ATTRIBUTE best matching pattern}
+		 * in the request, it is combined with the method-level pattern.</li>
 		 * <li>Otherwise, the method-level pattern is returned.</li>
 		 * </ol>
 		 */
@@ -708,7 +702,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (StringUtils.hasText(bestMatchingPattern) && bestMatchingPattern.endsWith("*")) {
 				String combinedPattern = pathMatcher.combine(bestMatchingPattern, methodLevelPattern);
 				String matchingPattern = getMatchingPattern(combinedPattern, lookupPath);
-				if ((matchingPattern != null) && !matchingPattern.equals(bestMatchingPattern)) {
+				if (matchingPattern != null && !matchingPattern.equals(bestMatchingPattern)) {
 					return matchingPattern;
 				}
 			}
@@ -720,31 +714,31 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				return pattern;
 			}
 			boolean hasSuffix = pattern.indexOf('.') != -1;
-			if (!hasSuffix && pathMatcher.match(pattern + ".*", lookupPath)) {
-				return pattern + ".*";
+			if (!hasSuffix) {
+				String patternWithSuffix = pattern + ".*";
+				if (pathMatcher.match(patternWithSuffix, lookupPath)) {
+					return patternWithSuffix;
+				}
 			}
 			if (pathMatcher.match(pattern, lookupPath)) {
 				return pattern;
 			}
 			boolean endsWithSlash = pattern.endsWith("/");
-			if (!endsWithSlash && pathMatcher.match(pattern + "/", lookupPath)) {
-				return pattern + "/";
+			if (!endsWithSlash) {
+				String patternWithSlash = pattern + "/";
+				if (pathMatcher.match(patternWithSlash, lookupPath)) {
+					return patternWithSlash;
+				}
 			}
 			return null;
 		}
 
 		@SuppressWarnings("unchecked")
-		private void extractHandlerMethodUriTemplates(String mappedPattern,
-				String lookupPath,
-				HttpServletRequest request) {
-
+		private void extractHandlerMethodUriTemplates(String mappedPattern, String lookupPath, HttpServletRequest request) {
 			Map<String, String> variables =
 					(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-
 			int patternVariableCount = StringUtils.countOccurrencesOf(mappedPattern, "{");
-			
-			if ( (variables == null || patternVariableCount != variables.size())  
-					&& pathMatcher.match(mappedPattern, lookupPath)) {
+			if ((variables == null || patternVariableCount != variables.size()) && pathMatcher.match(mappedPattern, lookupPath)) {
 				variables = pathMatcher.extractUriTemplateVariables(mappedPattern, lookupPath);
 				request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, variables);
 			}
