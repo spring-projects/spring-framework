@@ -65,13 +65,6 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 
 	/**
-	 * @param separator the statement separator
-	 */
-	public void setSeparator(String separator) {
-		this.separator = separator;
-	}
-
-	/**
 	 * Add a script to execute to populate the database.
 	 * @param script the path to a SQL script
 	 */
@@ -123,6 +116,13 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		this.ignoreFailedDrops = ignoreFailedDrops;
 	}
 
+	/**
+	 * Specify the statement separator, if a custom one.
+	 */
+	public void setSeparator(String separator) {
+		this.separator = separator;
+	}
+
 
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : this.scripts) {
@@ -149,8 +149,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param continueOnError whether or not to continue without throwing an exception in the event of an error
 	 * @param ignoreFailedDrops whether of not to continue in the event of specifically an error on a <code>DROP</code>
 	 */
-	private void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
-			boolean ignoreFailedDrops) throws SQLException {
+	private void executeSqlScript(Connection connection, EncodedResource resource,
+			boolean continueOnError, boolean ignoreFailedDrops) throws SQLException {
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Executing SQL script from " + resource);
@@ -160,10 +160,11 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		String script;
 		try {
 			script = readScript(resource);
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			throw new CannotReadScriptException(resource, ex);
 		}
-		String delimiter = separator;
+		String delimiter = this.separator;
 		if (delimiter == null) {
 			delimiter = ";";
 			if (!containsSqlScriptDelimiters(script, delimiter)) {
@@ -186,8 +187,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
 					if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Failed to execute SQL script statement at line " + lineNumber
-									+ " of resource " + resource + ": " + statement, ex);
+							logger.debug("Failed to execute SQL script statement at line " + lineNumber +
+									" of resource " + resource + ": " + statement, ex);
 						}
 					}
 					else {
@@ -222,7 +223,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
 			if (StringUtils.hasText(currentStatement) &&
-					this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix)) {
+					(this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
 				if (scriptBuilder.length() > 0) {
 					scriptBuilder.append('\n');
 				}
