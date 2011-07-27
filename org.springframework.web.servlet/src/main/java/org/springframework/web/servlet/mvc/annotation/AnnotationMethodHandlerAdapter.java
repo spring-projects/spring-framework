@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -183,7 +184,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	private BeanExpressionContext expressionContext;
 
 	private final Map<Class<?>, ServletHandlerMethodResolver> methodResolverCache =
-			new HashMap<Class<?>, ServletHandlerMethodResolver>();
+			new ConcurrentHashMap<Class<?>, ServletHandlerMethodResolver>();
+
+	private final Map<Class<?>, Boolean> sessionAnnotatedClassesCache = new ConcurrentHashMap<Class<?>, Boolean>();
 
 
 	public AnnotationMethodHandlerAdapter() {
@@ -390,7 +393,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
-		if (AnnotationUtils.findAnnotation(handler.getClass(), SessionAttributes.class) != null) {
+		Class<?> clazz = ClassUtils.getUserClass(handler);
+		Boolean annotatedWithSessionAttributes = this.sessionAnnotatedClassesCache.get(clazz);
+		if (annotatedWithSessionAttributes == null) {
+			annotatedWithSessionAttributes = (AnnotationUtils.findAnnotation(clazz, SessionAttributes.class) != null);
+			this.sessionAnnotatedClassesCache.put(clazz, annotatedWithSessionAttributes);
+		}
+
+		if (annotatedWithSessionAttributes) {
 			// Always prevent caching in case of session attribute management.
 			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
 			// Prepare cached set of session attributes names.
@@ -448,14 +458,17 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 */
 	private ServletHandlerMethodResolver getMethodResolver(Object handler) {
 		Class handlerClass = ClassUtils.getUserClass(handler);
-		synchronized (this.methodResolverCache) {
-			ServletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
-			if (resolver == null) {
-				resolver = new ServletHandlerMethodResolver(handlerClass);
-				this.methodResolverCache.put(handlerClass, resolver);
+		ServletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
+		if (resolver == null) {
+			synchronized (this.methodResolverCache) {
+				resolver = this.methodResolverCache.get(handlerClass);
+				if (resolver == null) {
+					resolver = new ServletHandlerMethodResolver(handlerClass);
+					this.methodResolverCache.put(handlerClass, resolver);
+				}
 			}
-			return resolver;
 		}
+		return resolver;
 	}
 
 
