@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jdbc.datasource.init.DatabasePopulator;
+import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 
 /**
  * A subclass of {@link EmbeddedDatabaseFactory} that implements {@link FactoryBean} for registration as a Spring bean.
@@ -32,14 +34,37 @@ import org.springframework.beans.factory.InitializingBean;
  * <p>Implements DisposableBean to shutdown the embedded database when the managing Spring container is shutdown.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory
 		implements FactoryBean<DataSource>, InitializingBean, DisposableBean {
 
+	private DatabasePopulator databaseCleaner;
+
+
+	/**
+	 * Set a script execution to be run in the bean destruction callback,
+	 * cleaning up the database and leaving it in a known state for others.
+	 * @param databaseCleaner the database script executor to run on destroy
+	 * @see #setDatabasePopulator
+	 * @see org.springframework.jdbc.datasource.init.DataSourceInitializer#setDatabaseCleaner
+	 */
+	public void setDatabaseCleaner(DatabasePopulator databaseCleaner) {
+		this.databaseCleaner = databaseCleaner;
+	}
+
 	public void afterPropertiesSet() {
 		initDatabase();
 	}
+
+	public void destroy() {
+		if (this.databaseCleaner != null) {
+			DatabasePopulatorUtils.execute(this.databaseCleaner, getDataSource());
+		}
+		shutdownDatabase();
+	}
+
 
 	public DataSource getObject() {
 		return getDataSource();
@@ -52,9 +77,5 @@ public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory
 	public boolean isSingleton() {
 		return true;
 	}
-
-	public void destroy() {
-		shutdownDatabase();
-	}	
 
 }

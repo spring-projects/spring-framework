@@ -55,13 +55,13 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private String sqlScriptEncoding;
 
+	private String separator;
+
 	private String commentPrefix = DEFAULT_COMMENT_PREFIX;
 
 	private boolean continueOnError = false;
 
 	private boolean ignoreFailedDrops = false;
-
-	private String separator = null;
 
 
 	/**
@@ -91,6 +91,13 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
+	 * Specify the statement separator, if a custom one.
+	 */
+	public void setSeparator(String separator) {
+		this.separator = separator;
+	}
+
+	/**
 	 * Set the line prefix that identifies comments in the SQL script.
 	 * Default is "--".
 	 */
@@ -114,13 +121,6 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 */
 	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
 		this.ignoreFailedDrops = ignoreFailedDrops;
-	}
-
-	/**
-	 * Specify the statement separator, if a custom one.
-	 */
-	public void setSeparator(String separator) {
-		this.separator = separator;
 	}
 
 

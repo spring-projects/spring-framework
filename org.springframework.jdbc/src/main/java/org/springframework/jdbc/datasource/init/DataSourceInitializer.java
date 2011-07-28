@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,10 @@
 
 package org.springframework.jdbc.datasource.init;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.util.Assert;
 
 /**
  * Used to populate a database during initialization.
@@ -41,6 +37,7 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	private DatabasePopulator databaseCleaner;
 
 	private boolean enabled = true;
+
 
 	/**
 	 * The {@link DataSource} to populate when this component is initialized.
@@ -61,9 +58,8 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	}
 
 	/**
-	 * Set a script execution to be run in the bean destruction callback, cleaning up the database and leaving it in 
-	 * a known state for others.
-	 * 
+	 * Set a script execution to be run in the bean destruction callback,
+	 * cleaning up the database and leaving it in a known state for others.
 	 * @param databaseCleaner the database script executor to run on destroy
 	 */
 	public void setDatabaseCleaner(DatabasePopulator databaseCleaner) {
@@ -78,42 +74,22 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 		this.enabled = enabled;
 	}
 
+
 	/**
 	 * Use the populator to set up data in the data source.
 	 */
-	public void afterPropertiesSet() throws Exception {
-		if (this.databasePopulator != null) {
-			execute(this.databasePopulator);
+	public void afterPropertiesSet() {
+		if (this.databasePopulator != null && this.enabled) {
+			DatabasePopulatorUtils.execute(this.databasePopulator, this.dataSource);
 		}
 	}
 
 	/**
 	 * Use the populator to clean up data in the data source.
 	 */
-	public void destroy() throws Exception {
-		if (this.databaseCleaner != null) {
-			execute(this.databaseCleaner);
-		}
-	}
-
-	private void execute(DatabasePopulator populator) throws Exception {
-		if (this.enabled) {
-			Assert.state(this.dataSource != null, "DataSource must be provided");
-			Assert.state(populator != null, "DatabasePopulator must be provided");
-			try {
-				Connection connection = this.dataSource.getConnection();
-				try {
-					populator.populate(connection);
-				} finally {
-					try {
-						connection.close();
-					} catch (SQLException ex) {
-						// ignore
-					}
-				}
-			} catch (Exception ex) {
-				throw new DataAccessResourceFailureException("Failed to execute database script", ex);
-			}
+	public void destroy() {
+		if (this.databaseCleaner != null && this.enabled) {
+			DatabasePopulatorUtils.execute(this.databaseCleaner, this.dataSource);
 		}
 	}
 

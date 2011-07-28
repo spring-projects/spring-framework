@@ -12,13 +12,12 @@
 
 	<xsd:element name="embedded-database">
 		<xsd:annotation>
-			<xsd:documentation
-				source="java:org.springframework.jdbc.embedded.EmbeddedDataSourceFactoryBean"><![CDATA[
+			<xsd:documentation source="java:org.springframework.jdbc.embedded.EmbeddedDataSourceFactoryBean"><![CDATA[
 	Creates an embedded database instance and makes it available to other beans as a javax.sql.DataSource.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
-					<tool:exports type="javax.sql.DataSource" />
+					<tool:exports type="javax.sql.DataSource"/>
 				</tool:annotation>
 			</xsd:appinfo>
 		</xsd:annotation>
@@ -26,8 +25,7 @@
 			<xsd:complexContent>
 				<xsd:extension base="beans:identifiedType">
 					<xsd:sequence>
-						<xsd:element name="script" type="scriptType"
-							minOccurs="0" maxOccurs="unbounded">
+						<xsd:element name="script" type="scriptType" minOccurs="0" maxOccurs="unbounded">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
 			A SQL script to execute during embedded database initialization.
@@ -35,8 +33,7 @@
 							</xsd:annotation>
 						</xsd:element>
 					</xsd:sequence>
-					<xsd:attribute name="type" type="databaseType"
-						default="HSQL">
+					<xsd:attribute name="type" type="databaseType" default="HSQL">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 			The type of embedded database to create, such as HSQL, H2 or Derby. Defaults to HSQL.
@@ -50,51 +47,43 @@
 
 	<xsd:element name="initialize-database">
 		<xsd:annotation>
-			<xsd:documentation
-				source="java:org.springframework.jdbc.embedded.DataSourceInitializer"><![CDATA[
+			<xsd:documentation source="java:org.springframework.jdbc.embedded.DataSourceInitializer"><![CDATA[
 	Initializes a database instance with SQL scripts provided in nested <script/> elements.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="script" type="scriptType" minOccurs="1"
-					maxOccurs="unbounded">
+				<xsd:element name="script" type="scriptType" minOccurs="1" maxOccurs="unbounded">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
 			A SQL script to execute during database initialization.
-								]]></xsd:documentation>
+						]]></xsd:documentation>
 					</xsd:annotation>
 				</xsd:element>
 			</xsd:sequence>
-			<xsd:attribute name="data-source" type="xsd:string"
-				default="dataSource">
+			<xsd:attribute name="data-source" type="xsd:string" default="dataSource">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-			A reference to a data source that should be initialized.  Defaults to "dataSource".
-							]]></xsd:documentation>
+			A reference to a data source that should be initialized. Defaults to "dataSource".
+					]]></xsd:documentation>
 					<xsd:appinfo>
-						<tool:annotation kind="ref" />
-						<tool:expected-type type="javax.sql.DataSource" />
+						<tool:annotation kind="ref"/>
+						<tool:expected-type type="javax.sql.DataSource"/>
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="enabled" type="xsd:string" use="optional"
-				default="true">
+			<xsd:attribute name="enabled" type="xsd:string" use="optional" default="true">
 				<xsd:annotation>
 					<xsd:documentation>
-						Is this bean "enabled", meaning the scripts will
-						be executed?
-						Defaults to true, but can be used to switch on and off
-						the initialization depending on the environment.
+						Is this bean "enabled", meaning the scripts will be executed?
+						Defaults to true, but can be used to switch on and off the initialization depending on the environment.
 					</xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="ignore-failures" use="optional"
-				default="NONE">
+			<xsd:attribute name="ignore-failures" use="optional" default="NONE">
 				<xsd:annotation>
 					<xsd:documentation>
-						Should failed SQL statements be ignored during
-						initialization?
+						Should failed SQL statements be ignored during initialization?
 					</xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -134,6 +123,13 @@
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="encoding" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The encoding for SQL scripts, if different from the platform encoding.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 		<xsd:attribute name="separator" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
@@ -144,13 +140,13 @@
 		<xsd:attribute name="execution">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Indicate the timing of the execution of this script.  Use INIT to execute on startup (as a bean initialization) and DESTROY to execute on shutdown (as a bean destruction callback).
+	Indicate the timing of the execution of this script. Use INIT to execute on startup (as a bean initialization) and DESTROY to execute on shutdown (as a bean destruction callback).
 				]]></xsd:documentation>
 			</xsd:annotation>
 			<xsd:simpleType>
 				<xsd:restriction base="xsd:string">
-					<xsd:enumeration value="INIT" />
-					<xsd:enumeration value="DESTROY" />
+					<xsd:enumeration value="INIT"/>
+					<xsd:enumeration value="DESTROY"/>
 				</xsd:restriction>
 			</xsd:simpleType>
 		</xsd:attribute>
