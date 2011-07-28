@@ -3,16 +3,18 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.6 (2011-07-22)
+Changes in version 3.0.6 (2011-07-29)
 -------------------------------------
 
 * fixed aspects bundle to declare dependencies for @Async aspect as well
 * ProxyCreationContext uses "ThreadLocal.remove()" over "ThreadLocal.set(null)" as well
 * DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
 * DefaultListableBeanFactory's getBean(name, type) attempts type conversion if necessary
-* BeanDefinitionVisitor now actually visits factory method names
-* fixed potential InjectionMetadata NPE when using SpringBeanAutowiringInterceptor
+* DefaultListableBeanFactory allows for init methods to register further bean definitions (again)
+* XmlBeanDefinitionReader accepts description subelement within map entry as well (as per the XSD)
 * ConfigurationClassPostProcessor supports use of same processor instance with several factories
+* fixed potential InjectionMetadata NPE when using SpringBeanAutowiringInterceptor
+* BeanDefinitionVisitor now actually visits factory method names
 * restored support for String-to-ContextResource conversion
 * restored original GenericConversionService behavior with respect to empty collections/maps
 * restored original FormattingConversionService behavior with respect to the use of subtypes
@@ -26,7 +28,10 @@ Changes in version 3.0.6 (2011-07-22)
 * SimpleClientHttpRequest uses fixed-length streaming mode (always sets content-length header)
 * FormHttpMessageConverter correctly processes POST requests
 * ResourceHttpRequestHandler does not set Content-Length header for 304 response
+* ResourceHttpRequestHandler detects invalid directory traversal in given path
 * LocaleChangeInterceptor validates locale values in order to prevent XSS vulnerability
+* HtmlUtils properly escapes single quotes as well
+* added support for web.xml context-param "springJspExpressionSupport" (explicit "true"/"false")
 * ContextLoader and FrameworkServlet support "contextId" parameter for custom serialization id
 * RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
 * added "acceptProxyClasses" flag to RemoteInvocationSerializingExporter
