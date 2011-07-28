@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,16 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
+	 * Set the factory to use to create the DataSource instance that connects to the embedded database.
+	 * Defaults to {@link SimpleDriverDataSourceFactory}.
+	 * @param dataSourceFactory the data source factory
+	 */
+	public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
+		Assert.notNull(dataSourceFactory, "DataSourceFactory is required");
+		this.dataSourceFactory = dataSourceFactory;
+	}
+
+	/**
 	 * Set the type of embedded database to use. Call this when you wish to configure
 	 * one of the pre-supported types. Defaults to HSQL.
 	 * @param type the test database type
@@ -83,7 +93,6 @@ public class EmbeddedDatabaseFactory {
 	 * @param configurer the embedded database configurer
 	 */
 	public void setDatabaseConfigurer(EmbeddedDatabaseConfigurer configurer) {
-		Assert.notNull(configurer, "EmbeddedDatabaseConfigurer is required");
 		this.databaseConfigurer = configurer;
 	}
 
@@ -92,18 +101,7 @@ public class EmbeddedDatabaseFactory {
 	 * @param populator the database populator
 	 */
 	public void setDatabasePopulator(DatabasePopulator populator) {
-		Assert.notNull(populator, "DatabasePopulator is required");
 		this.databasePopulator = populator;
-	}
-
-	/**
-	 * Set the factory to use to create the DataSource instance that connects to the embedded database.
-	 * Defaults to {@link SimpleDriverDataSourceFactory}.
-	 * @param dataSourceFactory the data source factory
-	 */
-	public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
-		Assert.notNull(dataSourceFactory, "DataSourceFactory is required");
-		this.dataSourceFactory = dataSourceFactory;
 	}
 
 	/**
