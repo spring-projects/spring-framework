@@ -76,8 +76,8 @@ import org.springframework.web.util.WebUtils;
  * and XmlWebApplicationContext with an underlying MockServletContext (as long as
  * the MockServletContext has been configured with a FileSystemResourceLoader).
  *
- * Supports the Servlet 3.0 API level, but throws {@link UnsupportedOperationException}
- * for all methods introduced in Servlet 3.0.
+ * <p>Supports Servlet 3.0 API level, but throws {@link UnsupportedOperationException}
+ * for most methods introduced in Servlet 3.0.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -102,7 +102,13 @@ public class MockServletContext implements ServletContext {
 
 	private String contextPath = "";
 
+	private int majorVersion = 2;
+
 	private int minorVersion = 5;
+
+	private int effectiveMajorVersion = 2;
+
+	private int effectiveMinorVersion = 5;
 
 	private final Map<String, ServletContext> contexts = new HashMap<String, ServletContext>();
 
@@ -191,19 +197,36 @@ public class MockServletContext implements ServletContext {
 		return this.contexts.get(contextPath);
 	}
 
+	public void setMajorVersion(int majorVersion) {
+		this.majorVersion = majorVersion;
+	}
+
 	public int getMajorVersion() {
-		return 2;
+		return this.majorVersion;
 	}
 
 	public void setMinorVersion(int minorVersion) {
-		if (minorVersion < 3 || minorVersion > 5) {
-			throw new IllegalArgumentException("Only Servlet minor versions between 3 and 5 are supported");
-		}
 		this.minorVersion = minorVersion;
 	}
 
 	public int getMinorVersion() {
 		return this.minorVersion;
+	}
+
+	public void setEffectiveMajorVersion(int effectiveMajorVersion) {
+		this.effectiveMajorVersion = effectiveMajorVersion;
+	}
+
+	public int getEffectiveMajorVersion() {
+		return this.effectiveMajorVersion;
+	}
+
+	public void setEffectiveMinorVersion(int effectiveMinorVersion) {
+		this.effectiveMinorVersion = effectiveMinorVersion;
+	}
+
+	public int getEffectiveMinorVersion() {
+		return this.effectiveMinorVersion;
 	}
 
 	public String getMimeType(String filePath) {
@@ -441,14 +464,6 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public Set<SessionTrackingMode> getDefaultSessionTrackingModes() {
-		throw new UnsupportedOperationException();
-	}
-
-	public int getEffectiveMajorVersion() {
-		throw new UnsupportedOperationException();
-	}
-
-	public int getEffectiveMinorVersion() {
 		throw new UnsupportedOperationException();
 	}
 

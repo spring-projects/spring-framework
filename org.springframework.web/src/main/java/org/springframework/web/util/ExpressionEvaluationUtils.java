@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.util;
 
+import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.el.ELException;
@@ -30,6 +31,10 @@ import org.springframework.util.Assert;
  * invoking the EL evaluator, treating the value as "normal" expression
  * (i.e. a literal String value) else.
  *
+ * <p><b>See {@link #isSpringJspExpressionSupportActive} for guidelines
+ * on when to use Spring's JSP expression support as opposed to the
+ * built-in expression support in JSP 2.0+ containers.</b>
+ *
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @since 11.07.2003
@@ -37,10 +42,56 @@ import org.springframework.util.Assert;
  */
 public abstract class ExpressionEvaluationUtils {
 
+	/**
+	 * Expression support parameter at the servlet context level
+	 * (i.e. a context-param in <code>web.xml</code>): "springJspExpressionSupport".
+	 */
+	public static final String EXPRESSION_SUPPORT_CONTEXT_PARAM = "springJspExpressionSupport";
+
 	public static final String EXPRESSION_PREFIX = "${";
 
 	public static final String EXPRESSION_SUFFIX = "}";
 
+
+	/**
+	 * Check whether Spring's JSP expression support is actually active.
+	 * <p>Note that JSP 2.0+ containers come with expression support themselves:
+	 * However, it will only be active for web applications declaring Servlet 2.4
+	 * or higher in their <code>web.xml</code> deployment descriptor.
+	 * <p>If a <code>web.xml</code> context-param named "springJspExpressionSupport" is
+	 * found, its boolean value will be taken to decide whether this support is active.
+	 * If not found, the default is for expression support to be inactive on Servlet 3.0
+	 * containers with web applications declaring Servlet 2.4 or higher in their
+	 * <code>web.xml</code>. For backwards compatibility, Spring's expression support
+	 * will remain active for applications declaring Servlet 2.3 or earlier. However,
+	 * on Servlet 2.4/2.5 containers, we can't find out what the application has declared,
+	 * so we'll also fall back to keeping expression support active in such a case.
+	 * <p><b>Recommendations:</b> Explicitly set "springJspExpressionSupport" to "false"
+	 * in order to prevent double evaluation for Servlet 2.4+ based applications.
+	 * On Servlet 3.0 containers, this will be done for you by default by the framework.
+	 * If for some reason you nevertheless want Spring's JSP expression support to be
+	 * active, explicitly set the "springJspExpressionSupport" context-param to "true".
+	 * @param pageContext current JSP PageContext
+	 * @return <code>true</code> if active (ExpressionEvaluationUtils will actually evaluate expressions);
+	 * <code>false</code> if not active (ExpressionEvaluationUtils will return given values as-is,
+	 * relying on the JSP container pre-evaluating values before passing them to JSP tag attributes)
+	 */
+	public static boolean isSpringJspExpressionSupportActive(PageContext pageContext) {
+		ServletContext sc = pageContext.getServletContext();
+		String springJspExpressionSupport = sc.getInitParameter(EXPRESSION_SUPPORT_CONTEXT_PARAM);
+		if (springJspExpressionSupport != null) {
+			return Boolean.valueOf(springJspExpressionSupport);
+		}
+		if (sc.getMajorVersion() >= 3) {
+			// We're on a Servlet 3.0+ container: Let's check what the application declares...
+			if (sc.getEffectiveMajorVersion() > 2 || sc.getEffectiveMinorVersion() > 3) {
+				// Application declares Servlet 2.4+ in its web.xml: JSP 2.0 expressions active.
+				// Skip our own expression support in order to prevent double evaluation.
+				return false;
+			}
+		}
+		return true;
+	}
 
 	/**
 	 * Check if the given expression value is an EL expression.
@@ -67,7 +118,7 @@ public abstract class ExpressionEvaluationUtils {
 	public static Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
 			throws JspException {
 
-		if (isExpressionLanguage(attrValue)) {
+		if (isSpringJspExpressionSupportActive(pageContext) && isExpressionLanguage(attrValue)) {
 			return doEvaluate(attrName, attrValue, resultClass, pageContext);
 		}
 		else if (attrValue != null && resultClass != null && !resultClass.isInstance(attrValue)) {
@@ -90,7 +141,7 @@ public abstract class ExpressionEvaluationUtils {
 	public static Object evaluate(String attrName, String attrValue, PageContext pageContext)
 			throws JspException {
 
-		if (isExpressionLanguage(attrValue)) {
+		if (isSpringJspExpressionSupportActive(pageContext) && isExpressionLanguage(attrValue)) {
 			return doEvaluate(attrName, attrValue, Object.class, pageContext);
 		}
 		else {
@@ -109,7 +160,7 @@ public abstract class ExpressionEvaluationUtils {
 	public static String evaluateString(String attrName, String attrValue, PageContext pageContext)
 			throws JspException {
 
-		if (isExpressionLanguage(attrValue)) {
+		if (isSpringJspExpressionSupportActive(pageContext) && isExpressionLanguage(attrValue)) {
 			return (String) doEvaluate(attrName, attrValue, String.class, pageContext);
 		}
 		else {
@@ -128,7 +179,7 @@ public abstract class ExpressionEvaluationUtils {
 	public static int evaluateInteger(String attrName, String attrValue, PageContext pageContext)
 			throws JspException {
 
-		if (isExpressionLanguage(attrValue)) {
+		if (isSpringJspExpressionSupportActive(pageContext) && isExpressionLanguage(attrValue)) {
 			return (Integer) doEvaluate(attrName, attrValue, Integer.class, pageContext);
 		}
 		else {
@@ -147,14 +198,13 @@ public abstract class ExpressionEvaluationUtils {
 	public static boolean evaluateBoolean(String attrName, String attrValue, PageContext pageContext)
 			throws JspException {
 
-		if (isExpressionLanguage(attrValue)) {
+		if (isSpringJspExpressionSupportActive(pageContext) && isExpressionLanguage(attrValue)) {
 			return (Boolean) doEvaluate(attrName, attrValue, Boolean.class, pageContext);
 		}
 		else {
 			return Boolean.valueOf(attrValue);
 		}
 	}
-
 
 	/**
 	 * Actually evaluate the given expression (be it EL or a literal String value)
