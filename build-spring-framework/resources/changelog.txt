@@ -13,23 +13,33 @@ Changes in version 3.1 RC1 (2011-08-xx)
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
 * DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
 * DefaultListableBeanFactory's getBean(name, type) attempts type conversion if necessary
+* DefaultListableBeanFactory allows for init methods to register further bean definitions (again)
+* XmlBeanDefinitionReader accepts description subelement within map entry as well (as per the XSD)
 * ConfigurationClassPostProcessor supports use of same processor instance with several factories
 * DataBinder uses a default limit of 256 for array/collection auto-growing
 * added "autoGrowNestedPaths" property to ConfigurableWebBindingInitializer
-* added headers support to MultipartFile abstraction (actually supported on Servlet 3.0)
-* ContextLoader and FrameworkServlet support "contextId" parameter for custom serialization id
-* AnnotationConfigContextLoader now supports default configuration classes with arbitrary names
-* revised JMS CachedConnectionFactory to avoid unnecessary rollback calls on Session return
-* fixed JMS CachedConnectionFactory to fully synchronize its Session list
-* added "acceptProxyClasses" flag to RemoteInvocationSerializingExporter
-* refined WebLogic RMI descriptor to only mark 'getTargetInterfaceName' method as idempotent
-* JavaMailSenderImpl detects and respects "mail.transport.protocol" property in existing Session
-* added "disabled" property to EhCacheFactoryBean
-* fixed @ExceptionHandler exception type matching (ExceptionDepthComparator)
 * added "getMultipartContentType(String)" method to MultipartRequest interface
-* added RequestPartServletServerHttpRequest and corresponding @RequestPart support in Spring MVC
+* added headers support to MultipartFile abstraction (actually supported on Servlet 3.0)
 * revised Servlet 3.0 based StandardServletMultipartResolver for correct param/file distinction
 * MultipartFilter uses a Servlet 3.0 based StandardServletMultipartResolver by default
+* added RequestPartServletServerHttpRequest and corresponding @RequestPart support in Spring MVC
+* fixed @ExceptionHandler exception type matching (ExceptionDepthComparator)
+* ResourceHttpRequestHandler detects invalid directory traversal in given path
+* HtmlUtils properly escapes single quotes as well
+* Spring JSP tags do not use their own expression support on Servlet 3.0 containers by default
+* added support for web.xml context-param "springJspExpressionSupport" (explicit "true"/"false")
+* ContextLoader and FrameworkServlet support "contextId" parameter for custom serialization id
+* added "acceptProxyClasses" flag to RemoteInvocationSerializingExporter
+* refined WebLogic RMI descriptor to only mark 'getTargetInterfaceName' method as idempotent
+* revised JMS CachedConnectionFactory to avoid unnecessary rollback calls on Session return
+* fixed JMS CachedConnectionFactory to fully synchronize its Session list
+* JpaTransactionManager etc can find EntityManagerFactory by "persistenceUnitName" property now
+* jdbc:script's "separator" and "execution" attributes work nested with embedded-database as well
+* added "encoding" attribute to jdbc:script element
+* JavaMailSenderImpl detects and respects "mail.transport.protocol" property in existing Session
+* added ConcurrentMapCacheManager, dynamically building ConcurrentMapCache instances at runtime
+* added "disabled" property to EhCacheFactoryBean
+* AnnotationConfigContextLoader now supports default configuration classes within test classes
 * extended Servlet API mocks for Servlet 3.0 forward compatibility as far as possible
 * made MockHttpServletResponse compatible with Servlet 3.0 getHeader(s) method returning Strings
 * added getHeaderValue(s) method to MockHttpServletResponse for raw value access
@@ -60,6 +70,8 @@ Changes in version 3.1 M2 (2011-06-08)
 * added Servlet 3.0 based StandardServletMultipartResolver
 * added "packagesToScan" feature to LocalContainerEntityManagerFactoryBean (avoiding persistence.xml)
 * fixed JPA 2.0 timeout hints to correctly specify milliseconds
+* added support for shutdown scripts to DataSourceInitializer (see "databaseCleaner" property)
+* added "separator" and "execution" attributes to jdbc:script element
 * revised cache abstraction to focus on minimal atomic access operations
 * updated Quartz package to support Quartz 1.8 as well (note: not fully supporting Quartz 2.0 yet)
 * RemoteExporter uses an opaque proxy for 'serviceInterface' (no AOP interfaces exposed)
