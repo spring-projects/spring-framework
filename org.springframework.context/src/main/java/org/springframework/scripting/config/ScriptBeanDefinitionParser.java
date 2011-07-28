@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.scripting.config;
 
 import java.util.List;
 
+import org.w3c.dom.Element;
+
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -29,7 +31,6 @@ import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.w3c.dom.Element;
 
 /**
  * BeanDefinitionParser implementation for the '<code>&lt;lang:groovy/&gt;</code>',
@@ -75,11 +76,13 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
 	private static final String CUSTOMIZER_REF_ATTRIBUTE = "customizer-ref";
 
+
 	/**
 	 * The {@link org.springframework.scripting.ScriptFactory} class that this
 	 * parser instance will create bean definitions for.
 	 */
 	private final String scriptFactoryClassName;
+
 
 	/**
 	 * Create a new instance of this parser, creating bean definitions for the
@@ -89,6 +92,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	public ScriptBeanDefinitionParser(String scriptFactoryClassName) {
 		this.scriptFactoryClassName = scriptFactoryClassName;
 	}
+
 
 	/**
 	 * Parses the dynamic object element and returns the resulting bean definition.
@@ -123,7 +127,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// Only "byType" and "byName" supported, but maybe other default inherited...
 		if (autowireMode == GenericBeanDefinition.AUTOWIRE_AUTODETECT) {
 			autowireMode = GenericBeanDefinition.AUTOWIRE_BY_TYPE;
-		} else if (autowireMode == GenericBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
+		}
+		else if (autowireMode == GenericBeanDefinition.AUTOWIRE_CONSTRUCTOR) {
 			autowireMode = GenericBeanDefinition.AUTOWIRE_NO;
 		}
 		bd.setAutowireMode(autowireMode);
@@ -139,14 +144,16 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		String initMethod = element.getAttribute(INIT_METHOD_ATTRIBUTE);
 		if (StringUtils.hasLength(initMethod)) {
 			bd.setInitMethodName(initMethod);
-		} else if (beanDefinitionDefaults.getInitMethodName() != null) {
+		}
+		else if (beanDefinitionDefaults.getInitMethodName() != null) {
 			bd.setInitMethodName(beanDefinitionDefaults.getInitMethodName());
 		}
 
 		String destroyMethod = element.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 		if (StringUtils.hasLength(destroyMethod)) {
 			bd.setDestroyMethodName(destroyMethod);
-		} else if (beanDefinitionDefaults.getDestroyMethodName() != null) {
+		}
+		else if (beanDefinitionDefaults.getDestroyMethodName() != null) {
 			bd.setDestroyMethodName(beanDefinitionDefaults.getDestroyMethodName());
 		}
 
@@ -176,7 +183,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			String customizerBeanName = element.getAttribute(CUSTOMIZER_REF_ATTRIBUTE);
 			if (!StringUtils.hasText(customizerBeanName)) {
 				parserContext.getReaderContext().error("Attribute 'customizer-ref' has empty value", element);
-			} else {
+			}
+			else {
 				cav.addIndexedArgumentValue(constructorArgNum++, new RuntimeBeanReference(customizerBeanName));
 			}
 		}
@@ -198,12 +206,15 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		if (hasScriptSource && !elements.isEmpty()) {
 			readerContext.error("Only one of 'script-source' and 'inline-script' should be specified.", element);
 			return null;
-		} else if (hasScriptSource) {
+		}
+		else if (hasScriptSource) {
 			return element.getAttribute(SCRIPT_SOURCE_ATTRIBUTE);
-		} else if (!elements.isEmpty()) {
+		}
+		else if (!elements.isEmpty()) {
 			Element inlineElement = (Element) elements.get(0);
 			return "inline:" + DomUtils.getTextValue(inlineElement);
-		} else {
+		}
+		else {
 			readerContext.error("Must specify either 'script-source' or 'inline-script'.", element);
 			return null;
 		}
