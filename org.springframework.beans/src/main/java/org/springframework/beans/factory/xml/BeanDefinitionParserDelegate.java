@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1176,7 +1176,10 @@ public class BeanDefinitionParserDelegate {
 					}
 					else {
 						// Child element is what we're looking for.
-						if (valueEle != null) {
+						if (nodeNameEquals(candidateEle, DESCRIPTION_ELEMENT)) {
+							// the element is a <description> -> ignore it
+						}
+						else if (valueEle != null) {
 							error("<entry> element must not contain more than one value sub-element", entryEle);
 						}
 						else {
@@ -1422,7 +1425,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Determine whether the name of the supplied node is equal to the supplied name.
 	 * <p>The default implementation checks the supplied desired name against both
-	 * {@link Node#getNodeName()) and {@link Node#getLocalName()}.
+	 * {@link Node#getNodeName()} and {@link Node#getLocalName()}.
 	 * <p>Subclasses may override the default implementation to provide a different
 	 * mechanism for comparing node names.
 	 * @param node the node to compare
