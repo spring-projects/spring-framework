@@ -18,38 +18,40 @@ package org.springframework.jdbc.datasource.init;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * {@link DatabasePopulator} implementation that delegates to a list of other implementations, executing alll scripts.
- * 
- * @author Dave Syer
+ * {@link DatabasePopulator} implementation that delegates to a list of other
+ * DatabasePopulator implementations, executing all scripts.
  *
+ * @author Dave Syer
+ * @author Juergen Hoeller
+ * @since 3.1
  */
 public class CompositeDatabasePopulator implements DatabasePopulator {
 
 	private List<DatabasePopulator> populators = new ArrayList<DatabasePopulator>();
 
+
 	/**
-	 * @param populators the populators to set
+	 * Specify a list of populators to delegate to.
 	 */
-	public void setPopulators(List<DatabasePopulator> populators) {
+	public void setPopulators(DatabasePopulator... populators) {
 		this.populators.clear();
-		this.populators.addAll(populators);
+		this.populators.addAll(Arrays.asList(populators));
 	}
 
 	/**
-	 * @param populator the populator to add
+	 * Add a populator to the list of delegates.
 	 */
-	public void addPopulator(DatabasePopulator populator) {
-		this.populators.add(populator);
+	public void addPopulators(DatabasePopulator... populators) {
+		this.populators.addAll(Arrays.asList(populators));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.springframework.jdbc.datasource.init.DatabasePopulator#populate(java.sql.Connection)
-	 */
+
 	public void populate(Connection connection) throws SQLException {
-		for (DatabasePopulator populator : populators) {
+		for (DatabasePopulator populator : this.populators) {
 			populator.populate(connection);
 		}
 	}

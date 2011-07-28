@@ -25,8 +25,8 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
+import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -70,6 +70,15 @@ public class EmbeddedDatabaseFactory {
 	}
 
 	/**
+	 * Set the factory to use to create the DataSource instance that connects to the embedded database.
+	 * <p>Defaults to {@link SimpleDriverDataSourceFactory}.
+	 */
+	public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
+		Assert.notNull(dataSourceFactory, "DataSourceFactory is required");
+		this.dataSourceFactory = dataSourceFactory;
+	}
+
+	/**
 	 * Set the type of embedded database to use. Call this when you wish to configure
 	 * one of the pre-supported types. Defaults to HSQL.
 	 * @param type the test database type
@@ -80,31 +89,18 @@ public class EmbeddedDatabaseFactory {
 
 	/**
 	 * Set the strategy that will be used to configure the embedded database instance.
-	 * Call this when you wish to use an embedded database type not already supported.
-	 * @param configurer the embedded database configurer
+	 * <p>Call this when you wish to use an embedded database type not already supported.
 	 */
 	public void setDatabaseConfigurer(EmbeddedDatabaseConfigurer configurer) {
-		Assert.notNull(configurer, "EmbeddedDatabaseConfigurer is required");
 		this.databaseConfigurer = configurer;
 	}
 
 	/**
 	 * Set the strategy that will be used to populate the embedded database. Defaults to null.
-	 * @param populator the database populator
+	 * @see org.springframework.jdbc.datasource.init.DataSourceInitializer#setDatabasePopulator
 	 */
 	public void setDatabasePopulator(DatabasePopulator populator) {
-		Assert.notNull(populator, "DatabasePopulator is required");
 		this.databasePopulator = populator;
-	}
-
-	/**
-	 * Set the factory to use to create the DataSource instance that connects to the embedded database.
-	 * Defaults to {@link SimpleDriverDataSourceFactory}.
-	 * @param dataSourceFactory the data source factory
-	 */
-	public void setDataSourceFactory(DataSourceFactory dataSourceFactory) {
-		Assert.notNull(dataSourceFactory, "DataSourceFactory is required");
-		this.dataSourceFactory = dataSourceFactory;
 	}
 
 	/**
@@ -137,7 +133,7 @@ public class EmbeddedDatabaseFactory {
 		// Now populate the database
 		if (this.databasePopulator != null) {
 			try {
-				populateDatabase();
+				DatabasePopulatorUtils.execute(this.databasePopulator, this.dataSource);
 			}
 			catch (RuntimeException ex) {
 				// failed to populate, so leave it as not initialized
@@ -145,35 +141,6 @@ public class EmbeddedDatabaseFactory {
 				throw ex;
 			}
 		}
-	}
-
-	private void populateDatabase() {
-		try {
-			Connection connection = this.dataSource.getConnection();
-			try {
-				this.databasePopulator.populate(connection);
-			}
-			finally {
-				try {
-					connection.close();
-				}
-				catch (SQLException ex) {
-					// ignore
-				}
-			}
-		}
-		catch (Exception ex) {
-			throw new DataAccessResourceFailureException("Failed to populate database", ex);
-		}
-	}
-
-	/**
-	 * Hook that gets the DataSource that provides the connectivity to the embedded database.
-	 * <p>Returns null if the DataSource has not been initialized or the database has been shut down.
-	 * Subclasses may call to access the datasource instance directly.
-	 */
-	protected DataSource getDataSource() {
-		return this.dataSource;
 	}
 
 	/**
@@ -185,6 +152,15 @@ public class EmbeddedDatabaseFactory {
 			this.databaseConfigurer.shutdown(this.dataSource, this.databaseName);
 			this.dataSource = null;
 		}
+	}
+
+	/**
+	 * Hook that gets the DataSource that provides the connectivity to the embedded database.
+	 * <p>Returns <code>null</code> if the DataSource has not been initialized or the database
+	 * has been shut down. Subclasses may call to access the DataSource instance directly.
+	 */
+	protected final DataSource getDataSource() {
+		return this.dataSource;
 	}
 
 

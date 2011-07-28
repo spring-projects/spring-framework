@@ -14,7 +14,7 @@
 
 	<!-- This cache relies on data created in the initialize-database element.  It works fine
 	if the bean definitions are registered in the right order.  (Could possibly be fixed later.) -->	
-	<bean class="org.springframework.jdbc.config.InitializeDatabaseIntegrationTest$CacheData">
+	<bean class="org.springframework.jdbc.config.InitializeDatabaseIntegrationTests$CacheData">
 		<property name="dataSource" ref="dataSource"/>
 	</bean>
 
