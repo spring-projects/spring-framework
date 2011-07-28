@@ -155,6 +155,18 @@
 		</property>
 	</bean>
 
+	<!-- The <description> element below caused parsing exception prior to resolution of SPR-8563 -->
+	<bean id="mapWithDescriptionInEntry" class="org.springframework.beans.factory.xml.HasMap">
+		<property name="map">
+			<map>
+				<entry key="e1">
+					<description>A map entry with a description</description>
+					<value>v1</value>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
 	<bean id="fooKey" class="java.lang.String">
 		<constructor-arg value="foo"/>
 	</bean>
