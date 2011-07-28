@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,55 @@ import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.el.FunctionMapper;
 import javax.servlet.jsp.el.VariableResolver;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.mock.web.MockExpressionEvaluator;
 import org.springframework.mock.web.MockPageContext;
+import org.springframework.mock.web.MockServletContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Aled Arendsen
  * @author Juergen Hoeller
  * @since 16.09.2003
  */
-public class ExpressionEvaluationUtilsTests extends TestCase {
+public class ExpressionEvaluationUtilsTests {
 
+	@Test
+	public void testIsSpringJspExpressionSupportActive() {
+		MockServletContext sc = new MockServletContext();
+		PageContext pc = new MockPageContext(sc);
+		assertTrue(ExpressionEvaluationUtils.isSpringJspExpressionSupportActive(pc));
+		sc.addInitParameter("springJspExpressionSupport", "false");
+		assertFalse(ExpressionEvaluationUtils.isSpringJspExpressionSupportActive(pc));
+	}
+
+	@Test
+	public void testIsSpringJspExpressionSupportActiveOnServlet30() {
+		MockServletContext sc = new MockServletContext();
+		sc.setMajorVersion(3);
+		sc.setMinorVersion(0);
+		PageContext pc = new MockPageContext(sc);
+		assertFalse(ExpressionEvaluationUtils.isSpringJspExpressionSupportActive(pc));
+		sc.addInitParameter("springJspExpressionSupport", "true");
+		assertTrue(ExpressionEvaluationUtils.isSpringJspExpressionSupportActive(pc));
+	}
+
+	@Test
+	public void testIsSpringJspExpressionSupportActiveOnServlet30WithServlet23Application() {
+		MockServletContext sc = new MockServletContext();
+		sc.setMajorVersion(3);
+		sc.setMinorVersion(0);
+		sc.setEffectiveMajorVersion(2);
+		sc.setEffectiveMinorVersion(3);
+		PageContext pc = new MockPageContext(sc);
+		assertTrue(ExpressionEvaluationUtils.isSpringJspExpressionSupportActive(pc));
+		sc.addInitParameter("springJspExpressionSupport", "false");
+		assertFalse(ExpressionEvaluationUtils.isSpringJspExpressionSupportActive(pc));
+	}
+
+	@Test
 	public void testIsExpressionLanguage() {
 		assertTrue(ExpressionEvaluationUtils.isExpressionLanguage("${bla}"));
 		assertTrue(ExpressionEvaluationUtils.isExpressionLanguage("bla${bla}"));
@@ -43,6 +80,7 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		assertFalse(ExpressionEvaluationUtils.isExpressionLanguage("bla$b{"));
 	}
 
+	@Test
 	public void testEvaluate() throws Exception {
 		PageContext ctx = new MockPageContext();
 		ctx.setAttribute("bla", "blie");
@@ -59,6 +97,7 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEvaluateWithConcatenation() throws Exception {
 		PageContext ctx = new MockPageContext();
 		ctx.setAttribute("bla", "blie");
@@ -98,6 +137,7 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEvaluateString() throws Exception {
 		PageContext ctx = new MockPageContext();
 		ctx.setAttribute("bla", "blie");
@@ -106,6 +146,7 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		assertEquals("blie", ExpressionEvaluationUtils.evaluateString("test", "blie", ctx));
 	}
 
+	@Test
 	public void testEvaluateStringWithConcatenation() throws Exception {
 		PageContext ctx = new MockPageContext();
 		ctx.setAttribute("bla", "blie");
@@ -137,6 +178,7 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 
 	}
 
+	@Test
 	public void testEvaluateInteger() throws Exception {
 		PageContext ctx = new MockPageContext();
 		ctx.setAttribute("bla", new Integer(1));
@@ -145,6 +187,7 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		assertEquals(21, ExpressionEvaluationUtils.evaluateInteger("test", "21", ctx));
 	}
 
+	@Test
 	public void testEvaluateBoolean() throws Exception {
 		PageContext ctx = new MockPageContext();
 		ctx.setAttribute("bla", new Boolean(true));
@@ -153,6 +196,7 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		assertTrue(ExpressionEvaluationUtils.evaluateBoolean("test", "true", ctx));
 	}
 
+	@Test
 	public void testRepeatedEvaluate() throws Exception {
 		PageContext ctx = new CountingMockPageContext();
 		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
@@ -172,6 +216,7 @@ public class ExpressionEvaluationUtilsTests extends TestCase {
 		assertEquals(4, eval.evaluateCount);
 	}
 
+	@Test
 	public void testEvaluateWithComplexConcatenation() throws Exception {
 		PageContext ctx = new CountingMockPageContext();
 		CountingMockExpressionEvaluator eval = (CountingMockExpressionEvaluator) ctx.getExpressionEvaluator();
