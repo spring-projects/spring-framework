@@ -1255,7 +1255,10 @@ public class BeanDefinitionParserDelegate {
 					}
 					else {
 						// Child element is what we're looking for.
-						if (valueEle != null) {
+						if (nodeNameEquals(candidateEle, DESCRIPTION_ELEMENT)) {
+							// the element is a <description> -> ignore it
+						}
+						else if (valueEle != null) {
 							error("<entry> element must not contain more than one value sub-element", entryEle);
 						}
 						else {
