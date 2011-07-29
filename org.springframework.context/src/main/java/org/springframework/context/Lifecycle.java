@@ -55,10 +55,14 @@ public interface Lifecycle {
 	void start();
 
 	/**
-	 * Stop this component.
-	 * Should not throw an exception if the component isn't started yet.
+	 * Stop this component, typically in a synchronous fashion, such that
+	 * the component is fully stopped upon return of this method. Consider
+	 * implementing {@link SmartLifecycle} and its {@code stop(Runnable)}
+	 * variant in cases where asynchronous stop behavior is necessary.
+	 * <p>Should not throw an exception if the component isn't started yet.
 	 * <p>In the case of a container, this will propagate the stop signal
 	 * to all components that apply.
+	 * @see SmartLifecycle#stop(Runnable)
 	 */
 	void stop();
 
