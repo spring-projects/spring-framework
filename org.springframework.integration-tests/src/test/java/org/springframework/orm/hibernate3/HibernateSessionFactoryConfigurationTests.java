@@ -42,6 +42,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.core.InfrastructureProxy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
@@ -137,6 +138,7 @@ public class HibernateSessionFactoryConfigurationTests {
 		SessionFactory sessionFactory = ctx.getBean(SessionFactory.class);
 		assertThat(sessionFactory, instanceOf(DisposableBean.class));
 		assertThat(sessionFactory, instanceOf(SessionFactoryImplementor.class));
+		assertThat(sessionFactory, instanceOf(InfrastructureProxy.class));
 		assertThat(sessionFactory.toString(), startsWith("DisposableBean proxy for SessionFactory"));
 		ctx.close();
 		assertTrue("SessionFactory was not closed as expected", sessionFactory.isClosed());
