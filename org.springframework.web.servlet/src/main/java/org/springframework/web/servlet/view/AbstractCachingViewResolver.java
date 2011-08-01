@@ -42,6 +42,9 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/** Whether we should cache views, once resolved */
 	private boolean cache = true;
 
+	/** Whether we should attempt to resolve views again if unresolved once */
+	private boolean cacheUnresolved = false;
+
 	/** Map from view key to View instance */
 	private final Map<Object, View> viewCache = new HashMap<Object, View>();
 
@@ -62,7 +65,27 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	public boolean isCache() {
 		return this.cache;
 	}
+	
+	/**
+	 * Whether a view name once resolved to {@code null} should be cached and 
+	 * automatically resolved to {@code null} subsequently.
+	 * <p>Default is "false": unresolved view names are not cached.
+	 * <p>Of specific interest is the ability for some AbstractUrlBasedView 
+	 * implementations (Freemarker, Velocity, Tiles) to check if an underlying 
+	 * resource exists via {@link AbstractUrlBasedView#checkResource(Locale)}.
+	 * With this flag set to "false", an underlying resource that re-appears 
+	 * is noticed and used. With the flag set to "true", one check is made only.
+	 */
+	public void setCacheUnresolved(boolean cacheUnresolved) {
+		this.cacheUnresolved = cacheUnresolved;
+	}
 
+	/**
+	 * Return if caching of unresolved views is enabled.
+	 */
+	public boolean isCacheUnresolved() {
+		return cacheUnresolved;
+	}
 
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!isCache()) {
@@ -72,7 +95,8 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			Object cacheKey = getCacheKey(viewName, locale);
 			synchronized (this.viewCache) {
 				View view = this.viewCache.get(cacheKey);
-				if (view == null) {
+				boolean isCached = this.cacheUnresolved && this.viewCache.containsKey(cacheKey);
+				if (view == null && !isCached) {
 					// Ask the subclass to create the View object.
 					view = createView(viewName, locale);
 					this.viewCache.put(cacheKey, view);

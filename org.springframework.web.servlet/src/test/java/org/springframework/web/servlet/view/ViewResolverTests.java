@@ -16,10 +16,18 @@
 
 package org.springframework.web.servlet.view;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -30,9 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
@@ -497,6 +503,31 @@ public class ViewResolverTests {
 		}
 	}
 
+	@Test
+	public void testCacheUnresolved() throws Exception {
+		final AtomicInteger count = new AtomicInteger();
+		AbstractCachingViewResolver viewResolver = new AbstractCachingViewResolver() {
+			@Override
+			protected View loadView(String viewName, Locale locale) throws Exception {
+				count.incrementAndGet();
+				return null;
+			}
+		};
+
+		viewResolver.setCacheUnresolved(false);
+
+		viewResolver.resolveViewName("view", Locale.getDefault());
+		viewResolver.resolveViewName("view", Locale.getDefault());
+		
+		assertEquals(2, count.intValue());
+
+		viewResolver.setCacheUnresolved(true);
+		
+		viewResolver.resolveViewName("view", Locale.getDefault());
+		viewResolver.resolveViewName("view", Locale.getDefault());
+		
+		assertEquals(2, count.intValue());
+	}
 
 	public static class TestView extends InternalResourceView {
 
