@@ -282,9 +282,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			return NOT_ACCEPTABLE_VIEW;
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("No acceptable view found; returning null");
-			}
+			logger.debug("No acceptable view found; returning null");
 			return null;
 		}
 	}
