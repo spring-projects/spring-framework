@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.HandlerMapping;
 
 public class RedirectViewUriTemplateTests {
 
@@ -75,21 +75,23 @@ public class RedirectViewUriTemplateTests {
 	}
 
 	@Test
-	public void doNotAppendUriTemplateVarFromCurrentRequest() throws Exception {
+	public void currentRequestUriTemplateVars() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("name1", "value1");
-		model.put("name2", "value2");
-		model.put("name3", "value3");
+		model.put("key1", "value1");
+		model.put("name", "value2");
+		model.put("key3", "value3");
 		
-		Map<String, String> uriTemplatVars = new HashMap<String, String>();
-		uriTemplatVars.put("name1", "value1");
-		uriTemplatVars.put("name2", "value2");
-		request.setAttribute(View.PATH_VARIABLES, uriTemplatVars);
+		Map<String, String> vars = new HashMap<String, String>();
+		vars.put("var1", "v1");
+		vars.put("name", "v2");
+		vars.put("var3", "v3");
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, vars);
 
 		String url = "http://url.somewhere.com";
-		RedirectView redirectView = new RedirectView(url + "/{name2}");
+		RedirectView redirectView = new RedirectView(url + "/{key1}/{var1}/{name}");
 		redirectView.renderMergedOutputModel(model, request, response);
 
-		assertEquals(url + "/value2?name3=value3", response.getRedirectedUrl());
+		assertEquals(url + "/value1/v1/value2?key3=value3", response.getRedirectedUrl());
 	}
+
 }
