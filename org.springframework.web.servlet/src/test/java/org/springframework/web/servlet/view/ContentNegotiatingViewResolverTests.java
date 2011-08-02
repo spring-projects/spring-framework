@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.easymock.EasyMock.*;
 import org.junit.After;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,6 +35,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -169,6 +170,14 @@ public class ContentNegotiatingViewResolverTests {
 		View result = viewResolver.resolveViewName(viewName, locale);
 		assertSame("Invalid view", viewMock, result);
 		verify(viewResolverMock, viewMock);
+	}
+
+	@Test
+	public void resolveViewNameWithInvalidAcceptHeader() throws Exception {
+		request.addHeader("Accept", "application");
+
+		View result = viewResolver.resolveViewName("test", Locale.ENGLISH);
+		assertNull(result);
 	}
 
 	@Test
