@@ -22,7 +22,6 @@ import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,6 +37,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UriUtils;
@@ -47,8 +48,8 @@ import org.springframework.web.util.WebUtils;
  * <p>View that redirects to an absolute, context relative, or current request
  * relative URL. The URL may be a URI template in which case the URI template 
  * variables will be replaced with values available in the model. By default 
- * all primitive model attributes (or collections thereof), not used to fill
- * in URI tempate variables, are exposed as HTTP query parameters, but this 
+ * all primitive model attributes (or collections thereof), not used as URI
+ * template variables, are exposed as HTTP query parameters, but this  
  * behavior can be changed by overriding the 
  * {@link #isEligibleProperty(String, Object)} method.
  * 
@@ -99,6 +100,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * Constructor for use as a bean.
 	 */
 	public RedirectView() {
+		setExposePathVariables(false);
 	}
 
 	/**
@@ -110,6 +112,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 */
 	public RedirectView(String url) {
 		super(url);
+		setExposePathVariables(false);
 	}
 
 	/**
@@ -121,6 +124,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	public RedirectView(String url, boolean contextRelative) {
 		super(url);
 		this.contextRelative = contextRelative;
+		setExposePathVariables(false);
 	}
 
 	/**
@@ -134,6 +138,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		super(url);
 		this.contextRelative = contextRelative;
 		this.http10Compatible = http10Compatible;
+		setExposePathVariables(false);
 	}
 
 	/**
@@ -150,6 +155,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		this.contextRelative = contextRelative;
 		this.http10Compatible = http10Compatible;
 		this.exposeModelAttributes = exposeModelAttributes;
+		setExposePathVariables(false);
 	}
 
 
@@ -245,21 +251,30 @@ public class RedirectView extends AbstractUrlBasedView {
 			enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
 		}
 
-		UriTemplate redirectUri = createUriTemplate(targetUrl, enc);
-		if (redirectUri.getVariableNames().size() > 0) {
-			targetUrl = new StringBuilder(redirectUri.expand(model).toString());
-			model = removeKeys(model, redirectUri.getVariableNames());
+		UriTemplate uriTemplate = createUriTemplate(targetUrl, enc);
+		if (uriTemplate.getVariableNames().size() > 0) {
+			Map<String, Object> vars = new HashMap<String, Object>();
+			vars.putAll(getCurrentUriVars(request));
+			vars.putAll(model);
+			targetUrl = new StringBuilder(uriTemplate.expand(vars).toString());
+			model = removeKeys(model, uriTemplate.getVariableNames());
 		}
 		
 		if (this.exposeModelAttributes) {
-			List<String> pathVarNames = getPathVarNames(request);
-			if (!pathVarNames.isEmpty()) {
-				model = removeKeys(model, pathVarNames);
-			}
 			appendQueryProperties(targetUrl, model, enc);
 		}
 		
 		return targetUrl.toString();
+	}
+
+	/**
+	 * Returns the URI template variables extracted from the current request.
+	 */
+	@SuppressWarnings("unchecked")
+	private Map<String, String> getCurrentUriVars(HttpServletRequest request) {
+		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+		Map<String, String> map = (Map<String, String>) request.getAttribute(name);
+		return (map != null) ? map : new HashMap<String, String>();
 	}
 
 	@SuppressWarnings("serial")
@@ -285,15 +300,6 @@ public class RedirectView extends AbstractUrlBasedView {
 			result.remove(key);
 		}
 		return result;
-	}
-
-	/**
-	 * Returns the names of PathVariable for the current request; or an empty list.
-	 */
-	@SuppressWarnings("unchecked")
-	private List<String> getPathVarNames(HttpServletRequest request) {
-		Map<String, Object> map = (Map<String, Object>) request.getAttribute(View.PATH_VARIABLES);
-		return (map != null) ? new ArrayList<String>(map.keySet()) : Collections.<String>emptyList();
 	}
 
 	/**
