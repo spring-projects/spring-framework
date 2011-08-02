@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.UriTemplate;
@@ -285,9 +283,11 @@ public class RedirectView extends AbstractUrlBasedView {
 				try {
 					String encoded = UriUtils.encodeUri(uri, encoding);
 					return new URI(encoded);
-				} catch (UnsupportedEncodingException ex) {
+				}
+				catch (UnsupportedEncodingException ex) {
 					throw new IllegalStateException(ex);
-				} catch (URISyntaxException ex) {
+				}
+				catch (URISyntaxException ex) {
 					throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex, ex);
 				}
 			}
@@ -476,7 +476,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Determines the status code to use for HTTP 1.1 compatible requests.
-	 * <p>The default implemenetation returns the {@link #setStatusCode(HttpStatus) statusCode}
+	 * <p>The default implementation returns the {@link #setStatusCode(HttpStatus) statusCode}
 	 * property if set, or the value of the {@link #RESPONSE_STATUS_ATTRIBUTE} attribute.
 	 * If neither are set, it defaults to {@link HttpStatus#SEE_OTHER} (303).
 	 * @param request the request to inspect
