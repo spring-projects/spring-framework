@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Vector;
-
 import javax.el.ELContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -41,18 +41,17 @@ import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the {@link javax.servlet.jsp.PageContext} interface.
- * <p>
- * Used for testing the web framework; only necessary for testing applications
- * when testing custom JSP tags.
- * <p>
- * Note: Expects initialization via the constructor rather than via the
- * <code>PageContext.initialize</code> method. Does not support writing to a
- * JspWriter, request dispatching, and <code>handlePageException</code> calls.
- * 
+ *
+ * <p>Used for testing the web framework; only necessary for testing
+ * applications when testing custom JSP tags.
+ *
+ * <p>Note: Expects initialization via the constructor rather than via the
+ * <code>PageContext.initialize</code> method. Does not support writing to
+ * a JspWriter, request dispatching, and <code>handlePageException</code> calls.
+ *
  * @author Juergen Hoeller
  * @since 1.0.2
  */
-@SuppressWarnings("deprecation")
 public class MockPageContext extends PageContext {
 
 	private final ServletContext servletContext;
@@ -80,9 +79,8 @@ public class MockPageContext extends PageContext {
 	/**
 	 * Create new MockPageContext with a default {@link MockHttpServletRequest},
 	 * {@link MockHttpServletResponse}, {@link MockServletConfig}.
-	 * 
-	 * @param servletContext the ServletContext that the JSP page runs in (only
-	 * necessary when actually accessing the ServletContext)
+	 * @param servletContext the ServletContext that the JSP page runs in
+	 * (only necessary when actually accessing the ServletContext)
 	 */
 	public MockPageContext(ServletContext servletContext) {
 		this(servletContext, null, null, null);
@@ -91,10 +89,9 @@ public class MockPageContext extends PageContext {
 	/**
 	 * Create new MockPageContext with a MockHttpServletResponse,
 	 * MockServletConfig.
-	 * 
 	 * @param servletContext the ServletContext that the JSP page runs in
-	 * @param request the current HttpServletRequest (only necessary when
-	 * actually accessing the request)
+	 * @param request the current HttpServletRequest
+	 * (only necessary when actually accessing the request)
 	 */
 	public MockPageContext(ServletContext servletContext, HttpServletRequest request) {
 		this(servletContext, request, null, null);
@@ -102,11 +99,10 @@ public class MockPageContext extends PageContext {
 
 	/**
 	 * Create new MockPageContext with a MockServletConfig.
-	 * 
 	 * @param servletContext the ServletContext that the JSP page runs in
 	 * @param request the current HttpServletRequest
-	 * @param response the current HttpServletResponse (only necessary when
-	 * actually writing to the response)
+	 * @param response the current HttpServletResponse
+	 * (only necessary when actually writing to the response)
 	 */
 	public MockPageContext(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response) {
 		this(servletContext, request, response, null);
@@ -114,15 +110,13 @@ public class MockPageContext extends PageContext {
 
 	/**
 	 * Create new MockServletConfig.
-	 * 
 	 * @param servletContext the ServletContext that the JSP page runs in
 	 * @param request the current HttpServletRequest
 	 * @param response the current HttpServletResponse
-	 * @param servletConfig the ServletConfig (hardly ever accessed from within
-	 * a tag)
+	 * @param servletConfig the ServletConfig (hardly ever accessed from within a tag)
 	 */
-	public MockPageContext(ServletContext servletContext, HttpServletRequest request, HttpServletResponse response,
-			ServletConfig servletConfig) {
+	public MockPageContext(ServletContext servletContext, HttpServletRequest request,
+			HttpServletResponse response, ServletConfig servletConfig) {
 
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.request = (request != null ? request : new MockHttpServletRequest(servletContext));
@@ -130,8 +124,10 @@ public class MockPageContext extends PageContext {
 		this.servletConfig = (servletConfig != null ? servletConfig : new MockServletConfig(servletContext));
 	}
 
-	public void initialize(Servlet servlet, ServletRequest request, ServletResponse response, String errorPageURL,
-			boolean needsSession, int bufferSize, boolean autoFlush) {
+
+	public void initialize(
+			Servlet servlet, ServletRequest request, ServletResponse response,
+			String errorPageURL, boolean needsSession, int bufferSize, boolean autoFlush) {
 
 		throw new UnsupportedOperationException("Use appropriate constructor");
 	}
@@ -252,7 +248,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return new Vector<String>(this.attributes.keySet()).elements();
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -319,24 +315,37 @@ public class MockPageContext extends PageContext {
 		return this.servletContext;
 	}
 
-	public void forward(String url) throws ServletException, IOException {
-		throw new UnsupportedOperationException("forward");
+	public void forward(String path) throws ServletException, IOException {
+		this.request.getRequestDispatcher(path).forward(this.request, this.response);
 	}
 
-	public void include(String url) throws ServletException, IOException {
-		throw new UnsupportedOperationException("include");
+	public void include(String path) throws ServletException, IOException {
+		this.request.getRequestDispatcher(path).include(this.request, this.response);
 	}
 
-	public void include(String url, boolean flush) throws ServletException, IOException {
-		throw new UnsupportedOperationException("include");
+	public void include(String path, boolean flush) throws ServletException, IOException {
+		this.request.getRequestDispatcher(path).include(this.request, this.response);
+		if (flush) {
+			this.response.flushBuffer();
+		}
+	}
+
+	public byte[] getContentAsByteArray() {
+		Assert.isTrue(this.response instanceof MockHttpServletResponse);
+		return ((MockHttpServletResponse) this.response).getContentAsByteArray();
+	}
+
+	public String getContentAsString() throws UnsupportedEncodingException {
+		Assert.isTrue(this.response instanceof MockHttpServletResponse);
+		return ((MockHttpServletResponse) this.response).getContentAsString();
 	}
 
 	public void handlePageException(Exception ex) throws ServletException, IOException {
-		throw new UnsupportedOperationException("handlePageException");
+		throw new ServletException("Page exception", ex);
 	}
 
 	public void handlePageException(Throwable ex) throws ServletException, IOException {
-		throw new UnsupportedOperationException("handlePageException");
+		throw new ServletException("Page exception", ex);
 	}
 
 }
