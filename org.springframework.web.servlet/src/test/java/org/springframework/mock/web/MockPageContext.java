@@ -17,6 +17,7 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
@@ -333,24 +334,37 @@ public class MockPageContext extends PageContext {
 		return this.servletContext;
 	}
 
-	public void forward(String url) throws ServletException, IOException {
-		throw new UnsupportedOperationException("forward");
+	public void forward(String path) throws ServletException, IOException {
+		this.request.getRequestDispatcher(path).forward(this.request, this.response);
 	}
 
-	public void include(String url) throws ServletException, IOException {
-		throw new UnsupportedOperationException("include");
+	public void include(String path) throws ServletException, IOException {
+		this.request.getRequestDispatcher(path).include(this.request, this.response);
 	}
 
-	public void include(String url, boolean flush) throws ServletException, IOException {
-		throw new UnsupportedOperationException("include");
+	public void include(String path, boolean flush) throws ServletException, IOException {
+		this.request.getRequestDispatcher(path).include(this.request, this.response);
+		if (flush) {
+			this.response.flushBuffer();
+		}
+	}
+
+	public byte[] getContentAsByteArray() {
+		Assert.isTrue(this.response instanceof MockHttpServletResponse);
+		return ((MockHttpServletResponse) this.response).getContentAsByteArray();
+	}
+
+	public String getContentAsString() throws UnsupportedEncodingException {
+		Assert.isTrue(this.response instanceof MockHttpServletResponse);
+		return ((MockHttpServletResponse) this.response).getContentAsString();
 	}
 
 	public void handlePageException(Exception ex) throws ServletException, IOException {
-		throw new UnsupportedOperationException("handlePageException");
+		throw new ServletException("Page exception", ex);
 	}
 
 	public void handlePageException(Throwable ex) throws ServletException, IOException {
-		throw new UnsupportedOperationException("handlePageException");
+		throw new ServletException("Page exception", ex);
 	}
 
 }
