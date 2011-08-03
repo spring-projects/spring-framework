@@ -51,12 +51,12 @@ abstract class MediaTypeExpression implements Comparable<MediaTypeExpression> {
 		isNegated = negated;
 	}
 
-	public boolean match(HttpServletRequest request) {
-		boolean match = match(request, this.mediaType);
+	public final boolean match(HttpServletRequest request) {
+		boolean match = matchMediaType(request);
 		return !isNegated ? match : !match;
 	}
 
-	protected abstract boolean match(HttpServletRequest request, MediaType mediaType);
+	protected abstract boolean matchMediaType(HttpServletRequest request);
 
 	MediaType getMediaType() {
 		return mediaType;

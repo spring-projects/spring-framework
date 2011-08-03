@@ -27,10 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.WebUtils;
 
 /**
- * A logical conjunction (' && ') request condition that matches a request against a set parameter expressions.
- * 
- * <p>For details on the syntax of the expressions see {@link RequestMapping#params()}. If the condition is
- * created with 0 parameter expressions, it will match to every request.
+ * A logical conjunction (' && ') request condition that matches a request against 
+ * a set parameter expressions with syntax defined in {@link RequestMapping#params()}. 
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -41,9 +39,9 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	private final Set<ParamExpression> expressions;
 	
 	/**
-	 * Create a {@link ParamsRequestCondition} with the given param expressions. 
-	 * 
-	 * @param params 0 or more param expressions; if 0, the condition will match to every request.
+	 * Create a new instance from the given param expressions. 
+	 * @param params expressions with syntax defined in {@link RequestMapping#params()}; 
+	 * 	if 0, the condition will match to every request.
 	 */
 	public ParamsRequestCondition(String... params) {
 		this(parseExpressions(params));
@@ -74,7 +72,8 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	}
 
 	/**
-	 * Returns a new instance with the union of the param expressions from "this" and the "other" instance.
+	 * Returns a new instance with the union of the param expressions 
+	 * from "this" and the "other" instance.
 	 */
 	public ParamsRequestCondition combine(ParamsRequestCondition other) {
 		Set<ParamExpression> set = new LinkedHashSet<ParamExpression>(this.expressions);
@@ -83,7 +82,8 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	}
 
 	/**
-	 * Returns "this" instance if the request matches to all parameter expressions; or {@code null} otherwise.
+	 * Returns "this" instance if the request matches all param expressions; 
+	 * or {@code null} otherwise.
 	 */
 	public ParamsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		for (ParamExpression expression : expressions) {
@@ -102,16 +102,16 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * 	<li>Greater than 1 if the "other" instance has more parameter expressions
 	 * </ul>   
 	 * 
-	 * <p>It is assumed that both instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)} 
-	 * and each instance contains the matching parameter expressions only or is otherwise empty.
+	 * <p>It is assumed that both instances have been obtained via 
+	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance 
+	 * contains the matching parameter expressions only or is otherwise empty.
 	 */
 	public int compareTo(ParamsRequestCondition other, HttpServletRequest request) {
 		return other.expressions.size() - this.expressions.size();
 	}
 
 	/**
-	 * Parsing and request matching logic for parameter expressions.
-	 * @see RequestMapping#params() 
+	 * Parses and matches a single param expression to a request. 
 	 */
 	static class ParamExpression extends AbstractNameValueExpression<String> {
 
