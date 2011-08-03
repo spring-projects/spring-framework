@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.context;
 
 /**
- * An extension of the Lifecycle interface for those objects that require to be
+ * An extension of the {@link Lifecycle} interface for those objects that require to be
  * started upon ApplicationContext refresh and/or shutdown in a particular order.
  * The {@link #isAutoStartup()} return value indicates whether this object should
  * be started at the time of a context refresh. The callback-accepting
@@ -67,10 +67,14 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 
 	/**
 	 * Indicates that a Lifecycle component must stop if it is currently running.
-	 * <p>The provided callback is used by the LifecycleProcessor to support an
+	 * <p>The provided callback is used by the {@link LifecycleProcessor} to support an
 	 * ordered, and potentially concurrent, shutdown of all components having a
 	 * common shutdown order value. The callback <b>must</b> be executed after
 	 * the SmartLifecycle component does indeed stop.
+	 * <p>The {@code LifecycleProcessor} will call <i>only</i> this variant of the
+	 * {@code stop} method; i.e. {@link Lifecycle#stop()} will not be called for
+	 * {@link SmartLifecycle} implementations unless explicitly delegated to within the
+	 * this method.
 	 */
 	void stop(Runnable callback);
 
