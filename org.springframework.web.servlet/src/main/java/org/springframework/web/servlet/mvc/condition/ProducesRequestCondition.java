@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.condition;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -33,14 +32,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
 
 /**
- * A logical disjunction (' || ') request condition to match requests against producible 
- * media type expressions.
- * 
- * <p>For details on the syntax of the expressions see {@link RequestMapping#consumes()}. 
- * If the condition is created without media type expressions, it matches to every request.
- * 
- * <p>This request condition is also capable of parsing header expressions by selecting 
- * 'Accept' header expressions and converting them to prodicuble media type expressions.
+ * A logical disjunction (' || ') request condition to match a request's 'Accept' header
+ * to a list of media type expressions. Two kinds of media type expressions are 
+ * supported, which are described in {@link RequestMapping#produces()} and
+ * {@link RequestMapping#headers()} where the header name is 'Accept'. 
+ * Regardless of which syntax is used, the semantics are the same.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -51,26 +47,27 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	private final List<ProduceMediaTypeExpression> expressions;
 
 	/**
-	 * Creates a {@link ProducesRequestCondition} with the given producible media type expressions.
-	 * @param produces the expressions to parse; if 0 the condition matches to every request
+	 * Creates a new instance from 0 or more "produces" expressions.
+	 * @param produces expressions with the syntax described in {@link RequestMapping#produces()}
+	 * 		if 0 expressions are provided, the condition matches to every request
 	 */
 	public ProducesRequestCondition(String... produces) {
-		this(produces, null);
+		this(parseExpressions(produces, null));
 	}
 	
 	/**
-	 * Creates a {@link ProducesRequestCondition} with the given header and produces expressions.
-	 * In addition to produces expressions, {@code "Accept"} header expressions are extracted and treated as
-	 * producible media type expressions.
-	 * @param produces the produces expressions to parse; if 0, the condition matches to all requests
-	 * @param headers the header expression to parse; if 0, the condition matches to all requests
+	 * Creates a new instance with "produces" and "header" expressions. "Header" expressions 
+	 * where the header name is not 'Accept' or have no header value defined are ignored.
+	 * If 0 expressions are provided in total, the condition matches to every request
+	 * @param produces expressions with the syntax described in {@link RequestMapping#produces()}
+	 * @param headers expressions with the syntax described in {@link RequestMapping#headers()}
 	 */
 	public ProducesRequestCondition(String[] produces, String[] headers) {
 		this(parseExpressions(produces, headers));
 	}
 
 	/**
-	 * A private constructor.
+	 * Private constructor accepting parsed media type expressions.
 	 */
 	private ProducesRequestCondition(Collection<ProduceMediaTypeExpression> expressions) {
 		this.expressions = new ArrayList<ProduceMediaTypeExpression>(expressions);
@@ -98,7 +95,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	/**
-	 * Returns the producible media types contained in all expressions of this condition.
+	 * Returns the media types for this condition.
 	 */
 	public Set<MediaType> getMediaTypes() {
 		Set<MediaType> result = new LinkedHashSet<MediaType>();
@@ -109,7 +106,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	/**
-	 * Returns true if this condition contains no producible media type expressions.
+	 * Whether the condition has any media type expressions.
 	 */
 	public boolean isEmpty() {
 		return expressions.isEmpty();
@@ -126,22 +123,25 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	/**
-	 * Returns the "other" instance if "other" as long as it contains any expressions; or "this" instance otherwise.
-	 * In other words "other" takes precedence over "this" as long as it contains any expressions.
-	 * <p>Example: method-level "produces" overrides type-level "produces" condition. 
+	 * Returns the "other" instance if it has any expressions; returns "this" 
+	 * instance otherwise. Practically that means a method-level "produces" 
+	 * overrides a type-level "produces" condition.
 	 */
 	public ProducesRequestCondition combine(ProducesRequestCondition other) {
 		return !other.expressions.isEmpty() ? other : this;
 	}
 
 	/**
-	 * Checks if any of the producible media type expressions match the given request and returns an instance that 
-	 * is guaranteed to contain matching media type expressions only.
+	 * Checks if any of the contained media type expressions match the given 
+	 * request 'Content-Type' header and returns an instance that is guaranteed 
+	 * to contain matching expressions only. The match is performed via
+	 * {@link MediaType#isCompatibleWith(MediaType)}.
 	 * 
 	 * @param request the current request
 	 * 
-	 * @return the same instance if the condition contains no expressions; 
-	 * 		or a new condition with matching expressions; or {@code null} if no expressions match.
+	 * @return the same instance if there are no expressions; 
+	 * 		or a new condition with matching expressions; 
+	 * 		or {@code null} if no expressions match.
 	 */
 	public ProducesRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (isEmpty()) {
@@ -158,22 +158,38 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	/**
-	 * Returns:
-	 * <ul>
-	 * 	<li>0 if the two conditions have the same number of expressions
-	 * 	<li>Less than 1 if "this" has more in number or more specific producible media type expressions
-	 * 	<li>Greater than 1 if "other" has more in number or more specific producible media type expressions
-	 * </ul>   
+	 * Compares this and another Produces condition as follows:
 	 * 
-	 * <p>It is assumed that both instances have been obtained via {@link #getMatchingCondition(HttpServletRequest)}
-	 * and each instance contains the matching producible media type expression only or is otherwise empty.
+	 * <ol>
+	 * 	<li>Sorts the request 'Accept' header media types by quality value via
+	 * 	{@link MediaType#sortByQualityValue(List)} and iterates over the sorted types.
+	 * 	<li>Compares the sorted request media types against the media types of each 
+	 * 	Produces condition via {@link MediaType#includes(MediaType)}. 
+	 * 	<li>A "produces" condition with a matching media type listed earlier wins.
+	 * 	<li>If both conditions have a matching media type at the same index, the
+	 * 	media types are further compared by specificity and quality.
+	 * </ol>
+	 * 
+	 * <p>If a request media type is {@link MediaType#ALL} or if there is no 'Accept'
+	 * header, and therefore both conditions match, preference is given to one 
+	 * Produces condition if it is empty and the other one is not.
+	 * 
+	 * <p>It is assumed that both instances have been obtained via 
+	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance 
+	 * contains the matching producible media type expression only or 
+	 * is otherwise empty.
 	 */
 	public int compareTo(ProducesRequestCondition other, HttpServletRequest request) {
 		String acceptHeader = request.getHeader("Accept");
 		List<MediaType> acceptedMediaTypes = MediaType.parseMediaTypes(acceptHeader);
 		MediaType.sortByQualityValue(acceptedMediaTypes);
-		
+
 		for (MediaType acceptedMediaType : acceptedMediaTypes) {
+			if (acceptedMediaType.equals(MediaType.ALL)) {
+				if (isOneEmptyButNotBoth(other)) {
+					return this.isEmpty() ? -1 : 1;
+				}
+			}
 			int thisIndex = this.indexOfMediaType(acceptedMediaType);
 			int otherIndex = other.indexOfMediaType(acceptedMediaType);
 			if (thisIndex != otherIndex) {
@@ -187,6 +203,13 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 				}
 			}
 		}
+		
+		if (acceptedMediaTypes.isEmpty()) {
+			if (isOneEmptyButNotBoth(other)) {
+				return this.isEmpty() ? -1 : 1;
+			}
+		}
+		
 		return 0;
 	}
 
@@ -199,12 +222,15 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		return -1;
 	}
 
+	private boolean isOneEmptyButNotBoth(ProducesRequestCondition other) {
+		return ((this.isEmpty() || other.isEmpty()) && (this.expressions.size() != other.expressions.size()));
+	}
+	
 	/**
-	 * Parsing and request matching logic for producible media type expressions.
-	 * @see RequestMapping#produces() 
+	 * Parses and matches a single media type expression to a request's 'Accept' header. 
 	 */
 	static class ProduceMediaTypeExpression extends MediaTypeExpression {
-
+		
 		ProduceMediaTypeExpression(MediaType mediaType, boolean negated) {
 			super(mediaType, negated);
 		}
@@ -214,10 +240,10 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		}
 
 		@Override
-		protected boolean match(HttpServletRequest request, MediaType mediaType) {
+		protected boolean matchMediaType(HttpServletRequest request) {
 			List<MediaType> acceptedMediaTypes = getAcceptedMediaTypes(request);
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {
-				if (mediaType.isCompatibleWith(acceptedMediaType)) {
+				if (getMediaType().isCompatibleWith(acceptedMediaType)) {
 					return true;
 				}
 			}

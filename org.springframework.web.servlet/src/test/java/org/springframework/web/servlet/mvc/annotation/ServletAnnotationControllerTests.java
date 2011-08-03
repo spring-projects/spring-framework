@@ -16,6 +16,14 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.io.Serializable;
@@ -39,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -51,7 +60,6 @@ import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Test;
-
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -132,8 +140,6 @@ import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameRes
 import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.NestedServletException;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -1869,6 +1875,40 @@ public class ServletAnnotationControllerTests {
 		servlet.service(request, response);
 		assertEquals(405, response.getStatus());
 	}
+	
+	// SPR-8536
+
+	@Test
+	public void testHeadersCondition() throws Exception {
+		initServlet(HeadersConditionController.class);
+
+		// No "Accept" header
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		
+		assertEquals(200, response.getStatus());
+		assertEquals("home", response.getForwardedUrl());
+
+		// Accept "*/*"
+		request = new MockHttpServletRequest("GET", "/");
+		request.addHeader("Accept", "*/*");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("home", response.getForwardedUrl());
+
+		// Accept "application/json"
+		request = new MockHttpServletRequest("GET", "/");
+		request.addHeader("Accept", "application/json");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		
+		assertEquals(200, response.getStatus());
+		assertEquals("application/json", response.getHeader("Content-Type"));
+		assertEquals("homeJson", response.getContentAsString());
+	}	
 
 
 	/*
@@ -3149,6 +3189,21 @@ public class ServletAnnotationControllerTests {
 		@RequestMapping(value = "/m2", method = RequestMethod.POST)
 		public void handle2(Writer writer) throws IOException {
 			writer.write("handle2");
+		}
+	}
+	
+	@Controller
+	static class HeadersConditionController {
+		
+		@RequestMapping(value = "/", method = RequestMethod.GET)
+		public String home() {
+			return "home";
+		}
+
+		@RequestMapping(value = "/", method = RequestMethod.GET, headers="Accept=application/json")
+		@ResponseBody
+		public String homeJson() {
+			return "homeJson";
 		}
 	}
 

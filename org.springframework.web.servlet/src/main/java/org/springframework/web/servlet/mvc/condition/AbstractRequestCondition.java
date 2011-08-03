@@ -20,7 +20,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Base class for {@link RequestCondition}s. 
+ * A base class for {@link RequestCondition} types providing implementations of 
+ * {@link #equals(Object)}, {@link #hashCode()}, and {@link #toString()}. 
  * 
  * @author Rossen Stoyanchev
  * @since 3.1

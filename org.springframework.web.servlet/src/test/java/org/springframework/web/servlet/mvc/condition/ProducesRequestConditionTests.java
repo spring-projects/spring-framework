@@ -120,7 +120,7 @@ public class ProducesRequestConditionTests {
 	}
 	
 	@Test
-	public void compareToSingle() {
+	public void compareToWithSingleExpression() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Accept", "text/plain");
 		
@@ -135,7 +135,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void compareToMultiple() {
+	public void compareToMultipleExpressions() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("*/*", "text/plain");
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("text/*", "text/plain;q=0.7");
 
@@ -147,22 +147,10 @@ public class ProducesRequestConditionTests {
 
 		result = condition2.compareTo(condition1, request);
 		assertTrue("Invalid comparison result: " + result, result > 0);
-
-		condition1 = new ProducesRequestCondition("*/*");
-		condition2 = new ProducesRequestCondition("text/*");
-
-		request = new MockHttpServletRequest();
-		request.addHeader("Accept", "text/*");
-
-		result = condition1.compareTo(condition2, request);
-		assertTrue("Invalid comparison result: " + result, result > 0);
-
-		result = condition2.compareTo(condition1, request);
-		assertTrue("Invalid comparison result: " + result, result < 0);
 	}
 
 	@Test
-	public void compareToMultipleAccept() {
+	public void compareToMultipleExpressionsAndMultipeAcceptHeaderValues() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/*", "text/plain");
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/*", "application/xml");
 
@@ -186,7 +174,36 @@ public class ProducesRequestConditionTests {
 		result = condition2.compareTo(condition1, request);
 		assertTrue("Invalid comparison result: " + result, result < 0);
 	}
-	
+
+	@Test
+	public void compareToEmptyCondition() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Accept", "*/*");
+
+		ProducesRequestCondition condition1 = new ProducesRequestCondition();
+		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/json");
+
+		int result = condition1.compareTo(condition2, request);
+		assertTrue("Invalid comparison result: " + result, result < 0);
+
+		result = condition2.compareTo(condition1, request);
+		assertTrue("Invalid comparison result: " + result, result > 0);
+	}
+
+	@Test
+	public void compareToWithoutAcceptHeader() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+
+		ProducesRequestCondition condition1 = new ProducesRequestCondition();
+		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/json");
+
+		int result = condition1.compareTo(condition2, request);
+		assertTrue("Invalid comparison result: " + result, result < 0);
+
+		result = condition2.compareTo(condition1, request);
+		assertTrue("Invalid comparison result: " + result, result > 0);
+	}
+
 	@Test
 	public void combine() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/plain");
