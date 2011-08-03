@@ -23,13 +23,14 @@ import java.util.List;
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.validation.Errors;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
@@ -38,7 +39,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * annotated with {@link ResponseBody}. 
  * 
  * <p>An @{@link RequestBody} method argument will be validated if annotated with {@code @Valid}. 
- * In case of validation failure, a {@link RequestBodyNotValidException} is thrown and handled 
+ * In case of validation failure, a {@link MethodArgumentNotValidException} is thrown and handled 
  * automatically in {@link DefaultHandlerExceptionResolver}. 
  * 
  * @author Arjen Poutsma
@@ -68,9 +69,9 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			String name = Conventions.getVariableNameForParameter(parameter);
 			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
 			binder.validate();
-			Errors errors = binder.getBindingResult();
-			if (errors.hasErrors()) {
-				throw new RequestBodyNotValidException(errors);
+			BindingResult bindingResult = binder.getBindingResult();
+			if (bindingResult.hasErrors()) {
+				throw new MethodArgumentNotValidException(parameter, bindingResult);
 			}
 		}
 		return arg;
