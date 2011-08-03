@@ -27,7 +27,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
-import org.springframework.validation.Errors;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -134,9 +135,9 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			if (isValidationApplicable(arg, parameter)) {
 				WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
 				binder.validate();
-				Errors errors = binder.getBindingResult();
-				if (errors.hasErrors()) {
-					throw new RequestPartNotValidException(errors);
+				BindingResult bindingResult = binder.getBindingResult();
+				if (bindingResult.hasErrors()) {
+					throw new MethodArgumentNotValidException(parameter, bindingResult);
 				}
 			}
 		}

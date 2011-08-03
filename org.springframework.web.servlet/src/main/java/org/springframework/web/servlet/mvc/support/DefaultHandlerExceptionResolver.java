@@ -37,10 +37,11 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.method.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.RequestBodyNotValidException;
-import org.springframework.web.servlet.mvc.method.annotation.support.RequestPartNotValidException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 /**
@@ -127,11 +128,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			else if (ex instanceof HttpMessageNotWritableException) {
 				return handleHttpMessageNotWritable((HttpMessageNotWritableException) ex, request, response, handler);
 			}
-			else if (ex instanceof RequestBodyNotValidException) {
-				return handleRequestBodyNotValidException((RequestBodyNotValidException) ex, request, response, handler);
-			}
-			else if (ex instanceof RequestPartNotValidException) {
-				return handleRequestPartNotValidException((RequestPartNotValidException) ex, request, response, handler);
+			else if (ex instanceof MethodArgumentNotValidException) {
+				return handleMethodArgumentNotValidException((MethodArgumentNotValidException) ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerException) {
@@ -343,33 +341,19 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
-	 * Handle the case where the object created from the body of a request has failed validation. 
-	 * The default implementation sends an HTTP 400 error.
+	 * Handle the case where an argument annotated with {@code @Valid} such as 
+	 * an {@link RequestBody} or {@link RequestPart} argument fails validation. 
+	 * An HTTP 400 error is sent back to the client.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler the executed handler
 	 * @return an empty ModelAndView indicating the exception was handled
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
-	protected ModelAndView handleRequestBodyNotValidException(RequestBodyNotValidException ex,
+	protected ModelAndView handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
  		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();
 	}
 
-	/**
-	 * Handle the case where the object created from the part of a multipart request has failed validation. 
-	 * The default implementation sends an HTTP 400 error.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @param handler the executed handler
-	 * @return an empty ModelAndView indicating the exception was handled
-	 * @throws IOException potentially thrown from response.sendError()
-	 */
-	protected ModelAndView handleRequestPartNotValidException(RequestPartNotValidException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
- 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-		return new ModelAndView();
-	}
-	
 }

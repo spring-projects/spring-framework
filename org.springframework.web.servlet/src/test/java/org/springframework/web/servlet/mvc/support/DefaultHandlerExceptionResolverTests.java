@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -36,9 +37,8 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.method.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.method.annotation.support.RequestBodyNotValidException;
-import org.springframework.web.servlet.mvc.method.annotation.support.RequestPartNotValidException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 /** @author Arjen Poutsma */
@@ -136,24 +136,18 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleRequestBodyNotValid() {
+	public void handleMethodArgumentNotValid() throws Exception {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(new TestBean(), "testBean");
 		errors.rejectValue("name", "invalid");
-		RequestBodyNotValidException ex = new RequestBodyNotValidException(errors);
+		MethodParameter parameter = new MethodParameter(this.getClass().getMethod("handle", String.class), 0);
+		MethodArgumentNotValidException ex = new MethodArgumentNotValidException(parameter, errors);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 400, response.getStatus());
 	}
 
-	@Test
-	public void handleRequestPartNotValid() {
-		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(new TestBean(), "testBean");
-		errors.rejectValue("name", "invalid");
-		RequestPartNotValidException ex = new RequestPartNotValidException(errors);
-		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
-		assertEquals("Invalid status code", 400, response.getStatus());
+	public void handle(String arg) {
 	}
+
 }

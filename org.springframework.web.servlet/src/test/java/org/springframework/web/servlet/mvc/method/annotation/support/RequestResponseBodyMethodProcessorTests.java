@@ -59,6 +59,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -148,10 +149,10 @@ public class RequestResponseBodyMethodProcessorTests {
 		try {
 			testResolveArgumentWithValidation(new SimpleBean(null));
 			fail("Expected exception");
-		} catch (RequestBodyNotValidException e) {
-			assertEquals("simpleBean", e.getErrors().getObjectName());
-			assertEquals(1, e.getErrors().getErrorCount());
-			assertNotNull(e.getErrors().getFieldError("name"));
+		} catch (MethodArgumentNotValidException e) {
+			assertEquals("simpleBean", e.getBindingResult().getObjectName());
+			assertEquals(1, e.getBindingResult().getErrorCount());
+			assertNotNull(e.getBindingResult().getFieldError("name"));
 		}
 	}
 

@@ -59,6 +59,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.RequestPartServletServerHttpRequest;
@@ -194,10 +195,10 @@ public class RequestPartMethodArgumentResolverTests {
 		try {
 			testResolveArgument(new SimpleBean(null), paramValidRequestPart);
 			fail("Expected exception");
-		} catch (RequestPartNotValidException e) {
-			assertEquals("requestPart", e.getErrors().getObjectName());
-			assertEquals(1, e.getErrors().getErrorCount());
-			assertNotNull(e.getErrors().getFieldError("name"));
+		} catch (MethodArgumentNotValidException e) {
+			assertEquals("requestPart", e.getBindingResult().getObjectName());
+			assertEquals(1, e.getBindingResult().getErrorCount());
+			assertNotNull(e.getBindingResult().getFieldError("name"));
 		}
 	}
 	
