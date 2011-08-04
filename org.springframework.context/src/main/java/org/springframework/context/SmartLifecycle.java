@@ -73,7 +73,7 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	 * the SmartLifecycle component does indeed stop.
 	 * <p>The {@code LifecycleProcessor} will call <i>only</i> this variant of the
 	 * {@code stop} method; i.e. {@link Lifecycle#stop()} will not be called for
-	 * {@link SmartLifecycle} implementations unless explicitly delegated to within the
+	 * {@link SmartLifecycle} implementations unless explicitly delegated to within
 	 * this method.
 	 */
 	void stop(Runnable callback);
