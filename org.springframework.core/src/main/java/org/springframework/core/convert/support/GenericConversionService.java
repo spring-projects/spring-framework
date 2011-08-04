@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionFailedException;
@@ -42,7 +40,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.converter.GenericConverter;
-import org.springframework.core.style.StylerUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -82,8 +79,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 	};
 
-
-	private static final Log logger = LogFactory.getLog(GenericConversionService.class);
 
 	private final Map<Class<?>, Map<Class<?>, MatchableConverters>> converters =
 			new HashMap<Class<?>, Map<Class<?>, MatchableConverters>>(36);
@@ -147,18 +142,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 		if (sourceType == null) {
 			return true;
 		}
-		if (logger.isTraceEnabled()) {
-			logger.trace("Checking if I can convert " + sourceType + " to " + targetType);
-		}		
 		GenericConverter converter = getConverter(sourceType, targetType);
-		if (converter != null) {
-			logger.trace("Yes, I can convert");
-			return true;
-		}
-		else {
-			logger.trace("No, I cannot convert");
-			return false;
-		}
+		return (converter != null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -179,9 +164,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 		if (source != null && !sourceType.getObjectType().isInstance(source)) {
 			throw new IllegalArgumentException("The source to convert from must be an instance of " + sourceType + "; instead it was a " + source.getClass().getName());
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Converting value " + StylerUtils.style(source) + " of " + sourceType + " to " + targetType);
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter != null) {
@@ -253,9 +235,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 		ConverterCacheKey key = new ConverterCacheKey(sourceType, targetType);
 		GenericConverter converter = this.converterCache.get(key);
 		if (converter != null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Matched cached converter " + converter);
-			}
 			return converter != NO_MATCH ? converter : null;
 		}
 		else {
@@ -264,15 +243,10 @@ public class GenericConversionService implements ConfigurableConversionService {
 				converter = getDefaultConverter(sourceType, targetType);				
 			}
 			if (converter != null) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Caching matched Converter under key " + key);
-				}
 				this.converterCache.put(key, converter);
 				return converter;
-			} else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Caching Converter [NO_MATCH] result under key " + key);
-				}
+			}
+			else {
 				this.converterCache.put(key, NO_MATCH);
 				return null;
 			}
@@ -289,13 +263,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * @return the default generic converter that will perform the conversion
 	 */
 	protected GenericConverter getDefaultConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (sourceType.isAssignableTo(targetType)) {
-			logger.trace("Matched default NO_OP_CONVERTER");
-			return NO_OP_CONVERTER;
-		}
-		else {
-			return null;
-		}
+		return (sourceType.isAssignableTo(targetType) ? NO_OP_CONVERTER : null);
 	}
 
 	// internal helpers
@@ -335,9 +303,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 			classQueue.addFirst(sourceObjectType);
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
-				if (logger.isTraceEnabled()) {
-					logger.trace("Searching for converters indexed by source interface [" + currentClass.getName() + "]");
-				}
 				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
 				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
 				if (converter != null) {
@@ -356,9 +321,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 			classQueue.addFirst(sourceObjectType);
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
-				if (logger.isTraceEnabled()) {
-					logger.trace("Searching for converters indexed by source array type [" + currentClass.getName() + "]");
-				}
 				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
 				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
 				if (converter != null) {
@@ -379,9 +341,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 			classQueue.addFirst(sourceObjectType);
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
-				if (logger.isTraceEnabled()) {
-					logger.trace("Searching for converters indexed by source class [" + currentClass.getName() + "]");
-				}
 				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
 				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
 				if (converter != null) {
@@ -396,9 +355,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 				}
 			}
 			for (Class<?> interfaceType : interfaces) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Searching for converters indexed by source interface [" + interfaceType.getName() + "]");
-				}
 				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(interfaceType);
 				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
 				if (converter != null) {
@@ -426,9 +382,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 			classQueue.addFirst(targetObjectType);
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
-				if (logger.isTraceEnabled()) {
-					logger.trace("and indexed by target class [" + currentClass.getName() + "]");
-				}
 				MatchableConverters matchable = converters.get(currentClass);
 				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
 				if (converter != null) {
@@ -439,18 +392,12 @@ public class GenericConversionService implements ConfigurableConversionService {
 					classQueue.addFirst(ifc);
 				}
 			}
-			if (logger.isTraceEnabled()) {
-				logger.trace("and indexed by [java.lang.Object]");
-			}							
 			return matchConverter(converters.get(Object.class), sourceType, targetType);
 		} else if (targetObjectType.isArray()) {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
 			classQueue.addFirst(targetObjectType);
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
-				if (logger.isTraceEnabled()) {
-					logger.trace("and indexed by target array type [" + currentClass.getName() + "]");
-				}				
 				MatchableConverters matchable = converters.get(currentClass);
 				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
 				if (converter != null) {
@@ -472,9 +419,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 			classQueue.addFirst(targetObjectType);
 			while (!classQueue.isEmpty()) {
 				Class<?> currentClass = classQueue.removeLast();
-				if (logger.isTraceEnabled()) {
-					logger.trace("and indexed by target class [" + currentClass.getName() + "]");
-				}				
 				MatchableConverters matchable = converters.get(currentClass);
 				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
 				if (converter != null) {
@@ -489,19 +433,13 @@ public class GenericConversionService implements ConfigurableConversionService {
 				}
 			}
 			for (Class<?> interfaceType : interfaces) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("and indexed by target interface [" + interfaceType.getName() + "]");
-				}				
 				MatchableConverters matchable = converters.get(interfaceType);
 				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
 				if (converter != null) {
 					return converter;
 				}
 			}
-			if (logger.isTraceEnabled()) {
-				logger.trace("and indexed by [java.lang.Object]");
-			}							
-			return matchConverter(converters.get(Object.class), sourceType, targetType);				
+			return matchConverter(converters.get(Object.class), sourceType, targetType);
 		}
 	}
 
@@ -517,9 +455,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 		if (matchable == null) {
 			return null;
 		}
-		if (logger.isTraceEnabled()) {
-			logger.trace("Found matchable converters " + matchable);
-		}
 		return matchable.matchConverter(sourceFieldType, targetFieldType);
 	}
 
@@ -527,9 +462,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 		if (source == null) {
 			assertNotPrimitiveTargetType(sourceType, targetType);
 			return source;
-		} else if (sourceType.isAssignableTo(targetType)) {
-			logger.debug("No converter found - returning assignable source object as-is");
-			return source;				
+		}
+		else if (sourceType.isAssignableTo(targetType)) {
+			return source;
 		}
 		else {
 			throw new ConverterNotFoundException(sourceType, targetType);
@@ -540,10 +475,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		if (result == null) {
 			assertNotPrimitiveTargetType(sourceType, targetType);
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("Converted to " + StylerUtils.style(result));
-		}			
-		return result;		
+		return result;
 	}
 	private void assertNotPrimitiveTargetType(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (targetType.isPrimitive()) {
@@ -633,25 +565,11 @@ public class GenericConversionService implements ConfigurableConversionService {
 		public GenericConverter matchConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (this.conditionalConverters != null) {
 				for (ConditionalGenericConverter conditional : this.conditionalConverters) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Matching " + conditional);
-					}
 					if (conditional.matches(sourceType, targetType)) {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Matched converter " + conditional);
-						}
 						return conditional;
-					}
-					else {
-						if (logger.isTraceEnabled()) {
-							logger.trace("Did not match converter " + conditional);
-						}
 					}
 				}
 			}
-			if (this.defaultConverter != null && logger.isTraceEnabled()) {
-				logger.trace("Matched converter " + this.defaultConverter);
-			}			
 			return this.defaultConverter;
 		}
 
