@@ -366,7 +366,7 @@ public class ExampleBean {
         set, and the relevant lifecycle methods (such as a <link
         linkend="beans-factory-lifecycle-initializingbean">configured init
         method</link> or the <link
-        linkend="beans-factory-lifecycle-initializingbean">IntializingBean
+        linkend="beans-factory-lifecycle-initializingbean">InitializingBean
         callback method</link>) are invoked.</para>
     </section>
 
