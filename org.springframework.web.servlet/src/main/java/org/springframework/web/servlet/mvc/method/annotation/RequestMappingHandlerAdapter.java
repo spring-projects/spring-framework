@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,13 +46,10 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
-import org.springframework.web.bind.support.FlashStatus;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.SessionStatus;
-import org.springframework.web.bind.support.SimpleFlashStatus;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -61,7 +57,6 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
-import org.springframework.web.method.annotation.FlashAttributesHandler;
 import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.annotation.SessionAttributesHandler;
 import org.springframework.web.method.annotation.support.ErrorsMethodArgumentResolver;
@@ -78,6 +73,8 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.servlet.FlashMap;
+import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.LastModified;
@@ -94,6 +91,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletMode
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
+import org.springframework.web.servlet.mvc.method.support.ResponseContext;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -149,18 +147,16 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache =
 		new ConcurrentHashMap<Class<?>, SessionAttributesHandler>();
 
-	private final Map<Class<?>, FlashAttributesHandler> flashAttributesHandlerCache =
-		new ConcurrentHashMap<Class<?>, FlashAttributesHandler>();
-
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
 	private HandlerMethodArgumentResolverComposite initBinderArgumentResolvers;
 	
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
-	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
+	private final Map<Class<?>, WebDataBinderFactory> dataBinderFactoryCache = 
+		new ConcurrentHashMap<Class<?>, WebDataBinderFactory>();
 
-	private final Map<Class<?>, Set<Method>> modelAttributeMethodCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
+	private final Map<Class<?>, ModelFactory> modelFactoryCache = new ConcurrentHashMap<Class<?>, ModelFactory>();
 
 	/**
 	 * Create a {@link RequestMappingHandlerAdapter} instance.
@@ -372,7 +368,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		argumentResolvers.addResolver(new HttpEntityMethodProcessor(messageConverters));
 		argumentResolvers.addResolver(new ModelMethodProcessor());
 		argumentResolvers.addResolver(new ErrorsMethodArgumentResolver());
-		
+
 		// Default-mode resolution
 		argumentResolvers.addResolver(new RequestParamMethodArgumentResolver(beanFactory, true));
 		argumentResolvers.addResolver(new ServletModelAttributeMethodProcessor(true));
@@ -462,8 +458,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	protected final ModelAndView handleInternal(HttpServletRequest request,
 												HttpServletResponse response,
 												HandlerMethod handlerMethod) throws Exception {
-		
-		if (hasSessionAttributes(handlerMethod.getBeanType())) {
+
+		if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
 			// Always prevent caching in case of session attribute management.
 			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
 		}
@@ -487,118 +483,106 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * Whether the given handler type defines any handler-specific session attributes 
-	 * via {@link SessionAttributes}.
+	 * Return the {@link SessionAttributesHandler} instance for the given 
+	 * handler type, never {@code null}.
 	 */
-	private boolean hasSessionAttributes(Class<?> handlerType) {
-		SessionAttributesHandler sessionAttrsHandler = null;
-		synchronized(this.sessionAttributesHandlerCache) {
-			sessionAttrsHandler = this.sessionAttributesHandlerCache.get(handlerType);
-			if (sessionAttrsHandler == null) {
-				sessionAttrsHandler = new SessionAttributesHandler(handlerType, sessionAttributeStore);
-				this.sessionAttributesHandlerCache.put(handlerType, sessionAttrsHandler);
+	private SessionAttributesHandler getSessionAttributesHandler(HandlerMethod handlerMethod) {
+		Class<?> handlerType = handlerMethod.getBeanType();
+		SessionAttributesHandler sessionAttrHandler = this.sessionAttributesHandlerCache.get(handlerType);
+		if (sessionAttrHandler == null) {
+			synchronized(this.sessionAttributesHandlerCache) {
+				sessionAttrHandler = this.sessionAttributesHandlerCache.get(handlerType);
+				if (sessionAttrHandler == null) {
+					sessionAttrHandler = new SessionAttributesHandler(handlerType, sessionAttributeStore);
+					this.sessionAttributesHandlerCache.put(handlerType, sessionAttrHandler);
+				}
 			}
 		}
-		FlashAttributesHandler flashAttrsHandler = null;
-		synchronized(this.flashAttributesHandlerCache) {
-			flashAttrsHandler = this.flashAttributesHandlerCache.get(handlerType);
-			if (flashAttrsHandler == null) {
-				flashAttrsHandler = new FlashAttributesHandler(handlerType);
-				this.flashAttributesHandlerCache.put(handlerType, flashAttrsHandler);
-			}
-		}
-		return sessionAttrsHandler.hasSessionAttributes() || flashAttrsHandler.hasFlashAttributes();
+		return sessionAttrHandler;
 	}
 
 	/**
 	 * Invoke the {@link RequestMapping} handler method preparing a {@link ModelAndView} if view resolution is required.
 	 */
-	private ModelAndView invokeHandlerMethod(HttpServletRequest request,
-											 HttpServletResponse response,
-											 HandlerMethod handlerMethod) throws Exception {
+	private ModelAndView invokeHandlerMethod(HttpServletRequest request, HttpServletResponse response,
+			HandlerMethod handlerMethod) throws Exception {
 		
-		WebDataBinderFactory binderFactory = createDataBinderFactory(handlerMethod);
-		ModelFactory modelFactory = createModelFactory(handlerMethod, binderFactory);
-		ServletInvocableHandlerMethod requestMethod = createRequestMappingMethod(handlerMethod, binderFactory);
-
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
-		SessionStatus sessionStatus = new SimpleSessionStatus();
-		FlashStatus flashStatus = new SimpleFlashStatus();
+		
+		ServletInvocableHandlerMethod requestMappingMethod = createRequestMappingMethod(handlerMethod);
+		ModelFactory modelFactory = getModelFactory(handlerMethod);
 
+		FlashMap flashMap = (FlashMap) request.getAttribute(FlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE);
+		
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		modelFactory.initModel(webRequest, mavContainer, requestMethod);
+		mavContainer.addAllAttributes(flashMap);
+		modelFactory.initModel(webRequest, mavContainer, requestMappingMethod);
 		
-		requestMethod.invokeAndHandle(webRequest, mavContainer, sessionStatus, flashStatus);
-		modelFactory.updateModel(webRequest, mavContainer, sessionStatus, flashStatus);
+		SessionStatus sessionStatus = new SimpleSessionStatus();
+		ResponseContext responseContext = new ResponseContext(webRequest, mavContainer);
 		
+		requestMappingMethod.invokeAndHandle(webRequest, mavContainer, sessionStatus, responseContext);
+		modelFactory.updateModel(webRequest, mavContainer, sessionStatus);
+
 		if (!mavContainer.isResolveView()) {
 			return null;
 		}
 		else {
 			ModelAndView mav = new ModelAndView().addAllObjects(mavContainer.getModel());
 			mav.setViewName(mavContainer.getViewName());
-			if (mavContainer.getView() != null) {
+			if (!mavContainer.isViewReference()) {
 				mav.setView((View) mavContainer.getView());
 			}
 			return mav;				
 		}
 	}
 
-	private WebDataBinderFactory createDataBinderFactory(HandlerMethod handlerMethod) {
-		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<InvocableHandlerMethod>();
-
+	private ServletInvocableHandlerMethod createRequestMappingMethod(HandlerMethod handlerMethod) {
+		ServletInvocableHandlerMethod requestMappingMethod = 
+			new ServletInvocableHandlerMethod(handlerMethod.getBean(), handlerMethod.getMethod());
+		requestMappingMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+		requestMappingMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+		requestMappingMethod.setDataBinderFactory(getDataBinderFactory(handlerMethod));
+		requestMappingMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+		return requestMappingMethod;
+	}
+	
+	private ModelFactory getModelFactory(HandlerMethod handlerMethod) {
+		SessionAttributesHandler sessionAttrHandler = getSessionAttributesHandler(handlerMethod);
+		WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
 		Class<?> handlerType = handlerMethod.getBeanType();
-		Set<Method> binderMethods = initBinderMethodCache.get(handlerType);
-		if (binderMethods == null) {
-			binderMethods = HandlerMethodSelector.selectMethods(handlerType, INIT_BINDER_METHODS);
-			initBinderMethodCache.put(handlerType, binderMethods);
+		ModelFactory modelFactory = this.modelFactoryCache.get(handlerType);
+		if (modelFactory == null) {
+			List<InvocableHandlerMethod> attrMethods = new ArrayList<InvocableHandlerMethod>();
+			for (Method method : HandlerMethodSelector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS)) {
+				InvocableHandlerMethod attrMethod = new InvocableHandlerMethod(handlerMethod.getBean(), method);
+				attrMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+				attrMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+				attrMethod.setDataBinderFactory(binderFactory);
+				attrMethods.add(attrMethod);
+			}
+			modelFactory = new ModelFactory(attrMethods, binderFactory, sessionAttrHandler);
+			this.modelFactoryCache.put(handlerType, modelFactory);
 		}
-
-		for (Method method : binderMethods) {
-			Object bean = handlerMethod.getBean();
-			InvocableHandlerMethod binderMethod = new InvocableHandlerMethod(bean, method);
-			binderMethod.setHandlerMethodArgumentResolvers(this.initBinderArgumentResolvers);
-			binderMethod.setDataBinderFactory(new DefaultDataBinderFactory(this.webBindingInitializer));
-			binderMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-			initBinderMethods.add(binderMethod);
-		}
-
-		return new ServletRequestDataBinderFactory(initBinderMethods, this.webBindingInitializer);
+		return modelFactory;
 	}
 
-	private ModelFactory createModelFactory(HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
-		List<InvocableHandlerMethod> modelAttrMethods = new ArrayList<InvocableHandlerMethod>();
-
+	private WebDataBinderFactory getDataBinderFactory(HandlerMethod handlerMethod) {
 		Class<?> handlerType = handlerMethod.getBeanType();
-		Set<Method> attributeMethods = modelAttributeMethodCache.get(handlerType);
-		if (attributeMethods == null) {
-			attributeMethods = HandlerMethodSelector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS);
-			modelAttributeMethodCache.put(handlerType, attributeMethods);
+		WebDataBinderFactory binderFactory = this.dataBinderFactoryCache.get(handlerType);
+		if (binderFactory == null) {
+			List<InvocableHandlerMethod> binderMethods = new ArrayList<InvocableHandlerMethod>();
+			for (Method method : HandlerMethodSelector.selectMethods(handlerType, INIT_BINDER_METHODS)) {
+				InvocableHandlerMethod binderMethod = new InvocableHandlerMethod(handlerMethod.getBean(), method);
+				binderMethod.setHandlerMethodArgumentResolvers(this.initBinderArgumentResolvers);
+				binderMethod.setDataBinderFactory(new DefaultDataBinderFactory(this.webBindingInitializer));
+				binderMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+				binderMethods.add(binderMethod);
+			}
+			binderFactory = new ServletRequestDataBinderFactory(binderMethods, this.webBindingInitializer);
+			this.dataBinderFactoryCache.put(handlerType, binderFactory);
 		}
-
-		for (Method method : attributeMethods) {
-			InvocableHandlerMethod attrMethod = new InvocableHandlerMethod(handlerMethod.getBean(), method);
-			attrMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-			attrMethod.setDataBinderFactory(binderFactory);
-			attrMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-			modelAttrMethods.add(attrMethod);
-		}
-
-		SessionAttributesHandler sessionAttrsHandler = sessionAttributesHandlerCache.get(handlerType);
-		FlashAttributesHandler flashAttrsHandler = flashAttributesHandlerCache.get(handlerType);
-		
-		return new ModelFactory(modelAttrMethods, binderFactory, sessionAttrsHandler, flashAttrsHandler);
-	}
-
-	private ServletInvocableHandlerMethod createRequestMappingMethod(HandlerMethod handlerMethod,
-															   		 WebDataBinderFactory binderFactory) {
-		Method method = handlerMethod.getMethod();
-		ServletInvocableHandlerMethod requestMethod = new ServletInvocableHandlerMethod(handlerMethod.getBean(), method);
-		requestMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-		requestMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
-		requestMethod.setDataBinderFactory(binderFactory);
-		requestMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-		return requestMethod;
+		return binderFactory;
 	}
 
 	/**

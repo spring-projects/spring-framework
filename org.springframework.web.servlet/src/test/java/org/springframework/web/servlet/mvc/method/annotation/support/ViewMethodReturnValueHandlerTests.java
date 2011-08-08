@@ -26,12 +26,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
-import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
 import org.springframework.web.servlet.view.InternalResourceView;
 
 /**
@@ -50,7 +47,7 @@ public class ViewMethodReturnValueHandlerTests {
 	@Before
 	public void setUp() {
 		handler = new ViewMethodReturnValueHandler();
-		mavContainer = new ModelAndViewContainer(new ExtendedModelMap());
+		mavContainer = new ModelAndViewContainer();
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 	

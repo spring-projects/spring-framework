@@ -32,6 +32,8 @@ import org.springframework.beans.TestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.servlet.FlashMap;
+import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.View;
 import org.springframework.web.util.WebUtils;
 
@@ -88,6 +90,35 @@ public class RedirectViewTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		rv.render(new HashMap<String, Object>(), request, response);
 		assertEquals(201, response.getStatus());
+		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
+	}
+	
+	@Test
+	public void flashMap() throws Exception {
+		RedirectView rv = new RedirectView();
+		rv.setUrl("http://url.somewhere.com");
+		rv.setHttp10Compatible(false);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		FlashMap flashMap = new FlashMap("key", "_flashKey");
+		flashMap.put("name", "value");
+		request.setAttribute(FlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, flashMap);
+		rv.render(new HashMap<String, Object>(), request, response);
+		assertEquals(303, response.getStatus());
+		assertEquals("http://url.somewhere.com?_flashKey=key", response.getHeader("Location"));
+	}
+
+	@Test
+	public void emptyFlashMap() throws Exception {
+		RedirectView rv = new RedirectView();
+		rv.setUrl("http://url.somewhere.com");
+		rv.setHttp10Compatible(false);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		FlashMap flashMap = new FlashMap("key", "_flashKey");
+		request.setAttribute(FlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, flashMap);
+		rv.render(new HashMap<String, Object>(), request, response);
+		assertEquals(303, response.getStatus());
 		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
 	}
 

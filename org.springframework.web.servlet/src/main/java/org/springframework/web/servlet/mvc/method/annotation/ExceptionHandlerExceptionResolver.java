@@ -60,6 +60,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequ
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
+import org.springframework.web.servlet.mvc.method.support.ResponseContext;
 
 /**
  * An {@link AbstractHandlerMethodExceptionResolver} that supports using {@link ExceptionHandler}-annotated methods
@@ -231,7 +232,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 					}
 
 					ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-					exceptionHandler.invokeAndHandle(webRequest, mavContainer, ex);
+					ResponseContext responseContext = new ResponseContext(webRequest, mavContainer);
+					
+					exceptionHandler.invokeAndHandle(webRequest, mavContainer, ex, responseContext);
 					
 					if (!mavContainer.isResolveView()) {
 						return new ModelAndView();
@@ -239,7 +242,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 					else {
 						ModelAndView mav = new ModelAndView().addAllObjects(mavContainer.getModel());
 						mav.setViewName(mavContainer.getViewName());
-						if (mavContainer.getView() != null) {
+						if (!mavContainer.isViewReference()) {
 							mav.setView((View) mavContainer.getView());
 						}
 						return mav;				

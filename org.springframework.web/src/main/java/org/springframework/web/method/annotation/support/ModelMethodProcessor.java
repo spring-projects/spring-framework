@@ -56,9 +56,7 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> paramType = returnType.getParameterType();
 		boolean hasModelAttr = returnType.getMethodAnnotation(ModelAttribute.class) != null;
-		
-		return (Model.class.isAssignableFrom(paramType) 
-				|| (Map.class.isAssignableFrom(paramType) && !hasModelAttr));
+		return (Model.class.isAssignableFrom(paramType) || (Map.class.isAssignableFrom(paramType) && !hasModelAttr));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

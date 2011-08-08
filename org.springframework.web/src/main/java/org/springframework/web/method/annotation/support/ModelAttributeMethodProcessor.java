@@ -95,7 +95,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 										WebDataBinderFactory binderFactory) throws Exception {
 		String name = ModelFactory.getNameForParameter(parameter);
 		Object target = (mavContainer.containsAttribute(name)) ?
-				mavContainer.getAttribute(name) : createAttribute(name, parameter, binderFactory, request);
+				mavContainer.getModel().get(name) : createAttribute(name, parameter, binderFactory, request);
 				
 		WebDataBinder binder = binderFactory.createBinder(request, target, name);
 

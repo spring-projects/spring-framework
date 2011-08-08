@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
@@ -84,9 +83,11 @@ public class DefaultMethodReturnValueHandler implements HandlerMethodReturnValue
 				ExtendedModelMap model = (ExtendedModelMap) mavContainer.getModel();
 				ModelAndView mav = resolver.resolveModelAndView(method, handlerType, returnValue, model, request);
 				if (mav != ModelAndViewResolver.UNRESOLVED) {
-					mavContainer.setView(mav.getView());
-					mavContainer.setViewName(mav.getViewName());
 					mavContainer.addAllAttributes(mav.getModel());
+					mavContainer.setViewName(mav.getViewName());
+					if (!mav.isReference()) {
+						mavContainer.setView(mav.getView());
+					}
 					return;
 				}
 			}
