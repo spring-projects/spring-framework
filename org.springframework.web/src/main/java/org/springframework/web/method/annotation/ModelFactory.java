@@ -35,7 +35,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.support.FlashStatus;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -66,23 +65,18 @@ public final class ModelFactory {
 	
 	private final SessionAttributesHandler sessionAttributesHandler;
 	
-	private final FlashAttributesHandler flashAttributesHandler;
-	
 	/**
 	 * Create a ModelFactory instance with the provided {@link ModelAttribute} methods.
 	 * @param attributeMethods {@link ModelAttribute} methods to initialize model instances with
 	 * @param binderFactory used to add {@link BindingResult} attributes to the model
 	 * @param sessionAttributesHandler used to access handler-specific session attributes
-	 * @param flashAttributesHandler used to access flash attributes
 	 */
 	public ModelFactory(List<InvocableHandlerMethod> attributeMethods,
 						WebDataBinderFactory binderFactory,
-						SessionAttributesHandler sessionAttributesHandler,
-						FlashAttributesHandler flashAttributesHandler) {
+						SessionAttributesHandler sessionAttributesHandler) {
 		this.attributeMethods = (attributeMethods != null) ? attributeMethods : new ArrayList<InvocableHandlerMethod>();
 		this.binderFactory = binderFactory;
 		this.sessionAttributesHandler = sessionAttributesHandler;
-		this.flashAttributesHandler = flashAttributesHandler;
 	}
 
 	/**
@@ -93,21 +87,17 @@ public final class ModelFactory {
 	 * 	<li>Check the session for any controller-specific attributes not yet "remembered".
 	 * </ol>
 	 * @param request the current request
-	 * @param mavContainer contains the model to initialize
+	 * @param mavContainer contains the model to initialize 
 	 * @param handlerMethod the @{@link RequestMapping} method for which the model is initialized
 	 * @throws Exception may arise from the invocation of @{@link ModelAttribute} methods
 	 */
-	public void initModel(NativeWebRequest request, ModelAndViewContainer mavContainer, HandlerMethod handlerMethod) 
+	public void initModel(NativeWebRequest request, ModelAndViewContainer mavContainer, HandlerMethod handlerMethod)
 			throws Exception {
-		
+
 		Map<String, ?> sessionAttrs = this.sessionAttributesHandler.retrieveAttributes(request);
-		mavContainer.addAllAttributes(sessionAttrs);
+		mavContainer.mergeAttributes(sessionAttrs);
 		
-		Map<String, ?> flashAttrs = this.flashAttributesHandler.retrieveAttributes(request);
-		mavContainer.addAllAttributes(flashAttrs);
-		this.flashAttributesHandler.cleanupAttributes(request);
-		
-		invokeAttributeMethods(request, mavContainer);
+		invokeModelAttributeMethods(request, mavContainer);
 		
 		checkHandlerSessionAttributes(request, mavContainer, handlerMethod);
 	}
@@ -116,7 +106,7 @@ public final class ModelFactory {
 	 * Invoke model attribute methods to populate the model. 
 	 * If two methods return the same attribute, the attribute from the first method is added.
 	 */
-	private void invokeAttributeMethods(NativeWebRequest request, ModelAndViewContainer mavContainer)
+	private void invokeModelAttributeMethods(NativeWebRequest request, ModelAndViewContainer mavContainer)
 			throws Exception {
 		
 		for (InvocableHandlerMethod attrMethod : this.attributeMethods) {
@@ -128,18 +118,23 @@ public final class ModelFactory {
 			Object returnValue = attrMethod.invokeForRequest(request, mavContainer);
 
 			if (!attrMethod.isVoid()){
-				String valueName = getNameForReturnValue(returnValue, attrMethod.getReturnType());
-				mavContainer.mergeAttribute(valueName, returnValue);
+				String returnValueName = getNameForReturnValue(returnValue, attrMethod.getReturnType());
+				if (!mavContainer.containsAttribute(returnValueName)) {
+					mavContainer.addAttribute(returnValueName, returnValue);
+				}
 			}
 		}
 	}
 	
 	/**
-	 * Checks if any @{@link ModelAttribute} handler method arguments declared as 
-	 * session attributes via @{@link SessionAttributes} but are not already in the 
-	 * model. If found add them to the model, raise an exception otherwise. 
+	 * Checks for @{@link ModelAttribute} arguments in the signature of the 
+	 * {@link RequestMapping} method that are declared as session attributes 
+	 * via @{@link SessionAttributes} but are not already in the model. 
+	 * Those attributes may have been outside of this controller. 
+	 * Try to locate the attributes in the session or raise an exception. 
 	 * 
-	 * @throws HttpSessionRequiredException raised if a handler session attribute could is missing 
+	 * @throws HttpSessionRequiredException raised if an attribute declared
+	 * as session attribute is missing.
 	 */
 	private void checkHandlerSessionAttributes(NativeWebRequest request, 
 											   ModelAndViewContainer mavContainer, 
@@ -203,21 +198,17 @@ public final class ModelFactory {
 	 * promotes model attributes to the session, and adds {@link BindingResult} attributes where missing.
 	 * @param request the current request
 	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
-	 * @param sessionStatus whether session processing is complete 
+	 * @param sessionStatus the session status for the current request
 	 * @throws Exception if the process of creating {@link BindingResult} attributes causes an error
 	 */
-	public void updateModel(NativeWebRequest request, ModelAndViewContainer mavContainer, 
-			SessionStatus sessionStatus, FlashStatus flashStatus) throws Exception {
+	public void updateModel(NativeWebRequest request, ModelAndViewContainer mavContainer, SessionStatus sessionStatus)
+			throws Exception {
 		
 		if (sessionStatus.isComplete()){
 			this.sessionAttributesHandler.cleanupAttributes(request);
 		}
 		else {
 			this.sessionAttributesHandler.storeAttributes(request, mavContainer.getModel());
-		}
-
-		if (flashStatus.isActive()) {
-			this.flashAttributesHandler.storeAttributes(request, mavContainer.getModel());
 		}
 		
 		if (mavContainer.isResolveView()) {

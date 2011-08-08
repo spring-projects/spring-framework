@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,6 +53,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
@@ -179,6 +181,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	public static final String VIEW_RESOLVER_BEAN_NAME = "viewResolver";
 
 	/**
+	 * Well-known name for the FlashMapManager object in the bean factory for this namespace.
+	 */
+	public static final String FLASH_MAP_MANAGER_BEAN_NAME = "flashMapManager";
+
+	/**
 	 * Request attribute to hold the current web application context.
 	 * Otherwise only the global web app context is obtainable by tags etc.
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getWebApplicationContext
@@ -202,7 +209,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeSource
 	 */
 	public static final String THEME_SOURCE_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_SOURCE";
-
+	
 	/** Log category to use when no mapped handler is found for a request. */
 	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
 
@@ -269,6 +276,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** RequestToViewNameTranslator used by this servlet */
 	private RequestToViewNameTranslator viewNameTranslator;
 
+	/** FlashMapManager used by this servlet */
+	private FlashMapManager flashMapManager;
+	
 	/** List of ViewResolvers used by this servlet */
 	private List<ViewResolver> viewResolvers;
 
@@ -414,6 +424,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		initHandlerExceptionResolvers(context);
 		initRequestToViewNameTranslator(context);
 		initViewResolvers(context);
+		initFlashMapManager(context);
 	}
 
 	/**
@@ -660,6 +671,28 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+	 * Initialize the {@link FlashMapManager} used by this servlet instance.
+	 * <p>If no implementation is configured then we default to DefaultFlashMapManager.
+	 */
+	private void initFlashMapManager(ApplicationContext context) {
+		try {
+			this.flashMapManager =
+					context.getBean(FLASH_MAP_MANAGER_BEAN_NAME, FlashMapManager.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Using FlashMapManager [" + this.flashMapManager + "]");
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// We need to use the default.
+			this.flashMapManager = getDefaultStrategy(context, FlashMapManager.class);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Unable to locate FlashMapManager with name '" +
+						FLASH_MAP_MANAGER_BEAN_NAME + "': using default [" + this.flashMapManager + "]");
+			}
+		}
+	}
+
+	/**
 	 * Return this servlet's ThemeSource, if any; else return <code>null</code>.
 	 * <p>Default is to return the WebApplicationContext as ThemeSource,
 	 * provided that it implements the ThemeSource interface.
@@ -782,6 +815,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
+		boolean flashInitialized = this.flashMapManager.requestStarted(request);
+
 		// Make framework objects available to handlers and view objects.
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
@@ -792,6 +827,9 @@ public class DispatcherServlet extends FrameworkServlet {
 			doDispatch(request, response);
 		}
 		finally {
+			if (flashInitialized) {
+				this.flashMapManager.requestCompleted(request);
+			}
 			// Restore the original attribute snapshot, in case of an include.
 			if (attributesSnapshot != null) {
 				restoreAttributesAfterInclude(request, attributesSnapshot);

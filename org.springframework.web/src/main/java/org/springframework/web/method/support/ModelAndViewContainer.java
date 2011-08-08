@@ -18,142 +18,141 @@ package org.springframework.web.method.support;
 
 import java.util.Map;
 
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.support.BindingAwareModelMap;
 
 /**
- * Provides access to the model and a place to record model and view related decisions made by
- * {@link HandlerMethodArgumentResolver}s or a {@link HandlerMethodReturnValueHandler}.
- * 
- * <p>In addition to storing model attributes and a view, the {@link ModelAndViewContainer} also provides
- * a {@link #setResolveView(boolean)} flag, which can be used to request or bypass a view resolution phase.
- * This is most commonly used from {@link HandlerMethodReturnValueHandler}s but in some cases may also be 
- * used from {@link HandlerMethodArgumentResolver}s such as when a handler method accepts an argument 
- * providing access to the response. When that is the case, if the handler method returns {@code null},
- * view resolution is skipped.
+ * Record model and view related decisions made by {@link HandlerMethodArgumentResolver}s 
+ * and {@link HandlerMethodReturnValueHandler}s during the course of invocation of a 
+ * request-handling method.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class ModelAndViewContainer {
 
-	private String viewName;
-	
 	private Object view;
-	
-	private final ModelMap model;
 	
 	private boolean resolveView = true;
 
+	private final ModelMap model = new BindingAwareModelMap();
+	
 	/**
-	 * Create a {@link ModelAndViewContainer} instance with a {@link BindingAwareModelMap}.
+	 * Create a new instance.
 	 */
 	public ModelAndViewContainer() {
-		this.model = new BindingAwareModelMap();
 	}
 
 	/**
-	 * Create a {@link ModelAndViewContainer} instance with the given {@link ModelMap} instance.
-	 * @param model the model to use
-	 */
-	public ModelAndViewContainer(ModelMap model) {
-		Assert.notNull(model);
-		this.model = model;
-	}
-
-	/**
-	 * @return the model for the current request
-	 */
-	public ModelMap getModel() {
-		return model;
-	}
-
-	/**
-	 * @return the view name to use for view resolution, or {@code null}
-	 */
-	public String getViewName() {
-		return this.viewName;
-	}
-	
-	/**
-	 * @param viewName the name of the view to use for view resolution
+	 * Set a view name to be resolved by the DispatcherServlet via a ViewResolver. 
+	 * Will override any pre-existing view name or View.
 	 */
 	public void setViewName(String viewName) {
-		this.viewName = viewName;
+		this.view = viewName;
 	}
 
 	/**
-	 * @return the view instance to use for view resolution  
+	 * Return the view name to be resolved by the DispatcherServlet via a 
+	 * ViewResolver, or {@code null} if a View object is set.
 	 */
-	public Object getView() {
-		return this.view;
+	public String getViewName() {
+		return (this.view instanceof String ? (String) this.view : null);
 	}
 	
 	/**
-	 * @param view the view instance to use for view resolution
+	 * Set a View object to be used by the DispatcherServlet. 
+	 * Will override any pre-existing view name or View.
 	 */
 	public void setView(Object view) {
 		this.view = view;
 	}
-	
+
 	/**
-	 * @return whether the view resolution is requested ({@code true}), or should be bypassed ({@code false})
+	 * Return the View object, or {@code null} if we using a view name
+	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
-	public boolean isResolveView() {
-		return resolveView;
+	public Object getView() {
+		return this.view;
 	}
 
 	/**
-	 * @param resolveView whether the view resolution is requested ({@code true}), or should be bypassed ({@code false}) 
+	 * Whether the view is a view reference specified via a name to be 
+	 * resolved by the DispatcherServlet via a ViewResolver.
+	 */
+	public boolean isViewReference() {
+		return (this.view instanceof String);
+	}
+	
+	/**
+	 * Whether view resolution is required or not. The default value is "true".
+	 * <p>When set to "false" by a {@link HandlerMethodReturnValueHandler}, the response 
+	 * is considered complete and view resolution is not be performed. 
+	 * <p>When set to "false" by {@link HandlerMethodArgumentResolver}, the response is
+	 * considered complete only in combination with the request mapping method 
+	 * returning {@code null} or void.
 	 */
 	public void setResolveView(boolean resolveView) {
 		this.resolveView = resolveView;
 	}
+	
+	/**
+	 * Whether view resolution is required or not.
+	 */
+	public boolean isResolveView() {
+		return this.resolveView;
+	}
 
 	/**
-	 * Whether model contains an attribute of the given name.
-	 * @param name the name of the model attribute
-	 * @return {@code true} if the model contains an attribute by that name and the name is not an empty string 
+	 * Return the underlying {@code ModelMap} instance, never {@code null}.
+	 */
+	public ModelMap getModel() {
+		return this.model;
+	}
+
+	/**
+	 * Add the supplied attribute to the underlying model.
+	 * @see ModelMap#addAttribute(String, Object)
+	 */
+	public ModelAndViewContainer addAttribute(String name, Object value) {
+		this.model.addAttribute(name, value);
+		return this;
+	}
+	
+	/**
+	 * Add the supplied attribute to the underlying model.
+	 * @see Model#addAttribute(Object)
+	 */
+	public ModelAndViewContainer addAttribute(Object value) {
+		this.model.addAttribute(value);
+		return this;
+	}
+
+	/**
+	 * Copy all attributes to the underlying model.
+	 * @see ModelMap#addAllAttributes(Map)
+	 */
+	public ModelAndViewContainer addAllAttributes(Map<String, ?> attributes) {
+		this.model.addAllAttributes(attributes);
+		return this;
+	}
+
+	/**
+	 * Copy attributes in the supplied <code>Map</code> with existing objects of 
+	 * the same name taking precedence (i.e. not getting replaced).
+	 * @see ModelMap#mergeAttributes(Map)
+	 */
+	public ModelAndViewContainer mergeAttributes(Map<String, ?> attributes) {
+		this.model.mergeAttributes(attributes);
+		return this;
+	}
+
+	/**
+	 * Whether the underlying model contains the given attribute name.
+	 * @see ModelMap#containsAttribute(String)
 	 */
 	public boolean containsAttribute(String name) {
-		return (StringUtils.hasText(name) && model.containsAttribute(name));
-	}
-	
-	/**
-	 * @param name the attribute to get from the model
-	 * @return the attribute or {@code null}
-	 */
-	public Object getAttribute(String name) {
-		return model.get(name);
-	}
-	
-	/**
-	 * Add the supplied attribute under the given name.
-	 * @param name the name of the model attribute (never null)
-	 * @param value the model attribute value (can be null)
-	 */
-	public void addAttribute(String name, Object value) {
-		model.addAttribute(name, value);
-	}
-	
-	/**
-	 * Copy all attributes in the supplied Map into the model
-	 */
-	public void addAllAttributes(Map<String, ?> attributes) {
-		model.addAllAttributes(attributes);
+		return this.model.containsAttribute(name);
 	}
 
-	/**
-	 * Add the given attribute if the model does not already contain such an attribute.
-	 * @param name the name of the attribute to check and add
-	 * @param value the value of the attribute
-	 */
-	public void mergeAttribute(String name, Object value) {
-		if (!containsAttribute(name)) {
-			model.addAttribute(name, value);
-		}
-	}
-	
 }

@@ -30,14 +30,19 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.UriTemplate;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
@@ -76,6 +81,7 @@ import org.springframework.web.util.WebUtils;
  * @author Colin Sampaleanu
  * @author Sam Brannen
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @see #setContextRelative
  * @see #setHttp10Compatible
  * @see #setExposeModelAttributes
@@ -262,6 +268,14 @@ public class RedirectView extends AbstractUrlBasedView {
 			appendQueryProperties(targetUrl, model, enc);
 		}
 		
+		FlashMap flashMap = RequestContextUtils.getFlashMap(request);
+		if (flashMap != null && !flashMap.isEmpty()) {
+			if (flashMap.getKey() != null) {
+				ModelMap queryParam = new ModelMap(flashMap.getKeyParameterName(), flashMap.getKey());
+				appendQueryProperties(targetUrl, queryParam, enc);
+			}
+		}
+		
 		return targetUrl.toString();
 	}
 
@@ -323,7 +337,7 @@ public class RedirectView extends AbstractUrlBasedView {
 		}
 
 		// If there aren't already some parameters, we need a "?".
-		boolean first = (getUrl().indexOf('?') < 0);
+		boolean first = (targetUrl.toString().indexOf('?') < 0);
 		for (Map.Entry<String, Object> entry : queryProperties(model).entrySet()) {
 			Object rawValue = entry.getValue();
 			Iterator<Object> valueIter;

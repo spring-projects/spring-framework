@@ -56,7 +56,7 @@ public class DefaultMethodReturnValueHandlerTests {
 	public void setUp() {
 		mavResolvers = new ArrayList<ModelAndViewResolver>();
 		handler = new DefaultMethodReturnValueHandler(mavResolvers);
-		mavContainer = new ModelAndViewContainer(new ExtendedModelMap());
+		mavContainer = new ModelAndViewContainer();
 		request = new ServletWebRequest(new MockHttpServletRequest());
 	}
 
@@ -69,7 +69,7 @@ public class DefaultMethodReturnValueHandlerTests {
 		handler.handleReturnValue(testBean, testBeanType, mavContainer, request);
 		
 		assertEquals("viewName", mavContainer.getViewName());
-		assertSame(testBean, mavContainer.getAttribute("modelAttrName"));
+		assertSame(testBean, mavContainer.getModel().get("modelAttrName"));
 		assertTrue(mavContainer.isResolveView());
 	}
 

@@ -133,11 +133,14 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
+import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
+import org.springframework.web.servlet.mvc.method.support.ResponseContext;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
@@ -1452,7 +1455,46 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals("application/json", response.getHeader("Content-Type"));
 		assertEquals("homeJson", response.getContentAsString());
 	}	
-	
+
+	@Test
+	public void flashAttribute() throws Exception {
+		initServletWithControllers(MessageController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/messages");
+		HttpSession session = request.getSession();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		// POST -> bind error
+		getServlet().service(request, response);
+		
+		assertEquals(200, response.getStatus());
+		assertEquals("messages/new", response.getForwardedUrl());
+		assertTrue(RequestContextUtils.getFlashMap(request).isEmpty());
+
+		// POST -> success
+		request = new MockHttpServletRequest("POST", "/messages");
+		request.setSession(session);
+		request.addParameter("name", "Jeff");
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		FlashMap flashMap = RequestContextUtils.getFlashMap(request);
+
+		assertNotNull(flashMap);
+		assertEquals(200, response.getStatus());
+		assertEquals("/messages/1?name=value&_flashKey=" + flashMap.getKey(), response.getRedirectedUrl());
+
+		// GET after POST
+		request = new MockHttpServletRequest("GET", "/messages/1");
+		request.setSession(session);
+		request.setParameter("_flashKey", String.valueOf(flashMap.getKey()));
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("Got: yay!", response.getContentAsString());
+	}
 
 	/*
 	 * Controllers
@@ -2761,6 +2803,32 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			return "homeJson";
 		}
 	}
+
+	@Controller
+	static class MessageController {
+
+		@InitBinder
+		public void initBinder(WebDataBinder dataBinder) {
+			dataBinder.setRequiredFields("name");
+		}
+
+		@RequestMapping(value = "/messages/{id}", method = RequestMethod.GET)
+		public void message(ModelMap model, Writer writer) throws IOException {
+			writer.write("Got: " + model.get("successMessage"));
+		}
+
+		@RequestMapping(value = "/messages", method = RequestMethod.POST)
+		public void sendMessage(TestBean testBean, BindingResult result, ResponseContext responseContext) {
+			if (result.hasErrors()) {
+				responseContext.view("messages/new");
+			}
+			else {
+				responseContext.redirect("/messages/{id}").uriVariable("id", "1").queryParam("name", "value")
+						.flashAttribute("successMessage", "yay!");
+			}
+		}
+	}
+    
 	
 // Test cases deleted from the original SevletAnnotationControllerTests:
 	
