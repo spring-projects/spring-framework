@@ -16,19 +16,18 @@
 
 package org.springframework.jdbc.config;
 
-import java.util.Arrays;
 import java.util.List;
-
-import org.w3c.dom.Element;
 
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.jdbc.datasource.init.CompositeDatabasePopulator;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.w3c.dom.Element;
 
 /**
  * @author Juergen Hoeller
@@ -63,16 +62,15 @@ class DatabasePopulatorConfigUtils {
 			delegate.addPropertyValue("ignoreFailedDrops", ignoreFailedDrops);
 			delegate.addPropertyValue("continueOnError", continueOnError);
 
-			List<String> locations = Arrays.asList(scriptElement.getAttribute("location"));
 			// Use a factory bean for the resources so they can be given an order if a pattern is used
 			BeanDefinitionBuilder resourcesFactory = BeanDefinitionBuilder.genericBeanDefinition(SortedResourcesFactoryBean.class);
-			resourcesFactory.addConstructorArgValue(locations);
+			resourcesFactory.addConstructorArgValue(new TypedStringValue(scriptElement.getAttribute("location")));
 			delegate.addPropertyValue("scripts", resourcesFactory.getBeanDefinition());
 			if (StringUtils.hasLength(scriptElement.getAttribute("encoding"))) {
-				delegate.addPropertyValue("sqlScriptEncoding", scriptElement.getAttribute("encoding"));
+				delegate.addPropertyValue("sqlScriptEncoding", new TypedStringValue(scriptElement.getAttribute("encoding")));
 			}
 			if (StringUtils.hasLength(scriptElement.getAttribute("separator"))) {
-				delegate.addPropertyValue("separator", scriptElement.getAttribute("separator"));
+				delegate.addPropertyValue("separator", new TypedStringValue(scriptElement.getAttribute("separator")));
 			}
 			delegates.add(delegate.getBeanDefinition());
 		}

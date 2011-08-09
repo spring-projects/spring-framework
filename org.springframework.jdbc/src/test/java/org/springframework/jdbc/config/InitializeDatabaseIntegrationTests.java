@@ -92,6 +92,13 @@ public class InitializeDatabaseIntegrationTests {
 	}
 
 	@Test
+	public void testScriptNameWithExpressions() throws Exception {
+		context = new ClassPathXmlApplicationContext("org/springframework/jdbc/config/jdbc-initialize-expression-config.xml");
+		DataSource dataSource = context.getBean("dataSource", DataSource.class);
+		assertCorrectSetup(dataSource);
+	}
+
+	@Test
 	public void testCacheInitialization() throws Exception {
 		context = new ClassPathXmlApplicationContext("org/springframework/jdbc/config/jdbc-initialize-cache-config.xml");
 		assertCorrectSetup(context.getBean("dataSource", DataSource.class));
