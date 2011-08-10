@@ -23,14 +23,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.servlet.FlashMap;
-import org.springframework.web.servlet.FlashMapManager;
 
 /**
  * Test fixture for {@link DefaultFlashMapManager} tests.
@@ -50,125 +50,102 @@ public class DefaultFlashMapManagerTests {
 	}
 	
 	@Test
-	public void requestAlreadyStarted() {
-		request.setAttribute(FlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, new FlashMap());
-		boolean actual = this.flashMapManager.requestStarted(this.request);
+	public void requestStarted() {
+		boolean initialized = this.flashMapManager.requestStarted(this.request);
+
+		assertTrue("Current FlashMap not initialized on first call", initialized);
+		assertNotNull("Current FlashMap not found", RequestContextUtils.getFlashMap(request));
 		
-		assertFalse(actual);
-	}
-	
-	@Test
-	public void createFlashMap() {
-		boolean actual = this.flashMapManager.requestStarted(this.request);
-		FlashMap flashMap = RequestContextUtils.getFlashMap(this.request);
-
-		assertTrue(actual);
-		assertNotNull(flashMap);
-		assertNotNull(flashMap.getKey());
-		assertEquals("_flashKey", flashMap.getKeyParameterName());
-	}
-	
-	@Test
-	public void createFlashMapWithoutKey() {
-		this.flashMapManager.setUseUniqueFlashKey(false);
-		boolean actual = this.flashMapManager.requestStarted(this.request);
-		FlashMap flashMap = RequestContextUtils.getFlashMap(this.request);
-
-		assertTrue(actual);
-		assertNotNull(flashMap);
-		assertNull(flashMap.getKey());
-		assertNull(flashMap.getKeyParameterName());
+		initialized = this.flashMapManager.requestStarted(this.request);
+		
+		assertFalse("Current FlashMap initialized twice", initialized);
 	}
 
 	@Test
 	public void lookupPreviousFlashMap() {
-		FlashMap flashMap = new FlashMap("key", "_flashKey");
-		flashMap.put("name", "value");
-		Map<String, FlashMap> allFlashMaps = new HashMap<String, FlashMap>();
-		allFlashMaps.put(flashMap.getKey(), flashMap);
-		
-		this.request.getSession().setAttribute(DefaultFlashMapManager.FLASH_MAPS_SESSION_ATTRIBUTE, allFlashMaps);
-		this.request.addParameter("_flashKey", flashMap.getKey());
+		FlashMap flashMap = new FlashMap();
+
+		List<FlashMap> allMaps = createFlashMapsSessionAttribute();
+		allMaps.add(flashMap);
+
 		this.flashMapManager.requestStarted(this.request);
 		
 		assertSame(flashMap, request.getAttribute(DefaultFlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE));
-		assertEquals("value", request.getAttribute("name"));
 	}
-
+	
 	@Test
-	public void lookupPreviousFlashMapWithoutKey() {
-		Map<String, FlashMap> allFlashMaps = new HashMap<String, FlashMap>();
-		request.getSession().setAttribute(DefaultFlashMapManager.FLASH_MAPS_SESSION_ATTRIBUTE, allFlashMaps);
+	public void lookupPreviousFlashMapExpectedUrlPath() {
+		FlashMap emptyFlashMap = new FlashMap();
 
-		FlashMap flashMap = new FlashMap();
-		flashMap.put("name", "value");
-		allFlashMaps.put("key", flashMap);
+		FlashMap oneFlashMap = new FlashMap();
+		oneFlashMap.setExpectedUrlPath(null, "/one");
+
+		FlashMap oneOtherFlashMap = new FlashMap();
+		oneOtherFlashMap.setExpectedUrlPath(null, "/one/other");
 		
-		this.flashMapManager.setUseUniqueFlashKey(false);
+		List<FlashMap> allMaps = createFlashMapsSessionAttribute();
+		allMaps.add(emptyFlashMap);
+		allMaps.add(oneFlashMap);
+		allMaps.add(oneOtherFlashMap);
+		Collections.shuffle(allMaps);
+
+		this.request.setRequestURI("/one");
 		this.flashMapManager.requestStarted(this.request);
 		
-		assertSame(flashMap, this.request.getAttribute(DefaultFlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE));
-		assertEquals("value", this.request.getAttribute("name"));
+		assertSame(oneFlashMap, request.getAttribute(DefaultFlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE));
 	}
 
-	@SuppressWarnings("static-access")
 	@Test
-	public void removeExpired() throws InterruptedException {
-		FlashMap[] flashMapArray = new FlashMap[5];
-		flashMapArray[0] = new FlashMap("key0", "_flashKey");
-		flashMapArray[1] = new FlashMap("key1", "_flashKey");
-		flashMapArray[2] = new FlashMap("key2", "_flashKey");
-		flashMapArray[3] = new FlashMap("key3", "_flashKey");
-		flashMapArray[4] = new FlashMap("key4", "_flashKey");
-		
-		Map<String, FlashMap> allFlashMaps = new HashMap<String, FlashMap>();
-		for (FlashMap flashMap : flashMapArray) {
-			allFlashMaps.put(flashMap.getKey(), flashMap);
+	public void removeExpiredFlashMaps() throws InterruptedException {
+		List<FlashMap> allMaps = createFlashMapsSessionAttribute();
+		for (int i=0; i < 5; i++) {
+			FlashMap flashMap = new FlashMap();
+			allMaps.add(flashMap);
+			flashMap.startExpirationPeriod(0);
 		}
 		
-		flashMapArray[1].startExpirationPeriod(0);
-		flashMapArray[3].startExpirationPeriod(0);
-		
-		Thread.currentThread().sleep(5);
+		Thread.sleep(5);
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.getSession().setAttribute(DefaultFlashMapManager.FLASH_MAPS_SESSION_ATTRIBUTE, allFlashMaps);
-		request.setParameter("_flashKey", "key0");
-		this.flashMapManager.requestStarted(request);
+		this.flashMapManager.requestStarted(this.request);
 		
-		assertEquals(2, allFlashMaps.size());
-		assertNotNull(allFlashMaps.get("key2"));
-		assertNotNull(allFlashMaps.get("key4"));
+		assertEquals(0, allMaps.size());
 	}
 
-	@SuppressWarnings({ "unchecked", "static-access" })
 	@Test
 	public void saveFlashMap() throws InterruptedException {
-		FlashMap flashMap = new FlashMap("key", "_flashKey");
+		FlashMap flashMap = new FlashMap();
 		flashMap.put("name", "value");
 		request.setAttribute(DefaultFlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, flashMap);
 
 		this.flashMapManager.setFlashMapTimeout(0);
 		this.flashMapManager.requestCompleted(this.request);
 
-		Thread.currentThread().sleep(1);
+		Thread.sleep(1);
 		
-		String sessionKey = DefaultFlashMapManager.FLASH_MAPS_SESSION_ATTRIBUTE;
-		Map<String, FlashMap> allFlashMaps = (Map<String, FlashMap>) this.request.getSession().getAttribute(sessionKey);
+		List<FlashMap> allMaps = getFlashMapsSessionAttribute();
 		
-		assertSame(flashMap, allFlashMaps.get("key"));
+		assertNotNull(allMaps);
+		assertSame(flashMap, allMaps.get(0));
 		assertTrue(flashMap.isExpired());
 	}
 
 	@Test
-	public void saveEmptyFlashMap() throws InterruptedException {
-		FlashMap flashMap = new FlashMap("key", "_flashKey");
-		request.setAttribute(DefaultFlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, flashMap);
-
-		this.flashMapManager.setFlashMapTimeout(0);
+	public void saveFlashMapIsEmpty() throws InterruptedException {
+		request.setAttribute(DefaultFlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, new FlashMap());
 		this.flashMapManager.requestCompleted(this.request);
 
-		assertNull(this.request.getSession().getAttribute(DefaultFlashMapManager.FLASH_MAPS_SESSION_ATTRIBUTE));
+		assertNull(getFlashMapsSessionAttribute());
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<FlashMap> getFlashMapsSessionAttribute() {
+		return (List<FlashMap>) this.request.getSession().getAttribute(DefaultFlashMapManager.class + ".FLASH_MAPS");
+	}
+
+	private List<FlashMap> createFlashMapsSessionAttribute() {
+		List<FlashMap> allMaps = new CopyOnWriteArrayList<FlashMap>();
+		this.request.getSession().setAttribute(DefaultFlashMapManager.class + ".FLASH_MAPS", allMaps);
+		return allMaps;
 	}
 
 }

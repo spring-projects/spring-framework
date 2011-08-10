@@ -133,7 +133,6 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
-import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
@@ -1479,21 +1478,20 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 
-		FlashMap flashMap = RequestContextUtils.getFlashMap(request);
-
-		assertNotNull(flashMap);
 		assertEquals(200, response.getStatus());
-		assertEquals("/messages/1?name=value&_flashKey=" + flashMap.getKey(), response.getRedirectedUrl());
+		assertEquals("/messages/1?name=value", response.getRedirectedUrl());
+		assertEquals("yay!", RequestContextUtils.getFlashMap(request).get("successMessage"));
 
 		// GET after POST
 		request = new MockHttpServletRequest("GET", "/messages/1");
+		request.addParameter("name", "value");
 		request.setSession(session);
-		request.setParameter("_flashKey", String.valueOf(flashMap.getKey()));
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 
 		assertEquals(200, response.getStatus());
 		assertEquals("Got: yay!", response.getContentAsString());
+		assertTrue(RequestContextUtils.getFlashMap(request).isEmpty());
 	}
 
 	/*
