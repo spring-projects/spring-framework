@@ -16,58 +16,35 @@
 
 package org.springframework.web.servlet.support;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
+import org.springframework.web.util.WebUtils;
 
 /**
- * A default implementation that saves and retrieves FlashMap instances to and 
- * from the HTTP session.
+ * A {@link FlashMapManager} that saves and retrieves FlashMap instances in the 
+ * HTTP session.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class DefaultFlashMapManager implements FlashMapManager {
 
-	static final String FLASH_MAPS_SESSION_ATTRIBUTE = DefaultFlashMapManager.class + ".FLASH_MAPS";
+	private static final String FLASH_MAPS_SESSION_ATTRIBUTE = DefaultFlashMapManager.class + ".FLASH_MAPS";
 
-	private boolean useUniqueFlashKey = true;
-	
-	private String flashKeyParameterName = "_flashKey";
+	private static final Log logger = LogFactory.getLog(DefaultFlashMapManager.class);
 	
 	private int flashTimeout = 180;
-	
-	private static final Random random = new Random();
-
-	/**
-	 * Whether each FlashMap instance should be stored with a unique key.
-	 * The unique key needs to be passed as a parameter in the redirect URL 
-	 * and then used to look up the FlashMap instance avoiding potential 
-	 * issues with concurrent requests.
-	 * <p>The default setting is "true".
-	 * <p>When set to "false" only one FlashMap is maintained making it
-	 * possible for a second concurrent request (e.g. via Ajax) to "consume" 
-	 * the FlashMap inadvertently.
-	 */
-	public void setUseUniqueFlashKey(boolean useUniqueFlashKey) {
-		this.useUniqueFlashKey = useUniqueFlashKey;
-	}
-
-	/**
-	 * Customize the name of the request parameter to be appended to the 
-	 * redirect URL when using a unique flash key.
-	 * <p>The default value is "_flashKey".
-	 */
-	public void setFlashKeyParameterName(String parameterName) {
-		this.flashKeyParameterName = parameterName;
-	}
 
 	/**
 	 * The amount of time in seconds after a request has completed processing 
@@ -90,92 +67,91 @@ public class DefaultFlashMapManager implements FlashMapManager {
 			return false;
 		}
 
-		FlashMap currentFlashMap = 
-			this.useUniqueFlashKey ?
-				new FlashMap(createFlashKey(request), this.flashKeyParameterName) : new FlashMap();
+		FlashMap currentFlashMap = new FlashMap();
 		request.setAttribute(CURRENT_FLASH_MAP_ATTRIBUTE, currentFlashMap);
 		
 		FlashMap previousFlashMap = lookupPreviousFlashMap(request);
 		if (previousFlashMap != null) {
-			for (String name : previousFlashMap.keySet()) {
-				if (request.getAttribute(name) == null) {
-					request.setAttribute(name, previousFlashMap.get(name));
-				}
-			}
-			// For exposing flash attributes in other places (e.g. annotated controllers)
+			WebUtils.exposeRequestAttributes(request, previousFlashMap);
 			request.setAttribute(PREVIOUS_FLASH_MAP_ATTRIBUTE, previousFlashMap);
 		}
 		
-		// Check and remove expired instances
-		Map<String, FlashMap> allFlashMaps = retrieveAllFlashMaps(request, false);
-		if (allFlashMaps != null && !allFlashMaps.isEmpty()) {
-			Iterator<FlashMap> iterator = allFlashMaps.values().iterator();
-			while (iterator.hasNext()) {
-				if (iterator.next().isExpired()) {
-					iterator.remove();
+		// Remove expired flash maps
+		List<FlashMap> allMaps = retrieveFlashMaps(request, false);
+		if (allMaps != null && !allMaps.isEmpty()) {
+			List<FlashMap> expiredMaps = new ArrayList<FlashMap>();
+			for (FlashMap flashMap : allMaps) {
+				if (flashMap.isExpired()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Removing expired FlashMap: " + flashMap);
+					}
+					expiredMaps.add(flashMap);
 				}
 			}
+			allMaps.removeAll(expiredMaps);
 		}
 		
 		return true;
 	}
 
 	/**
-	 * Create a unique flash key. The default implementation uses {@link Random}.
-	 * @return the unique key; never {@code null}.
-	 */
-	protected String createFlashKey(HttpServletRequest request) {
-		return String.valueOf(random.nextInt());
-	}
-	
-	/**
-	 * Return the FlashMap from the previous request, if available. 
-	 * If {@link #useUniqueFlashKey} is "true", a flash key parameter is 
-	 * expected to be in the request. Otherwise there can be only one  
-	 * FlashMap instance to return.
+	 * Return the FlashMap from the previous request.
 	 * 
 	 * @return the FlashMap from the previous request; or {@code null} if none.
 	 */
 	private FlashMap lookupPreviousFlashMap(HttpServletRequest request) {
-		Map<String, FlashMap> flashMaps = retrieveAllFlashMaps(request, false);
-		if (flashMaps != null && !flashMaps.isEmpty()) {
-			if (this.useUniqueFlashKey) {
-				String key = request.getParameter(this.flashKeyParameterName);
-				if (key != null) {
-					return flashMaps.remove(key);
+		List<FlashMap> allMaps = retrieveFlashMaps(request, false);
+		if (CollectionUtils.isEmpty(allMaps)) {
+			return null;
+		}
+		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking up previous FlashMap among available FlashMaps: " + allMaps);
+		}
+		
+		List<FlashMap> matches = new ArrayList<FlashMap>();
+		for (FlashMap flashMap : allMaps) {
+			if (flashMap.matches(request)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Matched " + flashMap);
 				}
-			}
-			else {
-				String key = flashMaps.keySet().iterator().next();
-				return flashMaps.remove(key);
+				matches.add(flashMap);
 			}
 		}
+		
+		if (!matches.isEmpty()) {
+			Collections.sort(matches);
+			return matches.remove(0);
+		}
+		
 		return null;
 	}
 
 	/**
-	 * Retrieve all FlashMap instances from the HTTP session in a thread-safe way. 
+	 * Retrieve the list of all FlashMap instances from the HTTP session. 
 	 * @param request the current request
 	 * @param allowCreate whether to create and the FlashMap container if not found
 	 * @return a Map with all stored FlashMap instances; or {@code null}
 	 */
 	@SuppressWarnings("unchecked")
-	private Map<String, FlashMap> retrieveAllFlashMaps(HttpServletRequest request, boolean allowCreate) {
+	private List<FlashMap> retrieveFlashMaps(HttpServletRequest request, boolean allowCreate) {
 		HttpSession session = request.getSession(allowCreate);
 		if (session == null) {
 			return null;
 		} 
-		Map<String, FlashMap> result = (Map<String, FlashMap>) session.getAttribute(FLASH_MAPS_SESSION_ATTRIBUTE);
-		if (result == null && allowCreate) {
+		
+		List<FlashMap> allMaps = (List<FlashMap>) session.getAttribute(FLASH_MAPS_SESSION_ATTRIBUTE);
+		if (allMaps == null && allowCreate) {
 			synchronized (DefaultFlashMapManager.class) {
-				result = (Map<String, FlashMap>) session.getAttribute(FLASH_MAPS_SESSION_ATTRIBUTE);
-				if (result == null) {
-					result = new ConcurrentHashMap<String, FlashMap>(5);
-					session.setAttribute(FLASH_MAPS_SESSION_ATTRIBUTE, result);
+				allMaps = (List<FlashMap>) session.getAttribute(FLASH_MAPS_SESSION_ATTRIBUTE);
+				if (allMaps == null) {
+					allMaps = new CopyOnWriteArrayList<FlashMap>();
+					session.setAttribute(FLASH_MAPS_SESSION_ATTRIBUTE, allMaps);
 				}
 			}
 		}
-		return result;
+		
+		return allMaps;
 	}
 
 	/**
@@ -187,13 +163,16 @@ public class DefaultFlashMapManager implements FlashMapManager {
 		FlashMap flashMap = (FlashMap) request.getAttribute(CURRENT_FLASH_MAP_ATTRIBUTE);
 		if (flashMap == null) {
 			throw new IllegalStateException(
-					"Did not find current FlashMap exposed as request attribute " + CURRENT_FLASH_MAP_ATTRIBUTE);
+					"Did not find a FlashMap exposed as the request attribute " + CURRENT_FLASH_MAP_ATTRIBUTE);
 		}
+		
 		if (!flashMap.isEmpty()) {
-			Map<String, FlashMap> allFlashMaps = retrieveAllFlashMaps(request, true);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Saving FlashMap=" + flashMap);
+			}
+			List<FlashMap> allFlashMaps = retrieveFlashMaps(request, true);
 			flashMap.startExpirationPeriod(this.flashTimeout);
-			String key = this.useUniqueFlashKey ? flashMap.getKey() : "flashMap";
-			allFlashMaps.put(key, flashMap);
+			allFlashMaps.add(flashMap);
 		}
 	}
 

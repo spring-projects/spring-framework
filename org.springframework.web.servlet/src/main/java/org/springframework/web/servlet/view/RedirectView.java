@@ -36,7 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.FlashMap;
@@ -44,7 +43,6 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.UriTemplate;
-import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -263,19 +261,17 @@ public class RedirectView extends AbstractUrlBasedView {
 			targetUrl = new StringBuilder(uriTemplate.expand(vars).toString());
 			model = removeKeys(model, uriTemplate.getVariableNames());
 		}
+
+		FlashMap flashMap = RequestContextUtils.getFlashMap(request);
+		if (!CollectionUtils.isEmpty(flashMap)) {
+			flashMap.setExpectedUrlPath(request, targetUrl.toString());
+			flashMap.setExpectedRequestParameters(model);
+		}
 		
 		if (this.exposeModelAttributes) {
 			appendQueryProperties(targetUrl, model, enc);
 		}
-		
-		FlashMap flashMap = RequestContextUtils.getFlashMap(request);
-		if (flashMap != null && !flashMap.isEmpty()) {
-			if (flashMap.getKey() != null) {
-				ModelMap queryParam = new ModelMap(flashMap.getKeyParameterName(), flashMap.getKey());
-				appendQueryProperties(targetUrl, queryParam, enc);
-			}
-		}
-		
+
 		return targetUrl.toString();
 	}
 
@@ -295,11 +291,7 @@ public class RedirectView extends AbstractUrlBasedView {
 			@Override
 			protected URI encodeUri(String uri) {
 				try {
-					String encoded = UriUtils.encodeUri(uri, encoding);
-					return new URI(encoded);
-				}
-				catch (UnsupportedEncodingException ex) {
-					throw new IllegalStateException(ex);
+					return new URI(uri);
 				}
 				catch (URISyntaxException ex) {
 					throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex, ex);

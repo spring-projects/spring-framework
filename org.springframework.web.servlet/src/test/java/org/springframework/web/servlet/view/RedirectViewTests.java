@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.View;
@@ -96,30 +97,20 @@ public class RedirectViewTests {
 	@Test
 	public void flashMap() throws Exception {
 		RedirectView rv = new RedirectView();
-		rv.setUrl("http://url.somewhere.com");
+		rv.setUrl("http://url.somewhere.com/path");
 		rv.setHttp10Compatible(false);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		FlashMap flashMap = new FlashMap("key", "_flashKey");
-		flashMap.put("name", "value");
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("successMessage", "yay!");
 		request.setAttribute(FlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, flashMap);
-		rv.render(new HashMap<String, Object>(), request, response);
+		rv.render(new ModelMap("id", "1"), request, response);
 		assertEquals(303, response.getStatus());
-		assertEquals("http://url.somewhere.com?_flashKey=key", response.getHeader("Location"));
-	}
-
-	@Test
-	public void emptyFlashMap() throws Exception {
-		RedirectView rv = new RedirectView();
-		rv.setUrl("http://url.somewhere.com");
-		rv.setHttp10Compatible(false);
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		FlashMap flashMap = new FlashMap("key", "_flashKey");
-		request.setAttribute(FlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, flashMap);
-		rv.render(new HashMap<String, Object>(), request, response);
-		assertEquals(303, response.getStatus());
-		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
+		assertEquals("http://url.somewhere.com/path?id=1", response.getHeader("Location"));
+		
+		MockHttpServletRequest nextRequest = new MockHttpServletRequest("GET", "/path");
+		nextRequest.addParameter("id", "1");
+		assertTrue(flashMap.matches(nextRequest));
 	}
 
 	@Test
