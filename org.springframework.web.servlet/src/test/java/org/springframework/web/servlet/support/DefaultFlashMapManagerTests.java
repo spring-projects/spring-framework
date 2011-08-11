@@ -71,6 +71,7 @@ public class DefaultFlashMapManagerTests {
 		this.flashMapManager.requestStarted(this.request);
 		
 		assertSame(flashMap, request.getAttribute(DefaultFlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE));
+		assertEquals("Previous FlashMap should have been removed", 0, allMaps.size());
 	}
 	
 	@Test

@@ -62,7 +62,7 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
  * @see #handleTypeMismatch
  * @see #handleHttpMessageNotReadable
  * @see #handleHttpMessageNotWritable
- * @see #handleRequestBodyNotValidException
+ * @see #handleMethodArgumentNotValidException
  */
 public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
