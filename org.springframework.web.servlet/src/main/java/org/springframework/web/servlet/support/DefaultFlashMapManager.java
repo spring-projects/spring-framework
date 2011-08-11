@@ -121,7 +121,9 @@ public class DefaultFlashMapManager implements FlashMapManager {
 		
 		if (!matches.isEmpty()) {
 			Collections.sort(matches);
-			return matches.remove(0);
+			FlashMap match = matches.remove(0);
+			allMaps.remove(match);
+			return match;
 		}
 		
 		return null;

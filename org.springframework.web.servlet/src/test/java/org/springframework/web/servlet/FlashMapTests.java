@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.support;
+package org.springframework.web.servlet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
