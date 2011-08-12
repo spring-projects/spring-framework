@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  * {@link ClientHttpRequestFactory} implementation that uses standard J2SE facilities.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  * @see java.net.HttpURLConnection
  * @see CommonsClientHttpRequestFactory
@@ -44,6 +45,10 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	private boolean bufferRequestBody = true;
 
 	private int chunkSize = DEFAULT_CHUNK_SIZE;
+
+	private int connectTimeout = -1;
+
+	private int readTimeout = -1;
 
 
 	/**
@@ -77,6 +82,26 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 */
 	public void setChunkSize(int chunkSize) {
 		this.chunkSize = chunkSize;
+	}
+
+	/**
+	 * Set the underlying URLConnection's connect timeout (in milliseconds).
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @see URLConnection#setConnectTimeout(int)
+	 */
+	public void setConnectTimeout(int connectTimeout) {
+		this.connectTimeout = connectTimeout;
+	}
+
+	/**
+	 * Set the underlying URLConnection's read timeout (in milliseconds).
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @see URLConnection#setReadTimeout(int)
+	 */
+	public void setReadTimeout(int readTimeout) {
+		this.readTimeout = readTimeout;
 	}
 
 
@@ -114,6 +139,12 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 * @throws IOException in case of I/O errors
 	 */
 	protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+		if (this.connectTimeout >= 0) {
+			connection.setConnectTimeout(this.connectTimeout);
+		}
+		if (this.readTimeout >= 0) {
+			connection.setReadTimeout(this.readTimeout);
+		}
 		connection.setDoInput(true);
 		if ("GET".equals(httpMethod)) {
 			connection.setInstanceFollowRedirects(true);
