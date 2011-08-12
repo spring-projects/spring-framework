@@ -16,13 +16,14 @@
 
 package org.springframework.web.servlet;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -32,13 +33,13 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class FlashMap extends ModelMap implements Comparable<FlashMap> {
+public class FlashMap extends HashMap<String, Object> implements Comparable<FlashMap> {
 
 	private static final long serialVersionUID = 1L;
 	
 	private String expectedUrlPath;
 	
-	private Map<String, String> expectedRequestParameters = new LinkedHashMap<String, String>();
+	private final Map<String, String> expectedRequestParameters = new LinkedHashMap<String, String>();
 	
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 	
@@ -47,52 +48,62 @@ public class FlashMap extends ModelMap implements Comparable<FlashMap> {
 	private int timeToLive;
 	
 	/**
-	 * Provide a URL path to help identify the request this FlashMap should be
-	 * made available to. This will usually be the target URL of a redirect. 
-	 * If not set, this FlashMap will match to requests with any URL path.
-	 * 
-	 * <p>If the {@code url} parameter is not a URL path but is an absolute 
-	 * or a relative URL, the unnecessary parts of the URL are removed the 
-	 * resulting URL path is normalized.
-	 * 
-	 * @param request the current request
-	 * @param url a URL path, an absolute URL, or a relative URL 
+	 * Provide a URL to identify the target request for this FlashMap.
+	 * Only the path of the provided URL will be used for matching purposes. 
+	 * If the URL is absolute or has a query string, the URL path is 
+	 * extracted. Or if the URL is relative, it is appended to the current 
+	 * request URI and normalized.  
+	 *  
+	 * @param request the current request, used to normalize relative URLs
+	 * @param url an absolute URL, a URL path, or a relative URL, never {@code null}
 	 */
-	public void setExpectedUrlPath(HttpServletRequest request, String url) {
-		this.expectedUrlPath = (url != null) ? normalizeRelativeUrlPath(request, extractUrlPath(url)) : null;
+	public FlashMap setExpectedUrl(HttpServletRequest request, String url) {
+		Assert.notNull(url, "Expected URL must not be null");
+		String urlPath = extractUrlPath(url);
+		this.expectedUrlPath = urlPath.startsWith("/") ? urlPath : normalizeRelativeUrl(request, urlPath);
+		return this;
 	}
 
 	private String extractUrlPath(String url) {
 		int index = url.indexOf("://");
 		if (index != -1) {
-			index = url.indexOf("/", index + 3);
+			index = url.indexOf('/', index + 3);
 			url = (index != -1) ? url.substring(index) : "";
 		}
-		index = url.indexOf("?");
+		index = url.indexOf('?');
 		return (index != -1) ? url.substring(0, index) : url;  
 	}
 
-	private String normalizeRelativeUrlPath(HttpServletRequest request, String path) {
-		if (!path.startsWith("/")) {
-			String requestUri = this.urlPathHelper.getRequestUri(request);
-			path = requestUri.substring(0, requestUri.lastIndexOf('/') + 1) + path;
-			path = StringUtils.cleanPath(path);
-		}
-		return path;
+	private String normalizeRelativeUrl(HttpServletRequest request, String relativeUrl) {
+		String requestUri = this.urlPathHelper.getRequestUri(request);
+		relativeUrl = requestUri.substring(0, requestUri.lastIndexOf('/') + 1) + relativeUrl;
+		return StringUtils.cleanPath(relativeUrl);
 	}
-	
+
+	/**
+	 * Add a request parameter pair to help identify the request this FlashMap 
+	 * should be made available to. If expected parameters are not set, the 
+	 * FlashMap instance will match to requests with any parameters.
+	 * 
+	 * @param name the name of the expected parameter (never {@code null})
+	 * @param value the value for the expected parameter (never {@code null})
+	 */
+	public FlashMap setExpectedRequestParam(String name, String value) {
+		this.expectedRequestParameters.put(name, value.toString());
+		return this;
+	}
+
 	/**
 	 * Provide request parameter pairs to help identify the request this FlashMap 
-	 * should be made available to. If expected parameters are not set, this 
-	 * FlashMap instance will match to requests with any parameters. 
+	 * should be made available to. If expected parameters are not set, the 
+	 * FlashMap instance will match to requests with any parameters.
 	 * 
 	 * <p>Although the provided map contain any Object values, only non-"simple" 
 	 * value types as defined in {@link BeanUtils#isSimpleValueType} are used.
 	 * 
 	 * @param params a Map with the names and values of expected parameters.
 	 */
-	public void setExpectedRequestParameters(Map<String, ?> params) {
-		this.expectedRequestParameters = new LinkedHashMap<String, String>();
+	public FlashMap setExpectedRequestParams(Map<String, ?> params) {
 		if (params != null) {
 			for (String name : params.keySet()) {
 				Object value = params.get(name);
@@ -101,12 +112,13 @@ public class FlashMap extends ModelMap implements Comparable<FlashMap> {
 				}
 			}
 		}
+		return this;
 	}
-	
+
 	/**
 	 * Whether this FlashMap matches to the given request by checking 
-	 * expectations provided via {@link #setExpectedUrlPath} and 
-	 * {@link #setExpectedRequestParameters}.
+	 * expectations provided via {@link #setExpectedUrl} and 
+	 * {@link #setExpectedRequestParams}.
 	 * 
 	 * @param request the current request
 	 * 

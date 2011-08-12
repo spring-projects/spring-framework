@@ -264,8 +264,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 		FlashMap flashMap = RequestContextUtils.getFlashMap(request);
 		if (!CollectionUtils.isEmpty(flashMap)) {
-			flashMap.setExpectedUrlPath(request, targetUrl.toString());
-			flashMap.setExpectedRequestParameters(model);
+			flashMap.setExpectedUrl(request, targetUrl.toString()).setExpectedRequestParams(model);
 		}
 		
 		if (this.exposeModelAttributes) {
