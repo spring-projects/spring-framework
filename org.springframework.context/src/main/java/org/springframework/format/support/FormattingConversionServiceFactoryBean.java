@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.convert.support.ConversionServiceFactory;
 import org.springframework.format.AnnotationFormatterFactory;
+import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
@@ -55,35 +56,77 @@ public class FormattingConversionServiceFactoryBean
 
 	private Set<?> converters;
 
+	private Set<?> formatters;
+
 	private StringValueResolver embeddedValueResolver;
 
 	private FormattingConversionService conversionService;
 
 
 	/**
-	 * Configure the set of custom converter objects that should be added:
-	 * implementing {@link org.springframework.core.convert.converter.Converter},
+	 * Configure the set of custom converter objects that should be added.
+	 * @param converters instances of any of the following:
+	 * {@link org.springframework.core.convert.converter.Converter},
 	 * {@link org.springframework.core.convert.converter.ConverterFactory},
-	 * or {@link org.springframework.core.convert.converter.GenericConverter}.
+	 * {@link org.springframework.core.convert.converter.GenericConverter}
 	 */
 	public void setConverters(Set<?> converters) {
 		this.converters = converters;
+	}
+
+	/**
+	 * Configure the set of custom formatter objects that should be added.
+	 * @param formatters instances of {@link Formatter} or {@link AnnotationFormatterFactory}
+	 */
+	public void setFormatters(Set<?> formatters) {
+		this.formatters = formatters;
 	}
 
 	public void setEmbeddedValueResolver(StringValueResolver embeddedValueResolver) {
 		this.embeddedValueResolver = embeddedValueResolver;
 	}
 
+
 	public void afterPropertiesSet() {
 		this.conversionService = new FormattingConversionService();
 		this.conversionService.setEmbeddedValueResolver(this.embeddedValueResolver);
 		ConversionServiceFactory.addDefaultConverters(this.conversionService);
 		ConversionServiceFactory.registerConverters(this.converters, this.conversionService);
+		registerFormatters();
+	}
+
+	private void registerFormatters() {
+		if (this.formatters != null) {
+			for (Object formatter : this.formatters) {
+				if (formatter instanceof Formatter<?>) {
+					this.conversionService.addFormatter((Formatter<?>) formatter);
+				}
+				else if (formatter instanceof AnnotationFormatterFactory<?>) {
+					this.conversionService.addFormatterForFieldAnnotation((AnnotationFormatterFactory<?>) formatter);
+				}
+				else {
+					throw new IllegalArgumentException(
+							"Custom formatters must be implementations of Formatter or AnnotationFormatterFactory");
+				}
+			}
+		}
 		installFormatters(this.conversionService);
 	}
 
+	/**
+	 * Install Formatters and Converters into the new FormattingConversionService using the FormatterRegistry SPI.
+	 * Subclasses may override to customize the set of formatters and/or converters that are installed.
+	 */
+	protected void installFormatters(FormatterRegistry registry) {
+		registry.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
+		if (jodaTimePresent) {
+			new JodaTimeFormattingConfigurer().installJodaTimeFormatting(registry);
+		}
+		else {
+			registry.addFormatterForFieldAnnotation(new NoJodaDateTimeFormatAnnotationFormatterFactory());
+		}
+	}
 
-	// implementing FactoryBean
 
 	public FormattingConversionService getObject() {
 		return this.conversionService;
@@ -95,23 +138,6 @@ public class FormattingConversionServiceFactoryBean
 
 	public boolean isSingleton() {
 		return true;
-	}
-
-
-	// subclassing hooks
-
-	/**
-	 * Install Formatters and Converters into the new FormattingConversionService using the FormatterRegistry SPI.
-	 * Subclasses may override to customize the set of formatters and/or converters that are installed.
-	 */
-	protected void installFormatters(FormatterRegistry registry) {
-		registry.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
-		if (jodaTimePresent) {
-			new JodaTimeFormattingConfigurer().installJodaTimeFormatting(registry);			
-		}
-		else {
-			registry.addFormatterForFieldAnnotation(new NoJodaDateTimeFormatAnnotationFormatterFactory());
-		}
 	}
 
 

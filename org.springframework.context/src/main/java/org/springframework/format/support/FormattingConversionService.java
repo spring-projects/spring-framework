@@ -36,6 +36,7 @@ import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
+import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -62,6 +63,15 @@ public class FormattingConversionService extends GenericConversionService
 		this.embeddedValueResolver = resolver;
 	}
 
+
+	public void addFormatter(Formatter<?> formatter) {
+		Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
+		if (fieldType == null) {
+			throw new IllegalArgumentException("Unable to extract parameterized field type argument from Formatter [" +
+					formatter.getClass().getName() + "]; does the formatter parameterize the <T> generic type?");
+		}
+		addFormatterForFieldType(fieldType, formatter);
+	}
 
 	public void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter) {
 		addConverter(new PrinterConverter(fieldType, formatter, this));
@@ -228,7 +238,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			String text = (String) source;
-			if (text == null || text.length() == 0) {
+			if (!StringUtils.hasText(text)) {
 				return null;
 			}
 			Object result;
