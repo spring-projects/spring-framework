@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  * {@link ClientHttpRequestFactory} implementation that uses standard J2SE facilities.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  * @see java.net.HttpURLConnection
  * @see CommonsClientHttpRequestFactory
@@ -37,6 +38,10 @@ import org.springframework.util.Assert;
 public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 	private Proxy proxy;
+
+	private int connectTimeout = -1;
+
+	private int readTimeout = -1;
 
 
 	/**
@@ -46,9 +51,29 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 		this.proxy = proxy;
 	}
 
+	/**
+	 * Set the underlying URLConnection's connect timeout (in milliseconds).
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @see URLConnection#setConnectTimeout(int)
+	 */
+	public void setConnectTimeout(int connectTimeout) {
+		this.connectTimeout = connectTimeout;
+	}
+
+	/**
+	 * Set the underlying URLConnection's read timeout (in milliseconds).
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @see URLConnection#setReadTimeout(int)
+	 */
+	public void setReadTimeout(int readTimeout) {
+		this.readTimeout = readTimeout;
+	}
+
 
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		HttpURLConnection connection = openConnection(uri.toURL(), proxy);
+		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
 		prepareConnection(connection, httpMethod.name());
 		return new SimpleClientHttpRequest(connection);
 	}
@@ -76,6 +101,12 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 * @throws IOException in case of I/O errors
 	 */
 	protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+		if (this.connectTimeout >= 0) {
+			connection.setConnectTimeout(this.connectTimeout);
+		}
+		if (this.readTimeout >= 0) {
+			connection.setReadTimeout(this.readTimeout);
+		}
 		connection.setDoInput(true);
 		if ("GET".equals(httpMethod)) {
 			connection.setInstanceFollowRedirects(true);
