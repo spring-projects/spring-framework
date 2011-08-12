@@ -52,6 +52,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 1.0.2
  */
+@SuppressWarnings("deprecation")
 public class MockPageContext extends PageContext {
 
 	private final ServletContext servletContext;
