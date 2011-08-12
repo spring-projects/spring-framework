@@ -67,7 +67,7 @@ public abstract class JdoDaoSupport extends DaoSupport {
 	 */
 	public final void setPersistenceManagerFactory(PersistenceManagerFactory persistenceManagerFactory) {
 		if (this.jdoTemplate == null || persistenceManagerFactory != this.jdoTemplate.getPersistenceManagerFactory()) {
-	  	this.jdoTemplate = createJdoTemplate(persistenceManagerFactory);
+	  		this.jdoTemplate = createJdoTemplate(persistenceManagerFactory);
 		}
 	}
 
