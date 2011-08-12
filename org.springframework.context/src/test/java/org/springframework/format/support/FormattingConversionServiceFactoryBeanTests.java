@@ -15,10 +15,6 @@
  */
 package org.springframework.format.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,6 +25,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.AnnotationFormatterFactory;
@@ -40,8 +37,9 @@ import org.springframework.format.Printer;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 
+import static org.junit.Assert.*;
+
 /**
- * Test fixture for FormattingConversionServiceFactoryBean.
  * @author Rossen Stoyanchev
  */
 public class FormattingConversionServiceFactoryBeanTests {
@@ -68,8 +66,9 @@ public class FormattingConversionServiceFactoryBeanTests {
 		try {
 			fcs.convert("5%", TypeDescriptor.valueOf(String.class), descriptor);
 			fail("This format should not be parseable");
-		} catch (ConversionFailedException e) {
-			assertTrue(e.getCause() instanceof NumberFormatException);
+		}
+		catch (ConversionFailedException ex) {
+			assertTrue(ex.getCause() instanceof NumberFormatException);
 		}
 	}
 
@@ -117,7 +116,8 @@ public class FormattingConversionServiceFactoryBeanTests {
 		try {
 			factory.afterPropertiesSet();
 			fail("Expected formatter to be rejected");
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 	}

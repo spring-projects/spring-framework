@@ -65,10 +65,10 @@ public class FormattingConversionService extends GenericConversionService
 
 
 	public void addFormatter(Formatter<?> formatter) {
-		final Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
+		Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
 		if (fieldType == null) {
-			throw new IllegalArgumentException("Unable to extract parameterized field type argument from Formatter ["
-					+ formatter.getClass().getName() + "]; does the formatter parameterize the <T> generic type?");
+			throw new IllegalArgumentException("Unable to extract parameterized field type argument from Formatter [" +
+					formatter.getClass().getName() + "]; does the formatter parameterize the <T> generic type?");
 		}
 		addFormatterForFieldType(fieldType, formatter);
 	}
@@ -84,7 +84,7 @@ public class FormattingConversionService extends GenericConversionService
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void addFormatterForFieldAnnotation(final AnnotationFormatterFactory annotationFormatterFactory) {
+	public void addFormatterForFieldAnnotation(AnnotationFormatterFactory annotationFormatterFactory) {
 		final Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
 				GenericTypeResolver.resolveTypeArgument(annotationFormatterFactory.getClass(), AnnotationFormatterFactory.class);
 		if (annotationType == null) {
@@ -100,6 +100,7 @@ public class FormattingConversionService extends GenericConversionService
 			addConverter(new AnnotationParserConverter(annotationType, annotationFormatterFactory, fieldType));
 		}
 	}
+
 
 	private static class PrinterConverter implements GenericConverter {
 
@@ -142,6 +143,7 @@ public class FormattingConversionService extends GenericConversionService
 			return this.fieldType.getName() + " -> " + String.class.getName() + " : " + this.printer;
 		}
 	}
+
 
 	private static class ParserConverter implements GenericConverter {
 
@@ -188,7 +190,8 @@ public class FormattingConversionService extends GenericConversionService
 		}
 	}
 	
-	private final class AnnotationPrinterConverter implements ConditionalGenericConverter {
+
+	private class AnnotationPrinterConverter implements ConditionalGenericConverter {
 		
 		private Class<? extends Annotation> annotationType;
 		
@@ -227,7 +230,8 @@ public class FormattingConversionService extends GenericConversionService
 		}
 	}
 	
-	private final class AnnotationParserConverter implements ConditionalGenericConverter {
+
+	private class AnnotationParserConverter implements ConditionalGenericConverter {
 		
 		private Class<? extends Annotation> annotationType;
 		
@@ -265,8 +269,9 @@ public class FormattingConversionService extends GenericConversionService
 			return String.class.getName() + " -> @" + annotationType.getName() + " " + fieldType.getName() + ": " + annotationFormatterFactory;
 		}	
 	}
-	
-	private static final class AnnotationConverterKey {
+
+
+	private static class AnnotationConverterKey {
 		
 		private final Annotation annotation;
 		
