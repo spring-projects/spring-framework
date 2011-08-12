@@ -34,6 +34,7 @@ public interface FormatterRegistry extends ConverterRegistry {
 	 * The field type is implied by the parameterized Formatter instance.
 	 * @param formatter the formatter to add
 	 * @see #addFormatterForFieldType(Class, Formatter)
+	 * @since 3.1
 	 */
 	void addFormatter(Formatter<?> formatter);
 

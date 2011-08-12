@@ -69,18 +69,19 @@ public class FormattingConversionServiceFactoryBean
 
 	private Set<FormatterRegistrar> formatterRegistrars;
 
-	private FormattingConversionService conversionService;
+	private boolean registerDefaultFormatters = true;
 
 	private StringValueResolver embeddedValueResolver;
 
-	private boolean registerDefaultFormatters = true;
+	private FormattingConversionService conversionService;
+
 
 	/**
 	 * Configure the set of custom converter objects that should be added.
 	 * @param converters instances of any of the following:
-	 * 		{@link org.springframework.core.convert.converter.Converter},
-	 * 		{@link org.springframework.core.convert.converter.ConverterFactory},
-	 * 		{@link org.springframework.core.convert.converter.GenericConverter}.
+	 * {@link org.springframework.core.convert.converter.Converter},
+	 * {@link org.springframework.core.convert.converter.ConverterFactory},
+	 * {@link org.springframework.core.convert.converter.GenericConverter}
 	 */
 	public void setConverters(Set<?> converters) {
 		this.converters = converters;
@@ -88,8 +89,7 @@ public class FormattingConversionServiceFactoryBean
 
 	/**
 	 * Configure the set of custom formatter objects that should be added.
-	 * @param formatters instances of {@link Formatter} or 
-	 * 		{@link AnnotationFormatterFactory}.
+	 * @param formatters instances of {@link Formatter} or {@link AnnotationFormatterFactory}
 	 */
 	public void setFormatters(Set<?> formatters) {
 		this.formatters = formatters;
@@ -113,14 +113,10 @@ public class FormattingConversionServiceFactoryBean
 		this.formatterRegistrars = formatterRegistrars;
 	}
 
-	public void setEmbeddedValueResolver(StringValueResolver embeddedValueResolver) {
-		this.embeddedValueResolver = embeddedValueResolver;
-	}
-
 	/**
-	 * Indicates whether default formatters should be registered or not. By 
-	 * default built-in formatters are registered. This flag can be used to 
-	 * turn that off and rely on explicitly registered formatters only.
+	 * Indicate whether default formatters should be registered or not.
+	 * <p>By default, built-in formatters are registered. This flag can be used
+	 * to  turn that off and rely on explicitly registered formatters only.
 	 * @see #setFormatters(Set)
 	 * @see #setFormatterRegistrars(Set)
 	 */
@@ -128,8 +124,10 @@ public class FormattingConversionServiceFactoryBean
 		this.registerDefaultFormatters = registerDefaultFormatters;
 	}
 
+	public void setEmbeddedValueResolver(StringValueResolver embeddedValueResolver) {
+		this.embeddedValueResolver = embeddedValueResolver;
+	}
 
-	// implementing InitializingBean
 
 	public void afterPropertiesSet() {
 		this.conversionService = new DefaultFormattingConversionService(this.embeddedValueResolver, this.registerDefaultFormatters);
@@ -137,46 +135,16 @@ public class FormattingConversionServiceFactoryBean
 		registerFormatters();
 	}
 
-
-	// implementing FactoryBean
-
-	public FormattingConversionService getObject() {
-		return this.conversionService;
-	}
-
-	public Class<? extends FormattingConversionService> getObjectType() {
-		return FormattingConversionService.class;
-	}
-
-	public boolean isSingleton() {
-		return true;
-	}
-
-
-	// subclassing hooks
-
-	/**
-	 * Subclasses may override this method to register formatters and/or converters. 
-	 * Starting with Spring 3.1 however the recommended way of doing that is to 
-	 * through FormatterRegistrars.
-	 * @see #setFormatters(Set)
-	 * @see #setFormatterRegistrars(Set) 
-	 * @deprecated since Spring 3.1 in favor of {@link #setFormatterRegistrars(Set)}
-	 */
-	@Deprecated
-	protected void installFormatters(FormatterRegistry registry) {
-	}
-
-	// private helper methods
-
 	private void registerFormatters() {
 		if (this.formatters != null) {
 			for (Object formatter : this.formatters) {
 				if (formatter instanceof Formatter<?>) {
 					this.conversionService.addFormatter((Formatter<?>) formatter);
-				} else if (formatter instanceof AnnotationFormatterFactory<?>) {
+				}
+				else if (formatter instanceof AnnotationFormatterFactory<?>) {
 					this.conversionService.addFormatterForFieldAnnotation((AnnotationFormatterFactory<?>) formatter);
-				} else {
+				}
+				else {
 					throw new IllegalArgumentException(
 							"Custom formatters must be implementations of Formatter or AnnotationFormatterFactory");
 				}
@@ -188,6 +156,31 @@ public class FormattingConversionServiceFactoryBean
 			}
 		}
 		installFormatters(this.conversionService);
+	}
+
+	/**
+	 * Subclasses may override this method to register formatters and/or converters.
+	 * Starting with Spring 3.1 however the recommended way of doing that is to
+	 * through FormatterRegistrars.
+	 * @see #setFormatters(Set)
+	 * @see #setFormatterRegistrars(Set)
+	 * @deprecated since Spring 3.1 in favor of {@link #setFormatterRegistrars(Set)}
+	 */
+	@Deprecated
+	protected void installFormatters(FormatterRegistry registry) {
+	}
+
+
+	public FormattingConversionService getObject() {
+		return this.conversionService;
+	}
+
+	public Class<? extends FormattingConversionService> getObjectType() {
+		return FormattingConversionService.class;
+	}
+
+	public boolean isSingleton() {
+		return true;
 	}
 
 }
