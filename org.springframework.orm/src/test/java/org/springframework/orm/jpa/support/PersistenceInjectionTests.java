@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	public void testPublicExtendedPersistenceContextSetter() throws Exception {
-		Object mockEm = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
+		EntityManager mockEm = MockControl.createControl(EntityManager.class).getMock();
 		mockEmf.createEntityManager();
 		emfMc.setReturnValue(mockEm, 1);
 		emfMc.replay();
@@ -110,6 +110,39 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 				DefaultPublicPersistenceContextSetter.class.getName());
 		assertNotNull(bean.em);
 		emfMc.verify();
+	}
+
+	public void testPublicSpecificExtendedPersistenceContextSetter() throws Exception {
+		emfMc.replay();
+
+		MockControl<EntityManagerFactory> emfMc2 = MockControl.createControl(EntityManagerFactory.class);
+		EntityManagerFactory mockEmf2 = emfMc2.getMock();
+		MockControl<EntityManager> emMc2 = MockControl.createControl(EntityManager.class);
+		EntityManager mockEm2 = emMc2.getMock();
+		mockEm2.getTransaction();
+		emMc2.setReturnValue(null, 1);
+		mockEm2.flush();
+		emMc2.setVoidCallable(1);
+		emMc2.replay();
+		mockEmf2.createEntityManager();
+		emfMc2.setReturnValue(mockEm2, 1);
+		emfMc2.replay();
+
+		GenericApplicationContext gac = new GenericApplicationContext();
+		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
+		gac.getDefaultListableBeanFactory().registerSingleton("unit2", mockEmf2);
+		gac.registerBeanDefinition("annotationProcessor",
+				new RootBeanDefinition(PersistenceAnnotationBeanPostProcessor.class));
+		gac.registerBeanDefinition(SpecificPublicPersistenceContextSetter.class.getName(),
+				new RootBeanDefinition(SpecificPublicPersistenceContextSetter.class));
+		gac.refresh();
+
+		SpecificPublicPersistenceContextSetter bean = (SpecificPublicPersistenceContextSetter) gac.getBean(
+				SpecificPublicPersistenceContextSetter.class.getName());
+		assertNotNull(bean.getEntityManager());
+		bean.getEntityManager().flush();
+		emfMc.verify();
+		emfMc2.verify();
 	}
 
 	public void testPublicExtendedPersistenceContextSetterWithSerialization() throws Exception {
@@ -743,6 +776,15 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 		public EntityManager getEntityManager() {
 			return em;
+		}
+	}
+
+
+	public static class SpecificPublicPersistenceContextSetter extends DefaultPublicPersistenceContextSetter {
+
+		@PersistenceContext(unitName="unit2", type = PersistenceContextType.EXTENDED)
+		public void setEntityManager(EntityManager em) {
+			super.setEntityManager(em);
 		}
 	}
 

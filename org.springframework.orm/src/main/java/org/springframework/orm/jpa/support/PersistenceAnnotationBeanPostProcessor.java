@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -384,7 +383,7 @@ public class PersistenceAnnotationBeanPostProcessor
 						for (Method method : targetClass.getDeclaredMethods()) {
 							PersistenceContext pc = method.getAnnotation(PersistenceContext.class);
 							PersistenceUnit pu = method.getAnnotation(PersistenceUnit.class);
-							if (pc != null || pu != null &&
+							if ((pc != null || pu != null) &&
 									method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 								if (Modifier.isStatic(method.getModifiers())) {
 									throw new IllegalStateException("Persistence annotations are not supported on static methods");
