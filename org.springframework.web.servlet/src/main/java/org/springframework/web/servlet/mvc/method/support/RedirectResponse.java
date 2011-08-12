@@ -16,8 +16,12 @@
 
 package org.springframework.web.servlet.mvc.method.support;
 
+import java.util.Collection;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.core.Conventions;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.FlashMap;
@@ -92,7 +96,7 @@ public class RedirectResponse {
 	 * target controller method after the redirect.
 	 */
 	public RedirectResponse flashAttribute(String name, Object value) {
-		getFlashMap().addAttribute(name, value);
+		getFlashMap().put(name, value);
 		return this;
 	}
 
@@ -102,9 +106,12 @@ public class RedirectResponse {
 	 * The name of the attribute is selected using a
 	 * {@link org.springframework.core.Conventions#getVariableName generated name}.
 	 */
-	public RedirectResponse flashAttribute(Object value) {
-		getFlashMap().addAttribute(value);
-		return this;
+	public RedirectResponse flashAttribute(Object attributeValue) {
+		Assert.notNull(attributeValue, "Model object must not be null");
+		if (attributeValue instanceof Collection && ((Collection) attributeValue).isEmpty()) {
+			return this;
+		}
+		return flashAttribute(Conventions.getVariableName(attributeValue), attributeValue);
 	}
 
 	private FlashMap getFlashMap() {
