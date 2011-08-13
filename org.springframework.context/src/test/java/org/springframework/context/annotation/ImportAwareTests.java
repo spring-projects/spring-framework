@@ -121,12 +121,10 @@ public class ImportAwareTests {
 	static class BPP implements BeanFactoryAware, BeanPostProcessor {
 
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-			// TODO Auto-generated method stub
 			return bean;
 		}
 
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-			// TODO Auto-generated method stub
 			return bean;
 		}
 

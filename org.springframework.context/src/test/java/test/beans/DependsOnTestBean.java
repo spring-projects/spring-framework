@@ -15,9 +15,8 @@
  */
 package test.beans;
 
-
-/** TODO: JAVADOC */
 public class DependsOnTestBean {
+
 	public TestBean tb;
 
 	private int state;

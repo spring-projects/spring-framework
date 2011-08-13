@@ -116,6 +116,7 @@ public class CollectionToCollectionConverterTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void arrayCollectionToObjectInteraction() throws Exception {
 		List<String>[] array = new List[2];
 		array[0] = Arrays.asList("9", "12");
@@ -127,6 +128,7 @@ public class CollectionToCollectionConverterTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void objectToCollection() throws Exception {
 		List<List<String>> list = new ArrayList<List<String>>();
 		list.add(Arrays.asList("9", "12"));
@@ -147,6 +149,7 @@ public class CollectionToCollectionConverterTests {
 	public List<List<List<Integer>>> objectToCollection;
 	
 	@Test
+	@SuppressWarnings("unchecked")
 	public void stringToCollection() throws Exception {
 		List<List<String>> list = new ArrayList<List<String>>();
 		list.add(Arrays.asList("9,12"));
@@ -220,62 +223,50 @@ public class CollectionToCollectionConverterTests {
 	public static abstract class BaseResource implements Resource {
 
 		public InputStream getInputStream() throws IOException {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public boolean exists() {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		public boolean isReadable() {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		public boolean isOpen() {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		public URL getURL() throws IOException {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public URI getURI() throws IOException {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public File getFile() throws IOException {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public long contentLength() throws IOException {
-			// TODO Auto-generated method stub
 			return 0;
 		}
 
 		public long lastModified() throws IOException {
-			// TODO Auto-generated method stub
 			return 0;
 		}
 
 		public Resource createRelative(String relativePath) throws IOException {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public String getFilename() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public String getDescription() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 	}
@@ -298,6 +289,7 @@ public class CollectionToCollectionConverterTests {
 		testCollectionConversionToArrayList(vector);
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void testCollectionConversionToArrayList(Collection<String> aSource) {
 		Object myConverted = (new CollectionToCollectionConverter(new GenericConversionService())).convert(
 				aSource, TypeDescriptor.forObject(aSource), TypeDescriptor.forObject(new ArrayList()));
