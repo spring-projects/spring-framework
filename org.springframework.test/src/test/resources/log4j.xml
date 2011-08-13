@@ -21,14 +21,16 @@
 	<logger name="org.springframework.test.context.ContextLoaderUtils">
 		<level value="warn" />
 	</logger>
+<!--
 	<logger name="org.springframework.test.context.support.AbstractGenericContextLoader">
-		<level value="warn" />
+		<level value="info" />
 	</logger>
 	<logger name="org.springframework.test.context.support.AnnotationConfigContextLoader">
-		<level value="warn" />
+		<level value="info" />
 	</logger>
+-->
 	<logger name="org.springframework.test.context.support">
-		<level value="warn" />
+		<level value="fatal" />
 	</logger>
 
 	<!-- Root Logger -->
