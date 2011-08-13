@@ -86,6 +86,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @return a new application context
 	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
 	 * @see GenericApplicationContext
+	 * @since 3.1
 	 */
 	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
 		if (logger.isDebugEnabled()) {
@@ -131,6 +132,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @see org.springframework.test.context.ContextLoader#loadContext
 	 * @see GenericApplicationContext
 	 * @see #loadContext(MergedContextConfiguration)
+	 * @since 2.5
 	 */
 	public final ConfigurableApplicationContext loadContext(String... locations) throws Exception {
 		if (logger.isDebugEnabled()) {
@@ -159,6 +161,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @see GenericApplicationContext#setAllowBeanDefinitionOverriding
 	 * @see GenericApplicationContext#setResourceLoader
 	 * @see GenericApplicationContext#setId
+	 * @since 2.5
 	 */
 	protected void prepareContext(GenericApplicationContext context) {
 	}
@@ -175,6 +178,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
 	 * @see DefaultListableBeanFactory#setAllowCircularReferences
 	 * @see DefaultListableBeanFactory#setAllowRawInjectionDespiteWrapping
+	 * @since 2.5
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
 	}
@@ -194,8 +198,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * registering bean definitions.
 	 * @param context the context into which the bean definitions should be loaded
 	 * @param mergedConfig the merged context configuration 
-	 * @since 3.1
 	 * @see #loadContext(MergedContextConfiguration)
+	 * @since 3.1
 	 */
 	protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
 		createBeanDefinitionReader(context).loadBeanDefinitions(mergedConfig.getLocations());
@@ -210,6 +214,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @see #loadContext(String...)
 	 * @see #loadBeanDefinitions
 	 * @see BeanDefinitionReader
+	 * @since 2.5
 	 */
 	protected abstract BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context);
 
@@ -222,6 +227,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @param context the newly created application context
 	 * @see #loadContext(MergedContextConfiguration)
 	 * @see #loadContext(String...)
+	 * @since 2.5
 	 */
 	protected void customizeContext(GenericApplicationContext context) {
 	}

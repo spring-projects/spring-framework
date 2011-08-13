@@ -36,6 +36,7 @@ import org.springframework.test.context.support.DelegatingSmartContextLoader;
  * 
  * @author Sam Brannen
  * @since 3.1
+ * @see DefaultConfigClassesBaseTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration

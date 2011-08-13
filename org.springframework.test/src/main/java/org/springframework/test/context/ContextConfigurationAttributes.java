@@ -99,12 +99,24 @@ public class ContextConfigurationAttributes {
 	 * @param classes the configuration classes declared via {@code @ContextConfiguration}
 	 * @param inheritLocations the <code>inheritLocations</code> flag declared via {@code @ContextConfiguration}
 	 * @param contextLoaderClass the {@code ContextLoader} class declared via {@code @ContextConfiguration}
+	 * @throws IllegalArgumentException if the {@code declaringClass} or {@code contextLoaderClass} is
+	 * <code>null</code>, or if the {@code locations} and {@code classes} are both non-empty 
 	 */
 	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
 			boolean inheritLocations, Class<? extends ContextLoader> contextLoaderClass) {
 
 		Assert.notNull(declaringClass, "declaringClass must not be null");
 		Assert.notNull(contextLoaderClass, "contextLoaderClass must not be null");
+
+		if (!ObjectUtils.isEmpty(locations) && !ObjectUtils.isEmpty(classes)) {
+			String msg = String.format(
+				"Test class [%s] has been configured with @ContextConfiguration's 'locations' (or 'value') %s "
+						+ "and 'classes' %s attributes. Only one declaration of resources "
+						+ "is permitted per @ContextConfiguration annotation.", declaringClass.getName(),
+				ObjectUtils.nullSafeToString(locations), ObjectUtils.nullSafeToString(classes));
+			logger.error(msg);
+			throw new IllegalArgumentException(msg);
+		}
 
 		this.declaringClass = declaringClass;
 		this.locations = locations;
@@ -171,14 +183,36 @@ public class ContextConfigurationAttributes {
 
 	/**
 	 * Determine if this {@code ContextConfigurationAttributes} instance has 
+	 * path-based resource locations.
+	 * @return <code>true</code> if the {@link #getLocations() locations} array is not empty
+	 * @see #hasResources()
+	 * @see #hasClasses()
+	 */
+	public boolean hasLocations() {
+		return !ObjectUtils.isEmpty(getLocations());
+	}
+
+	/**
+	 * Determine if this {@code ContextConfigurationAttributes} instance has 
+	 * class-based resources.
+	 * @return <code>true</code> if the {@link #getClasses() classes} array is not empty
+	 * @see #hasResources()
+	 * @see #hasLocations()
+	 */
+	public boolean hasClasses() {
+		return !ObjectUtils.isEmpty(getClasses());
+	}
+
+	/**
+	 * Determine if this {@code ContextConfigurationAttributes} instance has 
 	 * either path-based resource locations or class-based resources.
 	 * @return <code>true</code> if either the {@link #getLocations() locations}
 	 * or the {@link #getClasses() classes} array is not empty
-	 * @see #getLocations()
-	 * @see #getClasses()
+	 * @see #hasLocations()
+	 * @see #hasClasses()
 	 */
 	public boolean hasResources() {
-		return !ObjectUtils.isEmpty(getLocations()) || !ObjectUtils.isEmpty(getClasses());
+		return hasLocations() || hasClasses();
 	}
 
 	/**

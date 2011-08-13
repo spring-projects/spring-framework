@@ -37,6 +37,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
  * 
  * @author Sam Brannen
  * @since 3.1
+ * @see DefaultLoaderDefaultConfigClassesBaseTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)

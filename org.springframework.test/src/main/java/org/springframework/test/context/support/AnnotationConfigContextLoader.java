@@ -64,29 +64,21 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	/**
 	 * Process configuration classes in the supplied {@link ContextConfigurationAttributes}.
 	 * <p>If the configuration classes are <code>null</code> or empty and
-	 * {@link #generatesDefaults()} returns <code>true</code>, this
+	 * {@link #isGenerateDefaultLocations()} returns <code>true</code>, this
 	 * <code>SmartContextLoader</code> will attempt to
 	 * {@link #generateDefaultConfigurationClasses generate default configuration classes}.
 	 * Otherwise, properties in the supplied configuration attributes will not
 	 * be modified.
 	 * @param configAttributes the context configuration attributes to process
 	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration()
-	 * @see #generatesDefaults()
+	 * @see #isGenerateDefaultLocations()
 	 * @see #generateDefaultConfigurationClasses()
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
-		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && generatesDefaults()) {
+		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && isGenerateDefaultLocations()) {
 			Class<?>[] defaultConfigClasses = generateDefaultConfigurationClasses(configAttributes.getDeclaringClass());
 			configAttributes.setClasses(defaultConfigClasses);
 		}
-	}
-
-	/**
-	 * TODO Document overridden supports(MergedContextConfiguration) implementation.
-	 */
-	@Override
-	public boolean supports(MergedContextConfiguration mergedConfig) {
-		return ObjectUtils.isEmpty(mergedConfig.getLocations()) && !ObjectUtils.isEmpty(mergedConfig.getClasses());
 	}
 
 	// --- AnnotationConfigContextLoader ---------------------------------------
@@ -99,7 +91,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 
 	/**
 	 * Determine if the supplied {@link Class} meets the criteria for being
-	 * considered as a <em>default configuration class</em> candidate.
+	 * considered a <em>default configuration class</em> candidate.
 	 * <p>Specifically, such candidates:
 	 * <ul>
 	 * <li>must not be <code>null</code></li>

@@ -18,7 +18,6 @@ package org.springframework.test.context.support;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -50,12 +49,7 @@ public class DelegatingSmartContextLoaderTests {
 		assertTrue(ObjectUtils.isEmpty(array));
 	}
 
-	// --- SmartContextLoader --------------------------------------------------
-
-	@Test
-	public void generatesDefaults() {
-		assertTrue(loader.generatesDefaults());
-	}
+	// --- SmartContextLoader - processContextConfiguration() ------------------
 
 	@Test(expected = IllegalStateException.class)
 	public void processContextConfigurationWithoutLocationsAndConfigurationClassesForBogusTestClass() {
@@ -82,6 +76,14 @@ public class DelegatingSmartContextLoaderTests {
 		assertEmpty(configAttributes.getLocations());
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void processContextConfigurationWithDefaultXmlConfigAndConfigurationClassGeneration() {
+		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(
+			ImproperDuplicateDefaultXmlAndConfigClassTestCase.class, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true,
+			ContextLoader.class);
+		loader.processContextConfiguration(configAttributes);
+	}
+
 	@Test
 	public void processContextConfigurationWithLocation() {
 		String[] locations = new String[] { "classpath:/foo.xml" };
@@ -102,39 +104,7 @@ public class DelegatingSmartContextLoaderTests {
 		assertEmpty(configAttributes.getLocations());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void doesNotSupportNullConfig() {
-		MergedContextConfiguration mergedConfig = null;
-		loader.supports(mergedConfig);
-	}
-
-	@Test
-	public void doesNotSupportEmptyConfig() {
-		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
-			EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
-		assertFalse(loader.supports(mergedConfig));
-	}
-
-	@Test
-	public void doesNotSupportLocationsAndConfigurationClasses() {
-		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(),
-			new String[] { "foo.xml" }, new Class<?>[] { getClass() }, EMPTY_STRING_ARRAY, loader);
-		assertFalse(loader.supports(mergedConfig));
-	}
-
-	@Test
-	public void supportsLocations() {
-		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(),
-			new String[] { "foo.xml" }, EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
-		assertTrue(loader.supports(mergedConfig));
-	}
-
-	@Test
-	public void supportsConfigurationClasses() {
-		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
-			new Class<?>[] { getClass() }, EMPTY_STRING_ARRAY, loader);
-		assertTrue(loader.supports(mergedConfig));
-	}
+	// --- SmartContextLoader - loadContext() ----------------------------------
 
 	@Test(expected = IllegalArgumentException.class)
 	public void loadContextWithNullConfig() throws Exception {
@@ -187,6 +157,8 @@ public class DelegatingSmartContextLoaderTests {
 	}
 
 
+	// -------------------------------------------------------------------------
+
 	static class XmlTestCase {
 	}
 
@@ -199,6 +171,15 @@ public class DelegatingSmartContextLoaderTests {
 			public String foo() {
 				return new String("foo");
 			}
+		}
+	}
+
+	static class ImproperDuplicateDefaultXmlAndConfigClassTestCase {
+
+		@Configuration
+		static class Config {
+			// intentionally empty: we just need the class to be present to fail
+			// the test
 		}
 	}
 
