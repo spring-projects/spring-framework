@@ -39,7 +39,9 @@ Changes in version 3.1 RC1 (2011-08-xx)
 * JavaMailSenderImpl detects and respects "mail.transport.protocol" property in existing Session
 * added ConcurrentMapCacheManager, dynamically building ConcurrentMapCache instances at runtime
 * added "disabled" property to EhCacheFactoryBean
-* AnnotationConfigContextLoader now supports default configuration classes within test classes
+* AnnotationConfigContextLoader now detects default configuration classes within test classes
+* TestContext now uses MergedContextConfiguration for the ContextCache key
+* introduced DelegatingSmartContextLoader as the new default ContextLoader for the TestContext framework
 * extended Servlet API mocks for Servlet 3.0 forward compatibility as far as possible
 * made MockHttpServletResponse compatible with Servlet 3.0 getHeader(s) method returning Strings
 * added getHeaderValue(s) method to MockHttpServletResponse for raw value access
