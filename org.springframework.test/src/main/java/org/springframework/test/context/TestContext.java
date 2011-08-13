@@ -54,32 +54,30 @@ public class TestContext extends AttributeAccessorSupport {
 
 	/**
 	 * Delegates to {@link #TestContext(Class, ContextCache, String)} with a
-	 * value of <code>null</code> for the default <code>ContextLoader</code>
-	 * class name.
+	 * value of <code>null</code> for the default {@code ContextLoader} class name.
 	 */
 	TestContext(Class<?> testClass, ContextCache contextCache) {
 		this(testClass, contextCache, null);
 	}
 
-	// TODO Update regarding default --> DelegatingSmartContextLoader
 	/**
 	 * Construct a new test context for the supplied {@link Class test class}
 	 * and {@link ContextCache context cache} and parse the corresponding
 	 * {@link ContextConfiguration &#064;ContextConfiguration} annotation, if
 	 * present.
-	 * <p>If the supplied class name for the default <code>ContextLoader</code>
-	 * is <code>null</code> or <em>empty</em> and no <code>ContextLoader</code>
-	 * class is explicitly supplied via the
-	 * <code>&#064;ContextConfiguration</code> annotation, a
-	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
-	 * GenericXmlContextLoader} will be used instead.
+	 * <p>If the supplied class name for the default {@code ContextLoader}
+	 * is <code>null</code> or <em>empty</em> and no concrete {@code ContextLoader}
+	 * class is explicitly supplied via the {@code @ContextConfiguration}
+	 * annotation, a
+	 * {@link org.springframework.test.context.support.DelegatingSmartContextLoader
+	 * DelegatingSmartContextLoader} will be used instead.
 	 * @param testClass the test class for which the test context should be
 	 * constructed (must not be <code>null</code>)
 	 * @param contextCache the context cache from which the constructed test
 	 * context should retrieve application contexts (must not be
 	 * <code>null</code>)
 	 * @param defaultContextLoaderClassName the name of the default
-	 * <code>ContextLoader</code> class to use (may be <code>null</code>)
+	 * {@code ContextLoader} class to use (may be <code>null</code>)
 	 */
 	TestContext(Class<?> testClass, ContextCache contextCache, String defaultContextLoaderClassName) {
 		Assert.notNull(testClass, "Test class must not be null");
@@ -110,7 +108,7 @@ public class TestContext extends AttributeAccessorSupport {
 
 	/**
 	 * Load an <code>ApplicationContext</code> for this test context using the
-	 * configured <code>ContextLoader</code> and configuration attributes.
+	 * configured {@code ContextLoader} and configuration attributes.
 	 * @throws Exception if an error occurs while loading the application context
 	 */
 	private ApplicationContext loadApplicationContext() throws Exception {

@@ -27,6 +27,7 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * TODO Document DelegatingSmartContextLoader.
@@ -41,92 +42,106 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 
 	private static final Log logger = LogFactory.getLog(DelegatingSmartContextLoader.class);
 
-	private final List<? extends SmartContextLoader> candidates = Arrays.asList(new GenericXmlContextLoader(),
-		new AnnotationConfigContextLoader());
+	private final SmartContextLoader xmlLoader = new GenericXmlContextLoader();
+	private final SmartContextLoader annotationLoader = new AnnotationConfigContextLoader();
 
 
 	// --- SmartContextLoader --------------------------------------------------
 
-	/**
-	 * TODO Document generatesDefaults() implementation.
-	 */
-	public boolean generatesDefaults() {
-		for (SmartContextLoader loader : candidates) {
-			if (loader.generatesDefaults()) {
-				return true;
-			}
+	private static String name(SmartContextLoader loader) {
+		return loader.getClass().getSimpleName();
+	}
+
+	private static void delegateProcessing(SmartContextLoader loader, ContextConfigurationAttributes configAttributes) {
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Delegating to %s to process context configuration [%s].", name(loader),
+				configAttributes));
 		}
-		return false;
+		loader.processContextConfiguration(configAttributes);
+	}
+
+	private static boolean supports(SmartContextLoader loader, MergedContextConfiguration mergedConfig) {
+		if (loader instanceof AnnotationConfigContextLoader) {
+			return ObjectUtils.isEmpty(mergedConfig.getLocations()) && !ObjectUtils.isEmpty(mergedConfig.getClasses());
+		}
+		else {
+			return !ObjectUtils.isEmpty(mergedConfig.getLocations()) && ObjectUtils.isEmpty(mergedConfig.getClasses());
+		}
 	}
 
 	/**
 	 * TODO Document processContextConfiguration() implementation.
 	 */
-	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
+	public void processContextConfiguration(final ContextConfigurationAttributes configAttributes) {
 
-		final boolean originallyHadResources = configAttributes.hasResources();
+		if (configAttributes.hasLocations() && configAttributes.hasClasses()) {
+			throw new IllegalStateException(String.format(
+				"Cannot process locations AND configuration classes for context "
+						+ "configuration [%s]; configure one or the other, but not both.", configAttributes));
+		}
 
-		// If the original locations and classes were not empty, there's no
-		// need to bother with default generation checks; just let each
+		// If the original locations or classes were not empty, there's no
+		// need to bother with default detection checks; just let the respective
 		// loader process the configuration.
-		if (originallyHadResources) {
-			for (SmartContextLoader loader : candidates) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Delegating to %s to process context configuration [%s].",
-						loader.getClass().getName(), configAttributes));
-				}
-				loader.processContextConfiguration(configAttributes);
-			}
+		if (configAttributes.hasLocations()) {
+			delegateProcessing(xmlLoader, configAttributes);
 		}
-		else if (generatesDefaults()) {
-			for (SmartContextLoader loader : candidates) {
-				boolean defaultResourcesAlreadyGenerated = configAttributes.hasResources();
-				// If defaults haven't already been generated and the loader
-				// claims to generate defaults, let it process the
-				// configuration.
-				if (!defaultResourcesAlreadyGenerated && loader.generatesDefaults()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(String.format(
-							"Delegating to %s to detect defaults for context configuration [%s].",
-							loader.getClass().getName(), configAttributes));
-					}
+		else if (configAttributes.hasClasses()) {
+			delegateProcessing(annotationLoader, configAttributes);
+		}
+		else {
+			// Else attempt to detect defaults...
 
-					loader.processContextConfiguration(configAttributes);
+			// Let the XML loader process the configuration.
+			delegateProcessing(xmlLoader, configAttributes);
+			boolean xmlLoaderDetectedDefaults = configAttributes.hasLocations();
 
-					if (configAttributes.hasResources()) {
-						if (logger.isInfoEnabled()) {
-							logger.info(String.format("SmartContextLoader candidate %s "
-									+ "detected defaults for context configuration [%s].", loader, configAttributes));
-						}
-					}
+			if (xmlLoaderDetectedDefaults) {
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("%s detected default locations for context configuration [%s].",
+						name(xmlLoader), configAttributes));
 				}
 			}
 
-			// If any loader claims to generate defaults but none actually did,
-			// throw an exception.
+			if (configAttributes.hasClasses()) {
+				throw new IllegalStateException(String.format(
+					"%s should NOT have detected default configuration classes for context configuration [%s].",
+					name(xmlLoader), configAttributes));
+			}
+
+			// Now let the annotation loader process the configuration.
+			delegateProcessing(annotationLoader, configAttributes);
+
+			if (configAttributes.hasClasses()) {
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format(
+						"%s detected default configuration classes for context configuration [%s].",
+						name(annotationLoader), configAttributes));
+				}
+			}
+
+			if (!xmlLoaderDetectedDefaults && configAttributes.hasLocations()) {
+				throw new IllegalStateException(String.format(
+					"%s should NOT have detected default locations for context configuration [%s].",
+					name(annotationLoader), configAttributes));
+			}
+
+			// If neither loader detected defaults, throw an exception.
 			if (!configAttributes.hasResources()) {
-				throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s "
-						+ "was able to detect defaults for context configuration [%s].", candidates, configAttributes));
+				throw new IllegalStateException(String.format(
+					"Neither %s nor %s was able to detect defaults for context configuration [%s].", name(xmlLoader),
+					name(annotationLoader), configAttributes));
 			}
 
-			// TODO Throw exception if defaults were generated for both
-			// locations and configuration classes.
-		}
-	}
-
-	/**
-	 * TODO Document supports(MergedContextConfiguration) implementation.
-	 */
-	public boolean supports(MergedContextConfiguration mergedConfig) {
-		Assert.notNull(mergedConfig, "mergedConfig must not be null");
-
-		for (SmartContextLoader loader : candidates) {
-			if (loader.supports(mergedConfig)) {
-				return true;
+			if (configAttributes.hasLocations() && configAttributes.hasClasses()) {
+				String message = String.format(
+					"Configuration error: both default locations AND default configuration classes "
+							+ "were detected for context configuration [%s]; configure one or the other, but not both.",
+					configAttributes);
+				logger.error(message);
+				throw new IllegalStateException(message);
 			}
 		}
-
-		return false;
 	}
 
 	/**
@@ -135,20 +150,23 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
 		Assert.notNull(mergedConfig, "mergedConfig must not be null");
 
+		List<SmartContextLoader> candidates = Arrays.asList(xmlLoader, annotationLoader);
+
+		// Determine if each loader can load a context from the mergedConfig. If
+		// it can, let it; otherwise, keep iterating.
 		for (SmartContextLoader loader : candidates) {
-			// Ask each loader if it can load a context from the mergedConfig.
-			// If it can, let it; otherwise, keep iterating.
-			if (loader.supports(mergedConfig)) {
+			if (supports(loader, mergedConfig)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Delegating to %s to load context from [%s].",
-						loader.getClass().getName(), mergedConfig));
+					logger.debug(String.format("Delegating to %s to load context from [%s].", name(loader),
+						mergedConfig));
 				}
 				return loader.loadContext(mergedConfig);
 			}
 		}
 
-		throw new IllegalStateException(String.format("None of the SmartContextLoader candidates %s "
-				+ "was able to load an ApplicationContext from [%s].", candidates, mergedConfig));
+		throw new IllegalStateException(String.format(
+			"Neither %s nor %s was able to load an ApplicationContext from [%s].", name(xmlLoader),
+			name(annotationLoader), mergedConfig));
 	}
 
 	// --- ContextLoader -------------------------------------------------------

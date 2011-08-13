@@ -103,8 +103,8 @@ public @interface ContextConfiguration {
 	 * for details on the default configuration classes that will be used if none
 	 * are specified.
 	 * 
-	 * <p>Note that this attribute may <strong>not</strong> be used in
-	 * conjunction with {@link #locations} or {@link #value}.
+	 * <p>This attribute may <strong>not</strong> be used in conjunction with
+	 * {@link #locations} or {@link #value}.
 	 * @since 3.1
 	 * @see org.springframework.context.annotation.Configuration
 	 * @see org.springframework.test.context.support.AnnotationConfigContextLoader
@@ -158,12 +158,12 @@ public @interface ContextConfiguration {
 	 * {@code ExtendedConfig} may therefore override those defined in
 	 * {@code BaseConfig}.
 	 * <pre class="code">
-	 * &#064;ContextConfiguration(classes=BaseConfig.class, loader=AnnotationConfigContextLoader.class)
+	 * &#064;ContextConfiguration(classes=BaseConfig.class)
 	 * public class BaseTest {
 	 *     // ...
 	 * }
 	 * 
-	 * &#064;ContextConfiguration(classes=ExtendedConfig.class, loader=AnnotationConfigContextLoader.class)
+	 * &#064;ContextConfiguration(classes=ExtendedConfig.class)
 	 * public class ExtendedTest extends BaseTest {
 	 *     // ...
 	 * }
@@ -172,7 +172,6 @@ public @interface ContextConfiguration {
 	 */
 	boolean inheritLocations() default true;
 
-	// TODO Update regarding default --> DelegatingSmartContextLoader
 	/**
 	 * The type of {@link ContextLoader} (or {@link SmartContextLoader}) to use
 	 * for loading an {@link org.springframework.context.ApplicationContext
@@ -184,10 +183,15 @@ public @interface ContextConfiguration {
 	 * loader, a default loader will be used instead.
 	 * 
 	 * <p>The default concrete implementation chosen at runtime will be
-	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
-	 * GenericXmlContextLoader}. Also check out
+	 * {@link org.springframework.test.context.support.DelegatingSmartContextLoader
+	 * DelegatingSmartContextLoader}. For further details on the default behavior
+	 * of various concrete {@code ContextLoaders}, check out the Javadoc for
 	 * {@link org.springframework.test.context.support.AbstractContextLoader
-	 * AbstractContextLoader}'s javadoc for details on the default behavior there.
+	 * AbstractContextLoader},
+	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
+	 * GenericXmlContextLoader}, and
+	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader
+	 * AnnotationConfigContextLoader}.
 	 * @since 2.5
 	 */
 	Class<? extends ContextLoader> loader() default ContextLoader.class;
