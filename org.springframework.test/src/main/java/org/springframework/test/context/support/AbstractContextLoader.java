@@ -131,17 +131,23 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		String suffix = getResourceSuffix();
 		Assert.hasText(suffix, "Resource suffix must not be empty");
 		String resourcePath = SLASH + ClassUtils.convertClassNameToResourcePath(clazz.getName()) + suffix;
+		String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
+		ClassPathResource classPathResource = new ClassPathResource(resourcePath, clazz);
 
-		if (!new ClassPathResource(resourcePath, clazz).exists()) {
+		if (classPathResource.exists()) {
 			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Could not detect default resource locations for test class [%s]: "
-						+ "classpath resource [%s] does not exist.", clazz.getName(), resourcePath));
+				logger.info(String.format("Detected default resource location \"%s\" for test class [%s].",
+					prefixedResourcePath, clazz.getName()));
 			}
-			return EMPTY_STRING_ARRAY;
+			return new String[] { prefixedResourcePath };
 		}
 
 		// else
-		return new String[] { ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath };
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("Could not detect default resource locations for test class [%s]: "
+					+ "%s does not exist.", clazz.getName(), classPathResource));
+		}
+		return EMPTY_STRING_ARRAY;
 	}
 
 	/**

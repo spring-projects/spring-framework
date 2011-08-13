@@ -172,6 +172,10 @@ public class DelegatingSmartContextLoaderTests {
 				return new String("foo");
 			}
 		}
+
+		static class NotAConfigClass {
+
+		}
 	}
 
 	static class ImproperDuplicateDefaultXmlAndConfigClassTestCase {
