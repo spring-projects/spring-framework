@@ -41,6 +41,7 @@ import static org.junit.Assert.assertNull;
  * @author Keith Donald
  * @author Andy Clement
  */
+@SuppressWarnings("rawtypes")
 public class TypeDescriptorTests {
 
 	public List<String> listOfString;
@@ -204,7 +205,7 @@ public class TypeDescriptorTests {
 
 	@Test
 	public void propertyComplex() throws Exception {
-		Property property = new Property(getClass(), getClass().getMethod("getComplexProperty", null), getClass().getMethod("setComplexProperty", Map.class));		
+		Property property = new Property(getClass(), getClass().getMethod("getComplexProperty"), getClass().getMethod("setComplexProperty", Map.class));		
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(String.class, desc.getMapKeyTypeDescriptor().getType());
 		assertEquals(Integer.class, desc.getMapValueTypeDescriptor().getElementTypeDescriptor().getElementTypeDescriptor().getType());
@@ -221,7 +222,7 @@ public class TypeDescriptorTests {
 	@Test
 	public void propertyGenericType() throws Exception {
 		GenericType<Integer> genericBean = new IntegerType();
-		Property property = new Property(getClass(), genericBean.getClass().getMethod("getProperty", null), genericBean.getClass().getMethod("setProperty", Integer.class));		
+		Property property = new Property(getClass(), genericBean.getClass().getMethod("getProperty"), genericBean.getClass().getMethod("setProperty", Integer.class));		
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(Integer.class, desc.getType());
 	}
@@ -229,7 +230,7 @@ public class TypeDescriptorTests {
 	@Test
 	public void propertyTypeCovariance() throws Exception {
 		GenericType<Number> genericBean = new NumberType();
-		Property property = new Property(getClass(), genericBean.getClass().getMethod("getProperty", null), genericBean.getClass().getMethod("setProperty", Number.class));		
+		Property property = new Property(getClass(), genericBean.getClass().getMethod("getProperty"), genericBean.getClass().getMethod("setProperty", Number.class));		
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(Integer.class, desc.getType());
 	}
@@ -237,7 +238,7 @@ public class TypeDescriptorTests {
 	@Test
 	public void propertyGenericTypeList() throws Exception {
 		GenericType<Integer> genericBean = new IntegerType();
-		Property property = new Property(getClass(), genericBean.getClass().getMethod("getListProperty", null), genericBean.getClass().getMethod("setListProperty", List.class));		
+		Property property = new Property(getClass(), genericBean.getClass().getMethod("getListProperty"), genericBean.getClass().getMethod("setListProperty", List.class));		
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(List.class, desc.getType());
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
@@ -257,25 +258,18 @@ public class TypeDescriptorTests {
 	public class IntegerType implements GenericType<Integer> {
 
 		public Integer getProperty() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public void setProperty(Integer t) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		public List<Integer> getListProperty() {
-			// TODO Auto-generated method stub
 			return null;
 		}
 
 		public void setListProperty(List<Integer> t) {
-			// TODO Auto-generated method stub
-			
 		}
-		
 	}
 
 	public class NumberType implements GenericType<Number> {
@@ -298,7 +292,7 @@ public class TypeDescriptorTests {
 	@Test
 	public void propertyGenericClassList() throws Exception {
 		IntegerClass genericBean = new IntegerClass();
-		Property property = new Property(genericBean.getClass(), genericBean.getClass().getMethod("getListProperty", null), genericBean.getClass().getMethod("setListProperty", List.class));		
+		Property property = new Property(genericBean.getClass(), genericBean.getClass().getMethod("getListProperty"), genericBean.getClass().getMethod("setListProperty", List.class));		
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(List.class, desc.getType());
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
@@ -330,7 +324,7 @@ public class TypeDescriptorTests {
 
 	@Test
 	public void property() throws Exception {
-		Property property = new Property(getClass(), getClass().getMethod("getProperty", null), getClass().getMethod("setProperty", Map.class));		
+		Property property = new Property(getClass(), getClass().getMethod("getProperty"), getClass().getMethod("setProperty", Map.class));		
 		TypeDescriptor desc = new TypeDescriptor(property);
 		assertEquals(Map.class, desc.getType());
 		assertEquals(Integer.class, desc.getMapKeyTypeDescriptor().getElementTypeDescriptor().getType());
@@ -600,7 +594,7 @@ public class TypeDescriptorTests {
 
 	@Test
 	public void nestedPropertyTypeMapTwoLevels() throws Exception {
-		Property property = new Property(getClass(), getClass().getMethod("getTest4", null), getClass().getMethod("setTest4", List.class));
+		Property property = new Property(getClass(), getClass().getMethod("getTest4"), getClass().getMethod("setTest4", List.class));
 		TypeDescriptor t1 = TypeDescriptor.nested(property, 2);
 		assertEquals(String.class, t1.getType());
 	}
@@ -804,22 +798,4 @@ public class TypeDescriptorTests {
 
 	public Map<CharSequence, Number> isAssignableMapKeyValueTypes;
 
-	private void assignabilityExamples() {
-		Number num = null;
-		Integer integer = null;
-		num = integer;
-		
-		List list = null;
-		List<String> listString = null;
-		list = listString;
-		listString = list;
-
-		Map map = null;
-		Map<String, String> mapString = null;
-		map = mapString;
-		mapString = map;
-
-		Map<String, String> mapString2 = null;
-		mapString = mapString2;
-	}
 }

@@ -21,7 +21,6 @@ import java.util.Map;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.Scope;
 
-
 /**
  * Simple scope implementation which creates object based on a flag.
  *
@@ -34,11 +33,6 @@ public class CustomScope implements Scope {
 
 	private Map<String, Object> beans = new HashMap<String, Object>();
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.beans.factory.config.Scope#get(java.lang.String,
-	 * org.springframework.beans.factory.ObjectFactory)
-	 */
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		if (createNewScope) {
 			beans.clear();
@@ -56,33 +50,19 @@ public class CustomScope implements Scope {
 		return beans.get(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.beans.factory.config.Scope#getConversationId()
-	 */
 	public String getConversationId() {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.beans.factory.config.Scope#registerDestructionCallback(java.lang.String,
-	 * java.lang.Runnable)
-	 */
 	public void registerDestructionCallback(String name, Runnable callback) {
 		// do nothing
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.springframework.beans.factory.config.Scope#remove(java.lang.String)
-	 */
 	public Object remove(String name) {
 		return beans.remove(name);
 	}
 
 	public Object resolveContextualObject(String key) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
