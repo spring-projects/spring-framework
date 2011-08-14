@@ -489,6 +489,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #setMessageListener
 	 */
+	@SuppressWarnings("rawtypes")
 	protected void invokeListener(Session session, Message message) throws JMSException {
 		Object listener = getMessageListener();
 		if (listener instanceof SessionAwareMessageListener) {
@@ -517,7 +518,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @see SessionAwareMessageListener
 	 * @see #setExposeListenerSession
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void doInvokeListener(SessionAwareMessageListener listener, Session session, Message message)
 			throws JMSException {
 
@@ -700,6 +701,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * Internal exception class that indicates a rejected message on shutdown.
 	 * Used to trigger a rollback for an external transaction manager in that case.
 	 */
+	@SuppressWarnings("serial")
 	private static class MessageRejectedWhileStoppingException extends RuntimeException {
 
 	}
