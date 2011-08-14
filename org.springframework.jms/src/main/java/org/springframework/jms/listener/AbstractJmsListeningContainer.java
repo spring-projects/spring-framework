@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,10 +84,10 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 
 	/**
-	 * Specify the JMS client id for a shared Connection created and used
+	 * Specify the JMS client ID for a shared Connection created and used
 	 * by this container.
-	 * <p>Note that client ids need to be unique among all active Connections
-	 * of the underlying JMS provider. Furthermore, a client id can only be
+	 * <p>Note that client IDs need to be unique among all active Connections
+	 * of the underlying JMS provider. Furthermore, a client ID can only be
 	 * assigned if the original ConnectionFactory hasn't already assigned one.
 	 * @see javax.jms.Connection#setClientID
 	 * @see #setConnectionFactory
@@ -530,7 +530,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	protected void resumePausedTasks() {
 		synchronized (this.lifecycleMonitor) {
 			if (!this.pausedTasks.isEmpty()) {
-				for (Iterator it = this.pausedTasks.iterator(); it.hasNext();) {
+				for (Iterator<?> it = this.pausedTasks.iterator(); it.hasNext();) {
 					Object task = it.next();
 					try {
 						doRescheduleTask(task);
@@ -623,6 +623,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * shared JMS Connection failed. This is indicating to invokers that they need
 	 * to establish the shared Connection themselves on first access.
 	 */
+	@SuppressWarnings("serial")
 	public static class SharedConnectionNotInitializedException extends RuntimeException {
 
 		/**
