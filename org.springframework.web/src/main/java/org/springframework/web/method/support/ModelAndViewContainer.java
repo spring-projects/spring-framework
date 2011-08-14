@@ -35,9 +35,13 @@ public class ModelAndViewContainer {
 	private Object view;
 	
 	private boolean resolveView = true;
-
-	private final ModelMap model = new BindingAwareModelMap();
 	
+	private final ModelMap model = new BindingAwareModelMap();
+
+	private ModelMap redirectModel;
+
+	private boolean useRedirectModel = false;
+
 	/**
 	 * Create a new instance.
 	 */
@@ -104,10 +108,35 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Return the underlying {@code ModelMap} instance, never {@code null}.
+	 * Return the internal model currently in use. Normally this is the 
+	 * implicit model created in the constructor of this class. 
+	 * However, when a redirect model is provided via {@link #setRedirectModel}
+	 * and then enabled for use via {@link #useRedirectModel()}, this method 
+	 * returns the redirect model instead.
+	 * 
+	 * @return the internal model currently in use, never {@code null}.
 	 */
 	public ModelMap getModel() {
-		return this.model;
+		return this.useRedirectModel ? this.redirectModel : this.model;
+	}
+
+	/**
+	 * Provide a model that may be used in case of a redirect. 
+	 * If {@link #useRedirectModel()} is called at any time after this method is
+	 * called, the ModelAndViewContainer will switch to using the redirect model 
+	 * for all operations. Until then, the redirect model is not used. 
+	 */
+	public void setRedirectModel(ModelMap redirectModel) {
+		this.redirectModel = redirectModel;
+	}
+
+	/**
+	 * Make a switch internally from using the implicit model to using the 
+	 * redirect model provided earlier via {@link #setRedirectModel(ModelMap)}.
+	 * If the redirect model was never set, this method has no effect.
+	 */
+	public void useRedirectModel() {
+		this.useRedirectModel = this.redirectModel != null;
 	}
 
 	/**
@@ -115,7 +144,7 @@ public class ModelAndViewContainer {
 	 * @see ModelMap#addAttribute(String, Object)
 	 */
 	public ModelAndViewContainer addAttribute(String name, Object value) {
-		this.model.addAttribute(name, value);
+		getModel().addAttribute(name, value);
 		return this;
 	}
 	
@@ -124,7 +153,7 @@ public class ModelAndViewContainer {
 	 * @see Model#addAttribute(Object)
 	 */
 	public ModelAndViewContainer addAttribute(Object value) {
-		this.model.addAttribute(value);
+		getModel().addAttribute(value);
 		return this;
 	}
 
@@ -133,7 +162,7 @@ public class ModelAndViewContainer {
 	 * @see ModelMap#addAllAttributes(Map)
 	 */
 	public ModelAndViewContainer addAllAttributes(Map<String, ?> attributes) {
-		this.model.addAllAttributes(attributes);
+		getModel().addAllAttributes(attributes);
 		return this;
 	}
 
@@ -143,7 +172,7 @@ public class ModelAndViewContainer {
 	 * @see ModelMap#mergeAttributes(Map)
 	 */
 	public ModelAndViewContainer mergeAttributes(Map<String, ?> attributes) {
-		this.model.mergeAttributes(attributes);
+		getModel().mergeAttributes(attributes);
 		return this;
 	}
 
@@ -152,7 +181,7 @@ public class ModelAndViewContainer {
 	 * @see ModelMap#containsAttribute(String)
 	 */
 	public boolean containsAttribute(String name) {
-		return this.model.containsAttribute(name);
+		return getModel().containsAttribute(name);
 	}
-
+	
 }

@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionAttributeStore;
@@ -35,11 +34,12 @@ import org.springframework.web.context.request.WebRequest;
  * Manages handler-specific session attributes declared via @{@link SessionAttributes}. 
  * Actual storage is performed through an instance of {@link SessionAttributeStore}.
  * 
- * <p>A typical scenario begins with a controller adding attributes to the {@link Model}. 
- * At the end of the request, model attributes are checked to see if any of them match
- * the names and types declared via @{@link SessionAttributes}. Matching model 
- * attributes are "promoted" to the session and remain there until the controller 
- * calls {@link SessionStatus#setComplete()} to indicate the session attributes are
+ * <p>A typical scenario begins with a controller adding attributes to the 
+ * {@link org.springframework.ui.Model Model}. At the end of the request, model 
+ * attributes are checked to see if any of them match the names and types declared 
+ * via @{@link SessionAttributes}. Matching model attributes are "promoted" to 
+ * the session and remain there until the controller calls 
+ * {@link SessionStatus#setComplete()} to indicate the session attributes are
  * no longer needed and can be removed. 
  * 
  * @author Rossen Stoyanchev

@@ -40,6 +40,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.WebDataBinder;
@@ -84,6 +85,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMeth
 import org.springframework.web.servlet.mvc.method.annotation.support.HttpEntityMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ModelAndViewMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.support.PathVariableMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.RedirectModelMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestPartMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestResponseBodyMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletCookieValueMethodArgumentResolver;
@@ -91,7 +93,8 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletMode
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
-import org.springframework.web.servlet.mvc.method.support.ResponseContext;
+import org.springframework.web.servlet.mvc.support.RedirectModel;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -366,6 +369,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		argumentResolvers.addResolver(new ServletRequestMethodArgumentResolver());
 		argumentResolvers.addResolver(new ServletResponseMethodArgumentResolver());
 		argumentResolvers.addResolver(new HttpEntityMethodProcessor(messageConverters));
+		argumentResolvers.addResolver(new RedirectModelMethodArgumentResolver());
 		argumentResolvers.addResolver(new ModelMethodProcessor());
 		argumentResolvers.addResolver(new ErrorsMethodArgumentResolver());
 
@@ -512,26 +516,31 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		ServletInvocableHandlerMethod requestMappingMethod = createRequestMappingMethod(handlerMethod);
 		ModelFactory modelFactory = getModelFactory(handlerMethod);
 
-		FlashMap flashMap = (FlashMap) request.getAttribute(FlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE);
+		FlashMap previousFlashMap = (FlashMap) request.getAttribute(FlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE);
 		
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		mavContainer.addAllAttributes(flashMap);
+		mavContainer.addAllAttributes(previousFlashMap);
 		modelFactory.initModel(webRequest, mavContainer, requestMappingMethod);
 		
 		SessionStatus sessionStatus = new SimpleSessionStatus();
-		ResponseContext responseContext = new ResponseContext(webRequest, mavContainer);
 		
-		requestMappingMethod.invokeAndHandle(webRequest, mavContainer, sessionStatus, responseContext);
+		requestMappingMethod.invokeAndHandle(webRequest, mavContainer, sessionStatus);
 		modelFactory.updateModel(webRequest, mavContainer, sessionStatus);
 
 		if (!mavContainer.isResolveView()) {
 			return null;
 		}
 		else {
-			ModelAndView mav = new ModelAndView().addAllObjects(mavContainer.getModel());
+			ModelMap model = mavContainer.getModel();
+			ModelAndView mav = new ModelAndView().addAllObjects(model);
 			mav.setViewName(mavContainer.getViewName());
 			if (!mavContainer.isViewReference()) {
 				mav.setView((View) mavContainer.getView());
+			}
+			if (model instanceof RedirectModel) {
+				RedirectModel redirectModel = (RedirectModel) model;
+				FlashMap currentFlashMap = RequestContextUtils.getFlashMap(request);
+				currentFlashMap.putAll(redirectModel.getFlashAttributes());
 			}
 			return mav;				
 		}
