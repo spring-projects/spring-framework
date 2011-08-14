@@ -18,6 +18,7 @@ package org.springframework.web.filter;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
@@ -52,7 +53,7 @@ public class HttpPutFormContentFilterTests {
 		filter = new HttpPutFormContentFilter();
 		request = new MockHttpServletRequest("PUT", "/");
 		request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=ISO-8859-1");
-		request.setContentType("application/x-www-form-urlencoded");
+		request.setContentType("application/x-www-form-urlencoded; charset=ISO-8859-1");
 		response = new MockHttpServletResponse();
 		filterChain = new MockFilterChain();
 	}
@@ -90,20 +91,22 @@ public class HttpPutFormContentFilterTests {
 	}
 	
 	@Test
-	public void queryStringParam() throws Exception {
+	public void getParameterFromQueryString() throws Exception {
 		request.addParameter("name", "value1");
 		request.setContent("name=value2".getBytes("ISO-8859-1"));
 		filter.doFilter(request, response, filterChain);
-		
+	
+		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertEquals("Query string parameters should be listed ahead of form parameters", 
 				"value1", filterChain.getRequest().getParameter("name"));
 	}
 	
 	@Test
-	public void nullParameter() throws Exception {
+	public void getParameterNullValue() throws Exception {
 		request.setContent("name=value".getBytes("ISO-8859-1"));
 		filter.doFilter(request, response, filterChain);
 		
+		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertNull(filterChain.getRequest().getParameter("noSuchParam"));
 	}
 
@@ -112,9 +115,11 @@ public class HttpPutFormContentFilterTests {
 		request.addParameter("name1", "value1");
 		request.addParameter("name2", "value2");
 		request.setContent("name1=value1&name3=value3&name4=value4".getBytes("ISO-8859-1"));
+		
 		filter.doFilter(request, response, filterChain);
-
 		List<String> names = Collections.list(filterChain.getRequest().getParameterNames());
+
+		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertEquals(Arrays.asList("name1", "name2", "name3", "name4"), names);
 	}
 	
@@ -123,42 +128,50 @@ public class HttpPutFormContentFilterTests {
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("name=value3&name=value4".getBytes("ISO-8859-1"));
+		
 		filter.doFilter(request, response, filterChain);
-
 		String[] values = filterChain.getRequest().getParameterValues("name");
+
+		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertArrayEquals(new String[]{"value1", "value2", "value3", "value4"}, values);
 	}
 	
 	@Test
-	public void getQueryStringParameterValuesOnly() throws Exception {
+	public void getParameterValuesFromQueryString() throws Exception {
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("anotherName=anotherValue".getBytes("ISO-8859-1"));
-		filter.doFilter(request, response, filterChain);
 
+		filter.doFilter(request, response, filterChain);
 		String[] values = filterChain.getRequest().getParameterValues("name");
+
+		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertArrayEquals(new String[]{"value1", "value2"}, values);
 	}
 	
 	@Test
-	public void getFormParameterValuesOnly() throws Exception {
+	public void getParameterValuesFromFormContent() throws Exception {
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("anotherName=anotherValue".getBytes("ISO-8859-1"));
+		
 		filter.doFilter(request, response, filterChain);
-
 		String[] values = filterChain.getRequest().getParameterValues("anotherName");
+
+		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertArrayEquals(new String[]{"anotherValue"}, values);
 	}
 	
 	@Test
-	public void noParameterValuesOnly() throws Exception {
+	public void getParameterValuesInvalidName() throws Exception {
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("anotherName=anotherValue".getBytes("ISO-8859-1"));
+		
 		filter.doFilter(request, response, filterChain);
-
 		String[] values = filterChain.getRequest().getParameterValues("noSuchParameter");
+
+		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertNull(values);
 	}
 	
@@ -167,9 +180,11 @@ public class HttpPutFormContentFilterTests {
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("name=value3&name4=value4".getBytes("ISO-8859-1"));
-		filter.doFilter(request, response, filterChain);
 
+		filter.doFilter(request, response, filterChain);
 		Map<String, String[]> parameters = filterChain.getRequest().getParameterMap();
+
+		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertEquals(2, parameters.size());
 		assertArrayEquals(new String[] {"value1", "value2", "value3"}, parameters.get("name"));
 		assertArrayEquals(new String[] {"value4"}, parameters.get("name4"));
