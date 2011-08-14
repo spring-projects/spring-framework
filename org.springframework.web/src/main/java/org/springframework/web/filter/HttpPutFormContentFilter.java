@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -43,22 +44,22 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@link javax.servlet.Filter} that makes form encoded data available through the 
- * {@code ServletRequest.getParameter*()} family of methods during HTTP PUT requests.
+ * {@link javax.servlet.Filter} that makes form encoded data available through 
+ * the {@code ServletRequest.getParameter*()} family of methods during HTTP PUT 
+ * requests.
  *  
- * <p>The Servlet spec requires form data to be available for HTTP POST but not for
- * HTTP PUT requests. This filter intercepts HTTP PUT requests  
- * where {@code 'Content-Type:application/x-www-form-urlencoded'}, reads the form
- * data from the body of the request, and wraps the ServletRequest in order to make
- * the form data available as request parameters.
+ * <p>The Servlet spec requires form data to be available for HTTP POST but 
+ * not for HTTP PUT requests. This filter intercepts HTTP PUT requests where 
+ * content type is {@code 'application/x-www-form-urlencoded'}, reads form
+ * encoded content from the body of the request, and wraps the ServletRequest 
+ * in order to make the form data available as request parameters just like
+ * it is for HTTP POST requests.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
-	private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
-	
 	private final FormHttpMessageConverter formConverter = new XmlAwareFormHttpMessageConverter();
 	
 	/**
@@ -69,8 +70,8 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected void doFilterInternal(final HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+	protected void doFilterInternal(final HttpServletRequest request, HttpServletResponse response,
+			FilterChain filterChain) throws ServletException, IOException {
 
 		if ("PUT".equals(request.getMethod()) && isFormContentType(request)) {
 			HttpInputMessage inputMessage = new ServletServerHttpRequest(request) {
@@ -91,7 +92,13 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 	private boolean isFormContentType(HttpServletRequest request) {
 		String contentType = request.getContentType();
-		return ((contentType != null) && contentType.equals(FORM_CONTENT_TYPE));
+		if (contentType != null) {
+			MediaType mediaType = MediaType.parseMediaType(contentType);
+			return (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType));
+		}
+		else {
+			return false;
+		}
 	}
 
 	private static class HttpPutFormContentRequestWrapper extends HttpServletRequestWrapper {
