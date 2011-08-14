@@ -60,7 +60,6 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequ
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
-import org.springframework.web.servlet.mvc.method.support.ResponseContext;
 
 /**
  * An {@link AbstractHandlerMethodExceptionResolver} that supports using {@link ExceptionHandler}-annotated methods
@@ -214,10 +213,10 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request,
 														   HttpServletResponse response,
 														   HandlerMethod handlerMethod,
-														   Exception ex) {
+														   Exception exception) {
 		if (handlerMethod != null) {
 			ExceptionMethodMapping mapping = getExceptionMethodMapping(handlerMethod);
-			Method method = mapping.getMethod(ex);
+			Method method = mapping.getMethod(exception);
 
 			if (method != null) {
 				Object handler = handlerMethod.getBean();
@@ -232,9 +231,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 					}
 
 					ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-					ResponseContext responseContext = new ResponseContext(webRequest, mavContainer);
 					
-					exceptionHandler.invokeAndHandle(webRequest, mavContainer, ex, responseContext);
+					exceptionHandler.invokeAndHandle(webRequest, mavContainer, exception);
 					
 					if (!mavContainer.isResolveView()) {
 						return new ModelAndView();

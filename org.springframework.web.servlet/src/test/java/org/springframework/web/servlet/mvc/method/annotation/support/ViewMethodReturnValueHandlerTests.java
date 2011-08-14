@@ -29,7 +29,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.mvc.support.RedirectModel;
 import org.springframework.web.servlet.view.InternalResourceView;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * Test fixture with {@link DefaultMethodReturnValueHandler}.
@@ -61,13 +63,36 @@ public class ViewMethodReturnValueHandlerTests {
 	public void returnView() throws Exception {
 		InternalResourceView view = new InternalResourceView("testView");
 		handler.handleReturnValue(view, createMethodParam("view"), mavContainer, webRequest);
+		
 		assertSame(view, mavContainer.getView());
+	}
+
+	@Test
+	public void returnViewRedirect() throws Exception {
+		RedirectView redirectView = new RedirectView("testView");
+		RedirectModel redirectModel = new RedirectModel();
+		mavContainer.setRedirectModel(redirectModel);
+		handler.handleReturnValue(redirectView, createMethodParam("view"), mavContainer, webRequest);
+		
+		assertSame(redirectView, mavContainer.getView());
+		assertSame("Should have switched to the RedirectModel", redirectModel, mavContainer.getModel());
 	}
 	
 	@Test
 	public void returnViewName() throws Exception {
 		handler.handleReturnValue("testView", createMethodParam("viewName"), mavContainer, webRequest);
+		
 		assertEquals("testView", mavContainer.getViewName());
+	}
+
+	@Test
+	public void returnViewNameRedirect() throws Exception {
+		RedirectModel redirectModel = new RedirectModel();
+		mavContainer.setRedirectModel(redirectModel);
+		handler.handleReturnValue("redirect:testView", createMethodParam("viewName"), mavContainer, webRequest);
+
+		assertEquals("redirect:testView", mavContainer.getViewName());
+		assertSame("Should have switched to the RedirectModel", redirectModel, mavContainer.getModel());
 	}
 
 	private MethodParameter createMethodParam(String methodName) throws Exception {

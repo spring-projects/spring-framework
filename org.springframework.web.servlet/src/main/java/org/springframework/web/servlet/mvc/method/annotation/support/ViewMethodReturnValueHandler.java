@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
-import java.lang.reflect.Method;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -26,18 +24,20 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 
 /**
- * Handles return values that are of type {@code void}, {@code String} (i.e. logical view name), or {@link View}.
+ * Handles return values that are of type {@code void}, {@code String} (i.e. 
+ * logical view name), or {@link View}.
  *
- * <p>A {@code null} return value, either due to a void return type or as the actual value returned from a
- * method is left unhandled, leaving it to the configured {@link RequestToViewNameTranslator} to resolve the
- * request to an actual view name. By default it is the {@link DefaultRequestToViewNameTranslator}.
+ * <p>A {@code null} return value, either due to a void return type or as the
+ * actual value returned from a method is left unhandled, leaving it to the 
+ * configured {@link RequestToViewNameTranslator} to resolve the request to 
+ * an actual view name. 
  *
- * <p>Since a {@link String} return value may handled in different ways, especially in combination with method
- * annotations such as @{@link ModelAttribute} and @{@link ResponseBody}, this handler should be ordered after
- * return value handlers that support method annotations.
+ * <p>Since a {@link String} return value may be handled in combination with 
+ * method annotations such as @{@link ModelAttribute} or @{@link ResponseBody},
+ * this handler should be ordered after return value handlers that support 
+ * method annotations.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -57,17 +57,44 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 			return;
 		}
 		if (returnValue instanceof String) {
-			mavContainer.setViewName((String) returnValue);
+			String viewName = (String) returnValue;
+			mavContainer.setViewName(viewName);
+			if (isRedirectViewName(viewName)) {
+				mavContainer.useRedirectModel();
+			}
 		}
 		else if (returnValue instanceof View){
-			mavContainer.setView(returnValue);
+			View view = (View) returnValue;
+			mavContainer.setView(view);
+			if (isRedirectView(view)) {	
+				mavContainer.useRedirectModel();
+			}
 		}
 		else {
 			// should not happen
-			Method method = returnType.getMethod();
-			String returnTypeName = returnType.getParameterType().getName();
-			throw new UnsupportedOperationException("Unknown return type: " + returnTypeName + " in method: " + method);
+			throw new UnsupportedOperationException("Unknown return type: " + 
+					returnType.getParameterType().getName() + " in method: " + returnType.getMethod());
 		}
+	}
+
+	/**
+	 * Whether the given view name is a redirect view reference.
+	 * @param viewName the view name to check, never {@code null}
+	 * @return "true" if the given view name is recognized as a redirect view 
+	 * reference; "false" otherwise.
+	 */
+	protected boolean isRedirectViewName(String viewName) {
+		return viewName.startsWith("redirect:");
+	}
+
+	/**
+	 * Whether the given View instance is a redirect view.
+	 * @param view a view instance, never {@code null}
+	 * @return "true" if the given view is recognized as a redirect View; 
+	 * "false" otherwise.
+	 */
+	protected boolean isRedirectView(View view) {
+		return "RedirectView".equals(view.getClass().getSimpleName());
 	}
 
 }

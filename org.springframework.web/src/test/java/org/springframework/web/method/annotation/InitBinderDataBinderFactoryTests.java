@@ -74,7 +74,7 @@ public class InitBinderDataBinderFactoryTests {
 	@Test
 	public void createBinderWithGlobalInitialization() throws Exception {
 		ConversionService conversionService = new DefaultFormattingConversionService();
-		bindingInitializer.setConversionService(conversionService );
+		bindingInitializer.setConversionService(conversionService);
 		
 		WebDataBinderFactory factory = createBinderFactory("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = factory.createBinder(webRequest, null, null);

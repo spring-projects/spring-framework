@@ -138,7 +138,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
-import org.springframework.web.servlet.mvc.method.support.ResponseContext;
+import org.springframework.web.servlet.mvc.support.RedirectModel;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -2816,13 +2816,14 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@RequestMapping(value = "/messages", method = RequestMethod.POST)
-		public void sendMessage(TestBean testBean, BindingResult result, ResponseContext responseContext) {
+		public String sendMessage(TestBean testBean, BindingResult result, RedirectModel redirectModel) {
 			if (result.hasErrors()) {
-				responseContext.view("messages/new");
+				return "messages/new";
 			}
 			else {
-				responseContext.redirect("/messages/{id}").uriVariable("id", "1").queryParam("name", "value")
-						.flashAttribute("successMessage", "yay!");
+				redirectModel.addAttribute("id", "1").addAttribute("name", "value");
+				redirectModel.addFlashAttribute("successMessage", "yay!");
+				return "redirect:/messages/{id}";
 			}
 		}
 	}
