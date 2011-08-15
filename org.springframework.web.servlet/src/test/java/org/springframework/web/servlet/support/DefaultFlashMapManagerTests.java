@@ -79,10 +79,10 @@ public class DefaultFlashMapManagerTests {
 		FlashMap emptyFlashMap = new FlashMap();
 
 		FlashMap oneFlashMap = new FlashMap();
-		oneFlashMap.setExpectedUrl(null, "/one");
+		oneFlashMap.setExpectedRequestUri(null, "/one");
 
 		FlashMap oneOtherFlashMap = new FlashMap();
-		oneOtherFlashMap.setExpectedUrl(null, "/one/other");
+		oneOtherFlashMap.setExpectedRequestUri(null, "/one/other");
 		
 		List<FlashMap> allMaps = createFlashMapsSessionAttribute();
 		allMaps.add(emptyFlashMap);
