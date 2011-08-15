@@ -105,6 +105,28 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.codehaus.jsr166-mirror/com.springsource.jsr166/1.7.0/com.springsource.jsr166-1.7.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.codehaus.jsr166-mirror/com.springsource.jsr166/1.7.0/com.springsource.jsr166-sources-1.7.0.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/1.6.2/com.springsource.net.sf.ehcache-1.6.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/1.6.2/com.springsource.net.sf.ehcache-sources-1.6.2.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
           <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.dbcp/1.2.2.osgi/com.springsource.org.apache.commons.dbcp-1.2.2.osgi.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -152,17 +174,6 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$IVY_CACHE$/org.jruby/com.springsource.org.jruby/1.4.0/com.springsource.org.jruby-sources-1.4.0.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/1.6.2/com.springsource.net.sf.ehcache-1.6.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/1.6.2/com.springsource.net.sf.ehcache-sources-1.6.2.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
