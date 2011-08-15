@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.6 (2011-07-29)
+Changes in version 3.0.6 (2011-08-18)
 -------------------------------------
 
 * fixed aspects bundle to declare dependencies for @Async aspect as well
@@ -14,10 +14,13 @@ Changes in version 3.0.6 (2011-07-29)
 * XmlBeanDefinitionReader accepts description subelement within map entry as well (as per the XSD)
 * ConfigurationClassPostProcessor supports use of same processor instance with several factories
 * fixed potential InjectionMetadata NPE when using SpringBeanAutowiringInterceptor
+* SpringBeanAutowiringSupport is able to process @Value annotations on any given target instance
+* overridden @PersistenceContext annotations on subclass methods are being processed correctly
 * BeanDefinitionVisitor now actually visits factory method names
 * restored support for String-to-ContextResource conversion
 * restored original GenericConversionService behavior with respect to empty collections/maps
 * restored original FormattingConversionService behavior with respect to the use of subtypes
+* added "formatters" property to FormattingConversionServiceFactoryBean
 * collection/array conversion returns original collection if possible (instead of first element)
 * fixed collection element resolution when using a ConversionService with a DataBinder
 * DataBinder uses a default limit of 256 for array/collection auto-growing
@@ -26,6 +29,8 @@ Changes in version 3.0.6 (2011-07-29)
 * fixed AbstractBindingResult to avoid NPE in "hashCode()" if target is null
 * fixed several HttpHeaders issues (charset handling, quoting/unquoting)
 * SimpleClientHttpRequest uses fixed-length streaming mode (always sets content-length header)
+* added "connectTimeout" and "readTimeout" properties to Simple/CommonsClientHttpRequestFactory
+* explicit status code in RedirectView respected in HTTP 1.0 compatibility mode
 * FormHttpMessageConverter correctly processes POST requests
 * ResourceHttpRequestHandler does not set Content-Length header for 304 response
 * ResourceHttpRequestHandler detects invalid directory traversal in given path
@@ -43,7 +48,6 @@ Changes in version 3.0.6 (2011-07-29)
 * fixed JPA 2.0 timeout hints to correctly specify milliseconds
 * updated Quartz package to support Quartz 1.8 as well (note: not supporting Quartz 2.0 yet)
 * fixed @Rule execution order in SpringJUnit4ClassRunner to match standard JUnit 4 behavior
-* Explicit status code in RedirectView respected in HTTP 1.0 compatibility mode
 
 
 Changes in version 3.0.5 (2010-10-20)
