@@ -90,14 +90,24 @@ public class CommonsClientHttpRequestFactory implements ClientHttpRequestFactory
 	}
 
 	/**
-	 * Set the socket read timeout for the underlying HttpClient. A value of 0 means <em>never</em> timeout.
+	 * Set the connection timeout for the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * @param timeout the timeout value in milliseconds
+	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setConnectionTimeout(int)
+	 */
+	public void setConnectTimeout(int timeout) {
+		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
+		this.httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+	}
+
+	/**
+	 * Set the socket read timeout for the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
 	 * @param timeout the timeout value in milliseconds
 	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setSoTimeout(int)
 	 */
 	public void setReadTimeout(int timeout) {
-		if (timeout < 0) {
-			throw new IllegalArgumentException("timeout must be a non-negative value");
-		}
+		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
 		getHttpClient().getHttpConnectionManager().getParams().setSoTimeout(timeout);
 	}
 

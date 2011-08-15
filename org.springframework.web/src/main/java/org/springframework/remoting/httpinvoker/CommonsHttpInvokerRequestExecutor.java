@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.remoting.support.RemoteInvocationResult;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -66,7 +67,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	 */
 	public CommonsHttpInvokerRequestExecutor() {
 		this.httpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
-		this.setReadTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS);
+		setReadTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS);
 	}
 
 	/**
@@ -95,16 +96,25 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	}
 
 	/**
-	 * Set the socket read timeout for the underlying HttpClient. A value
-	 * of 0 means <emphasis>never</emphasis> timeout. 
+	 * Set the connection timeout for the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * @param timeout the timeout value in milliseconds
+	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setConnectionTimeout(int)
+	 */
+	public void setConnectTimeout(int timeout) {
+		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
+		this.httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
+	}
+
+	/**
+	 * Set the socket read timeout for the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
 	 * @param timeout the timeout value in milliseconds
 	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setSoTimeout(int)
 	 * @see #DEFAULT_READ_TIMEOUT_MILLISECONDS
 	 */
 	public void setReadTimeout(int timeout) {
-		if (timeout < 0) {
-			throw new IllegalArgumentException("timeout must be a non-negative value");
-		}
+		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
 		this.httpClient.getHttpConnectionManager().getParams().setSoTimeout(timeout);
 	}
 

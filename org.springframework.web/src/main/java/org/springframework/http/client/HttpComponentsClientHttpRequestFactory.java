@@ -42,7 +42,8 @@ import org.springframework.util.Assert;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that uses
- * <a href="http://hc.apache.org/httpcomponents-client-ga/httpclient/">Http Components HttpClient</a> to create requests.
+ * <a href="http://hc.apache.org/httpcomponents-client-ga/httpclient/">Apache HttpComponents HttpClient</a>
+ * to create requests.
  *
  * <p>Allows to use a pre-configured {@link HttpClient} instance -
  * potentially with authentication, HTTP connection pooling, etc.
@@ -61,9 +62,10 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	private HttpClient httpClient;
 
+
 	/**
-	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory} with a default {@link HttpClient} that
-	 * uses a default {@link org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager}
+	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory} with a default
+	 * {@link HttpClient} that uses a default {@link org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager}.
 	 */
 	public HttpComponentsClientHttpRequestFactory() {
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
@@ -74,20 +76,21 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		connectionManager.setMaxTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
 		connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
 
-		httpClient = new DefaultHttpClient(connectionManager);
-		this.setReadTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS);
+		this.httpClient = new DefaultHttpClient(connectionManager);
+		setReadTimeout(DEFAULT_READ_TIMEOUT_MILLISECONDS);
 	}
 
+
 	/**
-	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory} with the given {@link HttpClient}
-	 * instance.
-	 *
+	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
+	 * with the given {@link HttpClient} instance.
 	 * @param httpClient the HttpClient instance to use for this factory
 	 */
 	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
-		Assert.notNull(httpClient, "httpClient must not be null");
+		Assert.notNull(httpClient, "HttpClient must not be null");
 		this.httpClient = httpClient;
 	}
+
 
 	/**
 	 * Set the {@code HttpClient} used by this factory.
@@ -97,24 +100,34 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
-	 * Set the socket read timeout for the underlying HttpClient. A value of 0 means <em>never</em> timeout.
-	 *
-	 * @param timeout the timeout value in milliseconds
-	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setSoTimeout(int)
-	 */
-	public void setReadTimeout(int timeout) {
-		if (timeout < 0) {
-			throw new IllegalArgumentException("timeout must be a non-negative value");
-		}
-		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
-	}
-
-	/**
 	 * Return the {@code HttpClient} used by this factory.
 	 */
 	public HttpClient getHttpClient() {
 		return this.httpClient;
 	}
+
+	/**
+	 * Set the connection timeout for the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * @param timeout the timeout value in milliseconds
+	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setConnectionTimeout(int)
+	 */
+	public void setConnectTimeout(int timeout) {
+		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
+		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
+	}
+
+	/**
+	 * Set the socket read timeout for the underlying HttpClient.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * @param timeout the timeout value in milliseconds
+	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setSoTimeout(int)
+	 */
+	public void setReadTimeout(int timeout) {
+		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
+		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
+	}
+
 
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
@@ -124,7 +137,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	/**
 	 * Create a Commons HttpMethodBase object for the given HTTP method and URI specification.
-	 *
 	 * @param httpMethod the HTTP method
 	 * @param uri the URI
 	 * @return the Commons HttpMethodBase object
@@ -151,20 +163,21 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
-	 * Template method that allows for manipulating the {@link HttpUriRequest} before it is returned as part of a {@link
-	 * HttpComponentsClientHttpRequest}.
+	 * Template method that allows for manipulating the {@link HttpUriRequest} before it is
+	 * returned as part of a {@link HttpComponentsClientHttpRequest}.
 	 * <p>The default implementation is empty.
-	 *
 	 * @param request the request to process
 	 */
 	protected void postProcessHttpRequest(HttpUriRequest request) {
 	}
 
 	/**
-	 * Shutdown hook that closes the underlying {@link org.apache.http.conn.ClientConnectionManager
-	 * ClientConnectionManager}'s connection pool, if any.
+	 * Shutdown hook that closes the underlying
+	 * {@link org.apache.http.conn.ClientConnectionManager ClientConnectionManager}'s
+	 * connection pool, if any.
 	 */
 	public void destroy() {
 		getHttpClient().getConnectionManager().shutdown();
 	}
+
 }
