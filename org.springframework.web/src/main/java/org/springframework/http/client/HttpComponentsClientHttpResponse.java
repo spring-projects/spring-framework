@@ -29,13 +29,13 @@ import org.springframework.http.HttpStatus;
 
 /**
  * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
- * Apache Http Components HttpClient to execute requests.
+ * Apache HttpComponents HttpClient to execute requests.
  *
  * <p>Created via the {@link HttpComponentsClientHttpRequest}.
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
- * @since 3.0
+ * @since 3.1
  * @see HttpComponentsClientHttpRequest#execute()
  */
 final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
@@ -44,35 +44,37 @@ final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
 	private HttpHeaders headers;
 
+
 	public HttpComponentsClientHttpResponse(HttpResponse httpResponse) {
 		this.httpResponse = httpResponse;
 	}
 
+
 	public HttpStatus getStatusCode() throws IOException {
-		return HttpStatus.valueOf(httpResponse.getStatusLine().getStatusCode());
+		return HttpStatus.valueOf(this.httpResponse.getStatusLine().getStatusCode());
 	}
 
 	public String getStatusText() throws IOException {
-		return httpResponse.getStatusLine().getReasonPhrase();
+		return this.httpResponse.getStatusLine().getReasonPhrase();
 	}
 
 	public HttpHeaders getHeaders() {
-		if (headers == null) {
-			headers = new HttpHeaders();
-			for (Header header : httpResponse.getAllHeaders()) {
-				headers.add(header.getName(), header.getValue());
+		if (this.headers == null) {
+			this.headers = new HttpHeaders();
+			for (Header header : this.httpResponse.getAllHeaders()) {
+				this.headers.add(header.getName(), header.getValue());
 			}
 		}
-		return headers;
+		return this.headers;
 	}
 
 	public InputStream getBody() throws IOException {
-		HttpEntity entity = httpResponse.getEntity();
+		HttpEntity entity = this.httpResponse.getEntity();
 		return entity != null ? entity.getContent() : null;
 	}
 
 	public void close() {
-		HttpEntity entity = httpResponse.getEntity();
+		HttpEntity entity = this.httpResponse.getEntity();
 		if (entity != null) {
 			try {
 				// Release underlying connection back to the connection manager
@@ -83,4 +85,5 @@ final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 			}
 		}
 	}
+
 }

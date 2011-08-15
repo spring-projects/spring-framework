@@ -34,13 +34,13 @@ import org.springframework.http.HttpMethod;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
- * Apache HTTPComponents HttpClient to execute requests.
+ * Apache HttpComponents HttpClient to execute requests.
  *
  * <p>Created via the {@link HttpComponentsClientHttpRequestFactory}.
  *
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
- * @since 3.0
+ * @since 3.1
  * @see HttpComponentsClientHttpRequestFactory#createRequest(URI, HttpMethod)
  */
 final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpRequest {
@@ -49,18 +49,21 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 
 	private final HttpUriRequest httpRequest;
 
+
 	public HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 	}
 
+
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(httpRequest.getMethod());
+		return HttpMethod.valueOf(this.httpRequest.getMethod());
 	}
 
 	public URI getURI() {
-		return httpRequest.getURI();
+		return this.httpRequest.getURI();
 	}
+
 
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
@@ -69,17 +72,17 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 			if (!headerName.equalsIgnoreCase(HTTP.CONTENT_LEN) &&
 					!headerName.equalsIgnoreCase(HTTP.TRANSFER_ENCODING)) {
 				for (String headerValue : entry.getValue()) {
-					httpRequest.addHeader(headerName, headerValue);
+					this.httpRequest.addHeader(headerName, headerValue);
 				}
 			}
 		}
-		if (httpRequest instanceof HttpEntityEnclosingRequest) {
-			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) httpRequest;
+		if (this.httpRequest instanceof HttpEntityEnclosingRequest) {
+			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
 			HttpEntity requestEntity = new ByteArrayEntity(bufferedOutput);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
-		HttpResponse httpResponse = httpClient.execute(httpRequest);
+		HttpResponse httpResponse = this.httpClient.execute(this.httpRequest);
 		return new HttpComponentsClientHttpResponse(httpResponse);
-
 	}
+
 }
