@@ -69,20 +69,32 @@ public class RedirectViewTests {
 	}
 
 	@Test
-	public void explicitStatusCode() throws Exception {
+	public void explicitStatusCodeHttp11() throws Exception {
 		RedirectView rv = new RedirectView();
 		rv.setUrl("http://url.somewhere.com");
 		rv.setHttp10Compatible(false);
-		rv.setStatusCode(HttpStatus.CREATED);
+		rv.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		rv.render(new HashMap<String, Object>(), request, response);
-		assertEquals(201, response.getStatus());
+		assertEquals(301, response.getStatus());
 		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
 	}
 
 	@Test
-	public void attributeStatusCode() throws Exception {
+	public void explicitStatusCodeHttp10() throws Exception {
+		RedirectView rv = new RedirectView();
+		rv.setUrl("http://url.somewhere.com");
+		rv.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		rv.render(new HashMap<String, Object>(), request, response);
+		assertEquals(301, response.getStatus());
+		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
+	}
+	
+	@Test
+	public void attributeStatusCodeHttp11() throws Exception {
 		RedirectView rv = new RedirectView();
 		rv.setUrl("http://url.somewhere.com");
 		rv.setHttp10Compatible(false);
