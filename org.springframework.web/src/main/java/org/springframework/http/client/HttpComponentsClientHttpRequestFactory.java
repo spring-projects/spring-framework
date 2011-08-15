@@ -64,7 +64,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	/**
-	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory} with a default
+	 * Create a new instance of the HttpComponentsClientHttpRequestFactory with a default
 	 * {@link HttpClient} that uses a default {@link org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager}.
 	 */
 	public HttpComponentsClientHttpRequestFactory() {
@@ -82,9 +82,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	/**
-	 * Create a new instance of the {@code HttpComponentsClientHttpRequestFactory}
+	 * Create a new instance of the HttpComponentsClientHttpRequestFactory
 	 * with the given {@link HttpClient} instance.
-	 * @param httpClient the HttpClient instance to use for this factory
+	 * @param httpClient the HttpClient instance to use for this request factory
 	 */
 	public HttpComponentsClientHttpRequestFactory(HttpClient httpClient) {
 		Assert.notNull(httpClient, "HttpClient must not be null");
@@ -110,7 +110,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Set the connection timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * @param timeout the timeout value in milliseconds
-	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setConnectionTimeout(int)
 	 */
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
@@ -121,7 +120,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * Set the socket read timeout for the underlying HttpClient.
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * @param timeout the timeout value in milliseconds
-	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setSoTimeout(int)
 	 */
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
