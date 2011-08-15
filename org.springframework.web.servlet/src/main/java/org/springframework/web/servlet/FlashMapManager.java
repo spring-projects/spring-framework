@@ -22,10 +22,12 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * A strategy interface for maintaining {@link FlashMap} instances in some 
- * underlying storage until the next request. The most common use case is
- * a redirect. For example redirecting from a POST that creates a resource 
- * to the page that shows the created resource and passing along a 
- * success message that needs to be shown once only.
+ * underlying storage until the next request. 
+ * 
+ * <p>The most common use case for using flash storage is a redirect. 
+ * For example creating a resource in a POST request and then redirecting
+ * to the page that shows the resource. Flash storage may be used to 
+ * pass along a success message.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -33,48 +35,41 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @see FlashMap
  */
 public interface FlashMapManager {
-	
+
 	/**
-	 * Request attribute to hold the current request FlashMap. 
-	 * @see RequestContextUtils#getFlashMap
+	 * Request attribute holding the read-only Map with flash attributes saved 
+	 * during the previous request.
+	 * @see RequestContextUtils#getInputFlashMap(HttpServletRequest)
 	 */
-	public static final String CURRENT_FLASH_MAP_ATTRIBUTE = DispatcherServlet.class.getName() + ".CURRENT_FLASH_MAP";
-	
+	public static final String INPUT_FLASH_MAP_ATTRIBUTE = FlashMapManager.class.getName() + ".INPUT_FLASH_MAP";
+
 	/**
-	 * Request attribute to hold the FlashMap from the previous request. 
-	 * Access to the previous FlashMap should generally not be needed 
-	 * since its content is exposed as attributes of the current 
-	 * request. However, it may be useful to expose previous request
-	 * flash attributes in other ways such as in the model of annotated 
-	 * controllers.
+	 * Request attribute holding the {@link FlashMap} to add attributes to during 
+	 * the current request.
+	 * @see RequestContextUtils#getOutputFlashMap(HttpServletRequest)
 	 */
-	public static final String PREVIOUS_FLASH_MAP_ATTRIBUTE = DispatcherServlet.class.getName() + ".PREVIOUS_FLASH_MAP";
+	public static final String OUTPUT_FLASH_MAP_ATTRIBUTE = FlashMapManager.class.getName() + ".OUTPUT_FLASH_MAP";
 
 	/**
 	 * Perform flash storage tasks at the start of a new request:
 	 * <ul>
-	 * 	<li>Create a new FlashMap and make it available to the current request 
-	 * 	under the request attribute {@link #CURRENT_FLASH_MAP_ATTRIBUTE}.
-	 * 	<li>Locate the FlashMap saved on the previous request and expose its 
-	 * 	contents as attributes in the current request, also exposing the 
-	 *  previous FlashMap under {@link #PREVIOUS_FLASH_MAP_ATTRIBUTE}.
-	 * 	<li>Check for and remove expired FlashMap instances.
+	 * 	<li>Create a FlashMap and make it available under the request attribute 
+	 * 	{@link #OUTPUT_FLASH_MAP_ATTRIBUTE}.
+	 * 	<li>Locate the FlashMap saved during the previous request and make it
+	 * 	available under the request attribute {@link #INPUT_FLASH_MAP_ATTRIBUTE}.
+	 * 	<li>Remove expired FlashMap instances.
 	 * </ul>
-	 * 
-	 * <p>If the {@link #CURRENT_FLASH_MAP_ATTRIBUTE} request attribute exists
-	 * in the current request, this method should return "false" immediately.
+	 * <p>If the {@link #OUTPUT_FLASH_MAP_ATTRIBUTE} request attribute exists
+	 * return "false" immediately.
 	 * 
 	 * @param request the current request
-	 * 
 	 * @return "true" if flash storage tasks were performed; "false" otherwise.
 	 */
 	boolean requestStarted(HttpServletRequest request);
 
 	/**
-	 * Access the current FlashMap through the request attribute
-	 * {@link #CURRENT_FLASH_MAP_ATTRIBUTE} and if it is not empty, save it 
-	 * in the underlying storage. 
-	 * 
+	 * Access the FlashMap with attributes added during the current request and
+	 * if it is not empty, save it in the underlying storage. 
 	 * <p>If the call to {@link #requestStarted} returned "false", this 
 	 * method is not invoked.
 	 */

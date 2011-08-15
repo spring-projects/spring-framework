@@ -1469,7 +1469,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		
 		assertEquals(200, response.getStatus());
 		assertEquals("messages/new", response.getForwardedUrl());
-		assertTrue(RequestContextUtils.getFlashMap(request).isEmpty());
+		assertTrue(RequestContextUtils.getOutputFlashMap(request).isEmpty());
 
 		// POST -> success
 		request = new MockHttpServletRequest("POST", "/messages");
@@ -1480,7 +1480,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		assertEquals(200, response.getStatus());
 		assertEquals("/messages/1?name=value", response.getRedirectedUrl());
-		assertEquals("yay!", RequestContextUtils.getFlashMap(request).get("successMessage"));
+		assertEquals("yay!", RequestContextUtils.getOutputFlashMap(request).get("successMessage"));
 
 		// GET after POST
 		request = new MockHttpServletRequest("GET", "/messages/1");
@@ -1491,7 +1491,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		assertEquals(200, response.getStatus());
 		assertEquals("Got: yay!", response.getContentAsString());
-		assertTrue(RequestContextUtils.getFlashMap(request).isEmpty());
+		assertTrue(RequestContextUtils.getOutputFlashMap(request).isEmpty());
 	}
 
 	/*

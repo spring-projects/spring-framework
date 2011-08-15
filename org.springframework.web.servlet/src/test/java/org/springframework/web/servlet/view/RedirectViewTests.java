@@ -115,7 +115,7 @@ public class RedirectViewTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("successMessage", "yay!");
-		request.setAttribute(FlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, flashMap);
+		request.setAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
 		rv.render(new ModelMap("id", "1"), request, response);
 		assertEquals(303, response.getStatus());
 		assertEquals("http://url.somewhere.com/path?id=1", response.getHeader("Location"));

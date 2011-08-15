@@ -54,7 +54,7 @@ public class DefaultFlashMapManagerTests {
 		boolean initialized = this.flashMapManager.requestStarted(this.request);
 
 		assertTrue("Current FlashMap not initialized on first call", initialized);
-		assertNotNull("Current FlashMap not found", RequestContextUtils.getFlashMap(request));
+		assertNotNull("Current FlashMap not found", RequestContextUtils.getOutputFlashMap(request));
 		
 		initialized = this.flashMapManager.requestStarted(this.request);
 		
@@ -62,38 +62,39 @@ public class DefaultFlashMapManagerTests {
 	}
 
 	@Test
-	public void lookupPreviousFlashMap() {
+	public void lookupInputFlashMap() {
 		FlashMap flashMap = new FlashMap();
+		flashMap.put("key", "value");
 
 		List<FlashMap> allMaps = createFlashMapsSessionAttribute();
 		allMaps.add(flashMap);
 
 		this.flashMapManager.requestStarted(this.request);
 		
-		assertSame(flashMap, request.getAttribute(DefaultFlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE));
-		assertEquals("Previous FlashMap should have been removed", 0, allMaps.size());
+		assertEquals(flashMap, request.getAttribute(DefaultFlashMapManager.INPUT_FLASH_MAP_ATTRIBUTE));
+		assertEquals("Input FlashMap should have been removed", 0, allMaps.size());
 	}
 	
 	@Test
-	public void lookupPreviousFlashMapExpectedUrlPath() {
+	public void lookupInputFlashMapExpectedUrlPath() {
 		FlashMap emptyFlashMap = new FlashMap();
 
 		FlashMap oneFlashMap = new FlashMap();
 		oneFlashMap.setExpectedRequestUri(null, "/one");
 
-		FlashMap oneOtherFlashMap = new FlashMap();
-		oneOtherFlashMap.setExpectedRequestUri(null, "/one/other");
+		FlashMap secondFlashMap = new FlashMap();
+		secondFlashMap.setExpectedRequestUri(null, "/one/two");
 		
 		List<FlashMap> allMaps = createFlashMapsSessionAttribute();
 		allMaps.add(emptyFlashMap);
 		allMaps.add(oneFlashMap);
-		allMaps.add(oneOtherFlashMap);
+		allMaps.add(secondFlashMap);
 		Collections.shuffle(allMaps);
 
 		this.request.setRequestURI("/one");
 		this.flashMapManager.requestStarted(this.request);
 		
-		assertSame(oneFlashMap, request.getAttribute(DefaultFlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE));
+		assertEquals(oneFlashMap, request.getAttribute(DefaultFlashMapManager.INPUT_FLASH_MAP_ATTRIBUTE));
 	}
 
 	@Test
@@ -116,7 +117,7 @@ public class DefaultFlashMapManagerTests {
 	public void saveFlashMap() throws InterruptedException {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("name", "value");
-		request.setAttribute(DefaultFlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, flashMap);
+		request.setAttribute(DefaultFlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
 
 		this.flashMapManager.setFlashMapTimeout(0);
 		this.flashMapManager.requestCompleted(this.request);
@@ -132,7 +133,7 @@ public class DefaultFlashMapManagerTests {
 
 	@Test
 	public void saveFlashMapIsEmpty() throws InterruptedException {
-		request.setAttribute(DefaultFlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE, new FlashMap());
+		request.setAttribute(DefaultFlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
 		this.flashMapManager.requestCompleted(this.request);
 
 		assertNull(getFlashMapsSessionAttribute());

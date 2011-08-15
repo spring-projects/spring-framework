@@ -516,10 +516,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		ServletInvocableHandlerMethod requestMappingMethod = createRequestMappingMethod(handlerMethod);
 		ModelFactory modelFactory = getModelFactory(handlerMethod);
 
-		FlashMap previousFlashMap = (FlashMap) request.getAttribute(FlashMapManager.PREVIOUS_FLASH_MAP_ATTRIBUTE);
-		
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		mavContainer.addAllAttributes(previousFlashMap);
+		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
 		modelFactory.initModel(webRequest, mavContainer, requestMappingMethod);
 		
 		SessionStatus sessionStatus = new SimpleSessionStatus();
@@ -539,8 +537,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			}
 			if (model instanceof RedirectModel) {
 				RedirectModel redirectModel = (RedirectModel) model;
-				FlashMap currentFlashMap = RequestContextUtils.getFlashMap(request);
-				currentFlashMap.putAll(redirectModel.getFlashAttributes());
+				FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
+				flashMap.putAll(redirectModel.getFlashAttributes());
 			}
 			return mav;				
 		}
