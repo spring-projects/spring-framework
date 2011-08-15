@@ -171,10 +171,9 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 
 	/**
 	 * Set the given serialized remote invocation as request body.
-	 * <p>The default implementation simply sets the serialized invocation
-	 * as the PostMethod's request body. This can be overridden, for example,
-	 * to write a specific encoding and potentially set appropriate HTTP
-	 * request headers.
+	 * <p>The default implementation simply sets the serialized invocation as the
+	 * PostMethod's request body. This can be overridden, for example, to write a
+	 * specific encoding and to potentially set appropriate HTTP request headers.
 	 * @param config the HTTP invoker configuration that specifies the target service
 	 * @param postMethod the PostMethod to set the request body on
 	 * @param baos the ByteArrayOutputStream that contains the serialized
@@ -228,11 +227,10 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	}
 
 	/**
-	 * Extract the response body from the given executed remote invocation
-	 * request.
-	 * <p>The default implementation simply fetches the PostMethod's response
-	 * body stream. If the response is recognized as GZIP response, the
-	 * InputStream will get wrapped in a GZIPInputStream.
+	 * Extract the response body from the given executed remote invocation request.
+	 * <p>The default implementation simply fetches the PostMethod's response body stream.
+	 * If the response is recognized as GZIP response, the InputStream will get wrapped
+	 * in a GZIPInputStream.
 	 * @param config the HTTP invoker configuration that specifies the target service
 	 * @param postMethod the PostMethod to read the response body from
 	 * @return an InputStream for the response body
@@ -255,7 +253,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 
 	/**
 	 * Determine whether the given response indicates a GZIP response.
-	 * <p>Default implementation checks whether the HTTP "Content-Encoding"
+	 * <p>The default implementation checks whether the HTTP "Content-Encoding"
 	 * header contains "gzip" (in any casing).
 	 * @param postMethod the PostMethod to check
 	 * @return whether the given response indicates a GZIP response
@@ -263,7 +261,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	protected boolean isGzipResponse(PostMethod postMethod) {
 		Header encodingHeader = postMethod.getResponseHeader(HTTP_HEADER_CONTENT_ENCODING);
 		return (encodingHeader != null && encodingHeader.getValue() != null &&
-				encodingHeader.getValue().toLowerCase().indexOf(ENCODING_GZIP) != -1);
+				encodingHeader.getValue().toLowerCase().contains(ENCODING_GZIP));
 	}
 
 }
