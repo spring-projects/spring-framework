@@ -49,9 +49,9 @@ import org.springframework.web.util.WebUtils;
  * <p>View that redirects to an absolute, context relative, or current request
  * relative URL. The URL may be a URI template in which case the URI template 
  * variables will be replaced with values available in the model. By default 
- * all primitive model attributes (or collections thereof), not used as URI
- * template variables, are exposed as HTTP query parameters, but this  
- * behavior can be changed by overriding the 
+ * all primitive model attributes (or collections thereof) are exposed as HTTP 
+ * query parameters (assuming they've not been used as URI template variables), 
+ * but this behavior can be changed by overriding the 
  * {@link #isEligibleProperty(String, Object)} method.
  * 
  * <p>A URL for this view is supposed to be a HTTP redirect URL, i.e.
@@ -264,11 +264,14 @@ public class RedirectView extends AbstractUrlBasedView {
 
 		FlashMap flashMap = RequestContextUtils.getFlashMap(request);
 		if (!CollectionUtils.isEmpty(flashMap)) {
-			flashMap.setExpectedUrl(request, targetUrl.toString()).setExpectedRequestParams(model);
+			flashMap.setExpectedUrlPath(request, targetUrl.toString());
 		}
-		
+
 		if (this.exposeModelAttributes) {
 			appendQueryProperties(targetUrl, model, enc);
+			if (!CollectionUtils.isEmpty(flashMap)) {
+				flashMap.setExpectedRequestParams(model);
+			}
 		}
 
 		return targetUrl.toString();
@@ -468,14 +471,22 @@ public class RedirectView extends AbstractUrlBasedView {
 			HttpServletRequest request, HttpServletResponse response, String targetUrl, boolean http10Compatible)
 			throws IOException {
 
+		String encodedRedirectURL = response.encodeRedirectURL(targetUrl);
+		
 		if (http10Compatible) {
-			// Always send status code 302.
-			response.sendRedirect(response.encodeRedirectURL(targetUrl));
+			if (this.statusCode != null) {
+				response.setStatus(this.statusCode.value());
+				response.setHeader("Location", encodedRedirectURL);
+			}
+			else {
+				// Send status code 302 by default.
+				response.sendRedirect(encodedRedirectURL);
+			}
 		}
 		else {
 			HttpStatus statusCode = getHttp11StatusCode(request, response, targetUrl);
 			response.setStatus(statusCode.value());
-			response.setHeader("Location", response.encodeRedirectURL(targetUrl));
+			response.setHeader("Location", encodedRedirectURL);
 		}
 	}
 
