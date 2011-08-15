@@ -19,6 +19,7 @@ package org.springframework.web.servlet.support;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
-import org.springframework.web.util.WebUtils;
 
 /**
  * A {@link FlashMapManager} that saves and retrieves FlashMap instances in the 
@@ -58,48 +58,34 @@ public class DefaultFlashMapManager implements FlashMapManager {
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * <p>This method never creates an HTTP session. The current FlashMap is 
-	 * exposed as a request attribute only and is not saved in the session 
-	 * until {@link #requestCompleted}.
+	 * <p>This method never creates an HTTP session. The new FlashMap created 
+	 * for the current request is exposed as a request attribute only and is 
+	 * not saved in the session until {@link #requestCompleted} is called.
 	 */
 	public boolean requestStarted(HttpServletRequest request) {
-		if (request.getAttribute(CURRENT_FLASH_MAP_ATTRIBUTE) != null) {
+		if (request.getAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE) != null) {
 			return false;
 		}
 
-		FlashMap currentFlashMap = new FlashMap();
-		request.setAttribute(CURRENT_FLASH_MAP_ATTRIBUTE, currentFlashMap);
+		FlashMap outputFlashMap = new FlashMap();
+		request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, outputFlashMap);
 		
-		FlashMap previousFlashMap = lookupPreviousFlashMap(request);
-		if (previousFlashMap != null) {
-			WebUtils.exposeRequestAttributes(request, previousFlashMap);
-			request.setAttribute(PREVIOUS_FLASH_MAP_ATTRIBUTE, previousFlashMap);
+		Map<String, ?> inputFlashMap = getFlashMap(request);
+		if (inputFlashMap != null) {
+			request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, inputFlashMap);
 		}
 		
-		// Remove expired flash maps
-		List<FlashMap> allMaps = retrieveFlashMaps(request, false);
-		if (allMaps != null && !allMaps.isEmpty()) {
-			List<FlashMap> expiredMaps = new ArrayList<FlashMap>();
-			for (FlashMap flashMap : allMaps) {
-				if (flashMap.isExpired()) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Removing expired FlashMap: " + flashMap);
-					}
-					expiredMaps.add(flashMap);
-				}
-			}
-			allMaps.removeAll(expiredMaps);
-		}
+		removeExpiredFlashMaps(request);
 		
 		return true;
 	}
 
 	/**
-	 * Return the FlashMap from the previous request.
+	 * Return the flash attributes saved during the previous request if any.
 	 * 
-	 * @return the FlashMap from the previous request; or {@code null} if none.
+	 * @return a read-only Map; or {@code null} if not found.
 	 */
-	private FlashMap lookupPreviousFlashMap(HttpServletRequest request) {
+	private Map<String, ?> getFlashMap(HttpServletRequest request) {
 		List<FlashMap> allMaps = retrieveFlashMaps(request, false);
 		if (CollectionUtils.isEmpty(allMaps)) {
 			return null;
@@ -123,7 +109,7 @@ public class DefaultFlashMapManager implements FlashMapManager {
 			Collections.sort(matches);
 			FlashMap match = matches.remove(0);
 			allMaps.remove(match);
-			return match;
+			return Collections.unmodifiableMap(match);
 		}
 		
 		return null;
@@ -156,16 +142,32 @@ public class DefaultFlashMapManager implements FlashMapManager {
 		return allMaps;
 	}
 
+	private void removeExpiredFlashMaps(HttpServletRequest request) {
+		List<FlashMap> allMaps = retrieveFlashMaps(request, false);
+		if (allMaps != null && !allMaps.isEmpty()) {
+			List<FlashMap> expiredMaps = new ArrayList<FlashMap>();
+			for (FlashMap flashMap : allMaps) {
+				if (flashMap.isExpired()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Removing expired FlashMap: " + flashMap);
+					}
+					expiredMaps.add(flashMap);
+				}
+			}
+			allMaps.removeAll(expiredMaps);
+		}
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 * 
 	 * <p>The HTTP session is not created if the current FlashMap instance is empty.
 	 */
 	public void requestCompleted(HttpServletRequest request) {
-		FlashMap flashMap = (FlashMap) request.getAttribute(CURRENT_FLASH_MAP_ATTRIBUTE);
+		FlashMap flashMap = (FlashMap) request.getAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE);
 		if (flashMap == null) {
 			throw new IllegalStateException(
-					"Did not find a FlashMap exposed as the request attribute " + CURRENT_FLASH_MAP_ATTRIBUTE);
+					"Did not find a FlashMap exposed as the request attribute " + OUTPUT_FLASH_MAP_ATTRIBUTE);
 		}
 		
 		if (!flashMap.isEmpty()) {

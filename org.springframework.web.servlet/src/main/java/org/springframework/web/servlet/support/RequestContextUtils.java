@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.support;
 
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
@@ -27,8 +28,8 @@ import org.springframework.ui.context.ThemeSource;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.FlashMap;
+import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ThemeResolver;
 
@@ -156,12 +157,22 @@ public abstract class RequestContextUtils {
 	}
 
 	/**
-	 * Retrieves the flash map to use for the current request.
+	 * Return a read-only Map with flash attributes saved during the previous request. 
+	 * @param request the current request
+	 * @return a read-only Map, or {@code null}
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<String, ?> getInputFlashMap(HttpServletRequest request) {
+		return (Map<String, ?>) request.getAttribute(FlashMapManager.INPUT_FLASH_MAP_ATTRIBUTE);
+	}
+
+	/**
+	 * Return a FlashMap to add attributes to during the current request.
 	 * @param request current HTTP request
 	 * @return the flash map for the current request; never {@code null}.
 	 */
-	public static FlashMap getFlashMap(HttpServletRequest request) {
-		return (FlashMap) request.getAttribute(FlashMapManager.CURRENT_FLASH_MAP_ATTRIBUTE);
+	public static FlashMap getOutputFlashMap(HttpServletRequest request) {
+		return (FlashMap) request.getAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE);
 	}
 
 }

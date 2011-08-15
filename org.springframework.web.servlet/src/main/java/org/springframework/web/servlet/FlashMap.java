@@ -41,11 +41,11 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	
 	private final Map<String, String> expectedRequestParameters = new LinkedHashMap<String, String>();
 	
-	private UrlPathHelper urlPathHelper = new UrlPathHelper();
-	
 	private long expirationStartTime;
 	
 	private int timeToLive;
+
+	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
 	
 	/**
 	 * Provide a URL to identify the target request for this FlashMap.
