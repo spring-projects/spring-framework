@@ -389,9 +389,17 @@ public class RedirectView extends AbstractUrlBasedView {
 			HttpServletRequest request, HttpServletResponse response, String targetUrl, boolean http10Compatible)
 			throws IOException {
 
+		String encodedRedirectURL = response.encodeRedirectURL(targetUrl);
+		
 		if (http10Compatible) {
-			// Always send status code 302.
-			response.sendRedirect(response.encodeRedirectURL(targetUrl));
+			if (this.statusCode != null) {
+				response.setStatus(this.statusCode.value());
+				response.setHeader("Location", encodedRedirectURL);
+			}
+			else {
+				// Send status code 302 by default.
+				response.sendRedirect(encodedRedirectURL);
+			}
 		}
 		else {
 			HttpStatus statusCode = getHttp11StatusCode(request, response, targetUrl);
