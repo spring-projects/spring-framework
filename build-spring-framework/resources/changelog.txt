@@ -3,19 +3,22 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1 RC1 (2011-08-xx)
+Changes in version 3.1 RC1 (2011-09-xx)
 ---------------------------------------
 
-* updated Quartz support package for full Quartz 2.0 support (compatibility with Quartz 1.5+)
+* updated Quartz support package for Quartz 2.0 support (compatibility with Quartz 1.5+)
 * updated JBossLoadTimeWeaver to automatically detect and support JBoss AS 7 as well
 * support for load-time weaving on WebSphere 7 and 8
 * support for Hibernate 4.0 beta as a JPA provider
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
+* introduced ForkJoinPoolFactoryBean for Java 7 (alternative: add new jsr166.jar to Java 6)
 * DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
 * DefaultListableBeanFactory's getBean(name, type) attempts type conversion if necessary
 * DefaultListableBeanFactory allows for init methods to register further bean definitions (again)
 * XmlBeanDefinitionReader accepts description subelement within map entry as well (as per the XSD)
 * ConfigurationClassPostProcessor supports use of same processor instance with several factories
+* SpringBeanAutowiringSupport is able to process @Value annotations on any given target instance
+* overridden @PersistenceContext annotations on subclass methods are being processed correctly
 * DataBinder uses a default limit of 256 for array/collection auto-growing
 * added "autoGrowNestedPaths" property to ConfigurableWebBindingInitializer
 * added "getMultipartContentType(String)" method to MultipartRequest interface
@@ -23,6 +26,7 @@ Changes in version 3.1 RC1 (2011-08-xx)
 * revised Servlet 3.0 based StandardServletMultipartResolver for correct param/file distinction
 * MultipartFilter uses a Servlet 3.0 based StandardServletMultipartResolver by default
 * added RequestPartServletServerHttpRequest and corresponding @RequestPart support in Spring MVC
+* added "connectTimeout" and "readTimeout" properties to Simple/CommonsClientHttpRequestFactory
 * fixed @ExceptionHandler exception type matching (ExceptionDepthComparator)
 * ResourceHttpRequestHandler detects invalid directory traversal in given path
 * HtmlUtils properly escapes single quotes as well
@@ -41,7 +45,7 @@ Changes in version 3.1 RC1 (2011-08-xx)
 * added "disabled" property to EhCacheFactoryBean
 * AnnotationConfigContextLoader now detects default configuration classes within test classes
 * TestContext now uses MergedContextConfiguration for the ContextCache key
-* introduced DelegatingSmartContextLoader as the new default ContextLoader for the TestContext framework
+* introduced DelegatingSmartContextLoader as new default ContextLoader for TestContext framework
 * extended Servlet API mocks for Servlet 3.0 forward compatibility as far as possible
 * made MockHttpServletResponse compatible with Servlet 3.0 getHeader(s) method returning Strings
 * added getHeaderValue(s) method to MockHttpServletResponse for raw value access
