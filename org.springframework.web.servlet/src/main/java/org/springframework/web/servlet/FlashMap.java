@@ -37,7 +37,7 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 
 	private static final long serialVersionUID = 1L;
 	
-	private String expectedUrlPath;
+	private String expectedRequestUri;
 	
 	private final Map<String, String> expectedRequestParameters = new LinkedHashMap<String, String>();
 	
@@ -57,24 +57,27 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	 * @param request the current request, used to normalize relative URLs
 	 * @param url an absolute URL, a URL path, or a relative URL, never {@code null}
 	 */
-	public FlashMap setExpectedUrl(HttpServletRequest request, String url) {
+	public FlashMap setExpectedRequestUri(HttpServletRequest request, String url) {
 		Assert.notNull(url, "Expected URL must not be null");
-		String urlPath = extractUrlPath(url);
-		this.expectedUrlPath = urlPath.startsWith("/") ? urlPath : normalizeRelativeUrl(request, urlPath);
+		String path = extractRequestUri(url);
+		this.expectedRequestUri = path.startsWith("/") ? path : normalizeRelativePath(request, path);
 		return this;
 	}
 
-	private String extractUrlPath(String url) {
-		int index = url.indexOf("://");
+	private String extractRequestUri(String url) {
+		int index = url.indexOf("?");
 		if (index != -1) {
-			index = url.indexOf('/', index + 3);
-			url = (index != -1) ? url.substring(index) : "";
+			url = url.substring(0, index);
 		}
-		index = url.indexOf('?');
-		return (index != -1) ? url.substring(0, index) : url;  
+		index = url.indexOf("://");
+		if (index != -1) {
+			int pathBegin = url.indexOf("/", index + 3);
+			url = (pathBegin != -1 ) ? url.substring(pathBegin) : "";
+		}
+		return url;
 	}
 
-	private String normalizeRelativeUrl(HttpServletRequest request, String relativeUrl) {
+	private String normalizeRelativePath(HttpServletRequest request, String relativeUrl) {
 		String requestUri = this.urlPathHelper.getRequestUri(request);
 		relativeUrl = requestUri.substring(0, requestUri.lastIndexOf('/') + 1) + relativeUrl;
 		return StringUtils.cleanPath(relativeUrl);
@@ -117,7 +120,7 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 
 	/**
 	 * Whether this FlashMap matches to the given request by checking 
-	 * expectations provided via {@link #setExpectedUrl} and 
+	 * expectations provided via {@link #setExpectedRequestUri} and 
 	 * {@link #setExpectedRequestParams}.
 	 * 
 	 * @param request the current request
@@ -125,8 +128,9 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	 * @return "true" if the expectations match or there are no expectations.
 	 */
 	public boolean matches(HttpServletRequest request) {
-		if (this.expectedUrlPath != null) {
-			if (!matchPathsIgnoreTrailingSlash(this.urlPathHelper.getRequestUri(request), this.expectedUrlPath)) {
+		if (this.expectedRequestUri != null) {
+			String requestUri = this.urlPathHelper.getRequestUri(request);
+			if (!matchPathsIgnoreTrailingSlash(requestUri, this.expectedRequestUri)) {
 				return false;
 			}
 		}
@@ -178,8 +182,8 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	 * current request via {@link FlashMap#matches}.
 	 */
 	public int compareTo(FlashMap other) {
-		int thisUrlPath = (this.expectedUrlPath != null) ? 1 : 0;
-		int otherUrlPath = (other.expectedUrlPath != null) ? 1 : 0;
+		int thisUrlPath = (this.expectedRequestUri != null) ? 1 : 0;
+		int otherUrlPath = (other.expectedRequestUri != null) ? 1 : 0;
 		if (thisUrlPath != otherUrlPath) {
 			return otherUrlPath - thisUrlPath;
 		}
@@ -192,7 +196,7 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		result.append("[Attributes=").append(super.toString());
-		result.append(", expecteUrlPath=").append(this.expectedUrlPath);
+		result.append(", expecteRequestUri=").append(this.expectedRequestUri);
 		result.append(", expectedRequestParameters=" + this.expectedRequestParameters.toString()).append("]");
 		return result.toString();
 	}
