@@ -102,7 +102,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setConnectionTimeout(int)
 	 */
 	public void setConnectTimeout(int timeout) {
-		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
+		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
 		this.httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
 	}
 
@@ -114,7 +114,7 @@ public class CommonsHttpInvokerRequestExecutor extends AbstractHttpInvokerReques
 	 * @see #DEFAULT_READ_TIMEOUT_MILLISECONDS
 	 */
 	public void setReadTimeout(int timeout) {
-		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
+		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
 		this.httpClient.getHttpConnectionManager().getParams().setSoTimeout(timeout);
 	}
 
