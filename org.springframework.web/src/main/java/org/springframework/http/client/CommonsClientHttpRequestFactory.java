@@ -96,7 +96,7 @@ public class CommonsClientHttpRequestFactory implements ClientHttpRequestFactory
 	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setConnectionTimeout(int)
 	 */
 	public void setConnectTimeout(int timeout) {
-		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
+		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
 		this.httpClient.getHttpConnectionManager().getParams().setConnectionTimeout(timeout);
 	}
 
@@ -107,7 +107,7 @@ public class CommonsClientHttpRequestFactory implements ClientHttpRequestFactory
 	 * @see org.apache.commons.httpclient.params.HttpConnectionManagerParams#setSoTimeout(int)
 	 */
 	public void setReadTimeout(int timeout) {
-		Assert.isTrue(timeout < 0, "Timeout must be a non-negative value");
+		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
 		getHttpClient().getHttpConnectionManager().getParams().setSoTimeout(timeout);
 	}
 
