@@ -86,7 +86,7 @@ public abstract class AbstractAnnotationTests {
 		Object r2 = service.cache(o1);
 
 		assertSame(r1, r2);
-		service.invalidate(o1, null);
+		service.evict(o1, null);
 		Object r3 = service.cache(o1);
 		Object r4 = service.cache(o1);
 		assertNotSame(r1, r3);

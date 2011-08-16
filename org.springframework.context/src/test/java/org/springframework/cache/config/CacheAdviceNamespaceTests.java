@@ -18,28 +18,13 @@ package org.springframework.cache.config;
 
 
 /**
- * Basic service interface.
- * 
  * @author Costin Leau
  */
-public interface CacheableService<T> {
+public class CacheAdviceNamespaceTests extends AbstractAnnotationTests {
 
-	T cache(Object arg1);
 
-	void invalidate(Object arg1);
-
-	void evict(Object arg1, Object arg2);
-
-	T conditional(int field);
-
-	T key(Object arg1, Object arg2);
-
-	T name(Object arg1);
-
-	T nullValue(Object arg1);
-
-	Number nullInvocations();
-
-	T rootVars(Object arg1);
-
+	@Override
+	protected String getConfig() {
+		return "/org/springframework/cache/config/cache-advice.xml";
+	}
 }

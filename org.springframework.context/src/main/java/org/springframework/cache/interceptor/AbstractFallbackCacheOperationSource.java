@@ -117,11 +117,6 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		return new DefaultCacheKey(method, targetClass);
 	}
 
-	/**
-	 * Same signature as {@link #getTransactionAttribute}, but doesn't cache the result.
-	 * {@link #getTransactionAttribute} is effectively a caching decorator for this method.
-	 * @see #getTransactionAttribute
-	 */
 	private CacheOperation computeCacheOperationDefinition(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {

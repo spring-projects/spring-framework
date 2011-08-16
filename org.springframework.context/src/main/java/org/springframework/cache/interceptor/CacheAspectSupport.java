@@ -44,12 +44,8 @@ import org.springframework.util.StringUtils;
  *
  * <p>Subclasses are responsible for calling methods in this class in the correct order.
  *
- * <p>If no caching name has been specified in the <code>CacheOperationDefinition</code>,
- * the exposed name will be the <code>fully-qualified class name + "." + method name</code>
- * (by default).
- *
  * <p>Uses the <b>Strategy</b> design pattern. A <code>CacheManager</code>
- * implementation will perform the actual transaction management, and a
+ * implementation will perform the actual cache management, and a
  * <code>CacheDefinitionSource</code> is used for determining caching operation definitions.
  *
  * <p>A cache aspect is serializable if its <code>CacheManager</code>
@@ -154,6 +150,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
 		return ClassUtils.getQualifiedMethodName(specificMethod);
 	}
+
 
 	protected Collection<Cache> getCaches(CacheOperation operation) {
 		Set<String> cacheNames = operation.getCacheNames();

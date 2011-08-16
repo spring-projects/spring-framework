@@ -43,7 +43,7 @@ public class AnnotatedClassCacheableService implements CacheableService {
 	}
 
 	@CacheEvict(value = "default", key = "#p0")
-	public void invalidate(Object arg1, Object arg2) {
+	public void evict(Object arg1, Object arg2) {
 	}
 
 	@Cacheable(value = "default", key = "#p0")

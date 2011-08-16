@@ -17,6 +17,7 @@
 package org.springframework.cache.config;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
+import org.w3c.dom.Element;
 
 /**
  * <code>NamespaceHandler</code> allowing for the configuration of
@@ -30,8 +31,18 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  */
 public class CacheNamespaceHandler extends NamespaceHandlerSupport {
 
+	static final String CACHE_MANAGER_ATTRIBUTE = "cache-manager";
+	static final String DEFAULT_CACHE_MANAGER_BEAN_NAME = "cacheManager";
+
+	static String extractCacheManager(Element element) {
+		return (element.hasAttribute(CacheNamespaceHandler.CACHE_MANAGER_ATTRIBUTE) ? element
+				.getAttribute(CacheNamespaceHandler.CACHE_MANAGER_ATTRIBUTE)
+				: CacheNamespaceHandler.DEFAULT_CACHE_MANAGER_BEAN_NAME);
+	}
+
 	public void init() {
 		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenCacheBeanDefinitionParser());
+		registerBeanDefinitionParser("advice", new CacheAdviceParser());
 	}
 
 }
