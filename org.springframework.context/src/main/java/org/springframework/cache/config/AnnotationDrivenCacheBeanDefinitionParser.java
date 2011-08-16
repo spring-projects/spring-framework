@@ -48,11 +48,6 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  */
 class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser {
 
-	private static final String CACHE_MANAGER_ATTRIBUTE = "cache-manager";
-
-	private static final String DEFAULT_CACHE_MANAGER_BEAN_NAME = "cacheManager";
-
-
 	/**
 	 * Parses the '<code>&lt;cache:annotation-driven/&gt;</code>' tag. Will
 	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator}
@@ -71,13 +66,9 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 		return null;
 	}
 
-	private static String extractCacheManager(Element element) {
-		return (element.hasAttribute(CACHE_MANAGER_ATTRIBUTE) ? element.getAttribute(CACHE_MANAGER_ATTRIBUTE)
-				: DEFAULT_CACHE_MANAGER_BEAN_NAME);
-	}
-
 	private static void registerCacheManagerProperty(Element element, BeanDefinition def) {
-		def.getPropertyValues().add("cacheManager", new RuntimeBeanReference(extractCacheManager(element)));
+		def.getPropertyValues().add("cacheManager",
+				new RuntimeBeanReference(CacheNamespaceHandler.extractCacheManager(element)));
 	}
 
 	/**
@@ -124,7 +115,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				interceptorDef.setSource(eleSource);
 				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				registerCacheManagerProperty(element, interceptorDef);
-				interceptorDef.getPropertyValues().add("cacheOperationSource", new RuntimeBeanReference(sourceName));
+				interceptorDef.getPropertyValues().add("cacheOperationSources", new RuntimeBeanReference(sourceName));
 				String interceptorName = parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
 
 				// Create the CacheAdvisor definition.
