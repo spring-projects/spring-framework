@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.scheduling.support;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -30,7 +28,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
 import org.springframework.scheduling.TriggerContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Dave Syer
@@ -668,6 +669,28 @@ public class CronTriggerTests {
 		CronTrigger trigger1 = new CronTrigger("*  *  * *  1 *", timeZone);
 		CronTrigger trigger2 = new CronTrigger("* * * * 1 *", timeZone);
 		assertEquals(trigger1, trigger2);
+	}
+
+	@Test
+	public void testMonthSequence() throws Exception {
+		CronTrigger trigger = new CronTrigger("0 30 23 30 1/3 ?", timeZone);
+		calendar.set(2010, 11, 30);
+		Date date = calendar.getTime();
+		// set expected next trigger time
+		calendar.set(Calendar.HOUR_OF_DAY, 23);
+		calendar.set(Calendar.MINUTE, 30);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.add(Calendar.MONTH, 1);
+		TriggerContext context1 = getTriggerContext(date);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context1));
+		// Next trigger is 3 months latter
+		calendar.add(Calendar.MONTH, 3);
+		TriggerContext context2 = getTriggerContext(date);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context2));
+		// Next trigger is 3 months latter
+		calendar.add(Calendar.MONTH, 3);
+		TriggerContext context3 = getTriggerContext(date);
+		assertEquals(calendar.getTime(), date = trigger.nextExecutionTime(context3));
 	}
 
 
