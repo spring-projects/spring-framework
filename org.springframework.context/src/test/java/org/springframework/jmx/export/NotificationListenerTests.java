@@ -18,7 +18,6 @@ package org.springframework.jmx.export;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
 import javax.management.MalformedObjectNameException;
@@ -41,7 +40,7 @@ import org.springframework.jmx.support.ObjectNameManager;
  */
 public class NotificationListenerTests extends AbstractMBeanServerTests {
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void testRegisterNotificationListenerForMBean() throws Exception {
 		ObjectName objectName = ObjectName.getInstance("spring:name=Test");
 		JmxTestBean bean = new JmxTestBean();
@@ -427,7 +426,8 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		assertEquals("Listener notified after destruction", 1, listener.getCount(attributeName));
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private static class CountingAttributeChangeNotificationListener implements NotificationListener {
 
 		private Map attributeCounts = new HashMap();
@@ -461,6 +461,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 			return this.attributeHandbacks.get(attributeName);
 		}
 	}
+
 
 	public static class SelfNamingTestBean implements SelfNaming {
 
