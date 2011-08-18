@@ -27,7 +27,7 @@ import org.springframework.beans.factory.InitializingBean;
  * May be used on Java 7 as well as on Java 6 with <code>jsr166.jar</code> on the classpath
  * (ideally on the VM bootstrap classpath).
  *
- * <p>For details on the ForkJoinPool API and its its use with RecursiveActions, see the
+ * <p>For details on the ForkJoinPool API and its use with RecursiveActions, see the
  * <a href="http://download.java.net/jdk7/docs/api/java/util/concurrent/ForkJoinPool.html">JDK 7 javadoc</a>.
  *
  * <p><code>jsr166.jar</code>, containing <code>java.util.concurrent</code> updates for Java 6, can be obtained
