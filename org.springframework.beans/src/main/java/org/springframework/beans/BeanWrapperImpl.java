@@ -611,7 +611,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private Object setDefaultValue(PropertyTokenHolder tokens) {
 		PropertyValue pv = createDefaultPropertyValue(tokens);
 		setPropertyValue(tokens, pv);
-		return pv.getValue();
+		return getPropertyValue(tokens);
 	}
 
 	private PropertyValue createDefaultPropertyValue(PropertyTokenHolder tokens) {
