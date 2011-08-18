@@ -1,5 +1,5 @@
 # common dependency versions
 aspectj.version=1.6.8.RELEASE
 slf4j.version=1.5.3
-junit.version=4.8.1
+junit.version=4.8.2
 testng.version=5.12.1
