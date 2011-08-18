@@ -32,7 +32,7 @@ import org.junit.Ignore;
  * @author Rob Harrop
  */
 @Ignore // see https://issuetracker.springsource.com/browse/BRITS-235
-public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTests {
+public class RemoteMBeanClientInterceptorTestsIgnore extends MBeanClientInterceptorTests {
 
 	private static final String SERVICE_URL = "service:jmx:jmxmp://localhost:9876";
 

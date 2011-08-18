@@ -35,7 +35,7 @@ import org.springframework.jmx.AbstractMBeanServerTests;
  * @author Rob Harrop
  */
 @Ignore // see https://issuetracker.springsource.com/browse/BRITS-235
-public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
+public class ConnectorServerFactoryBeanTestsIgnore extends AbstractMBeanServerTests {
 
 	private static final String OBJECT_NAME = "spring:type=connector,name=test";
 
