@@ -36,7 +36,7 @@ public class JndiPropertySourceTests {
 
 	@Test
 	public void nonExistentProperty() {
-		JndiPropertySource ps = new JndiPropertySource();
+		JndiPropertySource ps = new JndiPropertySource("jndiProperties");
 		assertThat(ps.getProperty("bogus"), nullValue());
 	}
 
@@ -55,7 +55,7 @@ public class JndiPropertySourceTests {
 		jndiLocator.setResourceRef(true);
 		jndiLocator.setJndiTemplate(jndiTemplate);
 
-		JndiPropertySource ps = new JndiPropertySource(jndiLocator);
+		JndiPropertySource ps = new JndiPropertySource("jndiProperties", jndiLocator);
 		assertThat((String)ps.getProperty("p1"), equalTo("v1"));
 	}
 
@@ -74,7 +74,7 @@ public class JndiPropertySourceTests {
 		jndiLocator.setResourceRef(true);
 		jndiLocator.setJndiTemplate(jndiTemplate);
 
-		JndiPropertySource ps = new JndiPropertySource(jndiLocator);
+		JndiPropertySource ps = new JndiPropertySource("jndiProperties", jndiLocator);
 		assertThat((String)ps.getProperty("p1"), equalTo("v1"));
 	}
 

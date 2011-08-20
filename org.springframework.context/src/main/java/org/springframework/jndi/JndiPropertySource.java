@@ -35,14 +35,12 @@ import org.springframework.core.env.PropertySource;
  * be specified using {@link JndiLocatorDelegate#setJndiEnvironment(java.util.Properties)}
  * prior to construction of the {@code JndiPropertySource}.
  *
- * <p>{@link org.springframework.web.context.support.StandardServletEnvironment
- * StandardServletEnvironment} allows for declaratively including a
- * {@code JndiPropertySource} through its support for a {@link
- * org.springframework.web.context.support.StandardServletEnvironment#JNDI_PROPERTY_SOURCE_ENABLED
- * JNDI_PROPERTY_SOURCE_ENABLED} context-param, but any customization of the underlying
- * {@link JndiLocatorDelegate} will typically be done within an {@link
- * org.springframework.context.ApplicationContextInitializer ApplicationContextInitializer}
- * or {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializer}.
+ * <p>Note that {@link org.springframework.web.context.support.StandardServletEnvironment
+ * StandardServletEnvironment} includes a {@code JndiPropertySource} by default, and any
+ * customization of the underlying {@link JndiLocatorDelegate} may be performed within an
+ * {@link org.springframework.context.ApplicationContextInitializer
+ * ApplicationContextInitializer} or {@link org.springframework.web.WebApplicationInitializer
+ * WebApplicationInitializer}.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -54,18 +52,6 @@ import org.springframework.core.env.PropertySource;
  */
 public class JndiPropertySource extends PropertySource<JndiLocatorDelegate> {
 
-	/** JNDI context property source name: {@value} */
-	public static final String JNDI_PROPERTY_SOURCE_NAME = "jndiPropertySource";
-
-	/**
-	 * Create a new {@code JndiPropertySource} with the default name
-	 * {@value #JNDI_PROPERTY_SOURCE_NAME} and a {@link JndiLocatorDelegate} configured
-	 * to prefix any names with "java:comp/env/".
-	 */
-	public JndiPropertySource() {
-		this(JNDI_PROPERTY_SOURCE_NAME);
-	}
-
 	/**
 	 * Create a new {@code JndiPropertySource} with the given name
 	 * and a {@link JndiLocatorDelegate} configured to prefix any names with
@@ -73,14 +59,6 @@ public class JndiPropertySource extends PropertySource<JndiLocatorDelegate> {
 	 */
 	public JndiPropertySource(String name) {
 		this(name, createDefaultJndiLocator());
-	}
-
-	/**
-	 * Create a new {@code JndiPropertySource} with the default name
-	 * {@value #JNDI_PROPERTY_SOURCE_NAME} and the given {@code JndiLocatorDelegate}.
-	 */
-	public JndiPropertySource(JndiLocatorDelegate jndiLocator) {
-		this(JNDI_PROPERTY_SOURCE_NAME, jndiLocator);
 	}
 
 	/**
