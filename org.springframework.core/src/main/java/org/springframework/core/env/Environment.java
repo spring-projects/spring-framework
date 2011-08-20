@@ -97,12 +97,11 @@ public interface Environment extends PropertyResolver {
 	String[] getDefaultProfiles();
 
 	/**
-	 * @return whether one or more of the given profiles is active, or in the case of no
+	 * Return whether one or more of the given profiles is active or, in the case of no
 	 * explicit active profiles, whether one or more of the given profiles is included in
 	 * the set of default profiles
-	 * @throws IllegalArgumentException unless at least one profile has been specified
-	 * @throws IllegalArgumentException if any profile is the empty string or consists
-	 * only of whitespace
+	 * @throws IllegalArgumentException if called with zero arguments
+	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only
 	 * @see #getActiveProfiles
 	 * @see #getDefaultProfiles
 	 */

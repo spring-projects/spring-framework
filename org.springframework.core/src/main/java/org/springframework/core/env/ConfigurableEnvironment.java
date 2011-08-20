@@ -34,10 +34,13 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * Specify the set of profiles active for this {@code Environment}. Profiles are
 	 * evaluated during container bootstrap to determine whether bean definitions
 	 * should be registered with the container.
+	 * <p>Any existing active profiles will be replaced with the given arguments; call
+	 * with zero arguments to clear the current set of active profiles.
 	 *
 	 * @see #setDefaultProfiles
 	 * @see org.springframework.context.annotation.Profile
 	 * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
+	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only
 	 */
 	void setActiveProfiles(String... profiles);
 
@@ -45,6 +48,7 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * Specify the set of profiles to be made active by default if no other profiles
 	 * are explicitly made active through {@link #setActiveProfiles}.
 	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
+	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only
 	 */
 	void setDefaultProfiles(String... profiles);
 
