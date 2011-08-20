@@ -19,12 +19,11 @@ package org.springframework.web.context.support;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySource.StubPropertySource;
-import org.springframework.core.env.PropertySources;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.jndi.JndiPropertySource;
 
 /**
@@ -32,20 +31,13 @@ import org.springframework.jndi.JndiPropertySource;
  * applications. All web-related (servlet-based) {@code ApplicationContext} classes
  * initialize an instance by default.
  *
- * <p>Contributes {@code ServletConfig}- and {@code ServletContext}-based
- * {@link PropertySource} instances. See the {@link #customizePropertySources} method
- * for details.
- *
- * <p>After initial bootstrapping, property sources will be searched for the presence of a
- * "jndiPropertySourceEnabled" property; if found, a {@link JndiPropertySource} will be
- * added to this environment's {@link PropertySources}, with precedence higher than system
- * properties and environment variables, but lower than that of ServletContext and
- * ServletConfig init params.
+ * <p>Contributes {@code ServletConfig}, {@code ServletContext}, and JNDI-based
+ * {@link PropertySource} instances. See {@link #customizePropertySources} method
+ * documentation for details.
  *
  * @author Chris Beams
  * @since 3.1
  * @see StandardEnvironment
- * @see StandardPortletEnvironment
  */
 public class StandardServletEnvironment extends StandardEnvironment {
 
@@ -55,11 +47,8 @@ public class StandardServletEnvironment extends StandardEnvironment {
 	/** Servlet config init parameters property source name: {@value} */
 	public static final String SERVLET_CONFIG_PROPERTY_SOURCE_NAME = "servletConfigInitParams";
 
-	/**
-	 * Name of property used to determine if a {@link JndiPropertySource}
-	 * should be registered by default: {@value}
-	 */
-	public static final String JNDI_PROPERTY_SOURCE_ENABLED_FLAG = "jndiPropertySourceEnabled";
+	/** JNDI property source name: {@value} */
+	public static final String JNDI_PROPERTY_SOURCE_NAME = "jndiProperties";
 
 
 	/**
@@ -68,21 +57,18 @@ public class StandardServletEnvironment extends StandardEnvironment {
 	 * <ul>
 	 * <li>{@value #SERVLET_CONFIG_PROPERTY_SOURCE_NAME}
 	 * <li>{@value #SERVLET_CONTEXT_PROPERTY_SOURCE_NAME}
-	 * <li>(optionally) {@link JndiPropertySource#JNDI_PROPERTY_SOURCE_NAME "jndiPropertySource"}
+	 * <li>{@value #JNDI_PROPERTY_SOURCE_NAME}
 	 * </ul>
 	 * <p>Properties present in {@value #SERVLET_CONFIG_PROPERTY_SOURCE_NAME} will
-	 * take precedence over those in {@value #SERVLET_CONTEXT_PROPERTY_SOURCE_NAME}.
+	 * take precedence over those in {@value #SERVLET_CONTEXT_PROPERTY_SOURCE_NAME}, and
+	 * properties found in either of the above take precedence over those found in
+	 * {@value #JNDI_PROPERTY_SOURCE_NAME}.
 	 * <p>Properties in any of the above will take precedence over system properties and
 	 * environment variables contributed by the {@link StandardEnvironment} superclass.
 	 * <p>The {@code Servlet}-related property sources are added as stubs for now, and
 	 * will be {@linkplain WebApplicationContextUtils#initServletPropertySources fully
 	 * initialized} once the actual {@link ServletConfig} and {@link ServletContext}
 	 * objects are available.
-	 * <p>If the {@link JndiPropertySource#JNDI_PROPERTY_SOURCE_ENABLED_FLAG "jndiPropertySourceEnabled"}
-	 * property is present in any of the default property sources, a
-	 * {@link JndiPropertySource} will be added as well, with precedence lower than
-	 * servlet property sources, but higher than system properties and environment
-	 * variables.
 	 * @see StandardEnvironment#customizePropertySources
 	 * @see org.springframework.core.env.AbstractEnvironment#customizePropertySources
 	 * @see ServletConfigPropertySource
@@ -95,10 +81,7 @@ public class StandardServletEnvironment extends StandardEnvironment {
 	protected void customizePropertySources(MutablePropertySources propertySources) {
 		propertySources.addLast(new StubPropertySource(SERVLET_CONFIG_PROPERTY_SOURCE_NAME));
 		propertySources.addLast(new StubPropertySource(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
+		propertySources.addLast(new JndiPropertySource(JNDI_PROPERTY_SOURCE_NAME));
 		super.customizePropertySources(propertySources);
-
-		if (this.getProperty(JNDI_PROPERTY_SOURCE_ENABLED_FLAG, boolean.class, false)) {
-			propertySources.addAfter(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, new JndiPropertySource());
-		}
 	}
 }
