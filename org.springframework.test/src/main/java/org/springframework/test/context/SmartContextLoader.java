@@ -22,12 +22,12 @@ import org.springframework.context.ApplicationContext;
  * <p>Strategy interface for loading an {@link ApplicationContext application context}
  * for an integration test managed by the Spring TestContext Framework.
  * 
- * <p>The {@code SmartContextLoader} SPI supersedes the {@link ContextLoader}
- * SPI introduced in Spring 2.5: a {@code SmartContextLoader} can process both
- * resource locations and configuration classes. Furthermore, a {@code SmartContextLoader}
- * can set active bean definition profiles in the context that it loads (see
- * {@link MergedContextConfiguration#getActiveProfiles()} and
- * {@link #loadContext(MergedContextConfiguration)}).
+ * <p>The {@code SmartContextLoader} SPI supersedes the {@link ContextLoader} SPI
+ * introduced in Spring 2.5: a {@code SmartContextLoader} can choose to process
+ * either resource locations or configuration classes. Furthermore, a
+ * {@code SmartContextLoader} can set active bean definition profiles in the
+ * context that it loads (see {@link MergedContextConfiguration#getActiveProfiles()}
+ * and {@link #loadContext(MergedContextConfiguration)}).
  *
  * <p>Clients of a {@code SmartContextLoader} should call
  * {@link #processContextConfiguration(ContextConfigurationAttributes)
@@ -80,7 +80,6 @@ public interface SmartContextLoader extends ContextLoader {
 	 * <code>locations</code> or <code>classes</code> property empty signals that
 	 * this {@code SmartContextLoader} was not able to generate or detect defaults.
 	 * @param configAttributes the context configuration attributes to process
-	 * @see #generatesDefaults()
 	 */
 	void processContextConfiguration(ContextConfigurationAttributes configAttributes);
 
