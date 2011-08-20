@@ -25,6 +25,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySource.StubPropertySource;
+import org.springframework.jndi.JndiPropertySource;
 import org.springframework.web.context.support.StandardServletEnvironment;
 
 /**
@@ -32,8 +33,8 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * applications. All Portlet-related {@code ApplicationContext} classes initialize an instance
  * by default.
  *
- * <p>Contributes {@code ServletContext}-, {@code PortletContext}-, and
- * {@code PortletConfig}-based {@link PropertySource} instances. See the
+ * <p>Contributes {@code ServletContext}, {@code PortletContext}, {@code PortletConfig}
+ * and JNDI-based {@link PropertySource} instances. See the
  * {@link #customizePropertySources} method for details.
  *
  * @author Chris Beams
@@ -53,14 +54,16 @@ public class StandardPortletEnvironment extends StandardEnvironment {
 	 * Customize the set of property sources with those contributed by superclasses as
 	 * well as those appropriate for standard portlet-based environments:
 	 * <ul>
-	 *   <li>{@value #PORTLET_CONFIG_PROPERTY_SOURCE_NAME}
-	 *   <li>{@value #PORTLET_CONTEXT_PROPERTY_SOURCE_NAME}
-	 *   <li>{@linkplain StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}
+	 * <li>{@value #PORTLET_CONFIG_PROPERTY_SOURCE_NAME}
+	 * <li>{@value #PORTLET_CONTEXT_PROPERTY_SOURCE_NAME}
+	 * <li>{@linkplain StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}
+	 * <li>{@linkplain StandardServletEnvironment#JNDI_PROPERTY_SOURCE_NAME "jndiProperties"}
 	 * </ul>
 	 * <p>Properties present in {@value #PORTLET_CONFIG_PROPERTY_SOURCE_NAME} will
 	 * take precedence over those in {@value #PORTLET_CONTEXT_PROPERTY_SOURCE_NAME},
 	 * which takes precedence over those in {@linkplain
-	 * StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}.
+	 * StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME "servletContextInitParams"}
+	 * and so on.
 	 * <p>Properties in any of the above will take precedence over system properties and
 	 * environment variables contributed by the {@link StandardEnvironment} superclass.
 	 * <p>The property sources are added as stubs for now, and will be
@@ -79,6 +82,7 @@ public class StandardPortletEnvironment extends StandardEnvironment {
 		propertySources.addLast(new StubPropertySource(PORTLET_CONFIG_PROPERTY_SOURCE_NAME));
 		propertySources.addLast(new StubPropertySource(PORTLET_CONTEXT_PROPERTY_SOURCE_NAME));
 		propertySources.addLast(new StubPropertySource(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
+		propertySources.addLast(new JndiPropertySource(StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME));
 		super.customizePropertySources(propertySources);
 	}
 }
