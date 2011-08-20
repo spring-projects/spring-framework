@@ -123,12 +123,6 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>apache-taglibs</groupId>
-			<artifactId>standard</artifactId>
-			<version>1.1.2</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>velocity</groupId>
 			<artifactId>velocity</artifactId>
 			<version>1.5</version>
