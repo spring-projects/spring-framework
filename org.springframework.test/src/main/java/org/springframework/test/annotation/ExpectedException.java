@@ -29,10 +29,13 @@ import java.lang.annotation.Target;
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
+ * @deprecated as of Spring 3.1 in favor of using built-in support for declaring
+ * expected exceptions in the underlying testing framework (e.g., JUnit, TestNG, etc.) 
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Deprecated
 public @interface ExpectedException {
 
 	Class<? extends Throwable> value();
