@@ -41,6 +41,8 @@ import java.lang.annotation.Target;
  * @since 2.5
  * @see ContextLoader
  * @see SmartContextLoader
+ * @see ContextConfigurationAttributes
+ * @see MergedContextConfiguration
  * @see org.springframework.context.ApplicationContext
  * @see ActiveProfiles
  */
@@ -51,7 +53,7 @@ import java.lang.annotation.Target;
 public @interface ContextConfiguration {
 
 	/**
-	 * Alias for {@link #locations() locations}.
+	 * Alias for {@link #locations}.
 	 * 
 	 * <p>This attribute may <strong>not</strong> be used in conjunction
 	 * with {@link #locations} or {@link #classes}, but it may be used
@@ -64,7 +66,7 @@ public @interface ContextConfiguration {
 	 * The resource locations to use for loading an
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * 
-	 * <p>Check out the javadoc for
+	 * <p>Check out the Javadoc for
 	 * {@link org.springframework.test.context.support.AbstractContextLoader#modifyLocations
 	 * AbstractContextLoader.modifyLocations()} for details on how a location
 	 * String will be interpreted at runtime, in particular in case of a relative
@@ -78,7 +80,9 @@ public @interface ContextConfiguration {
 	 * AbstractContextLoader} subclass such as
 	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
 	 * GenericXmlContextLoader} which is the effective default implementation
-	 * used at runtime.
+	 * used at runtime if <code>locations</code> are configured. See the
+	 * documentation for {@link #loader} for further details regarding default
+	 * loaders.
 	 * 
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #value} or {@link #classes}, but it may be used instead of
@@ -88,20 +92,16 @@ public @interface ContextConfiguration {
 	String[] locations() default {};
 
 	/**
-	 * The {@link org.springframework.context.annotation.Configuration configuration classes}
-	 * to use for loading an
+	 * The {@link org.springframework.context.annotation.Configuration
+	 * configuration classes} to use for loading an
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
 	 * 
-	 * <p>To enable support for configuration class processing, an appropriate
-	 * {@link SmartContextLoader} must be {@link #loader configured}.
-	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader
-	 * AnnotationConfigContextLoader} is one such loader provided by the Spring Framework.
-	 * 
-	 * <p>Check out the javadoc for
-	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader#generateDefaultConfigurationClasses
-	 * AnnotationConfigContextLoader.generateDefaultConfigurationClasses()}
-	 * for details on the default configuration classes that will be used if none
-	 * are specified.
+	 * <p>Check out the Javadoc for
+	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader#detectDefaultConfigurationClasses
+	 * AnnotationConfigContextLoader.detectDefaultConfigurationClasses()} for details
+	 * on how default configuration classes will be detected if none are specified.
+	 * See the documentation for {@link #loader} for further details regarding
+	 * default loaders.
 	 * 
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #locations} or {@link #value}.

@@ -68,18 +68,18 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * <li>Sets the <em>active bean definition profiles</em> from the supplied
 	 * <code>MergedContextConfiguration</code> in the
 	 * {@link org.springframework.core.env.Environment Environment} of the context.</li>
-	 * <li>Calls {@link #prepareContext(GenericApplicationContext)} to
-	 * prepare the context.</li>
-	 * <li>Calls {@link #customizeBeanFactory(DefaultListableBeanFactory)} to
-	 * allow for customizing the context's <code>DefaultListableBeanFactory</code>.</li>
+	 * <li>Calls {@link #prepareContext()} to allow for customizing the context
+	 * before bean definitions are loaded.</li>
+	 * <li>Calls {@link #customizeBeanFactory()} to allow for customizing the
+	 * context's <code>DefaultListableBeanFactory</code>.</li>
 	 * <li>Delegates to {@link #loadBeanDefinitions()} to populate the context
 	 * from the configuration locations or classes in the supplied
 	 * <code>MergedContextConfiguration</code>.</li>
 	 * <li>Delegates to {@link AnnotationConfigUtils} for
 	 * {@link AnnotationConfigUtils#registerAnnotationConfigProcessors registering}
 	 * annotation configuration processors.</li>
-	 * <li>Calls {@link #customizeContext(GenericApplicationContext)} to allow
-	 * for customizing the context before it is refreshed.</li>
+	 * <li>Calls {@link #customizeContext()} to allow for customizing the context
+	 * before it is refreshed.</li>
 	 * <li>{@link ConfigurableApplicationContext#refresh Refreshes} the
 	 * context and registers a JVM shutdown hook for it.</li>
 	 * </ul>
@@ -110,18 +110,18 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * <p>Implementation details:
 	 * <ul>
 	 * <li>Creates a {@link GenericApplicationContext} instance.</li>
-	 * <li>Calls {@link #prepareContext(GenericApplicationContext)} to
-	 * prepare the context.</li>
-	 * <li>Calls {@link #customizeBeanFactory(DefaultListableBeanFactory)} to
-	 * allow for customizing the context's <code>DefaultListableBeanFactory</code>.</li>
+	 * <li>Calls {@link #prepareContext()} to allow for customizing the context
+	 * before bean definitions are loaded.</li>
+	 * <li>Calls {@link #customizeBeanFactory()} to allow for customizing the
+	 * context's <code>DefaultListableBeanFactory</code>.</li>
 	 * <li>Delegates to {@link #createBeanDefinitionReader()} to create a 
 	 * {@link BeanDefinitionReader} which is then used to populate the context
 	 * from the specified config locations.</li>
 	 * <li>Delegates to {@link AnnotationConfigUtils} for
 	 * {@link AnnotationConfigUtils#registerAnnotationConfigProcessors registering}
 	 * annotation configuration processors.</li>
-	 * <li>Calls {@link #customizeContext(GenericApplicationContext)} to allow
-	 * for customizing the context before it is refreshed.</li>
+	 * <li>Calls {@link #customizeContext()} to allow for customizing the context
+	 * before it is refreshed.</li>
 	 * <li>{@link ConfigurableApplicationContext#refresh Refreshes} the
 	 * context and registers a JVM shutdown hook for it.</li>
 	 * </ul>
