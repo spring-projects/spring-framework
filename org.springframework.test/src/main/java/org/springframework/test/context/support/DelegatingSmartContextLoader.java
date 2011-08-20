@@ -22,7 +22,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
@@ -42,13 +41,14 @@ import org.springframework.util.ObjectUtils;
  * that supports the merged, processed configuration will be used to actually
  * {@link #loadContext load} the context.
  * 
- * <p>Placing an empty {@code @ContextConfiguration} annotation on
- * a test class signals that default resource locations (i.e., XML configuration files)
- * or default {@link Configuration configuration classes} should be detected. Furthermore,
- * if a specific {@link ContextLoader} or {@link SmartContextLoader} is not explicitly
- * declared via {@code @ContextConfiguration}, {@code DelegatingSmartContextLoader} will
- * be used as the default loader, thus providing automatic support for either XML
- * configuration files or configuration classes, but not both simultaneously.
+ * <p>Placing an empty {@code @ContextConfiguration} annotation on a test class signals
+ * that default resource locations (i.e., XML configuration files) or default
+ * {@link org.springframework.context.annotation.Configuration configuration classes}
+ * should be detected. Furthermore, if a specific {@link ContextLoader} or
+ * {@link SmartContextLoader} is not explicitly declared via
+ * {@code @ContextConfiguration}, {@code DelegatingSmartContextLoader} will be used as
+ * the default loader, thus providing automatic support for either XML configuration
+ * files or configuration classes, but not both simultaneously.
  * 
  * @author Sam Brannen
  * @since 3.1
