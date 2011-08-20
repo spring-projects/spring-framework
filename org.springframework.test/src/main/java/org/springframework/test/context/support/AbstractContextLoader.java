@@ -31,7 +31,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract application context loader, which provides a basis for all concrete
+ * Abstract application context loader that provides a basis for all concrete
  * implementations of the {@link ContextLoader} SPI. Provides a
  * <em>Template Method</em> based approach for {@link #processLocations processing}
  * resource locations.
@@ -190,6 +190,13 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * Determine whether or not <em>default</em> resource locations should be
 	 * generated if the <code>locations</code> provided to
 	 * {@link #processLocations()} are <code>null</code> or empty.
+	 * <p>As of Spring 3.1, the semantics of this method have been overloaded
+	 * to include detection of either default resource locations or default
+	 * configuration classes. Consequently, this method can also be used to 
+	 * determine whether or not <em>default</em> configuration classes should be
+	 * detected if the <code>classes</code> present in the
+	 * {@link ContextConfigurationAttributes configuration attributes} supplied
+	 * to {@link #processContextConfiguration()} are <code>null</code> or empty.
 	 * <p>Can be overridden by subclasses to change the default behavior.
 	 * @return always <code>true</code> by default
 	 * @since 2.5

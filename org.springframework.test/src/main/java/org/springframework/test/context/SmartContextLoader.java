@@ -19,7 +19,7 @@ package org.springframework.test.context;
 import org.springframework.context.ApplicationContext;
 
 /**
- * <p>Strategy interface for loading an {@link ApplicationContext application context}
+ * Strategy interface for loading an {@link ApplicationContext application context}
  * for an integration test managed by the Spring TestContext Framework.
  * 
  * <p>The {@code SmartContextLoader} SPI supersedes the {@link ContextLoader} SPI
@@ -34,8 +34,9 @@ import org.springframework.context.ApplicationContext;
  * processContextConfiguration()} prior to calling
  * {@link #loadContext(MergedContextConfiguration) loadContext()}. This gives a
  * {@code SmartContextLoader} the opportunity to provide custom support for
- * modifying or generating resource locations or configuration classes. The
- * results of {@link #processContextConfiguration(ContextConfigurationAttributes)
+ * modifying resource locations or detecting default resource locations or 
+ * default configuration classes. The results of
+ * {@link #processContextConfiguration(ContextConfigurationAttributes)
  * processContextConfiguration()} should be merged for all classes in the
  * hierarchy of the root test class and then supplied to
  * {@link #loadContext(MergedContextConfiguration) loadContext()}.

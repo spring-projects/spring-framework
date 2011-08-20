@@ -51,7 +51,7 @@ import org.springframework.util.ObjectUtils;
  * @author Sam Brannen
  * @since 3.1
  * @see #processContextConfiguration()
- * @see #generateDefaultConfigurationClasses()
+ * @see #detectDefaultConfigurationClasses()
  * @see #loadBeanDefinitions()
  */
 public class AnnotationConfigContextLoader extends AbstractGenericContextLoader {
@@ -65,18 +65,20 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * Process configuration classes in the supplied {@link ContextConfigurationAttributes}.
 	 * <p>If the configuration classes are <code>null</code> or empty and
 	 * {@link #isGenerateDefaultLocations()} returns <code>true</code>, this
-	 * <code>SmartContextLoader</code> will attempt to
-	 * {@link #generateDefaultConfigurationClasses generate default configuration classes}.
-	 * Otherwise, properties in the supplied configuration attributes will not
-	 * be modified.
+	 * <code>SmartContextLoader</code> will attempt to {@link
+	 * #detectDefaultConfigurationClasses detect default configuration classes}.
+	 * If defaults are detected they will be
+	 * {@link ContextConfigurationAttributes#setClasses(Class[]) set} in the
+	 * supplied configuration attributes. Otherwise, properties in the supplied
+	 * configuration attributes will not be modified.
 	 * @param configAttributes the context configuration attributes to process
 	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration()
 	 * @see #isGenerateDefaultLocations()
-	 * @see #generateDefaultConfigurationClasses()
+	 * @see #detectDefaultConfigurationClasses()
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && isGenerateDefaultLocations()) {
-			Class<?>[] defaultConfigClasses = generateDefaultConfigurationClasses(configAttributes.getDeclaringClass());
+			Class<?>[] defaultConfigClasses = detectDefaultConfigurationClasses(configAttributes.getDeclaringClass());
 			configAttributes.setClasses(defaultConfigClasses);
 		}
 	}
@@ -108,24 +110,23 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * Generate the default configuration class array for the supplied test class.
-	 * <p>The generated class array will contain all static inner classes of
+	 * Detect the default configuration classes for the supplied test class.
+	 * <p>The returned class array will contain all static inner classes of
 	 * the supplied class that meet the requirements for {@code @Configuration}
 	 * class implementations as specified in the documentation for
 	 * {@link Configuration @Configuration}.
 	 * <p>The implementation of this method adheres to the contract defined in the
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
-	 * SPI. Specifically, this method will <em>preemptively</em> verify that the
-	 * generated default configuration classes exist <b>and</b> that such classes
-	 * comply with the constraints required of {@code @Configuration} class
-	 * implementations. If a candidate configuration class does meet these
-	 * requirements, this method will log a warning, and the candidate class will
-	 * be ignored.
+	 * SPI. Specifically, this method uses introspection to detect default 
+	 * configuration classes that comply with the constraints required of
+	 * {@code @Configuration} class implementations. If a potential candidate
+	 * configuration class does meet these requirements, this method will log a
+	 * warning, and the potential candidate class will be ignored.
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
 	 * @return an array of default configuration classes, potentially empty but
 	 * never <code>null</code>
 	 */
-	protected Class<?>[] generateDefaultConfigurationClasses(Class<?> declaringClass) {
+	protected Class<?>[] detectDefaultConfigurationClasses(Class<?> declaringClass) {
 		Assert.notNull(declaringClass, "Declaring class must not be null");
 
 		List<Class<?>> configClasses = new ArrayList<Class<?>>();

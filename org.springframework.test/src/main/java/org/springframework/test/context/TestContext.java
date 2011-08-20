@@ -108,7 +108,8 @@ public class TestContext extends AttributeAccessorSupport {
 
 	/**
 	 * Load an <code>ApplicationContext</code> for this test context using the
-	 * configured {@code ContextLoader} and configuration attributes.
+	 * configured {@code ContextLoader} and merged context configuration. Supports
+	 * both the {@link SmartContextLoader} and {@link ContextLoader} SPIs.
 	 * @throws Exception if an error occurs while loading the application context
 	 */
 	private ApplicationContext loadApplicationContext() throws Exception {

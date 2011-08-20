@@ -158,9 +158,9 @@ class ContextCache {
 	 * {@link #remove removing} the context from the cache and explicitly
 	 * {@link ConfigurableApplicationContext#close() closing} it if
 	 * it is an instance of {@link ConfigurableApplicationContext}.
-	 * <p>Generally speaking, you would only call this method only if you change
-	 * the state of a singleton bean, potentially affecting future interaction
-	 * with the context.
+	 * <p>Generally speaking, you would only call this method if you change the
+	 * state of a singleton bean, potentially affecting future interaction with
+	 * the context.
 	 * @param key the context key (never <code>null</code>)
 	 * @see #remove
 	 */

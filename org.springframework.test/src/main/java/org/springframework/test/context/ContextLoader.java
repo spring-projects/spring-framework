@@ -19,11 +19,12 @@ package org.springframework.test.context;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Strategy interface for loading an {@link ApplicationContext application context}.
+ * Strategy interface for loading an {@link ApplicationContext application context}
+ * for an integration test managed by the Spring TestContext Framework.
  * 
- * <p><b>Note</b>: as of Spring 3.1, consider implementing {@link SmartContextLoader}
- * instead of this interface in order to provide support for configuration classes
- * and active bean definition profiles.
+ * <p><b>Note</b>: as of Spring 3.1, implement {@link SmartContextLoader} instead
+ * of this interface in order to provide support for configuration classes and
+ * active bean definition profiles.
  *
  * <p>Clients of a ContextLoader should call
  * {@link #processLocations(Class,String...) processLocations()} prior to
@@ -38,7 +39,6 @@ import org.springframework.context.ApplicationContext;
  * <p>Spring provides the following out-of-the-box implementations:
  * <ul>
  * <li>{@link org.springframework.test.context.support.GenericXmlContextLoader GenericXmlContextLoader}</li>
- * <li>{@link org.springframework.test.context.support.AnnotationConfigContextLoader AnnotationConfigContextLoader}</li>
  * <li>{@link org.springframework.test.context.support.GenericPropertiesContextLoader GenericPropertiesContextLoader}</li>
  * </ul>
  *
@@ -46,6 +46,7 @@ import org.springframework.context.ApplicationContext;
  * @author Juergen Hoeller
  * @since 2.5
  * @see SmartContextLoader
+ * @see org.springframework.test.context.support.AnnotationConfigContextLoader AnnotationConfigContextLoader
  */
 public interface ContextLoader {
 
@@ -68,12 +69,12 @@ public interface ContextLoader {
 	 * <p>Configuration locations are generally considered to be classpath
 	 * resources by default.
 	 * <p>Concrete implementations should register annotation configuration
-	 * processors with bean factories of
-	 * {@link ApplicationContext application contexts} loaded by this
-	 * ContextLoader. Beans will therefore automatically be candidates for
-	 * annotation-based dependency injection using
-	 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired}
-	 * and {@link javax.annotation.Resource @Resource}.
+	 * processors with bean factories of {@link ApplicationContext application
+	 * contexts} loaded by this ContextLoader. Beans will therefore automatically
+	 * be candidates for annotation-based dependency injection using
+	 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
+	 * {@link javax.annotation.Resource @Resource}, and
+	 * {@link javax.inject.Inject @Inject}.
 	 * <p>Any ApplicationContext loaded by a ContextLoader <strong>must</strong>
 	 * register a JVM shutdown hook for itself. Unless the context gets closed
 	 * early, all context instances will be automatically closed on JVM

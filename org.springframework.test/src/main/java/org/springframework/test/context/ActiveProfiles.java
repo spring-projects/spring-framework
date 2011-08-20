@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
 public @interface ActiveProfiles {
 
 	/**
-	 * Alias for {@link #profiles() profiles}.
+	 * Alias for {@link #profiles}.
 	 * 
 	 * <p>This attribute may <strong>not</strong> be used in conjunction
 	 * with {@link #profiles}, but it may be used <em>instead</em> of
