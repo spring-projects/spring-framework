@@ -17,11 +17,10 @@
 package org.springframework.core.env;
 
 import static java.lang.String.format;
-import static org.springframework.util.StringUtils.commaDelimitedListToSet;
+import static org.springframework.util.StringUtils.commaDelimitedListToStringArray;
 import static org.springframework.util.StringUtils.trimAllWhitespace;
 
 import java.security.AccessControlException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -182,7 +181,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		if (this.activeProfiles.isEmpty()) {
 			String profiles = this.propertyResolver.getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 			if (StringUtils.hasText(profiles)) {
-				this.activeProfiles = commaDelimitedListToSet(trimAllWhitespace(profiles));
+				setActiveProfiles(commaDelimitedListToStringArray(trimAllWhitespace(profiles)));
 			}
 		}
 		return this.activeProfiles;
@@ -211,9 +210,9 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	protected Set<String> doGetDefaultProfiles() {
 		if (this.defaultProfiles.equals(this.getReservedDefaultProfiles())) {
-			String defaultProfiles = this.propertyResolver.getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
-			if (defaultProfiles != null) {
-				this.defaultProfiles = commaDelimitedListToSet(trimAllWhitespace(defaultProfiles));
+			String profiles = this.propertyResolver.getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
+			if (StringUtils.hasText(profiles)) {
+				this.setDefaultProfiles(commaDelimitedListToStringArray(trimAllWhitespace(profiles)));
 			}
 		}
 		return this.defaultProfiles;
@@ -228,7 +227,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	public void setDefaultProfiles(String... profiles) {
 		this.defaultProfiles.clear();
-		this.defaultProfiles.addAll(Arrays.asList(profiles));
+		for (String profile : profiles) {
+			this.validateProfile(profile);
+			this.defaultProfiles.add(profile);
+		}
 	}
 
 	public boolean acceptsProfiles(String... profiles) {
@@ -237,7 +239,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		Set<String> activeProfiles = this.doGetActiveProfiles();
 		Set<String> defaultProfiles = this.doGetDefaultProfiles();
 		for (String profile : profiles) {
-			Assert.hasText(profile, "profile must not be empty");
+			this.validateProfile(profile);
 			if (activeProfiles.contains(profile)
 					|| (activeProfiles.isEmpty() && defaultProfiles.contains(profile))) {
 				activeProfileFound = true;
@@ -245,6 +247,18 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 			}
 		}
 		return activeProfileFound;
+	}
+
+	/**
+	 * Validate the given profile, called internally prior to adding to the set of
+	 * active or default profiles.
+	 * <p>Subclasses may override to impose further restrictions on profile syntax.
+	 * @throws IllegalArgumentException if the profile is null, empty or whitespace-only
+	 * @see #acceptsProfiles
+	 * @see #setDefaultProfiles
+	 */
+	protected void validateProfile(String profile) {
+		Assert.hasText(profile, "Invalid profile [" + profile + "]: must contain text");
 	}
 
 	public MutablePropertySources getPropertySources() {

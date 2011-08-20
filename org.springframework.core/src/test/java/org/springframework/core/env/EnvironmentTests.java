@@ -72,12 +72,52 @@ public class EnvironmentTests {
 	}
 
 	@Test
-	public void activeProfiles() {
+	public void activeProfilesIsEmptyByDefault() {
 		assertThat(environment.getActiveProfiles().length, is(0));
+	}
+
+	@Test
+	public void defaultProfilesContainsDefaultProfileByDefault() {
+		assertThat(environment.getDefaultProfiles().length, is(1));
+		assertThat(environment.getDefaultProfiles()[0], equalTo("default"));
+	}
+
+	@Test
+	public void setActiveProfiles() {
 		environment.setActiveProfiles("local", "embedded");
 		String[] activeProfiles = environment.getActiveProfiles();
 		assertThat(Arrays.asList(activeProfiles), hasItems("local", "embedded"));
 		assertThat(activeProfiles.length, is(2));
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void setActiveProfiles_withNullProfileArray() {
+		environment.setActiveProfiles((String[])null);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void setActiveProfiles_withNullProfile() {
+		environment.setActiveProfiles((String)null);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void setActiveProfiles_withEmptyProfile() {
+		environment.setActiveProfiles("");
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void setDefaultProfiles_withNullProfileArray() {
+		environment.setDefaultProfiles((String[])null);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void setDefaultProfiles_withNullProfile() {
+		environment.setDefaultProfiles((String)null);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void setDefaultProfiles_withEmptyProfile() {
+		environment.setDefaultProfiles("");
 	}
 
 	@Test
@@ -100,7 +140,6 @@ public class EnvironmentTests {
 
 	@Test
 	public void getActiveProfiles_fromSystemProperties() {
-		assertThat(environment.getActiveProfiles().length, is(0));
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "foo");
 		assertThat(Arrays.asList(environment.getActiveProfiles()), hasItem("foo"));
 		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
@@ -108,7 +147,6 @@ public class EnvironmentTests {
 
 	@Test
 	public void getActiveProfiles_fromSystemProperties_withMultipleProfiles() {
-		assertThat(environment.getActiveProfiles().length, is(0));
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "foo,bar");
 		assertThat(Arrays.asList(environment.getActiveProfiles()), hasItems("foo", "bar"));
 		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
@@ -116,7 +154,6 @@ public class EnvironmentTests {
 
 	@Test
 	public void getActiveProfiles_fromSystemProperties_withMulitpleProfiles_withWhitespace() {
-		assertThat(environment.getActiveProfiles().length, is(0));
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, " bar , baz "); // notice whitespace
 		assertThat(Arrays.asList(environment.getActiveProfiles()), hasItems("bar", "baz"));
 		System.getProperties().remove(ACTIVE_PROFILES_PROPERTY_NAME);
@@ -142,9 +179,25 @@ public class EnvironmentTests {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void acceptsProfiles_mustSpecifyAtLeastOne() {
+	public void acceptsProfiles_withEmptyArgumentList() {
 		environment.acceptsProfiles();
 	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void acceptsProfiles_withNullArgumentList() {
+		environment.acceptsProfiles((String[])null);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void acceptsProfiles_withNullArgument() {
+		environment.acceptsProfiles((String)null);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void acceptsProfiles_withEmptyArgument() {
+		environment.acceptsProfiles("");
+	}
+
 
 	@Test
 	public void acceptsProfiles_activeProfileSetProgrammatically() {
@@ -172,6 +225,30 @@ public class EnvironmentTests {
 		environment.setActiveProfiles("p1");
 		assertThat(environment.acceptsProfiles("pd"), is(false));
 		assertThat(environment.acceptsProfiles("p1"), is(true));
+	}
+
+	@Test
+	public void environmentSubclass_withCustomProfileValidation() {
+		ConfigurableEnvironment env = new AbstractEnvironment() {
+			@Override
+			protected void validateProfile(String profile) {
+				super.validateProfile(profile);
+				if (profile.contains("-")) {
+					throw new IllegalArgumentException(
+							"Invalid profile [" + profile + "]: must not contain dash character");
+				}
+			}
+		};
+
+		env.addActiveProfile("validProfile"); // succeeds
+
+		try {
+			env.addActiveProfile("invalid-profile");
+			fail("expected validation exception");
+		} catch (IllegalArgumentException ex) {
+			assertThat(ex.getMessage(),
+					equalTo("Invalid profile [invalid-profile]: must not contain dash character"));
+		}
 	}
 
 	@Test
