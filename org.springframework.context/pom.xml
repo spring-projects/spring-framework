@@ -29,8 +29,8 @@
 		</dependency>
 		<dependency>
 			<groupId>javax.ejb</groupId>
-			<artifactId>ejb-api</artifactId>
-			<version>3.0</version>
+			<artifactId>com.springsource.javax.ejb</artifactId>
+			<version>3.0.0</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -40,9 +40,9 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.atinject</groupId>
-			<artifactId>inject-tck</artifactId>
-			<version>1.0.0-PFD-3-jboss-1</version>
+			<groupId>javax.inject</groupId>
+			<artifactId>com.springsource.org.atinject.tck</artifactId>
+			<version>1.0.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -225,6 +225,12 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jsr166-mirror</groupId>
+			<artifactId>jsr166</artifactId>
+			<version>1.7.0</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
