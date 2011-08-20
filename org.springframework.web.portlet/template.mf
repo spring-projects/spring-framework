@@ -12,6 +12,7 @@ Import-Template:
  org.springframework.context.*;version=${spring.osgi.range},
  org.springframework.core.*;version=${spring.osgi.range},
  org.springframework.http.*;version=${spring.osgi.range},
+ org.springframework.jndi.*;version=${spring.osgi.range},
  org.springframework.stereotype;version=${spring.osgi.range},
  org.springframework.ui.*;version=${spring.osgi.range},
  org.springframework.util.*;version=${spring.osgi.range},
