@@ -34,7 +34,6 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
-
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.test.annotation.Repeat;
@@ -86,6 +85,7 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.5
  * @see TestContextManager
  */
+@SuppressWarnings("deprecation")
 public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	private static final Log logger = LogFactory.getLog(SpringJUnit4ClassRunner.class);
@@ -282,6 +282,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		Object testInstance;
 		try {
 			testInstance = new ReflectiveCallable() {
+
 				@Override
 				protected Object runReflectiveCall() throws Throwable {
 					return createTest();
@@ -355,8 +356,8 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	protected Class<? extends Throwable> getExpectedException(FrameworkMethod frameworkMethod) {
 		Test testAnnotation = frameworkMethod.getAnnotation(Test.class);
-		Class<? extends Throwable> junitExpectedException = (testAnnotation != null &&
-				testAnnotation.expected() != Test.None.class ? testAnnotation.expected() : null);
+		Class<? extends Throwable> junitExpectedException = (testAnnotation != null
+				&& testAnnotation.expected() != Test.None.class ? testAnnotation.expected() : null);
 
 		ExpectedException expectedExAnn = frameworkMethod.getAnnotation(ExpectedException.class);
 		Class<? extends Throwable> springExpectedException = (expectedExAnn != null ? expectedExAnn.value() : null);
@@ -438,7 +439,6 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @see RunBeforeTestMethodCallbacks
 	 */
 	@Override
-	@SuppressWarnings("deprecation")
 	protected Statement withBefores(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Statement junitBefores = super.withBefores(frameworkMethod, testInstance, statement);
 		return new RunBeforeTestMethodCallbacks(junitBefores, testInstance, frameworkMethod.getMethod(),
@@ -453,7 +453,6 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @see RunAfterTestMethodCallbacks
 	 */
 	@Override
-	@SuppressWarnings("deprecation")
 	protected Statement withAfters(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Statement junitAfters = super.withAfters(frameworkMethod, testInstance, statement);
 		return new RunAfterTestMethodCallbacks(junitAfters, testInstance, frameworkMethod.getMethod(),

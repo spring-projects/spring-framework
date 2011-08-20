@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,12 @@ import org.springframework.test.context.TestExecutionListeners;
  * @author Sam Brannen
  * @since 3.0
  */
+@SuppressWarnings("deprecation")
 @RunWith(JUnit4.class)
 public class ExpectedExceptionSpringRunnerTests {
 
 	@Test
-	public void timedTests() throws Exception {
+	public void expectedExceptions() throws Exception {
 		Class<ExpectedExceptionSpringRunnerTestCase> testClass = ExpectedExceptionSpringRunnerTestCase.class;
 		TrackingRunListener listener = new TrackingRunListener();
 		RunNotifier notifier = new RunNotifier();
@@ -59,7 +60,7 @@ public class ExpectedExceptionSpringRunnerTests {
 
 
 	@RunWith(SpringJUnit4ClassRunner.class)
-	@TestExecutionListeners( {})
+	@TestExecutionListeners({})
 	public static final class ExpectedExceptionSpringRunnerTestCase {
 
 		// Should Pass.
