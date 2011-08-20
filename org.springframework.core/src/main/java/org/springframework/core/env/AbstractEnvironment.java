@@ -188,8 +188,16 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	public void setActiveProfiles(String... profiles) {
+		Assert.notNull(profiles, "Profile array must not be null");
 		this.activeProfiles.clear();
-		this.activeProfiles.addAll(Arrays.asList(profiles));
+		for (String profile : profiles) {
+			this.addActiveProfile(profile);
+		}
+	}
+
+	public void addActiveProfile(String profile) {
+		this.validateProfile(profile);
+		this.activeProfiles.add(profile);
 	}
 
 	public String[] getDefaultProfiles() {
@@ -226,6 +234,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see #getReservedDefaultProfiles()
 	 */
 	public void setDefaultProfiles(String... profiles) {
+		Assert.notNull(profiles, "Profile array must not be null");
 		this.defaultProfiles.clear();
 		for (String profile : profiles) {
 			this.validateProfile(profile);
@@ -255,6 +264,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * <p>Subclasses may override to impose further restrictions on profile syntax.
 	 * @throws IllegalArgumentException if the profile is null, empty or whitespace-only
 	 * @see #acceptsProfiles
+	 * @see #addActiveProfile
 	 * @see #setDefaultProfiles
 	 */
 	protected void validateProfile(String profile) {

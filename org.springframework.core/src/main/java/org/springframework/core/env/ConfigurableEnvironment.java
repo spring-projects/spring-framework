@@ -19,9 +19,9 @@ package org.springframework.core.env;
 import java.util.Map;
 
 /**
- * Configuration interface to be implemented by most if not all {@link Environment
- * Environments}. Provides facilities for setting active and default profiles as well
- * as accessing the {@linkplain #getPropertySources() property sources}.
+ * Configuration interface to be implemented by most if not all {@link Environment} types.
+ * Provides facilities for setting active and default profiles as well
+ * as accessing underlying {@linkplain #getPropertySources() property sources}.
  *
  * @author Chris Beams
  * @since 3.1
@@ -35,14 +35,23 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * evaluated during container bootstrap to determine whether bean definitions
 	 * should be registered with the container.
 	 * <p>Any existing active profiles will be replaced with the given arguments; call
-	 * with zero arguments to clear the current set of active profiles.
+	 * with zero arguments to clear the current set of active profiles. Use
+	 * {@link #addActiveProfile} to add a profile while preserving the existing set.
 	 *
+	 * @see #addActiveProfile
 	 * @see #setDefaultProfiles
 	 * @see org.springframework.context.annotation.Profile
 	 * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
 	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only
 	 */
 	void setActiveProfiles(String... profiles);
+
+	/**
+	 * Add a profile to the current set of active profiles.
+	 * @see #setActiveProfiles
+	 * @throws IllegalArgumentException if the profile is null, empty or whitespace-only
+	 */
+	void addActiveProfile(String profile);
 
 	/**
 	 * Specify the set of profiles to be made active by default if no other profiles
