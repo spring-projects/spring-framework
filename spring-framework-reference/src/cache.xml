@@ -421,7 +421,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 		<para>The Ehcache implementation is located under <literal>org.springframework.cache.ehcache</literal> package. Again, to use it, one simply needs to declare the appropriate 
 		<interfacename>CacheManager</interfacename>:</para>
 		
-		<programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.ehcache.EhcacheCacheManager" p:cache-manager="ehcache"/>
+		<programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager="ehcache"/>
 
 <!-- Ehcache library setup -->
 <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>]]></programlisting>
