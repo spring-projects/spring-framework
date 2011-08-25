@@ -175,33 +175,54 @@ public class ProducesRequestConditionTests {
 		assertTrue("Invalid comparison result: " + result, result < 0);
 	}
 
-	@Test
-	public void compareToEmptyCondition() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("Accept", "*/*");
+	// SPR-8536
 
+	@Test
+	public void compareToMediaTypeAll() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		
 		ProducesRequestCondition condition1 = new ProducesRequestCondition();
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/json");
 
-		int result = condition1.compareTo(condition2, request);
-		assertTrue("Invalid comparison result: " + result, result < 0);
+		assertTrue("Should have picked '*/*' condition as an exact match",
+				condition1.compareTo(condition2, request) < 0);
+		assertTrue("Should have picked '*/*' condition as an exact match",
+				condition2.compareTo(condition1, request) > 0);
 
-		result = condition2.compareTo(condition1, request);
-		assertTrue("Invalid comparison result: " + result, result > 0);
+		condition1 = new ProducesRequestCondition("*/*");
+		condition2 = new ProducesRequestCondition("application/json");
+
+		assertTrue(condition1.compareTo(condition2, request) < 0);
+		assertTrue(condition2.compareTo(condition1, request) > 0);
+	
+		request.addHeader("Accept", "*/*");
+
+		condition1 = new ProducesRequestCondition();
+		condition2 = new ProducesRequestCondition("application/json");
+
+		assertTrue(condition1.compareTo(condition2, request) < 0);
+		assertTrue(condition2.compareTo(condition1, request) > 0);
+
+		condition1 = new ProducesRequestCondition("*/*");
+		condition2 = new ProducesRequestCondition("application/json");
+
+		assertTrue(condition1.compareTo(condition2, request) < 0);
+		assertTrue(condition2.compareTo(condition1, request) > 0);
 	}
 
 	@Test
-	public void compareToWithoutAcceptHeader() {
+	public void compareToEqualMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Accept", "text/*");
 
-		ProducesRequestCondition condition1 = new ProducesRequestCondition();
-		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/json");
+		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/plain");
+		ProducesRequestCondition condition2 = new ProducesRequestCondition("text/xhtml");
 
 		int result = condition1.compareTo(condition2, request);
-		assertTrue("Invalid comparison result: " + result, result < 0);
+		assertTrue("Should have used MediaType.equals(Object) to break the match", result < 0);
 
 		result = condition2.compareTo(condition1, request);
-		assertTrue("Invalid comparison result: " + result, result > 0);
+		assertTrue("Should have used MediaType.equals(Object) to break the match", result > 0);
 	}
 
 	@Test
