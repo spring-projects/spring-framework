@@ -28,57 +28,53 @@ import org.springframework.beans.TestBean;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.DataBinder;
 
 /**
  * 
- * Test fixture for RedirectModel tests.
+ * Test fixture for {@link RedirectAttributesModelMap} tests.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class RedirectModelTests {
+public class RedirectAttributesModelMapTests {
 
-	private RedirectModel redirectModel;
+	private RedirectAttributesModelMap redirectAttributes;
 	
 	private FormattingConversionService conversionService;
 
-	private ModelMap implicitModel;
-	
 	@Before
 	public void setup() {
 		this.conversionService = new DefaultFormattingConversionService();
 		DataBinder dataBinder = new DataBinder(null);
 		dataBinder.setConversionService(conversionService);
 		
-		this.implicitModel = new ModelMap();
-		this.redirectModel = new RedirectModel(dataBinder, implicitModel);
+		this.redirectAttributes = new RedirectAttributesModelMap(dataBinder);
 	}
 	
 	@Test
 	public void addAttributePrimitiveType() {
-		this.redirectModel.addAttribute("speed", 65);
-		assertEquals("65", this.redirectModel.get("speed"));
+		this.redirectAttributes.addAttribute("speed", 65);
+		assertEquals("65", this.redirectAttributes.get("speed"));
 	}
 
 	@Test
 	public void addAttributeCustomType() {
 		String attrName = "person";
-		this.redirectModel.addAttribute(attrName, new TestBean("Fred"));
+		this.redirectAttributes.addAttribute(attrName, new TestBean("Fred"));
 		
-		assertEquals("ConversionService should have invoked toString()", "Fred", this.redirectModel.get(attrName));
+		assertEquals("ConversionService should have invoked toString()", "Fred", this.redirectAttributes.get(attrName));
 
 		this.conversionService.addConverter(new TestBeanConverter());
-		this.redirectModel.addAttribute(attrName, new TestBean("Fred"));
+		this.redirectAttributes.addAttribute(attrName, new TestBean("Fred"));
 		
-		assertEquals("Type converter should have been used", "[Fred]", this.redirectModel.get(attrName));
+		assertEquals("Type converter should have been used", "[Fred]", this.redirectAttributes.get(attrName));
 	}
 
 	@Test
 	public void addAttributeToString() {
 		String attrName = "person";
-		RedirectModel model = new RedirectModel();
+		RedirectAttributesModelMap model = new RedirectAttributesModelMap();
 		model.addAttribute(attrName, new TestBean("Fred"));
 
 		assertEquals("toString() should have been used", "Fred", model.get(attrName));
@@ -86,17 +82,17 @@ public class RedirectModelTests {
 
 	@Test
 	public void addAttributeValue() {
-		this.redirectModel.addAttribute(new TestBean("Fred"));
+		this.redirectAttributes.addAttribute(new TestBean("Fred"));
 		
-		assertEquals("Fred", this.redirectModel.get("testBean"));
+		assertEquals("Fred", this.redirectAttributes.get("testBean"));
 	}
 
 	@Test
 	public void addAllAttributesList() {
-		this.redirectModel.addAllAttributes(Arrays.asList(new TestBean("Fred"), new Integer(5)));
+		this.redirectAttributes.addAllAttributes(Arrays.asList(new TestBean("Fred"), new Integer(5)));
 		
-		assertEquals("Fred", this.redirectModel.get("testBean"));
-		assertEquals("5", this.redirectModel.get("integer"));
+		assertEquals("Fred", this.redirectAttributes.get("testBean"));
+		assertEquals("5", this.redirectAttributes.get("integer"));
 	}
 
 	@Test
@@ -104,10 +100,10 @@ public class RedirectModelTests {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);
-		this.redirectModel.addAllAttributes(map);
+		this.redirectAttributes.addAllAttributes(map);
 		
-		assertEquals("Fred", this.redirectModel.get("person"));
-		assertEquals("33", this.redirectModel.get("age"));
+		assertEquals("Fred", this.redirectAttributes.get("person"));
+		assertEquals("33", this.redirectAttributes.get("age"));
 	}
 
 	@Test
@@ -116,27 +112,11 @@ public class RedirectModelTests {
 		map.put("person", new TestBean("Fred"));
 		map.put("age", 33);
 		
-		this.redirectModel.addAttribute("person", new TestBean("Ralph"));
-		this.redirectModel.mergeAttributes(map);
+		this.redirectAttributes.addAttribute("person", new TestBean("Ralph"));
+		this.redirectAttributes.mergeAttributes(map);
 		
-		assertEquals("Ralph", this.redirectModel.get("person"));
-		assertEquals("33", this.redirectModel.get("age"));
-	}
-	
-	@Test
-	public void addModelAttributes() {
-		this.implicitModel.addAttribute("person", new TestBean("Ralph"));
-		this.implicitModel.addAttribute("age", 33);
-		
-		this.redirectModel.addModelAttributes("person", "age");
-		
-		assertEquals("Ralph", this.redirectModel.get("person"));
-		assertEquals("33", this.redirectModel.get("age"));
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void addModelAttributesInvalidName() {
-		this.redirectModel.addModelAttributes("person");
+		assertEquals("Ralph", this.redirectAttributes.get("person"));
+		assertEquals("33", this.redirectAttributes.get("age"));
 	}
 	
 	public static class TestBeanConverter implements Converter<TestBean, String> {

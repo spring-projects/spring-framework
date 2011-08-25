@@ -23,6 +23,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
+import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
 
 /**
@@ -60,14 +61,14 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 			String viewName = (String) returnValue;
 			mavContainer.setViewName(viewName);
 			if (isRedirectViewName(viewName)) {
-				mavContainer.useRedirectModel();
+				mavContainer.setRedirectModelEnabled();
 			}
 		}
 		else if (returnValue instanceof View){
 			View view = (View) returnValue;
 			mavContainer.setView(view);
 			if (isRedirectView(view)) {	
-				mavContainer.useRedirectModel();
+				mavContainer.setRedirectModelEnabled();
 			}
 		}
 		else {
@@ -94,7 +95,12 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 	 * "false" otherwise.
 	 */
 	protected boolean isRedirectView(View view) {
-		return "RedirectView".equals(view.getClass().getSimpleName());
+		if (SmartView.class.isAssignableFrom(view.getClass())) {
+			return ((SmartView) view).isRedirectView();
+		}
+		else {
+			return false;
+		}
 	}
 
 }

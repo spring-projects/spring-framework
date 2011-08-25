@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
+import java.util.Map;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -25,21 +27,22 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.support.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.mvc.support.RedirectModel;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 /**
- * Resolves {@link RedirectModel} method arguments. 
+ * Resolves {@link RedirectAttributesModelMap} method arguments. 
  * 
  * <p>This resolver must be listed ahead of the {@link ModelMethodProcessor}, 
- * which also resolves arguments of type {@link Model}.  
+ * which also resolves arguments of type {@link Map} and {@link Model}.  
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class RedirectModelMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class RedirectAttributesMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 	public boolean supportsParameter(MethodParameter parameter) {
-		return RedirectModel.class.equals(parameter.getParameterType());
+		return RedirectAttributes.class.isAssignableFrom(parameter.getParameterType());
 	}
 
 	public Object resolveArgument(MethodParameter parameter, 
@@ -47,10 +50,9 @@ public class RedirectModelMethodArgumentResolver implements HandlerMethodArgumen
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws Exception {
 		DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
-		ModelMap implicitModel = mavContainer.getModel();
-		RedirectModel redirectModel = new RedirectModel(dataBinder, implicitModel);
-		mavContainer.setRedirectModel(redirectModel);
-		return redirectModel;
+		ModelMap attributes = new RedirectAttributesModelMap(dataBinder);
+		mavContainer.setRedirectModel(attributes);
+		return attributes;
 	}
 
 }

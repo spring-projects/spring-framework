@@ -26,10 +26,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.support.RedirectModel;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -70,7 +72,7 @@ public class ViewMethodReturnValueHandlerTests {
 	@Test
 	public void returnViewRedirect() throws Exception {
 		RedirectView redirectView = new RedirectView("testView");
-		RedirectModel redirectModel = new RedirectModel();
+		ModelMap redirectModel = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectModel);
 		handler.handleReturnValue(redirectView, createMethodParam("view"), mavContainer, webRequest);
 		
@@ -87,7 +89,7 @@ public class ViewMethodReturnValueHandlerTests {
 
 	@Test
 	public void returnViewNameRedirect() throws Exception {
-		RedirectModel redirectModel = new RedirectModel();
+		ModelMap redirectModel = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectModel);
 		handler.handleReturnValue("redirect:testView", createMethodParam("viewName"), mavContainer, webRequest);
 

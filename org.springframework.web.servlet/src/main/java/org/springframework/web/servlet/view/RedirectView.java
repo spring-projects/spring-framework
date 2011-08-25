@@ -40,6 +40,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.UriTemplate;
@@ -85,7 +86,7 @@ import org.springframework.web.util.WebUtils;
  * @see #setExposeModelAttributes
  * @see javax.servlet.http.HttpServletResponse#sendRedirect
  */
-public class RedirectView extends AbstractUrlBasedView {
+public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	private boolean contextRelative = false;
 
@@ -214,6 +215,13 @@ public class RedirectView extends AbstractUrlBasedView {
 	 */
 	public void setStatusCode(HttpStatus statusCode) {
 		this.statusCode = statusCode;
+	}
+
+	/**
+	 * Returns "true" indicating this view performs a redirect.
+	 */
+	public boolean isRedirectView() {
+		return true;
 	}
 
 	/**
