@@ -74,8 +74,6 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.FlashMap;
-import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.LastModified;
@@ -85,7 +83,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMeth
 import org.springframework.web.servlet.mvc.method.annotation.support.HttpEntityMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ModelAndViewMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.support.PathVariableMethodArgumentResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.RedirectModelMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.RedirectAttributesMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestPartMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestResponseBodyMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletCookieValueMethodArgumentResolver;
@@ -93,7 +91,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletMode
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
-import org.springframework.web.servlet.mvc.support.RedirectModel;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -369,7 +367,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		argumentResolvers.addResolver(new ServletRequestMethodArgumentResolver());
 		argumentResolvers.addResolver(new ServletResponseMethodArgumentResolver());
 		argumentResolvers.addResolver(new HttpEntityMethodProcessor(messageConverters));
-		argumentResolvers.addResolver(new RedirectModelMethodArgumentResolver());
+		argumentResolvers.addResolver(new RedirectAttributesMethodArgumentResolver());
 		argumentResolvers.addResolver(new ModelMethodProcessor());
 		argumentResolvers.addResolver(new ErrorsMethodArgumentResolver());
 
@@ -530,15 +528,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		}
 		else {
 			ModelMap model = mavContainer.getModel();
-			ModelAndView mav = new ModelAndView().addAllObjects(model);
-			mav.setViewName(mavContainer.getViewName());
+			ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model);
 			if (!mavContainer.isViewReference()) {
 				mav.setView((View) mavContainer.getView());
 			}
-			if (model instanceof RedirectModel) {
-				RedirectModel redirectModel = (RedirectModel) model;
-				FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
-				flashMap.putAll(redirectModel.getFlashAttributes());
+			if (model instanceof RedirectAttributes) {
+				Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
+				RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
 			}
 			return mav;				
 		}
