@@ -99,7 +99,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 */
 	public Set<MediaType> getMediaTypes() {
 		Set<MediaType> result = new LinkedHashSet<MediaType>();
-		for (ProduceMediaTypeExpression expression : expressions) {
+		for (ProduceMediaTypeExpression expression : getContent()) {
 			result.add(expression.getMediaType());
 		}
 		return result;
@@ -113,8 +113,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	@Override
-	protected Collection<ProduceMediaTypeExpression> getContent() {
-		return expressions;
+	protected List<ProduceMediaTypeExpression> getContent() {
+		return this.expressions.isEmpty() ? DEFAULT_EXPRESSIONS : this.expressions;
 	}
 
 	@Override
@@ -158,21 +158,18 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	/**
-	 * Compares this and another Produces condition as follows:
+	 * Compares this and another "produces" condition as follows:
 	 * 
 	 * <ol>
-	 * 	<li>Sorts the request 'Accept' header media types by quality value via
-	 * 	{@link MediaType#sortByQualityValue(List)} and iterates over the sorted types.
-	 * 	<li>Compares the sorted request media types against the media types of each 
-	 * 	Produces condition via {@link MediaType#includes(MediaType)}. 
-	 * 	<li>A "produces" condition with a matching media type listed earlier wins.
-	 * 	<li>If both conditions have a matching media type at the same index, the
-	 * 	media types are further compared by specificity and quality.
+	 * 	<li>Sort 'Accept' header media types by quality value via
+	 * 	{@link MediaType#sortByQualityValue(List)} and iterate the list.
+	 * 	<li>Get the lowest index of matching media types from each "produces" 
+	 * 	condition first matching with {@link MediaType#equals(Object)} and 
+	 * 	then with {@link MediaType#includes(MediaType)}.
+	 *  <li>If a lower index is found, the "produces" condition wins.
+	 *  <li>If both indexes are equal, the media types at the index are 
+	 *  compared further with {@link MediaType#SPECIFICITY_COMPARATOR}.
 	 * </ol>
-	 * 
-	 * <p>If a request media type is {@link MediaType#ALL} or if there is no 'Accept'
-	 * header, and therefore both conditions match, preference is given to one 
-	 * Produces condition if it is empty and the other one is not.
 	 * 
 	 * <p>It is assumed that both instances have been obtained via 
 	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance 
@@ -180,51 +177,72 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * is otherwise empty.
 	 */
 	public int compareTo(ProducesRequestCondition other, HttpServletRequest request) {
-		String acceptHeader = request.getHeader("Accept");
-		List<MediaType> acceptedMediaTypes = MediaType.parseMediaTypes(acceptHeader);
+		List<MediaType> acceptedMediaTypes = getAcceptedMediaTypes(request);
 		MediaType.sortByQualityValue(acceptedMediaTypes);
 
 		for (MediaType acceptedMediaType : acceptedMediaTypes) {
-			if (acceptedMediaType.equals(MediaType.ALL)) {
-				if (isOneEmptyButNotBoth(other)) {
-					return this.isEmpty() ? -1 : 1;
-				}
+			int thisIndex = this.indexOfEqualMediaType(acceptedMediaType);
+			int otherIndex = other.indexOfEqualMediaType(acceptedMediaType);
+			int result = compareMatchingMediaTypes(this, thisIndex, other, otherIndex);
+			if (result != 0) {
+				return result;
 			}
-			int thisIndex = this.indexOfMediaType(acceptedMediaType);
-			int otherIndex = other.indexOfMediaType(acceptedMediaType);
-			if (thisIndex != otherIndex) {
-				return otherIndex - thisIndex;
-			} else if (thisIndex != -1 && otherIndex != -1) {
-				ProduceMediaTypeExpression thisExpr = this.expressions.get(thisIndex);
-				ProduceMediaTypeExpression otherExpr = other.expressions.get(otherIndex);
-				int result = thisExpr.compareTo(otherExpr);
-				if (result != 0) {
-					return result;
-				}
-			}
-		}
-		
-		if (acceptedMediaTypes.isEmpty()) {
-			if (isOneEmptyButNotBoth(other)) {
-				return this.isEmpty() ? -1 : 1;
+			thisIndex = this.indexOfIncludedMediaType(acceptedMediaType);
+			otherIndex = other.indexOfIncludedMediaType(acceptedMediaType);
+			result = compareMatchingMediaTypes(this, thisIndex, other, otherIndex);
+			if (result != 0) {
+				return result;
 			}
 		}
 		
 		return 0;
 	}
 
-	private int indexOfMediaType(MediaType mediaType) {
-		for (int i = 0; i < expressions.size(); i++) {
-			if (mediaType.includes(expressions.get(i).getMediaType())) {
+	private static List<MediaType> getAcceptedMediaTypes(HttpServletRequest request) {
+		String acceptHeader = request.getHeader("Accept");
+		if (StringUtils.hasLength(acceptHeader)) {
+			return MediaType.parseMediaTypes(acceptHeader);
+		}
+		else {
+			return Collections.singletonList(MediaType.ALL);
+		}
+	}
+	
+	private int indexOfEqualMediaType(MediaType mediaType) {
+		for (int i = 0; i < getContent().size(); i++) {
+			if (mediaType.equals(getContent().get(i).getMediaType())) {
 				return i;
 			}
 		}
 		return -1;
 	}
 
-	private boolean isOneEmptyButNotBoth(ProducesRequestCondition other) {
-		return ((this.isEmpty() || other.isEmpty()) && (this.expressions.size() != other.expressions.size()));
+	private int indexOfIncludedMediaType(MediaType mediaType) {
+		for (int i = 0; i < getContent().size(); i++) {
+			if (mediaType.includes(getContent().get(i).getMediaType())) {
+				return i;
+			}
+		}
+		return -1;
 	}
+
+	private static int compareMatchingMediaTypes(ProducesRequestCondition condition1, int index1,
+												 ProducesRequestCondition condition2, int index2) {
+		int result = 0;
+		if (index1 != index2) {
+			result = index2 - index1;
+		}
+		else if (index1 != -1 && index2 != -1) {
+			ProduceMediaTypeExpression expr1 = condition1.getContent().get(index1);
+			ProduceMediaTypeExpression expr2 = condition2.getContent().get(index2);
+			result = expr1.compareTo(expr2);
+			result = (result != 0) ? result : expr1.getMediaType().compareTo(expr2.getMediaType());
+		}
+		return result;
+	}
+
+	private static final List<ProduceMediaTypeExpression> DEFAULT_EXPRESSIONS = 
+		Collections.singletonList(new ProduceMediaTypeExpression("*/*"));
 	
 	/**
 	 * Parses and matches a single media type expression to a request's 'Accept' header. 
@@ -250,15 +268,6 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			return false;
 		}
 
-		private List<MediaType> getAcceptedMediaTypes(HttpServletRequest request) {
-			String acceptHeader = request.getHeader("Accept");
-			if (StringUtils.hasLength(acceptHeader)) {
-				return MediaType.parseMediaTypes(acceptHeader);
-			}
-			else {
-				return Collections.singletonList(MediaType.ALL);
-			}
-		}
 	}
 
 }
