@@ -499,6 +499,34 @@ public class ExtendedBeanInfoTests {
 		assertThat(ebi.getPropertyDescriptors(), equalTo(bi.getPropertyDescriptors()));
 	}
 
+	/**
+	 * Corners the bug revealed by SPR-8522, in which an (apparently) indexed write method
+	 * without a corresponding indexed read method would fail to be processed correctly by
+	 * ExtendedBeanInfo. The local class C below represents the relevant methods from
+	 * Google's GsonBuilder class. Interestingly, the setDateFormat(int, int) method was
+	 * not actually intended to serve as an indexed write method; it just appears that way.
+	 */
+	@Test
+	public void reproSpr8522() throws IntrospectionException {
+		@SuppressWarnings("unused") class C {
+			public Object setDateFormat(String pattern) { return new Object(); }
+			public Object setDateFormat(int style) { return new Object(); }
+			public Object setDateFormat(int dateStyle, int timeStyle) { return new Object(); }
+		}
+		BeanInfo bi = Introspector.getBeanInfo(C.class);
+		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
+
+		assertThat(hasReadMethodForProperty(bi, "dateFormat"), is(false));
+		assertThat(hasWriteMethodForProperty(bi, "dateFormat"), is(false));
+		assertThat(hasIndexedReadMethodForProperty(bi, "dateFormat"), is(false));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat"), is(true));
+
+		assertThat(hasReadMethodForProperty(ebi, "dateFormat"), is(false));
+		assertThat(hasWriteMethodForProperty(ebi, "dateFormat"), is(true));
+		assertThat(hasIndexedReadMethodForProperty(ebi, "dateFormat"), is(false));
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "dateFormat"), is(true));
+	}
+
 	@Test
 	public void propertyCountsMatch() throws IntrospectionException {
 		BeanInfo bi = Introspector.getBeanInfo(TestBean.class);

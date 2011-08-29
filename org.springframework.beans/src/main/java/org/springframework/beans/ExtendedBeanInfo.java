@@ -227,7 +227,9 @@ public class ExtendedBeanInfo implements BeanInfo {
 					}
 					// update the existing descriptor's indexed read method
 					try {
-						existingIPD.setIndexedReadMethod(indexedReadMethod);
+						if (indexedReadMethod != null) {
+							existingIPD.setIndexedReadMethod(indexedReadMethod);
+						}
 					} catch (IntrospectionException ex) {
 						// there is a conflicting indexed setter method present -> null it out and try again
 						existingIPD.setIndexedWriteMethod(null);
