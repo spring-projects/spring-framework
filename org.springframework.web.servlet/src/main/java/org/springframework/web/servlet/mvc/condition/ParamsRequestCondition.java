@@ -54,8 +54,8 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	private static Collection<ParamExpression> parseExpressions(String... params) {
 		Set<ParamExpression> expressions = new LinkedHashSet<ParamExpression>();
 		if (params != null) {
-			for (String header : params) {
-				expressions.add(new ParamExpression(header));
+			for (String param : params) {
+				expressions.add(new ParamExpression(param));
 			}
 		}
 		return expressions;

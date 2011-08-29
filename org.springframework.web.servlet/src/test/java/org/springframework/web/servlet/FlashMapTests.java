@@ -21,7 +21,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  * Test fixture for {@link FlashMap} tests.
@@ -29,101 +28,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * @author Rossen Stoyanchev
  */
 public class FlashMapTests {
-
-	@Test
-	public void matchAnyUrlPath() {
-		FlashMap flashMap = new FlashMap();
-
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "")));
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/")));
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/yes")));
-	}
-
-	@Test
-	public void matchUrlPath() {
-		FlashMap flashMap = new FlashMap();
-		flashMap.setExpectedRequestUri(null, "/yes");
-
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/yes")));
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/yes/")));
-		assertFalse(flashMap.matches(new MockHttpServletRequest("GET", "/yes/but")));
-		assertFalse(flashMap.matches(new MockHttpServletRequest("GET", "/no")));
-
-		flashMap.setExpectedRequestUri(null, "/thats it?");
-
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/thats it")));
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/thats%20it")));
-	}
-
-	@Test
-	public void matchRelativeUrlPath() {
-		FlashMap flashMap = new FlashMap();
-
-		flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET", "/oh/no"), "yes");
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/oh/yes")));
-
-		flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET", "/oh/not/again"), "../ok");
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/oh/ok")));
-
-		flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET", "/yes/it/is"), "..");
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/yes")));
-
-		flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET", "/yes/it/is"), "../");
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/yes")));
-
-		flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET", "/thats it/really"), "./");
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/thats%20it")));
-		
-		flashMap.setExpectedRequestUri(new MockHttpServletRequest("GET", "/yes/it/is"), "..?url=http://example.com");
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/yes")));
-	}
-
-	@Test
-	public void matchAbsoluteUrlPath() {
-		FlashMap flashMap = new FlashMap();
-		flashMap.setExpectedRequestUri(new MockHttpServletRequest(), "http://example.com");
-
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "")));
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/")));
-		assertFalse(flashMap.matches(new MockHttpServletRequest("GET", "/no")));
-
-		flashMap.setExpectedRequestUri(null, "http://example.com/");
-
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "")));
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/")));
-		assertFalse(flashMap.matches(new MockHttpServletRequest("GET", "/no")));
-
-		flashMap.setExpectedRequestUri(null, "http://example.com/yes");
-
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/yes")));
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/yes/")));
-		assertFalse(flashMap.matches(new MockHttpServletRequest("GET", "/no")));
-		assertFalse(flashMap.matches(new MockHttpServletRequest("GET", "/yes/no")));
-
-		flashMap.setExpectedRequestUri(null, "http://example.com/yes?a=1");
-
-		assertTrue(flashMap.matches(new MockHttpServletRequest("GET", "/yes")));
-	}
-
-	@Test
-	public void matchExpectedRequestParameter() {
-		String parameterName = "numero";
-
-		FlashMap flashMap = new FlashMap();
-		flashMap.setExpectedRequestParam(parameterName, "uno");
-
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		assertFalse(flashMap.matches(request));
-
-		request.setParameter(parameterName, "uno");
-		assertTrue(flashMap.matches(request));
-
-		request.setParameter(parameterName, "dos");
-		assertFalse(flashMap.matches(request));
-
-		request.setParameter(parameterName, (String) null);
-		assertFalse(flashMap.matches(request));
-	}
 
 	@Test
 	public void isExpired() throws InterruptedException {
@@ -152,18 +56,18 @@ public class FlashMapTests {
 		FlashMap flashMap2 = new FlashMap();
 		assertEquals(0, flashMap1.compareTo(flashMap2));
 
-		flashMap1.setExpectedRequestUri(null, "/path1");
+		flashMap1.setTargetRequestPath("/path1");
 		assertEquals(-1, flashMap1.compareTo(flashMap2));
 		assertEquals(1, flashMap2.compareTo(flashMap1));
 
-		flashMap2.setExpectedRequestUri(null, "/path2");
+		flashMap2.setTargetRequestPath("/path2");
 		assertEquals(0, flashMap1.compareTo(flashMap2));
 
-		flashMap1.setExpectedRequestParam("id", "1");
+		flashMap1.addTargetRequestParam("id", "1");
 		assertEquals(-1, flashMap1.compareTo(flashMap2));
 		assertEquals(1, flashMap2.compareTo(flashMap1));
 
-		flashMap2.setExpectedRequestParam("id", "2");
+		flashMap2.addTargetRequestParam("id", "2");
 		assertEquals(0, flashMap1.compareTo(flashMap2));
 	}
 

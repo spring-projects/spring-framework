@@ -53,7 +53,6 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
@@ -815,7 +814,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		boolean flashInitialized = this.flashMapManager.requestStarted(request);
+		this.flashMapManager.requestStarted(request);
 
 		// Make framework objects available to handlers and view objects.
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
@@ -827,9 +826,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			doDispatch(request, response);
 		}
 		finally {
-			if (flashInitialized) {
-				this.flashMapManager.requestCompleted(request);
-			}
+			this.flashMapManager.requestCompleted(request);
+			
 			// Restore the original attribute snapshot, in case of an include.
 			if (attributesSnapshot != null) {
 				restoreAttributesAfterInclude(request, attributesSnapshot);

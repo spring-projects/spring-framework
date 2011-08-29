@@ -16,18 +16,25 @@
 
 package org.springframework.web.servlet.view;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.AssertionFailedError;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
+import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -116,13 +123,13 @@ public class RedirectViewTests {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("successMessage", "yay!");
 		request.setAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
-		rv.render(new ModelMap("id", "1"), request, response);
+		ModelMap model = new ModelMap("id", "1");
+		rv.render(model, request, response);
 		assertEquals(303, response.getStatus());
 		assertEquals("http://url.somewhere.com/path?id=1", response.getHeader("Location"));
 		
-		MockHttpServletRequest nextRequest = new MockHttpServletRequest("GET", "/path");
-		nextRequest.addParameter("id", "1");
-		assertTrue(flashMap.matches(nextRequest));
+		assertEquals("/path", flashMap.getTargetRequestPath());
+		assertEquals(model, flashMap.getTargetRequestParams());
 	}
 
 	@Test

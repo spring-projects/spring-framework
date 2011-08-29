@@ -38,6 +38,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.SmartView;
@@ -261,24 +262,27 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
 		}
 
-		UriTemplate uriTemplate = createUriTemplate(targetUrl, enc);
-		if (uriTemplate.getVariableNames().size() > 0) {
-			Map<String, Object> vars = new HashMap<String, Object>();
-			vars.putAll(getCurrentUriVars(request));
-			vars.putAll(model);
-			targetUrl = new StringBuilder(uriTemplate.expand(vars).toString());
-			model = removeKeys(model, uriTemplate.getVariableNames());
+		if (StringUtils.hasText(targetUrl)) {
+			UriTemplate uriTemplate = createUriTemplate(targetUrl, enc);
+			if (uriTemplate.getVariableNames().size() > 0) {
+				Map<String, Object> vars = new HashMap<String, Object>();
+				vars.putAll(getCurrentUriVars(request));
+				vars.putAll(model);
+				targetUrl = new StringBuilder(uriTemplate.expand(vars).toString());
+				model = removeKeys(model, uriTemplate.getVariableNames());
+			}
 		}
-
+		
 		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
 		if (!CollectionUtils.isEmpty(flashMap)) {
-			flashMap.setExpectedRequestUri(request, targetUrl.toString());
+			String targetPath = WebUtils.extractUrlPath(targetUrl.toString());
+			flashMap.setTargetRequestPath(targetPath);
 		}
 
 		if (this.exposeModelAttributes) {
 			appendQueryProperties(targetUrl, model, enc);
 			if (!CollectionUtils.isEmpty(flashMap)) {
-				flashMap.setExpectedRequestParams(model);
+				flashMap.addTargetRequestParams(model);
 			}
 		}
 

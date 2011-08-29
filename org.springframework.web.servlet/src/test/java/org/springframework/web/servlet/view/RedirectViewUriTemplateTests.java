@@ -94,4 +94,14 @@ public class RedirectViewUriTemplateTests {
 		assertEquals(url + "/value1/v1/value2?key3=value3", response.getRedirectedUrl());
 	}
 
+	@Test
+	public void emptyRedirectString() throws Exception {
+		Map<String, Object> model = new HashMap<String, Object>();
+
+		RedirectView redirectView = new RedirectView("");
+		redirectView.renderMergedOutputModel(model, request, response);
+
+		assertEquals("", response.getRedirectedUrl());
+	}
+	
 }
