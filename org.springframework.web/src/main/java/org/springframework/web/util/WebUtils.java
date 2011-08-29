@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
@@ -723,4 +724,29 @@ public abstract class WebUtils {
 		return urlPath.substring(begin, end);
 	}
 
+	/**
+	 * Extracts the path from the given URL by removing the query at the end 
+	 * and the scheme and authority in the front, if present.
+	 * @param url a URL, never {@code null}
+	 * @return the extracted URL path
+	 */
+	public static String extractUrlPath(String url) {
+		// Remove query/fragment
+		int end = url.indexOf('?');
+		if (end == -1) {
+			end = url.indexOf('#');
+			if (end == -1) {
+				end = url.length();
+			}
+		}
+		url = url.substring(0, end);
+		// Remove scheme + authority
+		int start = url.indexOf("://");
+		if (start != -1) {
+			start = url.indexOf('/', start + 3);
+			url = (start != -1 ) ? url.substring(start) : "";
+		}
+		return url;
+	}
+	
 }

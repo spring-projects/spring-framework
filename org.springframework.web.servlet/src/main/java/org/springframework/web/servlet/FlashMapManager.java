@@ -16,18 +16,20 @@
 
 package org.springframework.web.servlet;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.web.servlet.support.RequestContextUtils;
-
 /**
- * A strategy interface for maintaining {@link FlashMap} instances in some 
- * underlying storage until the next request. 
+ * A strategy interface for storing and retrieving {@code FlashMap} instances.
+ * See {@link FlashMap} for a general overview of using flash attributes.
  * 
- * <p>The most common use case for using flash storage is a redirect. 
- * For example creating a resource in a POST request and then redirecting
- * to the page that shows the resource. Flash storage may be used to 
- * pass along a success message.
+ * <p>A FlashMapManager is invoked at the beginning and at the end of a request.
+ * For each request, it exposes an "input" FlashMap with attributes passed from
+ * a previous request (if any) and an "output" FlashMap with attributes to pass 
+ * to a subsequent request. Both FlashMap instances are exposed via request
+ * attributes and can be accessed through methods in
+ * {@code org.springframework.web.servlet.support.RequestContextUtils}.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -37,41 +39,42 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public interface FlashMapManager {
 
 	/**
-	 * Request attribute holding the read-only Map with flash attributes saved 
-	 * during the previous request.
-	 * @see RequestContextUtils#getInputFlashMap(HttpServletRequest)
+	 * Name of request attribute that holds a read-only {@link Map} with 
+	 * "input" flash attributes from a previous request (if any).
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getInputFlashMap(HttpServletRequest)
 	 */
 	public static final String INPUT_FLASH_MAP_ATTRIBUTE = FlashMapManager.class.getName() + ".INPUT_FLASH_MAP";
 
 	/**
-	 * Request attribute holding the {@link FlashMap} to add attributes to during 
-	 * the current request.
-	 * @see RequestContextUtils#getOutputFlashMap(HttpServletRequest)
+	 * Name of request attribute that holds the "output" {@link FlashMap} with
+	 * attributes to pass to a subsequent request.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getOutputFlashMap(HttpServletRequest)
 	 */
 	public static final String OUTPUT_FLASH_MAP_ATTRIBUTE = FlashMapManager.class.getName() + ".OUTPUT_FLASH_MAP";
 
 	/**
-	 * Perform flash storage tasks at the start of a new request:
-	 * <ul>
-	 * 	<li>Create a FlashMap and make it available under the request attribute 
-	 * 	{@link #OUTPUT_FLASH_MAP_ATTRIBUTE}.
-	 * 	<li>Locate the FlashMap saved during the previous request and make it
-	 * 	available under the request attribute {@link #INPUT_FLASH_MAP_ATTRIBUTE}.
+	 * Performs the following tasks unless the {@link #OUTPUT_FLASH_MAP_ATTRIBUTE} 
+	 * request attribute exists:
+	 * <ol>
+	 * 	<li>Find the "input" FlashMap from a previous request (if any), expose it 
+	 * under the request attribute {@link #INPUT_FLASH_MAP_ATTRIBUTE}, and 
+	 * remove it from underlying storage.
+	 * 	<li>Create the "output" FlashMap where the current request can save 
+	 * flash attributes and expose it under the request attribute 
+	 * {@link #OUTPUT_FLASH_MAP_ATTRIBUTE}.
 	 * 	<li>Remove expired FlashMap instances.
-	 * </ul>
-	 * <p>If the {@link #OUTPUT_FLASH_MAP_ATTRIBUTE} request attribute exists
-	 * return "false" immediately.
+	 * </ol>
 	 * 
 	 * @param request the current request
-	 * @return "true" if flash storage tasks were performed; "false" otherwise.
 	 */
-	boolean requestStarted(HttpServletRequest request);
+	void requestStarted(HttpServletRequest request);
 
 	/**
-	 * Access the FlashMap with attributes added during the current request and
-	 * if it is not empty, save it in the underlying storage. 
-	 * <p>If the call to {@link #requestStarted} returned "false", this 
-	 * method is not invoked.
+	 * Save the "output" FlashMap in underlying storage, start its expiration 
+	 * period, and decode/normalize its target request path. 
+	 * 
+	 * <p>The "output" FlashMap is not saved if it is empty or if it was not 
+	 * created by this FlashMapManager.
 	 */
 	void requestCompleted(HttpServletRequest request);
 

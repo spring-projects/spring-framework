@@ -20,98 +20,90 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Stores attributes that need to be made available in the next request.
+ * A FlashMap provides a way for one request to store attributes intended for 
+ * use in another. This is most commonly needed when redirecting from one URL
+ * to another -- e.g. the Post/Redirect/Get pattern. A FlashMap is saved before 
+ * the redirect (typically in the session) and is made available after the 
+ * redirect and removed immediately.
+ * 
+ * <p>A FlashMap can be set up with a request path and request parameters to 
+ * help identify the target request. Without this information, a FlashMap is
+ * made available to the next request, which may or may not be the intended 
+ * result. Before a redirect, the target URL is known and when using the
+ * {@code org.springframework.web.servlet.view.RedirectView}, FlashMap 
+ * instances are automatically updated with redirect URL information.
+ * 
+ * <p>Annotated controllers will usually not access a FlashMap directly.. TODO
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
+ * 
+ * @see FlashMapManager
  */
 public class FlashMap extends HashMap<String, Object> implements Comparable<FlashMap> {
 
 	private static final long serialVersionUID = 1L;
 	
-	private String expectedRequestUri;
+	private String targetRequestPath;
 	
-	private final Map<String, String> expectedRequestParameters = new LinkedHashMap<String, String>();
+	private final Map<String, String> targetRequestParams = new LinkedHashMap<String, String>();
 	
 	private long expirationStartTime;
 	
 	private int timeToLive;
 
-	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
-	
+	private final int createdBy;
+
 	/**
-	 * Provide a URL to identify the target request for this FlashMap.
-	 * Only the path of the provided URL will be used for matching purposes. 
-	 * If the URL is absolute or has a query string, the URL path is 
-	 * extracted. Or if the URL is relative, it is appended to the current 
-	 * request URI and normalized.  
-	 *  
-	 * @param request the current request, used to normalize relative URLs
-	 * @param url an absolute URL, a URL path, or a relative URL, never {@code null}
+	 * Create a new instance.
 	 */
-	public FlashMap setExpectedRequestUri(HttpServletRequest request, String url) {
-		Assert.notNull(url, "Expected URL must not be null");
-		String path = extractRequestUri(url);
-		this.expectedRequestUri = path.startsWith("/") ? path : normalizeRelativePath(request, path);
-		return this;
-	}
-
-	private String extractRequestUri(String url) {
-		int index = url.indexOf("?");
-		if (index != -1) {
-			url = url.substring(0, index);
-		}
-		index = url.indexOf("://");
-		if (index != -1) {
-			int pathBegin = url.indexOf("/", index + 3);
-			url = (pathBegin != -1 ) ? url.substring(pathBegin) : "";
-		}
-		return url;
-	}
-
-	private String normalizeRelativePath(HttpServletRequest request, String relativeUrl) {
-		String requestUri = this.urlPathHelper.getRequestUri(request);
-		relativeUrl = requestUri.substring(0, requestUri.lastIndexOf('/') + 1) + relativeUrl;
-		return StringUtils.cleanPath(relativeUrl);
+	public FlashMap() {
+		this.createdBy = 0;
 	}
 
 	/**
-	 * Add a request parameter pair to help identify the request this FlashMap 
-	 * should be made available to. If expected parameters are not set, the 
-	 * FlashMap instance will match to requests with any parameters.
-	 * 
-	 * @param name the name of the expected parameter (never {@code null})
-	 * @param value the value for the expected parameter (never {@code null})
+	 * Create a new instance with an id uniquely identifying the creator of 
+	 * this FlashMap.
 	 */
-	public FlashMap setExpectedRequestParam(String name, String value) {
-		this.expectedRequestParameters.put(name, value.toString());
-		return this;
+	public FlashMap(int createdBy) {
+		this.createdBy = createdBy;
 	}
 
 	/**
-	 * Provide request parameter pairs to help identify the request this FlashMap 
-	 * should be made available to. If expected parameters are not set, the 
-	 * FlashMap instance will match to requests with any parameters.
-	 * 
-	 * <p>Although the provided map contain any Object values, only non-"simple" 
-	 * value types as defined in {@link BeanUtils#isSimpleValueType} are used.
-	 * 
+	 * Provide a URL path to help identify the target request for this FlashMap.
+	 * The path may be absolute (e.g. /application/resource) or relative to the
+	 * current request (e.g. ../resource).
+	 * @param path the URI path, never {@code null}
+	 */
+	public void setTargetRequestPath(String path) {
+		Assert.notNull(path, "Expected path must not be null");
+		this.targetRequestPath = path;
+	}
+
+	/**
+	 * Return the URL path of the target request, or {@code null} if none.
+	 */
+	public String getTargetRequestPath() {
+		return targetRequestPath;
+	}
+
+	/**
+	 * Provide request parameter pairs to identify the request for this FlashMap. 
+	 * If not set, the FlashMap will match to requests with any parameters.
+	 * Only simple value types, as defined in {@link BeanUtils#isSimpleValueType}, 
+	 * are used.
 	 * @param params a Map with the names and values of expected parameters.
 	 */
-	public FlashMap setExpectedRequestParams(Map<String, ?> params) {
+	public FlashMap addTargetRequestParams(Map<String, ?> params) {
 		if (params != null) {
 			for (String name : params.keySet()) {
 				Object value = params.get(name);
 				if ((value != null) && BeanUtils.isSimpleValueType(value.getClass())) {
-					this.expectedRequestParameters.put(name, value.toString());
+					this.targetRequestParams.put(name, value.toString());
 				}
 			}
 		}
@@ -119,37 +111,24 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	}
 
 	/**
-	 * Whether this FlashMap matches to the given request by checking 
-	 * expectations provided via {@link #setExpectedRequestUri} and 
-	 * {@link #setExpectedRequestParams}.
+	 * Provide a request parameter to identify the request for this FlashMap.
+	 * If not set, the FlashMap will match to requests with any parameters.
 	 * 
-	 * @param request the current request
-	 * 
-	 * @return "true" if the expectations match or there are no expectations.
+	 * @param name the name of the expected parameter (never {@code null})
+	 * @param value the value for the expected parameter (never {@code null})
 	 */
-	public boolean matches(HttpServletRequest request) {
-		if (this.expectedRequestUri != null) {
-			String requestUri = this.urlPathHelper.getRequestUri(request);
-			if (!matchPathsIgnoreTrailingSlash(requestUri, this.expectedRequestUri)) {
-				return false;
-			}
-		}
-		if (this.expectedRequestParameters != null) {
-			for (Map.Entry<String, String> entry : this.expectedRequestParameters.entrySet()) {
-				if (!entry.getValue().equals(request.getParameter(entry.getKey()))) {
-					return false;
-				}
-			}
-		}
-		return true;
+	public FlashMap addTargetRequestParam(String name, String value) {
+		this.targetRequestParams.put(name, value.toString());
+		return this;
 	}
 	
-	private boolean matchPathsIgnoreTrailingSlash(String path1, String path2) {
-		path1 = path1.endsWith("/") ? path1.substring(0, path1.length() - 1) : path1;
-		path2 = path2.endsWith("/") ? path2.substring(0, path2.length() - 1) : path2;
-		return path1.equals(path2);
+	/**
+	 * Return the parameters identifying the target request, or an empty Map.
+	 */
+	public Map<String, String> getTargetRequestParams() {
+		return targetRequestParams;
 	}
-	
+
 	/**
 	 * Start the expiration period for this instance. After the given number of 
 	 * seconds calls to {@link #isExpired()} will return "true".
@@ -174,21 +153,24 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	}
 
 	/**
-	 * Compare two FlashMap instances. One instance is preferred over the other
-	 * if it has an expected URL path or if it has a greater number of expected 
-	 * request parameters.
-	 * 
-	 * <p>It is expected that both instances have been matched against the 
-	 * current request via {@link FlashMap#matches}.
+	 * Whether the given id matches the id of the creator of this FlashMap.
+	 */
+	public boolean isCreatedBy(int createdBy) {
+		return this.createdBy == createdBy;
+	}
+
+	/**
+	 * Compare two FlashMaps and select the one that has a target URL path or 
+	 * has more target request parameters. 
 	 */
 	public int compareTo(FlashMap other) {
-		int thisUrlPath = (this.expectedRequestUri != null) ? 1 : 0;
-		int otherUrlPath = (other.expectedRequestUri != null) ? 1 : 0;
+		int thisUrlPath = (this.targetRequestPath != null) ? 1 : 0;
+		int otherUrlPath = (other.targetRequestPath != null) ? 1 : 0;
 		if (thisUrlPath != otherUrlPath) {
 			return otherUrlPath - thisUrlPath;
 		}
 		else {
-			return other.expectedRequestParameters.size() - this.expectedRequestParameters.size();
+			return other.targetRequestParams.size() - this.targetRequestParams.size();
 		}
 	}
 
@@ -196,8 +178,8 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		result.append("[Attributes=").append(super.toString());
-		result.append(", expecteRequestUri=").append(this.expectedRequestUri);
-		result.append(", expectedRequestParameters=" + this.expectedRequestParameters.toString()).append("]");
+		result.append(", expecteRequestUri=").append(this.targetRequestPath);
+		result.append(", expectedRequestParameters=" + this.targetRequestParams.toString()).append("]");
 		return result.toString();
 	}
 
