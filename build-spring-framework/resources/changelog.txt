@@ -10,7 +10,7 @@ Changes in version 3.1 RC1 (2011-09-xx)
 * updated JBossLoadTimeWeaver to automatically detect and support JBoss AS 7 as well
 * support for load-time weaving on WebSphere 7 and 8
 * support for Hibernate 4.0 beta as a JPA provider
-* upgraded to JUnit 4.8.2
+* upgraded to JUnit 4.9
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
 * introduced ForkJoinPoolFactoryBean for Java 7 (alternative: add new jsr166.jar to Java 6)
 * DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
