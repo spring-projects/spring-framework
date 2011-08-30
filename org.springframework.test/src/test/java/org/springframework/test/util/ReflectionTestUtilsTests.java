@@ -24,6 +24,7 @@ import static org.springframework.test.util.ReflectionTestUtils.invokeMethod;
 import static org.springframework.test.util.ReflectionTestUtils.invokeSetterMethod;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.AssertThrows;
 import org.springframework.test.util.subpackage.Component;
@@ -201,9 +202,22 @@ public class ReflectionTestUtilsTests {
 	}
 
 	@Test
-	public void invokeMethodWithReturnValueWithAutoboxingAndUnboxing() {
-		int sum = invokeMethod(component, "add", 1, 2);
-		assertEquals("add(1, 2)", 3, sum);
+	public void invokeMethodWithAutoboxingAndUnboxing() {
+		int difference = invokeMethod(component, "subtract", 5, 2);
+		assertEquals("subtract(5, 2)", 3, difference);
+	}
+
+	@Ignore("[SPR-8644] findMethod() does not currently support var-args")
+	@Test
+	public void invokeMethodWithPrimitiveVarArgs() {
+		int sum = invokeMethod(component, "add", 1, 2, 3, 4);
+		assertEquals("add(1,2,3,4)", 10, sum);
+	}
+
+	@Test
+	public void invokeMethodWithPrimitiveVarArgsAsSingleArgument() {
+		int sum = invokeMethod(component, "add", new int[] { 1, 2, 3, 4 });
+		assertEquals("add(1,2,3,4)", 10, sum);
 	}
 
 	@Test
@@ -228,7 +242,7 @@ public class ReflectionTestUtilsTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void invokeMethodWithIncompatibleArgumentTypes() {
-		invokeMethod(component, "add", "foo", 2.0);
+		invokeMethod(component, "subtract", "foo", 2.0);
 	}
 
 	@Test(expected = IllegalStateException.class)
