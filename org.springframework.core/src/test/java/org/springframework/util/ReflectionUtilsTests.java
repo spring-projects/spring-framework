@@ -17,7 +17,13 @@
 package org.springframework.util;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,8 +33,8 @@ import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.beans.TestBean;
 
 /**
@@ -90,25 +96,25 @@ public class ReflectionUtilsTests {
 		bean.setName(rob);
 
 		Method getName = TestBean.class.getMethod("getName", (Class[]) null);
-		Method setName = TestBean.class.getMethod("setName", new Class[]{String.class});
+		Method setName = TestBean.class.getMethod("setName", new Class[] { String.class });
 
 		Object name = ReflectionUtils.invokeMethod(getName, bean);
 		assertEquals("Incorrect name returned", rob, name);
 
 		String juergen = "Juergen Hoeller";
-		ReflectionUtils.invokeMethod(setName, bean, new Object[]{juergen});
+		ReflectionUtils.invokeMethod(setName, bean, new Object[] { juergen });
 		assertEquals("Incorrect name set", juergen, bean.getName());
 	}
 
 	@Test
 	public void declaresException() throws Exception {
-		Method remoteExMethod = A.class.getDeclaredMethod("foo", new Class[]{Integer.class});
+		Method remoteExMethod = A.class.getDeclaredMethod("foo", new Class[] { Integer.class });
 		assertTrue(ReflectionUtils.declaresException(remoteExMethod, RemoteException.class));
 		assertTrue(ReflectionUtils.declaresException(remoteExMethod, ConnectException.class));
 		assertFalse(ReflectionUtils.declaresException(remoteExMethod, NoSuchMethodException.class));
 		assertFalse(ReflectionUtils.declaresException(remoteExMethod, Exception.class));
 
-		Method illegalExMethod = B.class.getDeclaredMethod("bar", new Class[]{String.class});
+		Method illegalExMethod = B.class.getDeclaredMethod("bar", new Class[] { String.class });
 		assertTrue(ReflectionUtils.declaresException(illegalExMethod, IllegalArgumentException.class));
 		assertTrue(ReflectionUtils.declaresException(illegalExMethod, NumberFormatException.class));
 		assertFalse(ReflectionUtils.declaresException(illegalExMethod, IllegalStateException.class));
@@ -122,8 +128,7 @@ public class ReflectionUtilsTests {
 		try {
 			ReflectionUtils.shallowCopyFieldState(src, dest);
 			fail();
-		}
-		catch (IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			// Ok
 		}
 	}
@@ -135,8 +140,7 @@ public class ReflectionUtilsTests {
 		try {
 			ReflectionUtils.shallowCopyFieldState(src, dest);
 			fail();
-		}
-		catch (IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			// Ok
 		}
 	}
@@ -148,8 +152,7 @@ public class ReflectionUtilsTests {
 		try {
 			ReflectionUtils.shallowCopyFieldState(src, dest);
 			fail();
-		}
-		catch (IllegalArgumentException ex) {
+		} catch (IllegalArgumentException ex) {
 			// Ok
 		}
 	}
@@ -240,18 +243,39 @@ public class ReflectionUtilsTests {
 		assertNotNull(ReflectionUtils.findMethod(B.class, "getClass"));
 	}
 
+	@Ignore("[SPR-8644] findMethod() does not currently support var-args")
+	@Test
+	public void findMethodWithVarArgs() throws Exception {
+		assertNotNull(ReflectionUtils.findMethod(B.class, "add", int.class, int.class, int.class));
+	}
+
 	@Test
 	public void isCglibRenamedMethod() throws SecurityException, NoSuchMethodException {
 		@SuppressWarnings("unused")
 		class C {
-			public void CGLIB$m1$123() { }
-			public void CGLIB$m1$0() { }
-			public void CGLIB$$0() { }
-			public void CGLIB$m1$() { }
-			public void CGLIB$m1() { }
-			public void m1() { }
-			public void m1$() { }
-			public void m1$1() { }
+			public void CGLIB$m1$123() {
+			}
+
+			public void CGLIB$m1$0() {
+			}
+
+			public void CGLIB$$0() {
+			}
+
+			public void CGLIB$m1$() {
+			}
+
+			public void CGLIB$m1() {
+			}
+
+			public void m1() {
+			}
+
+			public void m1$() {
+			}
+
+			public void m1$1() {
+			}
 		}
 		assertTrue(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$123")));
 		assertTrue(ReflectionUtils.isCglibRenamedMethod(C.class.getMethod("CGLIB$m1$0")));
@@ -300,6 +324,7 @@ public class ReflectionUtilsTests {
 	@Test
 	public void getUniqueDeclaredMethods_withCovariantReturnType() throws Exception {
 		class Parent {
+			@SuppressWarnings("unused")
 			public Number m1() {
 				return new Integer(42);
 			}
@@ -322,7 +347,6 @@ public class ReflectionUtilsTests {
 		assertFalse(ObjectUtils.containsElement(methods, Parent.class.getMethod("m1")));
 	}
 
-
 	private static class ListSavingMethodCallback implements ReflectionUtils.MethodCallback {
 
 		private List<String> methodNames = new LinkedList<String>();
@@ -338,11 +362,11 @@ public class ReflectionUtilsTests {
 			return this.methodNames;
 		}
 
+		@SuppressWarnings("unused")
 		public List<Method> getMethods() {
 			return this.methods;
 		}
 	}
-
 
 	private static class TestBeanSubclass extends TestBean {
 
@@ -352,12 +376,11 @@ public class ReflectionUtilsTests {
 		}
 	}
 
-
 	private static class TestBeanSubclassWithPublicField extends TestBean {
 
+		@SuppressWarnings("unused")
 		public String publicField = "foo";
 	}
-
 
 	private static class TestBeanSubclassWithNewField extends TestBean {
 
@@ -366,23 +389,31 @@ public class ReflectionUtilsTests {
 		protected String prot = "foo";
 	}
 
-
 	private static class TestBeanSubclassWithFinalField extends TestBean {
 
+		@SuppressWarnings("unused")
 		private final String foo = "will break naive copy that doesn't exclude statics";
 	}
 
-
 	private static class A {
 
+		@SuppressWarnings("unused")
 		private void foo(Integer i) throws RemoteException {
 		}
 	}
 
-
+	@SuppressWarnings("unused")
 	private static class B extends A {
 
 		void bar(String s) throws IllegalArgumentException {
+		}
+
+		int add(int... args) {
+			int sum = 0;
+			for (int i = 0; i < args.length; i++) {
+				sum += args[i];
+			}
+			return sum;
 		}
 	}
 
