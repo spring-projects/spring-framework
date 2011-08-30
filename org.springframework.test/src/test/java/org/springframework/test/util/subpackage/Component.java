@@ -62,8 +62,24 @@ public class Component {
 		this.text = null;
 	}
 
-	int add(int a, int b) {
-		return a + b;
+	int subtract(int a, int b) {
+		return a - b;
+	}
+
+	int add(int... args) {
+		int sum = 0;
+		for (int i = 0; i < args.length; i++) {
+			sum += args[i];
+		}
+		return sum;
+	}
+
+	int multiply(Integer... args) {
+		int product = 1;
+		for (int i = 0; i < args.length; i++) {
+			product *= args[i];
+		}
+		return product;
 	}
 
 }
