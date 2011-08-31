@@ -124,15 +124,15 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed]]></
 			</para>
 			
 			<programlisting language="java"><!-- select 'isbn' argument -->
-@Cacheable(value="book", <emphasis role="bold">key="#isbn"</emphasis>
+@Cacheable(value="books", <emphasis role="bold">key="#isbn"</emphasis>
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
 <!-- select nested property of a certain argument -->
-@Cacheable(value="book", <emphasis role="bold">key="#isbn.rawNumber"</emphasis>)
+@Cacheable(value="books", <emphasis role="bold">key="#isbn.rawNumber"</emphasis>)
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
 <!-- invoke arbitrary method using certain arguments -->
-@Cacheable(value="book", <emphasis role="bold">key="T(someType).hash(#isbn)"</emphasis>)
+@Cacheable(value="books", <emphasis role="bold">key="T(someType).hash(#isbn)"</emphasis>)
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)</programlisting>
 
 			<para>The snippets above, show how easy it is to select a certain argument, one of its properties or even an arbitrary (static) method.</para>
@@ -350,6 +350,45 @@ public void loadBooks(InputStream batch)]]></programlisting>
         linkend="mvc-servlet" /> for more information.</para>
       </note>
       		
+      <sidebar>
+        <title>Method visibility and
+        <interfacename>@Cacheable/@CacheEvcit</interfacename></title>
+
+        <para>When using proxies, you should apply the
+        <interfacename>@Cacheable/@CacheEvict</interfacename> annotations only to
+        methods with <emphasis>public</emphasis> visibility. If you do
+        annotate protected, private or package-visible methods with these annotations,
+        no error is raised, but the annotated method does not exhibit the configured
+        caching settings. Consider the use of AspectJ (see below) if you
+        need to annotate non-public methods as it changes the bytecode itself.</para>
+      </sidebar>
+      
+      <para><tip>
+          <para>Spring recommends that you only annotate concrete classes (and
+          methods of concrete classes) with the
+          <interfacename>@Cacheable/@CacheEvict</interfacename> annotation, as opposed
+          to annotating interfaces. You certainly can place the
+          <interfacename>@Cacheable/@CacheEvict</interfacename> annotation on an
+          interface (or an interface method), but this works only as you would
+          expect it to if you are using interface-based proxies. The fact that
+          Java annotations are <emphasis>not inherited from interfaces</emphasis>
+          means that if you are using class-based proxies
+          (<literal>proxy-target-class="true"</literal>) or the weaving-based
+          aspect (<literal>mode="aspectj"</literal>), then the caching
+          settings are not recognized by the proxying and weaving
+          infrastructure, and the object will not be wrapped in a
+          caching proxy, which would be decidedly
+          <emphasis>bad</emphasis>.</para>
+        </tip></para>
+
+      <note>
+        <para>In proxy mode (which is the default), only external method calls
+        coming in through the proxy are intercepted. This means that
+        self-invocation, in effect, a method within the target object calling
+        another method of the target object, will not lead to an actual
+        caching at runtime even if the invoked method is marked with
+        <interfacename>@Cacheable</interfacename> - considering using the aspectj mode in this case.</para>
+      </note>      
 	</section>
 	
 	<section id="cache-annotation-stereotype">
@@ -383,6 +422,47 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 	</section>
   </section>
   
+  <section id="cache-declarative-xml">
+  	<title>Declarative XML-based caching</title>
+  	
+  	<para>If annotations are not an option (no access to the sources or no external code), one can use XML for declarative caching. So instead of annotating the methods for caching, one specifies
+  	the target method and the caching directives externally (similar to the declarative transaction management <link linkend="transaction-declarative-first-example">advice</link>). The previous example
+  	can be translated into:</para>
+  	
+  	<programlisting language="xml"><![CDATA[<!-- the service we want to make cacheable -->
+  	    <bean id="bookService" class="x.y.service.DefaultBookService"/>
+  	    
+  		<!-- cache definitions -->
+  		<cache:advice id="cacheAdvice" cache-manager="cacheManager">
+			<cache:definitions cache="books">
+				<cache:cacheable method="findBook" key="#isbn"/>
+				<cache:cache-evict method="loadBooks" all-entries="true"/>
+			</cache:definitions>
+		</cache:advice>
+		
+		<!-- apply the cacheable behaviour to all BookService interfaces -->
+		<aop:config>
+			<aop:advisor advice-ref="cacheAdvice" pointcut="execution(* x.y.BookService.*(..))"/>
+		</aop:config>
+		...
+		// cache manager definition omitted
+		]]>
+  	</programlisting>
+  	
+  	<para>In the configuration above, the <literal>bookService</literal> is made cacheable. The caching semantics to apply are encapsulated in the <literal>cache:advice</literal> definition which
+  	instructs method <literal>findBooks</literal> to be used for putting data into the cache while method <literal>loadBooks</literal> for evicting data. Both definitions are working against the
+  	<literal>books</literal> cache.</para>
+  	
+  	<para>The <literal>aop:config</literal> definition applies the cache advice to the appropriate points in the program by using the AspectJ pointcut expression (more information is available 
+  	in <xref linkend="aop" />). In the example above, all methods from the <interfacename>BookService</interfacename> are considered and the cache advice applied to them.</para>
+  	
+  	<para>The declarative XML caching supports all of the annotation-based model so moving between the two should be fairly easy - further more both can be used inside the same application.
+  	The XML based approach does not touch the target code however it is inherently more verbose; when dealing with classes with overloaded methods that are targeted for caching, identifying the 
+  	proper methods does take an extra effort since the <literal>method</literal> argument is not a good discriminator - in these cases, the AspectJ pointcut can be used to cherry pick the target
+  	methods and apply the appropriate caching functionality. Howeve through XML, it is easier to apply a package/group/interface-wide caching (again due to the AspectJ poincut) and to create
+  	template-like definitions (as we did in the example above by defining the target cache through the <literal>cache:definitions </literal><literal>cache</literal> attribute).  
+  	</para>
+  </section>
   
   <section id="cache-store-configuration">
 	<title>Configuring the cache storage</title>
@@ -450,7 +530,6 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 		or <literal>gemfireCache</literal> (configured above) will be handled by the no op cache, which will not store any information causing the target method to be executed every time.
 		</para>
 	</section>
-	
   </section>
   
   <section id="cache-plug">
