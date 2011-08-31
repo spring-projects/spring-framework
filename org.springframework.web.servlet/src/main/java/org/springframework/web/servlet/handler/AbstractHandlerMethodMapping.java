@@ -24,12 +24,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.ApplicationContextException;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -37,7 +35,6 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping HandlerMapping} implementations that
@@ -51,51 +48,10 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping {
 
-	private UrlPathHelper urlPathHelper = new UrlPathHelper();
-
 	private final MultiValueMap<String, T> urlMap = new LinkedMultiValueMap<String, T>();
 	
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>();
 
-	/**
-	 * Set if URL lookup should always use the full path within the current servlet context. Else, the path within the
-	 * current servlet mapping is used if applicable (that is, in the case of a ".../*" servlet mapping in web.xml).
-	 * <p>Default is "false".
-	 *
-	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath
-	 */
-	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
-		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
-	}
-
-	/**
-	 * Set if context path and request URI should be URL-decoded. Both are returned <i>undecoded</i> by the Servlet API, in
-	 * contrast to the servlet path. <p>Uses either the request encoding or the default encoding according to the Servlet
-	 * spec (ISO-8859-1).
-	 *
-	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode
-	 */
-	public void setUrlDecode(boolean urlDecode) {
-		this.urlPathHelper.setUrlDecode(urlDecode);
-	}
-
-	/**
-	 * Set the UrlPathHelper to use for resolution of lookup paths. <p>Use this to override the default UrlPathHelper 
-	 * with a custom subclass, or to share common UrlPathHelper settings across multiple HandlerMappings and
-	 * MethodNameResolvers.
-	 *
-	 */
-	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
-		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
-		this.urlPathHelper = urlPathHelper;
-	}
-	
-	/**
-	 * Return the {@link UrlPathHelper} to use for resolution of lookup paths.
-	 */
-	public UrlPathHelper getUrlPathHelper() {
-		return urlPathHelper;
-	}
 
 	/**
 	 * Return the map with all {@link HandlerMethod}s. The key of the map is the generic type 
@@ -222,7 +178,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	@Override
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-		String lookupPath = urlPathHelper.getLookupPathForRequest(request);
+		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up handler method for path " + lookupPath);
 		}
