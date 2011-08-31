@@ -16,10 +16,12 @@
 
 package org.springframework.http.client.support;
 
+import java.util.List;
+
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.InterceptingClientHttpRequestFactory;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Base class for {@link org.springframework.web.client.RestTemplate} and other HTTP accessing gateway helpers, adding
@@ -31,26 +33,26 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class InterceptingHttpAccessor extends HttpAccessor {
 
-	private ClientHttpRequestInterceptor[] interceptors;
+	private List<ClientHttpRequestInterceptor> interceptors;
 
 	/**
 	 * Sets the request interceptors that this accessor should use.
 	 */
-	public void setInterceptors(ClientHttpRequestInterceptor[] interceptors) {
+	public void setInterceptors(List<ClientHttpRequestInterceptor> interceptors) {
 		this.interceptors = interceptors;
 	}
 
 	/**
 	 * Return the request interceptor that this accessor uses.
 	 */
-	public ClientHttpRequestInterceptor[] getInterceptors() {
+	public List<ClientHttpRequestInterceptor> getInterceptors() {
 		return interceptors;
 	}
 
 	@Override
 	public ClientHttpRequestFactory getRequestFactory() {
 		ClientHttpRequestFactory delegate = super.getRequestFactory();
-		if (!ObjectUtils.isEmpty(getInterceptors())) {
+		if (!CollectionUtils.isEmpty(getInterceptors())) {
 			return new InterceptingClientHttpRequestFactory(delegate, getInterceptors());
 		}
 		else {
