@@ -403,6 +403,32 @@ public class ContentNegotiatingViewResolverTests {
 	}
 
 	@Test
+	public void resolveViewNameRedirectView() throws Exception {
+		request.addHeader("Accept", "application/json");
+		request.setRequestURI("/test");
+
+		ViewResolver xmlViewResolver = createMock(ViewResolver.class);
+		viewResolver.setViewResolvers(Arrays.<ViewResolver>asList(xmlViewResolver, new UrlBasedViewResolver()));
+
+		View xmlView = createMock("application_xml", View.class);
+		View jsonView = createMock("application_json", View.class);
+		viewResolver.setDefaultViews(Arrays.asList(jsonView));
+		
+		String viewName = "redirect:anotherTest";
+		Locale locale = Locale.ENGLISH;
+
+		expect(xmlViewResolver.resolveViewName(viewName, locale)).andReturn(xmlView);
+		expect(jsonView.getContentType()).andReturn("application/json").anyTimes();
+
+		replay(xmlViewResolver, xmlView, jsonView);
+
+		View actualView = viewResolver.resolveViewName(viewName, locale);
+		assertEquals("Invalid view", RedirectView.class, actualView.getClass());
+
+		verify(xmlViewResolver, xmlView, jsonView);
+	}
+	
+	@Test
 	public void resolveViewNoMatch() throws Exception {
 		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9");
 

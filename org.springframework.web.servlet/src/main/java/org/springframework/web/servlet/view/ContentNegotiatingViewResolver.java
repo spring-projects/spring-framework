@@ -53,6 +53,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.util.UrlPathHelper;
@@ -476,29 +477,32 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	}
 
 	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes) {
-		MediaType bestRequestedMediaType = null;
-		View bestView = null;
-		for (MediaType requestedMediaType : requestedMediaTypes) {
+		for (View candidateView : candidateViews) {
+			if (candidateView instanceof SmartView) {
+				SmartView smartView = (SmartView) candidateView;
+				if (smartView.isRedirectView()) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Returning redirect view [" + candidateView + "]");
+					}
+					return candidateView;
+				}
+			}
+		}
+		for (MediaType mediaType : requestedMediaTypes) {
 			for (View candidateView : candidateViews) {
 				if (StringUtils.hasText(candidateView.getContentType())) {
 					MediaType candidateContentType = MediaType.parseMediaType(candidateView.getContentType());
-					if (requestedMediaType.includes(candidateContentType)) {
-						bestRequestedMediaType = requestedMediaType;
-						bestView = candidateView;
-						break;
+					if (mediaType.includes(candidateContentType)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Returning [" + candidateView + "] based on requested media type '"
+									+ mediaType + "'");
+						}
+						return candidateView;
 					}
 				}
 			}
-			if (bestView != null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Returning [" + bestView + "] based on requested media type '" +
-							bestRequestedMediaType + "'");
-				}
-				break;
-			}
 		}
-		return bestView;
-
+		return null;
 	}
 
 
