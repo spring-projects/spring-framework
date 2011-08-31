@@ -18,8 +18,8 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,14 +36,14 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	private final ClientHttpRequestFactory requestFactory;
 
-	private final ClientHttpRequestInterceptor[] interceptors;
+	private final List<ClientHttpRequestInterceptor> interceptors;
 
 	private HttpMethod method;
 
 	private URI uri;
 
 	protected InterceptingClientHttpRequest(ClientHttpRequestFactory requestFactory,
-			ClientHttpRequestInterceptor[] interceptors,
+			List<ClientHttpRequestInterceptor> interceptors,
 			URI uri,
 			HttpMethod method) {
 		this.requestFactory = requestFactory;
@@ -72,7 +72,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 		private final Iterator<ClientHttpRequestInterceptor> iterator;
 
 		private RequestExecution() {
-			this.iterator = Arrays.asList(interceptors).iterator();
+			this.iterator = interceptors.iterator();
 		}
 
 		public ClientHttpResponse execute(HttpRequest request, byte[] body) throws IOException {
