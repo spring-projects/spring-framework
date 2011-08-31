@@ -289,4 +289,26 @@ public class UrlPathHelperTests {
 		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo/foo/");
 		tomcatCasualServletFolder();
 	}
+
+	@Test
+	public void getOriginatingQueryString() {
+		request.setQueryString("forward=on");
+		request.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/path");
+		request.setAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE, "original=on");
+		assertEquals("original=on", this.helper.getOriginatingQueryString(request));
+	}
+	
+	@Test
+	public void getOriginatingQueryStringNotPresent() {
+		request.setQueryString("forward=true");
+		assertEquals("forward=true", this.helper.getOriginatingQueryString(request));
+	}
+
+	@Test
+	public void getOriginatingQueryStringIsNull() {
+		request.setQueryString("forward=true");
+		request.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/path");
+		assertNull(this.helper.getOriginatingQueryString(request));
+	}
+
 }
