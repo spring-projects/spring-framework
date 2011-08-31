@@ -287,13 +287,14 @@ public class UrlPathHelper {
 	 * @return the query string
 	 */
 	public String getOriginatingQueryString(HttpServletRequest request) {
-		String queryString = (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);
-		if (queryString == null) {
-			queryString = request.getQueryString();
+		if ((request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE) != null) || 
+			(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null)) {
+			return (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);
 		}
-		return queryString;
+		else {
+			return request.getQueryString();
+		}
 	}
-
 
 	/**
 	 * Decode the supplied URI string and strips any extraneous portion after a ';'.
