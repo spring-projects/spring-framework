@@ -32,8 +32,9 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 
 /**
- * A sub-class of {@link RequestMappingInfoHandlerMapping} that prepares {@link RequestMappingInfo}s 
- * from @{@link RequestMapping} annotations on @{@link Controller} classes.
+ * Creates {@link RequestMappingInfo} instances from type and method-level 
+ * {@link RequestMapping @RequestMapping} annotations in 
+ * {@link Controller @Controller} classes.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -44,25 +45,24 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private boolean useSuffixPatternMatch = true;
 
 	/**
-	 * Set whether to use a suffix pattern match (".*") when matching patterns to URLs.
-	 * If enabled a method mapped to "/users" will also match to "/users.*".
-	 * <p>Default is "true". Turn this convention off if you intend to interpret path mappings strictly. 
+	 * Whether to use suffix pattern match (".*") when matching patterns to
+	 * requests. If enabled a method mapped to "/users" also matches to 
+	 * "/users.*". The default value is "true". 
 	 */
 	public void setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 	}
 
 	/**
-	 * Returns the value of the useSuffixPatternMatch flag, see {@link #setUseSuffixPatternMatch(boolean)}.
+	 * Whether to use suffix pattern matching.
 	 */
-	public boolean isUseSuffixPatternMatch() {
-		return useSuffixPatternMatch;
+	public boolean useSuffixPatternMatch() {
+		return this.useSuffixPatternMatch;
 	}
 
 	/**
 	 * {@inheritDoc} 
-	 * The default implementation checks for the presence of a type-level {@link Controller} 
-	 * annotation via {@link AnnotationUtils#findAnnotation(Class, Class)}.
+	 * Expects a handler to have a type-level @{@link Controller} annotation.
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
@@ -70,58 +70,68 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Determines if the given method is a handler method and creates a {@link RequestMappingInfo} for it. 
+	 * Uses method and type-level @{@link RequestMapping} annotations to create
+	 * the RequestMappingInfo.
 	 * 
-	 * <p>The default implementation expects the presence of a method-level @{@link RequestMapping} 
-	 * annotation via {@link AnnotationUtils#findAnnotation(Class, Class)}. The presence of 
-	 * type-level annotations is also checked and if present a RequestMappingInfo is created for each type- 
-	 * and method-level annotations and combined via {@link RequestMappingInfo#combine(RequestMappingInfo)}.
-	 *
-	 * @param method the method to create a RequestMappingInfo for
-	 * @param handlerType the actual handler type, possibly a sub-type of {@code method.getDeclaringClass()}
-	 * @return the info, or {@code null}
+	 * @return the created RequestMappingInfo, or {@code null} if the method
+	 * does not have a {@code @RequestMapping} annotation.
+	 * 
+	 * @see #getCustomMethodCondition(Method)
+	 * @see #getCustomTypeCondition(Class)
 	 */
 	@Override
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		RequestMapping methodAnnot = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-		if (methodAnnot != null) {
-			RequestMapping typeAnnot = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
-			RequestMappingInfo methodInfo = createRequestMappingInfo(methodAnnot, true, method, handlerType);
-			if (typeAnnot != null) {
-				RequestMappingInfo typeInfo = createRequestMappingInfo(typeAnnot, false, method, handlerType);
-				return typeInfo.combine(methodInfo);
-			}
-			else {
-				return methodInfo;
+		RequestMappingInfo info = null;
+		RequestMapping methodAnnotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+		if (methodAnnotation != null) {
+			RequestCondition<?> methodCondition = getCustomMethodCondition(method);
+			info = createRequestMappingInfo(methodAnnotation, methodCondition);
+			RequestMapping typeAnnotation = AnnotationUtils.findAnnotation(handlerType, RequestMapping.class);
+			if (typeAnnotation != null) {
+				RequestCondition<?> typeCondition = getCustomTypeCondition(handlerType);
+				info = createRequestMappingInfo(typeAnnotation, typeCondition).combine(info);
 			}
 		}
+		return info;
+	}
+
+	/**
+	 * Provide a custom method-level request condition.
+	 * The custom {@link RequestCondition} can be of any type so long as the 
+	 * same condition type is returned from all calls to this method in order
+	 * to ensure custom request conditions can be combined and compared. 
+	 * @param method the handler method for which to create the condition
+	 * @return the condition, or {@code null}
+	 */
+	protected RequestCondition<?> getCustomMethodCondition(Method method) {
+		return null;
+	}
+	
+	/**
+	 * Provide a custom type-level request condition.
+	 * The custom {@link RequestCondition} can be of any type so long as the 
+	 * same condition type is returned from all calls to this method in order
+	 * to ensure custom request conditions can be combined and compared. 
+	 * @param method the handler method for which to create the condition
+	 * @return the condition, or {@code null}
+	 */
+	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
 		return null;
 	}
 
 	/**
-	 * Override this method to create a {@link RequestMappingInfo} from a @{@link RequestMapping} annotation. The main 
-	 * reason for doing so is to provide a custom {@link RequestCondition} to the RequestMappingInfo constructor. 
-	 * 
-	 * <p>This method is invoked both for type- and method-level @{@link RequestMapping} annotations. The resulting 
-	 * {@link RequestMappingInfo}s are combined via {@link RequestMappingInfo#combine(RequestMappingInfo)}.
-	 * 
-	 * @param annot a type- or a method-level {@link RequestMapping} annotation
-	 * @param isMethodAnnotation {@code true} if this is a method annotation; {@code false} if it is a type annotation
-	 * @param method the method with which the created RequestMappingInfo will be combined
-	 * @param handlerType the handler type
-	 * @return a {@link RequestMappingInfo} instance; never {@code null}
+	 * Created a RequestMappingInfo from a RequestMapping annotation.
 	 */
-	protected RequestMappingInfo createRequestMappingInfo(RequestMapping annot, 
-														  boolean isMethodAnnotation, 
-														  Method method, 
-														  Class<?> handlerType) {
+	private RequestMappingInfo createRequestMappingInfo(RequestMapping annotation, RequestCondition<?> customCondition) {
 		return new RequestMappingInfo(
-				new PatternsRequestCondition(annot.value(), getUrlPathHelper(), getPathMatcher(), useSuffixPatternMatch),
-				new RequestMethodsRequestCondition(annot.method()),
-				new ParamsRequestCondition(annot.params()),
-				new HeadersRequestCondition(annot.headers()),
-				new ConsumesRequestCondition(annot.consumes(), annot.headers()),
-				new ProducesRequestCondition(annot.produces(), annot.headers()), null);
+				new PatternsRequestCondition(annotation.value(), 
+						getUrlPathHelper(), getPathMatcher(), useSuffixPatternMatch),
+				new RequestMethodsRequestCondition(annotation.method()),
+				new ParamsRequestCondition(annotation.params()),
+				new HeadersRequestCondition(annotation.headers()),
+				new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
+				new ProducesRequestCondition(annotation.produces(), annotation.headers()), 
+				customCondition);
 	}
 
 }

@@ -36,8 +36,8 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
 
 /**
- * An {@link AbstractHandlerMethodMapping} variant that uses {@link RequestMappingInfo} to represent request 
- * mapping conditions.
+ * Abstract base class for classes for which {@link RequestMappingInfo} defines
+ * the mapping between a request and a handler method.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -54,19 +54,18 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * Checks if the given RequestMappingInfo matches the current request and returns a potentially new 
-	 * RequestMappingInfo instances tailored to the current request, for example containing the subset
-	 * of URL patterns or media types that match the request.
-	 *  
-	 * @returns a RequestMappingInfo instance in case of a match; or {@code null} in case of no match. 
+	 * Check if the given RequestMappingInfo matches the current request and 
+	 * return a (potentially new) instance with conditions that match the 
+	 * current request -- for example with a subset of URL patterns.
+	 * @returns an info in case of a match; or {@code null} otherwise. 
 	 */
 	@Override
 	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo info, HttpServletRequest request) {
-		return info.getMatchingInfo(request);
+		return info.getMatchingCondition(request);
 	}
 
 	/**
-	 * Returns a {@link Comparator} for sorting {@link RequestMappingInfo} in the context of the given request.
+	 * Provide a Comparator to sort RequestMappingInfos matched to a request.
 	 */
 	@Override
 	protected Comparator<RequestMappingInfo> getMappingComparator(final HttpServletRequest request) {
@@ -78,8 +77,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * Exposes URI template variables and producible media types as request attributes.
-	 * 
+	 * Expose URI template variables and producible media types in the request.
 	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
 	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
 	 */
@@ -98,14 +96,15 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * Iterates all {@link RequestMappingInfo}s looking for mappings that match by URL but not by HTTP method.
-	 *
+	 * Iterate all RequestMappingInfos once again, look if any match by URL at
+	 * least and raise exceptions accordingly.
+	 * 
 	 * @throws HttpRequestMethodNotSupportedException 
 	 * 		if there are matches by URL but not by HTTP method
 	 * @throws HttpMediaTypeNotAcceptableException 
-	 * 		if there are matches by URL but the consumable media types don't match the 'Content-Type' header
+	 * 		if there are matches by URL but not by consumable media types
 	 * @throws HttpMediaTypeNotAcceptableException 
-	 * 		if there are matches by URL but the producible media types don't match the 'Accept' header
+	 * 		if there are matches by URL but not by producible media types
 	 */
 	@Override
 	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos, 

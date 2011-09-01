@@ -54,11 +54,10 @@ import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Test fixture with {@link RequestMappingHandlerMapping}.
+ * Test fixture with {@link RequestMappingInfoHandlerMapping}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -275,6 +274,7 @@ public class RequestMappingInfoHandlerMappingTests {
 					new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
 					new ProducesRequestCondition(annotation.produces(), annotation.headers()), null);
 		}
+
 	}
 	
 }

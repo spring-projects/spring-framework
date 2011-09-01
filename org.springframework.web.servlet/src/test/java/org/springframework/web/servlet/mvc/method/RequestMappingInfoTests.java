@@ -67,14 +67,14 @@ public class RequestMappingInfoTests {
 		RequestMappingInfo expected = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo*"), null, null, null, null, null, null);
 		
-		assertEquals(expected, info.getMatchingInfo(request));
+		assertEquals(expected, info.getMatchingCondition(request));
 
 		info = new RequestMappingInfo(
 				new PatternsRequestCondition("/**", "/foo*", "/foo"), null, null, null, null, null, null);
 		expected = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo", "/foo*", "/**"), null, null, null, null, null, null);
 		
-		assertEquals(expected, info.getMatchingInfo(request));
+		assertEquals(expected, info.getMatchingCondition(request));
 	}
 
 	@Test
@@ -86,14 +86,14 @@ public class RequestMappingInfoTests {
 				new RequestMappingInfo(
 						new PatternsRequestCondition("/foo"), null, 
 						new ParamsRequestCondition("foo=bar"), null, null, null, null);
-		RequestMappingInfo match = info.getMatchingInfo(request);
+		RequestMappingInfo match = info.getMatchingCondition(request);
 
 		assertNotNull(match);
 
 		info = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, 
 				new ParamsRequestCondition("foo!=bar"), null, null, null, null);
-		match = info.getMatchingInfo(request);
+		match = info.getMatchingCondition(request);
 
 		assertNull(match);
 	}
@@ -107,14 +107,14 @@ public class RequestMappingInfoTests {
 				new RequestMappingInfo(
 						new PatternsRequestCondition("/foo"), null, null, 
 						new HeadersRequestCondition("foo=bar"), null, null, null);
-		RequestMappingInfo match = info.getMatchingInfo(request);
+		RequestMappingInfo match = info.getMatchingCondition(request);
 
 		assertNotNull(match);
 
 		info = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, 
 				new HeadersRequestCondition("foo!=bar"), null, null, null);
-		match = info.getMatchingInfo(request);
+		match = info.getMatchingCondition(request);
 
 		assertNull(match);
 	}
@@ -128,14 +128,14 @@ public class RequestMappingInfoTests {
 			new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, null,
 				new ConsumesRequestCondition("text/plain"), null, null);
-		RequestMappingInfo match = info.getMatchingInfo(request);
+		RequestMappingInfo match = info.getMatchingCondition(request);
 
 		assertNotNull(match);
 
 		info = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, null,
 				new ConsumesRequestCondition("application/xml"), null, null);
-		match = info.getMatchingInfo(request);
+		match = info.getMatchingCondition(request);
 
 		assertNull(match);
 	}
@@ -149,14 +149,14 @@ public class RequestMappingInfoTests {
 			new RequestMappingInfo(
 					new PatternsRequestCondition("/foo"), null, null, null, null, 
 					new ProducesRequestCondition("text/plain"), null);
-		RequestMappingInfo match = info.getMatchingInfo(request);
+		RequestMappingInfo match = info.getMatchingCondition(request);
 
 		assertNotNull(match);
 
 		info = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo"), null, null, null, null,
 				new ProducesRequestCondition("application/xml"), null);
-		match = info.getMatchingInfo(request);
+		match = info.getMatchingCondition(request);
 
 		assertNull(match);
 	}
@@ -170,7 +170,7 @@ public class RequestMappingInfoTests {
 				new RequestMappingInfo(
 						new PatternsRequestCondition("/foo"), null, null, null, null, null, 
 						new ParamsRequestCondition("foo=bar"));
-		RequestMappingInfo match = info.getMatchingInfo(request);
+		RequestMappingInfo match = info.getMatchingCondition(request);
 
 		assertNotNull(match);
 
@@ -178,7 +178,7 @@ public class RequestMappingInfoTests {
 				new PatternsRequestCondition("/foo"), null, 
 				new ParamsRequestCondition("foo!=bar"), null, null, null, 
 				new ParamsRequestCondition("foo!=bar"));
-		match = info.getMatchingInfo(request);
+		match = info.getMatchingCondition(request);
 
 		assertNull(match);
 	}	
