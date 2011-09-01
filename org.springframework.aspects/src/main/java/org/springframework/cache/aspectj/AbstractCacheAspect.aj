@@ -65,12 +65,7 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 			}
 		};
 
-		try {
-			return execute(ajInvocation, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
-		}
-		catch (Exception ex) {
-			throw new UnsupportedOperationException("Should not throw exception", ex);
-		}
+		return execute(ajInvocation, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
 	}
 
 	/**
