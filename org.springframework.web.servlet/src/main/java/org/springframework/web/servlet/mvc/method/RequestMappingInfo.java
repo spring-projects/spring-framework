@@ -24,26 +24,26 @@ import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
+import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 
 /**
- * A RequestMapingInfo encapsulates and operates on the following request mapping conditions:
- * <ul>
- * 	<li>{@link PatternsRequestCondition}</li>
- * 	<li>{@link RequestMethodsRequestCondition}</li>
- * 	<li>{@link ParamsRequestCondition}</li>
- * 	<li>{@link HeadersRequestCondition}</li>
- * 	<li>{@link ConsumesRequestCondition}</li>
- * 	<li>{@link ProducesRequestCondition}</li>
- * </ul>
- * 
- * Optionally a custom request condition may be provided. 
+ * Encapsulates the following request mapping conditions:
+ * <ol>
+ * 	<li>{@link PatternsRequestCondition}
+ * 	<li>{@link RequestMethodsRequestCondition}
+ * 	<li>{@link ParamsRequestCondition}
+ * 	<li>{@link HeadersRequestCondition}
+ * 	<li>{@link ConsumesRequestCondition}
+ * 	<li>{@link ProducesRequestCondition}
+ * 	<li>{@code RequestCondition<?>} (optional, custom request condition)
+ * </ol>
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public final class RequestMappingInfo {
+public final class RequestMappingInfo implements RequestCondition<RequestMappingInfo> {
 
 	private final PatternsRequestCondition patternsCondition;
 
@@ -57,12 +57,12 @@ public final class RequestMappingInfo {
 
 	private final ProducesRequestCondition producesCondition;
 	
-	private final CustomRequestCondition customCondition;
+	private final RequestConditionHolder customConditionHolder;
 
 	private int hash;
 
 	/**
-	 * Creates a new {@code RequestMappingInfo} instance.
+	 * Creates a new instance with the given request conditions.
 	 */
 	public RequestMappingInfo(PatternsRequestCondition patterns,
 							  RequestMethodsRequestCondition methods, 
@@ -77,11 +77,11 @@ public final class RequestMappingInfo {
 		this.headersCondition = headers != null ? headers : new HeadersRequestCondition();
 		this.consumesCondition = consumes != null ? consumes : new ConsumesRequestCondition();
 		this.producesCondition = produces != null ? produces : new ProducesRequestCondition();
-		this.customCondition = custom != null ? new CustomRequestCondition(custom) : new CustomRequestCondition();
+		this.customConditionHolder = new RequestConditionHolder(custom);
 	}
 
 	/**
-	 * Re-create a {@link RequestMappingInfo} with the given custom {@link RequestCondition}.
+	 * Re-create a RequestMappingInfo with the given custom request condition.
 	 */
 	public RequestMappingInfo(RequestMappingInfo info, RequestCondition<?> customRequestCondition) {
 		this(info.patternsCondition, info.methodsCondition, info.paramsCondition, info.headersCondition,
@@ -140,7 +140,7 @@ public final class RequestMappingInfo {
 	 * Returns the "custom" condition of this {@link RequestMappingInfo}; or {@code null}
 	 */
 	public RequestCondition<?> getCustomCondition() {
-		return customCondition.getCondition();
+		return customConditionHolder.getCondition();
 	}
 
 	/**
@@ -155,7 +155,7 @@ public final class RequestMappingInfo {
 		HeadersRequestCondition headers = this.headersCondition.combine(other.headersCondition);
 		ConsumesRequestCondition consumes = this.consumesCondition.combine(other.consumesCondition);
 		ProducesRequestCondition produces = this.producesCondition.combine(other.producesCondition);
-		CustomRequestCondition custom = this.customCondition.combine(other.customCondition);
+		RequestConditionHolder custom = this.customConditionHolder.combine(other.customConditionHolder);
 
 		return new RequestMappingInfo(patterns, methods, params, headers, consumes, produces, custom.getCondition());
 	}
@@ -167,7 +167,7 @@ public final class RequestMappingInfo {
 	 * the current request, sorted with best matching patterns on top.
 	 * @return a new instance in case all conditions match; or {@code null} otherwise
 	 */
-	public RequestMappingInfo getMatchingInfo(HttpServletRequest request) {
+	public RequestMappingInfo getMatchingCondition(HttpServletRequest request) {
 		RequestMethodsRequestCondition methods = methodsCondition.getMatchingCondition(request);
 		ParamsRequestCondition params = paramsCondition.getMatchingCondition(request);
 		HeadersRequestCondition headers = headersCondition.getMatchingCondition(request);
@@ -183,7 +183,7 @@ public final class RequestMappingInfo {
 			return null;
 		}
 		
-		CustomRequestCondition custom = customCondition.getMatchingCondition(request);
+		RequestConditionHolder custom = customConditionHolder.getMatchingCondition(request);
 		if (custom == null) {
 			return null;
 		}
@@ -194,7 +194,7 @@ public final class RequestMappingInfo {
 	/**
 	 * Compares "this" info (i.e. the current instance) with another info in the context of a request. 
 	 * <p>Note: it is assumed both instances have been obtained via 
-	 * {@link #getMatchingInfo(HttpServletRequest)} to ensure they have conditions with
+	 * {@link #getMatchingCondition(HttpServletRequest)} to ensure they have conditions with
 	 * content relevant to current request.
 	 */
 	public int compareTo(RequestMappingInfo other, HttpServletRequest request) {
@@ -222,7 +222,7 @@ public final class RequestMappingInfo {
 		if (result != 0) {
 			return result;
 		}
-		result = customCondition.compareTo(other.customCondition, request);
+		result = customConditionHolder.compareTo(other.customConditionHolder, request);
 		if (result != 0) {
 			return result;
 		}
@@ -242,7 +242,7 @@ public final class RequestMappingInfo {
 					this.headersCondition.equals(other.headersCondition) &&
 					this.consumesCondition.equals(other.consumesCondition) &&
 					this.producesCondition.equals(other.producesCondition) && 
-					this.customCondition.equals(other.customCondition));
+					this.customConditionHolder.equals(other.customConditionHolder));
 		}
 		return false;
 	}
@@ -257,7 +257,7 @@ public final class RequestMappingInfo {
 			result = 31 * result + headersCondition.hashCode();
 			result = 31 * result + consumesCondition.hashCode();
 			result = 31 * result + producesCondition.hashCode();
-			result = 31 * result + customCondition.hashCode();
+			result = 31 * result + customConditionHolder.hashCode();
 			hash = result;
 		}
 		return result;
@@ -272,7 +272,7 @@ public final class RequestMappingInfo {
 		builder.append(",headers=").append(headersCondition);
 		builder.append(",consumes=").append(consumesCondition);
 		builder.append(",produces=").append(producesCondition);
-		builder.append(",custom=").append(customCondition);
+		builder.append(",custom=").append(customConditionHolder);
 		builder.append('}');
 		return builder.toString();
 	}
