@@ -16,6 +16,7 @@
 
 package org.springframework.cache.config;
 
+
 /**
  * Basic service interface.
  * 
@@ -31,4 +32,7 @@ public interface CacheableService<T> {
 
 	T key(Object arg1, Object arg2);
 
+	T throwChecked(Object arg1) throws Exception;
+
+	T throwUnchecked(Object arg1);
 }

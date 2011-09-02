@@ -18,6 +18,7 @@ package org.springframework.cache.interceptor;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
  * Proxy factory bean for simplified declarative caching handling.
@@ -38,9 +39,26 @@ public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean {
 	private final CacheInterceptor cachingInterceptor = new CacheInterceptor();
 	private Pointcut pointcut;
 
+	/**
+	 * Set a pointcut, i.e a bean that can cause conditional invocation
+	 * of the CacheInterceptor depending on method and attributes passed.
+	 * Note: Additional interceptors are always invoked.
+	 * @see #setPreInterceptors
+	 * @see #setPostInterceptors
+	 */
+	public void setPointcut(Pointcut pointcut) {
+		this.pointcut = pointcut;
+	}
+
 	@Override
 	protected Object createMainInterceptor() {
-		return null;
+		this.cachingInterceptor.afterPropertiesSet();
+		if (this.pointcut != null) {
+			return new DefaultPointcutAdvisor(this.pointcut, this.cachingInterceptor);
+		} else {
+			// Rely on default pointcut.
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	/**

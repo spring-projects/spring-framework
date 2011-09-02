@@ -21,11 +21,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
@@ -56,6 +54,10 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  */
 public abstract class CacheAspectSupport implements InitializingBean {
+
+	public interface Invoker {
+		Object invoke();
+	}
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -171,11 +173,11 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		return new CacheOperationContext(operation, method, args, target, targetClass);
 	}
 
-	protected Object execute(Callable<Object> invocation, Object target, Method method, Object[] args) throws Exception {
+	protected Object execute(Invoker invoker, Object target, Method method, Object[] args) {
 		// check whether aspect is enabled
 		// to cope with cases where the AJ is pulled in automatically
 		if (!this.initialized) {
-			return invocation.call();
+			return invoker.invoke();
 		}
 
 		boolean log = logger.isTraceEnabled();
@@ -224,7 +226,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 							logger.trace("Key " + key + " NOT found in cache(s), invoking cached target method  "
 									+ method);
 						}
-						retVal = invocation.call();
+						retVal = invoker.invoke();
 						// update all caches
 						for (Cache cache : caches) {
 							cache.put(key, retVal);
@@ -239,7 +241,6 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 				if (cacheOp instanceof CacheEvictOperation) {
 					CacheEvictOperation evictOp = (CacheEvictOperation) cacheOp;
-					retVal = invocation.call();
 
 					// for each cache
 					// lazy key initialization
@@ -266,6 +267,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 							cache.evict(key);
 						}
 					}
+					retVal = invoker.invoke();
 				}
 				return retVal;
 			}
@@ -276,7 +278,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			}
 		}
 
-		return invocation.call();
+		return invoker.invoke();
 	}
 
 

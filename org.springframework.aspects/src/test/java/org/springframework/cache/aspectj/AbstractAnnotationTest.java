@@ -16,8 +16,9 @@
 
 package org.springframework.cache.aspectj;
 
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
+
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -97,6 +98,26 @@ public abstract class AbstractAnnotationTest {
 		assertNotSame(r3, r4);
 	}
 
+	public void testCheckedThrowable(CacheableService service) throws Exception {
+		String arg = UUID.randomUUID().toString();
+		try {
+			service.throwChecked(arg);
+			fail("Excepted exception");
+		} catch (Exception ex) {
+			assertEquals(arg, ex.getMessage());
+		}
+	}
+
+	public void testUncheckedThrowable(CacheableService service) throws Exception {
+		try {
+			service.throwUnchecked(Long.valueOf(1));
+			fail("Excepted exception");
+		} catch (RuntimeException ex) {
+			assertTrue(ex instanceof UnsupportedOperationException);
+			// expected
+		}
+	}
+
 	@Test
 	public void testCacheable() throws Exception {
 		testCacheable(cs);
@@ -125,6 +146,26 @@ public abstract class AbstractAnnotationTest {
 	@Test
 	public void testClassCacheInvalidate() throws Exception {
 		testInvalidate(ccs);
+	}
+
+	@Test
+	public void testCheckedException() throws Exception {
+		testCheckedThrowable(cs);
+	}
+
+	@Test
+	public void testClassCheckedException() throws Exception {
+		testCheckedThrowable(ccs);
+	}
+
+	@Test
+	public void testUncheckedException() throws Exception {
+		testUncheckedThrowable(cs);
+	}
+
+	@Test
+	public void testClassUncheckedException() throws Exception {
+		testUncheckedThrowable(ccs);
 	}
 
 }
