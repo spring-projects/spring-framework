@@ -266,8 +266,6 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals(405, response.getStatus());
-
-
 	}
 
 	@Test

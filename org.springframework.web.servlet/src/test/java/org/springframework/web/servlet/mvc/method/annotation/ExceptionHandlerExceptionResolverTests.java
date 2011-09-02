@@ -17,33 +17,25 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.BindException;
-import java.net.SocketException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 /**
  * Test fixture with {@link ExceptionHandlerExceptionResolver}.
@@ -54,7 +46,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
  */
 public class ExceptionHandlerExceptionResolverTests {
 
-	private ExceptionHandlerExceptionResolver exceptionResolver;
+	private ExceptionHandlerExceptionResolver resolver;
 
 	private MockHttpServletRequest request;
 
@@ -62,178 +54,101 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		exceptionResolver = new ExceptionHandlerExceptionResolver();
-		exceptionResolver.afterPropertiesSet();
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
-		request.setMethod("GET");
+		this.resolver = new ExceptionHandlerExceptionResolver();
+		this.resolver.afterPropertiesSet();
+		this.request = new MockHttpServletRequest("GET", "/");
+		this.response = new MockHttpServletResponse();
 	}
 
 	@Test
-	public void simpleWithIOException() throws NoSuchMethodException {
-		IOException ex = new IOException();
-		HandlerMethod handlerMethod = new InvocableHandlerMethod(new SimpleController(), "handle");
-		ModelAndView mav = exceptionResolver.resolveException(request, response, handlerMethod, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertEquals("Invalid view name returned", "X:IOException", mav.getViewName());
-		assertEquals("Invalid status code returned", 500, response.getStatus());
-	}
-
-	@Test
-	public void simpleWithSocketException() throws NoSuchMethodException {
-		SocketException ex = new SocketException();
-		HandlerMethod handlerMethod = new InvocableHandlerMethod(new SimpleController(), "handle");
-		ModelAndView mav = exceptionResolver.resolveException(request, response, handlerMethod, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertEquals("Invalid view name returned", "Y:SocketException", mav.getViewName());
-		assertEquals("Invalid status code returned", 406, response.getStatus());
-		assertEquals("Invalid status reason returned", "This is simply unacceptable!", response.getErrorMessage());
-	}
-
-	@Test
-	public void simpleWithFileNotFoundException() throws NoSuchMethodException {
-		FileNotFoundException ex = new FileNotFoundException();
-		HandlerMethod handlerMethod = new InvocableHandlerMethod(new SimpleController(), "handle");
-		ModelAndView mav = exceptionResolver.resolveException(request, response, handlerMethod, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertEquals("Invalid view name returned", "X:FileNotFoundException", mav.getViewName());
-		assertEquals("Invalid status code returned", 500, response.getStatus());
-	}
-
-	@Test
-	public void simpleWithBindException() throws NoSuchMethodException {
-		BindException ex = new BindException();
-		HandlerMethod handlerMethod = new InvocableHandlerMethod(new SimpleController(), "handle");
-		ModelAndView mav = exceptionResolver.resolveException(request, response, handlerMethod, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertEquals("Invalid view name returned", "Y:BindException", mav.getViewName());
-		assertEquals("Invalid status code returned", 406, response.getStatus());
-	}
-
-	@Test
-	public void inherited() throws NoSuchMethodException	{
-		IOException ex = new IOException();
-		HandlerMethod handlerMethod = new InvocableHandlerMethod(new InheritedController(), "handle");
-		ModelAndView mav = exceptionResolver.resolveException(request, response, handlerMethod, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertEquals("Invalid view name returned", "GenericError", mav.getViewName());
-		assertEquals("Invalid status code returned", 500, response.getStatus());
+	public void nullHandlerMethod() {
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, null, null);
+		assertNull(mav);
 	}
 	
-	@Test(expected = IllegalStateException.class)
-	public void ambiguous() throws NoSuchMethodException {
-		IllegalArgumentException ex = new IllegalArgumentException();
-		HandlerMethod handlerMethod = new InvocableHandlerMethod(new AmbiguousController(), "handle");
-		exceptionResolver.resolveException(request, response, handlerMethod, ex);
+	@Test
+	public void noExceptionHandlerMethod() throws NoSuchMethodException {
+		Exception exception = new NullPointerException();
+		HandlerMethod handlerMethod = new HandlerMethod(new IoExceptionController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, exception);
+
+		assertNull(mav);
 	}
 
+	@Test
+	public void modelAndViewController() throws NoSuchMethodException {
+		IllegalArgumentException ex = new IllegalArgumentException("Bad argument");
+		HandlerMethod handlerMethod = new HandlerMethod(new ModelAndViewController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertNotNull(mav);
+		assertFalse(mav.isEmpty());
+		assertEquals("errorView", mav.getViewName());
+		assertEquals("Bad argument", mav.getModel().get("detail"));
+	}
+	
 	@Test
 	public void noModelAndView() throws UnsupportedEncodingException, NoSuchMethodException {
 		IllegalArgumentException ex = new IllegalArgumentException();
-		HandlerMethod handlerMethod = new InvocableHandlerMethod(new NoMAVReturningController(), "handle");
-		ModelAndView mav = exceptionResolver.resolveException(request, response, handlerMethod, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertTrue("ModelAndView not empty", mav.isEmpty());
-		assertEquals("Invalid response written", "IllegalArgumentException", response.getContentAsString());
+		HandlerMethod handlerMethod = new HandlerMethod(new NoModelAndViewController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertNotNull(mav);
+		assertTrue(mav.isEmpty());
+		assertEquals("IllegalArgumentException", this.response.getContentAsString());
 	}
 	
 	@Test
 	public void responseBody() throws UnsupportedEncodingException, NoSuchMethodException {
 		IllegalArgumentException ex = new IllegalArgumentException();
-		HandlerMethod handlerMethod = new InvocableHandlerMethod(new ResponseBodyController(), "handle");
-		request.addHeader("Accept", "text/plain");
-		ModelAndView mav = exceptionResolver.resolveException(request, response, handlerMethod, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertTrue("ModelAndView not empty", mav.isEmpty());
-		assertEquals("Invalid response written", "IllegalArgumentException", response.getContentAsString());
-	}
-
-
-	@Controller
-	private static class SimpleController {
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
 		
-		@SuppressWarnings("unused")
-		public void handle() {}
-
-		@SuppressWarnings("unused")
-		@ExceptionHandler(IOException.class)
-		@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-		public String handleIOException(IOException ex, HttpServletRequest request) {
-			return "X:" + ClassUtils.getShortName(ex.getClass());
-		}
-
-		@SuppressWarnings("unused")
-		@ExceptionHandler(SocketException.class)
-		@ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE, reason = "This is simply unacceptable!")
-		public String handleSocketException(Exception ex, HttpServletResponse response) {
-			return "Y:" + ClassUtils.getShortName(ex.getClass());
-		}
-
-		@SuppressWarnings("unused")
-		@ExceptionHandler(IllegalArgumentException.class)
-		public String handleIllegalArgumentException(Exception ex) {
-			return ClassUtils.getShortName(ex.getClass());
-		}
+		assertNotNull(mav);
+		assertTrue(mav.isEmpty());
+		assertEquals("IllegalArgumentException", this.response.getContentAsString());
 	}
 
-
 	@Controller
-	private static class InheritedController extends SimpleController {
+	static class ModelAndViewController {
 
-		@Override
-		public String handleIOException(IOException ex, HttpServletRequest request)	{
-			return "GenericError";
-		}
-	}
-
-
-	@Controller
-	private static class AmbiguousController {
-
-		@SuppressWarnings("unused")
 		public void handle() {}
 
-		@SuppressWarnings("unused")
-		@ExceptionHandler({BindException.class, IllegalArgumentException.class})
-		public String handle1(Exception ex, HttpServletRequest request, HttpServletResponse response)
-				throws IOException {
-			return ClassUtils.getShortName(ex.getClass());
-		}
-
-		@SuppressWarnings("unused")
 		@ExceptionHandler
-		public String handle2(IllegalArgumentException ex) {
-			return ClassUtils.getShortName(ex.getClass());
+		public ModelAndView handle(Exception ex) throws IOException {
+			return new ModelAndView("errorView", "detail", ex.getMessage());
 		}
 	}
-
-
+	
 	@Controller
-	private static class NoMAVReturningController {
+	static class NoModelAndViewController {
 
-		@SuppressWarnings("unused")
 		public void handle() {}
 
-		@SuppressWarnings("unused")
-		@ExceptionHandler(Exception.class)
+		@ExceptionHandler
 		public void handle(Exception ex, Writer writer) throws IOException {
 			writer.write(ClassUtils.getShortName(ex.getClass()));
 		}
 	}
 
-
 	@Controller
-	private static class ResponseBodyController {
+	static class ResponseBodyController {
 
-		@SuppressWarnings("unused")
 		public void handle() {}
 
-		@SuppressWarnings("unused")
-		@ExceptionHandler(Exception.class)
+		@ExceptionHandler
 		@ResponseBody
 		public String handle(Exception ex) {
 			return ClassUtils.getShortName(ex.getClass());
 		}
 	}
-	
+
+	@Controller
+	static class IoExceptionController {
+
+		@ExceptionHandler(value=IOException.class)
+		public void handle() {
+		}
+	}
+
 }
