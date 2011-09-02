@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,20 +27,17 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Source;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
-import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.HandlerMethodSelector;
-import org.springframework.web.method.annotation.ExceptionMethodMapping;
+import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
 import org.springframework.web.method.annotation.support.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -65,9 +61,9 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodR
  * An {@link AbstractHandlerMethodExceptionResolver} that supports using {@link ExceptionHandler}-annotated methods
  * to resolve exceptions.
  *
- * <p>{@link ExceptionMethodMapping} is a key contributing class that stores method-to-exception mappings extracted
+ * <p>{@link ExceptionHandlerMethodResolver} is a key contributing class that stores method-to-exception mappings extracted
  * from {@link ExceptionHandler} annotations or from the list of method arguments on the exception-handling method.
- * {@link ExceptionMethodMapping} assists with actually locating a method for a thrown exception.
+ * {@link ExceptionHandlerMethodResolver} assists with actually locating a method for a thrown exception.
  *
  * <p>Once located the invocation of the exception-handling method is done using much of the same classes
  * used for {@link RequestMapping} methods, which is described under {@link RequestMappingHandlerAdapter}.
@@ -87,8 +83,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
-	private final Map<Class<?>, ExceptionMethodMapping> exceptionMethodMappingCache =
-		new ConcurrentHashMap<Class<?>, ExceptionMethodMapping>();
+	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerMethodResolvers =
+		new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>();
 
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
 	
@@ -205,90 +201,77 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	}
 
 	/**
-	 * Attempts to find an {@link ExceptionHandler}-annotated method that can handle the thrown exception.
-	 * The exception-handling method, if found, is invoked resulting in a {@link ModelAndView}.
-	 * @return a {@link ModelAndView} if a matching exception-handling method was found, or {@code null} otherwise
+	 * Find an @{@link ExceptionHandler} method and invoke it to handle the 
+	 * raised exception.
 	 */
 	@Override
-	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request,
+	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request, 
 														   HttpServletResponse response,
-														   HandlerMethod handlerMethod,
+														   HandlerMethod handlerMethod, 
 														   Exception exception) {
-		if (handlerMethod != null) {
-			ExceptionMethodMapping mapping = getExceptionMethodMapping(handlerMethod);
-			Method method = mapping.getMethod(exception);
-
-			if (method != null) {
-				Object handler = handlerMethod.getBean();
-				ServletInvocableHandlerMethod exceptionHandler = new ServletInvocableHandlerMethod(handler, method);
-				exceptionHandler.setHandlerMethodArgumentResolvers(argumentResolvers);
-				exceptionHandler.setHandlerMethodReturnValueHandlers(returnValueHandlers);
-				
-				ServletWebRequest webRequest = new ServletWebRequest(request, response);
-				try {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Invoking exception-handling method: " + exceptionHandler);
-					}
-
-					ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-					
-					exceptionHandler.invokeAndHandle(webRequest, mavContainer, exception);
-					
-					if (!mavContainer.isResolveView()) {
-						return new ModelAndView();
-					}
-					else {
-						ModelAndView mav = new ModelAndView().addAllObjects(mavContainer.getModel());
-						mav.setViewName(mavContainer.getViewName());
-						if (!mavContainer.isViewReference()) {
-							mav.setView((View) mavContainer.getView());
-						}
-						return mav;				
-					}
-				}
-				catch (Exception invocationEx) {
-					logger.error("Invoking exception-handling method resulted in exception : " +
-							exceptionHandler, invocationEx);
-				}
-			}
+		if (handlerMethod == null) {
+			return null;
 		}
 		
-		return null;
+		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);
+		if (exceptionHandlerMethod == null) {
+			return null;
+		}
+
+		exceptionHandlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+		exceptionHandlerMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+
+		ServletWebRequest webRequest = new ServletWebRequest(request, response);
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+
+		try {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Invoking @ExceptionHandler method: " + exceptionHandlerMethod);
+			}
+			exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception);
+		}
+		catch (Exception invocationEx) {
+			logger.error("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
+			return null;
+		}
+		
+		if (!mavContainer.isResolveView()) {
+			return new ModelAndView();
+		}
+		else {
+			ModelAndView mav = new ModelAndView().addAllObjects(mavContainer.getModel());
+			mav.setViewName(mavContainer.getViewName());
+			if (!mavContainer.isViewReference()) {
+				mav.setView((View) mavContainer.getView());
+			}
+			return mav;				
+		}
 	}
 
 	/**
-	 * @return an {@link ExceptionMethodMapping} for the the given handler method, never {@code null}
+	 * Find the @{@link ExceptionHandler} method for the given exception.
+	 * The default implementation searches @{@link ExceptionHandler} methods 
+	 * in the class hierarchy of the method that raised the exception.
+	 * @param handlerMethod the method where the exception was raised
+	 * @param exception the raised exception
+	 * @return a method to handle the exception, or {@code null}
 	 */
-	private ExceptionMethodMapping getExceptionMethodMapping(HandlerMethod handlerMethod) {
+	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
 		Class<?> handlerType = handlerMethod.getBeanType();
-		ExceptionMethodMapping mapping = exceptionMethodMappingCache.get(handlerType);
-		if (mapping == null) {
-			Set<Method> methods = HandlerMethodSelector.selectMethods(handlerType, EXCEPTION_HANDLER_METHODS);
-			extendExceptionHandlerMethods(methods, handlerType);
-			mapping = new ExceptionMethodMapping(methods);
-			exceptionMethodMappingCache.put(handlerType, mapping);
-		}
-		return mapping;
+		Method method = getExceptionHandlerMethodResolver(handlerType).resolveMethod(exception);
+		return (method != null) ? new ServletInvocableHandlerMethod(handlerMethod.getBean(), method) : null;
 	}
 
 	/**
-	 * Extension hook that subclasses can override to register additional @{@link ExceptionHandler} methods 
-	 * by controller type. By default only @{@link ExceptionHandler} methods from the same controller are
-	 * included. 
-	 * @param methods the list of @{@link ExceptionHandler} methods detected in the controller allowing to add more 
-	 * @param handlerType the controller type to which the @{@link ExceptionHandler} methods will apply
+	 * Return a method resolver for the given handler type, never {@code null}.
 	 */
-	protected void extendExceptionHandlerMethods(Set<Method> methods, Class<?> handlerType) {
-	}
-	
-	/**
-	 * MethodFilter that matches {@link ExceptionHandler @ExceptionHandler} methods.
-	 */
-	public static MethodFilter EXCEPTION_HANDLER_METHODS = new MethodFilter() {
-
-		public boolean matches(Method method) {
-			return AnnotationUtils.findAnnotation(method, ExceptionHandler.class) != null;
+	private ExceptionHandlerMethodResolver getExceptionHandlerMethodResolver(Class<?> handlerType) {
+		ExceptionHandlerMethodResolver resolver = this.exceptionHandlerMethodResolvers.get(handlerType);
+		if (resolver == null) {
+			resolver = new ExceptionHandlerMethodResolver(handlerType);
+			this.exceptionHandlerMethodResolvers.put(handlerType, resolver);
 		}
-	};
+		return resolver;
+	}
 
 }
