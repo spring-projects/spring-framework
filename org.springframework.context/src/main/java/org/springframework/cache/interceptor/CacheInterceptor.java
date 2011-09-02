@@ -18,12 +18,9 @@ package org.springframework.cache.interceptor;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-
-import org.springframework.util.ReflectionUtils;
 
 /**
  * AOP Alliance MethodInterceptor for declarative cache
@@ -44,22 +41,31 @@ import org.springframework.util.ReflectionUtils;
 @SuppressWarnings("serial")
 public class CacheInterceptor extends CacheAspectSupport implements MethodInterceptor, Serializable {
 
+	private static class ThrowableWrapper extends RuntimeException {
+		private final Throwable original;
+
+		ThrowableWrapper(Throwable original) {
+			this.original = original;
+		}
+	}
+
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 
-		Callable<Object> aopAllianceInvocation = new Callable<Object>() {
-			public Object call() throws Exception {
+		Invoker aopAllianceInvoker = new Invoker() {
+			public Object invoke() {
 				try {
 					return invocation.proceed();
-				}
-				catch (Throwable ex) {
-					ReflectionUtils.rethrowException(ex);
-					return null;
+				} catch (Throwable ex) {
+					throw new ThrowableWrapper(ex);
 				}
 			}
 		};
 
-		return execute(aopAllianceInvocation, invocation.getThis(), method, invocation.getArguments());
+		try {
+			return execute(aopAllianceInvoker, invocation.getThis(), method, invocation.getArguments());
+		} catch (ThrowableWrapper th) {
+			throw th.original;
+		}
 	}
-
 }

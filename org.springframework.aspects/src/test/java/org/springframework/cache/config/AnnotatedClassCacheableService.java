@@ -45,4 +45,12 @@ public class AnnotatedClassCacheableService implements CacheableService {
 	public Object key(Object arg1, Object arg2) {
 		return counter.getAndIncrement();
 	}
+
+	public Long throwChecked(Object arg1) throws Exception {
+		throw new UnsupportedOperationException(arg1.toString());
+	}
+
+	public Long throwUnchecked(Object arg1) {
+		throw new UnsupportedOperationException();
+	}
 }

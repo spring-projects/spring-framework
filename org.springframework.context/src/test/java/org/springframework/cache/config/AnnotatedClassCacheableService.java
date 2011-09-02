@@ -69,4 +69,12 @@ public class AnnotatedClassCacheableService implements CacheableService {
 	public Number nullInvocations() {
 		return nullInvocations.get();
 	}
+
+	public Long throwChecked(Object arg1) throws Exception {
+		throw new UnsupportedOperationException(arg1.toString());
+	}
+
+	public Long throwUnchecked(Object arg1) {
+		throw new UnsupportedOperationException();
+	}
 }

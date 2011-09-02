@@ -73,4 +73,14 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	public Number nullInvocations() {
 		return nullInvocations.get();
 	}
+
+	@Cacheable("default")
+	public Long throwChecked(Object arg1) throws Exception {
+		throw new Exception(arg1.toString());
+	}
+
+	@Cacheable("default")
+	public Long throwUnchecked(Object arg1) {
+		throw new UnsupportedOperationException(arg1.toString());
+	}
 }

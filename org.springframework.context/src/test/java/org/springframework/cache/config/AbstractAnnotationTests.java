@@ -18,6 +18,8 @@ package org.springframework.cache.config;
 
 import static org.junit.Assert.*;
 
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -148,6 +150,27 @@ public abstract class AbstractAnnotationTests {
 		assertNotNull(cache.get(expectedKey));
 	}
 
+	public void testCheckedThrowable(CacheableService service) throws Exception {
+		String arg = UUID.randomUUID().toString();
+		try {
+			service.throwChecked(arg);
+			fail("Excepted exception");
+		} catch (Exception ex) {
+			assertEquals(arg, ex.getMessage());
+		}
+	}
+
+	public void testUncheckedThrowable(CacheableService service) throws Exception {
+		try {
+			service.throwUnchecked(Long.valueOf(1));
+			fail("Excepted exception");
+		} catch (RuntimeException ex) {
+			assertTrue("Excepted different exception type and got " + ex.getClass(),
+					ex instanceof UnsupportedOperationException);
+			// expected
+		}
+	}
+
 	public void testNullArg(CacheableService service) {
 		Object r1 = service.cache(null);
 		assertSame(r1, service.cache(null));
@@ -240,5 +263,25 @@ public abstract class AbstractAnnotationTests {
 	@Test
 	public void testClassNullArg() throws Exception {
 		testNullArg(ccs);
+	}
+
+	@Test
+	public void testCheckedException() throws Exception {
+		testCheckedThrowable(cs);
+	}
+
+	@Test
+	public void testClassCheckedException() throws Exception {
+		testCheckedThrowable(ccs);
+	}
+
+	@Test
+	public void testUncheckedException() throws Exception {
+		testUncheckedThrowable(cs);
+	}
+
+	@Test
+	public void testClassUncheckedException() throws Exception {
+		testUncheckedThrowable(ccs);
 	}
 }

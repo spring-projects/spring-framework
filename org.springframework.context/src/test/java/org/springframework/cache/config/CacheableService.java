@@ -42,4 +42,8 @@ public interface CacheableService<T> {
 
 	T rootVars(Object arg1);
 
+	T throwChecked(Object arg1) throws Exception;
+
+	T throwUnchecked(Object arg1);
+
 }

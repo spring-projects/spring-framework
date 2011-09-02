@@ -24,6 +24,7 @@ import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.cache.interceptor.CacheAspectSupport;
 import org.springframework.cache.interceptor.CacheOperationSource;
+import org.springframework.cache.interceptor.CacheAspectSupport.Invoker;
 
 /**
  * Abstract superaspect for AspectJ cache aspects. Concrete
@@ -60,17 +61,13 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 		MethodSignature methodSignature = (MethodSignature) thisJoinPoint.getSignature();
 		Method method = methodSignature.getMethod();
 
-		Callable<Object> ajInvocation = new Callable<Object>() {
-			public Object call() {
+		Invoker aspectJInvoker = new Invoker() {
+			public Object invoke() {
 				return proceed(cachedObject);
 			}
 		};
 
-		try{
-			return execute(ajInvocation, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());	
-		} catch (Exception ex){
-			throw new RuntimeException("Cannot cache target ", ex);
-		}
+		return execute(aspectJInvoker, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());	
 	}
 
 	/**
