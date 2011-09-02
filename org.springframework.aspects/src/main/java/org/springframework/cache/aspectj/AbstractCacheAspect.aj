@@ -16,6 +16,7 @@
 
 package org.springframework.cache.aspectj;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 
@@ -55,7 +56,7 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 	}
 
 	@SuppressAjWarnings("adviceDidNotMatch")
-	Object around(final Object cachedObject) : cacheMethodExecution(cachedObject){
+	Object around(final Object cachedObject) : cacheMethodExecution(cachedObject) {
 		MethodSignature methodSignature = (MethodSignature) thisJoinPoint.getSignature();
 		Method method = methodSignature.getMethod();
 
@@ -65,7 +66,11 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 			}
 		};
 
-		return execute(ajInvocation, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());
+		try{
+			return execute(ajInvocation, thisJoinPoint.getTarget(), method, thisJoinPoint.getArgs());	
+		} catch (Exception ex){
+			throw new RuntimeException("Cannot cache target ", ex);
+		}
 	}
 
 	/**
