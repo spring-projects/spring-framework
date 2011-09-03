@@ -35,7 +35,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  * As an alternative to a mock objects approach to testing data access code,
  * consider the powerful integration testing support provided in the
  * <code>org.springframework.test</code> package, shipped in
- * <code>spring-mock.jar</code>.
+ * <code>spring-test.jar</code>.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
