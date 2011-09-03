@@ -16,10 +16,17 @@
 
 package org.springframework.context.annotation;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+
+import java.lang.instrument.ClassFileTransformer;
+
 import org.junit.Test;
+import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
-import org.springframework.instrument.classloading.SimpleLoadTimeWeaver;
 
 /**
  * Unit tests for @EnableLoadTimeWeaving
@@ -37,19 +44,61 @@ public class EnableLoadTimeWeavingTests {
 	}
 
 	@Test
-	public void test() {
+	public void enableLTW_withAjWeavingDisabled() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(Config.class);
+		ctx.register(EnableLTWConfig_withAjWeavingDisabled.class);
+		ctx.refresh();
+		ctx.getBean("loadTimeWeaver");
+	}
+
+	@Test
+	public void enableLTW_withAjWeavingAutodetect() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(EnableLTWConfig_withAjWeavingAutodetect.class);
+		ctx.refresh();
+		ctx.getBean("loadTimeWeaver");
+	}
+
+	@Test
+	public void enableLTW_withAjWeavingEnabled() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(EnableLTWConfig_withAjWeavingEnabled.class);
 		ctx.refresh();
 		ctx.getBean("loadTimeWeaver");
 	}
 
 	@Configuration
-	@EnableLoadTimeWeaving
-	static class Config implements LoadTimeWeavingConfigurer {
-
+	@EnableLoadTimeWeaving(aspectjWeaving=AspectJWeaving.DISABLED)
+	static class EnableLTWConfig_withAjWeavingDisabled implements LoadTimeWeavingConfigurer {
 		public LoadTimeWeaver getLoadTimeWeaver() {
-			return new SimpleLoadTimeWeaver();
+			LoadTimeWeaver mockLTW = createMock(LoadTimeWeaver.class);
+			// no expectations -> a class file transformer should NOT be added
+			replay(mockLTW);
+			return mockLTW;
+		}
+	}
+
+	@Configuration
+	@EnableLoadTimeWeaving(aspectjWeaving=AspectJWeaving.AUTODETECT)
+	static class EnableLTWConfig_withAjWeavingAutodetect implements LoadTimeWeavingConfigurer {
+		public LoadTimeWeaver getLoadTimeWeaver() {
+			LoadTimeWeaver mockLTW = createMock(LoadTimeWeaver.class);
+			// no expectations -> a class file transformer should NOT be added
+			// because no META-INF/aop.xml is present on the classpath
+			replay(mockLTW);
+			return mockLTW;
+		}
+	}
+
+	@Configuration
+	@EnableLoadTimeWeaving(aspectjWeaving=AspectJWeaving.ENABLED)
+	static class EnableLTWConfig_withAjWeavingEnabled implements LoadTimeWeavingConfigurer {
+		public LoadTimeWeaver getLoadTimeWeaver() {
+			LoadTimeWeaver mockLTW = createMock(LoadTimeWeaver.class);
+			mockLTW.addTransformer(isA(ClassFileTransformer.class));
+			expectLastCall();
+			replay(mockLTW);
+			return mockLTW;
 		}
 	}
 }

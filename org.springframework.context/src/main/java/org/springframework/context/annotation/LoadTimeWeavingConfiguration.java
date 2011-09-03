@@ -84,7 +84,7 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 				// AJ weaving is disabled -> do nothing
 				break;
 			case AUTODETECT:
-				if (this.beanClassLoader.getResource(ASPECTJ_AOP_XML_RESOURCE) != null) {
+				if (this.beanClassLoader.getResource(ASPECTJ_AOP_XML_RESOURCE) == null) {
 					// No aop.xml present on the classpath -> treat as 'disabled'
 					break;
 				}
