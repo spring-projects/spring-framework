@@ -19,23 +19,22 @@ package org.springframework.web.servlet.view;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -44,7 +43,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContextUtils;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -88,6 +87,8 @@ import org.springframework.web.util.WebUtils;
  * @see javax.servlet.http.HttpServletResponse#sendRedirect
  */
 public class RedirectView extends AbstractUrlBasedView implements SmartView {
+
+	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 	private boolean contextRelative = false;
 
@@ -234,7 +235,18 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	protected void renderMergedOutputModel(
 			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
+
 		String targetUrl = createTargetUrl(model, request);
+
+		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
+		if (!CollectionUtils.isEmpty(flashMap)) {
+			String targetPath = WebUtils.extractUrlPath(targetUrl.toString());
+			flashMap.setTargetRequestPath(targetPath);
+			if (this.exposeModelAttributes) {
+				flashMap.addTargetRequestParams(model);
+			}				
+		}
+		
 		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
 	}
 
@@ -263,65 +275,53 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		}
 
 		if (StringUtils.hasText(targetUrl)) {
-			UriTemplate uriTemplate = createUriTemplate(targetUrl, enc);
-			if (uriTemplate.getVariableNames().size() > 0) {
-				Map<String, Object> vars = new HashMap<String, Object>();
-				vars.putAll(getCurrentUriVars(request));
-				vars.putAll(model);
-				targetUrl = new StringBuilder(uriTemplate.expand(vars).toString());
-				model = removeKeys(model, uriTemplate.getVariableNames());
-			}
+			Map<String, String> variables = getCurrentRequestUriVariables(request);
+			targetUrl = replaceUriTemplateVariables(targetUrl.toString(), model, variables, enc);
 		}
 		
-		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
-		if (!CollectionUtils.isEmpty(flashMap)) {
-			String targetPath = WebUtils.extractUrlPath(targetUrl.toString());
-			flashMap.setTargetRequestPath(targetPath);
-		}
-
 		if (this.exposeModelAttributes) {
 			appendQueryProperties(targetUrl, model, enc);
-			if (!CollectionUtils.isEmpty(flashMap)) {
-				flashMap.addTargetRequestParams(model);
-			}
 		}
 
 		return targetUrl.toString();
 	}
 
 	/**
-	 * Returns the URI template variables extracted from the current request.
+	 * Replace URI template variables in the target URL with encoded model 
+	 * attributes or URI variables from the current request. Model attributes
+	 * referenced in the URL are removed from the model. 
+	 * @param targetUrl the redirect URL
+	 * @param model Map that contains model attributes
+	 * @param currentUriVariables current request URI variables to use
+	 * @param encodingScheme the encoding scheme to use
+	 * @throws UnsupportedEncodingException if string encoding failed
 	 */
-	@SuppressWarnings("unchecked")
-	private Map<String, String> getCurrentUriVars(HttpServletRequest request) {
-		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		Map<String, String> map = (Map<String, String>) request.getAttribute(name);
-		return (map != null) ? map : new HashMap<String, String>();
-	}
-
-	@SuppressWarnings("serial")
-	private UriTemplate createUriTemplate(StringBuilder targetUrl, final String encoding) {
-		return new UriTemplate(targetUrl.toString()) {
-			@Override
-			protected URI encodeUri(String uri) {
-				try {
-					return new URI(uri);
-				}
-				catch (URISyntaxException ex) {
-					throw new IllegalArgumentException("Could not create URI from [" + uri + "]: " + ex, ex);
-				}
-			}
-		};
-	}
-	
-	private static Map<String, Object> removeKeys(Map<String, Object> map, List<String> keysToRemove) {
-		Map<String, Object> result = new HashMap<String, Object>(map);
-		for (String key : keysToRemove) {
-			result.remove(key);
+	protected StringBuilder replaceUriTemplateVariables(
+			String targetUrl, Map<String, Object> model, Map<String, String> currentUriVariables, String encodingScheme)
+			throws UnsupportedEncodingException {
+		
+		StringBuilder result = new StringBuilder();
+		Matcher m = URI_TEMPLATE_VARIABLE_PATTERN.matcher(targetUrl);
+		int endLastMatch = 0;
+		while (m.find()) {
+			String name = m.group(1);
+			Object value = model.containsKey(name) ? model.remove(name) : currentUriVariables.get(name);
+			Assert.notNull(value, "Model has no value for '" + name + "'");
+			result.append(targetUrl.substring(endLastMatch, m.start()));
+			result.append(UriUtils.encodePathSegment(value.toString(), encodingScheme));
+			endLastMatch = m.end();
 		}
+		result.append(targetUrl.substring(endLastMatch, targetUrl.length()));
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
+	private Map<String, String> getCurrentRequestUriVariables(HttpServletRequest request) {
+		Map<String, String> uriVars = 
+			(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+		return (uriVars != null) ? uriVars : Collections.<String, String> emptyMap();
+	}
+	
 	/**
 	 * Append query properties to the redirect URL.
 	 * Stringifies, URL-encodes and formats model attributes as query properties.
