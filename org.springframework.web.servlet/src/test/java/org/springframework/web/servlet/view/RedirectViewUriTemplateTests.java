@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.HandlerMapping;
 
 public class RedirectViewUriTemplateTests {
@@ -40,7 +41,7 @@ public class RedirectViewUriTemplateTests {
 	}
 
 	@Test
-	public void uriTemplateVar() throws Exception {
+	public void uriTemplate() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", "bar");
 
@@ -52,7 +53,19 @@ public class RedirectViewUriTemplateTests {
 	}
 	
 	@Test
-	public void uriTemplateVarAndArrayParam() throws Exception {
+	public void uriTemplateEncode() throws Exception {
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("foo", "bar/bar baz");
+
+		String baseUrl = "http://url.somewhere.com";
+		RedirectView redirectView = new RedirectView(baseUrl + "/context path/{foo}");
+		redirectView.renderMergedOutputModel(model, request, response);
+
+		assertEquals(baseUrl + "/context path/bar%2Fbar%20baz", response.getRedirectedUrl());
+	}
+	
+	@Test
+	public void uriTemplateAndArrayQueryParam() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", "bar");
 		model.put("fooArr", new String[] { "baz", "bazz" });
@@ -64,7 +77,7 @@ public class RedirectViewUriTemplateTests {
 	}
 
 	@Test
-	public void uriTemplateVarWithObjectConversion() throws Exception {
+	public void uriTemplateWithObjectConversion() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", new Long(611));
 
@@ -75,17 +88,17 @@ public class RedirectViewUriTemplateTests {
 	}
 
 	@Test
-	public void currentRequestUriTemplateVars() throws Exception {
+	public void uriTemplateReuseCurrentRequestVars() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("key1", "value1");
 		model.put("name", "value2");
 		model.put("key3", "value3");
 		
-		Map<String, String> vars = new HashMap<String, String>();
-		vars.put("var1", "v1");
-		vars.put("name", "v2");
-		vars.put("var3", "v3");
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, vars);
+		Map<String, String> currentRequestUriTemplateVars = new HashMap<String, String>();
+		currentRequestUriTemplateVars.put("var1", "v1");
+		currentRequestUriTemplateVars.put("name", "v2");
+		currentRequestUriTemplateVars.put("var3", "v3");
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, currentRequestUriTemplateVars);
 
 		String url = "http://url.somewhere.com";
 		RedirectView redirectView = new RedirectView(url + "/{key1}/{var1}/{name}");
@@ -94,6 +107,11 @@ public class RedirectViewUriTemplateTests {
 		assertEquals(url + "/value1/v1/value2?key3=value3", response.getRedirectedUrl());
 	}
 
+	@Test(expected=IllegalArgumentException.class)
+	public void uriTemplateNullValue() throws Exception {
+		new RedirectView("/{foo}").renderMergedOutputModel(new ModelMap(), request, response);
+	}
+	
 	@Test
 	public void emptyRedirectString() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
