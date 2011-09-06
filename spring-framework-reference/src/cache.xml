@@ -76,7 +76,7 @@ public Book findBook(ISBN isbn) {...}]]></programlisting>
 		is checked to see whether the invocation has been already executed and does not have to be repeated. While in most cases, only one cache is declared, the annotation allows multiple
 		names to be specified so that more then one cache are being used. In this case, each of the caches will be checked before executing the method - if at least one cache is hit,
 		then the associated value will be returned:</para>
-		<note>All the other caches that do not contain the method will be updated as well event though the cached method was not actually
+		<note>All the other caches that do not contain the method will be updated as well even though the cached method was not actually
 		executed.</note>
 		
 		<programlisting language="java"><![CDATA[@Cacheable({ "books", "isbns" })
