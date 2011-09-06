@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.BitSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,23 +40,7 @@ import org.springframework.util.Assert;
  */
 public abstract class UriUtils {
 
-	private static final BitSet SCHEME;
-
-	private static final BitSet USER_INFO;
-
-	private static final BitSet HOST;
-
-	private static final BitSet PORT;
-
-	private static final BitSet PATH;
-
-	private static final BitSet SEGMENT;
-
-	private static final BitSet QUERY;
-
-	private static final BitSet QUERY_PARAM;
-
-	private static final BitSet FRAGMENT;
+	private static final String DEFAULT_ENCODING = "UTF-8";
 
 	private static final String SCHEME_PATTERN = "([^:/?#]+):";
 
@@ -84,107 +67,7 @@ public abstract class UriUtils {
 			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" +
 					")?" + PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
 
-
-	static {
-		// variable names refer to RFC 3986, appendix A
-		BitSet alpha = new BitSet(256);
-		for (int i = 'a'; i <= 'z'; i++) {
-			alpha.set(i);
-		}
-		for (int i = 'A'; i <= 'Z'; i++) {
-			alpha.set(i);
-		}
-		BitSet digit = new BitSet(256);
-		for (int i = '0'; i <= '9'; i++) {
-			digit.set(i);
-		}
-
-		BitSet gendelims = new BitSet(256);
-		gendelims.set(':');
-		gendelims.set('/');
-		gendelims.set('?');
-		gendelims.set('#');
-		gendelims.set('[');
-		gendelims.set(']');
-		gendelims.set('@');
-
-		BitSet subdelims = new BitSet(256);
-		subdelims.set('!');
-		subdelims.set('$');
-		subdelims.set('&');
-		subdelims.set('\'');
-		subdelims.set('(');
-		subdelims.set(')');
-		subdelims.set('*');
-		subdelims.set('+');
-		subdelims.set(',');
-		subdelims.set(';');
-		subdelims.set('=');
-
-		BitSet reserved = new BitSet(256);
-		reserved.or(gendelims);
-		reserved.or(subdelims);
-
-		BitSet unreserved = new BitSet(256);
-		unreserved.or(alpha);
-		unreserved.or(digit);
-		unreserved.set('-');
-		unreserved.set('.');
-		unreserved.set('_');
-		unreserved.set('~');
-
-		SCHEME = new BitSet(256);
-		SCHEME.or(alpha);
-		SCHEME.or(digit);
-		SCHEME.set('+');
-		SCHEME.set('-');
-		SCHEME.set('.');
-
-		USER_INFO = new BitSet(256);
-		USER_INFO.or(unreserved);
-		USER_INFO.or(subdelims);
-		USER_INFO.set(':');
-
-		HOST = new BitSet(256);
-		HOST.or(unreserved);
-		HOST.or(subdelims);
-
-		PORT = new BitSet(256);
-		PORT.or(digit);
-
-		BitSet pchar = new BitSet(256);
-		pchar.or(unreserved);
-		pchar.or(subdelims);
-		pchar.set(':');
-		pchar.set('@');
-
-		SEGMENT = new BitSet(256);
-		SEGMENT.or(pchar);
-
-		PATH = new BitSet(256);
-		PATH.or(SEGMENT);
-		PATH.set('/');
-
-		QUERY = new BitSet(256);
-		QUERY.or(pchar);
-		QUERY.set('/');
-		QUERY.set('?');
-
-		QUERY_PARAM = new BitSet(256);
-		QUERY_PARAM.or(pchar);
-		QUERY_PARAM.set('/');
-		QUERY_PARAM.set('?');
-		QUERY_PARAM.clear('=');
-		QUERY_PARAM.clear('+');
-		QUERY_PARAM.clear('&');
-
-		FRAGMENT = new BitSet(256);
-		FRAGMENT.or(pchar);
-		FRAGMENT.set('/');
-		FRAGMENT.set('?');
-	}
-
-
+	
 	/**
 	 * Encodes the given source URI into an encoded String. All various URI components
 	 * are encoded according to their respective valid character sets.
@@ -258,15 +141,53 @@ public abstract class UriUtils {
 	 * @param path the path
 	 * @param query	the query
 	 * @param fragment the fragment
+	 * @return the encoded URI
+	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
+	 */
+	public static String encodeUriComponents(String scheme,
+											 String authority,
+											 String userinfo,
+											 String host,
+											 String port,
+											 String path,
+											 String query,
+											 String fragment) {
+		try {
+			return encodeUriComponents(scheme, authority, userinfo, host, port, path, query, fragment,
+					DEFAULT_ENCODING);
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new InternalError("'UTF-8' encoding not supported");
+		}
+	}
+
+	/**
+	 * Encodes the given source URI components into an encoded String.
+	 * All various URI components are optional, but encoded according
+	 * to their respective valid character sets.
+	 * @param scheme the scheme
+	 * @param authority the authority
+	 * @param userinfo the user info
+	 * @param host the host
+	 * @param port the port
+	 * @param path the path
+	 * @param query	the query
+	 * @param fragment the fragment
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded URI
 	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
-	public static String encodeUriComponents(String scheme, String authority, String userinfo,
-			String host, String port, String path, String query, String fragment, String encoding)
-			throws UnsupportedEncodingException {
-		
+	public static String encodeUriComponents(String scheme,
+											 String authority,
+											 String userinfo,
+											 String host,
+											 String port,
+											 String path,
+											 String query,
+											 String fragment,
+											 String encoding) throws UnsupportedEncodingException {
+
 		Assert.hasLength(encoding, "'encoding' must not be empty");
 		StringBuilder sb = new StringBuilder();
 
@@ -275,7 +196,7 @@ public abstract class UriUtils {
 			sb.append(':');
 		}
 
-		if (authority != null) {
+		if (userinfo != null || host != null || port != null) {
 			sb.append("//");
 			if (userinfo != null) {
 				sb.append(encodeUserInfo(userinfo, encoding));
@@ -288,9 +209,14 @@ public abstract class UriUtils {
 				sb.append(':');
 				sb.append(encodePort(port, encoding));
 			}
+		} else if (authority != null) {
+			sb.append("//");
+			sb.append(encodeAuthority(authority, encoding));
 		}
 
-		sb.append(encodePath(path, encoding));
+		if (path != null) {
+			sb.append(encodePath(path, encoding));
+		}
 
 		if (query != null) {
 			sb.append('?');
@@ -306,135 +232,201 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given URI scheme.
+	 * Encodes the given URI scheme with the given encoding.
 	 * @param scheme the scheme to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded scheme
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeScheme(String scheme, String encoding) throws UnsupportedEncodingException {
-		return encode(scheme, encoding, SCHEME);
+		return encode(scheme, encoding, SCHEME_COMPONENT, false);
 	}
 
 	/**
-	 * Encodes the given URI user info.
+	 * Encodes the given URI authority with the given encoding.
+	 * @param authority the authority to be encoded
+	 * @param encoding the character encoding to encode to
+	 * @return the encoded authority
+	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
+	 */
+	public static String encodeAuthority(String authority, String encoding) throws UnsupportedEncodingException {
+		return encode(authority, encoding, AUTHORITY_COMPONENT, false);
+	}
+
+	/**
+	 * Encodes the given URI user info with the given encoding.
 	 * @param userInfo the user info to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded user info
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeUserInfo(String userInfo, String encoding) throws UnsupportedEncodingException {
-		return encode(userInfo, encoding, USER_INFO);
+		return encode(userInfo, encoding, USER_INFO_COMPONENT, false);
 	}
 
 	/**
-	 * Encodes the given URI host.
+	 * Encodes the given URI host with the given encoding.
 	 * @param host the host to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded host
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeHost(String host, String encoding) throws UnsupportedEncodingException {
-		return encode(host, encoding, HOST);
+		return encode(host, encoding, HOST_COMPONENT, false);
 	}
 
 	/**
-	 * Encodes the given URI port.
+	 * Encodes the given URI port with the given encoding.
 	 * @param port the port to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded port
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePort(String port, String encoding) throws UnsupportedEncodingException {
-		return encode(port, encoding, PORT);
+		return encode(port, encoding, PORT_COMPONENT, false);
 	}
 
 	/**
-	 * Encodes the given URI path.
+	 * Encodes the given URI path with the given encoding.
 	 * @param path the path to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded path
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePath(String path, String encoding) throws UnsupportedEncodingException {
-		return encode(path, encoding, PATH);
+		return encode(path, encoding, PATH_COMPONENT, false);
 	}
 
 	/**
-	 * Encodes the given URI path segment.
+	 * Encodes the given URI path segment with the given encoding.
 	 * @param segment the segment to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded segment
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePathSegment(String segment, String encoding) throws UnsupportedEncodingException {
-		return encode(segment, encoding, SEGMENT);
+		return encode(segment, encoding, PATH_SEGMENT_COMPONENT, false);
 	}
 
 	/**
-	 * Encodes the given URI query.
+	 * Encodes the given URI query with the given encoding.
 	 * @param query	the query to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded query
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeQuery(String query, String encoding) throws UnsupportedEncodingException {
-		return encode(query, encoding, QUERY);
+		return encode(query, encoding, QUERY_COMPONENT, false);
 	}
 
 	/**
-	 * Encodes the given URI query parameter.
+	 * Encodes the given URI query parameter with the given encoding.
 	 * @param queryParam the query parameter to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded query parameter
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeQueryParam(String queryParam, String encoding) throws UnsupportedEncodingException {
-		return encode(queryParam, encoding, QUERY_PARAM);
+		return encode(queryParam, encoding, QUERY_PARAM_COMPONENT, false);
 	}
 
 	/**
-	 * Encodes the given URI fragment.
+	 * Encodes the given URI fragment with the given encoding.
 	 * @param fragment the fragment to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded fragment
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeFragment(String fragment, String encoding) throws UnsupportedEncodingException {
-		return encode(fragment, encoding, FRAGMENT);
+		return encode(fragment, encoding, FRAGMENT_COMPONENT, false);
 	}
 
-	private static String encode(String source, String encoding, BitSet notEncoded)
-			throws UnsupportedEncodingException {
+	/**
+	 * Encodes the given source into an encoded String using the rules specified by the given component. This method
+	 * encodes with the default encoding (i.e. UTF-8).
+	 * @param source the source string
+	 * @param uriComponent the URI component for the source
+	 * @param allowTemplateVars whether URI template variables are allowed. If {@code true}, '{' and '}' characters
+	 * are not encoded, even though they might not be valid for the component
+	 * @return the encoded URI
+	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
+	 * @see #SCHEME_COMPONENT
+	 * @see #AUTHORITY_COMPONENT
+	 * @see #USER_INFO_COMPONENT
+	 * @see #HOST_COMPONENT
+	 * @see #PORT_COMPONENT
+	 * @see #PATH_COMPONENT
+	 * @see #PATH_SEGMENT_COMPONENT
+	 * @see #QUERY_COMPONENT
+	 * @see #QUERY_PARAM_COMPONENT
+	 * @see #FRAGMENT_COMPONENT
+	 */
+	public static String encode(String source, UriComponent uriComponent, boolean allowTemplateVars) {
+		try {
+			return encode(source, DEFAULT_ENCODING, uriComponent, allowTemplateVars);
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new InternalError("'" + DEFAULT_ENCODING + "' encoding not supported");
+		}
+	}
 
-		Assert.notNull(source, "'source' must not be null");
+	/**
+	 * Encodes the given source into an encoded String using the rules specified by the given component.
+	 * @param source the source string
+	 * @param encoding the encoding of the source string
+	 * @param uriComponent the URI component for the source
+	 * @param allowTemplateVars whether URI template variables are allowed. If {@code true}, '{' and '}' characters
+	 * are not encoded, even though they might not be valid for the component
+	 * @return the encoded URI
+	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
+	 * @see #SCHEME_COMPONENT
+	 * @see #AUTHORITY_COMPONENT
+	 * @see #USER_INFO_COMPONENT
+	 * @see #HOST_COMPONENT
+	 * @see #PORT_COMPONENT
+	 * @see #PATH_COMPONENT
+	 * @see #PATH_SEGMENT_COMPONENT
+	 * @see #QUERY_COMPONENT
+	 * @see #QUERY_PARAM_COMPONENT
+	 * @see #FRAGMENT_COMPONENT
+	 */
+	public static String encode(String source, String encoding, UriComponent uriComponent, boolean allowTemplateVars)
+			throws UnsupportedEncodingException {
 		Assert.hasLength(encoding, "'encoding' must not be empty");
 
-		byte[] bytes = encode(source.getBytes(encoding), notEncoded);
+		byte[] bytes = encodeInternal(source.getBytes(encoding), uriComponent, allowTemplateVars);
 		return new String(bytes, "US-ASCII");
 	}
 
-	private static byte[] encode(byte[] source, BitSet notEncoded) {
+	private static byte[] encodeInternal(byte[] source, UriComponent uriComponent, boolean allowTemplateVars) {
 		Assert.notNull(source, "'source' must not be null");
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(source.length * 2);
+		Assert.notNull(uriComponent, "'uriComponent' must not be null");
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(source.length);
 		for (int i = 0; i < source.length; i++) {
 			int b = source[i];
 			if (b < 0) {
 				b += 256;
 			}
-			if (notEncoded.get(b)) {
+			if (uriComponent.isAllowed(b)) {
+				bos.write(b);
+			}
+			else if (allowTemplateVars && (b == '{' || b == '}')) {
 				bos.write(b);
 			}
 			else {
 				bos.write('%');
+
 				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
 				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
+
 				bos.write(hex1);
 				bos.write(hex2);
 			}
 		}
 		return bos.toByteArray();
 	}
+
 
 	/**
 	 * Decodes the given encoded source String into an URI. Based on the following
@@ -485,5 +477,127 @@ public abstract class UriUtils {
 		}
 		return changed ? new String(bos.toByteArray(), encoding) : source;
 	}
+
+	/**
+	 * Defines the contract for an URI component, i.e. scheme, host, path, etc.
+	 */
+	public interface UriComponent {
+
+		/**
+		 * Specifies whether the given character is allowed in this URI component.
+		 * @param c the character
+		 * @return {@code true} if the character is allowed; {@code false} otherwise
+		 */
+		boolean isAllowed(int c);
+
+	}
+
+	private static abstract class AbstractUriComponent implements UriComponent {
+
+		protected boolean isAlpha(int c) {
+			return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+		}
+
+		protected boolean isDigit(int c) {
+			return c >= '0' && c <= '9';
+		}
+
+		protected boolean isGenericDelimiter(int c) {
+			return ':' == c || '/' == c || '?' == c || '#' == c || '[' == c || ']' == c || '@' == c;
+		}
+
+		protected boolean isSubDelimiter(int c) {
+			return '!' == c || '$' == c || '&' == c || '\'' == c || '(' == c || ')' == c || '*' == c || '+' == c ||
+					',' == c || ';' == c || '=' == c;
+		}
+
+		protected boolean isReserved(char c) {
+			return isGenericDelimiter(c) || isReserved(c);
+		}
+
+		protected boolean isUnreserved(int c) {
+			return isAlpha(c) || isDigit(c) || '-' == c || '.' == c || '_' == c || '~' == c;
+		}
+
+		protected boolean isPchar(int c) {
+			return isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c;
+		}
+
+	}
+
+	/** The scheme URI component. */
+	public static final UriComponent SCHEME_COMPONENT = new AbstractUriComponent() {
+		public boolean isAllowed(int c) {
+			return isAlpha(c) || isDigit(c) || '+' == c || '-' == c || '.' == c;
+		}
+	};
+
+	/** The authority URI component. */
+	public static final UriComponent AUTHORITY_COMPONENT = new AbstractUriComponent() {
+		public boolean isAllowed(int c) {
+			return isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c;
+		}
+	};
+
+	/** The user info URI component. */
+	public static final UriComponent USER_INFO_COMPONENT = new AbstractUriComponent() {
+		public boolean isAllowed(int c) {
+			return isUnreserved(c) || isSubDelimiter(c) || ':' == c;
+		}
+	};
+
+	/** The host URI component. */
+	public static final UriComponent HOST_COMPONENT = new AbstractUriComponent() {
+		public boolean isAllowed(int c) {
+			return isUnreserved(c) || isSubDelimiter(c);
+		}
+	};
+
+	/** The port URI component. */
+	public static final UriComponent PORT_COMPONENT = new AbstractUriComponent() {
+		public boolean isAllowed(int c) {
+			return isDigit(c);
+		}
+	};
+
+	/** The path URI component. */
+	public static final UriComponent PATH_COMPONENT = new AbstractUriComponent() {
+		public boolean isAllowed(int c) {
+			return isPchar(c) || '/' == c;
+		}
+	};
+
+	/** The path segment URI component. */
+	public static final UriComponent PATH_SEGMENT_COMPONENT = new AbstractUriComponent() {
+		public boolean isAllowed(int c) {
+			return isPchar(c);
+		}
+	};
+
+	/** The query URI component. */
+	public static final UriComponent QUERY_COMPONENT = new AbstractUriComponent() {
+		public boolean isAllowed(int c) {
+			return isPchar(c) || '/' == c || '?' == c;
+		}
+	};
+
+	/** The query parameter URI component. */
+	public static final UriComponent QUERY_PARAM_COMPONENT = new AbstractUriComponent() {
+		public boolean isAllowed(int c) {
+			if ('=' == c || '+' == c || '&' == c) {
+				return false;
+			}
+			else {
+				return isPchar(c) || '/' == c || '?' == c;
+			}
+		}
+	};
+
+	/** The fragment URI component. */
+	public static final UriComponent FRAGMENT_COMPONENT = new AbstractUriComponent() {
+		public boolean isAllowed(int c) {
+			return isPchar(c) || '/' == c || '?' == c;
+		}
+	};
 
 }
