@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class UriTemplate implements Serializable {
 	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 	/** Replaces template variables in the URI template. */
-	private static final String VALUE_REGEX = "(.*)";
+	private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
 
 	private final List<String> variableNames;
@@ -55,6 +55,8 @@ public class UriTemplate implements Serializable {
 	private final Pattern matchPattern;
 
 	private final String uriTemplate;
+
+	private final UriUtils.UriComponent uriComponent;
 
 
 	/**
@@ -66,6 +68,19 @@ public class UriTemplate implements Serializable {
 		this.uriTemplate = uriTemplate;
 		this.variableNames = parser.getVariableNames();
 		this.matchPattern = parser.getMatchPattern();
+		this.uriComponent = null;
+	}
+
+	/**
+	 * Construct a new {@link UriTemplate} with the given URI String.
+	 * @param uriTemplate the URI template string
+	 */
+	public UriTemplate(String uriTemplate, UriUtils.UriComponent uriComponent) {
+		Parser parser = new Parser(uriTemplate);
+		this.uriTemplate = uriTemplate;
+		this.variableNames = parser.getVariableNames();
+		this.matchPattern = parser.getMatchPattern();
+		this.uriComponent = uriComponent;
 	}
 
 	/**
@@ -95,6 +110,28 @@ public class UriTemplate implements Serializable {
 	 * or if it does not contain values for all the variable names
 	 */
 	public URI expand(Map<String, ?> uriVariables) {
+		return encodeUri(expandAsString(true, uriVariables));
+	}
+
+	/**
+	 * Given the Map of variables, expands this template into a URI. The Map keys represent variable names,
+	 * the Map values variable values. The order of variables is not significant.
+	 * <p>Example:
+	 * <pre class="code">
+	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
+	 * Map&lt;String, String&gt; uriVariables = new HashMap&lt;String, String&gt;();
+	 * uriVariables.put("booking", "42");
+	 * uriVariables.put("hotel", "1");
+	 * System.out.println(template.expand(uriVariables));
+	 * </pre>
+	 * will print: <blockquote><code>http://example.com/hotels/1/bookings/42</code></blockquote>
+	 * @param encodeUriVariableValues indicates whether uri template variables should be encoded or not
+	 * @param uriVariables the map of URI variables
+	 * @return the expanded URI
+	 * @throws IllegalArgumentException if <code>uriVariables</code> is <code>null</code>;
+	 * or if it does not contain values for all the variable names
+	 */
+	public String expandAsString(boolean encodeUriVariableValues, Map<String, ?> uriVariables) {
 		Assert.notNull(uriVariables, "'uriVariables' must not be null");
 		Object[] values = new Object[this.variableNames.size()];
 		for (int i = 0; i < this.variableNames.size(); i++) {
@@ -104,7 +141,7 @@ public class UriTemplate implements Serializable {
 			}
 			values[i] = uriVariables.get(name);
 		}
-		return expand(values);
+		return expandAsString(encodeUriVariableValues, values);
 	}
 
 	/**
@@ -122,22 +159,45 @@ public class UriTemplate implements Serializable {
 	 * or if it does not contain sufficient variables
 	 */
 	public URI expand(Object... uriVariableValues) {
+		return encodeUri(expandAsString(true, uriVariableValues));
+	}
+
+	/**
+	 * Given an array of variables, expand this template into a full URI String. The array represent variable values.
+	 * The order of variables is significant.
+	 * <p>Example:
+	 * <pre class="code">
+	 * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
+	 * System.out.println(template.expand("1", "42));
+	 * </pre>
+	 * will print: <blockquote><code>http://example.com/hotels/1/bookings/42</code></blockquote>
+	 * @param encodeVariableValues indicates whether uri template variables should be encoded or not
+	 * @param uriVariableValues the array of URI variables
+	 * @return the expanded URI
+	 * @throws IllegalArgumentException if <code>uriVariables</code> is <code>null</code>
+	 * or if it does not contain sufficient variables
+	 */
+	public String expandAsString(boolean encodeVariableValues, Object... uriVariableValues) {
 		Assert.notNull(uriVariableValues, "'uriVariableValues' must not be null");
-		if (uriVariableValues.length != this.variableNames.size()) {
+		if (uriVariableValues.length < this.variableNames.size()) {
 			throw new IllegalArgumentException(
-					"Invalid amount of variables values in [" + this.uriTemplate + "]: expected " +
+					"Not enough of variables values in [" + this.uriTemplate + "]: expected at least " +
 							this.variableNames.size() + "; got " + uriVariableValues.length);
 		}
 		Matcher matcher = NAMES_PATTERN.matcher(this.uriTemplate);
-		StringBuffer buffer = new StringBuffer();
+		StringBuffer uriBuffer = new StringBuffer();
 		int i = 0;
 		while (matcher.find()) {
 			Object uriVariable = uriVariableValues[i++];
-			String replacement = Matcher.quoteReplacement(uriVariable != null ? uriVariable.toString() : "");
-			matcher.appendReplacement(buffer, replacement);
+			String uriVariableString = uriVariable != null ? uriVariable.toString() : "";
+			if (encodeVariableValues && uriComponent != null) {
+				uriVariableString = UriUtils.encode(uriVariableString, uriComponent, false);
+			}
+			String replacement = Matcher.quoteReplacement(uriVariableString);
+			matcher.appendReplacement(uriBuffer, replacement);
 		}
-		matcher.appendTail(buffer);
-		return encodeUri(buffer.toString());
+		matcher.appendTail(uriBuffer);
+		return uriBuffer.toString();
 	}
 
 	/**
@@ -220,8 +280,23 @@ public class UriTemplate implements Serializable {
 			int end = 0;
 			while (m.find()) {
 				this.patternBuilder.append(quote(uriTemplate, end, m.start()));
-				this.patternBuilder.append(VALUE_REGEX);
-				this.variableNames.add(m.group(1));
+				String match = m.group(1);
+				int colonIdx = match.indexOf(':');
+				if (colonIdx == -1) {
+					this.patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
+					this.variableNames.add(match);
+				}
+				else {
+					if (colonIdx + 1 == match.length()) {
+						throw new IllegalArgumentException("No custom regular expression specified after ':' in \"" + match	+ "\"");
+					}
+					String variablePattern = match.substring(colonIdx + 1, match.length());
+					this.patternBuilder.append('(');
+					this.patternBuilder.append(variablePattern);
+					this.patternBuilder.append(')');
+					String variableName = match.substring(0, colonIdx);
+					this.variableNames.add(variableName);
+				}
 				end = m.end();
 			}
 			this.patternBuilder.append(quote(uriTemplate, end, uriTemplate.length()));

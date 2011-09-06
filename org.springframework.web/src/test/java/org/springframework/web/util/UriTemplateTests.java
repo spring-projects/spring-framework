@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -47,9 +48,9 @@ public class UriTemplateTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void expandVarArgsInvalidAmountVariables() throws Exception {
+	public void expandVarArgsNotEnoughVariables() throws Exception {
 		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
-		template.expand("1", "42", "100");
+		template.expand("1");
 	}
 
 	@Test
@@ -110,6 +111,13 @@ public class UriTemplateTests {
 		assertFalse("UriTemplate matches", template.matches(""));
 		assertFalse("UriTemplate matches", template.matches(null));
 	}
+	
+	@Test
+	public void matchesCustomRegex() throws Exception {
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel:\\d+}");
+		assertTrue("UriTemplate does not match", template.matches("http://example.com/hotels/42"));
+		assertFalse("UriTemplate matches", template.matches("http://example.com/hotels/foo"));
+	}
 
 	@Test
 	public void match() throws Exception {
@@ -118,6 +126,17 @@ public class UriTemplateTests {
 		expected.put("hotel", "1");
 
 		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
+		Map<String, String> result = template.match("http://example.com/hotels/1/bookings/42");
+		assertEquals("Invalid match", expected, result);
+	}
+
+	@Test
+	public void matchCustomRegex() throws Exception {
+		Map<String, String> expected = new HashMap<String, String>(2);
+		expected.put("booking", "42");
+		expected.put("hotel", "1");
+
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel:\\d}/bookings/{booking:\\d+}");
 		Map<String, String> result = template.match("http://example.com/hotels/1/bookings/42");
 		assertEquals("Invalid match", expected, result);
 	}
