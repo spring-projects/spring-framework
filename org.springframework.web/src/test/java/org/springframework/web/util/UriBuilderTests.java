@@ -39,6 +39,14 @@ public class UriBuilderTests {
 	}
 
 	@Test
+	public void fromPath() throws URISyntaxException {
+		URI result = UriBuilder.fromPath("foo").queryParam("bar").fragment("baz").build();
+
+		URI expected = new URI("/foo?bar#baz");
+		assertEquals("Invalid result URI", expected, result);
+	}
+
+	@Test
 	public void fromUri() throws URISyntaxException {
 		URI uri = new URI("http://example.com/foo?bar#baz");
 
