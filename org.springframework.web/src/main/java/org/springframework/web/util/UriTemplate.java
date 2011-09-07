@@ -56,7 +56,7 @@ public class UriTemplate implements Serializable {
 
 	private final String uriTemplate;
 
-	private final UriUtils.UriComponent uriComponent;
+	private final UriComponent uriComponent;
 
 
 	/**
@@ -75,7 +75,7 @@ public class UriTemplate implements Serializable {
 	 * Construct a new {@link UriTemplate} with the given URI String.
 	 * @param uriTemplate the URI template string
 	 */
-	public UriTemplate(String uriTemplate, UriUtils.UriComponent uriComponent) {
+	public UriTemplate(String uriTemplate, UriComponent uriComponent) {
 		Parser parser = new Parser(uriTemplate);
 		this.uriTemplate = uriTemplate;
 		this.variableNames = parser.getVariableNames();
@@ -110,7 +110,7 @@ public class UriTemplate implements Serializable {
 	 * or if it does not contain values for all the variable names
 	 */
 	public URI expand(Map<String, ?> uriVariables) {
-		return encodeUri(expandAsString(true, uriVariables));
+		return encodeUri(expandAsString(false, uriVariables));
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class UriTemplate implements Serializable {
 	 * or if it does not contain sufficient variables
 	 */
 	public URI expand(Object... uriVariableValues) {
-		return encodeUri(expandAsString(true, uriVariableValues));
+		return encodeUri(expandAsString(false, uriVariableValues));
 	}
 
 	/**

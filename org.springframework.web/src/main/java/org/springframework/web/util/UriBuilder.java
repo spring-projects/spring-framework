@@ -52,6 +52,7 @@ import org.springframework.util.StringUtils;
  * values are encoded when a URI is built.
  * Template parameter regular expressions are ignored when building a URI, i.e.
  * no validation is performed.
+ *
  * <p>Inspired by {@link javax.ws.rs.core.UriBuilder}.
  *
  * @author Arjen Poutsma
@@ -132,7 +133,8 @@ public class UriBuilder {
 		StringBuilder uriBuilder = new StringBuilder();
 
 		if (scheme != null) {
-			uriBuilder.append(scheme).append(':');
+			uriBuilder.append(scheme);
+			uriBuilder.append(':');
 		}
 
 		if (userInfo != null || host != null || port != -1) {
@@ -218,7 +220,7 @@ public class UriBuilder {
 		UriTemplate template;
 
 		if (scheme != null) {
-			template = new UriTemplate(scheme, UriUtils.SCHEME_COMPONENT);
+			template = new UriTemplate(scheme, UriComponent.SCHEME);
 			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
 			uriBuilder.append(':');
 		}
@@ -227,13 +229,13 @@ public class UriBuilder {
 			uriBuilder.append("//");
 
 			if (StringUtils.hasLength(userInfo)) {
-				template = new UriTemplate(userInfo, UriUtils.USER_INFO_COMPONENT);
+				template = new UriTemplate(userInfo, UriComponent.USER_INFO);
 				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
 				uriBuilder.append('@');
 			}
 
 			if (host != null) {
-				template = new UriTemplate(host, UriUtils.HOST_COMPONENT);
+				template = new UriTemplate(host, UriComponent.HOST);
 				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
 			}
 
@@ -254,19 +256,19 @@ public class UriBuilder {
 				else if (endsWithSlash && startsWithSlash) {
 					pathSegment = pathSegment.substring(1);
 				}
-				template = new UriTemplate(pathSegment, UriUtils.PATH_SEGMENT_COMPONENT);
+				template = new UriTemplate(pathSegment, UriComponent.PATH_SEGMENT);
 				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
 			}
 		}
 		if (queryBuilder.length() > 0) {
 			uriBuilder.append('?');
-			template = new UriTemplate(queryBuilder.toString(), UriUtils.QUERY_COMPONENT);
+			template = new UriTemplate(queryBuilder.toString(), UriComponent.QUERY);
 			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
 		}
 
 		if (StringUtils.hasLength(fragment)) {
 			uriBuilder.append('#');
-			template = new UriTemplate(fragment, UriUtils.FRAGMENT_COMPONENT);
+			template = new UriTemplate(fragment, UriComponent.FRAGMENT);
 			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
 		}
 
@@ -306,7 +308,7 @@ public class UriBuilder {
 		UriTemplate template;
 
 		if (scheme != null) {
-			template = new UriTemplate(scheme, UriUtils.SCHEME_COMPONENT);
+			template = new UriTemplate(scheme, UriComponent.SCHEME);
 			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
 			uriBuilder.append(':');
 		}
@@ -315,13 +317,13 @@ public class UriBuilder {
 			uriBuilder.append("//");
 
 			if (StringUtils.hasLength(userInfo)) {
-				template = new UriTemplate(userInfo, UriUtils.USER_INFO_COMPONENT);
+				template = new UriTemplate(userInfo, UriComponent.USER_INFO);
 				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
 				uriBuilder.append('@');
 			}
 
 			if (host != null) {
-				template = new UriTemplate(host, UriUtils.HOST_COMPONENT);
+				template = new UriTemplate(host, UriComponent.HOST);
 				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
 			}
 
@@ -342,20 +344,20 @@ public class UriBuilder {
 				else if (endsWithSlash && startsWithSlash) {
 					pathSegment = pathSegment.substring(1);
 				}
-				template = new UriTemplate(pathSegment, UriUtils.PATH_SEGMENT_COMPONENT);
+				template = new UriTemplate(pathSegment, UriComponent.PATH_SEGMENT);
 				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
 			}
 		}
 
 		if (queryBuilder.length() > 0) {
 			uriBuilder.append('?');
-			template = new UriTemplate(queryBuilder.toString(), UriUtils.QUERY_COMPONENT);
+			template = new UriTemplate(queryBuilder.toString(), UriComponent.QUERY);
 			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
 		}
 
 		if (StringUtils.hasLength(fragment)) {
 			uriBuilder.append('#');
-			template = new UriTemplate(fragment, UriUtils.FRAGMENT_COMPONENT);
+			template = new UriTemplate(fragment, UriComponent.FRAGMENT);
 			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
 		}
 
@@ -411,7 +413,7 @@ public class UriBuilder {
 	public UriBuilder scheme(String scheme) {
 		if (scheme != null) {
 			Assert.hasLength(scheme, "'scheme' must not be empty");
-			this.scheme = UriUtils.encode(scheme, UriUtils.SCHEME_COMPONENT, true);
+			this.scheme = UriUtils.encode(scheme, UriComponent.SCHEME, true);
 		}
 		else {
 			this.scheme = null;
@@ -429,7 +431,7 @@ public class UriBuilder {
 	public UriBuilder userInfo(String userInfo) {
 		if (userInfo != null) {
 			Assert.hasLength(userInfo, "'userInfo' must not be empty");
-			this.userInfo = UriUtils.encode(userInfo, UriUtils.USER_INFO_COMPONENT, true);
+			this.userInfo = UriUtils.encode(userInfo, UriComponent.USER_INFO, true);
 		}
 		else {
 			this.userInfo = null;
@@ -447,7 +449,7 @@ public class UriBuilder {
 	public UriBuilder host(String host) {
 		if (host != null) {
 			Assert.hasLength(host, "'host' must not be empty");
-			this.host = UriUtils.encode(host, UriUtils.HOST_COMPONENT, true);
+			this.host = UriUtils.encode(host, UriComponent.HOST, true);
 		}
 		else {
 			this.host = null;
@@ -490,7 +492,7 @@ public class UriBuilder {
 	public UriBuilder pathSegment(String... segments) throws IllegalArgumentException {
 		Assert.notNull(segments, "'segments' must not be null");
 		for (String segment : segments) {
-			this.pathSegments.add(UriUtils.encode(segment, UriUtils.PATH_SEGMENT_COMPONENT, true));
+			this.pathSegments.add(UriUtils.encode(segment, UriComponent.PATH_SEGMENT, true));
 		}
 
 		return this;
@@ -508,7 +510,7 @@ public class UriBuilder {
 	public UriBuilder queryParam(String name, Object... values) {
 		Assert.notNull(name, "'name' must not be null");
 
-		String encodedName = UriUtils.encode(name, UriUtils.QUERY_PARAM_COMPONENT, true);
+		String encodedName = UriUtils.encode(name, UriComponent.QUERY_PARAM, true);
 
 		if (ObjectUtils.isEmpty(values)) {
 			if (queryBuilder.length() != 0) {
@@ -526,7 +528,7 @@ public class UriBuilder {
 				String valueAsString = value != null ? value.toString() : "";
 				if (valueAsString.length() != 0) {
 					queryBuilder.append('=');
-					queryBuilder.append(UriUtils.encode(valueAsString, UriUtils.QUERY_PARAM_COMPONENT, true));
+					queryBuilder.append(UriUtils.encode(valueAsString, UriComponent.QUERY_PARAM, true));
 				}
 
 			}
@@ -544,7 +546,7 @@ public class UriBuilder {
 	public UriBuilder fragment(String fragment) {
 		if (fragment != null) {
 			Assert.hasLength(fragment, "'fragment' must not be empty");
-			this.fragment = UriUtils.encode(fragment, UriUtils.FRAGMENT_COMPONENT, true);
+			this.fragment = UriUtils.encode(fragment, UriComponent.FRAGMENT, true);
 		}
 		else {
 			this.fragment = null;

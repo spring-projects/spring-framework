@@ -239,7 +239,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeScheme(String scheme, String encoding) throws UnsupportedEncodingException {
-		return encode(scheme, encoding, SCHEME_COMPONENT, false);
+		return encode(scheme, encoding, UriComponent.SCHEME, false);
 	}
 
 	/**
@@ -250,7 +250,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeAuthority(String authority, String encoding) throws UnsupportedEncodingException {
-		return encode(authority, encoding, AUTHORITY_COMPONENT, false);
+		return encode(authority, encoding, UriComponent.AUTHORITY, false);
 	}
 
 	/**
@@ -261,7 +261,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeUserInfo(String userInfo, String encoding) throws UnsupportedEncodingException {
-		return encode(userInfo, encoding, USER_INFO_COMPONENT, false);
+		return encode(userInfo, encoding, UriComponent.USER_INFO, false);
 	}
 
 	/**
@@ -272,7 +272,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeHost(String host, String encoding) throws UnsupportedEncodingException {
-		return encode(host, encoding, HOST_COMPONENT, false);
+		return encode(host, encoding, UriComponent.HOST, false);
 	}
 
 	/**
@@ -283,7 +283,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePort(String port, String encoding) throws UnsupportedEncodingException {
-		return encode(port, encoding, PORT_COMPONENT, false);
+		return encode(port, encoding, UriComponent.PORT, false);
 	}
 
 	/**
@@ -294,7 +294,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePath(String path, String encoding) throws UnsupportedEncodingException {
-		return encode(path, encoding, PATH_COMPONENT, false);
+		return encode(path, encoding, UriComponent.PATH, false);
 	}
 
 	/**
@@ -305,7 +305,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePathSegment(String segment, String encoding) throws UnsupportedEncodingException {
-		return encode(segment, encoding, PATH_SEGMENT_COMPONENT, false);
+		return encode(segment, encoding, UriComponent.PATH_SEGMENT, false);
 	}
 
 	/**
@@ -316,7 +316,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeQuery(String query, String encoding) throws UnsupportedEncodingException {
-		return encode(query, encoding, QUERY_COMPONENT, false);
+		return encode(query, encoding, UriComponent.QUERY, false);
 	}
 
 	/**
@@ -327,7 +327,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeQueryParam(String queryParam, String encoding) throws UnsupportedEncodingException {
-		return encode(queryParam, encoding, QUERY_PARAM_COMPONENT, false);
+		return encode(queryParam, encoding, UriComponent.QUERY_PARAM, false);
 	}
 
 	/**
@@ -338,7 +338,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeFragment(String fragment, String encoding) throws UnsupportedEncodingException {
-		return encode(fragment, encoding, FRAGMENT_COMPONENT, false);
+		return encode(fragment, encoding, UriComponent.FRAGMENT, false);
 	}
 
 	/**
@@ -477,127 +477,5 @@ public abstract class UriUtils {
 		}
 		return changed ? new String(bos.toByteArray(), encoding) : source;
 	}
-
-	/**
-	 * Defines the contract for an URI component, i.e. scheme, host, path, etc.
-	 */
-	public interface UriComponent {
-
-		/**
-		 * Specifies whether the given character is allowed in this URI component.
-		 * @param c the character
-		 * @return {@code true} if the character is allowed; {@code false} otherwise
-		 */
-		boolean isAllowed(int c);
-
-	}
-
-	private static abstract class AbstractUriComponent implements UriComponent {
-
-		protected boolean isAlpha(int c) {
-			return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
-		}
-
-		protected boolean isDigit(int c) {
-			return c >= '0' && c <= '9';
-		}
-
-		protected boolean isGenericDelimiter(int c) {
-			return ':' == c || '/' == c || '?' == c || '#' == c || '[' == c || ']' == c || '@' == c;
-		}
-
-		protected boolean isSubDelimiter(int c) {
-			return '!' == c || '$' == c || '&' == c || '\'' == c || '(' == c || ')' == c || '*' == c || '+' == c ||
-					',' == c || ';' == c || '=' == c;
-		}
-
-		protected boolean isReserved(char c) {
-			return isGenericDelimiter(c) || isReserved(c);
-		}
-
-		protected boolean isUnreserved(int c) {
-			return isAlpha(c) || isDigit(c) || '-' == c || '.' == c || '_' == c || '~' == c;
-		}
-
-		protected boolean isPchar(int c) {
-			return isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c;
-		}
-
-	}
-
-	/** The scheme URI component. */
-	public static final UriComponent SCHEME_COMPONENT = new AbstractUriComponent() {
-		public boolean isAllowed(int c) {
-			return isAlpha(c) || isDigit(c) || '+' == c || '-' == c || '.' == c;
-		}
-	};
-
-	/** The authority URI component. */
-	public static final UriComponent AUTHORITY_COMPONENT = new AbstractUriComponent() {
-		public boolean isAllowed(int c) {
-			return isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c;
-		}
-	};
-
-	/** The user info URI component. */
-	public static final UriComponent USER_INFO_COMPONENT = new AbstractUriComponent() {
-		public boolean isAllowed(int c) {
-			return isUnreserved(c) || isSubDelimiter(c) || ':' == c;
-		}
-	};
-
-	/** The host URI component. */
-	public static final UriComponent HOST_COMPONENT = new AbstractUriComponent() {
-		public boolean isAllowed(int c) {
-			return isUnreserved(c) || isSubDelimiter(c);
-		}
-	};
-
-	/** The port URI component. */
-	public static final UriComponent PORT_COMPONENT = new AbstractUriComponent() {
-		public boolean isAllowed(int c) {
-			return isDigit(c);
-		}
-	};
-
-	/** The path URI component. */
-	public static final UriComponent PATH_COMPONENT = new AbstractUriComponent() {
-		public boolean isAllowed(int c) {
-			return isPchar(c) || '/' == c;
-		}
-	};
-
-	/** The path segment URI component. */
-	public static final UriComponent PATH_SEGMENT_COMPONENT = new AbstractUriComponent() {
-		public boolean isAllowed(int c) {
-			return isPchar(c);
-		}
-	};
-
-	/** The query URI component. */
-	public static final UriComponent QUERY_COMPONENT = new AbstractUriComponent() {
-		public boolean isAllowed(int c) {
-			return isPchar(c) || '/' == c || '?' == c;
-		}
-	};
-
-	/** The query parameter URI component. */
-	public static final UriComponent QUERY_PARAM_COMPONENT = new AbstractUriComponent() {
-		public boolean isAllowed(int c) {
-			if ('=' == c || '+' == c || '&' == c) {
-				return false;
-			}
-			else {
-				return isPchar(c) || '/' == c || '?' == c;
-			}
-		}
-	};
-
-	/** The fragment URI component. */
-	public static final UriComponent FRAGMENT_COMPONENT = new AbstractUriComponent() {
-		public boolean isAllowed(int c) {
-			return isPchar(c) || '/' == c || '?' == c;
-		}
-	};
 
 }
