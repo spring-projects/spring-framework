@@ -42,16 +42,6 @@ import org.springframework.util.StringUtils;
  *
  * <p>Most of the URI component methods accept URI template variables (i.e. {@code "{foo}"}), which are expanded by
  * calling {@code build}.
- * one , are allowed in most components of a URI but their value is
- * restricted to a particular component. E.g.
- * <blockquote><code>UriBuilder.fromPath("{arg1}").build("foo#bar");</code></blockquote>
- * would result in encoding of the '#' such that the resulting URI is
- * "foo%23bar". To create a URI "foo#bar" use
- * <blockquote><code>UriBuilder.fromPath("{arg1}").fragment("{arg2}").build("foo", "bar")</code></blockquote>
- * instead. URI template names and delimiters are never encoded but their
- * values are encoded when a URI is built.
- * Template parameter regular expressions are ignored when building a URI, i.e.
- * no validation is performed.
  *
  * <p>Inspired by {@link javax.ws.rs.core.UriBuilder}.
  *
