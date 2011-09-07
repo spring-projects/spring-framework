@@ -56,8 +56,6 @@ public class UriTemplate implements Serializable {
 
 	private final String uriTemplate;
 
-	private final UriComponent uriComponent;
-
 
 	/**
 	 * Construct a new {@link UriTemplate} with the given URI String.
@@ -68,19 +66,6 @@ public class UriTemplate implements Serializable {
 		this.uriTemplate = uriTemplate;
 		this.variableNames = parser.getVariableNames();
 		this.matchPattern = parser.getMatchPattern();
-		this.uriComponent = null;
-	}
-
-	/**
-	 * Construct a new {@link UriTemplate} with the given URI String.
-	 * @param uriTemplate the URI template string
-	 */
-	public UriTemplate(String uriTemplate, UriComponent uriComponent) {
-		Parser parser = new Parser(uriTemplate);
-		this.uriTemplate = uriTemplate;
-		this.variableNames = parser.getVariableNames();
-		this.matchPattern = parser.getMatchPattern();
-		this.uriComponent = uriComponent;
 	}
 
 	/**
@@ -110,7 +95,7 @@ public class UriTemplate implements Serializable {
 	 * or if it does not contain values for all the variable names
 	 */
 	public URI expand(Map<String, ?> uriVariables) {
-		return encodeUri(expandAsString(false, uriVariables));
+		return encodeUri(expandAsString(uriVariables));
 	}
 
 	/**
@@ -125,13 +110,13 @@ public class UriTemplate implements Serializable {
 	 * System.out.println(template.expand(uriVariables));
 	 * </pre>
 	 * will print: <blockquote><code>http://example.com/hotels/1/bookings/42</code></blockquote>
-	 * @param encodeUriVariableValues indicates whether uri template variables should be encoded or not
+	 *
 	 * @param uriVariables the map of URI variables
 	 * @return the expanded URI
 	 * @throws IllegalArgumentException if <code>uriVariables</code> is <code>null</code>;
 	 * or if it does not contain values for all the variable names
 	 */
-	public String expandAsString(boolean encodeUriVariableValues, Map<String, ?> uriVariables) {
+	public String expandAsString(Map<String, ?> uriVariables) {
 		Assert.notNull(uriVariables, "'uriVariables' must not be null");
 		Object[] values = new Object[this.variableNames.size()];
 		for (int i = 0; i < this.variableNames.size(); i++) {
@@ -141,7 +126,7 @@ public class UriTemplate implements Serializable {
 			}
 			values[i] = uriVariables.get(name);
 		}
-		return expandAsString(encodeUriVariableValues, values);
+		return expandAsString(values);
 	}
 
 	/**
@@ -159,7 +144,7 @@ public class UriTemplate implements Serializable {
 	 * or if it does not contain sufficient variables
 	 */
 	public URI expand(Object... uriVariableValues) {
-		return encodeUri(expandAsString(false, uriVariableValues));
+		return encodeUri(expandAsString(uriVariableValues));
 	}
 
 	/**
@@ -171,13 +156,13 @@ public class UriTemplate implements Serializable {
 	 * System.out.println(template.expand("1", "42));
 	 * </pre>
 	 * will print: <blockquote><code>http://example.com/hotels/1/bookings/42</code></blockquote>
-	 * @param encodeVariableValues indicates whether uri template variables should be encoded or not
+	 *
 	 * @param uriVariableValues the array of URI variables
 	 * @return the expanded URI
 	 * @throws IllegalArgumentException if <code>uriVariables</code> is <code>null</code>
 	 * or if it does not contain sufficient variables
 	 */
-	public String expandAsString(boolean encodeVariableValues, Object... uriVariableValues) {
+	public String expandAsString(Object... uriVariableValues) {
 		Assert.notNull(uriVariableValues, "'uriVariableValues' must not be null");
 		if (uriVariableValues.length < this.variableNames.size()) {
 			throw new IllegalArgumentException(
@@ -188,16 +173,25 @@ public class UriTemplate implements Serializable {
 		StringBuffer uriBuffer = new StringBuffer();
 		int i = 0;
 		while (matcher.find()) {
-			Object uriVariable = uriVariableValues[i++];
-			String uriVariableString = uriVariable != null ? uriVariable.toString() : "";
-			if (encodeVariableValues && uriComponent != null) {
-				uriVariableString = UriUtils.encode(uriVariableString, uriComponent, false);
-			}
-			String replacement = Matcher.quoteReplacement(uriVariableString);
+			Object uriVariableValue = uriVariableValues[i++];
+			String uriVariableValueString = getVariableValueAsString(uriVariableValue);
+			String replacement = Matcher.quoteReplacement(uriVariableValueString);
 			matcher.appendReplacement(uriBuffer, replacement);
 		}
 		matcher.appendTail(uriBuffer);
 		return uriBuffer.toString();
+	}
+
+	/**
+	 * Template method that returns the string representation of the given URI template value.
+	 *
+	 * <p>Defaults implementation simply calls {@link Object#toString()}, or returns an empty string for {@code null}.
+	 *
+	 * @param variableValue the URI template variable value
+	 * @return the variable value as string
+	 */
+	protected String getVariableValueAsString(Object variableValue) {
+		return variableValue != null ? variableValue.toString() : "";
 	}
 
 	/**
