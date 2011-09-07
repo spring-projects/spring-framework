@@ -16,6 +16,7 @@
 
 package org.springframework.http.client.support;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -33,7 +34,7 @@ import org.springframework.util.CollectionUtils;
  */
 public abstract class InterceptingHttpAccessor extends HttpAccessor {
 
-	private List<ClientHttpRequestInterceptor> interceptors;
+	private List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
 
 	/**
 	 * Sets the request interceptors that this accessor should use.
