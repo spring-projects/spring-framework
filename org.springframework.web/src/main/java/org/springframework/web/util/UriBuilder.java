@@ -220,8 +220,8 @@ public class UriBuilder {
 		UriTemplate template;
 
 		if (scheme != null) {
-			template = new UriTemplate(scheme, UriComponent.SCHEME);
-			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
+			template = new UriComponentTemplate(scheme, UriComponent.SCHEME, encodeUriVariableValues);
+			uriBuilder.append(template.expandAsString(uriVariables));
 			uriBuilder.append(':');
 		}
 
@@ -229,14 +229,14 @@ public class UriBuilder {
 			uriBuilder.append("//");
 
 			if (StringUtils.hasLength(userInfo)) {
-				template = new UriTemplate(userInfo, UriComponent.USER_INFO);
-				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
+				template = new UriComponentTemplate(userInfo, UriComponent.USER_INFO, encodeUriVariableValues);
+				uriBuilder.append(template.expandAsString(uriVariables));
 				uriBuilder.append('@');
 			}
 
 			if (host != null) {
-				template = new UriTemplate(host, UriComponent.HOST);
-				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
+				template = new UriComponentTemplate(host, UriComponent.HOST, encodeUriVariableValues);
+				uriBuilder.append(template.expandAsString(uriVariables));
 			}
 
 			if (port != -1) {
@@ -256,20 +256,20 @@ public class UriBuilder {
 				else if (endsWithSlash && startsWithSlash) {
 					pathSegment = pathSegment.substring(1);
 				}
-				template = new UriTemplate(pathSegment, UriComponent.PATH_SEGMENT);
-				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
+				template = new UriComponentTemplate(pathSegment, UriComponent.PATH_SEGMENT, encodeUriVariableValues);
+				uriBuilder.append(template.expandAsString(uriVariables));
 			}
 		}
 		if (queryBuilder.length() > 0) {
 			uriBuilder.append('?');
-			template = new UriTemplate(queryBuilder.toString(), UriComponent.QUERY);
-			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
+			template = new UriComponentTemplate(queryBuilder.toString(), UriComponent.QUERY, encodeUriVariableValues);
+			uriBuilder.append(template.expandAsString(uriVariables));
 		}
 
 		if (StringUtils.hasLength(fragment)) {
 			uriBuilder.append('#');
-			template = new UriTemplate(fragment, UriComponent.FRAGMENT);
-			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariables));
+			template = new UriComponentTemplate(fragment, UriComponent.FRAGMENT, encodeUriVariableValues);
+			uriBuilder.append(template.expandAsString(uriVariables));
 		}
 
 		return URI.create(uriBuilder.toString());
@@ -308,8 +308,8 @@ public class UriBuilder {
 		UriTemplate template;
 
 		if (scheme != null) {
-			template = new UriTemplate(scheme, UriComponent.SCHEME);
-			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
+			template = new UriComponentTemplate(scheme, UriComponent.SCHEME, encodeUriVariableValues);
+			uriBuilder.append(template.expandAsString(uriVariableValues));
 			uriBuilder.append(':');
 		}
 
@@ -317,14 +317,14 @@ public class UriBuilder {
 			uriBuilder.append("//");
 
 			if (StringUtils.hasLength(userInfo)) {
-				template = new UriTemplate(userInfo, UriComponent.USER_INFO);
-				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
+				template = new UriComponentTemplate(userInfo, UriComponent.USER_INFO, encodeUriVariableValues);
+				uriBuilder.append(template.expandAsString(uriVariableValues));
 				uriBuilder.append('@');
 			}
 
 			if (host != null) {
-				template = new UriTemplate(host, UriComponent.HOST);
-				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
+				template = new UriComponentTemplate(host, UriComponent.HOST, encodeUriVariableValues);
+				uriBuilder.append(template.expandAsString(uriVariableValues));
 			}
 
 			if (port != -1) {
@@ -344,21 +344,21 @@ public class UriBuilder {
 				else if (endsWithSlash && startsWithSlash) {
 					pathSegment = pathSegment.substring(1);
 				}
-				template = new UriTemplate(pathSegment, UriComponent.PATH_SEGMENT);
-				uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
+				template = new UriComponentTemplate(pathSegment, UriComponent.PATH_SEGMENT, encodeUriVariableValues);
+				uriBuilder.append(template.expandAsString(uriVariableValues));
 			}
 		}
 
 		if (queryBuilder.length() > 0) {
 			uriBuilder.append('?');
-			template = new UriTemplate(queryBuilder.toString(), UriComponent.QUERY);
-			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
+			template = new UriComponentTemplate(queryBuilder.toString(), UriComponent.QUERY, encodeUriVariableValues);
+			uriBuilder.append(template.expandAsString(uriVariableValues));
 		}
 
 		if (StringUtils.hasLength(fragment)) {
 			uriBuilder.append('#');
-			template = new UriTemplate(fragment, UriComponent.FRAGMENT);
-			uriBuilder.append(template.expandAsString(encodeUriVariableValues, uriVariableValues));
+			template = new UriComponentTemplate(fragment, UriComponent.FRAGMENT, encodeUriVariableValues);
+			uriBuilder.append(template.expandAsString(uriVariableValues));
 		}
 
 		return URI.create(uriBuilder.toString());
