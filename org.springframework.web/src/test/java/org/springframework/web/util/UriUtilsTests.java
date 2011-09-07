@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.web.util;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
+
+import org.junit.Test;
 
 import static org.junit.Assert.*;
-import org.junit.Test;
 
 /**
  * @author Arjen Poutsma
@@ -27,6 +29,47 @@ import org.junit.Test;
 public class UriUtilsTests {
 
 	private static final String ENC = "UTF-8";
+
+	
+	@Test
+	public void parseUriComponents() {
+		Map<UriComponent, String> result = UriUtils.parseUriComponents("http://www.ietf.org/rfc/rfc3986.txt");
+		assertEquals("http", result.get(UriComponent.SCHEME));
+		assertNull(result.get(UriComponent.USER_INFO));
+		assertEquals("www.ietf.org", result.get(UriComponent.HOST));
+		assertNull(result.get(UriComponent.PORT));
+		assertEquals("/rfc/rfc3986.txt", result.get(UriComponent.PATH));
+		assertNull(result.get(UriComponent.QUERY));
+		assertNull(result.get(UriComponent.FRAGMENT));
+
+		result = UriUtils.parseUriComponents(
+				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)");
+		assertEquals("http", result.get(UriComponent.SCHEME));
+		assertEquals("arjen:foobar", result.get(UriComponent.USER_INFO));
+		assertEquals("java.sun.com", result.get(UriComponent.HOST));
+		assertEquals("80", result.get(UriComponent.PORT));
+		assertEquals("/javase/6/docs/api/java/util/BitSet.html", result.get(UriComponent.PATH));
+		assertEquals("foo=bar", result.get(UriComponent.QUERY));
+		assertEquals("and(java.util.BitSet)", result.get(UriComponent.FRAGMENT));
+
+		result = UriUtils.parseUriComponents("mailto:java-net@java.sun.com");
+		assertEquals("mailto", result.get(UriComponent.SCHEME));
+		assertNull(result.get(UriComponent.USER_INFO));
+		assertNull(result.get(UriComponent.HOST));
+		assertNull(result.get(UriComponent.PORT));
+		assertEquals("java-net@java.sun.com", result.get(UriComponent.PATH));
+		assertNull(result.get(UriComponent.QUERY));
+		assertNull(result.get(UriComponent.FRAGMENT));
+
+		result = UriUtils.parseUriComponents("docs/guide/collections/designfaq.html#28");
+		assertNull(result.get(UriComponent.SCHEME));
+		assertNull(result.get(UriComponent.USER_INFO));
+		assertNull(result.get(UriComponent.HOST));
+		assertNull(result.get(UriComponent.PORT));
+		assertEquals("docs/guide/collections/designfaq.html", result.get(UriComponent.PATH));
+		assertNull(result.get(UriComponent.QUERY));
+		assertEquals("28", result.get(UriComponent.FRAGMENT));
+	}
 
 	@Test
 	public void encodeScheme() throws UnsupportedEncodingException {
