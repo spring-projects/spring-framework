@@ -19,6 +19,7 @@ package org.springframework.web.util;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -120,56 +121,27 @@ public class UriBuilder {
 	 * @return the resulting URI
 	 */
 	public URI build() {
-		StringBuilder uriBuilder = new StringBuilder();
-
-		if (scheme != null) {
-			uriBuilder.append(scheme);
-			uriBuilder.append(':');
-		}
-
-		if (userInfo != null || host != null || port != -1) {
-			uriBuilder.append("//");
-
-			if (StringUtils.hasLength(userInfo)) {
-				uriBuilder.append(userInfo);
-				uriBuilder.append('@');
-			}
-
-			if (host != null) {
-				uriBuilder.append(host);
-			}
-
-			if (port != -1) {
-				uriBuilder.append(':');
-				uriBuilder.append(port);
-			}
-		}
-
+		String port = portAsString();
+		String path = null;
 		if (!pathSegments.isEmpty()) {
+			StringBuilder pathBuilder = new StringBuilder();
 			for (String pathSegment : pathSegments) {
 				boolean startsWithSlash = pathSegment.charAt(0) == '/';
-				boolean endsWithSlash = uriBuilder.length() > 0 && uriBuilder.charAt(uriBuilder.length() - 1) == '/';
+				boolean endsWithSlash = pathBuilder.length() > 0 && pathBuilder.charAt(pathBuilder.length() - 1) == '/';
 
 				if (!endsWithSlash && !startsWithSlash) {
-					uriBuilder.append('/');
+					pathBuilder.append('/');
 				}
 				else if (endsWithSlash && startsWithSlash) {
 					pathSegment = pathSegment.substring(1);
 				}
-				uriBuilder.append(pathSegment);
+				pathBuilder.append(pathSegment);
 			}
+			path = pathBuilder.toString();
 		}
+		String query = queryAsString();
 
-		if (queryBuilder.length() > 0) {
-			uriBuilder.append('?');
-			uriBuilder.append(queryBuilder);
-		}
-
-		if (StringUtils.hasLength(fragment)) {
-			uriBuilder.append('#');
-			uriBuilder.append(fragment);
-		}
-		String uri = uriBuilder.toString();
+		String uri = UriUtils.buildUri(scheme, null, userInfo, host, port, path, query, fragment);
 
 		uri = StringUtils.replace(uri, "{", "%7B");
 		uri = StringUtils.replace(uri, "}", "%7D");
@@ -186,7 +158,7 @@ public class UriBuilder {
 	 * @return the resulting URI
 	 */
 	public URI build(Map<String, ?> uriVariables) {
-		return buildFromMap(true, uriVariables);
+		return buildFromMap(uriVariables, true);
 	}
 
 	/**
@@ -197,72 +169,54 @@ public class UriBuilder {
 	 * @return the resulting URI
 	 */
 	public URI buildFromEncoded(Map<String, ?> uriVariables) {
-		return buildFromMap(false, uriVariables);
+		return buildFromMap(uriVariables, false);
 	}
 
-	private URI buildFromMap(boolean encodeUriVariableValues, Map<String, ?> uriVariables) {
+	private URI buildFromMap(Map<String, ?> uriVariables, boolean encodeUriVariableValues) {
 		if (CollectionUtils.isEmpty(uriVariables)) {
 			return build();
 		}
-
-		StringBuilder uriBuilder = new StringBuilder();
-
-		UriTemplate template;
-
-		if (scheme != null) {
-			template = new UriComponentTemplate(scheme, UriComponent.SCHEME, encodeUriVariableValues);
-			uriBuilder.append(template.expandAsString(uriVariables));
-			uriBuilder.append(':');
-		}
-
-		if (userInfo != null || host != null || port != -1) {
-			uriBuilder.append("//");
-
-			if (StringUtils.hasLength(userInfo)) {
-				template = new UriComponentTemplate(userInfo, UriComponent.USER_INFO, encodeUriVariableValues);
-				uriBuilder.append(template.expandAsString(uriVariables));
-				uriBuilder.append('@');
-			}
-
-			if (host != null) {
-				template = new UriComponentTemplate(host, UriComponent.HOST, encodeUriVariableValues);
-				uriBuilder.append(template.expandAsString(uriVariables));
-			}
-
-			if (port != -1) {
-				uriBuilder.append(':');
-				uriBuilder.append(port);
-			}
-		}
-
-		if (!pathSegments.isEmpty()) {
-			for (String pathSegment : pathSegments) {
+		String scheme = expand(this.scheme, UriComponent.SCHEME, uriVariables, encodeUriVariableValues);
+		String userInfo = expand(this.userInfo, UriComponent.USER_INFO, uriVariables, encodeUriVariableValues);
+		String host = expand(this.host, UriComponent.HOST, uriVariables, encodeUriVariableValues);
+		String port = expand(this.portAsString(), UriComponent.PORT, uriVariables, encodeUriVariableValues);
+		String path = null;
+		if (!this.pathSegments.isEmpty()) {
+			StringBuilder pathBuilder = new StringBuilder();
+			for (String pathSegment : this.pathSegments) {
 				boolean startsWithSlash = pathSegment.charAt(0) == '/';
-				boolean endsWithSlash = uriBuilder.length() > 0 && uriBuilder.charAt(uriBuilder.length() - 1) == '/';
+				boolean endsWithSlash = pathBuilder.length() > 0 && pathBuilder.charAt(pathBuilder.length() - 1) == '/';
 
 				if (!endsWithSlash && !startsWithSlash) {
-					uriBuilder.append('/');
+					pathBuilder.append('/');
 				}
 				else if (endsWithSlash && startsWithSlash) {
 					pathSegment = pathSegment.substring(1);
 				}
-				template = new UriComponentTemplate(pathSegment, UriComponent.PATH_SEGMENT, encodeUriVariableValues);
-				uriBuilder.append(template.expandAsString(uriVariables));
+				pathSegment = expand(pathSegment, UriComponent.PATH_SEGMENT, uriVariables, encodeUriVariableValues);
+				pathBuilder.append(pathSegment);
 			}
+			path = pathBuilder.toString();
 		}
-		if (queryBuilder.length() > 0) {
-			uriBuilder.append('?');
-			template = new UriComponentTemplate(queryBuilder.toString(), UriComponent.QUERY, encodeUriVariableValues);
-			uriBuilder.append(template.expandAsString(uriVariables));
-		}
+		String query = expand(this.queryAsString(), UriComponent.QUERY, uriVariables, encodeUriVariableValues);
+		String fragment = expand(this.fragment, UriComponent.FRAGMENT, uriVariables, encodeUriVariableValues);
 
-		if (StringUtils.hasLength(fragment)) {
-			uriBuilder.append('#');
-			template = new UriComponentTemplate(fragment, UriComponent.FRAGMENT, encodeUriVariableValues);
-			uriBuilder.append(template.expandAsString(uriVariables));
-		}
+		String uri = UriUtils.buildUri(scheme, null, userInfo, host, port, path, query, fragment);
+		return URI.create(uri);
+	}
 
-		return URI.create(uriBuilder.toString());
+	private String expand(String source,
+						  UriComponent uriComponent,
+						  Map<String, ?> uriVariables,
+						  boolean encodeUriVariableValues) {
+		if (source == null) {
+			return null;
+		}
+		if (source.indexOf('{') == -1) {
+			return source;
+		}
+		UriTemplate template = new UriComponentTemplate(source, uriComponent, encodeUriVariableValues);
+		return template.expandAsString(uriVariables);
 	}
 
 	/**
@@ -403,7 +357,7 @@ public class UriBuilder {
 	public UriBuilder scheme(String scheme) {
 		if (scheme != null) {
 			Assert.hasLength(scheme, "'scheme' must not be empty");
-			this.scheme = UriUtils.encode(scheme, UriComponent.SCHEME, true);
+			this.scheme = encodeUriComponent(scheme, UriComponent.SCHEME);
 		}
 		else {
 			this.scheme = null;
@@ -421,7 +375,7 @@ public class UriBuilder {
 	public UriBuilder userInfo(String userInfo) {
 		if (userInfo != null) {
 			Assert.hasLength(userInfo, "'userInfo' must not be empty");
-			this.userInfo = UriUtils.encode(userInfo, UriComponent.USER_INFO, true);
+			this.userInfo = encodeUriComponent(userInfo, UriComponent.USER_INFO);
 		}
 		else {
 			this.userInfo = null;
@@ -439,7 +393,7 @@ public class UriBuilder {
 	public UriBuilder host(String host) {
 		if (host != null) {
 			Assert.hasLength(host, "'host' must not be empty");
-			this.host = UriUtils.encode(host, UriComponent.HOST, true);
+			this.host = encodeUriComponent(host, UriComponent.HOST);
 		}
 		else {
 			this.host = null;
@@ -457,6 +411,10 @@ public class UriBuilder {
 		Assert.isTrue(port >= -1, "'port' must not be < -1");
 		this.port = port;
 		return this;
+	}
+
+	private String portAsString() {
+		return this.port != -1 ? Integer.toString(this.port) : null;
 	}
 
 	/**
@@ -482,7 +440,7 @@ public class UriBuilder {
 	public UriBuilder pathSegment(String... segments) throws IllegalArgumentException {
 		Assert.notNull(segments, "'segments' must not be null");
 		for (String segment : segments) {
-			this.pathSegments.add(UriUtils.encode(segment, UriComponent.PATH_SEGMENT, true));
+			this.pathSegments.add(encodeUriComponent(segment, UriComponent.PATH_SEGMENT));
 		}
 
 		return this;
@@ -500,7 +458,7 @@ public class UriBuilder {
 	public UriBuilder queryParam(String name, Object... values) {
 		Assert.notNull(name, "'name' must not be null");
 
-		String encodedName = UriUtils.encode(name, UriComponent.QUERY_PARAM, true);
+		String encodedName = encodeUriComponent(name, UriComponent.QUERY_PARAM);
 
 		if (ObjectUtils.isEmpty(values)) {
 			if (queryBuilder.length() != 0) {
@@ -518,12 +476,16 @@ public class UriBuilder {
 				String valueAsString = value != null ? value.toString() : "";
 				if (valueAsString.length() != 0) {
 					queryBuilder.append('=');
-					queryBuilder.append(UriUtils.encode(valueAsString, UriComponent.QUERY_PARAM, true));
+					queryBuilder.append(encodeUriComponent(valueAsString, UriComponent.QUERY_PARAM));
 				}
 
 			}
 		}
 		return this;
+	}
+
+	private String queryAsString() {
+		return queryBuilder.length() != 0 ? queryBuilder.toString() : null;
 	}
 
 	/**
@@ -536,12 +498,17 @@ public class UriBuilder {
 	public UriBuilder fragment(String fragment) {
 		if (fragment != null) {
 			Assert.hasLength(fragment, "'fragment' must not be empty");
-			this.fragment = UriUtils.encode(fragment, UriComponent.FRAGMENT, true);
+			this.fragment = encodeUriComponent(fragment, UriComponent.FRAGMENT);
 		}
 		else {
 			this.fragment = null;
 		}
 		return this;
+	}
+
+
+	private String encodeUriComponent(String source, UriComponent uriComponent) {
+		return UriUtils.encodeUriComponent(source, uriComponent, EnumSet.of(UriUtils.EncodingOption.ALLOW_TEMPLATE_VARS));
 	}
 
 
