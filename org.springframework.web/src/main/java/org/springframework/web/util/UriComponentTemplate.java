@@ -40,7 +40,7 @@ class UriComponentTemplate extends UriTemplate {
 	@Override
 	protected String getVariableValueAsString(Object variableValue) {
 		String variableValueString = super.getVariableValueAsString(variableValue);
-		return encodeUriVariableValues ? UriUtils.encode(variableValueString, uriComponent, false) :
+		return encodeUriVariableValues ? UriUtils.encodeUriComponent(variableValueString, uriComponent) :
 				variableValueString;
 	}
 }
