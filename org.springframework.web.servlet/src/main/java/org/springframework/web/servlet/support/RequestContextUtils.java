@@ -157,9 +157,11 @@ public abstract class RequestContextUtils {
 	}
 
 	/**
-	 * Return a read-only Map with flash attributes saved during the previous request. 
+	 * Return a read-only {@link Map} with "input" flash attributes saved on a
+	 * previous request. 
 	 * @param request the current request
-	 * @return a read-only Map, or {@code null}
+	 * @return a read-only Map, or {@code null} 
+	 * @see FlashMap
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, ?> getInputFlashMap(HttpServletRequest request) {
@@ -167,9 +169,10 @@ public abstract class RequestContextUtils {
 	}
 
 	/**
-	 * Return a FlashMap to add attributes to during the current request.
-	 * @param request current HTTP request
-	 * @return the flash map for the current request; never {@code null}.
+	 * Return the "output" FlashMap with attributes to save for a subsequent request.
+	 * @param request current request
+	 * @return a {@link FlashMap} instance, never {@code null}
+	 * @see FlashMap
 	 */
 	public static FlashMap getOutputFlashMap(HttpServletRequest request) {
 		return (FlashMap) request.getAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE);

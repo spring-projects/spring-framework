@@ -671,7 +671,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Initialize the {@link FlashMapManager} used by this servlet instance.
-	 * <p>If no implementation is configured then we default to DefaultFlashMapManager.
+	 * <p>If no implementation is configured then we default to 
+	 * {@code org.springframework.web.servlet.support.DefaultFlashMapManager}.
 	 */
 	private void initFlashMapManager(ApplicationContext context) {
 		try {

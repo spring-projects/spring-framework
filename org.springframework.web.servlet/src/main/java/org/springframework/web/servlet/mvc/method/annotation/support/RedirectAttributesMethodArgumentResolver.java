@@ -31,10 +31,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 /**
- * Resolves {@link RedirectAttributesModelMap} method arguments. 
+ * Resolves method arguments of type {@link RedirectAttributes}. 
  * 
- * <p>This resolver must be listed ahead of the {@link ModelMethodProcessor}, 
- * which also resolves arguments of type {@link Map} and {@link Model}.  
+ * <p>This resolver must be listed before the {@link ModelMethodProcessor},
+ * which resolves {@link Map} and {@link Model} arguments.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
