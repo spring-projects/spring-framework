@@ -21,7 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.util.Assert;
 
 /**
  * A FlashMap provides a way for one request to store attributes intended for 
@@ -33,11 +32,14 @@ import org.springframework.util.Assert;
  * <p>A FlashMap can be set up with a request path and request parameters to 
  * help identify the target request. Without this information, a FlashMap is
  * made available to the next request, which may or may not be the intended 
- * result. Before a redirect, the target URL is known and when using the
- * {@code org.springframework.web.servlet.view.RedirectView}, FlashMap 
- * instances are automatically updated with redirect URL information.
+ * recipient. On a redirect, the target URL is known and for example
+ * {@code org.springframework.web.servlet.view.RedirectView} has the
+ * opportunity to automatically update the current FlashMap with target
+ * URL information .
  * 
- * <p>Annotated controllers will usually not access a FlashMap directly.. TODO
+ * <p>Annotated controllers will usually not use this type directly.
+ * See {@code org.springframework.web.servlet.mvc.support.RedirectAttributes}
+ * for an overview of using flash attributes in annotated controllers. 
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -59,6 +61,14 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	private final int createdBy;
 
 	/**
+	 * Create a new instance with an id uniquely identifying the creator of 
+	 * this FlashMap.
+	 */
+	public FlashMap(int createdBy) {
+		this.createdBy = createdBy;
+	}
+	
+	/**
 	 * Create a new instance.
 	 */
 	public FlashMap() {
@@ -66,26 +76,17 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	}
 
 	/**
-	 * Create a new instance with an id uniquely identifying the creator of 
-	 * this FlashMap.
-	 */
-	public FlashMap(int createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	/**
 	 * Provide a URL path to help identify the target request for this FlashMap.
 	 * The path may be absolute (e.g. /application/resource) or relative to the
 	 * current request (e.g. ../resource).
-	 * @param path the URI path, never {@code null}
+	 * @param path the URI path
 	 */
 	public void setTargetRequestPath(String path) {
-		Assert.notNull(path, "Expected path must not be null");
 		this.targetRequestPath = path;
 	}
 
 	/**
-	 * Return the URL path of the target request, or {@code null} if none.
+	 * Return the target URL path or {@code null}.
 	 */
 	public String getTargetRequestPath() {
 		return targetRequestPath;
@@ -93,10 +94,9 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 
 	/**
 	 * Provide request parameter pairs to identify the request for this FlashMap. 
-	 * If not set, the FlashMap will match to requests with any parameters.
-	 * Only simple value types, as defined in {@link BeanUtils#isSimpleValueType}, 
-	 * are used.
+	 * Only simple type, non-null parameter values are used.
 	 * @param params a Map with the names and values of expected parameters.
+	 * @see BeanUtils#isSimpleValueType(Class)
 	 */
 	public FlashMap addTargetRequestParams(Map<String, ?> params) {
 		if (params != null) {
@@ -112,10 +112,8 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 
 	/**
 	 * Provide a request parameter to identify the request for this FlashMap.
-	 * If not set, the FlashMap will match to requests with any parameters.
-	 * 
-	 * @param name the name of the expected parameter (never {@code null})
-	 * @param value the value for the expected parameter (never {@code null})
+	 * @param name the name of the expected parameter, never {@code null}
+	 * @param value the value for the expected parameter, never {@code null}
 	 */
 	public FlashMap addTargetRequestParam(String name, String value) {
 		this.targetRequestParams.put(name, value.toString());
@@ -130,9 +128,8 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	}
 
 	/**
-	 * Start the expiration period for this instance. After the given number of 
-	 * seconds calls to {@link #isExpired()} will return "true".
-	 * @param timeToLive the number of seconds before flash map expires
+	 * Start the expiration period for this instance.
+	 * @param timeToLive the number of seconds before expiration
 	 */
 	public void startExpirationPeriod(int timeToLive) {
 		this.expirationStartTime = System.currentTimeMillis();
@@ -140,8 +137,8 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	}
 
 	/**
-	 * Whether the flash map has expired depending on the number of seconds 
-	 * elapsed since the call to {@link #startExpirationPeriod}.
+	 * Whether this instance has expired depending on the amount of elapsed
+	 * time since the call to {@link #startExpirationPeriod}.
 	 */
 	public boolean isExpired() {
 		if (this.expirationStartTime != 0) {
@@ -160,8 +157,9 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	}
 
 	/**
-	 * Compare two FlashMaps and select the one that has a target URL path or 
-	 * has more target request parameters. 
+	 * Compare two FlashMaps and prefer the one that specifies a target URL 
+	 * path or has more target URL parameters. Before comparing FlashMap
+	 * instances ensure that they match a given request.
 	 */
 	public int compareTo(FlashMap other) {
 		int thisUrlPath = (this.targetRequestPath != null) ? 1 : 0;
@@ -178,8 +176,8 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		result.append("[Attributes=").append(super.toString());
-		result.append(", expecteRequestUri=").append(this.targetRequestPath);
-		result.append(", expectedRequestParameters=" + this.targetRequestParams.toString()).append("]");
+		result.append(", targetRequestPath=").append(this.targetRequestPath);
+		result.append(", targetRequestParams=" + this.targetRequestParams.toString()).append("]");
 		return result.toString();
 	}
 

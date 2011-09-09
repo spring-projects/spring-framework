@@ -23,12 +23,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.DataBinder;
 
 /**
- * A {@link ModelMap} that implements the {@link RedirectAttributes} interface.
- * 
- * <p>Attributes are formatted and stored as Strings so they can be used as URI 
- * variables or as query parameters in the redirect URL. Alternatively, 
- * attributes may also be added as flash attributes in order to request storing
- * them until the next request without affecting the redirect URL.
+ * A {@link ModelMap} implementation of {@link RedirectAttributes} that formats
+ * values as Strings using a {@link DataBinder}. Also provides a place to store 
+ * flash attributes so they can survive a redirect without the need to be 
+ * embedded in the redirect URL.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -41,33 +39,31 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	private final ModelMap flashAttributes = new ModelMap();
 
 	/**
+	 * Class constructor.
+	 * @param dataBinder used to format attribute values as Strings.
+	 */
+	public RedirectAttributesModelMap(DataBinder dataBinder) {
+		this.dataBinder = dataBinder;
+	}
+	
+	/**
 	 * Default constructor without a DataBinder. 
-	 * Redirect attribute values will be formatted via {@link #toString()}.
+	 * Attribute values are converted to String via {@link #toString()}.
 	 */
 	public RedirectAttributesModelMap() {
 		this(null);
 	}
 
 	/**
-	 * Constructor with a DataBinder to use to format redirect attribute values.
-	 * @param dataBinder a DataBinder for converting attribute values to String.
-	 */
-	public RedirectAttributesModelMap(DataBinder dataBinder) {
-		this.dataBinder = dataBinder;
-	}
-
-	/**
-	 * Return the attributes candidate for flash storage.
+	 * Return the attributes candidate for flash storage or an empty Map.
 	 */
 	public Map<String, ?> getFlashAttributes() {
-		return flashAttributes;
+		return this.flashAttributes;
 	}
 
 	/**
-	 * Format the attribute value as a String and add it. If the value is 
-	 * {@code null} it is not be added. 
-	 * @param attributeName the attribute name; never null
-	 * @param attributeValue the attribute value; skipped if null
+	 * {@inheritDoc}
+	 * <p>Formats the attribute value as a String before adding it.
 	 */
 	public RedirectAttributesModelMap addAttribute(String attributeName, Object attributeValue) {
 		if (attributeValue != null) {
@@ -81,10 +77,8 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	}
 
 	/**
-	 * Add an attribute using a 
-	 * {@link org.springframework.core.Conventions#getVariableName generated name}. 
-	 * Before being added the attribute value is formatted as a String.
-	 * @param attributeValue the attribute value; never null
+	 * {@inheritDoc}
+	 * <p>Formats the attribute value as a String before adding it.
 	 */
 	public RedirectAttributesModelMap addAttribute(Object attributeValue) {
 		super.addAttribute(attributeValue);
@@ -92,9 +86,8 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	}
 
 	/**
-	 * Copy all attributes in the supplied <code>Collection</code> into this
-	 * Model using attribute name generation for each element. 
-	 * @see #addAttribute(Object)
+	 * {@inheritDoc}
+	 * <p>Each attribute value is formatted as a String before being added.
 	 */
 	public RedirectAttributesModelMap addAllAttributes(Collection<?> attributeValues) {
 		super.addAllAttributes(attributeValues);
@@ -102,8 +95,8 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	}
 
 	/**
-	 * Copy all supplied attributes into this model.
-	 * @see #addAttribute(String, Object)
+	 * {@inheritDoc}
+	 * <p>Each attribute value is formatted as a String before being added.
 	 */
 	public RedirectAttributesModelMap addAllAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
@@ -115,9 +108,8 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	}
 
 	/**
-	 * Copy all supplied attributes into this model with with existing 
-	 * attributes of the same name taking precedence (i.e. not getting replaced).
-	 * @see #addAttribute(String, Object)
+	 * {@inheritDoc}
+	 * <p>Each attribute value is formatted as a String before being merged.
 	 */
 	public RedirectAttributesModelMap mergeAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
@@ -134,21 +126,11 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 		return this;
 	}
 
-	/**
-	 * Add the given attribute as a candidate for flash storage. 
-	 * @param attributeName the flash attribute name; never null
-	 * @param attributeValue the flash attribute value; may be null
-	 */
 	public RedirectAttributes addFlashAttribute(String attributeName, Object attributeValue) {
 		this.flashAttributes.addAttribute(attributeName, attributeValue);
 		return this;
 	}
 	
-	/**
-	 * Add the given attribute value as a candidate for flash storage using a
-	 * {@link org.springframework.core.Conventions#getVariableName generated name}. 
-	 * @param attributeValue the flash attribute value; never null
-	 */
 	public RedirectAttributes addFlashAttribute(Object attributeValue) {
 		this.flashAttributes.addAttribute(attributeValue);
 		return this;

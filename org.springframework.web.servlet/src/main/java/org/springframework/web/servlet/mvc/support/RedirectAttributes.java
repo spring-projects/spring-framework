@@ -20,70 +20,66 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.FlashMap;
 
 /**
- * A {@link Model} that can also store attributes candidate for flash storage.
+ * A specialization of the {@link Model} interface that controllers can use to
+ * select attributes for a redirect scenario. Since the intent of adding 
+ * redirect attributes is very explicit --  i.e. to be used for a redirect URL, 
+ * attribute values may be formatted as Strings and stored that way to make 
+ * them eligible to be appended to the query string or expanded as URI 
+ * variables in {@code org.springframework.web.servlet.view.RedirectView}.
+ * 
+ * <p>This interface also provides a way to add flash attributes. For a 
+ * general overview of flash attributes see {@link FlashMap}. You can use 
+ * {@link RedirectAttributes} to store flash attributes and they will be 
+ * automatically propagated to the "output" FlashMap of the current request. 
+ * 
+ * <p>Example usage in an {@code @Controller}:
+ * <pre>
+ * &#064;RequestMapping(value = "/accounts", method = RequestMethod.POST)
+ * public String handle(Account account, BindingResult result, RedirectAttributes redirectAttrs) {
+ *   if (result.hasErrors()) {
+ *     return "accounts/new";
+ *   }
+ *   // Save account ...
+ *   redirectAttrs.addAttribute("id", account.getId()).addFlashAttribute("message", "Account created!");
+ *   return "redirect:/accounts/{id}";
+ * }
+ * </pre>
+ * 
+ * <p>After the redirect, flash attributes are automatically added to the model
+ * of the controller serving the redirect URL.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public interface RedirectAttributes extends Model {
 
-	/**
-	 * Add the supplied attribute under the supplied name.
-	 * @param attributeName the name of the model attribute (never <code>null</code>)
-	 * @param attributeValue the model attribute value (can be <code>null</code>)
-	 */
 	RedirectAttributes addAttribute(String attributeName, Object attributeValue);
 
-	/**
-	 * Add the supplied attribute to this <code>Map</code> using a
-	 * {@link org.springframework.core.Conventions#getVariableName generated name}.
-	 * <p><emphasis>Note: Empty {@link java.util.Collection Collections} are not added to
-	 * the model when using this method because we cannot correctly determine
-	 * the true convention name. View code should check for <code>null</code> rather
-	 * than for empty collections as is already done by JSTL tags.</emphasis>
-	 * @param attributeValue the model attribute value (never <code>null</code>)
-	 */
 	RedirectAttributes addAttribute(Object attributeValue);
 
-	/**
-	 * Copy all attributes in the supplied <code>Collection</code> into this
-	 * <code>Map</code>, using attribute name generation for each element.
-	 * @see #addAttribute(Object)
-	 */
 	RedirectAttributes addAllAttributes(Collection<?> attributeValues);
-
-	/**
-	 * Copy all attributes in the supplied <code>Map</code> into this <code>Map</code>.
-	 * @see #addAttribute(String, Object)
-	 */
-	Model addAllAttributes(Map<String, ?> attributes);
-
-	/**
-	 * Copy all attributes in the supplied <code>Map</code> into this <code>Map</code>,
-	 * with existing objects of the same name taking precedence (i.e. not getting
-	 * replaced).
-	 */
-	RedirectAttributes mergeAttributes(Map<String, ?> attributes);
 	
+	RedirectAttributes mergeAttributes(Map<String, ?> attributes);
+
 	/**
-	 * Add the given attribute as a candidate for flash storage. 
-	 * @param attributeName the flash attribute name; never null
-	 * @param attributeValue the flash attribute value; may be null
+	 * Add the given flash attribute. 
+	 * @param attributeName the attribute name; never {@code null}
+	 * @param attributeValue the attribute value; may be {@code null}
 	 */
 	RedirectAttributes addFlashAttribute(String attributeName, Object attributeValue);
 
 	/**
-	 * Add the given attribute value as a candidate for flash storage using a
+	 * Add the given flash storage using a
 	 * {@link org.springframework.core.Conventions#getVariableName generated name}. 
-	 * @param attributeValue the flash attribute value; never null
+	 * @param attributeValue the flash attribute value; never {@code null}
 	 */
 	RedirectAttributes addFlashAttribute(Object attributeValue);
 
 	/**
-	 * Return the attributes candidate for flash storage.
+	 * Return the attributes candidate for flash storage or an empty Map.
 	 */
 	Map<String, ?> getFlashAttributes();
-
 }
