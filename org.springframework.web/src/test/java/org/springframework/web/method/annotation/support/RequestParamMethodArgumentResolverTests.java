@@ -16,10 +16,10 @@
 
 package org.springframework.web.method.annotation.support;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -180,16 +181,26 @@ public class RequestParamMethodArgumentResolverTests {
 		assertEquals(Arrays.asList(expected1, expected2), result);
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void missingMultipartFile() throws Exception {
+	@Test(expected = MultipartException.class)
+	public void notMultipartRequest() throws Exception {
 		resolver.resolveArgument(paramMultiPartFile, null, webRequest, null);
-		fail("Expected exception");
+		fail("Expected exception: request is not a multipart request");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void missingMultipartFile() throws Exception {
+		request.setMethod("POST");
+		request.setContentType("multipart/form-data");
+		resolver.resolveArgument(paramMultiPartFile, null, webRequest, null);
+		fail("Expected exception: request is not MultiPartHttpServletRequest but param is MultipartFile");
 	}
 
 	@Test
 	public void resolveServlet30Part() throws Exception {
 		MockPart expected = new MockPart("servlet30Part", "Hello World".getBytes());
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.setContentType("multipart/form-data");
 		request.addPart(expected);
 		webRequest = new ServletWebRequest(request);
 

@@ -28,7 +28,6 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,10 +36,11 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.multipart.support.RequestPartServletServerHttpRequest;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.util.WebUtils;
@@ -66,8 +66,8 @@ import org.springframework.web.util.WebUtils;
  * 
  * <p>Automatic validation can be applied to a @{@link RequestPart} method argument 
  * through the use of {@code @Valid}. In case of validation failure, a 
- * {@link RequestPartNotValidException} is thrown and handled automatically through
- * the {@link DefaultHandlerExceptionResolver}. 
+ * {@link MethodArgumentNotValidException} is thrown and handled automatically by
+ * the {@link DefaultHandlerExceptionResolver}.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -111,44 +111,65 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 								  NativeWebRequest request, 
 								  WebDataBinderFactory binderFactory) throws Exception {
 
-		String partName = getPartName(parameter);
-		Object arg;
-
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
+		if (!isMultipartRequest(servletRequest)) {
+			throw new MultipartException("The current request is not a multipart request.");
+		}
+		
 		MultipartHttpServletRequest multipartRequest = 
 			WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
 
+		String partName = getPartName(parameter);
+		Object arg;
+
 		if (MultipartFile.class.equals(parameter.getParameterType())) {
-			assertMultipartRequest(multipartRequest, request);
+			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 			arg = multipartRequest.getFile(partName);
 		}
 		else if (isMultipartFileCollection(parameter)) {
-			assertMultipartRequest(multipartRequest, request);
+			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 			arg = multipartRequest.getFiles(partName);
 		}
 		else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
 			arg = servletRequest.getPart(partName);
 		}
 		else {
-			HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, partName);
-			arg = readWithMessageConverters(inputMessage, parameter, parameter.getParameterType());
-			if (isValidationApplicable(arg, parameter)) {
-				WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
-				binder.validate();
-				BindingResult bindingResult = binder.getBindingResult();
-				if (bindingResult.hasErrors()) {
-					throw new MethodArgumentNotValidException(parameter, bindingResult);
+			try {
+				HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, partName);
+				arg = readWithMessageConverters(inputMessage, parameter, parameter.getParameterType());
+				if (isValidationApplicable(arg, parameter)) {
+					WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
+					binder.validate();
+					BindingResult bindingResult = binder.getBindingResult();
+					if (bindingResult.hasErrors()) {
+						throw new MethodArgumentNotValidException(parameter, bindingResult);
+					}
 				}
+			} 
+			catch (MissingServletRequestPartException e) {
+				// handled below
+				arg = null;
 			}
 		}
 
-		if (arg == null) {
-			handleMissingValue(partName, parameter);
+		RequestPart annot = parameter.getParameterAnnotation(RequestPart.class);
+		boolean isRequired = (annot != null) ? annot.required() : true;
+
+		if (arg == null && isRequired) {
+			throw new MissingServletRequestPartException(partName);
 		}
 		
 		return arg;
 	}
 
+	private boolean isMultipartRequest(HttpServletRequest request) {
+		if (!"post".equals(request.getMethod().toLowerCase())) {
+			return false;
+		}
+		String contentType = request.getContentType();
+		return (contentType != null && contentType.toLowerCase().startsWith("multipart/"));
+	}
+	
 	private String getPartName(MethodParameter parameter) {
 		RequestPart annot = parameter.getParameterAnnotation(RequestPart.class);
 		String partName = (annot != null) ? annot.value() : "";
@@ -158,13 +179,6 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 					+ "] not available, and parameter name information not found in class file either.");
 		}
 		return partName;
-	}
-
-	private void assertMultipartRequest(MultipartHttpServletRequest multipartRequest, NativeWebRequest request) {
-		if (multipartRequest == null) {
-			throw new IllegalStateException("Current request is not of type [" + MultipartRequest.class.getName()
-					+ "]: " + request + ". Do you have a MultipartResolver configured?");
-		}
 	}
 	
 	private boolean isMultipartFileCollection(MethodParameter parameter) {
@@ -176,22 +190,6 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			}
 		}
 		return false;
-	}
-	
-	/**
-	 * Invoked if the resolved argument value is {@code null}. The default implementation raises 
-	 * a {@link ServletRequestBindingException} if the method parameter is required.
-	 * @param partName the name used to look up the request part
-	 * @param param the method argument
-	 */
-	protected void handleMissingValue(String partName, MethodParameter param) throws ServletRequestBindingException {
-		RequestPart annot = param.getParameterAnnotation(RequestPart.class);
-		boolean isRequired = (annot != null) ? annot.required() : true;
-		if (isRequired) {
-			String paramType = param.getParameterType().getName();
-			throw new ServletRequestBindingException(
-					"Missing request part '" + partName + "' for method parameter type [" + paramType + "]");
-		}
 	}
 	
 	/**

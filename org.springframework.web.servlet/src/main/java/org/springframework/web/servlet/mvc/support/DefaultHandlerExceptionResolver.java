@@ -40,6 +40,8 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.method.annotation.support.MethodArgumentNotValidException;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
@@ -130,6 +132,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof MethodArgumentNotValidException) {
 				return handleMethodArgumentNotValidException((MethodArgumentNotValidException) ex, request, response, handler);
+			}
+			else if (ex instanceof MissingServletRequestPartException) {
+				return handleMissingServletRequestPartException((MissingServletRequestPartException) ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerException) {
@@ -351,6 +356,22 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * @throws IOException potentially thrown from response.sendError()
 	 */
 	protected ModelAndView handleMethodArgumentNotValidException(MethodArgumentNotValidException ex,
+			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+ 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		return new ModelAndView();
+	}
+
+	/**
+	 * Handle the case where an @{@link RequestPart}, a {@link MultipartFile}, 
+	 * or a {@code javax.servlet.http.Part} argument is required but missing. 
+	 * An HTTP 400 error is sent back to the client.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler
+	 * @return an empty ModelAndView indicating the exception was handled
+	 * @throws IOException potentially thrown from response.sendError()
+	 */
+	protected ModelAndView handleMissingServletRequestPartException(MissingServletRequestPartException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
  		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();

@@ -19,18 +19,23 @@ package org.springframework.web.multipart.support;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
 
 /**
- * {@link ServerHttpRequest} implementation that is based on a part of a {@link MultipartHttpServletRequest}.
- * The part is accessed as {@link MultipartFile} and adapted to the ServerHttpRequest contract.
+ * {@link ServerHttpRequest} implementation that accesses one part of a multipart
+ * request. If using {@link MultipartResolver} configuration the part is accessed
+ * through a {@link MultipartFile}. Or if using Servlet 3.0 multipart processing
+ * the part is accessed through {@code ServletRequest.getPart}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -46,23 +51,44 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 
 
 	/**
-	 * Create a new {@link RequestPartServletServerHttpRequest} instance.
-	 * @param request the multipart request
+	 * Create a new instance. 
+	 * @param request the current request
 	 * @param partName the name of the part to adapt to the {@link ServerHttpRequest} contract
+	 * @throws MissingServletRequestPartException if the request part cannot be found
+	 * @throws IllegalArgumentException if MultipartHttpServletRequest cannot be initialized
 	 */
-	public RequestPartServletServerHttpRequest(HttpServletRequest request, String partName) {
+	public RequestPartServletServerHttpRequest(HttpServletRequest request, String partName) 
+			throws MissingServletRequestPartException {
+		
 		super(request);
 
-		this.multipartRequest = (request instanceof MultipartHttpServletRequest ?
-				(MultipartHttpServletRequest) request : new StandardMultipartHttpServletRequest(request));
+		this.multipartRequest = asMultipartRequest(request);
 		this.partName = partName;
 
 		this.headers = this.multipartRequest.getMultipartHeaders(this.partName);
 		if (this.headers == null) {
-			throw new IllegalArgumentException("No request part found for name '" + this.partName + "'");
+			if (request instanceof MultipartHttpServletRequest) {
+				throw new MissingServletRequestPartException(partName);
+			}
+			else {
+				throw new IllegalArgumentException(
+						"Failed to obtain request part: " + partName + ". " +
+						"The part is missing or multipart processing is not configured. " +
+						"Check for a MultipartResolver bean or if Servlet 3.0 multipart processing is enabled.");
+			}
 		}
 	}
-
+	
+	private static MultipartHttpServletRequest asMultipartRequest(HttpServletRequest request) {
+		if (request instanceof MultipartHttpServletRequest) {
+			return (MultipartHttpServletRequest) request;
+		}
+		else if (ClassUtils.hasMethod(HttpServletRequest.class, "getParts")) {
+			// Servlet 3.0 available ..
+			return new StandardMultipartHttpServletRequest(request);
+		}
+		throw new IllegalArgumentException("Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
+	}
 
 	@Override
 	public HttpHeaders getHeaders() {

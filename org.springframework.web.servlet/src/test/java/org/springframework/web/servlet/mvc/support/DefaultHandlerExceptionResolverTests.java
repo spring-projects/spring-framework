@@ -38,6 +38,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.method.annotation.support.MethodArgumentNotValidException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
@@ -141,6 +142,15 @@ public class DefaultHandlerExceptionResolverTests {
 		errors.rejectValue("name", "invalid");
 		MethodParameter parameter = new MethodParameter(this.getClass().getMethod("handle", String.class), 0);
 		MethodArgumentNotValidException ex = new MethodArgumentNotValidException(parameter, errors);
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
+		assertEquals("Invalid status code", 400, response.getStatus());
+	}
+
+	@Test
+	public void handleMissingServletRequestPartException() throws Exception {
+		MissingServletRequestPartException ex = new MissingServletRequestPartException("name");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());

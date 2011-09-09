@@ -29,6 +29,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
@@ -36,9 +37,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.util.WebUtils;
 
@@ -58,8 +59,8 @@ import org.springframework.web.util.WebUtils;
  * parameter type, the {@link RequestParamMapMethodArgumentResolver} is used instead 
  * providing access to all request parameters in the form of a map.
  * 
- * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved request header values that 
- * don't yet match the method parameter type.
+ * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved request 
+ * header values that don't yet match the method parameter type.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -71,11 +72,13 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	private final boolean useDefaultResolution;
 
 	/**
-	 * @param beanFactory a bean factory to use for resolving  ${...} placeholder and #{...} SpEL expressions 
-	 * in default values, or {@code null} if default values are not expected to contain expressions
-	 * @param useDefaultResolution in default resolution mode a method argument that is a simple type, as
-	 * defined in {@link BeanUtils#isSimpleProperty(Class)}, is treated as a request parameter even if it doesn't have
-	 * an @{@link RequestParam} annotation, the request parameter name is derived from the method parameter name.
+	 * @param beanFactory a bean factory used for resolving  ${...} placeholder 
+	 * and #{...} SpEL expressions in default values, or {@code null} if default 
+	 * values are not expected to contain expressions
+	 * @param useDefaultResolution in default resolution mode a method argument 
+	 * that is a simple type, as defined in {@link BeanUtils#isSimpleProperty}, 
+	 * is treated as a request parameter even if it itsn't annotated, the 
+	 * request parameter name is derived from the method parameter name.
 	 */
 	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory, 
 											  boolean useDefaultResolution) {
@@ -87,11 +90,15 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 * Supports the following:
 	 * <ul>
 	 * 	<li>@RequestParam-annotated method arguments. 
-	 * 		This excludes {@link Map} parameters where the annotation does not specify a name value.
-	 * 		See {@link RequestParamMapMethodArgumentResolver} instead for such parameters.
-	 * 	<li>Arguments of type {@link MultipartFile} unless annotated with {@link RequestPart}.
-	 * 	<li>Arguments of type {@code javax.servlet.http.Part} unless annotated with {@link RequestPart}.
-	 * 	<li>In default resolution mode, simple type arguments even if not with @RequestParam.
+	 * 		This excludes {@link Map} params where the annotation doesn't 
+	 * 		specify a name.	See {@link RequestParamMapMethodArgumentResolver} 
+	 * 		instead for such params.
+	 * 	<li>Arguments of type {@link MultipartFile} 
+	 * 		unless annotated with @{@link RequestPart}.
+	 * 	<li>Arguments of type {@code javax.servlet.http.Part} 
+	 * 		unless annotated with @{@link RequestPart}.
+	 * 	<li>In default resolution mode, simple type arguments 
+	 * 		even if not with @{@link RequestParam}.
 	 * </ul>
 	 */
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -139,14 +146,17 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
 
 		if (MultipartFile.class.equals(parameter.getParameterType())) {
-			assertMultipartRequest(multipartRequest, webRequest);
+			assertIsMultipartRequest(servletRequest);
+			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 			arg = multipartRequest.getFile(name);
 		}
 		else if (isMultipartFileCollection(parameter)) {
-			assertMultipartRequest(multipartRequest, webRequest);
+			assertIsMultipartRequest(servletRequest);
+			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 			arg = multipartRequest.getFiles(name);
 		}
 		else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
+			assertIsMultipartRequest(servletRequest);
 			arg = servletRequest.getPart(name);
 		}
 		else {
@@ -168,11 +178,18 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		return arg;
 	}
 
-	private void assertMultipartRequest(MultipartHttpServletRequest multipartRequest, NativeWebRequest request) {
-		if (multipartRequest == null) {
-			throw new IllegalStateException("Current request is not of type [" + MultipartRequest.class.getName()
-					+ "]: " + request + ". Do you have a MultipartResolver configured?");
+	private void assertIsMultipartRequest(HttpServletRequest request) {
+		if (!isMultipartRequest(request)) {
+			throw new MultipartException("The current request is not a multipart request.");
 		}
+	}
+	
+	private boolean isMultipartRequest(HttpServletRequest request) {
+		if (!"post".equals(request.getMethod().toLowerCase())) {
+			return false;
+		}
+		String contentType = request.getContentType();
+		return (contentType != null && contentType.toLowerCase().startsWith("multipart/"));
 	}
 	
 	private boolean isMultipartFileCollection(MethodParameter parameter) {
