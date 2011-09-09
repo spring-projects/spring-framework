@@ -26,11 +26,11 @@ import org.springframework.util.Assert;
  */
 class UriComponentTemplate extends UriTemplate {
 
-	private final UriComponent uriComponent;
+	private final UriComponents.Type uriComponent;
 
 	private boolean encodeUriVariableValues;
 
-	UriComponentTemplate(String uriTemplate, UriComponent uriComponent, boolean encodeUriVariableValues) {
+	UriComponentTemplate(String uriTemplate, UriComponents.Type uriComponent, boolean encodeUriVariableValues) {
 		super(uriTemplate);
 		Assert.notNull(uriComponent, "'uriComponent' must not be null");
 		this.uriComponent = uriComponent;
