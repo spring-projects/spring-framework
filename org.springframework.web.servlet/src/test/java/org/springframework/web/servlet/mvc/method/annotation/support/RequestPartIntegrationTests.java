@@ -24,6 +24,7 @@ import java.util.Arrays;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
@@ -52,6 +53,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -69,6 +71,7 @@ public class RequestPartIntegrationTests {
 
 	private static String baseUrl;
 
+	
 	@BeforeClass
 	public static void startServer() throws Exception {
 		
@@ -78,10 +81,19 @@ public class RequestPartIntegrationTests {
 		server = new Server(port);
 		Context context = new Context(server, "/");
 
+		Class<?> config = CommonsMultipartResolverTestConfig.class;
 		ServletHolder commonsResolverServlet = new ServletHolder(DispatcherServlet.class);
-		commonsResolverServlet.setInitParameter("contextConfigLocation", CommonsMultipartResolverTestConfig.class.getName());
+		commonsResolverServlet.setInitParameter("contextConfigLocation", config.getName());
 		commonsResolverServlet.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
-		context.addServlet(commonsResolverServlet, "/commons/*");
+		context.addServlet(commonsResolverServlet, "/commons-resolver/*");
+
+		config = StandardMultipartResolverTestConfig.class;
+		ServletHolder standardResolverServlet = new ServletHolder(DispatcherServlet.class);
+		standardResolverServlet.setInitParameter("contextConfigLocation", config.getName());
+		standardResolverServlet.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
+		context.addServlet(standardResolverServlet, "/standard-resolver/*");
+
+		// TODO: add Servlet 3.0 test case without MultipartResolver 
 
 		server.start();
 	}
@@ -103,17 +115,28 @@ public class RequestPartIntegrationTests {
 		}
 	}
 
+	
 	@Test
 	public void commonsMultipartResolver() throws Exception {
+		testCreate(baseUrl + "/commons-resolver/test");
+	}
 
+	@Test
+	@Ignore("jetty 6.1.9 doesn't support Servlet 3.0")
+	public void standardMultipartResolver() throws Exception {
+		testCreate(baseUrl + "/standard-resolver/test");
+	}
+
+	private void testCreate(String url) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
 		HttpEntity<TestData> jsonEntity = new HttpEntity<TestData>(new TestData("Jason"));
 		parts.add("json-data", jsonEntity);
 		parts.add("file-data", new ClassPathResource("logo.jpg", this.getClass()));
 
-		URI location = restTemplate.postForLocation(baseUrl + "/commons/test", parts);
+		URI location = restTemplate.postForLocation(url, parts);
 		assertEquals("http://localhost:8080/test/Jason/logo.jpg", location.toString());
-	}	
+	}
+
 
 	@Configuration
 	@EnableWebMvc
@@ -125,13 +148,22 @@ public class RequestPartIntegrationTests {
 		}
 	}
 	
+	@Configuration
 	static class CommonsMultipartResolverTestConfig extends RequestPartTestConfig {
 
 		@Bean
 		public MultipartResolver multipartResolver() {
 			return new CommonsMultipartResolver();
 		}
-		
+	}
+
+	@Configuration
+	static class StandardMultipartResolverTestConfig extends RequestPartTestConfig {
+
+		@Bean
+		public MultipartResolver multipartResolver() {
+			return new StandardServletMultipartResolver();
+		}
 	}
 
 	@SuppressWarnings("unused")

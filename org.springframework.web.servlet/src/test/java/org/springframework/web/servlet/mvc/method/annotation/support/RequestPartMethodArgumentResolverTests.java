@@ -61,7 +61,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.multipart.support.RequestPartServletServerHttpRequest;
 
 /**
@@ -171,6 +173,8 @@ public class RequestPartMethodArgumentResolverTests {
 	public void resolveServlet30PartArgument() throws Exception {
 		MockPart expected = new MockPart("servlet30Part", "Hello World".getBytes());
 		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setMethod("POST");
+		request.setContentType("multipart/form-data");
 		request.addPart(expected);
 		webRequest = new ServletWebRequest(request);
 
@@ -212,8 +216,8 @@ public class RequestPartMethodArgumentResolverTests {
 		try {
 			testResolveArgument(null, paramValidRequestPart);
 			fail("Expected exception");
-		} catch (ServletRequestBindingException e) {
-			assertTrue(e.getMessage().contains("Missing request part"));
+		} catch (MissingServletRequestPartException e) {
+			assertEquals("requestPart", e.getRequestPartName());
 		}
 	}
 
@@ -221,19 +225,26 @@ public class RequestPartMethodArgumentResolverTests {
 	public void resolveRequestPartNotRequired() throws Exception {
 		testResolveArgument(new SimpleBean("foo"), paramValidRequestPart);
 	}
+	
+	@Test(expected=MultipartException.class)
+	public void notMultipartRequest() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		resolver.resolveArgument(paramMultipartFile, new ModelAndViewContainer(), new ServletWebRequest(request), null);
+		fail("Expected exception");
+	}
 
-	private void testResolveArgument(SimpleBean expectedValue, MethodParameter parameter) throws IOException, Exception {
+	private void testResolveArgument(SimpleBean argValue, MethodParameter parameter) throws IOException, Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		multipartRequest.addHeader("Content-Type", contentType.toString());
 
 		expect(messageConverter.canRead(SimpleBean.class, contentType)).andReturn(true);
-		expect(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).andReturn(expectedValue);
+		expect(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).andReturn(argValue);
 		replay(messageConverter);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		Object actualValue = resolver.resolveArgument(parameter, mavContainer, webRequest, new ValidatingBinderFactory());
 
-		assertEquals("Invalid argument value", expectedValue, actualValue);
+		assertEquals("Invalid argument value", argValue, actualValue);
 		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
 		
 		verify(messageConverter);
