@@ -48,8 +48,11 @@ import org.springframework.web.servlet.FlashMap;
  * }
  * </pre>
  * 
+ * <p>A RedirectAttributes model is empty when the method is called and is never
+ * used unless the method returns a redirect view name or a RedirectView.
+ * 
  * <p>After the redirect, flash attributes are automatically added to the model
- * of the controller serving the redirect URL.
+ * of the controller that serves the target URL.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
