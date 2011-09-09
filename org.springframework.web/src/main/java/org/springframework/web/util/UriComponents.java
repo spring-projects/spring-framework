@@ -37,24 +37,24 @@ import org.springframework.util.StringUtils;
  * Represents the components that make up a URI, mapping component type to string values. Contains convenience getters
  * and setters for all components, as well as the regular {@link Map} implementation.
  *
- * <p>This mapping does not contain mappings for {@link UriComponent#PATH_SEGMENT} or nor {@link
- * UriComponent#QUERY_PARAM}, since those components can occur multiple times in the URI. Instead, one can use {@link
+ * <p>This mapping does not contain mappings for {@link org.springframework.web.util.UriComponents.Type#PATH_SEGMENT} or nor {@link
+ * org.springframework.web.util.UriComponents.Type#QUERY_PARAM}, since those components can occur multiple times in the URI. Instead, one can use {@link
  * #getPathSegments()} or {@link #getQueryParams()} respectively.
  *
  * @author Arjen Poutsma
  * @since 3.1
  */
-public class UriComponents implements Map<UriComponent, String> {
+public class UriComponents implements Map<UriComponents.Type, String> {
 
 	private static final String PATH_DELIMITER = "/";
 
 	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)=?([^&=]+)?");
 
-	private final Map<UriComponent, String> uriComponents;
+	private final Map<Type, String> uriComponents;
 
 	/** Constructs a new, empty instance of the {@code UriComponents} object. */
 	public UriComponents() {
-		this.uriComponents = new EnumMap<UriComponent, String>(UriComponent.class);
+		this.uriComponents = new EnumMap<Type, String>(Type.class);
 	}
 
 	/**
@@ -62,9 +62,9 @@ public class UriComponents implements Map<UriComponent, String> {
 	 *
 	 * @param uriComponents the component to initialize with
 	 */
-	public UriComponents(Map<UriComponent, String> uriComponents) {
+	public UriComponents(Map<Type, String> uriComponents) {
 		Assert.notNull(uriComponents, "'uriComponents' must not be null");
-		this.uriComponents = new EnumMap<UriComponent, String>(uriComponents);
+		this.uriComponents = new EnumMap<Type, String>(uriComponents);
 	}
 
 	// convenience properties
@@ -75,7 +75,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @return the scheme. Can be {@code null}.
 	 */
 	public String getScheme() {
-		return get(UriComponent.SCHEME);
+		return get(Type.SCHEME);
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @param scheme the scheme. Can be {@code null}.
 	 */
 	public void setScheme(String scheme) {
-		put(UriComponent.SCHEME, scheme);
+		put(Type.SCHEME, scheme);
 	}
 
 	/**
@@ -93,7 +93,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @return the authority. Can be {@code null}.
 	 */
 	public String getAuthority() {
-		return get(UriComponent.AUTHORITY);
+		return get(Type.AUTHORITY);
 	}
 
 	/**
@@ -102,7 +102,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @param authority the authority. Can be {@code null}.
 	 */
 	public void setAuthority(String authority) {
-		put(UriComponent.AUTHORITY, authority);
+		put(Type.AUTHORITY, authority);
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @return the user info. Can be {@code null}.
 	 */
 	public String getUserInfo() {
-		return get(UriComponent.USER_INFO);
+		return get(Type.USER_INFO);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @param userInfo the user info. Can be {@code null}
 	 */
 	public void setUserInfo(String userInfo) {
-		put(UriComponent.USER_INFO, userInfo);
+		put(Type.USER_INFO, userInfo);
 	}
 
 	/**
@@ -129,7 +129,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @return the host. Can be {@code null}.
 	 */
 	public String getHost() {
-		return get(UriComponent.HOST);
+		return get(Type.HOST);
 	}
 
 	/**
@@ -138,7 +138,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @param host the host. Can be {@code null}.
 	 */
 	public void setHost(String host) {
-		put(UriComponent.HOST, host);
+		put(Type.HOST, host);
 	}
 
 	/**
@@ -147,7 +147,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @return the port as string. Can be {@code null}.
 	 */
 	public String getPort() {
-		return get(UriComponent.PORT);
+		return get(Type.PORT);
 	}
 
 	/**
@@ -156,7 +156,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @param port the port as string. Can be {@code null}.
 	 */
 	public void setPort(String port) {
-		put(UriComponent.PORT, port);
+		put(Type.PORT, port);
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 */
 	public void setPortAsInteger(int port) {
 		String portString = port > -1 ? Integer.toString(port) : null;
-		put(UriComponent.PORT, portString);
+		put(Type.PORT, portString);
 	}
 
 	/**
@@ -185,7 +185,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @return the path. Can be {@code null}.
 	 */
 	public String getPath() {
-		return get(UriComponent.PATH);
+		return get(Type.PATH);
 	}
 
 	/**
@@ -194,7 +194,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @param path the path. Can be {@code null}.
 	 */
 	public void setPath(String path) {
-		put(UriComponent.PATH, path);
+		put(Type.PATH, path);
 	}
 
 	/**
@@ -240,7 +240,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @return the query. Can be {@code null}.
 	 */
 	public String getQuery() {
-		return get(UriComponent.QUERY);
+		return get(Type.QUERY);
 	}
 
 	/**
@@ -249,7 +249,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @param query the query. Can be {@code null}.
 	 */
 	public void setQuery(String query) {
-		put(UriComponent.QUERY, query);
+		put(Type.QUERY, query);
 	}
 
 	/**
@@ -315,7 +315,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @return the fragment. Can be {@code null}.
 	 */
 	public String getFragment() {
-		return get(UriComponent.FRAGMENT);
+		return get(Type.FRAGMENT);
 	}
 
 	/**
@@ -324,7 +324,7 @@ public class UriComponents implements Map<UriComponent, String> {
 	 * @param fragment the fragment. Can be {@code null}.
 	 */
 	public void setFragment(String fragment) {
-		put(UriComponent.FRAGMENT, fragment);
+		put(Type.FRAGMENT, fragment);
 	}
 
 	// Map implementation
@@ -349,7 +349,7 @@ public class UriComponents implements Map<UriComponent, String> {
 		return this.uriComponents.get(key);
 	}
 
-	public String put(UriComponent key, String value) {
+	public String put(Type key, String value) {
 		return this.uriComponents.put(key, value);
 	}
 
@@ -357,7 +357,7 @@ public class UriComponents implements Map<UriComponent, String> {
 		return this.uriComponents.remove(key);
 	}
 
-	public void putAll(Map<? extends UriComponent, ? extends String> m) {
+	public void putAll(Map<? extends Type, ? extends String> m) {
 		this.uriComponents.putAll(m);
 	}
 
@@ -365,7 +365,7 @@ public class UriComponents implements Map<UriComponent, String> {
 		this.uriComponents.clear();
 	}
 
-	public Set<UriComponent> keySet() {
+	public Set<Type> keySet() {
 		return this.uriComponents.keySet();
 	}
 
@@ -373,7 +373,7 @@ public class UriComponents implements Map<UriComponent, String> {
 		return this.uriComponents.values();
 	}
 
-	public Set<Entry<UriComponent, String>> entrySet() {
+	public Set<Entry<Type, String>> entrySet() {
 		return this.uriComponents.entrySet();
 	}
 
@@ -399,5 +399,155 @@ public class UriComponents implements Map<UriComponent, String> {
 		return this.uriComponents.toString();
 	}
 
+	// inner types
 
+	/**
+	 * Enumeration used to identify the parts of a URI.
+	 *
+	 * <p>Contains methods to indicate whether a given character is valid in a specific URI component.
+	 *
+	 * @author Arjen Poutsma
+	 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
+	 */
+	public static enum Type {
+
+		SCHEME {
+			@Override
+			public boolean isAllowed(int c) {
+				return isAlpha(c) || isDigit(c) || '+' == c || '-' == c || '.' == c;
+			}
+		},
+		AUTHORITY {
+			@Override
+			public boolean isAllowed(int c) {
+				return isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c;
+			}
+		},
+		USER_INFO {
+			@Override
+			public boolean isAllowed(int c) {
+				return isUnreserved(c) || isSubDelimiter(c) || ':' == c;
+			}
+		},
+		HOST {
+			@Override
+			public boolean isAllowed(int c) {
+				return isUnreserved(c) || isSubDelimiter(c);
+			}
+		},
+		PORT {
+			@Override
+			public boolean isAllowed(int c) {
+				return isDigit(c);
+			}
+		},
+		PATH {
+			@Override
+			public boolean isAllowed(int c) {
+				return isPchar(c) || '/' == c;
+			}
+		},
+		PATH_SEGMENT {
+			@Override
+			public boolean isAllowed(int c) {
+				return isPchar(c);
+			}
+		},
+		QUERY {
+			@Override
+			public boolean isAllowed(int c) {
+				return isPchar(c) || '/' == c || '?' == c;
+			}
+		},
+		QUERY_PARAM {
+			@Override
+			public boolean isAllowed(int c) {
+				if ('=' == c || '+' == c || '&' == c) {
+					return false;
+				}
+				else {
+					return isPchar(c) || '/' == c || '?' == c;
+				}
+			}
+		},
+		FRAGMENT {
+			@Override
+			public boolean isAllowed(int c) {
+				return isPchar(c) || '/' == c || '?' == c;
+			}
+		};
+
+		/**
+		 * Indicates whether the given character is allowed in this URI component.
+		 *
+		 * @param c the character
+		 * @return {@code true} if the character is allowed; {@code false} otherwise
+		 */
+		public abstract boolean isAllowed(int c);
+
+		/**
+		 * Indicates whether the given character is in the {@code ALPHA} set.
+		 *
+		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
+		 */
+		protected boolean isAlpha(int c) {
+			return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+		}
+
+		/**
+		 * Indicates whether the given character is in the {@code DIGIT} set.
+		 *
+		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
+		 */
+		protected boolean isDigit(int c) {
+			return c >= '0' && c <= '9';
+		}
+
+		/**
+		 * Indicates whether the given character is in the {@code gen-delims} set.
+		 *
+		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
+		 */
+		protected boolean isGenericDelimiter(int c) {
+			return ':' == c || '/' == c || '?' == c || '#' == c || '[' == c || ']' == c || '@' == c;
+		}
+
+		/**
+		 * Indicates whether the given character is in the {@code sub-delims} set.
+		 *
+		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
+		 */
+		protected boolean isSubDelimiter(int c) {
+			return '!' == c || '$' == c || '&' == c || '\'' == c || '(' == c || ')' == c || '*' == c || '+' == c ||
+					',' == c || ';' == c || '=' == c;
+		}
+
+		/**
+		 * Indicates whether the given character is in the {@code reserved} set.
+		 *
+		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
+		 */
+		protected boolean isReserved(char c) {
+			return isGenericDelimiter(c) || isReserved(c);
+		}
+
+		/**
+		 * Indicates whether the given character is in the {@code unreserved} set.
+		 *
+		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
+		 */
+		protected boolean isUnreserved(int c) {
+			return isAlpha(c) || isDigit(c) || '-' == c || '.' == c || '_' == c || '~' == c;
+		}
+
+		/**
+		 * Indicates whether the given character is in the {@code pchar} set.
+		 *
+		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
+		 */
+		protected boolean isPchar(int c) {
+			return isUnreserved(c) || isSubDelimiter(c) || ':' == c || '@' == c;
+		}
+
+	}
 }

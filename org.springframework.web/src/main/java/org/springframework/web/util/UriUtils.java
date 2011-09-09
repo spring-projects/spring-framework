@@ -79,37 +79,37 @@ public abstract class UriUtils {
 	 *
 	 * <p>The returned map will contain keys for
 	 * <ul>
-	 *     <li>{@link UriComponent#SCHEME}</li>
-	 *     <li>{@link UriComponent#AUTHORITY}</li>
-	 *     <li>{@link UriComponent#USER_INFO}</li>
-	 *     <li>{@link UriComponent#HOST}</li>
-	 *     <li>{@link UriComponent#PORT}</li>
-	 *     <li>{@link UriComponent#PATH}</li>
-	 *     <li>{@link UriComponent#QUERY}</li>
-	 *     <li>{@link UriComponent#FRAGMENT}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#SCHEME}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#AUTHORITY}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#USER_INFO}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#HOST}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#PORT}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#PATH}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#QUERY}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#FRAGMENT}</li>
 	 * </ul>
 	 * though the values assigned to these keys is {@code null} if they do not occur in the given source URI.
 	 *
-	 * <p><strong>Note</strong> that the returned map will never contain mappings for {@link UriComponent#PATH_SEGMENT},
-	 * nor {@link UriComponent#QUERY_PARAM}, since those components can occur multiple times in the URI.
+	 * <p><strong>Note</strong> that the returned map will never contain mappings for {@link org.springframework.web.util.UriComponents.Type#PATH_SEGMENT},
+	 * nor {@link org.springframework.web.util.UriComponents.Type#QUERY_PARAM}, since those components can occur multiple times in the URI.
 	 *
 	 * @param uri the source URI
 	 * @return the URI components of the URI
 	 */
-	public static Map<UriComponent, String> parseUriComponents(String uri) {
+	public static Map<UriComponents.Type, String> parseUriComponents(String uri) {
 		Assert.notNull(uri, "'uri' must not be null");
 		Matcher m = URI_PATTERN.matcher(uri);
 		if (m.matches()) {
-			Map<UriComponent, String> result = new EnumMap<UriComponent, String>(UriComponent.class);
+			Map<UriComponents.Type, String> result = new EnumMap<UriComponents.Type, String>(UriComponents.Type.class);
 
-			result.put(UriComponent.SCHEME, m.group(2));
-			result.put(UriComponent.AUTHORITY, m.group(3));
-			result.put(UriComponent.USER_INFO, m.group(5));
-			result.put(UriComponent.HOST, m.group(6));
-			result.put(UriComponent.PORT, m.group(8));
-			result.put(UriComponent.PATH, m.group(9));
-			result.put(UriComponent.QUERY, m.group(11));
-			result.put(UriComponent.FRAGMENT, m.group(13));
+			result.put(UriComponents.Type.SCHEME, m.group(2));
+			result.put(UriComponents.Type.AUTHORITY, m.group(3));
+			result.put(UriComponents.Type.USER_INFO, m.group(5));
+			result.put(UriComponents.Type.HOST, m.group(6));
+			result.put(UriComponents.Type.PORT, m.group(8));
+			result.put(UriComponents.Type.PATH, m.group(9));
+			result.put(UriComponents.Type.QUERY, m.group(11));
+			result.put(UriComponents.Type.FRAGMENT, m.group(13));
 
 			return result;
 		}
@@ -124,37 +124,37 @@ public abstract class UriUtils {
 	 *
 	 * <p>The returned map will contain keys for
 	 * <ul>
-	 *     <li>{@link UriComponent#SCHEME}</li>
-	 *     <li>{@link UriComponent#AUTHORITY}</li>
-	 *     <li>{@link UriComponent#USER_INFO}</li>
-	 *     <li>{@link UriComponent#HOST}</li>
-	 *     <li>{@link UriComponent#PORT}</li>
-	 *     <li>{@link UriComponent#PATH}</li>
-	 *     <li>{@link UriComponent#QUERY}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#SCHEME}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#AUTHORITY}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#USER_INFO}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#HOST}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#PORT}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#PATH}</li>
+	 *     <li>{@link org.springframework.web.util.UriComponents.Type#QUERY}</li>
 	 * </ul>
 	 * though the values assigned to these keys is {@code null} if they do not occur in the given source URI.
 	 *
-	 * <p><strong>Note</strong> that the returned map will never contain mappings for {@link UriComponent#PATH_SEGMENT},
-	 * nor {@link UriComponent#QUERY_PARAM}, since those components can occur multiple times in the URI. Nor does it
-	 * contain a mapping for {@link UriComponent#FRAGMENT}, as fragments are not supposed to be sent to the server, but
+	 * <p><strong>Note</strong> that the returned map will never contain mappings for {@link org.springframework.web.util.UriComponents.Type#PATH_SEGMENT},
+	 * nor {@link org.springframework.web.util.UriComponents.Type#QUERY_PARAM}, since those components can occur multiple times in the URI. Nor does it
+	 * contain a mapping for {@link org.springframework.web.util.UriComponents.Type#FRAGMENT}, as fragments are not supposed to be sent to the server, but
 	 * retained by the client.
 	 *
 	 * @param httpUrl the source URI
 	 * @return the URI components of the URI
 	 */
-	public static Map<UriComponent, String> parseHttpUrlComponents(String httpUrl) {
+	public static Map<UriComponents.Type, String> parseHttpUrlComponents(String httpUrl) {
 		Assert.notNull(httpUrl, "'httpUrl' must not be null");
 		Matcher m = HTTP_URL_PATTERN.matcher(httpUrl);
 		if (m.matches()) {
-			Map<UriComponent, String> result = new EnumMap<UriComponent, String>(UriComponent.class);
+			Map<UriComponents.Type, String> result = new EnumMap<UriComponents.Type, String>(UriComponents.Type.class);
 
-			result.put(UriComponent.SCHEME, m.group(1));
-			result.put(UriComponent.AUTHORITY, m.group(2));
-			result.put(UriComponent.USER_INFO, m.group(4));
-			result.put(UriComponent.HOST, m.group(5));
-			result.put(UriComponent.PORT, m.group(7));
-			result.put(UriComponent.PATH, m.group(8));
-			result.put(UriComponent.QUERY, m.group(10));
+			result.put(UriComponents.Type.SCHEME, m.group(1));
+			result.put(UriComponents.Type.AUTHORITY, m.group(2));
+			result.put(UriComponents.Type.USER_INFO, m.group(4));
+			result.put(UriComponents.Type.HOST, m.group(5));
+			result.put(UriComponents.Type.PORT, m.group(7));
+			result.put(UriComponents.Type.PATH, m.group(8));
+			result.put(UriComponents.Type.QUERY, m.group(10));
 
 			return result;
 		}
@@ -168,20 +168,21 @@ public abstract class UriUtils {
 	/**
 	 * Builds a URI from the given URI components. The given map should contain at least one entry.
 	 *
-	 * <p><strong>Note</strong> that {@link UriComponent#PATH_SEGMENT} and {@link UriComponent#QUERY_PARAM} keys (if any)
-	 * will not be used to build the URI, in favor of {@link UriComponent#PATH} and {@link UriComponent#QUERY}
+	 * <p><strong>Note</strong> that {@link org.springframework.web.util.UriComponents.Type#PATH_SEGMENT} and {@link org.springframework.web.util.UriComponents.Type#QUERY_PARAM} keys (if any)
+	 * will not be used to build the URI, in favor of {@link org.springframework.web.util.UriComponents.Type#PATH} and {@link org.springframework.web.util.UriComponents.Type#QUERY}
 	 * respectively.
 	 *
 	 * @param uriComponents the components to build the URI out of
 	 * @return the URI created from the given components
 	 */
-	public static String buildUri(Map<UriComponent, String> uriComponents) {
+	public static String buildUri(Map<UriComponents.Type, String> uriComponents) {
 		Assert.notEmpty(uriComponents, "'uriComponents' must not be empty");
 
-		return buildUri(uriComponents.get(UriComponent.SCHEME), uriComponents.get(UriComponent.AUTHORITY),
-				uriComponents.get(UriComponent.USER_INFO), uriComponents.get(UriComponent.HOST),
-				uriComponents.get(UriComponent.PORT), uriComponents.get(UriComponent.PATH),
-				uriComponents.get(UriComponent.QUERY), uriComponents.get(UriComponent.FRAGMENT));
+		return buildUri(uriComponents.get(UriComponents.Type.SCHEME), uriComponents.get(
+				UriComponents.Type.AUTHORITY),
+				uriComponents.get(UriComponents.Type.USER_INFO), uriComponents.get(UriComponents.Type.HOST),
+				uriComponents.get(UriComponents.Type.PORT), uriComponents.get(UriComponents.Type.PATH),
+				uriComponents.get(UriComponents.Type.QUERY), uriComponents.get(UriComponents.Type.FRAGMENT));
 	}
 
 	/**
@@ -261,7 +262,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeUri(String uri, String encoding) throws UnsupportedEncodingException {
-		Map<UriComponent, String> uriComponents = parseUriComponents(uri);
+		Map<UriComponents.Type, String> uriComponents = parseUriComponents(uri);
 		return encodeUriComponents(uriComponents, encoding);
 	}
 
@@ -277,7 +278,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeHttpUrl(String httpUrl, String encoding) throws UnsupportedEncodingException {
-		Map<UriComponent, String> uriComponents = parseHttpUrlComponents(httpUrl);
+		Map<UriComponents.Type, String> uriComponents = parseHttpUrlComponents(httpUrl);
 		return encodeUriComponents(uriComponents, encoding);
 	}
 
@@ -291,13 +292,13 @@ public abstract class UriUtils {
 	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
-	public static String encodeUriComponents(Map<UriComponent, String> uriComponents,
+	public static String encodeUriComponents(Map<UriComponents.Type, String> uriComponents,
 											 String encoding) throws UnsupportedEncodingException {
 		Assert.notEmpty(uriComponents, "'uriComponents' must not be empty");
 		Assert.hasLength(encoding, "'encoding' must not be empty");
 
-		Map<UriComponent, String> encodedUriComponents = new EnumMap<UriComponent, String>(UriComponent.class);
-		for (Map.Entry<UriComponent, String> entry : uriComponents.entrySet()) {
+		Map<UriComponents.Type, String> encodedUriComponents = new EnumMap<UriComponents.Type, String>(UriComponents.Type.class);
+		for (Map.Entry<UriComponents.Type, String> entry : uriComponents.entrySet()) {
 			if (entry.getValue() != null) {
 				String encodedValue = encodeUriComponent(entry.getValue(), encoding, entry.getKey(), null);
 				encodedUriComponents.put(entry.getKey(), encodedValue);
@@ -369,7 +370,7 @@ public abstract class UriUtils {
 	 * @return the encoded URI
 	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
 	 */
-	public static String encodeUriComponent(String source, UriComponent uriComponent) {
+	public static String encodeUriComponent(String source, UriComponents.Type uriComponent) {
 		return encodeUriComponent(source, uriComponent, null);
 	}
 
@@ -386,7 +387,7 @@ public abstract class UriUtils {
 	 * @see EncodingOption
 	 */
 	public static String encodeUriComponent(String source,
-											UriComponent uriComponent,
+											UriComponents.Type uriComponent,
 											Set<EncodingOption> encodingOptions) {
 		try {
 			return encodeUriComponent(source, DEFAULT_ENCODING, uriComponent, encodingOptions);
@@ -408,7 +409,7 @@ public abstract class UriUtils {
 	 */
 	public static String encodeUriComponent(String source,
 											String encoding,
-											UriComponent uriComponent) throws UnsupportedEncodingException {
+											UriComponents.Type uriComponent) throws UnsupportedEncodingException {
 		return encodeUriComponent(source, encoding, uriComponent, null);
 	}
 
@@ -426,7 +427,7 @@ public abstract class UriUtils {
 	 */
 	public static String encodeUriComponent(String source,
 											String encoding,
-											UriComponent uriComponent,
+											UriComponents.Type uriComponent,
 											Set<EncodingOption> encodingOptions) throws UnsupportedEncodingException {
 		Assert.hasLength(encoding, "'encoding' must not be empty");
 
@@ -435,7 +436,7 @@ public abstract class UriUtils {
 	}
 
 	private static byte[] encodeInternal(byte[] source,
-										 UriComponent uriComponent,
+										 UriComponents.Type uriComponent,
 										 Set<EncodingOption> encodingOptions) {
 		Assert.notNull(source, "'source' must not be null");
 		Assert.notNull(uriComponent, "'uriComponent' must not be null");
@@ -480,7 +481,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeScheme(String scheme, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(scheme, encoding, UriComponent.SCHEME, null);
+		return encodeUriComponent(scheme, encoding, UriComponents.Type.SCHEME, null);
 	}
 
 	/**
@@ -492,7 +493,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeAuthority(String authority, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(authority, encoding, UriComponent.AUTHORITY, null);
+		return encodeUriComponent(authority, encoding, UriComponents.Type.AUTHORITY, null);
 	}
 
 	/**
@@ -504,7 +505,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeUserInfo(String userInfo, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(userInfo, encoding, UriComponent.USER_INFO, null);
+		return encodeUriComponent(userInfo, encoding, UriComponents.Type.USER_INFO, null);
 	}
 
 	/**
@@ -516,7 +517,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeHost(String host, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(host, encoding, UriComponent.HOST, null);
+		return encodeUriComponent(host, encoding, UriComponents.Type.HOST, null);
 	}
 
 	/**
@@ -528,7 +529,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePort(String port, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(port, encoding, UriComponent.PORT, null);
+		return encodeUriComponent(port, encoding, UriComponents.Type.PORT, null);
 	}
 
 	/**
@@ -540,7 +541,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePath(String path, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(path, encoding, UriComponent.PATH, null);
+		return encodeUriComponent(path, encoding, UriComponents.Type.PATH, null);
 	}
 
 	/**
@@ -552,7 +553,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePathSegment(String segment, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(segment, encoding, UriComponent.PATH_SEGMENT, null);
+		return encodeUriComponent(segment, encoding, UriComponents.Type.PATH_SEGMENT, null);
 	}
 
 	/**
@@ -564,7 +565,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeQuery(String query, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(query, encoding, UriComponent.QUERY, null);
+		return encodeUriComponent(query, encoding, UriComponents.Type.QUERY, null);
 	}
 
 	/**
@@ -576,7 +577,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeQueryParam(String queryParam, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(queryParam, encoding, UriComponent.QUERY_PARAM, null);
+		return encodeUriComponent(queryParam, encoding, UriComponents.Type.QUERY_PARAM, null);
 	}
 
 	/**
@@ -588,7 +589,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeFragment(String fragment, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(fragment, encoding, UriComponent.FRAGMENT, null);
+		return encodeUriComponent(fragment, encoding, UriComponents.Type.FRAGMENT, null);
 	}
 
 

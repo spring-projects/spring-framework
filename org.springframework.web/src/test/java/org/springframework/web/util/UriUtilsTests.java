@@ -33,42 +33,42 @@ public class UriUtilsTests {
 	
 	@Test
 	public void parseUriComponents() {
-		Map<UriComponent, String> result = UriUtils.parseUriComponents("http://www.ietf.org/rfc/rfc3986.txt");
-		assertEquals("http", result.get(UriComponent.SCHEME));
-		assertNull(result.get(UriComponent.USER_INFO));
-		assertEquals("www.ietf.org", result.get(UriComponent.HOST));
-		assertNull(result.get(UriComponent.PORT));
-		assertEquals("/rfc/rfc3986.txt", result.get(UriComponent.PATH));
-		assertNull(result.get(UriComponent.QUERY));
-		assertNull(result.get(UriComponent.FRAGMENT));
+		Map<UriComponents.Type, String> result = UriUtils.parseUriComponents("http://www.ietf.org/rfc/rfc3986.txt");
+		assertEquals("http", result.get(UriComponents.Type.SCHEME));
+		assertNull(result.get(UriComponents.Type.USER_INFO));
+		assertEquals("www.ietf.org", result.get(UriComponents.Type.HOST));
+		assertNull(result.get(UriComponents.Type.PORT));
+		assertEquals("/rfc/rfc3986.txt", result.get(UriComponents.Type.PATH));
+		assertNull(result.get(UriComponents.Type.QUERY));
+		assertNull(result.get(UriComponents.Type.FRAGMENT));
 
 		result = UriUtils.parseUriComponents(
 				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)");
-		assertEquals("http", result.get(UriComponent.SCHEME));
-		assertEquals("arjen:foobar", result.get(UriComponent.USER_INFO));
-		assertEquals("java.sun.com", result.get(UriComponent.HOST));
-		assertEquals("80", result.get(UriComponent.PORT));
-		assertEquals("/javase/6/docs/api/java/util/BitSet.html", result.get(UriComponent.PATH));
-		assertEquals("foo=bar", result.get(UriComponent.QUERY));
-		assertEquals("and(java.util.BitSet)", result.get(UriComponent.FRAGMENT));
+		assertEquals("http", result.get(UriComponents.Type.SCHEME));
+		assertEquals("arjen:foobar", result.get(UriComponents.Type.USER_INFO));
+		assertEquals("java.sun.com", result.get(UriComponents.Type.HOST));
+		assertEquals("80", result.get(UriComponents.Type.PORT));
+		assertEquals("/javase/6/docs/api/java/util/BitSet.html", result.get(UriComponents.Type.PATH));
+		assertEquals("foo=bar", result.get(UriComponents.Type.QUERY));
+		assertEquals("and(java.util.BitSet)", result.get(UriComponents.Type.FRAGMENT));
 
 		result = UriUtils.parseUriComponents("mailto:java-net@java.sun.com");
-		assertEquals("mailto", result.get(UriComponent.SCHEME));
-		assertNull(result.get(UriComponent.USER_INFO));
-		assertNull(result.get(UriComponent.HOST));
-		assertNull(result.get(UriComponent.PORT));
-		assertEquals("java-net@java.sun.com", result.get(UriComponent.PATH));
-		assertNull(result.get(UriComponent.QUERY));
-		assertNull(result.get(UriComponent.FRAGMENT));
+		assertEquals("mailto", result.get(UriComponents.Type.SCHEME));
+		assertNull(result.get(UriComponents.Type.USER_INFO));
+		assertNull(result.get(UriComponents.Type.HOST));
+		assertNull(result.get(UriComponents.Type.PORT));
+		assertEquals("java-net@java.sun.com", result.get(UriComponents.Type.PATH));
+		assertNull(result.get(UriComponents.Type.QUERY));
+		assertNull(result.get(UriComponents.Type.FRAGMENT));
 
 		result = UriUtils.parseUriComponents("docs/guide/collections/designfaq.html#28");
-		assertNull(result.get(UriComponent.SCHEME));
-		assertNull(result.get(UriComponent.USER_INFO));
-		assertNull(result.get(UriComponent.HOST));
-		assertNull(result.get(UriComponent.PORT));
-		assertEquals("docs/guide/collections/designfaq.html", result.get(UriComponent.PATH));
-		assertNull(result.get(UriComponent.QUERY));
-		assertEquals("28", result.get(UriComponent.FRAGMENT));
+		assertNull(result.get(UriComponents.Type.SCHEME));
+		assertNull(result.get(UriComponents.Type.USER_INFO));
+		assertNull(result.get(UriComponents.Type.HOST));
+		assertNull(result.get(UriComponents.Type.PORT));
+		assertEquals("docs/guide/collections/designfaq.html", result.get(UriComponents.Type.PATH));
+		assertNull(result.get(UriComponents.Type.QUERY));
+		assertEquals("28", result.get(UriComponents.Type.FRAGMENT));
 	}
 
 	@Test
