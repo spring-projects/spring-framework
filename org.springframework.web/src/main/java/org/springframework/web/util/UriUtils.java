@@ -77,26 +77,10 @@ public abstract class UriUtils {
 	/**
 	 * Parses the given source URI into a mapping of URI components to string values.
 	 *
-	 * <p>The returned map will contain keys for
-	 * <ul>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#SCHEME}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#AUTHORITY}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#USER_INFO}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#HOST}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#PORT}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#PATH}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#QUERY}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#FRAGMENT}</li>
-	 * </ul>
-	 * though the values assigned to these keys is {@code null} if they do not occur in the given source URI.
-	 *
-	 * <p><strong>Note</strong> that the returned map will never contain mappings for {@link org.springframework.web.util.UriComponents.Type#PATH_SEGMENT},
-	 * nor {@link org.springframework.web.util.UriComponents.Type#QUERY_PARAM}, since those components can occur multiple times in the URI.
-	 *
 	 * @param uri the source URI
 	 * @return the URI components of the URI
 	 */
-	public static Map<UriComponents.Type, String> parseUriComponents(String uri) {
+	public static UriComponents parseUriComponents(String uri) {
 		Assert.notNull(uri, "'uri' must not be null");
 		Matcher m = URI_PATTERN.matcher(uri);
 		if (m.matches()) {
@@ -111,7 +95,7 @@ public abstract class UriUtils {
 			result.put(UriComponents.Type.QUERY, m.group(11));
 			result.put(UriComponents.Type.FRAGMENT, m.group(13));
 
-			return result;
+			return new UriComponents(result);
 		}
 		else {
 			throw new IllegalArgumentException("[" + uri + "] is not a valid URI");
@@ -120,29 +104,15 @@ public abstract class UriUtils {
 
 	/**
 	 * Parses the given source HTTP URL into a mapping of URI components to string values.
-	 *
-	 *
-	 * <p>The returned map will contain keys for
-	 * <ul>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#SCHEME}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#AUTHORITY}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#USER_INFO}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#HOST}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#PORT}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#PATH}</li>
-	 *     <li>{@link org.springframework.web.util.UriComponents.Type#QUERY}</li>
-	 * </ul>
-	 * though the values assigned to these keys is {@code null} if they do not occur in the given source URI.
-	 *
-	 * <p><strong>Note</strong> that the returned map will never contain mappings for {@link org.springframework.web.util.UriComponents.Type#PATH_SEGMENT},
-	 * nor {@link org.springframework.web.util.UriComponents.Type#QUERY_PARAM}, since those components can occur multiple times in the URI. Nor does it
-	 * contain a mapping for {@link org.springframework.web.util.UriComponents.Type#FRAGMENT}, as fragments are not supposed to be sent to the server, but
-	 * retained by the client.
+
+	 * <p><strong>Note</strong> that the returned map will contain a mapping for
+	 * {@link org.springframework.web.util.UriComponents.Type#FRAGMENT}, as fragments are not supposed to be sent to the
+	 * server, but retained by the client.
 	 *
 	 * @param httpUrl the source URI
 	 * @return the URI components of the URI
 	 */
-	public static Map<UriComponents.Type, String> parseHttpUrlComponents(String httpUrl) {
+	public static UriComponents parseHttpUrlComponents(String httpUrl) {
 		Assert.notNull(httpUrl, "'httpUrl' must not be null");
 		Matcher m = HTTP_URL_PATTERN.matcher(httpUrl);
 		if (m.matches()) {
@@ -156,7 +126,7 @@ public abstract class UriUtils {
 			result.put(UriComponents.Type.PATH, m.group(8));
 			result.put(UriComponents.Type.QUERY, m.group(10));
 
-			return result;
+			return new UriComponents(result);
 		}
 		else {
 			throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
