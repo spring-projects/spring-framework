@@ -53,22 +53,22 @@ public class UriTemplateTests {
 		template.expand("1");
 	}
 
+    @Test
+    public void expandMap() throws Exception {
+        Map<String, String> uriVariables = new HashMap<String, String>(2);
+        uriVariables.put("booking", "42");
+        uriVariables.put("hotel", "1");
+        UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
+        URI result = template.expand(uriVariables);
+        assertEquals("Invalid expanded template", new URI("http://example.com/hotels/1/bookings/42"), result);
+    }
+
 	@Test
 	public void expandMapDuplicateVariables() throws Exception {
 		UriTemplate template = new UriTemplate("/order/{c}/{c}/{c}");
 		assertEquals("Invalid variable names", Arrays.asList("c", "c", "c"), template.getVariableNames());
 		URI result = template.expand(Collections.singletonMap("c", "cheeseburger"));
 		assertEquals("Invalid expanded template", new URI("/order/cheeseburger/cheeseburger/cheeseburger"), result);
-	}
-
-	@Test
-	public void expandMap() throws Exception {
-		Map<String, String> uriVariables = new HashMap<String, String>(2);
-		uriVariables.put("booking", "42");
-		uriVariables.put("hotel", "1");
-		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
-		URI result = template.expand(uriVariables);
-		assertEquals("Invalid expanded template", new URI("http://example.com/hotels/1/bookings/42"), result);
 	}
 
 	@Test
@@ -80,6 +80,15 @@ public class UriTemplateTests {
 		URI result = template.expand(uriVariables);
 		assertEquals("Invalid expanded template", new URI("http://example.com/hotels/1/bookings/42"), result);
 	}
+    
+    @Test
+    public void expandMapEncoded() throws Exception {
+        Map<String, String> uriVariables = Collections.singletonMap("hotel", "Z\u00fcrich");
+        UriTemplate template = new UriTemplate("http://example.com/hotel list/{hotel}");
+        URI result = template.expand(uriVariables);
+        assertEquals("Invalid expanded template", new URI("http://example.com/hotel%20list/Z%C3%BCrich"), result);
+    }
+
 
 	@Test(expected = IllegalArgumentException.class)
 	public void expandMapInvalidAmountVariables() throws Exception {

@@ -22,13 +22,13 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /** @author Arjen Poutsma */
-public class ServletUriBuilder extends UriBuilder {
+public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 
 
-	public static ServletUriBuilder fromCurrentServletRequest() {
+	public static ServletUriComponentsBuilder fromCurrentServletRequest() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 		Assert.state(requestAttributes != null, "Could not find current RequestAttributes in RequestContextHolder");
 		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);
@@ -38,10 +38,10 @@ public class ServletUriBuilder extends UriBuilder {
 		return fromServletRequest(servletRequest);
 	}
 
-	public static ServletUriBuilder fromServletRequest(HttpServletRequest request) {
+	public static ServletUriComponentsBuilder fromServletRequest(HttpServletRequest request) {
 		Assert.notNull(request, "'request' must not be null");
 
-		ServletUriBuilder builder = new ServletUriBuilder();
+		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
 		builder.scheme(request.getScheme());
 		builder.host(request.getServerName());
 		builder.port(request.getServerPort());
