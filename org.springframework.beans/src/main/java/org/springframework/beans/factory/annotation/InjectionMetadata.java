@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -53,7 +54,7 @@ public class InjectionMetadata {
 
 
 	public InjectionMetadata(Class targetClass, Collection<InjectedElement> elements) {
-		this.injectedElements = new LinkedHashSet<InjectedElement>();
+		this.injectedElements = Collections.synchronizedSet(new LinkedHashSet<InjectedElement>());
 		for (InjectedElement element : elements) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found injected element on class [" + targetClass.getName() + "]: " + element);
@@ -63,13 +64,15 @@ public class InjectionMetadata {
 	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
-		for (Iterator<InjectedElement> it = this.injectedElements.iterator(); it.hasNext();) {
-			Member member = it.next().getMember();
-			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
-				beanDefinition.registerExternallyManagedConfigMember(member);
-			}
-			else {
-				it.remove();
+		synchronized(this.injectedElements) {
+			for (Iterator<InjectedElement> it = this.injectedElements.iterator(); it.hasNext();) {
+				Member member = it.next().getMember();
+				if (!beanDefinition.isExternallyManagedConfigMember(member)) {
+					beanDefinition.registerExternallyManagedConfigMember(member);
+				}
+				else {
+					it.remove();
+				}
 			}
 		}
 	}

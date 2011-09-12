@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -246,7 +247,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 		public LifecycleMetadata(Class<?> targetClass, Collection<LifecycleElement> initMethods,
 				Collection<LifecycleElement> destroyMethods) {
 
-			this.initMethods = new LinkedHashSet<LifecycleElement>();
+			this.initMethods = Collections.synchronizedSet(new LinkedHashSet<LifecycleElement>());
 			for (LifecycleElement element : initMethods) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found init method on class [" + targetClass.getName() + "]: " + element);
@@ -254,7 +255,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 				this.initMethods.add(element);
 			}
 
-			this.destroyMethods = new LinkedHashSet<LifecycleElement>();
+			this.destroyMethods = Collections.synchronizedSet(new LinkedHashSet<LifecycleElement>());
 			for (LifecycleElement element : destroyMethods) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found destroy method on class [" + targetClass.getName() + "]: " + element);
@@ -264,22 +265,26 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 
 		public void checkConfigMembers(RootBeanDefinition beanDefinition) {
-			for (Iterator<LifecycleElement> it = this.initMethods.iterator(); it.hasNext();) {
-				String methodIdentifier = it.next().getIdentifier();
-				if (!beanDefinition.isExternallyManagedInitMethod(methodIdentifier)) {
-					beanDefinition.registerExternallyManagedInitMethod(methodIdentifier);
-				}
-				else {
-					it.remove();
+			synchronized(this.initMethods) {
+				for (Iterator<LifecycleElement> it = this.initMethods.iterator(); it.hasNext();) {
+					String methodIdentifier = it.next().getIdentifier();
+					if (!beanDefinition.isExternallyManagedInitMethod(methodIdentifier)) {
+						beanDefinition.registerExternallyManagedInitMethod(methodIdentifier);
+					}
+					else {
+						it.remove();
+					}
 				}
 			}
-			for (Iterator<LifecycleElement> it = this.destroyMethods.iterator(); it.hasNext();) {
-				String methodIdentifier = it.next().getIdentifier();
-				if (!beanDefinition.isExternallyManagedDestroyMethod(methodIdentifier)) {
-					beanDefinition.registerExternallyManagedDestroyMethod(methodIdentifier);
-				}
-				else {
-					it.remove();
+			synchronized(this.destroyMethods) {
+				for (Iterator<LifecycleElement> it = this.destroyMethods.iterator(); it.hasNext();) {
+					String methodIdentifier = it.next().getIdentifier();
+					if (!beanDefinition.isExternallyManagedDestroyMethod(methodIdentifier)) {
+						beanDefinition.registerExternallyManagedDestroyMethod(methodIdentifier);
+					}
+					else {
+						it.remove();
+					}
 				}
 			}
 		}
