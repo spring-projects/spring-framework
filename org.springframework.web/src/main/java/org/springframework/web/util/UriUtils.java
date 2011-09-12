@@ -18,12 +18,6 @@ package org.springframework.web.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
 
@@ -44,181 +38,6 @@ import org.springframework.util.Assert;
  */
 public abstract class UriUtils {
 
-	private static final String DEFAULT_ENCODING = "UTF-8";
-
-	private static final String SCHEME_PATTERN = "([^:/?#]+):";
-
-	private static final String HTTP_PATTERN = "(http|https):";
-
-	private static final String USERINFO_PATTERN = "([^@/]*)";
-
-	private static final String HOST_PATTERN = "([^/?#:]*)";
-
-	private static final String PORT_PATTERN = "(\\d*)";
-
-	private static final String PATH_PATTERN = "([^?#]*)";
-
-	private static final String QUERY_PATTERN = "([^#]*)";
-
-	private static final String LAST_PATTERN = "(.*)";
-
-	// Regex patterns that matches URIs. See RFC 3986, appendix B
-	private static final Pattern URI_PATTERN = Pattern.compile(
-			"^(" + SCHEME_PATTERN + ")?" + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN +
-					")?" + ")?" + PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
-
-	private static final Pattern HTTP_URL_PATTERN = Pattern.compile(
-			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
-					PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
-	
-
-	// Parsing
-
-	/**
-	 * Parses the given source URI into a mapping of URI components to string values.
-	 *
-	 * @param uri the source URI
-	 * @return the URI components of the URI
-	 */
-	public static UriComponents parseUriComponents(String uri) {
-		Assert.notNull(uri, "'uri' must not be null");
-		Matcher m = URI_PATTERN.matcher(uri);
-		if (m.matches()) {
-			Map<UriComponents.Type, String> result = new EnumMap<UriComponents.Type, String>(UriComponents.Type.class);
-
-			result.put(UriComponents.Type.SCHEME, m.group(2));
-			result.put(UriComponents.Type.AUTHORITY, m.group(3));
-			result.put(UriComponents.Type.USER_INFO, m.group(5));
-			result.put(UriComponents.Type.HOST, m.group(6));
-			result.put(UriComponents.Type.PORT, m.group(8));
-			result.put(UriComponents.Type.PATH, m.group(9));
-			result.put(UriComponents.Type.QUERY, m.group(11));
-			result.put(UriComponents.Type.FRAGMENT, m.group(13));
-
-			return new UriComponents(result);
-		}
-		else {
-			throw new IllegalArgumentException("[" + uri + "] is not a valid URI");
-		}
-	}
-
-	/**
-	 * Parses the given source HTTP URL into a mapping of URI components to string values.
-
-	 * <p><strong>Note</strong> that the returned map will contain a mapping for
-	 * {@link org.springframework.web.util.UriComponents.Type#FRAGMENT}, as fragments are not supposed to be sent to the
-	 * server, but retained by the client.
-	 *
-	 * @param httpUrl the source URI
-	 * @return the URI components of the URI
-	 */
-	public static UriComponents parseHttpUrlComponents(String httpUrl) {
-		Assert.notNull(httpUrl, "'httpUrl' must not be null");
-		Matcher m = HTTP_URL_PATTERN.matcher(httpUrl);
-		if (m.matches()) {
-			Map<UriComponents.Type, String> result = new EnumMap<UriComponents.Type, String>(UriComponents.Type.class);
-
-			result.put(UriComponents.Type.SCHEME, m.group(1));
-			result.put(UriComponents.Type.AUTHORITY, m.group(2));
-			result.put(UriComponents.Type.USER_INFO, m.group(4));
-			result.put(UriComponents.Type.HOST, m.group(5));
-			result.put(UriComponents.Type.PORT, m.group(7));
-			result.put(UriComponents.Type.PATH, m.group(8));
-			result.put(UriComponents.Type.QUERY, m.group(10));
-
-			return new UriComponents(result);
-		}
-		else {
-			throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
-		}
-	}
-
-	// building
-
-	/**
-	 * Builds a URI from the given URI components. The given map should contain at least one entry.
-	 *
-	 * <p><strong>Note</strong> that {@link org.springframework.web.util.UriComponents.Type#PATH_SEGMENT} and {@link org.springframework.web.util.UriComponents.Type#QUERY_PARAM} keys (if any)
-	 * will not be used to build the URI, in favor of {@link org.springframework.web.util.UriComponents.Type#PATH} and {@link org.springframework.web.util.UriComponents.Type#QUERY}
-	 * respectively.
-	 *
-	 * @param uriComponents the components to build the URI out of
-	 * @return the URI created from the given components
-	 */
-	public static String buildUri(Map<UriComponents.Type, String> uriComponents) {
-		Assert.notEmpty(uriComponents, "'uriComponents' must not be empty");
-
-		return buildUri(uriComponents.get(UriComponents.Type.SCHEME), uriComponents.get(
-				UriComponents.Type.AUTHORITY),
-				uriComponents.get(UriComponents.Type.USER_INFO), uriComponents.get(UriComponents.Type.HOST),
-				uriComponents.get(UriComponents.Type.PORT), uriComponents.get(UriComponents.Type.PATH),
-				uriComponents.get(UriComponents.Type.QUERY), uriComponents.get(UriComponents.Type.FRAGMENT));
-	}
-
-	/**
-	 * Builds a URI from the given URI component parameters. All parameters can be {@code null}.
-	 *
-	 * @param scheme the scheme
-	 * @param authority the authority
-	 * @param userinfo the user info
-	 * @param host the host
-	 * @param port the port
-	 * @param path the path
-	 * @param query the query
-	 * @param fragment the fragment
-	 * @return the URI created from the given components
-	 */
-	public static String buildUri(String scheme,
-								  String authority,
-								  String userinfo,
-								  String host,
-								  String port,
-								  String path,
-								  String query,
-								  String fragment) {
-		StringBuilder uriBuilder = new StringBuilder();
-
-		if (scheme != null) {
-			uriBuilder.append(scheme);
-			uriBuilder.append(':');
-		}
-
-		if (userinfo != null || host != null || port != null) {
-			uriBuilder.append("//");
-			if (userinfo != null) {
-				uriBuilder.append(userinfo);
-				uriBuilder.append('@');
-			}
-			if (host != null) {
-				uriBuilder.append(host);
-			}
-			if (port != null) {
-				uriBuilder.append(':');
-				uriBuilder.append(port);
-			}
-		}
-		else if (authority != null) {
-			uriBuilder.append("//");
-			uriBuilder.append(authority);
-		}
-
-		if (path != null) {
-			uriBuilder.append(path);
-		}
-
-		if (query != null) {
-			uriBuilder.append('?');
-			uriBuilder.append(query);
-		}
-
-		if (fragment != null) {
-			uriBuilder.append('#');
-			uriBuilder.append(fragment);
-		}
-
-		return uriBuilder.toString();
-	}
-
 	// encoding
 
 	/**
@@ -232,9 +51,10 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeUri(String uri, String encoding) throws UnsupportedEncodingException {
-		Map<UriComponents.Type, String> uriComponents = parseUriComponents(uri);
-		return encodeUriComponents(uriComponents, encoding);
-	}
+        UriComponents uriComponents = UriComponents.fromUriString(uri);
+        UriComponents encoded = uriComponents.encode(encoding);
+        return encoded.toUriString();
+    }
 
 	/**
 	 * Encodes the given HTTP URI into an encoded String. All various URI components are encoded according to their
@@ -248,33 +68,9 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeHttpUrl(String httpUrl, String encoding) throws UnsupportedEncodingException {
-		Map<UriComponents.Type, String> uriComponents = parseHttpUrlComponents(httpUrl);
-		return encodeUriComponents(uriComponents, encoding);
-	}
-
-	/**
-	 * Encodes the given source URI components into an encoded String. All various URI components are optional, but encoded
-	 * according to their respective valid character sets.
-	 *
-	 * @param uriComponents the URI components
-	 * @param encoding the character encoding to encode to
-	 * @return the encoded URI
-	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
-	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
-	 */
-	public static String encodeUriComponents(Map<UriComponents.Type, String> uriComponents,
-											 String encoding) throws UnsupportedEncodingException {
-		Assert.notEmpty(uriComponents, "'uriComponents' must not be empty");
-		Assert.hasLength(encoding, "'encoding' must not be empty");
-
-		Map<UriComponents.Type, String> encodedUriComponents = new EnumMap<UriComponents.Type, String>(UriComponents.Type.class);
-		for (Map.Entry<UriComponents.Type, String> entry : uriComponents.entrySet()) {
-			if (entry.getValue() != null) {
-				String encodedValue = encodeUriComponent(entry.getValue(), encoding, entry.getKey(), null);
-				encodedUriComponents.put(entry.getKey(), encodedValue);
-			}
-		}
-		return buildUri(encodedUriComponents);
+        UriComponents uriComponents = UriComponents.fromHttpUrl(httpUrl);
+        UriComponents encoded = uriComponents.encode(encoding);
+        return encoded.toUriString();
 	}
 
 	/**
@@ -303,141 +99,10 @@ public abstract class UriUtils {
 											 String query,
 											 String fragment,
 											 String encoding) throws UnsupportedEncodingException {
-		Assert.hasLength(encoding, "'encoding' must not be empty");
+        UriComponents uriComponents = UriComponents.fromUriComponents(scheme, authority, userInfo, host, port, path, query, fragment);
+        UriComponents encoded = uriComponents.encode(encoding);
 
-		if (scheme != null) {
-			scheme = encodeScheme(scheme, encoding);
-		}
-		if (authority != null) {
-			authority = encodeAuthority(authority, encoding);
-		}
-		if (userInfo != null) {
-			userInfo = encodeUserInfo(userInfo, encoding);
-		}
-		if (host != null) {
-			host = encodeHost(host, encoding);
-		}
-		if (port != null) {
-			port = encodePort(port, encoding);
-		}
-		if (path != null) {
-			path = encodePath(path, encoding);
-		}
-		if (query != null) {
-			query = encodeQuery(query, encoding);
-		}
-		if (fragment != null) {
-			fragment = encodeFragment(fragment, encoding);
-		}
-		return buildUri(scheme, authority, userInfo, host, port, path, query, fragment);
-	}
-
-	/**
-	 * Encodes the given source into an encoded String using the rules specified by the given component.
-	 *
-	 * @param source the source string
-	 * @param uriComponent the URI component for the source
-	 * @return the encoded URI
-	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
-	 */
-	public static String encodeUriComponent(String source, UriComponents.Type uriComponent) {
-		return encodeUriComponent(source, uriComponent, null);
-	}
-
-	/**
-	 * Encodes the given source into an encoded String using the rules specified by the given component and with the
-	 * given options.
-	 *
-	 * @param source the source string
-	 * @param encoding the encoding of the source string
-	 * @param uriComponent the URI component for the source
-	 * @param encodingOptions the options used when encoding. May be {@code null}.
-	 * @return the encoded URI
-	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
-	 * @see EncodingOption
-	 */
-	public static String encodeUriComponent(String source,
-											UriComponents.Type uriComponent,
-											Set<EncodingOption> encodingOptions) {
-		try {
-			return encodeUriComponent(source, DEFAULT_ENCODING, uriComponent, encodingOptions);
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new InternalError("\"" + DEFAULT_ENCODING + "\" not supported");
-		}
-	}
-
-
-	/**
-	 * Encodes the given source into an encoded String using the rules specified by the given component.
-	 *
-	 * @param source the source string
-	 * @param encoding the encoding of the source string
-	 * @param uriComponent the URI component for the source
-	 * @return the encoded URI
-	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
-	 */
-	public static String encodeUriComponent(String source,
-											String encoding,
-											UriComponents.Type uriComponent) throws UnsupportedEncodingException {
-		return encodeUriComponent(source, encoding, uriComponent, null);
-	}
-
-	/**
-	 * Encodes the given source into an encoded String using the rules specified by the given component and with the
-	 * given options.
-	 *
-	 * @param source the source string
-	 * @param encoding the encoding of the source string
-	 * @param uriComponent the URI component for the source
-	 * @param encodingOptions the options used when encoding. May be {@code null}.
-	 * @return the encoded URI
-	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
-	 * @see EncodingOption
-	 */
-	public static String encodeUriComponent(String source,
-											String encoding,
-											UriComponents.Type uriComponent,
-											Set<EncodingOption> encodingOptions) throws UnsupportedEncodingException {
-		Assert.hasLength(encoding, "'encoding' must not be empty");
-
-		byte[] bytes = encodeInternal(source.getBytes(encoding), uriComponent, encodingOptions);
-		return new String(bytes, "US-ASCII");
-	}
-
-	private static byte[] encodeInternal(byte[] source,
-										 UriComponents.Type uriComponent,
-										 Set<EncodingOption> encodingOptions) {
-		Assert.notNull(source, "'source' must not be null");
-		Assert.notNull(uriComponent, "'uriComponent' must not be null");
-
-		if (encodingOptions == null) {
-			encodingOptions = Collections.emptySet();
-		}
-
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(source.length);
-		for (int i = 0; i < source.length; i++) {
-			int b = source[i];
-			if (b < 0) {
-				b += 256;
-			}
-			if (uriComponent.isAllowed(b)) {
-				bos.write(b);
-			}
-			else if (encodingOptions.contains(EncodingOption.ALLOW_TEMPLATE_VARS) && (b == '{' || b == '}')) {
-				bos.write(b);
-			}
-			else {
-				bos.write('%');
-
-				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
-				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
-
-				bos.write(hex1);
-				bos.write(hex2);
-			}
-		}
-		return bos.toByteArray();
+        return encoded.toUriString();
 	}
 
 	// encoding convenience methods
@@ -451,7 +116,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeScheme(String scheme, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(scheme, encoding, UriComponents.Type.SCHEME, null);
+		return UriComponents.encodeUriComponent(scheme, encoding, UriComponents.Type.SCHEME);
 	}
 
 	/**
@@ -463,7 +128,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeAuthority(String authority, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(authority, encoding, UriComponents.Type.AUTHORITY, null);
+		return UriComponents.encodeUriComponent(authority, encoding, UriComponents.Type.AUTHORITY);
 	}
 
 	/**
@@ -475,7 +140,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeUserInfo(String userInfo, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(userInfo, encoding, UriComponents.Type.USER_INFO, null);
+		return UriComponents.encodeUriComponent(userInfo, encoding, UriComponents.Type.USER_INFO);
 	}
 
 	/**
@@ -487,7 +152,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeHost(String host, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(host, encoding, UriComponents.Type.HOST, null);
+		return UriComponents.encodeUriComponent(host, encoding, UriComponents.Type.HOST);
 	}
 
 	/**
@@ -499,7 +164,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePort(String port, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(port, encoding, UriComponents.Type.PORT, null);
+		return UriComponents.encodeUriComponent(port, encoding, UriComponents.Type.PORT);
 	}
 
 	/**
@@ -511,7 +176,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePath(String path, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(path, encoding, UriComponents.Type.PATH, null);
+		return UriComponents.encodeUriComponent(path, encoding, UriComponents.Type.PATH);
 	}
 
 	/**
@@ -523,7 +188,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePathSegment(String segment, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(segment, encoding, UriComponents.Type.PATH_SEGMENT, null);
+		return UriComponents.encodeUriComponent(segment, encoding, UriComponents.Type.PATH_SEGMENT);
 	}
 
 	/**
@@ -535,7 +200,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeQuery(String query, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(query, encoding, UriComponents.Type.QUERY, null);
+		return UriComponents.encodeUriComponent(query, encoding, UriComponents.Type.QUERY);
 	}
 
 	/**
@@ -547,7 +212,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeQueryParam(String queryParam, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(queryParam, encoding, UriComponents.Type.QUERY_PARAM, null);
+		return UriComponents.encodeUriComponent(queryParam, encoding, UriComponents.Type.QUERY_PARAM);
 	}
 
 	/**
@@ -559,7 +224,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeFragment(String fragment, String encoding) throws UnsupportedEncodingException {
-		return encodeUriComponent(fragment, encoding, UriComponents.Type.FRAGMENT, null);
+		return UriComponents.encodeUriComponent(fragment, encoding, UriComponents.Type.FRAGMENT);
 	}
 
 
@@ -607,18 +272,6 @@ public abstract class UriUtils {
 			}
 		}
 		return changed ? new String(bos.toByteArray(), encoding) : source;
-	}
-
-	/**
-	 * Enumeration used to control how URIs are encoded.
-	 */
-	public enum EncodingOption {
-
-		/**
-		 * Allow for URI template variables to occur in the URI component (i.e. '{foo}')
-		 */
-		ALLOW_TEMPLATE_VARS
-
 	}
 
 }
