@@ -23,7 +23,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that an annotated class is a "Repository" (or "DAO").
+ * Indicates that an annotated class is a "Repository",
+ * "a mechanism for encapsulating storage, retrieval,
+ * and search behaviour which emulates a collection of objects”.
  * 
  * <p>A class thus annotated is eligible for Spring
  * {@link org.springframework.dao.DataAccessException} translation. The
