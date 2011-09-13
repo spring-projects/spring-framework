@@ -40,6 +40,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.validation.DataBinder;
@@ -92,6 +93,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequ
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -144,6 +146,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	private ConfigurableBeanFactory beanFactory;
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
+	
+	private boolean alwaysUseRedirectAttributes;
 	
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache =
 		new ConcurrentHashMap<Class<?>, SessionAttributesHandler>();
@@ -329,6 +333,22 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
 	}
 	
+	/**
+	 * By default a controller uses {@link Model} to select attributes for 
+	 * rendering and for redirecting. However, a controller can also use 
+	 * {@link RedirectAttributes} to select attributes before a redirect.
+	 * <p>When this flag is set to {@code true}, {@link RedirectAttributes} 
+	 * becomes the only way to select attributes for a redirect. 
+	 * In other words, for a redirect a controller must use 
+	 * {@link RedirectAttributes} or no attributes will be used.
+	 * <p>The default value is {@code false}, meaning the {@link Model} is
+	 * used unless {@link RedirectAttributes} is used.
+	 * @see RedirectAttributes
+	 */
+	public void setAlwaysUseRedirectAttributes(boolean alwaysUseRedirectAttributes) {
+		this.alwaysUseRedirectAttributes = alwaysUseRedirectAttributes;
+	}
+
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
@@ -510,13 +530,19 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			HandlerMethod handlerMethod) throws Exception {
 		
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
-		
-		ServletInvocableHandlerMethod requestMappingMethod = createRequestMappingMethod(handlerMethod);
-		ModelFactory modelFactory = getModelFactory(handlerMethod);
+
+		WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
+		ServletInvocableHandlerMethod requestMappingMethod = createRequestMappingMethod(handlerMethod, binderFactory);
+		ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
 		modelFactory.initModel(webRequest, mavContainer, requestMappingMethod);
+
+		if (this.alwaysUseRedirectAttributes) {
+			DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
+			mavContainer.setRedirectModel(new RedirectAttributesModelMap(dataBinder));
+		}
 		
 		SessionStatus sessionStatus = new SimpleSessionStatus();
 		
@@ -536,23 +562,23 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 				Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
 				RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
 			}
-			return mav;				
+			return mav;
 		}
 	}
 
-	private ServletInvocableHandlerMethod createRequestMappingMethod(HandlerMethod handlerMethod) {
-		ServletInvocableHandlerMethod requestMappingMethod = 
-			new ServletInvocableHandlerMethod(handlerMethod.getBean(), handlerMethod.getMethod());
-		requestMappingMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-		requestMappingMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
-		requestMappingMethod.setDataBinderFactory(getDataBinderFactory(handlerMethod));
-		requestMappingMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-		return requestMappingMethod;
+	private ServletInvocableHandlerMethod createRequestMappingMethod(HandlerMethod handlerMethod, 
+																	 WebDataBinderFactory binderFactory) {
+		ServletInvocableHandlerMethod requestMethod;
+		requestMethod = new ServletInvocableHandlerMethod(handlerMethod.getBean(), handlerMethod.getMethod());
+		requestMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+		requestMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+		requestMethod.setDataBinderFactory(binderFactory);
+		requestMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+		return requestMethod;
 	}
 	
-	private ModelFactory getModelFactory(HandlerMethod handlerMethod) {
+	private ModelFactory getModelFactory(HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
 		SessionAttributesHandler sessionAttrHandler = getSessionAttributesHandler(handlerMethod);
-		WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
 		Class<?> handlerType = handlerMethod.getBeanType();
 		ModelFactory modelFactory = this.modelFactoryCache.get(handlerType);
 		if (modelFactory == null) {
