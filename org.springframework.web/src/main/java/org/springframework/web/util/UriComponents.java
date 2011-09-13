@@ -20,17 +20,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -48,229 +48,54 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  * @see UriComponentsBuilder
  */
-public final class UriComponents implements Map<UriComponents.Type, String> {
+public final class UriComponents {
 
-    /**
-     * The default encoding used for various encode methods.
-     */
-    public static final String DEFAULT_ENCODING = "UTF-8";
+    private static final String DEFAULT_ENCODING = "UTF-8";
 
-    private static final String SCHEME_PATTERN = "([^:/?#]+):";
+    private static final char PATH_DELIMITER = '/';
 
-    private static final String HTTP_PATTERN = "(http|https):";
+	/** Captures URI template variable names. */
+	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
-    private static final String USERINFO_PATTERN = "([^@/]*)";
+	private final String scheme;
 
-    private static final String HOST_PATTERN = "([^/?#:]*)";
+	private final String userInfo;
 
-    private static final String PORT_PATTERN = "(\\d*)";
+	private final String host;
 
-    private static final String PATH_PATTERN = "([^?#]*)";
+	private final int port;
 
-    private static final String QUERY_PATTERN = "([^#]*)";
+	private final List<String> pathSegments;
 
-    private static final String LAST_PATTERN = "(.*)";
+	private final MultiValueMap<String, String> queryParams;
 
-    // Regex patterns that matches URIs. See RFC 3986, appendix B
-    private static final Pattern URI_PATTERN = Pattern.compile(
-            "^(" + SCHEME_PATTERN + ")?" + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN +
-                    ")?" + ")?" + PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
-
-    private static final Pattern HTTP_URL_PATTERN = Pattern.compile(
-            "^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
-                    PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
-
-
-    private static final String PATH_DELIMITER = "/";
-
-    private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)=?([^&=]+)?");
-
-    private final Map<Type, String> uriComponents;
+	private final String fragment;
 
     private final boolean encoded;
 
-    private UriComponents(Map<Type, String> uriComponents, boolean encoded) {
-        Assert.notEmpty(uriComponents, "'uriComponents' must not be empty");
-        this.uriComponents = Collections.unmodifiableMap(uriComponents);
-        this.encoded = encoded;
-    }
-
-    /**
-     * Creates a new {@code UriComponents} object from the given string URI.
-     *
-     * @param uri the source URI
-     * @return the URI components of the URI
-     */
-    public static UriComponents fromUriString(String uri) {
-        Assert.notNull(uri, "'uri' must not be null");
-        Matcher m = URI_PATTERN.matcher(uri);
-        if (m.matches()) {
-            Map<UriComponents.Type, String> result = new EnumMap<UriComponents.Type, String>(UriComponents.Type.class);
-
-            result.put(UriComponents.Type.SCHEME, m.group(2));
-            result.put(UriComponents.Type.AUTHORITY, m.group(3));
-            result.put(UriComponents.Type.USER_INFO, m.group(5));
-            result.put(UriComponents.Type.HOST, m.group(6));
-            result.put(UriComponents.Type.PORT, m.group(8));
-            result.put(UriComponents.Type.PATH, m.group(9));
-            result.put(UriComponents.Type.QUERY, m.group(11));
-            result.put(UriComponents.Type.FRAGMENT, m.group(13));
-
-            return new UriComponents(result, false);
-        }
-        else {
-            throw new IllegalArgumentException("[" + uri + "] is not a valid URI");
-        }
-    }
-
-    /**
-     * Creates a new {@code UriComponents} object from the string HTTP URL.
-     *
-     * @param httpUrl the source URI
-     * @return the URI components of the URI
-     */
-    public static UriComponents fromHttpUrl(String httpUrl) {
-        Assert.notNull(httpUrl, "'httpUrl' must not be null");
-        Matcher m = HTTP_URL_PATTERN.matcher(httpUrl);
-        if (m.matches()) {
-            Map<UriComponents.Type, String> result = new EnumMap<UriComponents.Type, String>(UriComponents.Type.class);
-
-            result.put(UriComponents.Type.SCHEME, m.group(1));
-            result.put(UriComponents.Type.AUTHORITY, m.group(2));
-            result.put(UriComponents.Type.USER_INFO, m.group(4));
-            result.put(UriComponents.Type.HOST, m.group(5));
-            result.put(UriComponents.Type.PORT, m.group(7));
-            result.put(UriComponents.Type.PATH, m.group(8));
-            result.put(UriComponents.Type.QUERY, m.group(10));
-
-            return new UriComponents(result, false);
-        }
-        else {
-            throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
-        }
-    }
-
-    /**
-     * Creates a new {@code UriComponents} object from the given {@code URI}.
-     *
-     * @param uri the URI
-     * @return the URI components of the URI
-     */
-    public static UriComponents fromUri(URI uri) {
-        Assert.notNull(uri, "'uri' must not be null");
-
-        Map<Type, String> uriComponents = new EnumMap<Type, String>(Type.class);
-        if (uri.getScheme() != null) {
-            uriComponents.put(Type.SCHEME, uri.getScheme());
-        }
-        if (uri.getRawAuthority() != null) {
-            uriComponents.put(Type.AUTHORITY, uri.getRawAuthority());
-        }
-        if (uri.getRawUserInfo() != null) {
-            uriComponents.put(Type.USER_INFO, uri.getRawUserInfo());
-        }
-        if (uri.getHost() != null) {
-            uriComponents.put(Type.HOST, uri.getHost());
-        }
-        if (uri.getPort() != -1) {
-            uriComponents.put(Type.PORT, Integer.toString(uri.getPort()));
-        }
-        if (uri.getRawPath() != null) {
-            uriComponents.put(Type.PATH, uri.getRawPath());
-        }
-        if (uri.getRawQuery() != null) {
-            uriComponents.put(Type.QUERY, uri.getRawQuery());
-        }
-        if (uri.getRawFragment() != null) {
-            uriComponents.put(Type.FRAGMENT, uri.getRawFragment());
-        }
-        return new UriComponents(uriComponents, true);
-    }
-
-
-    /**
-     * Creates an instance of the {@code UriComponents} object from the given components. All the given arguments
-     * can be {@code null} and are considered to be unencoded.
-     */
-    public static UriComponents fromUriComponents(String scheme,
-                         String authority,
-                         String userInfo,
-                         String host,
-                         String port,
-                         String path,
-                         String query,
-                         String fragment) {
-        return fromUriComponents(scheme, authority, userInfo, host, port, path, query, fragment, false);
-    }
-
-    /**
-     * Creates an instance of the {@code UriComponents} object from the given components. All the given arguments
-     * can be {@code null}.
-     *
-     * @param encoded {@code true} if the arguments are encoded; {@code false} otherwise
-     */
-    public static UriComponents fromUriComponents(String scheme,
-                                                  String authority,
-                                                  String userInfo,
-                                                  String host,
-                                                  String port,
-                                                  String path,
-                                                  String query,
-                                                  String fragment,
-                                                  boolean encoded) {
-        Map<Type, String> uriComponents = new EnumMap<Type, String>(Type.class);
-        if (scheme != null) {
-            uriComponents.put(Type.SCHEME, scheme);
-        }
-        if (authority != null) {
-            uriComponents.put(Type.AUTHORITY, authority);
-        }
-        if (userInfo != null) {
-            uriComponents.put(Type.USER_INFO, userInfo);
-        }
-        if (host != null) {
-            uriComponents.put(Type.HOST, host);
-        }
-        if (port != null) {
-            uriComponents.put(Type.PORT, port);
-        }
-        if (path != null) {
-            uriComponents.put(Type.PATH, path);
-        }
-        if (query != null) {
-            uriComponents.put(Type.QUERY, query);
-        }
-        if (fragment != null) {
-            uriComponents.put(Type.FRAGMENT, fragment);
-        }
-        return new UriComponents(uriComponents, encoded);
-    }
-
-    /**
-     * Creates an instance of the {@code UriComponents} object that contains the given components map.
-     *
-     * @param uriComponents the component to initialize with
-     */
-    public static UriComponents fromUriComponentMap(Map<Type, String> uriComponents) {
-        boolean encoded;
-        if (uriComponents instanceof UriComponents) {
-            encoded = ((UriComponents) uriComponents).encoded;
-        }
-        else {
-            encoded = false;
-        }
-        return new UriComponents(uriComponents, encoded);
-    }
-
-    /**
-     * Creates an instance of the {@code UriComponents} object that contains the given components map.
-     *
-     * @param uriComponents the component to initialize with
-     * @param encoded whether the components are encpded
-     */
-    public static UriComponents fromUriComponentMap(Map<Type, String> uriComponents, boolean encoded) {
-        return new UriComponents(uriComponents, encoded);
-    }
+	public UriComponents(String scheme,
+						 String userInfo,
+						 String host,
+						 int port,
+						 List<String> pathSegments,
+						 MultiValueMap<String, String> queryParams,
+						 String fragment,
+						 boolean encoded) {
+		this.scheme = scheme;
+		this.userInfo = userInfo;
+		this.host = host;
+		this.port = port;
+		if (pathSegments == null) {
+			pathSegments = Collections.emptyList();
+		}
+		this.pathSegments = Collections.unmodifiableList(pathSegments);
+		if (queryParams == null) {
+			queryParams = new LinkedMultiValueMap<String, String>(0);
+		}
+		this.queryParams = CollectionUtils.unmodifiableMultiValueMap(queryParams);
+		this.fragment = fragment;
+		this.encoded = encoded;
+	}
 
     // component getters
 
@@ -280,16 +105,7 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
      * @return the scheme. Can be {@code null}.
      */
     public String getScheme() {
-        return get(Type.SCHEME);
-    }
-
-    /**
-     * Returns the authority.
-     *
-     * @return the authority. Can be {@code null}.
-     */
-    public String getAuthority() {
-        return get(Type.AUTHORITY);
+		return scheme;
     }
 
     /**
@@ -298,7 +114,7 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
      * @return the user info. Can be {@code null}.
      */
     public String getUserInfo() {
-        return get(Type.USER_INFO);
+		return userInfo;
     }
 
     /**
@@ -307,36 +123,47 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
      * @return the host. Can be {@code null}.
      */
     public String getHost() {
-        return get(Type.HOST);
+		return host;
     }
 
     /**
-     * Returns the port as string.
+     * Returns the port. Returns {@code -1} if no port has been set.
      *
-     * @return the port as string. Can be {@code null}.
+     * @return the port
      */
-    public String getPort() {
-        return get(Type.PORT);
+    public int getPort() {
+		return port;
     }
 
-    /**
-     * Returns the port as integer. Returns {@code -1} if no port has been set.
-     *
-     * @return the port the port as integer
-     */
-    public int getPortAsInteger() {
-        String port = getPort();
-        return port != null ? Integer.parseInt(port) : -1;
-    }
+	/**
+	 * Returns the path.
+	 *
+	 * @return the path. Can be {@code null}.
+	 */
+	public String getPath() {
+		if (!pathSegments.isEmpty()) {
+			StringBuilder pathBuilder = new StringBuilder();
+			for (String pathSegment : pathSegments) {
+				if (StringUtils.hasLength(pathSegment)) {
+					boolean startsWithSlash = pathSegment.charAt(0) == PATH_DELIMITER;
+					boolean endsWithSlash =
+							pathBuilder.length() > 0 && pathBuilder.charAt(pathBuilder.length() - 1) == PATH_DELIMITER;
 
-    /**
-     * Returns the path.
-     *
-     * @return the path. Can be {@code null}.
-     */
-    public String getPath() {
-        return get(Type.PATH);
-    }
+					if (!endsWithSlash && !startsWithSlash) {
+						pathBuilder.append('/');
+					}
+					else if (endsWithSlash && startsWithSlash) {
+						pathSegment = pathSegment.substring(1);
+					}
+					pathBuilder.append(pathSegment);
+				}
+			}
+			return pathBuilder.toString();
+		}
+		else {
+			return null;
+		}
+	}
 
     /**
      * Returns the list of path segments.
@@ -344,41 +171,54 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
      * @return the path segments. Empty if no path has been set.
      */
     public List<String> getPathSegments() {
-        String path = getPath();
-        if (path != null) {
-            return Arrays.asList(StringUtils.tokenizeToStringArray(path, PATH_DELIMITER));
-        }
-        else {
-            return Collections.emptyList();
-        }
+		return pathSegments;
     }
 
-    /**
-     * Returns the query.
-     *
-     * @return the query. Can be {@code null}.
-     */
-    public String getQuery() {
-        return get(Type.QUERY);
-    }
+	/**
+	 * Returns the query.
+	 *
+	 * @return the query. Can be {@code null}.
+	 */
+	public String getQuery() {
+		if (!queryParams.isEmpty()) {
+			StringBuilder queryBuilder = new StringBuilder();
+			for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
+				String name = entry.getKey();
+				List<String> values = entry.getValue();
+				if (CollectionUtils.isEmpty(values)) {
+					if (queryBuilder.length() != 0) {
+						queryBuilder.append('&');
+					}
+					queryBuilder.append(name);
+				}
+				else {
+					for (Object value : values) {
+						if (queryBuilder.length() != 0) {
+							queryBuilder.append('&');
+						}
+						queryBuilder.append(name);
 
-    /**
+						if (value != null) {
+							queryBuilder.append('=');
+							queryBuilder.append(value.toString());
+						}
+					}
+				}
+			}
+			return queryBuilder.toString();
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
      * Returns the map of query parameters.
      *
      * @return the query parameters. Empty if no query has been set.
      */
     public MultiValueMap<String, String> getQueryParams() {
-        MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
-        String query = getQuery();
-        if (query != null) {
-            Matcher m = QUERY_PARAM_PATTERN.matcher(query);
-            while (m.find()) {
-                String name = m.group(1);
-                String value = m.group(2);
-                result.add(name, value);
-            }
-        }
-        return result;
+		return queryParams;
     }
 
     /**
@@ -387,11 +227,17 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
      * @return the fragment. Can be {@code null}.
      */
     public String getFragment() {
-        return get(Type.FRAGMENT);
+		return fragment;
     }
 
-    // other functionality
+    // encoding
 
+	/**
+	 * Encodes all URI components using their specific encoding rules, and returns the result as a new
+	 * {@code UriComponents} instance. This method uses UTF-8 to encode.
+	 *
+	 * @return the encoded uri components
+	 */
     public UriComponents encode() {
         try {
             return encode(DEFAULT_ENCODING);
@@ -416,16 +262,29 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
             return this;
         }
 
-        final Map<Type, String> encoded = new EnumMap<Type, String>(Type.class);
-        for (Entry<Type, String> entry : uriComponents.entrySet()) {
-            Type key = entry.getKey();
-            String value = entry.getValue();
-            if (value != null) {
-                value = encodeUriComponent(value, encoding, key);
-            }
-            encoded.put(key, value);
-        }
-        return new UriComponents(encoded, true);
+		String encodedScheme = encodeUriComponent(this.scheme, encoding, Type.SCHEME);
+		String encodedUserInfo = encodeUriComponent(this.userInfo, encoding, Type.USER_INFO);
+		String encodedHost = encodeUriComponent(this.host, encoding, Type.HOST);
+		List<String> encodedPathSegments = new ArrayList<String>(this.pathSegments.size());
+		for (String pathSegment : this.pathSegments) {
+			String encodedPathSegment = encodeUriComponent(pathSegment, encoding, Type.PATH_SEGMENT);
+			encodedPathSegments.add(encodedPathSegment);
+		}
+		MultiValueMap<String, String> encodedQueryParams =
+				new LinkedMultiValueMap<String, String>(this.queryParams.size());
+		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
+			String encodedName = encodeUriComponent(entry.getKey(), encoding, Type.QUERY_PARAM);
+			List<String> encodedValues = new ArrayList<String>(entry.getValue().size());
+			for (String value : entry.getValue()) {
+				String encodedValue = encodeUriComponent(value, encoding, Type.QUERY_PARAM);
+				encodedValues.add(encodedValue);
+			}
+			encodedQueryParams.put(encodedName, encodedValues);
+		}
+		String encodedFragment = encodeUriComponent(this.fragment, encoding, Type.FRAGMENT);
+
+		return new UriComponents(encodedScheme, encodedUserInfo, encodedHost, this.port, encodedPathSegments,
+				encodedQueryParams, encodedFragment, true);
     }
 
     /**
@@ -434,25 +293,25 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
      *
      * @param source the source string
      * @param encoding the encoding of the source string
-     * @param uriComponent the URI component for the source
-     * @param encodingOptions the options used when encoding. May be {@code null}.
+     * @param type the URI component for the source
      * @return the encoded URI
      * @throws IllegalArgumentException when the given uri parameter is not a valid URI
-     * @see EncodingOption
      */
-    static String encodeUriComponent(String source,
-                                            String encoding,
-                                            UriComponents.Type uriComponent) throws UnsupportedEncodingException {
-        Assert.hasLength(encoding, "'encoding' must not be empty");
+	static String encodeUriComponent(String source, String encoding, Type type)
+			throws UnsupportedEncodingException {
+		if (source == null) {
+			return null;
+		}
+		
+		Assert.hasLength(encoding, "'encoding' must not be empty");
 
-        byte[] bytes = encodeInternal(source.getBytes(encoding), uriComponent);
-        return new String(bytes, "US-ASCII");
-    }
+		byte[] bytes = encodeBytes(source.getBytes(encoding), type);
+		return new String(bytes, "US-ASCII");
+	}
 
-    private static byte[] encodeInternal(byte[] source,
-                                         UriComponents.Type uriComponent) {
-        Assert.notNull(source, "'source' must not be null");
-        Assert.notNull(uriComponent, "'uriComponent' must not be null");
+	private static byte[] encodeBytes(byte[] source, Type type) {
+		Assert.notNull(source, "'source' must not be null");
+        Assert.notNull(type, "'type' must not be null");
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream(source.length);
         for (int i = 0; i < source.length; i++) {
@@ -460,7 +319,7 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
             if (b < 0) {
                 b += 256;
             }
-            if (uriComponent.isAllowed(b)) {
+            if (type.isAllowed(b)) {
                 bos.write(b);
             }
             else {
@@ -476,51 +335,181 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
         return bos.toByteArray();
     }
 
+	// expanding
+
+	/**
+	 * Replaces all URI template variables with the values from a given map. The map keys represent
+	 * variable names; the values variable values. The order of variables is not significant.
+
+	 * @param uriVariables the map of URI variables
+	 * @return the expanded uri components
+	 */
+	public UriComponents expand(Map<String, ?> uriVariables) {
+		Assert.notNull(uriVariables, "'uriVariables' must not be null");
+
+		String expandedScheme = expandUriComponent(this.scheme, uriVariables);
+		String expandedUserInfo = expandUriComponent(this.userInfo, uriVariables);
+		String expandedHost = expandUriComponent(this.host, uriVariables);
+		List<String> expandedPathSegments = new ArrayList<String>(this.pathSegments.size());
+		for (String pathSegment : this.pathSegments) {
+			String expandedPathSegment = expandUriComponent(pathSegment, uriVariables);
+			expandedPathSegments.add(expandedPathSegment);
+		}
+		MultiValueMap<String, String> expandedQueryParams =
+				new LinkedMultiValueMap<String, String>(this.queryParams.size());
+		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
+			String expandedName = expandUriComponent(entry.getKey(), uriVariables);
+			List<String> expandedValues = new ArrayList<String>(entry.getValue().size());
+			for (String value : entry.getValue()) {
+				String expandedValue = expandUriComponent(value, uriVariables);
+				expandedValues.add(expandedValue);
+			}
+			expandedQueryParams.put(expandedName, expandedValues);
+		}
+		String expandedFragment = expandUriComponent(this.fragment, uriVariables);
+
+		return new UriComponents(expandedScheme, expandedUserInfo, expandedHost, this.port, expandedPathSegments,
+				expandedQueryParams, expandedFragment, false);
+	}
+
+	private String expandUriComponent(String source, Map<String, ?> uriVariables) {
+		if (source == null) {
+			return null;
+		}
+		if (source.indexOf('{') == -1) {
+			return source;
+		}
+		Matcher matcher = NAMES_PATTERN.matcher(source);
+		StringBuffer sb = new StringBuffer();
+		while (matcher.find()) {
+			String match = matcher.group(1);
+			String variableName = getVariableName(match);
+			Object variableValue = uriVariables.get(variableName);
+			String uriVariableValueString = getVariableValueAsString(variableValue);
+			String replacement = Matcher.quoteReplacement(uriVariableValueString);
+			matcher.appendReplacement(sb, replacement);
+		}
+		matcher.appendTail(sb);
+		return sb.toString();
+	}
+
+	/**
+	 * Replaces all URI template variables with the values from a given array. The array represent variable values.
+	 * The order of variables is significant.
+
+	 * @param uriVariableValues URI variable values
+	 * @return the expanded uri components
+	 */
+	public UriComponents expand(Object... uriVariableValues) {
+		Assert.notNull(uriVariableValues, "'uriVariableValues' must not be null");
+
+		Iterator<Object> valueIterator = Arrays.asList(uriVariableValues).iterator();
+
+		String expandedScheme = expandUriComponent(this.scheme, valueIterator);
+		String expandedUserInfo = expandUriComponent(this.userInfo, valueIterator);
+		String expandedHost = expandUriComponent(this.host, valueIterator);
+		List<String> expandedPathSegments = new ArrayList<String>(this.pathSegments.size());
+		for (String pathSegment : this.pathSegments) {
+			String expandedPathSegment = expandUriComponent(pathSegment, valueIterator);
+			expandedPathSegments.add(expandedPathSegment);
+		}
+		MultiValueMap<String, String> expandedQueryParams =
+				new LinkedMultiValueMap<String, String>(this.queryParams.size());
+		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
+			String expandedName = expandUriComponent(entry.getKey(), valueIterator);
+			List<String> expandedValues = new ArrayList<String>(entry.getValue().size());
+			for (String value : entry.getValue()) {
+				String expandedValue = expandUriComponent(value, valueIterator);
+				expandedValues.add(expandedValue);
+			}
+			expandedQueryParams.put(expandedName, expandedValues);
+		}
+		String expandedFragment = expandUriComponent(this.fragment, valueIterator);
+
+		return new UriComponents(expandedScheme, expandedUserInfo, expandedHost, this.port, expandedPathSegments,
+				expandedQueryParams, expandedFragment, false);
+	}
+
+	private String expandUriComponent(String source, Iterator<Object> valueIterator) {
+		if (source == null) {
+			return null;
+		}
+		if (source.indexOf('{') == -1) {
+			return source;
+		}
+		Matcher matcher = NAMES_PATTERN.matcher(source);
+		StringBuffer sb = new StringBuffer();
+		while (matcher.find()) {
+			if (!valueIterator.hasNext()) {
+				throw new IllegalArgumentException("Not enough variable values available to expand [" + source + "]");
+			}
+			Object variableValue = valueIterator.next();
+			String uriVariableValueString = getVariableValueAsString(variableValue);
+			String replacement = Matcher.quoteReplacement(uriVariableValueString);
+			matcher.appendReplacement(sb, replacement);
+		}
+		matcher.appendTail(sb);
+		return sb.toString();
+	}
+
+
+	private String getVariableName(String match) {
+		int colonIdx = match.indexOf(':');
+		return colonIdx == -1 ? match : match.substring(0, colonIdx);
+	}
+
+	protected String getVariableValueAsString(Object variableValue) {
+		return variableValue != null ? variableValue.toString() : "";
+	}
+
+
+
+
+
+	// other functionality
 
     /**
      * Returns a URI string from this {@code UriComponents} instance.
      *
-     * @return the URI created from the given components
+     * @return the URI string
      */
     public String toUriString() {
         StringBuilder uriBuilder = new StringBuilder();
 
-        if (getScheme() != null) {
-            uriBuilder.append(getScheme());
+        if (scheme != null) {
+            uriBuilder.append(scheme);
             uriBuilder.append(':');
         }
 
-        if (getUserInfo() != null || getHost() != null || getPort() != null) {
+        if (userInfo != null || host != null) {
             uriBuilder.append("//");
-            if (getUserInfo() != null) {
-                uriBuilder.append(getUserInfo());
+            if (userInfo != null) {
+				uriBuilder.append(userInfo);
                 uriBuilder.append('@');
             }
-            if (getHost() != null) {
-                uriBuilder.append(getHost());
+            if (host != null) {
+				uriBuilder.append(host);
             }
-            if (getPort() != null) {
+            if (port != -1) {
                 uriBuilder.append(':');
-                uriBuilder.append(getPort());
+				uriBuilder.append(port);
             }
         }
-        else if (getAuthority() != null) {
-            uriBuilder.append("//");
-            uriBuilder.append(getAuthority());
+
+		String path = getPath();
+		if (path != null) {
+            uriBuilder.append(path);
         }
 
-        if (getPath() != null) {
-            uriBuilder.append(getPath());
-        }
-
-        if (getQuery() != null) {
+		String query = getQuery();
+		if (query != null) {
             uriBuilder.append('?');
-            uriBuilder.append(getQuery());
+            uriBuilder.append(query);
         }
 
-        if (getFragment() != null) {
+        if (fragment != null) {
             uriBuilder.append('#');
-            uriBuilder.append(getFragment());
+			uriBuilder.append(fragment);
         }
 
         return uriBuilder.toString();
@@ -529,7 +518,7 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
     /**
      * Returns a {@code URI} from this {@code UriComponents} instance.
      *
-     * @return the URI created from the given components
+     * @return the URI
      */
     public URI toUri() {
         try {
@@ -537,13 +526,8 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
                 return new URI(toUriString());
             }
             else {
-                if (getUserInfo() != null || getHost() != null || getPort() != null) {
-                    return new URI(getScheme(), getUserInfo(), getHost(), getPortAsInteger(), getPath(), getQuery(),
-                            getFragment());
-                }
-                else {
-                    return new URI(getScheme(), getAuthority(), getPath(), getQuery(), getFragment());
-                }
+				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), getPath(), getQuery(),
+						getFragment());
             }
         }
         catch (URISyntaxException ex) {
@@ -551,76 +535,57 @@ public final class UriComponents implements Map<UriComponents.Type, String> {
         }
     }
 
-    // Map implementation
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o instanceof UriComponents) {
+			UriComponents other = (UriComponents) o;
 
-    public int size() {
-        return this.uriComponents.size();
-    }
+			if (scheme != null ? !scheme.equals(other.scheme) : other.scheme != null) {
+				return false;
+			}
+			if (userInfo != null ? !userInfo.equals(other.userInfo) : other.userInfo != null) {
+				return false;
+			}
+			if (host != null ? !host.equals(other.host) : other.host != null) {
+				return false;
+			}
+			if (port != other.port) {
+				return false;
+			}
+			if (!pathSegments.equals(other.pathSegments)) {
+				return false;
+			}
+			if (!queryParams.equals(other.queryParams)) {
+				return false;
+			}
+			if (fragment != null ? !fragment.equals(other.fragment) : other.fragment != null) {
+				return false;
+			}
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
-    public boolean isEmpty() {
-        return this.uriComponents.isEmpty();
-    }
+	@Override
+	public int hashCode() {
+		int result = scheme != null ? scheme.hashCode() : 0;
+		result = 31 * result + (userInfo != null ? userInfo.hashCode() : 0);
+		result = 31 * result + (host != null ? host.hashCode() : 0);
+		result = 31 * result + port;
+		result = 31 * result + pathSegments.hashCode();
+		result = 31 * result + queryParams.hashCode();
+		result = 31 * result + (fragment != null ? fragment.hashCode() : 0);
+		return result;
+	}
 
-    public boolean containsKey(Object key) {
-        return this.uriComponents.containsKey(key);
-    }
-
-    public boolean containsValue(Object value) {
-        return this.uriComponents.containsValue(value);
-    }
-
-    public String get(Object key) {
-        return this.uriComponents.get(key);
-    }
-
-    public String put(Type key, String value) {
-        return this.uriComponents.put(key, value);
-    }
-
-    public String remove(Object key) {
-        return this.uriComponents.remove(key);
-    }
-
-    public void putAll(Map<? extends Type, ? extends String> m) {
-        this.uriComponents.putAll(m);
-    }
-
-    public void clear() {
-        this.uriComponents.clear();
-    }
-
-    public Set<Type> keySet() {
-        return this.uriComponents.keySet();
-    }
-
-    public Collection<String> values() {
-        return this.uriComponents.values();
-    }
-
-    public Set<Entry<Type, String>> entrySet() {
-        return this.uriComponents.entrySet();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o instanceof UriComponents) {
-            UriComponents other = (UriComponents) o;
-            return this.uriComponents.equals(other.uriComponents);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.uriComponents.hashCode();
-    }
-
-    @Override
+	@Override
     public String toString() {
-        return this.uriComponents.toString();
+		return toUriString();
     }
 
     // inner types

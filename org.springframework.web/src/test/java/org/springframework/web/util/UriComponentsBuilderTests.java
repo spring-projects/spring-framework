@@ -18,10 +18,14 @@ package org.springframework.web.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
+import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 public class UriComponentsBuilderTests {
@@ -71,40 +75,90 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void pathSegments() throws URISyntaxException {
-		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		URI result = builder.pathSegment("foo").pathSegment("bar").build().toUri();
+	public void fromUriString() {
+		UriComponents result = UriComponentsBuilder.fromUriString("http://www.ietf.org/rfc/rfc3986.txt").build();
+		assertEquals("http", result.getScheme());
+		assertNull(result.getUserInfo());
+		assertEquals("www.ietf.org", result.getHost());
+		assertEquals(-1, result.getPort());
+		assertEquals("/rfc/rfc3986.txt", result.getPath());
+		assertEquals(Arrays.asList("rfc", "rfc3986.txt"), result.getPathSegments());
+		assertNull(result.getQuery());
+		assertNull(result.getFragment());
 
-		URI expected = new URI("/foo/bar");
-		assertEquals("Invalid result URI", expected, result);
+		result = UriComponentsBuilder.fromUriString(
+				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)")
+				.build();
+        assertEquals("http", result.getScheme());
+        assertEquals("arjen:foobar", result.getUserInfo());
+        assertEquals("java.sun.com", result.getHost());
+        assertEquals(80, result.getPort());
+        assertEquals("/javase/6/docs/api/java/util/BitSet.html", result.getPath());
+        assertEquals("foo=bar", result.getQuery());
+		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<String, String>(1);
+		expectedQueryParams.add("foo", "bar");
+		assertEquals(expectedQueryParams, result.getQueryParams());
+        assertEquals("and(java.util.BitSet)", result.getFragment());
+
+        result = UriComponentsBuilder.fromUriString("mailto:java-net@java.sun.com").build();
+        assertEquals("mailto", result.getScheme());
+        assertNull(result.getUserInfo());
+        assertNull(result.getHost());
+        assertEquals(-1, result.getPort());
+        assertEquals("java-net@java.sun.com", result.getPathSegments().get(0));
+        assertNull(result.getQuery());
+        assertNull(result.getFragment());
+
+        result = UriComponentsBuilder.fromUriString("docs/guide/collections/designfaq.html#28").build();
+        assertNull(result.getScheme());
+        assertNull(result.getUserInfo());
+        assertNull(result.getHost());
+        assertEquals(-1, result.getPort());
+        assertEquals("/docs/guide/collections/designfaq.html", result.getPath());
+        assertNull(result.getQuery());
+        assertEquals("28", result.getFragment());
+	}
+
+
+	@Test
+	public void path() throws URISyntaxException {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/foo/bar");
+		UriComponents result = builder.build();
+
+		assertEquals("/foo/bar", result.getPath());
+		assertEquals(Arrays.asList("foo", "bar"), result.getPathSegments());
 	}
 
 	@Test
-	public void queryParam() throws URISyntaxException {
+	public void pathSegments() throws URISyntaxException {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		URI result = builder.queryParam("baz", "qux", 42).build().toUri();
+		UriComponents result = builder.pathSegment("foo").pathSegment("bar").build();
 
-		URI expected = new URI("?baz=qux&baz=42");
-		assertEquals("Invalid result URI", expected, result);
+		assertEquals("/foo/bar", result.getPath());
+		assertEquals(Arrays.asList("foo", "bar"), result.getPathSegments());
+	}
+
+	@Test
+	public void queryParams() throws URISyntaxException {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
+		UriComponents result = builder.queryParam("baz", "qux", 42).build();
+
+		assertEquals("baz=qux&baz=42", result.getQuery());
+		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<String, String>(2);
+		expectedQueryParams.add("baz", "qux");
+		expectedQueryParams.add("baz", "42");
+		assertEquals(expectedQueryParams, result.getQueryParams());
 	}
 
 	@Test
 	public void emptyQueryParam() throws URISyntaxException {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		URI result = builder.queryParam("baz").build().toUri();
+		UriComponents result = builder.queryParam("baz").build();
 
-		URI expected = new URI("?baz");
-		assertEquals("Invalid result URI", expected, result);
+		assertEquals("baz", result.getQuery());
+		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<String, String>(2);
+		expectedQueryParams.add("baz", null);
+		assertEquals(expectedQueryParams, result.getQueryParams());
 	}
-
-    @Test
-    public void combineWithUriTemplate() throws URISyntaxException {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/{foo}");
-        UriComponents components = builder.build();
-        UriTemplate template = new UriTemplate(components);
-        URI uri = template.expand("bar baz");
-        assertEquals(new URI("/bar%20baz"), uri);
-    }
-
 
 }

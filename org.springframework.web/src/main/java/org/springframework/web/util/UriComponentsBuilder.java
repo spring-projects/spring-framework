@@ -20,8 +20,12 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -49,6 +53,34 @@ public class UriComponentsBuilder {
 
     private static final char PATH_DELIMITER = '/';
 
+	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)=?([^&=]+)?");
+
+	private static final String SCHEME_PATTERN = "([^:/?#]+):";
+
+	private static final String HTTP_PATTERN = "(http|https):";
+
+	private static final String USERINFO_PATTERN = "([^@/]*)";
+
+	private static final String HOST_PATTERN = "([^/?#:]*)";
+
+	private static final String PORT_PATTERN = "(\\d*)";
+
+	private static final String PATH_PATTERN = "([^?#]*)";
+
+	private static final String QUERY_PATTERN = "([^#]*)";
+
+	private static final String LAST_PATTERN = "(.*)";
+
+	// Regex patterns that matches URIs. See RFC 3986, appendix B
+	private static final Pattern URI_PATTERN = Pattern.compile(
+			"^(" + SCHEME_PATTERN + ")?" + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN +
+					")?" + ")?" + PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
+
+	private static final Pattern HTTP_URL_PATTERN = Pattern.compile(
+			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
+					PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
+
+
     private String scheme;
 
     private String userInfo;
@@ -59,7 +91,7 @@ public class UriComponentsBuilder {
 
     private final List<String> pathSegments = new ArrayList<String>();
 
-    private final StringBuilder queryBuilder = new StringBuilder();
+	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
 
     private String fragment;
 
@@ -76,7 +108,7 @@ public class UriComponentsBuilder {
     // Factory methods
 
     /**
-     * Returns a new, empty URI builder.
+     * Returns a new, empty builder.
      *
      * @return the new {@code UriComponentsBuilder}
      */
@@ -85,7 +117,7 @@ public class UriComponentsBuilder {
     }
 
     /**
-     * Returns a URI builder that is initialized with the given path.
+     * Returns a builder that is initialized with the given path.
      *
      * @param path the path to initialize with
      * @return the new {@code UriComponentsBuilder}
@@ -97,7 +129,7 @@ public class UriComponentsBuilder {
     }
 
     /**
-     * Returns a URI builder that is initialized with the given {@code URI}.
+     * Returns a builder that is initialized with the given {@code URI}.
      *
      * @param uri the URI to initialize with
      * @return the new {@code UriComponentsBuilder}
@@ -108,6 +140,67 @@ public class UriComponentsBuilder {
         return builder;
     }
 
+	/**
+	 * Returns a builder that is initialized with the given URI string.
+	 *
+	 * @param uri the URI string to initialize with
+	 * @return the new {@code UriComponentsBuilder}
+	 */
+	public static UriComponentsBuilder fromUriString(String uri) {
+		Assert.hasLength(uri, "'uri' must not be empty");
+		Matcher m = URI_PATTERN.matcher(uri);
+		if (m.matches()) {
+			UriComponentsBuilder builder = new UriComponentsBuilder();
+
+			builder.scheme(m.group(2));
+			builder.userInfo(m.group(5));
+			builder.host(m.group(6));
+			String port = m.group(8);
+			if (StringUtils.hasLength(port)) {
+				builder.port(Integer.parseInt(port));
+			}
+			builder.path(m.group(9));
+			builder.query(m.group(11));
+			builder.fragment(m.group(13));
+
+			return builder;
+		}
+		else {
+			throw new IllegalArgumentException("[" + uri + "] is not a valid URI");
+		}
+	}
+
+	/**
+	 * Creates a new {@code UriComponents} object from the string HTTP URL.
+	 *
+	 * @param httpUrl the source URI
+	 * @return the URI components of the URI
+	 */
+	public static UriComponentsBuilder fromHttpUrl(String httpUrl) {
+		Assert.notNull(httpUrl, "'httpUrl' must not be null");
+		Matcher m = HTTP_URL_PATTERN.matcher(httpUrl);
+		if (m.matches()) {
+			UriComponentsBuilder builder = new UriComponentsBuilder();
+
+			builder.scheme(m.group(1));
+			builder.userInfo(m.group(4));
+			builder.host(m.group(5));
+			String port = m.group(7);
+			if (StringUtils.hasLength(port)) {
+				builder.port(Integer.parseInt(port));
+			}
+			builder.path(m.group(8));
+			builder.query(m.group(10));
+
+			return builder;
+		}
+		else {
+			throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
+		}
+	}
+
+
+
     // build methods
 
     /**
@@ -116,12 +209,19 @@ public class UriComponentsBuilder {
      * @return the URI components
      */
     public UriComponents build() {
-        String port = portAsString();
-        String path = pathAsString();
-        String query = queryAsString();
-        return UriComponents.fromUriComponents(scheme, null, userInfo, host, port, path, query, fragment, false);
+		return build(false);
+	}
+
+    /**
+     * Builds a {@code UriComponents} instance from the various components contained in this builder.
+     *
+	 * @param encoded whether all the components set in this builder are encoded ({@code true}) or not ({@code false}).
+	 * @return the URI components
+     */
+    public UriComponents build(boolean encoded) {
+		return new UriComponents(scheme, userInfo, host, port, pathSegments, queryParams, fragment, encoded);
     }
-    
+
     // URI components methods
 
     /**
@@ -146,14 +246,12 @@ public class UriComponentsBuilder {
             this.port = uri.getPort();
         }
         if (StringUtils.hasLength(uri.getPath())) {
-            String[] pathSegments = StringUtils.tokenizeToStringArray(uri.getPath(), "/");
-
             this.pathSegments.clear();
-            Collections.addAll(this.pathSegments, pathSegments);
+			path(uri.getPath());
         }
         if (StringUtils.hasLength(uri.getQuery())) {
-            this.queryBuilder.setLength(0);
-            this.queryBuilder.append(uri.getQuery());
+			this.queryParams.clear();
+			query(uri.getQuery());
         }
         if (uri.getFragment() != null) {
             this.fragment = uri.getFragment();
@@ -220,35 +318,14 @@ public class UriComponentsBuilder {
      * @return this UriComponentsBuilder
      */
     public UriComponentsBuilder path(String path) {
-        Assert.notNull(path, "path must not be null");
-
-        String[] pathSegments = StringUtils.tokenizeToStringArray(path, "/");
-        return pathSegment(pathSegments);
+		if (path != null) {
+	        String[] pathSegments = StringUtils.tokenizeToStringArray(path, "/");
+    	    pathSegment(pathSegments);
+		} else {
+			pathSegments.clear();
+		}
+		return this;
     }
-
-    private String pathAsString() {
-        if (!pathSegments.isEmpty()) {
-            StringBuilder pathBuilder = new StringBuilder();
-            for (String pathSegment : pathSegments) {
-                boolean startsWithSlash = pathSegment.charAt(0) == PATH_DELIMITER;
-                boolean endsWithSlash =
-                        pathBuilder.length() > 0 && pathBuilder.charAt(pathBuilder.length() - 1) == PATH_DELIMITER;
-
-                if (!endsWithSlash && !startsWithSlash) {
-                    pathBuilder.append('/');
-                }
-                else if (endsWithSlash && startsWithSlash) {
-                    pathSegment = pathSegment.substring(1);
-                }
-                pathBuilder.append(pathSegment);
-            }
-            return pathBuilder.toString();
-        }
-        else {
-            return null;
-        }
-    }
-
 
     /**
      * Appends the given path segments to the existing path of this builder. Each given path segments may contain URI
@@ -264,6 +341,28 @@ public class UriComponentsBuilder {
         return this;
     }
 
+	/**
+	 * Appends the given query to the existing query of this builder. The given query may contain URI template variables.
+	 *
+	 * @param query the URI path
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder query(String query) {
+		if (query != null) {
+			Matcher m = QUERY_PARAM_PATTERN.matcher(query);
+			while (m.find()) {
+				String name = m.group(1);
+				String value = m.group(2);
+				queryParam(name, value);
+			}
+		}
+		else {
+			queryParams.clear();
+		}
+		return this;
+	}
+
+
     /**
      * Appends the given query parameter to the existing query parameters. The given name or any of the values may contain
      * URI template variables. If no values are given, the resulting URI will contain the query parameter name only (i.e.
@@ -274,33 +373,18 @@ public class UriComponentsBuilder {
      * @return this UriComponentsBuilder
      */
     public UriComponentsBuilder queryParam(String name, Object... values) {
-        Assert.notNull(name, "'name' must not be null");
-
-        if (ObjectUtils.isEmpty(values)) {
-            if (queryBuilder.length() != 0) {
-                queryBuilder.append('&');
-            }
-            queryBuilder.append(name);
-        }
-        else {
-            for (Object value : values) {
-                if (queryBuilder.length() != 0) {
-                    queryBuilder.append('&');
-                }
-                queryBuilder.append(name);
-
-                if (value != null) {
-                    queryBuilder.append('=');
-                    queryBuilder.append(value.toString());
-                }
-            }
-        }
-        return this;
-    }
-
-    private String queryAsString() {
-        return queryBuilder.length() != 0 ? queryBuilder.toString() : null;
-    }
+		Assert.notNull(name, "'name' must not be null");
+		if (!ObjectUtils.isEmpty(values)) {
+			for (Object value : values) {
+				String valueAsString = value != null ? value.toString() : null;
+				queryParams.add(name, valueAsString);
+			}
+		}
+		else {
+			queryParams.add(name, null);
+		}
+		return this;
+	}
 
     /**
      * Sets the URI fragment. The given fragment may contain URI template variables, and may also be {@code null} to clear
