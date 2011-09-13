@@ -94,6 +94,17 @@ public class ContentNegotiatingViewResolverTests {
 				result);
 	}
 
+	// SPR-8678
+	
+	@Test
+	public void getMediaTypeFilenameWithContextPath() {
+		request.setContextPath("/project-1.0.0.M3");
+		request.setRequestURI("/project-1.0.0.M3/");
+		assertTrue("Context path should be excluded", viewResolver.getMediaTypes(request).isEmpty());
+		request.setRequestURI("/project-1.0.0.M3");
+		assertTrue("Context path should be excluded", viewResolver.getMediaTypes(request).isEmpty());
+	}
+
 	@Test
 	public void getMediaTypeParameter() {
 		viewResolver.setFavorParameter(true);
