@@ -314,7 +314,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 */
 	protected List<MediaType> getMediaTypes(HttpServletRequest request) {
 		if (this.favorPathExtension) {
-			String requestUri = urlPathHelper.getRequestUri(request);
+			String requestUri = urlPathHelper.getLookupPathForRequest(request);
 			String filename = WebUtils.extractFullFilenameFromUrlPath(requestUri);
 			MediaType mediaType = getMediaTypeFromFilename(filename);
 			if (mediaType != null) {
