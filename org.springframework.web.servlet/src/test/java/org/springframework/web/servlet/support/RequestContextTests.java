@@ -56,6 +56,7 @@ public class RequestContextTests {
 		assertEquals("foo/bar", context.getContextUrl("bar"));
 	}
 
+	@org.junit.Ignore // TODO: Arjen to address in SPR-5973
 	@Test
 	public void testGetContextUrlStringMap() throws Exception {
 		request.setContextPath("foo/");
