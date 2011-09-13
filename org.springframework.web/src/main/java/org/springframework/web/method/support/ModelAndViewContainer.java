@@ -23,9 +23,19 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.support.BindingAwareModelMap;
 
 /**
- * Record model and view related decisions made by {@link HandlerMethodArgumentResolver}s 
- * and {@link HandlerMethodReturnValueHandler}s during the course of invocation of a 
- * request-handling method.
+ * Records model and view related decisions made by 
+ * {@link HandlerMethodArgumentResolver}s and 
+ * {@link HandlerMethodReturnValueHandler}s during the course of invocation of 
+ * a controller method.
+ * 
+ * <p>The {@link #setResolveView(boolean)} flag can be used to indicate that
+ * view resolution is not required (e.g. {@code @ResponseBody} method).
+ * 
+ * <p>A default {@link Model} is created at instantiation and used thereafter. 
+ * The {@link #setRedirectModel(ModelMap)} method can be used to provide a 
+ * separate model to use potentially in case of a redirect. 
+ * The {@link #setUseRedirectModel()} can be used to enable use of the 
+ * redirect model if the controller decides to redirect. 
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -40,7 +50,7 @@ public class ModelAndViewContainer {
 
 	private ModelMap redirectModel;
 
-	private boolean redirectModelEnabled;
+	private boolean useRedirectModel = false;
 
 	/**
 	 * Create a new instance.
@@ -89,12 +99,15 @@ public class ModelAndViewContainer {
 	}
 	
 	/**
-	 * Whether view resolution is required or not. The default value is "true".
-	 * <p>When set to "false" by a {@link HandlerMethodReturnValueHandler}, the response 
-	 * is considered complete and view resolution is not be performed. 
-	 * <p>When set to "false" by {@link HandlerMethodArgumentResolver}, the response is
-	 * considered complete only in combination with the request mapping method 
-	 * returning {@code null} or void.
+	 * Whether view resolution is required or not. 
+	 * <p>A {@link HandlerMethodReturnValueHandler} may use this flag to 
+	 * indicate the response has been fully handled and view resolution 
+	 * is not required (e.g. {@code @ResponseBody}).
+	 * <p>A {@link HandlerMethodArgumentResolver} may also use this flag
+	 * to indicate the presence of an argument (e.g. 
+	 * {@code ServletResponse} or {@code OutputStream}) that may lead to 
+	 * a complete response depending on the method return value.
+	 * <p>The default value is {@code true}.
 	 */
 	public void setResolveView(boolean resolveView) {
 		this.resolveView = resolveView;
@@ -108,32 +121,42 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Return the model to use, never {@code null}.
+	 * Return the default model created at instantiation or the one provided 
+	 * via {@link #setRedirectModel(ModelMap)} as long as it has been enabled 
+	 * via {@link #setUseRedirectModel()}.
 	 */
 	public ModelMap getModel() {
-		if (this.redirectModelEnabled && (this.redirectModel != null)) {
+		if ((this.redirectModel != null) && this.useRedirectModel) {
 			return this.redirectModel;
 		}
 		else {
 			return this.model;
 		}
 	}
-
+	
 	/**
-	 * Provide an alternative model that may be prepared for a specific redirect
-	 * case. To enable use of this model, {@link #setRedirectModelEnabled()} 
-	 * must also be called.
+	 * Provide a model instance to use in case the controller redirects. 
+	 * Note that {@link #setUseRedirectModel()} must also be called in order 
+	 * to enable use of the redirect model.
 	 */
 	public void setRedirectModel(ModelMap redirectModel) {
 		this.redirectModel = redirectModel;
 	}
 
 	/**
-	 * Signals that a redirect model provided via {@link #setRedirectModel} 
-	 * may be used if it was provided.
+	 * Return the redirect model provided via 
+	 * {@link #setRedirectModel(ModelMap)} or {@code null} if not provided.
 	 */
-	public void setRedirectModelEnabled() {
-		this.redirectModelEnabled = true;
+	public ModelMap getRedirectModel() {
+		return this.redirectModel;
+	}
+
+	/**
+	 * Indicate that the redirect model provided via 
+	 * {@link #setRedirectModel(ModelMap)} should be used.
+	 */
+	public void setUseRedirectModel() {
+		this.useRedirectModel = true;
 	}
 
 	/**
@@ -179,6 +202,27 @@ public class ModelAndViewContainer {
 	 */
 	public boolean containsAttribute(String name) {
 		return getModel().containsAttribute(name);
+	}
+
+	/**
+	 * Return diagnostic information.
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("ModelAndViewContainer: ");
+		if (isResolveView()) {
+			if (isViewReference()) {
+				sb.append("reference to view with name '").append(this.view).append("'");
+			}
+			else {
+				sb.append("View is [").append(this.view).append(']');
+			}
+			sb.append("; model is ").append(getModel());
+		}
+		else {
+			sb.append("View resolution not required");
+		}
+		return sb.toString();
 	}
 	
 }

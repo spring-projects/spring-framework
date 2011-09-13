@@ -119,6 +119,24 @@ public class RedirectAttributesModelMapTests {
 		assertEquals("33", this.redirectAttributes.get("age"));
 	}
 	
+	@Test
+	public void put() {
+		this.redirectAttributes.put("testBean", new TestBean("Fred"));
+		
+		assertEquals("Fred", this.redirectAttributes.get("testBean"));
+	}
+
+	@Test
+	public void putAll() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("person", new TestBean("Fred"));
+		map.put("age", 33);
+		this.redirectAttributes.putAll(map);
+		
+		assertEquals("Fred", this.redirectAttributes.get("person"));
+		assertEquals("33", this.redirectAttributes.get("age"));
+	}
+	
 	public static class TestBeanConverter implements Converter<TestBean, String> {
 		
 		public String convert(TestBean source) {

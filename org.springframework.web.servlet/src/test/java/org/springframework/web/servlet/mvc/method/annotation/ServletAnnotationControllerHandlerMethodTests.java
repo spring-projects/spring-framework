@@ -1456,8 +1456,8 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}	
 
 	@Test
-	public void flashAttribute() throws Exception {
-		initServletWithControllers(MessageController.class);
+	public void redirectAttribute() throws Exception {
+		initServletWithControllers(RedirectAttributesController.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/messages");
 		HttpSession session = request.getSession();
@@ -2803,7 +2803,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	static class MessageController {
+	static class RedirectAttributesController {
 
 		@InitBinder
 		public void initBinder(WebDataBinder dataBinder) {
@@ -2827,8 +2827,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			}
 		}
 	}
-    
-	
+
 // Test cases deleted from the original SevletAnnotationControllerTests:
 	
 //	@Ignore("Controller interface => no method-level @RequestMapping annotation")	
