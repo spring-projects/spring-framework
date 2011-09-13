@@ -30,7 +30,7 @@ import org.springframework.http.HttpStatus;
 /**
  * @author Arjen Poutsma
  */
-public class ServletHttpResponseTests {
+public class ServletServerHttpResponseTests {
 
 	private ServletServerHttpResponse response;
 
