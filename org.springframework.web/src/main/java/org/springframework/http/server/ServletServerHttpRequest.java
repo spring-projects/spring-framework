@@ -30,6 +30,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -115,7 +116,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	private boolean isFormSubmittal(HttpServletRequest request) {
-		return FORM_CONTENT_TYPE.equals(request.getContentType()) &&
+		return request.getContentType() != null && request.getContentType().contains(FORM_CONTENT_TYPE) &&
 				(METHOD_POST.equalsIgnoreCase(request.getMethod()) || METHOD_PUT.equalsIgnoreCase(request.getMethod()));
 	}
 
