@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that an annotated class is a "Service" (e.g. a business service facade).
+ * Indicates that an annotated class is a "Service", originally defined by Domain-Driven
+ * Design (Evans, 2003) as "an operation offered as an interface that stands alone in the
+ * model, with no encapsulated state."
+ *
+ * <p>May also indicate that a class is a "Business Service Facade" (in the Core J2EE
+ * patterns sense), or something similar. This annotation is a general-purpose stereotype
+ * and individual teams may narrow their semantics and use as appropriate.
  *
  * <p>This annotation serves as a specialization of {@link Component @Component},
  * allowing for implementation classes to be autodetected through classpath scanning.
@@ -31,7 +37,7 @@ import java.lang.annotation.Target;
  * @author Juergen Hoeller
  * @since 2.5
  * @see Component
- * @see org.springframework.context.annotation.ClassPathBeanDefinitionScanner
+ * @see Repository
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
