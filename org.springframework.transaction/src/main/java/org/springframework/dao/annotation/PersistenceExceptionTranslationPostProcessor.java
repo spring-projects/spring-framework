@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,25 +35,28 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Bean post-processor that automatically applies persistence exception
- * translation to any bean that carries the
- * {@link org.springframework.stereotype.Repository} annotation,
- * adding a corresponding {@link PersistenceExceptionTranslationAdvisor}
- * to the exposed proxy (either an existing AOP proxy or a newly generated
- * proxy that implements all of the target's interfaces).
+ * Bean post-processor that automatically applies persistence exception translation to any
+ * bean marked with Spring's @{@link org.springframework.stereotype.Repository Repository}
+ * annotation, adding a corresponding {@link PersistenceExceptionTranslationAdvisor} to
+ * the exposed proxy (either an existing AOP proxy or a newly generated proxy that
+ * implements all of the target's interfaces).
  *
  * <p>Translates native resource exceptions to Spring's
- * {@link org.springframework.dao.DataAccessException} hierarchy.
+ * {@link org.springframework.dao.DataAccessException DataAccessException} hierarchy.
  * Autodetects beans that implement the
- * {@link org.springframework.dao.support.PersistenceExceptionTranslator}
- * interface, which are subsequently asked to translate candidate exceptions.
+ * {@link org.springframework.dao.support.PersistenceExceptionTranslator
+ * PersistenceExceptionTranslator} interface, which are subsequently asked to translate
+ * candidate exceptions.
  *
- * <p>All of Spring's applicable resource factories implement the
- * <code>PersistenceExceptionTranslator</code> interface out of the box.
- * As a consequence, all that is usually needed to enable automatic exception
- * translation is marking all affected beans (such as DAOs) with the
- * <code>Repository</code> annotation, along with defining this post-processor
- * as bean in the application context.
+
+ * <p>All of Spring's applicable resource factories (e.g. {@link
+ * org.springframework.orm.hibernate3.LocalSessionFactoryBean LocalSessionFactoryBean},
+ * {@link org.springframework.orm.jpa.LocalEntityManagerFactoryBean
+ * LocalEntityManagerFactoryBean}) implement the {@code PersistenceExceptionTranslator}
+ * interface out of the box. As a consequence, all that is usually needed to enable
+ * automatic exception translation is marking all affected beans (such as Repositories or
+ * DAOs) with the {@code @Repository} annotation, along with defining this post-processor
+ * as a bean in the application context.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -63,6 +66,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.dao.DataAccessException
  * @see org.springframework.dao.support.PersistenceExceptionTranslator
  */
+@SuppressWarnings("serial")
 public class PersistenceExceptionTranslationPostProcessor extends ProxyConfig
 		implements BeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware, Ordered {
 
@@ -115,7 +119,7 @@ public class PersistenceExceptionTranslationPostProcessor extends ProxyConfig
 			// Ignore AOP infrastructure such as scoped proxies.
 			return bean;
 		}
-		Class targetClass = AopUtils.getTargetClass(bean);
+		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (AopUtils.canApply(this.persistenceExceptionTranslationAdvisor, targetClass)) {
 			if (bean instanceof Advised) {
 				((Advised) bean).addAdvisor(this.persistenceExceptionTranslationAdvisor);
