@@ -20,7 +20,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -111,23 +111,19 @@ public class UriUtilsTests {
 				UriUtils.encodeUri("http://www.ietf.org/rfc/rfc3986.txt", ENC));
 		assertEquals("Invalid encoded URI", "https://www.ietf.org/rfc/rfc3986.txt",
 				UriUtils.encodeUri("https://www.ietf.org/rfc/rfc3986.txt", ENC));
-		assertEquals("Invalid encoded URI", "http://www.google.com/?q=Z%C3%BCrich",
-				UriUtils.encodeUri("http://www.google.com/?q=Z\u00fcrich", ENC));
+		assertEquals("Invalid encoded URI", "http://www.google.com?q=Z%C3%BCrich",
+				UriUtils.encodeUri("http://www.google.com?q=Z\u00fcrich", ENC));
 		assertEquals("Invalid encoded URI",
 				"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)",
 				UriUtils.encodeUri(
 						"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar#and(java.util.BitSet)",
 						ENC));
-		assertEquals("Invalid encoded URI", "mailto:java-net@java.sun.com",
-				UriUtils.encodeUri("mailto:java-net@java.sun.com", ENC));
-		assertEquals("Invalid encoded URI", "news:comp.lang.java", UriUtils.encodeUri("news:comp.lang.java", ENC));
-		assertEquals("Invalid encoded URI", "urn:isbn:096139210x", UriUtils.encodeUri("urn:isbn:096139210x", ENC));
-		assertEquals("Invalid encoded URI", "http://java.sun.com/j2se/1.3/",
-				UriUtils.encodeUri("http://java.sun.com/j2se/1.3/", ENC));
-		assertEquals("Invalid encoded URI", "docs/guide/collections/designfaq.html#28",
-				UriUtils.encodeUri("docs/guide/collections/designfaq.html#28", ENC));
-		assertEquals("Invalid encoded URI", "../../../demo/jfc/SwingSet2/src/SwingSet2.java",
-				UriUtils.encodeUri("../../../demo/jfc/SwingSet2/src/SwingSet2.java", ENC));
+		assertEquals("Invalid encoded URI", "http://java.sun.com/j2se/1.3",
+				UriUtils.encodeUri("http://java.sun.com/j2se/1.3", ENC));
+		assertEquals("Invalid encoded URI", "/docs/guide/collections/designfaq.html#28",
+				UriUtils.encodeUri("/docs/guide/collections/designfaq.html#28", ENC));
+		assertEquals("Invalid encoded URI", "/../../../demo/jfc/SwingSet2/src/SwingSet2.java",
+				UriUtils.encodeUri("/../../../demo/jfc/SwingSet2/src/SwingSet2.java", ENC));
 		assertEquals("Invalid encoded URI", "file:///~/calendar", UriUtils.encodeUri("file:///~/calendar", ENC));
 		assertEquals("Invalid encoded URI", "http://example.com/query=foo@bar",
 				UriUtils.encodeUri("http://example.com/query=foo@bar", ENC));
@@ -140,8 +136,8 @@ public class UriUtilsTests {
 				UriUtils.encodeHttpUrl("http://www.ietf.org/rfc/rfc3986.txt", ENC));
 		assertEquals("Invalid encoded URI", "https://www.ietf.org/rfc/rfc3986.txt",
 				UriUtils.encodeHttpUrl("https://www.ietf.org/rfc/rfc3986.txt", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://www.google.com/?q=Z%C3%BCrich",
-				UriUtils.encodeHttpUrl("http://www.google.com/?q=Z\u00fcrich", ENC));
+		assertEquals("Invalid encoded HTTP URL", "http://www.google.com?q=Z%C3%BCrich",
+				UriUtils.encodeHttpUrl("http://www.google.com?q=Z\u00fcrich", ENC));
 		assertEquals("Invalid encoded HTTP URL", "http://ws.geonames.org/searchJSON?q=T%C5%8Dky%C5%8D&style=FULL&maxRows=300",
 				UriUtils.encodeHttpUrl("http://ws.geonames.org/searchJSON?q=T\u014dky\u014d&style=FULL&maxRows=300", ENC));
 		assertEquals("Invalid encoded HTTP URL",
@@ -150,8 +146,8 @@ public class UriUtilsTests {
 						"http://arjen:foobar@java.sun.com:80/javase/6/docs/api/java/util/BitSet.html?foo=bar", ENC));
 		assertEquals("Invalid encoded HTTP URL", "http://search.twitter.com/search.atom?q=%23avatar",
 				UriUtils.encodeHttpUrl("http://search.twitter.com/search.atom?q=#avatar", ENC));
-		assertEquals("Invalid encoded HTTP URL", "http://java.sun.com/j2se/1.3/",
-				UriUtils.encodeHttpUrl("http://java.sun.com/j2se/1.3/", ENC));
+		assertEquals("Invalid encoded HTTP URL", "http://java.sun.com/j2se/1.3",
+				UriUtils.encodeHttpUrl("http://java.sun.com/j2se/1.3", ENC));
 		assertEquals("Invalid encoded HTTP URL", "http://example.com/query=foo@bar",
 				UriUtils.encodeHttpUrl("http://example.com/query=foo@bar", ENC));
 	}

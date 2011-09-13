@@ -51,7 +51,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeUri(String uri, String encoding) throws UnsupportedEncodingException {
-        UriComponents uriComponents = UriComponents.fromUriString(uri);
+        UriComponents uriComponents = UriComponentsBuilder.fromUriString(uri).build();
         UriComponents encoded = uriComponents.encode(encoding);
         return encoded.toUriString();
     }
@@ -68,7 +68,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeHttpUrl(String httpUrl, String encoding) throws UnsupportedEncodingException {
-        UriComponents uriComponents = UriComponents.fromHttpUrl(httpUrl);
+        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(httpUrl).build();
         UriComponents encoded = uriComponents.encode(encoding);
         return encoded.toUriString();
 	}
@@ -99,8 +99,13 @@ public abstract class UriUtils {
 											 String query,
 											 String fragment,
 											 String encoding) throws UnsupportedEncodingException {
-        UriComponents uriComponents = UriComponents.fromUriComponents(scheme, authority, userInfo, host, port, path, query, fragment);
-        UriComponents encoded = uriComponents.encode(encoding);
+		int portAsInt = port != null ? Integer.parseInt(port) : -1;
+
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
+		builder.scheme(scheme).userInfo(userInfo).host(host).port(portAsInt);
+		builder.path(path).query(query).fragment(fragment);
+
+		UriComponents encoded = builder.build().encode(encoding);
 
         return encoded.toUriString();
 	}
