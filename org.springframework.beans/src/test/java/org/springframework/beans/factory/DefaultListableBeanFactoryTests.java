@@ -16,14 +16,17 @@
 
 package org.springframework.beans.factory;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -74,7 +77,6 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -2152,6 +2154,15 @@ public class DefaultListableBeanFactoryTests {
 				}, null);
 		assertNotNull(bean);
 		assertEquals("user1", bean.getUserName());
+	}
+
+	@Test
+	public void testContainsBeanReturnsTrueEvenForAbstractBeanDefinition() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("abs",
+				rootBeanDefinition(TestBean.class).setAbstract(true).getBeanDefinition());
+		assertThat(bf.containsBean("abs"), is(true));
+		assertThat(bf.containsBean("bogus"), is(false));
 	}
 
 
