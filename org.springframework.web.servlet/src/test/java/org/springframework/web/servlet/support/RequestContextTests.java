@@ -16,18 +16,19 @@
 
 package org.springframework.web.servlet.support;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Dave Syer
@@ -56,7 +57,6 @@ public class RequestContextTests {
 		assertEquals("foo/bar", context.getContextUrl("bar"));
 	}
 
-	@org.junit.Ignore // TODO: Arjen to address in SPR-5973
 	@Test
 	public void testGetContextUrlStringMap() throws Exception {
 		request.setContextPath("foo/");

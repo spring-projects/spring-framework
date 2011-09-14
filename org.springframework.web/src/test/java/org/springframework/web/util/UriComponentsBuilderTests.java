@@ -36,18 +36,18 @@ public class UriComponentsBuilderTests {
 		UriComponents result = builder.scheme("http").host("example.com").path("foo").queryParam("bar").fragment("baz").build();
         assertEquals("http", result.getScheme());
         assertEquals("example.com", result.getHost());
-        assertEquals("/foo", result.getPath());
+        assertEquals("foo", result.getPath());
         assertEquals("bar", result.getQuery());
         assertEquals("baz", result.getFragment());
 
 		URI expected = new URI("http://example.com/foo?bar#baz");
 		assertEquals("Invalid result URI", expected, result.toUri());
 	}
-
+	
 	@Test
 	public void fromPath() throws URISyntaxException {
 		UriComponents result = UriComponentsBuilder.fromPath("foo").queryParam("bar").fragment("baz").build();
-        assertEquals("/foo", result.getPath());
+        assertEquals("foo", result.getPath());
         assertEquals("bar", result.getQuery());
         assertEquals("baz", result.getFragment());
 
@@ -114,7 +114,7 @@ public class UriComponentsBuilderTests {
         assertNull(result.getUserInfo());
         assertNull(result.getHost());
         assertEquals(-1, result.getPort());
-        assertEquals("/docs/guide/collections/designfaq.html", result.getPath());
+        assertEquals("docs/guide/collections/designfaq.html", result.getPath());
         assertNull(result.getQuery());
         assertEquals("28", result.getFragment());
 	}
