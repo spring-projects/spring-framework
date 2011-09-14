@@ -49,13 +49,13 @@ public class UriTemplate implements Serializable {
 	/** Replaces template variables in the URI template. */
 	private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
 
+	private final UriComponents uriComponents;
+
 	private final List<String> variableNames;
 
 	private final Pattern matchPattern;
 
 	private final String uriTemplate;
-
-    private final UriComponents uriComponents;
 
 
 	/**
