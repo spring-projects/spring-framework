@@ -316,9 +316,26 @@ public final class UriComponents {
 	 * @param uriVariables the map of URI variables
 	 * @return the expanded uri components
 	 */
-	public UriComponents expand(Map<String, ?> uriVariables) {
-		Assert.notNull(uriVariables, "'uriVariables' must not be null");
+	public UriComponents expand(Map<String, ?> map) {
+		Assert.notNull(map, "'uriVariables' must not be null");
 
+		return expandInternal(new MapTemplateVariables(map));
+	}
+
+	/**
+	 * Replaces all URI template variables with the values from a given array. The array represent variable values.
+	 * The order of variables is significant.
+
+	 * @param uriVariableValues URI variable values
+	 * @return the expanded uri components
+	 */
+	public UriComponents expand(Object... uriVariableValues) {
+		Assert.notNull(uriVariableValues, "'uriVariableValues' must not be null");
+
+		return expandInternal(new VarArgsTemplateVariables(uriVariableValues));
+	}
+
+	private UriComponents expandInternal(UriTemplateVariables uriVariables) {
 		String expandedScheme = expandUriComponent(this.scheme, uriVariables);
 		String expandedUserInfo = expandUriComponent(this.userInfo, uriVariables);
 		String expandedHost = expandUriComponent(this.host, uriVariables);
@@ -340,7 +357,7 @@ public final class UriComponents {
 				expandedQueryParams, expandedFragment, false);
 	}
 
-	private static String expandUriComponent(String source, Map<String, ?> uriVariables) {
+	private static String expandUriComponent(String source, UriTemplateVariables uriVariables) {
 		if (source == null) {
 			return null;
 		}
@@ -352,70 +369,14 @@ public final class UriComponents {
 		while (matcher.find()) {
 			String match = matcher.group(1);
 			String variableName = getVariableName(match);
-			Object variableValue = uriVariables.get(variableName);
-			String uriVariableValueString = getVariableValueAsString(variableValue);
-			String replacement = Matcher.quoteReplacement(uriVariableValueString);
+			Object variableValue = uriVariables.getValue(variableName);
+			String variableValueString = getVariableValueAsString(variableValue);
+			String replacement = Matcher.quoteReplacement(variableValueString);
 			matcher.appendReplacement(sb, replacement);
 		}
 		matcher.appendTail(sb);
 		return sb.toString();
 	}
-
-	/**
-	 * Replaces all URI template variables with the values from a given array. The array represent variable values.
-	 * The order of variables is significant.
-
-	 * @param uriVariableValues URI variable values
-	 * @return the expanded uri components
-	 */
-	public UriComponents expand(Object... uriVariableValues) {
-		Assert.notNull(uriVariableValues, "'uriVariableValues' must not be null");
-
-		Iterator<Object> valueIterator = Arrays.asList(uriVariableValues).iterator();
-
-		String expandedScheme = expandUriComponent(this.scheme, valueIterator);
-		String expandedUserInfo = expandUriComponent(this.userInfo, valueIterator);
-		String expandedHost = expandUriComponent(this.host, valueIterator);
-		PathComponent expandedPath = path.expand(valueIterator);
-		MultiValueMap<String, String> expandedQueryParams =
-				new LinkedMultiValueMap<String, String>(this.queryParams.size());
-		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
-			String expandedName = expandUriComponent(entry.getKey(), valueIterator);
-			List<String> expandedValues = new ArrayList<String>(entry.getValue().size());
-			for (String value : entry.getValue()) {
-				String expandedValue = expandUriComponent(value, valueIterator);
-				expandedValues.add(expandedValue);
-			}
-			expandedQueryParams.put(expandedName, expandedValues);
-		}
-		String expandedFragment = expandUriComponent(this.fragment, valueIterator);
-
-		return new UriComponents(expandedScheme, expandedUserInfo, expandedHost, this.port, expandedPath,
-				expandedQueryParams, expandedFragment, false);
-	}
-
-	private static String expandUriComponent(String source, Iterator<Object> valueIterator) {
-		if (source == null) {
-			return null;
-		}
-		if (source.indexOf('{') == -1) {
-			return source;
-		}
-		Matcher matcher = NAMES_PATTERN.matcher(source);
-		StringBuffer sb = new StringBuffer();
-		while (matcher.find()) {
-			if (!valueIterator.hasNext()) {
-				throw new IllegalArgumentException("Not enough variable values available to expand [" + source + "]");
-			}
-			Object variableValue = valueIterator.next();
-			String uriVariableValueString = getVariableValueAsString(variableValue);
-			String replacement = Matcher.quoteReplacement(uriVariableValueString);
-			matcher.appendReplacement(sb, replacement);
-		}
-		matcher.appendTail(sb);
-		return sb.toString();
-	}
-
 
 	private static String getVariableName(String match) {
 		int colonIdx = match.indexOf(':');
@@ -425,10 +386,6 @@ public final class UriComponents {
 	private static String getVariableValueAsString(Object variableValue) {
 		return variableValue != null ? variableValue.toString() : "";
 	}
-
-
-
-
 
 	// other functionality
 
@@ -722,9 +679,8 @@ public final class UriComponents {
 
 		PathComponent encode(String encoding) throws UnsupportedEncodingException;
 
-		PathComponent expand(Map<String, ?> uriVariables);
+		PathComponent expand(UriTemplateVariables uriVariables);
 
-		PathComponent expand(Iterator<Object> valueIterator);
 	}
 
 	/**
@@ -753,13 +709,8 @@ public final class UriComponents {
 			return new FullPathComponent(encodedPath);
 		}
 
-		public PathComponent expand(Map<String, ?> uriVariables) {
+		public PathComponent expand(UriTemplateVariables uriVariables) {
 			String expandedPath = expandUriComponent(getPath(), uriVariables);
-			return new FullPathComponent(expandedPath);
-		}
-
-		public PathComponent expand(Iterator<Object> valueIterator) {
-			String expandedPath = expandUriComponent(getPath(), valueIterator);
 			return new FullPathComponent(expandedPath);
 		}
 
@@ -818,21 +769,11 @@ public final class UriComponents {
 			return new PathSegmentComponent(encodedPathSegments);
 		}
 
-		public PathComponent expand(Map<String, ?> uriVariables) {
+		public PathComponent expand(UriTemplateVariables uriVariables) {
 			List<String> pathSegments = getPathSegments();
 			List<String> expandedPathSegments = new ArrayList<String>(pathSegments.size());
 			for (String pathSegment : pathSegments) {
 				String expandedPathSegment = expandUriComponent(pathSegment, uriVariables);
-				expandedPathSegments.add(expandedPathSegment);
-			}
-			return new PathSegmentComponent(expandedPathSegments);
-		}
-
-		public PathComponent expand(Iterator<Object> valueIterator) {
-			List<String> pathSegments = getPathSegments();
-			List<String> expandedPathSegments = new ArrayList<String>(pathSegments.size());
-			for (String pathSegment : pathSegments) {
-				String expandedPathSegment = expandUriComponent(pathSegment, valueIterator);
 				expandedPathSegments.add(expandedPathSegment);
 			}
 			return new PathSegmentComponent(expandedPathSegments);
@@ -873,11 +814,7 @@ public final class UriComponents {
 			return this;
 		}
 
-		public PathComponent expand(Map<String, ?> uriVariables) {
-			return this;
-		}
-
-		public PathComponent expand(Iterator<Object> valueIterator) {
+		public PathComponent expand(UriTemplateVariables uriVariables) {
 			return this;
 		}
 
@@ -892,5 +829,51 @@ public final class UriComponents {
 		}
 
 	};
+
+	/**
+	 * Defines the contract for URI Template variables
+	 *
+	 * @see UriComponents#expand
+	 */
+	private interface UriTemplateVariables {
+
+		Object getValue(String name);
+
+
+	}
+
+	/**
+	 * URI template variables backed by a map.
+	 */
+	private static class MapTemplateVariables implements UriTemplateVariables {
+
+		private final Map<String, ?> uriVariables;
+
+		public MapTemplateVariables(Map<String, ?> uriVariables) {
+			this.uriVariables = uriVariables;
+		}
+
+		public Object getValue(String name) {
+			return this.uriVariables.get(name);
+		}
+	}
+
+	/**
+	 * URI template variables backed by a variable argument array.
+	 */
+	private static class VarArgsTemplateVariables implements UriTemplateVariables {
+		private final Iterator<Object> valueIterator;
+
+		public VarArgsTemplateVariables(Object... uriVariableValues) {
+			this.valueIterator = Arrays.asList(uriVariableValues).iterator();
+		}
+
+		public Object getValue(String name) {
+			if (!valueIterator.hasNext()) {
+				throw new IllegalArgumentException("Not enough variable values available to expand [" + name + "]");
+			}
+			return valueIterator.next();
+		}
+	}
 
 }
