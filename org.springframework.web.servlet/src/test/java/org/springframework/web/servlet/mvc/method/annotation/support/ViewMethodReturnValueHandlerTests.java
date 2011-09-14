@@ -30,7 +30,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
@@ -50,65 +49,66 @@ public class ViewMethodReturnValueHandlerTests {
 
 	@Before
 	public void setUp() {
-		handler = new ViewMethodReturnValueHandler();
-		mavContainer = new ModelAndViewContainer();
-		webRequest = new ServletWebRequest(new MockHttpServletRequest());
+		this.handler = new ViewMethodReturnValueHandler();
+		this.mavContainer = new ModelAndViewContainer();
+		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 	
 	@Test
 	public void supportsReturnType() throws Exception {
-		assertTrue(handler.supportsReturnType(createMethodParam("view")));
-		assertTrue(handler.supportsReturnType(createMethodParam("viewName")));
+		assertTrue(this.handler.supportsReturnType(createReturnValueParam("view")));
+		assertTrue(this.handler.supportsReturnType(createReturnValueParam("viewName")));
 	}
 
 	@Test
 	public void returnView() throws Exception {
 		InternalResourceView view = new InternalResourceView("testView");
-		handler.handleReturnValue(view, createMethodParam("view"), mavContainer, webRequest);
+		this.handler.handleReturnValue(view, createReturnValueParam("view"), this.mavContainer, this.webRequest);
 		
-		assertSame(view, mavContainer.getView());
+		assertSame(view, this.mavContainer.getView());
 	}
 
 	@Test
 	public void returnViewRedirect() throws Exception {
 		RedirectView redirectView = new RedirectView("testView");
 		ModelMap redirectModel = new RedirectAttributesModelMap();
-		mavContainer.setRedirectModel(redirectModel);
-		handler.handleReturnValue(redirectView, createMethodParam("view"), mavContainer, webRequest);
+		this.mavContainer.setRedirectModel(redirectModel);
+		MethodParameter param = createReturnValueParam("view");
+		this.handler.handleReturnValue(redirectView, param, this.mavContainer, this.webRequest);
 		
-		assertSame(redirectView, mavContainer.getView());
-		assertSame("Should have switched to the RedirectModel", redirectModel, mavContainer.getModel());
+		assertSame(redirectView, this.mavContainer.getView());
+		assertSame("Should have switched to the RedirectModel", redirectModel, this.mavContainer.getModel());
 	}
 	
 	@Test
 	public void returnViewName() throws Exception {
-		handler.handleReturnValue("testView", createMethodParam("viewName"), mavContainer, webRequest);
+		MethodParameter param = createReturnValueParam("viewName");
+		this.handler.handleReturnValue("testView", param, this.mavContainer, this.webRequest);
 		
-		assertEquals("testView", mavContainer.getViewName());
+		assertEquals("testView", this.mavContainer.getViewName());
 	}
 
 	@Test
 	public void returnViewNameRedirect() throws Exception {
 		ModelMap redirectModel = new RedirectAttributesModelMap();
-		mavContainer.setRedirectModel(redirectModel);
-		handler.handleReturnValue("redirect:testView", createMethodParam("viewName"), mavContainer, webRequest);
+		this.mavContainer.setRedirectModel(redirectModel);
+		MethodParameter param = createReturnValueParam("viewName");
+		this.handler.handleReturnValue("redirect:testView", param, this.mavContainer, this.webRequest);
 
-		assertEquals("redirect:testView", mavContainer.getViewName());
-		assertSame("Should have switched to the RedirectModel", redirectModel, mavContainer.getModel());
+		assertEquals("redirect:testView", this.mavContainer.getViewName());
+		assertSame("Should have switched to the RedirectModel", redirectModel, this.mavContainer.getModel());
 	}
 
-	private MethodParameter createMethodParam(String methodName) throws Exception {
+	private MethodParameter createReturnValueParam(String methodName) throws Exception {
 		Method method = getClass().getDeclaredMethod(methodName);
 		return new MethodParameter(method, -1);
 	}
 	
-	@SuppressWarnings("unused")
-	private View view() {
+	View view() {
 		return null;
 	}
 
-	@SuppressWarnings("unused")
-	private String viewName() {
+	String viewName() {
 		return null;
 	}
 	
