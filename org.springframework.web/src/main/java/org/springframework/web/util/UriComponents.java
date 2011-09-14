@@ -65,7 +65,7 @@ public final class UriComponents {
 
 	private final int port;
 
-	private final List<String> pathSegments;
+	private final PathComponent path;
 
 	private final MultiValueMap<String, String> queryParams;
 
@@ -73,11 +73,11 @@ public final class UriComponents {
 
     private final boolean encoded;
 
-	public UriComponents(String scheme,
+	UriComponents(String scheme,
 						 String userInfo,
 						 String host,
 						 int port,
-						 List<String> pathSegments,
+						 PathComponent path,
 						 MultiValueMap<String, String> queryParams,
 						 String fragment,
 						 boolean encoded) {
@@ -85,10 +85,7 @@ public final class UriComponents {
 		this.userInfo = userInfo;
 		this.host = host;
 		this.port = port;
-		if (pathSegments == null) {
-			pathSegments = Collections.emptyList();
-		}
-		this.pathSegments = Collections.unmodifiableList(pathSegments);
+		this.path = path != null ? path : NULL_PATH_COMPONENT;
 		if (queryParams == null) {
 			queryParams = new LinkedMultiValueMap<String, String>(0);
 		}
@@ -141,28 +138,7 @@ public final class UriComponents {
 	 * @return the path. Can be {@code null}.
 	 */
 	public String getPath() {
-		if (!pathSegments.isEmpty()) {
-			StringBuilder pathBuilder = new StringBuilder();
-			for (String pathSegment : pathSegments) {
-				if (StringUtils.hasLength(pathSegment)) {
-					boolean startsWithSlash = pathSegment.charAt(0) == PATH_DELIMITER;
-					boolean endsWithSlash =
-							pathBuilder.length() > 0 && pathBuilder.charAt(pathBuilder.length() - 1) == PATH_DELIMITER;
-
-					if (!endsWithSlash && !startsWithSlash) {
-						pathBuilder.append('/');
-					}
-					else if (endsWithSlash && startsWithSlash) {
-						pathSegment = pathSegment.substring(1);
-					}
-					pathBuilder.append(pathSegment);
-				}
-			}
-			return pathBuilder.toString();
-		}
-		else {
-			return null;
-		}
+		return path.getPath();
 	}
 
     /**
@@ -170,9 +146,9 @@ public final class UriComponents {
      *
      * @return the path segments. Empty if no path has been set.
      */
-    public List<String> getPathSegments() {
-		return pathSegments;
-    }
+	public List<String> getPathSegments() {
+		return path.getPathSegments();
+	}
 
 	/**
 	 * Returns the query.
@@ -265,11 +241,7 @@ public final class UriComponents {
 		String encodedScheme = encodeUriComponent(this.scheme, encoding, Type.SCHEME);
 		String encodedUserInfo = encodeUriComponent(this.userInfo, encoding, Type.USER_INFO);
 		String encodedHost = encodeUriComponent(this.host, encoding, Type.HOST);
-		List<String> encodedPathSegments = new ArrayList<String>(this.pathSegments.size());
-		for (String pathSegment : this.pathSegments) {
-			String encodedPathSegment = encodeUriComponent(pathSegment, encoding, Type.PATH_SEGMENT);
-			encodedPathSegments.add(encodedPathSegment);
-		}
+		PathComponent encodedPath = path.encode(encoding);
 		MultiValueMap<String, String> encodedQueryParams =
 				new LinkedMultiValueMap<String, String>(this.queryParams.size());
 		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
@@ -283,7 +255,7 @@ public final class UriComponents {
 		}
 		String encodedFragment = encodeUriComponent(this.fragment, encoding, Type.FRAGMENT);
 
-		return new UriComponents(encodedScheme, encodedUserInfo, encodedHost, this.port, encodedPathSegments,
+		return new UriComponents(encodedScheme, encodedUserInfo, encodedHost, this.port, encodedPath,
 				encodedQueryParams, encodedFragment, true);
     }
 
@@ -350,11 +322,7 @@ public final class UriComponents {
 		String expandedScheme = expandUriComponent(this.scheme, uriVariables);
 		String expandedUserInfo = expandUriComponent(this.userInfo, uriVariables);
 		String expandedHost = expandUriComponent(this.host, uriVariables);
-		List<String> expandedPathSegments = new ArrayList<String>(this.pathSegments.size());
-		for (String pathSegment : this.pathSegments) {
-			String expandedPathSegment = expandUriComponent(pathSegment, uriVariables);
-			expandedPathSegments.add(expandedPathSegment);
-		}
+		PathComponent expandedPath = path.expand(uriVariables);
 		MultiValueMap<String, String> expandedQueryParams =
 				new LinkedMultiValueMap<String, String>(this.queryParams.size());
 		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
@@ -368,11 +336,11 @@ public final class UriComponents {
 		}
 		String expandedFragment = expandUriComponent(this.fragment, uriVariables);
 
-		return new UriComponents(expandedScheme, expandedUserInfo, expandedHost, this.port, expandedPathSegments,
+		return new UriComponents(expandedScheme, expandedUserInfo, expandedHost, this.port, expandedPath,
 				expandedQueryParams, expandedFragment, false);
 	}
 
-	private String expandUriComponent(String source, Map<String, ?> uriVariables) {
+	private static String expandUriComponent(String source, Map<String, ?> uriVariables) {
 		if (source == null) {
 			return null;
 		}
@@ -408,11 +376,7 @@ public final class UriComponents {
 		String expandedScheme = expandUriComponent(this.scheme, valueIterator);
 		String expandedUserInfo = expandUriComponent(this.userInfo, valueIterator);
 		String expandedHost = expandUriComponent(this.host, valueIterator);
-		List<String> expandedPathSegments = new ArrayList<String>(this.pathSegments.size());
-		for (String pathSegment : this.pathSegments) {
-			String expandedPathSegment = expandUriComponent(pathSegment, valueIterator);
-			expandedPathSegments.add(expandedPathSegment);
-		}
+		PathComponent expandedPath = path.expand(valueIterator);
 		MultiValueMap<String, String> expandedQueryParams =
 				new LinkedMultiValueMap<String, String>(this.queryParams.size());
 		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
@@ -426,11 +390,11 @@ public final class UriComponents {
 		}
 		String expandedFragment = expandUriComponent(this.fragment, valueIterator);
 
-		return new UriComponents(expandedScheme, expandedUserInfo, expandedHost, this.port, expandedPathSegments,
+		return new UriComponents(expandedScheme, expandedUserInfo, expandedHost, this.port, expandedPath,
 				expandedQueryParams, expandedFragment, false);
 	}
 
-	private String expandUriComponent(String source, Iterator<Object> valueIterator) {
+	private static String expandUriComponent(String source, Iterator<Object> valueIterator) {
 		if (source == null) {
 			return null;
 		}
@@ -453,12 +417,12 @@ public final class UriComponents {
 	}
 
 
-	private String getVariableName(String match) {
+	private static String getVariableName(String match) {
 		int colonIdx = match.indexOf(':');
 		return colonIdx == -1 ? match : match.substring(0, colonIdx);
 	}
 
-	protected String getVariableValueAsString(Object variableValue) {
+	private static String getVariableValueAsString(Object variableValue) {
 		return variableValue != null ? variableValue.toString() : "";
 	}
 
@@ -497,9 +461,12 @@ public final class UriComponents {
         }
 
 		String path = getPath();
-		if (path != null) {
-            uriBuilder.append(path);
-        }
+		if (StringUtils.hasLength(path)) {
+			if (uriBuilder.length() != 0 && path.charAt(0) != PATH_DELIMITER) {
+				uriBuilder.append(PATH_DELIMITER);
+			}
+			uriBuilder.append(path);
+		}
 
 		String query = getQuery();
 		if (query != null) {
@@ -526,7 +493,11 @@ public final class UriComponents {
                 return new URI(toUriString());
             }
             else {
-				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), getPath(), getQuery(),
+				String path = getPath();
+				if (StringUtils.hasLength(path) && path.charAt(0) != PATH_DELIMITER) {
+					path = PATH_DELIMITER + path;
+				}
+				return new URI(getScheme(), getUserInfo(), getHost(), getPort(), path, getQuery(),
 						getFragment());
             }
         }
@@ -555,7 +526,7 @@ public final class UriComponents {
 			if (port != other.port) {
 				return false;
 			}
-			if (!pathSegments.equals(other.pathSegments)) {
+			if (!path.equals(other.path)) {
 				return false;
 			}
 			if (!queryParams.equals(other.queryParams)) {
@@ -577,7 +548,7 @@ public final class UriComponents {
 		result = 31 * result + (userInfo != null ? userInfo.hashCode() : 0);
 		result = 31 * result + (host != null ? host.hashCode() : 0);
 		result = 31 * result + port;
-		result = 31 * result + pathSegments.hashCode();
+		result = 31 * result + path.hashCode();
 		result = 31 * result + queryParams.hashCode();
 		result = 31 * result + (fragment != null ? fragment.hashCode() : 0);
 		return result;
@@ -739,5 +710,187 @@ public final class UriComponents {
         }
 
     }
+
+	/**
+	 * Defines the contract for path (segments).
+	 */
+	interface PathComponent {
+
+		String getPath();
+
+		List<String> getPathSegments();
+
+		PathComponent encode(String encoding) throws UnsupportedEncodingException;
+
+		PathComponent expand(Map<String, ?> uriVariables);
+
+		PathComponent expand(Iterator<Object> valueIterator);
+	}
+
+	/**
+	 * Represents a path backed by a string.
+	 */
+	final static class FullPathComponent implements PathComponent {
+
+		private final String path;
+
+		FullPathComponent(String path) {
+			this.path = path;
+		}
+
+		public String getPath() {
+			return path;
+		}
+
+		public List<String> getPathSegments() {
+			String delimiter = new String(new char[]{PATH_DELIMITER});
+			String[] pathSegments = StringUtils.tokenizeToStringArray(path, delimiter);
+			return Collections.unmodifiableList(Arrays.asList(pathSegments));
+		}
+
+		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
+			String encodedPath = encodeUriComponent(getPath(),encoding, Type.PATH);
+			return new FullPathComponent(encodedPath);
+		}
+
+		public PathComponent expand(Map<String, ?> uriVariables) {
+			String expandedPath = expandUriComponent(getPath(), uriVariables);
+			return new FullPathComponent(expandedPath);
+		}
+
+		public PathComponent expand(Iterator<Object> valueIterator) {
+			String expandedPath = expandUriComponent(getPath(), valueIterator);
+			return new FullPathComponent(expandedPath);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			} else if (o instanceof FullPathComponent) {
+				FullPathComponent other = (FullPathComponent) o;
+				return this.getPath().equals(other.getPath());
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return getPath().hashCode();
+		}
+	}
+
+	/**
+	 * Represents a path backed by a string list (i.e. path segments).
+	 */
+	final static class PathSegmentComponent implements PathComponent {
+
+		private final List<String> pathSegments;
+
+		PathSegmentComponent(List<String> pathSegments) {
+			this.pathSegments = Collections.unmodifiableList(pathSegments);
+		}
+
+		public String getPath() {
+			StringBuilder pathBuilder = new StringBuilder();
+			pathBuilder.append(PATH_DELIMITER);
+			for (Iterator<String> iterator = pathSegments.iterator(); iterator.hasNext(); ) {
+				String pathSegment = iterator.next();
+				pathBuilder.append(pathSegment);
+				if (iterator.hasNext()) {
+					pathBuilder.append(PATH_DELIMITER);
+				}
+			}
+			return pathBuilder.toString();
+		}
+
+		public List<String> getPathSegments() {
+			return pathSegments;
+		}
+
+		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
+			List<String> pathSegments = getPathSegments();
+			List<String> encodedPathSegments = new ArrayList<String>(pathSegments.size());
+			for (String pathSegment : pathSegments) {
+				String encodedPathSegment = encodeUriComponent(pathSegment, encoding, Type.PATH_SEGMENT);
+				encodedPathSegments.add(encodedPathSegment);
+			}
+			return new PathSegmentComponent(encodedPathSegments);
+		}
+
+		public PathComponent expand(Map<String, ?> uriVariables) {
+			List<String> pathSegments = getPathSegments();
+			List<String> expandedPathSegments = new ArrayList<String>(pathSegments.size());
+			for (String pathSegment : pathSegments) {
+				String expandedPathSegment = expandUriComponent(pathSegment, uriVariables);
+				expandedPathSegments.add(expandedPathSegment);
+			}
+			return new PathSegmentComponent(expandedPathSegments);
+		}
+
+		public PathComponent expand(Iterator<Object> valueIterator) {
+			List<String> pathSegments = getPathSegments();
+			List<String> expandedPathSegments = new ArrayList<String>(pathSegments.size());
+			for (String pathSegment : pathSegments) {
+				String expandedPathSegment = expandUriComponent(pathSegment, valueIterator);
+				expandedPathSegments.add(expandedPathSegment);
+			}
+			return new PathSegmentComponent(expandedPathSegments);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			} else if (o instanceof PathSegmentComponent) {
+				PathSegmentComponent other = (PathSegmentComponent) o;
+				return this.getPathSegments().equals(other.getPathSegments());
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return getPathSegments().hashCode();
+		}
+
+	}
+
+	/**
+	 * Represents an empty path.
+	 */
+	final static PathComponent NULL_PATH_COMPONENT = new PathComponent() {
+
+		public String getPath() {
+			return null;
+		}
+
+		public List<String> getPathSegments() {
+			return Collections.emptyList();
+		}
+
+		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
+			return this;
+		}
+
+		public PathComponent expand(Map<String, ?> uriVariables) {
+			return this;
+		}
+
+		public PathComponent expand(Iterator<Object> valueIterator) {
+			return this;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			return this == o;
+		}
+
+		@Override
+		public int hashCode() {
+			return 42;
+		}
+
+	};
 
 }

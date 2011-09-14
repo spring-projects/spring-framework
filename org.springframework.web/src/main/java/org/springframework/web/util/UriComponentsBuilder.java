@@ -51,8 +51,6 @@ import org.springframework.util.StringUtils;
  */
 public class UriComponentsBuilder {
 
-    private static final char PATH_DELIMITER = '/';
-
 	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)=?([^&=]+)?");
 
 	private static final String SCHEME_PATTERN = "([^:/?#]+):";
@@ -89,7 +87,7 @@ public class UriComponentsBuilder {
 
     private int port = -1;
 
-    private final List<String> pathSegments = new ArrayList<String>();
+	private PathComponentBuilder pathBuilder = NULL_PATH_COMPONENT_BUILDER;
 
 	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
 
@@ -219,7 +217,7 @@ public class UriComponentsBuilder {
 	 * @return the URI components
      */
     public UriComponents build(boolean encoded) {
-		return new UriComponents(scheme, userInfo, host, port, pathSegments, queryParams, fragment, encoded);
+		return new UriComponents(scheme, userInfo, host, port, pathBuilder.build(), queryParams, fragment, encoded);
     }
 
     // URI components methods
@@ -246,8 +244,7 @@ public class UriComponentsBuilder {
             this.port = uri.getPort();
         }
         if (StringUtils.hasLength(uri.getPath())) {
-            this.pathSegments.clear();
-			path(uri.getPath());
+			this.pathBuilder = new FullPathComponentBuilder(uri.getPath());
         }
         if (StringUtils.hasLength(uri.getQuery())) {
 			this.queryParams.clear();
@@ -307,11 +304,7 @@ public class UriComponentsBuilder {
         return this;
     }
 
-    private String portAsString() {
-        return this.port != -1 ? Integer.toString(this.port) : null;
-    }
-
-    /**
+	/**
      * Appends the given path to the existing path of this builder. The given path may contain URI template variables.
      *
      * @param path the URI path
@@ -319,10 +312,9 @@ public class UriComponentsBuilder {
      */
     public UriComponentsBuilder path(String path) {
 		if (path != null) {
-	        String[] pathSegments = StringUtils.tokenizeToStringArray(path, "/");
-    	    pathSegment(pathSegments);
+			this.pathBuilder = this.pathBuilder.appendPath(path);
 		} else {
-			pathSegments.clear();
+			this.pathBuilder = NULL_PATH_COMPONENT_BUILDER;
 		}
 		return this;
     }
@@ -331,15 +323,14 @@ public class UriComponentsBuilder {
      * Appends the given path segments to the existing path of this builder. Each given path segments may contain URI
      * template variables.
      *
-     * @param segments the URI path segments
+     * @param pathSegments the URI path segments
      * @return this UriComponentsBuilder
      */
-    public UriComponentsBuilder pathSegment(String... segments) throws IllegalArgumentException {
-        Assert.notNull(segments, "'segments' must not be null");
-        Collections.addAll(this.pathSegments, segments);
-
-        return this;
-    }
+    public UriComponentsBuilder pathSegment(String... pathSegments) throws IllegalArgumentException {
+		Assert.notNull(pathSegments, "'segments' must not be null");
+		this.pathBuilder = this.pathBuilder.appendPathSegments(pathSegments);
+		return this;
+	}
 
 	/**
 	 * Appends the given query to the existing query of this builder. The given query may contain URI template variables.
@@ -403,5 +394,101 @@ public class UriComponentsBuilder {
         }
         return this;
     }
+
+	/**
+	 * Represents a builder for {@link org.springframework.web.util.UriComponents.PathComponent}
+	 */
+	private interface PathComponentBuilder {
+
+		UriComponents.PathComponent build();
+
+		PathComponentBuilder appendPath(String path);
+		
+		PathComponentBuilder appendPathSegments(String... pathSegments);
+	}
+
+	/**
+	 * Represents a builder for full string paths.
+	 */
+	private static class FullPathComponentBuilder implements PathComponentBuilder {
+
+		private final StringBuilder path;
+
+		private FullPathComponentBuilder(String path) {
+			this.path = new StringBuilder(path);
+		}
+
+		public UriComponents.PathComponent build() {
+			return new UriComponents.FullPathComponent(path.toString());
+		}
+
+		public PathComponentBuilder appendPath(String path) {
+			this.path.append(path);
+			return this;
+		}
+
+		public PathComponentBuilder appendPathSegments(String... pathSegments) {
+			for (String pathSegment : pathSegments) {
+				final boolean pathEndsInSlash = path.length() > 0 && path.charAt(path.length() - 1) == '/';
+				final boolean segmentStartsWithSlash = pathSegment.charAt(0) == '/';
+
+				if (path.length() > 0 && !pathEndsInSlash && !segmentStartsWithSlash) {
+					path.append('/');
+				} else if (pathEndsInSlash && segmentStartsWithSlash) {
+					pathSegment = pathSegment.substring(1);
+					if (pathSegment.length() == 0)
+						continue;
+				}
+				path.append(pathSegment);
+			}
+			return this;
+		}
+	}
+
+	/**
+	 * Represents a builder for paths segment paths.
+	 */
+	private static class PathSegmentComponentBuilder implements PathComponentBuilder {
+
+		private final List<String> pathSegments = new ArrayList<String>();
+
+		private PathSegmentComponentBuilder(String... pathSegments) {
+			Collections.addAll(this.pathSegments, pathSegments);
+		}
+
+		public UriComponents.PathComponent build() {
+			return new UriComponents.PathSegmentComponent(pathSegments);
+		}
+
+		public PathComponentBuilder appendPath(String path) {
+			String[] pathSegments = StringUtils.tokenizeToStringArray(path, "/");
+			Collections.addAll(this.pathSegments, pathSegments);
+			return this;
+		}
+
+		public PathComponentBuilder appendPathSegments(String... pathSegments) {
+			Collections.addAll(this.pathSegments, pathSegments);
+			return this;
+		}
+	}
+
+
+	/**
+	 * Represents a builder for an empty path.
+	 */
+	private static PathComponentBuilder NULL_PATH_COMPONENT_BUILDER = new PathComponentBuilder() {
+
+		public UriComponents.PathComponent build() {
+			return UriComponents.NULL_PATH_COMPONENT;
+		}
+
+		public PathComponentBuilder appendPath(String path) {
+			return new FullPathComponentBuilder(path);
+		}
+
+		public PathComponentBuilder appendPathSegments(String... pathSegments) {
+			return new PathSegmentComponentBuilder(pathSegments);
+		}
+	};
 
 }

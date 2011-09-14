@@ -26,7 +26,6 @@ import static org.junit.Assert.*;
 /** @author Arjen Poutsma */
 public class UriComponentsTests {
 
-
     @Test
     public void encode() {
         UriComponents uriComponents = UriComponentsBuilder.fromPath("/hotel list").build();
