@@ -45,5 +45,13 @@ public class UriComponentsTests {
         UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
         assertEquals(new URI("http://example.com/hotel%20list/Z\u00fcrich"), uriComponents.toUri());
     }
+	
+	@Test
+	public void expand() {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo} {bar}").build();
+		uriComponents = uriComponents.expand("1 2", "3 4");
+		assertEquals("/1 2 3 4", uriComponents.getPath());
+		assertEquals("http://example.com/1 2 3 4", uriComponents.toUriString());
+	}
 
 }

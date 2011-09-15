@@ -316,10 +316,10 @@ public final class UriComponents {
 	 * @param uriVariables the map of URI variables
 	 * @return the expanded uri components
 	 */
-	public UriComponents expand(Map<String, ?> map) {
-		Assert.notNull(map, "'uriVariables' must not be null");
+	public UriComponents expand(Map<String, ?> uriVariables) {
+		Assert.notNull(uriVariables, "'uriVariables' must not be null");
 
-		return expandInternal(new MapTemplateVariables(map));
+		return expandInternal(new MapTemplateVariables(uriVariables));
 	}
 
 	/**
@@ -526,7 +526,7 @@ public final class UriComponents {
      * @author Arjen Poutsma
      * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
      */
-    public static enum Type {
+    static enum Type {
 
         SCHEME {
             @Override
@@ -796,6 +796,52 @@ public final class UriComponents {
 		}
 
 	}
+
+	/**
+	 * Represents a collection of PathComponents.
+	 */
+	final static class PathComponentComposite implements PathComponent {
+
+		private final List<PathComponent> pathComponents;
+
+		PathComponentComposite(List<PathComponent> pathComponents) {
+			this.pathComponents = pathComponents;
+		}
+
+		public String getPath() {
+			StringBuilder pathBuilder = new StringBuilder();
+			for (PathComponent pathComponent : pathComponents) {
+				pathBuilder.append(pathComponent.getPath());
+			}
+			return pathBuilder.toString();
+		}
+
+		public List<String> getPathSegments() {
+			List<String> result = new ArrayList<String>();
+			for (PathComponent pathComponent : pathComponents) {
+				result.addAll(pathComponent.getPathSegments());
+			}
+			return result;
+		}
+
+		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
+			List<PathComponent> encodedComponents = new ArrayList<PathComponent>(pathComponents.size());
+			for (PathComponent pathComponent : pathComponents) {
+				encodedComponents.add(pathComponent.encode(encoding));
+			}
+			return new PathComponentComposite(encodedComponents);
+		}
+
+		public PathComponent expand(UriTemplateVariables uriVariables) {
+			List<PathComponent> expandedComponents = new ArrayList<PathComponent>(pathComponents.size());
+			for (PathComponent pathComponent : pathComponents) {
+				expandedComponents.add(pathComponent.expand(uriVariables));
+			}
+			return new PathComponentComposite(expandedComponents);
+		}
+	}
+
+	
 
 	/**
 	 * Represents an empty path.
