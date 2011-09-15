@@ -54,7 +54,7 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Sets the {@link ModelAndViewContainer#setResolveView(boolean)} flag to {@code false} to indicate
+	 * <p>Sets the {@link ModelAndViewContainer#setRequestHandled(boolean)} flag to {@code false} to indicate
 	 * that the method signature provides access to the response. If subsequently the underlying method  
 	 * returns {@code null}, view resolution will be bypassed.
 	 * @see ServletInvocableHandlerMethod#invokeAndHandle(NativeWebRequest, ModelAndViewContainer, Object...)
@@ -64,7 +64,7 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws IOException {
 		
-		mavContainer.setResolveView(false);
+		mavContainer.setRequestHandled(true);
 
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		Class<?> paramType = parameter.getParameterType();

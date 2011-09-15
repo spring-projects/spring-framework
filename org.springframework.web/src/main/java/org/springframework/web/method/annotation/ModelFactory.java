@@ -211,7 +211,7 @@ public final class ModelFactory {
 			this.sessionAttributesHandler.storeAttributes(request, mavContainer.getModel());
 		}
 		
-		if (mavContainer.isResolveView()) {
+		if (!mavContainer.isRequestHandled()) {
 			updateBindingResult(request, mavContainer.getModel());
 		} 
 	}

@@ -150,6 +150,8 @@ public class WebMvcConfigurationSupportTests {
 		Validator validator = initializer.getValidator();
 		assertNotNull(validator);
 		assertTrue(validator instanceof LocalValidatorFactoryBean);
+		
+		assertEquals(true, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
 	}
 	
 	@Test

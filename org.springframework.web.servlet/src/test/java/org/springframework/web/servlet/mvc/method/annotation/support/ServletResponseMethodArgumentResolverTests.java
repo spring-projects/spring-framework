@@ -67,7 +67,7 @@ public class ServletResponseMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(servletResponseParameter, mavContainer, webRequest, null);
 		assertSame("Invalid result", servletResponse, result);
-		assertFalse(mavContainer.isResolveView());
+		assertTrue(mavContainer.isRequestHandled());
 	}
 
 	@Test
@@ -78,7 +78,7 @@ public class ServletResponseMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(outputStreamParameter, mavContainer, webRequest, null);
 		assertSame("Invalid result", servletResponse.getOutputStream(), result);
-		assertFalse(mavContainer.isResolveView());
+		assertTrue(mavContainer.isRequestHandled());
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class ServletResponseMethodArgumentResolverTests {
 
 		Object result = resolver.resolveArgument(writerParameter, mavContainer, webRequest, null);
 		assertSame("Invalid result", servletResponse.getWriter(), result);
-		assertFalse(mavContainer.isResolveView());
+		assertTrue(mavContainer.isRequestHandled());
 	}
 
 	public void supportedParams(ServletResponse p0, OutputStream p1, Writer p2) {

@@ -245,7 +245,7 @@ public class RequestPartMethodArgumentResolverTests {
 		Object actualValue = resolver.resolveArgument(parameter, mavContainer, webRequest, new ValidatingBinderFactory());
 
 		assertEquals("Invalid argument value", argValue, actualValue);
-		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
+		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 		
 		verify(messageConverter);
 	}	

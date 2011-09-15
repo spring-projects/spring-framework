@@ -21,6 +21,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Test fixture for {@link FlashMap} tests.
@@ -31,18 +33,17 @@ public class FlashMapTests {
 
 	@Test
 	public void isExpired() throws InterruptedException {
+		assertFalse(new FlashMap().isExpired());
+
 		FlashMap flashMap = new FlashMap();
 		flashMap.startExpirationPeriod(0);
-
-		Thread.sleep(1);
+		Thread.sleep(100);
 
 		assertTrue(flashMap.isExpired());
 	}
 
 	@Test
 	public void notExpired() throws InterruptedException {
-		assertFalse(new FlashMap().isExpired());
-
 		FlashMap flashMap = new FlashMap();
 		flashMap.startExpirationPeriod(10);
 		Thread.sleep(100);
@@ -71,4 +72,51 @@ public class FlashMapTests {
 		assertEquals(0, flashMap1.compareTo(flashMap2));
 	}
 
+	@Test
+	public void addTargetRequestParamNullValue() {
+		FlashMap flashMap = new FlashMap();
+		flashMap.addTargetRequestParam("text", "abc");
+		flashMap.addTargetRequestParam("empty", " ");
+		flashMap.addTargetRequestParam("null", null);
+		
+		assertEquals(1, flashMap.getTargetRequestParams().size());
+		assertEquals("abc", flashMap.getTargetRequestParams().getFirst("text"));
+	}
+
+	@Test
+	public void addTargetRequestParamsNullValue() {
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("key", "abc");
+		params.add("key", " ");
+		params.add("key", null);
+		
+		FlashMap flashMap = new FlashMap();
+		flashMap.addTargetRequestParams(params);
+		
+		assertEquals(1, flashMap.getTargetRequestParams().size());
+		assertEquals(1, flashMap.getTargetRequestParams().get("key").size());
+		assertEquals("abc", flashMap.getTargetRequestParams().getFirst("key"));
+	}
+
+	@Test
+	public void addTargetRequestParamNullKey() {
+		FlashMap flashMap = new FlashMap();
+		flashMap.addTargetRequestParam(" ", "abc");
+		flashMap.addTargetRequestParam(null, "abc");
+		
+		assertTrue(flashMap.getTargetRequestParams().isEmpty());
+	}
+
+	@Test
+	public void addTargetRequestParamsNullKey() {
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add(" ", "abc");
+		params.add(null, " ");
+		
+		FlashMap flashMap = new FlashMap();
+		flashMap.addTargetRequestParams(params);
+		
+		assertTrue(flashMap.getTargetRequestParams().isEmpty());
+	}
+	
 }

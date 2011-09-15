@@ -49,16 +49,10 @@ public class RedirectAttributesMethodArgumentResolver implements HandlerMethodAr
 								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws Exception {
-		
-		if (mavContainer.getRedirectModel() != null) {
-			return mavContainer.getRedirectModel();
-		}
-		else {
-			DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
-			ModelMap redirectAttributes  = new RedirectAttributesModelMap(dataBinder);
-			mavContainer.setRedirectModel(redirectAttributes);
-			return redirectAttributes;
-		}
+		DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
+		ModelMap redirectAttributes  = new RedirectAttributesModelMap(dataBinder);
+		mavContainer.setRedirectModel(redirectAttributes);
+		return redirectAttributes;
 	}
 
 }

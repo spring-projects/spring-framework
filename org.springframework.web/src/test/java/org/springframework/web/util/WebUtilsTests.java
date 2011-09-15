@@ -64,15 +64,4 @@ public class WebUtilsTests {
 		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a.do"));
 	}
 
-	@Test
-	public void extractUriPath() {
-		assertEquals("", WebUtils.extractUrlPath("http://example.com"));
-		assertEquals("/", WebUtils.extractUrlPath("http://example.com/"));
-		assertEquals("/rfc/rfc3986.txt", WebUtils.extractUrlPath("http://www.ietf.org/rfc/rfc3986.txt"));
-		assertEquals("/over/there", WebUtils.extractUrlPath("http://example.com/over/there?name=ferret#nose"));
-		assertEquals("/over/there", WebUtils.extractUrlPath("http://example.com/over/there#nose"));
-		assertEquals("/over/there", WebUtils.extractUrlPath("/over/there?name=ferret#nose"));
-		assertEquals("/over/there", WebUtils.extractUrlPath("/over/there?url=http://example.com"));
-	}
-	
 }

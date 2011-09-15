@@ -130,6 +130,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		methodAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		methodAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
 		methodAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
+		methodAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", true);
 		if (argumentResolvers != null) {
 			methodAdapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
 		}

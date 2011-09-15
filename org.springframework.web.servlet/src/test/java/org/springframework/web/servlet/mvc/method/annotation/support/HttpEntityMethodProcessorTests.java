@@ -138,7 +138,7 @@ public class HttpEntityMethodProcessorTests {
 		Object result = processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
 
 		assertTrue(result instanceof HttpEntity);
-		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
+		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 		assertEquals("Invalid argument", body, ((HttpEntity<?>) result).getBody());
 		verify(messageConverter);
 	}
@@ -179,7 +179,7 @@ public class HttpEntityMethodProcessorTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertFalse(mavContainer.isResolveView());
+		assertTrue(mavContainer.isRequestHandled());
 		verify(messageConverter);
 	}
 
@@ -197,7 +197,7 @@ public class HttpEntityMethodProcessorTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityProduces, mavContainer, webRequest);
 
-		assertFalse(mavContainer.isResolveView());
+		assertTrue(mavContainer.isRequestHandled());
 		verify(messageConverter);
 	}
 
@@ -245,7 +245,7 @@ public class HttpEntityMethodProcessorTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertFalse(mavContainer.isResolveView());
+		assertTrue(mavContainer.isRequestHandled());
 		assertEquals("headerValue", servletResponse.getHeader("headerName"));
 	}
 
@@ -264,7 +264,7 @@ public class HttpEntityMethodProcessorTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertFalse(mavContainer.isResolveView());
+		assertTrue(mavContainer.isRequestHandled());
 		assertEquals("headerValue", outputMessage.getValue().getHeaders().get("header").get(0));
 		verify(messageConverter);
 	}

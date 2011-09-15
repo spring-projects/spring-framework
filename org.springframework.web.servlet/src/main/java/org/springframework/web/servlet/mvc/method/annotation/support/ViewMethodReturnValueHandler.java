@@ -61,14 +61,14 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 			String viewName = (String) returnValue;
 			mavContainer.setViewName(viewName);
 			if (isRedirectViewName(viewName)) {
-				mavContainer.setUseRedirectModel();
+				mavContainer.setUseRedirectModel(true);
 			}
 		}
 		else if (returnValue instanceof View){
 			View view = (View) returnValue;
 			mavContainer.setView(view);
 			if (isRedirectView(view)) {	
-				mavContainer.setUseRedirectModel();
+				mavContainer.setUseRedirectModel(true);
 			}
 		}
 		else {
@@ -95,7 +95,7 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 	 * "false" otherwise.
 	 */
 	protected boolean isRedirectView(View view) {
-		if (SmartView.class.isAssignableFrom(view.getClass())) {
+		if (view instanceof SmartView) {
 			return ((SmartView) view).isRedirectView();
 		}
 		else {

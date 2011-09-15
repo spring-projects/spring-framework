@@ -17,10 +17,10 @@
 package org.springframework.web.servlet;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * A FlashMap provides a way for one request to store attributes intended for 
@@ -35,7 +35,7 @@ import org.springframework.beans.BeanUtils;
  * recipient. On a redirect, the target URL is known and for example
  * {@code org.springframework.web.servlet.view.RedirectView} has the
  * opportunity to automatically update the current FlashMap with target
- * URL information .
+ * URL information.
  * 
  * <p>Annotated controllers will usually not use this type directly.
  * See {@code org.springframework.web.servlet.mvc.support.RedirectAttributes}
@@ -46,13 +46,13 @@ import org.springframework.beans.BeanUtils;
  * 
  * @see FlashMapManager
  */
-public class FlashMap extends HashMap<String, Object> implements Comparable<FlashMap> {
+public final class FlashMap extends HashMap<String, Object> implements Comparable<FlashMap> {
 
 	private static final long serialVersionUID = 1L;
 	
 	private String targetRequestPath;
 	
-	private final Map<String, String> targetRequestParams = new LinkedHashMap<String, String>();
+	private final MultiValueMap<String, String> targetRequestParams = new LinkedMultiValueMap<String, String>();
 	
 	private long expirationStartTime;
 	
@@ -93,17 +93,15 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	}
 
 	/**
-	 * Provide request parameter pairs to identify the request for this FlashMap. 
-	 * Only simple type, non-null parameter values are used.
+	 * Provide request parameters identifying the request for this FlashMap.
+	 * Null or empty keys and values are skipped.
 	 * @param params a Map with the names and values of expected parameters.
-	 * @see BeanUtils#isSimpleValueType(Class)
 	 */
-	public FlashMap addTargetRequestParams(Map<String, ?> params) {
+	public FlashMap addTargetRequestParams(MultiValueMap<String, String> params) {
 		if (params != null) {
-			for (String name : params.keySet()) {
-				Object value = params.get(name);
-				if ((value != null) && BeanUtils.isSimpleValueType(value.getClass())) {
-					this.targetRequestParams.put(name, value.toString());
+			for (String key : params.keySet()) {
+				for (String value : params.get(key)) {
+					addTargetRequestParam(key, value);
 				}
 			}
 		}
@@ -111,19 +109,21 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 	}
 
 	/**
-	 * Provide a request parameter to identify the request for this FlashMap.
-	 * @param name the name of the expected parameter, never {@code null}
-	 * @param value the value for the expected parameter, never {@code null}
+	 * Provide a request parameter identifying the request for this FlashMap.
+	 * @param name the expected parameter name, skipped if {@code null}
+	 * @param value the expected parameter value, skipped if {@code null}
 	 */
 	public FlashMap addTargetRequestParam(String name, String value) {
-		this.targetRequestParams.put(name, value.toString());
+		if (StringUtils.hasText(name) && StringUtils.hasText(value)) {
+			this.targetRequestParams.add(name, value);
+		}
 		return this;
 	}
 	
 	/**
-	 * Return the parameters identifying the target request, or an empty Map.
+	 * Return the parameters identifying the target request, or an empty map.
 	 */
-	public Map<String, String> getTargetRequestParams() {
+	public MultiValueMap<String, String> getTargetRequestParams() {
 		return targetRequestParams;
 	}
 
@@ -174,11 +174,11 @@ public class FlashMap extends HashMap<String, Object> implements Comparable<Flas
 
 	@Override
 	public String toString() {
-		StringBuilder result = new StringBuilder();
-		result.append("[Attributes=").append(super.toString());
-		result.append(", targetRequestPath=").append(this.targetRequestPath);
-		result.append(", targetRequestParams=" + this.targetRequestParams.toString()).append("]");
-		return result.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("[Attributes=").append(super.toString());
+		sb.append(", targetRequestPath=").append(this.targetRequestPath);
+		sb.append(", targetRequestParams=").append(this.targetRequestParams).append("]");
+		return sb.toString();
 	}
 
 }
