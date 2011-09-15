@@ -71,8 +71,8 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("responseStatus");
 		handlerMethod.invokeAndHandle(webRequest, mavContainer);
 
-		assertFalse("Null return value + @ResponseStatus should result in 'no view resolution'",
-				mavContainer.isResolveView());
+		assertTrue("Null return value + @ResponseStatus should result in 'request handled'",
+				mavContainer.isRequestHandled());
 
 		assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
 		assertEquals("400 Bad Request", response.getErrorMessage());
@@ -85,8 +85,8 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("httpServletResponse", HttpServletResponse.class);
 		handlerMethod.invokeAndHandle(webRequest, mavContainer);
 
-		assertFalse("Null return value + HttpServletResponse arg should result in 'no view resolution'",
-				mavContainer.isResolveView());
+		assertTrue("Null return value + HttpServletResponse arg should result in 'request handled'",
+				mavContainer.isRequestHandled());
 	}
 
 	@Test
@@ -98,8 +98,8 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("notModified");
 		handlerMethod.invokeAndHandle(webRequest, mavContainer);
 
-		assertFalse("Null return value + 'not modified' request should result in 'no view resolution'",
-				mavContainer.isResolveView());
+		assertTrue("Null return value + 'not modified' request should result in 'request handled'",
+				mavContainer.isRequestHandled());
 	}
 	
 	@Test

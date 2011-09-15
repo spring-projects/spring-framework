@@ -43,6 +43,8 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -240,11 +242,9 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
 		if (!CollectionUtils.isEmpty(flashMap)) {
-			String targetPath = WebUtils.extractUrlPath(targetUrl.toString());
-			flashMap.setTargetRequestPath(targetPath);
-			if (this.exposeModelAttributes) {
-				flashMap.addTargetRequestParams(model);
-			}				
+			UriComponents uriComponents = UriComponentsBuilder.fromUriString(targetUrl).build();
+			flashMap.setTargetRequestPath(uriComponents.getPath());
+			flashMap.addTargetRequestParams(uriComponents.getQueryParams());
 		}
 		
 		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);

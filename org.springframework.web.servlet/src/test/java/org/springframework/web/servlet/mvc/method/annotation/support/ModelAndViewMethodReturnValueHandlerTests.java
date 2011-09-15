@@ -79,7 +79,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	public void handleReturnValueNull() throws Exception {
 		handler.handleReturnValue(null, getReturnValueParam("modelAndView"), mavContainer, webRequest);
 		
-		assertFalse(mavContainer.isResolveView());
+		assertTrue(mavContainer.isRequestHandled());
 	}
 
 	private MethodParameter getReturnValueParam(String methodName) throws Exception {

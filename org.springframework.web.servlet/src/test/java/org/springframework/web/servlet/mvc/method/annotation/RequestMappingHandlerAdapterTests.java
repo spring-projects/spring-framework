@@ -103,7 +103,7 @@ public class RequestMappingHandlerAdapterTests {
 		
 		handlerAdapter.setArgumentResolvers(Arrays.asList(redirectAttributesResolver, modelResolver));
 		handlerAdapter.setReturnValueHandlers(Arrays.asList(viewHandler));
-		handlerAdapter.setAlwaysUseRedirectAttributes(true);
+		handlerAdapter.setIgnoreDefaultModelOnRedirect(true);
 		handlerAdapter.afterPropertiesSet();
 
 		request.setAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
@@ -111,7 +111,7 @@ public class RequestMappingHandlerAdapterTests {
 		HandlerMethod handlerMethod = handlerMethod(new RedirectAttributeHandler(), "handle", Model.class);
 		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
 
-		assertTrue("No redirect attributes added, model should be empty", mav.getModel().isEmpty());
+		assertTrue("Without RedirectAttributes arg, model should be empty", mav.getModel().isEmpty());
 	}
 
 	@Test

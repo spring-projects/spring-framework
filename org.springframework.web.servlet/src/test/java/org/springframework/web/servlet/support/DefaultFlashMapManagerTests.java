@@ -163,9 +163,7 @@ public class DefaultFlashMapManagerTests {
 			allMaps.add(flashMap);
 			flashMap.startExpirationPeriod(0);
 		}
-		
-		Thread.sleep(5);
-
+		Thread.sleep(100);
 		this.flashMapManager.requestStarted(this.request);
 		
 		assertEquals(0, allMaps.size());
@@ -197,7 +195,7 @@ public class DefaultFlashMapManagerTests {
 		this.flashMapManager.setFlashMapTimeout(0);
 		this.flashMapManager.requestCompleted(this.request);
 
-		Thread.sleep(1);
+		Thread.sleep(100);
 		
 		List<FlashMap> allMaps = getFlashMaps();
 		

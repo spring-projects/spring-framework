@@ -67,6 +67,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		MessageCodesResolver resolver = ((ConfigurableWebBindingInitializer) initializer).getMessageCodesResolver();
 		assertNotNull(resolver);
 		assertEquals(TestMessageCodesResolver.class, resolver.getClass());
+		assertEquals(true, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
 	}
 
 	@Test

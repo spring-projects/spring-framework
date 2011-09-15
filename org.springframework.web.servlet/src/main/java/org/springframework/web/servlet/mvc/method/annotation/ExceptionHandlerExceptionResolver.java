@@ -235,7 +235,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			return null;
 		}
 		
-		if (!mavContainer.isResolveView()) {
+		if (mavContainer.isRequestHandled()) {
 			return new ModelAndView();
 		}
 		else {

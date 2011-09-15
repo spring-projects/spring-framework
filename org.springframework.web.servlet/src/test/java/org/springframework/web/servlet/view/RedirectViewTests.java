@@ -129,7 +129,7 @@ public class RedirectViewTests {
 		assertEquals("http://url.somewhere.com/path?id=1", response.getHeader("Location"));
 		
 		assertEquals("/path", flashMap.getTargetRequestPath());
-		assertEquals(model, flashMap.getTargetRequestParams());
+		assertEquals(model, flashMap.getTargetRequestParams().toSingleValueMap());
 	}
 
 	@Test

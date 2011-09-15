@@ -27,13 +27,14 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * A default {@link FlashMapManager} implementation keeps {@link FlashMap}
+ * A default {@link FlashMapManager} implementation that stores {@link FlashMap}
  * instances in the HTTP session.
  * 
  * @author Rossen Stoyanchev
@@ -122,9 +123,10 @@ public class DefaultFlashMapManager implements FlashMapManager {
 				return false;
 			}
 		}
-		if (flashMap.getTargetRequestParams() != null) {
-			for (String paramName : flashMap.getTargetRequestParams().keySet()) {
-				if (!flashMap.getTargetRequestParams().get(paramName).equals(request.getParameter(paramName))) {
+		MultiValueMap<String, String> params = flashMap.getTargetRequestParams();
+		for (String key : params.keySet()) {
+			for (String value : params.get(key)) {
+				if (!value.equals(request.getParameter(key))) {
 					return false;
 				}
 			}

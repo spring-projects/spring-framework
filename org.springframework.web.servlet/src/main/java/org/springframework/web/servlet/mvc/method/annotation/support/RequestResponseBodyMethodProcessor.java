@@ -98,7 +98,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 								  MethodParameter returnType,
 								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest) throws IOException, HttpMediaTypeNotAcceptableException {
-		mavContainer.setResolveView(false);
+		mavContainer.setRequestHandled(true);
 		if (returnValue != null) {
 			writeWithMessageConverters(returnValue, returnType, webRequest);
 		}

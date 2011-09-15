@@ -93,7 +93,6 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequ
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
@@ -147,7 +146,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 	
-	private boolean alwaysUseRedirectAttributes;
+	private boolean ignoreDefaultModelOnRedirect = false;
 	
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache =
 		new ConcurrentHashMap<Class<?>, SessionAttributesHandler>();
@@ -334,19 +333,20 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 	
 	/**
-	 * By default a controller uses {@link Model} to select attributes for 
-	 * rendering and for redirecting. However, a controller can also use 
-	 * {@link RedirectAttributes} to select attributes before a redirect.
-	 * <p>When this flag is set to {@code true}, {@link RedirectAttributes} 
-	 * becomes the only way to select attributes for a redirect. 
-	 * In other words, for a redirect a controller must use 
-	 * {@link RedirectAttributes} or no attributes will be used.
-	 * <p>The default value is {@code false}, meaning the {@link Model} is
-	 * used unless {@link RedirectAttributes} is used.
+	 * A controller can use the "default" {@link Model} in rendering and
+	 * redirect scenarios. Alternatively, it can use {@link RedirectAttributes}
+	 * to provide attributes for a redirect scenario.
+	 * <p>When this flag is set to {@code true}, the "default" model is never 
+	 * used in a redirect even if the controller method doesn't explicitly 
+	 * declare a RedirectAttributes argument.
+	 * <p>When set to {@code false}, the "default" model may be used in a 
+	 * redirect if the controller method doesn't explicitly declare a 
+	 * RedirectAttributes argument.
+	 * <p>The default setting is {@code false}.
 	 * @see RedirectAttributes
 	 */
-	public void setAlwaysUseRedirectAttributes(boolean alwaysUseRedirectAttributes) {
-		this.alwaysUseRedirectAttributes = alwaysUseRedirectAttributes;
+	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
+		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -538,18 +538,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
 		modelFactory.initModel(webRequest, mavContainer, requestMappingMethod);
+		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
 
-		if (this.alwaysUseRedirectAttributes) {
-			DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
-			mavContainer.setRedirectModel(new RedirectAttributesModelMap(dataBinder));
-		}
-		
 		SessionStatus sessionStatus = new SimpleSessionStatus();
 		
 		requestMappingMethod.invokeAndHandle(webRequest, mavContainer, sessionStatus);
 		modelFactory.updateModel(webRequest, mavContainer, sessionStatus);
 
-		if (!mavContainer.isResolveView()) {
+		if (mavContainer.isRequestHandled()) {
 			return null;
 		}
 		else {

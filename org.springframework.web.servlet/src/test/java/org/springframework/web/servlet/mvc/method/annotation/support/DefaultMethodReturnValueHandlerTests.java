@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -70,7 +71,7 @@ public class DefaultMethodReturnValueHandlerTests {
 		
 		assertEquals("viewName", mavContainer.getViewName());
 		assertSame(testBean, mavContainer.getModel().get("modelAttrName"));
-		assertTrue(mavContainer.isResolveView());
+		assertFalse(mavContainer.isRequestHandled());
 	}
 
 	@Test(expected=UnsupportedOperationException.class)

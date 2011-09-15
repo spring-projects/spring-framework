@@ -75,7 +75,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * <p>Return value handling may be skipped entirely when the method returns {@code null} (also possibly due
 	 * to a {@code void} return type) and one of the following additional conditions is true:
 	 * <ul>
-	 * <li>A {@link HandlerMethodArgumentResolver} has set the {@link ModelAndViewContainer#setResolveView(boolean)}
+	 * <li>A {@link HandlerMethodArgumentResolver} has set the {@link ModelAndViewContainer#setRequestHandled(boolean)}
 	 * flag to {@code false} -- e.g. method arguments providing access to the response.
 	 * <li>The request qualifies as "not modified" as defined in {@link ServletWebRequest#checkNotModified(long)}
 	 * and {@link ServletWebRequest#checkNotModified(String)}. In this case a response with "not modified" response
@@ -98,13 +98,13 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		setResponseStatus((ServletWebRequest) request);
 
 		if (returnValue == null) {
-			if (isRequestNotModified(request) || hasResponseStatus() || !mavContainer.isResolveView()) {
-				mavContainer.setResolveView(false);
+			if (isRequestNotModified(request) || hasResponseStatus() || mavContainer.isRequestHandled()) {
+				mavContainer.setRequestHandled(true);
 				return;
 			}
 		}
 
-		mavContainer.setResolveView(true);
+		mavContainer.setRequestHandled(false);
 
 		try {
 			returnValueHandlers.handleReturnValue(returnValue, getReturnType(), mavContainer, request);

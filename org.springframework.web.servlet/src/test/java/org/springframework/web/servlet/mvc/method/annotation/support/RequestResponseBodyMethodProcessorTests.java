@@ -140,7 +140,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		Object result = processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 
 		assertEquals("Invalid argument", body, result);
-		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
+		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 		verify(messageConverter);
 	}
 
@@ -211,7 +211,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		processor.handleReturnValue(body, returnTypeString, mavContainer, webRequest);
 
-		assertFalse("The ResolveView flag wasn't turned off", mavContainer.isResolveView());
+		assertTrue("The requestHandled flag wasn't set", mavContainer.isRequestHandled());
 		verify(messageConverter);
 	}
 
@@ -228,7 +228,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		processor.handleReturnValue(body, returnTypeStringProduces, mavContainer, webRequest);
 
-		assertFalse(mavContainer.isResolveView());
+		assertTrue(mavContainer.isRequestHandled());
 		verify(messageConverter);
 	}
 

@@ -24,7 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Handles return values of type {@link ModelAndView} transferring their content to the {@link ModelAndViewContainer}. 
- * If the return value is {@code null}, the {@link ModelAndViewContainer#setResolveView(boolean)} flag is set to 
+ * If the return value is {@code null}, the {@link ModelAndViewContainer#setRequestHandled(boolean)} flag is set to 
  * {@code false} to indicate view resolution is not needed.
  *
  * @author Rossen Stoyanchev
@@ -49,7 +49,7 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 			mavContainer.addAllAttributes(mav.getModel());
 		}
 		else {
-			mavContainer.setResolveView(false);
+			mavContainer.setRequestHandled(true);
 		}
 	}
 

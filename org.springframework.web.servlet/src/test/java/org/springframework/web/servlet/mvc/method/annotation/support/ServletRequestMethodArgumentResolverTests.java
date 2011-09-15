@@ -75,7 +75,7 @@ public class ServletRequestMethodArgumentResolverTests {
 		
 		assertTrue("ServletRequest not supported", isSupported);
 		assertSame("Invalid result", servletRequest, result);
-		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
+		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 		assertTrue("Session not supported", isSupported);
 		assertSame("Invalid result", session, result);
-		assertTrue("The ResolveView flag shouldn't change", mavContainer.isResolveView());
+		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 	}
 
 	@Test

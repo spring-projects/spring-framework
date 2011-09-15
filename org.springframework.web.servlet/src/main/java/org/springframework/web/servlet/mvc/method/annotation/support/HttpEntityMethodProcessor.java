@@ -101,7 +101,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 								  ModelAndViewContainer mavContainer, 
 								  NativeWebRequest webRequest) throws Exception {
 		
-		mavContainer.setResolveView(false);
+		mavContainer.setRequestHandled(true);
 
 		if (returnValue == null) {
 			return;

@@ -28,14 +28,14 @@ import org.springframework.validation.support.BindingAwareModelMap;
  * {@link HandlerMethodReturnValueHandler}s during the course of invocation of 
  * a controller method.
  * 
- * <p>The {@link #setResolveView(boolean)} flag can be used to indicate that
- * view resolution is not required (e.g. {@code @ResponseBody} method).
+ * <p>The {@link #setRequestHandled} flag can be used to indicate the request
+ * has been handled directly and view resolution is not required.
  * 
- * <p>A default {@link Model} is created at instantiation and used thereafter. 
- * The {@link #setRedirectModel(ModelMap)} method can be used to provide a 
- * separate model to use potentially in case of a redirect. 
- * The {@link #setUseRedirectModel()} can be used to enable use of the 
- * redirect model if the controller decides to redirect. 
+ * <p>A default {@link Model} is automatically created at instantiation. 
+ * An alternate model instance may be provided via {@link #setRedirectModel} 
+ * for use in a redirect scenario. When {@link #setUseRedirectModel} is set 
+ * to {@code true} signalling a redirect scenario, the {@link #getModel()} 
+ * returns the redirect model instead of the default model.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -44,12 +44,14 @@ public class ModelAndViewContainer {
 
 	private Object view;
 	
-	private boolean resolveView = true;
+	private boolean requestHandled = false;
 	
 	private final ModelMap model = new BindingAwareModelMap();
 
 	private ModelMap redirectModel;
 
+	private boolean ignoreDefaultModelOnRedirect = false;
+	
 	private boolean useRedirectModel = false;
 
 	/**
@@ -99,7 +101,7 @@ public class ModelAndViewContainer {
 	}
 	
 	/**
-	 * Whether view resolution is required or not. 
+	 * Signal a scenario where the request is handled directly. 
 	 * <p>A {@link HandlerMethodReturnValueHandler} may use this flag to 
 	 * indicate the response has been fully handled and view resolution 
 	 * is not required (e.g. {@code @ResponseBody}).
@@ -109,54 +111,64 @@ public class ModelAndViewContainer {
 	 * a complete response depending on the method return value.
 	 * <p>The default value is {@code true}.
 	 */
-	public void setResolveView(boolean resolveView) {
-		this.resolveView = resolveView;
+	public void setRequestHandled(boolean requestHandled) {
+		this.requestHandled = requestHandled;
 	}
 	
 	/**
-	 * Whether view resolution is required or not.
+	 * Whether the request is handled directly.
 	 */
-	public boolean isResolveView() {
-		return this.resolveView;
+	public boolean isRequestHandled() {
+		return this.requestHandled;
 	}
 
 	/**
-	 * Return the default model created at instantiation or the one provided 
-	 * via {@link #setRedirectModel(ModelMap)} as long as it has been enabled 
-	 * via {@link #setUseRedirectModel()}.
+	 * Return the model to use. This is either the default model created at 
+	 * instantiation or the redirect model if {@link #setUseRedirectModel} 
+	 * is set to {@code true}. If a redirect model was never provided via 
+	 * {@link #setRedirectModel}, return the default model unless 
+	 * {@link #setIgnoreDefaultModelOnRedirect} is set to {@code true}.
 	 */
 	public ModelMap getModel() {
-		if ((this.redirectModel != null) && this.useRedirectModel) {
+		if (!this.useRedirectModel) {
+			return this.model;
+		}
+		else if (this.redirectModel != null) {
 			return this.redirectModel;
 		}
 		else {
-			return this.model;
+			return this.ignoreDefaultModelOnRedirect ? new ModelMap() : this.model;
 		}
 	}
 	
 	/**
-	 * Provide a model instance to use in case the controller redirects. 
-	 * Note that {@link #setUseRedirectModel()} must also be called in order 
-	 * to enable use of the redirect model.
+	 * Provide a separate model instance to use in a redirect scenario. 
+	 * The provided additional model however is not used used unless 
+	 * {@link #setUseRedirectModel(boolean)} gets set to {@code true} to signal
+	 * a redirect scenario.
 	 */
 	public void setRedirectModel(ModelMap redirectModel) {
 		this.redirectModel = redirectModel;
 	}
 
 	/**
-	 * Return the redirect model provided via 
-	 * {@link #setRedirectModel(ModelMap)} or {@code null} if not provided.
+	 * When set to {@code true} the default model is never used in a redirect
+	 * scenario. So if a redirect model is not available, an empty model is 
+	 * used instead.
+	 * <p>When set to {@code false} the default model can be used in a redirect
+	 * scenario if a redirect model is not available.
+	 * <p>The default setting is {@code false}.
 	 */
-	public ModelMap getRedirectModel() {
-		return this.redirectModel;
+	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
+		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}
 
 	/**
-	 * Indicate that the redirect model provided via 
-	 * {@link #setRedirectModel(ModelMap)} should be used.
+	 * Signal the conditions for using a redirect model are in place -- e.g. 
+	 * the controller has requested a redirect.
 	 */
-	public void setUseRedirectModel() {
-		this.useRedirectModel = true;
+	public void setUseRedirectModel(boolean useRedirectModel) {
+		this.useRedirectModel = useRedirectModel;
 	}
 
 	/**
@@ -210,7 +222,7 @@ public class ModelAndViewContainer {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("ModelAndViewContainer: ");
-		if (isResolveView()) {
+		if (!isRequestHandled()) {
 			if (isViewReference()) {
 				sb.append("reference to view with name '").append(this.view).append("'");
 			}
@@ -220,7 +232,7 @@ public class ModelAndViewContainer {
 			sb.append("; model is ").append(getModel());
 		}
 		else {
-			sb.append("View resolution not required");
+			sb.append("Request handled directly");
 		}
 		return sb.toString();
 	}

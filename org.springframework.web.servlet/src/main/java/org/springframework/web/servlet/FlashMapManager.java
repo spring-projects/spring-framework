@@ -29,8 +29,7 @@ import javax.servlet.http.HttpServletRequest;
  * instances are exposed as request attributes and are accessible via methods
  * in {@code org.springframework.web.servlet.support.RequestContextUtils}.
  * 
- * <p>Annotated controllers are most likely to store and access flash attributes
- * through their model. 
+ * <p>Annotated controllers will usually not use this FlashMap directly.
  * See {@code org.springframework.web.servlet.mvc.support.RedirectAttributes}.
  * 
  * @author Rossen Stoyanchev

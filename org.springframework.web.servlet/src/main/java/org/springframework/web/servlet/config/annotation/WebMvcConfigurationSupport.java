@@ -73,42 +73,59 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
- * A base class that provides default configuration for Spring MVC applications by registering Spring MVC 
- * infrastructure components to be detected by the {@link DispatcherServlet}. Typically applications should not
- * have to extend this class. A more likely place to start is to annotate an @{@link Configuration}
- * class with @{@link EnableWebMvc} (see @{@link EnableWebMvc} and {@link WebMvcConfigurer} for details).
+ * A base class that provides default configuration for Spring MVC applications 
+ * by registering Spring MVC infrastructure components to be detected by the 
+ * {@link DispatcherServlet}. An application configuration class is not required
+ * to extend this class. A more likely place to start is to annotate 
+ * an @{@link Configuration} class with @{@link EnableWebMvc} 
+ * (see @{@link EnableWebMvc} and {@link WebMvcConfigurer} for details).
  * 
- * <p>If using @{@link EnableWebMvc} does not give you all you need, consider extending directly from this 
- * class. Remember to add @{@link Configuration} to your subclass and @{@link Bean} to any superclass 
- * @{@link Bean} methods you choose to override.
+ * <p>If the customization options available with use of @{@link EnableWebMvc} 
+ * are not enough, consider extending directly from this class and override the
+ * appropriate methods. Remember to add @{@link Configuration} to your subclass 
+ * and @{@link Bean} to any superclass @{@link Bean} methods you override.
  * 
  * <p>This class registers the following {@link HandlerMapping}s:</p>
  * <ul>
- * 	<li>{@link RequestMappingHandlerMapping} ordered at 0 for mapping requests to annotated controller methods.
- * 	<li>{@link HandlerMapping} ordered at 1 to map URL paths directly to view names.
- * 	<li>{@link BeanNameUrlHandlerMapping} ordered at 2 to map URL paths to controller bean names.
- * 	<li>{@link HandlerMapping} ordered at {@code Integer.MAX_VALUE-1} to serve static resource requests.
- * 	<li>{@link HandlerMapping} ordered at {@code Integer.MAX_VALUE} to forward requests to the default servlet.
+ * 	<li>{@link RequestMappingHandlerMapping} 
+ * 	ordered at 0 for mapping requests to annotated controller methods.
+ * 	<li>{@link HandlerMapping} 
+ * 	ordered at 1 to map URL paths directly to view names.
+ * 	<li>{@link BeanNameUrlHandlerMapping} 
+ * 	ordered at 2 to map URL paths to controller bean names.
+ * 	<li>{@link HandlerMapping} 
+ * 	ordered at {@code Integer.MAX_VALUE-1} to serve static resource requests.
+ * 	<li>{@link HandlerMapping} 
+ * 	ordered at {@code Integer.MAX_VALUE} to forward requests to the default servlet.
  * </ul>
  *
  * <p>Registers these {@link HandlerAdapter}s:
  * <ul>
- * 	<li>{@link RequestMappingHandlerAdapter} for processing requests with annotated controller methods.
- * 	<li>{@link HttpRequestHandlerAdapter} for processing requests with {@link HttpRequestHandler}s.
- * 	<li>{@link SimpleControllerHandlerAdapter} for processing requests with interface-based {@link Controller}s.
+ * 	<li>{@link RequestMappingHandlerAdapter} 
+ * 	for processing requests with annotated controller methods.
+ * 	<li>{@link HttpRequestHandlerAdapter} 
+ * 	for processing requests with {@link HttpRequestHandler}s.
+ * 	<li>{@link SimpleControllerHandlerAdapter} 
+ * 	for processing requests with interface-based {@link Controller}s.
  * </ul>
  *
- * <p>Registers a {@link HandlerExceptionResolverComposite} with this chain of exception resolvers:
+ * <p>Registers a {@link HandlerExceptionResolverComposite} with this chain of
+ * exception resolvers:
  * <ul>
- * 	<li>{@link ExceptionHandlerExceptionResolver} for handling exceptions through @{@link ExceptionHandler} methods.
- * 	<li>{@link ResponseStatusExceptionResolver} for exceptions annotated with @{@link ResponseStatus}.
- * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring exception types
+ * 	<li>{@link ExceptionHandlerExceptionResolver} for handling exceptions 
+ * 	through @{@link ExceptionHandler} methods.
+ * 	<li>{@link ResponseStatusExceptionResolver} for exceptions annotated 
+ * 	with @{@link ResponseStatus}.
+ * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring 
+ * 	exception types
  * </ul>
  *
  * <p>Registers these other instances:
  * <ul>
- * 	<li>{@link FormattingConversionService} for use with annotated controller methods and the spring:eval JSP tag.
- * 	<li>{@link Validator} for validating model attributes on annotated controller methods.
+ * 	<li>{@link FormattingConversionService} 
+ * 	for use with annotated controller methods and the spring:eval JSP tag.
+ * 	<li>{@link Validator} 
+ * 	for validating model attributes on annotated controller methods.
  * </ul>
  *
  * @see EnableWebMvc
@@ -137,7 +154,8 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 	
 	/**
-	 * Returns a {@link RequestMappingHandlerMapping} ordered at 0 for mapping requests to annotated controllers.
+	 * Return a {@link RequestMappingHandlerMapping} ordered at 0 for mapping 
+	 * requests to annotated controllers.
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
@@ -148,8 +166,9 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 	
 	/**
-	 * Provides access to the shared handler interceptors used to configure {@link HandlerMapping} instances with.
-	 * This method cannot be overridden, use {@link #addInterceptors(InterceptorRegistry)} instead. 
+	 * Provide access to the shared handler interceptors used to configure 
+	 * {@link HandlerMapping} instances with. This method cannot be overridden, 
+	 * use {@link #addInterceptors(InterceptorRegistry)} instead. 
 	 */
 	protected final Object[] getInterceptors() {
 		if (interceptors == null) {
@@ -162,15 +181,17 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 	
 	/**
-	 * Override this method to add Spring MVC interceptors for pre/post-processing of controller invocation.
+	 * Override this method to add Spring MVC interceptors for 
+	 * pre- and post-processing of controller invocation.
 	 * @see InterceptorRegistry
 	 */
 	protected void addInterceptors(InterceptorRegistry registry) {
 	}
 
 	/**
-	 * Returns a handler mapping ordered at 1 to map URL paths directly to view names.
-	 * To configure view controllers, override {@link #addViewControllers(ViewControllerRegistry)}. 
+	 * Return a handler mapping ordered at 1 to map URL paths directly to 
+	 * view names. To configure view controllers, override 
+	 * {@link #addViewControllers}. 
 	 */
 	@Bean
 	public HandlerMapping viewControllerHandlerMapping() {
@@ -191,7 +212,8 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 	
 	/**
-	 * Returns a {@link BeanNameUrlHandlerMapping} ordered at 2 to map URL paths to controller bean names.
+	 * Return a {@link BeanNameUrlHandlerMapping} ordered at 2 to map URL 
+	 * paths to controller bean names.
 	 */
 	@Bean
 	public BeanNameUrlHandlerMapping beanNameHandlerMapping() {
@@ -202,8 +224,9 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Returns a handler mapping ordered at Integer.MAX_VALUE-1 with mapped resource handlers.
-	 * To configure resource handling, override {@link #addResourceHandlers(ResourceHandlerRegistry)}.
+	 * Return a handler mapping ordered at Integer.MAX_VALUE-1 with mapped 
+	 * resource handlers. To configure resource handling, override 
+	 * {@link #addResourceHandlers}.
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
@@ -222,9 +245,9 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Returns a handler mapping ordered at Integer.MAX_VALUE with a mapped default servlet handler.
-	 * To configure "default" Servlet handling, override 
-	 * {@link #configureDefaultServletHandling(DefaultServletHandlerConfigurer)}.  
+	 * Return a handler mapping ordered at Integer.MAX_VALUE with a mapped 
+	 * default servlet handler. To configure "default" Servlet handling, 
+	 * override {@link #configureDefaultServletHandling}.  
 	 */
 	@Bean
 	public HandlerMapping defaultServletHandlerMapping() {
@@ -243,12 +266,13 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Returns a {@link RequestMappingHandlerAdapter} for processing requests through annotated controller methods.
-	 * Consider overriding one of these other more fine-grained methods:
+	 * Returns a {@link RequestMappingHandlerAdapter} for processing requests 
+	 * through annotated controller methods. Consider overriding one of these 
+	 * other more fine-grained methods:
 	 * <ul>
-	 *  <li>{@link #addArgumentResolvers(List)} for adding custom argument resolvers.
-	 * 	<li>{@link #addReturnValueHandlers(List)} for adding custom return value handlers.
-	 * 	<li>{@link #configureMessageConverters(List)} for adding custom message converters.
+	 *  <li>{@link #addArgumentResolvers} for adding custom argument resolvers.
+	 * 	<li>{@link #addReturnValueHandlers} for adding custom return value handlers.
+	 * 	<li>{@link #configureMessageConverters} for adding custom message converters.
 	 * </ul>
 	 */
 	@Bean
@@ -268,34 +292,46 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 		adapter.setWebBindingInitializer(webBindingInitializer);
 		adapter.setCustomArgumentResolvers(argumentResolvers);
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
+		adapter.setIgnoreDefaultModelOnRedirect(true);
 		return adapter;
 	}
 
 	/**
-	 * Add custom {@link HandlerMethodArgumentResolver}s to use in addition to the ones registered by default.
-	 * <p>Custom argument resolvers are invoked before built-in resolvers except for those that rely on the presence 
-	 * of annotations (e.g. {@code @RequestParameter}, {@code @PathVariable}, etc.). The latter can be customized 
-	 * by configuring the {@link RequestMappingHandlerAdapter} directly. 
-	 * @param argumentResolvers the list of custom converters; initially an empty list.
+	 * Add custom {@link HandlerMethodArgumentResolver}s to use in addition to 
+	 * the ones registered by default.
+	 * <p>Custom argument resolvers are invoked before built-in resolvers 
+	 * except for those that rely on the presence of annotations (e.g. 
+	 * {@code @RequestParameter}, {@code @PathVariable}, etc.). 
+	 * The latter can  be customized by configuring the 
+	 * {@link RequestMappingHandlerAdapter} directly. 
+	 * @param argumentResolvers the list of custom converters; 
+	 * 	initially an empty list.
 	 */
 	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 	}
 
 	/**
-	 * Add custom {@link HandlerMethodReturnValueHandler}s in addition to the ones registered by default.
-	 * <p>Custom return value handlers are invoked before built-in ones except for those that rely on the presence 
-	 * of annotations (e.g. {@code @ResponseBody}, {@code @ModelAttribute}, etc.). The latter can be customized
-	 * by configuring the {@link RequestMappingHandlerAdapter} directly.
-	 * @param returnValueHandlers the list of custom handlers; initially an empty list.
+	 * Add custom {@link HandlerMethodReturnValueHandler}s in addition to the 
+	 * ones registered by default.
+	 * <p>Custom return value handlers are invoked before built-in ones except 
+	 * for those that rely on the presence of annotations (e.g. 
+	 * {@code @ResponseBody}, {@code @ModelAttribute}, etc.). 
+	 * The latter can be customized by configuring the 
+	 * {@link RequestMappingHandlerAdapter} directly.
+	 * @param returnValueHandlers the list of custom handlers; 
+	 * initially an empty list.
 	 */
 	protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 	}
 
 	/**
 	 * Provides access to the shared {@link HttpMessageConverter}s used by the 
-	 * {@link RequestMappingHandlerAdapter} and the {@link ExceptionHandlerExceptionResolver}. 
-	 * This method cannot be overridden. Use {@link #configureMessageConverters(List)} instead.
-	 * Also see {@link #addDefaultHttpMessageConverters(List)} that can be used to add default message converters.
+	 * {@link RequestMappingHandlerAdapter} and the 
+	 * {@link ExceptionHandlerExceptionResolver}. 
+	 * This method cannot be overridden. 
+	 * Use {@link #configureMessageConverters(List)} instead.
+	 * Also see {@link #addDefaultHttpMessageConverters(List)} that can be 
+	 * used to add default message converters.
 	 */
 	protected final List<HttpMessageConverter<?>> getMessageConverters() {
 		if (messageConverters == null) {
@@ -309,17 +345,20 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Override this method to add custom {@link HttpMessageConverter}s to use with 
-	 * the {@link RequestMappingHandlerAdapter} and the {@link ExceptionHandlerExceptionResolver}.
-	 * Adding converters to the list turns off the default converters that would otherwise be registered by default.
-	 * Also see {@link #addDefaultHttpMessageConverters(List)} that can be used to add default message converters.
-	 * @param converters a list to add message converters to; initially an empty list.
+	 * Override this method to add custom {@link HttpMessageConverter}s to use 
+	 * with the {@link RequestMappingHandlerAdapter} and the 
+	 * {@link ExceptionHandlerExceptionResolver}. Adding converters to the 
+	 * list turns off the default converters that would otherwise be registered
+	 * by default. Also see {@link #addDefaultHttpMessageConverters(List)} that 
+	 * can be used to add default message converters.
+	 * @param converters a list to add message converters to; 
+	 * initially an empty list.
 	 */
 	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
 	/**
-	 * A method available to subclasses to add default {@link HttpMessageConverter}s. 
+	 * Override this method to add default {@link HttpMessageConverter}s. 
 	 * @param messageConverters the list to add the default message converters to
 	 */
 	protected final void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
@@ -346,9 +385,9 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 	
 	/**
-	 * Returns a {@link FormattingConversionService} for use with annotated controller methods and the 
-	 * {@code spring:eval} JSP tag. Also see {@link #addFormatters(FormatterRegistry)} as an alternative
-	 * to overriding this method.
+	 * Returns a {@link FormattingConversionService} for use with annotated 
+	 * controller methods and the {@code spring:eval} JSP tag. 
+	 * Also see {@link #addFormatters} as an alternative to overriding this method.
 	 */
 	@Bean
 	public FormattingConversionService mvcConversionService() {
@@ -364,8 +403,9 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Returns {@link Validator} for validating {@code @ModelAttribute} and {@code @RequestBody} arguments of 
-	 * annotated controller methods. To configure a custom validation, override {@link #getValidator()}.
+	 * Returns {@link Validator} for validating {@code @ModelAttribute} 
+	 * and {@code @RequestBody} arguments of annotated controller methods. 
+	 * To configure a custom validation, override {@link #getValidator()}.
 	 */
 	@Bean
 	Validator mvcValidator() {
@@ -404,7 +444,8 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Returns a {@link HttpRequestHandlerAdapter} for processing requests with {@link HttpRequestHandler}s.
+	 * Returns a {@link HttpRequestHandlerAdapter} for processing requests 
+	 * with {@link HttpRequestHandler}s.
 	 */
 	@Bean
 	public HttpRequestHandlerAdapter httpRequestHandlerAdapter() {
@@ -412,7 +453,8 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Returns a {@link SimpleControllerHandlerAdapter} for processing requests with interface-based controllers.
+	 * Returns a {@link SimpleControllerHandlerAdapter} for processing requests 
+	 * with interface-based controllers.
 	 */
 	@Bean
 	public SimpleControllerHandlerAdapter simpleControllerHandlerAdapter() {
@@ -420,8 +462,9 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Returns a {@link HandlerExceptionResolverComposite} that contains a list of exception resolvers.
-	 * To customize the list of exception resolvers, override {@link #configureHandlerExceptionResolvers(List)}.
+	 * Returns a {@link HandlerExceptionResolverComposite} that contains a list
+	 * of exception resolvers. To customize the list of exception resolvers, 
+	 * override {@link #configureHandlerExceptionResolvers(List)}.
 	 */
 	@Bean
 	HandlerExceptionResolver handlerExceptionResolver() throws Exception {
@@ -439,21 +482,28 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Override this method to configure the list of {@link HandlerExceptionResolver}s to use.
-	 * Adding resolvers to the list turns off the default resolvers that would otherwise be registered by default.
-	 * Also see {@link #addDefaultHandlerExceptionResolvers(List)} that can be used to add the default exception resolvers.
-	 * @param exceptionResolvers a list to add exception resolvers to; initially an empty list.
+	 * Override this method to configure the list of 
+	 * {@link HandlerExceptionResolver}s to use. Adding resolvers to the list 
+	 * turns off the default resolvers that would otherwise be registered by 
+	 * default. Also see {@link #addDefaultHandlerExceptionResolvers(List)} 
+	 * that can be used to add the default exception resolvers.
+	 * @param exceptionResolvers a list to add exception resolvers to; 
+	 * initially an empty list.
 	 */
 	protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 	}
 
 	/**
-	 * A method available to subclasses for adding default {@link HandlerExceptionResolver}s.
+	 * A method available to subclasses for adding default 
+	 * {@link HandlerExceptionResolver}s.
 	 * <p>Adds the following exception resolvers:
 	 * <ul>
-	 * 	<li>{@link ExceptionHandlerExceptionResolver} for handling exceptions through @{@link ExceptionHandler} methods.
-	 * 	<li>{@link ResponseStatusExceptionResolver} for exceptions annotated with @{@link ResponseStatus}.
-	 * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring exception types
+	 * 	<li>{@link ExceptionHandlerExceptionResolver} 
+	 * 	for handling exceptions through @{@link ExceptionHandler} methods.
+	 * 	<li>{@link ResponseStatusExceptionResolver} 
+	 * 	for exceptions annotated with @{@link ResponseStatus}.
+	 * 	<li>{@link DefaultHandlerExceptionResolver} 
+	 * 	for resolving known Spring exception types
 	 * </ul>
 	 */
 	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
