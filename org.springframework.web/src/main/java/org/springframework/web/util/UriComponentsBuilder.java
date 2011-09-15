@@ -428,20 +428,9 @@ public class UriComponentsBuilder {
 		}
 
 		public PathComponentBuilder appendPathSegments(String... pathSegments) {
-			for (String pathSegment : pathSegments) {
-				final boolean pathEndsInSlash = path.length() > 0 && path.charAt(path.length() - 1) == '/';
-				final boolean segmentStartsWithSlash = pathSegment.charAt(0) == '/';
-
-				if (path.length() > 0 && !pathEndsInSlash && !segmentStartsWithSlash) {
-					path.append('/');
-				} else if (pathEndsInSlash && segmentStartsWithSlash) {
-					pathSegment = pathSegment.substring(1);
-					if (pathSegment.length() == 0)
-						continue;
-				}
-				path.append(pathSegment);
-			}
-			return this;
+			PathComponentCompositeBuilder builder = new PathComponentCompositeBuilder(this);
+			builder.appendPathSegments(pathSegments);
+			return builder;
 		}
 	}
 
@@ -461,13 +450,45 @@ public class UriComponentsBuilder {
 		}
 
 		public PathComponentBuilder appendPath(String path) {
-			String[] pathSegments = StringUtils.tokenizeToStringArray(path, "/");
-			Collections.addAll(this.pathSegments, pathSegments);
-			return this;
+			PathComponentCompositeBuilder builder = new PathComponentCompositeBuilder(this);
+			builder.appendPath(path);
+			return builder;
 		}
 
 		public PathComponentBuilder appendPathSegments(String... pathSegments) {
 			Collections.addAll(this.pathSegments, pathSegments);
+			return this;
+		}
+	}
+
+	/**
+	 * Represents a builder for a collection of PathComponents.
+	 */
+	private static class PathComponentCompositeBuilder implements PathComponentBuilder {
+
+		private final List<PathComponentBuilder> pathComponentBuilders = new ArrayList<PathComponentBuilder>();
+
+		private PathComponentCompositeBuilder(PathComponentBuilder builder) {
+			pathComponentBuilders.add(builder);
+		}
+
+		public UriComponents.PathComponent build() {
+			List<UriComponents.PathComponent> pathComponents =
+					new ArrayList<UriComponents.PathComponent>(pathComponentBuilders.size());
+
+			for (PathComponentBuilder pathComponentBuilder : pathComponentBuilders) {
+				pathComponents.add(pathComponentBuilder.build());
+			}
+			return new UriComponents.PathComponentComposite(pathComponents);
+		}
+
+		public PathComponentBuilder appendPath(String path) {
+			this.pathComponentBuilders.add(new FullPathComponentBuilder(path));
+			return this;
+		}
+
+		public PathComponentBuilder appendPathSegments(String... pathSegments) {
+			this.pathComponentBuilders.add(new PathSegmentComponentBuilder(pathSegments));
 			return this;
 		}
 	}

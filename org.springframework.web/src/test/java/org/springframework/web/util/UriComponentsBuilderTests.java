@@ -139,6 +139,42 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
+	public void pathThenPath() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/foo/bar").path("ba/z");
+		UriComponents result = builder.build().encode();
+
+		assertEquals("/foo/barba/z", result.getPath());
+		assertEquals(Arrays.asList("foo", "barba", "z"), result.getPathSegments());
+	}
+
+	@Test
+	public void pathThenPathSegments() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/foo/bar").pathSegment("ba/z");
+		UriComponents result = builder.build().encode();
+
+		assertEquals("/foo/bar/ba%2Fz", result.getPath());
+		assertEquals(Arrays.asList("foo", "bar", "ba%2Fz"), result.getPathSegments());
+	}
+
+	@Test
+	public void pathSegmentsThenPathSegments() {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().pathSegment("foo").pathSegment("bar");
+		UriComponents result = builder.build();
+
+		assertEquals("/foo/bar", result.getPath());
+		assertEquals(Arrays.asList("foo", "bar"), result.getPathSegments());
+	}
+
+	@Test
+	public void pathSegmentsThenPath() {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().pathSegment("foo").path("/");
+		UriComponents result = builder.build();
+
+		assertEquals("/foo/", result.getPath());
+		assertEquals(Arrays.asList("foo"), result.getPathSegments());
+	}
+
+	@Test
 	public void queryParams() throws URISyntaxException {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.queryParam("baz", "qux", 42).build();
