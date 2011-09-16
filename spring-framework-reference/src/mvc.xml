@@ -1133,6 +1133,18 @@ public class RelativePathUriTemplateController {
             </listitem>
 
             <listitem>
+              <para>
+                <interfacename>org.springframework.web.servlet.mvc.support.RedirectAttributes</interfacename>
+                to specify the exact set of attributes to use in case of a redirect
+                and also to add flash attributes (attributes stored temporarily on
+                the server-side to make them available to the request after the redirect).
+                <literal>RedirectAttributes</literal> is used instead of the implicit
+                model if the method returns a "redirect:" prefixed view name or 
+                <classname>RedirectView</classname>.
+              </para>
+            </listitem>
+
+            <listitem>
               <para>Command or form objects to bind request parameters to bean
               properties (via setters) or directly to fields, with
               customizable type conversion, depending on
@@ -1697,9 +1709,56 @@ public class EditPetForm {
           </para>
         </note>
       </section>
+
+      <section id="mvc-ann-redirect-attributes">
+        <title>Specifying redirect and flash attributes</title>
+
+        <para>By default all model attributes are considered to be exposed as 
+        URI template variables in the redirect URL. Of the remaining attributes 
+        those that are primitive types or collections/arrays of primitive types 
+        are automatically appended as query parameters.
+        </para>
+        
+        <para>In annotated controllers however the model may contain 
+        additional attributes originally added for rendering 
+        purposes (e.g. drop-down field values).
+        To gain precise control over the attributes used in a redirect scenario,
+        an <interfacename>@RequestMapping</interfacename> method can declare an
+        argument of type <interfacename>RedirectAttributes</interfacename>
+        and use it to add attributes for use in <classname>RedirectView</classname>. 
+        If the controller method does redirect, the content of 
+        <interfacename>RedirectAttributes</interfacename> is used. 
+        Otherwise the content of the default <interfacename>Model</interfacename> 
+        is used.
+        </para>
+        
+        <para>
+        The <classname>RequestMappingHandlerAdapter</classname> provides a flag
+        called <literal>"ignoreDefaultModelOnRedirect"</literal> that can be 
+        used to indicate the content of the default <interfacename>Model</interfacename>
+        should never be used if a controller method redirects. 
+        Instead the controller method should declare an attribute of type
+        <interfacename>RedirectAttributes</interfacename> or if it doesn't do so
+        no attributes should be passed on to <classname>RedirectView</classname>.
+        Both the MVC namespace and the MVC Java config (via
+        <interfacename>@EnableWebMvc</interfacename>) automatically set 
+        this flag to <literal>true</literal>.
+        </para>
+        
+        <para>The <interfacename>RedirectAttributes</interfacename> interface can
+        also be used to add flash attributes. Unlike other redirect attributes, 
+        which end up in the target redirect URL, flash attributes are saved
+        in the HTTP session (and hence do not appear in the URL). The model of 
+        the controller serving the target redirect URL automatically receives
+        these flash attributes after which they are removed from the session.
+        See <xref linkend="mvc-flash-attributes"/> for an overview of the general 
+        support for flash attributes in Spring MVC.
+        </para>
+        
+      </section>
       
       <section id="mvc-ann-form-urlencoded-data">
-        <title>Working with <literal>application/x-www-form-urlencoded</literal> data</title>
+        <title>Working with <literal>"application/x-www-form-urlencoded"</literal> data</title>
 
 		<para>The previous sections covered use of <interfacename>@ModelAttribute</interfacename> 
 		to support form submission requests from browser clients. The same annotation is 
@@ -2431,24 +2490,38 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         <para>The <classname>RedirectView</classname> issues an
         <literal>HttpServletResponse.sendRedirect()</literal> call that
         returns to the client browser as an HTTP redirect.
-        All model attributes are considered to be exposed as either URI template variables first, 
-        assuming the URL is a URI template such as <code>/account/{number}</code>, 
-        or as HTTP query parameters second. By default String and primitive model attributes 
-        are eligible to be exposed this way. However, this behavior can be extended by 
-        sub-classing RedirectView. Also consider that <code>@PathVariable</code>-annotated 
-        method arguments are automatically added to the model, which is convenient when 
-        redirecting to the same URL using a different HTTP method. For example:</para>
+        By default all model attributes are considered to be exposed as URI
+        template variables in the redirect URL. Of the remaining attributes 
+        those that are primitive types or collections/arrays of primitive types
+        are automatically appended as query parameters.
+        </para>
+        
+        <para>
+        Appending primitive type attributes as query parameters may be the 
+        desired result if a model instance was prepared specifically for the
+        redirect. However, in annotated controllers the model may contain 
+        additional attributes added for rendering purposes (e.g. drop-down 
+        field values). To avoid the possibility of having such attributes 
+        appear in the URL an annotated controller can declare an 
+        argument of type <interfacename>RedirectAttributes</interfacename>
+        and use it to specify the exact attributes to make available to
+        <classname>RedirectView</classname>. If the controller method decides
+        to redirect, the content of <interfacename>RedirectAttributes</interfacename> 
+        is used. Otherwise the content of the model is used.
+        </para>
+        
+        <para>
+        Note that URI template variables from the present request are automatically
+        made available when expanding a redirect URL and do not need to be added
+        explicitly neither through <interfacename>Model</interfacename> nor 
+        <interfacename>RedirectAttributes</interfacename>. For example:</para>
         
       <programlisting language="java">@RequestMapping(value = "/files/{path}", method = RequestMethod.POST)
-public String upload(@PathVariable String path, ...) {
+public String upload(...) {
     // ...
     return "redirect:files/{path}";
 }
-
-@RequestMapping(value = "/files/{path}", method = RequestMethod.GET)
-public void get(@PathVariable String path, ...) {
-    // ...
-}</programlisting>        
+</programlisting>        
 
         <para>If you use <classname>RedirectView</classname> and the view is
         created by the controller itself, it is recommended that you configure
@@ -2681,6 +2754,73 @@ public class ContentController {
     </section>
   </section>
 
+  <section id="mvc-flash-attributes">
+    <title>Using flash attributes</title>
+
+    <para>Flash attributes provide a way for one request to store attributes 
+    intended for use in another. This is most commonly needed when redirecting 
+    -- e.g. the Post/Redirect/Get pattern. Flash attributes are saved temporarily
+    before the redirect (typically in the session) to be made available to the 
+    request after the redirect and removed immediately.
+    </para>
+    
+    <para>Spring MVC has two main abstractions in support of flash attributes. 
+    <classname>FlashMap</classname> is used to hold flash attributes while 
+    <interfacename>FlashMapManager</interfacename> is used to store, retrieve, 
+    and manage <classname>FlashMap</classname> instances.
+    </para>
+    
+    <para>Flash attribute support is always "on" and does not need to enabled
+    explicitly although if not used, it never causes HTTP session creation.
+    On each request there is an "input" <classname>FlashMap</classname> with 
+    attributes passed from a previous request (if any) and an "output" 
+    <classname>FlashMap</classname> with attributes to save for a subsequent 
+    request. Both <classname>FlashMap</classname> instances are accessible
+    from anywhere in Spring MVC through static methods in
+    <classname>RequestContextUtils</classname>. 
+    </para>
+
+    <para>Annotated controllers typically do not need to work with  
+    <classname>FlashMap</classname> directly. Instead an 
+    <interfacename>@RequestMapping</interfacename> method can accept an argument
+    of type <interfacename>RedirectAttributes</interfacename> and use it to
+    add flash attributes for a redirect scenario. Flash attributes added via
+    <interfacename>RedirectAttributes</interfacename> are automatically 
+    propagated to the "output" FlashMap. Similarly after the
+    redirect attributes from the "input" <classname>FlashMap</classname> are 
+    automatically added to the <interfacename>Model</interfacename> 
+    of the controller serving the target URL.  
+    </para>
+
+    <sidebar id="mvc-flash-attributes-concurrency">
+        <title>Matching requests to flash attributes</title>
+        <para>The concept of flash attributes exists in many other Web frameworks
+        and has proven to be exposed sometimes to concurrency issues. 
+        This is because by definition flash attributes are 
+        to be stored until the next request. However the very "next" 
+        request may not be the intended recepient but another 
+        asynchronous request (e.g. polling or resource requests)
+        in which case the flash attributes are removed too early. 
+        </para>
+        
+        <para>To reduce the possibility of such issues,
+        <classname>RedirectView</classname> automatically "stamps" 
+        <classname>FlashMap</classname> instances with the path and query
+        parameters of the target redirect URL. In turn the default 
+        <classname>FlashMapManager</classname> matches that information to incoming
+        requests when looking up the "input" <classname>FlashMap</classname>.
+        </para>
+        
+        <para>This does not eliminate the possibility of a concurrency issue
+        entirely but nevertheless reducess it greatly with information 
+        that is already available in the redirect URL.
+        Therefore the use of flash attributes is recommended
+        mainly for redirect scenarios unless the target URL and/or query 
+        parameters are known.</para>
+    </sidebar>
+
+  </section>
+  
   <section id="mvc-localeresolver">
     <title>Using locales</title>
 

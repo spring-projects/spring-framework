@@ -52,7 +52,10 @@ Changes in version 3.1 RC1 (2011-09-xx)
 * extended Servlet API mocks for Servlet 3.0 forward compatibility as far as possible
 * made MockHttpServletResponse compatible with Servlet 3.0 getHeader(s) method returning Strings
 * added getHeaderValue(s) method to MockHttpServletResponse for raw value access
-
+* add flash attribute support through FlashMap and FlashMapManager abstractions
+* add RedirectAttributes abstraction as supported method argument type of @RequestMapping methods
+* add "ignoreDefaultModelOnRedirect" flag to RequestMappingHandlerAdapter
+* add support for @RequestPart annotated controller method arguments
 
 Changes in version 3.1 M2 (2011-06-08)
 --------------------------------------
@@ -64,17 +67,16 @@ Changes in version 3.1 M2 (2011-06-08)
 * AnnotatedBeanDefinitionReader now inherits Environment of supplied BeanDefinitionRegistry
 * eliminated @Feature support in favor of @Enable* and framework-provided @Configuration classes
 * introduced @EnableTransactionManagement, @EnableScheduling, etc
-* introduced @EnableWebMvc to provide default configuration for Spring MVC applications
-* introduced HandlerMethod abstraction representing a Spring MVC controller method
-* added HandlerMapping/HandlerAdapter/HandlerExceptionResolver HandlerMethod-based implementations
-* enabled HandlerMethod-based infrastructure through the mvc namespace and Java-based configuration
-* support for automatically adding @PathVariables to the model
-* support for including @PathVariables in data binding
-* support for URI template variables in view names with the "redirect:" prefix
-* added a flag for extracting the value from single-key models in MappingJacksonJsonView
-* added support for @Valid with @RequestBody arguments
+* add Java config alternative to MVC namespace via @EnableWebMvc annotation
+* introduce HandlerMethod abstraction selecting and invoking @RequestMapping methods
+* add HandlerMethod-based implementations of HandlerMapping, HandlerAdapter, HandlerExceptionResolver
+* merge @PathVariables in the model before rendering except for JSON/XML serialization/marshalling.
+* use @PathVariables in addition to request parameters in data binding
+* support URI variable placeholders in "redirect:" prefixed view names
+* add flag to extract value from single-key model in MappingJacksonJsonView
+* support @Valid on @RequestBody method arguments
 * allow bean references in mvc:interceptor namespace elements
-* consolidated the initialization and use of MappedInterceptors in AbstractHandlerMapping
+* consolidate initialization and use of MappedInterceptors in AbstractHandlerMapping
 * added Servlet 3.0 based WebApplicationInitializer mechanism for programmatic bootstrapping
 * added Servlet 3.0 based StandardServletMultipartResolver
 * added "packagesToScan" feature to LocalContainerEntityManagerFactoryBean (avoiding persistence.xml)

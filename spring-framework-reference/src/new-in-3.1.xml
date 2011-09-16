@@ -240,7 +240,7 @@
       recommended going forward.</para>
     </section>
     <section>
-      <title>Consumes and Produces <interface>@RequestMapping</interface> Conditions</title>
+      <title>"consumes" and "produces" conditions in <interface>@RequestMapping</interface></title>
       <para>Improved support for specifying media types consumed by a method through the 
       <literal>'Content-Type'</literal> header as well as for producible types specified
       through the <literal>'Accept'</literal> header.
@@ -248,29 +248,57 @@
       <xref linkend="mvc-ann-requestmapping-produces"/>
       </para>
     </section>
+    <section>
+      <title>Flash Attributes and <interfacename>RedirectAttributes</interfacename></title>
+      <para>Flash attributes can now be stored in a <classname>FlashMap</classname>
+      and saved in the HTTP session to survive a redirect. For an overview of 
+      the general support for flash attributes in Spring MVC
+      see <xref linkend="mvc-flash-attributes"/>. 
+      </para>
+      <para>
+      In annotated controllers, an <interfacename>@RequestMapping</interfacename>
+      method can add flash attributes by declaring a method argument of type
+      <interfacename>RedirectAttributes</interfacename>. This method argument
+      can now also be used to get precise control over the attributes used in
+      a redirect scenario. See <xref linkend="mvc-ann-redirect-attributes"/> 
+      for more details.
+      </para>
+    </section>
 	<section>
-	  <title>Working With URI Template Variables In Controller Methods</title>
-	  <para>@PathVariable method arguments are now automatically added to the model. 
-	  If you declare any <interface>@PathVariable</interface> arguments on a 
-	  controller method you no longer need to add them to the model.</para>
-	  <para>Redirect view strings can now be URI templates. 
-	  For example a controller can return <literal>"redirect:/blog/{year}/{month}"</literal>.
-	  The URI template will be expanded with variables from the model, which 
-	  of course includes <interface>@PathVariable</interface> method arguments 
-	  that are now automatically added to the model.</para>
-	  <para>URI template variables are now included in data binding
-	  in addition to request parameters, which are typically used for 
-	  populating a model.</para>
+	  <title>URI Template Variable Enhancements</title>
+      <para>URI template variables from the current request are used in more places:
+      <itemizedlist>
+        <listitem>URI template variables are used in addition to request parameters 
+        when binding a request to @ModelAttribute method arguments.</listitem>
+        <listitem>@PathVariable method argument values are merged into the model 
+        before rendering except in views that generate content in an automated
+        fashion such as JSON serialization an XML marshalling.</listitem>
+        <listitem>A redirect string can contain placeholders for URI variables
+        (e.g. <literal>"redirect:/blog/{year}/{month}"</literal>). When expanding
+        the placeholders, URI template variables from the current request are 
+        automatically considered.</listitem>
+        <listitem>An @ModelAttribute method argument can be instantiated from
+        a URI template variable provided there is a registered Converter or
+        PropertyEditor to convert from a String to the target object type.</listitem>
+      </itemizedlist>
+      </para>
 	</section>
 	<section>
-	  <title>Validation For <interface>@RequestBody</interface> Method Arguments</title>
-	  <para>An <interface>@RequestBody</interface> method argument annotated 
-	  with <interface>@Valid</interface> is now automatically validated with the 
-	  same <classname>Validator</classname> instance used to validate 
-	  an <interface>@ModelAttribute</interface> method argument.
-	  Both the MVC namespace and <interface>@EnableWebMvc</interface> 
-	  automatically configure a JSR-303 <classname>Validator</classname> adapter 
-	  provided a JSR-303 implementation is available on the classpath.</para>
+	  <title><interfacename>@Valid</interfacename> On 
+      <interface>@RequestBody</interface> Controller Method Arguments</title>
+	  <para>An <interface>@RequestBody</interface> method argument 
+      can be annotated with <interface>@Valid</interface> to invoke automatic
+      validation similar to the support for 
+      <interface>@ModelAttribute</interface> method arguments.
+      The resulting MethodArgumentNotValidException is handled in the 
+      DefaultHandlerExceptionResolver and results in 400 response code.</para>
 	</section>
+    <section>
+        <title><interfacename>@RequestPart</interfacename> Annotation On Controller Method Arguments</title>
+        <para>This new annotation provides access to the content of a 
+        "multipart/form-data" request part.
+        See <xref linkend="mvc-multipart-forms-non-browsers" /> and
+        <xref linkend="mvc-multipart"/></para>
+    </section>
   </section>
 </chapter>
