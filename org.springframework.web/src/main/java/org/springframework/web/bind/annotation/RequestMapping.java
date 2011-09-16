@@ -108,6 +108,12 @@ import java.lang.annotation.Target;
  * <li>{@link java.util.Map} / {@link org.springframework.ui.Model} /
  * {@link org.springframework.ui.ModelMap} for enriching the implicit model
  * that will be exposed to the web view.
+ * <li>{@link org.springframework.web.servlet.mvc.support.RedirectAttributes} 
+ * to specify the exact set of attributes to use in case of a redirect
+ * and also to add flash attributes (attributes stored temporarily on the 
+ * server-side to make them available to the request after the redirect).
+ * {@code RedirectAttributes} is used instead of the implicit model if the 
+ * method returns a "redirect:" prefixed view name or {@code RedirectView}.
  * <li>Command/form objects to bind parameters to: as bean properties or fields,
  * with customizable type conversion, depending on {@link InitBinder} methods
  * and/or the HandlerAdapter configuration - see the "webBindingInitializer"
