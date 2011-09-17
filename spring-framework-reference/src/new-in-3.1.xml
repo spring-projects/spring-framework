@@ -269,17 +269,19 @@
       <para>URI template variables from the current request are used in more places:
       <itemizedlist>
         <listitem>URI template variables are used in addition to request parameters 
-        when binding a request to @ModelAttribute method arguments.</listitem>
+        when binding a request to <interfacename>@ModelAttribute</interfacename>
+        method arguments.</listitem>
         <listitem>@PathVariable method argument values are merged into the model 
-        before rendering except in views that generate content in an automated
-        fashion such as JSON serialization an XML marshalling.</listitem>
+        before rendering, except in views that generate content in an automated
+        fashion such as JSON serialization or XML marshalling.</listitem>
         <listitem>A redirect string can contain placeholders for URI variables
         (e.g. <literal>"redirect:/blog/{year}/{month}"</literal>). When expanding
         the placeholders, URI template variables from the current request are 
         automatically considered.</listitem>
-        <listitem>An @ModelAttribute method argument can be instantiated from
-        a URI template variable provided there is a registered Converter or
-        PropertyEditor to convert from a String to the target object type.</listitem>
+        <listitem>An <interfacename>@ModelAttribute</interfacename> method argument
+        can be instantiated from a URI template variable provided there is a
+        registered Converter or PropertyEditor to convert from a String to the
+        target object type.</listitem>
       </itemizedlist>
       </para>
 	</section>
@@ -290,15 +292,16 @@
       can be annotated with <interface>@Valid</interface> to invoke automatic
       validation similar to the support for 
       <interface>@ModelAttribute</interface> method arguments.
-      The resulting MethodArgumentNotValidException is handled in the 
-      DefaultHandlerExceptionResolver and results in 400 response code.</para>
+      A resulting <classname>MethodArgumentNotValidException</classname> is
+      handled in the <classname>DefaultHandlerExceptionResolver</classname>
+      and results in a <literal>400</literal> response code.</para>
 	</section>
     <section>
         <title><interfacename>@RequestPart</interfacename> Annotation On Controller Method Arguments</title>
         <para>This new annotation provides access to the content of a 
         "multipart/form-data" request part.
         See <xref linkend="mvc-multipart-forms-non-browsers" /> and
-        <xref linkend="mvc-multipart"/></para>
+        <xref linkend="mvc-multipart"/>.</para>
     </section>
   </section>
 </chapter>
