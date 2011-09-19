@@ -33,11 +33,11 @@ public class RedirectViewUriTemplateTests {
 	private MockHttpServletRequest request;
 
 	private MockHttpServletResponse response;
-
+	
 	@Before
 	public void setUp() {
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
+		this.request = new MockHttpServletRequest();
+		this.response = new MockHttpServletResponse();
 	}
 
 	@Test
@@ -47,9 +47,9 @@ public class RedirectViewUriTemplateTests {
 
 		String baseUrl = "http://url.somewhere.com";
 		RedirectView redirectView = new RedirectView(baseUrl + "/{foo}");
-		redirectView.renderMergedOutputModel(model, request, response);
+		redirectView.renderMergedOutputModel(model, this.request, this.response);
 
-		assertEquals(baseUrl + "/bar", response.getRedirectedUrl());
+		assertEquals(baseUrl + "/bar", this.response.getRedirectedUrl());
 	}
 	
 	@Test
@@ -59,9 +59,9 @@ public class RedirectViewUriTemplateTests {
 
 		String baseUrl = "http://url.somewhere.com";
 		RedirectView redirectView = new RedirectView(baseUrl + "/context path/{foo}");
-		redirectView.renderMergedOutputModel(model, request, response);
+		redirectView.renderMergedOutputModel(model, this.request, this.response);
 
-		assertEquals(baseUrl + "/context path/bar%2Fbar%20baz", response.getRedirectedUrl());
+		assertEquals(baseUrl + "/context path/bar%2Fbar%20baz", this.response.getRedirectedUrl());
 	}
 	
 	@Test
@@ -71,9 +71,9 @@ public class RedirectViewUriTemplateTests {
 		model.put("fooArr", new String[] { "baz", "bazz" });
 
 		RedirectView redirectView = new RedirectView("/foo/{foo}");
-		redirectView.renderMergedOutputModel(model, request, response);
+		redirectView.renderMergedOutputModel(model, this.request, this.response);
 
-		assertEquals("/foo/bar?fooArr=baz&fooArr=bazz", response.getRedirectedUrl());
+		assertEquals("/foo/bar?fooArr=baz&fooArr=bazz", this.response.getRedirectedUrl());
 	}
 
 	@Test
@@ -82,9 +82,9 @@ public class RedirectViewUriTemplateTests {
 		model.put("foo", new Long(611));
 
 		RedirectView redirectView = new RedirectView("/foo/{foo}");
-		redirectView.renderMergedOutputModel(model, request, response);
+		redirectView.renderMergedOutputModel(model, this.request, this.response);
 
-		assertEquals("/foo/611", response.getRedirectedUrl());
+		assertEquals("/foo/611", this.response.getRedirectedUrl());
 	}
 
 	@Test
@@ -98,18 +98,18 @@ public class RedirectViewUriTemplateTests {
 		currentRequestUriTemplateVars.put("var1", "v1");
 		currentRequestUriTemplateVars.put("name", "v2");
 		currentRequestUriTemplateVars.put("var3", "v3");
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, currentRequestUriTemplateVars);
+		this.request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, currentRequestUriTemplateVars);
 
 		String url = "http://url.somewhere.com";
 		RedirectView redirectView = new RedirectView(url + "/{key1}/{var1}/{name}");
-		redirectView.renderMergedOutputModel(model, request, response);
+		redirectView.renderMergedOutputModel(model, this.request, this.response);
 
-		assertEquals(url + "/value1/v1/value2?key3=value3", response.getRedirectedUrl());
+		assertEquals(url + "/value1/v1/value2?key3=value3", this.response.getRedirectedUrl());
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void uriTemplateNullValue() throws Exception {
-		new RedirectView("/{foo}").renderMergedOutputModel(new ModelMap(), request, response);
+		new RedirectView("/{foo}").renderMergedOutputModel(new ModelMap(), this.request, this.response);
 	}
 	
 	@Test
@@ -117,9 +117,9 @@ public class RedirectViewUriTemplateTests {
 		Map<String, Object> model = new HashMap<String, Object>();
 
 		RedirectView redirectView = new RedirectView("");
-		redirectView.renderMergedOutputModel(model, request, response);
+		redirectView.renderMergedOutputModel(model, this.request, this.response);
 
-		assertEquals("", response.getRedirectedUrl());
+		assertEquals("", this.response.getRedirectedUrl());
 	}
 	
 }

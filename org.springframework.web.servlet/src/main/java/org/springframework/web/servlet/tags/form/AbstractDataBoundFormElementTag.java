@@ -17,6 +17,9 @@
 package org.springframework.web.servlet.tags.form;
 
 import java.beans.PropertyEditor;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
@@ -24,6 +27,7 @@ import org.springframework.beans.PropertyAccessor;
 import org.springframework.core.Conventions;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.BindStatus;
+import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.servlet.tags.EditorAwareTag;
 import org.springframework.web.servlet.tags.NestedPathTag;
 
@@ -227,6 +231,18 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 		return getDisplayString(value, editor);
 	}
 
+	/**
+	 * Process the given form field through a {@link RequestDataValueProcessor}
+	 * instance if one is configured or otherwise returns the same value.
+	 */
+	protected final String processFieldValue(String name, String value, String type) {
+		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
+		ServletRequest request = this.pageContext.getRequest();
+		if (processor != null && (request instanceof HttpServletRequest)) {
+			value = processor.processFormFieldValue((HttpServletRequest) request, name, value, type);
+		}
+		return value;
+	}
 
 	/**
 	 * Disposes of the {@link BindStatus} instance.

@@ -55,8 +55,9 @@ public class CheckboxTag extends AbstractSingleCheckedElementTag {
 			// Write out the 'field was present' marker.
 			tagWriter.startTag("input");
 			tagWriter.writeAttribute("type", "hidden");
-			tagWriter.writeAttribute("name", WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName());
-			tagWriter.writeAttribute("value", "on");
+			String name = WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName();
+			tagWriter.writeAttribute("name", name);
+			tagWriter.writeAttribute("value", processFieldValue(name, "on", getInputType()));
 			tagWriter.endTag();
 		}
 
@@ -65,7 +66,7 @@ public class CheckboxTag extends AbstractSingleCheckedElementTag {
 
 	@Override
 	protected void writeTagDetails(TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("type", "checkbox");
+		tagWriter.writeAttribute("type", getInputType());
 
 		Object boundValue = getBoundValue();
 		Class valueType = getBindStatus().getValueType();
@@ -87,6 +88,11 @@ public class CheckboxTag extends AbstractSingleCheckedElementTag {
 			Object resolvedValue = (value instanceof String ? evaluate("value", (String) value) : value);
 			renderFromValue(resolvedValue, tagWriter);
 		}
+	}
+
+	@Override
+	protected String getInputType() {
+		return "checkbox";
 	}
 
 }

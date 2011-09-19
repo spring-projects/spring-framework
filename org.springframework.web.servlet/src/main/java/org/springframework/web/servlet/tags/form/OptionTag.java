@@ -207,6 +207,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 		writeOptionalAttribute(tagWriter, "id", resolveId());
 		writeOptionalAttributes(tagWriter);
 		String renderedValue = getDisplayString(value, getBindStatus().getEditor());
+		renderedValue = processFieldValue(getSelectTag().getName(), renderedValue, "option");
 		tagWriter.writeAttribute(VALUE_ATTRIBUTE, renderedValue);
 		if (isSelected(value)) {
 			tagWriter.writeAttribute(SELECTED_ATTRIBUTE, SELECTED_ATTRIBUTE);
@@ -237,6 +238,10 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	private void assertUnderSelectTag() {
 		TagUtils.assertHasAncestorOfType(this, SelectTag.class, "option", "select");
+	}
+	
+	private SelectTag getSelectTag() {
+		return (SelectTag) findAncestorWithClass(this, SelectTag.class);
 	}
 
 	private boolean isSelected(Object resolvedValue) {

@@ -16,7 +16,11 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import java.util.Map;
+
+import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
@@ -25,6 +29,7 @@ import org.springframework.beans.PropertyAccessor;
 import org.springframework.core.Conventions;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.HtmlUtils;
 
 /**
@@ -393,7 +398,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	protected String resolveAction() throws JspException {
 		String action = getAction();
 		if (StringUtils.hasText(action)) {
-			return getDisplayString(evaluate(ACTION_ATTRIBUTE, action));
+			action = getDisplayString(evaluate(ACTION_ATTRIBUTE, action));
+			return processAction(action);
 		}
 		else {
 			String requestUri = getRequestContext().getRequestUri();
@@ -406,7 +412,7 @@ public class FormTag extends AbstractHtmlElementTag {
 				}
 			}
 			if (StringUtils.hasText(requestUri)) {
-				return requestUri;
+				return processAction(requestUri);
 			}
 			else {
 				throw new IllegalArgumentException("Attribute 'action' is required. " +
@@ -415,6 +421,18 @@ public class FormTag extends AbstractHtmlElementTag {
 		}
 	}
 
+	/**
+	 * Process the action through a {@link RequestDataValueProcessor} instance
+	 * if one is configured or otherwise returns the action unmodified.
+	 */
+	private String processAction(String action) {
+		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
+		ServletRequest request = this.pageContext.getRequest();
+		if ((processor != null) && (request instanceof HttpServletRequest)) {
+			action = processor.processAction((HttpServletRequest) request, action);
+		}
+		return action;
+	}
 
 	/**
 	 * Closes the '<code>form</code>' block tag and removes the form object name
@@ -422,8 +440,26 @@ public class FormTag extends AbstractHtmlElementTag {
 	 */
 	@Override
 	public int doEndTag() throws JspException {
+		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
+		ServletRequest request = this.pageContext.getRequest();
+		if ((processor != null) && (request instanceof HttpServletRequest)) {
+			writeHiddenFields(processor.getExtraHiddenFields((HttpServletRequest) request));
+		}
 		this.tagWriter.endTag();
 		return EVAL_PAGE;
+	}
+
+	/**
+	 * Writes the given values as hidden fields.
+	 */
+	private void writeHiddenFields(Map<String, String> hiddenFields) throws JspException {
+		if (hiddenFields != null) {
+			for (String name : hiddenFields.keySet()) {
+				this.tagWriter.appendValue("<input type=\"hidden\" ");
+				this.tagWriter.appendValue("name=\"" + name + "\" value=\"" + hiddenFields.get(name) + "\" ");
+				this.tagWriter.appendValue("</input>\n");
+			}
+		}
 	}
 
 	/**

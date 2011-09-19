@@ -64,6 +64,11 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
+			public String getName() {
+				// Should not be used other than to delegate to 
+				// RequestDataValueDataProcessor
+				return "testName";
+			}
 		};
 		selectTag.setPageContext(getPageContext());
 		this.tag.setParent(selectTag);
@@ -299,5 +304,5 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		RequestContext context = new RequestContext((HttpServletRequest) pageContext.getRequest(), model);
 		pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE, context);
 	}
-
+	
 }

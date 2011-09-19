@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -145,26 +146,26 @@ public class OptionsTag extends AbstractHtmlElementTag {
 
 	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
-		assertUnderSelectTag();
+		SelectTag selectTag = getSelectTag();
 		Object items = getItems();
 		Object itemsObject = null;
 		if (items != null) {
 			itemsObject = (items instanceof String ? evaluate("items", items) : items);
 		} else {
-			Class<?> selectTagBoundType = ((SelectTag) findAncestorWithClass(this, SelectTag.class))
-				.getBindStatus().getValueType();
+			Class<?> selectTagBoundType = selectTag.getBindStatus().getValueType();
 			if (selectTagBoundType != null && selectTagBoundType.isEnum()) {
 				itemsObject = selectTagBoundType.getEnumConstants();
 			}
 		}
 		if (itemsObject != null) {
+			String selectName = selectTag.getName();
 			String itemValue = getItemValue();
 			String itemLabel = getItemLabel();
 			String valueProperty =
 					(itemValue != null ? ObjectUtils.getDisplayString(evaluate("itemValue", itemValue)) : null);
 			String labelProperty =
 					(itemLabel != null ? ObjectUtils.getDisplayString(evaluate("itemLabel", itemLabel)) : null);
-			OptionsWriter optionWriter = new OptionsWriter(itemsObject, valueProperty, labelProperty);
+			OptionsWriter optionWriter = new OptionsWriter(selectName, itemsObject, valueProperty, labelProperty);
 			optionWriter.writeOptions(tagWriter);
 		}
 		return SKIP_BODY;
@@ -184,8 +185,9 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		return null;
 	}
 
-	private void assertUnderSelectTag() {
+	private SelectTag getSelectTag() {
 		TagUtils.assertHasAncestorOfType(this, SelectTag.class, "options", "select");
+		return (SelectTag) findAncestorWithClass(this, SelectTag.class);
 	}
 
 	@Override
@@ -198,9 +200,12 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * Inner class that adapts OptionWriter for multiple options to be rendered.
 	 */
 	private class OptionsWriter extends OptionWriter {
+		
+		private final String selectName; 
 
-		public OptionsWriter(Object optionSource, String valueProperty, String labelProperty) {
+		public OptionsWriter(String selectName, Object optionSource, String valueProperty, String labelProperty) {
 			super(optionSource, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
+			this.selectName = selectName;
 		}
 
 		@Override
@@ -213,6 +218,12 @@ public class OptionsTag extends AbstractHtmlElementTag {
 			writeOptionalAttribute(tagWriter, "id", resolveId());
 			writeOptionalAttributes(tagWriter);
 		}
+
+		@Override
+		protected String processOptionValue(String value) {
+			return processFieldValue(this.selectName, value, "option");
+		}
+		
 	}
 
 }

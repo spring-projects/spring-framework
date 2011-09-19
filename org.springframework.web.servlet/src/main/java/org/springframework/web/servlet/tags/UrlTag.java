@@ -22,12 +22,15 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.ExpressionEvaluationUtils;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.JavaScriptUtils;
@@ -168,6 +171,13 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	@Override
 	public int doEndTag() throws JspException {
 		String url = createUrl();
+		
+		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
+		ServletRequest request = this.pageContext.getRequest();
+		if ((processor != null) && (request instanceof HttpServletRequest)) {
+			url = processor.processUrl((HttpServletRequest) request, url);
+		}
+		
 		if (this.var == null) {
 			// print the url to the writer
 			try {

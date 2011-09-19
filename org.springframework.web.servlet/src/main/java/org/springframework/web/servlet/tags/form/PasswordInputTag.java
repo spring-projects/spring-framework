@@ -66,7 +66,7 @@ public class PasswordInputTag extends InputTag {
 		if (this.showPassword) {
 			super.writeValue(tagWriter);
 		} else {
-			tagWriter.writeAttribute("value", "");
+			tagWriter.writeAttribute("value", processFieldValue(getName(), "", getType()));
 		}
 	}
 }

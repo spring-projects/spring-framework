@@ -20,12 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.jstl.core.Config;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
@@ -80,6 +82,12 @@ public class RequestContext {
 	 */
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = RequestContext.class.getName() + ".CONTEXT";
 
+	/**
+	 * The name of the bean to use to look up in an implementation of 
+	 * {@link RequestDataValueProcessor} has been configured. 
+	 */
+	private static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
+
 	protected static final boolean jstlPresent = ClassUtils.isPresent("javax.servlet.jsp.jstl.core.Config",
 			RequestContext.class.getClassLoader());
 
@@ -98,6 +106,8 @@ public class RequestContext {
 	private Boolean defaultHtmlEscape;
 
 	private UrlPathHelper urlPathHelper;
+
+	private RequestDataValueProcessor requestDataValueProcessor;
 
 	private Map<String, Errors> errorsMap;
 
@@ -212,8 +222,16 @@ public class RequestContext {
 		this.defaultHtmlEscape = WebUtils.getDefaultHtmlEscape(this.webApplicationContext.getServletContext());
 
 		this.urlPathHelper = new UrlPathHelper();
-	}
 
+		try {
+			this.requestDataValueProcessor = this.webApplicationContext.getBean(
+					REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME, RequestDataValueProcessor.class);
+		} 
+		catch (NoSuchBeanDefinitionException ex) {
+			// Ignored
+		}
+	}
+	
 	/**
 	 * Determine the fallback locale for this context. <p>The default implementation checks for a JSTL locale attribute
 	 * in request, session or application scope; if not found, returns the <code>HttpServletRequest.getLocale()</code>.
@@ -345,6 +363,15 @@ public class RequestContext {
 	 */
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
+	}
+
+	/**
+	 * Return the RequestDataValueProcessor instance to use obtained from the 
+	 * WebApplicationContext under the name {@code "requestDataValueProcessor"}.
+	 * Or {@code null} if no matching bean was found.
+	 */
+	public RequestDataValueProcessor getRequestDataValueProcessor() {
+		return this.requestDataValueProcessor;
 	}
 
 	/**

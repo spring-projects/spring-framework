@@ -50,6 +50,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
+import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.servlet.view.AbstractView;
 
 /**
@@ -148,6 +149,8 @@ public class VelocityViewTests {
 		expectLastCall().andReturn(null);
 		wac.getServletContext();
 		expectLastCall().andReturn(sc).times(3);
+		wac.getBean("requestDataValueProcessor", RequestDataValueProcessor.class);
+		expectLastCall().andReturn(null);
 		replay(wac);
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -203,6 +206,8 @@ public class VelocityViewTests {
 		expectLastCall().andReturn(null);
 		wac.getServletContext();
 		expectLastCall().andReturn(sc).times(3);
+		wac.getBean("requestDataValueProcessor", RequestDataValueProcessor.class);
+		expectLastCall().andReturn(null);
 		replay(wac);
 
 		HttpServletRequest request = new MockHttpServletRequest();

@@ -29,6 +29,8 @@ import org.springframework.web.servlet.support.BindStatus;
 public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 
 	private OptionTag tag;
+	
+	private SelectTag parentTag;
 
 	protected void onSetUp() {
 		this.tag = new OptionTag() {
@@ -36,7 +38,14 @@ public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 				return new TagWriter(getWriter());
 			}
 		};
-		this.tag.setParent(new SelectTag());
+		this.parentTag = new SelectTag() {
+			public String getName() {
+				// Should not be used other than to delegate to 
+				// RequestDataValueDataProcessor
+				return "testName";
+			}
+		};
+		this.tag.setParent(this.parentTag);
 		this.tag.setPageContext(getPageContext());
 	}
 
@@ -44,7 +53,8 @@ public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 		GenericBean testBean = new GenericBean();
 		testBean.setCustomEnum(CustomEnum.VALUE_1);
 		getPageContext().getRequest().setAttribute("testBean", testBean);
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.customEnum", false));
+		String selectName = "testBean.customEnum";
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 
 		this.tag.setValue("VALUE_1");
 

@@ -49,6 +49,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	private OptionTag tag;
 
+	private SelectTag parentTag;
 
 	protected void onSetUp() {
 		this.tag = new OptionTag() {
@@ -56,13 +57,21 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 				return new TagWriter(getWriter());
 			}
 		};
-		this.tag.setParent(new SelectTag());
+		this.parentTag = new SelectTag() {
+			public String getName() {
+				// Should not be used other than to delegate to 
+				// RequestDataValueDataProcessor
+				return "testName";
+			}
+		};
+		this.tag.setParent(this.parentTag);
 		this.tag.setPageContext(getPageContext());
 	}
 
 
 	public void testCanBeDisabledEvenWhenSelected() throws Exception {
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
+		String selectName = "testBean.name";
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue("bar");
 		this.tag.setLabel("Bar");
 		this.tag.setDisabled("true");
@@ -81,7 +90,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testRenderNotSelected() throws Exception {
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
+		String selectName = "testBean.name";
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue("bar");
 		this.tag.setLabel("Bar");
 		int result = this.tag.doStartTag();
@@ -101,7 +111,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
 		
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
+		String selectName = "testBean.name";
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue("bar");
 		this.tag.setLabel("Bar");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
@@ -123,7 +134,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testRenderSelected() throws Exception {
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
+		String selectName = "testBean.name";
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setId("myOption");
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");
@@ -143,7 +155,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithNoLabel() throws Exception {
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.name", false));
+		String selectName = "testBean.name";
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue("bar");
 		this.tag.setCssClass("myClass");
 		this.tag.setOnclick("CLICK");
@@ -175,7 +188,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithEnum() throws Exception {
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.favouriteColour", false));
+		String selectName = "testBean.favouriteColour";
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 
 		String value = Colour.GREEN.getCode().toString();
 		String label = Colour.GREEN.getLabel();
@@ -198,7 +212,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithEnumNotSelected() throws Exception {
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.favouriteColour", false));
+		String selectName = "testBean.favouriteColour";
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 
 		String value = Colour.BLUE.getCode().toString();
 		String label = Colour.BLUE.getLabel();
@@ -221,7 +236,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithPropertyEditor() throws Exception {
-		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.stringArray", false) {
+		String selectName = "testBean.stringArray";
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
 			public PropertyEditor getEditor() {
 				return new StringArrayPropertyEditor();
 			}
@@ -249,7 +265,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	public void testWithPropertyEditorStringComparison() throws Exception {
 		final PropertyEditor testBeanEditor = new TestBeanPropertyEditor();
 		testBeanEditor.setValue(new TestBean("Sally"));
-		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.spouse", false) {
+		String selectName = "testBean.spouse";
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
 			public PropertyEditor getEditor() {
 				return testBeanEditor;
 			}
@@ -272,7 +289,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithCustomObjectSelected() throws Exception {
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.someNumber", false));
+		String selectName = "testBean.someNumber";
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue("${myNumber}");
 		this.tag.setLabel("GBP ${myNumber}");
 		int result = this.tag.doStartTag();
@@ -290,7 +308,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testWithCustomObjectNotSelected() throws Exception {
-		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.someNumber", false));
+		String selectName = "testBean.someNumber";
+		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue("${myOtherNumber}");
 		this.tag.setLabel("GBP ${myOtherNumber}");
 		int result = this.tag.doStartTag();
@@ -310,7 +329,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	public void testWithCustomObjectAndEditorSelected() throws Exception {
 		final PropertyEditor floatEditor = new SimpleFloatEditor();
 		floatEditor.setValue(new Float("12.34"));
-		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.someNumber", false) {
+		String selectName = "testBean.someNumber";
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
 			public PropertyEditor getEditor() {
 				return floatEditor;
 			}
@@ -334,7 +354,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	public void testWithCustomObjectAndEditorNotSelected() throws Exception {
 		final PropertyEditor floatEditor = new SimpleFloatEditor();
-		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.someNumber", false) {
+		String selectName = "testBean.someNumber";
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
 			public PropertyEditor getEditor() {
 				return floatEditor;
 			}
@@ -357,7 +378,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testAsBodyTag() throws Exception {
-		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.name", false);
+		String selectName = "testBean.name";
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 
 		String bodyContent = "some content";
@@ -377,7 +399,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testAsBodyTagSelected() throws Exception {
-		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.name", false);
+		String selectName = "testBean.name";
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 
 		String bodyContent = "some content";
@@ -396,7 +419,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testAsBodyTagCollapsed() throws Exception {
-		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.name", false);
+		String selectName = "testBean.name";
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
 
 		String bodyContent = "some content";
@@ -416,7 +440,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 	public void testAsBodyTagWithEditor() throws Exception {
-		BindStatus bindStatus = new BindStatus(getRequestContext(), "testBean.stringArray", false) {
+		String selectName = "testBean.stringArray";
+		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
 			public PropertyEditor getEditor() {
 				return new RulesVariantEditor();
 			}

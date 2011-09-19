@@ -291,10 +291,4 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		tagWriter.endTag();
 	}
 
-	/**
-	 * Return the type of the HTML input element to generate:
-	 * "checkbox" or "radio".
-	 */
-	protected abstract String getInputType();
-
 }
