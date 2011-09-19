@@ -44,9 +44,10 @@ public class HiddenInputTag extends AbstractHtmlElementTag {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "hidden");
-		tagWriter.writeAttribute("value", getDisplayString(getBoundValue(), getPropertyEditor()));
+		String value = getDisplayString(getBoundValue(), getPropertyEditor());
+		tagWriter.writeAttribute("value", processFieldValue(getName(), value, "hidden"));
 		tagWriter.endTag();
 		return SKIP_BODY;
 	}
-
+	
 }

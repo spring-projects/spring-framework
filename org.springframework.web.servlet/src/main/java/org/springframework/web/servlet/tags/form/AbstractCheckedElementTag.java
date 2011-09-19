@@ -44,7 +44,8 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * bound value.
 	 */
 	protected void renderFromValue(Object item, Object value, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", convertToDisplayString(value));
+		String displayValue = convertToDisplayString(value);
+		tagWriter.writeAttribute("value", processFieldValue(getName(), displayValue, getInputType()));
 		if (isOptionSelected(value) || (value != item && isOptionSelected(item))) {
 			tagWriter.writeAttribute("checked", "checked");
 		}
@@ -64,7 +65,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 * <code>true</code>.
 	 */
 	protected void renderFromBoolean(Boolean boundValue, TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", "true");
+		tagWriter.writeAttribute("value", processFieldValue(getName(), "true", getInputType()));
 		if (boundValue) {
 			tagWriter.writeAttribute("checked", "checked");
 		}
@@ -86,5 +87,11 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	 */
 	@Override
 	protected abstract int writeTagContent(TagWriter tagWriter) throws JspException;
+
+	/**
+	 * Return the type of the HTML input element to generate:
+	 * "checkbox" or "radio".
+	 */
+	protected abstract String getInputType();
 
 }

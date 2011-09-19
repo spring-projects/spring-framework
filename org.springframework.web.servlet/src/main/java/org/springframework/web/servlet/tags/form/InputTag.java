@@ -16,7 +16,11 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
+
+import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
 /**
  * Data-binding-aware JSP tag for rendering an HTML '<code>input</code>'
@@ -158,7 +162,8 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 * when the value is written.
 	 */
 	protected void writeValue(TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("value", getDisplayString(getBoundValue(), getPropertyEditor()));
+		String value = getDisplayString(getBoundValue(), getPropertyEditor());
+		tagWriter.writeAttribute("value", processFieldValue(getName(), value, getType()));
 	}
 
 	/**

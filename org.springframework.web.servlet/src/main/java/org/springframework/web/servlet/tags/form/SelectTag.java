@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags.form;
 
 import java.util.Collection;
 import java.util.Map;
+
 import javax.servlet.jsp.JspException;
 
 import org.springframework.util.ObjectUtils;
@@ -207,12 +208,17 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 			if (items != EMPTY) {
 				Object itemsObject = evaluate("items", items);
 				if (itemsObject != null) {
+					final String selectName = getName();
 					String valueProperty = (getItemValue() != null ?
 							ObjectUtils.getDisplayString(evaluate("itemValue", getItemValue())) : null);
 					String labelProperty = (getItemLabel() != null ?
 							ObjectUtils.getDisplayString(evaluate("itemLabel", getItemLabel())) : null);
 					OptionWriter optionWriter =
-							new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
+							new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape()) {
+								protected String processOptionValue(String resolvedValue) {
+									return processFieldValue(selectName, resolvedValue, "option");
+								}
+							};
 					optionWriter.writeOptions(tagWriter);
 				}
 			}
@@ -238,8 +244,9 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		if (isMultiple()) {
 			tagWriter.startTag("input");
 			tagWriter.writeAttribute("type", "hidden");
-			tagWriter.writeAttribute("name", WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName());
-			tagWriter.writeAttribute("value", "1");
+			String name = WebDataBinder.DEFAULT_FIELD_MARKER_PREFIX + getName();
+			tagWriter.writeAttribute("name", name);
+			tagWriter.writeAttribute("value", processFieldValue(name, "1", "hidden"));
 			tagWriter.endTag();
 		}
 	}
@@ -305,5 +312,5 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		this.tagWriter = null;
 		this.pageContext.removeAttribute(LIST_VALUE_PAGE_ATTRIBUTE);
 	}
-
+	
 }

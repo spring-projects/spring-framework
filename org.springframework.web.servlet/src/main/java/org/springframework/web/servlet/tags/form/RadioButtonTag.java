@@ -36,9 +36,14 @@ public class RadioButtonTag extends AbstractSingleCheckedElementTag {
 
 	@Override
 	protected void writeTagDetails(TagWriter tagWriter) throws JspException {
-		tagWriter.writeAttribute("type", "radio");
+		tagWriter.writeAttribute("type", getInputType());
 		Object resolvedValue = evaluate("value", getValue());
 		renderFromValue(resolvedValue, tagWriter);
+	}
+
+	@Override
+	protected String getInputType() {
+		return "radio";
 	}
 
 }

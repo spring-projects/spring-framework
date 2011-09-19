@@ -42,7 +42,9 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
@@ -229,6 +231,14 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	}
 
 	/**
+	 * An ApplicationContext is not strictly required for RedirectView.
+	 */
+	@Override
+	protected boolean isContextRequired() {
+		return false;
+	}
+
+	/**
 	 * Convert model to request parameters and redirect to the given URL.
 	 * @see #appendQueryProperties
 	 * @see #sendRedirect
@@ -240,6 +250,14 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 		String targetUrl = createTargetUrl(model, request);
 
+		if (getWebApplicationContext() != null) {
+			RequestContext requestContext = createRequestContext(request, response, model);
+			RequestDataValueProcessor processor = requestContext.getRequestDataValueProcessor();
+			if (processor != null) {
+				targetUrl = processor.processUrl(request, targetUrl);
+			}
+		}
+		
 		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
 		if (!CollectionUtils.isEmpty(flashMap)) {
 			UriComponents uriComponents = UriComponentsBuilder.fromUriString(targetUrl).build();
