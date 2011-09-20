@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -50,9 +51,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	protected static final String FORM_CHARSET = "UTF-8";
 
 	private static final String METHOD_POST = "POST";
-
-	private static final String METHOD_PUT = "PUT";
-
 
 	private final HttpServletRequest servletRequest;
 
@@ -107,20 +105,26 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	public InputStream getBody() throws IOException {
-		if (isFormSubmittal(this.servletRequest)) {
-			return getFormBody(this.servletRequest);
+		if (isFormPost(this.servletRequest)) {
+			return getBodyFromServletRequestParameters(this.servletRequest);
 		}
 		else {
 			return this.servletRequest.getInputStream();
 		}
 	}
 
-	private boolean isFormSubmittal(HttpServletRequest request) {
+	private boolean isFormPost(HttpServletRequest request) {
 		return request.getContentType() != null && request.getContentType().contains(FORM_CONTENT_TYPE) &&
-				(METHOD_POST.equalsIgnoreCase(request.getMethod()) || METHOD_PUT.equalsIgnoreCase(request.getMethod()));
+				(METHOD_POST.equalsIgnoreCase(request.getMethod()));
 	}
 
-	private InputStream getFormBody(HttpServletRequest request) throws IOException {
+	/**
+	 * Use {@link ServletRequest#getParameterMap()} to reconstruct the body of 
+	 * a form 'POST' providing a predictable outcome as opposed to reading
+	 * from the body, which can fail if any other code has used ServletRequest 
+	 * to access a parameter thus causing the input stream to be "consumed".  
+	 */
+	private InputStream getBodyFromServletRequestParameters(HttpServletRequest request) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		Writer writer = new OutputStreamWriter(bos, FORM_CHARSET);
 
