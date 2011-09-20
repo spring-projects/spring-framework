@@ -86,6 +86,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		super.handleMatch(info, lookupPath, request);
 
 		String pattern = info.getPatternsCondition().getPatterns().iterator().next();
+		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, pattern);
+		
 		Map<String, String> uriTemplateVariables = getPathMatcher().extractUriTemplateVariables(pattern, lookupPath);
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 
