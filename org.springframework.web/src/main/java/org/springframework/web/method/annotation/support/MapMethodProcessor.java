@@ -16,8 +16,9 @@
 
 package org.springframework.web.method.annotation.support;
 
+import java.util.Map;
+
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -25,20 +26,20 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves {@link Model} method arguments and handles {@link Model} return values. 
+ * Resolves {@link Map} method arguments and handles {@link Map} return values.
  * 
- * <p>A {@link Model} return type has a set purpose. Therefore this handler 
- * should be configured ahead of handlers that support any return value type 
- * annotated with {@code @ModelAttribute} or {@code @ResponseBody} to ensure
- * they don't take over.
+ * <p>A Map return value can be interpreted in more than one ways depending 
+ * on the presence of annotations like {@code @ModelAttribute} or 
+ * {@code @ResponseBody}. Therefore this handler should be configured after
+ * the handlers that support these annotations.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ModelMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
+public class MapMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
 
 	public boolean supportsParameter(MethodParameter parameter) {
-		return Model.class.isAssignableFrom(parameter.getParameterType());
+		return Map.class.isAssignableFrom(parameter.getParameterType());
 	}
 
 	public Object resolveArgument(MethodParameter parameter, 
@@ -49,9 +50,10 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 	}
 
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return Model.class.isAssignableFrom(returnType.getParameterType());
+		return Map.class.isAssignableFrom(returnType.getParameterType());
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void handleReturnValue(Object returnValue, 
 								  MethodParameter returnType, 
 								  ModelAndViewContainer mavContainer,
@@ -59,8 +61,8 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 		if (returnValue == null) {
 			return;
 		}
-		else if (returnValue instanceof Model) {
-			mavContainer.addAllAttributes(((Model) returnValue).asMap());
+		else if (returnValue instanceof Map){
+			mavContainer.addAllAttributes((Map) returnValue);
 		}
 		else {
 			// should not happen

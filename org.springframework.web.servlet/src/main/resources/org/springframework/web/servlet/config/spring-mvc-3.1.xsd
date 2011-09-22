@@ -53,10 +53,9 @@
 				<xsd:element name="argument-resolvers" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-	Configures one or more WebArgumentResolver types to use for resolving custom arguments to handler methods.
-	Typically implemented to detect special parameter types, resolving well-known argument values for them.
-	Using this configuration element is optional.
-	Using it does not override the built-in support for resolving handler method arguments.
+	Configures HandlerMethodArgumentResolver types to support custom controller method argument types.
+    Using this option does not override the built-in support for resolving handler method arguments.
+    To customize the built-in support for argument resolution configure RequestMappingHandlerAdapter directly.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
@@ -64,7 +63,7 @@
 							<xsd:element ref="beans:bean" minOccurs="1" maxOccurs="unbounded">
 								<xsd:annotation>
 									<xsd:documentation><![CDATA[
-	The HandlerMethodArgumentResolver or WebArgumentResolver bean definition.
+	The HandlerMethodArgumentResolver (or WebArgumentResolver for backwards compatibility) bean definition.
 									]]></xsd:documentation>
 								</xsd:annotation>
 							</xsd:element>
@@ -74,9 +73,9 @@
 				<xsd:element name="return-value-handlers" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-	Configures one or more HandlerMethodReturnValueHandler types to use for handling the return value from handler methods.
-	Using this configuration element is optional.
-	Using it does not override the built-in support for handling return values.
+	Configures HandlerMethodReturnValueHandler types to support custom controller method return value handling.
+    Using this option does not override the built-in support for handling return values.
+    To customize the built-in support for handling return values configure RequestMappingHandlerAdapter directly.
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>

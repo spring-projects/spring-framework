@@ -52,7 +52,7 @@ public class ModelAndViewContainerTests {
 		assertEquals("Default model should be used if not in redirect scenario",
 				"value", this.mavContainer.getModel().get("name"));
 	
-		this.mavContainer.setUseRedirectModel(true);
+		this.mavContainer.setRedirectModelScenario(true);
 		
 		assertEquals("Redirect model should be used in redirect scenario", 
 				"redirectValue", this.mavContainer.getModel().get("name"));
@@ -61,7 +61,7 @@ public class ModelAndViewContainerTests {
 	@Test
 	public void getModelIgnoreDefaultModelOnRedirect() {
 		this.mavContainer.addAttribute("name", "value");
-		this.mavContainer.setUseRedirectModel(true);
+		this.mavContainer.setRedirectModelScenario(true);
 		
 		assertEquals("Default model should be used since no redirect model was provided", 
 				1, this.mavContainer.getModel().size());

@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation.support;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -39,8 +38,13 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves {@link HttpEntity} method argument values.
- * Handles {@link HttpEntity} and {@link ResponseEntity} return values.  
+ * Resolves {@link HttpEntity} method argument values and also handles
+ * both {@link HttpEntity} and {@link ResponseEntity} return values.  
+ * 
+ * <p>An {@link HttpEntity} return type has a set purpose. Therefore this 
+ * handler should be configured ahead of handlers that support any return 
+ * value type annotated with {@code @ModelAttribute} or {@code @ResponseBody}
+ * to ensure they don't take over.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev

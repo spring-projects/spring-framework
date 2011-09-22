@@ -41,8 +41,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
-import org.springframework.web.bind.support.SessionStatus;
-import org.springframework.web.bind.support.SimpleSessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -161,7 +159,7 @@ public class ModelFactoryTests {
 		replay(binderFactory);
 		
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, sessionAttrsHandler);
-		modelFactory.updateModel(webRequest, mavContainer, new SimpleSessionStatus());
+		modelFactory.updateModel(webRequest, mavContainer);
 
 		assertEquals(attrValue, mavContainer.getModel().remove(attrName));
 		assertSame(dataBinder.getBindingResult(), mavContainer.getModel().remove(bindingResultKey(attrName)));
@@ -177,6 +175,7 @@ public class ModelFactoryTests {
 		
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAttribute(attrName, attrValue);
+		mavContainer.getSessionStatus().setComplete();
 		sessionAttributeStore.storeAttribute(webRequest, attrName, attrValue);
 		
 		// Resolve successfully handler session attribute once
@@ -187,11 +186,8 @@ public class ModelFactoryTests {
 		expect(binderFactory.createBinder(webRequest, attrValue, attrName)).andReturn(dataBinder);
 		replay(binderFactory);
 
-		SessionStatus sessionStatus = new SimpleSessionStatus();
-		sessionStatus.setComplete();
-		
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, sessionAttrsHandler);
-		modelFactory.updateModel(webRequest, mavContainer, sessionStatus);
+		modelFactory.updateModel(webRequest, mavContainer);
 
 		assertEquals(attrValue, mavContainer.getModel().get(attrName));
 		assertNull(sessionAttributeStore.retrieveAttribute(webRequest, attrName));

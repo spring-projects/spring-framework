@@ -26,8 +26,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
- * Abstract base class for {@link HandlerAdapter} implementations that support the handling of requests through
- * the execution of {@link HandlerMethod}s rather than handlers. 
+ * Abstract base class for {@link HandlerAdapter} implementations that support 
+ * handlers of type {@link HandlerMethod}.
  *
  * @author Arjen Poutsma
  * @since 3.1

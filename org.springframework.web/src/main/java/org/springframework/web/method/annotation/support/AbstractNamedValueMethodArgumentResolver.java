@@ -55,7 +55,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private final ConfigurableBeanFactory beanFactory;
+	private final ConfigurableBeanFactory configurableBeanFactory;
 
 	private final BeanExpressionContext expressionContext;
 
@@ -67,7 +67,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * in default values, or {@code null} if default values are not expected to contain expressions
 	 */
 	public AbstractNamedValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
+		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null) ? new BeanExpressionContext(beanFactory, new RequestScope()) : null;
 	}
 
@@ -105,11 +105,11 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * Obtain the named value for the given method parameter.
 	 */
 	private NamedValueInfo getNamedValueInfo(MethodParameter parameter) {
-		NamedValueInfo namedValueInfo = namedValueInfoCache.get(parameter);
+		NamedValueInfo namedValueInfo = this.namedValueInfoCache.get(parameter);
 		if (namedValueInfo == null) {
 			namedValueInfo = createNamedValueInfo(parameter);
 			namedValueInfo = updateNamedValueInfo(parameter, namedValueInfo);
-			namedValueInfoCache.put(parameter, namedValueInfo);
+			this.namedValueInfoCache.put(parameter, namedValueInfo);
 		}
 		return namedValueInfo;
 	}
@@ -153,15 +153,15 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * Resolves the given default value into an argument value.
 	 */
 	private Object resolveDefaultValue(String defaultValue) {
-		if (beanFactory == null) {
+		if (this.configurableBeanFactory == null) {
 			return defaultValue;
 		}
-		String placeholdersResolved = beanFactory.resolveEmbeddedValue(defaultValue);
-		BeanExpressionResolver exprResolver = beanFactory.getBeanExpressionResolver();
+		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(defaultValue);
+		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
 		if (exprResolver == null) {
 			return defaultValue;
 		}
-		return exprResolver.evaluate(placeholdersResolved, expressionContext);
+		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
 	}
 
 	/**
