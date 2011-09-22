@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -72,6 +73,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -138,7 +140,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	@Test
-	public void handleMvc() throws Exception {
+	public void handle() throws Exception {
 		
 		Class<?>[] parameterTypes = new Class<?>[] { int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
@@ -160,15 +162,12 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		request.setContent("Hello World".getBytes("UTF-8"));
 		request.setUserPrincipal(new User());
 		request.setContextPath("/contextPath");
-
 		System.setProperty("systemHeader", "systemHeaderValue");
-
-		/* Set up path variables as RequestMappingHandlerMapping would... */
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
 		uriTemplateVars.put("pathvar", "pathvarValue");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		HandlerMethod handlerMethod = handlerMethod("handleMvc", parameterTypes);
+		HandlerMethod handlerMethod = handlerMethod("handle", parameterTypes);
 		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
 		ModelMap model = mav.getModelMap();
 
@@ -259,6 +258,14 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertEquals("content", mav.getModelMap().get("requestPart"));
 	}
 	
+	@Test
+	public void handleAndCompleteSession() throws Exception {
+		HandlerMethod handlerMethod = handlerMethod("handleAndCompleteSession", SessionStatus.class);
+		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
+
+		assertFalse(request.getSession().getAttributeNames().hasMoreElements());
+	}
+	
 	private HandlerMethod handlerMethod(String methodName, Class<?>... paramTypes) throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
 		return new InvocableHandlerMethod(handler, method);
@@ -287,7 +294,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 			model.addAttribute(new OtherUser());
 		}
 
-		public String handleMvc(
+		public String handle(
 							@CookieValue("cookie") int cookie,
 						 	@PathVariable("pathvar") String pathvar,
 						 	@RequestHeader("header") String header,
@@ -335,6 +342,10 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		
 		public void handleRequestPart(@RequestPart String requestPart, Model model) {
 			model.addAttribute("requestPart", requestPart);
+		}
+		
+		public void handleAndCompleteSession(SessionStatus sessionStatus) {
+			sessionStatus.setComplete();
 		}
 	}
 

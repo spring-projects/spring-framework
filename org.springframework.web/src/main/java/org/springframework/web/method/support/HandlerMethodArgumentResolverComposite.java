@@ -17,6 +17,7 @@
 package org.springframework.web.method.support;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +46,13 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	private final Map<MethodParameter, HandlerMethodArgumentResolver> argumentResolverCache =
 		new ConcurrentHashMap<MethodParameter, HandlerMethodArgumentResolver>();
 	
+	/**
+	 * Return a read-only list with the contained resolvers, or an empty list.
+	 */
+	public List<HandlerMethodArgumentResolver> getResolvers() {
+		return Collections.unmodifiableList(this.argumentResolvers);
+	}
+
 	/**
 	 * Whether the given {@linkplain MethodParameter method parameter} is supported by any registered 
 	 * {@link HandlerMethodArgumentResolver}.
@@ -90,19 +98,22 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	/**
 	 * Add the given {@link HandlerMethodArgumentResolver}.
 	 */
-	public void addResolver(HandlerMethodArgumentResolver argumentResolver) {
+	public HandlerMethodArgumentResolverComposite addResolver(HandlerMethodArgumentResolver argumentResolver) {
 		this.argumentResolvers.add(argumentResolver);
+		return this;
 	}
 
 	/**
 	 * Add the given {@link HandlerMethodArgumentResolver}s.
 	 */
-	public void addResolvers(List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
+	public HandlerMethodArgumentResolverComposite addResolvers(
+			List<? extends HandlerMethodArgumentResolver> argumentResolvers) {
 		if (argumentResolvers != null) {
 			for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
 				this.argumentResolvers.add(resolver);
 			}
 		}
+		return this;
 	}
 
 }

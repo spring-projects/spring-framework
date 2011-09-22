@@ -21,27 +21,28 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
-import org.springframework.web.servlet.SmartView;
-import org.springframework.web.servlet.View;
 
 /**
- * Handles return values that are of type {@link View}.
+ * Handles return values of types {@code void} and {@code String} interpreting
+ * them as view name reference.
  *
- * <p>A {@code null} return value is left as-is leaving it to the configured 
- * {@link RequestToViewNameTranslator} to select a view name by convention. 
+ * <p>A {@code null} return value, either due to a {@code void} return type or 
+ * as the actual return value is left as-is allowing the configured 
+ * {@link RequestToViewNameTranslator} to select a view name by convention.
  *
- * <p>A {@link View} return type has a set purpose. Therefore this handler 
- * should be configured ahead of handlers that support any return value type 
- * annotated with {@code @ModelAttribute} or {@code @ResponseBody} to ensure
- * they don't take over.
- * 
+ * <p>A String return value can be interpreted in more than one ways depending 
+ * on the presence of annotations like {@code @ModelAttribute} or 
+ * {@code @ResponseBody}. Therefore this handler should be configured after
+ * the handlers that support these annotations.
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
+public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return View.class.isAssignableFrom(returnType.getParameterType());
+		Class<?> paramType = returnType.getParameterType();
+		return (void.class.equals(paramType) || String.class.equals(paramType));
 	}
 
 	public void handleReturnValue(Object returnValue,
@@ -51,13 +52,11 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 		if (returnValue == null) {
 			return;
 		}
-		else if (returnValue instanceof View){
-			View view = (View) returnValue;
-			mavContainer.setView(view);
-			if (view instanceof SmartView) {
-				if (((SmartView) view).isRedirectView()) {
-					mavContainer.setRedirectModelScenario(true);
-				}
+		else if (returnValue instanceof String) {
+			String viewName = (String) returnValue;
+			mavContainer.setViewName(viewName);
+			if (isRedirectViewName(viewName)) {
+				mavContainer.setRedirectModelScenario(true);
 			}
 		}
 		else {
@@ -65,6 +64,16 @@ public class ViewMethodReturnValueHandler implements HandlerMethodReturnValueHan
 			throw new UnsupportedOperationException("Unexpected return type: " + 
 					returnType.getParameterType().getName() + " in method: " + returnType.getMethod());
 		}
+	}
+
+	/**
+	 * Whether the given view name is a redirect view reference.
+	 * @param viewName the view name to check, never {@code null}
+	 * @return "true" if the given view name is recognized as a redirect view 
+	 * reference; "false" otherwise.
+	 */
+	protected boolean isRedirectViewName(String viewName) {
+		return viewName.startsWith("redirect:");
 	}
 
 }

@@ -198,13 +198,11 @@ public final class ModelFactory {
 	 * promotes model attributes to the session, and adds {@link BindingResult} attributes where missing.
 	 * @param request the current request
 	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
-	 * @param sessionStatus the session status for the current request
 	 * @throws Exception if the process of creating {@link BindingResult} attributes causes an error
 	 */
-	public void updateModel(NativeWebRequest request, ModelAndViewContainer mavContainer, SessionStatus sessionStatus)
-			throws Exception {
+	public void updateModel(NativeWebRequest request, ModelAndViewContainer mavContainer) throws Exception {
 		
-		if (sessionStatus.isComplete()){
+		if (mavContainer.getSessionStatus().isComplete()){
 			this.sessionAttributesHandler.cleanupAttributes(request);
 		}
 		else {

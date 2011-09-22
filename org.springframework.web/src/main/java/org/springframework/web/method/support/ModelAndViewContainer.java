@@ -21,6 +21,8 @@ import java.util.Map;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.support.BindingAwareModelMap;
+import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.bind.support.SimpleSessionStatus;
 
 /**
  * Records model and view related decisions made by 
@@ -33,7 +35,7 @@ import org.springframework.validation.support.BindingAwareModelMap;
  * 
  * <p>A default {@link Model} is automatically created at instantiation. 
  * An alternate model instance may be provided via {@link #setRedirectModel} 
- * for use in a redirect scenario. When {@link #setUseRedirectModel} is set 
+ * for use in a redirect scenario. When {@link #setRedirectModelScenario} is set 
  * to {@code true} signalling a redirect scenario, the {@link #getModel()} 
  * returns the redirect model instead of the default model.
  * 
@@ -46,14 +48,16 @@ public class ModelAndViewContainer {
 	
 	private boolean requestHandled = false;
 	
-	private final ModelMap model = new BindingAwareModelMap();
+	private final ModelMap defaultModel = new BindingAwareModelMap();
 
 	private ModelMap redirectModel;
 
-	private boolean ignoreDefaultModelOnRedirect = false;
-	
-	private boolean useRedirectModel = false;
+	private boolean redirectModelScenario = false;
 
+	private boolean ignoreDefaultModelOnRedirect = false;
+
+	private final SessionStatus sessionStatus = new SimpleSessionStatus();
+	
 	/**
 	 * Create a new instance.
 	 */
@@ -123,32 +127,43 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Return the model to use. This is either the default model created at 
-	 * instantiation or the redirect model if {@link #setUseRedirectModel} 
-	 * is set to {@code true}. If a redirect model was never provided via 
-	 * {@link #setRedirectModel}, return the default model unless 
-	 * {@link #setIgnoreDefaultModelOnRedirect} is set to {@code true}.
+	 * Return the model to use: the "default" or the "redirect" model.
+	 * <p>The default model is used if {@code "redirectModelScenario=false"} or
+	 * if the redirect model is {@code null} (i.e. it wasn't declared as a 
+	 * method argument) and {@code ignoreDefaultModelOnRedirect=false}.
 	 */
 	public ModelMap getModel() {
-		if (!this.useRedirectModel) {
-			return this.model;
-		}
-		else if (this.redirectModel != null) {
-			return this.redirectModel;
+		if (useDefaultModel()) {
+			return this.defaultModel;
 		}
 		else {
-			return this.ignoreDefaultModelOnRedirect ? new ModelMap() : this.model;
+			return (this.redirectModel != null) ? this.redirectModel : new ModelMap();
 		}
+	}
+	
+	/**
+	 * Whether to use the default model or the redirect model.
+	 */
+	private boolean useDefaultModel() {
+		return !this.redirectModelScenario || ((this.redirectModel == null) && !this.ignoreDefaultModelOnRedirect);
 	}
 	
 	/**
 	 * Provide a separate model instance to use in a redirect scenario. 
 	 * The provided additional model however is not used used unless 
-	 * {@link #setUseRedirectModel(boolean)} gets set to {@code true} to signal
+	 * {@link #setRedirectModelScenario(boolean)} gets set to {@code true} to signal
 	 * a redirect scenario.
 	 */
 	public void setRedirectModel(ModelMap redirectModel) {
 		this.redirectModel = redirectModel;
+	}
+
+	/**
+	 * Signal the conditions are in place for using a redirect model.
+	 * Typically that means the controller has returned a redirect instruction.
+	 */
+	public void setRedirectModelScenario(boolean redirectModelScenario) {
+		this.redirectModelScenario = redirectModelScenario;
 	}
 
 	/**
@@ -164,11 +179,11 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Signal the conditions for using a redirect model are in place -- e.g. 
-	 * the controller has requested a redirect.
+	 * Return the {@link SessionStatus} instance to use that can be used to 
+	 * signal that session processing is complete.
 	 */
-	public void setUseRedirectModel(boolean useRedirectModel) {
-		this.useRedirectModel = useRedirectModel;
+	public SessionStatus getSessionStatus() {
+		return sessionStatus;
 	}
 
 	/**
@@ -229,7 +244,13 @@ public class ModelAndViewContainer {
 			else {
 				sb.append("View is [").append(this.view).append(']');
 			}
-			sb.append("; model is ").append(getModel());
+			if (useDefaultModel()) {
+				sb.append("; default model ");
+			}
+			else {
+				sb.append("; redirect model ");
+			}
+			sb.append(getModel());
 		}
 		else {
 			sb.append("Request handled directly");

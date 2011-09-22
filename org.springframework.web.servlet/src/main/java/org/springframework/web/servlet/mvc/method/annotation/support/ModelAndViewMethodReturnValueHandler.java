@@ -23,9 +23,17 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Handles return values of type {@link ModelAndView} transferring their content to the {@link ModelAndViewContainer}. 
- * If the return value is {@code null}, the {@link ModelAndViewContainer#setRequestHandled(boolean)} flag is set to 
- * {@code false} to indicate view resolution is not needed.
+ * Handles return values of type {@link ModelAndView} copying view and model 
+ * information to the {@link ModelAndViewContainer}.
+ *  
+ * <p>If the return value is {@code null}, the 
+ * {@link ModelAndViewContainer#setRequestHandled(boolean)} flag is set to 
+ * {@code false} to indicate the request was handled directly.
+ * 
+ * <p>A {@link ModelAndView} return type has a set purpose. Therefore this 
+ * handler should be configured ahead of handlers that support any return 
+ * value type annotated with {@code @ModelAttribute} or {@code @ResponseBody}
+ * to ensure they don't take over.
  *
  * @author Rossen Stoyanchev
  * @since 3.1

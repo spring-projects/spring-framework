@@ -20,35 +20,27 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.beans.DirectFieldAccessor;
-import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.support.WebDataBinderFactory;
-import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.support.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
-import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.support.RedirectAttributesMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
+import org.springframework.web.servlet.mvc.method.annotation.support.ViewNameMethodReturnValueHandler;
 
 /**
  * Unit tests for {@link RequestMappingHandlerAdapter}.
@@ -61,12 +53,28 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodR
  */
 public class RequestMappingHandlerAdapterTests {
 
+	private static int RESOLVER_COUNT;
+	
+	private static int INIT_BINDER_RESOLVER_COUNT;
+	
+	private static int HANDLER_COUNT;
+
 	private RequestMappingHandlerAdapter handlerAdapter;
 	
 	private MockHttpServletRequest request;
 	
 	private MockHttpServletResponse response;
 
+	@BeforeClass
+	public static void setupOnce() {
+		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
+		adapter.afterPropertiesSet();
+		
+		RESOLVER_COUNT = adapter.getArgumentResolvers().getResolvers().size();
+		INIT_BINDER_RESOLVER_COUNT = adapter.getInitBinderArgumentResolvers().getResolvers().size();
+		HANDLER_COUNT = adapter.getReturnValueHandlers().getHandlers().size();
+	}
+	
 	@Before
 	public void setup() throws Exception {
 		this.handlerAdapter = new RequestMappingHandlerAdapter();
@@ -77,17 +85,17 @@ public class RequestMappingHandlerAdapterTests {
 
 	@Test
 	public void cacheControlWithoutSessionAttributes() throws Exception {
-		SimpleHandler handler = new SimpleHandler();
+		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
 		handlerAdapter.afterPropertiesSet();
 		handlerAdapter.setCacheSeconds(100);
-		handlerAdapter.handle(request, response, handlerMethod(handler, "handle"));
+		handlerAdapter.handle(request, response, handlerMethod);
 
 		assertTrue(response.getHeader("Cache-Control").toString().contains("max-age"));
 	}
 
 	@Test
 	public void cacheControlWithSessionAttributes() throws Exception {
-		SessionAttributeHandler handler = new SessionAttributeHandler();
+		SessionAttributeController handler = new SessionAttributeController();
 		handlerAdapter.afterPropertiesSet();
 		handlerAdapter.setCacheSeconds(100);
 		handlerAdapter.handle(request, response, handlerMethod(handler, "handle"));
@@ -99,7 +107,7 @@ public class RequestMappingHandlerAdapterTests {
 	public void setAlwaysUseRedirectAttributes() throws Exception {
 		HandlerMethodArgumentResolver redirectAttributesResolver = new RedirectAttributesMethodArgumentResolver();
 		HandlerMethodArgumentResolver modelResolver = new ModelMethodProcessor();
-		HandlerMethodReturnValueHandler viewHandler = new ViewMethodReturnValueHandler();
+		HandlerMethodReturnValueHandler viewHandler = new ViewNameMethodReturnValueHandler();
 		
 		handlerAdapter.setArgumentResolvers(Arrays.asList(redirectAttributesResolver, modelResolver));
 		handlerAdapter.setReturnValueHandlers(Arrays.asList(viewHandler));
@@ -108,104 +116,57 @@ public class RequestMappingHandlerAdapterTests {
 
 		request.setAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
 
-		HandlerMethod handlerMethod = handlerMethod(new RedirectAttributeHandler(), "handle", Model.class);
+		HandlerMethod handlerMethod = handlerMethod(new RedirectAttributeController(), "handle", Model.class);
 		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
 
 		assertTrue("Without RedirectAttributes arg, model should be empty", mav.getModel().isEmpty());
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
-	public void setArgumentResolvers() {
-		List<HandlerMethodArgumentResolver> argumentResolvers  = new ArrayList<HandlerMethodArgumentResolver>();
-		argumentResolvers.add(new ServletRequestMethodArgumentResolver());
-
-		handlerAdapter.setArgumentResolvers(argumentResolvers);
-		handlerAdapter.afterPropertiesSet();
+	public void setCustomArgumentResolvers() throws Exception {
+		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
+		this.handlerAdapter.setCustomArgumentResolvers(Arrays.asList(resolver));
+		this.handlerAdapter.afterPropertiesSet();
 		
-		HandlerMethodArgumentResolverComposite composite = (HandlerMethodArgumentResolverComposite) 
-			new DirectFieldAccessor(handlerAdapter).getPropertyValue("argumentResolvers");
-
-		List<HandlerMethodArgumentResolver> actual = (List<HandlerMethodArgumentResolver>)
-			new DirectFieldAccessor(composite).getPropertyValue("argumentResolvers");
-		
-		assertEquals(argumentResolvers, actual);
+		assertTrue(this.handlerAdapter.getArgumentResolvers().getResolvers().contains(resolver));
+		assertMethodProcessorCount(RESOLVER_COUNT + 1, INIT_BINDER_RESOLVER_COUNT + 1, HANDLER_COUNT);
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
-	public void setInitBinderArgumentResolvers() {
-		List<HandlerMethodArgumentResolver> argumentResolvers  = new ArrayList<HandlerMethodArgumentResolver>();
-		argumentResolvers.add(new ServletRequestMethodArgumentResolver());
-		
-		handlerAdapter.setInitBinderArgumentResolvers(argumentResolvers);
-		handlerAdapter.afterPropertiesSet();
-		
-		HandlerMethodArgumentResolverComposite composite = (HandlerMethodArgumentResolverComposite) 
-			new DirectFieldAccessor(handlerAdapter).getPropertyValue("initBinderArgumentResolvers");
+	public void setArgumentResolvers() throws Exception {
+		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
+		this.handlerAdapter.setArgumentResolvers(Arrays.asList(resolver));
+		this.handlerAdapter.afterPropertiesSet();
 
-		List<HandlerMethodArgumentResolver> actual = (List<HandlerMethodArgumentResolver>)
-			new DirectFieldAccessor(composite).getPropertyValue("argumentResolvers");
-		
-		assertEquals(argumentResolvers, actual);
+		assertMethodProcessorCount(1, INIT_BINDER_RESOLVER_COUNT, HANDLER_COUNT);
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	public void setInitBinderArgumentResolvers() throws Exception {
+		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
+		handlerAdapter.setInitBinderArgumentResolvers(Arrays.<HandlerMethodArgumentResolver>asList(resolver));
+		handlerAdapter.afterPropertiesSet();
+		
+		assertMethodProcessorCount(RESOLVER_COUNT, 1, HANDLER_COUNT);
+	}
+
+	@Test
+	public void setCustomReturnValueHandlers() {
+		HandlerMethodReturnValueHandler handler = new ViewNameMethodReturnValueHandler();
+		handlerAdapter.setCustomReturnValueHandlers(Arrays.asList(handler));
+		handlerAdapter.afterPropertiesSet();
+
+		assertTrue(this.handlerAdapter.getReturnValueHandlers().getHandlers().contains(handler));
+		assertMethodProcessorCount(RESOLVER_COUNT, INIT_BINDER_RESOLVER_COUNT, HANDLER_COUNT + 1);
+	}
+	
+	@Test
 	public void setReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ModelMethodProcessor();
-		List<HandlerMethodReturnValueHandler> handlers = Arrays.asList(handler);
-
-		handlerAdapter.setReturnValueHandlers(handlers);
+		handlerAdapter.setReturnValueHandlers(Arrays.asList(handler));
 		handlerAdapter.afterPropertiesSet();
-		
-		HandlerMethodReturnValueHandlerComposite composite = (HandlerMethodReturnValueHandlerComposite) 
-			new DirectFieldAccessor(handlerAdapter).getPropertyValue("returnValueHandlers");
 
-		List<HandlerMethodReturnValueHandler> actual = (List<HandlerMethodReturnValueHandler>)
-			new DirectFieldAccessor(composite).getPropertyValue("returnValueHandlers");
-		
-		assertEquals(handlers, actual);
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	public void setCustomArgumentResolvers() {
-		HandlerMethodArgumentResolver resolver = new TestHanderMethodArgumentResolver();
-		handlerAdapter.setCustomArgumentResolvers(Arrays.asList(resolver));
-		handlerAdapter.afterPropertiesSet();
-		
-		HandlerMethodArgumentResolverComposite composite = (HandlerMethodArgumentResolverComposite) 
-			new DirectFieldAccessor(handlerAdapter).getPropertyValue("argumentResolvers");
-
-		List<HandlerMethodArgumentResolver> actual = (List<HandlerMethodArgumentResolver>)
-			new DirectFieldAccessor(composite).getPropertyValue("argumentResolvers");
-		
-		assertTrue(actual.contains(resolver));
-		
-		composite = (HandlerMethodArgumentResolverComposite) 
-		new DirectFieldAccessor(handlerAdapter).getPropertyValue("initBinderArgumentResolvers");
-
-		actual = (List<HandlerMethodArgumentResolver>)
-		new DirectFieldAccessor(composite).getPropertyValue("argumentResolvers");
-
-		assertTrue(actual.contains(resolver));
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	public void setCustomReturnValueHandlers() {
-		TestHandlerMethodReturnValueHandler handler = new TestHandlerMethodReturnValueHandler();
-		handlerAdapter.setCustomReturnValueHandlers(Arrays.<HandlerMethodReturnValueHandler>asList(handler));
-		handlerAdapter.afterPropertiesSet();
-		
-		HandlerMethodReturnValueHandlerComposite composite = (HandlerMethodReturnValueHandlerComposite) 
-			new DirectFieldAccessor(handlerAdapter).getPropertyValue("returnValueHandlers");
-
-		List<HandlerMethodReturnValueHandler> actual = (List<HandlerMethodReturnValueHandler>)
-			new DirectFieldAccessor(composite).getPropertyValue("returnValueHandlers");
-		
-		assertTrue(actual.contains(handler));
+		assertMethodProcessorCount(RESOLVER_COUNT, INIT_BINDER_RESOLVER_COUNT, 1);
 	}
 
 	private HandlerMethod handlerMethod(Object handler, String methodName, Class<?>... paramTypes) throws Exception {
@@ -213,46 +174,37 @@ public class RequestMappingHandlerAdapterTests {
 		return new InvocableHandlerMethod(handler, method);
 	}
 
-	private final class TestHanderMethodArgumentResolver implements HandlerMethodArgumentResolver {
+	
 
-		public boolean supportsParameter(MethodParameter parameter) {
-			return false;
-		}
+	private void assertMethodProcessorCount(int resolverCount, int initBinderResolverCount, int handlerCount) {
+		assertEquals(resolverCount, this.handlerAdapter.getArgumentResolvers().getResolvers().size());
+		assertEquals(initBinderResolverCount, this.handlerAdapter.getInitBinderArgumentResolvers().getResolvers().size());
+		assertEquals(handlerCount, this.handlerAdapter.getReturnValueHandlers().getHandlers().size());
+	}
 
-		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-				NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	@SuppressWarnings("unused")
+	private static class SimpleController {
+
+		public String handle() {
 			return null;
 		}
 	}
 
-	private final class TestHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler{
-
-		public boolean supportsReturnType(MethodParameter returnType) {
-			return false;
-		}
-
-		public void handleReturnValue(Object returnValue, MethodParameter returnType,
-				ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
-		}
-	}
-	
-	static class SimpleHandler {
-		public void handle() {
-		}
-	}
-
 	@SessionAttributes("attr1")
-	static class SessionAttributeHandler {
+	private static class SessionAttributeController {
+		
+		@SuppressWarnings("unused")
 		public void handle() {
 		}
 	}
 
-	static class RedirectAttributeHandler {
+	@SuppressWarnings("unused")
+	private static class RedirectAttributeController {
+		
 		public String handle(Model model) {
 			model.addAttribute("someAttr", "someAttrValue");
 			return "redirect:/path";
 		}
 	}
-	
 	
 }

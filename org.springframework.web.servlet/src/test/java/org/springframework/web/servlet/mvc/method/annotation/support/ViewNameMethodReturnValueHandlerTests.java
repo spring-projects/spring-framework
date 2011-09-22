@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -28,19 +29,16 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
-import org.springframework.web.servlet.view.InternalResourceView;
-import org.springframework.web.servlet.view.RedirectView;
 
 /**
- * Test fixture with {@link ViewMethodReturnValueHandler}.
+ * Test fixture with {@link ViewNameMethodReturnValueHandler}.
  * 
  * @author Rossen Stoyanchev
  */
-public class ViewMethodReturnValueHandlerTests {
+public class ViewNameMethodReturnValueHandlerTests {
 
-	private ViewMethodReturnValueHandler handler;
+	private ViewNameMethodReturnValueHandler handler;
 
 	private ModelAndViewContainer mavContainer;
 
@@ -48,33 +46,32 @@ public class ViewMethodReturnValueHandlerTests {
 
 	@Before
 	public void setUp() {
-		this.handler = new ViewMethodReturnValueHandler();
+		this.handler = new ViewNameMethodReturnValueHandler();
 		this.mavContainer = new ModelAndViewContainer();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
 	
 	@Test
 	public void supportsReturnType() throws Exception {
-		assertTrue(this.handler.supportsReturnType(createReturnValueParam("view")));
+		assertTrue(this.handler.supportsReturnType(createReturnValueParam("viewName")));
 	}
-
+	
 	@Test
-	public void returnView() throws Exception {
-		InternalResourceView view = new InternalResourceView("testView");
-		this.handler.handleReturnValue(view, createReturnValueParam("view"), this.mavContainer, this.webRequest);
+	public void returnViewName() throws Exception {
+		MethodParameter param = createReturnValueParam("viewName");
+		this.handler.handleReturnValue("testView", param, this.mavContainer, this.webRequest);
 		
-		assertSame(view, this.mavContainer.getView());
+		assertEquals("testView", this.mavContainer.getViewName());
 	}
 
 	@Test
-	public void returnViewRedirect() throws Exception {
-		RedirectView redirectView = new RedirectView("testView");
+	public void returnViewNameRedirect() throws Exception {
 		ModelMap redirectModel = new RedirectAttributesModelMap();
 		this.mavContainer.setRedirectModel(redirectModel);
-		MethodParameter param = createReturnValueParam("view");
-		this.handler.handleReturnValue(redirectView, param, this.mavContainer, this.webRequest);
-		
-		assertSame(redirectView, this.mavContainer.getView());
+		MethodParameter param = createReturnValueParam("viewName");
+		this.handler.handleReturnValue("redirect:testView", param, this.mavContainer, this.webRequest);
+
+		assertEquals("redirect:testView", this.mavContainer.getViewName());
 		assertSame("Should have switched to the RedirectModel", redirectModel, this.mavContainer.getModel());
 	}
 
@@ -83,8 +80,8 @@ public class ViewMethodReturnValueHandlerTests {
 		return new MethodParameter(method, -1);
 	}
 	
-	View view() {
+	String viewName() {
 		return null;
 	}
-
+	
 }

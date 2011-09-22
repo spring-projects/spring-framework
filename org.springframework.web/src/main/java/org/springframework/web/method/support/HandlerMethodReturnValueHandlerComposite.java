@@ -17,6 +17,7 @@
 package org.springframework.web.method.support;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +44,13 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	private final Map<MethodParameter, HandlerMethodReturnValueHandler> returnValueHandlerCache =
 		new ConcurrentHashMap<MethodParameter, HandlerMethodReturnValueHandler>();
+
+	/**
+	 * Return a read-only list with the registered handlers, or an empty list.
+	 */
+	public List<HandlerMethodReturnValueHandler> getHandlers() {
+		return Collections.unmodifiableList(this.returnValueHandlers);
+	}
 
 	/**
 	 * Whether the given {@linkplain MethodParameter method return type} is supported by any registered 
@@ -89,19 +97,22 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}.
 	 */
-	public void addHandler(HandlerMethodReturnValueHandler returnValuehandler) {
+	public HandlerMethodReturnValueHandlerComposite addHandler(HandlerMethodReturnValueHandler returnValuehandler) {
 		returnValueHandlers.add(returnValuehandler);
+		return this;
 	}
 
 	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}s.
 	 */
-	public void addHandlers(List<? extends HandlerMethodReturnValueHandler> returnValueHandlers) {
+	public HandlerMethodReturnValueHandlerComposite addHandlers(
+			List<? extends HandlerMethodReturnValueHandler> returnValueHandlers) {
 		if (returnValueHandlers != null) {
 			for (HandlerMethodReturnValueHandler handler : returnValueHandlers) {
 				this.returnValueHandlers.add(handler);
 			}
 		}
+		return this;
 	}
 
 }
