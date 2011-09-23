@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -54,6 +55,12 @@ public class ConsumesRequestConditionTests {
 		assertNull(condition.getMatchingCondition(request));
 	}
 
+	@Test
+	public void getConsumableMediaTypesNegatedExpression() {
+		ConsumesRequestCondition condition = new ConsumesRequestCondition("!application/xml");
+		assertEquals(Collections.emptySet(), condition.getConsumableMediaTypes());
+	}
+	
 	@Test
 	public void consumesWildcardMatch() {
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/*");

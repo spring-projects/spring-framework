@@ -32,11 +32,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
 
 /**
- * A logical disjunction (' || ') request condition to match a request's 'Content-Type' 
- * header to a list of media type expressions. Two kinds of media type expressions are 
- * supported, which are described in {@link RequestMapping#consumes()} and 
- * {@link RequestMapping#headers()} where the header name is 'Content-Type'. 
- * Regardless of which syntax is used, the semantics are the same.
+ * A logical disjunction (' || ') request condition to match a request's 
+ * 'Content-Type' header to a list of media type expressions. Two kinds of 
+ * media type expressions are supported, which are described in 
+ * {@link RequestMapping#consumes()} and {@link RequestMapping#headers()} 
+ * where the header name is 'Content-Type'. Regardless of which syntax is 
+ * used, the semantics are the same.
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -48,19 +49,21 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 
 	/**
 	 * Creates a new instance from 0 or more "consumes" expressions.
-	 * @param consumes expressions with the syntax described in {@link RequestMapping#consumes()}
-	 * 		if 0 expressions are provided, the condition will match to every request
+	 * @param consumes expressions with the syntax described in 
+	 * {@link RequestMapping#consumes()}; if 0 expressions are provided, 
+	 * the condition will match to every request.
 	 */
 	public ConsumesRequestCondition(String... consumes) {
 		this(consumes, null);
 	}
 
 	/**
-	 * Creates a new instance with "consumes" and "header" expressions. "Header" expressions 
-	 * where the header name is not 'Content-Type' or have no header value defined are ignored.
-	 * If 0 expressions are provided in total, the condition will match to every request
-	 * @param consumes expressions with the syntax described in {@link RequestMapping#consumes()}
-	 * @param headers expressions with the syntax described in {@link RequestMapping#headers()}
+	 * Creates a new instance with "consumes" and "header" expressions. 
+	 * "Header" expressions where the header name is not 'Content-Type' or have
+	 * no header value defined are ignored. If 0 expressions are provided in 
+	 * total, the condition will match to every request
+	 * @param consumes as described in {@link RequestMapping#consumes()}
+	 * @param headers as described in {@link RequestMapping#headers()}
 	 */
 	public ConsumesRequestCondition(String[] consumes, String[] headers) {
 		this(parseExpressions(consumes, headers));
@@ -95,26 +98,35 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	}
 
 	/**
-	 * Returns the media types for this condition.
+	 * Return the contained MediaType expressions.
 	 */
-	public Set<MediaType> getMediaTypes() {
+	public Set<MediaTypeExpression> getExpressions() {
+		return new LinkedHashSet<MediaTypeExpression>(this.expressions);
+	}
+
+	/**
+	 * Returns the media types for this condition excluding negated expressions.
+	 */
+	public Set<MediaType> getConsumableMediaTypes() {
 		Set<MediaType> result = new LinkedHashSet<MediaType>();
-		for (ConsumeMediaTypeExpression expression : expressions) {
-			result.add(expression.getMediaType());
+		for (ConsumeMediaTypeExpression expression : this.expressions) {
+			if (!expression.isNegated()) {
+				result.add(expression.getMediaType());
+			}
 		}
 		return result;
 	}
-
+	
 	/**
 	 * Whether the condition has any media type expressions.
 	 */
 	public boolean isEmpty() {
-		return expressions.isEmpty();
+		return this.expressions.isEmpty();
 	}
 
 	@Override
 	protected Collection<ConsumeMediaTypeExpression> getContent() {
-		return expressions;
+		return this.expressions;
 	}
 
 	@Override
@@ -133,8 +145,8 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 
 	/**
 	 * Checks if any of the contained media type expressions match the given 
-	 * request 'Accept' header and returns an instance that is guaranteed to 
-	 * contain matching expressions only. The match is performed via
+	 * request 'Content-Type' header and returns an instance that is guaranteed 
+	 * to contain matching expressions only. The match is performed via
 	 * {@link MediaType#includes(MediaType)}.
 	 * 
 	 * @param request the current request
@@ -170,24 +182,24 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * the matching consumable media type expression only or is otherwise empty.
 	 */
 	public int compareTo(ConsumesRequestCondition other, HttpServletRequest request) {
-		if (expressions.isEmpty() && other.expressions.isEmpty()) {
+		if (this.expressions.isEmpty() && other.expressions.isEmpty()) {
 			return 0;
 		}
-		else if (expressions.isEmpty()) {
+		else if (this.expressions.isEmpty()) {
 			return 1;
 		}
 		else if (other.expressions.isEmpty()) {
 			return -1;
 		}
 		else {
-			return expressions.get(0).compareTo(other.expressions.get(0));
+			return this.expressions.get(0).compareTo(other.expressions.get(0));
 		}
 	}
 
 	/**
 	 * Parses and matches a single media type expression to a request's 'Content-Type' header. 
 	 */
-	static class ConsumeMediaTypeExpression extends MediaTypeExpression {
+	static class ConsumeMediaTypeExpression extends AbstractMediaTypeExpression {
 
 		ConsumeMediaTypeExpression(String expression) {
 			super(expression);
@@ -199,11 +211,9 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 
 		@Override
 		protected boolean matchMediaType(HttpServletRequest request) {
-
 			MediaType contentType = StringUtils.hasLength(request.getContentType()) ?
 					MediaType.parseMediaType(request.getContentType()) :
 					MediaType.APPLICATION_OCTET_STREAM	;
-					
 			return getMediaType().includes(contentType);
 		}
 	}

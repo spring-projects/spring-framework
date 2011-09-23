@@ -16,23 +16,24 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+
 /**
- * A contract for media type expressions (e.g. "text/plain", "!text/plain") as 
- * defined in the {@code @RequestMapping} annotation for "consumes" and 
- * "produces" conditions.
+ * A contract for {@code "name!=value"} style expression used to specify request 
+ * parameters and request header conditions in {@code @RequestMapping}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  * 
- * @see RequestMapping#consumes()
- * @see RequestMapping#produces()
+ * @see RequestMapping#params()
+ * @see RequestMapping#headers()
  */
-public interface MediaTypeExpression {
+public interface NameValueExpression<T> {
 
-	MediaType getMediaType();
+	String getName();
+
+	T getValue();
 
 	boolean isNegated();
 

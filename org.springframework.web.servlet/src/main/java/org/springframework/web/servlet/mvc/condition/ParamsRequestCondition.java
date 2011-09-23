@@ -61,6 +61,13 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 		return expressions;
 	}
 
+	/**
+	 * Return the contained request parameter expressions.
+	 */
+	public Set<NameValueExpression<String>> getExpressions() {
+		return new LinkedHashSet<NameValueExpression<String>>(this.expressions);
+	}
+
 	@Override
 	protected Collection<ParamExpression> getContent() {
 		return expressions;

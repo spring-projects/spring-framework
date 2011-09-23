@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author Arjen Poutsma
  * @since 3.1
  */
-abstract class AbstractNameValueExpression<T> {
+abstract class AbstractNameValueExpression<T> implements NameValueExpression<T> {
 
 	protected final String name;
 
@@ -47,6 +47,18 @@ abstract class AbstractNameValueExpression<T> {
 			this.name = isNegated ? expression.substring(0, separator - 1) : expression.substring(0, separator);
 			this.value = parseValue(expression.substring(separator + 1));
 		}
+	}
+	
+	public String getName() {
+		return this.name;
+	}
+
+	public T getValue() {
+		return this.value;
+	}
+
+	public boolean isNegated() {
+		return this.isNegated;
 	}
 
 	protected abstract T parseValue(String valueExpression);
