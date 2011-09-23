@@ -91,8 +91,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		Map<String, String> uriTemplateVariables = getPathMatcher().extractUriTemplateVariables(pattern, lookupPath);
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 
-		if (!info.getProducesCondition().isEmpty()) {
-			Set<MediaType> mediaTypes = info.getProducesCondition().getMediaTypes();
+		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
+			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
 			request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
 		}
 	}
@@ -123,10 +123,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 					}
 				}
 				if (info.getConsumesCondition().getMatchingCondition(request) == null) {
-					consumableMediaTypes.addAll(info.getConsumesCondition().getMediaTypes());
+					consumableMediaTypes.addAll(info.getConsumesCondition().getConsumableMediaTypes());
 				}
 				if (info.getProducesCondition().getMatchingCondition(request) == null) {
-					producibleMediaTypes.addAll(info.getProducesCondition().getMediaTypes());
+					producibleMediaTypes.addAll(info.getProducesCondition().getProducibleMediaTypes());
 				}
 			}
 		}

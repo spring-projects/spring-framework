@@ -70,9 +70,16 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 		return expressions;
 	}
 
+	/**
+	 * Return the contained request header expressions.
+	 */
+	public Set<NameValueExpression<String>> getExpressions() {
+		return new LinkedHashSet<NameValueExpression<String>>(this.expressions);
+	}
+	
 	@Override
 	protected Collection<HeaderExpression> getContent() {
-		return expressions;
+		return this.expressions;
 	}
 
 	@Override

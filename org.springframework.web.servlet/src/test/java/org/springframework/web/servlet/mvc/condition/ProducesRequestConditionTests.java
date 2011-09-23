@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -30,11 +31,12 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition.Pr
 
 /**
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class ProducesRequestConditionTests {
-
+	
 	@Test
-	public void consumesMatch() {
+	public void producesMatch() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -44,7 +46,7 @@ public class ProducesRequestConditionTests {
 	}
 	
 	@Test
-	public void negatedConsumesMatch() {
+	public void negatedProducesMatch() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -54,7 +56,13 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void consumesWildcardMatch() {
+	public void getProducibleMediaTypesNegatedExpression() {
+		ProducesRequestCondition condition = new ProducesRequestCondition("!application/xml");
+		assertEquals(Collections.emptySet(), condition.getProducibleMediaTypes());
+	}
+	
+	@Test
+	public void producesWildcardMatch() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/*");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -64,7 +72,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void consumesMultipleMatch() {
+	public void producesMultipleMatch() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain", "application/xml");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -74,7 +82,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void consumesSingleNoMatch() {
+	public void producesSingleNoMatch() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -244,10 +252,10 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void parseConsumesAndHeaders() {
-		String[] consumes = new String[] {"text/plain"};
+	public void parseProducesAndHeaders() {
+		String[] produces = new String[] {"text/plain"};
 		String[] headers = new String[]{"foo=bar", "accept=application/xml,application/pdf"};
-		ProducesRequestCondition condition = new ProducesRequestCondition(consumes, headers);
+		ProducesRequestCondition condition = new ProducesRequestCondition(produces, headers);
 
 		assertConditions(condition, "text/plain", "application/xml", "application/pdf");
 	}

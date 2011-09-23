@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -214,6 +215,23 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
+	public void producibleMediaTypesAttribute() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/content");
+		request.addHeader("Accept", "application/xml");
+		this.mapping.getHandler(request);
+
+		assertEquals(Collections.singleton(MediaType.APPLICATION_XML),
+				request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE));
+
+		request = new MockHttpServletRequest("GET", "/content");
+		request.addHeader("Accept", "application/json");
+		this.mapping.getHandler(request);
+
+		assertNull("Negated expression should not be listed as a producible type", 
+				request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE));
+	}
+	
+	@Test
 	public void mappedInterceptors() throws Exception {
 		String path = "/foo";
 		HandlerInterceptor interceptor = new HandlerInterceptorAdapter() {};
@@ -259,6 +277,16 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		@RequestMapping(value = "/persons", produces="application/xml")
 		public String produces() {
+			return "";
+		}
+
+		@RequestMapping(value = "/content", produces="application/xml")
+		public String xmlContent() {
+			return "";
+		}
+
+		@RequestMapping(value = "/content", produces="!application/xml")
+		public String nonXmlContent() {
 			return "";
 		}
 	}

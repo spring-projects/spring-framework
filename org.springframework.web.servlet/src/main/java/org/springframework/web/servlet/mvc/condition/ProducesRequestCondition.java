@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.condition;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -95,12 +96,21 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	/**
-	 * Returns the media types for this condition.
+	 * Return the contained "produces" expressions.
 	 */
-	public Set<MediaType> getMediaTypes() {
+	public Set<MediaTypeExpression> getExpressions() {
+		return new LinkedHashSet<MediaTypeExpression>(this.expressions);
+	}
+
+	/**
+	 * Return the contained producible media types excluding negated expressions.
+	 */
+	public Set<MediaType> getProducibleMediaTypes() {
 		Set<MediaType> result = new LinkedHashSet<MediaType>();
-		for (ProduceMediaTypeExpression expression : getContent()) {
-			result.add(expression.getMediaType());
+		for (ProduceMediaTypeExpression expression : this.expressions) {
+			if (!expression.isNegated()) {
+				result.add(expression.getMediaType());
+			}
 		}
 		return result;
 	}
@@ -109,12 +119,12 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * Whether the condition has any media type expressions.
 	 */
 	public boolean isEmpty() {
-		return expressions.isEmpty();
+		return this.expressions.isEmpty();
 	}
 
 	@Override
 	protected List<ProduceMediaTypeExpression> getContent() {
-		return this.expressions.isEmpty() ? DEFAULT_EXPRESSIONS : this.expressions;
+		return this.expressions;
 	}
 
 	@Override
@@ -166,7 +176,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * 	<li>Get the lowest index of matching media types from each "produces" 
 	 * 	condition first matching with {@link MediaType#equals(Object)} and 
 	 * 	then with {@link MediaType#includes(MediaType)}.
-	 *  <li>If a lower index is found, the "produces" condition wins.
+	 *  <li>If a lower index is found, the condition at that index wins.
 	 *  <li>If both indexes are equal, the media types at the index are 
 	 *  compared further with {@link MediaType#SPECIFICITY_COMPARATOR}.
 	 * </ol>
@@ -207,10 +217,10 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			return Collections.singletonList(MediaType.ALL);
 		}
 	}
-	
+
 	private int indexOfEqualMediaType(MediaType mediaType) {
-		for (int i = 0; i < getContent().size(); i++) {
-			if (mediaType.equals(getContent().get(i).getMediaType())) {
+		for (int i = 0; i < getExpressionsToCompare().size(); i++) {
+			if (mediaType.equals(getExpressionsToCompare().get(i).getMediaType())) {
 				return i;
 			}
 		}
@@ -218,8 +228,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	private int indexOfIncludedMediaType(MediaType mediaType) {
-		for (int i = 0; i < getContent().size(); i++) {
-			if (mediaType.includes(getContent().get(i).getMediaType())) {
+		for (int i = 0; i < getExpressionsToCompare().size(); i++) {
+			if (mediaType.includes(getExpressionsToCompare().get(i).getMediaType())) {
 				return i;
 			}
 		}
@@ -233,21 +243,30 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			result = index2 - index1;
 		}
 		else if (index1 != -1 && index2 != -1) {
-			ProduceMediaTypeExpression expr1 = condition1.getContent().get(index1);
-			ProduceMediaTypeExpression expr2 = condition2.getContent().get(index2);
+			ProduceMediaTypeExpression expr1 = condition1.getExpressionsToCompare().get(index1);
+			ProduceMediaTypeExpression expr2 = condition2.getExpressionsToCompare().get(index2);
 			result = expr1.compareTo(expr2);
 			result = (result != 0) ? result : expr1.getMediaType().compareTo(expr2.getMediaType());
 		}
 		return result;
 	}
 
-	private static final List<ProduceMediaTypeExpression> DEFAULT_EXPRESSIONS = 
-		Collections.singletonList(new ProduceMediaTypeExpression("*/*"));
+	/**
+	 * Return the contained "produces" expressions or if that's empty, a list 
+	 * with a {@code MediaType_ALL} expression. 
+	 */ 
+	private List<ProduceMediaTypeExpression> getExpressionsToCompare() {
+		return this.expressions.isEmpty() ? DEFAULT_EXPRESSION_LIST : this.expressions;	
+	}
+
+	private static final List<ProduceMediaTypeExpression> DEFAULT_EXPRESSION_LIST = 
+		Arrays.asList(new ProduceMediaTypeExpression("*/*"));
+
 	
 	/**
 	 * Parses and matches a single media type expression to a request's 'Accept' header. 
 	 */
-	static class ProduceMediaTypeExpression extends MediaTypeExpression {
+	static class ProduceMediaTypeExpression extends AbstractMediaTypeExpression {
 		
 		ProduceMediaTypeExpression(MediaType mediaType, boolean negated) {
 			super(mediaType, negated);
@@ -267,7 +286,6 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			}
 			return false;
 		}
-
 	}
 
 }
