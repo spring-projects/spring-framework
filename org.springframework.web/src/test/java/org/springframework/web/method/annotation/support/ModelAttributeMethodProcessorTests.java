@@ -137,7 +137,7 @@ public class ModelAttributeMethodProcessorTests {
 	public void supportedReturnTypesInDefaultResolutionMode() throws Exception {
 		processor = new ModelAttributeMethodProcessor(true);
 		assertTrue(processor.supportsReturnType(returnParamNamedModelAttr));
-		assertFalse(processor.supportsReturnType(returnParamNonSimpleType));
+		assertTrue(processor.supportsReturnType(returnParamNonSimpleType));
 	}
 	
 	@Test

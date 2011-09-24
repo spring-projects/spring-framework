@@ -24,6 +24,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.annotation.support.MapMethodProcessor;
 import org.springframework.web.method.annotation.support.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -33,8 +34,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 /**
  * Resolves method arguments of type {@link RedirectAttributes}. 
  * 
- * <p>This resolver must be listed before the {@link ModelMethodProcessor},
- * which resolves {@link Map} and {@link Model} arguments.
+ * <p>This resolver must be listed ahead of {@link ModelMethodProcessor} and
+ * {@link MapMethodProcessor}, which support {@link Map} and {@link Model}
+ * arguments both of which are "super" types of {@code RedirectAttributes}
+ * and would also attempt to resolve a {@code RedirectAttributes} argument.
  *
  * @author Rossen Stoyanchev
  * @since 3.1

@@ -16,32 +16,29 @@
 
 package org.springframework.web.servlet.mvc.method.annotation.support;
 
-import java.beans.PropertyEditor;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory;
 
 /**
- * A Servlet-specific {@link ModelAttributeMethodProcessor} variant with the following further benefits:
- * <ul>
- * 	<li>Casts the data binder down to {@link ServletRequestDataBinder} prior to invoking bind on it
- * 	<li>Attempts to instantiate the model attribute using a path variable and type conversion
- * </ul>
- *  that casts
- * instance to {@link ServletRequestDataBinder} prior to invoking data binding.
+ * A Servlet-specific {@link ModelAttributeMethodProcessor} that applies data
+ * binding through a WebDataBinder of type {@link ServletRequestDataBinder}. 
+ * 
+ * <p>Also adds a fall-back strategy to instantiate a model attribute from a 
+ * URI template variable combined with type conversion, if the model attribute 
+ * name matches to a URI template variable name.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -49,39 +46,37 @@ import org.springframework.web.servlet.HandlerMapping;
 public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodProcessor {
 
 	/**
-	 * @param useDefaultResolution in default resolution mode a method argument that isn't a simple type, as
-	 * defined in {@link BeanUtils#isSimpleProperty(Class)}, is treated as a model attribute even if it doesn't
-	 * have an @{@link ModelAttribute} annotation with its name derived from the model attribute type.
+	 * @param annotationNotRequired if {@code true}, any non-simple type 
+	 * argument or return value is regarded as a model attribute even without 
+	 * the presence of a {@code @ModelAttribute} annotation in which case the 
+	 * attribute name is derived from the model attribute's type.
 	 */
-	public ServletModelAttributeMethodProcessor(boolean useDefaultResolution) {
-		super(useDefaultResolution);
+	public ServletModelAttributeMethodProcessor(boolean annotationNotRequired) {
+		super(annotationNotRequired);
 	}
 
 	/**
-	 * Instantiates the model attribute by trying to match the model attribute name to a path variable.
-	 * If a match is found an attempt is made to convert the String path variable to the expected 
-	 * method parameter type through a registered {@link Converter} or {@link PropertyEditor}.
-	 * If this fails the call is delegated back to the parent for default constructor instantiation.   
+	 * Add a fall-back strategy to instantiate the model attribute from a URI 
+	 * template variable and type conversion, assuming the model attribute 
+	 * name matches to a URI variable name. If instantiation fails for _any_ 
+	 * reason, the call is delegated to the base class.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	protected Object createAttribute(String attributeName, 
 									 MethodParameter parameter, 
 									 WebDataBinderFactory binderFactory, 
 									 NativeWebRequest request) throws Exception {
-		Map<String, String> uriTemplateVars = 
-			(Map<String, String>) request.getAttribute(
-					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
-		if (uriTemplateVars != null && uriTemplateVars.containsKey(attributeName)) {
+		Map<String, String> uriVariables = getUriTemplateVariables(request);
+
+		if (uriVariables.containsKey(attributeName)) {
 			try {
-				String var = uriTemplateVars.get(attributeName);
 				DataBinder binder = binderFactory.createBinder(request, null, attributeName);
-				return binder.convertIfNecessary(var, parameter.getParameterType());
+				return binder.convertIfNecessary(uriVariables.get(attributeName), parameter.getParameterType());
 
 			} catch (Exception exception) {
-				logger.info("Model attribute '" + attributeName + "' matches to a URI template variable name. "
-						+ "The URI template variable however couldn't converted to a model attribute instance: "
+				logger.info("Model attribute name '" + attributeName + "' matches to a URI template variable name "
+						+ "but the variable String value could not be converted into an attribute instance: "
 						+ exception.getMessage());
 			}
 		}
@@ -89,9 +84,20 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 		return super.createAttribute(attributeName, parameter, binderFactory, request);
 	}
 
+	@SuppressWarnings("unchecked")
+	private Map<String, String> getUriTemplateVariables(NativeWebRequest request) {
+		
+		Map<String, String> uriTemplateVars = 
+			(Map<String, String>) request.getAttribute(
+					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+
+		return (uriTemplateVars != null) ? uriTemplateVars : Collections.<String, String>emptyMap();
+	}
+
 	/**
 	 * {@inheritDoc}
-	 * <p>This implementation downcasts to {@link ServletRequestDataBinder} before invoking the bind operation.
+	 * <p>Downcast {@link WebDataBinder} to {@link ServletRequestDataBinder} before binding.
+	 * @see ServletRequestDataBinderFactory
 	 */
 	@Override
 	protected void bindRequestParameters(WebDataBinder binder, NativeWebRequest request) {

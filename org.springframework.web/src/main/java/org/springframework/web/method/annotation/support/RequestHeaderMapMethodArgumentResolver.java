@@ -31,17 +31,17 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves {@link Map} method arguments annotated with an @{@link RequestHeader}. 
- * See {@link RequestHeaderMethodArgumentResolver} for individual header values with an @{@link RequestHeader}.
+ * Resolves {@link Map} method arguments annotated with {@code @RequestHeader}. 
+ * For individual header values annotated with {@code @RequestHeader} see 
+ * {@link RequestHeaderMethodArgumentResolver} instead.
  * 
- * <p>The created {@link Map} contains all request header name/value pairs. If the method parameter type 
- * is {@link MultiValueMap} instead, the created map contains all request headers and all their values in case 
- * request headers have multiple values.
+ * <p>The created {@link Map} contains all request header name/value pairs. 
+ * The method parameter type may be a {@link MultiValueMap} to receive all
+ * values for a header, not only the first one. 
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
- * @see RequestHeaderMethodArgumentResolver
  */
 public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
