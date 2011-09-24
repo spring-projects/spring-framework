@@ -33,11 +33,10 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
+import org.springframework.web.method.annotation.support.MapMethodProcessor;
 import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
 import org.springframework.web.method.annotation.support.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -48,29 +47,23 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.support.HttpEntityMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ModelAndViewMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestResponseBodyMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
+import org.springframework.web.servlet.mvc.method.annotation.support.ViewNameMethodReturnValueHandler;
 
 /**
- * An {@link AbstractHandlerMethodExceptionResolver} that supports using {@link ExceptionHandler}-annotated methods
- * to resolve exceptions.
+ * An {@link AbstractHandlerMethodExceptionResolver} that resolves exceptions
+ * through {@code @ExceptionHandler} methods.
  *
- * <p>{@link ExceptionHandlerMethodResolver} is a key contributing class that stores method-to-exception mappings extracted
- * from {@link ExceptionHandler} annotations or from the list of method arguments on the exception-handling method.
- * {@link ExceptionHandlerMethodResolver} assists with actually locating a method for a thrown exception.
- *
- * <p>Once located the invocation of the exception-handling method is done using much of the same classes
- * used for {@link RequestMapping} methods, which is described under {@link RequestMappingHandlerAdapter}.
- *
- * <p>See {@link ExceptionHandler} for information on supported method arguments and return values for
- * exception-handling methods.
- *
+ * <p>Support for custom argument and return value types can be added via
+ * {@link #setCustomArgumentResolvers} and {@link #setCustomReturnValueHandlers}.
+ * Or alternatively to re-configure all argument and return value types use
+ * {@link #setArgumentResolvers} and {@link #setReturnValueHandlers(List)}.
+ * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -91,64 +84,94 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 	/**
-	 * Creates an instance of {@link ExceptionHandlerExceptionResolver}.
+	 * Default constructor.
 	 */
 	public ExceptionHandlerExceptionResolver() {
 		
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316
 		
-		messageConverters = new ArrayList<HttpMessageConverter<?>>();
-		messageConverters.add(new ByteArrayHttpMessageConverter());
-		messageConverters.add(stringHttpMessageConverter);
-		messageConverters.add(new SourceHttpMessageConverter<Source>());
-		messageConverters.add(new XmlAwareFormHttpMessageConverter());
+		this.messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		this.messageConverters.add(new ByteArrayHttpMessageConverter());
+		this.messageConverters.add(stringHttpMessageConverter);
+		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
+		this.messageConverters.add(new XmlAwareFormHttpMessageConverter());
 	}
 
 	/**
-	 * Set one or more custom argument resolvers to use with {@link ExceptionHandler} methods. Custom argument resolvers
-	 * are given a chance to resolve argument values ahead of the standard argument resolvers registered by default.
-	 * <p>An existing {@link WebArgumentResolver} can either adapted with {@link ServletWebArgumentResolverAdapter}
-	 * or preferably converted to a {@link HandlerMethodArgumentResolver} instead.
+	 * Provide resolvers for custom argument types. Custom resolvers are ordered
+	 * after built-in ones. To override the built-in support for argument 
+	 * resolution use {@link #setArgumentResolvers} instead.
 	 */
 	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		this.customArgumentResolvers= argumentResolvers;
-	}	
+	}
+	
+	/**
+	 * Return the custom argument resolvers, or {@code null}.
+	 */
+	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
+		return this.customArgumentResolvers;
+	}
 
 	/**
-	 * Set the argument resolvers to use with {@link ExceptionHandler} methods.
-	 * This is an optional property providing full control over all argument resolvers in contrast to
-	 * {@link #setCustomArgumentResolvers(List)}, which does not override default registrations.
-	 * @param argumentResolvers argument resolvers for {@link ExceptionHandler} methods
+	 * Configure the complete list of supported argument types thus overriding
+	 * the resolvers that would otherwise be configured by default.
 	 */
 	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		if (argumentResolvers != null) {
+		if (argumentResolvers == null) {
+			this.argumentResolvers = null;
+		}
+		else {
 			this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
 			this.argumentResolvers.addResolvers(argumentResolvers);
 		}
 	}
+	
+	/**
+	 * Return the configured argument resolvers, or possibly {@code null} if 
+	 * not initialized yet via {@link #afterPropertiesSet()}.
+	 */
+	public HandlerMethodArgumentResolverComposite getArgumentResolvers() {
+		return this.argumentResolvers;
+	}
 
 	/**
-	 * Set custom return value handlers to use to handle the return values of {@link ExceptionHandler} methods.
-	 * Custom return value handlers are given a chance to handle a return value before the standard
-	 * return value handlers registered by default.
-	 * @param returnValueHandlers custom return value handlers for {@link ExceptionHandler} methods
+	 * Provide handlers for custom return value types. Custom handlers are
+	 * ordered after built-in ones. To override the built-in support for
+	 * return value handling use {@link #setReturnValueHandlers}.
 	 */
 	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		this.customReturnValueHandlers = returnValueHandlers;
 	}
 
 	/**
-	 * Set the {@link HandlerMethodReturnValueHandler}s to use to use with {@link ExceptionHandler} methods.
-	 * This is an optional property providing full control over all return value handlers in contrast to
-	 * {@link #setCustomReturnValueHandlers(List)}, which does not override default registrations.
-	 * @param returnValueHandlers the return value handlers for {@link ExceptionHandler} methods
+	 * Return the custom return value handlers, or {@code null}.
+	 */
+	public List<HandlerMethodReturnValueHandler> getCustomReturnValueHandlers() {
+		return this.customReturnValueHandlers;
+	}
+
+	/**
+	 * Configure the complete list of supported return value types thus 
+	 * overriding handlers that would otherwise be configured by default.
 	 */
 	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-		if (returnValueHandlers != null) {
+		if (returnValueHandlers == null) {
+			this.returnValueHandlers = null;
+		}
+		else {
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
 			this.returnValueHandlers.addHandlers(returnValueHandlers);
 		}
+	}
+	
+	/**
+	 * Return the configured handlers, or possibly {@code null} if not 
+	 * initialized yet via {@link #afterPropertiesSet()}.
+	 */
+	public HandlerMethodReturnValueHandlerComposite getReturnValueHandlers() {
+		return this.returnValueHandlers;
 	}
 	
 	/**
@@ -158,44 +181,72 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = messageConverters;
 	}
+	
+	/**
+	 * Return the configured message body converters.
+	 */
+	public List<HttpMessageConverter<?>> getMessageConverters() {
+		return messageConverters;
+	}
 
 	public void afterPropertiesSet() {
-		if (argumentResolvers == null) {
-			argumentResolvers = new HandlerMethodArgumentResolverComposite();
-			argumentResolvers.addResolvers(customArgumentResolvers);
-			argumentResolvers.addResolvers(getDefaultArgumentResolvers());
+		if (this.argumentResolvers == null) {
+			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
+			this.argumentResolvers = new HandlerMethodArgumentResolverComposite().addResolvers(resolvers);
 		}
-		if (returnValueHandlers == null) {
-			returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
-			returnValueHandlers.addHandlers(customReturnValueHandlers);
-			returnValueHandlers.addHandlers(getDefaultReturnValueHandlers(messageConverters));
+		if (this.returnValueHandlers == null) {
+			List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
+			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
 		}
 	}
 
-	public static List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
+	/**
+	 * Return the list of argument resolvers to use including built-in resolvers
+	 * and custom resolvers provided via {@link #setCustomArgumentResolvers}.
+	 */
+	protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		
+		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
 		resolvers.add(new ServletResponseMethodArgumentResolver());
+		
+		// Custom arguments
+		if (getCustomArgumentResolvers() != null) {
+			resolvers.addAll(getCustomArgumentResolvers());
+		}
+
 		return resolvers;
 	}
 
-	public static List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers(
-			List<HttpMessageConverter<?>> messageConverters) {
-		
+	/**
+	 * Return the list of return value handlers to use including built-in and 
+	 * custom handlers provided via {@link #setReturnValueHandlers}.
+	 */
+	protected List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
 		
-		// Annotation-based handlers
-		handlers.add(new RequestResponseBodyMethodProcessor(messageConverters));
-		handlers.add(new ModelAttributeMethodProcessor(false));
-		
-		// Type-based handlers
+		// Single-purpose return value types
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
-		handlers.add(new HttpEntityMethodProcessor(messageConverters));
-		
-		// Default handler
-		handlers.add(new DefaultMethodReturnValueHandler());
+		handlers.add(new HttpEntityMethodProcessor(getMessageConverters()));
+
+		// Annotation-based return value types
+		handlers.add(new ModelAttributeMethodProcessor(false));
+		handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters()));
+
+		// Multi-purpose return value types
+		handlers.add(new ViewNameMethodReturnValueHandler());
+		handlers.add(new MapMethodProcessor());
+
+		// Custom return value types
+		if (getCustomReturnValueHandlers() != null) {
+			handlers.addAll(getCustomReturnValueHandlers());
+		}
+
+		// Catch-all
+		handlers.add(new ModelAttributeMethodProcessor(true));
 		
 		return handlers;
 	}

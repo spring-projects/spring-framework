@@ -29,7 +29,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod;
 
 /**
  * Resolves response-related method argument values of types:
@@ -53,11 +52,10 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>Sets the {@link ModelAndViewContainer#setRequestHandled(boolean)} flag to {@code false} to indicate
-	 * that the method signature provides access to the response. If subsequently the underlying method  
-	 * returns {@code null}, view resolution will be bypassed.
-	 * @see ServletInvocableHandlerMethod#invokeAndHandle(NativeWebRequest, ModelAndViewContainer, Object...)
+	 * Set {@link ModelAndViewContainer#setRequestHandled(boolean)} to 
+	 * {@code false} to indicate that the method signature provides access 
+	 * to the response. If subsequently the underlying method returns 
+	 * {@code null}, the request is considered directly handled.
 	 */
 	public Object resolveArgument(MethodParameter parameter,
 								  ModelAndViewContainer mavContainer,

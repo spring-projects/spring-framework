@@ -21,7 +21,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -29,18 +28,18 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * An abstract base class adapting a {@link WebArgumentResolver} into the {@link HandlerMethodArgumentResolver} 
- * contract. Provided for backwards compatibility, some important considerations are listed below.
- *
- * <p>The method {@link #supportsParameter(MethodParameter)} is implemented by trying to resolve the value through 
- * the {@link WebArgumentResolver} and verifying the resulting value is not {@link WebArgumentResolver#UNRESOLVED}.
- * Exceptions resulting from that are absorbed and ignored since the adapter can't be sure if this is the resolver 
- * that supports the method parameter or not. To avoid this limitation change the {@link WebArgumentResolver} to
- * implement the {@link HandlerMethodArgumentResolver} contract instead.
+ * An abstract base class adapting a {@link WebArgumentResolver} to the 
+ * {@link HandlerMethodArgumentResolver} contract. 
  * 
- * <p>Another potentially useful advantage of {@link HandlerMethodArgumentResolver} is that it provides access to 
- * model  attributes through the {@link ModelAndViewContainer} as well as access to a {@link WebDataBinderFactory} 
- * for when type conversion through a {@link WebDataBinder} is needed.
+ * <p><strong>Note:</strong> This class is provided for backwards compatibility.
+ * However it is recommended to re-write a {@code WebArgumentResolver} as 
+ * {@code HandlerMethodArgumentResolver}. Since {@link #supportsParameter} 
+ * can only be implemented by actually resolving the value and then checking 
+ * the result is not {@code WebArgumentResolver#UNRESOLVED} any exceptions 
+ * raised must be absorbed and ignored since it's not clear whether the adapter 
+ * doesn't support the parameter or whether it failed for an internal reason.  
+ * The {@code HandlerMethodArgumentResolver} contract also provides access to
+ * model attributes and to {@code WebDataBinderFactory} (for type conversion).
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -53,7 +52,7 @@ public abstract class AbstractWebArgumentResolverAdapter implements HandlerMetho
 	private final WebArgumentResolver adaptee;
 
 	/**
-	 * Create a {@link AbstractWebArgumentResolverAdapter} with the {@link WebArgumentResolver} instance to delegate to.
+	 * Create a new instance.
 	 */
 	public AbstractWebArgumentResolverAdapter(WebArgumentResolver adaptee) {
 		Assert.notNull(adaptee, "'adaptee' must not be null");
@@ -61,12 +60,13 @@ public abstract class AbstractWebArgumentResolverAdapter implements HandlerMetho
 	}
 
 	/**
-	 * See the class-level documentation for an important consideration about exceptions arising in this method.
+	 * Actually resolve the value and check the resolved value is not 
+	 * {@link WebArgumentResolver#UNRESOLVED} absorbing _any_ exceptions.
 	 */
 	public boolean supportsParameter(MethodParameter parameter) {
 		try {
 			NativeWebRequest webRequest = getWebRequest();
-			Object result = adaptee.resolveArgument(parameter, webRequest);
+			Object result = this.adaptee.resolveArgument(parameter, webRequest);
 			if (result == WebArgumentResolver.UNRESOLVED) {
 				return false;
 			}
@@ -82,21 +82,21 @@ public abstract class AbstractWebArgumentResolverAdapter implements HandlerMetho
 	}
 
 	/**
-	 * Provide access to a {@link NativeWebRequest}.
+	 * Required for access to NativeWebRequest in {@link #supportsParameter}.
 	 */
 	protected abstract NativeWebRequest getWebRequest();
 
 	/**
-	 * Resolves the argument value by delegating to the {@link WebArgumentResolver} instance.
-	 * @exception IllegalStateException if the resolved value is {@link WebArgumentResolver#UNRESOLVED} or if the 
-	 * return value type cannot be assigned to the method parameter type.
+	 * Delegate to the {@link WebArgumentResolver} instance.
+	 * @exception IllegalStateException if the resolved value is not assignable 
+	 * to the method parameter.
 	 */
 	public Object resolveArgument(MethodParameter parameter,
 								  ModelAndViewContainer mavContainer,
 								  NativeWebRequest webRequest, 
 								  WebDataBinderFactory binderFactory) throws Exception {
 		Class<?> paramType = parameter.getParameterType();
-		Object result = adaptee.resolveArgument(parameter, webRequest);
+		Object result = this.adaptee.resolveArgument(parameter, webRequest);
 		if (result == WebArgumentResolver.UNRESOLVED || !ClassUtils.isAssignableValue(paramType, result)) {
 			throw new IllegalStateException(
 					"Standard argument type [" + paramType.getName() + "] in method " + parameter.getMethod() + 

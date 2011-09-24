@@ -59,7 +59,6 @@ import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
 
 /**
  * A test fixture for {@link WebMvcConfigurationSupport}.
@@ -285,7 +284,7 @@ public class WebMvcConfigurationSupportTests {
 
 		@Override
 		public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-			returnValueHandlers.add(new DefaultMethodReturnValueHandler());
+			returnValueHandlers.add(new ModelAttributeMethodProcessor(true));
 		}
 
 		@Override

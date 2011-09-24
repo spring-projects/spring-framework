@@ -28,10 +28,12 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves method arguments of type {@link Errors} and {@link BindingResult}.
+ * Resolves {@link Errors} method arguments.
  * 
- * <p>This argument should appear after a model attribute argument in the signature of the handler method. 
- * It is resolved by accessing the last attribute in the model expecting that to be a {@link BindingResult}.
+ * <p>An {@code Errors} method argument is expected to appear immediately after
+ * the model attribute in the method signature. It is resolved by expecting the
+ * last two attributes added to the model to be the model attribute and its
+ * {@link BindingResult}. 
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -57,8 +59,8 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 		}
 
 		throw new IllegalStateException(
-				"An Errors/BindingResult argument must follow a model attribute argument. " +
-				"Check your handler method signature: " + parameter.getMethod());
+				"An Errors/BindingResult argument is expected to be immediately after the model attribute " +
+				"argument in the controller method signature: " + parameter.getMethod());
 	}
 
 }

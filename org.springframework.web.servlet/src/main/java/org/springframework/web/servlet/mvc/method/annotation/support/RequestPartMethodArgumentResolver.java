@@ -48,26 +48,26 @@ import org.springframework.web.util.WebUtils;
 /**
  * Resolves the following method arguments:
  * <ul>
- * 	<li>Arguments annotated with @{@link RequestPart}.
- * 	<li>Arguments of type {@link MultipartFile} in conjunction with Spring's 
- * 		{@link MultipartResolver} abstraction.
- * 	<li>Arguments of type {@code javax.servlet.http.Part} in conjunction 
- * 		with Servlet 3.0 multipart requests.
+ * 	<li>Annotated with {@code @RequestPart}
+ * 	<li>Of type {@link MultipartFile} in conjunction with Spring's 
+ *  {@link MultipartResolver} abstraction
+ * 	<li>Of type {@code javax.servlet.http.Part} in conjunction with 
+ * 	Servlet 3.0 multipart requests
  * </ul>
  * 
- * <p>When a parameter is annotated with @{@link RequestPart} the content of the 
+ * <p>When a parameter is annotated with {@code @RequestPart} the content of the 
  * part is passed through an {@link HttpMessageConverter} to resolve the method 
  * argument with the 'Content-Type' of the request part in mind. This is 
  * analogous to what @{@link RequestBody} does to resolve an argument based on
- * the content of a non-multipart request.
+ * the content of a regular request.
  * 
  * <p>When a parameter is not annotated or the name of the part is not specified, 
  * it is derived from the name of the method argument.
  * 
- * <p>Automatic validation can be applied to a @{@link RequestPart} method argument 
- * through the use of {@code @Valid}. In case of validation failure, a 
- * {@link MethodArgumentNotValidException} is thrown and handled automatically by
- * the {@link DefaultHandlerExceptionResolver}.
+ * <p>Automatic validation may be applied if the argument is annotated with 
+ * {@code @javax.validation.Valid}. In case of validation failure, a 
+ * {@link MethodArgumentNotValidException} is raised and a 400 response status
+ * code returned if {@link DefaultHandlerExceptionResolver} is configured.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -81,9 +81,9 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	/**
 	 * Supports the following:
 	 * <ul>
-	 * 	<li>@RequestPart-annotated method arguments.
-	 * 	<li>Arguments of type {@link MultipartFile} unless annotated with {@link RequestParam}.
-	 * 	<li>Arguments of type {@code javax.servlet.http.Part} unless annotated with {@link RequestParam}.
+	 * 	<li>Annotated with {@code @RequestPart}
+	 * 	<li>Of type {@link MultipartFile} unless annotated with {@code @RequestParam}.
+	 * 	<li>Of type {@code javax.servlet.http.Part} unless annotated with {@code @RequestParam}.
 	 * </ul>
 	 */
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -193,15 +193,13 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	}
 	
 	/**
-	 * Whether to validate the given @{@link RequestPart} method argument. 
-	 * The default implementation return {@code true} if the argument value is not {@code null} 
-	 * and the method parameter is annotated with {@code @Valid}.
-	 * @param argumentValue the validation candidate
-	 * @param parameter the method argument declaring the validation candidate
-	 * @return {@code true} if validation should be invoked, {@code false} otherwise.
+	 * Whether to validate the given {@code @RequestPart} method argument. 
+	 * The default implementation looks for {@code @javax.validation.Valid}.
+	 * @param argument the resolved argument value
+	 * @param parameter the method argument
 	 */
-	protected boolean isValidationApplicable(Object argumentValue, MethodParameter parameter) {
-		if (argumentValue == null) {
+	protected boolean isValidationApplicable(Object argument, MethodParameter parameter) {
+		if (argument == null) {
 			return false;
 		}
 		else {

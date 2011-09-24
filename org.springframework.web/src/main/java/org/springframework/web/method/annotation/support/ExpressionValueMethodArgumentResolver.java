@@ -25,14 +25,14 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Resolves method arguments annotated with @{@link Value}.
+ * Resolves method arguments annotated with {@code @Value}.
  * 
- * <p>An @{@link Value} is a named value that does not have a name but gets resolved from a default value string 
- * that may contain ${...} placeholder or Spring Expression Language #{...} expressions. See the base class 
- * {@link AbstractNamedValueMethodArgumentResolver} for more information on how named values are processed.
+ * <p>An {@code @Value} does not have a name but gets resolved from the default
+ * value string, which may contain ${...} placeholder or Spring Expression 
+ * Language #{...} expressions. 
  * 
- * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved argument values that don't yet match 
- * the method parameter type.
+ * <p>A {@link WebDataBinder} may be invoked to apply type conversion to 
+ * resolved argument value.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -40,8 +40,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
 	/**
-	 * @param beanFactory a bean factory to use for resolving  ${...} placeholder and #{...} SpEL expressions 
-	 * in default values, or {@code null} if default values are not expected to contain expressions
+	 * @param beanFactory a bean factory to use for resolving  ${...} 
+	 * placeholder and #{...} SpEL expressions in default values;
+	 * or {@code null} if default values are not expected to contain expressions
 	 */
 	public ExpressionValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		super(beanFactory);

@@ -42,6 +42,7 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -77,9 +78,9 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter;
-import org.springframework.web.servlet.mvc.method.annotation.support.DefaultMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.support.HttpEntityMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ModelAndViewMethodReturnValueHandler;
+import org.springframework.web.servlet.mvc.method.annotation.support.ModelAndViewResolverMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.support.PathVariableMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.RedirectAttributesMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.RequestPartMethodArgumentResolver;
@@ -261,9 +262,18 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * Provide custom {@link ModelAndViewResolver}s. This is available for 
-	 * backwards compatibility. However it is recommended to use 
-	 * {@link HandlerMethodReturnValueHandler}s instead. 
+	 * Provide custom {@link ModelAndViewResolver}s. 
+	 * <p><strong>Note:</strong> This method is available for backwards 
+	 * compatibility only. However, it is recommended to re-write a 
+	 * {@code ModelAndViewResolver} as {@link HandlerMethodReturnValueHandler}.
+	 * An adapter between the two interfaces is not possible since the 
+	 * {@link HandlerMethodReturnValueHandler#supportsReturnType} method
+	 * cannot be implemented. Hence {@code ModelAndViewResolver}s are limited
+	 * to always being invoked at the end after all other return value 
+	 * handlers have been given a chance.
+	 * <p>A {@code HandlerMethodReturnValueHandler} provides better access to 
+	 * the return type and controller method information and can be ordered
+	 * freely relative to other return value handlers.
 	 */
 	public void setModelAndViewResolvers(List<ModelAndViewResolver> modelAndViewResolvers) {
 		this.modelAndViewResolvers = modelAndViewResolvers;
@@ -507,7 +517,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		}
 
 		// Catch-all
-		handlers.add(new DefaultMethodReturnValueHandler(getModelAndViewResolvers()));
+		if (!CollectionUtils.isEmpty(getModelAndViewResolvers())) {
+			handlers.add(new ModelAndViewResolverMethodReturnValueHandler(getModelAndViewResolvers()));
+		}
+		else {
+			handlers.add(new ModelAttributeMethodProcessor(true));
+		}
 
 		return handlers;
 	}

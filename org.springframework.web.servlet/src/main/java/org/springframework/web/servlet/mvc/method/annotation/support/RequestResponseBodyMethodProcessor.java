@@ -35,12 +35,16 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
- * Resolves method arguments annotated with @{@link RequestBody} and handles return values from methods 
- * annotated with {@link ResponseBody}. 
+ * Resolves method arguments annotated with {@code @RequestBody} and handles 
+ * return values from methods annotated with {@code @ResponseBody} by reading
+ * and writing to the body of the request or response with an 
+ * {@link HttpMessageConverter}.
  * 
- * <p>An @{@link RequestBody} method argument will be validated if annotated with {@code @Valid}. 
- * In case of validation failure, a {@link MethodArgumentNotValidException} is thrown and handled 
- * automatically in {@link DefaultHandlerExceptionResolver}. 
+ * <p>An {@code @RequestBody} method argument is also validated if it is 
+ * annotated with {@code @javax.validation.Valid}. In case of validation 
+ * failure, {@link MethodArgumentNotValidException} is raised and results 
+ * in a 400 response status code if {@link DefaultHandlerExceptionResolver}
+ * is configured. 
  * 
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -78,13 +82,12 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	}
 
 	/**
-	 * Whether to validate the given @{@link RequestBody} method argument. The default implementation checks 
-	 * if the parameter is also annotated with {@code @Valid}.
-	 * @param argumentValue the validation candidate
-	 * @param parameter the method argument declaring the validation candidate
-	 * @return {@code true} if validation should be invoked, {@code false} otherwise.
+	 * Whether to validate the given {@code @RequestBody} method argument. 
+	 * The default implementation looks for {@code @javax.validation.Valid}.
+	 * @param argument the resolved argument value
+	 * @param parameter the method argument
 	 */
-	protected boolean isValidationApplicable(Object argumentValue, MethodParameter parameter) {
+	protected boolean isValidationApplicable(Object argument, MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation annot : annotations) {
 			if ("Valid".equals(annot.annotationType().getSimpleName())) {

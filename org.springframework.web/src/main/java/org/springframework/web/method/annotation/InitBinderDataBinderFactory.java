@@ -30,7 +30,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 
 /**
- * Adds data binder initialization through the invocation of @{@link InitBinder} methods.
+ * Adds initialization to a WebDataBinder via {@code @InitBinder} methods.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -41,8 +41,8 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 	
 	/**
 	 * Create a new instance.
-	 * @param binderMethods {@link InitBinder} methods to initialize new data binder instances with
-	 * @param initializer a global initializer to initialize new data binder instances with
+	 * @param binderMethods {@code @InitBinder} methods, or {@code null}
+	 * @param initializer for global data binder intialization
 	 */
 	public InitBinderDataBinderFactory(List<InvocableHandlerMethod> binderMethods, WebBindingInitializer initializer) {
 		super(initializer);
@@ -50,16 +50,15 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 	}
 
 	/**
-	 * Initializes the given data binder through the invocation of @{@link InitBinder} methods.
-	 * An @{@link InitBinder} method that defines names via {@link InitBinder#value()} will 
-	 * not be invoked unless one of the names matches the target object name.
-	 * @see InitBinder#value()
+	 * Initialize a WebDataBinder with {@code @InitBinder} methods.
+	 * If the {@code @InitBinder} annotation specifies attributes names, it is
+	 * invoked only if the names include the target object name.
 	 * @throws Exception if one of the invoked @{@link InitBinder} methods fail.
 	 */
 	@Override
 	public void initBinder(WebDataBinder binder, NativeWebRequest request) throws Exception {
 		for (InvocableHandlerMethod binderMethod : this.binderMethods) {
-			if (!isBinderMethodApplicable(binderMethod, binder)) {
+			if (!invokeInitBinderMethod(binderMethod, binder)) {
 				continue;
 			}
 			Object returnValue = binderMethod.invokeForRequest(request, null, binder);
@@ -70,12 +69,12 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 	}
 
 	/**
-	 * Returns {@code true} if the given @{@link InitBinder} method should be invoked to initialize
-	 * the given {@link WebDataBinder} instance. This implementations returns {@code true} if 
-	 * the @{@link InitBinder} annotation on the method does not define any names or if one of the
-	 * names it defines names matches the target object name.
+	 * Return {@code true} if the given {@code @InitBinder} method should be 
+	 * invoked to initialize the given WebDataBinder. 
+	 * <p>The default implementation checks if target object name is included
+	 * in the attribute names specified in the {@code @InitBinder} annotation.
 	 */
-	protected boolean isBinderMethodApplicable(HandlerMethod binderMethod, WebDataBinder binder) {
+	protected boolean invokeInitBinderMethod(HandlerMethod binderMethod, WebDataBinder binder) {
 		InitBinder annot = binderMethod.getMethodAnnotation(InitBinder.class);
 		Collection<String> names = Arrays.asList(annot.value());
 		return (names.size() == 0 || names.contains(binder.getObjectName()));

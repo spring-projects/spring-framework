@@ -27,7 +27,8 @@ import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
 /**
- * A {@link AbstractCookieValueMethodArgumentResolver} that resolves the cookie value through the {@link HttpServletRequest}.
+ * An {@link AbstractCookieValueMethodArgumentResolver} that resolves cookie 
+ * values from an {@link HttpServletRequest}.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
