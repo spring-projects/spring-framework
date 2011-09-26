@@ -69,8 +69,8 @@ public class NumberFormattingTests {
 		LocaleContextHolder.setLocale(null);
 	}
 
-	// TODO [SPR-8178] determine why changes to GenericConversionService broke this test
-	@Ignore("Disabled until SPR-8178 is resolved")
+	// TODO [SPR-8718] determine why changes to GenericConversionService broke this test
+	@Ignore("Disabled until SPR-8718 is resolved")
 	@Test
 	public void testDefaultNumberFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
