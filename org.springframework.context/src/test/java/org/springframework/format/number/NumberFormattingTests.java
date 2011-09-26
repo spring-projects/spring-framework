@@ -24,7 +24,6 @@ import java.util.Locale;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -69,8 +68,6 @@ public class NumberFormattingTests {
 		LocaleContextHolder.setLocale(null);
 	}
 
-	// TODO [SPR-8718] determine why changes to GenericConversionService broke this test
-	@Ignore("Disabled until SPR-8718 is resolved")
 	@Test
 	public void testDefaultNumberFormatting() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();

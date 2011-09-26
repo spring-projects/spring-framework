@@ -485,7 +485,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private final class ConverterAdapter implements ConditionalGenericConverter {
+	private final class ConverterAdapter implements GenericConverter {
 
 		private final ConvertiblePair typeInfo;
 
@@ -498,11 +498,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return Collections.singleton(this.typeInfo);
-		}
-
-		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return (typeInfo.getTargetType().equals(targetType.getObjectType()) &&
-					typeInfo.getSourceType().isAssignableFrom(sourceType.getObjectType()));
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
