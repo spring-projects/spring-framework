@@ -41,10 +41,12 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	/**
 	 * Create a new {@link WebDataBinder} for the given target object and 
 	 * initialize it through a {@link WebBindingInitializer}. 
+	 * @throws Exception in case of invalid state or arguments
 	 */
-	public final WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
+	public final WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
+			throws Exception {
 		WebDataBinder dataBinder = createBinderInstance(target, objectName, webRequest);
-		if (initializer != null) {
+		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder, webRequest);
 		}
 		initBinder(dataBinder, webRequest);
@@ -52,13 +54,15 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	}
 
 	/**
-	 * Extension point to create the WebDataBinder instance, which is
-	 * {@link WebRequestDataBinder} by default.
+	 * Extension point to create the WebDataBinder instance.
+	 * By default this is {@code WebRequestDataBinder}.
 	 * @param target the binding target or {@code null} for type conversion only
 	 * @param objectName the binding target object name 
 	 * @param webRequest the current request
+	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected WebDataBinder createBinderInstance(Object target, String objectName, NativeWebRequest webRequest) {
+	protected WebDataBinder createBinderInstance(Object target, String objectName, NativeWebRequest webRequest)
+			throws Exception {
 		return new WebRequestDataBinder(target, objectName);
 	}
 

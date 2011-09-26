@@ -676,7 +676,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		return modelFactory;
 	}
 
-	private WebDataBinderFactory getDataBinderFactory(HandlerMethod handlerMethod) {
+	private WebDataBinderFactory getDataBinderFactory(HandlerMethod handlerMethod) throws Exception {
 		Class<?> handlerType = handlerMethod.getBeanType();
 		WebDataBinderFactory binderFactory = this.dataBinderFactoryCache.get(handlerType);
 		if (binderFactory == null) {
@@ -688,10 +688,23 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 				binderMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
 				binderMethods.add(binderMethod);
 			}
-			binderFactory = new ServletRequestDataBinderFactory(binderMethods, this.webBindingInitializer);
+			binderFactory = createDataBinderFactory(binderMethods);
 			this.dataBinderFactoryCache.put(handlerType, binderFactory);
 		}
 		return binderFactory;
+	}
+
+	/**
+	 * Template method to create a new ServletRequestDataBinderFactory instance.
+	 * <p>The default implementation creates a ServletRequestDataBinderFactory.
+	 * This can be overridden for custom ServletRequestDataBinder subclasses.
+	 * @param binderMethods {@code @InitBinder} methods
+	 * @return the ServletRequestDataBinderFactory instance to use
+	 * @throws Exception in case of invalid state or arguments
+	 */
+	protected ServletRequestDataBinderFactory createDataBinderFactory(List<InvocableHandlerMethod> binderMethods)
+			throws Exception {
+		return new ServletRequestDataBinderFactory(binderMethods, getWebBindingInitializer());
 	}
 
 	/**
