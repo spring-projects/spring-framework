@@ -28,7 +28,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.beans.BeanUtils;
@@ -190,8 +189,6 @@ public class FormattingConversionServiceTests {
 		}
 	}
 	
-	// TODO [SPR-8718] determine why changes to GenericConversionService broke this test
-	@Ignore("Disabled until SPR-8718 is resolved")
 	@Test
 	public void testPrintNull() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
