@@ -16,6 +16,16 @@
 
 package org.springframework.core.convert.support;
 
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+
+import java.awt.Color;
+import java.awt.SystemColor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
-
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -38,14 +47,6 @@ import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
-
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 /**
  * @author Keith Donald
@@ -203,6 +204,18 @@ public class GenericConversionServiceTests {
 		});
 		Integer result = conversionService.convert("3", Integer.class);
 		assertEquals(new Integer(3), result);
+	}
+
+	// SPR-8718
+	
+	@Test(expected=ConverterNotFoundException.class)
+	public void convertSuperTarget() {
+		conversionService.addConverter(new ColorConverter());
+		conversionService.convert("#000000", SystemColor.class);
+	}
+
+	public class ColorConverter implements Converter<String, Color> {
+		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
 	}
 
 	@Test
