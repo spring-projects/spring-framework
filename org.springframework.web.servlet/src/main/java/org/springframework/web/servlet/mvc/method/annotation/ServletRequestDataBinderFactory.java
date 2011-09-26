@@ -17,21 +17,15 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.web.bind.ServletRequestDataBinder;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.annotation.InitBinderDataBinderFactory;
 import org.springframework.web.method.support.InvocableHandlerMethod;
-import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Creates a WebDataBinder of type {@link ServletRequestDataBinder} that can 
- * also use URI template variables values for data binding purposes.
+ * Creates a {@code ServletRequestDataBinder}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -43,45 +37,16 @@ public class ServletRequestDataBinderFactory extends InitBinderDataBinderFactory
 	 * @param binderMethods one or more {@code @InitBinder} methods
 	 * @param initializer provides global data binder initialization
 	 */
-	public ServletRequestDataBinderFactory(List<InvocableHandlerMethod> binderMethods, 
-										   WebBindingInitializer initializer) {
+	public ServletRequestDataBinderFactory(List<InvocableHandlerMethod> binderMethods, WebBindingInitializer initializer) {
 		super(binderMethods, initializer);
 	}
-	
+
 	/**
-	 * Create a WebDataBinder of type {@link ServletRequestDataBinder} that can 
-	 * also use URI template variables values for data binding purposes.
+	 * Returns an instance of {@link ExtendedServletRequestDataBinder}.
 	 */
 	@Override
-	protected WebDataBinder createBinderInstance(Object target, String objectName, final NativeWebRequest request) {
-		return new ServletRequestDataBinder(target, objectName) {
-			@Override
-			protected void doBind(MutablePropertyValues mpvs) {
-				mergeUriTemplateVariables(mpvs, request);
-				super.doBind(mpvs);
-			}
-		};
-	}
-
-	/**
-	 * Merge URI variable values into the given PropertyValues.
-	 * @param mpvs the PropertyValues to add to
-	 * @param request the current request
-	 */
-	@SuppressWarnings("unchecked")
-	protected final void mergeUriTemplateVariables(MutablePropertyValues mpvs, NativeWebRequest request) {
-
-		Map<String, String> uriTemplateVars = 
-			(Map<String, String>) request.getAttribute(
-					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-		
-		if (uriTemplateVars != null){
-			for (String variableName : uriTemplateVars.keySet()) {
-				if (!mpvs.contains(variableName)) {
-					mpvs.addPropertyValue(variableName, uriTemplateVars.get(variableName));
-				}
-			}
-		}
+	protected ServletRequestDataBinder createBinderInstance(Object target, String objectName, NativeWebRequest request) {
+		return new ExtendedServletRequestDataBinder(target, objectName);
 	}
 
 }

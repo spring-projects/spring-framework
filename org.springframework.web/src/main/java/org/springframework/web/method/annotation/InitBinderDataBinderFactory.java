@@ -58,12 +58,11 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 	@Override
 	public void initBinder(WebDataBinder binder, NativeWebRequest request) throws Exception {
 		for (InvocableHandlerMethod binderMethod : this.binderMethods) {
-			if (!invokeInitBinderMethod(binderMethod, binder)) {
-				continue;
-			}
-			Object returnValue = binderMethod.invokeForRequest(request, null, binder);
-			if (returnValue != null) {
-				throw new IllegalStateException("@InitBinder methods should return void: " + binderMethod);
+			if (isBinderMethodApplicable(binderMethod, binder)) {
+				Object returnValue = binderMethod.invokeForRequest(request, null, binder);
+				if (returnValue != null) {
+					throw new IllegalStateException("@InitBinder methods should return void: " + binderMethod);
+				}
 			}
 		}
 	}
@@ -74,8 +73,8 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 	 * <p>The default implementation checks if target object name is included
 	 * in the attribute names specified in the {@code @InitBinder} annotation.
 	 */
-	protected boolean invokeInitBinderMethod(HandlerMethod binderMethod, WebDataBinder binder) {
-		InitBinder annot = binderMethod.getMethodAnnotation(InitBinder.class);
+	protected boolean isBinderMethodApplicable(HandlerMethod initBinderMethod, WebDataBinder binder) {
+		InitBinder annot = initBinderMethod.getMethodAnnotation(InitBinder.class);
 		Collection<String> names = Arrays.asList(annot.value());
 		return (names.size() == 0 || names.contains(binder.getObjectName()));
 	}

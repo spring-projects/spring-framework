@@ -21,42 +21,26 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Test fixture with {@link ServletRequestDataBinderFactory}.
+ * Test fixture for {@link ExtendedServletRequestDataBinder}.
  *
  * @author Rossen Stoyanchev
  */
-public class ServletRequestDataBinderFactoryTests {
+public class ExtendedServletRequestDataBinderTests {
 
-	private ServletRequestDataBinderFactory binderFactory;
-	
 	private MockHttpServletRequest request;
 	
-	private NativeWebRequest webRequest;
-
 	@Before
 	public void setup() {
-		binderFactory = new ServletRequestDataBinderFactory(null, null);
-		request = new MockHttpServletRequest();
-		webRequest = new ServletWebRequest(request);
-		RequestContextHolder.setRequestAttributes(webRequest);
-	}
-	
-	@After
-	public void teardown() {
-		RequestContextHolder.resetRequestAttributes();
+		this.request = new MockHttpServletRequest();
 	}
 	
 	@Test
@@ -67,7 +51,7 @@ public class ServletRequestDataBinderFactoryTests {
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 		
 		TestBean target = new TestBean();
-		WebDataBinder binder = binderFactory.createBinder(webRequest, target, "");
+		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
 		((ServletRequestDataBinder) binder).bind(request);
 
 		assertEquals("nameValue", target.getName());
@@ -75,7 +59,7 @@ public class ServletRequestDataBinderFactoryTests {
 	}
 
 	@Test
-	public void requestParamsOverrideUriTemplateVars() throws Exception {
+	public void uriTemplateVarAndRequestParam() throws Exception {
 		request.addParameter("age", "35");
 		
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
@@ -84,17 +68,17 @@ public class ServletRequestDataBinderFactoryTests {
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 		
 		TestBean target = new TestBean();
-		WebDataBinder binder = binderFactory.createBinder(webRequest, target, "");
+		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
 		((ServletRequestDataBinder) binder).bind(request);
 
 		assertEquals("nameValue", target.getName());
-		assertEquals(35, target.getAge());
+		assertEquals(25, target.getAge());
 	}
 
 	@Test
 	public void noUriTemplateVars() throws Exception {
 		TestBean target = new TestBean();
-		WebDataBinder binder = binderFactory.createBinder(webRequest, target, "");
+		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
 		((ServletRequestDataBinder) binder).bind(request);
 
 		assertEquals(null, target.getName());
