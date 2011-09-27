@@ -656,7 +656,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * This implementation attempts to query the FactoryBean's generic parameter metadata
-	 * if present to determin the object type. If not present, i.e. the FactoryBean is
+	 * if present to determine the object type. If not present, i.e. the FactoryBean is
 	 * declared as a raw type, checks the FactoryBean's <code>getObjectType</code> method
 	 * on a plain instance of the FactoryBean, without bean properties applied yet.
 	 * If this doesn't return a type yet, a full creation of the FactoryBean is
