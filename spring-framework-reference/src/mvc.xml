@@ -1607,9 +1607,8 @@ public String save(@ModelAttribute("account") Account account) {
 
 		<para>In this example the name of the model attribute (i.e. "account") 
 		matches the name of a URI template variable. If you register 
-		<classname>Converter&lt;String, Account&gt;</classname>
-		(or <classname>PropertyEditor</classname>) that can turn the 
-		<literal>String</literal>-based account into an <classname>Account</classname>
+		<classname>Converter&lt;String, Account&gt;</classname> that can turn the 
+		<literal>String</literal> account value into an <classname>Account</classname>
 		instance, then the above example will work without the need for an
 		<interfacename>@ModelAttribute</interfacename> method.</para>
         

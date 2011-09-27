@@ -99,6 +99,14 @@ public class InitBinderDataBinderFactoryTests {
 		assertNull(dataBinder.getDisallowedFields());
 	}
 	
+	@Test
+	public void createBinderNullAttrName() throws Exception {
+		WebDataBinderFactory factory = createBinderFactory("initBinderWithAttributeName", WebDataBinder.class);
+		WebDataBinder dataBinder = factory.createBinder(webRequest, null, null);
+		
+		assertNull(dataBinder.getDisallowedFields());
+	}
+	
 	@Test(expected=IllegalStateException.class)
 	public void returnValueNotExpected() throws Exception {
 		WebDataBinderFactory factory = createBinderFactory("initBinderReturnValue", WebDataBinder.class);
