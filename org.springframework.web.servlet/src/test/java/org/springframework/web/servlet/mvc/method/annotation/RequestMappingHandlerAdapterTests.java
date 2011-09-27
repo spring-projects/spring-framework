@@ -86,9 +86,9 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void cacheControlWithoutSessionAttributes() throws Exception {
 		HandlerMethod handlerMethod = handlerMethod(new SimpleController(), "handle");
-		handlerAdapter.afterPropertiesSet();
-		handlerAdapter.setCacheSeconds(100);
-		handlerAdapter.handle(request, response, handlerMethod);
+		this.handlerAdapter.afterPropertiesSet();
+		this.handlerAdapter.setCacheSeconds(100);
+		this.handlerAdapter.handle(this.request, this.response, handlerMethod);
 
 		assertTrue(response.getHeader("Cache-Control").toString().contains("max-age"));
 	}
@@ -96,11 +96,11 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void cacheControlWithSessionAttributes() throws Exception {
 		SessionAttributeController handler = new SessionAttributeController();
-		handlerAdapter.afterPropertiesSet();
-		handlerAdapter.setCacheSeconds(100);
-		handlerAdapter.handle(request, response, handlerMethod(handler, "handle"));
+		this.handlerAdapter.afterPropertiesSet();
+		this.handlerAdapter.setCacheSeconds(100);
+		this.handlerAdapter.handle(this.request, this.response, handlerMethod(handler, "handle"));
 
-		assertEquals("no-cache", response.getHeader("Cache-Control"));
+		assertEquals("no-cache", this.response.getHeader("Cache-Control"));
 	}
 
 	@Test
@@ -109,15 +109,15 @@ public class RequestMappingHandlerAdapterTests {
 		HandlerMethodArgumentResolver modelResolver = new ModelMethodProcessor();
 		HandlerMethodReturnValueHandler viewHandler = new ViewNameMethodReturnValueHandler();
 		
-		handlerAdapter.setArgumentResolvers(Arrays.asList(redirectAttributesResolver, modelResolver));
-		handlerAdapter.setReturnValueHandlers(Arrays.asList(viewHandler));
-		handlerAdapter.setIgnoreDefaultModelOnRedirect(true);
-		handlerAdapter.afterPropertiesSet();
+		this.handlerAdapter.setArgumentResolvers(Arrays.asList(redirectAttributesResolver, modelResolver));
+		this.handlerAdapter.setReturnValueHandlers(Arrays.asList(viewHandler));
+		this.handlerAdapter.setIgnoreDefaultModelOnRedirect(true);
+		this.handlerAdapter.afterPropertiesSet();
 
-		request.setAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
+		this.request.setAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
 
 		HandlerMethod handlerMethod = handlerMethod(new RedirectAttributeController(), "handle", Model.class);
-		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
+		ModelAndView mav = this.handlerAdapter.handle(request, response, handlerMethod);
 
 		assertTrue("Without RedirectAttributes arg, model should be empty", mav.getModel().isEmpty());
 	}
@@ -144,8 +144,8 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void setInitBinderArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
-		handlerAdapter.setInitBinderArgumentResolvers(Arrays.<HandlerMethodArgumentResolver>asList(resolver));
-		handlerAdapter.afterPropertiesSet();
+		this.handlerAdapter.setInitBinderArgumentResolvers(Arrays.<HandlerMethodArgumentResolver>asList(resolver));
+		this.handlerAdapter.afterPropertiesSet();
 		
 		assertMethodProcessorCount(RESOLVER_COUNT, 1, HANDLER_COUNT);
 	}
@@ -153,8 +153,8 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void setCustomReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ViewNameMethodReturnValueHandler();
-		handlerAdapter.setCustomReturnValueHandlers(Arrays.asList(handler));
-		handlerAdapter.afterPropertiesSet();
+		this.handlerAdapter.setCustomReturnValueHandlers(Arrays.asList(handler));
+		this.handlerAdapter.afterPropertiesSet();
 
 		assertTrue(this.handlerAdapter.getReturnValueHandlers().getHandlers().contains(handler));
 		assertMethodProcessorCount(RESOLVER_COUNT, INIT_BINDER_RESOLVER_COUNT, HANDLER_COUNT + 1);
@@ -163,8 +163,8 @@ public class RequestMappingHandlerAdapterTests {
 	@Test
 	public void setReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ModelMethodProcessor();
-		handlerAdapter.setReturnValueHandlers(Arrays.asList(handler));
-		handlerAdapter.afterPropertiesSet();
+		this.handlerAdapter.setReturnValueHandlers(Arrays.asList(handler));
+		this.handlerAdapter.afterPropertiesSet();
 
 		assertMethodProcessorCount(RESOLVER_COUNT, INIT_BINDER_RESOLVER_COUNT, 1);
 	}

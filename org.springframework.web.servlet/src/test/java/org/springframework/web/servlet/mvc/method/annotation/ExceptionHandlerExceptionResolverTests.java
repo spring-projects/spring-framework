@@ -25,8 +25,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.util.Arrays;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -35,7 +37,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.support.ModelMethodProcessor;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.ViewNameMethodReturnValueHandler;
 
 /**
  * Test fixture with {@link ExceptionHandlerExceptionResolver}.
@@ -46,39 +53,92 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class ExceptionHandlerExceptionResolverTests {
 
+	private static int RESOLVER_COUNT;
+	
+	private static int HANDLER_COUNT;
+
 	private ExceptionHandlerExceptionResolver resolver;
 
 	private MockHttpServletRequest request;
 
 	private MockHttpServletResponse response;
 
+	@BeforeClass
+	public static void setupOnce() {
+		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
+		resolver.afterPropertiesSet();
+		RESOLVER_COUNT = resolver.getArgumentResolvers().getResolvers().size();
+		HANDLER_COUNT = resolver.getReturnValueHandlers().getHandlers().size();
+	}
+	
 	@Before
 	public void setUp() throws Exception {
 		this.resolver = new ExceptionHandlerExceptionResolver();
-		this.resolver.afterPropertiesSet();
 		this.request = new MockHttpServletRequest("GET", "/");
 		this.response = new MockHttpServletResponse();
 	}
 
 	@Test
-	public void nullHandlerMethod() {
-		ModelAndView mav = this.resolver.resolveException(this.request, this.response, null, null);
-		assertNull(mav);
+	public void nullHandler() {
+		Object handler = null;
+		this.resolver.afterPropertiesSet();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handler, null);
+		assertNull("Exception can be resolved only if there is a HandlerMethod", mav);
+	}
+
+	@Test
+	public void setCustomArgumentResolvers() throws Exception {
+		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
+		this.resolver.setCustomArgumentResolvers(Arrays.asList(resolver));
+		this.resolver.afterPropertiesSet();
+		
+		assertTrue(this.resolver.getArgumentResolvers().getResolvers().contains(resolver));
+		assertMethodProcessorCount(RESOLVER_COUNT + 1, HANDLER_COUNT);
+	}
+
+	@Test
+	public void setArgumentResolvers() throws Exception {
+		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
+		this.resolver.setArgumentResolvers(Arrays.asList(resolver));
+		this.resolver.afterPropertiesSet();
+
+		assertMethodProcessorCount(1, HANDLER_COUNT);
+	}
+
+	@Test
+	public void setCustomReturnValueHandlers() {
+		HandlerMethodReturnValueHandler handler = new ViewNameMethodReturnValueHandler();
+		this.resolver.setCustomReturnValueHandlers(Arrays.asList(handler));
+		this.resolver.afterPropertiesSet();
+
+		assertTrue(this.resolver.getReturnValueHandlers().getHandlers().contains(handler));
+		assertMethodProcessorCount(RESOLVER_COUNT, HANDLER_COUNT + 1);
 	}
 	
 	@Test
-	public void noExceptionHandlerMethod() throws NoSuchMethodException {
-		Exception exception = new NullPointerException();
-		HandlerMethod handlerMethod = new HandlerMethod(new IoExceptionController(), "handle");
-		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, exception);
+	public void setReturnValueHandlers() {
+		HandlerMethodReturnValueHandler handler = new ModelMethodProcessor();
+		this.resolver.setReturnValueHandlers(Arrays.asList(handler));
+		this.resolver.afterPropertiesSet();
 
-		assertNull(mav);
+		assertMethodProcessorCount(RESOLVER_COUNT, 1);
 	}
 
 	@Test
-	public void modelAndViewController() throws NoSuchMethodException {
+	public void resolveNoExceptionHandlerForException() throws NoSuchMethodException {
+		Exception npe = new NullPointerException();
+		HandlerMethod handlerMethod = new HandlerMethod(new IoExceptionController(), "handle");
+		this.resolver.afterPropertiesSet();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, npe);
+
+		assertNull("NPE should not have been handled", mav);
+	}
+
+	@Test
+	public void resolveExceptionModelAndView() throws NoSuchMethodException {
 		IllegalArgumentException ex = new IllegalArgumentException("Bad argument");
 		HandlerMethod handlerMethod = new HandlerMethod(new ModelAndViewController(), "handle");
+		this.resolver.afterPropertiesSet();
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
 
 		assertNotNull(mav);
@@ -86,27 +146,35 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertEquals("errorView", mav.getViewName());
 		assertEquals("Bad argument", mav.getModel().get("detail"));
 	}
-	
+
 	@Test
-	public void noModelAndView() throws UnsupportedEncodingException, NoSuchMethodException {
+	public void resolveExceptionResponseBody() throws UnsupportedEncodingException, NoSuchMethodException {
 		IllegalArgumentException ex = new IllegalArgumentException();
-		HandlerMethod handlerMethod = new HandlerMethod(new NoModelAndViewController(), "handle");
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		this.resolver.afterPropertiesSet();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+		
+		assertNotNull(mav);
+		assertTrue(mav.isEmpty());
+		assertEquals("IllegalArgumentException", this.response.getContentAsString());
+	}
+
+	@Test
+	public void resolveExceptionResponseWriter() throws UnsupportedEncodingException, NoSuchMethodException {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseWriterController(), "handle");
+		this.resolver.afterPropertiesSet();
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
 
 		assertNotNull(mav);
 		assertTrue(mav.isEmpty());
 		assertEquals("IllegalArgumentException", this.response.getContentAsString());
 	}
+
 	
-	@Test
-	public void responseBody() throws UnsupportedEncodingException, NoSuchMethodException {
-		IllegalArgumentException ex = new IllegalArgumentException();
-		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
-		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
-		
-		assertNotNull(mav);
-		assertTrue(mav.isEmpty());
-		assertEquals("IllegalArgumentException", this.response.getContentAsString());
+	private void assertMethodProcessorCount(int resolverCount, int handlerCount) {
+		assertEquals(resolverCount, this.resolver.getArgumentResolvers().getResolvers().size());
+		assertEquals(handlerCount, this.resolver.getReturnValueHandlers().getHandlers().size());
 	}
 
 	@Controller
@@ -121,12 +189,12 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 	
 	@Controller
-	static class NoModelAndViewController {
+	static class ResponseWriterController {
 
 		public void handle() {}
 
 		@ExceptionHandler
-		public void handle(Exception ex, Writer writer) throws IOException {
+		public void handleException(Exception ex, Writer writer) throws IOException {
 			writer.write(ClassUtils.getShortName(ex.getClass()));
 		}
 	}
@@ -138,7 +206,7 @@ public class ExceptionHandlerExceptionResolverTests {
 
 		@ExceptionHandler
 		@ResponseBody
-		public String handle(Exception ex) {
+		public String handleException(Exception ex) {
 			return ClassUtils.getShortName(ex.getClass());
 		}
 	}
@@ -146,8 +214,10 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Controller
 	static class IoExceptionController {
 
+		public void handle() {}
+
 		@ExceptionHandler(value=IOException.class)
-		public void handle() {
+		public void handleException() {
 		}
 	}
 
