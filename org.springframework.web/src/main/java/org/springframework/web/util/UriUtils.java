@@ -247,6 +247,7 @@ public abstract class UriUtils {
 	 * @param source the source string
 	 * @param encoding the encoding
 	 * @return the decoded URI
+	 * @throws IllegalArgumentException when the given source contains invalid encoded sequences
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 * @see java.net.URLDecoder#decode(String, String)
 	 */
@@ -264,6 +265,9 @@ public abstract class UriUtils {
 					char hex2 = source.charAt(i + 2);
 					int u = Character.digit(hex1, 16);
 					int l = Character.digit(hex2, 16);
+					if (u == -1 || l == -1) {
+						throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
+					}
 					bos.write((char) ((u << 4) + l));
 					i += 2;
 					changed = true;
