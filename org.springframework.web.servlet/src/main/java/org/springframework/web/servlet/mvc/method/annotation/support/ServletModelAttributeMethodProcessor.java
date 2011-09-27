@@ -36,7 +36,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataB
  * A Servlet-specific {@link ModelAttributeMethodProcessor} that applies data
  * binding through a WebDataBinder of type {@link ServletRequestDataBinder}. 
  * 
- * <p>Also adds a fall-back strategy to instantiate a model attribute from a 
+ * <p>Adds a fall-back strategy to instantiate a model attribute from a 
  * URI template variable combined with type conversion, if the model attribute 
  * name matches to a URI template variable name.
  *
@@ -57,28 +57,20 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 
 	/**
 	 * Add a fall-back strategy to instantiate the model attribute from a URI 
-	 * template variable and type conversion, assuming the model attribute 
-	 * name matches to a URI variable name. If instantiation fails for _any_ 
-	 * reason, the call is delegated to the base class.
+	 * template variable with type conversion, if the model attribute name 
+	 * matches to a URI variable name.
 	 */
 	@Override
 	protected Object createAttribute(String attributeName, 
 									 MethodParameter parameter, 
 									 WebDataBinderFactory binderFactory, 
 									 NativeWebRequest request) throws Exception {
-
+		
 		Map<String, String> uriVariables = getUriTemplateVariables(request);
-
+		
 		if (uriVariables.containsKey(attributeName)) {
-			try {
-				DataBinder binder = binderFactory.createBinder(request, null, attributeName);
-				return binder.convertIfNecessary(uriVariables.get(attributeName), parameter.getParameterType());
-
-			} catch (Exception exception) {
-				logger.info("Model attribute name '" + attributeName + "' matches to a URI template variable name "
-						+ "but the variable String value could not be converted into an attribute instance: "
-						+ exception.getMessage());
-			}
+			DataBinder binder = binderFactory.createBinder(request, null, attributeName);
+			return binder.convertIfNecessary(uriVariables.get(attributeName), parameter.getParameterType());
 		}
 		
 		return super.createAttribute(attributeName, parameter, binderFactory, request);
@@ -90,7 +82,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 		Map<String, String> uriTemplateVars = 
 			(Map<String, String>) request.getAttribute(
 					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-
+		
 		return (uriTemplateVars != null) ? uriTemplateVars : Collections.<String, String>emptyMap();
 	}
 
