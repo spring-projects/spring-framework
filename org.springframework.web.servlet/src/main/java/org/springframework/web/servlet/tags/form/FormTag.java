@@ -345,10 +345,11 @@ public class FormTag extends AbstractHtmlElementTag {
 		tagWriter.forceBlock();
 
 		if (!isMethodBrowserSupported(getMethod())) {
+			String inputType = "hidden";
 			tagWriter.startTag(INPUT_TAG);
-			writeOptionalAttribute(tagWriter, TYPE_ATTRIBUTE, "hidden");
+			writeOptionalAttribute(tagWriter, TYPE_ATTRIBUTE, inputType);
 			writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, getMethodParameter());
-			writeOptionalAttribute(tagWriter, VALUE_ATTRIBUTE, getMethod());
+			writeOptionalAttribute(tagWriter, VALUE_ATTRIBUTE, processFieldValue(getName(), getMethod(), inputType));
 			tagWriter.endTag();
 		}
 
