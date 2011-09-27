@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 		HttpStatus statusCode = response.getStatusCode();
 		MediaType contentType = response.getHeaders().getContentType();
 		Charset charset = contentType != null ? contentType.getCharSet() : null;
-		byte[] body = FileCopyUtils.copyToByteArray(response.getBody());
+		byte[] body = getResponseBody(response);
 		switch (statusCode.series()) {
 			case CLIENT_ERROR:
 				throw new HttpClientErrorException(statusCode, response.getStatusText(), body, charset);
@@ -77,6 +77,15 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 				throw new HttpServerErrorException(statusCode, response.getStatusText(), body, charset);
 			default:
 				throw new RestClientException("Unknown status code [" + statusCode + "]");
+		}
+	}
+
+	private byte[] getResponseBody(ClientHttpResponse response) {
+		try {
+			return FileCopyUtils.copyToByteArray(response.getBody());
+		}
+		catch (IOException e) {
+			return new byte[0];
 		}
 	}
 
