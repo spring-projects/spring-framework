@@ -27,8 +27,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -60,44 +62,72 @@ public class SerlvetModelAttributeMethodProcessorTests {
 
 	@Before
 	public void setUp() throws Exception {
-		processor = new ServletModelAttributeMethodProcessor(false);
+		this.processor = new ServletModelAttributeMethodProcessor(false);
 
 		Method method = getClass().getDeclaredMethod("modelAttribute", 
 				TestBean.class, TestBeanWithoutStringConstructor.class);
 		
-		testBeanModelAttr = new MethodParameter(method, 0);
-		testBeanWithoutStringConstructorModelAttr = new MethodParameter(method, 1);
+		this.testBeanModelAttr = new MethodParameter(method, 0);
+		this.testBeanWithoutStringConstructorModelAttr = new MethodParameter(method, 1);
 		
-		binderFactory = new ServletRequestDataBinderFactory(null, null);
-		mavContainer = new ModelAndViewContainer();
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
 		
-		request = new MockHttpServletRequest();
-		webRequest = new ServletWebRequest(request);
+		this.binderFactory = new ServletRequestDataBinderFactory(null, initializer );
+		this.mavContainer = new ModelAndViewContainer();
+		
+		this.request = new MockHttpServletRequest();
+		this.webRequest = new ServletWebRequest(request);
 	}
 
 	@Test
-	public void createAttributeViaPathVariable() throws Exception {
+	public void createAttributeUriTemplateVar() throws Exception {
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
-		uriTemplateVars.put("testBean1", "pathy");
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+		uriTemplateVars.put("testBean1", "Patty");
+		this.request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		// Type conversion from "pathy" to TestBean via TestBean(String) constructor
+		// Type conversion from "Patty" to TestBean via TestBean(String) constructor
 
 		TestBean testBean = 
-			(TestBean) processor.resolveArgument(testBeanModelAttr, mavContainer, webRequest, binderFactory);
+			(TestBean) this.processor.resolveArgument(
+					this.testBeanModelAttr, this.mavContainer, this.webRequest, this.binderFactory);
 		
-		assertEquals("pathy", testBean.getName());
+		assertEquals("Patty", testBean.getName());
 	}
 
 	@Test
-	public void createAttributeAfterPathVariableConversionError() throws Exception {
+	public void createAttributeUriTemplateVarCannotConvert() throws Exception {
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
-		uriTemplateVars.put("testBean1", "pathy");
+		uriTemplateVars.put("testBean2", "Patty");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
 		TestBeanWithoutStringConstructor testBean = 
-			(TestBeanWithoutStringConstructor) processor.resolveArgument(
-				testBeanWithoutStringConstructorModelAttr, mavContainer, webRequest, binderFactory);
+			(TestBeanWithoutStringConstructor) this.processor.resolveArgument(
+					this.testBeanWithoutStringConstructorModelAttr, this.mavContainer, this.webRequest, this.binderFactory);
+		
+		assertNotNull(testBean);
+	}
+
+	@Test
+	public void createAttributeRequestParameter() throws Exception {
+		this.request.addParameter("testBean1", "Patty");
+
+		// Type conversion from "Patty" to TestBean via TestBean(String) constructor
+
+		TestBean testBean = 
+			(TestBean) this.processor.resolveArgument(
+					this.testBeanModelAttr, this.mavContainer, this.webRequest, this.binderFactory);
+		
+		assertEquals("Patty", testBean.getName());
+	}
+
+	@Test
+	public void createAttributeRequestParameterCannotConvert() throws Exception {
+		this.request.addParameter("testBean1", "Patty");
+
+		TestBeanWithoutStringConstructor testBean = 
+			(TestBeanWithoutStringConstructor) this.processor.resolveArgument(
+					this.testBeanWithoutStringConstructorModelAttr, this.mavContainer, this.webRequest, this.binderFactory);
 		
 		assertNotNull(testBean);
 	}
