@@ -9,10 +9,11 @@
 
     <para>Testing is an integral part of enterprise software development. This
     chapter focuses on the value-add of the IoC principle to <link
-    linkend="unit-testing">unit testing</link> and on the benefits of the Spring
-    Framework's support for <link linkend="integration-testing">integration
-    testing</link>. <emphasis>(A thorough treatment of testing in the enterprise
-    is beyond the scope of this reference manual.)</emphasis></para>
+    linkend="unit-testing">unit testing</link> and on the benefits of the
+    Spring Framework's support for <link
+    linkend="integration-testing">integration testing</link>. <emphasis>(A
+    thorough treatment of testing in the enterprise is beyond the scope of
+    this reference manual.)</emphasis></para>
   </section>
 
   <section id="unit-testing">
@@ -252,24 +253,26 @@
         every test fixture leads to slower overall test runs that could reduce
         productivity.</para>
 
-        <!--TODO Modify the following paragraph regarding 3.1's support for @Configuration classes.-->
-
-        <para>Test classes provide an array containing the resource locations
-        of XML configuration metadata — typically in the classpath — that is
-        used to configure the application. These locations are the same as or
-        similar to the list of configuration locations specified in
+        <para>Test classes can provide either an array containing the resource
+        locations of XML configuration metadata — typically in the classpath —
+        or an array containing <interfacename>@Configuration</interfacename>
+        classes that is used to configure the application. These locations or
+        classes are the same as or similar to those specified in
         <literal>web.xml</literal> or other deployment configuration
         files.</para>
 
         <para>By default, once loaded, the configured
         <interfacename>ApplicationContext</interfacename> is reused for each
         test. Thus the setup cost is incurred only once (per test suite), and
-        subsequent test execution is much faster. In the unlikely case that a
-        test corrupts the application context and requires reloading — for
-        example, by modifying a bean definition or the state of an application
-        object — the TestContext framework can be configured to reload the
-        configuration and rebuild the application context before executing the
-        next test.</para>
+        subsequent test execution is much faster. In this context, the term
+        <emphasis>test suite</emphasis> means all tests run in the same JVM —
+        for example, all tests run from an Ant or Maven build for a given
+        project or module. In the unlikely case that a test corrupts the
+        application context and requires reloading — for example, by modifying
+        a bean definition or the state of an application object — the
+        TestContext framework can be configured to reload the configuration
+        and rebuild the application context before executing the next
+        test.</para>
 
         <para>See context management and caching with the <link
         linkend="testcontext-ctx-management">TestContext
@@ -292,9 +295,8 @@
 
         <para>As an example, consider the scenario where we have a class,
         <classname>HibernateTitleRepository</classname>, that performs data
-        access logic for say, the <classname>Title</classname> domain object.
-        We want to write integration tests that test all of the following
-        areas:</para>
+        access logic for a <classname>Title</classname> domain entity. We want
+        to write integration tests that test the following areas:</para>
 
         <itemizedlist>
           <listitem>
@@ -334,13 +336,14 @@
         framework will create and roll back a transaction for each test. You
         simply write code that can assume the existence of a transaction. If
         you call transactionally proxied objects in your tests, they will
-        behave correctly, according to their transactional semantics. In
-        addition, if test methods delete the contents of selected tables while
-        running within a transaction, the transaction will roll back by
-        default, and the database will return to its state prior to execution
-        of the test. Transactional support is provided to your test class via
-        a <classname>PlatformTransactionManager</classname> bean defined in
-        the test's application context.</para>
+        behave correctly, according to their configured transactional
+        semantics. In addition, if test methods delete the contents of
+        selected tables while running within a transaction, the transaction
+        will roll back by default, and the database will return to its state
+        prior to execution of the test. Transactional support is provided to
+        your test class via a
+        <classname>PlatformTransactionManager</classname> bean defined in the
+        test's application context.</para>
 
         <para>If you want a transaction to commit — unusual, but occasionally
         useful when you want a particular test to populate or modify the
@@ -399,8 +402,8 @@
 
       <para>The <literal>org.springframework.test.jdbc</literal> package
       contains <classname>SimpleJdbcTestUtils</classname>, which is a
-      Java-5-based collection of JDBC related utility functions intended to
-      simplify standard database testing scenarios. <emphasis>Note that <link
+      collection of JDBC related utility functions intended to simplify
+      standard database testing scenarios. <emphasis>Note that <link
       linkend="testcontext-support-classes-junit4"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>
       and <link
       linkend="testcontext-support-classes-testng"><classname>AbstractTransactionalTestNGSpringContextTests</classname></link>
@@ -424,14 +427,17 @@
 
           <para>Defines class-level metadata that is used to determine how to
           load and configure an
-          <interfacename>ApplicationContext</interfacename>. Specifically,
-          <interfacename>@ContextConfiguration</interfacename> defines the
-          application context resource <literal>locations</literal> to load as
-          well as the <interfacename>ContextLoader</interfacename> strategy to
-          use for loading the context. Note, however, that you typically do
-          not need to explicitly configure the loader since the default loader
-          supports either resource <varname>locations</varname> or
-          configuration <varname>classes</varname>.</para>
+          <interfacename>ApplicationContext</interfacename> for test classes.
+          Specifically, <interfacename>@ContextConfiguration</interfacename>
+          declares either the application context resource
+          <literal>locations</literal> or the
+          <interfacename>@Configuration</interfacename>
+          <varname>classes</varname> to load as well as the
+          <interfacename>ContextLoader</interfacename> strategy to use for
+          loading the context. Note, however, that you typically do not need
+          to explicitly configure the loader since the default loader supports
+          either resource <varname>locations</varname> or configuration
+          <varname>classes</varname>.</para>
 
           <programlisting language="java">@ContextConfiguration(locations="example/test-context.xml", loader=CustomContextLoader.class)
 public class CustomConfiguredApplicationContextTests {
