@@ -46,9 +46,10 @@
 
       <para>You cannot add advice to final methods when you use Spring MVC.
       For example, you cannot add advice to the
-      <literal>AbstractController.setSynchronizeOnSession()</literal> method. Refer to
-      <xref linkend="aop-understanding-aop-proxies" /> for more information on
-      AOP proxies and why you cannot add advice to final methods.</para>
+      <literal>AbstractController.setSynchronizeOnSession()</literal> method.
+      Refer to <xref linkend="aop-understanding-aop-proxies" /> for more
+      information on AOP proxies and why you cannot add advice to final
+      methods.</para>
     </sidebar>
 
     <para>In Spring Web MVC you can use any object as a command or
@@ -62,21 +63,21 @@
     business objects.</para>
 
     <para>Spring's view resolution is extremely flexible. A
-    <interfacename>Controller</interfacename> is typically responsible for preparing
-    a model <classname>Map</classname> with data and selecting a view name but it 
-    can also write directly to the response stream and complete the request. 
-    View name resolution is highly configurable through file extension or Accept header 
-    content type negotiation, through bean names, a properties file,
-    or even a custom <interfacename>ViewResolver</interfacename>
-    implementation. The model (the M in MVC) is a
-    <interfacename>Map</interfacename> interface, which allows for the
-    complete abstraction of the view technology. You can integrate directly with 
-    template based rendering technologies such as JSP, Velocity and Freemarker, 
-    or directly generate XML, JSON, Atom, and many other types of content. 
-    The model <interfacename>Map</interfacename> is simply transformed into an
-    appropriate format, such as JSP request attributes, a Velocity template
-    model.</para>
-    
+    <interfacename>Controller</interfacename> is typically responsible for
+    preparing a model <classname>Map</classname> with data and selecting a
+    view name but it can also write directly to the response stream and
+    complete the request. View name resolution is highly configurable through
+    file extension or Accept header content type negotiation, through bean
+    names, a properties file, or even a custom
+    <interfacename>ViewResolver</interfacename> implementation. The model (the
+    M in MVC) is a <interfacename>Map</interfacename> interface, which allows
+    for the complete abstraction of the view technology. You can integrate
+    directly with template based rendering technologies such as JSP, Velocity
+    and Freemarker, or directly generate XML, JSON, Atom, and many other types
+    of content. The model <interfacename>Map</interfacename> is simply
+    transformed into an appropriate format, such as JSP request attributes, a
+    Velocity template model.</para>
+
     <section id="mvc-features">
       <title>Features of Spring Web MVC<!--I moved Features of Spring Web MVC before Pluggability of other MVC implementations. You want to highlight your own imp. first.--></title>
 
@@ -90,10 +91,10 @@
 
       <itemizedlist>
         <listitem>
-          <para><emphasis>Clear separation of roles</emphasis>. Each role &mdash;
+          <para><emphasis>Clear separation of roles</emphasis>. Each role —
           controller, validator, command object, form object, model object,
           <classname>DispatcherServlet</classname>, handler mapping, view
-          resolver, and so on &mdash; can be fulfilled by a specialized
+          resolver, and so on — can be fulfilled by a specialized
           object.</para>
         </listitem>
 
@@ -214,7 +215,7 @@
     <title>The <classname>DispatcherServlet</classname></title>
 
     <para>Spring's web MVC framework is, like many other web MVC frameworks,
-    request-driven, designed around a central servlet that dispatches requests
+    request-driven, designed around a central Servlet that dispatches requests
     to controllers and offers other functionality that facilitates the
     development of web applications. Spring's
     <classname>DispatcherServlet</classname> however, does more than just
@@ -237,8 +238,8 @@
           <imagedata align="center" fileref="images/mvc.png" format="PNG" />
         </imageobject>
 
-        <caption><para>The request processing workflow in Spring Web MVC
-        (high level)</para></caption>
+        <caption><para>The request processing workflow in Spring Web MVC (high
+        level)</para></caption>
       </mediaobject></para>
 
     <para>The <classname>DispatcherServlet</classname> is an actual
@@ -247,7 +248,7 @@
     the <literal>web.xml</literal> of your web application. You need to map
     requests that you want the <classname>DispatcherServlet</classname> to
     handle, by using a URL mapping in the same <literal>web.xml</literal>
-    file. This is standard J2EE servlet configuration; the following example
+    file. This is standard J2EE Servlet configuration; the following example
     shows such a <classname>DispatcherServlet</classname> declaration and
     mapping:</para>
 
@@ -267,9 +268,10 @@
 &lt;/web-app&gt;</programlisting>
 
     <para>In the preceding example, all requests startig with
-    <literal>/example</literal> will be handled by the <classname>DispatcherServlet</classname>
-    instance named <literal>example</literal>. This is only the first step in
-    setting up Spring Web MVC. <!--The discussion below is a little vague about what you're doing, when you do it, and what you're accomplishing. --><!-- Is the next step shown in the next example screen?-->You
+    <literal>/example</literal> will be handled by the
+    <classname>DispatcherServlet</classname> instance named
+    <literal>example</literal>. This is only the first step in setting up
+    Spring Web MVC. <!--The discussion below is a little vague about what you're doing, when you do it, and what you're accomplishing. --><!-- Is the next step shown in the next example screen?-->You
     now need to configure the various beans used by the Spring Web MVC
     framework (over and above the <classname>DispatcherServlet</classname>
     itself).<!--See previous sentence. Add info to indicate where you find info that tells you how to configure beans for MVC framework. --><!--Next paragraph, so what are you telling them to *do* here? --></para>
@@ -282,7 +284,7 @@
     the beans already defined in the root
     <interfacename>WebApplicationContext</interfacename>. These inherited
     beans can be overridden in the servlet-specific scope, and you can define
-    new scope-specific beans local to a given servlet instance.</para>
+    new scope-specific beans local to a given Servlet instance.</para>
 
     <para><mediaobject>
         <imageobject role="fo">
@@ -307,7 +309,7 @@
     with the same name in the global scope.</para>
 
     <para>Consider the following <classname>DispatcherServlet</classname>
-    servlet configuration (in the <literal>web.xml</literal> file):</para>
+    Servlet configuration (in the <literal>web.xml</literal> file):</para>
 
     <programlisting language="xml">&lt;web-app&gt;
 
@@ -324,12 +326,12 @@
 
 &lt;/web-app&gt;</programlisting>
 
-    <para>With the above servlet configuration in place, <!--Is this something you need to do (in above example)? -->you
+    <para>With the above Servlet configuration in place, <!--Is this something you need to do (in above example)? -->you
     will need to have a file called <literal>/WEB-INF/</literal><emphasis
     role="bold">golfing</emphasis><literal>-servlet.xml</literal> in your
     application; this file will contain all of your Spring Web MVC-specific
     components (beans). You can change the exact location of this
-    configuration file through a servlet initialization parameter (see below
+    configuration file through a Servlet initialization parameter (see below
     for details).</para>
 
     <!--See *where* for details? Give x-ref to section talks about how to change the location of the file through servlet init. param.-->
@@ -339,7 +341,7 @@
     that has some extra features necessary for web applications. It differs
     from a normal <interfacename>ApplicationContext</interfacename> in that it
     is capable of resolving themes (see <xref linkend="mvc-themeresolver" />),
-    and that it knows which servlet it is associated with (by having a link to
+    and that it knows which Servlet it is associated with (by having a link to
     the <interfacename>ServletContext</interfacename>). The
     <interfacename>WebApplicationContext</interfacename> is bound in the
     <interfacename>ServletContext</interfacename>, and by using static methods
@@ -451,6 +453,7 @@
         in the process to resolve the locale to use when processing the
         request (rendering the view, preparing data, and so on). If you do not
         need locale resolving, you do not need it.</para>
+
         <!--Reword 'if you don't need local resolving, you don't need to use it '. Are you saying locale resolving is optional? If you don't configure it, will this step occur?-->
       </listitem>
 
@@ -469,8 +472,8 @@
         inspected for multiparts; if multiparts are found, the request is
         wrapped in a <classname>MultipartHttpServletRequest</classname> for
         further processing by other elements in the process. See <xref
-        linkend="mvc-multipart" /> for further information about
-        multipart handling.</para>
+        linkend="mvc-multipart" /> for further information about multipart
+        handling.</para>
       </listitem>
 
       <listitem>
@@ -509,12 +512,13 @@
     client.</para>
 
     <para>You can customize individual
-    <classname>DispatcherServlet</classname> instances by adding servlet
+    <classname>DispatcherServlet</classname> instances by adding Servlet
     initialization parameters (<literal>init-param</literal> elements) to the
-    servlet declaration in the <literal>web.xml</literal> file. See the
+    Servlet declaration in the <literal>web.xml</literal> file. See the
     following table for the list of supported parameters.</para>
 
     <!--Reword above sentence to specify whether configuring parameters in table configures last-modification-date, or are they further -->
+
     <!--customization for some other purpose? If so, need to explain how you config last-modification-date-->
 
     <table id="mvc-disp-servlet-init-params-tbl">
@@ -540,7 +544,7 @@
 
             <entry>Class that implements
             <interfacename>WebApplicationContext</interfacename>, which
-            instantiates the context used by this servlet. By default, the
+            instantiates the context used by this Servlet. By default, the
             <classname>XmlWebApplicationContext</classname> is used.</entry>
           </row>
 
@@ -553,6 +557,7 @@
             (using a comma as a delimiter) to support multiple contexts. In
             case of multiple context locations with beans that are defined
             twice, the latest location takes precedence.</entry>
+
             <!-- MLP review -->
           </row>
 
@@ -589,10 +594,11 @@
     configure access to Servlet or Portlet facilities.</para>
 
     <tip>
-      <para>Available in the <link linkend="new-in-3.0-samples">samples repository</link>,
-      a number of web applications leverage the annotation support described in this section 
-      including <emphasis>MvcShowcase</emphasis>, <emphasis>MvcAjax</emphasis>,
-      <emphasis>MvcBasic</emphasis>, <emphasis>PetClinic</emphasis>, 
+      <para>Available in the <link linkend="new-in-3.0-samples">samples
+      repository</link>, a number of web applications leverage the annotation
+      support described in this section including
+      <emphasis>MvcShowcase</emphasis>, <emphasis>MvcAjax</emphasis>,
+      <emphasis>MvcBasic</emphasis>, <emphasis>PetClinic</emphasis>,
       <emphasis>PetCare</emphasis>, and others.</para>
 
       <!-- MLP Note removed reference to imagedb -->
@@ -613,14 +619,14 @@ public class HelloWorldController {
     <para>As you can see, the <interfacename>@Controller</interfacename> and
     <interfacename>@RequestMapping</interfacename> annotations allow flexible
     method names and signatures. In this particular example the method accepts
-    a <classname>Model</classname> and returns a view name as a 
-    <classname>String</classname>, but various other method parameters and 
-    return values can be used as explained later in this section. 
-    <interfacename>@Controller</interfacename> and 
-    <interfacename>@RequestMapping</interfacename> and a number of other 
-    annotations form the basis for the Spring MVC implementation. 
-    This section documents these annotations and
-    how they are most commonly used in a Servlet environment.</para>
+    a <classname>Model</classname> and returns a view name as a
+    <classname>String</classname>, but various other method parameters and
+    return values can be used as explained later in this section.
+    <interfacename>@Controller</interfacename> and
+    <interfacename>@RequestMapping</interfacename> and a number of other
+    annotations form the basis for the Spring MVC implementation. This section
+    documents these annotations and how they are most commonly used in a
+    Servlet environment.</para>
 
     <section id="mvc-ann-controller">
       <title>Defining a controller with
@@ -644,7 +650,9 @@ public class HelloWorldController {
       for autodetection, aligned with Spring general support for detecting
       component classes in the classpath and auto-registering bean definitions
       for them.</para>
+
       <!-- MLP Bev.changed to 'also supports autodetection -->
+
       <para>To enable autodetection of such annotated controllers, you add
       component scanning to your configuration. Use the
       <emphasis>spring-context</emphasis> schema as shown in the following XML
@@ -663,10 +671,9 @@ public class HelloWorldController {
 
     &lt;context:component-scan base-package="org.springframework.samples.petclinic.web"/&gt;
 
-    <lineannotation>// ...</lineannotation>
+    <lineannotation>&lt;!-- ... --&gt;</lineannotation>
 
 &lt;/beans&gt;</programlisting>
-
     </section>
 
     <section id="mvc-ann-requestmapping">
@@ -681,8 +688,9 @@ public class HelloWorldController {
       narrowing the primary mapping for a specific HTTP method request method
       ("GET", "POST", etc.) or an HTTP request parameter condition.</para>
 
-      <para>The following example from the <emphasis>Petcare</emphasis> sample shows 
-      a controller in a Spring MVC application that uses this annotation:</para>
+      <para>The following example from the <emphasis>Petcare</emphasis> sample
+      shows a controller in a Spring MVC application that uses this
+      annotation:</para>
 
       <programlisting language="java">@Controller
 <emphasis role="bold">@RequestMapping("/appointments")</emphasis>
@@ -740,9 +748,9 @@ public class AppointmentsController {
 
       <para>A <interfacename>@RequestMapping</interfacename> on the class
       level is not required. Without it, all paths are simply absolute, and
-      not relative. The following example from the <emphasis>PetClinic</emphasis> sample
-      application shows a multi-action controller using
-      <classname>@RequestMapping</classname>:</para>
+      not relative. The following example from the
+      <emphasis>PetClinic</emphasis> sample application shows a multi-action
+      controller using <classname>@RequestMapping</classname>:</para>
 
       <programlisting language="java">@Controller
 public class ClinicController {
@@ -766,80 +774,86 @@ public class ClinicController {
 }</programlisting>
 
       <tip>
-        <title>Using <interfacename>@RequestMapping</interfacename> On Interface Methods</title>
-		<para>
-		  A common pitfall when working with annotated controller classes
-		  happens when applying functionality that requires creating a proxy
-		  for the controller object (e.g.
-		  <interfacename>@Transactional</interfacename> methods). Usually you
-		  will introduce an interface for the controller in order to use JDK
-		  dynamic proxies. To make this work you must move the
-		  <interfacename>@RequestMapping</interfacename> annotations to the
-		  interface as well as the mapping mechanism can only "see" the interface
-		  exposed by the proxy. Alternatively, you could activate
-		  <code>proxy-target-class="true"</code> in the configuration for the
-		  functionality applied to the controller (in our transaction scenario
-		  in <code>&lt;tx:annotation-driven /&gt;</code>). Doing so indicates
-		  that CGLIB-based subclass proxies should be used instead of
-		  interface-based JDK proxies. For more information on various proxying
-		  mechanisms see <xref linkend="aop-proxying"/>.
-		</para>
-	  </tip>
+        <title>Using <interfacename>@RequestMapping</interfacename> On
+        Interface Methods</title>
+
+        <para>A common pitfall when working with annotated controller classes
+        happens when applying functionality that requires creating a proxy for
+        the controller object (e.g.
+        <interfacename>@Transactional</interfacename> methods). Usually you
+        will introduce an interface for the controller in order to use JDK
+        dynamic proxies. To make this work you must move the
+        <interfacename>@RequestMapping</interfacename> annotations to the
+        interface as well as the mapping mechanism can only "see" the
+        interface exposed by the proxy. Alternatively, you could activate
+        <code>proxy-target-class="true"</code> in the configuration for the
+        functionality applied to the controller (in our transaction scenario
+        in <code>&lt;tx:annotation-driven /&gt;</code>). Doing so indicates
+        that CGLIB-based subclass proxies should be used instead of
+        interface-based JDK proxies. For more information on various proxying
+        mechanisms see <xref linkend="aop-proxying" />.</para>
+      </tip>
 
       <section id="mvc-ann-requestmapping-uri-templates">
         <title>URI Template Patterns</title>
 
-        <para><emphasis>URI templates</emphasis> can be used for convenient access to selected
-        parts of a URL in a <interfacename>@RequestMapping</interfacename> method.</para>
+        <para><emphasis>URI templates</emphasis> can be used for convenient
+        access to selected parts of a URL in a
+        <interfacename>@RequestMapping</interfacename> method.</para>
 
-		<para>A URI Template is a URI-like string, containing one or more
-		variable names. When you substitute values for these variables, the
-		template becomes a URI. The <ulink
-		url="http://bitworking.org/projects/URI-Templates/">proposed RFC</ulink> for URI Templates
-		defines how a URI is parameterized. For example, the URI Template 
-		<code>http://www.example.com/users/{userId}</code> contains the variable 
-		<emphasis>userId</emphasis>. Assigning the value <emphasis>fred</emphasis> to the variable 
-		yields <code>http://www.example.com/users/fred</code>.</para>
-		
-        <para>In Spring MVC you can use the <interfacename>@PathVariable</interfacename> annotation on
-        a method argument to bind it to the value of a URI template variable:</para>
+        <para>A URI Template is a URI-like string, containing one or more
+        variable names. When you substitute values for these variables, the
+        template becomes a URI. The <ulink
+        url="http://bitworking.org/projects/URI-Templates/">proposed
+        RFC</ulink> for URI Templates defines how a URI is parameterized. For
+        example, the URI Template
+        <code>http://www.example.com/users/{userId}</code> contains the
+        variable <emphasis>userId</emphasis>. Assigning the value
+        <emphasis>fred</emphasis> to the variable yields
+        <code>http://www.example.com/users/fred</code>.</para>
+
+        <para>In Spring MVC you can use the
+        <interfacename>@PathVariable</interfacename> annotation on a method
+        argument to bind it to the value of a URI template variable:</para>
 
         <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
 public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ownerId, Model model) {
   Owner owner = ownerService.findOwner(ownerId);  
   model.addAttribute("owner", owner);  
   return "displayOwner"; 
-}
-</programlisting>
+}</programlisting>
 
         <para>The URI Template "<literal>/owners/{ownerId}</literal>"
         specifies the variable name <literal>ownerId</literal>. When the
-        controller handles this request, the value of <literal>ownerId</literal> 
-        is set to the value found in the appropriate part of the URI.
-        For example, when a request comes in for <code>/owners/fred</code>, the value 
-        of <literal>ownerId</literal> is <literal>fred</literal>.</para>
+        controller handles this request, the value of
+        <literal>ownerId</literal> is set to the value found in the
+        appropriate part of the URI. For example, when a request comes in for
+        <code>/owners/fred</code>, the value of <literal>ownerId</literal> is
+        <literal>fred</literal>.</para>
 
         <tip>
-	        <para>To process the @PathVariable annotation, Spring MVC needs to find the 
-	        matching URI template variable by name. You can specify it in the annotation:</para>
+          <para>To process the @PathVariable annotation, Spring MVC needs to
+          find the matching URI template variable by name. You can specify it
+          in the annotation:</para>
 
-	        <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
+          <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
 public String findOwner(<emphasis role="bold">@PathVariable</emphasis>("ownerId") String theOwner, Model model) {
   // implementation omitted
 }</programlisting>
 
-			<para>Or if the URI template variable name matches the method argument name 
-			you can omit that detail. As long as your code is not compiled without debugging
-	        information, Spring MVC will match the method argument name to the URI template variable name:</para>
-	
-	        <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
+          <para>Or if the URI template variable name matches the method
+          argument name you can omit that detail. As long as your code is not
+          compiled without debugging information, Spring MVC will match the
+          method argument name to the URI template variable name:</para>
+
+          <programlisting language="java">@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
 public String findOwner(<emphasis role="bold">@PathVariable</emphasis> String ownerId, Model model) {
   // implementation omitted
 }</programlisting>
-	
-		</tip>
+        </tip>
 
-        <para>A method can have any number of <interfacename>@PathVariable</interfacename> annotations:</para>
+        <para>A method can have any number of
+        <interfacename>@PathVariable</interfacename> annotations:</para>
 
         <programlisting language="java">@RequestMapping(value="/owners/{ownerId}/pets/{petId}", method=RequestMethod.GET)
 public String findPet(<emphasis role="bold">@PathVariable</emphasis> String ownerId, <emphasis
@@ -848,11 +862,11 @@ public String findPet(<emphasis role="bold">@PathVariable</emphasis> String owne
   Pet pet = owner.getPet(petId);  
   model.addAttribute("pet", pet);  
   return "displayPet"; 
-}
-</programlisting>
+}</programlisting>
 
-        <para>A URI template can be assembled from type and path level <emphasis>@RequestMapping</emphasis> 
-        annotations. As a result the <methodname>findPet()</methodname> method can be invoked with a URL 
+        <para>A URI template can be assembled from type and path level
+        <emphasis>@RequestMapping</emphasis> annotations. As a result the
+        <methodname>findPet()</methodname> method can be invoked with a URL
         such as <filename>/owners/42/pets/21</filename>.</para>
 
         <programlisting language="java">@Controller
@@ -863,165 +877,174 @@ public class RelativePathUriTemplateController {
   public void findPet(@PathVariable String ownerId, @PathVariable String petId, Model model) {    
     // implementation omitted
   }
-}
-</programlisting>
+}</programlisting>
 
-		<para>A <interfacename>@PathVariable</interfacename> argument can be of
-          <emphasis role="bold">any simple type</emphasis> such as int, long, Date, etc. 
-          Spring automatically converts to the appropriate type or throws a 
-          <classname>TypeMismatchException</classname> if it fails to do so. 
-          You can also register support for parsing additional data types.
-          See <xref linkend="mvc-ann-typeconversion"/> and <xref linkend="mvc-ann-webdatabinder" />.
-		</para>
-
+        <para>A <interfacename>@PathVariable</interfacename> argument can be
+        of <emphasis role="bold">any simple type</emphasis> such as int, long,
+        Date, etc. Spring automatically converts to the appropriate type or
+        throws a <classname>TypeMismatchException</classname> if it fails to
+        do so. You can also register support for parsing additional data
+        types. See <xref linkend="mvc-ann-typeconversion" /> and <xref
+        linkend="mvc-ann-webdatabinder" />.</para>
       </section>
 
       <section id="mvc-ann-requestmapping-uri-templates-regex">
         <title>URI Template Patterns with Regular Expressions</title>
-        
-        <para>Sometimes you need more precision in defining URI template variables. 
-        Consider the URL <code>"/spring-web/spring-web-3.0.5.jar"</code>.
-        How do you break it down into multiple parts?</para>
-        
-        <para>The <interfacename>@RequestMapping</interfacename> annotation supports the 
-        use of regular expressions in URI template variables.
-        The syntax is <code>{varName:regex}</code> where the first part defines the 
-        variable name and the second - the regular expression.For example:</para>
+
+        <para>Sometimes you need more precision in defining URI template
+        variables. Consider the URL
+        <code>"/spring-web/spring-web-3.0.5.jar"</code>. How do you break it
+        down into multiple parts?</para>
+
+        <para>The <interfacename>@RequestMapping</interfacename> annotation
+        supports the use of regular expressions in URI template variables. The
+        syntax is <code>{varName:regex}</code> where the first part defines
+        the variable name and the second - the regular expression.For
+        example:</para>
 
         <programlisting language="java">
 @RequestMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\d\.\d\.\d}.{extension:\.[a-z]}")
   public void handle(@PathVariable String version, @PathVariable String extension) {    
     // ...
   }
-}
-</programlisting>
-        
+}</programlisting>
       </section>
 
       <section id="mvc-ann-requestmapping-patterns">
         <title>Path Patterns</title>
-        
+
         <para>In addition to URI templates, the
         <interfacename>@RequestMapping</interfacename> annotation also
         supports Ant-style path patterns (for example,
         <filename>/myPath/*.do</filename>). A combination of URI templates and
         Ant-style globs is also supported (for example,
         <filename>/owners/*/pets/{petId}</filename>).</para>
-
-      </section>		
+      </section>
 
       <section id="mvc-ann-requestmapping-consumes">
         <title>Consumable Media Types</title>
-        <para>
-        	You can narrow the primary mapping by specifying a list of consumable media types. 
-        	The request will be matched only if the <emphasis>Content-Type</emphasis> request header 
-        	matches the specified media type. For example:
-        </para>
+
+        <para>You can narrow the primary mapping by specifying a list of
+        consumable media types. The request will be matched only if the
+        <emphasis>Content-Type</emphasis> request header matches the specified
+        media type. For example:</para>
+
         <programlisting language="java">@Controller
-@RequestMapping(value = "/pets", method = RequestMethod.POST, <emphasis role="bold">consumes="application/json"</emphasis>)
+@RequestMapping(value = "/pets", method = RequestMethod.POST, <emphasis
+            role="bold">consumes="application/json"</emphasis>)
 public void addPet(@RequestBody Pet pet, Model model) {    
     // implementation omitted
-}
-</programlisting>
-		<para>
-			Consumable media type expressions can also be negated as in <emphasis>!text/plain</emphasis> 
-			to match to all requests other than those with <emphasis>Content-Type</emphasis> of 
-			<emphasis>text/plain</emphasis>. 
-		</para>
-		<tip>
-			<para>The <emphasis>consumes</emphasis> condition is supported on the type and on the 
-			method level. Unlike most other conditions, when used at the type level, method-level 
-			consumable types override rather than extend type-level consumeable types.</para>
-		</tip>
-		 
+}</programlisting>
+
+        <para>Consumable media type expressions can also be negated as in
+        <emphasis>!text/plain</emphasis> to match to all requests other than
+        those with <emphasis>Content-Type</emphasis> of
+        <emphasis>text/plain</emphasis>.</para>
+
+        <tip>
+          <para>The <emphasis>consumes</emphasis> condition is supported on
+          the type and on the method level. Unlike most other conditions, when
+          used at the type level, method-level consumable types override
+          rather than extend type-level consumeable types.</para>
+        </tip>
       </section>
 
       <section id="mvc-ann-requestmapping-produces">
         <title>Producible Media Types</title>
-        <para>
-        	You can narrow the primary mapping by specifying a list of producible media types. 
-        	The request will be matched only if the <emphasis>Accept</emphasis> request header 
-        	matches one of these values. Furthermore, use of the <emphasis>produces</emphasis> 
-        	condition ensures the actual content type used to generate the response respects 
-        	the media types specified in the <emphasis>produces</emphasis> condition.
-        	For example:
-        </para>
+
+        <para>You can narrow the primary mapping by specifying a list of
+        producible media types. The request will be matched only if the
+        <emphasis>Accept</emphasis> request header matches one of these
+        values. Furthermore, use of the <emphasis>produces</emphasis>
+        condition ensures the actual content type used to generate the
+        response respects the media types specified in the
+        <emphasis>produces</emphasis> condition. For example:</para>
+
         <programlisting language="java">@Controller
-@RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET, <emphasis role="bold">produces="application/json"</emphasis>)
+@RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET, <emphasis
+            role="bold">produces="application/json"</emphasis>)
 @ResponseBody
 public Pet getPet(@PathVariable String petId, Model model) {    
     // implementation omitted
-}
-</programlisting>
-		<para>
-			Just like with <emphasis>consumes</emphasis>, producible media type
-			expressions can be negated as in <emphasis>!text/plain</emphasis> to match 
-			to all requests other than those with an <emphasis>Accept</emphasis> header value of 
-			<emphasis>text/plain</emphasis>. 
-        </para>
+}</programlisting>
+
+        <para>Just like with <emphasis>consumes</emphasis>, producible media
+        type expressions can be negated as in <emphasis>!text/plain</emphasis>
+        to match to all requests other than those with an
+        <emphasis>Accept</emphasis> header value of
+        <emphasis>text/plain</emphasis>.</para>
+
         <tip>
-        	<para>The <emphasis>produces</emphasis> condition is supported on the type and on the method level. 
-        	Unlike most other conditions, when used at the type level, method-level producible types
-			override rather than extend type-level producible types.</para>
+          <para>The <emphasis>produces</emphasis> condition is supported on
+          the type and on the method level. Unlike most other conditions, when
+          used at the type level, method-level producible types override
+          rather than extend type-level producible types.</para>
         </tip>
       </section>
 
       <section id="mvc-ann-requestmapping-params-and-headers">
         <title>Request Parameters and Header Values</title>
-        
-        <para>You can narrow request matching through request parameter conditions such as
-        <code>"myParam"</code>, <code>"!myParam"</code>, or <code>"myParam=myValue"</code>. 
-        The first two test for request parameter presense/absence and the third for a specific parameter value.
-        Here is an example with a request parameter value condition:</para>
-        
-        <programlisting language="java">@Controller
-@RequestMapping("/owners/{ownerId}")
-public class RelativePathUriTemplateController {
 
-  @RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET, <emphasis role="bold">params="myParam=myValue"</emphasis>)
-  public void findPet(@PathVariable String ownerId, @PathVariable String petId, Model model) {    
-    // implementation omitted
-  }
-}
-</programlisting>
-
-        <para>The same can be done to test for request header presence/absence or 
-        to match based on a specific request header value:</para>
+        <para>You can narrow request matching through request parameter
+        conditions such as <code>"myParam"</code>, <code>"!myParam"</code>, or
+        <code>"myParam=myValue"</code>. The first two test for request
+        parameter presense/absence and the third for a specific parameter
+        value. Here is an example with a request parameter value
+        condition:</para>
 
         <programlisting language="java">@Controller
 @RequestMapping("/owners/{ownerId}")
 public class RelativePathUriTemplateController {
 
-@RequestMapping(value = "/pets", method = RequestMethod.GET, <emphasis role="bold">headers="myHeader=myValue"</emphasis>)
+  @RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET, <emphasis
+            role="bold">params="myParam=myValue"</emphasis>)
   public void findPet(@PathVariable String ownerId, @PathVariable String petId, Model model) {    
     // implementation omitted
   }
 }</programlisting>
-		<tip>
-			<para>Although you can match to <emphasis>Content-Type</emphasis> and 
-			<emphasis>Accept</emphasis> header values using media type wildcards (for example
-			<emphasis>"content-type=text/*"</emphasis> will match to <emphasis>"text/plain"</emphasis>
-			and <emphasis>"text/html"</emphasis>), it is recommended to use the
-			<emphasis>consumes</emphasis> and <emphasis>produces</emphasis> conditions
-			respectively instead. They are intended specifically for that purpose.
-			</para>
-		</tip>
 
+        <para>The same can be done to test for request header presence/absence
+        or to match based on a specific request header value:</para>
+
+        <programlisting language="java">@Controller
+@RequestMapping("/owners/{ownerId}")
+public class RelativePathUriTemplateController {
+
+@RequestMapping(value = "/pets", method = RequestMethod.GET, <emphasis
+            role="bold">headers="myHeader=myValue"</emphasis>)
+  public void findPet(@PathVariable String ownerId, @PathVariable String petId, Model model) {    
+    // implementation omitted
+  }
+}</programlisting>
+
+        <tip>
+          <para>Although you can match to <emphasis>Content-Type</emphasis>
+          and <emphasis>Accept</emphasis> header values using media type wild
+          cards (for example <emphasis>"content-type=text/*"</emphasis> will
+          match to <emphasis>"text/plain"</emphasis> and
+          <emphasis>"text/html"</emphasis>), it is recommended to use the
+          <emphasis>consumes</emphasis> and <emphasis>produces</emphasis>
+          conditions respectively instead. They are intended specifically for
+          that purpose.</para>
+        </tip>
       </section>
     </section>
 
     <section id="mvc-ann-methods">
-      <title>Defining <interface>@RequestMapping</interface> handler methods</title>
-      <para>An <classname>@RequestMapping</classname> handler method can have a very flexible
-        signatures. The supported method arguments and return values are described in the
-        following section. Most arguments can be used in arbitrary order with the only 
-        exception of <classname>BindingResult</classname> arguments. This is described 
-        in the next section.
-      </para>
+      <title>Defining <interface>@RequestMapping</interface> handler
+      methods</title>
+
+      <para>An <classname>@RequestMapping</classname> handler method can have
+      a very flexible signatures. The supported method arguments and return
+      values are described in the following section. Most arguments can be
+      used in arbitrary order with the only exception of
+      <classname>BindingResult</classname> arguments. This is described in the
+      next section.</para>
+
       <section id="mvc-ann-arguments">
         <title>Supported method argument types</title>
-        <para>The following are the supported method arguments:
-          <itemizedlist>
+
+        <para>The following are the supported method arguments: <itemizedlist>
             <listitem>
               <para>Request or response objects (Servlet API). Choose any
               specific request or response type, for example
@@ -1095,31 +1118,32 @@ public class RelativePathUriTemplateController {
             </listitem>
 
             <listitem>
-              <para><interfacename>@RequestHeader</interfacename> annotated parameters
-              for access to specific Servlet request HTTP headers. Parameter
-              values are converted to the declared method argument
+              <para><interfacename>@RequestHeader</interfacename> annotated
+              parameters for access to specific Servlet request HTTP headers.
+              Parameter values are converted to the declared method argument
               type.</para>
             </listitem>
 
             <listitem>
-              <para><interfacename>@RequestBody</interfacename> annotated parameters
-              for access to the HTTP request body. Parameter values are
-              converted to the declared method argument type using
+              <para><interfacename>@RequestBody</interfacename> annotated
+              parameters for access to the HTTP request body. Parameter values
+              are converted to the declared method argument type using
               <interfacename>HttpMessageConverter</interfacename>s. See <xref
               linkend="mvc-ann-requestbody" />.</para>
             </listitem>
 
             <listitem>
-              <para><interfacename>@RequestPart</interfacename> annotated parameters
-              for access to the content of a "multipart/form-data" request part. 
-              See <xref linkend="mvc-multipart-forms-non-browsers" /> and
-              <xref linkend="mvc-multipart"/>.</para>
+              <para><interfacename>@RequestPart</interfacename> annotated
+              parameters for access to the content of a "multipart/form-data"
+              request part. See <xref
+              linkend="mvc-multipart-forms-non-browsers" /> and <xref
+              linkend="mvc-multipart" />.</para>
             </listitem>
 
             <listitem>
-              <para><classname>HttpEntity&lt;?&gt;</classname> parameters
-              for access to the Servlet request HTTP headers and contents. The request stream will be
-              converted to the entity body using
+              <para><classname>HttpEntity&lt;?&gt;</classname> parameters for
+              access to the Servlet request HTTP headers and contents. The
+              request stream will be converted to the entity body using
               <interfacename>HttpMessageConverter</interfacename>s. See <xref
               linkend="mvc-ann-httpentity" />.</para>
             </listitem>
@@ -1133,15 +1157,14 @@ public class RelativePathUriTemplateController {
             </listitem>
 
             <listitem>
-              <para>
-                <interfacename>org.springframework.web.servlet.mvc.support.RedirectAttributes</interfacename>
-                to specify the exact set of attributes to use in case of a redirect
-                and also to add flash attributes (attributes stored temporarily on
-                the server-side to make them available to the request after the redirect).
-                <literal>RedirectAttributes</literal> is used instead of the implicit
-                model if the method returns a "redirect:" prefixed view name or 
-                <classname>RedirectView</classname>.
-              </para>
+              <para><interfacename>org.springframework.web.servlet.mvc.support.RedirectAttributes</interfacename>
+              to specify the exact set of attributes to use in case of a
+              redirect and also to add flash attributes (attributes stored
+              temporarily on the server-side to make them available to the
+              request after the redirect).
+              <literal>RedirectAttributes</literal> is used instead of the
+              implicit model if the method returns a "redirect:" prefixed view
+              name or <classname>RedirectView</classname>.</para>
             </listitem>
 
             <listitem>
@@ -1153,11 +1176,12 @@ public class RelativePathUriTemplateController {
               <literal>webBindingInitializer</literal> property on
               <classname>RequestMappingHandlerAdapter</classname>. Such
               command objects along with their validation results will be
-              exposed as model attributes by default, using the command class 
+              exposed as model attributes by default, using the command class
               class name - e.g. model attribute "orderAddress" for a command
-              object of type "some.package.OrderAddress".
-              The <classname>ModelAttribute</classname> annotation can be used
-              on a method argument to customize the model attribute name used.</para>
+              object of type "some.package.OrderAddress". The
+              <classname>ModelAttribute</classname> annotation can be used on
+              a method argument to customize the model attribute name
+              used.</para>
             </listitem>
 
             <listitem>
@@ -1201,12 +1225,11 @@ public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet
     <emphasis role="bold">BindingResult result</emphasis>, Model model) { … }</programlisting>
         </example>
       </section>
-      
+
       <section id="mvc-ann-return-types">
         <title>Supported method return types</title>
 
-        <para>The following are the supported return types:
-          <itemizedlist>
+        <para>The following are the supported return types: <itemizedlist>
             <listitem>
               <para>A <classname>ModelAndView</classname> object, with the
               model implicitly enriched with command objects and the results
@@ -1274,10 +1297,9 @@ public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet
 
             <listitem>
               <para>A <classname>HttpEntity&lt;?&gt;</classname> or
-              <classname>ResponseEntity&lt;?&gt;</classname> object
-              to provide access to the Servlet response HTTP headers and
-              contents. The entity body will be converted to the response
-              stream using
+              <classname>ResponseEntity&lt;?&gt;</classname> object to provide
+              access to the Servlet response HTTP headers and contents. The
+              entity body will be converted to the response stream using
               <interfacename>HttpMessageConverter</interfacename>s. See <xref
               linkend="mvc-ann-httpentity" />.</para>
             </listitem>
@@ -1291,9 +1313,8 @@ public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet
               objects and the results of <literal>@ModelAttribute</literal>
               annotated reference data accessor methods.</para>
             </listitem>
-          </itemizedlist>
-        </para>
-      </section>  
+          </itemizedlist></para>
+      </section>
 
       <section id="mvc-ann-requestparam">
         <title>Binding request parameters to method parameters with
@@ -1318,8 +1339,7 @@ public class EditPetForm {
         return "petForm";
     }
 
-    <lineannotation>// ...</lineannotation>
-</programlisting>
+    <lineannotation>// ...</lineannotation></programlisting>
 
         <para>Parameters using this annotation are required by default, but
         you can specify that a parameter is optional by setting
@@ -1327,10 +1347,10 @@ public class EditPetForm {
         <literal>required</literal> attribute to <literal>false</literal>
         (e.g., <literal>@RequestParam(value="id",
         required=false)</literal>).</para>
-        
-        <para>Type conversion is applied automatically if the target method parameter 
-        type is not <classname>String</classname>.
-        See <xref linkend="mvc-ann-typeconversion"/>.</para>
+
+        <para>Type conversion is applied automatically if the target method
+        parameter type is not <classname>String</classname>. See <xref
+        linkend="mvc-ann-typeconversion" />.</para>
       </section>
 
       <section id="mvc-ann-requestbody">
@@ -1350,10 +1370,10 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         <interfacename>HttpMessageConverter</interfacename>.
         <interfacename>HttpMessageConverter</interfacename> is responsible for
         converting from the HTTP request message to an object and converting
-        from an object to the HTTP response body.
-        The <classname>RequestMappingHandlerAdapter</classname> supports the 
-        <classname>@RequestBody</classname> annotation with the following default 
-        <interfacename>HttpMessageConverters</interfacename>:</para>
+        from an object to the HTTP response body. The
+        <classname>RequestMappingHandlerAdapter</classname> supports the
+        <classname>@RequestBody</classname> annotation with the following
+        default <interfacename>HttpMessageConverters</interfacename>:</para>
 
         <itemizedlist>
           <listitem>
@@ -1379,16 +1399,16 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
 
         <para>For more information on these converters, see <link
         linkend="rest-message-conversion">Message Converters</link>. Also note
-        that if using the MVC namespace, a wider range of message converters 
-        are registered by default. See <xref linkend="mvc-annotation-driven"/> 
-        for more information.</para>
+        that if using the MVC namespace, a wider range of message converters
+        are registered by default. See <xref
+        linkend="mvc-annotation-driven" /> for more information.</para>
 
-        <para>If you intend to read and write XML, you will need to configure the 
-        <classname>MarshallingHttpMessageConverter</classname> with a 
-        specific <interfacename>Marshaller</interfacename> and 
-        an <interfacename>Unmarshaller</interfacename> implementation from the
-        <classname>org.springframework.oxm</classname> package.
-        For example:</para>
+        <para>If you intend to read and write XML, you will need to configure
+        the <classname>MarshallingHttpMessageConverter</classname> with a
+        specific <interfacename>Marshaller</interfacename> and an
+        <interfacename>Unmarshaller</interfacename> implementation from the
+        <classname>org.springframework.oxm</classname> package. For
+        example:</para>
 
         <programlisting language="xml">&lt;bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"&gt;
     &lt;property name="messageConverters"&gt;
@@ -1408,34 +1428,36 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
   &lt;property name="unmarshaller" ref="castorMarshaller" /&gt;
 &lt;/bean&gt;
 
-&lt;bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller"/&gt;
-</programlisting>
+&lt;bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller"/&gt;</programlisting>
 
-        <para>An <classname>@RequestBody</classname> method parameter can be annotated with 
-        <classname>@Valid</classname>, in which case it will validated using the configured
-        <classname>Validator</classname> instance. When using the MVC namespace a JSR-303 
-        validator is configured automatically assuming a JSR-303 implementation is available 
-        on the classpath. If validation fails a <classname>RequestBodyNotValidException</classname>
-        is raised. The exception is handled by the <classname>DefaultHandlerExceptionResolver</classname>
-        and results in a <literal>400</literal> error sent back to the client along with
-        a message containing the validation errors.</para>
+        <para>An <classname>@RequestBody</classname> method parameter can be
+        annotated with <classname>@Valid</classname>, in which case it will
+        validated using the configured <classname>Validator</classname>
+        instance. When using the MVC namespace a JSR-303 validator is
+        configured automatically assuming a JSR-303 implementation is
+        available on the classpath. If validation fails a
+        <classname>RequestBodyNotValidException</classname> is raised. The
+        exception is handled by the
+        <classname>DefaultHandlerExceptionResolver</classname> and results in
+        a <literal>400</literal> error sent back to the client along with a
+        message containing the validation errors.</para>
 
         <note>
-          <para> Also see <xref linkend="mvc-annotation-driven"/> for information on 
-          configuring message converters and a validator through the MVC namespace.</para>
+          <para>Also see <xref linkend="mvc-annotation-driven" /> for
+          information on configuring message converters and a validator
+          through the MVC namespace.</para>
         </note>
       </section>
 
       <section id="mvc-ann-responsebody">
-        <title>Mapping the response body with the <interfacename>@ResponseBody</interfacename>
-        annotation</title>
+        <title>Mapping the response body with the
+        <interfacename>@ResponseBody</interfacename> annotation</title>
 
         <para>The <interfacename>@ResponseBody</interfacename> annotation is
         similar to <interfacename>@RequestBody</interfacename>. This
-        annotation can be put on a method and
-        indicates that the return type should be written straight to the HTTP
-        response body (and not placed in a Model, or interpreted as a view
-        name). For example:</para>
+        annotation can be put on a method and indicates that the return type
+        should be written straight to the HTTP response body (and not placed
+        in a Model, or interpreted as a view name). For example:</para>
 
         <programlisting language="java">@RequestMapping(value = "/something", method = RequestMethod.PUT)
 @ResponseBody
@@ -1458,10 +1480,11 @@ public String helloWorld()  {
 
         <para>The <classname>HttpEntity</classname> is similar to
         <interfacename>@RequestBody</interfacename> and
-        <interfacename>@ResponseBody</interfacename>. Besides getting
-        access to the request and response body, <classname>HttpEntity</classname>
-        (and the response-specific subclass <classname>ResponseEntity</classname>)
-        also allows access to the request and response headers, like so:</para>
+        <interfacename>@ResponseBody</interfacename>. Besides getting access
+        to the request and response body, <classname>HttpEntity</classname>
+        (and the response-specific subclass
+        <classname>ResponseEntity</classname>) also allows access to the
+        request and response headers, like so:</para>
 
         <programlisting language="java">@RequestMapping("/something")
 public ResponseEntity&lt;String&gt; handle(HttpEntity&lt;byte[]&gt; requestEntity) throws UnsupportedEncodingException {
@@ -1474,33 +1497,38 @@ public ResponseEntity&lt;String&gt; handle(HttpEntity&lt;byte[]&gt; requestEntit
   return new ResponseEntity&lt;String&gt;("Hello World", responseHeaders, HttpStatus.CREATED);
 }</programlisting>
 
-        <para>The above example gets the value of the <literal>MyRequestHeader</literal> request
-        header, and reads the body as a byte array. It adds the <literal>MyResponseHeader</literal>
-        to the response, writes <literal>Hello World</literal> to the response
+        <para>The above example gets the value of the
+        <literal>MyRequestHeader</literal> request header, and reads the body
+        as a byte array. It adds the <literal>MyResponseHeader</literal> to
+        the response, writes <literal>Hello World</literal> to the response
         stream, and sets the response status code to 201 (Created).</para>
 
         <para>As with <interfacename>@RequestBody</interfacename> and
-        <interfacename>@ResponseBody</interfacename>, Spring
-        uses <interfacename>HttpMessageConverter</interfacename> to convert
-        from and to the request and response streams. For more
-        information on these converters, see the previous section and <link
+        <interfacename>@ResponseBody</interfacename>, Spring uses
+        <interfacename>HttpMessageConverter</interfacename> to convert from
+        and to the request and response streams. For more information on these
+        converters, see the previous section and <link
         linkend="rest-message-conversion">Message Converters</link>.</para>
       </section>
 
       <section id="mvc-ann-modelattrib-methods">
-        <title>Using <interfacename>@ModelAttribute</interfacename> on a method</title>
-        
-        <para>The <interfacename>@ModelAttribute</interfacename> annotation can be used on 
-        methods or on method arguments. This section explains its usage on methods while the 
-        next section explains its usage on method arguments.</para>
-        
-        <para>An <interfacename>@ModelAttribute</interfacename> on a method indicates the purpose
-        of that method is to add one or more model attributes. Such methods support the same 
-        argument types as <interfacename>@RequestMapping</interfacename> methods but cannot
-        be mapped directly to requests. Instead <interfacename>@ModelAttribute</interfacename>
-        methods in a controller are invoked before <interfacename>@RequestMapping</interfacename> 
+        <title>Using <interfacename>@ModelAttribute</interfacename> on a
+        method</title>
+
+        <para>The <interfacename>@ModelAttribute</interfacename> annotation
+        can be used on methods or on method arguments. This section explains
+        its usage on methods while the next section explains its usage on
+        method arguments.</para>
+
+        <para>An <interfacename>@ModelAttribute</interfacename> on a method
+        indicates the purpose of that method is to add one or more model
+        attributes. Such methods support the same argument types as
+        <interfacename>@RequestMapping</interfacename> methods but cannot be
+        mapped directly to requests. Instead
+        <interfacename>@ModelAttribute</interfacename> methods in a controller
+        are invoked before <interfacename>@RequestMapping</interfacename>
         methods, within the same controller. A couple of examples:</para>
-        
+
         <programlisting language="java">
 // Add one attribute
 // The return value of the method is added to the model under the name "account"
@@ -1517,87 +1545,105 @@ public Account addAccount(@RequestParam String number) {
 public void populateModel(@RequestParam String number, Model model) {
     model.addAttribute(accountManager.findAccount(number));
     // add more ...
-}
-</programlisting>        
+}</programlisting>
 
-        <para><interfacename>@ModelAttribute</interfacename> methods are used to populate 
-        the model with commonly needed attributes for example to fill a drop-down with 
-        states or with pet types, or to retrieve a command object like Account in order
-        to use it to represent the data on an HTML form. The latter case is further 
-        discussed in the next section.</para>
+        <para><interfacename>@ModelAttribute</interfacename> methods are used
+        to populate the model with commonly needed attributes for example to
+        fill a drop-down with states or with pet types, or to retrieve a
+        command object like Account in order to use it to represent the data
+        on an HTML form. The latter case is further discussed in the next
+        section.</para>
 
-		<para>Note the two styles of <interfacename>@ModelAttribute</interfacename> methods.
-		In the first, the method adds an attribute implicitly 
-		by returning it. In the second, the method accepts a <classname>Model</classname> 
-		and adds any number of model attributes to it. 
-		You can choose between the two styles depending on your needs.</para>
+        <para>Note the two styles of
+        <interfacename>@ModelAttribute</interfacename> methods. In the first,
+        the method adds an attribute implicitly by returning it. In the
+        second, the method accepts a <classname>Model</classname> and adds any
+        number of model attributes to it. You can choose between the two
+        styles depending on your needs.</para>
 
-        <para>A controller can have any number of <interfacename>@ModelAttribute</interfacename> 
-        methods. All such methods are invoked before <interfacename>@RequestMapping</interfacename> 
-        methods of the same controller.</para>
-		
-		<tip>
-			<para>What happens when a model attribute name is not explicitly specified? 
-			In such cases a default name is assigned to the model attribute based on its type.
-			For example if the method returns an object of type <classname>Account</classname>,
-			the default name used is "account". You can change that through
-			the value of the <interfacename>@ModelAttribute</interfacename> annotation. 
-			If adding attributes directly to the <classname>Model</classname>, use the 
-			appropriate overloaded <literal>addAttribute(..)</literal> method - i.e.
-			with or without an attribute name.</para>
-		</tip>
+        <para>A controller can have any number of
+        <interfacename>@ModelAttribute</interfacename> methods. All such
+        methods are invoked before
+        <interfacename>@RequestMapping</interfacename> methods of the same
+        controller.</para>
 
-		<para>The <interfacename>@ModelAttribute</interfacename> annotation can be used on
-		<interfacename>@RequestMapping</interfacename> methods as well. In that case 
-		the return value of the <interfacename>@RequestMapping</interfacename> method 
-		is interpreted as a model attribute rather than as a view name. 
-		The view name is derived from view name conventions instead much like for methods
-		returning void &mdash; see <xref linkend="mvc-coc-r2vnt"/>.</para>
-		
+        <tip>
+          <para>What happens when a model attribute name is not explicitly
+          specified? In such cases a default name is assigned to the model
+          attribute based on its type. For example if the method returns an
+          object of type <classname>Account</classname>, the default name used
+          is "account". You can change that through the value of the
+          <interfacename>@ModelAttribute</interfacename> annotation. If adding
+          attributes directly to the <classname>Model</classname>, use the
+          appropriate overloaded <literal>addAttribute(..)</literal> method -
+          i.e., with or without an attribute name.</para>
+        </tip>
+
+        <para>The <interfacename>@ModelAttribute</interfacename> annotation
+        can be used on <interfacename>@RequestMapping</interfacename> methods
+        as well. In that case the return value of the
+        <interfacename>@RequestMapping</interfacename> method is interpreted
+        as a model attribute rather than as a view name. The view name is
+        derived from view name conventions instead much like for methods
+        returning void — see <xref linkend="mvc-coc-r2vnt" />.</para>
       </section>
 
       <section id="mvc-ann-modelattrib-method-args">
-        <title>Using <interfacename>@ModelAttribute</interfacename> on a method argument</title>
-        
-        <para>As explained in the previous section <interfacename>@ModelAttribute</interfacename>
-        can be used on methods or on method arguments. This section explains its usage on 
-        method arguments.</para>
-        
-        <para>An <interfacename>@ModelAttribute</interfacename> on a method argument indicates
-        the argument should be retrieved from the model. If not present in the model, the argument
-        should be instantiated first and then added to the model. Once present in the model, the
-        argument's fields should be populated from all request parameters that have matching names.
-        This is known as data binding in Spring MVC, a very useful mechanism that saves you from 
-        having to parse each form field individually.
-        </para>
+        <title>Using <interfacename>@ModelAttribute</interfacename> on a
+        method argument</title>
+
+        <para>As explained in the previous section
+        <interfacename>@ModelAttribute</interfacename> can be used on methods
+        or on method arguments. This section explains its usage on method
+        arguments.</para>
+
+        <para>An <interfacename>@ModelAttribute</interfacename> on a method
+        argument indicates the argument should be retrieved from the model. If
+        not present in the model, the argument should be instantiated first
+        and then added to the model. Once present in the model, the argument's
+        fields should be populated from all request parameters that have
+        matching names. This is known as data binding in Spring MVC, a very
+        useful mechanism that saves you from having to parse each form field
+        individually.</para>
 
         <programlisting language="java">
 @RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
 public String processSubmit(<emphasis role="bold">@ModelAttribute Pet pet</emphasis>) {
    
 }</programlisting>
-       
-        <para>Given the above example where can the Pet instance come from? 
-        There are several options: </para>
-        
+
+        <para>Given the above example where can the Pet instance come from?
+        There are several options:</para>
+
         <itemizedlist>
-        	<listitem><para>It may already be in the model due to use of 
-        		<interfacename>@SessionAttributes</interfacename> 
-        		&mdash; see <xref linkend="mvc-ann-sessionattrib"/>.</para></listitem>
-        	<listitem><para>It may already be in the model due to an 
-        		<interfacename>@ModelAttribute</interfacename> method in the same 
-        		controller &mdash; as explained in the previous section.</para></listitem>
-        	<listitem><para>It may be retrieved based on a URI template variable
-        		and type converter (explained in more detail below).</para></listitem>
-        	<listitem><para>It may be instantiated using its default constructor.</para></listitem>
+          <listitem>
+            <para>It may already be in the model due to use of
+            <interfacename>@SessionAttributes</interfacename> — see <xref
+            linkend="mvc-ann-sessionattrib" />.</para>
+          </listitem>
+
+          <listitem>
+            <para>It may already be in the model due to an
+            <interfacename>@ModelAttribute</interfacename> method in the same
+            controller — as explained in the previous section.</para>
+          </listitem>
+
+          <listitem>
+            <para>It may be retrieved based on a URI template variable and
+            type converter (explained in more detail below).</para>
+          </listitem>
+
+          <listitem>
+            <para>It may be instantiated using its default constructor.</para>
+          </listitem>
         </itemizedlist>
-        
-       	<para>An <interfacename>@ModelAttribute</interfacename> method is a common
-       	way to to retrieve an attribute from the database, which may optionally be
-       	stored between requests through the use of 
-       	<interfacename>@SessionAttributes</interfacename>.
-       	In some cases it may be convenient to retrieve the attribute by using 
-       	an URI template variable and a type converter. Here is an example:</para>
+
+        <para>An <interfacename>@ModelAttribute</interfacename> method is a
+        common way to to retrieve an attribute from the database, which may
+        optionally be stored between requests through the use of
+        <interfacename>@SessionAttributes</interfacename>. In some cases it
+        may be convenient to retrieve the attribute by using an URI template
+        variable and a type converter. Here is an example:</para>
 
         <programlisting language="java">
 @RequestMapping(value="/accounts/{account}", method = RequestMethod.PUT)
@@ -1605,27 +1651,30 @@ public String save(@ModelAttribute("account") Account account) {
 
 }</programlisting>
 
-		<para>In this example the name of the model attribute (i.e. "account") 
-		matches the name of a URI template variable. If you register 
-		<classname>Converter&lt;String, Account&gt;</classname> that can turn the 
-		<literal>String</literal> account value into an <classname>Account</classname>
-		instance, then the above example will work without the need for an
-		<interfacename>@ModelAttribute</interfacename> method.</para>
-        
-		<para>The next step is data binding. The <classname>WebDataBinder</classname> 
-		class matches request parameter names &mdash; including query string parameters and
-		form fields &mdash; to model attribute fields by name. Matching fields are populated
-		after type conversion (from String to the target field type) has been applied
-		where necessary.
-		Data binding and validation are covered in <xref linkend="validation"/>.
-		Customizing the data binding process for a controller level is covered in 
-		<xref linkend="mvc-ann-webdatabinder"/>.</para>
+        <para>In this example the name of the model attribute (i.e. "account")
+        matches the name of a URI template variable. If you register
+        <classname>Converter&lt;String, Account&gt;</classname> that can turn
+        the <literal>String</literal> account value into an
+        <classname>Account</classname> instance, then the above example will
+        work without the need for an
+        <interfacename>@ModelAttribute</interfacename> method.</para>
 
-		<para>As a result of data binding there may be errors such as missing required
-		fields or type conversion errors. To check for such errors 
-		add a <classname>BindingResult</classname> argument immediately following
-		the <interfacename>@ModelAttribute</interfacename> argment:</para>
-		
+        <para>The next step is data binding. The
+        <classname>WebDataBinder</classname> class matches request parameter
+        names — including query string parameters and form fields — to model
+        attribute fields by name. Matching fields are populated after type
+        conversion (from String to the target field type) has been applied
+        where necessary. Data binding and validation are covered in <xref
+        linkend="validation" />. Customizing the data binding process for a
+        controller level is covered in <xref
+        linkend="mvc-ann-webdatabinder" />.</para>
+
+        <para>As a result of data binding there may be errors such as missing
+        required fields or type conversion errors. To check for such errors
+        add a <classname>BindingResult</classname> argument immediately
+        following the <interfacename>@ModelAttribute</interfacename>
+        argument:</para>
+
         <programlisting language="java">
 @RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
 public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet</emphasis>, BindingResult result) {
@@ -1637,15 +1686,18 @@ public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet
     // ...       
 
 }</programlisting>
-		
-		<para>With a <classname>BindingResult</classname> you can check if errors were found in 
-		which case it's common to render the same form where the errors
-		can be shown with the help of Spring's <literal>&lt;errors&gt;</literal> form tag.</para>
-		
-		<para>In addition to data binding you can also invoke validation using your own custom 
-		validator passing the same <classname>BindingResult</classname> that was used to record
-		data binding errors. That allows for data binding and validation errors to be accumulated
-		in one place and subsequently reported back to the user: </para>
+
+        <para>With a <classname>BindingResult</classname> you can check if
+        errors were found in which case it's common to render the same form
+        where the errors can be shown with the help of Spring's
+        <literal>&lt;errors&gt;</literal> form tag.</para>
+
+        <para>In addition to data binding you can also invoke validation using
+        your own custom validator passing the same
+        <classname>BindingResult</classname> that was used to record data
+        binding errors. That allows for data binding and validation errors to
+        be accumulated in one place and subsequently reported back to the
+        user:</para>
 
         <programlisting language="java">
 @RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
@@ -1659,9 +1711,9 @@ public String processSubmit(<emphasis role="bold">@ModelAttribute("pet") Pet pet
     // ...
 }</programlisting>
 
-		<para>Or you can have validation invoked automatically by adding the  
-		JSR-303 <interfacename>@Valid</interfacename> annotation:</para>
-		
+        <para>Or you can have validation invoked automatically by adding the
+        JSR-303 <interfacename>@Valid</interfacename> annotation:</para>
+
         <programlisting language="java">
 @RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
 public String processSubmit(<emphasis role="bold">@Valid @ModelAttribute("pet") Pet pet</emphasis>, BindingResult result) {
@@ -1672,15 +1724,15 @@ public String processSubmit(<emphasis role="bold">@Valid @ModelAttribute("pet") 
     
     // ...
 }</programlisting>
-		
-		<para>See <xref linkend="validation-beanvalidation"/> and 
-		<xref linkend="validation" /> for details on how to configure and use validation.</para>
 
-	  </section>
+        <para>See <xref linkend="validation-beanvalidation" /> and <xref
+        linkend="validation" /> for details on how to configure and use
+        validation.</para>
+      </section>
 
       <section id="mvc-ann-sessionattrib">
-        <title>Using <classname>@SessionAttributes</classname> to store model attributes
-        	in the HTTP session between requests</title>
+        <title>Using <classname>@SessionAttributes</classname> to store model
+        attributes in the HTTP session between requests</title>
 
         <para>The type-level <classname>@SessionAttributes</classname>
         annotation declares session attributes used by a specific handler.
@@ -1700,79 +1752,79 @@ public class EditPetForm {
 }</programlisting>
 
         <note>
-          <para>When using controller interfaces (e.g. for AOP proxying), make sure to
-          consistently put <emphasis>all</emphasis> your mapping annotations - such as
-          <interfacename>@RequestMapping</interfacename> and
-          <interfacename>@SessionAttributes</interfacename> - on the controller
-          <emphasis>interface</emphasis> rather than on the implementation class.
-          </para>
+          <para>When using controller interfaces (e.g., for AOP proxying),
+          make sure to consistently put <emphasis>all</emphasis> your mapping
+          annotations - such as <interfacename>@RequestMapping</interfacename>
+          and <interfacename>@SessionAttributes</interfacename> - on the
+          controller <emphasis>interface</emphasis> rather than on the
+          implementation class.</para>
         </note>
       </section>
 
       <section id="mvc-ann-redirect-attributes">
         <title>Specifying redirect and flash attributes</title>
 
-        <para>By default all model attributes are considered to be exposed as 
-        URI template variables in the redirect URL. Of the remaining attributes 
-        those that are primitive types or collections/arrays of primitive types 
-        are automatically appended as query parameters.
-        </para>
-        
-        <para>In annotated controllers however the model may contain 
-        additional attributes originally added for rendering 
-        purposes (e.g. drop-down field values).
-        To gain precise control over the attributes used in a redirect scenario,
-        an <interfacename>@RequestMapping</interfacename> method can declare an
-        argument of type <interfacename>RedirectAttributes</interfacename>
-        and use it to add attributes for use in <classname>RedirectView</classname>. 
-        If the controller method does redirect, the content of 
-        <interfacename>RedirectAttributes</interfacename> is used. 
-        Otherwise the content of the default <interfacename>Model</interfacename> 
-        is used.
-        </para>
-        
-        <para>
-        The <classname>RequestMappingHandlerAdapter</classname> provides a flag
-        called <literal>"ignoreDefaultModelOnRedirect"</literal> that can be 
-        used to indicate the content of the default <interfacename>Model</interfacename>
-        should never be used if a controller method redirects. 
-        Instead the controller method should declare an attribute of type
-        <interfacename>RedirectAttributes</interfacename> or if it doesn't do so
-        no attributes should be passed on to <classname>RedirectView</classname>.
-        Both the MVC namespace and the MVC Java config (via
-        <interfacename>@EnableWebMvc</interfacename>) automatically set 
-        this flag to <literal>true</literal>.
-        </para>
-        
-        <para>The <interfacename>RedirectAttributes</interfacename> interface can
-        also be used to add flash attributes. Unlike other redirect attributes, 
-        which end up in the target redirect URL, flash attributes are saved
-        in the HTTP session (and hence do not appear in the URL). The model of 
-        the controller serving the target redirect URL automatically receives
-        these flash attributes after which they are removed from the session.
-        See <xref linkend="mvc-flash-attributes"/> for an overview of the general 
-        support for flash attributes in Spring MVC.
-        </para>
-        
-      </section>
-      
-      <section id="mvc-ann-form-urlencoded-data">
-        <title>Working with <literal>"application/x-www-form-urlencoded"</literal> data</title>
+        <para>By default all model attributes are considered to be exposed as
+        URI template variables in the redirect URL. Of the remaining
+        attributes those that are primitive types or collections/arrays of
+        primitive types are automatically appended as query parameters.</para>
 
-		<para>The previous sections covered use of <interfacename>@ModelAttribute</interfacename> 
-		to support form submission requests from browser clients. The same annotation is 
-		recommended for use with requests from non-browser clients as well. However there is 
-		one notable difference when it comes to working with HTTP PUT requests.	
-		Browsers can submit form data via HTTP GET or HTTP POST. Non-browser 
-		clients can also submit forms via HTTP PUT. This presents a challenge because the Servlet 
-		specification requires the <literal>ServletRequest.getParameter*()</literal> family 
-		of methods to support form field access only for HTTP POST, not for HTTP PUT.
-		</para>
-      
-      	<para>To support HTTP PUT requests, the <literal>spring-web</literal> module provides 
-      	the filter <classname>HttpPutFormContentFilter</classname>, which can be configured
-      	in <filename>web.xml</filename>:</para>
-      	
+        <para>In annotated controllers however the model may contain
+        additional attributes originally added for rendering purposes (e.g.
+        drop-down field values). To gain precise control over the attributes
+        used in a redirect scenario, an
+        <interfacename>@RequestMapping</interfacename> method can declare an
+        argument of type <interfacename>RedirectAttributes</interfacename> and
+        use it to add attributes for use in
+        <classname>RedirectView</classname>. If the controller method does
+        redirect, the content of
+        <interfacename>RedirectAttributes</interfacename> is used. Otherwise
+        the content of the default <interfacename>Model</interfacename> is
+        used.</para>
+
+        <para>The <classname>RequestMappingHandlerAdapter</classname> provides
+        a flag called <literal>"ignoreDefaultModelOnRedirect"</literal> that
+        can be used to indicate the content of the default
+        <interfacename>Model</interfacename> should never be used if a
+        controller method redirects. Instead the controller method should
+        declare an attribute of type
+        <interfacename>RedirectAttributes</interfacename> or if it doesn't do
+        so no attributes should be passed on to
+        <classname>RedirectView</classname>. Both the MVC namespace and the
+        MVC Java config (via <interfacename>@EnableWebMvc</interfacename>)
+        automatically set this flag to <literal>true</literal>.</para>
+
+        <para>The <interfacename>RedirectAttributes</interfacename> interface
+        can also be used to add flash attributes. Unlike other redirect
+        attributes, which end up in the target redirect URL, flash attributes
+        are saved in the HTTP session (and hence do not appear in the URL).
+        The model of the controller serving the target redirect URL
+        automatically receives these flash attributes after which they are
+        removed from the session. See <xref linkend="mvc-flash-attributes" />
+        for an overview of the general support for flash attributes in Spring
+        MVC.</para>
+      </section>
+
+      <section id="mvc-ann-form-urlencoded-data">
+        <title>Working with
+        <literal>"application/x-www-form-urlencoded"</literal> data</title>
+
+        <para>The previous sections covered use of
+        <interfacename>@ModelAttribute</interfacename> to support form
+        submission requests from browser clients. The same annotation is
+        recommended for use with requests from non-browser clients as well.
+        However there is one notable difference when it comes to working with
+        HTTP PUT requests. Browsers can submit form data via HTTP GET or HTTP
+        POST. Non-browser clients can also submit forms via HTTP PUT. This
+        presents a challenge because the Servlet specification requires the
+        <literal>ServletRequest.getParameter*()</literal> family of methods to
+        support form field access only for HTTP POST, not for HTTP PUT.</para>
+
+        <para>To support HTTP PUT requests, the <literal>spring-web</literal>
+        module provides the filter
+        <classname>HttpPutFormContentFilter</classname>, which can be
+        configured in <filename>web.xml</filename>:</para>
+
         <programlisting language="xml">
 &lt;filter&gt;
   &lt;filter-name&gt;httpPutFormFilter&lt;/filter-name&gt;
@@ -1787,17 +1839,17 @@ public class EditPetForm {
 &lt;servlet&gt;
   &lt;servlet-name&gt;dispatcherServlet&lt;/servlet-name&gt;
   &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
-&lt;/servlet&gt;
-</programlisting>      	
+&lt;/servlet&gt;</programlisting>
 
-		<para>The above filter intercepts HTTP PUT requests with content type 
-		<literal>application/x-www-form-urlencoded</literal>, reads the form data from the 
-		body of the request, and wraps the <classname>ServletRequest</classname> in order 
-		to make the form data available through the <literal>ServletRequest.getParameter*()</literal> 
-		family of methods.</para>
+        <para>The above filter intercepts HTTP PUT requests with content type
+        <literal>application/x-www-form-urlencoded</literal>, reads the form
+        data from the body of the request, and wraps the
+        <classname>ServletRequest</classname> in order to make the form data
+        available through the
+        <literal>ServletRequest.getParameter*()</literal> family of
+        methods.</para>
+      </section>
 
-	  </section>
-	  
       <section id="mvc-ann-cookievalue">
         <title>Mapping cookie values with the @CookieValue annotation</title>
 
@@ -1820,9 +1872,9 @@ public void displayHeaderInfo(<emphasis role="bold">@CookieValue("JSESSIONID")</
 
 }</programlisting>
 
-        <para>Type conversion is applied automatically if the target method 
-        parameter type is not <classname>String</classname>.
-        See <xref linkend="mvc-ann-typeconversion"/>.</para>
+        <para>Type conversion is applied automatically if the target method
+        parameter type is not <classname>String</classname>. See <xref
+        linkend="mvc-ann-typeconversion" />.</para>
 
         <para>This annotation is supported for annotated handler methods in
         Servlet and Portlet environments.</para>
@@ -1843,8 +1895,7 @@ Accept                  text/html,application/xhtml+xml,application/xml;q=0.9
 Accept-Language         fr,en-gb;q=0.7,en;q=0.3
 Accept-Encoding         gzip,deflate
 Accept-Charset          ISO-8859-1,utf-8;q=0.7,*;q=0.7
-Keep-Alive              300
-</programlisting>
+Keep-Alive              300</programlisting>
 
         <para>The following code sample demonstrates how to get the value of
         the <literal>Accept-Encoding</literal> and
@@ -1858,16 +1909,19 @@ public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encod
 
 }</programlisting>
 
-        <para>Type conversion is applied automatically if the method parameter 
-        is not <classname>String</classname>. 
-        See <xref linkend="mvc-ann-typeconversion"/>.</para>
-        
-        <tip><para>Built-in support is available for converting a comma-separated 
-        string into an array/collection of strings or other types known to the 
-        type conversion system. For example a method parameter annotated with 
-        <literal>@RequestHeader("Accept")</literal> may be of type 
-        <classname>String</classname> but also <classname>String[]</classname> 
-        or <classname>List&lt;String&gt;</classname>.</para></tip>
+        <para>Type conversion is applied automatically if the method parameter
+        is not <classname>String</classname>. See <xref
+        linkend="mvc-ann-typeconversion" />.</para>
+
+        <tip>
+          <para>Built-in support is available for converting a comma-separated
+          string into an array/collection of strings or other types known to
+          the type conversion system. For example a method parameter annotated
+          with <literal>@RequestHeader("Accept")</literal> may be of type
+          <classname>String</classname> but also
+          <classname>String[]</classname> or
+          <classname>List&lt;String&gt;</classname>.</para>
+        </tip>
 
         <para>This annotation is supported for annotated handler methods in
         Servlet and Portlet environments.</para>
@@ -1875,21 +1929,21 @@ public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encod
 
       <section id="mvc-ann-typeconversion">
         <title>Method Parameters And Type Conversion</title>
-        
-        <para>String-based values extracted from the request including
-        request parameters, path variables, request headers, and cookie values 
-        may need to be converted to the target type of the method parameter or 
-        field (e.g. binding a request parameter to a field in an  
-        <interfacename>@ModelAttribute</interfacename> parameter) they're bound to. 
-        If the target type is not <classname>String</classname>, Spring 
-        automatically converts to the appropriate type. 
-        All simple types such as int, long, Date, etc. are 
-        supported. You can further customize the conversion process 
-        through a <classname>WebDataBinder</classname>  
-        (see <xref linkend="mvc-ann-webdatabinder" />) or by registering 
-        <classname>Formatters</classname> with the 
-        <classname>FormattingConversionService</classname>
-        (see <xref linkend="format" />).</para>
+
+        <para>String-based values extracted from the request including request
+        parameters, path variables, request headers, and cookie values may
+        need to be converted to the target type of the method parameter or
+        field (e.g., binding a request parameter to a field in an
+        <interfacename>@ModelAttribute</interfacename> parameter) they're
+        bound to. If the target type is not <classname>String</classname>,
+        Spring automatically converts to the appropriate type. All simple
+        types such as int, long, Date, etc. are supported. You can further
+        customize the conversion process through a
+        <classname>WebDataBinder</classname> (see <xref
+        linkend="mvc-ann-webdatabinder" />) or by registering
+        <classname>Formatters</classname> with the
+        <classname>FormattingConversionService</classname> (see <xref
+        linkend="format" />).</para>
       </section>
 
       <section id="mvc-ann-webdatabinder">
@@ -1966,23 +2020,25 @@ public class MyFormController {
     &lt;property name="webBindingInitializer"&gt;
         &lt;bean class="org.springframework.samples.petclinic.web.ClinicBindingInitializer" /&gt;
     &lt;/property&gt;
-&lt;/bean&gt;
-</programlisting>
+&lt;/bean&gt;</programlisting>
         </section>
       </section>
+
       <section id="mvc-ann-lastmodified">
-        <title>Support for the 'Last-Modified' Response Header To Facilitate Content Caching</title>
-        
-        <para>An <interfacename>@RequestMapping</interfacename> method may wish 
-        to support <literal>'Last-Modified'</literal> HTTP requests, 
-        as defined in the contract for the Servlet API's 
-        <literal>getLastModified</literal> method, to facilitate content caching.
-        This involves calculating a lastModified <literal>long</literal> 
-        value for a given request, comparing it against the 
-        <literal>'If-Modified-Since'</literal> request header value, and 
-        potentially returning a response with status code 304 (Not Modified).
-	  	An annotated controller method can achieve that as follows:</para>
-	  
+        <title>Support for the 'Last-Modified' Response Header To Facilitate
+        Content Caching</title>
+
+        <para>An <interfacename>@RequestMapping</interfacename> method may
+        wish to support <literal>'Last-Modified'</literal> HTTP requests, as
+        defined in the contract for the Servlet API's
+        <literal>getLastModified</literal> method, to facilitate content
+        caching. This involves calculating a lastModified
+        <literal>long</literal> value for a given request, comparing it
+        against the <literal>'If-Modified-Since'</literal> request header
+        value, and potentially returning a response with status code 304 (Not
+        Modified). An annotated controller method can achieve that as
+        follows:</para>
+
         <programlisting language="java">
 @RequestMapping
 public String myHandleMethod(WebRequest webRequest, Model model) {
@@ -1997,37 +2053,37 @@ public String myHandleMethod(WebRequest webRequest, Model model) {
     // 3. or otherwise further request processing, actually preparing content
     model.addAttribute(...);
     return "myViewName";
-}
-</programlisting>	  
-		<para>There are two key elements to note: 
-		calling <code>request.checkNotModified(lastModified)</code> 
-		and returning <literal>null</literal>. The former sets 
-		the response status to 304 before it returns <literal>true</literal>.
-		The latter, in combination with the former, causes 
-		Spring MVC to do no further processing of the request.  
-		</para>	  
-	  </section>      
+}</programlisting>
+
+        <para>There are two key elements to note: calling
+        <code>request.checkNotModified(lastModified)</code> and returning
+        <literal>null</literal>. The former sets the response status to 304
+        before it returns <literal>true</literal>. The latter, in combination
+        with the former, causes Spring MVC to do no further processing of the
+        request.</para>
+      </section>
     </section>
   </section>
 
   <section id="mvc-handlermapping">
     <title>Handler mappings</title>
 
-    <para>In previous versions of Spring, users were required to define one 
-    or more <interfacename>HandlerMapping</interfacename> beans in the web application
-    context to map incoming web requests to appropriate handlers. With the
-    introduction of annotated controllers, you generally don't need to do 
-    that because the <classname>RequestMappingHandlerMapping</classname> 
-    automatically looks for <interfacename>@RequestMapping</interfacename> 
-    annotations on all <interfacename>@Controller</interfacename> beans. 
+    <para>In previous versions of Spring, users were required to define one or
+    more <interfacename>HandlerMapping</interfacename> beans in the web
+    application context to map incoming web requests to appropriate handlers.
+    With the introduction of annotated controllers, you generally don't need
+    to do that because the <classname>RequestMappingHandlerMapping</classname>
+    automatically looks for <interfacename>@RequestMapping</interfacename>
+    annotations on all <interfacename>@Controller</interfacename> beans.
     However, do keep in mind that all <classname>HandlerMapping</classname>
-    classes extending from <classname>AbstractHandlerMapping</classname> 
-    have the following properties that you can use to customize their behavior:
-    </para>
-    
+    classes extending from <classname>AbstractHandlerMapping</classname> have
+    the following properties that you can use to customize their
+    behavior:</para>
+
     <variablelist>
       <varlistentry>
         <term><literal>interceptors</literal></term>
+
         <listitem>
           <para>List of interceptors to use.
           <interfacename>HandlerInterceptor</interfacename>s are discussed in
@@ -2037,6 +2093,7 @@ public String myHandleMethod(WebRequest webRequest, Model model) {
 
       <varlistentry>
         <term><literal>defaultHandler</literal></term>
+
         <listitem>
           <para>Default handler to use, when this handler mapping does not
           result in a matching handler.</para>
@@ -2045,6 +2102,7 @@ public String myHandleMethod(WebRequest webRequest, Model model) {
 
       <varlistentry>
         <term><literal>order</literal></term>
+
         <listitem>
           <para>Based on the value of the order property (see the
           <literal>org.springframework.core.Ordered</literal> interface),
@@ -2055,11 +2113,12 @@ public String myHandleMethod(WebRequest webRequest, Model model) {
 
       <varlistentry>
         <term><literal>alwaysUseFullPath</literal></term>
+
         <listitem>
           <para>If <literal>true</literal> , Spring uses the full path within
-          the current servlet context to find an appropriate handler. If
+          the current Servlet context to find an appropriate handler. If
           <literal>false</literal> (the default), the path within the current
-          servlet mapping is used. For example, if a servlet is mapped using
+          Servlet mapping is used. For example, if a Servlet is mapped using
           <literal>/testing/*</literal> and the
           <literal>alwaysUseFullPath</literal> property is set to true,
           <literal>/testing/viewPage.html</literal> is used, whereas if the
@@ -2070,16 +2129,16 @@ public String myHandleMethod(WebRequest webRequest, Model model) {
 
       <varlistentry>
         <term><literal>urlDecode</literal></term>
+
         <listitem>
-          <para>Defaults to <literal>true</literal>, as of Spring 2.5. 
-          If you prefer to compare encoded paths, set this flag to
+          <para>Defaults to <literal>true</literal>, as of Spring 2.5. If you
+          prefer to compare encoded paths, set this flag to
           <literal>false</literal>. However, the
           <interfacename>HttpServletRequest</interfacename> always exposes the
-          servlet path in decoded form. Be aware that the servlet path will
+          Servlet path in decoded form. Be aware that the Servlet path will
           not match when compared with encoded paths.</para>
         </listitem>
       </varlistentry>
-      
     </variablelist>
 
     <para>The following example shows how to configure an interceptor:</para>
@@ -2104,14 +2163,14 @@ public String myHandleMethod(WebRequest webRequest, Model model) {
       <para>Interceptors located in the handler mapping must implement
       <interfacename>HandlerInterceptor</interfacename> from the
       <literal>org.springframework.web.servlet</literal> package. This
-      interface defines three methods: <literal>preHandle(..)</literal> 
-      is called <emphasis>before</emphasis> the actual handler is executed; 
-      <literal>postHandle(..)</literal> is called <emphasis>after</emphasis> 
+      interface defines three methods: <literal>preHandle(..)</literal> is
+      called <emphasis>before</emphasis> the actual handler is executed;
+      <literal>postHandle(..)</literal> is called <emphasis>after</emphasis>
       the handler is executed; and <literal>afterCompletion(..)</literal> is
       called <emphasis>after the complete request has finished</emphasis>.
       These three methods should provide enough flexibility to do all kinds of
       preprocessing and postprocessing.</para>
-      
+
       <para>The <literal>preHandle(..)</literal> method returns a boolean
       value. You can use this method to break or continue the processing of
       the execution chain. When this method returns <literal>true</literal>,
@@ -2120,11 +2179,12 @@ public String myHandleMethod(WebRequest webRequest, Model model) {
       has taken care of requests (and, for example, rendered an appropriate
       view) and does not continue executing the other interceptors and the
       actual handler in the execution chain.</para>
-      
-      <para>Interceptors can be configured using the <literal>interceptors</literal>
-      property, which is present on all <classname>HandlerMapping</classname> classes 
-      extending from <classname>AbstractHandlerMapping</classname>.
-      This is shown in the example below:</para>
+
+      <para>Interceptors can be configured using the
+      <literal>interceptors</literal> property, which is present on all
+      <classname>HandlerMapping</classname> classes extending from
+      <classname>AbstractHandlerMapping</classname>. This is shown in the
+      example below:</para>
 
       <programlisting language="xml">&lt;beans&gt;
     &lt;bean id="handlerMapping"
@@ -2165,7 +2225,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
         Calendar cal = Calendar.getInstance();
         int hour = cal.get(HOUR_OF_DAY);
-        if (openingTime &lt;= hour &#38;&#38; hour &lt; closingTime) {
+        if (openingTime &lt;= hour &amp;&amp; hour &lt; closingTime) {
             return true;
         } else {
             response.sendRedirect("http://host.com/outsideOfficeHours.html");
@@ -2181,10 +2241,10 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       hours.</para>
 
       <note>
-        <para>When using the <classname>RequestMappingHandlerMapping</classname>
-        the actual handler is an instance of <classname>HandlerMethod</classname>
-        which identifies the specific controller method that will be invoked.
-        </para>
+        <para>When using the
+        <classname>RequestMappingHandlerMapping</classname> the actual handler
+        is an instance of <classname>HandlerMethod</classname> which
+        identifies the specific controller method that will be invoked.</para>
       </note>
 
       <para>As you can see, the Spring adapter class
@@ -2193,12 +2253,12 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
       interface.</para>
 
       <tip>
-        <para>In the example above, the configured interceptor will apply to all
-        requests handled with annotated controller methods. If you want to narrow
-        down the URL paths to which an interceptor applies, you can use the MVC
-        namespace to do that. See <xref linkend="mvc-annotation-driven"/>.</para>
-      </tip>      
-      
+        <para>In the example above, the configured interceptor will apply to
+        all requests handled with annotated controller methods. If you want to
+        narrow down the URL paths to which an interceptor applies, you can use
+        the MVC namespace to do that. See <xref
+        linkend="mvc-annotation-driven" />.</para>
+      </tip>
     </section>
   </section>
 
@@ -2408,7 +2468,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
   &lt;property name="location" value="/WEB-INF/views.xml"/&gt;
 &lt;/bean&gt;
 
-<lineannotation>&lt;!&mdash; in <literal>views.xml</literal> --&gt;</lineannotation>
+<lineannotation>&lt;!— in <literal>views.xml</literal> --&gt;</lineannotation>
 
 &lt;beans&gt;
   &lt;bean name="report" class="org.springframework.example.ReportExcelView"/&gt;
@@ -2488,39 +2548,36 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
 
         <para>The <classname>RedirectView</classname> issues an
         <literal>HttpServletResponse.sendRedirect()</literal> call that
-        returns to the client browser as an HTTP redirect.
-        By default all model attributes are considered to be exposed as URI
-        template variables in the redirect URL. Of the remaining attributes 
-        those that are primitive types or collections/arrays of primitive types
-        are automatically appended as query parameters.
-        </para>
-        
-        <para>
-        Appending primitive type attributes as query parameters may be the 
-        desired result if a model instance was prepared specifically for the
-        redirect. However, in annotated controllers the model may contain 
-        additional attributes added for rendering purposes (e.g. drop-down 
-        field values). To avoid the possibility of having such attributes 
-        appear in the URL an annotated controller can declare an 
-        argument of type <interfacename>RedirectAttributes</interfacename>
-        and use it to specify the exact attributes to make available to
+        returns to the client browser as an HTTP redirect. By default all
+        model attributes are considered to be exposed as URI template
+        variables in the redirect URL. Of the remaining attributes those that
+        are primitive types or collections/arrays of primitive types are
+        automatically appended as query parameters.</para>
+
+        <para>Appending primitive type attributes as query parameters may be
+        the desired result if a model instance was prepared specifically for
+        the redirect. However, in annotated controllers the model may contain
+        additional attributes added for rendering purposes (e.g. drop-down
+        field values). To avoid the possibility of having such attributes
+        appear in the URL an annotated controller can declare an argument of
+        type <interfacename>RedirectAttributes</interfacename> and use it to
+        specify the exact attributes to make available to
         <classname>RedirectView</classname>. If the controller method decides
-        to redirect, the content of <interfacename>RedirectAttributes</interfacename> 
-        is used. Otherwise the content of the model is used.
-        </para>
-        
-        <para>
-        Note that URI template variables from the present request are automatically
-        made available when expanding a redirect URL and do not need to be added
-        explicitly neither through <interfacename>Model</interfacename> nor 
+        to redirect, the content of
+        <interfacename>RedirectAttributes</interfacename> is used. Otherwise
+        the content of the model is used.</para>
+
+        <para>Note that URI template variables from the present request are
+        automatically made available when expanding a redirect URL and do not
+        need to be added explicitly neither through
+        <interfacename>Model</interfacename> nor
         <interfacename>RedirectAttributes</interfacename>. For example:</para>
-        
-      <programlisting language="java">@RequestMapping(value = "/files/{path}", method = RequestMethod.POST)
+
+        <programlisting language="java">@RequestMapping(value = "/files/{path}", method = RequestMethod.POST)
 public String upload(...) {
     // ...
     return "redirect:files/{path}";
-}
-</programlisting>        
+}</programlisting>
 
         <para>If you use <classname>RedirectView</classname> and the view is
         created by the controller itself, it is recommended that you configure
@@ -2551,10 +2608,10 @@ public String upload(...) {
         <para>The net effect is the same as if the controller had returned a
         <classname>RedirectView</classname>, but now the controller itself can
         simply operate in terms of logical view names. A logical view name
-        such as <literal>redirect:/myapp/some/resource</literal> will
-        redirect relative to the current servlet context, while a name such as
-        <literal>redirect:http://myhost.com/some/arbitrary/path</literal>
-        will redirect to an absolute URL.</para>
+        such as <literal>redirect:/myapp/some/resource</literal> will redirect
+        relative to the current Servlet context, while a name such as
+        <literal>redirect:http://myhost.com/some/arbitrary/path</literal> will
+        redirect to an absolute URL.</para>
       </section>
 
       <section id="mvc-redirecting-forward-prefix">
@@ -2652,7 +2709,7 @@ public String upload(...) {
       consulted. This latter option is appropriate for singleton
       <classname>Views</classname> that can render an appropriate
       representation of the current resource regardless of the logical view
-      name. The <literal>Accept</literal> header may include wildcards, for
+      name. The <literal>Accept</literal> header may include wild cards, for
       example text/*, in which case a <classname>View</classname> whose
       Content-Type was text/xml is a compatible match.</para>
 
@@ -2756,70 +2813,65 @@ public class ContentController {
   <section id="mvc-flash-attributes">
     <title>Using flash attributes</title>
 
-    <para>Flash attributes provide a way for one request to store attributes 
-    intended for use in another. This is most commonly needed when redirecting 
-    &mdash; e.g. the Post/Redirect/Get pattern. Flash attributes are saved temporarily
-    before the redirect (typically in the session) to be made available to the 
-    request after the redirect and removed immediately.
-    </para>
-    
-    <para>Spring MVC has two main abstractions in support of flash attributes. 
-    <classname>FlashMap</classname> is used to hold flash attributes while 
-    <interfacename>FlashMapManager</interfacename> is used to store, retrieve, 
-    and manage <classname>FlashMap</classname> instances.
-    </para>
-    
+    <para>Flash attributes provide a way for one request to store attributes
+    intended for use in another. This is most commonly needed when redirecting
+    — for example, the <emphasis>Post/Redirect/Get</emphasis> pattern. Flash
+    attributes are saved temporarily before the redirect (typically in the
+    session) to be made available to the request after the redirect and
+    removed immediately.</para>
+
+    <para>Spring MVC has two main abstractions in support of flash attributes.
+    <classname>FlashMap</classname> is used to hold flash attributes while
+    <interfacename>FlashMapManager</interfacename> is used to store, retrieve,
+    and manage <classname>FlashMap</classname> instances.</para>
+
     <para>Flash attribute support is always "on" and does not need to enabled
-    explicitly although if not used, it never causes HTTP session creation.
-    On each request there is an "input" <classname>FlashMap</classname> with 
-    attributes passed from a previous request (if any) and an "output" 
-    <classname>FlashMap</classname> with attributes to save for a subsequent 
+    explicitly although if not used, it never causes HTTP session creation. On
+    each request there is an "input" <classname>FlashMap</classname> with
+    attributes passed from a previous request (if any) and an "output"
+    <classname>FlashMap</classname> with attributes to save for a subsequent
     request. Both <classname>FlashMap</classname> instances are accessible
     from anywhere in Spring MVC through static methods in
-    <classname>RequestContextUtils</classname>. 
-    </para>
+    <classname>RequestContextUtils</classname>.</para>
 
-    <para>Annotated controllers typically do not need to work with  
-    <classname>FlashMap</classname> directly. Instead an 
-    <interfacename>@RequestMapping</interfacename> method can accept an argument
-    of type <interfacename>RedirectAttributes</interfacename> and use it to
-    add flash attributes for a redirect scenario. Flash attributes added via
-    <interfacename>RedirectAttributes</interfacename> are automatically 
-    propagated to the "output" FlashMap. Similarly after the
-    redirect attributes from the "input" <classname>FlashMap</classname> are 
-    automatically added to the <interfacename>Model</interfacename> 
-    of the controller serving the target URL.  
-    </para>
+    <para>Annotated controllers typically do not need to work with
+    <classname>FlashMap</classname> directly. Instead an
+    <interfacename>@RequestMapping</interfacename> method can accept an
+    argument of type <interfacename>RedirectAttributes</interfacename> and use
+    it to add flash attributes for a redirect scenario. Flash attributes added
+    via <interfacename>RedirectAttributes</interfacename> are automatically
+    propagated to the "output" FlashMap. Similarly after the redirect
+    attributes from the "input" <classname>FlashMap</classname> are
+    automatically added to the <interfacename>Model</interfacename> of the
+    controller serving the target URL.</para>
 
     <sidebar id="mvc-flash-attributes-concurrency">
-        <title>Matching requests to flash attributes</title>
-        <para>The concept of flash attributes exists in many other Web frameworks
-        and has proven to be exposed sometimes to concurrency issues. 
-        This is because by definition flash attributes are 
-        to be stored until the next request. However the very "next" 
-        request may not be the intended recepient but another 
-        asynchronous request (e.g. polling or resource requests)
-        in which case the flash attributes are removed too early. 
-        </para>
-        
-        <para>To reduce the possibility of such issues,
-        <classname>RedirectView</classname> automatically "stamps" 
-        <classname>FlashMap</classname> instances with the path and query
-        parameters of the target redirect URL. In turn the default 
-        <classname>FlashMapManager</classname> matches that information to incoming
-        requests when looking up the "input" <classname>FlashMap</classname>.
-        </para>
-        
-        <para>This does not eliminate the possibility of a concurrency issue
-        entirely but nevertheless reducess it greatly with information 
-        that is already available in the redirect URL.
-        Therefore the use of flash attributes is recommended
-        mainly for redirect scenarios unless the target URL and/or query 
-        parameters are known.</para>
-    </sidebar>
+      <title>Matching requests to flash attributes</title>
 
+      <para>The concept of flash attributes exists in many other Web
+      frameworks and has proven to be exposed sometimes to concurrency issues.
+      This is because by definition flash attributes are to be stored until
+      the next request. However the very "next" request may not be the
+      intended recipient but another asynchronous request (e.g. polling or
+      resource requests) in which case the flash attributes are removed too
+      early.</para>
+
+      <para>To reduce the possibility of such issues,
+      <classname>RedirectView</classname> automatically "stamps"
+      <classname>FlashMap</classname> instances with the path and query
+      parameters of the target redirect URL. In turn the default
+      <classname>FlashMapManager</classname> matches that information to
+      incoming requests when looking up the "input"
+      <classname>FlashMap</classname>.</para>
+
+      <para>This does not eliminate the possibility of a concurrency issue
+      entirely but nevertheless reduces it greatly with information that is
+      already available in the redirect URL. Therefore the use of flash
+      attributes is recommended mainly for redirect scenarios unless the
+      target URL and/or query parameters are known.</para>
+    </sidebar>
   </section>
-  
+
   <section id="mvc-localeresolver">
     <title>Using locales</title>
 
@@ -3105,7 +3157,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
   </section>
 
   <section id="mvc-multipart">
-    <title>Spring's multipart (fileupload) support</title>
+    <title>Spring's multipart (file upload) support</title>
 
     <section id="mvc-multipart-introduction">
       <title>Introduction</title>
@@ -3114,10 +3166,11 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       applications. You enable this multipart support with pluggable
       <interfacename>MultipartResolver</interfacename> objects, defined in the
       <literal>org.springframework.web.multipart</literal> package. Spring
-      provides one <interfacename>MultipartResolver</interfacename> implementation
-      for use with <ulink url="http://jakarta.apache.org/commons/fileupload">
-      <emphasis>Commons FileUpload</emphasis></ulink> and another for use
-      with Servlet 3.0 multipart request parsing.</para>
+      provides one <interfacename>MultipartResolver</interfacename>
+      implementation for use with <ulink
+      url="http://jakarta.apache.org/commons/fileupload"> <emphasis>Commons
+      FileUpload</emphasis></ulink> and another for use with Servlet 3.0
+      multipart request parsing.</para>
 
       <para>By default, Spring does no multipart handling, because some
       developers want to handle multiparts themselves. You enable Spring
@@ -3131,8 +3184,8 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
     </section>
 
     <section id="mvc-multipart-resolver-commons">
-      <title>Using a <interfacename>MultipartResolver</interfacename> 
-      with <emphasis>Commons FileUpload</emphasis></title>
+      <title>Using a <interfacename>MultipartResolver</interfacename> with
+      <emphasis>Commons FileUpload</emphasis></title>
 
       <para>The following example shows how to use the
       <classname>CommonsMultipartResolver</classname>:</para>
@@ -3161,31 +3214,31 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
     </section>
 
     <section id="mvc-multipart-resolver-standard">
-      <title>Using a <interfacename>MultipartResolver</interfacename> 
-      with <emphasis>Servlet 3.0</emphasis></title>
-      
-      <para>In order to use Servlet 3.0 based multipart parsing,
-      you need to mark the <classname>DispatcherServlet</classname> with a 
-      <literal>"multipart-config"</literal> section in
-      <filename>web.xml</filename>, or with a 
-      <classname>javax.servlet.MultipartConfigElement</classname> in 
-      programmatic servlet registration, or in case of a custom servlet class
-      possibly with a <classname>javax.servlet.annotation.MultipartConfig</classname> 
-      annotation on your servlet class. Configuration settings such as 
-      maximum sizes or storage locations need to be applied at that 
-      servlet registration level as Servlet 3.0 does not allow for 
-      those settings to be done from the MultipartResolver.</para>
+      <title>Using a <interfacename>MultipartResolver</interfacename> with
+      <emphasis>Servlet 3.0</emphasis></title>
 
-      <para>Once Servlet 3.0 multipart parsing has been enabled 
-      in one of the above mentioned ways you can add the
-      <classname>StandardServletMultipartResolver</classname>
-      to your Spring configuration:</para>
-      
+      <para>In order to use Servlet 3.0 based multipart parsing, you need to
+      mark the <classname>DispatcherServlet</classname> with a
+      <literal>"multipart-config"</literal> section in
+      <filename>web.xml</filename>, or with a
+      <classname>javax.servlet.MultipartConfigElement</classname> in
+      programmatic Servlet registration, or in case of a custom Servlet class
+      possibly with a
+      <classname>javax.servlet.annotation.MultipartConfig</classname>
+      annotation on your Servlet class. Configuration settings such as maximum
+      sizes or storage locations need to be applied at that Servlet
+      registration level as Servlet 3.0 does not allow for those settings to
+      be done from the MultipartResolver.</para>
+
+      <para>Once Servlet 3.0 multipart parsing has been enabled in one of the
+      above mentioned ways you can add the
+      <classname>StandardServletMultipartResolver</classname> to your Spring
+      configuration:</para>
+
       <programlisting language="xml">&lt;bean id="multipartResolver"
     class="org.springframework.web.multipart.support.StandardServletMultipartResolver"&gt;
 &lt;/bean&gt;</programlisting>
-
-	</section>
+    </section>
 
     <section id="mvc-multipart-forms">
       <title>Handling a file upload in a form</title>
@@ -3215,7 +3268,8 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       linkend="mvc-ann-controller">normal annotated
       <interfacename>@Controller</interfacename></link>, except that we use
       <classname>MultipartHttpServletRequest</classname> or
-      <filename>MultipartFile</filename> in the method parameters:
+      <filename>MultipartFile</filename> in the method parameters:</para>
+
       <programlisting language="java">@Controller
 public class FileUpoadController {
 
@@ -3232,16 +3286,18 @@ public class FileUpoadController {
        }
     }
 
-}</programlisting></para>
+}</programlisting>
 
       <para>Note how the <interfacename>@RequestParam</interfacename> method
       parameters map to the input elements declared in the form. In this
       example, nothing is done with the <literal>byte[]</literal>, but in
       practice you can save it in a database, store it on the file system, and
       so on.</para>
-      
+
       <para>When using Servlet 3.0 multipart parsing you can also use
-      <classname>javax.servlet.http.Part</classname> for the method parameter:
+      <classname>javax.servlet.http.Part</classname> for the method
+      parameter:</para>
+
       <programlisting language="java">@Controller
 public class FileUpoadController {
 
@@ -3255,19 +3311,18 @@ public class FileUpoadController {
         return "redirect:uploadSuccess";
     }
 
-}</programlisting></para>
-
+}</programlisting>
     </section>
-    
+
     <section id="mvc-multipart-forms-non-browsers">
       <title>Handling a file upload request from programmatic clients</title>
-    
-      <para>Multipart requests can also be submitted from non-browser clients in
-      a RESTful service scenario. All of the above examples and configuration 
-      apply here as well. However, unlike browsers that typically submit files
-      and simple form fields, a programmatic client can also send more complex 
-      data of a specific content type &mdash; for example a multipart request with 
-      a file and second part with JSON formatted data:
+
+      <para>Multipart requests can also be submitted from non-browser clients
+      in a RESTful service scenario. All of the above examples and
+      configuration apply here as well. However, unlike browsers that
+      typically submit files and simple form fields, a programmatic client can
+      also send more complex data of a specific content type — for example a
+      multipart request with a file and second part with JSON formatted data:
       <programlisting language="xml">
 POST /someUrl
 Content-Type: multipart/mixed
@@ -3286,24 +3341,22 @@ Content-Type: text/xml
 Content-Transfer-Encoding: 8bit
 ... File Data ...
       </programlisting></para>
-      
+
       <para>You could access the part named "meta-data" with a
-      <interfacename>@RequestParam("meta-data") String metadata</interfacename>
-      controller method argument. However, you would probably 
-      prefer to accept a strongly typed object initialized 
-      from the JSON formatted data in the body of the request 
-      part, very similar to the way 
-      <interfacename>@RequestBody</interfacename> converts 
-      the body of a non-multipart request to a target object
-      with the help of an <classname>HttpMessageConverter</classname>.</para>
-      
-      <para>You can use the <interfacename>@RequestPart</interfacename> 
+      <interfacename>@RequestParam("meta-data") String
+      metadata</interfacename> controller method argument. However, you would
+      probably prefer to accept a strongly typed object initialized from the
+      JSON formatted data in the body of the request part, very similar to the
+      way <interfacename>@RequestBody</interfacename> converts the body of a
+      non-multipart request to a target object with the help of an
+      <classname>HttpMessageConverter</classname>.</para>
+
+      <para>You can use the <interfacename>@RequestPart</interfacename>
       annotation instead of the <interfacename>@RequestParam</interfacename>
-      annotation for this purpose. It allows you to have the 
-      content of a specific multipart passed through an 
-      <classname>HttpMessageConverter</classname>
-      taking into consideration the <literal>'Content-Type'</literal>
-      header of the multipart:</para>
+      annotation for this purpose. It allows you to have the content of a
+      specific multipart passed through an
+      <classname>HttpMessageConverter</classname> taking into consideration
+      the <literal>'Content-Type'</literal> header of the multipart:</para>
 
       <programlisting language="java">@RequestMapping(value="/someUrl", method = RequestMethod.POST)
 public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData metadata,
@@ -3312,28 +3365,25 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
 
 }</programlisting>
 
-      <para>Notice how <classname>MultipartFile</classname> 
-      method arguments can be accessed with <interfacename>@RequestParam</interfacename> 
-      or with <interfacename>@RequestPart</interfacename> interchangeably.
-      However, the <literal>@RequestPart("meta-data") MetaData</literal> 
-      method argument in this case is read as JSON content 
-      based on its <literal>'Content-Type'</literal>
-      header and converted with the help of the 
-      <classname>MappingJacksonHttpMessageConverter</classname>.
-      </para>
-
+      <para>Notice how <classname>MultipartFile</classname> method arguments
+      can be accessed with <interfacename>@RequestParam</interfacename> or
+      with <interfacename>@RequestPart</interfacename> interchangeably.
+      However, the <literal>@RequestPart("meta-data") MetaData</literal>
+      method argument in this case is read as JSON content based on its
+      <literal>'Content-Type'</literal> header and converted with the help of
+      the <classname>MappingJacksonHttpMessageConverter</classname>.</para>
     </section>
-    
   </section>
 
   <section id="mvc-exceptionhandlers">
     <title>Handling exceptions</title>
 
     <section>
-      <title id="mvc-HandlerExceptionResolver"><interfacename>HandlerExceptionResolver</interfacename></title>
+      <title
+      id="mvc-HandlerExceptionResolver"><interfacename>HandlerExceptionResolver</interfacename></title>
 
-      <para>Spring <literal>HandlerExceptionResolver</literal> implementations deal
-      with unexpected exceptions that occur during controller execution.
+      <para>Spring <literal>HandlerExceptionResolver</literal> implementations
+      deal with unexpected exceptions that occur during controller execution.
       A <literal>HandlerExceptionResolver</literal> somewhat resembles the
       exception mappings you can define in the web application descriptor
       <literal>web.xml</literal>. However, they provide a more flexible way to
@@ -3341,7 +3391,7 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
       executing when the exception was thrown. Furthermore, a programmatic way
       of handling exceptions gives you more options for responding
       appropriately before the request is forwarded to another URL (the same
-      end result as when you use the servlet specific exception
+      end result as when you use the Servlet specific exception
       mappings).</para>
 
       <para>Besides implementing the
@@ -3357,58 +3407,75 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
       handlers.</para>
 
       <para>By default, the <classname>DispatcherServlet</classname> registers
-      the <classname>DefaultHandlerExceptionResolver</classname>. This resolver
-      handles certain standard Spring MVC exceptions by setting a specific
-      response status code:
-      <informaltable>
+      the <classname>DefaultHandlerExceptionResolver</classname>. This
+      resolver handles certain standard Spring MVC exceptions by setting a
+      specific response status code: <informaltable>
           <tgroup cols="2">
-              <thead>
-                  <row>
-                      <entry>Exception</entry>
-                      <entry>HTTP Status Code</entry>
-                  </row>
-              </thead>
-              <tbody>
-                  <row>
-                      <entry><classname>ConversionNotSupportedException</classname></entry>
-                      <entry>500 (Internal Server Error)</entry>
-                  </row>
-                  <row>
-                      <entry><classname>HttpMediaTypeNotAcceptableException</classname></entry>
-                      <entry>406 (Not Acceptable)</entry>
-                  </row>
-                  <row>
-                      <entry><classname>HttpMediaTypeNotSupportedException</classname></entry>
-                      <entry>415 (Unsupported Media Type)</entry>
-                  </row>
-                  <row>
-                      <entry><classname>HttpMessageNotReadableException</classname></entry>
-                      <entry>400 (Bad Request)</entry>
-                  </row>
-                  <row>
-                      <entry><classname>HttpMessageNotWritableException</classname></entry>
-                      <entry>500 (Internal Server Error)</entry>
-                  </row>
-                  <row>
-                      <entry><classname>HttpRequestMethodNotSupportedException</classname></entry>
-                      <entry>405 (Method Not Allowed)</entry>
-                  </row>
-                  <row>
-                      <entry><classname>MissingServletRequestParameterException</classname></entry>
-                      <entry>400 (Bad Request)</entry>
-                  </row>
-                  <row>
-                      <entry><classname>NoSuchRequestHandlingMethodException</classname></entry>
-                      <entry>404 (Not Found)</entry>
-                  </row>
-                  <row>
-                      <entry><classname>TypeMismatchException</classname></entry>
-                      <entry>400 (Bad Request)</entry>
-                  </row>
-              </tbody>
+            <thead>
+              <row>
+                <entry>Exception</entry>
+
+                <entry>HTTP Status Code</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><classname>ConversionNotSupportedException</classname></entry>
+
+                <entry>500 (Internal Server Error)</entry>
+              </row>
+
+              <row>
+                <entry><classname>HttpMediaTypeNotAcceptableException</classname></entry>
+
+                <entry>406 (Not Acceptable)</entry>
+              </row>
+
+              <row>
+                <entry><classname>HttpMediaTypeNotSupportedException</classname></entry>
+
+                <entry>415 (Unsupported Media Type)</entry>
+              </row>
+
+              <row>
+                <entry><classname>HttpMessageNotReadableException</classname></entry>
+
+                <entry>400 (Bad Request)</entry>
+              </row>
+
+              <row>
+                <entry><classname>HttpMessageNotWritableException</classname></entry>
+
+                <entry>500 (Internal Server Error)</entry>
+              </row>
+
+              <row>
+                <entry><classname>HttpRequestMethodNotSupportedException</classname></entry>
+
+                <entry>405 (Method Not Allowed)</entry>
+              </row>
+
+              <row>
+                <entry><classname>MissingServletRequestParameterException</classname></entry>
+
+                <entry>400 (Bad Request)</entry>
+              </row>
+
+              <row>
+                <entry><classname>NoSuchRequestHandlingMethodException</classname></entry>
+
+                <entry>404 (Not Found)</entry>
+              </row>
+
+              <row>
+                <entry><classname>TypeMismatchException</classname></entry>
+
+                <entry>400 (Bad Request)</entry>
+              </row>
+            </tbody>
           </tgroup>
-      </informaltable>
-      </para>
+        </informaltable></para>
     </section>
 
     <section id="mvc-ann-exceptionhandler">
@@ -3460,18 +3527,19 @@ public class SimpleController {
     <title>Convention over configuration support</title>
 
     <para>For a lot of projects, sticking to established conventions and
-    having reasonable defaults is just what they (the projects) need... this
-    theme of convention-over-configuration now has explicit support in Spring
-    Web MVC. What this means is that if you establish a set of naming
-    conventions and suchlike, you can <emphasis>substantially</emphasis> cut
-    down on the amount of configuration that is required to set up handler
-    mappings, view resolvers, <classname>ModelAndView</classname> instances,
-    etc. This is a great boon with regards to rapid prototyping, and can also
-    lend a degree of (always good-to-have) consistency across a codebase
-    should you choose to move forward with it into production.</para>
+    having reasonable defaults is just what they (the projects) need, and
+    Spring Web MVC now has explicit support for <emphasis>convention over
+    configuration</emphasis>. What this means is that if you establish a set
+    of naming conventions and suchlike, you can
+    <emphasis>substantially</emphasis> cut down on the amount of configuration
+    that is required to set up handler mappings, view resolvers,
+    <classname>ModelAndView</classname> instances, etc. This is a great boon
+    with regards to rapid prototyping, and can also lend a degree of (always
+    good-to-have) consistency across a codebase should you choose to move
+    forward with it into production.</para>
 
     <para>Convention-over-configuration support addresses the three core areas
-    of MVC &mdash; models, views, and controllers.</para>
+    of MVC: models, views, and controllers.</para>
 
     <section id="mvc-coc-ccnhm">
       <title>The Controller
@@ -3494,8 +3562,8 @@ public class SimpleController {
     }
 }</programlisting>
 
-      <para>Here is a snippet from the attendent Spring Web MVC configuration
-      file...</para>
+      <para>Here is a snippet from the corresponding Spring Web MVC
+      configuration file:</para>
 
       <programlisting language="xml">&lt;bean class="org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping"/&gt;
                 
@@ -3659,12 +3727,13 @@ public class SimpleController {
       </sidebar>
 
       <para>The strategy for generating a name after adding a
-      <interfacename>Set</interfacename> or a <interfacename>List</interfacename>
-      is to peek into the collection, take the short class name of the first object
-      in the collection, and use that with <literal>List</literal> appended to the
-      name. The same applies to arrays although with arrays it is not necessary to 
-      peek into the array contents. A few examples will make the semantics of name
-      generation for collections clearer:</para>
+      <interfacename>Set</interfacename> or a
+      <interfacename>List</interfacename> is to peek into the collection, take
+      the short class name of the first object in the collection, and use that
+      with <literal>List</literal> appended to the name. The same applies to
+      arrays although with arrays it is not necessary to peek into the array
+      contents. A few examples will make the semantics of name generation for
+      collections clearer:</para>
 
       <itemizedlist>
         <listitem>
@@ -3744,8 +3813,7 @@ public class SimpleController {
         &lt;property name="suffix" value=".jsp"/&gt;
     &lt;/bean&gt;
 
-&lt;/beans&gt;
-</programlisting>
+&lt;/beans&gt;</programlisting>
 
       <para>Notice how in the implementation of the
       <literal>handleRequest(..)</literal> method no
@@ -3796,7 +3864,7 @@ public class SimpleController {
     content has not changed, the server returns <literal>304: Not
     Modified</literal>.</para>
 
-    <para>Support for ETags is provided by the servlet filter
+    <para>Support for ETags is provided by the Servlet filter
     <classname>ShallowEtagHeaderFilter</classname>. It is a plain Servlet
     Filter, and thus can be used in combination with any web framework. <!--The preceding sentence was a fragment, not a complete sentence. Have I reworded ok?-->The
     <classname>ShallowEtagHeaderFilter</classname> filter creates so-called
@@ -3824,276 +3892,326 @@ public class SimpleController {
   &lt;servlet-name&gt;petclinic&lt;/servlet-name&gt;
 &lt;/filter-mapping&gt;</programlisting>
   </section>
+
   <section id="mvc-config">
-  	<title>Configuring Spring MVC</title>
-  	<para>
-  		Spring 3 introduces a <literal>mvc</literal> XML configuration namespace that simplifies the setup of Spring MVC inside your web application.
-  		Instead of registering low-level beans such as AnnotationMethodHandlerAdapter, you can simply use the namespace and its higher-level constructs.
-  		This is generally preferred unless you require finer-grained control of the configuration at the bean level.
-  	</para>
-  	<para>
-  		The mvc namespace consists of three tags: mvc:annotation-driven, mvc:interceptors, and mvc:view-controller.
-  		Each of these tags is documented below and in the <ulink url="http://static.springsource.org/schema/mvc/spring-mvc-3.0.xsd">XML schema</ulink>.
-  	</para>
-  	<section id="mvc-annotation-driven">
-  		<title>mvc:annotation-driven</title>
-  		<para>
-			This tag registers the RequestMappingHandlerMapping and RequestMappingHandlerAdapter beans that are required for Spring MVC to dispatch requests to @Controllers.
-			The tag configures those two beans with sensible defaults based on what is present in your classpath.
-			The defaults are:
-    		<orderedlist>
-    			<listitem>
-    				<para>
-			    		Support for Spring 3's Type <link linkend="core-convert">ConversionService</link> in addition to JavaBeans PropertyEditors during Data Binding.
-			    		A ConversionService instance produced by the <classname>org.springframework.format.support.FormattingConversionServiceFactoryBean</classname> is used by default.
-			    		This can be overridden by setting the <literal>conversion-service</literal> attribute. 
-    				</para>
-    			</listitem>
-    			<listitem>
-    				<para>
-    					Support for <link linkend="format">formatting</link> Number fields using the @NumberFormat annotation
-    				</para>
-    			</listitem>
-    			<listitem>
-    				<para>
-					    Support for <link linkend="format">formatting</link> Date, Calendar, Long, and Joda Time fields using the @DateTimeFormat annotation, if Joda Time 1.3 or higher is present on the classpath.
-    				</para>
-    			</listitem>
-    			<listitem>
-    				<para>
-    					Support for <link linkend="validation-mvc-jsr303">validating</link> @Controller inputs with @Valid, if a JSR-303 Provider is present on the classpath.
-    					The validation system can be explicitly configured by setting the <literal>validator</literal> attribute.
-    				</para>
-    			</listitem>
-    			<listitem>
-    				<para>
-    					HttpMessageConverter support for @RequestBody method parameters and @ResponseBody method return values.
-    				</para>
-    				<para>
-    					This is the complete list of HttpMessageConverters set up by mvc:annotation-driven:
-				        <itemizedlist>
-				          <listitem>
-				            <para><classname>ByteArrayHttpMessageConverter</classname>
-				            converts byte arrays.</para>
-				          </listitem>
-				
-				          <listitem>
-				            <para><classname>StringHttpMessageConverter</classname> converts
-				            strings.</para>
-				          </listitem>
-				
-				          <listitem>
-				            <para><classname>ResourceHttpMessageConverter</classname> converts
-				            to/from <classname>org.springframework.core.io.Resource</classname> 
-				            for all media types.</para>
-				          </listitem>
+    <title>Configuring Spring MVC</title>
 
-				          <listitem>
-				            <para><classname>SourceHttpMessageConverter</classname> converts
-				            to/from a <classname>javax.xml.transform.Source</classname>.</para>
-				          </listitem>
-				
-				          <listitem>
-				            <para><classname>FormHttpMessageConverter</classname> converts
-				            form data to/from a <classname>MultiValueMap&lt;String, String&gt;</classname>.</para>
-				          </listitem>
-				
-				          <listitem>
-				            <para><classname>Jaxb2RootElementHttpMessageConverter</classname>
-				            converts Java objects to/from XML &mdash; added if JAXB2 is present 
-				            on the classpath.
-				            </para>
-				          </listitem>
+    <para>Spring 3 introduces a <literal>mvc</literal> XML configuration
+    namespace that simplifies the setup of Spring MVC inside your web
+    application. Instead of registering low-level beans such as
+    AnnotationMethodHandlerAdapter, you can simply use the namespace and its
+    higher-level constructs. This is generally preferred unless you require
+    finer-grained control of the configuration at the bean level.</para>
 
-				          <listitem>
-				            <para><classname>MappingJacksonHttpMessageConverter</classname>
-				            converts to/from JSON &mdash; added if Jackson is present on the classpath.
-				            </para>
-				          </listitem>
+    <para>The mvc namespace consists of three tags: mvc:annotation-driven,
+    mvc:interceptors, and mvc:view-controller. Each of these tags is
+    documented below and in the <ulink
+    url="http://static.springsource.org/schema/mvc/spring-mvc-3.0.xsd">XML
+    schema</ulink>.</para>
 
-				          <listitem>
-				            <para><classname>AtomFeedHttpMessageConverter</classname>
-				            converts Atom feeds &mdash; added if Rome is present on the classpath.
-				            </para>
-				          </listitem>
+    <section id="mvc-annotation-driven">
+      <title>mvc:annotation-driven</title>
 
-				          <listitem>
-				            <para><classname>RssChannelHttpMessageConverter</classname>
-				            converts RSS feeds &mdash; added if Rome is present on the classpath.
-				            </para>
-				          </listitem>
-			        	</itemizedlist>
-    				</para>
-		            <note>
-						<para>
-							You can provide your own HttpMessageConverters through the 
-							mvc:message-converters sub-element of mvc:annotation-driven.
-							Message converters you provide will take precedence over the 
-							ones registered by default.
-						</para>
-		            </note>
-    			</listitem>
-    		</orderedlist>
-    		A typical usage is shown below:
-			<programlisting language="xml"><![CDATA[
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
+      <para>This tag registers the RequestMappingHandlerMapping and
+      RequestMappingHandlerAdapter beans that are required for Spring MVC to
+      dispatch requests to @Controllers. The tag configures those two beans
+      with sensible defaults based on what is present in your classpath. The
+      defaults are: <orderedlist>
+          <listitem>
+            <para>Support for Spring 3's Type <link
+            linkend="core-convert">ConversionService</link> in addition to
+            JavaBeans PropertyEditors during Data Binding. A ConversionService
+            instance produced by the
+            <classname>org.springframework.format.support.FormattingConversionServiceFactoryBean</classname>
+            is used by default. This can be overridden by setting the
+            <literal>conversion-service</literal> attribute.</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for <link linkend="format">formatting</link> Number
+            fields using the @NumberFormat annotation</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for <link linkend="format">formatting</link> Date,
+            Calendar, Long, and Joda Time fields using the @DateTimeFormat
+            annotation, if Joda Time 1.3 or higher is present on the
+            classpath.</para>
+          </listitem>
+
+          <listitem>
+            <para>Support for <link
+            linkend="validation-mvc-jsr303">validating</link> @Controller
+            inputs with @Valid, if a JSR-303 Provider is present on the
+            classpath. The validation system can be explicitly configured by
+            setting the <literal>validator</literal> attribute.</para>
+          </listitem>
+
+          <listitem>
+            <para>HttpMessageConverter support for @RequestBody method
+            parameters and @ResponseBody method return values.</para>
+
+            <para>This is the complete list of HttpMessageConverters set up by
+            mvc:annotation-driven: <itemizedlist>
+                <listitem>
+                  <para><classname>ByteArrayHttpMessageConverter</classname>
+                  converts byte arrays.</para>
+                </listitem>
+
+                <listitem>
+                  <para><classname>StringHttpMessageConverter</classname>
+                  converts strings.</para>
+                </listitem>
+
+                <listitem>
+                  <para><classname>ResourceHttpMessageConverter</classname>
+                  converts to/from
+                  <classname>org.springframework.core.io.Resource</classname>
+                  for all media types.</para>
+                </listitem>
+
+                <listitem>
+                  <para><classname>SourceHttpMessageConverter</classname>
+                  converts to/from a
+                  <classname>javax.xml.transform.Source</classname>.</para>
+                </listitem>
+
+                <listitem>
+                  <para><classname>FormHttpMessageConverter</classname>
+                  converts form data to/from a
+                  <classname>MultiValueMap&lt;String,
+                  String&gt;</classname>.</para>
+                </listitem>
+
+                <listitem>
+                  <para><classname>Jaxb2RootElementHttpMessageConverter</classname>
+                  converts Java objects to/from XML — added if JAXB2 is
+                  present on the classpath.</para>
+                </listitem>
+
+                <listitem>
+                  <para><classname>MappingJacksonHttpMessageConverter</classname>
+                  converts to/from JSON — added if Jackson is present on the
+                  classpath.</para>
+                </listitem>
+
+                <listitem>
+                  <para><classname>AtomFeedHttpMessageConverter</classname>
+                  converts Atom feeds — added if Rome is present on the
+                  classpath.</para>
+                </listitem>
+
+                <listitem>
+                  <para><classname>RssChannelHttpMessageConverter</classname>
+                  converts RSS feeds — added if Rome is present on the
+                  classpath.</para>
+                </listitem>
+              </itemizedlist></para>
+
+            <note>
+              <para>You can provide your own HttpMessageConverters through the
+              mvc:message-converters sub-element of mvc:annotation-driven.
+              Message converters you provide will take precedence over the
+              ones registered by default.</para>
+            </note>
+          </listitem>
+        </orderedlist> A typical usage is shown below: <programlisting
+      language="xml">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:mvc="http://www.springframework.org/schema/mvc"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans 
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd"&gt;
 
-    <!-- JSR-303 support will be detected on classpath and enabled automatically -->
-    <mvc:annotation-driven/>
+    &lt;!-- JSR-303 support will be detected on classpath and enabled automatically --&gt;
+    &lt;mvc:annotation-driven/&gt;
     
-</beans>]]>
-			</programlisting>   		
-  		</para>
-  	</section>
-  	<section id="mvc-interceptors">
-  		<title>mvc:interceptors</title>
-  		<para>
-  			This tag allows you to register custom HandlerInterceptors or WebRequestInterceptors that should be applied to all HandlerMapping beans.
-  			You can also restrict the URL paths that specific interceptors apply to.
-  		</para>
-  		<para>
-  			An example of registering an interceptor applied to all URL paths:
-  		</para>
-		<programlisting language="xml"><![CDATA[
-<mvc:interceptors>
-    <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
-</mvc:interceptors>]]>
-		</programlisting>  
-		<para>
-			An example of registering an interceptor limited to a specific URL path:
-		</para> 		
-		<programlisting language="xml"><![CDATA[
-<mvc:interceptors>
-    <mvc:interceptor>
-        <mapping path="/secure/*"/>
-        <bean class="org.example.SecurityInterceptor" />
-    </mvc:interceptor>
-</mvc:interceptors>]]>
-		</programlisting>
-  	</section>
-  	<section id="mvc-view-controller">
-  		<title>mvc:view-controller</title>
-  		<para>
-  			This tag is a shortcut for defining a <classname>ParameterizableViewController</classname> that immediately forwards to a view when invoked.
-  			Use it in static cases when there is no Java Controller logic to execute before the view generates the response.
-  		</para>
-  		<para>
-  			An example of view-controller that forwards to a home page is shown below:
-  		</para>
-		<programlisting language="xml"><![CDATA[
-<mvc:view-controller path="/" view-name="home"/>]]>
-		</programlisting>  		
-  	</section>
-  	<section id="mvc-static-resources">
-  		<title>mvc:resources</title>
-  		<para>
-  			This tag allows static resource requests following a particular URL pattern to be served by a <classname>ResourceHttpRequestHandler</classname> from 
-  			any of a list of <classname>Resource</classname> locations.  This provides a convenient way to serve static resources from locations other than the 
-  			web application root, including locations on the classpath. The <code>cache-period</code> property may be used to set far future expiration headers 
-  			(1 year is the recommendation of optimization tools such as Page Speed and YSlow) so that they will be more efficiently utilized by the client.  The handler 
-  			also properly evaluates the <code>Last-Modified</code> header (if present) so that a <code>304</code> status code will be returned as appropriate, avoiding 
-  			unnecessary overhead for resources that are already cached by the client.  For example, to serve resource requests with a URL pattern of 
-  			<code>/resources/**</code> from a <code>public-resources</code> directory within the web application root, the tag would be used as follows: 
-  		</para>
-  		<programlisting language="xml"><![CDATA[
-<mvc:resources mapping="/resources/**" location="/public-resources/"/>]]>
-  		</programlisting>
-  		<para>
-  			To serve these resources with a 1-year future expiration to ensure maximum use of the browser cache and a reduction in HTTP requests made by the browser:
-  		</para>
-  		<programlisting language="xml"><![CDATA[
-<mvc:resources mapping="/resources/**" location="/public-resources/" cache-period="31556926"/>]]>
-  		</programlisting>
-  		<para>
-  			The <code>mapping</code> attribute must be an Ant pattern that can be used by <classname>SimpleUrlHandlerMapping</classname>, and the <code>location</code> 
-  			attribute must specify one or more valid resource directory locations.  Multiple resource locations may be specified using a comma-separated list of values. 
-  			The locations specified will be checked in the specified order for the presence of the resource for any given request.  For example, to enable the serving 
-  			of resources from both the web application root and from a known path of <code>/META-INF/public-web-resources/</code> in any jar on the classpath, the tag 
-  			would be specified as: 
-  		</para>
-  		<programlisting language="xml"><![CDATA[
-<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/public-web-resources/"/>]]>
-  		</programlisting>
-  		<para>
-  			When serving resources that may change when a new version of the application is deployed, it is recommended that you incorporate a version string into the 
-  			mapping pattern used to request the resources, so that you may force clients to request the newly deployed version of your application's resources.  Such a 
-  			version string can be parameterized and accessed using SpEL so that it may be easily managed in a single place when deploying new versions.
-  		</para>
-  		<para>  
-  			As an example, let's consider an application that uses a performance-optimized custom build (as recommended) of the Dojo JavaScript library in production, and that the build is generally 
-  			deployed within the web application at a path of <code>/public-resources/dojo/dojo.js</code>.  Since different parts of Dojo may be incorporated into the 
-  			custom build for each new version of the application, the client web browsers need to be forced to re-download that custom-built <code>dojo.js</code> resource 
-  			any time a new version of the application is deployed.  A simple way to achieve this would be to manage the version of the application in a properties file, 
-  			such as:          
-  		</para>
-  		<programlisting><![CDATA[
-application.version=1.0.0]]>
-  		</programlisting>
-  		<para>
-  			and then to make the properties file's values accessible to SpEL as a bean using the <code>util:properties</code> tag:
-  		</para>
-  		<programlisting language="xml"><![CDATA[
-<util:properties id="applicationProps" location="/WEB-INF/spring/application.properties"/>]]>
-  		</programlisting>
-  		<para>
-  			With the application version now accessible via SpEL, we can incorporate this into the use of the <code>resources</code> tag:
-  		</para>
-  		<programlisting language="xml"><![CDATA[
-<mvc:resources mapping="/resources-#{applicationProps['application.version']}/**" location="/public-resources/"/>]]>
-  		</programlisting>
-  		<para>
-  			and finally, to request the resource with the proper URL, we can take advantage of the Spring JSP tags:
-  		</para>
-  		<programlisting language="xml"><![CDATA[
-<spring:eval expression="@applicationProps['application.version']" var="applicationVersion"/>
+&lt;/beans&gt;</programlisting></para>
+    </section>
 
-<spring:url value="/resources-{applicationVersion}" var="resourceUrl">
-	<spring:param name="applicationVersion" value="${applicationVersion}"/>
-</spring:url>
+    <section id="mvc-interceptors">
+      <title>mvc:interceptors</title>
 
-<script src="${resourceUrl}/dojo/dojo.js" type="text/javascript"> </script>]]>
-  		</programlisting>
-  	</section>
-  	<section id="mvc-default-servlet-handler">
-  		<title>mvc:default-servlet-handler</title>
-  		<para>
-  			This tag allows for mapping the <code>DispatcherServlet</code> to "/" (thus overriding the mapping of the container's default Servlet), 
-  			while still allowing static resource requests to be handled by the container's default Servlet.  It configures a 
-  			<code>DefaultServletHttpRequestHandler</code> with a URL mapping of "/**" and the lowest priority relative to other URL mappings.  
-  		</para>
-  		<para>
-  			This handler will forward all requests to the default Servlet. Therefore it is important that it remains last in the order of all
-  			other URL <code>HandlerMappings</code>. That will be the case if you use <code>&lt;mvc:annotation-driven&gt;</code> or alternatively if you 
-  			are setting up your own customized <code>HandlerMapping</code> instance be sure to set its <code>order</code> property to a value lower than 
-  			that of the <code>DefaultServletHttpRequestHandler</code>, which is <code>Integer.MAX_VALUE</code>.
-  		</para>
-  		<para>
-  			To enable the feature using the default setup, simply include the tag in the form:
-  		</para>
-  		<programlisting language="xml"><![CDATA[
-<mvc:default-servlet-handler/>]]>
-  		</programlisting>
-  		<para>
-  			The caveat to overriding the "/" Servlet mapping is that the <code>RequestDispatcher</code> for the default Servlet must be 
-  			retrieved by name rather than by path.  The <code>DefaultServletHttpRequestHandler</code> will attempt to auto-detect the default 
-  			Servlet for the container at startup time, using a list of known names for most of the major Servlet containers (including Tomcat, 
-  			Jetty, Glassfish, JBoss, Resin, WebLogic, and WebSphere).  If the default Servlet has been custom configured 
-  			with a different name, or if a different Servlet container is being used where the default Servlet name is unknown, then the 
-  			default Servlet's name must be explicitly provided as in the following example:
-  		</para>
-  		<programlisting language="xml"><![CDATA[
-<mvc:default-servlet-handler default-servlet-name="myCustomDefaultServlet"/>]]>
-  		</programlisting>
-  	</section>
+      <para>This tag allows you to register custom HandlerInterceptors or
+      WebRequestInterceptors that should be applied to all HandlerMapping
+      beans. You can also restrict the URL paths that specific interceptors
+      apply to.</para>
+
+      <para>An example of registering an interceptor applied to all URL
+      paths:</para>
+
+      <programlisting language="xml">
+&lt;mvc:interceptors&gt;
+    &lt;bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" /&gt;
+&lt;/mvc:interceptors&gt;</programlisting>
+
+      <para>An example of registering an interceptor limited to a specific URL
+      path:</para>
+
+      <programlisting language="xml">
+&lt;mvc:interceptors&gt;
+    &lt;mvc:interceptor&gt;
+        &lt;mapping path="/secure/*"/&gt;
+        &lt;bean class="org.example.SecurityInterceptor" /&gt;
+    &lt;/mvc:interceptor&gt;
+&lt;/mvc:interceptors&gt;</programlisting>
+    </section>
+
+    <section id="mvc-view-controller">
+      <title>mvc:view-controller</title>
+
+      <para>This tag is a shortcut for defining a
+      <classname>ParameterizableViewController</classname> that immediately
+      forwards to a view when invoked. Use it in static cases when there is no
+      Java Controller logic to execute before the view generates the
+      response.</para>
+
+      <para>An example of view-controller that forwards to a home page is
+      shown below:</para>
+
+      <programlisting language="xml">
+&lt;mvc:view-controller path="/" view-name="home"/&gt;</programlisting>
+    </section>
+
+    <section id="mvc-static-resources">
+      <title>mvc:resources</title>
+
+      <para>This tag allows static resource requests following a particular
+      URL pattern to be served by a
+      <classname>ResourceHttpRequestHandler</classname> from any of a list of
+      <classname>Resource</classname> locations. This provides a convenient
+      way to serve static resources from locations other than the web
+      application root, including locations on the classpath. The
+      <code>cache-period</code> property may be used to set far future
+      expiration headers (1 year is the recommendation of optimization tools
+      such as Page Speed and YSlow) so that they will be more efficiently
+      utilized by the client. The handler also properly evaluates the
+      <code>Last-Modified</code> header (if present) so that a
+      <code>304</code> status code will be returned as appropriate, avoiding
+      unnecessary overhead for resources that are already cached by the
+      client. For example, to serve resource requests with a URL pattern of
+      <code>/resources/**</code> from a <code>public-resources</code>
+      directory within the web application root, the tag would be used as
+      follows:</para>
+
+      <programlisting language="xml">
+&lt;mvc:resources mapping="/resources/**" location="/public-resources/"/&gt;</programlisting>
+
+      <para>To serve these resources with a 1-year future expiration to ensure
+      maximum use of the browser cache and a reduction in HTTP requests made
+      by the browser:</para>
+
+      <programlisting language="xml">
+&lt;mvc:resources mapping="/resources/**" location="/public-resources/" cache-period="31556926"/&gt;</programlisting>
+
+      <para>The <code>mapping</code> attribute must be an Ant pattern that can
+      be used by <classname>SimpleUrlHandlerMapping</classname>, and the
+      <code>location</code> attribute must specify one or more valid resource
+      directory locations. Multiple resource locations may be specified using
+      a comma-separated list of values. The locations specified will be
+      checked in the specified order for the presence of the resource for any
+      given request. For example, to enable the serving of resources from both
+      the web application root and from a known path of
+      <code>/META-INF/public-web-resources/</code> in any jar on the
+      classpath, the tag would be specified as:</para>
+
+      <programlisting language="xml">
+&lt;mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/public-web-resources/"/&gt;</programlisting>
+
+      <para>When serving resources that may change when a new version of the
+      application is deployed, it is recommended that you incorporate a
+      version string into the mapping pattern used to request the resources,
+      so that you may force clients to request the newly deployed version of
+      your application's resources. Such a version string can be parameterized
+      and accessed using SpEL so that it may be easily managed in a single
+      place when deploying new versions.</para>
+
+      <para>As an example, let's consider an application that uses a
+      performance-optimized custom build (as recommended) of the Dojo
+      JavaScript library in production, and that the build is generally
+      deployed within the web application at a path of
+      <code>/public-resources/dojo/dojo.js</code>. Since different parts of
+      Dojo may be incorporated into the custom build for each new version of
+      the application, the client web browsers need to be forced to
+      re-download that custom-built <code>dojo.js</code> resource any time a
+      new version of the application is deployed. A simple way to achieve this
+      would be to manage the version of the application in a properties file,
+      such as:</para>
+
+      <programlisting>
+application.version=1.0.0</programlisting>
+
+      <para>and then to make the properties file's values accessible to SpEL
+      as a bean using the <code>util:properties</code> tag:</para>
+
+      <programlisting language="xml">
+&lt;util:properties id="applicationProps" location="/WEB-INF/spring/application.properties"/&gt;</programlisting>
+
+      <para>With the application version now accessible via SpEL, we can
+      incorporate this into the use of the <code>resources</code> tag:</para>
+
+      <programlisting language="xml">
+&lt;mvc:resources mapping="/resources-#{applicationProps['application.version']}/**" location="/public-resources/"/&gt;</programlisting>
+
+      <para>and finally, to request the resource with the proper URL, we can
+      take advantage of the Spring JSP tags:</para>
+
+      <programlisting language="xml">
+&lt;spring:eval expression="@applicationProps['application.version']" var="applicationVersion"/&gt;
+
+&lt;spring:url value="/resources-{applicationVersion}" var="resourceUrl"&gt;
+	&lt;spring:param name="applicationVersion" value="${applicationVersion}"/&gt;
+&lt;/spring:url&gt;
+
+&lt;script src="${resourceUrl}/dojo/dojo.js" type="text/javascript"&gt; &lt;/script&gt;</programlisting>
+    </section>
+
+    <section id="mvc-default-servlet-handler">
+      <title>mvc:default-servlet-handler</title>
+
+      <para>This tag allows for mapping the <code>DispatcherServlet</code> to
+      "/" (thus overriding the mapping of the container's default Servlet),
+      while still allowing static resource requests to be handled by the
+      container's default Servlet. It configures a
+      <code>DefaultServletHttpRequestHandler</code> with a URL mapping of
+      "/**" and the lowest priority relative to other URL mappings.</para>
+
+      <para>This handler will forward all requests to the default Servlet.
+      Therefore it is important that it remains last in the order of all other
+      URL <code>HandlerMappings</code>. That will be the case if you use
+      <code>&lt;mvc:annotation-driven&gt;</code> or alternatively if you are
+      setting up your own customized <code>HandlerMapping</code> instance be
+      sure to set its <code>order</code> property to a value lower than that
+      of the <code>DefaultServletHttpRequestHandler</code>, which is
+      <code>Integer.MAX_VALUE</code>.</para>
+
+      <para>To enable the feature using the default setup, simply include the
+      tag in the form:</para>
+
+      <programlisting language="xml">
+&lt;mvc:default-servlet-handler/&gt;</programlisting>
+
+      <para>The caveat to overriding the "/" Servlet mapping is that the
+      <code>RequestDispatcher</code> for the default Servlet must be retrieved
+      by name rather than by path. The
+      <code>DefaultServletHttpRequestHandler</code> will attempt to
+      auto-detect the default Servlet for the container at startup time, using
+      a list of known names for most of the major Servlet containers
+      (including Tomcat, Jetty, Glassfish, JBoss, Resin, WebLogic, and
+      WebSphere). If the default Servlet has been custom configured with a
+      different name, or if a different Servlet container is being used where
+      the default Servlet name is unknown, then the default Servlet's name
+      must be explicitly provided as in the following example:</para>
+
+      <programlisting language="xml">
+&lt;mvc:default-servlet-handler default-servlet-name="myCustomDefaultServlet"/&gt;</programlisting>
+    </section>
   </section>
+
   <section id="mvc-resources">
     <title>More Spring Web MVC Resources</title>
 
@@ -4102,10 +4220,10 @@ application.version=1.0.0]]>
 
     <itemizedlist>
       <listitem>
-        <para>
-			There are many excellent articles and tutorials that show how to build web applications with Spring MVC. 
-			Read them at the <ulink url="http://www.springsource.org/documentation">Spring Documentation</ulink> page.
-		</para>
+        <para>There are many excellent articles and tutorials that show how to
+        build web applications with Spring MVC. Read them at the <ulink
+        url="http://www.springsource.org/documentation">Spring
+        Documentation</ulink> page.</para>
       </listitem>
 
       <listitem>
