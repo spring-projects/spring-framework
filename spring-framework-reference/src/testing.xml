@@ -429,8 +429,8 @@
           load and configure an
           <interfacename>ApplicationContext</interfacename> for test classes.
           Specifically, <interfacename>@ContextConfiguration</interfacename>
-          declares either the application context resource
-          <literal>locations</literal> or the
+          declares <emphasis>either</emphasis> the application context
+          resource <literal>locations</literal> <emphasis>or</emphasis> the
           <interfacename>@Configuration</interfacename>
           <varname>classes</varname> to load as well as the
           <interfacename>ContextLoader</interfacename> strategy to use for
@@ -439,18 +439,28 @@
           either resource <varname>locations</varname> or configuration
           <varname>classes</varname>.</para>
 
-          <programlisting language="java">@ContextConfiguration(locations="example/test-context.xml", loader=CustomContextLoader.class)
-public class CustomConfiguredApplicationContextTests {
+          <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>(<emphasis
+              role="bold">locations</emphasis>="example/test-context.xml", <emphasis
+              role="bold">loader</emphasis>=CustomContextLoader.class)
+public class XmlApplicationContextTests {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+          <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>(<emphasis
+              role="bold">classes</emphasis>=MyConfig.class)
+public class ConfigClassApplicationContextTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
           <note>
             <para><interfacename>@ContextConfiguration</interfacename>
-            supports <emphasis>inherited</emphasis> resource locations by
-            default. See <link linkend="testcontext-ctx-management">Context
-            management and caching</link> and Javadoc for an example and
-            further details.</para>
+            provides support for <emphasis>inheriting</emphasis> resource
+            locations or configuration classes by default.</para>
           </note>
+
+          <para>See <link linkend="testcontext-ctx-management">Context
+          management and caching</link> and Javadoc for examples and further
+          details.</para>
         </listitem>
 
         <listitem>
@@ -497,17 +507,18 @@ public class CustomConfiguredApplicationContextTests {
           <literal>AFTER_EACH_TEST_METHOD</literal>, the context is marked
           dirty after each test method in the class.</para>
 
-          <programlisting language="java">@DirtiesContext
+          <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>
 public class ContextDirtyingTests {
     <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
 }</programlisting>
 
-          <programlisting language="java">@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+          <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>(<emphasis
+              role="bold">classMode</emphasis> = ClassMode.AFTER_EACH_TEST_METHOD)
 public class ContextDirtyingTests {
     <lineannotation>// some tests that result in the Spring container being dirtied</lineannotation>
 }</programlisting>
 
-          <programlisting language="java">@DirtiesContext
+          <programlisting language="java"><emphasis role="bold">@DirtiesContext</emphasis>
 @Test
 public void testProcessWhichDirtiesAppCtx() {
     <lineannotation>// some logic that results in the Spring container being dirtied</lineannotation>
@@ -532,7 +543,7 @@ public void testProcessWhichDirtiesAppCtx() {
           <interfacename>@ContextConfiguration</interfacename>.</para>
 
           <programlisting language="java">@ContextConfiguration
-@TestExecutionListeners({CustomTestExecutionListener.class, AnotherTestExecutionListener.class})
+<emphasis role="bold">@TestExecutionListeners</emphasis>({CustomTestExecutionListener.class, AnotherTestExecutionListener.class})
 public class CustomTestExecutionListenerTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -559,7 +570,9 @@ public class CustomTestExecutionListenerTests {
           <interfacename>@ContextConfiguration</interfacename>.</para>
 
           <programlisting language="java">@ContextConfiguration
-@TransactionConfiguration(transactionManager="txMgr", defaultRollback=false)
+<emphasis role="bold">@TransactionConfiguration</emphasis>(<emphasis
+              role="bold">transactionManager</emphasis>="txMgr", <emphasis
+              role="bold">defaultRollback</emphasis>=false)
 public class CustomConfiguredTransactionalTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -587,7 +600,7 @@ public class CustomConfiguredTransactionalTests {
           <interfacename>@Rollback</interfacename> to override the default
           rollback flag configured at the class level.</para>
 
-          <programlisting language="java">@Rollback(false)
+          <programlisting language="java"><emphasis role="bold">@Rollback</emphasis>(false)
 @Test
 public void testProcessWithoutRollback() {
     <lineannotation>// ...</lineannotation>
@@ -604,8 +617,8 @@ public void testProcessWithoutRollback() {
           via the <interfacename>@Transactional</interfacename>
           annotation.</para>
 
-          <programlisting language="java">@BeforeTransaction
-public void beforeTransaction() {
+          <programlisting language="java"><emphasis role="bold">@BeforeTransaction
+</emphasis>public void beforeTransaction() {
     <lineannotation>// logic to be executed before a transaction is started</lineannotation>
 }</programlisting>
         </listitem>
@@ -620,8 +633,8 @@ public void beforeTransaction() {
           via the <interfacename>@Transactional</interfacename>
           annotation.</para>
 
-          <programlisting language="java">@AfterTransaction
-public void afterTransaction() {
+          <programlisting language="java"><emphasis role="bold">@AfterTransaction
+</emphasis>public void afterTransaction() {
     <lineannotation>// logic to be executed after a transaction has ended</lineannotation>
 }</programlisting>
         </listitem>
@@ -634,7 +647,7 @@ public void afterTransaction() {
           test method must <emphasis>not</emphasis> execute in a transactional
           context.</para>
 
-          <programlisting language="java">@NotTransactional 
+          <programlisting language="java"><emphasis role="bold">@NotTransactional</emphasis>
 @Test
 public void testProcessWithoutTransaction() {
     <lineannotation>// ...</lineannotation>
@@ -679,7 +692,8 @@ public void testProcessWithoutTransaction() {
           class or to individual methods. Class-level usage overrides
           method-level usage.</para>
 
-          <programlisting language="java">@IfProfileValue(name="java.vendor", value="Sun Microsystems Inc.")
+          <programlisting language="java"><emphasis role="bold">@IfProfileValue</emphasis>(<emphasis
+              role="bold">name</emphasis>="java.vendor", <emphasis role="bold">value</emphasis>="Sun Microsystems Inc.")
 @Test
 public void testProcessWhichRunsOnlyOnSunJvm() {
     <lineannotation>// some logic that should run only on Java VMs from Sun Microsystems</lineannotation>
@@ -691,7 +705,8 @@ public void testProcessWhichRunsOnlyOnSunJvm() {
           to achieve TestNG-like support for <emphasis>test groups</emphasis>
           in a JUnit environment. Consider the following example:</para>
 
-          <programlisting language="java">@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"})
+          <programlisting language="java"><emphasis role="bold">@IfProfileValue</emphasis>(<emphasis
+              role="bold">name</emphasis>="test-groups", <emphasis role="bold">values</emphasis>={"unit-tests", "integration-tests"})
 @Test
 public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
     <lineannotation>// some logic that should run only for unit and integration test groups</lineannotation>
@@ -711,7 +726,7 @@ public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
           <classname>SystemProfileValueSource</classname> is used by
           default.</para>
 
-          <programlisting language="java">@ProfileValueSourceConfiguration(CustomProfileValueSource.class)
+          <programlisting language="java"><emphasis role="bold">@ProfileValueSourceConfiguration</emphasis>(CustomProfileValueSource.class)
 public class CustomProfileValueSourceTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -731,7 +746,7 @@ public class CustomProfileValueSourceTests {
           <emphasis>set up</emphasis> or <emphasis>tear down</emphasis> of the
           test fixture.</para>
 
-          <programlisting language="java">@Timed(millis=1000)
+          <programlisting language="java"><emphasis role="bold">@Timed</emphasis>(millis=1000)
 public void testProcessWithOneSecondTimeout() {
     <lineannotation>// some logic that should not take longer than 1 second to execute</lineannotation>
 }</programlisting>
@@ -763,7 +778,7 @@ public void testProcessWithOneSecondTimeout() {
           the test method itself as well as any <emphasis>set up</emphasis> or
           <emphasis>tear down</emphasis> of the test fixture.</para>
 
-          <programlisting language="java">@Repeat(10)
+          <programlisting language="java"><emphasis role="bold">@Repeat</emphasis>(10)
 @Test
 public void testProcessRepeatedly() {
     <lineannotation>// ...</lineannotation>
@@ -1033,7 +1048,7 @@ public class MyTest {
         <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from <literal>"/applicationContext.xml"</literal> and <literal>"/applicationContext-test.xml"</literal></lineannotation>
 <lineannotation>// in the root of the classpath</lineannotation>
-<emphasis role="bold">@ContextConfiguration(locations={"/applicationContext.xml", "/applicationContext-test.xml"})</emphasis>
+<emphasis role="bold">@ContextConfiguration({"/applicationContext.xml", "/applicationContext-test.xml"})</emphasis>
 public class MyTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -1180,8 +1195,9 @@ public class HibernateTitleRepositoryTests {
     private HibernateTitleRepository titleRepository;
 
     @Test
-    public void loadTitle() {
-        Title title = titleRepository.loadTitle(new Long(10));
+    @Transactional
+    public void findById() {
+        Title title = titleRepository.findById(new Long(10));
         assertNotNull(title);
     }
 }</programlisting>
@@ -1205,8 +1221,9 @@ public class HibernateTitleRepositoryTests {
     }
 
     @Test
-    public void loadTitle() {
-        Title title = titleRepository.loadTitle(new Long(10));
+    @Transactional
+    public void findById() {
+        Title title = titleRepository.findById(new Long(10));
         assertNotNull(title);
     }
 }</programlisting>
@@ -1251,7 +1268,7 @@ public class HibernateTitleRepositoryTests {
     @Autowired
     @Override
     public void setDataSource(<emphasis role="bold">@Qualifier("myDataSource")</emphasis> DataSource dataSource) {
-        super.setDataSource(dataSource);
+        <emphasis role="bold">super</emphasis>.setDataSource(dataSource);
     }
 
 <lineannotation>// ...</lineannotation></programlisting>
