@@ -1026,8 +1026,10 @@ public void testProcessRepeatedly() {
                 <para><classname>DelegatingSmartContextLoader</classname>: the
                 default loader which delegates internally to an
                 <classname>AnnotationConfigContextLoader</classname> or a
-                <classname>GenericXmlContextLoader</classname> depending on
-                the configuration declared for the test class.</para>
+                <classname>GenericXmlContextLoader</classname> depending
+                either on the configuration declared for the test class or on
+                the presence of default locations or configuration
+                classes.</para>
               </listitem>
 
               <listitem>
@@ -1101,18 +1103,23 @@ public class MyTest {
         merely by declaring the
         <interfacename>@ContextConfiguration</interfacename> annotation at the
         class level. If your test class does not explicitly declare
-        application context resource <literal>locations</literal>, the
-        configured <interfacename>ContextLoader</interfacename> determines how
-        and whether to load a context from a default location. For example,
-        <classname>GenericXmlContextLoader</classname>, which is the default
-        <interfacename>ContextLoader</interfacename>, generates a default
-        location based on the name of the test class. If your class is named
-        <literal>com.example.MyTest</literal>,
-        <classname>GenericXmlContextLoader</classname> loads your application
-        context from
-        <literal>"classpath:/com/example/MyTest-context.xml"</literal>.</para>
+        application context resource <literal>locations</literal> or
+        configuration <varname>classes</varname>, the configured
+        <interfacename>ContextLoader</interfacename> determines how to load a
+        context from a default location or default configuration
+        classes.</para>
 
-        <programlisting language="java">package com.example;
+        <section id="testcontext-ctx-management-xml">
+          <title>XML-based configuration</title>
+
+          <para>For example, <classname>GenericXmlContextLoader</classname>
+          generates a default location based on the name of the test class. If
+          your class is named <literal>com.example.MyTest</literal>,
+          <classname>GenericXmlContextLoader</classname> loads your
+          application context from
+          <literal>"classpath:/com/example/MyTest-context.xml"</literal>.</para>
+
+          <programlisting language="java">package com.example;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from <literal>"classpath:/com/example/MyTest-context.xml"</literal></lineannotation>
@@ -1121,56 +1128,69 @@ public class MyTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
-        <para>If the default location does not suit your needs, you can
-        explicitly configure the <literal>locations</literal> attribute of
-        <interfacename>@ContextConfiguration</interfacename> with an array
-        that contains the resource locations of XML configuration metadata
-        (assuming an XML-capable <interfacename>ContextLoader</interfacename>
-        has been configured, which is the default). A plain path, for example
-        <literal>"context.xml"</literal>, will be treated as a classpath
-        resource from the same package in which the test class is defined. A
-        path starting with a slash is treated as a fully qualified classpath
-        location, for example <literal>"/org/example/config.xml"</literal>. A
-        path which represents a URL (i.e., a path prefixed with
-        <literal>classpath:</literal>, <literal>file:</literal>,
-        <literal>http:</literal>, etc.) will be used <emphasis>as
-        is</emphasis>. Alternatively, you can implement and configure your own
-        custom <interfacename>ContextLoader</interfacename>.</para>
+          <para>If the default location does not suit your needs, you can
+          explicitly configure the <literal>locations</literal> attribute of
+          <interfacename>@ContextConfiguration</interfacename> with an array
+          that contains the resource locations of XML configuration metadata
+          (assuming an XML-capable
+          <interfacename>ContextLoader</interfacename> has been configured,
+          which is the default). A plain path, for example
+          <literal>"context.xml"</literal>, will be treated as a classpath
+          resource from the same package in which the test class is defined. A
+          path starting with a slash is treated as a fully qualified classpath
+          location, for example <literal>"/org/example/config.xml"</literal>.
+          A path which represents a URL (i.e., a path prefixed with
+          <literal>classpath:</literal>, <literal>file:</literal>,
+          <literal>http:</literal>, etc.) will be used <emphasis>as
+          is</emphasis>. Alternatively, you can implement and configure your
+          own custom <interfacename>ContextLoader</interfacename>.</para>
 
-        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from <literal>"/applicationContext.xml"</literal> and <literal>"/applicationContext-test.xml"</literal></lineannotation>
-<lineannotation>// in the root of the classpath</lineannotation>
-<emphasis role="bold">@ContextConfiguration({"/applicationContext.xml", "/applicationContext-test.xml"})</emphasis>
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+<lineannotation>// ApplicationContext will be loaded from "/applicationContext.xml" and
+// "/applicationContext-test.xml" in the root of the classpath</lineannotation>
+<emphasis role="bold">@ContextConfiguration(locations={"/applicationContext.xml", "/applicationContext-test.xml"})</emphasis>
 public class MyTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
-        <para><interfacename>@ContextConfiguration</interfacename> supports an
-        alias for the <literal>locations</literal> attribute through the
-        standard <literal>value</literal> attribute. Thus, if you do not need
-        to configure a custom <interfacename>ContextLoader</interfacename>,
-        you can omit the declaration of the <literal>locations</literal>
-        attribute name and declare the resource locations by using the
-        shorthand format demonstrated in the following example.</para>
+          <para><interfacename>@ContextConfiguration</interfacename> supports
+          an alias for the <literal>locations</literal> attribute through the
+          standard <literal>value</literal> attribute. Thus, if you do not
+          need to configure a custom
+          <interfacename>ContextLoader</interfacename>, you can omit the
+          declaration of the <literal>locations</literal> attribute name and
+          declare the resource locations by using the shorthand format
+          demonstrated in the following example.</para>
 
-        <para><interfacename>@ContextConfiguration</interfacename> also
-        supports a boolean <literal>inheritLocations</literal> attribute that
-        denotes whether resource locations from superclasses should be
-        <emphasis>inherited</emphasis>. The default value is
-        <literal>true</literal>, which means that an annotated class inherits
-        the resource locations defined by an annotated superclass.
-        Specifically, the resource locations for an annotated class are
-        appended to the list of resource locations defined by an annotated
-        superclass. Thus, subclasses have the option of
-        <emphasis>extending</emphasis> the list of resource locations. In the
-        following example, the
-        <interfacename>ApplicationContext</interfacename> for
-        <classname>ExtendedTest</classname> is loaded from "/base-context.xml"
-        <emphasis role="bold">and</emphasis> "/extended-context.xml", in that
-        order. Beans defined in "/extended-context.xml" may therefore override
-        those defined in "/base-context.xml".</para>
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+<emphasis role="bold">@ContextConfiguration({"/applicationContext.xml", "/applicationContext-test.xml"})</emphasis>
+public class MyTest {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+        </section>
 
-        <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+        <section id="testcontext-ctx-management-inheritance">
+          <title>Configuration inheritance</title>
+
+          <para><interfacename>@ContextConfiguration</interfacename> also
+          supports a boolean <literal>inheritLocations</literal> attribute
+          that denotes whether resource locations from superclasses should be
+          <emphasis>inherited</emphasis>. The default value is
+          <literal>true</literal>, which means that an annotated class
+          inherits the resource locations defined by an annotated superclass.
+          Specifically, the resource locations for an annotated class are
+          appended to the list of resource locations defined by an annotated
+          superclass. Thus, subclasses have the option of
+          <emphasis>extending</emphasis> the list of resource locations. In
+          the following example, the
+          <interfacename>ApplicationContext</interfacename> for
+          <classname>ExtendedTest</classname> is loaded from
+          "/base-context.xml" <emphasis role="bold">and</emphasis>
+          "/extended-context.xml", in that order. Beans defined in
+          "/extended-context.xml" may therefore override those defined in
+          "/base-context.xml".</para>
+
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from <literal>"/base-context.xml"</literal> in the root of the classpath</lineannotation>
 <emphasis role="bold">@ContextConfiguration("/base-context.xml")</emphasis>
 public class BaseTest {
@@ -1184,23 +1204,28 @@ public class ExtendedTest extends BaseTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
-        <para>If <literal>inheritLocations</literal> is set to
-        <literal>false</literal>, the resource locations for the annotated
-        class shadow and effectively replace any resource locations defined by
-        a superclass.</para>
+          <para>If <literal>inheritLocations</literal> is set to
+          <literal>false</literal>, the resource locations for the annotated
+          class shadow and effectively replace any resource locations defined
+          by a superclass.</para>
+        </section>
 
-        <para>By default, once loaded, the configured
-        <interfacename>ApplicationContext</interfacename> is reused for each
-        test. Thus the setup cost is incurred only once (per test suite), and
-        subsequent test execution is much faster. In the unlikely case that a
-        test corrupts the application context and requires reloading — for
-        example, by modifying a bean definition or the state of an application
-        object — you can annotate your test class or test method with
-        <interfacename>@DirtiesContext</interfacename> (assuming
-        <classname>DirtiesContextTestExecutionListener</classname> has been
-        configured, which is the default). This instructs Spring to reload the
-        configuration and rebuild the application context before executing the
-        next test.</para>
+        <section id="testcontext-ctx-management-caching">
+          <title>Context caching</title>
+
+          <para>By default, once loaded, the configured
+          <interfacename>ApplicationContext</interfacename> is reused for each
+          test. Thus the setup cost is incurred only once (per test suite),
+          and subsequent test execution is much faster. In the unlikely case
+          that a test corrupts the application context and requires reloading
+          — for example, by modifying a bean definition or the state of an
+          application object — you can annotate your test class or test method
+          with <interfacename>@DirtiesContext</interfacename> (assuming
+          <classname>DirtiesContextTestExecutionListener</classname> has been
+          configured, which is the default). This instructs Spring to reload
+          the configuration and rebuild the application context before
+          executing the next test.</para>
+        </section>
       </section>
 
       <section id="testcontext-fixture-di">
