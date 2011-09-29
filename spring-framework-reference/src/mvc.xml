@@ -1825,8 +1825,7 @@ public class EditPetForm {
         <classname>HttpPutFormContentFilter</classname>, which can be
         configured in <filename>web.xml</filename>:</para>
 
-        <programlisting language="xml">
-&lt;filter&gt;
+        <programlisting language="xml">&lt;filter&gt;
   &lt;filter-name&gt;httpPutFormFilter&lt;/filter-name&gt;
   &lt;filter-class&gt;org.springframework.web.filter.HttpPutFormContentFilter&lt;/filter-class&gt;
 &lt;/filter&gt;
@@ -2468,7 +2467,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
   &lt;property name="location" value="/WEB-INF/views.xml"/&gt;
 &lt;/bean&gt;
 
-<lineannotation>&lt;!— in <literal>views.xml</literal> --&gt;</lineannotation>
+<lineannotation>&lt;!-- in <literal>views.xml</literal> --&gt;</lineannotation>
 
 &lt;beans&gt;
   &lt;bean name="report" class="org.springframework.example.ReportExcelView"/&gt;
@@ -2710,8 +2709,9 @@ public String upload(...) {
       <classname>Views</classname> that can render an appropriate
       representation of the current resource regardless of the logical view
       name. The <literal>Accept</literal> header may include wild cards, for
-      example text/*, in which case a <classname>View</classname> whose
-      Content-Type was text/xml is a compatible match.</para>
+      example <literal>text/*</literal>, in which case a
+      <classname>View</classname> whose Content-Type was
+      <literal>text/xml</literal> is a compatible match.</para>
 
       <para>To support the resolution of a view based on a file extension, use
       the <classname>ContentNegotiatingViewResolver </classname>bean property
@@ -3323,8 +3323,7 @@ public class FileUpoadController {
       typically submit files and simple form fields, a programmatic client can
       also send more complex data of a specific content type — for example a
       multipart request with a file and second part with JSON formatted data:
-      <programlisting language="xml">
-POST /someUrl
+      <programlisting>POST /someUrl
 Content-Type: multipart/mixed
  
 --edt7Tfrdusa7r3lNQc79vXuhIIMlatb7PQg7Vp
@@ -3339,8 +3338,7 @@ Content-Transfer-Encoding: 8bit
 Content-Disposition: form-data; name="file-data"; filename="file.properties"
 Content-Type: text/xml
 Content-Transfer-Encoding: 8bit
-... File Data ...
-      </programlisting></para>
+... File Data ...</programlisting></para>
 
       <para>You could access the part named "meta-data" with a
       <interfacename>@RequestParam("meta-data") String
@@ -3615,14 +3613,12 @@ public class SimpleController {
       <itemizedlist>
         <listitem>
           <para><classname>AdminController</classname> maps to the
-          <literal>/admin</literal><emphasis role="bold">/*</emphasis> request
-          URL</para>
+          <literal>/admin/*</literal> request URL</para>
         </listitem>
 
         <listitem>
           <para><classname>CatalogController</classname> maps to the
-          <literal>/catalog</literal><emphasis role="bold">/*</emphasis>
-          request URL</para>
+          <literal>/catalog/*</literal> request URL</para>
         </listitem>
       </itemizedlist>
 
@@ -3794,12 +3790,15 @@ public class SimpleController {
 }</programlisting>
 
       <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-        "http://www.springframework.org/dtd/spring-beans-2.0.dtd"&gt;
-&lt;beans&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
 
     <lineannotation>&lt;!-- this bean with the well known name generates view names for us --&gt;</lineannotation>
-    &lt;bean id="viewNameTranslator" class="org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator"/&gt;
+    &lt;bean id="viewNameTranslator"
+        class="org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator"/&gt;
 
     &lt;bean class="x.y.RegistrationController"&gt;
         <lineannotation>&lt;!-- inject dependencies as necessary --&gt;</lineannotation>
@@ -4044,16 +4043,14 @@ public class SimpleController {
       <para>An example of registering an interceptor applied to all URL
       paths:</para>
 
-      <programlisting language="xml">
-&lt;mvc:interceptors&gt;
+      <programlisting language="xml">&lt;mvc:interceptors&gt;
     &lt;bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" /&gt;
 &lt;/mvc:interceptors&gt;</programlisting>
 
       <para>An example of registering an interceptor limited to a specific URL
       path:</para>
 
-      <programlisting language="xml">
-&lt;mvc:interceptors&gt;
+      <programlisting language="xml">&lt;mvc:interceptors&gt;
     &lt;mvc:interceptor&gt;
         &lt;mapping path="/secure/*"/&gt;
         &lt;bean class="org.example.SecurityInterceptor" /&gt;
@@ -4073,8 +4070,7 @@ public class SimpleController {
       <para>An example of view-controller that forwards to a home page is
       shown below:</para>
 
-      <programlisting language="xml">
-&lt;mvc:view-controller path="/" view-name="home"/&gt;</programlisting>
+      <programlisting language="xml">&lt;mvc:view-controller path="/" view-name="home"/&gt;</programlisting>
     </section>
 
     <section id="mvc-static-resources">
@@ -4098,15 +4094,13 @@ public class SimpleController {
       directory within the web application root, the tag would be used as
       follows:</para>
 
-      <programlisting language="xml">
-&lt;mvc:resources mapping="/resources/**" location="/public-resources/"/&gt;</programlisting>
+      <programlisting language="xml">&lt;mvc:resources mapping="/resources/**" location="/public-resources/"/&gt;</programlisting>
 
       <para>To serve these resources with a 1-year future expiration to ensure
       maximum use of the browser cache and a reduction in HTTP requests made
       by the browser:</para>
 
-      <programlisting language="xml">
-&lt;mvc:resources mapping="/resources/**" location="/public-resources/" cache-period="31556926"/&gt;</programlisting>
+      <programlisting language="xml">&lt;mvc:resources mapping="/resources/**" location="/public-resources/" cache-period="31556926"/&gt;</programlisting>
 
       <para>The <code>mapping</code> attribute must be an Ant pattern that can
       be used by <classname>SimpleUrlHandlerMapping</classname>, and the
@@ -4119,8 +4113,7 @@ public class SimpleController {
       <code>/META-INF/public-web-resources/</code> in any jar on the
       classpath, the tag would be specified as:</para>
 
-      <programlisting language="xml">
-&lt;mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/public-web-resources/"/&gt;</programlisting>
+      <programlisting language="xml">&lt;mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/public-web-resources/"/&gt;</programlisting>
 
       <para>When serving resources that may change when a new version of the
       application is deployed, it is recommended that you incorporate a
@@ -4148,20 +4141,17 @@ application.version=1.0.0</programlisting>
       <para>and then to make the properties file's values accessible to SpEL
       as a bean using the <code>util:properties</code> tag:</para>
 
-      <programlisting language="xml">
-&lt;util:properties id="applicationProps" location="/WEB-INF/spring/application.properties"/&gt;</programlisting>
+      <programlisting language="xml">&lt;util:properties id="applicationProps" location="/WEB-INF/spring/application.properties"/&gt;</programlisting>
 
       <para>With the application version now accessible via SpEL, we can
       incorporate this into the use of the <code>resources</code> tag:</para>
 
-      <programlisting language="xml">
-&lt;mvc:resources mapping="/resources-#{applicationProps['application.version']}/**" location="/public-resources/"/&gt;</programlisting>
+      <programlisting language="xml">&lt;mvc:resources mapping="/resources-#{applicationProps['application.version']}/**" location="/public-resources/"/&gt;</programlisting>
 
       <para>and finally, to request the resource with the proper URL, we can
       take advantage of the Spring JSP tags:</para>
 
-      <programlisting language="xml">
-&lt;spring:eval expression="@applicationProps['application.version']" var="applicationVersion"/&gt;
+      <programlisting language="xml">&lt;spring:eval expression="@applicationProps['application.version']" var="applicationVersion"/&gt;
 
 &lt;spring:url value="/resources-{applicationVersion}" var="resourceUrl"&gt;
 	&lt;spring:param name="applicationVersion" value="${applicationVersion}"/&gt;
@@ -4192,8 +4182,7 @@ application.version=1.0.0</programlisting>
       <para>To enable the feature using the default setup, simply include the
       tag in the form:</para>
 
-      <programlisting language="xml">
-&lt;mvc:default-servlet-handler/&gt;</programlisting>
+      <programlisting language="xml">&lt;mvc:default-servlet-handler/&gt;</programlisting>
 
       <para>The caveat to overriding the "/" Servlet mapping is that the
       <code>RequestDispatcher</code> for the default Servlet must be retrieved
@@ -4207,8 +4196,7 @@ application.version=1.0.0</programlisting>
       the default Servlet name is unknown, then the default Servlet's name
       must be explicitly provided as in the following example:</para>
 
-      <programlisting language="xml">
-&lt;mvc:default-servlet-handler default-servlet-name="myCustomDefaultServlet"/&gt;</programlisting>
+      <programlisting language="xml">&lt;mvc:default-servlet-handler default-servlet-name="myCustomDefaultServlet"/&gt;</programlisting>
     </section>
   </section>
 
