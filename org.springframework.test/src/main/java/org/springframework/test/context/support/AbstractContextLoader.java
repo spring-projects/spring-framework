@@ -152,10 +152,10 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 
 	/**
 	 * Generate a modified version of the supplied locations array and return it.
-	 * <p>A plain path &mdash; for example, &quot;context.xml&quot; &mdash;
-	 * will be treated as a classpath resource from the same package in which
+	 * <p>A plain path &mdash; for example, &quot;context.xml&quot; &mdash; will
+	 * be treated as a classpath resource that is relative to the package in which
 	 * the specified class is defined. A path starting with a slash is treated
-	 * as a fully qualified classpath location, for example:
+	 * as an absolute classpath location, for example:
 	 * &quot;/org/springframework/whatever/foo.xml&quot;. A path which
 	 * references a URL (e.g., a path prefixed with
 	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
