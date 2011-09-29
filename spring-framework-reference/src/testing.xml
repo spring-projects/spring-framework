@@ -915,7 +915,7 @@ public void testProcessRepeatedly() {
         updates the state of the <classname>TestContext</classname> as the
         test progresses and delegates to
         <interfacename>TestExecutionListener</interfacename>s, which
-        instrument the actual test execution, by providing dependency
+        instrument the actual test execution by providing dependency
         injection, managing transactions, and so on. A
         <interfacename>ContextLoader</interfacename> (or
         <interfacename>SmartContextLoader</interfacename>) is responsible for
@@ -1435,7 +1435,6 @@ public class HibernateTitleRepositoryTests {
     private HibernateTitleRepository titleRepository;
 
     @Test
-    @Transactional
     public void findById() {
         Title title = titleRepository.findById(new Long(10));
         assertNotNull(title);
@@ -1461,7 +1460,6 @@ public class HibernateTitleRepositoryTests {
     }
 
     @Test
-    @Transactional
     public void findById() {
         Title title = titleRepository.findById(new Long(10));
         assertNotNull(title);
