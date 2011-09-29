@@ -116,19 +116,19 @@ public @interface ContextConfiguration {
 	 * {@link #classes configuration classes} from superclasses should be
 	 * <em>inherited</em>.
 	 * 
-	 * <p>The default value is <code>true</code>, which means that an annotated
+	 * <p>The default value is <code>true</code>. This means that an annotated
 	 * class will <em>inherit</em> the resource locations or configuration
-	 * classes defined by an annotated superclass. Specifically, the resource
+	 * classes defined by annotated superclasses. Specifically, the resource
 	 * locations or configuration classes for an annotated class will be
 	 * appended to the list of resource locations or configuration classes
-	 * defined by an annotated superclass. Thus, subclasses have the option of
+	 * defined by annotated superclasses. Thus, subclasses have the option of
 	 * <em>extending</em> the list of resource locations or configuration
 	 * classes.
 	 * 
 	 * <p>If <code>inheritLocations</code> is set to <code>false</code>, the
 	 * resource locations or configuration classes for the annotated class
 	 * will <em>shadow</em> and effectively replace any resource locations 
-	 * or configuration classes defined by a superclass.
+	 * or configuration classes defined by superclasses.
 	 * 
 	 * <p>In the following example that uses path-based resource locations, the
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}
