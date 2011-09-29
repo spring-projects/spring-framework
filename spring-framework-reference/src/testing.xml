@@ -684,9 +684,10 @@ public void testProcessWithoutTransaction() {
       <section id="integration-testing-annotations-standard">
         <title>Standard Annotation Support</title>
 
-        <para>The following non-test-specific annotations are supported with
-        standard semantics for all configurations of the Spring TestContext
-        Framework.</para>
+        <para>The following annotations are supported with standard semantics
+        for all configurations of the Spring TestContext Framework. Note that
+        these annotations are not specific to tests and can be used anywhere
+        in the Spring Framework.</para>
 
         <itemizedlist>
           <listitem>
@@ -888,11 +889,12 @@ public void testProcessRepeatedly() {
       <para>The following section provides an overview of the internals of the
       TestContext framework. If you are only interested in using the framework
       and not necessarily interested in extending it with your own custom
-      listeners, feel free to go directly to the configuration (<link
-      linkend="testcontext-ctx-management">context management</link>, <link
-      linkend="testcontext-fixture-di">dependency injection</link>, <link
-      linkend="testcontext-tx">transaction management</link>), <link
-      linkend="testcontext-support-classes">support classes</link>, and <link
+      listeners or custom loaders, feel free to go directly to the
+      configuration (<link linkend="testcontext-ctx-management">context
+      management</link>, <link linkend="testcontext-fixture-di">dependency
+      injection</link>, <link linkend="testcontext-tx">transaction
+      management</link>), <link linkend="testcontext-support-classes">support
+      classes</link>, and <link
       linkend="integration-testing-annotations">annotation support</link>
       sections.</para>
 
@@ -902,25 +904,36 @@ public void testProcessRepeatedly() {
         <para>The core of the framework consists of the
         <classname>TestContext</classname> and
         <classname>TestContextManager</classname> classes and the
-        <interfacename>TestExecutionListener</interfacename> interface. A
+        <interfacename>TestExecutionListener</interfacename>,
+        <interfacename>ContextLoader</interfacename>, and
+        <interfacename>SmartContextLoader</interfacename> interfaces. A
         <classname>TestContextManager</classname> is created on a per-test
-        basis. The <classname>TestContextManager</classname> in turn manages a
+        basis (e.g., for the execution of a single test method in JUnit). The
+        <classname>TestContextManager</classname> in turn manages a
         <classname>TestContext</classname> that holds the context of the
         current test. The <classname>TestContextManager</classname> also
         updates the state of the <classname>TestContext</classname> as the
         test progresses and delegates to
         <interfacename>TestExecutionListener</interfacename>s, which
         instrument the actual test execution, by providing dependency
-        injection, managing transactions, and so on. Consult the Javadoc and
-        the Spring test suite for further information and examples of various
-        configurations.</para>
+        injection, managing transactions, and so on. A
+        <interfacename>ContextLoader</interfacename> (or
+        <interfacename>SmartContextLoader</interfacename>) is responsible for
+        loading an <interfacename>ApplicationContext</interfacename> for a
+        given test class. Consult the Javadoc and the Spring test suite for
+        further information and examples of various implementations.</para>
 
         <itemizedlist>
           <listitem>
             <para><classname>TestContext</classname>: Encapsulates the context
             in which a test is executed, agnostic of the actual testing
             framework in use, and provides context management and caching
-            support for the test instance for which it is responsible.</para>
+            support for the test instance for which it is responsible. The
+            <classname>TestContext</classname> also delegates to a
+            <interfacename>ContextLoader</interfacename> (or
+            <interfacename>SmartContextLoader</interfacename>) to load an
+            <interfacename>ApplicationContext</interfacename> if
+            requested.</para>
           </listitem>
 
           <listitem>
@@ -976,6 +989,64 @@ public void testProcessRepeatedly() {
             <interfacename>@DirtiesContext</interfacename> annotation, and
             transactional test execution with default rollback
             semantics.</para>
+          </listitem>
+
+          <listitem>
+            <para><interfacename>ContextLoader</interfacename>: Strategy
+            interface for loading an
+            <interfacename>ApplicationContext</interfacename> for an
+            integration test managed by the Spring TestContext
+            Framework.</para>
+
+            <para>As of Spring 3.1, implement
+            <interfacename>SmartContextLoader</interfacename> instead of this
+            interface in order to provide support for configuration classes
+            and active bean definition profiles.</para>
+          </listitem>
+
+          <listitem>
+            <para><interfacename>SmartContextLoader</interfacename>: Extension
+            of the <interfacename>ContextLoader</interfacename> interface
+            introduced in Spring 3.1.</para>
+
+            <para>The <interfacename>SmartContextLoader</interfacename> SPI
+            supersedes the <interfacename>ContextLoader</interfacename> SPI
+            that was introduced in Spring 2.5. Specifically, a
+            <interfacename>SmartContextLoader</interfacename> can choose to
+            process either resource <varname>locations</varname> or
+            configuration <varname>classes</varname>. Furthermore, a
+            <interfacename>SmartContextLoader</interfacename> can set active
+            bean definition profiles in the context that it loads.</para>
+
+            <para>Spring provides the following out-of-the-box
+            implementations:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para><classname>DelegatingSmartContextLoader</classname>: the
+                default loader which delegates internally to an
+                <classname>AnnotationConfigContextLoader</classname> or a
+                <classname>GenericXmlContextLoader</classname> depending on
+                the configuration declared for the test class.</para>
+              </listitem>
+
+              <listitem>
+                <para><classname>AnnotationConfigContextLoader</classname>:
+                loads an application context from
+                <interfacename>@Configuration</interfacename> classes.</para>
+              </listitem>
+
+              <listitem>
+                <para><classname>GenericXmlContextLoader</classname>: loads
+                and application context from XML resource locations.</para>
+              </listitem>
+
+              <listitem>
+                <para><classname>GenericPropertiesContextLoader</classname>:
+                loads an application context from Java Properties
+                files.</para>
+              </listitem>
+            </itemizedlist>
           </listitem>
         </itemizedlist>
 
