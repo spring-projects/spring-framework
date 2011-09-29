@@ -5,7 +5,7 @@
   <title>Testing</title>
 
   <section id="testing-introduction">
-    <title>Introduction to testing</title>
+    <title>Introduction to Spring Testing</title>
 
     <para>Testing is an integral part of enterprise software development. This
     chapter focuses on the value-add of the IoC principle to <link
@@ -17,7 +17,7 @@
   </section>
 
   <section id="unit-testing">
-    <title>Unit testing</title>
+    <title>Unit Testing</title>
 
     <para>Dependency Injection should make your code less dependent on the
     container than it would be with traditional Java EE development. The POJOs
@@ -41,7 +41,7 @@
     testing support classes.</para>
 
     <section id="mock-objects">
-      <title>Mock objects</title>
+      <title>Mock Objects</title>
 
       <section id="mock-objects-jndi">
         <title>JNDI</title>
@@ -78,7 +78,7 @@
     </section>
 
     <section id="unit-testing-support-classes">
-      <title>Unit testing support classes</title>
+      <title>Unit Testing support Classes</title>
 
       <section id="unit-testing-utilities">
         <title>General utilities</title>
@@ -135,7 +135,7 @@
   </section>
 
   <section id="integration-testing">
-    <title>Integration testing</title>
+    <title>Integration Testing</title>
 
     <section id="integration-testing-overview">
       <title>Overview</title>
@@ -207,7 +207,7 @@
     </section>
 
     <section id="integration-testing-goals">
-      <title>Goals of integration testing</title>
+      <title>Goals of Integration Testing</title>
 
       <para>Spring's integration testing support has the following primary
       goals:</para>
@@ -398,7 +398,7 @@
     </section>
 
     <section id="integration-testing-support-jdbc">
-      <title>JDBC testing support</title>
+      <title>JDBC Testing Support</title>
 
       <para>The <literal>org.springframework.test.jdbc</literal> package
       contains <classname>SimpleJdbcTestUtils</classname>, which is a
@@ -1868,7 +1868,7 @@ public class SimpleTest {
     </section>
 
     <section id="testing-examples-petclinic">
-      <title>PetClinic example</title>
+      <title>PetClinic Example</title>
 
       <para>The PetClinic application, available from the <link
       linkend="new-in-3.0-samples">samples repository</link>, illustrates
