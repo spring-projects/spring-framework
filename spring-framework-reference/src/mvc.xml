@@ -90,10 +90,10 @@
 
       <itemizedlist>
         <listitem>
-          <para><emphasis>Clear separation of roles</emphasis>. Each role --
+          <para><emphasis>Clear separation of roles</emphasis>. Each role &mdash;
           controller, validator, command object, form object, model object,
           <classname>DispatcherServlet</classname>, handler mapping, view
-          resolver, and so on -- can be fulfilled by a specialized
+          resolver, and so on &mdash; can be fulfilled by a specialized
           object.</para>
         </listitem>
 
@@ -468,9 +468,9 @@
         <para>If you specify a multipart file resolver, the request is
         inspected for multiparts; if multiparts are found, the request is
         wrapped in a <classname>MultipartHttpServletRequest</classname> for
-        further processing by other elements in the process. (See <xref
-        linkend="mvc-multipart-resolver" /> for further information about
-        multipart handling).</para>
+        further processing by other elements in the process. See <xref
+        linkend="mvc-multipart" /> for further information about
+        multipart handling.</para>
       </listitem>
 
       <listitem>
@@ -1552,7 +1552,7 @@ public void populateModel(@RequestParam String number, Model model) {
 		the return value of the <interfacename>@RequestMapping</interfacename> method 
 		is interpreted as a model attribute rather than as a view name. 
 		The view name is derived from view name conventions instead much like for methods
-		returning void -- see <xref linkend="mvc-coc-r2vnt"/>.</para>
+		returning void &mdash; see <xref linkend="mvc-coc-r2vnt"/>.</para>
 		
       </section>
 
@@ -1581,15 +1581,15 @@ public String processSubmit(<emphasis role="bold">@ModelAttribute Pet pet</empha
         There are several options: </para>
         
         <itemizedlist>
-        	<listitem>It may already be in the model due to use of 
+        	<listitem><para>It may already be in the model due to use of 
         		<interfacename>@SessionAttributes</interfacename> 
-        		-- see <xref linkend="mvc-ann-sessionattrib"/>.</listitem>
-        	<listitem>It may already be in the model due to an 
+        		&mdash; see <xref linkend="mvc-ann-sessionattrib"/>.</para></listitem>
+        	<listitem><para>It may already be in the model due to an 
         		<interfacename>@ModelAttribute</interfacename> method in the same 
-        		controller -- as explained in the previous section.</listitem>
-        	<listitem>It may be retrieved based on a URI template variable
-        		and type converter (explained in more detail below).</listitem>
-        	<listitem>It may be instantiated using its default constructor.</listitem>
+        		controller &mdash; as explained in the previous section.</para></listitem>
+        	<listitem><para>It may be retrieved based on a URI template variable
+        		and type converter (explained in more detail below).</para></listitem>
+        	<listitem><para>It may be instantiated using its default constructor.</para></listitem>
         </itemizedlist>
         
        	<para>An <interfacename>@ModelAttribute</interfacename> method is a common
@@ -1613,8 +1613,8 @@ public String save(@ModelAttribute("account") Account account) {
 		<interfacename>@ModelAttribute</interfacename> method.</para>
         
 		<para>The next step is data binding. The <classname>WebDataBinder</classname> 
-		class matches request parameter names -- including query string parameters and
-		form fields -- to model attribute fields by name. Matching fields are populated
+		class matches request parameter names &mdash; including query string parameters and
+		form fields &mdash; to model attribute fields by name. Matching fields are populated
 		after type conversion (from String to the target field type) has been applied
 		where necessary.
 		Data binding and validation are covered in <xref linkend="validation"/>.
@@ -2408,7 +2408,7 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
   &lt;property name="location" value="/WEB-INF/views.xml"/&gt;
 &lt;/bean&gt;
 
-<lineannotation>&lt;!-- in <literal>views.xml</literal> --&gt;</lineannotation>
+<lineannotation>&lt;!&mdash; in <literal>views.xml</literal> --&gt;</lineannotation>
 
 &lt;beans&gt;
   &lt;bean name="report" class="org.springframework.example.ReportExcelView"/&gt;
@@ -2758,7 +2758,7 @@ public class ContentController {
 
     <para>Flash attributes provide a way for one request to store attributes 
     intended for use in another. This is most commonly needed when redirecting 
-    -- e.g. the Post/Redirect/Get pattern. Flash attributes are saved temporarily
+    &mdash; e.g. the Post/Redirect/Get pattern. Flash attributes are saved temporarily
     before the redirect (typically in the session) to be made available to the 
     request after the redirect and removed immediately.
     </para>
@@ -3266,7 +3266,7 @@ public class FileUpoadController {
       a RESTful service scenario. All of the above examples and configuration 
       apply here as well. However, unlike browsers that typically submit files
       and simple form fields, a programmatic client can also send more complex 
-      data of a specific content type -- for exmaple a multipart request with 
+      data of a specific content type &mdash; for example a multipart request with 
       a file and second part with JSON formatted data:
       <programlisting language="xml">
 POST /someUrl
@@ -3287,14 +3287,14 @@ Content-Transfer-Encoding: 8bit
 ... File Data ...
       </programlisting></para>
       
-      <para>You could access the part named "meta-data" with
+      <para>You could access the part named "meta-data" with a
       <interfacename>@RequestParam("meta-data") String metadata</interfacename>
       controller method argument. However, you would probably 
       prefer to accept a strongly typed object initialized 
       from the JSON formatted data in the body of the request 
       part, very similar to the way 
       <interfacename>@RequestBody</interfacename> converts 
-      the body of a non-multipart requests to a target object
+      the body of a non-multipart request to a target object
       with the help of an <classname>HttpMessageConverter</classname>.</para>
       
       <para>You can use the <interfacename>@RequestPart</interfacename> 
@@ -3303,23 +3303,22 @@ Content-Transfer-Encoding: 8bit
       content of a specific multipart passed through an 
       <classname>HttpMessageConverter</classname>
       taking into consideration the <literal>'Content-Type'</literal>
-      header of the multipart:
-      <programlisting language="java">
-@RequestMapping(value="/someUrl", method = RequestMethod.POST)
+      header of the multipart:</para>
+
+      <programlisting language="java">@RequestMapping(value="/someUrl", method = RequestMethod.POST)
 public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData metadata,
-                       @RequestPart("file-data") MultipartFile file,</emphasis>) {
+                       @RequestPart("file-data") MultipartFile file</emphasis>) {
     <lineannotation>// ...</lineannotation>
 
-}
-</programlisting></para>
+}</programlisting>
 
-      <para>Notice how you <classname>MultipartFile</classname> 
+      <para>Notice how <classname>MultipartFile</classname> 
       method arguments can be accessed with <interfacename>@RequestParam</interfacename> 
       or with <interfacename>@RequestPart</interfacename> interchangeably.
       However, the <literal>@RequestPart("meta-data") MetaData</literal> 
       method argument in this case is read as JSON content 
       based on its <literal>'Content-Type'</literal>
-      header and converted with help of the 
+      header and converted with the help of the 
       <classname>MappingJacksonHttpMessageConverter</classname>.
       </para>
 
@@ -3331,8 +3330,7 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
     <title>Handling exceptions</title>
 
     <section>
-      <title
-      id="mvc-HandlerExceptionResolver"><interfacename>HandlerExceptionResolver</interfacename></title>
+      <title id="mvc-HandlerExceptionResolver"><interfacename>HandlerExceptionResolver</interfacename></title>
 
       <para>Spring <literal>HandlerExceptionResolver</literal> implementations deal
       with unexpected exceptions that occur during controller execution.
@@ -3473,7 +3471,7 @@ public class SimpleController {
     should you choose to move forward with it into production.</para>
 
     <para>Convention-over-configuration support addresses the three core areas
-    of MVC -- models, views, and controllers.</para>
+    of MVC &mdash; models, views, and controllers.</para>
 
     <section id="mvc-coc-ccnhm">
       <title>The Controller
@@ -3902,26 +3900,26 @@ public class SimpleController {
 				
 				          <listitem>
 				            <para><classname>Jaxb2RootElementHttpMessageConverter</classname>
-				            converts Java objects to/from XML -- added if JAXB2 is present 
+				            converts Java objects to/from XML &mdash; added if JAXB2 is present 
 				            on the classpath.
 				            </para>
 				          </listitem>
 
 				          <listitem>
 				            <para><classname>MappingJacksonHttpMessageConverter</classname>
-				            converts to/from JSON -- added if Jackson is present on the classpath.
+				            converts to/from JSON &mdash; added if Jackson is present on the classpath.
 				            </para>
 				          </listitem>
 
 				          <listitem>
 				            <para><classname>AtomFeedHttpMessageConverter</classname>
-				            converts Atom feeds -- added if Rome is present on the classpath.
+				            converts Atom feeds &mdash; added if Rome is present on the classpath.
 				            </para>
 				          </listitem>
 
 				          <listitem>
 				            <para><classname>RssChannelHttpMessageConverter</classname>
-				            converts RSS feeds -- added if Rome is present on the classpath.
+				            converts RSS feeds &mdash; added if Rome is present on the classpath.
 				            </para>
 				          </listitem>
 			        	</itemizedlist>
