@@ -1062,16 +1062,13 @@ public void testProcessRepeatedly() {
         <title>Context management and caching</title>
 
         <para>Each <classname>TestContext</classname> provides context
-        management and caching support for the test instance for which it is
-        responsible. Test instances do not automatically receive access to the
+        management and caching support for the test instance it is responsible
+        for. Test instances do not automatically receive access to the
         configured <classname>ApplicationContext</classname>. However, if a
         test class implements the
         <interfacename>ApplicationContextAware</interfacename> interface, a
         reference to the <classname>ApplicationContext</classname> is supplied
-        to the test instance. Note that dependency injection support is
-        provided by the
-        <classname>DependencyInjectionTestExecutionListener</classname> which
-        is configured by default. In addition,
+        to the test instance. Note that
         <classname>AbstractJUnit4SpringContextTests</classname> and
         <classname>AbstractTestNGSpringContextTests</classname> implement
         <interfacename>ApplicationContextAware</interfacename> and therefore
@@ -1096,6 +1093,11 @@ public class MyTest {
 
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
+
+          <para>Note that support for dependency injection via
+          <interfacename>@Autowired</interfacename> is provided by the
+          <classname>DependencyInjectionTestExecutionListener</classname>
+          which is configured by default.</para>
         </tip>
 
         <para>In contrast to the deprecated JUnit 3.8 legacy class hierarchy,
@@ -1189,11 +1191,11 @@ public class MyTest {
 
           <para>To load an <interfacename>ApplicationContext</interfacename>
           for your tests from <interfacename>@Configuration</interfacename>
-          classes, annotate your test class with
-          <interfacename>@ContextConfiguration</interfacename> and configure
-          the <literal>classes</literal> attribute with an array that contains
-          class references to configuration classes. Alternatively, you can
-          implement and configure your own custom
+          classes (see <xref linkend="beans-java" />), annotate your test
+          class with <interfacename>@ContextConfiguration</interfacename> and
+          configure the <literal>classes</literal> attribute with an array
+          that contains class references to configuration classes.
+          Alternatively, you can implement and configure your own custom
           <interfacename>ContextLoader</interfacename> or
           <interfacename>SmartContextLoader</interfacename> for advanced use
           cases.</para>
@@ -1212,10 +1214,9 @@ public class MyTest {
           <classname>AnnotationConfigContextLoader</classname> will detect all
           static inner classes of the annotated test class that meet the
           requirements for configuration class implementations as specified in
-          the Javadoc for <interfacename>@Configuration</interfacename> (see
-          <xref linkend="beans-java" /> for further details). In the following
-          example, the <classname>OrderServiceTest</classname> class declares
-          a static inner configuration class named
+          the Javadoc for <interfacename>@Configuration</interfacename>. In
+          the following example, the <classname>OrderServiceTest</classname>
+          class declares a static inner configuration class named
           <classname>Config</classname> that will be automatically used to
           load the <interfacename>ApplicationContext</interfacename> for the
           test class. Note that the name of the configuration class is
@@ -1362,7 +1363,7 @@ public class ExtendedTest extends BaseTest {
         setter injection, field injection, or both, depending on which
         annotations you choose and whether you place them on setter methods or
         fields. For consistency with the annotation support introduced in
-        Spring 3.0, you can use Spring's
+        Spring 2.5 and 3.0, you can use Spring's
         <interfacename>@Autowired</interfacename> annotation or the
         <interfacename>@Inject</interfacename> annotation from JSR 300.</para>
 
