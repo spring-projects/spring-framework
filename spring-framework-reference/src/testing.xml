@@ -1094,17 +1094,17 @@ public class MyTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
-          <para>Note that support for dependency injection via
+          <para>Dependency injection via
           <interfacename>@Autowired</interfacename> is provided by the
           <classname>DependencyInjectionTestExecutionListener</classname>
-          which is configured by default.</para>
+          which is configured by default (see <xref
+          linkend="testcontext-fixture-di" />).</para>
         </tip>
 
-        <para>In contrast to the deprecated JUnit 3.8 legacy class hierarchy,
-        test classes that use the TestContext framework do not need to
-        override any <literal>protected</literal> instance methods to
+        <para>Test classes that use the TestContext framework do not need to
+        extend any particular class or implement a specific interface to
         configure their application context. Instead, configuration is
-        achieved merely by declaring the
+        achieved simply by declaring the
         <interfacename>@ContextConfiguration</interfacename> annotation at the
         class level. If your test class does not explicitly declare
         application context resource <literal>locations</literal> or
@@ -1113,7 +1113,7 @@ public class MyTest {
         context from a default location or default configuration
         classes.</para>
 
-        <para>The following sections explain how to configure and manage an
+        <para>The following sections explain how to configure an
         <interfacename>ApplicationContext</interfacename> via XML
         configuration files or <interfacename>@Configuration</interfacename>
         classes using Spring's
@@ -1121,10 +1121,10 @@ public class MyTest {
         annotation.</para>
 
         <section id="testcontext-ctx-management-xml">
-          <title>Context management with XML resources</title>
+          <title>Context configuration with XML resources</title>
 
           <para>To load an <interfacename>ApplicationContext</interfacename>
-          for your tests from XML configuration files, annotate your test
+          for your tests using XML configuration files, annotate your test
           class with <interfacename>@ContextConfiguration</interfacename> and
           configure the <literal>locations</literal> attribute with an array
           that contains the resource locations of XML configuration metadata.
@@ -1187,15 +1187,15 @@ public class MyTest {
         </section>
 
         <section id="testcontext-ctx-management-javaconfig">
-          <title>Context management with @Configuration classes</title>
+          <title>Context configuration with @Configuration classes</title>
 
           <para>To load an <interfacename>ApplicationContext</interfacename>
-          for your tests from <interfacename>@Configuration</interfacename>
+          for your tests using <interfacename>@Configuration</interfacename>
           classes (see <xref linkend="beans-java" />), annotate your test
           class with <interfacename>@ContextConfiguration</interfacename> and
           configure the <literal>classes</literal> attribute with an array
-          that contains class references to configuration classes.
-          Alternatively, you can implement and configure your own custom
+          that contains references to configuration classes. Alternatively,
+          you can implement and configure your own custom
           <interfacename>ContextLoader</interfacename> or
           <interfacename>SmartContextLoader</interfacename> for advanced use
           cases.</para>
@@ -1352,7 +1352,7 @@ public class ExtendedTest extends BaseTest {
       </section>
 
       <section id="testcontext-fixture-di">
-        <title>Dependency Injection of test fixtures</title>
+        <title>Dependency injection of test fixtures</title>
 
         <para>When you use the
         <classname>DependencyInjectionTestExecutionListener</classname> —
