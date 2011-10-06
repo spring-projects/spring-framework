@@ -206,7 +206,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public long queryForLong(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Number number = queryForObject(sql, paramSource, Number.class);
+		Number number = queryForObject(sql, paramSource, Long.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
@@ -215,7 +215,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 	public int queryForInt(String sql, SqlParameterSource paramSource) throws DataAccessException {
-		Number number = queryForObject(sql, paramSource, Number.class);
+		Number number = queryForObject(sql, paramSource, Integer.class);
 		return (number != null ? number.intValue() : 0);
 	}
 
