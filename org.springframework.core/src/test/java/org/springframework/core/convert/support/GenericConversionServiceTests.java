@@ -210,7 +210,6 @@ public class GenericConversionServiceTests {
 	// SPR-8718
 	
 	@Test(expected=ConverterNotFoundException.class)
-	@Ignore("TODO")
 	public void convertSuperTarget() {
 		conversionService.addConverter(new ColorConverter());
 		conversionService.convert("#000000", SystemColor.class);
