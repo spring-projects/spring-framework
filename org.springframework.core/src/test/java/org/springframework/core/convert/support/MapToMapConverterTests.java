@@ -2,6 +2,7 @@ package org.springframework.core.convert.support;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -56,7 +57,7 @@ public class MapToMapConverterTests {
 		map.put("1", "9");
 		map.put("2", "37");
 		assertTrue(conversionService.canConvert(Map.class, Map.class));
-		assertEquals(map, conversionService.convert(map, Map.class));
+		assertSame(map, conversionService.convert(map, Map.class));
 	}
 
 	@Test
@@ -140,7 +141,7 @@ public class MapToMapConverterTests {
 		map.put("1", Arrays.asList("9", "12"));
 		map.put("2", Arrays.asList("37", "23"));
 		assertTrue(conversionService.canConvert(Map.class, Map.class));
-		assertEquals(map, conversionService.convert(map, Map.class));
+		assertSame(map, conversionService.convert(map, Map.class));
 	}
 
 	@Test
@@ -151,7 +152,7 @@ public class MapToMapConverterTests {
 		conversionService.addConverter(new CollectionToCollectionConverter(conversionService));
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		assertTrue(conversionService.canConvert(Map.class, Map.class));
-		assertEquals(map, conversionService.convert(map, Map.class));
+		assertSame(map, conversionService.convert(map, Map.class));
 	}
 	
 	@Test
@@ -160,7 +161,7 @@ public class MapToMapConverterTests {
 		TypeDescriptor sourceType = TypeDescriptor.forObject(map);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("emptyMapTarget"));
 		assertTrue(conversionService.canConvert(sourceType, targetType));
-		assertEquals(map, conversionService.convert(map, sourceType, targetType));
+		assertSame(map, conversionService.convert(map, sourceType, targetType));
 	}
 
 	public Map<String, String> emptyMapTarget;
@@ -169,7 +170,7 @@ public class MapToMapConverterTests {
 	public void emptyMapNoTargetGenericInfo() throws Exception {
 		Map<String, String> map = new HashMap<String, String>();
 		assertTrue(conversionService.canConvert(Map.class, Map.class));
-		assertEquals(map, conversionService.convert(map, Map.class));
+		assertSame(map, conversionService.convert(map, Map.class));
 	}
 
 	@Test
@@ -185,5 +186,5 @@ public class MapToMapConverterTests {
 	}
 
 	public LinkedHashMap<String, String> emptyMapDifferentTarget;
-	
+
 }

@@ -57,6 +57,7 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		if (source == null) {
 			return null;
 		}
+		boolean isCopyRequired = !targetType.getType().isInstance(source);
 		Map<Object, Object> sourceMap = (Map<Object, Object>) source;
 		Map<Object, Object> targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
 		for (Map.Entry<Object, Object> entry : sourceMap.entrySet()) {
@@ -65,8 +66,11 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 			Object targetKey = convertKey(sourceKey, sourceType, targetType.getMapKeyTypeDescriptor());
 			Object targetValue = convertValue(sourceValue, sourceType, targetType.getMapValueTypeDescriptor());
 			targetMap.put(targetKey, targetValue);
+			if (sourceKey != targetKey || sourceValue != targetValue) {
+				isCopyRequired = true;
+			}
 		}
-		return targetMap;
+		return isCopyRequired ? targetMap : sourceMap;
 	}
 	
 	// internal helpers

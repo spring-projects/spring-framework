@@ -57,6 +57,7 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		if (source == null) {
 			return null;
 		}
+		boolean isCopyRequired = !targetType.getType().isInstance(source);
 		Collection<?> sourceCollection = (Collection<?>) source;
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 		if (targetType.getElementTypeDescriptor() == null) {
@@ -68,9 +69,12 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 			for (Object sourceElement : sourceCollection) {
 				Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
 				target.add(targetElement);
+				if (sourceElement != targetElement) {
+					isCopyRequired = true;
+				}
 			}
 		}
-		return target;
+		return isCopyRequired ? target : source;
 	}
 
 }
