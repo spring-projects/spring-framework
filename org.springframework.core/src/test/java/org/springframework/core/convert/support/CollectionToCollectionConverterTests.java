@@ -112,7 +112,7 @@ public class CollectionToCollectionConverterTests {
 		list.add(Arrays.asList("37", "23"));
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		assertTrue(conversionService.canConvert(List.class, List.class));
-		assertEquals(list, conversionService.convert(list, List.class));
+		assertSame(list, conversionService.convert(list, List.class));
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class CollectionToCollectionConverterTests {
 		resources.add(new FileSystemResource("test"));
 		resources.add(new TestResource());
 		TypeDescriptor sourceType = TypeDescriptor.forObject(resources);
-		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+		assertSame(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
 	@Test
@@ -186,7 +186,7 @@ public class CollectionToCollectionConverterTests {
 		resources.add(new FileSystemResource("test"));
 		resources.add(new TestResource());
 		TypeDescriptor sourceType = TypeDescriptor.forObject(resources);
-		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+		assertSame(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
 	@Test
@@ -195,7 +195,7 @@ public class CollectionToCollectionConverterTests {
 		resources.add(null);
 		resources.add(null);
 		TypeDescriptor sourceType = TypeDescriptor.forObject(resources);
-		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
+		assertSame(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
 	@Test(expected=ConverterNotFoundException.class)
