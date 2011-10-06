@@ -16,11 +16,14 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import static org.easymock.EasyMock.createMock;
+
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
@@ -28,8 +31,11 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockPageContext;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.support.JspAwareRequestContext;
 import org.springframework.web.servlet.support.RequestContext;
+import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.servlet.tags.AbstractTagTests;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
@@ -59,10 +65,12 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	protected MockPageContext createAndPopulatePageContext() throws JspException {
 		MockPageContext pageContext = createPageContext();
 		MockHttpServletRequest request = (MockHttpServletRequest) pageContext.getRequest();
-		RequestContext requestContext = new JspAwareRequestContext(pageContext);
-		pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE, requestContext);
+		StaticWebApplicationContext wac = (StaticWebApplicationContext) RequestContextUtils.getWebApplicationContext(request);
+		wac.registerSingleton("requestDataValueProcessor", DelegatingRequestDataValueProcessor.class);
 		extendRequest(request);
 		extendPageContext(pageContext);
+		RequestContext requestContext = new JspAwareRequestContext(pageContext);
+		pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE, requestContext);
 		return pageContext;
 	}
 
@@ -91,6 +99,13 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		return (RequestContext) getPageContext().getAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE);
 	}
 
+	protected RequestDataValueProcessor getMockRequestDataValueProcessor() {
+		RequestDataValueProcessor mockProcessor = createMock(RequestDataValueProcessor.class);
+		ServletRequest request = getPageContext().getRequest();
+		StaticWebApplicationContext wac = (StaticWebApplicationContext) RequestContextUtils.getWebApplicationContext(request);
+		wac.getBean(DelegatingRequestDataValueProcessor.class).setRequestDataValueProcessor(mockProcessor);		
+		return mockProcessor;
+	}
 
 	protected void exposeBindingResult(Errors errors) {
 		// wrap errors in a Model

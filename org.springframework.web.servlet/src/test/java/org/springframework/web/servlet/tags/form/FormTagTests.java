@@ -16,10 +16,20 @@
 
 package org.springframework.web.servlet.tags.form;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
+import java.util.Collections;
+
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
 /**
  * @author Rob Harrop
@@ -49,12 +59,12 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
+	@Override
 	protected void extendRequest(MockHttpServletRequest request) {
 		request.setRequestURI(REQUEST_URI);
 		request.setQueryString(QUERY_STRING);
 		this.request = request;
 	}
-
 
 	public void testWriteForm() throws Exception {
 		String commandName = "myCommand";
@@ -269,6 +279,26 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.doFinally();
 		assertNull(getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 	}
+	
+	public void testRequestDataValueProcessorHooks() throws Exception {
+		String action = "/my/form?foo=bar";
+		RequestDataValueProcessor processor = getMockRequestDataValueProcessor();
+		expect(processor.processAction(this.request, action)).andReturn(action);
+		expect(processor.getExtraHiddenFields(this.request)).andReturn(Collections.singletonMap("key", "value"));
+		replay(processor);
+		
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+		this.tag.doFinally();
+		
+		String output = getOutput();
+		
+		assertEquals("<input type=\"hidden\" name=\"key\" value=\"value\"></input>", getInputTag(output));
+		assertFormTagOpened(output);
+		assertFormTagClosed(output);
+		
+		verify(processor);
+	}
 
 	private String getFormTag(String output) {
 		int inputStart = output.indexOf("<", 1);
@@ -290,5 +320,5 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	private static void assertFormTagClosed(String output) {
 		assertTrue(output.endsWith("</form>"));
 	}
-
+	
 }
