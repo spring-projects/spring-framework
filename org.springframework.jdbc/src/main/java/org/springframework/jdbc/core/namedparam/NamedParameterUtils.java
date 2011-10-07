@@ -73,13 +73,18 @@ public abstract class NamedParameterUtils {
 		Assert.notNull(sql, "SQL must not be null");
 
 		Set<String> namedParameters = new HashSet<String>();
-		ParsedSql parsedSql = new ParsedSql(sql);
+		String sqlToUse = sql;
+		if (sql.contains("\\:")) {
+			sqlToUse = sql.replace("\\:", ":"); 
+		}
+		ParsedSql parsedSql = new ParsedSql(sqlToUse);
 
 		char[] statement = sql.toCharArray();
 		int namedParameterCount = 0;
 		int unnamedParameterCount = 0;
 		int totalParameterCount = 0;
 
+		int escapes = 0;
 		int i = 0;
 		while (i < statement.length) {
 			int skipToPosition = skipCommentsAndQuotes(statement, i);
@@ -97,21 +102,41 @@ public abstract class NamedParameterUtils {
 					i = i + 2;
 					continue;
 				}
-				while (j < statement.length && !isParameterSeparator(statement[j])) {
+				String parameter = null;
+				if (j < statement.length && c == ':' && statement[j] == '{') {
+					// :{x} style parameter
+					while (j < statement.length && !('}' == statement[j])) {
+						j++;
+					}
+					if (j - i > 3) {
+						parameter = sql.substring(i + 2, j);
+						namedParameterCount = addNewNamedParameter(namedParameters, namedParameterCount, parameter);
+						totalParameterCount = addNamedParameter(parsedSql, totalParameterCount, escapes, i, j + 1, parameter);
+					}
 					j++;
 				}
-				if (j - i > 1) {
-					String parameter = sql.substring(i + 1, j);
-					if (!namedParameters.contains(parameter)) {
-						namedParameters.add(parameter);
-						namedParameterCount++;
+				else {
+					while (j < statement.length && !isParameterSeparator(statement[j])) {
+						j++;
 					}
-					parsedSql.addNamedParameter(parameter, i, j);
-					totalParameterCount++;
+					if (j - i > 1) {
+						parameter = sql.substring(i + 1, j);
+						namedParameterCount = addNewNamedParameter(namedParameters, namedParameterCount, parameter);
+						totalParameterCount = addNamedParameter(parsedSql, totalParameterCount, escapes, i, j, parameter);
+					}
 				}
 				i = j - 1;
 			}
 			else {
+				if (c == '\\') {
+					int j = i + 1;
+					if (j < statement.length && statement[j] == ':') {
+						// this is an escaped : and should be skipped
+						escapes++;
+						i = i + 2;
+						continue;
+					}
+				}
 				if (c == '?') {
 					unnamedParameterCount++;
 					totalParameterCount++;
@@ -123,6 +148,21 @@ public abstract class NamedParameterUtils {
 		parsedSql.setUnnamedParameterCount(unnamedParameterCount);
 		parsedSql.setTotalParameterCount(totalParameterCount);
 		return parsedSql;
+	}
+
+	protected static int addNamedParameter(ParsedSql parsedSql, int totalParameterCount, int escapes, int i, int j,
+			String parameter) {
+		parsedSql.addNamedParameter(parameter, i - escapes, j - escapes);
+		totalParameterCount++;
+		return totalParameterCount;
+	}
+
+	protected static int addNewNamedParameter(Set<String> namedParameters, int namedParameterCount, String parameter) {
+		if (!namedParameters.contains(parameter)) {
+			namedParameters.add(parameter);
+			namedParameterCount++;
+		}
+		return namedParameterCount;
 	}
 
 	/**

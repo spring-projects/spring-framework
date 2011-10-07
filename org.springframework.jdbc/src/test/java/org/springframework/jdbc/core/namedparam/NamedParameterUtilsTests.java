@@ -55,7 +55,6 @@ public class NamedParameterUtilsTests {
 		assertEquals("a", psql3.getParameterNames().get(0));
 		assertEquals("b", psql3.getParameterNames().get(1));
 		assertEquals("c", psql3.getParameterNames().get(2));
-
 	}
 
 	@Test
@@ -183,6 +182,56 @@ public class NamedParameterUtilsTests {
 		String sql = "select 'first name' from artists where id = :id and birth_date=:birthDate::timestamp";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
+	}
+
+	/*
+	 * SPR-7476
+	 */
+	@Test
+	public void parseSqlStatementWithEscapedColon() throws Exception {
+		String expectedSql = "select foo from bar where baz < DATE(? 23:59:59) and baz = ?";
+		String sql = "select foo from bar where baz < DATE(:p1 23\\:59\\:59) and baz = :p2";
+
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(2, parsedSql.getParameterNames().size());
+		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
+		assertEquals(expectedSql, finalSql);
+	}
+
+	/*
+	 * SPR-7476
+	 */
+	@Test
+	public void parseSqlStatementWithBracketDelimitedParameterNames() throws Exception {
+		String expectedSql = "select foo from bar where baz = b??z";
+		String sql = "select foo from bar where baz = b:{p1}:{p2}z";
+
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(2, parsedSql.getParameterNames().size());
+		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
+		assertEquals(expectedSql, finalSql);
+	}
+
+	/*
+	 * SPR-7476
+	 */
+	@Test
+	public void parseSqlStatementWithEmptyBracketsOrBracketsInQuotes() throws Exception {
+		String expectedSql = "select foo from bar where baz = b:{}z";
+		String sql = "select foo from bar where baz = b:{}z";
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(0, parsedSql.getParameterNames().size());
+		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
+		assertEquals(expectedSql, finalSql);
+		
+		String expectedSql2 = "select foo from bar where baz = 'b:{p1}z'";
+		String sql2 = "select foo from bar where baz = 'b:{p1}z'";
+
+		ParsedSql parsedSql2 = NamedParameterUtils.parseSqlStatement(sql2);
+		assertEquals(0, parsedSql2.getParameterNames().size());
+		String finalSql2 = NamedParameterUtils.substituteNamedParameters(parsedSql2, null);
+		assertEquals(expectedSql2, finalSql2);
+
 	}
 
 	/*
