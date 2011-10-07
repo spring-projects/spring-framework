@@ -501,7 +501,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 		<para>The Ehcache implementation is located under <literal>org.springframework.cache.ehcache</literal> package. Again, to use it, one simply needs to declare the appropriate 
 		<interfacename>CacheManager</interfacename>:</para>
 		
-		<programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager="ehcache"/>
+		<programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
 
 <!-- Ehcache library setup -->
 <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>]]></programlisting>
@@ -541,6 +541,15 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 	Most <interfacename>CacheManager</interfacename> classes can use the classes in <literal>org.springframework.cache.support</literal> package, such as <classname>AbstractCacheManager</classname>
 	which takes care of the boiler-plate code leaving only the actual <emphasis>mapping</emphasis> to be completed. We hope that in time, the libraries that provide integration with Spring 
 	can fill in this small configuration gap.</para>
+  </section>
+  
+  <section id="cache-specific-config">
+  	<title>How can I set the TTL/TTI/Eviction policy/XXX feature?</title>
+  	
+  	<para>Directly through your cache provider. The cache abstraction is... well, an abstraction not a cache implementation. The solution you are using might support various data policies and different
+  	topologies which other solutions do not (take for example the JDK <literal>ConcurrentHashMap</literal>) - exposing that in the cache abstraction would be useless simply because there would 
+  	no backing support. Such functionality should be controlled directly through the backing cache, when configuring it or through its native API. 
+    </para>
   </section>
   
 </chapter>
