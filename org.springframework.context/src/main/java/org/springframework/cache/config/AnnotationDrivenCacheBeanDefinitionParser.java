@@ -16,7 +16,7 @@
 
 package org.springframework.cache.config;
 
-import org.w3c.dom.Element;
+import static org.springframework.context.annotation.AnnotationConfigUtils.*;
 
 import org.springframework.aop.config.AopNamespaceUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -29,8 +29,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.interceptor.BeanFactoryCacheOperationSourceAdvisor;
 import org.springframework.cache.interceptor.CacheInterceptor;
-
-import static org.springframework.context.annotation.AnnotationConfigUtils.*;
+import org.w3c.dom.Element;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
@@ -63,10 +62,11 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 			// mode="proxy"
 			AopAutoProxyConfigurer.configureAutoProxyCreator(element, parserContext);
 		}
+
 		return null;
 	}
 
-	private static void registerCacheManagerProperty(Element element, BeanDefinition def) {
+	private static void parseCacheManagerProperty(Element element, BeanDefinition def) {
 		def.getPropertyValues().add("cacheManager",
 				new RuntimeBeanReference(CacheNamespaceHandler.extractCacheManager(element)));
 	}
@@ -87,7 +87,8 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 			RootBeanDefinition def = new RootBeanDefinition();
 			def.setBeanClassName(CACHE_ASPECT_CLASS_NAME);
 			def.setFactoryMethodName("aspectOf");
-			registerCacheManagerProperty(element, def);
+			parseCacheManagerProperty(element, def);
+			CacheNamespaceHandler.parseKeyGenerator(element, def);
 			parserContext.registerBeanComponent(new BeanComponentDefinition(def, CACHE_ASPECT_BEAN_NAME));
 		}
 	}
@@ -114,7 +115,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				RootBeanDefinition interceptorDef = new RootBeanDefinition(CacheInterceptor.class);
 				interceptorDef.setSource(eleSource);
 				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-				registerCacheManagerProperty(element, interceptorDef);
+				parseCacheManagerProperty(element, interceptorDef);
 				interceptorDef.getPropertyValues().add("cacheOperationSources", new RuntimeBeanReference(sourceName));
 				String interceptorName = parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
 
@@ -138,5 +139,4 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 			}
 		}
 	}
-
 }
