@@ -45,6 +45,21 @@
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="key-generator" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.cache.interceptor.KeyGenerator"><![CDATA[
+	The bean name of the KeyGenerator that is to be used to retrieve the backing caches.
+	
+	This attribute is not required, and only needs to be specified
+	explicitly if the default strategy (DefaultKeyGenerator) is not sufficient.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.cache.interceptor.KeyGenerator"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="mode" default="proxy">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
@@ -128,6 +143,21 @@
 							</xsd:appinfo>
 						</xsd:annotation>
 					</xsd:attribute>
+					<xsd:attribute name="key-generator" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation source="java:org.springframework.cache.interceptor.KeyGenerator"><![CDATA[
+	The bean name of the KeyGenerator that is to be used to retrieve the backing caches.
+	
+	This attribute is not required, and only needs to be specified
+	explicitly if the default strategy (DefaultKeyGenerator) is not sufficient.
+							]]></xsd:documentation>
+							<xsd:appinfo>
+								<tool:annotation kind="ref">
+									<tool:expected-type type="org.springframework.cache.interceptor.KeyGenerator"/>
+								</tool:annotation>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:attribute>					
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>

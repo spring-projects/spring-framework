@@ -20,11 +20,13 @@ import static org.junit.Assert.*;
 
 import java.util.UUID;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -283,5 +285,11 @@ public abstract class AbstractAnnotationTests {
 	@Test
 	public void testClassUncheckedException() throws Exception {
 		testUncheckedThrowable(ccs);
+	}
+
+	@Test
+	public void testKeyStrategy() throws Exception {
+		CacheInterceptor bean = ctx.getBean("cacheAdviceClass", CacheInterceptor.class);
+		Assert.assertSame(ctx.getBean("keyGenerator"), bean.getKeyGenerator());
 	}
 }
