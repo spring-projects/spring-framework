@@ -16,6 +16,11 @@
 
 package org.springframework.cache.config;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
+import org.springframework.cache.interceptor.CacheInterceptor;
+
 
 /**
  * @author Costin Leau
@@ -27,4 +32,10 @@ public class AnnotationNamespaceDrivenTests extends AbstractAnnotationTests {
 		return "/org/springframework/cache/config/annotationDrivenCacheNamespace.xml";
 	}
 
+	@Test
+	public void testKeyStrategy() throws Exception {
+		CacheInterceptor ci = ctx.getBean("org.springframework.cache.interceptor.CacheInterceptor#0",
+				CacheInterceptor.class);
+		Assert.assertSame(ctx.getBean("keyGenerator"), ci.getKeyGenerator());
+	}
 }

@@ -88,7 +88,6 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 			def.setBeanClassName(CACHE_ASPECT_CLASS_NAME);
 			def.setFactoryMethodName("aspectOf");
 			parseCacheManagerProperty(element, def);
-			CacheNamespaceHandler.parseKeyGenerator(element, def);
 			parserContext.registerBeanComponent(new BeanComponentDefinition(def, CACHE_ASPECT_BEAN_NAME));
 		}
 	}
@@ -116,6 +115,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 				interceptorDef.setSource(eleSource);
 				interceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				parseCacheManagerProperty(element, interceptorDef);
+				CacheNamespaceHandler.parseKeyGenerator(element, interceptorDef);
 				interceptorDef.getPropertyValues().add("cacheOperationSources", new RuntimeBeanReference(sourceName));
 				String interceptorName = parserContext.getReaderContext().registerWithGeneratedName(interceptorDef);
 
