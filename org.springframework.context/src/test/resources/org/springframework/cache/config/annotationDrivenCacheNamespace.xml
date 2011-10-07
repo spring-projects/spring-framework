@@ -7,7 +7,7 @@
        		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
        		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-	<cache:annotation-driven proxy-target-class="false" order="0"/>
+	<cache:annotation-driven proxy-target-class="false" order="0" key-generator="keyGenerator"/>
 		
 	<aop:config>
 		<aop:advisor advice-ref="debugInterceptor" pointcut="execution(* *..CacheableService.*(..))" order="1"/>
@@ -27,4 +27,6 @@
 	
 	<bean id="classService" class="org.springframework.cache.config.AnnotatedClassCacheableService"/>
 
+	<bean id="keyGenerator" class="org.springframework.cache.config.SomeKeyGenerator"/>
+	
 </beans>

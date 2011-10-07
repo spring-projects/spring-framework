@@ -16,6 +16,10 @@
 
 package org.springframework.cache.config;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.springframework.cache.interceptor.CacheInterceptor;
+
 
 /**
  * @author Costin Leau
@@ -26,5 +30,11 @@ public class CacheAdviceNamespaceTests extends AbstractAnnotationTests {
 	@Override
 	protected String getConfig() {
 		return "/org/springframework/cache/config/cache-advice.xml";
+	}
+
+	@Test
+	public void testKeyStrategy() throws Exception {
+		CacheInterceptor bean = ctx.getBean("cacheAdviceClass", CacheInterceptor.class);
+		Assert.assertSame(ctx.getBean("keyGenerator"), bean.getKeyGenerator());
 	}
 }
