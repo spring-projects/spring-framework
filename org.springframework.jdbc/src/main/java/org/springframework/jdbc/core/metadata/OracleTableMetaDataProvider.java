@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.jdbc.core.metadata;
 
 import java.lang.reflect.Method;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
@@ -27,8 +29,12 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Oracle-specific implementation of the {@link org.springframework.jdbc.core.metadata.TableMetaDataProvider}.
- * Supports a feature for including synonyms in the metadata lookup.
+ * Supports a feature for including synonyms in the metadata lookup. Also supports lookup of current schema using
+ * the sys_context.
  *
+ * <p>Thanks to Mike Youngstrom and Bruce Campbell for submitting the original suggestion for the Oracle
+ * current schema lookup implementation.
+ * 
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 3.0
@@ -36,6 +42,8 @@ import org.springframework.util.ReflectionUtils;
 public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
 	private final boolean includeSynonyms;
+	
+	private String defaultSchema;
 
 
 	public OracleTableMetaDataProvider(DatabaseMetaData databaseMetaData) throws SQLException {
@@ -45,8 +53,16 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 	public OracleTableMetaDataProvider(DatabaseMetaData databaseMetaData, boolean includeSynonyms) throws SQLException {
 		super(databaseMetaData);
 		this.includeSynonyms = includeSynonyms;
+		lookupDefaultSchema(databaseMetaData);
 	}
 
+	@Override
+	protected String getDefaultSchema() {
+		if (defaultSchema != null) {
+			return defaultSchema;
+		}
+		return super.getDefaultSchema();
+	}
 
 	@Override
 	public void initializeWithTableColumnMetaData(DatabaseMetaData databaseMetaData,
@@ -65,7 +81,7 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 		}
 		boolean isOracleCon;
 		try {
-			Class oracleConClass = getClass().getClassLoader().loadClass("oracle.jdbc.OracleConnection");
+			Class<?> oracleConClass = getClass().getClassLoader().loadClass("oracle.jdbc.OracleConnection");
 			isOracleCon = oracleConClass.isInstance(con);
 		}
 		catch (ClassNotFoundException ex) {
@@ -107,6 +123,28 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 		catch (Exception ex) {
 			throw new InvalidDataAccessApiUsageException("Couldn't reset Oracle Connection", ex);
 		}
+	}
+	
+	/*
+	 * Oracle implementation for detecting current schema
+	 * 
+	 * @param databaseMetaData
+	 */
+	private void lookupDefaultSchema(DatabaseMetaData databaseMetaData) {
+		try {
+			CallableStatement cstmt = null;
+			try {
+				cstmt = databaseMetaData.getConnection().prepareCall("{? = call sys_context('USERENV', 'CURRENT_SCHEMA')}");
+				cstmt.registerOutParameter(1, Types.VARCHAR);
+				cstmt.execute();
+				this.defaultSchema = cstmt.getString(1);
+			}
+			finally {
+				if (cstmt != null) {
+					cstmt.close();
+				}
+			}
+		} catch (Exception ignore) {}
 	}
 
 }

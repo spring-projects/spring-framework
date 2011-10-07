@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	private boolean generatedKeysColumnNameArraySupported = true;
 
 	/** database products we know not supporting the use of a String[] for generated keys */
-	private List productsNotSupportingGeneratedKeysColumnNameArray =
+	private List<String> productsNotSupportingGeneratedKeysColumnNameArray =
 			Arrays.asList("Apache Derby", "HSQL Database Engine");
 
 	/** Collection of TableParameterMetaData objects */
@@ -267,11 +267,17 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	public String metaDataSchemaNameToUse(String schemaName) {
 		if (schemaName == null) {
-			return schemaNameToUse(userName);
+			return schemaNameToUse(getDefaultSchema());
 		}
 		return schemaNameToUse(schemaName);
 	}
 
+	/**
+	 * Provide access to default schema for subclasses.
+	 */
+	protected String getDefaultSchema() {
+		return userName;
+	}
 
 	/**
 	 * Provide access to version info for subclasses.
@@ -327,16 +333,19 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		else {
 			TableMetaData tmd;
 			if (schemaName == null) {
-				tmd = tableMeta.get(userName.toUpperCase());
+				tmd = tableMeta.get(getDefaultSchema());
+				if (tmd == null) {
+					tmd = tableMeta.get(userName.toUpperCase());
+				}
 				if (tmd == null) {
 					tmd = tableMeta.get("PUBLIC");
-					if (tmd == null) {
-						tmd = tableMeta.get("DBO");
-					}
-					if (tmd == null) {
-						throw new DataAccessResourceFailureException("Unable to locate table meta data for '" +
-								tableName + "' in the default schema");
-					}
+				}
+				if (tmd == null) {
+					tmd = tableMeta.get("DBO");
+				}
+				if (tmd == null) {
+					throw new DataAccessResourceFailureException("Unable to locate table meta data for '" +
+							tableName + "' in the default schema");
 				}
 			}
 			else {
@@ -461,6 +470,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			this.type = type;
 		}
 
+		@SuppressWarnings("unused")
 		public String getType() {
 			return this.type;
 		}
