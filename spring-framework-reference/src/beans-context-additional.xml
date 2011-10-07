@@ -462,20 +462,20 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <interfacename>ApplicationEventMulticaster</interfacename>
       interface.</para>
 
-    <para>The following example demonstrates the bean definitions used to
+    <para>The following example shows the bean definitions used to
       register and configure each of the classes above:</para>
     <programlisting language="xml"><![CDATA[<bean id="emailService" class="example.EmailService">
   <property name="blackList">
       <list>
-          <value>black@list.org</value>
-          <value>white@list.org</value>
-          <value>john@doe.org</value>
+          <value>known.spammer@example.org</value>
+          <value>known.hacker@example.org</value>
+          <value>john.doe@example.org</value>
       </list>
   </property>
 </bean>
 
 <bean id="blackListNotifier" class="example.BlackListNotifier">
-  <property name="notificationAddress" value="spam@list.org"/>
+  <property name="notificationAddress" value="blacklist@example.org"/>
 </bean>]]></programlisting>
 
     <para>Putting it all together, when the <methodname>sendEmail()</methodname>
