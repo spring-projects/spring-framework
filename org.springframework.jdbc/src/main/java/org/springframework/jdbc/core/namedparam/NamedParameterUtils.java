@@ -105,6 +105,12 @@ public abstract class NamedParameterUtils {
 					// :{x} style parameter
 					while (j < statement.length && !('}' == statement[j])) {
 						j++;
+						if (':' == statement[j] || '{' == statement[j] || isParameterSeparator(statement[j])) {
+							throw new InvalidDataAccessApiUsageException("Parameter name contains invalid character '" + statement[j] + "' at position " + i + " in statement " + sql);
+						}
+					}
+					if (j >= statement.length) {
+						throw new InvalidDataAccessApiUsageException("Non-terminated named parameter declaration at position " + i + " in statement " + sql);
 					}
 					if (j - i > 3) {
 						parameter = sql.substring(i + 2, j);
