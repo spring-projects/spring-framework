@@ -189,8 +189,8 @@ public class NamedParameterUtilsTests {
 	 */
 	@Test
 	public void parseSqlStatementWithEscapedColon() throws Exception {
-		String expectedSql = "select foo from bar where baz < DATE(? 23:59:59) and baz = ?";
-		String sql = "select foo from bar where baz < DATE(:p1 23\\:59\\:59) and baz = :p2";
+		String expectedSql = "select '0\\:0' as a, foo from bar where baz < DATE(? 23:59:59) and baz = ?";
+		String sql = "select '0\\:0' as a, foo from bar where baz < DATE(:p1 23\\:59\\:59) and baz = :p2";
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals(2, parsedSql.getParameterNames().size());
