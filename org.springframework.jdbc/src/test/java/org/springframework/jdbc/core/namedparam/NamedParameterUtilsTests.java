@@ -194,6 +194,8 @@ public class NamedParameterUtilsTests {
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals(2, parsedSql.getParameterNames().size());
+		assertEquals("p1", parsedSql.getParameterNames().get(0));
+		assertEquals("p2", parsedSql.getParameterNames().get(1));
 		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
 		assertEquals(expectedSql, finalSql);
 	}
@@ -208,6 +210,8 @@ public class NamedParameterUtilsTests {
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
 		assertEquals(2, parsedSql.getParameterNames().size());
+		assertEquals("p1", parsedSql.getParameterNames().get(0));
+		assertEquals("p2", parsedSql.getParameterNames().get(1));
 		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
 		assertEquals(expectedSql, finalSql);
 	}
