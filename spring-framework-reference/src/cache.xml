@@ -430,23 +430,23 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
   	can be translated into:</para>
   	
   	<programlisting language="xml"><![CDATA[<!-- the service we want to make cacheable -->
-  	    <bean id="bookService" class="x.y.service.DefaultBookService"/>
-  	    
-  		<!-- cache definitions -->
-  		<cache:advice id="cacheAdvice" cache-manager="cacheManager">
-			<cache:definitions cache="books">
-				<cache:cacheable method="findBook" key="#isbn"/>
-				<cache:cache-evict method="loadBooks" all-entries="true"/>
-			</cache:definitions>
-		</cache:advice>
-		
-		<!-- apply the cacheable behaviour to all BookService interfaces -->
-		<aop:config>
-			<aop:advisor advice-ref="cacheAdvice" pointcut="execution(* x.y.BookService.*(..))"/>
-		</aop:config>
-		...
-		// cache manager definition omitted
-		]]>
+<bean id="bookService" class="x.y.service.DefaultBookService"/>
+      
+<!-- cache definitions -->
+<cache:advice id="cacheAdvice" cache-manager="cacheManager">
+   <cache:definitions cache="books">
+      <cache:cacheable method="findBook" key="#isbn"/>
+      <cache:cache-evict method="loadBooks" all-entries="true"/>
+   </cache:definitions>
+</cache:advice>
+        
+<!-- apply the cacheable behaviour to all BookService interfaces -->
+<aop:config>
+   <aop:advisor advice-ref="cacheAdvice" pointcut="execution(* x.y.BookService.*(..))"/>
+</aop:config>
+...
+// cache manager definition omitted
+]]>
   	</programlisting>
   	
   	<para>In the configuration above, the <literal>bookService</literal> is made cacheable. The caching semantics to apply are encapsulated in the <literal>cache:advice</literal> definition which
@@ -518,11 +518,11 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 		one can wire in a simple, dummy cache that performs no caching - that is, forces the cached methods to be executed every time:</para>
 
 		<programlisting language="xml"><![CDATA[<bean id="cacheManager" class="org.springframework.cache.support.CompositeCacheManager">
-		<property name="cacheManagers"><list>
-		   <ref bean="jdkCache"/>
-		   <ref bean="gemfireCache"/>
-		</list></property>
-		<property name="addNoOpCache" value="true"/>
+   <property name="cacheManagers"><list>
+      <ref bean="jdkCache"/>
+      <ref bean="gemfireCache"/>
+   </list></property>
+   <property name="addNoOpCache" value="true"/>
 </bean>]]></programlisting>
 		
 		<para>The <literal>CompositeCacheManager</literal> above chains multiple <literal>CacheManager</literal>s and aditionally, through the <literal>addNoOpManager</literal> flag, adds a 
