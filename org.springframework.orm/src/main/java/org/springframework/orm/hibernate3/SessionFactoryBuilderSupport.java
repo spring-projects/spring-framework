@@ -52,7 +52,6 @@ import org.hibernate.transaction.JTATransactionFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.InfrastructureProxy;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
@@ -567,16 +566,12 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 			new Class<?>[] {
 				SessionFactory.class,
 				SessionFactoryImplementor.class,
-				InfrastructureProxy.class,
 				DisposableBean.class
 			},
 			new InvocationHandler() {
 				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 					if (ReflectionUtils.isToStringMethod(method)) {
 						return String.format("DisposableBean proxy for SessionFactory [%s]", rawSf.toString());
-					}
-					if (method.equals(InfrastructureProxy.class.getMethod("getWrappedObject"))) {
-						return rawSf;
 					}
 					if (method.equals(DisposableBean.class.getMethod("destroy"))) {
 						closeHibernateSessionFactory(SessionFactoryBuilderSupport.this, rawSf);
