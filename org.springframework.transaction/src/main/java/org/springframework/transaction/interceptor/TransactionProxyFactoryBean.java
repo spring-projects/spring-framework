@@ -33,18 +33,18 @@ import org.springframework.transaction.PlatformTransactionManager;
  * {@link org.springframework.aop.framework.ProxyFactoryBean}
  * with a separate {@link TransactionInterceptor} definition.
  *
- * <p><strong>HISTORICAL NOTE:</strong>This class was originally intended to cover the
- * typical case of declarative
- * transaction demarcation: namely, wrapping a singleton target object with a
- * transactional proxy, proxying all the interfaces that the target implements. However,
- * in Spring versions 2.0 and beyond, the functionality provided here is superseded
- * by the more convenient {@code tx:} XML namespace. See the <a href="http://bit.ly/qUwvwz">
- * declarative transaction management</a> section of the Spring reference documentation to
- * understand the modern options for managing transactions in Spring applications.
- * <strong>While this class has been deprecated starting with Spring 3.1, its use remains
- * valid and supported</strong>. The deprecation serves as a strong reminder to users that
- * simpler and superior approaches are available. What follows is the original
- * (pre-deprecation) documentation.
+ * <p><strong>HISTORICAL NOTE:</strong> This class was originally designed to cover the
+ * typical case of declarative transaction demarcation: namely, wrapping a singleton
+ * target object with a transactional proxy, proxying all the interfaces that the target
+ * implements. However, in Spring versions 2.0 and beyond, the functionality provided here
+ * is superseded by the more convenient {@code tx:} XML namespace. See the <a
+ * href="http://bit.ly/qUwvwz">declarative transaction management</a> section of the
+ * Spring reference documentation to understand the modern options for managing
+ * transactions in Spring applications. For these reasons, <strong>users should favor of
+ * the {@code tx:} XML namespace as well as
+ * the @{@link org.springframework.transaction.annotation.Transactional Transactional}
+ * and @{@link org.springframework.transaction.annotation.EnableTransactionManagement
+ * EnableTransactionManagement} annotations.</strong>
  *
  * <p>There are three main properties that need to be specified:
  * <ul>
@@ -111,12 +111,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see #setTransactionAttributes
  * @see TransactionInterceptor
  * @see org.springframework.aop.framework.ProxyFactoryBean
- * @deprecated as of Spring 3.1 in favor of the {@code tx:} XML namespace as well as the
- * {@link org.springframework.transaction.annotation.Transactional @Transactional} and
- * {@link org.springframework.transaction.annotation.EnableTransactionManagement @EnableTransactionManagement}
- * annotations
  */
-@Deprecated
 @SuppressWarnings("serial")
 public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 		implements BeanFactoryAware {
