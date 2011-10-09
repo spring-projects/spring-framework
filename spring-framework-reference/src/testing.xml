@@ -993,7 +993,7 @@ public void testProcessRepeatedly() {
 
           <listitem>
             <para><interfacename>ContextLoader</interfacename>: Strategy
-            interface for loading an
+            interface introduced in Spring 2.5 for loading an
             <interfacename>ApplicationContext</interfacename> for an
             integration test managed by the Spring TestContext
             Framework.</para>
@@ -1028,7 +1028,7 @@ public void testProcessRepeatedly() {
                 <classname>AnnotationConfigContextLoader</classname> or a
                 <classname>GenericXmlContextLoader</classname> depending
                 either on the configuration declared for the test class or on
-                the presence of default locations or configuration
+                the presence of default locations or default configuration
                 classes.</para>
               </listitem>
 
@@ -1039,8 +1039,8 @@ public void testProcessRepeatedly() {
               </listitem>
 
               <listitem>
-                <para><classname>GenericXmlContextLoader</classname>: loads
-                and application context from XML resource locations.</para>
+                <para><classname>GenericXmlContextLoader</classname>: loads an
+                application context from XML resource locations.</para>
               </listitem>
 
               <listitem>
@@ -1151,8 +1151,8 @@ public class MyTest {
 
           <para><interfacename>@ContextConfiguration</interfacename> supports
           an alias for the <literal>locations</literal> attribute through the
-          standard <literal>value</literal> attribute. Thus, if you do not
-          need to configure a custom
+          standard Java <literal>value</literal> attribute. Thus, if you do
+          not need to configure a custom
           <interfacename>ContextLoader</interfacename>, you can omit the
           declaration of the <literal>locations</literal> attribute name and
           declare the resource locations by using the shorthand format
@@ -1345,9 +1345,10 @@ public class ExtendedTest extends BaseTest {
           linkend="integration-testing-annotations-spring" />). This instructs
           Spring to reload the configuration and rebuild the application
           context before executing the next test. Note that support for the
-          <interfacename>@DirtiesContext</interfacename> annotation is enabled
-          via the <classname>DirtiesContextTestExecutionListener</classname>
-          which is enabled by default.</para>
+          <interfacename>@DirtiesContext</interfacename> annotation is
+          provided by the
+          <classname>DirtiesContextTestExecutionListener</classname> which is
+          enabled by default.</para>
         </section>
       </section>
 
