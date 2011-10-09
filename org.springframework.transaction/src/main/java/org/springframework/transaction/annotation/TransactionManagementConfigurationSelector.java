@@ -20,10 +20,10 @@ import java.util.Map;
 
 import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportSelectorContext;
 import org.springframework.context.annotation.ImportSelector;
-import org.springframework.context.config.AdviceMode;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 

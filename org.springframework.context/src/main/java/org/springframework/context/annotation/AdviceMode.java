@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.context.config;
+package org.springframework.context.annotation;
 
 /**
- * Enumeration used to determine whether proxy-based or AspectJ-based advice should be
- * applied.
+ * Enumeration used to determine whether JDK proxy-based or AspectJ weaving-based advice
+ * should be applied.
  *
  * @author Chris Beams
  * @since 3.1

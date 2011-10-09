@@ -24,10 +24,10 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.config.AdviceMode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;

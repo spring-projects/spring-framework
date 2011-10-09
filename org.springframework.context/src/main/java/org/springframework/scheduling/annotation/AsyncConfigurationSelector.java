@@ -18,10 +18,10 @@ package org.springframework.scheduling.annotation;
 
 import java.util.Map;
 
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.ImportSelectorContext;
 import org.springframework.context.annotation.ImportSelector;
-import org.springframework.context.config.AdviceMode;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
