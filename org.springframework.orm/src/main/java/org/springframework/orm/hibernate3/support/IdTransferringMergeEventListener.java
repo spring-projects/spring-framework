@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,21 +42,19 @@ import org.hibernate.persister.entity.EntityPersister;
  * calls, with the Hibernate SessionFactory configuration specifying an
  * <code>IdTransferringMergeEventListener</code>.
  *
- * <p>Typically specified as entry for SessionFactoryBuilder's "eventListeners"
+ * <p>Typically specified as entry for LocalSessionFactoryBean's "eventListeners"
  * map, with key "merge".
  *
  * @author Juergen Hoeller
  * @since 1.2
- * @see org.springframework.orm.hibernate3.SessionFactoryBuilder#setEventListeners(java.util.Map)
+ * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setEventListeners(java.util.Map)
  */
-@SuppressWarnings("serial")
 public class IdTransferringMergeEventListener extends DefaultMergeEventListener {
 
 	/**
 	 * Hibernate 3.1 implementation of ID transferral.
 	 */
 	@Override
-	@SuppressWarnings("rawtypes")
 	protected void entityIsTransient(MergeEvent event, Map copyCache) {
 		super.entityIsTransient(event, copyCache);
 		SessionImplementor session = event.getSession();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.orm.hibernate3;
 
 /**
  * Subclass of LocalDataSourceConnectionProvider that will be used
- * if SessionFactoryBean's "dataSource" property is set
+ * if LocalSessionFactoryBean's "dataSource" property is set
  * in combination with a Hibernate TransactionManagerLookup.
  *
  * @author Juergen Hoeller

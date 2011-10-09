@@ -28,11 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
-
 import org.easymock.MockControl;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
@@ -52,6 +50,7 @@ import org.hibernate.engine.FilterDefinition;
 import org.hibernate.event.MergeEvent;
 import org.hibernate.event.MergeEventListener;
 import org.hibernate.mapping.TypeDef;
+
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -60,17 +59,14 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * @author Juergen Hoeller
- * @author Chris Beams
  * @since 05.03.2005
  */
-@SuppressWarnings("serial")
 public class LocalSessionFactoryBeanTests extends TestCase {
 
 	public void testLocalSessionFactoryBeanWithDataSource() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final List invocations = new ArrayList();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public Configuration addInputStream(InputStream is) {
@@ -84,11 +80,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalDataSourceConnectionProvider.class.getName(),
-						this.getConfiguration().getProperty(Environment.CONNECTION_PROVIDER));
-				assertEquals(ds, SessionFactoryBuilderSupport.getConfigTimeDataSource());
+						config.getProperty(Environment.CONNECTION_PROVIDER));
+				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
 				invocations.add("newSessionFactory");
 				return null;
 			}
@@ -103,7 +98,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		final RegionFactory regionFactory = new NoCachingRegionFactory(null);
 		final List invocations = new ArrayList();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public Configuration addInputStream(InputStream is) {
@@ -117,11 +111,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalRegionFactoryProxy.class.getName(),
-						this.getConfiguration().getProperty(Environment.CACHE_REGION_FACTORY));
-				assertSame(regionFactory, SessionFactoryBuilderSupport.getConfigTimeRegionFactory());
+						config.getProperty(Environment.CACHE_REGION_FACTORY));
+				assertSame(regionFactory, LocalSessionFactoryBean.getConfigTimeRegionFactory());
 				invocations.add("newSessionFactory");
 				return null;
 			}
@@ -132,13 +125,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(0));
 	}
 
-	@SuppressWarnings("deprecation")
-	// CacheProvider is deprecated in Hibernate 3.3, but LSFB still supports its use
 	public void testLocalSessionFactoryBeanWithCacheProvider() throws Exception {
 		final CacheProvider cacheProvider = new NoCacheProvider();
-		final List<String> invocations = new ArrayList<String>();
+		final List invocations = new ArrayList();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public Configuration addInputStream(InputStream is) {
@@ -153,11 +143,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				};
 			}
 
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalCacheProviderProxy.class.getName(),
-						this.getConfiguration().getProperty(Environment.CACHE_PROVIDER));
-				assertSame(cacheProvider, SessionFactoryBeanDelegate.getConfigTimeCacheProvider());
+						config.getProperty(Environment.CACHE_PROVIDER));
+				assertSame(cacheProvider, LocalSessionFactoryBean.getConfigTimeCacheProvider());
 				invocations.add("newSessionFactory");
 				return null;
 			}
@@ -172,7 +161,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final List invocations = new ArrayList();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public Configuration addInputStream(InputStream is) {
@@ -187,11 +175,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				};
 			}
 
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(TransactionAwareDataSourceConnectionProvider.class.getName(),
-						this.getConfiguration().getProperty(Environment.CONNECTION_PROVIDER));
-				assertEquals(ds, SessionFactoryBuilderSupport.getConfigTimeDataSource());
+						config.getProperty(Environment.CONNECTION_PROVIDER));
+				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
 				invocations.add("newSessionFactory");
 				return null;
 			}
@@ -209,7 +196,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		final TransactionManager tm = (TransactionManager) tmControl.getMock();
 		final List invocations = new ArrayList();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public Configuration addInputStream(InputStream is) {
@@ -224,14 +210,13 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				};
 			}
 
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalJtaDataSourceConnectionProvider.class.getName(),
-						this.getConfiguration().getProperty(Environment.CONNECTION_PROVIDER));
-				assertEquals(ds, SessionFactoryBuilderSupport.getConfigTimeDataSource());
+						config.getProperty(Environment.CONNECTION_PROVIDER));
+				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
 				assertEquals(LocalTransactionManagerLookup.class.getName(),
-						this.getConfiguration().getProperty(Environment.TRANSACTION_MANAGER_STRATEGY));
-				assertEquals(tm, SessionFactoryBuilderSupport.getConfigTimeTransactionManager());
+						config.getProperty(Environment.TRANSACTION_MANAGER_STRATEGY));
+				assertEquals(tm, LocalSessionFactoryBean.getConfigTimeTransactionManager());
 				invocations.add("newSessionFactory");
 				return null;
 			}
@@ -252,7 +237,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final Set invocations = new HashSet();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public Configuration addJar(File file) {
@@ -262,11 +246,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				};
 			}
 
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalDataSourceConnectionProvider.class.getName(),
-						this.getConfiguration().getProperty(Environment.CONNECTION_PROVIDER));
-				assertEquals(ds, SessionFactoryBuilderSupport.getConfigTimeDataSource());
+						config.getProperty(Environment.CONNECTION_PROVIDER));
+				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
 				invocations.add("newSessionFactory");
 				return null;
 			}
@@ -285,7 +268,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final Set invocations = new HashSet();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public Configuration addInputStream(InputStream is) {
@@ -300,12 +282,11 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 				};
 			}
 
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(LocalDataSourceConnectionProvider.class.getName(),
-						this.getConfiguration().getProperty(Environment.CONNECTION_PROVIDER));
-				assertEquals(ds, SessionFactoryBuilderSupport.getConfigTimeDataSource());
-				assertEquals("myValue", this.getConfiguration().getProperty("myProperty"));
+						config.getProperty(Environment.CONNECTION_PROVIDER));
+				assertEquals(ds, LocalSessionFactoryBean.getConfigTimeDataSource());
+				assertEquals("myValue", config.getProperty("myProperty"));
 				invocations.add("newSessionFactory");
 				return null;
 			}
@@ -326,11 +307,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 	public void testLocalSessionFactoryBeanWithValidProperties() throws Exception {
 		final Set invocations = new HashSet();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				assertEquals(UserSuppliedConnectionProvider.class.getName(),
-						this.getConfiguration().getProperty(Environment.CONNECTION_PROVIDER));
-				assertEquals("myValue", this.getConfiguration().getProperty("myProperty"));
+						config.getProperty(Environment.CONNECTION_PROVIDER));
+				assertEquals("myValue", config.getProperty("myProperty"));
 				invocations.add("newSessionFactory");
 				return null;
 			}
@@ -376,8 +356,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		factoryControl.setVoidCallable(1);
 		factoryControl.replay();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				return sessionFactory;
 			}
 		};
@@ -392,7 +371,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 
 	public void testLocalSessionFactoryBeanWithEntityInterceptor() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public Configuration setInterceptor(Interceptor interceptor) {
@@ -419,7 +397,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 
 	public void testLocalSessionFactoryBeanWithNamingStrategy() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public Configuration setNamingStrategy(NamingStrategy namingStrategy) {
@@ -445,7 +422,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		final Properties registeredClassCache = new Properties();
 		final Properties registeredCollectionCache = new Properties();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public Configuration setCacheConcurrencyStrategy(String clazz, String concurrencyStrategy) {
@@ -458,8 +434,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
 		};
@@ -482,7 +457,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		final Properties registeredClassCache = new Properties();
 		final Properties registeredCollectionCache = new Properties();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					// changed from return type 'void' to 'Configuration' in Hibernate 3.6
@@ -494,8 +468,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
 		};
@@ -517,7 +490,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 	public void testLocalSessionFactoryBeanWithEventListeners() throws Exception {
 		final Map registeredListeners = new HashMap();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public void setListener(String type, Object listener) {
@@ -525,8 +497,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
 		};
@@ -543,7 +514,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 	public void testLocalSessionFactoryBeanWithEventListenerSet() throws Exception {
 		final Map registeredListeners = new HashMap();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
-			@Override
 			protected Configuration newConfiguration() {
 				return new Configuration() {
 					public void setListeners(String type, Object[] listeners) {
@@ -552,8 +522,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 					}
 				};
 			}
-			@Override
-			protected SessionFactory newSessionFactory() {
+			protected SessionFactory newSessionFactory(Configuration config) {
 				return null;
 			}
 		};
@@ -610,7 +579,6 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 
 		public List registeredFilterDefinitions = new LinkedList();
 
-		@Override
 		protected Configuration newConfiguration() throws HibernateException {
 			return new Configuration() {
 				public void addFilterDefinition(FilterDefinition definition) {
@@ -619,8 +587,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 			};
 		}
 
-		@Override
-		protected SessionFactory newSessionFactory() {
+		protected SessionFactory newSessionFactory(Configuration config) {
 			return null;
 		}
 	}
@@ -630,9 +597,8 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 
 		public Mappings mappings;
 
-		@Override
-		protected SessionFactory newSessionFactory() {
-			this.mappings = this.getConfiguration().createMappings();
+		protected SessionFactory newSessionFactory(Configuration config) {
+			this.mappings = config.createMappings();
 			return null;
 		}
 	}

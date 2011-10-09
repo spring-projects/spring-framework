@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 /**
  * Subclass of LocalDataSourceConnectionProvider that returns a
  * transaction-aware proxy for the exposed DataSource. Used if
- * SessionFactoryBuilder's "useTransactionAwareDataSource" flag is on.
+ * LocalSessionFactoryBean's "useTransactionAwareDataSource" flag is on.
  *
  * @author Juergen Hoeller
  * @since 1.2
- * @see SessionFactoryBuilder#setUseTransactionAwareDataSource
+ * @see LocalSessionFactoryBean#setUseTransactionAwareDataSource
  */
 public class TransactionAwareDataSourceConnectionProvider extends LocalDataSourceConnectionProvider {
 
