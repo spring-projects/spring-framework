@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.transaction.Status;
 import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
@@ -29,18 +30,23 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.usertype.UserType;
 import org.hibernate.util.EqualsHelper;
+
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.support.lob.JtaLobCreatorSynchronization;
 import org.springframework.jdbc.support.lob.LobCreator;
-import org.springframework.jdbc.support.lob.LobCreatorUtils;
 import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.orm.hibernate3.SessionFactoryBuilderSupport;
+import org.springframework.jdbc.support.lob.SpringLobCreatorSynchronization;
+import org.springframework.jdbc.support.lob.LobCreatorUtils;
+import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Abstract base class for Hibernate UserType implementations that map to LOBs.
- * Retrieves the LobHandler to use from SessionFactoryBuilder at config time.
+ * Retrieves the LobHandler to use from LocalSessionFactoryBean at config time.
  *
  * <p>For writing LOBs, either an active Spring transaction synchronization
  * or an active JTA transaction (with "jtaTransactionManager" specified on
- * SessionFactoryBuilder or a Hibernate TransactionManagerLookup configured
+ * LocalSessionFactoryBean or a Hibernate TransactionManagerLookup configured
  * through the corresponding Hibernate property) is required.
  *
  * <p>Offers template methods for setting parameters and getting result values,
@@ -50,8 +56,8 @@ import org.springframework.orm.hibernate3.SessionFactoryBuilderSupport;
  * @since 1.2
  * @see org.springframework.jdbc.support.lob.LobHandler
  * @see org.springframework.jdbc.support.lob.LobCreator
- * @see org.springframework.orm.hibernate3.SessionFactoryBuilder#setLobHandler
- * @see org.springframework.orm.hibernate3.SessionFactoryBuilder#setJtaTransactionManager
+ * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setLobHandler
+ * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setJtaTransactionManager
  */
 public abstract class AbstractLobType implements UserType {
 
@@ -64,13 +70,13 @@ public abstract class AbstractLobType implements UserType {
 
 	/**
 	 * Constructor used by Hibernate: fetches config-time LobHandler and
-	 * config-time JTA TransactionManager from the SessionFactory builder.
-	 * @see org.springframework.orm.hibernate3.SessionFactoryBuilderSupport#getConfigTimeLobHandler
-	 * @see org.springframework.orm.hibernate3.SessionFactoryBuilderSupport#getConfigTimeTransactionManager
+	 * config-time JTA TransactionManager from LocalSessionFactoryBean.
+	 * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#getConfigTimeLobHandler
+	 * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#getConfigTimeTransactionManager
 	 */
 	protected AbstractLobType() {
-		this(SessionFactoryBuilderSupport.getConfigTimeLobHandler(),
-				SessionFactoryBuilderSupport.getConfigTimeTransactionManager());
+		this(LocalSessionFactoryBean.getConfigTimeLobHandler(),
+		    LocalSessionFactoryBean.getConfigTimeTransactionManager());
 	}
 
 	/**
@@ -144,7 +150,7 @@ public abstract class AbstractLobType implements UserType {
 
 		if (this.lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
-			    "lobHandler property must be set on SessionFactoryBuilder");
+			    "lobHandler property must be set on LocalSessionFactoryBean");
 		}
 
 		try {
@@ -166,7 +172,7 @@ public abstract class AbstractLobType implements UserType {
 
 		if (this.lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
-			    "lobHandler property must be set on SessionFactoryBuilder");
+			    "lobHandler property must be set on LocalSessionFactoryBean");
 		}
 
 		LobCreator lobCreator = this.lobHandler.getLobCreator();

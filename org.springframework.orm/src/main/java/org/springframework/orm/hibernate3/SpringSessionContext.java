@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2008 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.hibernate.engine.SessionFactoryImplementor;
  * that delegates to Spring's SessionFactoryUtils for providing a
  * Spring-managed current Session.
  *
- * <p>Used by Spring's {@link SessionFactoryBuilder} when told to expose a
+ * <p>Used by Spring's {@link LocalSessionFactoryBean} when told to expose a
  * transaction-aware SessionFactory. This is the default as of Spring 2.5.
  *
  * <p>This CurrentSessionContext implementation can also be specified in custom
@@ -36,9 +36,8 @@ import org.hibernate.engine.SessionFactoryImplementor;
  * @author Juergen Hoeller
  * @since 2.0
  * @see SessionFactoryUtils#doGetSession
- * @see SessionFactoryBuilder#setExposeTransactionAwareSessionFactory
+ * @see LocalSessionFactoryBean#setExposeTransactionAwareSessionFactory
  */
-@SuppressWarnings("serial")
 public class SpringSessionContext implements CurrentSessionContext {
 
 	private final SessionFactoryImplementor sessionFactory;

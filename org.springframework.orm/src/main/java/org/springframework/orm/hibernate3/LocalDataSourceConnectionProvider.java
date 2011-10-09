@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.orm.hibernate3;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-
 import javax.sql.DataSource;
 
 import org.hibernate.HibernateException;
@@ -29,12 +28,12 @@ import org.hibernate.util.JDBCExceptionReporter;
 /**
  * Hibernate connection provider for local DataSource instances
  * in an application context. This provider will be used if
- * SessionFactoryBuilder's "dataSource" property is set
+ * LocalSessionFactoryBean's "dataSource" property is set
  * without a Hibernate TransactionManagerLookup.
  *
  * @author Juergen Hoeller
  * @since 1.2
- * @see SessionFactoryBuilder#setDataSource
+ * @see LocalSessionFactoryBean#setDataSource
  */
 public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 
@@ -44,11 +43,11 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 
 
 	public void configure(Properties props) throws HibernateException {
-		this.dataSource = SessionFactoryBuilderSupport.getConfigTimeDataSource();
+		this.dataSource = LocalSessionFactoryBean.getConfigTimeDataSource();
 		// absolutely needs thread-bound DataSource to initialize
 		if (this.dataSource == null) {
 			throw new HibernateException("No local DataSource found for configuration - " +
-			    "'dataSource' property must be set on SessionFactoryBuilder");
+			    "'dataSource' property must be set on LocalSessionFactoryBean");
 		}
 		this.dataSourceToUse = getDataSourceToUse(this.dataSource);
 	}
@@ -57,10 +56,10 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	 * Return the DataSource to use for retrieving Connections.
 	 * <p>This implementation returns the passed-in DataSource as-is.
 	 * @param originalDataSource the DataSource as configured by the user
-	 * on SessionFactoryBuilder
+	 * on LocalSessionFactoryBean
 	 * @return the DataSource to actually retrieve Connections from
 	 * (potentially wrapped)
-	 * @see SessionFactoryBuilder#setDataSource
+	 * @see LocalSessionFactoryBean#setDataSource
 	 */
 	protected DataSource getDataSourceToUse(DataSource originalDataSource) {
 		return originalDataSource;

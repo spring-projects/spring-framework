@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2007 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,20 +30,18 @@ import org.springframework.aop.support.AopUtils;
  *
  * <p>Usage example:
  *
- * <pre class="code">
- * {@code
- * <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+ * <pre>
+ * &lt;bean id=&quot;sessionFactory&quot; class=&quot;org.springframework.orm.hibernate3.LocalSessionFactoryBean&quot;&gt;
  *   ...
- *   <property name="entityInterceptor">
- *     <bean class="org.springframework.orm.hibernate3.support.ScopedBeanInterceptor"/>
- *   </property>
- * </bean>}</pre>
+ *   &lt;property name=&quot;entityInterceptor&quot;&gt;
+ *     &lt;bean class=&quot;org.springframework.orm.hibernate3.support.ScopedBeanInterceptor&quot;/&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
  *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0
  */
-@SuppressWarnings("serial")
 public class ScopedBeanInterceptor extends EmptyInterceptor {
 
 	@Override

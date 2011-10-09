@@ -117,8 +117,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
-			@Override
-			protected SessionFactory newSessionFactory() throws HibernateException {
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sf;
 			}
 		};
@@ -340,8 +339,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
-			@Override
-			protected SessionFactory newSessionFactory() throws HibernateException {
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sf;
 			}
 		};
@@ -418,8 +416,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
-			@Override
-			protected SessionFactory newSessionFactory() throws HibernateException {
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sf;
 			}
 		};
@@ -773,8 +770,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
-			@Override
-			protected SessionFactory newSessionFactory() throws HibernateException {
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sf;
 			}
 		};
@@ -858,8 +854,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
-			@Override
-			protected SessionFactory newSessionFactory() throws HibernateException {
+			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sf;
 			}
 		};

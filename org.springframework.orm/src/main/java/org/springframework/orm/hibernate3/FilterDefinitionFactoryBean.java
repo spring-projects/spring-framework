@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,25 +37,24 @@ import org.springframework.util.ReflectionUtils;
  * definition, as the list element for the "filterDefinitions" bean property.
  * For example:
  *
- * <pre class="code">
- * {@code
- * <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+ * <pre>
+ * &lt;bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
  *   ...
- *   <property name="filterDefinitions">
- *     <list>
- *       <bean class="org.springframework.orm.hibernate3.FilterDefinitionFactoryBean">
- *         <property name="filterName" value="myFilter"/>
- *         <property name="parameterTypes">
- *           <map>
- *             <entry key="myParam" value="string"/>
- *             <entry key="myOtherParam" value="long"/>
- *           </map>
- *         </property>
- *       </bean>
- *     </list>
- *   </property>
+ *   &lt;property name="filterDefinitions"&gt;
+ *     &lt;list&gt;
+ *       &lt;bean class="org.springframework.orm.hibernate3.FilterDefinitionFactoryBean"&gt;
+ *         &lt;property name="filterName" value="myFilter"/&gt;
+ *         &lt;property name="parameterTypes"&gt;
+ *           &lt;map&gt;
+ *             &lt;entry key="myParam" value="string"/&gt;
+ *             &lt;entry key="myOtherParam" value="long"/&gt;
+ *           &lt;/map&gt;
+ *         &lt;/property&gt;
+ *       &lt;/bean&gt;
+ *     &lt;/list&gt;
+ *   &lt;/property&gt;
  *   ...
- * </bean>}</pre>
+ * &lt;/bean&gt;</pre>
  *
  * Alternatively, specify a bean id (or name) attribute for the inner bean,
  * instead of the "filterName" property.
@@ -74,7 +73,7 @@ public class FilterDefinitionFactoryBean implements FactoryBean<FilterDefinition
 	static {
 		// Hibernate 3.6 TypeResolver class available?
 		try {
-			Class<?> trClass = FilterDefinitionFactoryBean.class.getClassLoader().loadClass(
+			Class trClass = FilterDefinitionFactoryBean.class.getClassLoader().loadClass(
 					"org.hibernate.type.TypeResolver");
 			heuristicTypeMethod = trClass.getMethod("heuristicType", String.class);
 			typeResolver = trClass.newInstance();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Proxy for a Hibernate RegionFactory, delegating to a Spring-managed
- * RegionFactory instance, determined by SessionFactoryBuilder's
+ * RegionFactory instance, determined by LocalSessionFactoryBean's
  * "cacheRegionFactory" property.
  *
  * <p>Compatible with Hibernate 3.3 as well as Hibernate 3.5's version
@@ -41,7 +41,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @since 3.0
- * @see SessionFactoryBuilder#setCacheRegionFactory
+ * @see LocalSessionFactoryBean#setCacheRegionFactory
  */
 public class LocalRegionFactoryProxy implements RegionFactory {
 
@@ -52,11 +52,11 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 	 * Standard constructor.
 	 */
 	public LocalRegionFactoryProxy() {
-		RegionFactory rf = (RegionFactory) SessionFactoryBuilderSupport.getConfigTimeRegionFactory();
+		RegionFactory rf = (RegionFactory) LocalSessionFactoryBean.getConfigTimeRegionFactory();
 		// absolutely needs thread-bound RegionFactory to initialize
 		if (rf == null) {
 			throw new IllegalStateException("No Hibernate RegionFactory found - " +
-			    "'cacheRegionFactory' property must be set on SessionFactoryBuilder");
+			    "'cacheRegionFactory' property must be set on LocalSessionFactoryBean");
 		}
 		this.regionFactory = rf;
 	}
