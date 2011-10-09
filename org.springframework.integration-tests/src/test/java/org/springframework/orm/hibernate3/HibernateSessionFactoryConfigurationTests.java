@@ -33,7 +33,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.classic.Session;
-import org.hibernate.engine.SessionFactoryImplementor;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.BeanCreationException;
@@ -132,11 +131,10 @@ public class HibernateSessionFactoryConfigurationTests {
 	}
 
 	@Test
-	public void builtSessionFactoryIsProxyImplementingDisposableBeanAndSessionFactoryImplementor() {
+	public void builtSessionFactoryIsDisposableBeanProxy() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AnnotationSessionFactoryConfig.class);
 		SessionFactory sessionFactory = ctx.getBean(SessionFactory.class);
 		assertThat(sessionFactory, instanceOf(DisposableBean.class));
-		assertThat(sessionFactory, instanceOf(SessionFactoryImplementor.class));
 		assertThat(sessionFactory.toString(), startsWith("DisposableBean proxy for SessionFactory"));
 		ctx.close();
 		assertTrue("SessionFactory was not closed as expected", sessionFactory.isClosed());
