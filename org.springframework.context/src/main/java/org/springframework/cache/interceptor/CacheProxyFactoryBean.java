@@ -26,14 +26,19 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  * {@link org.springframework.aop.framework.ProxyFactoryBean}
  * with a separate {@link CachingInterceptor} definition.
  *
- * <p>This class is intended to cover the <i>typical</i> case of declarative
- * cache demarcation: namely, wrapping a singleton target object with a
- * caching proxy, proxying all the interfaces that the target implements.
- * 
+ * <p>This class is designed to facilitate declarative cache demarcation: namely, wrapping
+ * a singleton target object with a caching proxy, proxying all the interfaces that the
+ * target implements. Exists primarily for third-party framework integration.
+ * <strong>Users should favor the {@code cache:} XML namespace
+ * {@link org.springframework.cache.annotation.Cacheable @Cacheable} annotation.</strong>
+ * See the <a href="http://bit.ly/p9rIvx">declarative annotation-based caching</a> section
+ * of the Spring reference documentation for more information.
+ *
  * @author Costin Leau
  * @see org.springframework.aop.framework.ProxyFactoryBean
  * @see CachingInterceptor
  */
+@SuppressWarnings("serial")
 public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean {
 
 	private final CacheInterceptor cachingInterceptor = new CacheInterceptor();
