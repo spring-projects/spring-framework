@@ -210,7 +210,7 @@ class ConfigurationClassParser {
 
 		// process any @Import annotations
 		List<Map<String, Object>> allImportAttribs =
-			AnnotationUtils.findAllAnnotationAttributes(Import.class, metadata.getClassName(), true);
+			AnnotationUtils.findAllAnnotationAttributes(Import.class, metadata.getClassName(), true, metadataReaderFactory);
 		for (Map<String, Object> importAttribs : allImportAttribs) {
 			processImport(configClass, (String[]) importAttribs.get("value"), true);
 		}

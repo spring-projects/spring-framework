@@ -39,6 +39,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.core.Ordered;
+import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -221,7 +222,9 @@ public class AnnotationUtilsTests {
 	@Test
 	public void findAllComponentAnnotationAttributes() throws IOException {
 		List<Map<String,Object>> allAttribs =
-			AnnotationUtils.findAllAnnotationAttributes(Component.class, HasLocalAndMetaComponentAnnotation.class.getName());
+			AnnotationUtils.findAllAnnotationAttributes(Component.class,
+					HasLocalAndMetaComponentAnnotation.class.getName(), false,
+					new SimpleMetadataReaderFactory());
 
 		Object value = null;
 		for (Map<String, Object> attribs : allAttribs) {
