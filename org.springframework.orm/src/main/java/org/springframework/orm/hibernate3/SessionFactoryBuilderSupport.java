@@ -232,9 +232,8 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 
 	/**
 	 * Build the underlying Hibernate SessionFactory.
-	 * @return the {@code SessionFactory}, potentially wrapped as a
-	 * {@code DisposableBean} and/or transaction-aware proxy before it is exposed to the
-	 * application.
+	 * @return the raw SessionFactory (potentially to be wrapped with a
+	 * transaction-aware proxy before it is exposed to the application)
 	 * @throws Exception in case of initialization failure
 	 */
 	public SessionFactory buildSessionFactory() throws Exception {
@@ -245,9 +244,8 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 
 	/**
 	 * Populate the underlying {@code Configuration} instance with the various
-	 * properties of this builder, then return the raw session factory resulting from
-	 * calling {@link Configuration#buildSessionFactory()}. Customization may be performed
-	 * through {@code pre*} and {@code post*} methods.
+	 * properties of this builder. Customization may be performed through
+	 * {@code pre*} and {@code post*} methods.
 	 * @see #preBuildSessionFactory()
 	 * @see #postProcessMappings()
 	 * @see #postBuildSessionFactory()
@@ -555,9 +553,8 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 	 * <p>Subclasses may override this to implement transaction awareness through
 	 * a {@code SessionFactory} proxy for example, or even to avoid creation of the
 	 * {@code DisposableBean} proxy altogether.
-	 * @param rawSf the raw {@code SessionFactory} as built by {@link #doBuildSessionFactory()}
-	 * @return a proxied {@code SessionFactory} if wrapping was necessary, otherwise the
-	 * original given 'raw' {@code SessionFactory} object.
+	 * @param rawSf the raw {@code SessionFactory} as built by {@link #buildSessionFactory()}
+	 * @return the {@code SessionFactory} reference to expose
 	 * @see #buildSessionFactory()
 	 */
 	protected SessionFactory wrapSessionFactoryIfNecessary(final SessionFactory rawSf) {
@@ -565,7 +562,6 @@ public abstract class SessionFactoryBuilderSupport<This extends SessionFactoryBu
 			this.beanClassLoader,
 			new Class<?>[] {
 				SessionFactory.class,
-				SessionFactoryImplementor.class,
 				DisposableBean.class
 			},
 			new InvocationHandler() {
