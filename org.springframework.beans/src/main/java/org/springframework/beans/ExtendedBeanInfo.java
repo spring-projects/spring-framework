@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  * @see CachedIntrospectionResults
  */
-public class ExtendedBeanInfo implements BeanInfo {
+class ExtendedBeanInfo implements BeanInfo {
 	private final BeanInfo delegate;
 	private final SortedSet<PropertyDescriptor> propertyDescriptors =
 		new TreeSet<PropertyDescriptor>(new PropertyDescriptorComparator());
