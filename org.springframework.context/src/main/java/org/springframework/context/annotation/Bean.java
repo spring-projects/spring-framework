@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,34 +27,83 @@ import org.springframework.beans.factory.annotation.Autowire;
 /**
  * Indicates that a method produces a bean to be managed by the Spring container. The
  * names and semantics of the attributes to this annotation are intentionally similar
- * to those of the {@code <bean/>} element in the Spring XML schema.
- *
- * <p>Note that the {@code @Bean} annotation does not provide attributes for scope,
- * primary or lazy. Rather, it should be used in conjunction with {@link Scope @Scope},
- * {@link Primary @Primary}, and {@link Lazy @Lazy} annotations to achieve
- * those semantics. The same annotations can also be used at the type level, e.g. for
- * component scanning.
+ * to those of the {@code <bean/>} element in the Spring XML schema. For example:
+ * <pre class="code">
+ *     &#064;Bean
+ *     public MyBean myBean() {
+ *         // instantiate and configure MyBean obj
+ *         return obj;
+ *     }</pre>
  *
  * <p>While a {@link #name()} attribute is available, the default strategy for determining
  * the name of a bean is to use the name of the Bean method. This is convenient and
  * intuitive, but if explicit naming is desired, the {@code name()} attribute may be used.
  * Also note that {@code name()} accepts an array of Strings. This is in order to allow
  * for specifying multiple names (i.e., aliases) for a single bean.
+ * <pre class="code">
+ *     &#064;Bean(name={"b1","b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
+ *     public MyBean myBean() {
+ *         // instantiate and configure MyBean obj
+ *         return obj;
+ *     }</pre>
  *
- * <p>The <code>@Bean</code> annotation may be used on any methods in an <code>@Component</code>
- * class, in which case they will get processed in a configuration class 'lite' mode where
+ * <p>Note that the {@code @Bean} annotation does not provide attributes for scope,
+ * primary or lazy. Rather, it should be used in conjunction with {@link Scope @Scope},
+ * {@link Primary @Primary}, and {@link Lazy @Lazy} annotations to achieve
+ * those semantics. For example:
+ * <pre class="code">
+ *     &#064;Bean
+ *     &#064;Scope("prototype")
+ *     public MyBean myBean() {
+ *         // instantiate and configure MyBean obj
+ *         return obj;
+ *     }</pre>
+ *
+ * <p>Typically, {@code @Bean} methods are declared within {@code @Configuration}
+ * classes. In this case, bean methods may reference other <code>@Bean</code> methods
+ * on the same class by calling them <i>directly</i>. This ensures that references between
+ * beans are strongly typed and navigable. Such so-called 'inter-bean references' are
+ * guaranteed to respect scoping and AOP semantics, just like <code>getBean</code> lookups
+ * would. These are the semantics known from the original 'Spring JavaConfig' project
+ * which require CGLIB subclassing of each such configuration class at runtime. As a
+ * consequence, {@code @Configuration} classes and their factory methods must not be
+ * marked as final or private in this mode. For example:
+ * <pre class="code">
+ * &#064;Configuration
+ * public class AppConfig {
+ *     &#064;Bean
+ *     public FooService fooService() {
+ *         return new FooService(fooRepository());
+ *     }
+ *     &#064;Bean
+ *     public FooRepository fooRepository() {
+ *         return new JdbcFooRepository(dataSource());
+ *     }
+ *     // ...
+ * }</pre>
+ *
+ * <p>{@code @Bean} methods may also be declared wihtin any {@code @Component} class, in
+ * which case they will get processed in a configuration class 'lite' mode in which
  * they will simply be called as plain factory methods from the container (similar to
- * <code>factory-method</code> declarations in XML). The containing component classes remain
- * unmodified in this case, and there are no unusual constraints for factory methods.
+ * {@code factory-method} declarations in XML). The containing component classes remain
+ * unmodified in this case, and there are no unusual constraints for factory methods,
+ * however, scoping semantics are not respected as described above for inter-bean method
+ * invocations in this mode. For example:
+ * <pre class="code">
+ * &#064;Component
+ * public class Calculator {
+ *     public int sum(int a, int b) {
+ *         return a+b;
+ *     }
  *
- * <p>As an advanced mode, <code>@Bean</code> may also be used within <code>@Configuration</code>
- * component classes. In this case, bean methods may reference other <code>@Bean</code> methods
- * on the same class by calling them <i>directly</i>. This ensures that references between beans
- * are strongly typed and navigable. Such so-called 'inter-bean references' are guaranteed to
- * respect scoping and AOP semantics, just like <code>getBean</code> lookups would. These are
- * the semantics known from the original 'Spring JavaConfig' project which require CGLIB
- * subclassing of each such configuration class at runtime. As a consequence, configuration
- * classes and their factory methods must not be marked as final or private in this mode.
+ *     &#064;Bean
+ *     public MyBean myBean() {
+ *         return new MyBean();
+ *     }
+ * }</pre>
+ *
+ * <p>See @{@link Configuration} Javadoc for further details including how to bootstrap
+ * the container using {@link AnnotationConfigApplicationContext} and friends.
  *
  * <h3>A note on {@code BeanFactoryPostProcessor}-returning {@code @Bean} methods</h3>
  * <p>Special consideration must be taken for {@code @Bean} methods that return Spring
@@ -81,12 +130,12 @@ import org.springframework.beans.factory.annotation.Autowire;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.stereotype.Component
  * @see Configuration
  * @see Scope
  * @see DependsOn
  * @see Lazy
  * @see Primary
+ * @see org.springframework.stereotype.Component
  * @see org.springframework.beans.factory.annotation.Autowired
  * @see org.springframework.beans.factory.annotation.Value
  */
@@ -110,7 +159,8 @@ public @interface Bean {
 	/**
 	 * The optional name of a method to call on the bean instance during initialization.
 	 * Not commonly used, given that the method may be called programmatically directly
-	 * within the body of a Bean-annotated method.
+	 * within the body of a Bean-annotated method. Default value is {@code ""}, indicating
+	 * that no init method should be called.
 	 */
 	String initMethod() default "";
 
