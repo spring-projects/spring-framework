@@ -18,7 +18,6 @@ package org.springframework.orm.hibernate3.annotation;
 
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
-
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
@@ -133,11 +132,6 @@ public class AnnotationSessionFactoryBean extends AnnotationSessionFactoryBuilde
 	public void setPersistenceExceptionTranslator(
 			HibernateExceptionTranslator hibernateExceptionTranslator) {
 		delegate.setPersistenceExceptionTranslator(hibernateExceptionTranslator);
-	}
-
-	@Override
-	public SessionFactory wrapSessionFactoryIfNecessary(SessionFactory rawSf) {
-		return delegate.wrapSessionFactoryIfNecessary(rawSf);
 	}
 
 	/**

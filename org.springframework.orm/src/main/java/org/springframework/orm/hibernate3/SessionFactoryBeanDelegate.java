@@ -16,6 +16,8 @@
 
 package org.springframework.orm.hibernate3;
 
+import javax.sql.DataSource;
+
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
 import org.hibernate.cache.RegionFactory;
@@ -113,7 +115,23 @@ public class SessionFactoryBeanDelegate implements SessionFactoryBeanOperations 
 	}
 
 	public void destroy() throws HibernateException {
-		SessionFactoryBuilderSupport.closeHibernateSessionFactory(this.builder, this.sessionFactory);
+		builder.logger.info("Closing Hibernate SessionFactory");
+		DataSource dataSource = builder.getDataSource();
+		if (dataSource != null) {
+			// Make given DataSource available for potential SchemaExport,
+			// which unfortunately reinstantiates a ConnectionProvider.
+			SessionFactoryBuilderSupport.configTimeDataSourceHolder.set(dataSource);
+		}
+		try {
+			builder.beforeSessionFactoryDestruction();
+		}
+		finally {
+			this.sessionFactory.close();
+			if (dataSource != null) {
+				// Reset DataSource holder.
+				SessionFactoryBuilderSupport.configTimeDataSourceHolder.remove();
+			}
+		}
 	}
 
 	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
@@ -123,11 +141,6 @@ public class SessionFactoryBeanDelegate implements SessionFactoryBeanOperations 
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return hibernateExceptionTranslator.translateExceptionIfPossible(ex);
 	}
-
-	public SessionFactory wrapSessionFactoryIfNecessary(SessionFactory rawSf) {
-		return rawSf;
-	}
-
 
 	/**
 	 * @see SessionFactoryBuilderSupport#preBuildSessionFactory()
