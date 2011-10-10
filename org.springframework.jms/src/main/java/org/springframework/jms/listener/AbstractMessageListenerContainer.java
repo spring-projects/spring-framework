@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -644,8 +644,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	/**
 	 * Handle the given exception that arose during listener execution.
-	 * <p>The default implementation logs the exception at error level,
-	 * not propagating it to the JMS provider - assuming that all handling of
+	 * <p>The default implementation logs the exception at warn level,
+	 * not propagating it to the JMS provider &mdash; assuming that all handling of
 	 * acknowledgement and/or transactions is done by this listener container.
 	 * This can be overridden in subclasses.
 	 * @param ex the exception to handle
@@ -683,7 +683,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
-	 * Invoke the registered ErrorHandler, if any. Log at error level otherwise.
+	 * Invoke the registered ErrorHandler, if any. Log at warn level otherwise.
 	 * @param ex the uncaught error that arose during JMS processing.
 	 * @see #setErrorHandler
 	 */
