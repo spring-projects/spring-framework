@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -209,5 +210,23 @@ public abstract class BridgeMethodResolver {
 	private static Method searchForMatch(Class type, Method bridgeMethod) {
 		return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());
 	}
+
+	/**
+	 * Compare the signatures of the bridge method and the method which it bridges. If
+	 * the parameter and return types are the same, it is a 'visibility' bridge method
+	 * introduced in Java 6 to fix http://bugs.sun.com/view_bug.do?bug_id=6342411.
+	 * See also http://stas-blogspot.blogspot.com/2010/03/java-bridge-methods-explained.html
+	 * @return whether signatures match as described
+	 */
+	public static boolean isJava6VisibilityBridgeMethodPair(Method bridgeMethod, Method bridgedMethod) {
+		Assert.isTrue(bridgeMethod != null);
+		Assert.isTrue(bridgedMethod != null);
+		if (bridgeMethod == bridgedMethod) {
+			return true;
+		}
+		return Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes())
+				&& bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType());
+	}
+
 
 }
