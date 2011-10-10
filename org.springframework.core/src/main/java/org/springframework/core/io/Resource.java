@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,13 @@ import java.net.URL;
  * @see #getURL()
  * @see #getURI()
  * @see #getFile()
+ * @see WritableResource
+ * @see ContextResource
  * @see FileSystemResource
  * @see ClassPathResource
  * @see UrlResource
  * @see ByteArrayResource
  * @see InputStreamResource
- * @see org.springframework.web.context.support.ServletContextResource
  */
 public interface Resource extends InputStreamSource {
 
@@ -59,6 +60,7 @@ public interface Resource extends InputStreamSource {
 	 * note that actual content reading may still fail when attempted.
 	 * However, a value of <code>false</code> is a definitive indication
 	 * that the resource content cannot be read.
+	 * @see #getInputStream()
 	 */
 	boolean isReadable();
 
