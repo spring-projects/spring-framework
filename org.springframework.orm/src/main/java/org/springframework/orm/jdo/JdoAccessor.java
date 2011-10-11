@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,11 @@ import org.springframework.dao.DataAccessException;
  * @see JdoTemplate
  * @see JdoInterceptor
  * @see #setFlushEager
+ * @deprecated as of Spring 3.1, in favor of native PersistenceManager usage
+ * (see {@link TransactionAwarePersistenceManagerFactoryProxy} and
+ * {@link org.springframework.orm.jdo.support.SpringPersistenceManagerProxyBean})
  */
+@Deprecated
 public abstract class JdoAccessor implements InitializingBean {
 
 	/** Logger available to subclasses */

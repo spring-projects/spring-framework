@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.orm.jdo.JdoAccessor;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.orm.jdo.DefaultJdoDialect;
+import org.springframework.orm.jdo.JdoDialect;
 import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
 import org.springframework.util.Assert;
 
@@ -56,7 +59,11 @@ import org.springframework.util.Assert;
  * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
  * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#releasePersistenceManager
  */
-public class SpringPersistenceManagerProxyBean extends JdoAccessor implements FactoryBean<PersistenceManager> {
+public class SpringPersistenceManagerProxyBean implements FactoryBean<PersistenceManager>, InitializingBean {
+
+	private PersistenceManagerFactory persistenceManagerFactory;
+
+	private JdoDialect jdoDialect;
 
 	private Class<? extends PersistenceManager> persistenceManagerInterface = PersistenceManager.class;
 
@@ -64,6 +71,36 @@ public class SpringPersistenceManagerProxyBean extends JdoAccessor implements Fa
 
 	private PersistenceManager proxy;
 
+
+	/**
+	 * Set the target PersistenceManagerFactory for this proxy.
+	 */
+	public void setPersistenceManagerFactory(PersistenceManagerFactory persistenceManagerFactory) {
+		this.persistenceManagerFactory = persistenceManagerFactory;
+	}
+
+	/**
+	 * Return the target PersistenceManagerFactory for this proxy.
+	 */
+	protected PersistenceManagerFactory getPersistenceManagerFactory() {
+		return this.persistenceManagerFactory;
+	}
+
+	/**
+	 * Set the JDO dialect to use for this proxy.
+	 * <p>Default is a DefaultJdoDialect based on the PersistenceManagerFactory's
+	 * underlying DataSource, if any.
+	 */
+	public void setJdoDialect(JdoDialect jdoDialect) {
+		this.jdoDialect = jdoDialect;
+	}
+
+	/**
+	 * Return the JDO dialect to use for this proxy.
+	 */
+	protected JdoDialect getJdoDialect() {
+		return this.jdoDialect;
+	}
 
 	/**
 	 * Specify the PersistenceManager interface to expose,
@@ -107,9 +144,14 @@ public class SpringPersistenceManagerProxyBean extends JdoAccessor implements Fa
 		return this.allowCreate;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
-		super.afterPropertiesSet();
+		if (getPersistenceManagerFactory() == null) {
+			throw new IllegalArgumentException("Property 'persistenceManagerFactory' is required");
+		}
+		// Build default JdoDialect if none explicitly specified.
+		if (this.jdoDialect == null) {
+			this.jdoDialect = new DefaultJdoDialect(getPersistenceManagerFactory().getConnectionFactory());
+		}
 		this.proxy = (PersistenceManager) Proxy.newProxyInstance(
 				getPersistenceManagerFactory().getClass().getClassLoader(),
 				new Class[] {getPersistenceManagerInterface()}, new PersistenceManagerInvocationHandler());

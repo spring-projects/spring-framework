@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,11 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see PersistenceManagerFactoryUtils#getPersistenceManager
  * @see JdoTransactionManager
  * @see JdoTemplate
+ * @deprecated as of Spring 3.1, in favor of native PersistenceManager usage
+ * and AOP-driven exception translation through
+ * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor}
  */
+@Deprecated
 public class JdoInterceptor extends JdoAccessor implements MethodInterceptor {
 
 	private boolean exceptionConversionEnabled = true;
