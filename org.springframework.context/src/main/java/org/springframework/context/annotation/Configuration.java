@@ -211,8 +211,8 @@ import org.springframework.stereotype.Component;
  *     }
  * }</pre>
  *
- * See @{@link Profile} and {@link org.springframework.core.env.Environment} Javadoc for
- * further details.
+ * See @{@link Profile} and {@link org.springframework.core.env.Environment Environment}
+ * Javadoc for further details.
  *
  * <h3>With Spring XML using the {@code @ImportResource} annotation</h3>
  * As mentioned above, {@code @Configuration} classes may be declared as regular Spring
@@ -273,10 +273,8 @@ import org.springframework.stereotype.Component;
  *
  * <h2>Testing support for {@code @Configuration} classes</h2>
  * The Spring <em>TestContext framework</em> available in the {@code spring-test} module
- * provides the
- * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
- * annotation, which as of Spring 3.1 can accept an array of {@code @Configuration}
- * {@code Class} objects:
+ * provides the {@code @ContextConfiguration} annotation, which as of Spring 3.1 can
+ * accept an array of {@code @Configuration} {@code Class} objects:
  * <pre class="code">
  * &#064;RunWith(SpringJUnit4ClassRunner.class)
  * &#064;ContextConfiguration(classes={AppConfig.class, DatabaseConfig.class})
