@@ -299,8 +299,9 @@ import org.springframework.stereotype.Component;
  * classes using their respective "{@code @Enable}" annotations. See
  * {@link org.springframework.scheduling.annotation.EnableAsync @EnableAsync},
  * {@link org.springframework.scheduling.annotation.EnableScheduling @EnableScheduling},
- * {@link org.springframework.transaction.annotation.EnableTransactionManagement @EnableTransactionManagement}, and
- * {@link org.springframework.web.servlet.config.annotation.EnableWebMvc @EnableWebMvc}
+ * {@link org.springframework.transaction.annotation.EnableTransactionManagement @EnableTransactionManagement},
+ * {@link org.springframework.context.annotation.EnableAspectJAutoProxy @EnableAspectJAutoProxy},
+ * and {@link org.springframework.web.servlet.config.annotation.EnableWebMvc @EnableWebMvc}
  * for details.
  *
  * <h2>Constraints when authoring {@code @Configuration} classes</h2>

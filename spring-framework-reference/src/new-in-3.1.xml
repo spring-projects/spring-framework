@@ -129,6 +129,12 @@
         </listitem>
 
         <listitem>
+          <para>See
+          org.springframework.context.annotation.EnableAspectJAutoProxy
+          Javadoc</para>
+        </listitem>
+
+        <listitem>
           <para>See org.springframework.scheduling.annotation.EnableScheduling
           Javadoc</para>
         </listitem>
