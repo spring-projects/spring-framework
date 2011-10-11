@@ -87,14 +87,14 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		if (targetType == null) {
 			return sourceKey;
 		}
-		return this.conversionService.convert(sourceKey, sourceType.mapKeyTypeDescriptor(sourceKey), targetType);
+		return this.conversionService.convert(sourceKey, sourceType.getMapKeyTypeDescriptor(sourceKey), targetType);
 	}
 
 	private Object convertValue(Object sourceValue, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (targetType == null) {
 			return sourceValue;
 		}
-		return this.conversionService.convert(sourceValue, sourceType.mapValueTypeDescriptor(sourceValue), targetType);
+		return this.conversionService.convert(sourceValue, sourceType.getMapValueTypeDescriptor(sourceValue), targetType);
 	}
 
 }

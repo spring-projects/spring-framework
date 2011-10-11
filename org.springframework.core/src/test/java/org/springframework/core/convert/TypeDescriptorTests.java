@@ -706,7 +706,7 @@ public class TypeDescriptorTests {
 	public void mapKeyType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Map.class);
 		Integer value = new Integer(3);
-		desc = desc.mapKeyTypeDescriptor(value);
+		desc = desc.getMapKeyTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getType());
 	}
 
@@ -715,7 +715,7 @@ public class TypeDescriptorTests {
 		TypeDescriptor desc = new TypeDescriptor(getClass().getField("mapPreserveContext"));
 		assertEquals(Integer.class, desc.getMapKeyTypeDescriptor().getElementTypeDescriptor().getType());
 		List<Integer> value = new ArrayList<Integer>(3);
-		desc = desc.mapKeyTypeDescriptor(value);
+		desc = desc.getMapKeyTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 		assertNotNull(desc.getAnnotation(FieldAnnotation.class));
 	}
@@ -727,7 +727,7 @@ public class TypeDescriptorTests {
 	public void mapValueType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Map.class);
 		Integer value = new Integer(3);
-		desc = desc.mapValueTypeDescriptor(value);
+		desc = desc.getMapValueTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getType());
 	}
 
@@ -736,7 +736,7 @@ public class TypeDescriptorTests {
 		TypeDescriptor desc = new TypeDescriptor(getClass().getField("mapPreserveContext"));
 		assertEquals(Integer.class, desc.getMapValueTypeDescriptor().getElementTypeDescriptor().getType());
 		List<Integer> value = new ArrayList<Integer>(3);
-		desc = desc.mapValueTypeDescriptor(value);
+		desc = desc.getMapValueTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 		assertNotNull(desc.getAnnotation(FieldAnnotation.class));		
 	}
