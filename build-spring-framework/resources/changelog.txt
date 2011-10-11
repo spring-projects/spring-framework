@@ -3,16 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1 RC1 (2011-09-xx)
+Changes in version 3.1 RC1 (2011-10-11)
 ---------------------------------------
 
-* updated Quartz support package for Quartz 2.0 support (compatibility with Quartz 1.5+)
-* updated JBossLoadTimeWeaver to automatically detect and support JBoss AS 7 as well
-* support for load-time weaving on WebSphere 7 and 8
-* support for Hibernate 4.0 beta as a JPA provider
 * upgraded to JUnit 4.9
+* updated Quartz support package for Quartz 2.0 compatibility
+* support for load-time weaving on WebSphere 7 and 8
+* updated JBossLoadTimeWeaver to automatically detect and support JBoss AS 7 as well
+* added support for Hibernate 4.0 (HibernateJpaDialect as well as natively in orm.hibernate4)
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
 * introduced ForkJoinPoolFactoryBean for Java 7 (alternative: add new jsr166.jar to Java 6)
+* introduced extended WritableResource interface
 * DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
 * DefaultListableBeanFactory's getBean(name, type) attempts type conversion if necessary
 * DefaultListableBeanFactory allows for init methods to register further bean definitions (again)
@@ -28,6 +29,10 @@ Changes in version 3.1 RC1 (2011-09-xx)
 * MultipartFilter uses a Servlet 3.0 based StandardServletMultipartResolver by default
 * added RequestPartServletServerHttpRequest and corresponding @RequestPart support in Spring MVC
 * added "connectTimeout" and "readTimeout" properties to Simple/CommonsClientHttpRequestFactory
+* added flash attribute support through FlashMap and FlashMapManager abstractions
+* added RedirectAttributes abstraction as supported method argument type of @RequestMapping methods
+* added "ignoreDefaultModelOnRedirect" flag to RequestMappingHandlerAdapter
+* added support for @RequestPart annotated controller method arguments
 * fixed @ExceptionHandler exception type matching (ExceptionDepthComparator)
 * ResourceHttpRequestHandler detects invalid directory traversal in given path
 * HtmlUtils properly escapes single quotes as well
@@ -39,6 +44,7 @@ Changes in version 3.1 RC1 (2011-09-xx)
 * revised JMS CachedConnectionFactory to avoid unnecessary rollback calls on Session return
 * fixed JMS CachedConnectionFactory to fully synchronize its Session list
 * JpaTransactionManager etc can find EntityManagerFactory by "persistenceUnitName" property now
+* HibernateJpaDialect exposes underlying Session for underlying SessionFactory
 * jdbc:script's "separator" and "execution" attributes work nested with embedded-database as well
 * added "encoding" attribute to jdbc:script element
 * JavaMailSenderImpl detects and respects "mail.transport.protocol" property in existing Session
@@ -52,10 +58,7 @@ Changes in version 3.1 RC1 (2011-09-xx)
 * extended Servlet API mocks for Servlet 3.0 forward compatibility as far as possible
 * made MockHttpServletResponse compatible with Servlet 3.0 getHeader(s) method returning Strings
 * added getHeaderValue(s) method to MockHttpServletResponse for raw value access
-* add flash attribute support through FlashMap and FlashMapManager abstractions
-* add RedirectAttributes abstraction as supported method argument type of @RequestMapping methods
-* add "ignoreDefaultModelOnRedirect" flag to RequestMappingHandlerAdapter
-* add support for @RequestPart annotated controller method arguments
+
 
 Changes in version 3.1 M2 (2011-06-08)
 --------------------------------------
