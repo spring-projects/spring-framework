@@ -16,35 +16,23 @@
 
 package org.springframework.orm.hibernate4;
 
+import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.Properties;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
 import javax.sql.DataSource;
 
-import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
-import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.core.type.filter.TypeFilter;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that creates a
@@ -66,26 +54,29 @@ import org.springframework.util.ReflectionUtils;
 public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, ResourceLoaderAware,
 		InitializingBean, DisposableBean {
 
-	private static final String RESOURCE_PATTERN = "/**/*.class";
-
-	private static final Method addAnnotatedClassMethod =
-			ClassUtils.getMethodIfAvailable(Configuration.class, "addAnnotatedClass", Class.class);
-
-
 	private DataSource dataSource;
+
+	private Resource[] configLocations;
+
+	private String[] mappingResources;
+
+	private Resource[] mappingLocations;
+
+	private Resource[] cacheableMappingLocations;
+
+	private Resource[] mappingJarLocations;
+
+	private Resource[] mappingDirectoryLocations;
 
 	private Properties hibernateProperties;
 
-	private String[] packagesToScan;
-
 	private Class<?>[] annotatedClasses;
 
-	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+	private String[] annotatedPackages;
 
-	private TypeFilter[] entityTypeFilters = new TypeFilter[] {
-			new AnnotationTypeFilter(Entity.class, false),
-			new AnnotationTypeFilter(Embeddable.class, false),
-			new AnnotationTypeFilter(MappedSuperclass.class, false)};
+	private String[] packagesToScan;
+
+	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
 	private SessionFactory sessionFactory;
 
@@ -95,28 +86,97 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 	 * If set, this will override corresponding settings in Hibernate properties.
 	 * <p>If this is set, the Hibernate settings should not define
 	 * a connection provider to avoid meaningless double configuration.
-	 * <p>If using HibernateTransactionManager as transaction strategy, consider
-	 * proxying your target DataSource with a LazyConnectionDataSourceProxy.
-	 * This defers fetching of an actual JDBC Connection until the first JDBC
-	 * Statement gets executed, even within JDBC transactions (as performed by
-	 * HibernateTransactionManager). Such lazy fetching is particularly beneficial
-	 * for read-only operations, in particular if the chances of resolving the
-	 * result in the second-level cache are high.
-	 * <p>As JTA and transactional JNDI DataSources already provide lazy enlistment
-	 * of JDBC Connections, LazyConnectionDataSourceProxy does not add value with
-	 * JTA (i.e. Spring's JtaTransactionManager) as transaction strategy.
-	 * @see HibernateTransactionManager
-	 * @see org.springframework.transaction.jta.JtaTransactionManager
-	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
 	/**
+	 * Set the location of a single Hibernate XML config file, for example as
+	 * classpath resource "classpath:hibernate.cfg.xml".
+	 * <p>Note: Can be omitted when all necessary properties and mapping
+	 * resources are specified locally via this bean.
+	 * @see org.hibernate.cfg.Configuration#configure(java.net.URL)
+	 */
+	public void setConfigLocation(Resource configLocation) {
+		this.configLocations = new Resource[] {configLocation};
+	}
+
+	/**
+	 * Set the locations of multiple Hibernate XML config files, for example as
+	 * classpath resources "classpath:hibernate.cfg.xml,classpath:extension.cfg.xml".
+	 * <p>Note: Can be omitted when all necessary properties and mapping
+	 * resources are specified locally via this bean.
+	 * @see org.hibernate.cfg.Configuration#configure(java.net.URL)
+	 */
+	public void setConfigLocations(Resource[] configLocations) {
+		this.configLocations = configLocations;
+	}
+
+	/**
+	 * Set Hibernate mapping resources to be found in the class path,
+	 * like "example.hbm.xml" or "mypackage/example.hbm.xml".
+	 * Analogous to mapping entries in a Hibernate XML config file.
+	 * Alternative to the more generic setMappingLocations method.
+	 * <p>Can be used to add to mappings from a Hibernate XML config file,
+	 * or to specify all mappings locally.
+	 * @see #setMappingLocations
+	 * @see org.hibernate.cfg.Configuration#addResource
+	 */
+	public void setMappingResources(String[] mappingResources) {
+		this.mappingResources = mappingResources;
+	}
+
+	/**
+	 * Set locations of Hibernate mapping files, for example as classpath
+	 * resource "classpath:example.hbm.xml". Supports any resource location
+	 * via Spring's resource abstraction, for example relative paths like
+	 * "WEB-INF/mappings/example.hbm.xml" when running in an application context.
+	 * <p>Can be used to add to mappings from a Hibernate XML config file,
+	 * or to specify all mappings locally.
+	 * @see org.hibernate.cfg.Configuration#addInputStream
+	 */
+	public void setMappingLocations(Resource[] mappingLocations) {
+		this.mappingLocations = mappingLocations;
+	}
+
+	/**
+	 * Set locations of cacheable Hibernate mapping files, for example as web app
+	 * resource "/WEB-INF/mapping/example.hbm.xml". Supports any resource location
+	 * via Spring's resource abstraction, as long as the resource can be resolved
+	 * in the file system.
+	 * <p>Can be used to add to mappings from a Hibernate XML config file,
+	 * or to specify all mappings locally.
+	 * @see org.hibernate.cfg.Configuration#addCacheableFile(java.io.File)
+	 */
+	public void setCacheableMappingLocations(Resource[] cacheableMappingLocations) {
+		this.cacheableMappingLocations = cacheableMappingLocations;
+	}
+
+	/**
+	 * Set locations of jar files that contain Hibernate mapping resources,
+	 * like "WEB-INF/lib/example.hbm.jar".
+	 * <p>Can be used to add to mappings from a Hibernate XML config file,
+	 * or to specify all mappings locally.
+	 * @see org.hibernate.cfg.Configuration#addJar(java.io.File)
+	 */
+	public void setMappingJarLocations(Resource[] mappingJarLocations) {
+		this.mappingJarLocations = mappingJarLocations;
+	}
+
+	/**
+	 * Set locations of directories that contain Hibernate mapping resources,
+	 * like "WEB-INF/mappings".
+	 * <p>Can be used to add to mappings from a Hibernate XML config file,
+	 * or to specify all mappings locally.
+	 * @see org.hibernate.cfg.Configuration#addDirectory(java.io.File)
+	 */
+	public void setMappingDirectoryLocations(Resource[] mappingDirectoryLocations) {
+		this.mappingDirectoryLocations = mappingDirectoryLocations;
+	}
+
+	/**
 	 * Set Hibernate properties, such as "hibernate.dialect".
-	 * <p>Can be used to override values in a Hibernate XML config file,
-	 * or to specify all necessary properties locally.
 	 * <p>Note: Do not specify a transaction provider here when using
 	 * Spring-driven transactions. It is also advisable to omit connection
 	 * provider settings and use a Spring-set DataSource instead.
@@ -124,6 +184,34 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 	 */
 	public void setHibernateProperties(Properties hibernateProperties) {
 		this.hibernateProperties = hibernateProperties;
+	}
+
+	/**
+	 * Return the Hibernate properties, if any. Mainly available for
+	 * configuration through property paths that specify individual keys.
+	 */
+	public Properties getHibernateProperties() {
+		if (this.hibernateProperties == null) {
+			this.hibernateProperties = new Properties();
+		}
+		return this.hibernateProperties;
+	}
+
+	/**
+	 * Specify annotated entity classes to register with this Hibernate SessionFactory.
+	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(String)
+	 */
+	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
+		this.annotatedClasses = annotatedClasses;
+	}
+
+	/**
+	 * Specify the names of annotated packages, for which package-level
+	 * annotation metadata will be read.
+	 * @see org.hibernate.cfg.Configuration#addPackage(String)
+	 */
+	public void setAnnotatedPackages(String[] annotatedPackages) {
+		this.annotatedPackages = annotatedPackages;
 	}
 
 	/**
@@ -135,79 +223,77 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 		this.packagesToScan = packagesToScan;
 	}
 
-	/**
-	 * Specify annotated entity classes to register with this Hibernate SessionFactory.
-	 */
-	public void setAnnotatedClasses(Class<?>... annotatedClasses) {
-		this.annotatedClasses = annotatedClasses;
-	}
-
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 
 
-	public void afterPropertiesSet() {
-		Configuration config = new Configuration();
-		config.getProperties().put(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
-		config.getProperties().put(Environment.DATASOURCE, this.dataSource);
-		config.getProperties().put("hibernate.classLoader.application", this.resourcePatternResolver.getClassLoader());
+	public void afterPropertiesSet() throws IOException {
+		LocalSessionFactoryBuilder sfb = new LocalSessionFactoryBuilder(this.dataSource, this.resourcePatternResolver);
+
+		if (this.configLocations != null) {
+			for (Resource resource : this.configLocations) {
+				// Load Hibernate configuration from given location.
+				sfb.configure(resource.getURL());
+			}
+		}
+
+		if (this.mappingResources != null) {
+			// Register given Hibernate mapping definitions, contained in resource files.
+			for (String mapping : this.mappingResources) {
+				Resource mr = new ClassPathResource(mapping.trim(), this.resourcePatternResolver.getClassLoader());
+				sfb.addInputStream(mr.getInputStream());
+			}
+		}
+
+		if (this.mappingLocations != null) {
+			// Register given Hibernate mapping definitions, contained in resource files.
+			for (Resource resource : this.mappingLocations) {
+				sfb.addInputStream(resource.getInputStream());
+			}
+		}
+
+		if (this.cacheableMappingLocations != null) {
+			// Register given cacheable Hibernate mapping definitions, read from the file system.
+			for (Resource resource : this.cacheableMappingLocations) {
+				sfb.addCacheableFile(resource.getFile());
+			}
+		}
+
+		if (this.mappingJarLocations != null) {
+			// Register given Hibernate mapping definitions, contained in jar files.
+			for (Resource resource : this.mappingJarLocations) {
+				sfb.addJar(resource.getFile());
+			}
+		}
+
+		if (this.mappingDirectoryLocations != null) {
+			// Register all Hibernate mapping definitions in the given directories.
+			for (Resource resource : this.mappingDirectoryLocations) {
+				File file = resource.getFile();
+				if (!file.isDirectory()) {
+					throw new IllegalArgumentException(
+							"Mapping directory location [" + resource + "] does not denote a directory");
+				}
+				sfb.addDirectory(file);
+			}
+		}
+
 		if (this.hibernateProperties != null) {
-			config.addProperties(this.hibernateProperties);
+			sfb.addProperties(this.hibernateProperties);
 		}
-		scanPackages(config);
-		for (Class<?> annotatedClass : this.annotatedClasses) {
-			ReflectionUtils.invokeMethod(addAnnotatedClassMethod, config, annotatedClass);
-		}
-		this.sessionFactory = config.buildSessionFactory();
-	}
 
-	/**
-	 * Perform Spring-based scanning for entity classes.
-	 * @see #setPackagesToScan
-	 */
-	private void scanPackages(Configuration config) {
-		if (this.packagesToScan != null) {
-			try {
-				for (String pkg : this.packagesToScan) {
-					String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
-							ClassUtils.convertClassNameToResourcePath(pkg) + RESOURCE_PATTERN;
-					Resource[] resources = this.resourcePatternResolver.getResources(pattern);
-					MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
-					for (Resource resource : resources) {
-						if (resource.isReadable()) {
-							MetadataReader reader = readerFactory.getMetadataReader(resource);
-							String className = reader.getClassMetadata().getClassName();
-							if (matchesFilter(reader, readerFactory)) {
-								Class<?> annotatedClass = this.resourcePatternResolver.getClassLoader().loadClass(className);
-								ReflectionUtils.invokeMethod(addAnnotatedClassMethod, config, annotatedClass);
-							}
-						}
-					}
-				}
-			}
-			catch (IOException ex) {
-				throw new MappingException("Failed to scan classpath for unlisted classes", ex);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new MappingException("Failed to load annotated classes from classpath", ex);
-			}
+		if (this.annotatedClasses != null) {
+			sfb.addAnnotatedClasses(this.annotatedClasses);
 		}
-	}
 
-	/**
-	 * Check whether any of the configured entity type filters matches
-	 * the current class descriptor contained in the metadata reader.
-	 */
-	private boolean matchesFilter(MetadataReader reader, MetadataReaderFactory readerFactory) throws IOException {
-		if (this.entityTypeFilters != null) {
-			for (TypeFilter filter : this.entityTypeFilters) {
-				if (filter.match(reader, readerFactory)) {
-					return true;
-				}
-			}
+		if (this.annotatedPackages != null) {
+			sfb.addPackages(this.annotatedPackages);
 		}
-		return false;
+
+		sfb.scanPackages(this.packagesToScan);
+
+		this.sessionFactory = sfb.buildSessionFactory();
 	}
 
 
