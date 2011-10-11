@@ -72,6 +72,9 @@
 		<xsd:annotation>
 			<xsd:documentation source="java:org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator"><![CDATA[
 	Enables the use of the @AspectJ style of Spring AOP.
+
+	See org.springframework.context.annotation.EnableAspectJAutoProxy Javadoc
+	for information on code-based alternatives to this XML element.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
