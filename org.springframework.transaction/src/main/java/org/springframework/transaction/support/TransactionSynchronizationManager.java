@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.transaction.support;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,8 +80,8 @@ public abstract class TransactionSynchronizationManager {
 	private static final ThreadLocal<Map<Object, Object>> resources =
 			new NamedThreadLocal<Map<Object, Object>>("Transactional resources");
 
-	private static final ThreadLocal<List<TransactionSynchronization>> synchronizations =
-			new NamedThreadLocal<List<TransactionSynchronization>>("Transaction synchronizations");
+	private static final ThreadLocal<Set<TransactionSynchronization>> synchronizations =
+			new NamedThreadLocal<Set<TransactionSynchronization>>("Transaction synchronizations");
 
 	private static final ThreadLocal<String> currentTransactionName =
 			new NamedThreadLocal<String>("Current transaction name");
@@ -256,7 +257,7 @@ public abstract class TransactionSynchronizationManager {
 			throw new IllegalStateException("Cannot activate transaction synchronization - already active");
 		}
 		logger.trace("Initializing transaction synchronization");
-		synchronizations.set(new LinkedList<TransactionSynchronization>());
+		synchronizations.set(new LinkedHashSet<TransactionSynchronization>());
 	}
 
 	/**
@@ -287,7 +288,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @see TransactionSynchronization
 	 */
 	public static List<TransactionSynchronization> getSynchronizations() throws IllegalStateException {
-		List<TransactionSynchronization> synchs = synchronizations.get();
+		Set<TransactionSynchronization> synchs = synchronizations.get();
 		if (synchs == null) {
 			throw new IllegalStateException("Transaction synchronization is not active");
 		}
@@ -299,8 +300,9 @@ public abstract class TransactionSynchronizationManager {
 		}
 		else {
 			// Sort lazily here, not in registerSynchronization.
-			OrderComparator.sort(synchs);
-			return Collections.unmodifiableList(new ArrayList<TransactionSynchronization>(synchs));
+			List<TransactionSynchronization> sortedSynchs = new ArrayList<TransactionSynchronization>(synchs);
+			OrderComparator.sort(sortedSynchs);
+			return Collections.unmodifiableList(sortedSynchs);
 		}
 	}
 
