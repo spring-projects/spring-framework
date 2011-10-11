@@ -82,6 +82,17 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.jboss.javassist/com.springsource.javassist/3.3.0.ga/com.springsource.javassist-3.3.0.ga.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.jboss.javassist/com.springsource.javassist/3.3.0.ga/com.springsource.javassist-sources-3.3.0.ga.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
           <root url="jar://$IVY_CACHE$/com.oracle.toplink.essentials/com.springsource.oracle.toplink.essentials/2.0.0.b41-beta2/com.springsource.oracle.toplink.essentials-2.0.0.b41-beta2.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -117,6 +128,17 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.lang/2.1.0/com.springsource.org.apache.commons.lang-2.1.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.lang/2.1.0/com.springsource.org.apache.commons.lang-sources-2.1.0.jar!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
@@ -199,11 +221,44 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.lang/2.1.0/com.springsource.org.apache.commons.lang-2.1.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate/4.0.0.CR4/com.springsource.org.hibernate-4.0.0.CR4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.apache.commons/com.springsource.org.apache.commons.lang/2.1.0/com.springsource.org.apache.commons.lang-sources-2.1.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate/4.0.0.CR4/com.springsource.org.hibernate-sources-4.0.0.CR4.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.ejb/4.0.0.CR4/com.springsource.org.hibernate.ejb-4.0.0.CR4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.ejb/4.0.0.CR4/com.springsource.org.hibernate.ejb-sources-4.0.0.CR4.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.hibernate.common/com.springsource.org.hibernate.annotations.common/4.0.0.CR2/com.springsource.org.hibernate.annotations.common-4.0.0.CR2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.hibernate.common/com.springsource.org.hibernate.annotations.common/4.0.0.CR2/com.springsource.org.hibernate.annotations.common-sources-4.0.0.CR2.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$IVY_CACHE$/org.jboss.logging/com.springsource.org.jboss.logging/3.0.0.GA/com.springsource.org.jboss.logging-3.0.0.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$IVY_CACHE$/org.jboss.logging/com.springsource.org.jboss.logging/3.0.0.GA/com.springsource.org.jboss.logging-sources-3.0.0.GA.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -214,17 +269,6 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.jboss.javassist/com.springsource.javassist/3.3.0.ga/com.springsource.javassist-3.3.0.ga.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.jboss.javassist/com.springsource.javassist/3.3.0.ga/com.springsource.javassist-sources-3.3.0.ga.jar!/" />
-        </SOURCES>
       </library>
     </orderEntry>
   </component>
