@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,7 +280,11 @@ public abstract class SessionFactoryUtils {
 
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
 
-		SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+		Object resource = TransactionSynchronizationManager.getResource(sessionFactory);
+		if (resource instanceof Session) {
+			return (Session) resource;
+		}
+		SessionHolder sessionHolder = (SessionHolder) resource;
 		if (sessionHolder != null && !sessionHolder.isEmpty()) {
 			// pre-bound Hibernate Session
 			Session session = null;

@@ -20,12 +20,15 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.ejb.HibernateEntityManager;
+import org.hibernate.ejb.HibernateEntityManagerFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
@@ -35,6 +38,7 @@ import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -79,12 +83,17 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 				previousFlushMode = flushMode;
 			}
 		}
+		EntityManagerFactory emf = entityManager.getEntityManagerFactory();
+		if (emf instanceof HibernateEntityManagerFactory) {
+			SessionFactory sf = ((HibernateEntityManagerFactory) emf).getSessionFactory();
+			TransactionSynchronizationManager.bindResource(sf, session);
+		}
 		return new SessionTransactionData(session, previousFlushMode);
 	}
 
 	@Override
 	public void cleanupTransaction(Object transactionData) {
-		((SessionTransactionData) transactionData).resetFlushMode();
+		((SessionTransactionData) transactionData).cleanup();
 	}
 
 	@Override
@@ -134,7 +143,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			this.previousFlushMode = previousFlushMode;
 		}
 
-		public void resetFlushMode() {
+		public void cleanup() {
+			TransactionSynchronizationManager.unbindResource(this.session.getSessionFactory());
 			if (this.previousFlushMode != null) {
 				this.session.setFlushMode(this.previousFlushMode);
 			}
