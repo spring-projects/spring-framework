@@ -12,7 +12,6 @@ Changes in version 3.1 RC1 (2011-10-11)
 * updated JBossLoadTimeWeaver to automatically detect and support JBoss AS 7 as well
 * added support for Hibernate 4.0 (HibernateJpaDialect as well as natively in orm.hibernate4)
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
-* introduced @EnableAspectJAutoProxy
 * introduced ForkJoinPoolFactoryBean for Java 7 (alternative: add new jsr166.jar to Java 6)
 * introduced extended WritableResource interface
 * DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
@@ -21,6 +20,7 @@ Changes in version 3.1 RC1 (2011-10-11)
 * XmlBeanDefinitionReader accepts description subelement within map entry as well (as per the XSD)
 * ConfigurationClassPostProcessor supports use of same processor instance with several factories
 * SpringBeanAutowiringSupport is able to process @Value annotations on any given target instance
+* introduced @EnableAspectJAutoProxy
 * overridden @PersistenceContext annotations on subclass methods are being processed correctly
 * DataBinder uses a default limit of 256 for array/collection auto-growing
 * added "autoGrowNestedPaths" property to ConfigurableWebBindingInitializer
@@ -46,6 +46,7 @@ Changes in version 3.1 RC1 (2011-10-11)
 * fixed JMS CachedConnectionFactory to fully synchronize its Session list
 * JpaTransactionManager etc can find EntityManagerFactory by "persistenceUnitName" property now
 * HibernateJpaDialect exposes underlying Session for underlying SessionFactory
+* deprecated JpaTemplate/JpaInterceptor/JpaDaoSupport and JdoTemplate/JdoInterceptor/JdoDaoSupport
 * jdbc:script's "separator" and "execution" attributes work nested with embedded-database as well
 * added "encoding" attribute to jdbc:script element
 * JavaMailSenderImpl detects and respects "mail.transport.protocol" property in existing Session
