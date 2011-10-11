@@ -437,7 +437,7 @@
             <emphasis>either</emphasis> the application context resource
             <literal>locations</literal> <emphasis>or</emphasis> the
             <interfacename>@Configuration</interfacename>
-            <varname>classes</varname> to load as well as the
+            <varname>classes</varname> (but not both) to load as well as the
             <interfacename>ContextLoader</interfacename> strategy to use for
             loading the context. Note, however, that you typically do not need
             to explicitly configure the loader since the default loader
@@ -1251,6 +1251,40 @@ public class OrderServiceTest {
     }
 
 }</programlisting>
+        </section>
+
+        <section id="testcontext-ctx-management-mixed-config">
+          <title>Mixing XML resources and @Configuration classes</title>
+
+          <para>It may sometimes be desirable to mix XML resources and
+          <interfacename>@Configuration</interfacename> classes to configure
+          an <interfacename>ApplicationContext</interfacename> for your tests.
+          For example, if you use XML configuration in production, you may
+          decide that you want to use
+          <interfacename>@Configuration</interfacename> classes to configure
+          specific Spring-managed components for your tests, or vice versa. As
+          mentioned in <xref
+          linkend="integration-testing-annotations-spring" /> the TestContext
+          framework does not allow you to declare <emphasis>both</emphasis>
+          via <interfacename>@ContextConfiguration</interfacename>, but this
+          does not mean that you cannot use both. If you want to use XML
+          <emphasis role="bold">and</emphasis>
+          <interfacename>@Configuration</interfacename> classes to configure
+          your tests, you will have to pick one as the <emphasis>entry
+          point</emphasis>, and that one will have to include or import the
+          other. For example, in XML you can include
+          <interfacename>@Configuration</interfacename> classes in component
+          scanning or define them as normal Spring beans; whereas, in a
+          <interfacename>@Configuration</interfacename> class you can use
+          <interfacename>@ImportResource</interfacename> to import XML
+          configuration files. Note that this behavior is semantically
+          equivalent to how you configure your application in production: in
+          production configuration you will define either a set of XML
+          resource locations or a set of
+          <interfacename>@Configuration</interfacename> classes that your
+          production <interfacename>ApplicationContext</interfacename> will
+          load, but you still have the freedom to include or import the other
+          type of configuration.</para>
         </section>
 
         <section id="testcontext-ctx-management-inheritance">
