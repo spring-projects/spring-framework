@@ -1283,7 +1283,7 @@ public class OrderServiceTest {
           production configuration you will define either a set of XML
           resource locations or a set of
           <interfacename>@Configuration</interfacename> classes that your
-          production <interfacename>ApplicationContext</interfacename> will
+          production <interfacename>ApplicationContext</interfacename> will be
           loaded from, but you still have the freedom to include or import the
           other type of configuration.</para>
         </section>
@@ -1362,22 +1362,26 @@ public class ExtendedTest extends BaseTest {
           <title>Context configuration with environment profiles</title>
 
           <para>Spring 3.1 introduces first-class support in the framework for
-          the notion of environments and profiles (a.k.a., bean definition
-          profiles), and integration tests can now be configured to activate
-          particular bean definition profiles for various testing scenarios.
-          This is achieved by annotating a test class with the new
-          @ActiveProfiles annotation and supplying a list of profiles that
-          should be activated when loading the ApplicationContext for the
-          test.</para>
+          the notion of environments and profiles (a.k.a., <emphasis>bean
+          definition profiles</emphasis>), and integration tests can now be
+          configured to activate particular bean definition profiles for
+          various testing scenarios. This is achieved by annotating a test
+          class with the new <interfacename>@ActiveProfiles</interfacename>
+          annotation and supplying a list of profiles that should be activated
+          when loading the <interfacename>ApplicationContext</interfacename>
+          for the test.</para>
 
           <note>
-            <para>@ActiveProfiles may be used with any implementation of the
-            new SmartContextLoader SPI, but @ActiveProfiles is not supported
-            with implementations of the older ContextLoader SPI.</para>
+            <para><interfacename>@ActiveProfiles</interfacename> may be used
+            with any implementation of the new
+            <interfacename>SmartContextLoader</interfacename> SPI, but
+            <interfacename>@ActiveProfiles</interfacename> is not supported
+            with implementations of the older
+            <interfacename>ContextLoader</interfacename> SPI.</para>
           </note>
 
           <para>Let's take a look at some examples with XML configuration and
-          @Configuration classes.</para>
+          <interfacename>@Configuration</interfacename> classes.</para>
 
           <programlisting language="xml">&lt;!-- app-config.xml --&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -1433,25 +1437,33 @@ public class TransferServiceTest {
    }
 }</programlisting>
 
-          <para>When TransferServiceTest is run, its ApplicationContext will
-          be loaded from the app-config.xml configuration file in the root of
-          the classpath. If you inspect app-config.xml you'll notice that the
-          accountRepository bean has a dependency on a dataSource bean;
-          however, dataSource is not defined as a top-level bean. Instead,
-          dataSource is defined twice: once in the production profile and once
-          in the dev profile.</para>
+          <para>When <classname>TransferServiceTest</classname> is run, its
+          <interfacename>ApplicationContext</interfacename> will be loaded
+          from the <filename>app-config.xml</filename> configuration file in
+          the root of the classpath. If you inspect
+          <filename>app-config.xml</filename> you'll notice that the
+          <varname>accountRepository</varname> bean has a dependency on a
+          <varname>dataSource</varname> bean; however,
+          <varname>dataSource</varname> is not defined as a top-level bean.
+          Instead, <varname>dataSource</varname> is defined twice: once in the
+          <emphasis>production</emphasis> profile and once in the
+          <emphasis>dev</emphasis> profile.</para>
 
-          <para>By annotating TransferServiceTest with @ActiveProfiles("dev")
-          we instruct the Spring TestContext Framework to load the
-          ApplicationContext with the active profiles set to {"dev"}. As a
-          result, an embedded database will be created, and the
-          accountRepository bean will be wired with a reference to the
-          development DataSource. And that's likely what we want in an
-          integration test.</para>
+          <para>By annotating <classname>TransferServiceTest</classname> with
+          <interfacename>@ActiveProfiles("dev")</interfacename> we instruct
+          the Spring TestContext Framework to load the
+          <interfacename>ApplicationContext</interfacename> with the active
+          profiles set to <literal>{"dev"}</literal>. As a result, an embedded
+          database will be created, and the
+          <varname>accountRepository</varname> bean will be wired with a
+          reference to the development
+          <interfacename>DataSource</interfacename>. And that's likely what we
+          want in an integration test.</para>
 
           <para>The following code listings demonstrate how to implement the
-          same configuration and integration test but using @Configuration
-          classes instead of XML.</para>
+          same configuration and integration test but using
+          <interfacename>@Configuration</interfacename> classes instead of
+          XML.</para>
 
           <programlisting language="java">@Configuration
 @Profile("dev")
@@ -1510,30 +1522,35 @@ public class TransferServiceTest {
 }</programlisting>
 
           <para>In this variation, we have split the XML configuration into
-          three independent @Configuration classes:</para>
+          three independent <interfacename>@Configuration</interfacename>
+          classes:</para>
 
           <itemizedlist>
             <listitem>
-              <para>TransferServiceConfig: acquires a dataSource via
-              dependency injection using @Autowired</para>
+              <para><classname>TransferServiceConfig</classname>: acquires a
+              <varname>dataSource</varname> via dependency injection using
+              <interfacename>@Autowired</interfacename></para>
             </listitem>
 
             <listitem>
-              <para>StandaloneDataConfig: defines a dataSource for an embedded
-              database suitable for developer tests</para>
+              <para><classname>StandaloneDataConfig</classname>: defines a
+              <varname>dataSource</varname> for an embedded database suitable
+              for developer tests</para>
             </listitem>
 
             <listitem>
-              <para>JndiDataConfig: defines a dataSource that is retrieved
-              from JNDI in a production environment</para>
+              <para><classname>JndiDataConfig</classname>: defines a
+              <varname>dataSource</varname> that is retrieved from JNDI in a
+              production environment</para>
             </listitem>
           </itemizedlist>
 
           <para>As with the XML-based configuration example, we still annotate
-          TransferServiceTest with @ActiveProfiles("dev"), but this time we
-          specify all three configuration classes via the
-          @ContextConfiguration annotation. The body of the test class itself
-          remains completely unchanged.</para>
+          <classname>TransferServiceTest</classname> with
+          <interfacename>@ActiveProfiles("dev")</interfacename>, but this time
+          we specify all three configuration classes via the
+          <interfacename>@ContextConfiguration </interfacename>annotation. The
+          body of the test class itself remains completely unchanged.</para>
         </section>
 
         <section id="testcontext-ctx-management-caching">
