@@ -1491,14 +1491,26 @@ public class JndiDataConfig {
 }</programlisting>
 
           <programlisting language="java">@Configuration
-@Profile("production")
-public class JndiDataConfig {
+public class TransferServiceConfig {
+
+    @Autowired DataSource dataSource;
 
     @Bean
-    public DataSource dataSource() throws Exception {
-        Context ctx = new InitialContext();
-        return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
+    public TransferService transferService() {
+        return new DefaultTransferService(accountRepository(),
+            feePolicy());
     }
+
+    @Bean
+    public AccountRepository accountRepository() {
+        return new JdbcAccountRepository(dataSource);
+    }
+
+    @Bean
+    public FeePolicy feePolicy() {
+        return new ZeroFeePolicy();
+    }
+
 }</programlisting>
 
           <programlisting language="java">package com.bank.service;
