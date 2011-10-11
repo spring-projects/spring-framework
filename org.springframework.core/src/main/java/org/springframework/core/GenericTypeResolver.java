@@ -116,21 +116,20 @@ public abstract class GenericTypeResolver {
 	public static Class<?> resolveReturnTypeArgument(Method method, Class<?> genericIfc) {
 		Type returnType = method.getReturnType();
 		Type genericReturnType = method.getGenericReturnType();
-		ParameterizedType targetType;
 		if (returnType.equals(genericIfc)) {
 			if (genericReturnType instanceof ParameterizedType) {
-				targetType = (ParameterizedType)genericReturnType;
+				ParameterizedType targetType = (ParameterizedType) genericReturnType;
 				Type[] actualTypeArguments = targetType.getActualTypeArguments();
 				Type typeArg = actualTypeArguments[0];
 				if (!(typeArg instanceof WildcardType)) {
-					return (Class<?>)typeArg;
+					return (Class<?>) typeArg;
 				}
 			}
 			else {
 				return null;
 			}
 		}
-		return GenericTypeResolver.resolveTypeArgument((Class<?>)returnType, genericIfc);
+		return GenericTypeResolver.resolveTypeArgument((Class<?>) returnType, genericIfc);
 	}
 
 	/**
