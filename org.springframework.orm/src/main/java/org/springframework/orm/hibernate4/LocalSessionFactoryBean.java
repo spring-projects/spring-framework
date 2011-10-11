@@ -152,7 +152,9 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 		config.getProperties().put(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
 		config.getProperties().put(Environment.DATASOURCE, this.dataSource);
 		config.getProperties().put("hibernate.classLoader.application", this.resourcePatternResolver.getClassLoader());
-		config.addProperties(this.hibernateProperties);
+		if (this.hibernateProperties != null) {
+			config.addProperties(this.hibernateProperties);
+		}
 		scanPackages(config);
 		for (Class<?> annotatedClass : this.annotatedClasses) {
 			ReflectionUtils.invokeMethod(addAnnotatedClassMethod, config, annotatedClass);
