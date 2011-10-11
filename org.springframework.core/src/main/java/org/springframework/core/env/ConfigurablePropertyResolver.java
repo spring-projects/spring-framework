@@ -20,7 +20,7 @@ import org.springframework.core.convert.support.ConfigurableConversionService;
 
 /**
  * Configuration interface to be implemented by most if not all {@link PropertyResolver
- * PropertyResolvers}. Provides facilities for accessing and customizing the
+ * PropertyResolver} types. Provides facilities for accessing and customizing the
  * {@link org.springframework.core.convert.ConversionService ConversionService} used when
  * converting property values from one type to another.
  *
