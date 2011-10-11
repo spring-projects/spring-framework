@@ -403,37 +403,40 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Returns {@link Validator} for validating {@code @ModelAttribute} 
-	 * and {@code @RequestBody} arguments of annotated controller methods. 
-	 * To configure a custom validation, override {@link #getValidator()}.
+	 * Returns a global {@link Validator} instance for example for validating 
+	 * {@code @ModelAttribute} and {@code @RequestBody} method arguments.
+	 * Delegates to {@link #getValidator()} first and if that returns {@code null}
+	 * checks the classpath for the presence of a JSR-303 implementations
+	 * before creating a {@code LocalValidatorFactoryBean}.If a JSR-303 
+	 * implementation is not available, a no-op {@link Validator} is returned.
 	 */
 	@Bean
-	Validator mvcValidator() {
+	public Validator mvcValidator() {
 		Validator validator = getValidator();
-		if (validator != null) {
-			return validator;
-		}
-		else if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
-			Class<?> clazz;
-			try {
-				String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
-				clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
-			} catch (ClassNotFoundException e) {
-				throw new BeanInitializationException("Could not find default validator");
-			} catch (LinkageError e) {
-				throw new BeanInitializationException("Could not find default validator");
+		if (validator == null) {
+			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+				Class<?> clazz;
+				try {
+					String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
+					clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
+				} catch (ClassNotFoundException e) {
+					throw new BeanInitializationException("Could not find default validator");
+				} catch (LinkageError e) {
+					throw new BeanInitializationException("Could not find default validator");
+				}
+				validator = (Validator) BeanUtils.instantiate(clazz);
 			}
-			return (Validator) BeanUtils.instantiate(clazz);
+			else {
+				validator = new Validator() {
+					public boolean supports(Class<?> clazz) {
+						return false;
+					}
+					public void validate(Object target, Errors errors) {
+					}
+				};
+			}
 		}
-		else {
-			return new Validator() {
-				public boolean supports(Class<?> clazz) {
-					return false;
-				}
-				public void validate(Object target, Errors errors) {
-				}
-			};
-		}
+		return validator;
 	}
 
 	/**
@@ -463,11 +466,11 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 
 	/**
 	 * Returns a {@link HandlerExceptionResolverComposite} that contains a list
-	 * of exception resolvers. To customize the list of exception resolvers, 
-	 * override {@link #configureHandlerExceptionResolvers(List)}.
+	 * of exception resolvers. To customize the list of exception resolvers,
+	 * consider overriding {@link #configureHandlerExceptionResolvers(List)}.
 	 */
 	@Bean
-	HandlerExceptionResolver handlerExceptionResolver() throws Exception {
+	public HandlerExceptionResolver handlerExceptionResolver() throws Exception {
 		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<HandlerExceptionResolver>();
 		configureHandlerExceptionResolvers(exceptionResolvers);
 		
