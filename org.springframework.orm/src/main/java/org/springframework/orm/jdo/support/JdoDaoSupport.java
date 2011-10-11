@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,11 @@ import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
  * @see #releasePersistenceManager
  * @see org.springframework.orm.jdo.JdoTemplate
  * @see org.springframework.orm.jdo.JdoInterceptor
+ * @deprecated as of Spring 3.1, in favor of native PersistenceManager usage
+ * (see {@link org.springframework.orm.jdo.TransactionAwarePersistenceManagerFactoryProxy}
+ * and {@link SpringPersistenceManagerProxyBean})
  */
+@Deprecated
 public abstract class JdoDaoSupport extends DaoSupport {
 
 	private JdoTemplate jdoTemplate;
@@ -67,7 +71,7 @@ public abstract class JdoDaoSupport extends DaoSupport {
 	 */
 	public final void setPersistenceManagerFactory(PersistenceManagerFactory persistenceManagerFactory) {
 		if (this.jdoTemplate == null || persistenceManagerFactory != this.jdoTemplate.getPersistenceManagerFactory()) {
-	  	this.jdoTemplate = createJdoTemplate(persistenceManagerFactory);
+	  		this.jdoTemplate = createJdoTemplate(persistenceManagerFactory);
 		}
 	}
 
