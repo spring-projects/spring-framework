@@ -30,7 +30,7 @@ package org.springframework.core.env;
  *
  * That is, if the key "xyz" is present both in the JVM system properties as well as in
  * the set of environment variables for the current process, the value of key "xyz" from
- * system properties * will return from a call to {@code environment.getProperty("xyz")}.
+ * system properties will return from a call to {@code environment.getProperty("xyz")}.
  * This ordering is chosen by default because system properties are per-JVM, while
  * environment variables may be the same across many JVMs on a given system.  Giving
  * system properties precedence allows for overriding of environment variables on a
@@ -38,37 +38,8 @@ package org.springframework.core.env;
  *
  * <p>These default property sources may be removed, reordered, or replaced; and
  * additional property sources may be added using the {@link MutablePropertySources}
- * instance available from {@link #getPropertySources()}.
- *
- * <h4>Example: adding a new property source with highest search priority</h4>
- * <pre class="code">
- *   ConfigurableEnvironment environment = new StandardEnvironment();
- *   MutablePropertySources propertySources = environment.getPropertySources();
- *   Map<String, String> myMap = new HashMap<String, String>();
- *   myMap.put("xyz", "myValue");
- *   propertySources.addFirst(new MapPropertySource("MY_MAP", myMap));
- * </pre>
- *
- * <h4>Example: removing the default system properties property source</h4>
- * <pre class="code">
- *   MutablePropertySources propertySources = environment.getPropertySources();
- *   propertySources.remove(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)
- * </pre>
- *
- * <h4>Example: mocking the system environment for testing purposes</h4>
- * <pre class="code">
- *   MutablePropertySources propertySources = environment.getPropertySources();
- *   MockPropertySource mockEnvVars = new MockPropertySource().withProperty("xyz", "myValue");
- *   propertySources.replace(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, mockEnvVars);
- * </pre>
- *
- * When an {@link Environment} is being used by an ApplicationContext, it is important
- * that any such PropertySource manipulations be performed <em>before</em> the context's
- * {@link org.springframework.context.support.AbstractApplicationContext#refresh()
- * refresh()} method is called. This ensures that all PropertySources are available during
- * the container bootstrap process, including use by
- * {@linkplain org.springframework.context.support.PropertySourcesPlaceholderConfigurer
- * property placeholder configurers}.
+ * instance available from {@link #getPropertySources()}. See
+ * {@link ConfigurableEnvironment} Javadoc for usage examples.
  *
  * @author Chris Beams
  * @since 3.1

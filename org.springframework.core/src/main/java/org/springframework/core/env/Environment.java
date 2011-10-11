@@ -19,7 +19,8 @@ package org.springframework.core.env;
 /**
  * Interface representing the environment in which the current application is running.
  * Models two key aspects of the application environment: <em>profiles</em> and
- * <em>properties</em>.
+ * <em>properties</em>. Methods related to property access are exposed via the
+ * {@link PropertyResolver} superinterface.
  *
  * <p>A <em>profile</em> is a named, logical group of bean definitions to be registered
  * with the container only if the given profile is <em>active</em>. Beans may be assigned
@@ -37,7 +38,7 @@ package org.springframework.core.env;
  * provide the user with a convenient service interface for configuring property sources
  * and resolving properties from them.
  *
- * <p>Beans managed within an ApplicationContext may register to be {@link
+ * <p>Beans managed within an {@code ApplicationContext} may register to be {@link
  * org.springframework.context.EnvironmentAware EnvironmentAware} or {@code @Inject} the
  * {@code Environment} in order to query profile state or resolve properties directly.
  *
@@ -50,10 +51,10 @@ package org.springframework.core.env;
  * {@code <context:property-placeholder/>}.
  *
  * <p>Configuration of the environment object must be done through the
- * {@link ConfigurableEnvironment} interface, returned from all
+ * {@code ConfigurableEnvironment} interface, returned from all
  * {@code AbstractApplicationContext} subclass {@code getEnvironment()} methods. See
- * {@link StandardEnvironment} for several examples of using the ConfigurableEnvironment
- * interface to manipulate property sources prior to application context refresh().
+ * {@link ConfigurableEnvironment} Javadoc for usage examples demonstrating manipulation
+ * of property sources prior to application context {@code refresh()}.
  *
  * @author Chris Beams
  * @since 3.1

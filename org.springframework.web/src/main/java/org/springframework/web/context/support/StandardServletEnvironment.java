@@ -65,10 +65,10 @@ public class StandardServletEnvironment extends StandardEnvironment {
 	 * {@value #JNDI_PROPERTY_SOURCE_NAME}.
 	 * <p>Properties in any of the above will take precedence over system properties and
 	 * environment variables contributed by the {@link StandardEnvironment} superclass.
-	 * <p>The {@code Servlet}-related property sources are added as stubs for now, and
-	 * will be {@linkplain WebApplicationContextUtils#initServletPropertySources fully
-	 * initialized} once the actual {@link ServletConfig} and {@link ServletContext}
-	 * objects are available.
+	 * <p>The {@code Servlet}-related property sources are added as {@link
+	 * StubPropertySource stubs} at this stage, and will be {@linkplain
+	 * WebApplicationContextUtils#initServletPropertySources fully initialized} once the
+	 * actual {@link ServletConfig} and {@link ServletContext} objects become available.
 	 * @see StandardEnvironment#customizePropertySources
 	 * @see org.springframework.core.env.AbstractEnvironment#customizePropertySources
 	 * @see ServletConfigPropertySource

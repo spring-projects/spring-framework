@@ -38,8 +38,16 @@ import org.springframework.util.StringUtils;
  * through the {@link #ACTIVE_PROFILES_PROPERTY_NAME} and
  * {@link #DEFAULT_PROFILES_PROPERTY_NAME} properties.
  *
+ * <p>Concrete subclasses differ primarily on which {@link PropertySource} objects they
+ * add by default. {@code AbstractEnvironment} adds none. Subclasses should contribute
+ * property sources through the protected {@link #customizePropertySources()} hook, while
+ * clients should customize using {@link ConfigurableEnvironment#getPropertySources()} and
+ * working against the {@link MutablePropertySources} API. See
+ * {@link ConfigurableEnvironment} Javadoc for usage examples.
+ *
  * @author Chris Beams
  * @since 3.1
+ * @see ConfigurableEnvironment
  * @see StandardEnvironment
  */
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
