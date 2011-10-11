@@ -104,20 +104,27 @@
       <title>Code equivalents for Spring's XML namespaces</title>
 
       <para>Code-based equivalents to popular Spring XML namespace elements
-      such as &lt;tx:annotation-driven/&gt; and &lt;mvc:annotation-driven&gt;
-      have been developed, in the form of
-      <interfacename>@Enable</interfacename> annotations, for use in
-      conjunction with Spring's <interfacename>@Configuration</interfacename>
-      classes.</para>
+      &lt;context:component-scan/&gt;, &lt;tx:annotation-driven/&gt;
+      and &lt;mvc:annotation-driven&gt; have been developed, most in the
+      form of <interfacename>@Enable</interfacename> annotations. These are
+      designed for use in conjunction with Spring's
+      <interfacename>@Configuration</interfacename> classes, which were
+      introduced in Spring 3.0.</para>
 
       <itemizedlist>
         <listitem>
-          <para>See org.springframework.scheduling.annotation.Configuration
+          <para>See org.springframework.context.annotation.Configuration
           Javadoc</para>
         </listitem>
 
         <listitem>
-          <para>See org.springframework.scheduling.annotation.EnableAsync
+          <para>See org.springframework.context.annotation.ComponentScan
+          Javadoc</para>
+        </listitem>
+
+        <listitem>
+          <para>See
+          org.springframework.context.annotation.EnableLoadTimeWeaving
           Javadoc</para>
         </listitem>
 
@@ -127,19 +134,18 @@
         </listitem>
 
         <listitem>
-          <para>See
-          org.springframework.scheduling.annotation.EnableTransactionManagement
+          <para>See org.springframework.scheduling.annotation.EnableAsync
           Javadoc</para>
         </listitem>
 
         <listitem>
           <para>See
-          org.springframework.scheduling.annotation.EnableLoadTimeWeaving
+          org.springframework.transaction.annotation.EnableTransactionManagement
           Javadoc</para>
         </listitem>
 
         <listitem>
-          <para>See org.springframework.scheduling.annotation.EnableWebMvc
+          <para>See org.springframework.web.servlet.config.annotation.EnableWebMvc
           Javadoc</para>
         </listitem>
       </itemizedlist>
