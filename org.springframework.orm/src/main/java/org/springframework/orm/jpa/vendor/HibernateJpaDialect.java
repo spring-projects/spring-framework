@@ -154,7 +154,10 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		}
 
 		public void cleanup() {
-			TransactionSynchronizationManager.unbindResource(this.session.getSessionFactory());
+			SessionFactory sessionFactory = this.session.getSessionFactory();
+			if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
+				TransactionSynchronizationManager.unbindResource(sessionFactory);
+			}
 			if (this.previousFlushMode != null) {
 				this.session.setFlushMode(this.previousFlushMode);
 			}
