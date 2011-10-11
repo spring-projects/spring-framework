@@ -146,23 +146,12 @@
     </section>
 
     <section>
-      <title>Builder-style APIs for code-based Hibernate configuration</title>
-
-      <para><classname>SessionFactoryBuilder</classname> and
-      <classname>AnnotationSessionFactoryBuilder</classname> classes have been
-      designed for use within <interfacename>@Bean</interfacename> methods in
-      <interfacename>@Configuration</interfacename> classes.</para>
+      <title>Support for Hibernate 4.x</title>
 
       <itemizedlist>
         <listitem>
-          <para>See org.springframework.orm.hibernate3.SessionFactoryBuilder
-          Javadoc</para>
-        </listitem>
-
-        <listitem>
-          <para>See
-          org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBuilder
-          Javadoc</para>
+          <para>See Javadoc for classes within the new
+          org.springframework.orm.hibernate4 package</para>
         </listitem>
       </itemizedlist>
     </section>
