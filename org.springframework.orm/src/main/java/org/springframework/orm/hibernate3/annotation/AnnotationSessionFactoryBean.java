@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,8 +128,8 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	}
 
 	/**
-	 * Set whether to use Spring-based scanning for entity classes in the classpath
-	 * instead of listing annotated classes explicitly.
+	 * Specify packages to search using Spring-based scanning for entity classes in
+	 * the classpath. This is an alternative to listing annotated classes explicitly.
 	 * <p>Default is none. Specify packages to search for autodetection of your entity
 	 * classes in the classpath. This is analogous to Spring's component-scan feature
 	 * ({@link org.springframework.context.annotation.ClassPathBeanDefinitionScanner}).
