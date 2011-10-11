@@ -95,7 +95,7 @@ public class Indexer extends SpelNodeImpl {
 				key = state.convertValue(key, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
 			}
 			Object value = ((Map<?, ?>) targetObject).get(key);
-			return new TypedValue(value, targetObjectTypeDescriptor.mapValueTypeDescriptor(value));
+			return new TypedValue(value, targetObjectTypeDescriptor.getMapValueTypeDescriptor(value));
 		}
 		
 		if (targetObject == null) {

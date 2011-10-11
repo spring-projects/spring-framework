@@ -382,7 +382,7 @@ public class TypeDescriptor {
 	 * @throws IllegalStateException if this type is not a java.util.Map.
 	 * @see #narrow(Object)
 	 */
-	public TypeDescriptor mapKeyTypeDescriptor(Object mapKey) {
+	public TypeDescriptor getMapKeyTypeDescriptor(Object mapKey) {
 		return narrow(mapKey, getMapKeyTypeDescriptor());
 	}
 
@@ -407,11 +407,126 @@ public class TypeDescriptor {
 	 * @return the map value type descriptor
 	 * @throws IllegalStateException if this type is not a java.util.Map. 
 	 */
-	public TypeDescriptor mapValueTypeDescriptor(Object mapValue) {
+	public TypeDescriptor getMapValueTypeDescriptor(Object mapValue) {
 		return narrow(mapValue, getMapValueTypeDescriptor());		
 	}
 
-	// extending Object
+
+	// deprecations in Spring 3.1
+	
+	/**
+	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getElementTypeDescriptor() elementTypeDescriptor}.
+	 * @deprecated in Spring 3.1 in favor of {@link #getElementTypeDescriptor()}.
+	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
+	 */
+	@Deprecated
+	public Class<?> getElementType() {
+		return getElementTypeDescriptor().getType();
+	}
+
+	/**
+	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getMapKeyTypeDescriptor() getMapKeyTypeDescriptor}.
+	 * @deprecated in Spring 3.1 in favor of {@link #getMapKeyTypeDescriptor()}.
+	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 */
+	@Deprecated
+	public Class<?> getMapKeyType() {
+		return getMapKeyTypeDescriptor().getType();
+	}
+
+	/**
+	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getMapValueTypeDescriptor() getMapValueTypeDescriptor}.
+	 * @deprecated in Spring 3.1 in favor of {@link #getMapValueTypeDescriptor()}.
+	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 */
+	@Deprecated
+	public Class<?> getMapValueType() {
+		return getMapValueTypeDescriptor().getType();
+	}
+
+	// package private helpers
+
+	TypeDescriptor(AbstractDescriptor descriptor) {
+		this.type = descriptor.getType();
+		this.elementTypeDescriptor = descriptor.getElementTypeDescriptor();
+		this.mapKeyTypeDescriptor = descriptor.getMapKeyTypeDescriptor();
+		this.mapValueTypeDescriptor = descriptor.getMapValueTypeDescriptor();
+		this.annotations = descriptor.getAnnotations();
+	}
+
+	static Annotation[] nullSafeAnnotations(Annotation[] annotations) {
+		return annotations != null ? annotations : EMPTY_ANNOTATION_ARRAY;
+	}
+
+
+	// internal constructors
+
+	private TypeDescriptor(Class<?> type) {
+		this(new ClassDescriptor(type));
+	}
+
+	private TypeDescriptor(Class<?> collectionType, TypeDescriptor elementTypeDescriptor) {
+		this(collectionType, elementTypeDescriptor, null, null, EMPTY_ANNOTATION_ARRAY);
+	}
+
+	private TypeDescriptor(Class<?> mapType, TypeDescriptor keyTypeDescriptor, TypeDescriptor valueTypeDescriptor) {
+		this(mapType, null, keyTypeDescriptor, valueTypeDescriptor, EMPTY_ANNOTATION_ARRAY);
+	}
+
+	private TypeDescriptor(Class<?> type, TypeDescriptor elementTypeDescriptor, TypeDescriptor mapKeyTypeDescriptor,
+			TypeDescriptor mapValueTypeDescriptor, Annotation[] annotations) {
+		this.type = type;
+		this.elementTypeDescriptor = elementTypeDescriptor;
+		this.mapKeyTypeDescriptor = mapKeyTypeDescriptor;
+		this.mapValueTypeDescriptor = mapValueTypeDescriptor;
+		this.annotations = annotations;
+	}
+
+	private static TypeDescriptor nested(AbstractDescriptor descriptor, int nestingLevel) {
+		for (int i = 0; i < nestingLevel; i++) {
+			descriptor = descriptor.nested();
+			if (descriptor == null) {
+				return null;
+			}
+		}
+		return new TypeDescriptor(descriptor);
+	}
+
+
+	// internal helpers
+
+	private void assertCollectionOrArray() {
+		if (!isCollection() && !isArray()) {
+			throw new IllegalStateException("Not a java.util.Collection or Array");
+		}
+	}
+
+	private void assertMap() {
+		if (!isMap()) {
+			throw new IllegalStateException("Not a java.util.Map");
+		}
+	}
+
+	private TypeDescriptor narrow(Object value, TypeDescriptor typeDescriptor) {
+		if (typeDescriptor != null) {
+			return typeDescriptor.narrow(value);
+		}
+		else {
+			return value != null ? new TypeDescriptor(value.getClass(), null, null, null, annotations) : null;
+		}		
+	}
+
+	private boolean isNestedAssignable(TypeDescriptor nestedTypeDescriptor, TypeDescriptor otherNestedTypeDescriptor) {
+		if (nestedTypeDescriptor == null || otherNestedTypeDescriptor == null) {
+			return true;
+		}
+		return nestedTypeDescriptor.isAssignableTo(otherNestedTypeDescriptor);
+	}
+
+	private String wildcard(TypeDescriptor typeDescriptor) {
+		return typeDescriptor != null ? typeDescriptor.toString() : "?";
+	}
+
 
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -455,119 +570,6 @@ public class TypeDescriptor {
 			builder.append("<").append(wildcard(getElementTypeDescriptor())).append(">");
 		}
 		return builder.toString();
-	}
-
-	// deprecations in Spring 3.1
-	
-	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getElementTypeDescriptor() elementTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getElementTypeDescriptor()}.
-	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
-	 */
-	@Deprecated
-	public Class<?> getElementType() {
-		return getElementTypeDescriptor().getType();
-	}
-
-	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getMapKeyTypeDescriptor() mapKeyTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getMapKeyTypeDescriptor()}.
-	 * @throws IllegalStateException if this type is not a java.util.Map.
-	 */
-	@Deprecated
-	public Class<?> getMapKeyType() {
-		return getMapKeyTypeDescriptor().getType();
-	}
-
-	/**
-	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getMapValueTypeDescriptor() mapValueTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getMapValueTypeDescriptor()}.
-	 * @throws IllegalStateException if this type is not a java.util.Map.
-	 */
-	@Deprecated
-	public Class<?> getMapValueType() {
-		return getMapValueTypeDescriptor().getType();
-	}
-
-	// package private helpers
-
-	TypeDescriptor(AbstractDescriptor descriptor) {
-		this.type = descriptor.getType();
-		this.elementTypeDescriptor = descriptor.getElementTypeDescriptor();
-		this.mapKeyTypeDescriptor = descriptor.getMapKeyTypeDescriptor();
-		this.mapValueTypeDescriptor = descriptor.getMapValueTypeDescriptor();
-		this.annotations = descriptor.getAnnotations();
-	}
-
-	static Annotation[] nullSafeAnnotations(Annotation[] annotations) {
-		return annotations != null ? annotations : EMPTY_ANNOTATION_ARRAY;
-	}
-
-	// internal constructors
-
-	private TypeDescriptor(Class<?> type) {
-		this(new ClassDescriptor(type));
-	}
-
-	private TypeDescriptor(Class<?> collectionType, TypeDescriptor elementTypeDescriptor) {
-		this(collectionType, elementTypeDescriptor, null, null, EMPTY_ANNOTATION_ARRAY);
-	}
-
-	private TypeDescriptor(Class<?> mapType, TypeDescriptor keyTypeDescriptor, TypeDescriptor valueTypeDescriptor) {
-		this(mapType, null, keyTypeDescriptor, valueTypeDescriptor, EMPTY_ANNOTATION_ARRAY);
-	}
-
-	private TypeDescriptor(Class<?> type, TypeDescriptor elementTypeDescriptor, TypeDescriptor mapKeyTypeDescriptor,
-			TypeDescriptor mapValueTypeDescriptor, Annotation[] annotations) {
-		this.type = type;
-		this.elementTypeDescriptor = elementTypeDescriptor;
-		this.mapKeyTypeDescriptor = mapKeyTypeDescriptor;
-		this.mapValueTypeDescriptor = mapValueTypeDescriptor;
-		this.annotations = annotations;
-	}
-
-	private static TypeDescriptor nested(AbstractDescriptor descriptor, int nestingLevel) {
-		for (int i = 0; i < nestingLevel; i++) {
-			descriptor = descriptor.nested();
-			if (descriptor == null) {
-				return null;
-			}
-		}
-		return new TypeDescriptor(descriptor);
-	}
-
-	// internal helpers
-
-	private void assertCollectionOrArray() {
-		if (!isCollection() && !isArray()) {
-			throw new IllegalStateException("Not a java.util.Collection or Array");
-		}
-	}
-
-	private void assertMap() {
-		if (!isMap()) {
-			throw new IllegalStateException("Not a java.util.Map");
-		}
-	}
-
-	private TypeDescriptor narrow(Object value, TypeDescriptor typeDescriptor) {
-		if (typeDescriptor != null) {
-			return typeDescriptor.narrow(value);
-		}
-		else {
-			return value != null ? new TypeDescriptor(value.getClass(), null, null, null, annotations) : null;
-		}		
-	}
-
-	private boolean isNestedAssignable(TypeDescriptor nestedTypeDescriptor, TypeDescriptor otherNestedTypeDescriptor) {
-		if (nestedTypeDescriptor == null || otherNestedTypeDescriptor == null) {
-			return true;
-		}
-		return nestedTypeDescriptor.isAssignableTo(otherNestedTypeDescriptor);
-	}
-
-	private String wildcard(TypeDescriptor typeDescriptor) {
-		return typeDescriptor != null ? typeDescriptor.toString() : "?";
 	}
 
 }
