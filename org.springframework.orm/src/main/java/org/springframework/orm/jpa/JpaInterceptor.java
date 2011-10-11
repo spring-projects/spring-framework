@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @since 2.0
  * @see JpaTransactionManager
  * @see JpaTemplate
+ * @deprecated as of Spring 3.1, in favor of native EntityManager usage
+ * (typically obtained through <code>@PersistenceContext</code>) and
+ * AOP-driven exception translation through
+ * {@link org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor}
  */
+@Deprecated
 public class JpaInterceptor extends JpaAccessor implements MethodInterceptor {
 
 	private boolean exceptionConversionEnabled = true;

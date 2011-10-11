@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,11 @@ import org.springframework.dao.DataAccessException;
  * @see JpaDialect
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
+ * @deprecated as of Spring 3.1, in favor of native EntityManager usage
+ * (typically obtained through <code>@PersistenceContext</code>).
+ * Note that this interface did not get upgraded to JPA 2.0 and never will.
  */
+@Deprecated
 public interface JpaOperations {
 
 	<T> T execute(JpaCallback<T> action) throws DataAccessException;
