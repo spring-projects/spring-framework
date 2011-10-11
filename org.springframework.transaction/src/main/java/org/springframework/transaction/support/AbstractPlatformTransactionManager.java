@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -847,15 +847,13 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				else if (status.hasTransaction()) {
 					if (status.isLocalRollbackOnly() || isGlobalRollbackOnParticipationFailure()) {
 						if (status.isDebug()) {
-							logger.debug(
-									"Participating transaction failed - marking existing transaction as rollback-only");
+							logger.debug("Participating transaction failed - marking existing transaction as rollback-only");
 						}
 						doSetRollbackOnly(status);
 					}
 					else {
 						if (status.isDebug()) {
-							logger.debug(
-									"Participating transaction failed - letting transaction originator decide on rollback");
+							logger.debug("Participating transaction failed - letting transaction originator decide on rollback");
 						}
 					}
 				}
@@ -885,8 +883,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	 * @throws TransactionException in case of rollback failure
 	 * @see #doRollback
 	 */
-	private void doRollbackOnCommitException(DefaultTransactionStatus status, Throwable ex)
-	    throws TransactionException {
+	private void doRollbackOnCommitException(DefaultTransactionStatus status, Throwable ex) throws TransactionException {
 		try {
 			if (status.isNewTransaction()) {
 				if (status.isDebug()) {
