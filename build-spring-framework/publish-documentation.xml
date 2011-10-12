@@ -3,10 +3,10 @@
 
 <!-- Main targets -->
 	<target name="publish-documentation" depends="publish-documentation.init">
-		<sshexec host="spring02.managed.contegix.com" username="${username}" keyfile="${key.file}" passphrase="${passphrase}"
+		<sshexec host="static.springsource.org" username="${username}" keyfile="${key.file}" passphrase="${passphrase}"
 				command="mkdir /opt/www/domains/springframework.org/www/htdocs/spring/docs/${bundle.version}"/>
 
-		<scp remoteToDir="${username}@spring02.managed.contegix.com:/opt/www/domains/springframework.org/www/htdocs/spring/docs/${bundle.version}"
+		<scp remoteToDir="${username}@static.springsource.org:/opt/www/domains/springframework.org/www/htdocs/spring/docs/${bundle.version}"
 				keyfile="${key.file}" passphrase="${passphrase}" sftp="true" verbose="true">
 			<fileset dir="${package.output.dir}">
 				<include name="changelog.txt" />
@@ -16,7 +16,7 @@
 			<fileset dir="${package.docs.dir}" />
 		</scp>
 
-		<sshexec host="spring02.managed.contegix.com" username="${username}" keyfile="${key.file}" passphrase="${passphrase}"
+		<sshexec host="static.springsource.org" username="${username}" keyfile="${key.file}" passphrase="${passphrase}"
 				command="rm /opt/www/domains/springframework.org/www/htdocs/spring/docs/3.0.x ; ln -s /opt/www/domains/springframework.org/www/htdocs/spring/docs/${bundle.version} /opt/www/domains/springframework.org/www/htdocs/spring/docs/3.0.x"/>
 	</target>
 
