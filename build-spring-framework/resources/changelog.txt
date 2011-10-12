@@ -11,6 +11,7 @@ Changes in version 3.1 RC1 (2011-10-11)
 * support for load-time weaving on WebSphere 7 and 8
 * updated JBossLoadTimeWeaver to automatically detect and support JBoss AS 7 as well
 * added support for Hibernate 4.0 (HibernateJpaDialect as well as natively in orm.hibernate4)
+* added 'destroy method inference' (SPR-8751)
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
 * introduced ForkJoinPoolFactoryBean for Java 7 (alternative: add new jsr166.jar to Java 6)
 * introduced extended WritableResource interface
