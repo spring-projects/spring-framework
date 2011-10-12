@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -94,7 +95,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				(this.bean instanceof DisposableBean && !beanDefinition.isExternallyManagedDestroyMethod("destroy"));
 		this.nonPublicAccessAllowed = beanDefinition.isNonPublicAccessAllowed();
 		this.acc = acc;
-		
+		inferDestroyMethodIfNecessary(beanDefinition);
 		final String destroyMethodName = beanDefinition.getDestroyMethodName();
 		if (destroyMethodName != null && !(this.invokeDisposableBean && "destroy".equals(destroyMethodName)) &&
 				!beanDefinition.isExternallyManagedDestroyMethod(destroyMethodName)) {
@@ -119,6 +120,31 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 		}
 		this.beanPostProcessors = filterPostProcessors(postProcessors);
+	}
+
+	/**
+	 * If the current value of the given beanDefinition's destroyMethodName property is
+	 * {@link AbstractBeanDefinition#INFER_METHOD}, then attempt to infer a destroy method.
+	 * Candidate methods are currently limited to public, no-arg methods named 'close'
+	 * (whether declared locally or inherited). The given beanDefinition's
+	 * destroyMethodName is updated to be null if no such method is found, otherwise set
+	 * to the name of the inferred method. This constant serves as the default for the
+	 * {@code @Bean#destroyMethod} attribute and the value of the constant may also be
+	 * used in XML within the {@code <bean destroy-method="">} or {@code
+	 * <beans default-destroy-method="">} attributes.
+	 */
+	private void inferDestroyMethodIfNecessary(RootBeanDefinition beanDefinition) {
+		if ("(inferred)".equals(beanDefinition.getDestroyMethodName())) {
+			try {
+				Method candidate = bean.getClass().getMethod("close");
+				if (Modifier.isPublic(candidate.getModifiers())) {
+					beanDefinition.setDestroyMethodName(candidate.getName());
+				}
+			} catch (NoSuchMethodException ex) {
+				// no candidate destroy method found
+				beanDefinition.setDestroyMethodName(null);
+			}
+		}
 	}
 
 	/**
