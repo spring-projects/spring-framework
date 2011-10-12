@@ -54,6 +54,7 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor
  * @see AbstractBeanDefinition#getDestroyMethodName()
  */
+@SuppressWarnings("serial")
 class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
@@ -106,7 +107,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				}
 			}
 			else {
-				Class[] paramTypes = this.destroyMethod.getParameterTypes();
+				Class<?>[] paramTypes = this.destroyMethod.getParameterTypes();
 				if (paramTypes.length > 1) {
 					throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
 							beanName + "' has more than one parameter - not supported as destroy method");
@@ -239,7 +240,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * assuming a "force" parameter), else logging an error.
 	 */
 	private void invokeCustomDestroyMethod(final Method destroyMethod) {
-		Class[] paramTypes = destroyMethod.getParameterTypes();
+		Class<?>[] paramTypes = destroyMethod.getParameterTypes();
 		final Object[] args = new Object[paramTypes.length];
 		if (paramTypes.length == 1) {
 			args[0] = Boolean.TRUE;
