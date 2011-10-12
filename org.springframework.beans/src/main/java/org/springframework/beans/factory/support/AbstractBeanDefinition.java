@@ -123,6 +123,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public static final int DEPENDENCY_CHECK_ALL = 3;
 
+	/**
+	 * Constant that indicates the container should attempt to infer the {@link
+	 * #setDestroyMethodName destroy method name} for a bean as opposed to explicit
+	 * specification of a method name. The value {@value} is specifically designed to
+	 * include characters otherwise illegal in a method name, ensuring no possibility of
+	 * collisions with a legitimately named methods having the same name.
+	 */
+	public static final String INFER_METHOD = "(inferred)";
+
 
 	private volatile Object beanClass;
 

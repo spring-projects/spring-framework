@@ -46,8 +46,6 @@ abstract class ConfigurationClassUtils {
 	private static final String CONFIGURATION_CLASS_ATTRIBUTE =
 		Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
 
-	static final String INFER_METHOD = ""; // TODO SPR-8751 update to '-' or some such
-
 
 	/**
 	 * Check whether the given bean definition is a candidate for a configuration class,
