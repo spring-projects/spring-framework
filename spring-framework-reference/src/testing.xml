@@ -460,12 +460,48 @@ public class ConfigClassApplicationContextTests {
             <note>
               <para><interfacename>@ContextConfiguration</interfacename>
               provides support for <emphasis>inheriting</emphasis> resource
-              locations or configuration classes by default.</para>
+              locations or configuration classes declared by superclasses by
+              default.</para>
             </note>
 
             <para>See <link linkend="testcontext-ctx-management">Context
             management and caching</link> and Javadoc for examples and further
             details.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis
+            role="bold"><interfacename>@ActiveProfiles</interfacename></emphasis></para>
+
+            <para>A class-level annotation that is used to declare which
+            <emphasis>bean definition profiles</emphasis> should be active
+            when loading an <interfacename>ApplicationContext</interfacename>
+            for test classes.</para>
+
+            <programlisting language="java">@ContextConfiguration
+<emphasis role="bold">@ActiveProfiles</emphasis>("dev")
+public class DeveloperTests {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+            <programlisting language="java">@ContextConfiguration
+<emphasis role="bold">@ActiveProfiles</emphasis>({"dev", "integration"})
+public class DeveloperIntegrationTests {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+            <note>
+              <para><interfacename>@ActiveProfiles</interfacename> provides
+              support for <emphasis>inheriting</emphasis> active bean
+              definition profiles declared by superclasses classes by
+              default.</para>
+            </note>
+
+            <para>See <link
+            linkend="testcontext-ctx-management-env-profiles">Context
+            configuration with environment profiles</link> and the Javadoc for
+            <interfacename>@ActiveProfiles</interfacename> for examples and
+            further details.</para>
           </listitem>
 
           <listitem>
@@ -1052,7 +1088,7 @@ public void testProcessRepeatedly() {
           </listitem>
         </itemizedlist>
 
-        <para>The following three sections explain how to configure the
+        <para>The following sections explain how to configure the
         <classname>TestContext</classname> framework through annotations and
         provide working examples of how to write unit and integration tests
         with the framework.</para>
@@ -1563,6 +1599,8 @@ public class TransferServiceTest {
           we specify all three configuration classes via the
           <interfacename>@ContextConfiguration </interfacename>annotation. The
           body of the test class itself remains completely unchanged.</para>
+
+          <!-- TODO Consider documenting inheritance for active profiles. -->
         </section>
 
         <section id="testcontext-ctx-management-caching">
