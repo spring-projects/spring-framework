@@ -47,13 +47,14 @@ import org.springframework.util.ReflectionUtils;
  * adding {@link SpringSessionContext} as a default and providing convenient ways
  * to specify a DataSource and an application class loader.
  *
- * <p>This is designed for programmatic use, e.g. in <code>@Bean</code> factory methods.
+ * <p>This is designed for programmatic use, e.g. in {@code @Bean} factory methods.
  * Consider using {@link LocalSessionFactoryBean} for XML bean definition files.
  *
  * @author Juergen Hoeller
  * @since 3.1
  * @see LocalSessionFactoryBean
  */
+@SuppressWarnings("serial")
 public class LocalSessionFactoryBuilder extends Configuration {
 
 	private static final String RESOURCE_PATTERN = "/**/*.class";
@@ -108,7 +109,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @see #addAnnotatedClass
 	 * @see #scanPackages
 	 */
-	public LocalSessionFactoryBuilder addAnnotatedClasses(Class... annotatedClasses) {
+	public LocalSessionFactoryBuilder addAnnotatedClasses(Class<?>... annotatedClasses) {
 		for (Class<?> annotatedClass : annotatedClasses) {
 			ReflectionUtils.invokeMethod(addAnnotatedClassMethod, this, annotatedClass);
 		}
@@ -129,7 +130,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 	/**
 	 * Perform Spring-based scanning for entity classes, registering them
-	 * as annotated classes with this <code>Configuration</code>.
+	 * as annotated classes with this {@code Configuration}.
 	 * @param packagesToScan one or more Java package names
 	 * @throws HibernateException if scanning fails for any reason
 	 */
@@ -175,7 +176,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 
 
 	/**
-	 * Build the <code>SessionFactory</code>.
+	 * Build the {@code SessionFactory}.
 	 */
 	@Override
 	@SuppressWarnings("deprecation")
