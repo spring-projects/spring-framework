@@ -18,14 +18,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.web.servlet.DispatcherServlet;
 
 /**
- * Enables default Spring MVC configuration and registers Spring MVC infrastructure components expected by the
- * {@link DispatcherServlet}. Use this annotation on an @{@link Configuration} class. In turn that will
- * import {@link DelegatingWebMvcConfiguration}, which provides default Spring MVC configuration.
+ * Add this annotation to an {@code @Configuration} class to have the Spring MVC
+ * configuration defined in {@link WebMvcConfigurationSupport} imported:
+ * 
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
@@ -33,14 +31,14 @@ import org.springframework.web.servlet.DispatcherServlet;
  * 	basePackageClasses = { MyConfiguration.class },
  * 	excludeFilters = { @Filter(type = FilterType.ANNOTATION, value = Configuration.class) }
  * )
- * public class MyConfiguration {
+ * public class MyWebConfiguration {
  *
  * }
  * </pre>
- * <p>To customize the imported configuration implement {@link WebMvcConfigurer}, or more conveniently extend
- * {@link WebMvcConfigurerAdapter} overriding specific methods only. Any @{@link Configuration} class that
- * implements {@link WebMvcConfigurer} will be detected by {@link DelegatingWebMvcConfiguration} and given 
- * an opportunity to customize the default Spring MVC code-based configuration.
+ * <p>Customize the imported configuration by implementing the
+ * {@link WebMvcConfigurer} interface or more likely by extending the 
+ * {@link WebMvcConfigurerAdapter} base class and overriding individual methods: 
+ * 
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
@@ -60,7 +58,34 @@ import org.springframework.web.servlet.DispatcherServlet;
  * 		converters.add(new MyHttpMessageConverter());
  * 	}
  *
- * 	// &#064;Override methods ...
+ * 	// More overridden methods ...
+ *
+ * }
+ * </pre>
+ *
+ * <p>If the customization options of {@link WebMvcConfigurer} do not expose 
+ * something you need to configure, consider removing the {@code @EnableWebMvc} 
+ * annotation and extending directly from {@link WebMvcConfigurationSupport} 
+ * overriding selected {@code @Bean} methods:
+ * 
+ * <pre class="code">
+ * &#064;Configuration
+ * &#064;ComponentScan(
+ * 	basePackageClasses = { MyConfiguration.class },
+ * 	excludeFilters = { @Filter(type = FilterType.ANNOTATION, value = Configuration.class) }
+ * )
+ * public class MyConfiguration extends WebMvcConfigurationSupport {
+ *
+ * 	&#064;Override
+ *	public void addFormatters(FormatterRegistry formatterRegistry) {
+ *		formatterRegistry.addConverter(new MyConverter());
+ *	}
+ *
+ *	&#064;Bean
+ *	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
+ *		// Create or delegate to "super" to create and
+ *		// customize properties of RequestMapingHandlerAdapter
+ *	}
  *
  * }
  * </pre>
