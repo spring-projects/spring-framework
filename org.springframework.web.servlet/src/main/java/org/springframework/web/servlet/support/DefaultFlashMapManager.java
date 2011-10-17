@@ -42,7 +42,7 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class DefaultFlashMapManager implements FlashMapManager {
 
-	private static final String FLASH_MAPS_SESSION_ATTRIBUTE = DefaultFlashMapManager.class + ".FLASH_MAPS";
+	private static final String FLASH_MAPS_SESSION_ATTRIBUTE = DefaultFlashMapManager.class.getName() + ".FLASH_MAPS";
 
 	private static final Log logger = LogFactory.getLog(DefaultFlashMapManager.class);
 	

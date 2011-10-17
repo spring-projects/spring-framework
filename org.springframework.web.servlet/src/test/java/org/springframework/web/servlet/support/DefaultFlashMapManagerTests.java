@@ -255,12 +255,12 @@ public class DefaultFlashMapManagerTests {
 
 	@SuppressWarnings("unchecked")
 	private List<FlashMap> getFlashMaps() {
-		return (List<FlashMap>) this.request.getSession().getAttribute(DefaultFlashMapManager.class + ".FLASH_MAPS");
+		return (List<FlashMap>) this.request.getSession().getAttribute(DefaultFlashMapManager.class.getName() + ".FLASH_MAPS");
 	}
 
 	private List<FlashMap> createFlashMaps() {
 		List<FlashMap> allMaps = new CopyOnWriteArrayList<FlashMap>();
-		this.request.getSession().setAttribute(DefaultFlashMapManager.class + ".FLASH_MAPS", allMaps);
+		this.request.getSession().setAttribute(DefaultFlashMapManager.class.getName() + ".FLASH_MAPS", allMaps);
 		return allMaps;
 	}
 	
