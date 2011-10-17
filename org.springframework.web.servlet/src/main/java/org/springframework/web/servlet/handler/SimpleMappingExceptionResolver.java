@@ -98,10 +98,18 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	}
 
 	/**
+	 * An alternative to {@link #setStatusCodes(Properties)} for use with 
+	 * Java-based configuration.
+	 */
+	public void addStatusCode(String viewName, int statusCode) {
+		this.statusCodes.put(viewName, statusCode);
+	}
+	
+	/**
 	 * Returns the HTTP status codes provided via {@link #setStatusCodes(Properties)}.
 	 * Keys are view names; values are status codes.
 	 */
-	public Map<String, Integer> getStatusCodes() {
+	public Map<String, Integer> getStatusCodesAsMap() {
 		return Collections.unmodifiableMap(statusCodes);
 	}
 
