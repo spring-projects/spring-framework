@@ -73,8 +73,8 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
- * A base class that provides default configuration for Spring MVC applications 
- * by registering Spring MVC infrastructure components to be detected by the 
+ * A base class that provides configuration for Spring MVC applications 
+ * by registering Spring MVC infrastructure components detected by the 
  * {@link DispatcherServlet}. An application configuration class is not required
  * to extend this class. A more likely place to start is to annotate 
  * an @{@link Configuration} class with @{@link EnableWebMvc} 

@@ -28,19 +28,15 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * A variant of {@link WebMvcConfigurationSupport} that delegates to one or more registered 
- * {@link WebMvcConfigurer}s allowing each of them to customize the default Spring MVC 
- * code-based configuration.
+ * A sub-class of {@link WebMvcConfigurationSupport} that detects beans of 
+ * type {@link WebMvcConfigurer}. Each {@link WebMvcConfigurer} is given a 
+ * chance to customize the Spring MVC configuration provided through
+ * {@link WebMvcConfigurationSupport}.
  * 
- * <p>This class is automatically imported when @{@link EnableWebMvc} is used to annotate
- * an @{@link Configuration} class. In turn it detects implementations of {@link WebMvcConfigurer}
- * via autowiring and delegates to them.  
- * 
- * @see EnableWebMvc
- * @see WebMvcConfigurer
- *
  * @author Rossen Stoyanchev
  * @since 3.1
+ * 
+ * @see EnableWebMvc
  */
 @Configuration
 public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
