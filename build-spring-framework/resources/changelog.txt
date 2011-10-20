@@ -3,6 +3,20 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.1 RC2 (2011-11-15)
+---------------------------------------
+
+* fixed OSGi manifest for spring-web bundle to not require Apache HttpComponents anymore
+* fixed GenericTypeResolver to consistently return null if not resolvable
+* added proper "contentLength()" implementation to ByteArrayResource
+* LocaleEditor and StringToLocaleConverter do not restrict variant part through validation
+* optimized DefaultListableBeanFactory's PropertyDescriptor caching for concurrent access
+* fixed HibernateTransactionManager for Hibernate 4.0 to refer to correct openSession() method
+* fixed MethodInvokingJobDetailFactoryBean's Quartz 2.0 support
+* RmiClientInterceptor detects nested SocketException as connect failure as well
+* fixed StandardServlet/PortletEnvironment to check for JNDI (for Google App Engine compatibility)
+
+
 Changes in version 3.1 RC1 (2011-10-11)
 ---------------------------------------
 
@@ -34,7 +48,6 @@ Changes in version 3.1 RC1 (2011-10-11)
 * added flash attribute support through FlashMap and FlashMapManager abstractions
 * added RedirectAttributes abstraction as supported method argument type of @RequestMapping methods
 * added "ignoreDefaultModelOnRedirect" flag to RequestMappingHandlerAdapter
-* added support for @RequestPart annotated controller method arguments
 * fixed @ExceptionHandler exception type matching (ExceptionDepthComparator)
 * ResourceHttpRequestHandler detects invalid directory traversal in given path
 * HtmlUtils properly escapes single quotes as well
