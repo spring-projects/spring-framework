@@ -194,8 +194,8 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		// Build JobDetail instance.
 		if (jobDetailImplClass != null) {
 			// Using Quartz 2.0 JobDetailImpl class...
-			Object jobDetail = BeanUtils.instantiate(jobDetailImplClass);
-			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(jobDetail);
+			this.jobDetail = (JobDetail) BeanUtils.instantiate(jobDetailImplClass);
+			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this.jobDetail);
 			bw.setPropertyValue("name", name);
 			bw.setPropertyValue("group", this.group);
 			bw.setPropertyValue("jobClass", jobClass);
