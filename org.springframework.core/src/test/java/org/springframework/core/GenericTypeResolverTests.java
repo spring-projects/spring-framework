@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@ package org.springframework.core;
 
 import java.util.Collection;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -46,6 +47,12 @@ public class GenericTypeResolverTests {
 		assertEquals(Collection.class, GenericTypeResolver.resolveTypeArgument(MyCollectionSuperclassType.class, MySuperclassType.class));
 	}
 
+	@Test
+	public void testNullIfNotResolvable() {
+		GenericClass<String> obj = new GenericClass<String>();
+		assertNull(GenericTypeResolver.resolveTypeArgument(obj.getClass(), GenericClass.class));
+	}
+
 
 	public interface MyInterfaceType<T> {
 	}
@@ -64,6 +71,9 @@ public class GenericTypeResolverTests {
 	}
 
 	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
+	}
+
+	static class GenericClass<T> {
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ import org.springframework.util.Assert;
  * @author Rob Harrop
  * @since 2.5.2
  * @see GenericCollectionTypeResolver
- * @see JdkVersion
  */
 public abstract class GenericTypeResolver {
 
@@ -175,7 +174,7 @@ public abstract class GenericTypeResolver {
 				return doResolveTypeArguments(ownerClass, (Class) rawType, genericIfc);
 			}
 		}
-		else if (genericIfc.isAssignableFrom((Class) ifc)) {
+		else if (ifc != null && genericIfc.isAssignableFrom((Class) ifc)) {
 			return doResolveTypeArguments(ownerClass, (Class) ifc, genericIfc);
 		}
 		return null;
