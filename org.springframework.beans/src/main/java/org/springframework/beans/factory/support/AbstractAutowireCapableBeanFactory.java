@@ -21,9 +21,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -31,7 +28,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -150,7 +146,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/** Cache of filtered PropertyDescriptors: bean Class -> PropertyDescriptor array */
 	private final Map<Class, PropertyDescriptor[]> filteredPropertyDescriptorsCache =
-			new HashMap<Class, PropertyDescriptor[]>();
+			new ConcurrentHashMap<Class, PropertyDescriptor[]>();
 
 
 	/**
@@ -1226,22 +1222,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #isExcludedFromDependencyCheck
 	 */
 	protected PropertyDescriptor[] filterPropertyDescriptorsForDependencyCheck(BeanWrapper bw) {
-		synchronized (this.filteredPropertyDescriptorsCache) {
-			PropertyDescriptor[] filtered = this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
-			if (filtered == null) {
-				List<PropertyDescriptor> pds =
-						new LinkedList<PropertyDescriptor>(Arrays.asList(bw.getPropertyDescriptors()));
-				for (Iterator<PropertyDescriptor> it = pds.iterator(); it.hasNext();) {
-					PropertyDescriptor pd = it.next();
-					if (isExcludedFromDependencyCheck(pd)) {
-						it.remove();
+		PropertyDescriptor[] filtered = this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
+		if (filtered == null) {
+			synchronized (this.filteredPropertyDescriptorsCache) {
+				filtered = this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
+				if (filtered == null) {
+					List<PropertyDescriptor> pds =
+							new LinkedList<PropertyDescriptor>(Arrays.asList(bw.getPropertyDescriptors()));
+					for (Iterator<PropertyDescriptor> it = pds.iterator(); it.hasNext();) {
+						PropertyDescriptor pd = it.next();
+						if (isExcludedFromDependencyCheck(pd)) {
+							it.remove();
+						}
 					}
+					filtered = pds.toArray(new PropertyDescriptor[pds.size()]);
+					this.filteredPropertyDescriptorsCache.put(bw.getWrappedClass(), filtered);
 				}
-				filtered = pds.toArray(new PropertyDescriptor[pds.size()]);
-				this.filteredPropertyDescriptorsCache.put(bw.getWrappedClass(), filtered);
 			}
-			return filtered;
 		}
+		return filtered;
 	}
 
 	/**
