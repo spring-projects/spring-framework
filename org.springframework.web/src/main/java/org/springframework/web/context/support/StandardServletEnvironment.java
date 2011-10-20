@@ -24,6 +24,7 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySource.StubPropertySource;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiPropertySource;
 
 /**
@@ -81,7 +82,10 @@ public class StandardServletEnvironment extends StandardEnvironment {
 	protected void customizePropertySources(MutablePropertySources propertySources) {
 		propertySources.addLast(new StubPropertySource(SERVLET_CONFIG_PROPERTY_SOURCE_NAME));
 		propertySources.addLast(new StubPropertySource(SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
-		propertySources.addLast(new JndiPropertySource(JNDI_PROPERTY_SOURCE_NAME));
+		if (JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable()) {
+			propertySources.addLast(new JndiPropertySource(JNDI_PROPERTY_SOURCE_NAME));
+		}
 		super.customizePropertySources(propertySources);
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jndi;
 
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 /**
@@ -35,6 +36,34 @@ public class JndiLocatorDelegate extends JndiLocatorSupport {
 	@Override
 	public <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
 		return super.lookup(jndiName, requiredType);
+	}
+
+
+	/**
+	 * Configure a {@code JndiLocatorDelegate} with its "resourceRef" property set to
+	 * <code>true</code>, meaning that all names will be prefixed with "java:comp/env/".
+	 * @see #setResourceRef
+	 */
+	public static JndiLocatorDelegate createDefaultResourceRefLocator() {
+		JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate();
+		jndiLocator.setResourceRef(true);
+		return jndiLocator;
+	}
+
+	/**
+	 * Check whether a default JNDI environment, as in a J2EE environment,
+	 * is available on this JVM.
+	 * @return <code>true</code> if a default InitialContext can be used,
+	 * <code>false</code> if not
+	 */
+	public static boolean isDefaultJndiEnvironmentAvailable() {
+		try {
+			new InitialContext();
+			return true;
+		}
+		catch (Throwable ex) {
+			return false;
+		}
 	}
 
 }
