@@ -607,6 +607,28 @@ public abstract class ClassUtils {
 
 	/**
 	 * Determine whether the given class has a method with the given signature,
+	 * and return it if available (else throws an <code>IllegalStateException</code>).
+	 * <p>Essentially translates <code>NoSuchMethodException</code> to <code>IllegalStateException</code>.
+	 * @param clazz	the clazz to analyze
+	 * @param methodName the name of the method
+	 * @param paramTypes the parameter types of the method
+	 * @return the method (never <code>null</code>)
+	 * @throws IllegalStateException if the method has not been found
+	 * @see java.lang.Class#getMethod
+	 */
+	public static Method getMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
+		Assert.notNull(clazz, "Class must not be null");
+		Assert.notNull(methodName, "Method name must not be null");
+		try {
+			return clazz.getMethod(methodName, paramTypes);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Expected method not found: " + ex);
+		}
+	}
+
+	/**
+	 * Determine whether the given class has a method with the given signature,
 	 * and return it if available (else return <code>null</code>).
 	 * <p>Essentially translates <code>NoSuchMethodException</code> to <code>null</code>.
 	 * @param clazz	the clazz to analyze

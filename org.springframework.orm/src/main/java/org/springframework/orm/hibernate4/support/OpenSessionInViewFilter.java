@@ -168,7 +168,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 */
 	protected Session openSession(SessionFactory sessionFactory) throws DataAccessResourceFailureException {
 		try {
-			Session session = sessionFactory.openSession();
+			Session session = SessionFactoryUtils.openSession(sessionFactory);
 			session.setFlushMode(FlushMode.MANUAL);
 			return session;
 		}
