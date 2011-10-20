@@ -25,7 +25,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -205,7 +204,7 @@ public abstract class GenericTypeResolver {
 				return doResolveTypeArguments(ownerClass, (Class) rawType, genericIfc);
 			}
 		}
-		else if (genericIfc.isAssignableFrom((Class) ifc)) {
+		else if (ifc != null && genericIfc.isAssignableFrom((Class) ifc)) {
 			return doResolveTypeArguments(ownerClass, (Class) ifc, genericIfc);
 		}
 		return null;
