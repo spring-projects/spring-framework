@@ -665,16 +665,11 @@ public abstract class StringUtils {
 	 * @return a corresponding <code>Locale</code> instance
 	 */
 	public static Locale parseLocaleString(String localeString) {
-		for (int i = 0; i < localeString.length(); i++) {
-			char ch = localeString.charAt(i);
-			if (ch != '_' && ch != ' ' && !Character.isLetterOrDigit(ch)) {
-				throw new IllegalArgumentException(
-						"Locale value \"" + localeString + "\" contains invalid characters");
-			}
-		}
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
 		String language = (parts.length > 0 ? parts[0] : "");
 		String country = (parts.length > 1 ? parts[1] : "");
+		validateLocalePart(language);
+		validateLocalePart(country);
 		String variant = "";
 		if (parts.length >= 2) {
 			// There is definitely a variant, and it is everything after the country
@@ -687,6 +682,16 @@ public abstract class StringUtils {
 			}
 		}
 		return (language.length() > 0 ? new Locale(language, country, variant) : null);
+	}
+
+	private static void validateLocalePart(String localePart) {
+		for (int i = 0; i < localePart.length(); i++) {
+			char ch = localePart.charAt(i);
+			if (ch != '_' && ch != ' ' && !Character.isLetterOrDigit(ch)) {
+				throw new IllegalArgumentException(
+						"Locale part \"" + localePart + "\" contains invalid characters");
+			}
+		}
 	}
 
 	/**

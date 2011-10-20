@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,21 +268,26 @@ public class StringUtilsTests extends TestCase {
 		assertEquals(null, StringUtils.getFilenameExtension(""));
 		assertEquals(null, StringUtils.getFilenameExtension("myfile"));
 		assertEquals(null, StringUtils.getFilenameExtension("myPath/myfile"));
+		assertEquals(null, StringUtils.getFilenameExtension("/home/user/.m2/settings/myfile"));
 		assertEquals("", StringUtils.getFilenameExtension("myfile."));
 		assertEquals("", StringUtils.getFilenameExtension("myPath/myfile."));
 		assertEquals("txt", StringUtils.getFilenameExtension("myfile.txt"));
 		assertEquals("txt", StringUtils.getFilenameExtension("mypath/myfile.txt"));
+		assertEquals("txt", StringUtils.getFilenameExtension("/home/user/.m2/settings/myfile.txt"));
 	}
 
 	public void testStripFilenameExtension() {
 		assertEquals(null, StringUtils.stripFilenameExtension(null));
 		assertEquals("", StringUtils.stripFilenameExtension(""));
 		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile"));
-		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile"));
 		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile."));
-		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile."));
 		assertEquals("myfile", StringUtils.stripFilenameExtension("myfile.txt"));
+		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile"));
+		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile."));
 		assertEquals("mypath/myfile", StringUtils.stripFilenameExtension("mypath/myfile.txt"));
+		assertEquals("/home/user/.m2/settings/myfile", StringUtils.stripFilenameExtension("/home/user/.m2/settings/myfile"));
+		assertEquals("/home/user/.m2/settings/myfile", StringUtils.stripFilenameExtension("/home/user/.m2/settings/myfile."));
+		assertEquals("/home/user/.m2/settings/myfile", StringUtils.stripFilenameExtension("/home/user/.m2/settings/myfile.txt"));
 	}
 
 	public void testCleanPath() {
@@ -562,6 +567,16 @@ public class StringUtilsTests extends TestCase {
 	}
 
 	/**
+	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-8637">See SPR-8637</a>.
+	 */
+	public void testParseLocaleWithMultiSpecialCharactersInVariant() throws Exception {
+		final String variant = "proper-northern";
+		final String localeString = "en_GB_" + variant;
+		Locale locale = StringUtils.parseLocaleString(localeString);
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+	}
+
+	/**
 	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
 	 */
 	public void testParseLocaleWithMultiValuedVariant() throws Exception {
@@ -609,6 +624,19 @@ public class StringUtilsTests extends TestCase {
 		final String localeString = "en_GB_____" + variant; // lots of underscores
 		Locale locale = StringUtils.parseLocaleString(localeString);
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+	}
+
+	/**
+	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-7779">See SPR-7779</a>.
+	 */
+	public void testParseLocaleWithInvalidCharacters() {
+		try {
+			StringUtils.parseLocaleString("%0D%0AContent-length:30%0D%0A%0D%0A%3Cscript%3Ealert%28123%29%3C/script%3E");
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 }
