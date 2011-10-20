@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.remoting.rmi;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.SocketException;
 import java.rmi.ConnectException;
 import java.rmi.ConnectIOException;
 import java.rmi.NoSuchObjectException;
@@ -211,8 +212,8 @@ public abstract class RmiClientInterceptorUtils {
 	public static boolean isConnectFailure(RemoteException ex) {
 		return (ex instanceof ConnectException || ex instanceof ConnectIOException ||
 				ex instanceof UnknownHostException || ex instanceof NoSuchObjectException ||
-				ex instanceof StubNotFoundException || isCorbaConnectFailure(ex.getCause()) ||
-				ORACLE_CONNECTION_EXCEPTION.equals(ex.getClass().getName()));
+				ex instanceof StubNotFoundException || ex.getCause() instanceof SocketException ||
+				isCorbaConnectFailure(ex.getCause()) || ORACLE_CONNECTION_EXCEPTION.equals(ex.getClass().getName()));
 	}
 
 	/**
