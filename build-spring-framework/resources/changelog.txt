@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.0.7 (2011-11-xx)
+-------------------------------------
+
+* fixed GenericTypeResolver to consistently return null if not resolvable
+* added proper "contentLength()" implementation to ByteArrayResource
+* LocaleEditor and StringToLocaleConverter do not restrict variant part through validation
+* optimized DefaultListableBeanFactory's PropertyDescriptor caching for concurrent access
+* RmiClientInterceptor detects nested SocketException as connect failure as well
+
+
 Changes in version 3.0.6 (2011-08-18)
 -------------------------------------
 
