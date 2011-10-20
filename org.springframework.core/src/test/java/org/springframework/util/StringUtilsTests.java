@@ -567,6 +567,16 @@ public class StringUtilsTests extends TestCase {
 	}
 
 	/**
+	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-8637">See SPR-8637</a>.
+	 */
+	public void testParseLocaleWithMultiSpecialCharactersInVariant() throws Exception {
+		final String variant = "proper-northern";
+		final String localeString = "en_GB_" + variant;
+		Locale locale = StringUtils.parseLocaleString(localeString);
+		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
+	}
+
+	/**
 	 * <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3671">See SPR-3671</a>.
 	 */
 	public void testParseLocaleWithMultiValuedVariant() throws Exception {
