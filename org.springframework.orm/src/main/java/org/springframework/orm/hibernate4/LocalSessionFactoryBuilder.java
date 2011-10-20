@@ -65,10 +65,10 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			new AnnotationTypeFilter(MappedSuperclass.class, false)};
 
 	private static final Method addAnnotatedClassMethod =
-			ClassUtils.getMethodIfAvailable(Configuration.class, "addAnnotatedClass", Class.class);
+			ClassUtils.getMethod(Configuration.class, "addAnnotatedClass", Class.class);
 
 	private static final Method addPackageMethod =
-			ClassUtils.getMethodIfAvailable(Configuration.class, "addPackage", String.class);
+			ClassUtils.getMethod(Configuration.class, "addPackage", String.class);
 
 
 	private final ResourcePatternResolver resourcePatternResolver;
