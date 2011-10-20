@@ -20,11 +20,12 @@ import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 import javax.servlet.ServletContext;
 
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySource.StubPropertySource;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiPropertySource;
 import org.springframework.web.context.support.StandardServletEnvironment;
 
@@ -82,7 +83,10 @@ public class StandardPortletEnvironment extends StandardEnvironment {
 		propertySources.addLast(new StubPropertySource(PORTLET_CONFIG_PROPERTY_SOURCE_NAME));
 		propertySources.addLast(new StubPropertySource(PORTLET_CONTEXT_PROPERTY_SOURCE_NAME));
 		propertySources.addLast(new StubPropertySource(StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
-		propertySources.addLast(new JndiPropertySource(StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME));
+		if (JndiLocatorDelegate.isDefaultJndiEnvironmentAvailable()) {
+			propertySources.addLast(new JndiPropertySource(StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME));
+		}
 		super.customizePropertySources(propertySources);
 	}
+
 }

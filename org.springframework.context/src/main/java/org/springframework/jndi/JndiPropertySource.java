@@ -58,7 +58,7 @@ public class JndiPropertySource extends PropertySource<JndiLocatorDelegate> {
 	 * "java:comp/env/".
 	 */
 	public JndiPropertySource(String name) {
-		this(name, createDefaultJndiLocator());
+		this(name, JndiLocatorDelegate.createDefaultResourceRefLocator());
 	}
 
 	/**
@@ -82,22 +82,12 @@ public class JndiPropertySource extends PropertySource<JndiLocatorDelegate> {
 			Object value = this.source.lookup(name);
 			logger.debug("JNDI lookup for name [" + name + "] returned: [" + value + "]");
 			return value;
-		} catch (NamingException ex) {
+		}
+		catch (NamingException ex) {
 			logger.debug("JNDI lookup for name [" + name + "] threw NamingException " +
 					"with message: " + ex.getMessage() + ". Returning null.");
 			return null;
 		}
-	}
-
-	/**
-	 * Configure a {@code JndiLocatorDelegate} with its "resourceRef" property set to true
-	 * meaning that all names will be prefixed with "java:comp/env/".
-	 * @return
-	 */
-	private static JndiLocatorDelegate createDefaultJndiLocator() {
-		JndiLocatorDelegate jndiLocator = new JndiLocatorDelegate();
-		jndiLocator.setResourceRef(true);
-		return jndiLocator;
 	}
 
 }
