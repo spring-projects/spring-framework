@@ -16,6 +16,16 @@
 
 package org.springframework.web.servlet.view;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +38,6 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -39,9 +48,6 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
-
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -418,8 +424,14 @@ public class ContentNegotiatingViewResolverTests {
 		request.addHeader("Accept", "application/json");
 		request.setRequestURI("/test");
 
+		StaticWebApplicationContext webAppContext = new StaticWebApplicationContext();
+		webAppContext.setServletContext(new MockServletContext());
+		webAppContext.refresh();
+		
+		UrlBasedViewResolver urlViewResolver = new InternalResourceViewResolver();
+		urlViewResolver.setApplicationContext(webAppContext);
 		ViewResolver xmlViewResolver = createMock(ViewResolver.class);
-		viewResolver.setViewResolvers(Arrays.<ViewResolver>asList(xmlViewResolver, new UrlBasedViewResolver()));
+		viewResolver.setViewResolvers(Arrays.<ViewResolver>asList(xmlViewResolver, urlViewResolver));
 
 		View xmlView = createMock("application_xml", View.class);
 		View jsonView = createMock("application_json", View.class);
@@ -491,15 +503,14 @@ public class ContentNegotiatingViewResolverTests {
 
 	@Test
 	public void nestedViewResolverIsNotSpringBean() throws Exception {
+		StaticWebApplicationContext webAppContext = new StaticWebApplicationContext();
+		webAppContext.setServletContext(new MockServletContext());
+		webAppContext.refresh();
+		
 		InternalResourceViewResolver nestedResolver = new InternalResourceViewResolver();
+		nestedResolver.setApplicationContext(webAppContext);
 		nestedResolver.setViewClass(InternalResourceView.class);
 		viewResolver.setViewResolvers(new ArrayList<ViewResolver>(Arrays.asList(nestedResolver)));
-		
-		StaticWebApplicationContext appContext = new StaticWebApplicationContext();
-		appContext.setServletContext(new MockServletContext());
-		appContext.refresh();
-		viewResolver.setApplicationContext(appContext);
-
 		viewResolver.setDefaultContentType(MediaType.TEXT_HTML);
 
 		String viewName = "view";

@@ -158,6 +158,7 @@ public class ViewResolverTests {
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
 		assertEquals("Correct view class", RedirectView.class, view.getClass());
 		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
+		assertSame("View not initialized as bean", wac, ((RedirectView) view).getApplicationContext());
 
 		view = vr.resolveViewName("forward:myUrl", Locale.getDefault());
 		assertEquals("Correct view class", InternalResourceView.class, view.getClass());

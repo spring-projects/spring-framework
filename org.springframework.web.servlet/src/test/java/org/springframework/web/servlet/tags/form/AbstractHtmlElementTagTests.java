@@ -32,6 +32,7 @@ import org.springframework.mock.web.MockPageContext;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
 import org.springframework.web.servlet.support.JspAwareRequestContext;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -66,7 +67,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		MockPageContext pageContext = createPageContext();
 		MockHttpServletRequest request = (MockHttpServletRequest) pageContext.getRequest();
 		StaticWebApplicationContext wac = (StaticWebApplicationContext) RequestContextUtils.getWebApplicationContext(request);
-		wac.registerSingleton("requestDataValueProcessor", DelegatingRequestDataValueProcessor.class);
+		wac.registerSingleton("requestDataValueProcessor", RequestDataValueProcessorWrapper.class);
 		extendRequest(request);
 		extendPageContext(pageContext);
 		RequestContext requestContext = new JspAwareRequestContext(pageContext);
@@ -103,7 +104,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		RequestDataValueProcessor mockProcessor = createMock(RequestDataValueProcessor.class);
 		ServletRequest request = getPageContext().getRequest();
 		StaticWebApplicationContext wac = (StaticWebApplicationContext) RequestContextUtils.getWebApplicationContext(request);
-		wac.getBean(DelegatingRequestDataValueProcessor.class).setRequestDataValueProcessor(mockProcessor);		
+		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);		
 		return mockProcessor;
 	}
 
