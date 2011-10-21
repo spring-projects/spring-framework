@@ -38,6 +38,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.SmartView;
@@ -250,13 +252,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 		String targetUrl = createTargetUrl(model, request);
 
-		if (getWebApplicationContext() != null) {
-			RequestContext requestContext = createRequestContext(request, response, model);
-			RequestDataValueProcessor processor = requestContext.getRequestDataValueProcessor();
-			if (processor != null) {
-				targetUrl = processor.processUrl(request, targetUrl);
-			}
-		}
+		targetUrl = updateTargetUrl(targetUrl, model, request, response);
 		
 		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
 		if (!CollectionUtils.isEmpty(flashMap)) {
@@ -489,6 +485,35 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		return (input != null ? URLEncoder.encode(input, encodingScheme) : null);
 	}
 
+	/**
+	 * Find the registered {@link RequestDataValueProcessor}, if any, and allow
+	 * it to update the redirect target URL.
+	 * @return the updated URL or the same as URL as the one passed in
+	 */
+	protected String updateTargetUrl(String targetUrl, Map<String, Object> model, 
+								  HttpServletRequest request, HttpServletResponse response) {
+		
+		RequestContext requestContext = null;
+		if (getWebApplicationContext() != null) {
+			requestContext = createRequestContext(request, response, model);
+		}
+		else {
+			WebApplicationContext wac = ContextLoader.getCurrentWebApplicationContext();
+			if (wac != null && wac.getServletContext() != null) {
+				requestContext = new RequestContext(request, response, wac.getServletContext(), model);
+			}
+		}
+
+		if (requestContext != null) {
+			RequestDataValueProcessor processor = requestContext.getRequestDataValueProcessor();
+			if (processor != null) {
+				targetUrl = processor.processUrl(request, targetUrl);
+			}
+		}
+		
+		return targetUrl;
+	}
+	
 	/**
 	 * Send a redirect back to the HTTP client
 	 * @param request current HTTP request (allows for reacting to request method)

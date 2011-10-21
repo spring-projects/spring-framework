@@ -389,7 +389,8 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		// Check for special "redirect:" prefix.
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
-			return new RedirectView(redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+			RedirectView view = new RedirectView(redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+			return applyLifecycleMethods(viewName, view);
 		}
 		// Check for special "forward:" prefix.
 		if (viewName.startsWith(FORWARD_URL_PREFIX)) {
@@ -433,8 +434,12 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	@Override
 	protected View loadView(String viewName, Locale locale) throws Exception {
 		AbstractUrlBasedView view = buildView(viewName);
-		View result = (View) getApplicationContext().getAutowireCapableBeanFactory().initializeBean(view, viewName);
+		View result = applyLifecycleMethods(viewName, view);
 		return (view.checkResource(locale) ? result : null);
+	}
+
+	private View applyLifecycleMethods(String viewName, AbstractView view) {
+		return (View) getApplicationContext().getAutowireCapableBeanFactory().initializeBean(view, viewName);
 	}
 
 	/**

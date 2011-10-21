@@ -34,15 +34,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.AssertionFailedError;
 
+import org.easymock.EasyMock;
 import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
+import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -118,8 +125,8 @@ public class RedirectViewTests {
 		RedirectView rv = new RedirectView();
 		rv.setUrl("http://url.somewhere.com/path");
 		rv.setHttp10Compatible(false);
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		MockHttpServletResponse response = new MockHttpServletResponse();
+		HttpServletRequest request = new MockHttpServletRequest();
+		HttpServletResponse response = new MockHttpServletResponse();
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("successMessage", "yay!");
 		request.setAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
@@ -130,6 +137,64 @@ public class RedirectViewTests {
 		
 		assertEquals("/path", flashMap.getTargetRequestPath());
 		assertEquals(model, flashMap.getTargetRequestParams().toSingleValueMap());
+	}
+	
+	@Test
+	public void updateTargetUrl() throws Exception {
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.registerSingleton("requestDataValueProcessor", RequestDataValueProcessorWrapper.class);
+		wac.setServletContext(new MockServletContext());
+		wac.refresh();
+		
+		RequestDataValueProcessor mockProcessor = createMock(RequestDataValueProcessor.class);
+		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
+		
+		RedirectView rv = new RedirectView();
+		rv.setApplicationContext(wac);	// Init RedirectView with WebAppCxt
+		rv.setUrl("/path");
+
+		HttpServletRequest request = new MockHttpServletRequest();
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		HttpServletResponse response = new MockHttpServletResponse();
+
+		EasyMock.expect(mockProcessor.processUrl(request, "/path")).andReturn("/path?key=123");
+		EasyMock.replay(mockProcessor);
+
+		rv.render(new ModelMap(), request, response);
+
+		EasyMock.verify(mockProcessor);
+	}
+
+	
+	@Test
+	public void updateTargetUrlWithContextLoader() throws Exception {
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.registerSingleton("requestDataValueProcessor", RequestDataValueProcessorWrapper.class);
+
+		MockServletContext servletContext = new MockServletContext();
+		ContextLoader contextLoader = new ContextLoader(wac);
+		contextLoader.initWebApplicationContext(servletContext); 
+
+		try {
+			RequestDataValueProcessor mockProcessor = createMock(RequestDataValueProcessor.class);
+			wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
+
+			RedirectView rv = new RedirectView();
+			rv.setUrl("/path");
+
+			HttpServletRequest request = new MockHttpServletRequest();
+			HttpServletResponse response = new MockHttpServletResponse();
+
+			EasyMock.expect(mockProcessor.processUrl(request, "/path")).andReturn("/path?key=123");
+			EasyMock.replay(mockProcessor);
+
+			rv.render(new ModelMap(), request, response);
+
+			EasyMock.verify(mockProcessor);
+		}
+		finally {
+			contextLoader.closeWebApplicationContext(servletContext);
+		}
 	}
 
 	@Test
@@ -296,7 +361,7 @@ public class RedirectViewTests {
 			expectedUrlForEncoding = "/context" + expectedUrlForEncoding;
 			expect(request.getContextPath()).andReturn("/context");
 		}
-
+		
 		HttpServletResponse response = createMock("response", HttpServletResponse.class);
 		expect(response.encodeRedirectURL(expectedUrlForEncoding)).andReturn(expectedUrlForEncoding);
 		response.sendRedirect(expectedUrlForEncoding);

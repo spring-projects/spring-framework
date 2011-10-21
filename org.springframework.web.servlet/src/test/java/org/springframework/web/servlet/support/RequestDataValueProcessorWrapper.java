@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.tags.form;
+package org.springframework.web.servlet.support;
 
 import java.util.Map;
 
@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
-class DelegatingRequestDataValueProcessor implements RequestDataValueProcessor {
+public class RequestDataValueProcessorWrapper implements RequestDataValueProcessor {
 
 	private RequestDataValueProcessor processor;
 	
