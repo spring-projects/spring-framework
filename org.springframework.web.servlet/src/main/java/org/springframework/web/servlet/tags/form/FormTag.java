@@ -350,7 +350,7 @@ public class FormTag extends AbstractHtmlElementTag {
 			tagWriter.startTag(INPUT_TAG);
 			writeOptionalAttribute(tagWriter, TYPE_ATTRIBUTE, inputType);
 			writeOptionalAttribute(tagWriter, NAME_ATTRIBUTE, inputName);
-			writeOptionalAttribute(tagWriter, VALUE_ATTRIBUTE, processFieldValue(getName(), getMethod(), inputType));
+			writeOptionalAttribute(tagWriter, VALUE_ATTRIBUTE, processFieldValue(inputName, getMethod(), inputType));
 			tagWriter.endTag();
 		}
 
