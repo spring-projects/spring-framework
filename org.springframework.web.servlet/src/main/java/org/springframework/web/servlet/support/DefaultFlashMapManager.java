@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
@@ -123,10 +124,10 @@ public class DefaultFlashMapManager implements FlashMapManager {
 				return false;
 			}
 		}
-		MultiValueMap<String, String> params = flashMap.getTargetRequestParams();
-		for (String key : params.keySet()) {
-			for (String value : params.get(key)) {
-				if (!value.equals(request.getParameter(key))) {
+		MultiValueMap<String, String> targetParams = flashMap.getTargetRequestParams();
+		for (String paramName : targetParams.keySet()) {
+			for (String targetValue : targetParams.get(paramName)) {
+				if (!ObjectUtils.containsElement(request.getParameterValues(paramName), targetValue)) {
 					return false;
 				}
 			}

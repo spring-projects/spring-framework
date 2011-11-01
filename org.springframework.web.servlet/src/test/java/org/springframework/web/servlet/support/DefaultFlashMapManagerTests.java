@@ -133,17 +133,43 @@ public class DefaultFlashMapManagerTests {
 		this.flashMapManager.requestStarted(this.request);
 
 		assertNull(RequestContextUtils.getInputFlashMap(this.request));
-		assertEquals("FlashMap should have been removed", 1, getFlashMaps().size());		
+		assertEquals("FlashMap should not have been removed", 1, getFlashMaps().size());		
 
-		clearRequestAttributes();
+		clearFlashMapRequestAttributes();
 		this.request.setParameter("number", "two");
 		this.flashMapManager.requestStarted(this.request);
 
 		assertNull(RequestContextUtils.getInputFlashMap(this.request));
-		assertEquals("FlashMap should have been removed", 1, getFlashMaps().size());		
+		assertEquals("FlashMap should not have been removed", 1, getFlashMaps().size());		
 
-		clearRequestAttributes();
+		clearFlashMapRequestAttributes();
 		this.request.setParameter("number", "one");
+		this.flashMapManager.requestStarted(this.request);
+
+		assertEquals(flashMap, RequestContextUtils.getInputFlashMap(this.request));
+		assertEquals("Input FlashMap should have been removed", 0, getFlashMaps().size());		
+	}
+
+	// SPR-8798
+	
+	@Test
+	public void lookupFlashMapWithMultiValueParam() {
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("name", "value");
+		flashMap.addTargetRequestParam("id", "1");
+		flashMap.addTargetRequestParam("id", "2");
+		
+		List<FlashMap> allMaps = createFlashMaps();
+		allMaps.add(flashMap);
+	
+		this.request.setParameter("id", "1");
+		this.flashMapManager.requestStarted(this.request);
+
+		assertNull(RequestContextUtils.getInputFlashMap(this.request));
+		assertEquals("FlashMap should not have been removed", 1, getFlashMaps().size());		
+
+		clearFlashMapRequestAttributes();
+		this.request.addParameter("id", "2");
 		this.flashMapManager.requestStarted(this.request);
 
 		assertEquals(flashMap, RequestContextUtils.getInputFlashMap(this.request));
@@ -284,7 +310,7 @@ public class DefaultFlashMapManagerTests {
 		return allMaps;
 	}
 	
-	private void clearRequestAttributes() {
+	private void clearFlashMapRequestAttributes() {
 		request.removeAttribute(INPUT_FLASH_MAP_ATTRIBUTE);
 		request.removeAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE);
 	}
