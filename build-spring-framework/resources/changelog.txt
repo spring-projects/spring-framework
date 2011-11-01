@@ -15,7 +15,8 @@ Changes in version 3.1 RC2 (2011-11-15)
 * fixed MethodInvokingJobDetailFactoryBean's Quartz 2.0 support
 * RmiClientInterceptor detects nested SocketException as connect failure as well
 * fixed StandardServlet/PortletEnvironment to check for JNDI (for Google App Engine compatibility)
-
+* Use original request URI in FlashMap matching logic to account for URL rewriting
+* Support target request with multiple parameter values in FlahMap matching logic
 
 Changes in version 3.1 RC1 (2011-10-11)
 ---------------------------------------
