@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.servlet.FlashMap;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Test fixture for {@link DefaultFlashMapManager} tests.
@@ -78,6 +79,25 @@ public class DefaultFlashMapManagerTests {
 		allMaps.add(flashMap);
 	
 		this.request.setRequestURI("/path");
+		this.flashMapManager.requestStarted(this.request);
+		
+		assertEquals(flashMap, RequestContextUtils.getInputFlashMap(this.request));
+		assertEquals("Input FlashMap should have been removed", 0, getFlashMaps().size());		
+	}
+
+	// SPR-8779
+	
+	@Test
+	public void lookupFlashMapByOriginatingPath() {
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("key", "value");
+		flashMap.setTargetRequestPath("/accounts");
+		
+		List<FlashMap> allMaps = createFlashMaps();
+		allMaps.add(flashMap);
+	
+		this.request.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/accounts");
+		this.request.setRequestURI("/mvc/accounts");
 		this.flashMapManager.requestStarted(this.request);
 		
 		assertEquals(flashMap, RequestContextUtils.getInputFlashMap(this.request));
