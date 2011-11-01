@@ -138,6 +138,7 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.AbstractController;
 import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
 import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.NestedServletException;
 
@@ -1910,6 +1911,17 @@ public class ServletAnnotationControllerTests {
 		assertEquals("homeJson", response.getContentAsString());
 	}	
 
+	@Test
+	public void redirectAttribute() throws Exception {
+		initServlet(RedirectAttributesController.class);
+		try {
+			servlet.service(new MockHttpServletRequest("GET", "/"), new MockHttpServletResponse());
+		}
+		catch (NestedServletException ex) {
+			assertTrue(ex.getMessage().contains("not assignable from the actual model"));
+		}
+	}
+	
 
 	/*
 	 * Controllers
@@ -3207,4 +3219,12 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@Controller
+	static class RedirectAttributesController {
+
+		@RequestMapping(value = "/")
+		public void handle(RedirectAttributes redirectAttrs) {
+		}
+	}
+	
 }
