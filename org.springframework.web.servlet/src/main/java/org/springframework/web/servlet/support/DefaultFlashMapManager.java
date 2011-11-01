@@ -117,7 +117,7 @@ public class DefaultFlashMapManager implements FlashMapManager {
 	 */
 	protected boolean isFlashMapForRequest(FlashMap flashMap, HttpServletRequest request) {
 		if (flashMap.getTargetRequestPath() != null) {
-			String requestUri = this.urlPathHelper.getRequestUri(request);
+			String requestUri = this.urlPathHelper.getOriginatingRequestUri(request);
 			if (!requestUri.equals(flashMap.getTargetRequestPath())
 					&& !requestUri.equals(flashMap.getTargetRequestPath() + "/")) {
 				return false;
