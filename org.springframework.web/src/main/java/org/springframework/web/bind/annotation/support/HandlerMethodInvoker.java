@@ -34,7 +34,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.BridgeMethodResolver;
@@ -313,8 +312,13 @@ public class HandlerMethodInvoker {
 					args[i] = resolveDefaultValue(defaultValue);
 				}
 				else {
-					Class paramType = methodParam.getParameterType();
+					Class<?> paramType = methodParam.getParameterType();
 					if (Model.class.isAssignableFrom(paramType) || Map.class.isAssignableFrom(paramType)) {
+						if (!paramType.isAssignableFrom(implicitModel.getClass())) {
+							throw new IllegalStateException("Argument [" + paramType.getSimpleName() + "] is of type " +
+									"Model or Map but is not assignable from the actual model. You may need to switch " +
+									"newer MVC infrastructure classes to use this argument.");
+						}
 						args[i] = implicitModel;
 					}
 					else if (SessionStatus.class.isAssignableFrom(paramType)) {
