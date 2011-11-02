@@ -25,6 +25,7 @@ import javax.servlet.jsp.JspException;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 2.5
  */
 public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElementTag {
@@ -88,6 +89,14 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	@Override
 	protected abstract int writeTagContent(TagWriter tagWriter) throws JspException;
 
+	/**
+	 * Flags "type" as an illegal dynamic attribute.
+	 */
+	@Override
+	protected boolean isValidDynamicAttribute(String localName, Object value) {
+		return !"type".equals(localName);
+	}
+	
 	/**
 	 * Return the type of the HTML input element to generate:
 	 * "checkbox" or "radio".

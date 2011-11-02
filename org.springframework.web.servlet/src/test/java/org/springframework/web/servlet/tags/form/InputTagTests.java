@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags.form;
 
 import java.io.Writer;
 
+import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.beans.TestBean;
@@ -342,7 +343,40 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertValueAttribute(output, "Rob");
 	}
 
+	public void testDynamicTypeAttribute() throws JspException {
+		this.tag.setPath("myFloat");
+		this.tag.setDynamicAttribute(null, "type", "number");
 
+		assertEquals(Tag.SKIP_BODY, this.tag.doStartTag());
+
+		String output = getOutput();
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "type", "number");
+		assertValueAttribute(output, "12.34");
+	}
+	
+	public void testDynamicTypeRadioAttribute() throws JspException {
+		try {
+			this.tag.setDynamicAttribute(null, "type", "radio");
+			fail("Expected exception");
+		}
+		catch (IllegalArgumentException e) {
+			assertEquals("Attribute type=\"radio\" is not allowed", e.getMessage());
+		}
+	}
+	
+	public void testDynamicTypeCheckboxAttribute() throws JspException {
+		try {
+			this.tag.setDynamicAttribute(null, "type", "checkbox");
+			fail("Expected exception");
+		}
+		catch (IllegalArgumentException e) {
+			assertEquals("Attribute type=\"checkbox\" is not allowed", e.getMessage());
+		}
+	}
+	
 	protected final void assertTagClosed(String output) {
 		assertTrue("Tag not closed properly", output.endsWith("/>"));
 	}

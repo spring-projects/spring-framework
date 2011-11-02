@@ -29,9 +29,19 @@ import javax.servlet.jsp.JspException;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class HiddenInputTag extends AbstractHtmlElementTag {
+
+	/**
+	 * Flags "type" as an illegal dynamic attribute.
+	 */
+	@Override
+	protected boolean isValidDynamicAttribute(String localName, Object value) {
+		return !"type".equals(localName);
+	}
 
 	/**
 	 * Writes the HTML '<code>input</code>' tag to the supplied {@link TagWriter} including the
