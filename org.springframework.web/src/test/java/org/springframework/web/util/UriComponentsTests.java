@@ -54,4 +54,9 @@ public class UriComponentsTests {
 		assertEquals("http://example.com/1 2 3 4", uriComponents.toUriString());
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void expandEncoded() {
+		UriComponentsBuilder.fromPath("/{foo}").build().encode().expand("bar");
+	}
+
 }

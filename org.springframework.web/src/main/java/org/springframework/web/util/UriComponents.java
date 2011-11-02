@@ -336,6 +336,8 @@ public final class UriComponents {
 	}
 
 	private UriComponents expandInternal(UriTemplateVariables uriVariables) {
+		Assert.state(!encoded, "Cannot expand an already encoded UriComponents object");
+		
 		String expandedScheme = expandUriComponent(this.scheme, uriVariables);
 		String expandedUserInfo = expandUriComponent(this.userInfo, uriVariables);
 		String expandedHost = expandUriComponent(this.host, uriVariables);
