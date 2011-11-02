@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.dom4j.Document;
@@ -610,6 +612,18 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals("true", checkboxElement.attribute("value").getValue());
 	}
+	
+	public void testDynamicTypeAttribute() throws JspException {
+		try {
+			this.tag.setDynamicAttribute(null, "type", "email");
+			fail("Expected exception");
+		}
+		catch (IllegalArgumentException e) {
+			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
+		}
+	}
+	
+	
 	private Date getDate() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, 10);

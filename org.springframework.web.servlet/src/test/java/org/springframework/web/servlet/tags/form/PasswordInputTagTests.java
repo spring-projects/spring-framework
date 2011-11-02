@@ -18,6 +18,7 @@ package org.springframework.web.servlet.tags.form;
 
 import java.io.Writer;
 
+import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
 /**
@@ -77,6 +78,15 @@ public class PasswordInputTagTests extends InputTagTests {
 		assertValueAttribute(output, "");
 	}
 
+	public void testDynamicTypeAttribute() throws JspException {
+		try {
+			this.getTag().setDynamicAttribute(null, "type", "email");
+			fail("Expected exception");
+		}
+		catch (IllegalArgumentException e) {
+			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
+		}
+	}
 
 	protected void assertValueAttribute(String output, String expectedValue) {
 		if (this.getPasswordTag().isShowPassword()) {

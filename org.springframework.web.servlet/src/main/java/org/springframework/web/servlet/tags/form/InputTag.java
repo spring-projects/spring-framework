@@ -16,11 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
-
-import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
 /**
  * Data-binding-aware JSP tag for rendering an HTML '<code>input</code>'
@@ -28,8 +24,10 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
  * 
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class InputTag extends AbstractHtmlInputElementTag {
 
 	public static final String SIZE_ATTRIBUTE = "size";
@@ -142,7 +140,9 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		tagWriter.startTag("input");
 
 		writeDefaultAttributes(tagWriter);
-		tagWriter.writeAttribute("type", getType());
+		if (!hasDynamicTypeAttribute()) {
+			tagWriter.writeAttribute("type", getType());
+		}
 		writeValue(tagWriter);
 
 		// custom optional attributes
@@ -156,6 +156,10 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		return SKIP_BODY;
 	}
 
+	private boolean hasDynamicTypeAttribute() {
+		return getDynamicAttributes() != null && getDynamicAttributes().containsKey("type");
+	}
+
 	/**
 	 * Writes the '<code>value</code>' attribute to the supplied {@link TagWriter}.
 	 * Subclasses may choose to override this implementation to control exactly
@@ -163,9 +167,24 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	 */
 	protected void writeValue(TagWriter tagWriter) throws JspException {
 		String value = getDisplayString(getBoundValue(), getPropertyEditor());
-		tagWriter.writeAttribute("value", processFieldValue(getName(), value, getType()));
+		String type = hasDynamicTypeAttribute() ? (String) getDynamicAttributes().get("type") : getType();
+		tagWriter.writeAttribute("value", processFieldValue(getName(), value, type));
 	}
 
+	/**
+	 * Flags {@code type="checkbox"} and {@code type="radio"} as illegal 
+	 * dynamic attributes.
+	 */
+	@Override
+	protected boolean isValidDynamicAttribute(String localName, Object value) {
+		if ("type".equals(localName)) {
+			if ("checkbox".equals(value) || "radio".equals(value)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * Get the value of the '<code>type</code>' attribute. Subclasses
 	 * can override this to change the type of '<code>input</code>' element

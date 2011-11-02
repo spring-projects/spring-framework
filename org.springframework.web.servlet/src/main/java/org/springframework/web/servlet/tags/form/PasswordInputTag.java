@@ -24,6 +24,7 @@ import javax.servlet.jsp.JspException;
  *
  * @author Rob Harrop
  * @author Rick Evans
+ * @author Rossen Stoyanchev
  * @since 2.0
  */
 public class PasswordInputTag extends InputTag {
@@ -45,6 +46,14 @@ public class PasswordInputTag extends InputTag {
 	 */
 	public void setShowPassword(boolean showPassword) {
 		this.showPassword = showPassword;
+	}
+
+	/**
+	 * Flags "type" as an illegal dynamic attribute.
+	 */
+	@Override
+	protected boolean isValidDynamicAttribute(String localName, Object value) {
+		return !"type".equals(localName);
 	}
 
 	/**

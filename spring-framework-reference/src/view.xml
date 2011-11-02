@@ -231,9 +231,11 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
       <section id="view-jsp-formtaglib-inputtag">
         <title>The <literal>input</literal> tag</title>
 
-        <para>This tag renders an HTML 'input' tag with type 'text' using the
-        bound value. For an example of this tag, see <xref
-        linkend="view-jsp-formtaglib-formtag" />.</para>
+        <para>This tag renders an HTML 'input' tag using the bound value
+        and type='text' by default. For an example of this tag, see <xref
+        linkend="view-jsp-formtaglib-formtag" />. Starting with Spring 3.1
+        you can use other types such HTML5-specific types like 'email', 
+        'tel', 'date', and others.</para>
       </section>
 
       <section id="view-jsp-formtaglib-checkboxtag">
@@ -805,6 +807,22 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
   return "redirect:/owners/" + ownerId;
 }</programlisting>
       </section>
+
+      <section id="view-jsp-formtaglib-html5">
+        <title>HTML5 Tags</title>
+			
+        <para>Starting with Spring 3, the Spring form tag library allows entering
+		dynamic attributes, which means you can enter any HTML5 specific attributes.
+		</para>
+
+        <para>In Spring 3.1, the form input tag supports entering a type attribute
+		other than 'text'. This is intended to allow rendering new HTML5 specific
+        input types such as 'email', 'date', 'range', and others. Note that 
+        entering type='text' is not required since 'text' is the default type.    
+		</para>
+
+      </section>
+
     </section>
   </section>
 

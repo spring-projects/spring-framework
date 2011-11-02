@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.DynamicAttributes;
 
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -37,6 +38,7 @@ import org.springframework.util.StringUtils;
  * 
  * @author Rob Harrop
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  * @since 2.0
  */
 public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElementTag implements DynamicAttributes {
@@ -396,7 +398,18 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 		if (this.dynamicAttributes == null) {
 			this.dynamicAttributes = new HashMap<String, Object>();
 		}
+		if (!isValidDynamicAttribute(localName, value)) {
+			throw new IllegalArgumentException(
+					"Attribute " + localName + "=\"" + value + "\" is not allowed");
+		}
 		dynamicAttributes.put(localName, value);
+	}
+	
+	/**
+	 * Whether the given name-value pair is a valid dynamic attribute.
+	 */
+	protected boolean isValidDynamicAttribute(String localName, Object value) {
+		return true;
 	}
 
 	/**

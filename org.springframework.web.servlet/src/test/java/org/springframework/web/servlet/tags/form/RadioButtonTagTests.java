@@ -20,6 +20,7 @@ import java.beans.PropertyEditorSupport;
 import java.io.StringReader;
 import java.util.Collections;
 
+import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.dom4j.Document;
@@ -227,6 +228,16 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 	}
 
+	public void testDynamicTypeAttribute() throws JspException {
+		try {
+			this.tag.setDynamicAttribute(null, "type", "email");
+			fail("Expected exception");
+		}
+		catch (IllegalArgumentException e) {
+			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
+		}
+	}
+	
 	private void assertTagOpened(String output) {
 		assertTrue(output.indexOf("<input ") > -1);
 	}

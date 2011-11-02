@@ -19,6 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import org.springframework.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 
+import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
 /**
@@ -69,6 +70,16 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 		assertContainsAttribute(output, "type", "hidden");
 		assertContainsAttribute(output, "value", "12.34f");
+	}
+	
+	public void testDynamicTypeAttribute() throws JspException {
+		try {
+			this.tag.setDynamicAttribute(null, "type", "email");
+			fail("Expected exception");
+		}
+		catch (IllegalArgumentException e) {
+			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
+		}
 	}
 
 	private void assertTagClosed(String output) {

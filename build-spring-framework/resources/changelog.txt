@@ -17,6 +17,8 @@ Changes in version 3.1 RC2 (2011-11-15)
 * fixed StandardServlet/PortletEnvironment to check for JNDI (for Google App Engine compatibility)
 * Use original request URI in FlashMap matching logic to account for URL rewriting
 * Support target request with multiple parameter values in FlahMap matching logic
+* Fix issue in SimpleMappingExceptionResolver causing exception when setting "statusCodes" property
+* The Form input tag allows type values other than "text" such as HTML5-specific types.
 
 Changes in version 3.1 RC1 (2011-10-11)
 ---------------------------------------

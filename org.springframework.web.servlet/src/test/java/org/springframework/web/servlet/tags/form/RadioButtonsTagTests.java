@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.dom4j.Document;
@@ -559,6 +560,16 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("element", spanElement.getName());
 	}
 
+	public void testDynamicTypeAttribute() throws JspException {
+		try {
+			this.tag.setDynamicAttribute(null, "type", "email");
+			fail("Expected exception");
+		}
+		catch (IllegalArgumentException e) {
+			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
+		}
+	}
+	
 	private Date getDate() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, 10);
