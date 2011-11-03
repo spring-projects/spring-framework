@@ -37,12 +37,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Represents an immutable collection of URI components, mapping component type to string values. Contains convenience
- * getters for all components, as well as the regular {@link Map} implementation. Effectively similar to {@link URI},
- * but with more powerful encoding options.
- * <p/>
- * <strong>Note</strong> that this {@code Map} does not contain entries for {@link Type#PATH_SEGMENT}
- * nor {@link Type#QUERY_PARAM}, since those components can occur multiple
- * times in the URI. Instead, one can use {@link #getPathSegments()} or {@link #getQueryParams()} respectively.
+ * getters for all components. Effectively similar to {@link URI}, but with more powerful encoding options and support
+ * for URI template variables.
  *
  * @author Arjen Poutsma
  * @since 3.1
@@ -73,28 +69,44 @@ public final class UriComponents {
 
     private final boolean encoded;
 
+	/**
+	 * Package-friendly constructor that creates a new {@code UriComponents} instance from the given parameters. All
+	 * parameters are optional, and can be {@code null}.
+	 *
+	 * @param scheme the scheme
+	 * @param userInfo the user info
+	 * @param host the host
+	 * @param port the port
+	 * @param path the path component
+	 * @param queryParams the query parameters
+	 * @param fragment the fragment
+	 * @param encoded whether the components are encoded
+	 * @param verify whether the components need to be verified to determine whether they contain illegal characters
+	 */
 	UriComponents(String scheme,
-						 String userInfo,
-						 String host,
-						 int port,
-						 PathComponent path,
-						 MultiValueMap<String, String> queryParams,
-						 String fragment,
-						 boolean encoded) {
+				  String userInfo,
+				  String host,
+				  int port,
+				  PathComponent path,
+				  MultiValueMap<String, String> queryParams,
+				  String fragment,
+				  boolean encoded,
+				  boolean verify) {
 		this.scheme = scheme;
 		this.userInfo = userInfo;
 		this.host = host;
 		this.port = port;
 		this.path = path != null ? path : NULL_PATH_COMPONENT;
-		if (queryParams == null) {
-			queryParams = new LinkedMultiValueMap<String, String>(0);
-		}
-		this.queryParams = CollectionUtils.unmodifiableMultiValueMap(queryParams);
+		this.queryParams = CollectionUtils.unmodifiableMultiValueMap(
+				queryParams != null ? queryParams : new LinkedMultiValueMap<String, String>(0));
 		this.fragment = fragment;
 		this.encoded = encoded;
+		if (verify) {
+			verify();
+		}
 	}
 
-    // component getters
+	// component getters
 
     /**
      * Returns the scheme.
@@ -256,7 +268,7 @@ public final class UriComponents {
 		String encodedFragment = encodeUriComponent(this.fragment, encoding, Type.FRAGMENT);
 
 		return new UriComponents(encodedScheme, encodedUserInfo, encodedHost, this.port, encodedPath,
-				encodedQueryParams, encodedFragment, true);
+				encodedQueryParams, encodedFragment, true, false);
     }
 
     /**
@@ -307,6 +319,63 @@ public final class UriComponents {
         return bos.toByteArray();
     }
 
+	// verifying
+
+	/**
+	 * Verifies all URI components to determine whether they contain any illegal characters, throwing an
+	 * {@code IllegalArgumentException} if so.
+	 *
+	 * @throws IllegalArgumentException if any of the components contain illegal characters
+	 */
+	private void verify() {
+		if (!encoded) {
+			return;
+		}
+		verifyUriComponent(scheme, Type.SCHEME);
+		verifyUriComponent(userInfo, Type.USER_INFO);
+		verifyUriComponent(host, Type.HOST);
+		path.verify();
+		for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
+			verifyUriComponent(entry.getKey(), Type.QUERY_PARAM);
+			for (String value : entry.getValue()) {
+				verifyUriComponent(value, Type.QUERY_PARAM);
+			}
+		}
+		verifyUriComponent(fragment, Type.FRAGMENT);
+	}
+
+
+	private static void verifyUriComponent(String source, Type type) {
+		if (source == null) {
+			return;
+		}
+
+		int length = source.length();
+
+		for (int i=0; i < length; i++) {
+			char ch = source.charAt(i);
+			if (ch == '%') {
+				if ((i + 2) < length) {
+					char hex1 = source.charAt(i + 1);
+					char hex2 = source.charAt(i + 2);
+					int u = Character.digit(hex1, 16);
+					int l = Character.digit(hex2, 16);
+					if (u == -1 || l == -1) {
+						throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
+					}
+					i += 2;
+				}
+				else {
+					throw new IllegalArgumentException("Invalid encoded sequence \"" + source.substring(i) + "\"");
+				}
+			}
+			else if (!type.isAllowed(ch)) {
+				throw new IllegalArgumentException(
+						"Invalid character '" + ch + "' for " + type.name() + " in \"" + source + "\"");
+			}
+		}
+	}
+
 	// expanding
 
 	/**
@@ -356,7 +425,7 @@ public final class UriComponents {
 		String expandedFragment = expandUriComponent(this.fragment, uriVariables);
 
 		return new UriComponents(expandedScheme, expandedUserInfo, expandedHost, this.port, expandedPath,
-				expandedQueryParams, expandedFragment, false);
+				expandedQueryParams, expandedFragment, false, false);
 	}
 
 	private static String expandUriComponent(String source, UriTemplateVariables uriVariables) {
@@ -523,7 +592,7 @@ public final class UriComponents {
     /**
      * Enumeration used to identify the parts of a URI.
      * <p/>
-     * <p>Contains methods to indicate whether a given character is valid in a specific URI component.
+     * Contains methods to indicate whether a given character is valid in a specific URI component.
      *
      * @author Arjen Poutsma
      * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
@@ -681,6 +750,8 @@ public final class UriComponents {
 
 		PathComponent encode(String encoding) throws UnsupportedEncodingException;
 
+		void verify();
+
 		PathComponent expand(UriTemplateVariables uriVariables);
 
 	}
@@ -709,6 +780,10 @@ public final class UriComponents {
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
 			String encodedPath = encodeUriComponent(getPath(),encoding, Type.PATH);
 			return new FullPathComponent(encodedPath);
+		}
+
+		public void verify() {
+			verifyUriComponent(path, Type.PATH);
 		}
 
 		public PathComponent expand(UriTemplateVariables uriVariables) {
@@ -769,6 +844,12 @@ public final class UriComponents {
 				encodedPathSegments.add(encodedPathSegment);
 			}
 			return new PathSegmentComponent(encodedPathSegments);
+		}
+
+		public void verify() {
+			for (String pathSegment : getPathSegments()) {
+				verifyUriComponent(pathSegment, Type.PATH_SEGMENT);
+			}
 		}
 
 		public PathComponent expand(UriTemplateVariables uriVariables) {
@@ -834,6 +915,12 @@ public final class UriComponents {
 			return new PathComponentComposite(encodedComponents);
 		}
 
+		public void verify() {
+			for (PathComponent pathComponent : pathComponents) {
+				pathComponent.verify();
+			}
+		}
+
 		public PathComponent expand(UriTemplateVariables uriVariables) {
 			List<PathComponent> expandedComponents = new ArrayList<PathComponent>(pathComponents.size());
 			for (PathComponent pathComponent : pathComponents) {
@@ -860,6 +947,9 @@ public final class UriComponents {
 
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
 			return this;
+		}
+
+		public void verify() {
 		}
 
 		public PathComponent expand(UriTemplateVariables uriVariables) {

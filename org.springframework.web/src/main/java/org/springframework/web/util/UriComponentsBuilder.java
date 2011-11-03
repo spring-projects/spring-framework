@@ -217,7 +217,7 @@ public class UriComponentsBuilder {
 	 * @return the URI components
      */
     public UriComponents build(boolean encoded) {
-		return new UriComponents(scheme, userInfo, host, port, pathBuilder.build(), queryParams, fragment, encoded);
+		return new UriComponents(scheme, userInfo, host, port, pathBuilder.build(), queryParams, fragment, encoded, true);
     }
 
     // URI components methods
