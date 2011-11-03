@@ -36,6 +36,28 @@ import javax.servlet.jsp.JspException;
 public class HiddenInputTag extends AbstractHtmlElementTag {
 
 	/**
+	 * The name of the '<code>disabled</code>' attribute.
+	 */
+	public static final String DISABLED_ATTRIBUTE = "disabled";
+
+	private String disabled;
+
+	/**
+	 * Get the value of the '<code>disabled</code>' attribute.
+	 */
+	public String getDisabled() {
+		return this.disabled;
+	}
+	
+	/**
+	 * Set the value of the '<code>disabled</code>' attribute.
+	 * May be a runtime expression.
+	 */
+	public void setDisabled(String disabled) {
+		this.disabled = disabled;
+	}
+
+	/**
 	 * Flags "type" as an illegal dynamic attribute.
 	 */
 	@Override
@@ -54,10 +76,20 @@ public class HiddenInputTag extends AbstractHtmlElementTag {
 		tagWriter.startTag("input");
 		writeDefaultAttributes(tagWriter);
 		tagWriter.writeAttribute("type", "hidden");
+		if (isDisabled()) {
+			tagWriter.writeAttribute(DISABLED_ATTRIBUTE, "disabled");
+		}
 		String value = getDisplayString(getBoundValue(), getPropertyEditor());
 		tagWriter.writeAttribute("value", processFieldValue(getName(), value, "hidden"));
 		tagWriter.endTag();
 		return SKIP_BODY;
 	}
-	
+
+	/**
+	 * Is the current HTML tag disabled?
+	 */
+	protected boolean isDisabled() throws JspException {
+		return evaluateBoolean(DISABLED_ATTRIBUTE, getDisabled());
+	}
+
 }
