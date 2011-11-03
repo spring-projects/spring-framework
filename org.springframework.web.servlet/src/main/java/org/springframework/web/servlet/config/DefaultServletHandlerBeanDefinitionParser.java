@@ -69,11 +69,8 @@ class DefaultServletHandlerBeanDefinitionParser implements BeanDefinitionParser 
 		parserContext.getRegistry().registerBeanDefinition(handlerMappingBeanName, handlerMappingDef);
 		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, handlerMappingBeanName));
 		
-		// Ensure BeanNameUrlHandlerMapping is not "turned off" (SPR-8289)
-		MvcNamespaceUtils.registerBeanNameUrlHandlerMapping(parserContext, source);
-
-		// Register HttpRequestHandlerAdapter
-		MvcNamespaceUtils.registerDefaultHandlerAdapters(parserContext, source);
+		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off" 
+		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
 
 		return null;
 	}

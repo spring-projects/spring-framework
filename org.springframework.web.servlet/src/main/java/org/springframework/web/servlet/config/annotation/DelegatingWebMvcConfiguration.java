@@ -28,10 +28,9 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * A sub-class of {@link WebMvcConfigurationSupport} that detects beans of 
- * type {@link WebMvcConfigurer}. Each {@link WebMvcConfigurer} is given a 
- * chance to customize the Spring MVC configuration provided through
- * {@link WebMvcConfigurationSupport}.
+ * Extends {@link WebMvcConfigurationSupport} with the ability to detect beans
+ * of type {@link WebMvcConfigurer} and give them a chance to customize the 
+ * provided configuration by delegating to them at the appropriate times.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1

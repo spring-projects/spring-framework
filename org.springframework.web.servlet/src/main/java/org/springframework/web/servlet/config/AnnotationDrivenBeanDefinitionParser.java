@@ -27,7 +27,7 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.core.convert.ConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -41,12 +41,21 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.DomUtils;
-import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
+import org.springframework.web.servlet.HandlerAdapter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
+import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
+import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -56,27 +65,52 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 import org.w3c.dom.Element;
 
 /**
- * {@link BeanDefinitionParser} that parses the {@code annotation-driven} element to configure a Spring MVC web
- * application.
+ * A {@link BeanDefinitionParser} that provides the configuration for the 
+ * {@code <annotation-driven/>} MVC namespace  element.
  *
- * <p>Responsible for:
- * <ol>
- * <li>Registering a {@code DefaultAnnotationHandlerMapping} bean for mapping HTTP Servlet Requests to {@code @Controller} methods
- * using {@code @RequestMapping} annotations.
- * <li>Registering an {@code AnnotationMethodHandlerAdapter} bean for invoking annotated {@code @Controller} methods.
- * Will configure the {@code HandlerAdapter}'s <code>webBindingInitializer</code> property for centrally configuring
- * {@code @Controller} {@code DataBinder} instances:
+ * <p>This class registers the following {@link HandlerMapping}s:</p>
  * <ul>
- * <li>Configures the conversionService if specified, otherwise defaults to a fresh {@link ConversionService} instance
- * created by the default {@link FormattingConversionServiceFactoryBean}.
- * <li>Configures the validator if specified, otherwise defaults to a fresh {@link Validator} instance created by the
- * default {@link LocalValidatorFactoryBean} <em>if the JSR-303 API is present on the classpath</em>.
- * <li>Configures standard {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverters},
- * including the {@link Jaxb2RootElementHttpMessageConverter} <em>if JAXB2 is present on the classpath</em>, and
- * the {@link MappingJacksonHttpMessageConverter} <em>if Jackson is present on the classpath</em>.
+ * 	<li>{@link RequestMappingHandlerMapping} 
+ * 	ordered at 0 for mapping requests to annotated controller methods.
+ * 	<li>{@link BeanNameUrlHandlerMapping} 
+ * 	ordered at 2 to map URL paths to controller bean names.
  * </ul>
- * </ol>
  *
+ * <p><strong>Note:</strong> Additional HandlerMappings may be registered 
+ * as a result of using the {@code <view-controller>} or the 
+ * {@code <resources>} MVC namespace elements.
+ * 
+ * <p>This class registers the following {@link HandlerAdapter}s:
+ * <ul>
+ * 	<li>{@link RequestMappingHandlerAdapter} 
+ * 	for processing requests with annotated controller methods.
+ * 	<li>{@link HttpRequestHandlerAdapter} 
+ * 	for processing requests with {@link HttpRequestHandler}s.
+ * 	<li>{@link SimpleControllerHandlerAdapter} 
+ * 	for processing requests with interface-based {@link Controller}s.
+ * </ul>
+ * 
+ * <p>This class registers the following {@link HandlerExceptionResolver}s:
+ * <ul>
+ * 	<li>{@link ExceptionHandlerExceptionResolver} for handling exceptions 
+ * 	through @{@link ExceptionHandler} methods.
+ * 	<li>{@link ResponseStatusExceptionResolver} for exceptions annotated 
+ * 	with @{@link ResponseStatus}.
+ * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring 
+ * 	exception types
+ * </ul>
+ * 
+ * <p>Both the {@link RequestMappingHandlerAdapter} and the 
+ * {@link ExceptionHandlerExceptionResolver} are configured with default 
+ * instances of the following kind, unless custom instances are provided:
+ * <ul>
+ * 	<li>A {@link DefaultFormattingConversionService}
+ * 	<li>A {@link LocalValidatorFactoryBean} if a JSR-303 implementation is 
+ * 	available on the classpath
+ * 	<li>A range of {@link HttpMessageConverter}s depending on what 3rd party 
+ * 	libraries are available on the classpath.
+ * </ul>
+ * 
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Arjen Poutsma
@@ -178,11 +212,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		parserContext.registerComponent(new BeanComponentDefinition(defaultExceptionResolver, defaultExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(mappedCsInterceptorDef, mappedInterceptorName));
 
-		// Ensure BeanNameUrlHandlerMapping is not "turned off" (SPR-8289)
-		MvcNamespaceUtils.registerBeanNameUrlHandlerMapping(parserContext, source);
-		
-		// Ensure default HandlerAdapters are not "turned off"
-		MvcNamespaceUtils.registerDefaultHandlerAdapters(parserContext, source);
+		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off" 
+		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
 
 		parserContext.popAndRegisterContainingComponent();
 

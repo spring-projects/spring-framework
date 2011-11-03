@@ -49,11 +49,8 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		// Register SimpleUrlHandlerMapping for view controllers
 		BeanDefinition handlerMappingDef = registerHandlerMapping(parserContext, source);
 
-		// Ensure BeanNameUrlHandlerMapping is not "turned off" (SPR-8289)
-		MvcNamespaceUtils.registerBeanNameUrlHandlerMapping(parserContext, source);
-
-		// Register SimpleControllerHandlerAdapter
-		MvcNamespaceUtils.registerDefaultHandlerAdapters(parserContext, source);
+		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off" 
+		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
 
 		// Create view controller bean definition
 		RootBeanDefinition viewControllerDef = new RootBeanDefinition(ParameterizableViewController.class);

@@ -48,6 +48,7 @@ import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -55,7 +56,6 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
-import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerMapping;
@@ -73,17 +73,13 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
- * A base class that provides configuration for Spring MVC applications 
- * by registering Spring MVC infrastructure components detected by the 
- * {@link DispatcherServlet}. An application configuration class is not required
- * to extend this class. A more likely place to start is to annotate 
- * an @{@link Configuration} class with @{@link EnableWebMvc} 
- * (see @{@link EnableWebMvc} and {@link WebMvcConfigurer} for details).
- * 
- * <p>If the customization options available with use of @{@link EnableWebMvc} 
- * are not enough, consider extending directly from this class and override the
- * appropriate methods. Remember to add @{@link Configuration} to your subclass 
- * and @{@link Bean} to any superclass @{@link Bean} methods you override.
+ * This is the main class providing the configuration behind the MVC Java config.
+ * It is typically imported by adding {@link EnableWebMvc @EnableWebMvc} to an 
+ * application {@link Configuration @Configuration} class. An alternative more 
+ * advanced option is to extend directly from this class and override methods as
+ * necessary remembering to add {@link Configuration @Configuration} to the 
+ * subclass and {@link Bean @Bean} to overridden {@link Bean @Bean} methods.
+ * For more details see the Javadoc of {@link EnableWebMvc @EnableWebMvc}.
  * 
  * <p>This class registers the following {@link HandlerMapping}s:</p>
  * <ul>
@@ -120,14 +116,17 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * 	exception types
  * </ul>
  *
- * <p>Registers these other instances:
+ * <p>Both the {@link RequestMappingHandlerAdapter} and the 
+ * {@link ExceptionHandlerExceptionResolver} are configured with default 
+ * instances of the following kind, unless custom instances are provided:
  * <ul>
- * 	<li>{@link FormattingConversionService} 
- * 	for use with annotated controller methods and the spring:eval JSP tag.
- * 	<li>{@link Validator} 
- * 	for validating model attributes on annotated controller methods.
+ * 	<li>A {@link DefaultFormattingConversionService}
+ * 	<li>A {@link LocalValidatorFactoryBean} if a JSR-303 implementation is 
+ * 	available on the classpath
+ * 	<li>A range of {@link HttpMessageConverter}s depending on the 3rd party 
+ * 	libraries available on the classpath.
  * </ul>
- *
+ * 
  * @see EnableWebMvc
  * @see WebMvcConfigurer
  * @see WebMvcConfigurerAdapter
