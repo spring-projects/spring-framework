@@ -59,4 +59,15 @@ public class UriComponentsTests {
 		UriComponentsBuilder.fromPath("/{foo}").build().encode().expand("bar");
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void invalidCharacters() {
+		UriComponentsBuilder.fromPath("/{foo}").build(true);
+
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void invalidEncodedSequence() {
+		UriComponentsBuilder.fromPath("/fo%2o").build(true);
+	}
+
 }
