@@ -16,11 +16,11 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import org.springframework.beans.TestBean;
-import org.springframework.validation.BeanPropertyBindingResult;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
+
+import org.springframework.beans.TestBean;
+import org.springframework.validation.BeanPropertyBindingResult;
 
 /**
  * @author Rob Harrop
@@ -31,6 +31,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new HiddenInputTag() {
 			protected TagWriter createTagWriter() {
@@ -52,6 +53,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 		assertContainsAttribute(output, "type", "hidden");
 		assertContainsAttribute(output, "value", "Sally Greenwood");
+		assertAttributeNotPresent(output, "disabled");
 	}
 
 	public void testWithCustomBinder() throws Exception {
@@ -82,6 +84,34 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		}
 	}
 
+	public void testDisabledTrue() throws Exception {
+		this.tag.setDisabled("true");
+		
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+
+		String output = getOutput();
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertContainsAttribute(output, "disabled", "disabled");
+	}
+
+	// SPR-8661
+	
+	public void testDisabledFalse() throws Exception {
+		this.tag.setDisabled("false");
+		
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+
+		String output = getOutput();
+		assertTagOpened(output);
+		assertTagClosed(output);
+
+		assertAttributeNotPresent(output, "disabled");
+	}
+	
 	private void assertTagClosed(String output) {
 		assertTrue(output.endsWith("/>"));
 	}
