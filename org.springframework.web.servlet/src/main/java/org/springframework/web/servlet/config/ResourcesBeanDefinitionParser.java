@@ -73,11 +73,9 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
 		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));	
 
-		// Ensure BeanNameUrlHandlerMapping is not "turned off" (SPR-8289)
-		MvcNamespaceUtils.registerBeanNameUrlHandlerMapping(parserContext, source);
-
+		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off" 
 		// Register HttpRequestHandlerAdapter
-		MvcNamespaceUtils.registerDefaultHandlerAdapters(parserContext, source);
+		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
 
 		return null;
 	}
