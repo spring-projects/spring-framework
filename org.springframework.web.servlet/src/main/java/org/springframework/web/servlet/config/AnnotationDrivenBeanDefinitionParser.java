@@ -158,13 +158,16 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedList<?> messageConverters = getMessageConverters(element, source, parserContext);
 		ManagedList<?> argumentResolvers = getArgumentResolvers(element, source, parserContext);
 		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, source, parserContext);
-
+		
 		RootBeanDefinition methodAdapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 		methodAdapterDef.setSource(source);
 		methodAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		methodAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
 		methodAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
-		methodAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", true);
+		if (element.hasAttribute("ignoreDefaultModelOnRedirect")) {
+			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignoreDefaultModelOnRedirect"));
+			methodAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", ignoreDefaultModel);
+		}
 		if (argumentResolvers != null) {
 			methodAdapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
 		}

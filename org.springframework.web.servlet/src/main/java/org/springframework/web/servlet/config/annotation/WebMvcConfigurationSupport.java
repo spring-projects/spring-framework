@@ -291,7 +291,6 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 		adapter.setWebBindingInitializer(webBindingInitializer);
 		adapter.setCustomArgumentResolvers(argumentResolvers);
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
-		adapter.setIgnoreDefaultModelOnRedirect(true);
 		return adapter;
 	}
 

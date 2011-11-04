@@ -34,6 +34,7 @@ import javax.validation.constraints.NotNull;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -109,6 +110,7 @@ public class MvcNamespaceTests {
 		
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
+		assertEquals(false, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
 		
 		List<HttpMessageConverter<?>> messageConverters = adapter.getMessageConverters();
 		assertTrue(messageConverters.size() > 0);
@@ -166,6 +168,7 @@ public class MvcNamespaceTests {
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
+		assertEquals(true, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
 
 		// default web binding initializer behavior test
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -322,7 +325,7 @@ public class MvcNamespaceTests {
 		ThemeChangeInterceptor interceptor2 = (ThemeChangeInterceptor) chain.getInterceptors()[2];
 		assertEquals("style", interceptor2.getParamName());
 	}
-
+	
 	@Test
 	public void testViewControllers() throws Exception {
 		loadBeanDefinitions("mvc-config-view-controllers.xml", 14);
@@ -346,7 +349,7 @@ public class MvcNamespaceTests {
 
 		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping2);
-		
+
 		SimpleControllerHandlerAdapter adapter = appContext.getBean(SimpleControllerHandlerAdapter.class);
 		assertNotNull(adapter);
 		
