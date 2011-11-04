@@ -1435,6 +1435,56 @@ URI location = template.postForLocation(uri, booking, "1");
       method arguments.</para>
 
       <section>
+        <title>Working with the URI</title>
+
+        <para>For each of the main HTTP methods, the <classname>RestTemplate</classname>
+        provides variants that either take a String URI or <classname>java.net.URI</classname>
+        as the first argument.
+        </para>
+        
+        <para>The String URI variants accept template arguments as a
+        String variable length argument or as a <classname>Map&lt;String,String&gt;</classname>.
+        They also assume the URL String is not encoded and needs to be encoded. 
+        For example the following: 
+        </para>
+        
+        <programlisting language="java">restTemplate.getForObject("http://example.com/hotel list", String.class);</programlisting>
+        
+        <para>will perform a GET on <filename>http://example.com/hotel%20list</filename>.
+        That means if the input URL String is already encoded, it will be encoded twice -- 
+        i.e. <filename>http://example.com/hotel%20list</filename> will become 
+        <filename>http://example.com/hotel%2520list</filename>. 
+        If this is not the intended effect, use the 
+        <classname>java.net.URI</classname> method variant, which assumes
+        the URL is already encoded is also generally useful if you want
+        to reuse a single (fully expanded) <classname>URI</classname>
+        multiple times.</para>
+
+        <para>The <classname>UriComponentsBuilder</classname> class can be used
+        to build and encode the <classname>URI</classname> including support 
+        for URI templates. For example you can start with a URL String:
+        </para>
+        
+        <programlisting language="java">UriComponents uriComponents = 
+        UriComponentsBuilder.fromUriString("http://example.com/hotels/{hotel}/bookings/{booking}").build()
+            .expand("42", "21")
+            .encode();
+            
+URI uri = uriComponents.toUri();</programlisting>
+
+        <para>Or specify each URI component indiviudally:</para>
+        
+        <programlisting language="java">UriComponents uriComponents = 
+        UriComponentsBuilder.newInstance()
+            .scheme("http").host("example.com").path("/hotels/{hotel}/bookings/{booking}").build()
+            .expand("42", "21")
+            .encode();
+
+URI uri = uriComponents.toUri();</programlisting>
+        
+      </section>
+
+      <section>
         <title>Dealing with request and response headers</title>
 
         <para>Besides the methods described above, the <classname>RestTemplate</classname>

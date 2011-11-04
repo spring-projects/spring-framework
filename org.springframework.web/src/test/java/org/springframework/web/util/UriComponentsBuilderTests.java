@@ -175,6 +175,36 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
+	public void replacePath() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://www.ietf.org/rfc/rfc2396.txt");
+		builder.replacePath("/rfc/rfc3986.txt");
+		UriComponents result = builder.build();
+
+		assertEquals("http://www.ietf.org/rfc/rfc3986.txt", result.toUriString());
+		
+		builder = UriComponentsBuilder.fromUriString("http://www.ietf.org/rfc/rfc2396.txt");
+		builder.replacePath(null);
+		result = builder.build();
+
+		assertEquals("http://www.ietf.org", result.toUriString());
+	}
+	
+	@Test
+	public void replaceQuery() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.com/foo?foo=bar&baz=qux");
+		builder.replaceQuery("baz=42");
+		UriComponents result = builder.build();
+		
+		assertEquals("http://example.com/foo?baz=42", result.toUriString());
+
+		builder = UriComponentsBuilder.fromUriString("http://example.com/foo?foo=bar&baz=qux");
+		builder.replaceQuery(null);
+		result = builder.build();
+		
+		assertEquals("http://example.com/foo", result.toUriString());
+	}
+
+	@Test
 	public void queryParams() throws URISyntaxException {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.queryParam("baz", "qux", 42).build();
@@ -195,6 +225,22 @@ public class UriComponentsBuilderTests {
 		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<String, String>(2);
 		expectedQueryParams.add("baz", null);
 		assertEquals(expectedQueryParams, result.getQueryParams());
+	}
+
+	
+	@Test
+	public void replaceQueryParam() {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().queryParam("baz", "qux", 42);
+		builder.replaceQueryParam("baz", "xuq", 24);
+		UriComponents result = builder.build();
+		
+		assertEquals("baz=xuq&baz=24", result.getQuery());
+
+		builder = UriComponentsBuilder.newInstance().queryParam("baz", "qux", 42);
+		builder.replaceQueryParam("baz");
+		result = builder.build();
+		
+		assertEquals("baz", result.getQuery());
 	}
 
 }

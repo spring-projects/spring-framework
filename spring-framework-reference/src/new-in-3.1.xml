@@ -467,5 +467,25 @@
       linkend="mvc-multipart-forms-non-browsers" /> and <xref
       linkend="mvc-multipart" />.</para>
     </section>
+
+    <section>
+      <title><classname>UriComponentsBuilder</classname> and <classname>UriComponents</classname></title>
+
+      <para>A new <classname>UriComponents</classname> class has been added, 
+      which is an immutable container of URI components providing 
+      access to all contained URI components.
+      A nenw <classname>UriComponentsBuilder</classname> class is also 
+      provided to help create <classname>UriComponents</classname> instances.
+      Together the two classes give fine-grained control over all
+      aspects of preparing a URI including construction, expansion
+      from URI template variables, and encoding.</para>
+      
+      <para>In most cases the new classes can be used as a more flexible 
+      alternative to the existing <classname>UriTemplate</classname> 
+      especially since <classname>UriTemplate</classname> relies on those
+      same classes internally.
+      </para>
+    </section>
+    
   </section>
 </chapter>
