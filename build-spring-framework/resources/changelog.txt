@@ -20,6 +20,7 @@ Changes in version 3.1 RC2 (2011-11-15)
 * Fix issue in SimpleMappingExceptionResolver causing exception when setting "statusCodes" property
 * The Form input tag allows type values other than "text" such as HTML5-specific types.
 * The Form hidden tag supports "disabled" attribute
+* Add ignoreDefaultModelOnRedirect attribute to <mvc:annotation-driven/>
 
 Changes in version 3.1 RC1 (2011-10-11)
 ---------------------------------------

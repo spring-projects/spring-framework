@@ -40,7 +40,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
@@ -372,16 +371,17 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 	
 	/**
-	 * A controller can use the "default" {@link Model} in rendering and
-	 * redirect scenarios. Alternatively, it can use {@link RedirectAttributes}
-	 * to provide attributes for a redirect scenario.
-	 * <p>When this flag is set to {@code true}, the "default" model is never 
-	 * used in a redirect even if the controller method doesn't explicitly 
-	 * declare a RedirectAttributes argument.
-	 * <p>When set to {@code false}, the "default" model may be used in a 
-	 * redirect if the controller method doesn't explicitly declare a 
+	 * By default the content of the "default" model is used both during 
+	 * rendering and redirect scenarios. Alternatively a controller method 
+	 * can declare a {@link RedirectAttributes} argument and use it to provide
+	 * attributes for a redirect.
+	 * <p>Setting this flag to {@code true} guarantees the "default" model is 
+	 * never used in a redirect scenario even if a RedirectAttributes argument 
+	 * is not declared. Setting it to {@code false} means the "default" model 
+	 * may be used in a redirect if the controller method doesn't declare a 
 	 * RedirectAttributes argument.
-	 * <p>The default setting is {@code false}.
+	 * <p>The default setting is {@code false} but new applications should 
+	 * consider setting it to {@code true}.
 	 * @see RedirectAttributes
 	 */
 	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
