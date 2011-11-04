@@ -33,9 +33,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpSessionRequiredException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.HandlerMethod;
@@ -43,16 +41,12 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Provides methods to initialize the {@link Model} before a controller method 
- * invocation and to update it after the controller method has been invoked.
- * 
- * <p>On initialization the model may be populated with session attributes 
- * stored during a previous request as a result of a {@link SessionAttributes} 
- * annotation. @{@link ModelAttribute} methods in the same controller may 
- * also be invoked to populate the model.
- * 
- * <p>On update attributes may be removed from or stored in the session.
- * {@link BindingResult} attributes may also be added as necessary.
+ * Provides methods to initialize the {@link Model} before controller method 
+ * invocation and to update it afterwards. On initialization, the model is 
+ * populated with attributes from the session or by invoking 
+ * {@code @ModelAttribute} methods. On update, model attributes are 
+ * synchronized with the session -- either adding or removing them. 
+ * Also {@link BindingResult} attributes where missing.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -66,10 +60,10 @@ public final class ModelFactory {
 	private final SessionAttributesHandler sessionAttributesHandler;
 	
 	/**
-	 * Create a ModelFactory instance with the provided {@link ModelAttribute} methods.
-	 * @param attributeMethods {@link ModelAttribute} methods to initialize model instances with
-	 * @param binderFactory used to add {@link BindingResult} attributes to the model
-	 * @param sessionAttributesHandler used to access handler-specific session attributes
+	 * Create a new instance with the given {@code @ModelAttribute} methods.
+	 * @param attributeMethods for model initialization
+	 * @param binderFactory for adding {@link BindingResult} attributes
+	 * @param sessionAttributesHandler for access to session attributes
 	 */
 	public ModelFactory(List<InvocableHandlerMethod> attributeMethods,
 						WebDataBinderFactory binderFactory,
@@ -82,29 +76,40 @@ public final class ModelFactory {
 	/**
 	 * Populate the model in the following order:
 	 * <ol>
-	 * 	<li>Retrieve "remembered" (i.e. previously stored) controller-specific session attributes
-	 * 	<li>Invoke @{@link ModelAttribute} methods
-	 * 	<li>Check the session for any controller-specific attributes not yet "remembered".
+	 * 	<li>Retrieve "known" session attributes -- i.e. attributes listed via 
+	 * 	{@link SessionAttributes @SessionAttributes} and previously stored in 
+	 * 	the in the model at least once
+	 * 	<li>Invoke {@link ModelAttribute @ModelAttribute} methods
+	 * 	<li>Find method arguments eligible as session attributes and retrieve
+	 * 	them if they're not	already	present in the model 
 	 * </ol>
 	 * @param request the current request
-	 * @param mavContainer contains the model to initialize 
-	 * @param handlerMethod the @{@link RequestMapping} method for which the model is initialized
-	 * @throws Exception may arise from the invocation of @{@link ModelAttribute} methods
+	 * @param mavContainer contains the model to be initialized 
+	 * @param handlerMethod the method for which the model is initialized
+	 * @throws Exception may arise from {@code @ModelAttribute} methods
 	 */
 	public void initModel(NativeWebRequest request, ModelAndViewContainer mavContainer, HandlerMethod handlerMethod)
 			throws Exception {
 
-		Map<String, ?> sessionAttrs = this.sessionAttributesHandler.retrieveAttributes(request);
-		mavContainer.mergeAttributes(sessionAttrs);
-		
+		Map<String, ?> attributesInSession = this.sessionAttributesHandler.retrieveAttributes(request);
+		mavContainer.mergeAttributes(attributesInSession);
+
 		invokeModelAttributeMethods(request, mavContainer);
-		
-		checkHandlerSessionAttributes(request, mavContainer, handlerMethod);
+
+		for (String name : findSessionAttributeArguments(handlerMethod)) {
+			if (!mavContainer.containsAttribute(name)) {
+				Object value = this.sessionAttributesHandler.retrieveAttribute(request, name);
+				if (value == null) {
+					throw new HttpSessionRequiredException("Expected session attribute '" + name + "'");
+				}
+				mavContainer.addAttribute(name, value);
+			}
+		}
 	}
 
 	/**
-	 * Invoke model attribute methods to populate the model. 
-	 * If two methods return the same attribute, the attribute from the first method is added.
+	 * Invoke model attribute methods to populate the model. Attributes are 
+	 * added only if not already present in the model.
 	 */
 	private void invokeModelAttributeMethods(NativeWebRequest request, ModelAndViewContainer mavContainer)
 			throws Exception {
@@ -127,41 +132,29 @@ public final class ModelFactory {
 	}
 	
 	/**
-	 * Checks for @{@link ModelAttribute} arguments in the signature of the 
-	 * {@link RequestMapping} method that are declared as session attributes 
-	 * via @{@link SessionAttributes} but are not already in the model. 
-	 * Those attributes may have been outside of this controller. 
-	 * Try to locate the attributes in the session or raise an exception. 
-	 * 
-	 * @throws HttpSessionRequiredException raised if an attribute declared
-	 * as session attribute is missing.
+	 * Return all {@code @ModelAttribute} arguments declared as session 
+	 * attributes via {@code @SessionAttributes}.
 	 */
-	private void checkHandlerSessionAttributes(NativeWebRequest request, 
-											   ModelAndViewContainer mavContainer, 
-											   HandlerMethod handlerMethod) throws HttpSessionRequiredException {
-		for (MethodParameter parameter : handlerMethod.getMethodParameters()) {
-			if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
-				String attrName = getNameForParameter(parameter);
-				if (!mavContainer.containsAttribute(attrName)) {
-					if (sessionAttributesHandler.isHandlerSessionAttribute(attrName, parameter.getParameterType())) {
-						Object attrValue = sessionAttributesHandler.retrieveAttribute(request, attrName);
-						if (attrValue == null){
-							throw new HttpSessionRequiredException(
-									"Session attribute '" + attrName + "' not found in session: " + handlerMethod);
-						}
-						mavContainer.addAttribute(attrName, attrValue);
-					}
+	private List<String> findSessionAttributeArguments(HandlerMethod handlerMethod) {
+		List<String> result = new ArrayList<String>();
+		for (MethodParameter param : handlerMethod.getMethodParameters()) {
+			if (param.hasParameterAnnotation(ModelAttribute.class)) {
+				String name = getNameForParameter(param);
+				if (this.sessionAttributesHandler.isHandlerSessionAttribute(name, param.getParameterType())) {
+					result.add(name);
 				}
 			}
 		}
+		return result;
 	}
 	
 	/**
-	 * Derive the model attribute name for the given return value using one of the following:
+	 * Derive the model attribute name for the given return value using 
+	 * one of the following:
 	 * <ol>
-	 * <li>The method {@link ModelAttribute} annotation value 
-	 * <li>The name of the return type
-	 * <li>The name of the return value type if the method return type is {@code Object} 
+	 * 	<li>The method {@code ModelAttribute} annotation value 
+	 * 	<li>The declared return type if it is other than {@code Object}
+	 * 	<li>The actual return value type
 	 * </ol>
 	 * @param returnValue the value returned from a method invocation
 	 * @param returnType the return type of the method
@@ -180,12 +173,12 @@ public final class ModelFactory {
 	}
 
 	/**
-	 * Derives the model attribute name for the given method parameter using one of the following:
+	 * Derives the model attribute name for a method parameter based on:
 	 * <ol>
-	 * <li>The parameter {@link ModelAttribute} annotation value
-	 * <li>The name of the parameter type 
+	 * 	<li>The parameter {@code @ModelAttribute} annotation value
+	 * 	<li>The parameter type 
 	 * </ol>
-	 * @return the method parameter model name, never {@code null} or an empty string
+	 * @return the derived name; never {@code null} or an empty string
 	 */
 	public static String getNameForParameter(MethodParameter parameter) {
 		ModelAttribute annot = parameter.getParameterAnnotation(ModelAttribute.class);
@@ -194,11 +187,11 @@ public final class ModelFactory {
 	}
 	
 	/**
-	 * Updates the model by cleaning handler session attributes depending on {@link SessionStatus#isComplete()},
-	 * promotes model attributes to the session, and adds {@link BindingResult} attributes where missing.
+	 * Synchronize model attributes with the session. Add {@link BindingResult}
+	 * attributes where necessary.
 	 * @param request the current request
-	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
-	 * @throws Exception if the process of creating {@link BindingResult} attributes causes an error
+	 * @param mavContainer contains the model to update
+	 * @throws Exception if creating BindingResult attributes fails
 	 */
 	public void updateModel(NativeWebRequest request, ModelAndViewContainer mavContainer) throws Exception {
 		
@@ -234,7 +227,7 @@ public final class ModelFactory {
 	}
 
 	/**
-	 * Whether the given attribute requires a {@link BindingResult} added to the model.
+	 * Whether the given attribute requires a {@link BindingResult} in the model.
 	 */
 	private boolean isBindingCandidate(String attributeName, Object value) {
 		if (attributeName.startsWith(BindingResult.MODEL_KEY_PREFIX)) {

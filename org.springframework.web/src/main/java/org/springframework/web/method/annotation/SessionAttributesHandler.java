@@ -31,16 +31,15 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.request.WebRequest;
 
 /**
- * Manages handler-specific session attributes declared via @{@link SessionAttributes}. 
- * Actual storage is performed through an instance of {@link SessionAttributeStore}.
+ * Manages controller-specific session attributes declared via 
+ * {@link SessionAttributes @SessionAttributes}. Actual storage is 
+ * performed via {@link SessionAttributeStore}.
  * 
- * <p>A typical scenario begins with a controller adding attributes to the 
- * {@link org.springframework.ui.Model Model}. At the end of the request, model 
- * attributes are checked to see if any of them match the names and types declared 
- * via @{@link SessionAttributes}. Matching model attributes are "promoted" to 
- * the session and remain there until the controller calls 
- * {@link SessionStatus#setComplete()} to indicate the session attributes are
- * no longer needed and can be removed. 
+ * <p>When a controller annotated with {@code @SessionAttributes} adds 
+ * attributes to its model, those attributes are checked against names and 
+ * types specified via {@code @SessionAttributes}. Matching model attributes 
+ * are saved in the HTTP session and remain there until the controller calls 
+ * {@link SessionStatus#setComplete()}.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -56,11 +55,9 @@ public class SessionAttributesHandler {
 	private final SessionAttributeStore sessionAttributeStore;
 
 	/**
-	 * Creates a {@link SessionAttributesHandler} instance for the specified handler type 
-	 * Inspects the given handler type for the presence of an @{@link SessionAttributes} 
-	 * and stores that information to identify model attribute that need to be stored, 
-	 * retrieved, or removed from the session.
-	 * @param handlerType the handler type to inspect for a {@link SessionAttributes} annotation
+	 * Creates a new instance for a controller type. Session attribute names/types
+	 * are extracted from a type-level {@code @SessionAttributes} if found.
+	 * @param handlerType the controller type
 	 * @param sessionAttributeStore used for session access
 	 */
 	public SessionAttributesHandler(Class<?> handlerType, SessionAttributeStore sessionAttributeStore) {
@@ -75,25 +72,24 @@ public class SessionAttributesHandler {
 	}
 
 	/**
-	 * Whether the controller represented by this handler has declared session 
-	 * attribute names or types of interest via @{@link SessionAttributes}. 
+	 * Whether the controller represented by this instance has declared session 
+	 * attribute names or types of interest via {@link SessionAttributes}. 
 	 */
 	public boolean hasSessionAttributes() {
 		return ((this.attributeNames.size() > 0) || (this.attributeTypes.size() > 0)); 
 	}
 	
 	/**
-	 * Whether the controller represented by this instance has declared a specific 
-	 * attribute as a session attribute via @{@link SessionAttributes}. 
+	 * Whether the attribute name and/or type match those specified in the
+	 * controller's {@code @SessionAttributes} annotation. 
 	 * 
-	 * <p>Attributes successfully resolved through this method are "remembered" and
-	 * used by calls to {@link #retrieveAttributes(WebRequest)} and 
-	 * {@link #cleanupAttributes(WebRequest)}. In other words unless attributes 
-	 * have been resolved and stored before, retrieval and cleanup have no impact.
+	 * <p>Attributes successfully resolved through this method are "remembered"
+	 * and used in {@link #retrieveAttributes(WebRequest)} and 
+	 * {@link #cleanupAttributes(WebRequest)}. In other words, retrieval and 
+	 * cleanup only affect attributes previously resolved through here.
 	 * 
-	 * @param attributeName the attribute name to check, must not be null
-	 * @param attributeType the type for the attribute, not required but should be provided when
-	 * available as session attributes of interest can be matched by type
+	 * @param attributeName the attribute name to check; must not be null
+	 * @param attributeType the type for the attribute; or {@code null}
 	 */
 	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
 		Assert.notNull(attributeName, "Attribute name must not be null");
@@ -108,7 +104,7 @@ public class SessionAttributesHandler {
 
 	/**
 	 * Stores a subset of the given attributes in the session. Attributes not 
-	 * declared as session attributes via @{@link SessionAttributes} are ignored. 
+	 * declared as session attributes via {@code @SessionAttributes} are ignored. 
 	 * @param request the current request
 	 * @param attributes candidate attributes for session storage
 	 */
@@ -124,8 +120,9 @@ public class SessionAttributesHandler {
 	}
 	
 	/**
-	 * Retrieves "remembered" (i.e. previously stored) session attributes 
-	 * for the controller represented by this handler.
+	 * Retrieve "known" attributes from the session -- i.e. attributes listed 
+	 * in {@code @SessionAttributes} and previously stored in the in the model 
+	 * at least once. 
 	 * @param request the current request
 	 * @return a map with handler session attributes; possibly empty.
 	 */
@@ -141,8 +138,9 @@ public class SessionAttributesHandler {
 	}
 
 	/**
-	 * Cleans "remembered" (i.e. previously stored) session attributes  
-	 * for the controller represented by this handler.
+	 * Cleans "known" attributes from the session - i.e. attributes listed
+	 * in {@code @SessionAttributes} and previously stored in the in the model 
+	 * at least once.
 	 * @param request the current request
 	 */
 	public void cleanupAttributes(WebRequest request) {

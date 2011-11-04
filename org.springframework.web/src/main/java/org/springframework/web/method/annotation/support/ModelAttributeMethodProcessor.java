@@ -54,14 +54,13 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
 
 	protected Log logger = LogFactory.getLog(this.getClass());
-	
+
 	private final boolean annotationNotRequired;
 	
 	/**
-	 * @param annotationNotRequired if {@code true}, any non-simple type 
-	 * argument or return value is regarded as a model attribute even without 
-	 * the presence of a {@code @ModelAttribute} annotation in which case the 
-	 * attribute name is derived from the model attribute's type.
+	 * @param annotationNotRequired if "true", non-simple method arguments and
+	 * return values are considered model attributes with or without a 
+	 * {@code @ModelAttribute} annotation.
 	 */
 	public ModelAttributeMethodProcessor(boolean annotationNotRequired) {
 		this.annotationNotRequired = annotationNotRequired;
@@ -99,7 +98,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		String name = ModelFactory.getNameForParameter(parameter);
 		Object target = (mavContainer.containsAttribute(name)) ?
 				mavContainer.getModel().get(name) : createAttribute(name, parameter, binderFactory, request);
-				
+
 		WebDataBinder binder = binderFactory.createBinder(request, target, name);
 
 		if (binder.getTarget() != null) {
