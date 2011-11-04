@@ -1792,7 +1792,9 @@ public class EditPetForm {
         so no attributes should be passed on to
         <classname>RedirectView</classname>. Both the MVC namespace and the
         MVC Java config (via <interfacename>@EnableWebMvc</interfacename>)
-        automatically set this flag to <literal>true</literal>.</para>
+        keep this flag set to <literal>false</literal> in order to maintain
+        backwards compatibility. However, for new applications we recommend
+        setting it to <literal>true</literal></para>
 
         <para>The <interfacename>RedirectAttributes</interfacename> interface
         can also be used to add flash attributes. Unlike other redirect

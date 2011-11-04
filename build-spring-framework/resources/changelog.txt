@@ -21,6 +21,7 @@ Changes in version 3.1 RC2 (2011-11-15)
 * The Form input tag allows type values other than "text" such as HTML5-specific types.
 * The Form hidden tag supports "disabled" attribute
 * Add ignoreDefaultModelOnRedirect attribute to <mvc:annotation-driven/>
+* Add methods to UriComponentsBuilder for replacing the path or the query.
 
 Changes in version 3.1 RC1 (2011-10-11)
 ---------------------------------------

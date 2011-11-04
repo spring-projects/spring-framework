@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * </ol>
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @see #newInstance()
  * @see #fromPath(String)
  * @see #fromUri(URI)
@@ -78,20 +79,20 @@ public class UriComponentsBuilder {
 			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
 					PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
 
+	
+	private String scheme;
 
-    private String scheme;
+	private String userInfo;
 
-    private String userInfo;
+	private String host;
 
-    private String host;
-
-    private int port = -1;
+	private int port = -1;
 
 	private PathComponentBuilder pathBuilder = NULL_PATH_COMPONENT_BUILDER;
 
 	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
 
-    private String fragment;
+	private String fragment;
 
 	/**
 	 * Default constructor. Protected to prevent direct instantiation.
@@ -101,42 +102,42 @@ public class UriComponentsBuilder {
 	 * @see #fromUri(URI)
 	 */
 	protected UriComponentsBuilder() {
-    }
+	}
 
     // Factory methods
 
-    /**
-     * Returns a new, empty builder.
-     *
-     * @return the new {@code UriComponentsBuilder}
-     */
-    public static UriComponentsBuilder newInstance() {
-        return new UriComponentsBuilder();
-    }
+	/**
+	 * Returns a new, empty builder.
+	 *
+	 * @return the new {@code UriComponentsBuilder}
+	 */
+	public static UriComponentsBuilder newInstance() {
+		return new UriComponentsBuilder();
+	}
 
-    /**
-     * Returns a builder that is initialized with the given path.
-     *
-     * @param path the path to initialize with
-     * @return the new {@code UriComponentsBuilder}
-     */
-    public static UriComponentsBuilder fromPath(String path) {
-        UriComponentsBuilder builder = new UriComponentsBuilder();
-        builder.path(path);
-        return builder;
-    }
+	/**
+	 * Returns a builder that is initialized with the given path.
+	 *
+	 * @param path the path to initialize with
+	 * @return the new {@code UriComponentsBuilder}
+	 */
+	public static UriComponentsBuilder fromPath(String path) {
+		UriComponentsBuilder builder = new UriComponentsBuilder();
+		builder.path(path);
+		return builder;
+	}
 
-    /**
-     * Returns a builder that is initialized with the given {@code URI}.
-     *
-     * @param uri the URI to initialize with
-     * @return the new {@code UriComponentsBuilder}
-     */
-    public static UriComponentsBuilder fromUri(URI uri) {
-        UriComponentsBuilder builder = new UriComponentsBuilder();
-        builder.uri(uri);
-        return builder;
-    }
+	/**
+	 * Returns a builder that is initialized with the given {@code URI}.
+	 *
+	 * @param uri the URI to initialize with
+	 * @return the new {@code UriComponentsBuilder}
+	 */
+	public static UriComponentsBuilder fromUri(URI uri) {
+		UriComponentsBuilder builder = new UriComponentsBuilder();
+		builder.uri(uri);
+		return builder;
+	}
 
 	/**
 	 * Returns a builder that is initialized with the given URI string.
@@ -201,132 +202,145 @@ public class UriComponentsBuilder {
 
     // build methods
 
-    /**
-     * Builds a {@code UriComponents} instance from the various components contained in this builder.
-     *
-     * @return the URI components
-     */
-    public UriComponents build() {
+	/**
+	 * Builds a {@code UriComponents} instance from the various components contained in this builder.
+	 *
+	 * @return the URI components
+	 */
+	public UriComponents build() {
 		return build(false);
 	}
 
-    /**
-     * Builds a {@code UriComponents} instance from the various components contained in this builder.
-     *
+	/**
+	 * Builds a {@code UriComponents} instance from the various components contained in this builder.
+	 *
 	 * @param encoded whether all the components set in this builder are encoded ({@code true}) or not ({@code false}).
 	 * @return the URI components
-     */
-    public UriComponents build(boolean encoded) {
+	 */
+	public UriComponents build(boolean encoded) {
 		return new UriComponents(scheme, userInfo, host, port, pathBuilder.build(), queryParams, fragment, encoded, true);
-    }
+	}
 
     // URI components methods
 
-    /**
-     * Initializes all components of this URI builder with the components of the given URI.
-     *
-     * @param uri the URI
-     * @return this UriComponentsBuilder
-     */
-    public UriComponentsBuilder uri(URI uri) {
-        Assert.notNull(uri, "'uri' must not be null");
-        Assert.isTrue(!uri.isOpaque(), "Opaque URI [" + uri + "] not supported");
+	/**
+	 * Initializes all components of this URI builder with the components of the given URI.
+	 *
+	 * @param uri the URI
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder uri(URI uri) {
+		Assert.notNull(uri, "'uri' must not be null");
+		Assert.isTrue(!uri.isOpaque(), "Opaque URI [" + uri + "] not supported");
 
-        this.scheme = uri.getScheme();
+		this.scheme = uri.getScheme();
 
-        if (uri.getUserInfo() != null) {
-            this.userInfo = uri.getUserInfo();
-        }
-        if (uri.getHost() != null) {
-            this.host = uri.getHost();
-        }
-        if (uri.getPort() != -1) {
-            this.port = uri.getPort();
-        }
-        if (StringUtils.hasLength(uri.getPath())) {
+		if (uri.getUserInfo() != null) {
+			this.userInfo = uri.getUserInfo();
+		}
+		if (uri.getHost() != null) {
+			this.host = uri.getHost();
+		}
+		if (uri.getPort() != -1) {
+			this.port = uri.getPort();
+		}
+		if (StringUtils.hasLength(uri.getPath())) {
 			this.pathBuilder = new FullPathComponentBuilder(uri.getPath());
-        }
-        if (StringUtils.hasLength(uri.getQuery())) {
+		}
+		if (StringUtils.hasLength(uri.getQuery())) {
 			this.queryParams.clear();
 			query(uri.getQuery());
-        }
-        if (uri.getFragment() != null) {
-            this.fragment = uri.getFragment();
-        }
-        return this;
-    }
-
-    /**
-     * Sets the URI scheme. The given scheme may contain URI template variables, and may also be {@code null} to clear the
-     * scheme of this builder.
-     *
-     * @param scheme the URI scheme
-     * @return this UriComponentsBuilder
-     */
-    public UriComponentsBuilder scheme(String scheme) {
-        this.scheme = scheme;
-        return this;
-    }
-
-    /**
-     * Sets the URI user info. The given user info may contain URI template variables, and may also be {@code null} to
-     * clear the user info of this builder.
-     *
-     * @param userInfo the URI user info
-     * @return this UriComponentsBuilder
-     */
-    public UriComponentsBuilder userInfo(String userInfo) {
-        this.userInfo = userInfo;
-        return this;
-    }
-
-    /**
-     * Sets the URI host. The given host may contain URI template variables, and may also be {@code null} to clear the host
-     * of this builder.
-     *
-     * @param host the URI host
-     * @return this UriComponentsBuilder
-     */
-    public UriComponentsBuilder host(String host) {
-        this.host = host;
-        return this;
-    }
-
-    /**
-     * Sets the URI port. Passing {@code -1} will clear the port of this builder.
-     *
-     * @param port the URI port
-     * @return this UriComponentsBuilder
-     */
-    public UriComponentsBuilder port(int port) {
-        Assert.isTrue(port >= -1, "'port' must not be < -1");
-        this.port = port;
-        return this;
-    }
+		}
+		if (uri.getFragment() != null) {
+			this.fragment = uri.getFragment();
+		}
+		return this;
+	}
 
 	/**
-     * Appends the given path to the existing path of this builder. The given path may contain URI template variables.
-     *
-     * @param path the URI path
-     * @return this UriComponentsBuilder
-     */
-    public UriComponentsBuilder path(String path) {
+	 * Sets the URI scheme. The given scheme may contain URI template variables, and may also be {@code null} to clear the
+	 * scheme of this builder.
+	 *
+	 * @param scheme the URI scheme
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder scheme(String scheme) {
+		this.scheme = scheme;
+		return this;
+	}
+
+	/**
+	 * Sets the URI user info. The given user info may contain URI template variables, and may also be {@code null} to
+	 * clear the user info of this builder.
+	 *
+	 * @param userInfo the URI user info
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder userInfo(String userInfo) {
+		this.userInfo = userInfo;
+		return this;
+	}
+
+	/**
+	 * Sets the URI host. The given host may contain URI template variables, and may also be {@code null} to clear the host
+	 * of this builder.
+	 *
+	 * @param host the URI host
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder host(String host) {
+		this.host = host;
+		return this;
+	}
+
+	/**
+	 * Sets the URI port. Passing {@code -1} will clear the port of this builder.
+	 *
+	 * @param port the URI port
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder port(int port) {
+		Assert.isTrue(port >= -1, "'port' must not be < -1");
+		this.port = port;
+		return this;
+	}
+
+	/**
+	 * Appends the given path to the existing path of this builder. The given path may contain URI template variables.
+	 *
+	 * @param path the URI path
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder path(String path) {
 		if (path != null) {
 			this.pathBuilder = this.pathBuilder.appendPath(path);
-		} else {
+		}
+		else {
 			this.pathBuilder = NULL_PATH_COMPONENT_BUILDER;
 		}
 		return this;
-    }
+	}
 
-    /**
-     * Appends the given path segments to the existing path of this builder. Each given path segments may contain URI
-     * template variables.
-     *
-     * @param pathSegments the URI path segments
-     * @return this UriComponentsBuilder
-     */
-    public UriComponentsBuilder pathSegment(String... pathSegments) throws IllegalArgumentException {
+	/**
+	 * Sets the path of this builder overriding all existing path and path segment values. 
+	 * 
+	 * @param path the URI path; a {@code null} value results in an empty path.
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder replacePath(String path) {
+		this.pathBuilder = NULL_PATH_COMPONENT_BUILDER;
+		path(path);
+		return this;
+	}
+
+	/**
+	 * Appends the given path segments to the existing path of this builder. Each given path segments may contain URI
+	 * template variables.
+	 *
+	 * @param pathSegments the URI path segments
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder pathSegment(String... pathSegments) throws IllegalArgumentException {
 		Assert.notNull(pathSegments, "'segments' must not be null");
 		this.pathBuilder = this.pathBuilder.appendPathSegments(pathSegments);
 		return this;
@@ -335,7 +349,7 @@ public class UriComponentsBuilder {
 	/**
 	 * Appends the given query to the existing query of this builder. The given query may contain URI template variables.
 	 *
-	 * @param query the URI path
+	 * @param query the query string
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder query(String query) {
@@ -348,52 +362,78 @@ public class UriComponentsBuilder {
 			}
 		}
 		else {
-			queryParams.clear();
+			this.queryParams.clear();
 		}
 		return this;
 	}
 
+	/**
+	 * Sets the query of this builder overriding all existing query parameters.
+	 * 
+	 * @param query the query string; a {@code null} value removes all query parameters.
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder replaceQuery(String query) {
+		this.queryParams.clear();
+		query(query);
+		return this;
+	}
 
-    /**
-     * Appends the given query parameter to the existing query parameters. The given name or any of the values may contain
-     * URI template variables. If no values are given, the resulting URI will contain the query parameter name only (i.e.
-     * {@code ?foo} instead of {@code ?foo=bar}.
-     *
-     * @param name   the query parameter name
-     * @param values the query parameter values
-     * @return this UriComponentsBuilder
-     */
-    public UriComponentsBuilder queryParam(String name, Object... values) {
+	/**
+	 * Appends the given query parameter to the existing query parameters. The given name or any of the values may contain
+	 * URI template variables. If no values are given, the resulting URI will contain the query parameter name only (i.e.
+	 * {@code ?foo} instead of {@code ?foo=bar}.
+	 *
+	 * @param name   the query parameter name
+	 * @param values the query parameter values
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder queryParam(String name, Object... values) {
 		Assert.notNull(name, "'name' must not be null");
 		if (!ObjectUtils.isEmpty(values)) {
 			for (Object value : values) {
 				String valueAsString = value != null ? value.toString() : null;
-				queryParams.add(name, valueAsString);
+				this.queryParams.add(name, valueAsString);
 			}
 		}
 		else {
-			queryParams.add(name, null);
+			this.queryParams.add(name, null);
 		}
 		return this;
 	}
 
-    /**
-     * Sets the URI fragment. The given fragment may contain URI template variables, and may also be {@code null} to clear
-     * the fragment of this builder.
-     *
-     * @param fragment the URI fragment
-     * @return this UriComponentsBuilder
-     */
-    public UriComponentsBuilder fragment(String fragment) {
-        if (fragment != null) {
-            Assert.hasLength(fragment, "'fragment' must not be empty");
-            this.fragment = fragment;
-        }
-        else {
-            this.fragment = null;
-        }
-        return this;
-    }
+	/**
+	 * Sets the query parameter values overriding all existing query values for the same parameter.
+	 * If no values are given, the resulting URI will contain the query parameter name only.
+	 * 
+	 * @param name   the query parameter name
+	 * @param values the query parameter values
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
+		Assert.notNull(name, "'name' must not be null");
+		this.queryParams.remove(name);
+		queryParam(name, values);
+		return this;
+	}
+    
+	/**
+	 * Sets the URI fragment. The given fragment may contain URI template variables, and may also be {@code null} to clear
+	 * the fragment of this builder.
+	 *
+	 * @param fragment the URI fragment
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder fragment(String fragment) {
+		if (fragment != null) {
+			Assert.hasLength(fragment, "'fragment' must not be empty");
+			this.fragment = fragment;
+		}
+		else {
+			this.fragment = null;
+		}
+		return this;
+	}
 
 	/**
 	 * Represents a builder for {@link org.springframework.web.util.UriComponents.PathComponent}
@@ -403,7 +443,7 @@ public class UriComponentsBuilder {
 		UriComponents.PathComponent build();
 
 		PathComponentBuilder appendPath(String path);
-		
+
 		PathComponentBuilder appendPathSegments(String... pathSegments);
 	}
 
