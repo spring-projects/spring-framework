@@ -76,7 +76,7 @@ public @interface ActiveProfiles {
 	 * definition profiles for the annotated class will <em>shadow</em> and
 	 * effectively replace any bean definition profiles defined by a superclass.
 	 *
-	 * <p>In the following examples, the {@code ApplicationContext} for
+	 * <p>In the following example, the {@code ApplicationContext} for
 	 * {@code BaseTest} will be loaded using only the &quot;base&quot;
 	 * bean definition profile; beans defined in the &quot;extended&quot; profile
 	 * will therefore not be loaded. In contrast, the {@code ApplicationContext}
