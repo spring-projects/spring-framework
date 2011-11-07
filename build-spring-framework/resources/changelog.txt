@@ -22,6 +22,7 @@ Changes in version 3.1 RC2 (2011-11-15)
 * The Form hidden tag supports "disabled" attribute
 * Add ignoreDefaultModelOnRedirect attribute to <mvc:annotation-driven/>
 * Add methods to UriComponentsBuilder for replacing the path or the query.
+* Add ServletUriComponentsBuilder to build a UriComponents instance starting with a ServletRequest
 
 Changes in version 3.1 RC1 (2011-10-11)
 ---------------------------------------
