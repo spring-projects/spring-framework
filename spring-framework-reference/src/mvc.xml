@@ -2869,9 +2869,70 @@ public class ContentController {
       <para>This does not eliminate the possibility of a concurrency issue
       entirely but nevertheless reduces it greatly with information that is
       already available in the redirect URL. Therefore the use of flash
-      attributes is recommended mainly for redirect scenarios unless the
-      target URL and/or query parameters are known.</para>
+      attributes is recommended mainly for redirect scenarios .</para>
     </sidebar>
+  </section>
+
+  <section id="mvc-construct-encode-uri">
+    <title>Building <literal>URI</literal>s</title>
+
+    <para>Spring MVC provides a mechanism for building and encoding a URI
+    using <classname>UriComponentsBuilder</classname> and
+    <classname>UriComponents</classname>.
+    </para>
+    
+    <para>For example you can expand and encode a URI template string:</para>
+
+<programlisting language="java">UriComponents uriComponents = 
+        UriComponentsBuilder.fromUriString("http://example.com/hotels/{hotel}/bookings/{booking}").build();
+        
+URI uri = uriComponents.expand("42", "21").encode().toUri();
+</programlisting>
+
+    <para>Note that <classname>UriComponents</classname> is immutable and 
+    the <literal>expand()</literal> and <literal>encode()</literal> 
+    operations return new instances if necessary.</para>
+    
+    <para>You can also expand and encode using individual URI components:</para>
+        
+<programlisting language="java">UriComponents uriComponents = 
+        UriComponentsBuilder.newInstance()
+            .scheme("http").host("example.com").path("/hotels/{hotel}/bookings/{booking}").build()
+            .expand("42", "21")
+            .encode();
+</programlisting>
+
+	<para>In a Servlet environment the 
+	<classname>ServletUriComponentsBuilder</classname> sub-class provides
+	static factory methods to copy available URL information from a 
+	Servlet request including host, scheme, port, path and query string: 
+	</para>
+
+<programlisting language="java">HttpServletRequest request = ...
+
+ServletUriComponentsBuilder ucb = 
+        ServletUriComponentsBuilder.fromRequest(request).replaceQueryParam("accountId", "{id}").build()
+            .expand("123")
+            .encode();
+</programlisting>
+
+    <para>Alternatively, you may choose to copy a subset of the available 
+    information up to and including the context path:</para>
+
+<programlisting language="java">// Host, port and context path
+ServletUriComponentsBuilder ucb = 
+        ServletUriComponentsBuilder.fromContextPath(request).path("/accounts").build()
+</programlisting>
+
+    <para>Or in cases where the <classname>DispatcherServlet</classname> is mapped
+    by name (e.g. <literal>/main/*</literal>), you can also have the literal part 
+    of the servlet mapping included:</para>
+
+<programlisting language="java">// Host, port, context path, and the literal part of the servlet mapping
+ServletUriComponentsBuilder ucb = 
+        ServletUriComponentsBuilder.fromServletMapping(request).path("/accounts").build()
+</programlisting>
+
   </section>
 
   <section id="mvc-localeresolver">
