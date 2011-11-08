@@ -204,12 +204,22 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void bestMatchingPatternAttribute() {
-		PatternsRequestCondition patterns = new PatternsRequestCondition("/1/2", "/{path1}/2");
+		PatternsRequestCondition patterns = new PatternsRequestCondition("/{path1}/2", "/**");
 		RequestMappingInfo key = new RequestMappingInfo(patterns, null, null, null, null, null, null);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
-		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 
-		this.mapping.handleMatch(key, lookupPath, request);
+		this.mapping.handleMatch(key, "/1/2", request);
+		
+		assertEquals("/{path1}/2", request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
+	}
+
+	@Test
+	public void bestMatchingPatternAttributeNoPatternsDefined() {
+		PatternsRequestCondition patterns = new PatternsRequestCondition();
+		RequestMappingInfo key = new RequestMappingInfo(patterns, null, null, null, null, null, null);
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
+
+		this.mapping.handleMatch(key, "/1/2", request);
 		
 		assertEquals("/1/2", request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
