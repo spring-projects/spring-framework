@@ -85,10 +85,11 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request) {
 		super.handleMatch(info, lookupPath, request);
 
-		String pattern = info.getPatternsCondition().getPatterns().iterator().next();
-		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, pattern);
+		Set<String> patterns = info.getPatternsCondition().getPatterns();
+		String bestPattern = patterns.isEmpty() ? lookupPath : patterns.iterator().next();
+		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 		
-		Map<String, String> uriTemplateVariables = getPathMatcher().extractUriTemplateVariables(pattern, lookupPath);
+		Map<String, String> uriTemplateVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
