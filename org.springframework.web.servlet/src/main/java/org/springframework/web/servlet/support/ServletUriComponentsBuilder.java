@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.util;
+package org.springframework.web.servlet.support;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,6 +23,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * A builder for {@link UriComponents} that offers static factory methods to 

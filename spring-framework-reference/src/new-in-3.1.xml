@@ -485,6 +485,12 @@
       especially since <classname>UriTemplate</classname> relies on those
       same classes internally.
       </para>
+      
+      <para>A <classname>ServletUriComponentsBuilder</classname> sub-class
+      provides static factory methods to copy information from 
+      a Servlet request. See <xref linkend="mvc-construct-encode-uri"/>.
+      </para>
+      
     </section>
     
   </section>

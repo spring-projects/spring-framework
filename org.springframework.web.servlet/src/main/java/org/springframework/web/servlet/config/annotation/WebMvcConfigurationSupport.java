@@ -356,7 +356,8 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Override this method to add default {@link HttpMessageConverter}s. 
+	 * Adds a set of default HttpMessageConverter instances to the given list. 
+	 * Subclasses can call this method from {@link #configureMessageConverters(List)}.  
 	 * @param messageConverters the list to add the default message converters to
 	 */
 	protected final void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
