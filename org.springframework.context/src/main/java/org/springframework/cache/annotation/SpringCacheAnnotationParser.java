@@ -23,13 +23,13 @@ import java.util.Collection;
 
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheOperation;
-import org.springframework.cache.interceptor.CacheUpdateOperation;
+import org.springframework.cache.interceptor.CachePutOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Strategy implementation for parsing Spring's {@link Cacheable}, {@link CacheEvict} and {@link CacheUpdate} annotations.
+ * Strategy implementation for parsing Spring's {@link Cacheable}, {@link CacheEvict} and {@link CachePut} annotations.
  * 
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -51,12 +51,12 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 			ops = lazyInit(ops);
 			ops.add(parseEvictAnnotation(ae, evict));
 		}
-		CacheUpdate update = AnnotationUtils.getAnnotation(ae, CacheUpdate.class);
+		CachePut update = AnnotationUtils.getAnnotation(ae, CachePut.class);
 		if (update != null) {
 			ops = lazyInit(ops);
 			ops.add(parseUpdateAnnotation(ae, update));
 		}
-		CacheDefinition definition = AnnotationUtils.getAnnotation(ae, CacheDefinition.class);
+		CacheDefinitions definition = AnnotationUtils.getAnnotation(ae, CacheDefinitions.class);
 		if (definition != null) {
 			ops = lazyInit(ops);
 			ops.addAll(parseDefinitionAnnotation(ae, definition));
@@ -87,8 +87,8 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return ceo;
 	}
 
-	CacheOperation parseUpdateAnnotation(AnnotatedElement ae, CacheUpdate ann) {
-		CacheUpdateOperation cuo = new CacheUpdateOperation();
+	CacheOperation parseUpdateAnnotation(AnnotatedElement ae, CachePut ann) {
+		CachePutOperation cuo = new CachePutOperation();
 		cuo.setCacheNames(ann.value());
 		cuo.setCondition(ann.condition());
 		cuo.setKey(ann.key());
@@ -96,27 +96,27 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return cuo;
 	}
 
-	Collection<CacheOperation> parseDefinitionAnnotation(AnnotatedElement ae, CacheDefinition ann) {
+	Collection<CacheOperation> parseDefinitionAnnotation(AnnotatedElement ae, CacheDefinitions ann) {
 		Collection<CacheOperation> ops = null;
 
-		Cacheable[] cacheables = ann.cacheables();
+		Cacheable[] cacheables = ann.cacheable();
 		if (!ObjectUtils.isEmpty(cacheables)) {
 			ops = lazyInit(ops);
 			for (Cacheable cacheable : cacheables) {
 				ops.add(parseCacheableAnnotation(ae, cacheable));
 			}
 		}
-		CacheEvict[] evicts = ann.evicts();
+		CacheEvict[] evicts = ann.evict();
 		if (!ObjectUtils.isEmpty(evicts)) {
 			ops = lazyInit(ops);
 			for (CacheEvict evict : evicts) {
 				ops.add(parseEvictAnnotation(ae, evict));
 			}
 		}
-		CacheUpdate[] updates = ann.updates();
+		CachePut[] updates = ann.put();
 		if (!ObjectUtils.isEmpty(updates)) {
 			ops = lazyInit(ops);
-			for (CacheUpdate update : updates) {
+			for (CachePut update : updates) {
 				ops.add(parseUpdateAnnotation(ae, update));
 			}
 		}

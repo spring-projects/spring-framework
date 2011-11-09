@@ -403,7 +403,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				evicts.add(opContext);
 			}
 
-			if (cacheOperation instanceof CacheUpdateOperation) {
+			if (cacheOperation instanceof CachePutOperation) {
 				updates.add(opContext);
 			}
 		}

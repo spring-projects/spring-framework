@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Group annotation for multiple cacheable annotations (of different or the same type).
+ * Group annotation for multiple cache annotations (of different or the same type).
  * 
  * @author Costin Leau
  * @since 3.1
@@ -33,11 +33,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface CacheDefinition {
+public @interface CacheDefinitions {
 
-	Cacheable[] cacheables();
+	Cacheable[] cacheable() default {};
 
-	CacheUpdate[] updates();
+	CachePut[] put() default {};
 
-	CacheEvict[] evicts();
+	CacheEvict[] evict() default {};
 }

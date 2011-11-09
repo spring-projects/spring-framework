@@ -182,35 +182,29 @@
 	The SpEL expression used for conditioning the method caching.]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-	</xsd:complexType>
-	
-	<xsd:complexType name="definitionType">
-		<xsd:complexContent>
-			<xsd:extension base="basedefinitionType">
-				<xsd:attribute name="method" type="xsd:string" use="required">
-					<xsd:annotation>
-						<xsd:documentation><![CDATA[
+		<xsd:attribute name="method" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
 	The method name(s) with which the cache attributes are to be
 	associated. The wildcard (*) character can be used to associate the
 	same cache attribute settings with a number of methods; for
-	example, 'get*', 'handle*', '*Order', 'on*Event', etc.
-							]]></xsd:documentation>
-					</xsd:annotation>
-				</xsd:attribute>
-			</xsd:extension>
-		</xsd:complexContent>
+	example, 'get*', 'handle*', '*Order', 'on*Event', etc.]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		
 	</xsd:complexType>
 	
 	<xsd:complexType name="definitionsType">
 		<xsd:complexContent>
 			<xsd:extension base="basedefinitionType">
 				<xsd:sequence>
-				  <xsd:choice>
-					<xsd:element name="cacheable" minOccurs="0" maxOccurs="unbounded" type="definitionType"/>
+				  <xsd:choice minOccurs="0" maxOccurs="unbounded">
+					<xsd:element name="cacheable" minOccurs="0" maxOccurs="unbounded" type="basedefinitionType"/>
+					<xsd:element name="cache-put" minOccurs="0" maxOccurs="unbounded" type="basedefinitionType"/>					
 					<xsd:element name="cache-evict" minOccurs="0" maxOccurs="unbounded">
 						<xsd:complexType>
 							<xsd:complexContent>
-								<xsd:extension base="definitionType">
+								<xsd:extension base="basedefinitionType">
 									<xsd:attribute name="all-entries" type="xsd:boolean" use="optional">
 										<xsd:annotation>
 											<xsd:documentation><![CDATA[
