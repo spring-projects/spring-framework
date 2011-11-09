@@ -24,7 +24,7 @@ import org.springframework.cache.interceptor.CacheInterceptor;
 /**
  * @author Costin Leau
  */
-public abstract class AbstractCacheAdviceNamespaceTests extends AbstractAnnotationTests {
+public class CacheAdviceNamespaceTests extends AbstractAnnotationTests {
 
 
 	@Override

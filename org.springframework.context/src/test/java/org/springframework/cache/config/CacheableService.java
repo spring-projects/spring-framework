@@ -50,4 +50,14 @@ public interface CacheableService<T> {
 
 	T throwUnchecked(Object arg1);
 
+	// multi annotations
+	T multiCache(Object arg1);
+	
+	T multiEvict(Object arg1);
+
+	T multiCacheAndEvict(Object arg1);
+	
+	T multiConditionalCacheAndEvict(Object arg1);
+
+	T multiUpdate(Object arg1);
 }

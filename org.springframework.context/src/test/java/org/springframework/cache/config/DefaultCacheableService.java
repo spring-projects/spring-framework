@@ -18,8 +18,9 @@ package org.springframework.cache.config;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.cache.annotation.CacheDefinitions;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CacheUpdate;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 
 /**
@@ -65,12 +66,12 @@ public class DefaultCacheableService implements CacheableService<Long> {
 		return counter.getAndIncrement();
 	}
 
-	@CacheUpdate("default")
+	@CachePut("default")
 	public Long update(Object arg1) {
 		return counter.getAndIncrement();
 	}
 
-	@CacheUpdate(value = "default", condition = "#arg.equals(3)")
+	@CachePut(value = "default", condition = "#arg.equals(3)")
 	public Long conditionalUpdate(Object arg) {
 		return Long.valueOf(arg.toString());
 	}
@@ -93,5 +94,32 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Cacheable("default")
 	public Long throwUnchecked(Object arg1) {
 		throw new UnsupportedOperationException(arg1.toString());
+	}
+
+	// multi annotations
+
+	@CacheDefinitions(cacheable = { @Cacheable("primary"), @Cacheable("secondary") })
+	public Long multiCache(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@CacheDefinitions(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#p0") })
+	public Long multiEvict(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@CacheDefinitions(cacheable = { @Cacheable(value = "primary", key = "#root.methodName") }, evict = { @CacheEvict("secondary") })
+	public Long multiCacheAndEvict(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@CacheDefinitions(cacheable = { @Cacheable(value = "primary", condition = "#p0 == 3") }, evict = { @CacheEvict("secondary") })
+	public Long multiConditionalCacheAndEvict(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@CacheDefinitions(put = { @CachePut("primary"), @CachePut("secondary") })
+	public Long multiUpdate(Object arg1) {
+		return Long.valueOf(arg1.toString());
 	}
 }

@@ -16,6 +16,8 @@
 
 package org.springframework.cache.config;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.config.TypedStringValue;
@@ -30,6 +32,7 @@ import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheOperation;
+import org.springframework.cache.interceptor.CachePutOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.cache.interceptor.NameMatchCacheOperationSource;
 import org.springframework.util.StringUtils;
@@ -52,13 +55,14 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 	 */
 	private static class Props {
 
-		private String key, condition;
+		private String key, condition, method;
 		private String[] caches = null;
 
 		Props(Element root) {
 			String defaultCache = root.getAttribute("cache");
 			key = root.getAttribute("key");
 			condition = root.getAttribute("condition");
+			method = root.getAttribute(METHOD_ATTRIBUTE);
 
 			if (StringUtils.hasText(defaultCache)) {
 				caches = StringUtils.commaDelimitedListToStringArray(defaultCache.trim());
@@ -95,10 +99,24 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 			return op;
 		}
+
+		String merge(Element element, ReaderContext readerCtx) {
+			String m = element.getAttribute(METHOD_ATTRIBUTE);
+
+			if (StringUtils.hasText(m)) {
+				return m.trim();
+			}
+			if (StringUtils.hasText(method)) {
+				return method;
+			}
+			readerCtx.error("No method specified for " + element.getNodeName(), element);
+			return null;
+		}
 	}
 
 	private static final String CACHEABLE_ELEMENT = "cacheable";
 	private static final String CACHE_EVICT_ELEMENT = "cache-evict";
+	private static final String CACHE_PUT_ELEMENT = "cache-put";
 	private static final String METHOD_ATTRIBUTE = "method";
 	private static final String DEFS_ELEMENT = "definitions";
 
@@ -139,34 +157,60 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 		Props prop = new Props(definition);
 		// add cacheable first
 
-		ManagedMap<TypedStringValue, CacheOperation> cacheOpeMap = new ManagedMap<TypedStringValue, CacheOperation>();
-		cacheOpeMap.setSource(parserContext.extractSource(definition));
+		ManagedMap<TypedStringValue, Collection<CacheOperation>> cacheOpMap = new ManagedMap<TypedStringValue, Collection<CacheOperation>>();
+		cacheOpMap.setSource(parserContext.extractSource(definition));
 
-		List<Element> updateCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHEABLE_ELEMENT);
+		List<Element> cacheableCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHEABLE_ELEMENT);
 
-		for (Element opElement : updateCacheMethods) {
-			String name = opElement.getAttribute(METHOD_ATTRIBUTE);
+		for (Element opElement : cacheableCacheMethods) {
+			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
 			CacheOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CacheableOperation());
 
-			cacheOpeMap.put(nameHolder, op);
+			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
+			if (col == null) {
+				col = new ArrayList<CacheOperation>(2);
+				cacheOpMap.put(nameHolder, col);
+			}
+			col.add(op);
 		}
 
 		List<Element> evictCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHE_EVICT_ELEMENT);
 
 		for (Element opElement : evictCacheMethods) {
-			String name = opElement.getAttribute(METHOD_ATTRIBUTE);
+			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
 			CacheOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CacheEvictOperation());
 
-			cacheOpeMap.put(nameHolder, op);
+			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
+			if (col == null) {
+				col = new ArrayList<CacheOperation>(2);
+				cacheOpMap.put(nameHolder, col);
+			}
+			col.add(op);
+		}
+
+		List<Element> putCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHE_PUT_ELEMENT);
+
+		for (Element opElement : putCacheMethods) {
+			String name = prop.merge(opElement, parserContext.getReaderContext());
+			TypedStringValue nameHolder = new TypedStringValue(name);
+			nameHolder.setSource(parserContext.extractSource(opElement));
+			CacheOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CachePutOperation());
+
+			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
+			if (col == null) {
+				col = new ArrayList<CacheOperation>(2);
+				cacheOpMap.put(nameHolder, col);
+			}
+			col.add(op);
 		}
 
 		RootBeanDefinition attributeSourceDefinition = new RootBeanDefinition(NameMatchCacheOperationSource.class);
 		attributeSourceDefinition.setSource(parserContext.extractSource(definition));
-		attributeSourceDefinition.getPropertyValues().add("nameMap", cacheOpeMap);
+		attributeSourceDefinition.getPropertyValues().add("nameMap", cacheOpMap);
 		return attributeSourceDefinition;
 	}
 }

@@ -17,11 +17,11 @@
 package org.springframework.cache.interceptor;
 
 /**
- * Class describing a cache 'update' operation.
+ * Class describing a cache 'put' operation.
  *
  * @author Costin Leau
  * @since 3.1
  */
-public class CacheUpdateOperation extends CacheOperation {
+public class CachePutOperation extends CacheOperation {
 
 }

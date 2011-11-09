@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * Implementation of the {@link org.springframework.cache.interceptor.CacheOperationSource}
  * interface for working with caching metadata in JDK 1.5+ annotation format.
  *
- * <p>This class reads Spring's JDK 1.5+ {@link Cacheable}, {@link CacheUpdate} and {@link CacheEvict} 
+ * <p>This class reads Spring's JDK 1.5+ {@link Cacheable}, {@link CachePut} and {@link CacheEvict} 
  * annotations and exposes corresponding caching operation definition to Spring's cache infrastructure.
  * This class may also serve as base class for a custom CacheOperationSource.
  *

@@ -23,11 +23,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.cache.Cache;
+
 /**
  * 
  * Annotation indicating that a method (or all methods on a class) trigger(s)
- * a cache update operation. As opposed to {@link Cacheable} annotation, this annotation
- * does not cause the target method to be skipped in case of a cache hit - rather it
+ * a {@link Cache#put(Object, Object)} operation. As opposed to {@link Cacheable} annotation, 
+ * this annotation does not cause the target method to be skipped - rather it
  * always causes the method to be invoked and its result to be placed into the cache.
  *
  * @author Costin Leau
@@ -37,7 +39,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface CacheUpdate {
+public @interface CachePut {
 
 	/**
 	 * Name of the caches in which the update takes place.

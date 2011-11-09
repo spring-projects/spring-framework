@@ -19,11 +19,8 @@ package org.springframework.cache.interceptor;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,28 +51,9 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 	 * @see CacheOperation
 	 * @see CacheOperationEditor
 	 */
-	public void setNameMap(Map<String, CacheOperation> nameMap) {
-		for (Map.Entry<String, CacheOperation> entry : nameMap.entrySet()) {
+	public void setNameMap(Map<String, Collection<CacheOperation>> nameMap) {
+		for (Map.Entry<String, Collection<CacheOperation>> entry : nameMap.entrySet()) {
 			addCacheMethod(entry.getKey(), entry.getValue());
-		}
-	}
-
-	/**
-	 * Parses the given properties into a name/attribute map.
-	 * Expects method names as keys and String attributes definitions as values,
-	 * parsable into CacheOperation instances via CacheOperationEditor.
-	 * @see #setNameMap
-	 * @see CacheOperationEditor
-	 */
-	public void setProperties(Properties cacheOperations) {
-		CacheOperationEditor tae = new CacheOperationEditor();
-		Enumeration propNames = cacheOperations.propertyNames();
-		while (propNames.hasMoreElements()) {
-			String methodName = (String) propNames.nextElement();
-			String value = cacheOperations.getProperty(methodName);
-			tae.setAsText(value);
-			CacheOperation op = (CacheOperation) tae.getValue();
-			addCacheMethod(methodName, op);
 		}
 	}
 
@@ -84,33 +62,33 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 	 * <p>Method names can be exact matches, or of the pattern "xxx*",
 	 * "*xxx" or "*xxx*" for matching multiple methods.
 	 * @param methodName the name of the method
-	 * @param operation operation associated with the method
+	 * @param ops operation associated with the method
 	 */
-	public void addCacheMethod(String methodName, CacheOperation operation) {
+	public void addCacheMethod(String methodName, Collection<CacheOperation> ops) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Adding method [" + methodName + "] with cache operation [" + operation + "]");
+			logger.debug("Adding method [" + methodName + "] with cache operations [" + ops + "]");
 		}
-		this.nameMap.put(methodName, Collections.singleton(operation));
+		this.nameMap.put(methodName, ops);
 	}
 
 	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
 		// look for direct name match
 		String methodName = method.getName();
-		Collection<CacheOperation> attr = this.nameMap.get(methodName);
+		Collection<CacheOperation> ops = this.nameMap.get(methodName);
 
-		if (attr == null) {
+		if (ops == null) {
 			// Look for most specific name match.
 			String bestNameMatch = null;
 			for (String mappedName : this.nameMap.keySet()) {
 				if (isMatch(methodName, mappedName)
 						&& (bestNameMatch == null || bestNameMatch.length() <= mappedName.length())) {
-					attr = this.nameMap.get(mappedName);
+					ops = this.nameMap.get(mappedName);
 					bestNameMatch = mappedName;
 				}
 			}
 		}
 
-		return attr;
+		return ops;
 	}
 
 	/**

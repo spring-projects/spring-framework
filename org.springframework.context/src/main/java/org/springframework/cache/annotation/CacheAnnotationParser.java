@@ -26,7 +26,7 @@ import org.springframework.cache.interceptor.CacheOperation;
  * Strategy interface for parsing known caching annotation types.
  * {@link AnnotationCacheDefinitionSource} delegates to such
  * parsers for supporting specific annotation types such as Spring's own
- * {@link Cacheable}, {@link CacheUpdate} or {@link CacheEvict}.
+ * {@link Cacheable}, {@link CachePut} or {@link CacheEvict}.
  *
  * @author Costin Leau
  * @since 3.1
