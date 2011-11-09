@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.interceptor;
+package org.springframework.cache.annotation;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Class describing a cache 'update' operation.
- *
+ * Group annotation for multiple cacheable annotations (of different or the same type).
+ * 
  * @author Costin Leau
  * @since 3.1
  */
-public class CacheUpdateOperation extends CacheOperation {
+@Target({ ElementType.METHOD, ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Documented
+public @interface CacheDefinition {
 
+	Cacheable[] cacheables();
+
+	CacheUpdate[] updates();
+
+	CacheEvict[] evicts();
 }

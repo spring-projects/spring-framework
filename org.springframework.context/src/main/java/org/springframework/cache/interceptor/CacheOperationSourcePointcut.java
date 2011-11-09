@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -34,7 +35,7 @@ abstract class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut 
 
 	public boolean matches(Method method, Class<?> targetClass) {
 		CacheOperationSource cas = getCacheOperationSource();
-		return (cas == null || cas.getCacheOperation(method, targetClass) != null);
+		return (cas != null && !CollectionUtils.isEmpty(cas.getCacheOperations(method, targetClass)));
 	}
 
 	@Override

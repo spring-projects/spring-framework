@@ -17,6 +17,7 @@
 package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 
 /**
  * Interface used by CacheInterceptor. Implementations know
@@ -30,13 +31,13 @@ public interface CacheOperationSource {
 
 	/**
 	 * Return the cache operation definition for this method,
-	 * or <code>null</code> if the method is not cacheable.
+	 * or <code>null</code> if the method contains no "cacheable" annotations.
 	 * @param method the method to introspect
 	 * @param targetClass the target class (may be <code>null</code>,
 	 * in which case the declaring class of the method must be used)
 	 * @return {@link CacheOperation} the matching cache operation,
 	 * or <code>null</code> if none found
 	 */
-	CacheOperation getCacheOperation(Method method, Class<?> targetClass);
+	Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass);
 
 }

@@ -19,6 +19,8 @@ package org.springframework.cache.annotation;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -32,7 +34,7 @@ import org.springframework.util.Assert;
  * Implementation of the {@link org.springframework.cache.interceptor.CacheOperationSource}
  * interface for working with caching metadata in JDK 1.5+ annotation format.
  *
- * <p>This class reads Spring's JDK 1.5+ {@link Cacheable} and {@link CacheEvict} 
+ * <p>This class reads Spring's JDK 1.5+ {@link Cacheable}, {@link CacheUpdate} and {@link CacheEvict} 
  * annotations and exposes corresponding caching operation definition to Spring's cache infrastructure.
  * This class may also serve as base class for a custom CacheOperationSource.
  *
@@ -83,13 +85,13 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 
 
 	@Override
-	protected CacheOperation findCacheOperation(Class<?> clazz) {
-		return determineCacheOperation(clazz);
+	protected Collection<CacheOperation> findCacheOperations(Class<?> clazz) {
+		return determineCacheOperations(clazz);
 	}
 
 	@Override
-	protected CacheOperation findCacheOperation(Method method) {
-		return determineCacheOperation(method);
+	protected Collection<CacheOperation> findCacheOperations(Method method) {
+		return determineCacheOperations(method);
 	}
 
 	/**
@@ -103,14 +105,19 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	 * @return CacheOperation the configured caching operation,
 	 * or <code>null</code> if none was found
 	 */
-	protected CacheOperation determineCacheOperation(AnnotatedElement ae) {
+	protected Collection<CacheOperation> determineCacheOperations(AnnotatedElement ae) {
+		Collection<CacheOperation> ops = null;
+
 		for (CacheAnnotationParser annotationParser : this.annotationParsers) {
-			CacheOperation attr = annotationParser.parseCacheAnnotation(ae);
-			if (attr != null) {
-				return attr;
+			Collection<CacheOperation> annOps = annotationParser.parseCacheAnnotations(ae);
+			if (annOps != null) {
+				if (ops == null) {
+					ops = new ArrayList<CacheOperation>();
+				}
+				ops.addAll(annOps);
 			}
 		}
-		return null;
+		return ops;
 	}
 
 	/**
@@ -120,5 +127,4 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	protected boolean allowPublicMethodsOnly() {
 		return this.publicMethodsOnly;
 	}
-
 }

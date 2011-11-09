@@ -38,6 +38,10 @@ public interface CacheableService<T> {
 
 	T nullValue(Object arg1);
 
+	T update(Object arg1);
+
+	T conditionalUpdate(Object arg2);
+
 	Number nullInvocations();
 
 	T rootVars(Object arg1);

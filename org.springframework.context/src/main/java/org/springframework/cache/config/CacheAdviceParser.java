@@ -30,7 +30,7 @@ import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheInterceptor;
 import org.springframework.cache.interceptor.CacheOperation;
-import org.springframework.cache.interceptor.CacheUpdateOperation;
+import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.cache.interceptor.NameMatchCacheOperationSource;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
@@ -148,7 +148,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String name = opElement.getAttribute(METHOD_ATTRIBUTE);
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
-			CacheOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CacheUpdateOperation());
+			CacheOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CacheableOperation());
 
 			cacheOpeMap.put(nameHolder, op);
 		}
