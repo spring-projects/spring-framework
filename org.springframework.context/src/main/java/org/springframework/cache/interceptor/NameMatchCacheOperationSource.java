@@ -18,6 +18,8 @@ package org.springframework.cache.interceptor;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -43,7 +45,7 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 	protected static final Log logger = LogFactory.getLog(NameMatchCacheOperationSource.class);
 
 	/** Keys are method names; values are TransactionAttributes */
-	private Map<String, CacheOperation> nameMap = new LinkedHashMap<String, CacheOperation>();
+	private Map<String, Collection<CacheOperation>> nameMap = new LinkedHashMap<String, Collection<CacheOperation>>();
 
 	/**
 	 * Set a name/attribute map, consisting of method names
@@ -88,13 +90,13 @@ public class NameMatchCacheOperationSource implements CacheOperationSource, Seri
 		if (logger.isDebugEnabled()) {
 			logger.debug("Adding method [" + methodName + "] with cache operation [" + operation + "]");
 		}
-		this.nameMap.put(methodName, operation);
+		this.nameMap.put(methodName, Collections.singleton(operation));
 	}
 
-	public CacheOperation getCacheOperation(Method method, Class<?> targetClass) {
+	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
 		// look for direct name match
 		String methodName = method.getName();
-		CacheOperation attr = this.nameMap.get(methodName);
+		Collection<CacheOperation> attr = this.nameMap.get(methodName);
 
 		if (attr == null) {
 			// Look for most specific name match.

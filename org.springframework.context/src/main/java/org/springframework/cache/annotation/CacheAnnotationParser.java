@@ -17,6 +17,7 @@
 package org.springframework.cache.annotation;
 
 import java.lang.reflect.AnnotatedElement;
+import java.util.Collection;
 
 import org.springframework.cache.interceptor.CacheOperation;
 
@@ -25,7 +26,7 @@ import org.springframework.cache.interceptor.CacheOperation;
  * Strategy interface for parsing known caching annotation types.
  * {@link AnnotationCacheDefinitionSource} delegates to such
  * parsers for supporting specific annotation types such as Spring's own
- * {@link Cacheable} or {@link CacheEvict}.
+ * {@link Cacheable}, {@link CacheUpdate} or {@link CacheEvict}.
  *
  * @author Costin Leau
  * @since 3.1
@@ -43,6 +44,5 @@ public interface CacheAnnotationParser {
 	 * or <code>null</code> if none was found
 	 * @see AnnotationCacheOperationSource#determineCacheOperation
 	 */
-	CacheOperation parseCacheAnnotation(AnnotatedElement ae);
-
+	Collection<CacheOperation> parseCacheAnnotations(AnnotatedElement ae);
 }

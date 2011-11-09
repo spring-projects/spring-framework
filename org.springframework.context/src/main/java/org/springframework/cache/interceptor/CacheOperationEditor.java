@@ -57,7 +57,7 @@ public class CacheOperationEditor extends PropertyEditorSupport {
 			CacheOperation op;
 
 			if ("cacheable".contains(tokens[0])) {
-				op = new CacheUpdateOperation();
+				op = new CacheableOperation();
 			}
 
 			else if ("evict".contains(tokens[0])) {

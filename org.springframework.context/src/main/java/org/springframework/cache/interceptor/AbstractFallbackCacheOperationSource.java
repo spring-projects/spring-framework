@@ -18,6 +18,8 @@ package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -51,7 +53,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * Canonical value held in cache to indicate no caching attribute was
 	 * found for this method and we don't need to look again.
 	 */
-	private final static CacheOperation NULL_CACHING_ATTRIBUTE = new CacheUpdateOperation();
+	private final static Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
 
 	/**
 	 * Logger available to subclasses.
@@ -65,7 +67,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	final Map<Object, CacheOperation> attributeCache = new ConcurrentHashMap<Object, CacheOperation>();
+	final Map<Object, Collection<CacheOperation>> attributeCache = new ConcurrentHashMap<Object, Collection<CacheOperation>>();
 
 
 	/**
@@ -76,10 +78,10 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return {@link CacheOperation} for this method, or <code>null</code> if the method
 	 * is not cacheable
 	 */
-	public CacheOperation getCacheOperation(Method method, Class<?> targetClass) {
+	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
-		CacheOperation cached = this.attributeCache.get(cacheKey);
+		Collection<CacheOperation> cached = this.attributeCache.get(cacheKey);
 		if (cached != null) {
 			if (cached == NULL_CACHING_ATTRIBUTE) {
 				return null;
@@ -90,18 +92,18 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		}
 		else {
 			// We need to work it out.
-			CacheOperation cacheDef = computeCacheOperationDefinition(method, targetClass);
+			Collection<CacheOperation> cacheDefs = computeCacheOperationDefinition(method, targetClass);
 			// Put it in the cache.
-			if (cacheDef == null) {
+			if (cacheDefs == null) {
 				this.attributeCache.put(cacheKey, NULL_CACHING_ATTRIBUTE);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheDef);
+					logger.debug("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheDefs);
 				}
-				this.attributeCache.put(cacheKey, cacheDef);
+				this.attributeCache.put(cacheKey, cacheDefs);
 			}
-			return cacheDef;
+			return cacheDefs;
 		}
 	}
 
@@ -117,7 +119,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		return new DefaultCacheKey(method, targetClass);
 	}
 
-	private CacheOperation computeCacheOperationDefinition(Method method, Class<?> targetClass) {
+	private Collection<CacheOperation> computeCacheOperationDefinition(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
@@ -130,25 +132,25 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		specificMethod = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
 		// First try is the method in the target class.
-		CacheOperation opDef = findCacheOperation(specificMethod);
+		Collection<CacheOperation> opDef = findCacheOperations(specificMethod);
 		if (opDef != null) {
 			return opDef;
 		}
 
 		// Second try is the caching operation on the target class.
-		opDef = findCacheOperation(specificMethod.getDeclaringClass());
+		opDef = findCacheOperations(specificMethod.getDeclaringClass());
 		if (opDef != null) {
 			return opDef;
 		}
 
 		if (specificMethod != method) {
 			// Fall back is to look at the original method.
-			opDef = findCacheOperation(method);
+			opDef = findCacheOperations(method);
 			if (opDef != null) {
 				return opDef;
 			}
 			// Last fall back is the class of the original method.
-			return findCacheOperation(method.getDeclaringClass());
+			return findCacheOperations(method.getDeclaringClass());
 		}
 		return null;
 	}
@@ -161,7 +163,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return all caching attribute associated with this method
 	 * (or <code>null</code> if none)
 	 */
-	protected abstract CacheOperation findCacheOperation(Method method);
+	protected abstract Collection<CacheOperation> findCacheOperations(Method method);
 
 	/**
 	 * Subclasses need to implement this to return the caching attribute
@@ -170,7 +172,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return all caching attribute associated with this class
 	 * (or <code>null</code> if none)
 	 */
-	protected abstract CacheOperation findCacheOperation(Class<?> clazz);
+	protected abstract Collection<CacheOperation> findCacheOperations(Class<?> clazz);
 
 	/**
 	 * Should only public methods be allowed to have caching semantics?
@@ -213,5 +215,4 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 			return this.method.hashCode() * 29 + (this.targetClass != null ? this.targetClass.hashCode() : 0);
 		}
 	}
-
 }

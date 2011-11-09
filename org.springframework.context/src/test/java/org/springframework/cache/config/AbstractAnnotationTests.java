@@ -176,6 +176,31 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r1, service.cache(null));
 	}
 
+	public void testCacheUpdate(CacheableService service) {
+		Object o = new Object();
+		Cache cache = cm.getCache("default");
+		assertNull(cache.get(o));
+		Object r1 = service.update(o);
+		assertSame(r1, cache.get(o).get());
+
+		o = new Object();
+		assertNull(cache.get(o));
+		Object r2 = service.update(o);
+		assertSame(r2, cache.get(o).get());
+	}
+
+	public void testConditionalCacheUpdate(CacheableService service) {
+		Integer one = Integer.valueOf(1);
+		Integer three = Integer.valueOf(3);
+
+		Cache cache = cm.getCache("default");
+		assertEquals(one, Integer.valueOf(service.conditionalUpdate(one).toString()));
+		assertNull(cache.get(one));
+
+		assertEquals(three, Integer.valueOf(service.conditionalUpdate(three).toString()));
+		assertEquals(three, Integer.valueOf(cache.get(three).get().toString()));
+	}
+
 	@Test
 	public void testCacheable() throws Exception {
 		testCacheable(cs);
@@ -283,5 +308,25 @@ public abstract class AbstractAnnotationTests {
 	@Test
 	public void testClassUncheckedException() throws Exception {
 		testUncheckedThrowable(ccs);
+	}
+
+	@Test
+	public void testUpdate() {
+		testCacheUpdate(cs);
+	}
+
+	@Test
+	public void testClassUpdate() {
+		testCacheUpdate(ccs);
+	}
+
+	@Test
+	public void testConditionalUpdate() {
+		testConditionalCacheUpdate(cs);
+	}
+
+	@Test
+	public void testClassConditionalUpdate() {
+		testConditionalCacheUpdate(ccs);
 	}
 }

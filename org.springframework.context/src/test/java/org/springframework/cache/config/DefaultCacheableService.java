@@ -19,6 +19,7 @@ package org.springframework.cache.config;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CacheUpdate;
 import org.springframework.cache.annotation.Cacheable;
 
 /**
@@ -62,6 +63,16 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Cacheable(value = "default", key = "#root.methodName + #root.method.name + #root.targetClass + #root.target")
 	public Long rootVars(Object arg1) {
 		return counter.getAndIncrement();
+	}
+
+	@CacheUpdate("default")
+	public Long update(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@CacheUpdate(value = "default", condition = "#arg.equals(3)")
+	public Long conditionalUpdate(Object arg) {
+		return Long.valueOf(arg.toString());
 	}
 
 	@Cacheable("default")
