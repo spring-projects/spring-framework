@@ -240,7 +240,7 @@ public class UriComponentsBuilderTests {
 		builder.replaceQueryParam("baz");
 		result = builder.build();
 		
-		assertEquals("baz", result.getQuery());
+		assertNull("Query param should have been deleted", result.getQuery());
 	}
 
 }

@@ -404,7 +404,7 @@ public class UriComponentsBuilder {
 
 	/**
 	 * Sets the query parameter values overriding all existing query values for the same parameter.
-	 * If no values are given, the resulting URI will contain the query parameter name only.
+	 * If no values are given, the query parameter is removed.
 	 * 
 	 * @param name   the query parameter name
 	 * @param values the query parameter values
@@ -413,7 +413,9 @@ public class UriComponentsBuilder {
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
 		Assert.notNull(name, "'name' must not be null");
 		this.queryParams.remove(name);
-		queryParam(name, values);
+		if (!ObjectUtils.isEmpty(values)) {
+			queryParam(name, values);
+		}
 		return this;
 	}
     

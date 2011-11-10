@@ -2905,10 +2905,13 @@ URI uri = uriComponents.expand("42", "21").encode().toUri();
 	<para>In a Servlet environment the 
 	<classname>ServletUriComponentsBuilder</classname> sub-class provides
 	static factory methods to copy available URL information from a 
-	Servlet request including host, scheme, port, path and query string: 
+	Servlet requests: 
 	</para>
 
 <programlisting language="java">HttpServletRequest request = ...
+
+// Re-use host, scheme, port, path and query string
+// Replace the "accountId" query param
 
 ServletUriComponentsBuilder ucb = 
         ServletUriComponentsBuilder.fromRequest(request).replaceQueryParam("accountId", "{id}").build()
@@ -2919,7 +2922,9 @@ ServletUriComponentsBuilder ucb =
     <para>Alternatively, you may choose to copy a subset of the available 
     information up to and including the context path:</para>
 
-<programlisting language="java">// Host, port and context path
+<programlisting language="java">// Re-use host, port and context path
+// Append "/accounts" to the path
+
 ServletUriComponentsBuilder ucb = 
         ServletUriComponentsBuilder.fromContextPath(request).path("/accounts").build()
 </programlisting>
@@ -2928,7 +2933,10 @@ ServletUriComponentsBuilder ucb =
     by name (e.g. <literal>/main/*</literal>), you can also have the literal part 
     of the servlet mapping included:</para>
 
-<programlisting language="java">// Host, port, context path, and the literal part of the servlet mapping
+<programlisting language="java">// Re-use host, port, context path
+// Append the literal part of the servlet mapping to the path
+// Append "/accounts" to the path
+
 ServletUriComponentsBuilder ucb = 
         ServletUriComponentsBuilder.fromServletMapping(request).path("/accounts").build()
 </programlisting>
