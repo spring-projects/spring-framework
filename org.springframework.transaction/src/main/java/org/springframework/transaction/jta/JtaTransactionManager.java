@@ -396,7 +396,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * <p>Default is "false", throwing an exception if a non-default isolation level
 	 * is specified for a transaction. Turn this flag on if affected resource adapters
 	 * check the thread-bound transaction context and apply the specified isolation
-	 * levels individually (e.g. through a IsolationLevelDataSourceRouter).
+	 * levels individually (e.g. through an IsolationLevelDataSourceAdapter).
+	 * @see org.springframework.jdbc.datasource.IsolationLevelDataSourceAdapter
 	 * @see org.springframework.jdbc.datasource.lookup.IsolationLevelDataSourceRouter
 	 */
 	public void setAllowCustomIsolationLevels(boolean allowCustomIsolationLevels) {
@@ -878,12 +879,12 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see #getTransactionManager()
 	 */
 	protected void applyIsolationLevel(JtaTransactionObject txObject, int isolationLevel)
-	    throws InvalidIsolationLevelException, SystemException {
+			throws InvalidIsolationLevelException, SystemException {
 
 		if (!this.allowCustomIsolationLevels && isolationLevel != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException(
 			    "JtaTransactionManager does not support custom isolation levels by default - " +
-					"switch 'allowCustomIsolationLevels' to 'true'");
+				"switch 'allowCustomIsolationLevels' to 'true'");
 		}
 	}
 
