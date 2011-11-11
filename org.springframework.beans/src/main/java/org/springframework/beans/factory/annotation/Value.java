@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
  * @author Juergen Hoeller
  * @since 3.0
  * @see AutowiredAnnotationBeanPostProcessor
- * @see Value
+ * @see Autowired
  * @see org.springframework.beans.factory.config.BeanExpressionResolver
  * @see org.springframework.beans.factory.support.AutowireCandidateResolver#getSuggestedValue
  */
