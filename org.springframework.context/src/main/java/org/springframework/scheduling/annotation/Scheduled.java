@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,15 @@ import java.lang.annotation.Target;
  * <p>The annotated method must expect no arguments and have a
  * <code>void</code> return type.
  *
+ * <p>Processing of {@code @Scheduled} annotations is performed by
+ * registering a {@link ScheduledAnnotationBeanPostProcessor}. This can be
+ * done manually or, more conveniently, through the {@code <task:annotation-driven/>}
+ * element or @{@link EnableScheduling} annotation.
+ *
  * @author Mark Fisher
  * @author Dave Syer
  * @since 3.0
+ * @see EnableScheduling
  * @see ScheduledAnnotationBeanPostProcessor
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
