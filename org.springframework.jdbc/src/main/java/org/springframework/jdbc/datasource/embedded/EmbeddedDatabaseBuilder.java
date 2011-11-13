@@ -21,7 +21,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
 /**
- * A builder that provides a fluent API for constructing an embedded database.
+ * A builder that provides a convenient API for constructing an embedded database.
  *
  * <p>Usage example:
  * <pre>
@@ -65,7 +65,7 @@ public class EmbeddedDatabaseBuilder {
 	 * Sets the name of the embedded database
 	 * Defaults to 'testdb' if not called.
 	 * @param databaseName the database name
-	 * @return this, for fluent call chaining
+	 * @return this, to facilitate method chaining
 	 */
 	public EmbeddedDatabaseBuilder setName(String databaseName) {
 		this.databaseFactory.setDatabaseName(databaseName);
@@ -76,7 +76,7 @@ public class EmbeddedDatabaseBuilder {
 	 * Sets the type of embedded database.
 	 * Defaults to HSQL if not called.
 	 * @param databaseType the database type
-	 * @return this, for fluent call chaining
+	 * @return this, to facilitate method chaining
 	 */
 	public EmbeddedDatabaseBuilder setType(EmbeddedDatabaseType databaseType) {
 		this.databaseFactory.setDatabaseType(databaseType);
@@ -86,7 +86,7 @@ public class EmbeddedDatabaseBuilder {
 	/**
 	 * Adds a SQL script to execute to populate the database.
 	 * @param sqlResource the sql resource location
-	 * @return this, for fluent call chaining
+	 * @return this, to facilitate method chaining
 	 */
 	public EmbeddedDatabaseBuilder addScript(String sqlResource) {
 		this.databasePopulator.addScript(this.resourceLoader.getResource(sqlResource));
@@ -95,8 +95,9 @@ public class EmbeddedDatabaseBuilder {
 
 	/**
 	 * Add default scripts to execute to populate the database.
-	 * The default scripts are <code>schema.sql</code> to create the db schema and <code>data.sql</code> to populate the db with data. 
-	 * @return this, for fluent call chaining
+	 * The default scripts are <code>schema.sql</code> to create the db schema and
+	 * <code>data.sql</code> to populate the db with data.
+	 * @return this, to facilitate method chaining
 	 */
 	public EmbeddedDatabaseBuilder addDefaultScripts() {
 		addScript("schema.sql");

@@ -42,11 +42,14 @@ import org.springframework.util.StringUtils;
  * @author Keith Donald
  * @author Dave Syer
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private static String DEFAULT_COMMENT_PREFIX = "--";
+
+	private static String DEFAULT_STATEMENT_SEPARATOR = ";";
 
 	private static final Log logger = LogFactory.getLog(ResourceDatabasePopulator.class);
 
@@ -91,7 +94,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Specify the statement separator, if a custom one.
+	 * Specify the statement separator, if a custom one. Default is ";".
 	 */
 	public void setSeparator(String separator) {
 		this.separator = separator;
@@ -141,8 +144,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Execute the given SQL script.
-	 * <p>The script will normally be loaded by classpath. There should be one statement per line.
-	 * Any semicolons will be removed.
+	 * <p>The script will normally be loaded by classpath. There should be one statement
+	 * per line. Any {@link #setSeparator(String) statement separators} will be removed.
 	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param connection the JDBC Connection with which to perform JDBC operations
 	 * @param resource the resource (potentially associated with a specific encoding) to load the SQL script from
@@ -166,7 +169,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		}
 		String delimiter = this.separator;
 		if (delimiter == null) {
-			delimiter = ";";
+			delimiter = DEFAULT_STATEMENT_SEPARATOR;
 			if (!containsSqlScriptDelimiters(script, delimiter)) {
 				delimiter = "\n";
 			}
