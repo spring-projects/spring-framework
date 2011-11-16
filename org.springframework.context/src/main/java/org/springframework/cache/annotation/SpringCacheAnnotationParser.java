@@ -29,11 +29,12 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Strategy implementation for parsing Spring's {@link Cacheable},
+ * Strategy implementation for parsing Spring's {@link Caching}, {@link Cacheable},
  * {@link CacheEvict} and {@link CachePut} annotations.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.1
  */
 @SuppressWarnings("serial")
@@ -57,10 +58,10 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 			ops = lazyInit(ops);
 			ops.add(parseUpdateAnnotation(ae, update));
 		}
-		CacheDefinitions definition = AnnotationUtils.getAnnotation(ae, CacheDefinitions.class);
-		if (definition != null) {
+		Caching caching = AnnotationUtils.getAnnotation(ae, Caching.class);
+		if (caching != null) {
 			ops = lazyInit(ops);
-			ops.addAll(parseDefinitionAnnotation(ae, definition));
+			ops.addAll(parseCachingAnnotation(ae, caching));
 		}
 		return ops;
 	}
@@ -69,52 +70,52 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return (ops != null ? ops : new ArrayList<CacheOperation>(2));
 	}
 
-	CacheableOperation parseCacheableAnnotation(AnnotatedElement ae, Cacheable ann) {
+	CacheableOperation parseCacheableAnnotation(AnnotatedElement ae, Cacheable caching) {
 		CacheableOperation cuo = new CacheableOperation();
-		cuo.setCacheNames(ann.value());
-		cuo.setCondition(ann.condition());
-		cuo.setKey(ann.key());
+		cuo.setCacheNames(caching.value());
+		cuo.setCondition(caching.condition());
+		cuo.setKey(caching.key());
 		cuo.setName(ae.toString());
 		return cuo;
 	}
 
-	CacheEvictOperation parseEvictAnnotation(AnnotatedElement ae, CacheEvict ann) {
+	CacheEvictOperation parseEvictAnnotation(AnnotatedElement ae, CacheEvict caching) {
 		CacheEvictOperation ceo = new CacheEvictOperation();
-		ceo.setCacheNames(ann.value());
-		ceo.setCondition(ann.condition());
-		ceo.setKey(ann.key());
-		ceo.setCacheWide(ann.allEntries());
+		ceo.setCacheNames(caching.value());
+		ceo.setCondition(caching.condition());
+		ceo.setKey(caching.key());
+		ceo.setCacheWide(caching.allEntries());
 		ceo.setName(ae.toString());
 		return ceo;
 	}
 
-	CacheOperation parseUpdateAnnotation(AnnotatedElement ae, CachePut ann) {
+	CacheOperation parseUpdateAnnotation(AnnotatedElement ae, CachePut caching) {
 		CachePutOperation cuo = new CachePutOperation();
-		cuo.setCacheNames(ann.value());
-		cuo.setCondition(ann.condition());
-		cuo.setKey(ann.key());
+		cuo.setCacheNames(caching.value());
+		cuo.setCondition(caching.condition());
+		cuo.setKey(caching.key());
 		cuo.setName(ae.toString());
 		return cuo;
 	}
 
-	Collection<CacheOperation> parseDefinitionAnnotation(AnnotatedElement ae, CacheDefinitions ann) {
+	Collection<CacheOperation> parseCachingAnnotation(AnnotatedElement ae, Caching caching) {
 		Collection<CacheOperation> ops = null;
 
-		Cacheable[] cacheables = ann.cacheable();
+		Cacheable[] cacheables = caching.cacheable();
 		if (!ObjectUtils.isEmpty(cacheables)) {
 			ops = lazyInit(ops);
 			for (Cacheable cacheable : cacheables) {
 				ops.add(parseCacheableAnnotation(ae, cacheable));
 			}
 		}
-		CacheEvict[] evicts = ann.evict();
+		CacheEvict[] evicts = caching.evict();
 		if (!ObjectUtils.isEmpty(evicts)) {
 			ops = lazyInit(ops);
 			for (CacheEvict evict : evicts) {
 				ops.add(parseEvictAnnotation(ae, evict));
 			}
 		}
-		CachePut[] updates = ann.put();
+		CachePut[] updates = caching.put();
 		if (!ObjectUtils.isEmpty(updates)) {
 			ops = lazyInit(ops);
 			for (CachePut update : updates) {

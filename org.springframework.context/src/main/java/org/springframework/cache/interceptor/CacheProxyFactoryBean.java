@@ -67,13 +67,10 @@ public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean {
 	}
 
 	/**
-	 * Set the caching attribute source which is used to find the cache operation
-	 * definition.
-	 * 
-	 * @param cacheDefinitionSources cache definition sources
+	 * Set the sources used to find cache operations.
 	 */
-	public void setCacheDefinitionSources(CacheOperationSource... cacheDefinitionSources) {
-		this.cachingInterceptor.setCacheOperationSources(cacheDefinitionSources);
+	public void setCacheOperationSources(CacheOperationSource... cacheOperationSources) {
+		this.cachingInterceptor.setCacheOperationSources(cacheOperationSources);
 	}
 
 }

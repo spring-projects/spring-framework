@@ -30,13 +30,13 @@ import java.util.Collection;
 public interface CacheOperationSource {
 
 	/**
-	 * Return the cache operation definition for this method,
+	 * Return the collection of cache operations for this method,
 	 * or {@code null} if the method contains no "cacheable" annotations.
 	 * @param method the method to introspect
 	 * @param targetClass the target class (may be {@code null},
 	 * in which case the declaring class of the method must be used)
-	 * @return {@link CacheOperation} the matching cache operation,
-	 * or {@code null} if none found
+	 * @return all cache operations for this method, or {@code null} if
+	 * none found
 	 */
 	Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass);
 

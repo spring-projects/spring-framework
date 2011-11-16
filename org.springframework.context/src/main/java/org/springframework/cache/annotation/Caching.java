@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface CacheDefinitions {
+public @interface Caching {
 
 	Cacheable[] cacheable() default {};
 

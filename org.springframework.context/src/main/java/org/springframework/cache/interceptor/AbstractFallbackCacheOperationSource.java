@@ -66,7 +66,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * Cache of CacheOperationDefinitions, keyed by DefaultCacheKey (Method + target Class).
+	 * Cache of CacheOperations, keyed by DefaultCacheKey (Method + target Class).
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
@@ -95,18 +95,18 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		}
 		else {
 			// We need to work it out.
-			Collection<CacheOperation> cacheDefs = computeCacheOperationDefinition(method, targetClass);
+			Collection<CacheOperation> cacheOps = computeCacheOperations(method, targetClass);
 			// Put it in the cache.
-			if (cacheDefs == null) {
+			if (cacheOps == null) {
 				this.attributeCache.put(cacheKey, NULL_CACHING_ATTRIBUTE);
 			}
 			else {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheDefs);
+					logger.debug("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheOps);
 				}
-				this.attributeCache.put(cacheKey, cacheDefs);
+				this.attributeCache.put(cacheKey, cacheOps);
 			}
-			return cacheDefs;
+			return cacheOps;
 		}
 	}
 
@@ -122,7 +122,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 		return new DefaultCacheKey(method, targetClass);
 	}
 
-	private Collection<CacheOperation> computeCacheOperationDefinition(Method method, Class<?> targetClass) {
+	private Collection<CacheOperation> computeCacheOperations(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;

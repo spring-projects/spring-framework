@@ -28,11 +28,12 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 
 /**
- * Simple {@link CacheOperationSource} implementation that
- * allows attributes to be matched by registered name.
+ * Simple {@link CacheOperationSource} implementation that allows attributes to be matched
+ * by registered name.
  *
  * @author Costin Leau
  */
+@SuppressWarnings("serial")
 public class NameMatchCacheOperationSource implements CacheOperationSource, Serializable {
 
 	/**

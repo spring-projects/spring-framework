@@ -18,7 +18,7 @@ package org.springframework.cache.config;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.springframework.cache.annotation.CacheDefinitions;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -92,27 +92,27 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 
 	// multi annotations
 
-	@CacheDefinitions(cacheable = { @Cacheable("primary"), @Cacheable("secondary") })
+	@Caching(cacheable = { @Cacheable("primary"), @Cacheable("secondary") })
 	public Object multiCache(Object arg1) {
 		return counter.getAndIncrement();
 	}
 
-	@CacheDefinitions(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#p0") })
+	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#p0") })
 	public Object multiEvict(Object arg1) {
 		return counter.getAndIncrement();
 	}
 
-	@CacheDefinitions(cacheable = { @Cacheable(value = "primary", key = "#root.methodName") }, evict = { @CacheEvict("secondary") })
+	@Caching(cacheable = { @Cacheable(value = "primary", key = "#root.methodName") }, evict = { @CacheEvict("secondary") })
 	public Object multiCacheAndEvict(Object arg1) {
 		return counter.getAndIncrement();
 	}
 
-	@CacheDefinitions(cacheable = { @Cacheable(value = "primary", condition = "#p0 == 3") }, evict = { @CacheEvict("secondary") })
+	@Caching(cacheable = { @Cacheable(value = "primary", condition = "#p0 == 3") }, evict = { @CacheEvict("secondary") })
 	public Object multiConditionalCacheAndEvict(Object arg1) {
 		return counter.getAndIncrement();
 	}
 
-	@CacheDefinitions(put = { @CachePut("primary"), @CachePut("secondary") })
+	@Caching(put = { @CachePut("primary"), @CachePut("secondary") })
 	public Object multiUpdate(Object arg1) {
 		return arg1;
 	}

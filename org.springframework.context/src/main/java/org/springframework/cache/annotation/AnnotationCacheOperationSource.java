@@ -30,13 +30,13 @@ import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.util.Assert;
 
 /**
- * 
- * Implementation of the {@link org.springframework.cache.interceptor.CacheOperationSource}
- * interface for working with caching metadata in JDK 1.5+ annotation format.
+ * Implementation of the {@link org.springframework.cache.interceptor.CacheOperationSource
+ * CacheOperationSource} interface for working with caching metadata in annotation format.
  *
- * <p>This class reads Spring's JDK 1.5+ {@link Cacheable}, {@link CachePut} and {@link CacheEvict} 
- * annotations and exposes corresponding caching operation definition to Spring's cache infrastructure.
- * This class may also serve as base class for a custom CacheOperationSource.
+ * <p>This class reads Spring's {@link Cacheable}, {@link CachePut} and {@link CacheEvict}
+ * annotations and exposes corresponding caching operation definition to Spring's cache
+ * infrastructure. This class may also serve as base class for a custom
+ * {@code CacheOperationSource}.
  *
  * @author Costin Leau
  * @since 3.1
@@ -52,15 +52,15 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 
 	/**
 	 * Create a default AnnotationCacheOperationSource, supporting public methods
-	 * that carry the <code>Cacheable</code> and <code>CacheEvict</code> annotations.
+	 * that carry the {@code Cacheable} and {@code CacheEvict} annotations.
 	 */
 	public AnnotationCacheOperationSource() {
 		this(true);
 	}
 
 	/**
-	 * Create a default AnnotationCacheOperationSource, supporting public methods
-	 * that carry the <code>Cacheable</code> and <code>CacheEvict</code> annotations.
+	 * Create a default {@code AnnotationCacheOperationSource}, supporting public methods
+	 * that carry the {@code Cacheable} and {@code CacheEvict} annotations.
 	 * @param publicMethodsOnly whether to support only annotated public methods
 	 * typically for use with proxy-based AOP), or protected/private methods as well
 	 * (typically used with AspectJ class weaving)
@@ -95,15 +95,14 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	}
 
 	/**
-	 * Determine the cache operation definition for the given method or class.
+	 * Determine the cache operation(s) for the given method or class.
 	 * <p>This implementation delegates to configured
-	 * {@link CacheAnnotationParser CacheAnnotationParsers}
-	 * for parsing known annotations into Spring's metadata attribute class.
-	 * Returns <code>null</code> if it's not cacheable.
-	 * <p>Can be overridden to support custom annotations that carry caching metadata.
+	 * {@link CacheAnnotationParser}s for parsing known annotations into
+	 * Spring's metadata attribute class.
+	 * <p>Can be overridden to support custom annotations that carry
+	 * caching metadata.
 	 * @param ae the annotated method or class
-	 * @return CacheOperation the configured caching operation,
-	 * or <code>null</code> if none was found
+	 * @return the configured caching operations, or {@code null} if none found
 	 */
 	protected Collection<CacheOperation> determineCacheOperations(AnnotatedElement ae) {
 		Collection<CacheOperation> ops = null;

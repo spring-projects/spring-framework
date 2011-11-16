@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 
 /**
  * Composite {@link CacheOperationSource} implementation that iterates
- * over a given array of {@link CacheOperationSource} instances.
+ * over a given array of {@code CacheOperationSource} instances.
  *
  * @author Costin Leau
  * @since 3.1
@@ -45,7 +45,8 @@ public class CompositeCacheOperationSource implements CacheOperationSource, Seri
 	}
 
 	/**
-	 * Return the CacheOperationSource instances that this CompositeCachingDefinitionSource combines.
+	 * Return the {@code CacheOperationSource} instances that this
+	 * {@code CompositeCacheOperationSource} combines.
 	 */
 	public final CacheOperationSource[] getCacheOperationSources() {
 		return this.cacheOperationSources;

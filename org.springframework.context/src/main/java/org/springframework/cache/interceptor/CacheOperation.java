@@ -114,7 +114,7 @@ public abstract class CacheOperation {
 	 */
 	protected StringBuilder getOperationDescription() {
 		StringBuilder result = new StringBuilder();
-		result.append("CacheDefinition[");
+		result.append("CacheOperation[");
 		result.append(this.name);
 		result.append("] caches=");
 		result.append(this.cacheNames);
