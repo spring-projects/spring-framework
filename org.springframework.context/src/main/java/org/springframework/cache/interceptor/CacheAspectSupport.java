@@ -453,7 +453,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			if (StringUtils.hasText(this.operation.getKey())) {
 				return evaluator.key(this.operation.getKey(), this.method, this.evalContext);
 			}
-			return keyGenerator.extract(this.target, this.method, this.args);
+			return keyGenerator.generate(this.target, this.method, this.args);
 		}
 
 		protected Collection<Cache> getCaches() {
