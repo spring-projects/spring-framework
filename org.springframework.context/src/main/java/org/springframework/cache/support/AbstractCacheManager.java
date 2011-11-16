@@ -44,7 +44,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 
 
 	public void afterPropertiesSet() {
-		Collection<Cache> caches = loadCaches();
+		Collection<? extends Cache> caches = loadCaches();
 		Assert.notEmpty(caches, "loadCaches must not return an empty Collection");
 		this.cacheMap.clear();
 
@@ -73,6 +73,6 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * Load the caches for this cache manager. Occurs at startup.
 	 * The returned collection must not be null.
 	 */
-	protected abstract Collection<Cache> loadCaches();
+	protected abstract Collection<? extends Cache> loadCaches();
 
 }
