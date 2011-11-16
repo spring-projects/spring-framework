@@ -54,6 +54,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private static final String CHARSET_PREFIX = "charset=";
 
+	private static final String CONTENT_TYPE_HEADER = "Content-Type";
+	
+	private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+
 
 	//---------------------------------------------------------------------
 	// ServletResponse properties
@@ -64,6 +68,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private boolean writerAccessAllowed = true;
 
 	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
+
+	private boolean charset = false;
 
 	private final ByteArrayOutputStream content = new ByteArrayOutputStream();
 
@@ -137,6 +143,19 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
+		this.charset = true;
+		if (this.contentType != null)  {
+			String type = removeCharset(this.contentType);
+			setContentType(type);
+		}
+	}
+	
+	private String removeCharset(String contentType) {
+		int index = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
+		if (index != -1) {
+			contentType = contentType.substring(0, contentType.lastIndexOf(';', index));
+		}
+		return contentType;
 	}
 
 	public String getCharacterEncoding() {
@@ -175,6 +194,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	public void setContentLength(int contentLength) {
 		this.contentLength = contentLength;
+		doAddHeaderValue(CONTENT_LENGTH_HEADER, contentLength, true);
 	}
 
 	public int getContentLength() {
@@ -187,8 +207,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
 			if (charsetIndex != -1) {
 				String encoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
-				setCharacterEncoding(encoding);
+				this.characterEncoding = encoding;
 			}
+			else if (this.charset) {
+				this.contentType += ";" + CHARSET_PREFIX + this.characterEncoding;
+			}
+			doAddHeaderValue(CONTENT_TYPE_HEADER, this.contentType, true);
 		}
 	}
 
@@ -390,11 +414,31 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	private void setHeaderValue(String name, Object value) {
+		if (setSpecialHeader(name, value)) {
+			return;
+		}
 		doAddHeaderValue(name, value, true);
 	}
 
 	private void addHeaderValue(String name, Object value) {
+		if (setSpecialHeader(name, value)) {
+			return;
+		}
 		doAddHeaderValue(name, value, false);
+	}
+	
+	private boolean setSpecialHeader(String name, Object value) {
+		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
+			setContentType((String) value);
+			return true;
+		}
+		else if (CONTENT_LENGTH_HEADER.equalsIgnoreCase(name)) {
+			setContentLength(Integer.parseInt((String) value));
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	private void doAddHeaderValue(String name, Object value, boolean replace) {

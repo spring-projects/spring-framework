@@ -52,7 +52,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.mock.web.MockPart;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -235,7 +234,6 @@ public class RequestPartMethodArgumentResolverTests {
 
 	private void testResolveArgument(SimpleBean argValue, MethodParameter parameter) throws IOException, Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
-		multipartRequest.addHeader("Content-Type", contentType.toString());
 
 		expect(messageConverter.canRead(SimpleBean.class, contentType)).andReturn(true);
 		expect(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).andReturn(argValue);

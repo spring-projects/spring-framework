@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,74 @@ import junit.framework.TestCase;
 /**
  * @author Rick Evans
  * @author Mark Fisher
+ * @author Rossen Stoyanchev
  */
 public class MockHttpServletRequestTests extends TestCase {
+
+	public void testSetContentType() {
+		String contentType = "test/plain";
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType(contentType);
+		assertEquals(contentType, request.getContentType());
+		assertEquals(contentType, request.getHeader("Content-Type"));
+		assertNull(request.getCharacterEncoding());
+	}
+
+	public void testSetContentTypeUTF8() {
+		String contentType = "test/plain;charset=UTF-8";
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType(contentType);
+		assertEquals(contentType, request.getContentType());
+		assertEquals(contentType, request.getHeader("Content-Type"));
+		assertEquals("UTF-8", request.getCharacterEncoding());
+	}
+
+	public void testSetContentTypeHeader() {
+		String contentType = "test/plain";
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Content-Type", contentType);
+		assertEquals(contentType, request.getContentType());
+		assertEquals(contentType, request.getHeader("Content-Type"));
+		assertNull(request.getCharacterEncoding());
+	}
+
+	public void testSetContentTypeHeaderUTF8() {
+		String contentType = "test/plain;charset=UTF-8";
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Content-Type", contentType);
+		assertEquals(contentType, request.getContentType());
+		assertEquals(contentType, request.getHeader("Content-Type"));
+		assertEquals("UTF-8", request.getCharacterEncoding());
+	}
+
+	public void testSetCharacterEncoding() {
+		String contentType = "test/plain;charset=UTF-8";
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType("test/plain");
+		request.setCharacterEncoding("UTF-8");
+		assertEquals(contentType, request.getContentType());
+		assertEquals(contentType, request.getHeader("Content-Type"));
+		assertEquals("UTF-8", request.getCharacterEncoding());
+	}
+
+	public void testSetCharacterEncodingOppositeOrder() {
+		String contentType = "test/plain;charset=UTF-8";
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setCharacterEncoding("UTF-8");
+		request.setContentType("test/plain");
+		assertEquals(contentType, request.getContentType());
+		assertEquals(contentType, request.getHeader("Content-Type"));
+		assertEquals("UTF-8", request.getCharacterEncoding());
+	}
+
+	public void testReplaceCharacterEncoding() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType("test/plain;charset=ISO-8859-1");
+		request.setCharacterEncoding("UTF-8");
+		assertEquals("test/plain;charset=UTF-8", request.getContentType());
+		assertEquals("test/plain;charset=UTF-8", request.getHeader("Content-Type"));
+		assertEquals("UTF-8", request.getCharacterEncoding());
+	}
 
 	public void testHttpHeaderNameCasingIsPreserved() throws Exception {
 		String headerName = "Header1";

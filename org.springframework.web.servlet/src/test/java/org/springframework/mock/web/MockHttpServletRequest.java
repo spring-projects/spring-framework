@@ -101,6 +101,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 */
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
+	private static final String CONTENT_TYPE_HEADER = "Content-Type";
+	
+	private static final String CHARSET_PREFIX = "charset=";
+
 
 	private boolean active = true;
 
@@ -306,6 +310,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
+		if (this.contentType != null)  {
+			String type = removeCharset(this.contentType);
+			setContentType(type);
+		}
+	}
+	
+	private String removeCharset(String contentType) {
+		int index = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
+		if (index != -1) {
+			contentType = contentType.substring(0, contentType.lastIndexOf(';', index));
+		}
+		return contentType;
 	}
 
 	public void setContent(byte[] content) {
@@ -318,6 +334,17 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
+		if (contentType != null) {
+			int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
+			if (charsetIndex != -1) {
+				String encoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
+				this.characterEncoding = encoding;
+			}
+			else if (this.characterEncoding != null) {
+				this.contentType += ";" + CHARSET_PREFIX + this.characterEncoding;
+			}
+			doAddHeaderValue(CONTENT_TYPE_HEADER, this.contentType, true);
+		}
 	}
 
 	public String getContentType() {
@@ -650,9 +677,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @see #getIntHeader
 	 */
 	public void addHeader(String name, Object value) {
+		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
+			setContentType((String) value);
+			return;
+		}
+		doAddHeaderValue(name, value, false);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private void doAddHeaderValue(String name, Object value, boolean replace) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
 		Assert.notNull(value, "Header value must not be null");
-		if (header == null) {
+		if (header == null || replace) {
 			header = new HeaderValueHolder();
 			this.headers.put(name, header);
 		}
