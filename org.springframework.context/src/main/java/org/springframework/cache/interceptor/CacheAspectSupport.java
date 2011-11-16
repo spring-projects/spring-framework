@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * <p>Uses the <b>Strategy</b> design pattern. A {@link CacheManager}
  * implementation will perform the actual cache management, and a
  * {@link CacheOperationSource} is used for determining caching
- * operation definitions.
+ * operations.
  *
  * <p>A cache aspect is serializable if its {@code CacheManager} and
  * {@code CacheOperationSource} are serializable.
@@ -93,7 +93,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	/**
-	 * Set one or more cache definition sources which are used to find the cache
+	 * Set one or more cache operation sources which are used to find the cache
 	 * attributes. If more than one source is provided, they will be aggregated using a
 	 * {@link CompositeCacheOperationSource}.
 	 * @param cacheOperationSources must not be {@code null}
@@ -133,7 +133,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			throw new IllegalStateException("'cacheManager' is required");
 		}
 		if (this.cacheOperationSource == null) {
-			throw new IllegalStateException("Either 'cacheDefinitionSource' or 'cacheDefinitionSources' is required: "
+			throw new IllegalStateException("The 'cacheOperationSources' property is required: "
 					+ "If there are no cacheable methods, then don't use a cache aspect.");
 		}
 
@@ -242,7 +242,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 						if (evictOp.isCacheWide()) {
 							cache.clear();
 							if (log) {
-								logger.trace("Invalidating entire cache for definition " + evictOp + " on method " + context.method);
+								logger.trace("Invalidating entire cache for operation " + evictOp + " on method " + context.method);
 							}
 						} else {
 							// check key
@@ -250,7 +250,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 								key = context.generateKey();
 							}
 							if (log) {
-								logger.trace("Invalidating cache key " + key + " for definition " + evictOp + " on method " + context.method);
+								logger.trace("Invalidating cache key " + key + " for operation " + evictOp + " on method " + context.method);
 							}
 							cache.evict(key);
 						}
@@ -258,7 +258,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				}
 				else {
 					if (log) {
-						logger.trace("Cache condition failed on method " + context.method + " for definition " + context.operation);
+						logger.trace("Cache condition failed on method " + context.method + " for operation " + context.operation);
 					}
 				}
 			}
@@ -282,11 +282,11 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					Object key = context.generateKey();
 
 					if (log) {
-						logger.trace("Computed cache key " + key + " for definition " + context.operation);
+						logger.trace("Computed cache key " + key + " for operation " + context.operation);
 					}
 					if (key == null) {
 						throw new IllegalArgumentException(
-								"Null key returned for cache definition (maybe you are using named params on classes without debug info?) "
+								"Null key returned for cache operation (maybe you are using named params on classes without debug info?) "
 										+ context.operation);
 					}
 
@@ -313,7 +313,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				}
 				else {
 					if (log) {
-						logger.trace("Cache condition failed on method " + context.method + " for definition " + context.operation);
+						logger.trace("Cache condition failed on method " + context.method + " for operation " + context.operation);
 					}
 				}
 			}
@@ -353,11 +353,11 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					Object key = context.generateKey();
 
 					if (log) {
-						logger.trace("Computed cache key " + key + " for definition " + context.operation);
+						logger.trace("Computed cache key " + key + " for operation " + context.operation);
 					}
 					if (key == null) {
 						throw new IllegalArgumentException(
-								"Null key returned for cache definition (maybe you are using named params on classes without debug info?) "
+								"Null key returned for cache operation (maybe you are using named params on classes without debug info?) "
 										+ context.operation);
 					}
 
@@ -366,7 +366,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 				}
 				else {
 					if (log) {
-						logger.trace("Cache condition failed on method " + context.method + " for definition " + context.operation);
+						logger.trace("Cache condition failed on method " + context.method + " for operation " + context.operation);
 					}
 				}
 			}
