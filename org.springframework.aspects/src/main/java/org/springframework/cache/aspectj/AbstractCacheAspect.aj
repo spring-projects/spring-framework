@@ -16,28 +16,23 @@
 
 package org.springframework.cache.aspectj;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
 
 import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.cache.interceptor.CacheAspectSupport;
 import org.springframework.cache.interceptor.CacheOperationSource;
-import org.springframework.cache.interceptor.CacheAspectSupport.Invoker;
 
 /**
- * Abstract superaspect for AspectJ cache aspects. Concrete
- * subaspects will implement the <code>cacheMethodExecution()</code>
- * pointcut using a strategy such as Java 5 annotations.
+ * Abstract superaspect for AspectJ cache aspects. Concrete subaspects will implement the
+ * {@link #cacheMethodExecution} pointcut using a strategy such as Java 5 annotations.
  *
- * <p>Suitable for use inside or outside the Spring IoC container.
- * Set the "cacheManager" property appropriately, allowing
- * use of any cache implementation supported by Spring.
+ * <p>Suitable for use inside or outside the Spring IoC container. Set the
+ * {@link #setCacheManager cacheManager} property appropriately, allowing use of any cache
+ * implementation supported by Spring.
  *
- * <p><b>NB:</b> If a method implements an interface that is itself
- * cache annotated, the relevant Spring cache definition
- * will <i>not</i> be resolved.
+ * <p><b>NB:</b> If a method implements an interface that is itself cache annotated, the
+ * relevant Spring cache definition will <i>not</i> be resolved.
  *
  * @author Costin Leau
  * @since 3.1
@@ -49,8 +44,8 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 
 	/**
 	 * Construct object using the given caching metadata retrieval strategy.
-	 * @param cos {@link CacheOperationSource} implementation, retrieving Spring
-	 * cache metadata for each joinpoint.
+	 * @param cos {@link CacheOperationSource} implementation, retrieving Spring cache
+	 * metadata for each joinpoint.
 	 */
 	protected AbstractCacheAspect(CacheOperationSource... cos) {
 		setCacheOperationSources(cos);
@@ -71,9 +66,7 @@ public abstract aspect AbstractCacheAspect extends CacheAspectSupport {
 	}
 
 	/**
-	 * Concrete subaspects must implement this pointcut, to identify
-	 * cached methods. For each selected joinpoint, {@link CacheOperationDefinition}
-	 * will be retrieved using Spring's {@link CacheOperationSource} interface.
+	 * Concrete subaspects must implement this pointcut, to identify cached methods.
 	 */
 	protected abstract pointcut cacheMethodExecution(Object cachedObject);
 
