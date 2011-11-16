@@ -27,7 +27,7 @@ import org.springframework.cache.annotation.Cacheable;
  * @author Costin Leau
  */
 @Cacheable("default")
-public class AnnotatedClassCacheableService implements CacheableService {
+public class AnnotatedClassCacheableService implements CacheableService<Object> {
 
 	private final AtomicLong counter = new AtomicLong();
 	public static final AtomicLong nullInvocations = new AtomicLong();

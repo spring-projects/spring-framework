@@ -21,7 +21,6 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.springframework.cache.interceptor.CacheInterceptor;
 
-
 /**
  * @author Costin Leau
  */

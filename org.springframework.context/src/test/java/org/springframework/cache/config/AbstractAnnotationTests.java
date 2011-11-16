@@ -31,16 +31,16 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Abstract annotation test (containing several reusable methods).
- * 
+ *
  * @author Costin Leau
  */
 public abstract class AbstractAnnotationTests {
 
 	protected ApplicationContext ctx;
 
-	protected CacheableService cs;
+	protected CacheableService<?> cs;
 
-	protected CacheableService ccs;
+	protected CacheableService<?> ccs;
 
 	protected CacheManager cm;
 
@@ -58,9 +58,8 @@ public abstract class AbstractAnnotationTests {
 		assertTrue(cn.contains("primary"));
 	}
 
-	public void testCacheable(CacheableService service) throws Exception {
+	public void testCacheable(CacheableService<?> service) throws Exception {
 		Object o1 = new Object();
-		Object o2 = new Object();
 
 		Object r1 = service.cache(o1);
 		Object r2 = service.cache(o1);
@@ -70,9 +69,8 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r1, r3);
 	}
 
-	public void testInvalidate(CacheableService service) throws Exception {
+	public void testInvalidate(CacheableService<?> service) throws Exception {
 		Object o1 = new Object();
-		Object o2 = new Object();
 
 		Object r1 = service.cache(o1);
 		Object r2 = service.cache(o1);
@@ -85,9 +83,8 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r3, r4);
 	}
 
-	public void testInvalidateWKey(CacheableService service) throws Exception {
+	public void testInvalidateWKey(CacheableService<?> service) throws Exception {
 		Object o1 = new Object();
-		Object o2 = new Object();
 
 		Object r1 = service.cache(o1);
 		Object r2 = service.cache(o1);
@@ -100,7 +97,7 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r3, r4);
 	}
 
-	public void testConditionalExpression(CacheableService service)
+	public void testConditionalExpression(CacheableService<?> service)
 			throws Exception {
 		Object r1 = service.conditional(4);
 		Object r2 = service.conditional(4);
@@ -113,7 +110,7 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r3, r4);
 	}
 
-	public void testKeyExpression(CacheableService service) throws Exception {
+	public void testKeyExpression(CacheableService<?> service) throws Exception {
 		Object r1 = service.key(5, 1);
 		Object r2 = service.key(5, 2);
 
@@ -125,7 +122,7 @@ public abstract class AbstractAnnotationTests {
 		assertNotSame(r3, r4);
 	}
 
-	public void testNullValue(CacheableService service) throws Exception {
+	public void testNullValue(CacheableService<?> service) throws Exception {
 		Object key = new Object();
 		assertNull(service.nullValue(key));
 		int nr = service.nullInvocations().intValue();
@@ -135,7 +132,7 @@ public abstract class AbstractAnnotationTests {
 		assertEquals(nr + 1, service.nullInvocations().intValue());
 	}
 
-	public void testMethodName(CacheableService service, String keyName)
+	public void testMethodName(CacheableService<?> service, String keyName)
 			throws Exception {
 		Object key = new Object();
 		Object r1 = service.name(key);
@@ -145,7 +142,7 @@ public abstract class AbstractAnnotationTests {
 		assertNotNull(cache.get(keyName));
 	}
 
-	public void testRootVars(CacheableService service) {
+	public void testRootVars(CacheableService<?> service) {
 		Object key = new Object();
 		Object r1 = service.rootVars(key);
 		assertSame(r1, service.rootVars(key));
@@ -155,7 +152,7 @@ public abstract class AbstractAnnotationTests {
 		assertNotNull(cache.get(expectedKey));
 	}
 
-	public void testCheckedThrowable(CacheableService service) throws Exception {
+	public void testCheckedThrowable(CacheableService<?> service) throws Exception {
 		String arg = UUID.randomUUID().toString();
 		try {
 			service.throwChecked(arg);
@@ -165,7 +162,7 @@ public abstract class AbstractAnnotationTests {
 		}
 	}
 
-	public void testUncheckedThrowable(CacheableService service) throws Exception {
+	public void testUncheckedThrowable(CacheableService<?> service) throws Exception {
 		try {
 			service.throwUnchecked(Long.valueOf(1));
 			fail("Excepted exception");
@@ -176,12 +173,12 @@ public abstract class AbstractAnnotationTests {
 		}
 	}
 
-	public void testNullArg(CacheableService service) {
+	public void testNullArg(CacheableService<?> service) {
 		Object r1 = service.cache(null);
 		assertSame(r1, service.cache(null));
 	}
 
-	public void testCacheUpdate(CacheableService service) {
+	public void testCacheUpdate(CacheableService<?> service) {
 		Object o = new Object();
 		Cache cache = cm.getCache("default");
 		assertNull(cache.get(o));
@@ -194,7 +191,7 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r2, cache.get(o).get());
 	}
 
-	public void testConditionalCacheUpdate(CacheableService service) {
+	public void testConditionalCacheUpdate(CacheableService<?> service) {
 		Integer one = Integer.valueOf(1);
 		Integer three = Integer.valueOf(3);
 
@@ -206,7 +203,7 @@ public abstract class AbstractAnnotationTests {
 		assertEquals(three, Integer.valueOf(cache.get(three).get().toString()));
 	}
 
-	public void testMultiCache(CacheableService service) {
+	public void testMultiCache(CacheableService<?> service) {
 		Object o1 = new Object();
 		Object o2 = new Object();
 
@@ -232,7 +229,7 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r4, secondary.get(o2).get());
 	}
 
-	public void testMultiEvict(CacheableService service) {
+	public void testMultiEvict(CacheableService<?> service) {
 		Object o1 = new Object();
 
 		Object r1 = service.multiCache(o1);
@@ -258,7 +255,7 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r4, secondary.get(o1).get());
 	}
 
-	public void testMultiPut(CacheableService service) {
+	public void testMultiPut(CacheableService<?> service) {
 		Object o = Integer.valueOf(1);
 
 		Cache primary = cm.getCache("primary");
@@ -278,7 +275,7 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r2, secondary.get(o).get());
 	}
 
-	public void testMultiCacheAndEvict(CacheableService service) {
+	public void testMultiCacheAndEvict(CacheableService<?> service) {
 		String methodName = "multiCacheAndEvict";
 
 		Cache primary = cm.getCache("primary");
@@ -299,7 +296,7 @@ public abstract class AbstractAnnotationTests {
 		assertNull(secondary.get(key));
 	}
 
-	public void testMultiConditionalCacheAndEvict(CacheableService service) {
+	public void testMultiConditionalCacheAndEvict(CacheableService<?> service) {
 		Cache primary = cm.getCache("primary");
 		Cache secondary = cm.getCache("secondary");
 		Object key = Integer.valueOf(1);
