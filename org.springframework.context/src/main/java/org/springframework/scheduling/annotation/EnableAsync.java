@@ -106,8 +106,8 @@ import org.springframework.core.Ordered;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Import(AsyncConfigurationSelector.class)
 @Documented
+@Import(AsyncConfigurationSelector.class)
 public @interface EnableAsync {
 
 	/**
