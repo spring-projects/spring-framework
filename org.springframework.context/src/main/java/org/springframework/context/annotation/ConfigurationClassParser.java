@@ -248,14 +248,22 @@ class ConfigurationClassParser {
 					// the candidate class is an ImportSelector -> delegate to it to determine imports
 					try {
 						ImportSelector selector = BeanUtils.instantiateClass(Class.forName(candidate), ImportSelector.class);
-						ImportSelectorContext context = new ImportSelectorContext(importingClassMetadata, this.registry);
-						processImport(configClass, selector.selectImports(context), false);
+						processImport(configClass, selector.selectImports(importingClassMetadata), false);
+					} catch (ClassNotFoundException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}
+				else if (new AssignableTypeFilter(ImportBeanDefinitionRegistrar.class).match(reader, metadataReaderFactory)) {
+					// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
+					try {
+						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(Class.forName(candidate), ImportBeanDefinitionRegistrar.class);
+						registrar.registerBeanDefinitions(importingClassMetadata, registry);
 					} catch (ClassNotFoundException ex) {
 						throw new IllegalStateException(ex);
 					}
 				}
 				else {
-					// the candidate class not an ImportSelector -> process it as a @Configuration class
+					// the candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
 					this.importStack.registerImport(importingClassMetadata.getClassName(), candidate);
 					processConfigurationClass(new ConfigurationClass(reader, null));
 				}
@@ -323,16 +331,16 @@ class ConfigurationClassParser {
 
 		/**
 		 * Given a stack containing (in order)
-		 * <ol>
+		 * <ul>
 		 * <li>com.acme.Foo</li>
 		 * <li>com.acme.Bar</li>
 		 * <li>com.acme.Baz</li>
-		 * </ol>
-		 * Returns "Foo->Bar->Baz". In the case of an empty stack, returns empty string.
+		 * </ul>
+		 * return "ImportStack: [Foo->Bar->Baz]".
 		 */
 		@Override
 		public String toString() {
-			StringBuilder builder = new StringBuilder();
+			StringBuilder builder = new StringBuilder("ImportStack: [");
 			Iterator<ConfigurationClass> iterator = iterator();
 			while (iterator.hasNext()) {
 				builder.append(iterator.next().getSimpleName());
@@ -340,7 +348,7 @@ class ConfigurationClassParser {
 					builder.append("->");
 				}
 			}
-			return builder.toString();
+			return builder.append(']').toString();
 		}
 	}
 
