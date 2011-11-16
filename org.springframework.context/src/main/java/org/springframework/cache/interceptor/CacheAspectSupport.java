@@ -44,15 +44,16 @@ import org.springframework.util.StringUtils;
  *
  * <p>Subclasses are responsible for calling methods in this class in the correct order.
  *
- * <p>Uses the <b>Strategy</b> design pattern. A <code>CacheManager</code>
- * implementation will perform the actual cache management, and a
- * <code>CacheDefinitionSource</code> is used for determining caching operation definitions.
+ * <p>Uses the <b>Strategy</b> design pattern. A {@link CacheManager} implementation will
+ * perform the actual cache management, and a {@link CacheOperationSource} is used for
+ * determining caching operation definitions.
  *
- * <p>A cache aspect is serializable if its <code>CacheManager</code>
- * and <code>CacheOperationSource</code> are serializable.
+ * <p>A cache aspect is serializable if its {@code CacheManager} and
+ * {@code CacheOperationSource} are serializable.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.1
  */
 public abstract class CacheAspectSupport implements InitializingBean {
@@ -90,21 +91,17 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	/**
-	 * Set multiple cache definition sources which are used to find the cache
-	 * attributes. Will build a CompositeCachingDefinitionSource for the given sources.
+	 * Set one or more cache definition sources which are used to find the cache
+	 * attributes. If more than one source is provided, they will be aggregated using a
+	 * {@link CompositeCacheOperationSource}.
+	 * @param cacheOperationSources must not be {@code null}
 	 */
-	public void setCacheOperationSources(CacheOperationSource... cacheDefinitionSources) {
-		Assert.notEmpty(cacheDefinitionSources);
-		this.cacheOperationSource = (cacheDefinitionSources.length > 1 ? new CompositeCacheOperationSource(
-				cacheDefinitionSources) : cacheDefinitionSources[0]);
-	}
-
-	/**
-	 * Set the CacheOperationSource for this cache aspect,
-	 * resolving applicable cache operations from annotations or the like.
-	 */
-	public void setCacheOperationSource(CacheOperationSource cacheOperationSource) {
-		this.cacheOperationSource = cacheOperationSource;
+	public void setCacheOperationSources(CacheOperationSource... cacheOperationSources) {
+		Assert.notEmpty(cacheOperationSources);
+		this.cacheOperationSource =
+				(cacheOperationSources.length > 1 ?
+						new CompositeCacheOperationSource(cacheOperationSources) :
+						cacheOperationSources[0]);
 	}
 
 	/**
