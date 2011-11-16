@@ -19,15 +19,19 @@ package org.springframework.cache.config;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.cache.interceptor.CacheInterceptor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 
 /**
  * @author Costin Leau
+ * @author Chris Beams
  */
 public class CacheAdviceNamespaceTests extends AbstractAnnotationTests {
 
 	@Override
-	protected String getConfig() {
-		return "/org/springframework/cache/config/cache-advice.xml";
+	protected ApplicationContext getApplicationContext() {
+		return new GenericXmlApplicationContext(
+				"/org/springframework/cache/config/cache-advice.xml");
 	}
 
 	@Test

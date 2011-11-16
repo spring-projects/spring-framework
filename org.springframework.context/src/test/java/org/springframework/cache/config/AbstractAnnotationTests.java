@@ -16,7 +16,13 @@
 
 package org.springframework.cache.config;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -27,12 +33,12 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Abstract annotation test (containing several reusable methods).
  *
  * @author Costin Leau
+ * @author Chris Beams
  */
 public abstract class AbstractAnnotationTests {
 
@@ -44,11 +50,12 @@ public abstract class AbstractAnnotationTests {
 
 	protected CacheManager cm;
 
-	protected abstract String getConfig();
+	/** @return a refreshed application context */
+	protected abstract ApplicationContext getApplicationContext();
 
 	@Before
 	public void setup() {
-		ctx = new ClassPathXmlApplicationContext(getConfig());
+		ctx = getApplicationContext();
 		cs = ctx.getBean("service", CacheableService.class);
 		ccs = ctx.getBean("classService", CacheableService.class);
 		cm = ctx.getBean(CacheManager.class);
