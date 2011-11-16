@@ -16,8 +16,6 @@
 
 package org.springframework.cache.config;
 
-
-
 /**
  * @author Costin Leau
  */

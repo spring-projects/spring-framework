@@ -20,12 +20,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.cache.interceptor.CacheInterceptor;
 
-
 /**
  * @author Costin Leau
  */
 public class CacheAdviceNamespaceTests extends AbstractAnnotationTests {
-
 
 	@Override
 	protected String getConfig() {
