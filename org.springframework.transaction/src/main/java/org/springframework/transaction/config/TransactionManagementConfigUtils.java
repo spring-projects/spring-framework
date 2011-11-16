@@ -36,4 +36,10 @@ public abstract class TransactionManagementConfigUtils {
 	public static final String TRANSACTION_ASPECT_CLASS_NAME =
 			"org.springframework.transaction.aspectj.AnnotationTransactionAspect";
 
+	/**
+	 * The name of the AspectJ transaction management @{@code Configuration} class.
+	 */
+	public static final String TRANSACTION_ASPECT_CONFIGURATION_CLASS_NAME =
+			"org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration";
+
 }

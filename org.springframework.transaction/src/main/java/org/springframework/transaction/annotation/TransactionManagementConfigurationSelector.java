@@ -16,63 +16,42 @@
 
 package org.springframework.transaction.annotation;
 
-import java.util.Map;
-
-import org.springframework.aop.config.AopConfigUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.AdviceMode;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportSelectorContext;
-import org.springframework.context.annotation.ImportSelector;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.util.Assert;
+import org.springframework.context.annotation.AdviceModeImportSelector;
+import org.springframework.context.annotation.AutoProxyRegistrar;
+import org.springframework.transaction.config.TransactionManagementConfigUtils;
 
 /**
  * Selects which implementation of {@link AbstractTransactionManagementConfiguration}
  * should be used based on the value of {@link EnableTransactionManagement#mode} on the
- * importing @{@link Configuration} class.
+ * importing {@code @Configuration} class.
  *
  * @author Chris Beams
  * @since 3.1
  * @see EnableTransactionManagement
- * @see AbstractTransactionManagementConfiguration
  * @see ProxyTransactionManagementConfiguration
- * @see org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration
+ * @see TransactionManagementConfigUtils#TRANSACTION_ASPECT_CONFIGURATION_CLASS_NAME
  */
-public class TransactionManagementConfigurationSelector implements ImportSelector {
+public class TransactionManagementConfigurationSelector
+		extends AdviceModeImportSelector<EnableTransactionManagement> {
 
 	/**
 	 * {@inheritDoc}
-	 * <p>This implementation selects {@link ProxyTransactionManagementConfiguration} if
-	 * {@link EnableTransactionManagement#mode()} equals {@code PROXY}, and  otherwise selects
-	 * {@link org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration
-	 * AspectJTransactionManagementConfiguration}.
-	 * <p>If {@code #mode()} equals {@code PROXY}, an auto-proxy creator bean definition
-	 * will also be added to the enclosing {@link BeanDefinitionRegistry} and escalated
-	 * if necessary through the usual {@link AopConfigUtils} family of methods.
+	 * @return {@link ProxyTransactionManagementConfiguration} or
+	 * {@code AspectJTransactionManagementConfiguration} for {@code PROXY} and
+	 * {@code ASPECTJ} values of {@link EnableTransactionManagement#mode()}, respectively
 	 */
-	public String[] selectImports(ImportSelectorContext context) {
-		AnnotationMetadata importingClassMetadata = context.getImportingClassMetadata();
-		BeanDefinitionRegistry registry = context.getBeanDefinitionRegistry();
-
-		Map<String, Object> enableTx =
-			importingClassMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName());
-		Assert.notNull(enableTx,
-				"@EnableTransactionManagement is not present on importing class " +
-				importingClassMetadata.getClassName());
-
-		switch ((AdviceMode) enableTx.get("mode")) {
+	@Override
+	protected String[] selectImports(AdviceMode adviceMode) {
+		switch (adviceMode) {
 			case PROXY:
-				AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
-				if ((Boolean)enableTx.get("proxyTargetClass")) {
-					AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
-				}
-				return new String[] { ProxyTransactionManagementConfiguration.class.getName() };
+				return new String[] { AutoProxyRegistrar.class.getName(), ProxyTransactionManagementConfiguration.class.getName() };
 			case ASPECTJ:
-				return new String[] {"org.springframework.transaction.aspectj.AspectJTransactionManagementConfiguration"};
+				return new String[] { TransactionManagementConfigUtils.TRANSACTION_ASPECT_CONFIGURATION_CLASS_NAME };
 			default:
-				throw new IllegalArgumentException("Unknown AdviceMode " + enableTx.get("mode"));
+				return null;
 		}
 	}
+
 
 }

@@ -100,8 +100,8 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Import(AspectJAutoProxyConfigurationSelector.class)
 @Documented
+@Import(AspectJAutoProxyRegistrar.class)
 public @interface EnableAspectJAutoProxy {
 
 	/**

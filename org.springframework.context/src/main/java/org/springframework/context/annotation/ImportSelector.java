@@ -16,30 +16,25 @@
 
 package org.springframework.context.annotation;
 
+import org.springframework.core.type.AnnotationMetadata;
+
 /**
  * Interface to be implemented by types that determine which @{@link Configuration}
  * class(es) should be imported based on a given selection criteria, usually one or more
  * annotation attributes.
  *
- * <p>In certain cases, an {@code ImportSelector} may register additional bean definitions
- * through the {@code BeanDefinitionRegistry} available in the
- * {@link ImportSelectorContext} provided to the {@link #selectImports} method.
- *
  * @author Chris Beams
  * @since 3.1
  * @see Import
+ * @see ImportBeanDefinitionRegistrar
  * @see Configuration
  */
 public interface ImportSelector {
 
 	/**
 	 * Select and return the names of which class(es) should be imported based on
-	 * the {@code AnnotationMetadata} of the importing {@code @Configuration} class and
-	 * optionally register any {@code BeanDefinition}s necessary to support the selected
-	 * classes.
-	 * @param context containing the {@code AnnotationMetadata} of the importing @{@link
-	 * Configuration} class and the enclosing {@code BeanDefinitionRegistry}.
+	 * the {@link AnnotationMetadata} of the importing @{@link Configuration} class.
 	 */
-	String[] selectImports(ImportSelectorContext context);
+	String[] selectImports(AnnotationMetadata importingClassMetadata);
 
 }
