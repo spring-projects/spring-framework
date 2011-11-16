@@ -33,24 +33,25 @@ import org.w3c.dom.Element;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
- * implementation that allows users to easily configure all the infrastructure
- * beans required to enable annotation-driven cache demarcation.
+ * implementation that allows users to easily configure all the
+ * infrastructure beans required to enable annotation-driven cache
+ * demarcation.
  *
- * <p>By default, all proxies are created as JDK proxies. This may cause some
- * problems if you are injecting objects as concrete classes rather than
- * interfaces. To overcome this restriction you can set the
- * '<code>proxy-target-class</code>' attribute to '<code>true</code>', which
- * will result in class-based proxies being created.
- * 
+ * <p>By default, all proxies are created as JDK proxies. This may cause
+ * some problems if you are injecting objects as concrete classes rather
+ * than interfaces. To overcome this restriction you can set the
+ * '{@code proxy-target-class}' attribute to '{@code true}', which will
+ * result in class-based proxies being created.
+ *
  * @author Costin Leau
  * @since 3.1
  */
 class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser {
 
 	/**
-	 * Parses the '<code>&lt;cache:annotation-driven/&gt;</code>' tag. Will
-	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator}
-	 * with the container as necessary.
+	 * Parses the '{@code <cache:annotation-driven>}' tag. Will
+	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary
+	 * register an AutoProxyCreator} with the container as necessary.
 	 */
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		String mode = element.getAttribute("mode");
@@ -72,7 +73,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	}
 
 	/**
-	 * Registers a 
+	 * Registers a
 	 * <pre>
 	 * <bean id="cacheAspect" class="org.springframework.cache.aspectj.AnnotationCacheAspect" factory-method="aspectOf">
 	 *   <property name="cacheManagerBeanName" value="cacheManager"/>

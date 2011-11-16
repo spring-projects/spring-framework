@@ -29,8 +29,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class implementing the common CacheManager methods.
- * Useful for 'static' environments where the backing caches do not change.
+ * Abstract base class implementing the common {@link CacheManager}
+ * methods. Useful for 'static' environments where the backing caches do
+ * not change.
  *
  * @author Costin Leau
  * @author Juergen Hoeller

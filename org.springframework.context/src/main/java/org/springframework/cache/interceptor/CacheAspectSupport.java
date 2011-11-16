@@ -39,14 +39,16 @@ import org.springframework.util.StringUtils;
  * Base class for caching aspects, such as the {@link CacheInterceptor}
  * or an AspectJ aspect.
  *
- * <p>This enables the underlying Spring caching infrastructure to be used easily
- * to implement an aspect for any aspect system.
+ * <p>This enables the underlying Spring caching infrastructure to be
+ * used easily to implement an aspect for any aspect system.
  *
- * <p>Subclasses are responsible for calling methods in this class in the correct order.
+ * <p>Subclasses are responsible for calling methods in this class in
+ * the correct order.
  *
- * <p>Uses the <b>Strategy</b> design pattern. A {@link CacheManager} implementation will
- * perform the actual cache management, and a {@link CacheOperationSource} is used for
- * determining caching operation definitions.
+ * <p>Uses the <b>Strategy</b> design pattern. A {@link CacheManager}
+ * implementation will perform the actual cache management, and a
+ * {@link CacheOperationSource} is used for determining caching
+ * operation definitions.
  *
  * <p>A cache aspect is serializable if its {@code CacheManager} and
  * {@code CacheOperationSource} are serializable.

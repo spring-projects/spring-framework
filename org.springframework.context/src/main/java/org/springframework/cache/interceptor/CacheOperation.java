@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 
 /**
  * Base class implementing {@link CacheOperation}.
- *  
+ *
  * @author Costin Leau
  */
 public abstract class CacheOperation {
@@ -80,7 +80,7 @@ public abstract class CacheOperation {
 	}
 
 	/**
-	 * This implementation compares the <code>toString()</code> results.
+	 * This implementation compares the {@code toString()} results.
 	 * @see #toString()
 	 */
 	@Override
@@ -89,7 +89,7 @@ public abstract class CacheOperation {
 	}
 
 	/**
-	 * This implementation returns <code>toString()</code>'s hash code.
+	 * This implementation returns {@code toString()}'s hash code.
 	 * @see #toString()
 	 */
 	@Override
@@ -99,8 +99,8 @@ public abstract class CacheOperation {
 
 	/**
 	 * Return an identifying description for this cache operation.
-	 * <p>Has to be overridden in subclasses for correct <code>equals</code>
-	 * and <code>hashCode</code> behavior. Alternatively, {@link #equals}
+	 * <p>Has to be overridden in subclasses for correct {@code equals}
+	 * and {@code hashCode} behavior. Alternatively, {@link #equals}
 	 * and {@link #hashCode} can be overridden themselves.
 	 */
 	@Override
@@ -110,7 +110,7 @@ public abstract class CacheOperation {
 
 	/**
 	 * Return an identifying description for this caching operation.
-	 * <p>Available to subclasses, for inclusion in their <code>toString()</code> result.
+	 * <p>Available to subclasses, for inclusion in their {@code toString()} result.
 	 */
 	protected StringBuilder getOperationDescription() {
 		StringBuilder result = new StringBuilder();

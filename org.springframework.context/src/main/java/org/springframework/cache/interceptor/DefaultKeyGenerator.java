@@ -21,9 +21,10 @@ import java.lang.reflect.Method;
 import org.springframework.cache.interceptor.KeyGenerator;
 
 /**
- * Default key generator. Returns {@value #NO_PARAM_KEY} if no parameters are provided,
- * the parameter itself if only one is given or a hash code computed from all given
- * parameters' hash code values. Uses the constant value {@value #NULL_PARAM_KEY} for any
+ * Default key generator. Returns {@value #NO_PARAM_KEY} if no
+ * parameters are provided, the parameter itself if only one is given or
+ * a hash code computed from all given parameters' hash code values.
+ * Uses the constant value {@value #NULL_PARAM_KEY} for any
  * {@code null} parameters given.
  *
  * @author Costin Leau

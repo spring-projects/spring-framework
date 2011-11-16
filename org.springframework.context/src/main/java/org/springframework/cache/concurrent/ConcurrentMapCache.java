@@ -25,14 +25,14 @@ import org.springframework.cache.support.ValueWrapperImpl;
 
 /**
  * Simple {@link Cache} implementation based on the core JDK
- * <code>java.util.concurrent</code> package.
+ * {@code java.util.concurrent} package.
  *
  * <p>Useful for testing or simple caching scenarios, typically in combination
  * with {@link org.springframework.cache.support.SimpleCacheManager} or
  * dynamically through {@link ConcurrentMapCacheManager}.
  *
  * <p><b>Note:</b> As {@link ConcurrentHashMap} (the default implementation used)
- * does not allow for <code>null</code> values to be stored, this class will replace
+ * does not allow for {@code null} values to be stored, this class will replace
  * them with a predefined internal object. This behavior can be changed through the
  * {@link #ConcurrentMapCache(String, ConcurrentMap, boolean)} constructor.
  *

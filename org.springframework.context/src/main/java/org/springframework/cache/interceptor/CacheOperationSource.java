@@ -31,12 +31,12 @@ public interface CacheOperationSource {
 
 	/**
 	 * Return the cache operation definition for this method,
-	 * or <code>null</code> if the method contains no "cacheable" annotations.
+	 * or {@code null} if the method contains no "cacheable" annotations.
 	 * @param method the method to introspect
-	 * @param targetClass the target class (may be <code>null</code>,
+	 * @param targetClass the target class (may be {@code null},
 	 * in which case the declaring class of the method must be used)
 	 * @return {@link CacheOperation} the matching cache operation,
-	 * or <code>null</code> if none found
+	 * or {@code null} if none found
 	 */
 	Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass);
 

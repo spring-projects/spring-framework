@@ -63,7 +63,7 @@ abstract class CacheOperationSourcePointcut extends StaticMethodMatcherPointcut 
 
 
 	/**
-	 * Obtain the underlying CacheOperationDefinitionSource (may be <code>null</code>).
+	 * Obtain the underlying CacheOperationDefinitionSource (may be {@code null}).
 	 * To be implemented by subclasses.
 	 */
 	protected abstract CacheOperationSource getCacheOperationSource();

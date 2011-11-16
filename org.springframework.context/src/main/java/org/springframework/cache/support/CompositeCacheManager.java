@@ -52,8 +52,8 @@ public class CompositeCacheManager implements InitializingBean, CacheManager {
 
 	/**
 	 * Indicate whether a {@link NoOpCacheManager} should be added at the end of the manager lists.
-	 * In this case, any <code>getCache</code> requests not handled by the configured cache managers will
-	 * be automatically handled by the {@link NoOpCacheManager} (and hence never return <code>null</code>).
+	 * In this case, any {@code getCache} requests not handled by the configured cache managers will
+	 * be automatically handled by the {@link NoOpCacheManager} (and hence never return {@code null}).
 	 */
 	public void setFallbackToNoOpCache(boolean fallbackToNoOpCache) {
 		this.fallbackToNoOpCache = fallbackToNoOpCache;
