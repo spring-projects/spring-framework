@@ -39,7 +39,7 @@ public interface ResourceHolder {
 	void unbound();
 
 	/**
-	 * Determine whether this holder is considere as 'void',
+	 * Determine whether this holder is considered as 'void',
 	 * i.e. as a leftover from a previous thread.
 	 */
 	boolean isVoid();
