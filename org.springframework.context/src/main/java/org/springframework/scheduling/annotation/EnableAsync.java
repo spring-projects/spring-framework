@@ -132,8 +132,9 @@ public @interface EnableAsync {
 	boolean proxyTargetClass() default false;
 
 	/**
-	 * Indicate how async advice should be applied.
-	 * The default is {@link AdviceMode#PROXY}.
+	 * Indicate how async advice should be applied. The default is
+	 * {@link AdviceMode#PROXY}.
+	 * @see AdviceMode
 	 */
 	AdviceMode mode() default AdviceMode.PROXY;
 

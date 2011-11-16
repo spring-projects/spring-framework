@@ -24,10 +24,10 @@ import org.springframework.transaction.PlatformTransactionManager;
  * or need to specify explicitly the {@link PlatformTransactionManager} bean to be used
  * for annotation-driven transaction management, as opposed to the default approach of a
  * by-type lookup. One reason this might be necessary is if there are two
- * {@code PlatformTransactionManager} implementations present in the container.
+ * {@code PlatformTransactionManager} beans present in the container.
  *
  * <p>See @{@link EnableTransactionManagement} for general examples and context; see
- * {@link #annotationDrivenTransactionManager()} below for detailed instructions.
+ * {@link #annotationDrivenTransactionManager()} for detailed instructions.
  *
  * <p>Note that in by-type lookup disambiguation cases, an alternative approach to
  * implementing this interface is to simply mark one of the offending {@code
