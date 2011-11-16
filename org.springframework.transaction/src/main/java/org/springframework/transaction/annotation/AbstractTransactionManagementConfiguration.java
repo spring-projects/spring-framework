@@ -41,8 +41,8 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 	protected PlatformTransactionManager txManager;
 
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
-		enableTx = importMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName(), false);
-		Assert.notNull(enableTx,
+		this.enableTx = importMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName(), false);
+		Assert.notNull(this.enableTx,
 				"@EnableTransactionManagement is not present on importing class " +
 				importMetadata.getClassName());
 	}

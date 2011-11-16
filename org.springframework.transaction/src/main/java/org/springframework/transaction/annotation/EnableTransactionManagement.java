@@ -71,7 +71,7 @@ import org.springframework.core.Ordered;
  * <tx:annotation-driven/>} are responsible for registering the necessary Spring
  * components that power annotation-driven transaction management, such as the
  * TransactionInterceptor and the proxy- or AspectJ-based advice that weave the
- * interceptor into the call stack when {@code JdbcFooRepository}'s {@code @Transacational}
+ * interceptor into the call stack when {@code JdbcFooRepository}'s {@code @Transactional}
  * methods are invoked.
  *
  * <p>A minor difference between the two examples lies in the naming of the {@code
@@ -123,9 +123,9 @@ import org.springframework.core.Ordered;
  * {@link AdviceMode#PROXY} (the default), then the other attributes control the behavior
  * of the proxying.
  *
- * <p>Note that if the {@linkplain #mode} is set to {@link AdviceMode#ASPECTJ}, then
- * the {@link #proxyTargetClass()} attribute is obsolete. Note also that in this case the
- * {@code spring-aspects} module JAR must be present on the classpath.<p>
+ * <p>If the {@linkplain #mode} is set to {@link AdviceMode#ASPECTJ}, then the
+ * {@link #proxyTargetClass()} attribute is obsolete. Note also that in this case the
+ * {@code spring-aspects} module JAR must be present on the classpath.
  *
  * @author Chris Beams
  * @since 3.1
@@ -141,9 +141,10 @@ import org.springframework.core.Ordered;
 public @interface EnableTransactionManagement {
 
 	/**
-	 * Indicate whether subclass-based (CGLIB) proxies are to be created as opposed
-	 * to standard Java interface-based proxies. The default is {@code false}. <strong>
-	 * Applicable only if {@link #mode()} is set to {@link AdviceMode#PROXY}</strong>.
+	 * Indicate whether subclass-based (CGLIB) proxies are to be created ({@code true}) as
+	 * opposed to standard Java interface-based proxies ({@code false}). The default is
+	 * {@code false}. <strong>Applicable only if {@link #mode()} is set to
+	 * {@link AdviceMode#PROXY}</strong>.
 	 *
 	 * <p>Note that subclass-based proxies require the {@link Transactional @Transactional}
 	 * to be defined on the concrete class. Annotations in interfaces will
@@ -152,8 +153,8 @@ public @interface EnableTransactionManagement {
 	boolean proxyTargetClass() default false;
 
 	/**
-	 * Indicate how transactional advice should be applied.
-	 * The default is {@link AdviceMode.PROXY}.
+	 * Indicate how transactional advice should be applied. The default is
+	 * {@link AdviceMode.PROXY}.
 	 * @see AdviceMode
 	 */
 	AdviceMode mode() default AdviceMode.PROXY;
