@@ -16,52 +16,35 @@
 
 package org.springframework.scheduling.annotation;
 
-import java.util.Map;
-
 import org.springframework.context.annotation.AdviceMode;
+import org.springframework.context.annotation.AdviceModeImportSelector;
 import org.springframework.context.annotation.AnnotationConfigUtils;
-import org.springframework.context.annotation.ImportSelectorContext;
-import org.springframework.context.annotation.ImportSelector;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.util.Assert;
 
 /**
- * Selects which implementation of {@link AbstractAsyncConfiguration}
- * should be used based on the value of {@link EnableAsync#mode} on the
- * importing @{@link Configuration} class.
+ * Selects which implementation of {@link AbstractAsyncConfiguration} should be used based
+ * on the value of {@link EnableAsync#mode} on the importing {@code @Configuration} class.
  *
  * @author Chris Beams
  * @since 3.1
  * @see EnableAsync
- * @see AbstractAsyncConfiguration
  * @see ProxyAsyncConfiguration
  * @see AnnotationConfigUtils#ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME
  */
-public class AsyncConfigurationSelector implements ImportSelector {
+public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableAsync> {
 
 	/**
 	 * {@inheritDoc}
-	 * <p>This implementation selects {@link ProxyAsyncConfiguration} if
-	 * {@link EnableAsync#mode()} equals {@code PROXY}, and otherwise selects
-	 * {@link org.springframework.scheduling.aspectj.AspectJAsyncConfiguration
-	 * AspectJAsyncConfiguration}. No additional {@code BeanDefinition}s are registered
-	 * in either case.
+	 * @return {@link ProxyAsyncConfiguration} or {@code AspectJAsyncConfiguration} for
+	 * {@code PROXY} and {@code ASPECTJ} values of {@link EnableAsync#mode()}, respectively
 	 */
-	public String[] selectImports(ImportSelectorContext context) {
-		AnnotationMetadata importingClassMetadata = context.getImportingClassMetadata();
-		Map<String, Object> enableAsync =
-			importingClassMetadata.getAnnotationAttributes(EnableAsync.class.getName());
-		Assert.notNull(enableAsync,
-				"@EnableAsync is not present on importing class " +
-				importingClassMetadata.getClassName());
-
-		switch ((AdviceMode) enableAsync.get("mode")) {
+	public String[] selectImports(AdviceMode adviceMode) {
+		switch (adviceMode) {
 			case PROXY:
-				return new String[] {ProxyAsyncConfiguration.class.getName()};
+				return new String[] { ProxyAsyncConfiguration.class.getName() };
 			case ASPECTJ:
-				return new String[] {AnnotationConfigUtils.ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME};
+				return new String[] { AnnotationConfigUtils.ASYNC_EXECUTION_ASPECT_CONFIGURATION_CLASS_NAME };
 			default:
-				throw new IllegalArgumentException("Unknown AdviceMode " + enableAsync.get("mode"));
+				return null;
 		}
 	}
 

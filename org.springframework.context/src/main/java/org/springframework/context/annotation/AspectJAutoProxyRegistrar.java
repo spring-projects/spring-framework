@@ -31,15 +31,15 @@ import org.springframework.core.type.AnnotationMetadata;
  * @see EnableAspectJAutoProxy
  * @since 3.1
  */
-public class AspectJAutoProxyConfigurationSelector implements ImportSelector {
+class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 
 	/**
-	 * Register, escalate, and configure the AspectJ auto proxy creator. Always return
-	 * an empty array, as no actual {@code @Configuration} classes are required.
+	 * Register, escalate, and configure the AspectJ auto proxy creator based on the value
+	 * of the @{@link EnableAspectJAutoProxy#proxyTargetClass()} attribute on the importing
+	 * {@code @Configuration} class.
 	 */
-	public String[] selectImports(ImportSelectorContext context) {
-		BeanDefinitionRegistry registry = context.getBeanDefinitionRegistry();
-		AnnotationMetadata importingClassMetadata = context.getImportingClassMetadata();
+	public void registerBeanDefinitions(
+			AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 
 		Map<String, Object> enableAJAutoProxy =
 			importingClassMetadata.getAnnotationAttributes(EnableAspectJAutoProxy.class.getName());
@@ -49,8 +49,6 @@ public class AspectJAutoProxyConfigurationSelector implements ImportSelector {
 		if ((Boolean)enableAJAutoProxy.get("proxyTargetClass")) {
 			AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 		}
-
-		return new String[] { };
 	}
 
 }

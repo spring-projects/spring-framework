@@ -120,6 +120,12 @@ public class AnnotationConfigUtils {
 			"org.springframework.cache.aspectj.AnnotationCacheAspect";
 
 	/**
+	 * The name of the AspectJ caching aspect @{@code Configuration} class.
+	 */
+	public static final String CACHE_ASPECT_CONFIGURATION_CLASS_NAME =
+			"org.springframework.cache.aspectj.AspectJCachingConfiguration";
+
+	/**
 	 * The bean name of the internally managed JPA annotation processor.
 	 */
 	public static final String PERSISTENCE_ANNOTATION_PROCESSOR_BEAN_NAME =

@@ -16,61 +16,37 @@
 
 package org.springframework.cache.annotation;
 
-import java.util.Map;
-
-import org.springframework.aop.config.AopConfigUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.AdviceMode;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportSelectorContext;
-import org.springframework.context.annotation.ImportSelector;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.util.Assert;
+import org.springframework.context.annotation.AdviceModeImportSelector;
+import org.springframework.context.annotation.AnnotationConfigUtils;
+import org.springframework.context.annotation.AutoProxyRegistrar;
 
 /**
  * Selects which implementation of {@link AbstractCachingConfiguration} should be used
- * based on the value of {@link EnableCaching#mode} on the importing @{@link Configuration}
+ * based on the value of {@link EnableCaching#mode} on the importing {@code @Configuration}
  * class.
  *
  * @author Chris Beams
  * @since 3.1
  * @see EnableCaching
- * @see AbstractCachingConfiguration
  * @see ProxyCachingConfiguration
- * @see org.springframework.cache.aspectj.AspectJCachingConfiguration
+ * @see AnnotationConfigUtils.CACHE_ASPECT_CONFIGURATION_CLASS_NAME
  */
-public class CachingConfigurationSelector implements ImportSelector {
+public class CachingConfigurationSelector extends AdviceModeImportSelector<EnableCaching> {
 
 	/**
 	 * {@inheritDoc}
-	 * <p>This implementation selects {@link ProxyCachingConfiguration} if
-	 * {@link EnableCaching#mode()} equals {@code PROXY}, and otherwise selects
-	 * {@link org.springframework.cache.aspectj.AspectJCachingConfiguration AspectJCacheConfiguration}.
-	 * <p>If {@code #mode()} equals {@code PROXY}, an auto-proxy creator bean definition
-	 * will also be added to the enclosing {@link BeanDefinitionRegistry} and escalated
-	 * if necessary through the usual {@link AopConfigUtils} family of methods.
+	 * @return {@link ProxyCachingConfiguration} or {@code AspectJCacheConfiguration} for
+	 * {@code PROXY} and {@code ASPECTJ} values of {@link EnableCaching#mode()}, respectively
 	 */
-	public String[] selectImports(ImportSelectorContext context) {
-		AnnotationMetadata importingClassMetadata = context.getImportingClassMetadata();
-		BeanDefinitionRegistry registry = context.getBeanDefinitionRegistry();
-
-		Map<String, Object> enableCaching =
-			importingClassMetadata.getAnnotationAttributes(EnableCaching.class.getName());
-		Assert.notNull(enableCaching,
-				"@EnableCaching is not present on importing class " +
-				importingClassMetadata.getClassName());
-
-		switch ((AdviceMode) enableCaching.get("mode")) {
+	public String[] selectImports(AdviceMode adviceMode) {
+		switch (adviceMode) {
 			case PROXY:
-				AopConfigUtils.registerAutoProxyCreatorIfNecessary(registry);
-				if ((Boolean)enableCaching.get("proxyTargetClass")) {
-					AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
-				}
-				return new String[] { ProxyCachingConfiguration.class.getName() };
+				return new String[] { AutoProxyRegistrar.class.getName(), ProxyCachingConfiguration.class.getName() };
 			case ASPECTJ:
-				return new String[] {"org.springframework.cache.aspectj.AspectJCachingConfiguration"};
+				return new String[] { AnnotationConfigUtils.CACHE_ASPECT_CONFIGURATION_CLASS_NAME };
 			default:
-				throw new IllegalArgumentException("Unknown AdviceMode " + enableCaching.get("mode"));
+				return null;
 		}
 	}
 
