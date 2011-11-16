@@ -146,9 +146,12 @@ public @interface EnableTransactionManagement {
 	 * {@code false}. <strong>Applicable only if {@link #mode()} is set to
 	 * {@link AdviceMode#PROXY}</strong>.
 	 *
-	 * <p>Note that subclass-based proxies require the {@link Transactional @Transactional}
-	 * to be defined on the concrete class. Annotations in interfaces will
-	 * not work in that case (they will rather only work with interface-based proxies)!
+	 * <p>Note that setting this attribute to {@code true} will affect <em>all</em>
+	 * Spring-managed beans requiring proxying, not just those marked with
+	 * {@code @Transactional}. For example, other beans marked with Spring's
+	 * {@code @Async} annotation will be upgraded to subclass proxying at the same
+	 * time. This approach has no negative impact in practice unless one is explicitly
+	 * expecting one type of proxy vs another, e.g. in tests.
 	 */
 	boolean proxyTargetClass() default false;
 
