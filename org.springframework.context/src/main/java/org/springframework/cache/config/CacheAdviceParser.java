@@ -42,15 +42,14 @@ import org.w3c.dom.Element;
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser
  * BeanDefinitionParser} for the {@code <tx:advice/>} tag.
- * 
- * @author Costin Leau
  *
+ * @author Costin Leau
  */
 class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 	/**
 	 * Simple, reusable class used for overriding defaults.
-	 * 
+	 *
 	 * @author Costin Leau
 	 */
 	private static class Props {

@@ -25,12 +25,12 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Evaluation context class that adds a method parameters as SpEL variables,
- * in a lazy manner. The lazy nature eliminates unneeded parsing of classes
- * byte code for parameter discovery.
+ * Evaluation context class that adds a method parameters as SpEL
+ * variables, in a lazy manner. The lazy nature eliminates unneeded
+ * parsing of classes byte code for parameter discovery.
  *
- * <p>To limit the creation of objects, an ugly constructor is used (rather then
- * a dedicated 'closure'-like class for deferred execution).
+ * <p>To limit the creation of objects, an ugly constructor is used
+ * (rather then a dedicated 'closure'-like class for deferred execution).
  *
  * @author Costin Leau
  * @since 3.1

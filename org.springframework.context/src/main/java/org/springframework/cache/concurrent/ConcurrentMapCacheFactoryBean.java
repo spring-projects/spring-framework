@@ -66,7 +66,7 @@ public class ConcurrentMapCacheFactoryBean
 	}
 
 	/**
-	 * Set whether to allow <code>null</code> values
+	 * Set whether to allow {@code null} values
 	 * (adapting them to an internal null holder value).
 	 * <p>Default is "true".
 	 */

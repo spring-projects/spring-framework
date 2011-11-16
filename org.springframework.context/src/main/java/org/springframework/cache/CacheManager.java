@@ -28,8 +28,8 @@ public interface CacheManager {
 
 	/**
 	 * Return the cache associated with the given name.
-	 * @param name cache identifier (must not be <code>null</code>)
-	 * @return associated cache, or <code>null</code> if none is found
+	 * @param name cache identifier (must not be {@code null})
+	 * @return associated cache, or {@code null} if none is found
 	 */
 	Cache getCache(String name);
 

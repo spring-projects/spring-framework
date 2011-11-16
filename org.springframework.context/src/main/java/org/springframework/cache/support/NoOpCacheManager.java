@@ -27,8 +27,9 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
 /**
- * A basic, no operation {@link CacheManager} implementation suitable for disabling caching, 
- * typically used for backing cache declarations without an actual backing store.
+ * A basic, no operation {@link CacheManager} implementation suitable
+ * for disabling caching, typically used for backing cache declarations
+ * without an actual backing store.
  *
  * <p>Will simply accept any items into the cache not actually storing them.
  *
@@ -91,8 +92,8 @@ public class NoOpCacheManager implements CacheManager {
 
 	/**
 	 * {@inheritDoc}
-	 * 
-	 * This implementation returns the name of the caches previously requested.  
+	 *
+	 * This implementation returns the name of the caches previously requested.
 	 */
 	public Collection<String> getCacheNames() {
 		return Collections.unmodifiableSet(names);

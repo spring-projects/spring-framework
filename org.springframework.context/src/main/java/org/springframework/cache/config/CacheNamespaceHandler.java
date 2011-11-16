@@ -23,8 +23,8 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
 /**
- * <code>NamespaceHandler</code> allowing for the configuration of
- * declarative cache management using either XML or using annotations.
+ * {@code NamespaceHandler} allowing for the configuration of declarative
+ * cache management using either XML or using annotations.
  *
  * <p>This namespace handler is the central piece of functionality in the
  * Spring cache management facilities.

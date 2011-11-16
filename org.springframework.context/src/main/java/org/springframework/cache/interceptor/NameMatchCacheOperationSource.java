@@ -30,7 +30,7 @@ import org.springframework.util.PatternMatchUtils;
 /**
  * Simple {@link CacheOperationSource} implementation that
  * allows attributes to be matched by registered name.
- * 
+ *
  * @author Costin Leau
  */
 public class NameMatchCacheOperationSource implements CacheOperationSource, Serializable {

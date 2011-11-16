@@ -21,7 +21,6 @@ import java.util.Collection;
 
 import org.springframework.cache.interceptor.CacheOperation;
 
-
 /**
  * Strategy interface for parsing known caching annotation types.
  * {@link AnnotationCacheDefinitionSource} delegates to such
@@ -37,11 +36,11 @@ public interface CacheAnnotationParser {
 	 * Parses the cache definition for the given method or class,
 	 * based on a known annotation type.
 	 * <p>This essentially parses a known cache annotation into Spring's
-	 * metadata attribute class. Returns <code>null</code> if the method/class
+	 * metadata attribute class. Returns {@code null} if the method/class
 	 * is not cacheable.
 	 * @param ae the annotated method or class
 	 * @return CacheOperation the configured caching operation,
-	 * or <code>null</code> if none was found
+	 * or {@code null} if none was found
 	 * @see AnnotationCacheOperationSource#determineCacheOperation
 	 */
 	Collection<CacheOperation> parseCacheAnnotations(AnnotatedElement ae);

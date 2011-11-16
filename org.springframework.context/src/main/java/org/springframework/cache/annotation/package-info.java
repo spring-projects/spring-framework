@@ -1,9 +1,8 @@
 
 /**
- * JDK 1.5+ annotation for caching demarcation.
+ * Annotations and supporting classes for declarative cache management.
  * Hooked into Spring's caching interception infrastructure
- * via CacheOperationSource implementation.
- *
+ * via {@link org.springframework.cache.interceptor.CacheOperationSource
+ * CacheOperationSource} implementation.
  */
 package org.springframework.cache.annotation;
-
