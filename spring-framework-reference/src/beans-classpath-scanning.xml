@@ -4,23 +4,21 @@
 <section id="beans-classpath-scanning">
   <title>Classpath scanning and managed components</title>
 
-  <!-- MLP: Beverly to review paragraph -->
-
-  <para>Most examples foo bar in this chapter use XML to specify the
-    configuration metadata that produces each
-    <interfacename>BeanDefinition</interfacename> within the Spring container.
-    The previous section (<xref linkend="beans-annotation-config"/>)
-    demonstrates how to provide a lot of the configuration metadata through
-    source-level annotations. Even in those examples, however, the "base" bean
-    definitions are explicitly defined in the XML file, while the annotations
-    only drive the dependency injection. This section describes an option for
-    implicitly detecting the <emphasis>candidate components</emphasis> by
-    scanning the classpath. Candidate components are classes that match against
-    a filter criteria and have a corresponding bean definition registered with
-    the container. This removes the need to use XML to perform bean
-    registration, instead you can use annotations (for example @Component),
-    AspectJ type expressions, or your own custom filter criteria to select which
-    classes will have bean definitions registered with the container.</para>
+  <para>Most examples in this chapter use XML to specify the configuration
+    metadata that produces each <interfacename>BeanDefinition</interfacename>
+    within the Spring container. The previous section
+    (<xref linkend="beans-annotation-config"/>) demonstrates how to provide a
+    lot of the configuration metadata through source-level annotations. Even
+    in those examples, however, the "base" bean definitions are explicitly
+    defined in the XML file, while the annotations only drive the dependency
+    injection. This section describes an option for implicitly detecting the
+    <emphasis>candidate components</emphasis> by scanning the classpath.
+    Candidate components are classes that match against a filter criteria and
+    have a corresponding bean definition registered with the container. This
+    removes the need to use XML to perform bean registration, instead you can
+    use annotations (for example @Component), AspectJ type expressions, or your
+    own custom filter criteria to select which classes will have bean
+    definitions registered with the container.</para>
 
   <note>
     <para>Starting with Spring 3.0, many features provided by the <ulink
