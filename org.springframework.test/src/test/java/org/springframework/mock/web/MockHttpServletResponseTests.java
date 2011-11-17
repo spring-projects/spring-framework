@@ -32,88 +32,84 @@ import org.springframework.web.util.WebUtils;
  */
 public class MockHttpServletResponseTests extends TestCase {
 
-	public void testSetContentTypeWithNoEncoding() {
+	public void testSetContentType() {
 		String contentType = "test/plain";
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType(contentType);
-		assertEquals("Character encoding should be the default", WebUtils.DEFAULT_CHARACTER_ENCODING,
-			response.getCharacterEncoding());
-		assertEquals("Content-Type header not set", contentType, response.getHeader("Content-Type"));
+		assertEquals(contentType, response.getContentType());
+		assertEquals(contentType, response.getHeader("Content-Type"));
+		assertEquals(WebUtils.DEFAULT_CHARACTER_ENCODING, response.getCharacterEncoding());
 	}
 
-	public void testSetContentTypeWithUTF8() {
-		String contentType = "test/plain; charset=UTF-8";
+	public void testSetContentTypeUTF8() {
+		String contentType = "test/plain;charset=UTF-8";
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType(contentType);
-		assertEquals("Character encoding should be 'UTF-8'", "UTF-8", response.getCharacterEncoding());
-		assertEquals("Content-Type header not set", contentType, response.getHeader("Content-Type"));
+		assertEquals("UTF-8", response.getCharacterEncoding());
+		assertEquals(contentType, response.getContentType());
+		assertEquals(contentType, response.getHeader("Content-Type"));
 	}
 	
-	public void testContentTypeHeaderWithNoEncoding() {
+	public void testContentTypeHeader() {
 		String contentType = "test/plain";
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader("Content-Type", contentType);
-		assertEquals("contentType field not set", contentType, response.getContentType());
+		assertEquals(contentType, response.getContentType());
+		assertEquals(contentType, response.getHeader("Content-Type"));
+		assertEquals(WebUtils.DEFAULT_CHARACTER_ENCODING, response.getCharacterEncoding());
 
 		response = new MockHttpServletResponse();
 		response.setHeader("Content-Type", contentType);
-		assertEquals("contentType field not set", contentType, response.getContentType());
+		assertEquals(contentType, response.getContentType());
+		assertEquals(contentType, response.getHeader("Content-Type"));
+		assertEquals(WebUtils.DEFAULT_CHARACTER_ENCODING, response.getCharacterEncoding());
 	}
 
-	public void testContentTypeHeaderWithUTF8() {
-		String contentType = "test/plain; charset=UTF-8";
+	public void testContentTypeHeaderUTF8() {
+		String contentType = "test/plain;charset=UTF-8";
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.setHeader("Content-Type", contentType);
+		assertEquals(contentType, response.getContentType());
+		assertEquals(contentType, response.getHeader("Content-Type"));
+		assertEquals("UTF-8", response.getCharacterEncoding());
+
+		response = new MockHttpServletResponse();
 		response.addHeader("Content-Type", contentType);
-		assertEquals("contentType field not set", contentType, response.getContentType());
-		assertEquals("Character encoding should be 'UTF-8'", "UTF-8", response.getCharacterEncoding());
-		assertEquals("Content-Type header not set", contentType, response.getHeader("Content-Type"));
-
-		response = new MockHttpServletResponse();
-		response.setHeader("Content-Type", contentType);
-		assertEquals("contentType field not set", contentType, response.getContentType());
-		assertEquals("Character encoding should be 'UTF-8'", "UTF-8", response.getCharacterEncoding());
-		assertEquals("Content-Type header not set", contentType, response.getHeader("Content-Type"));
+		assertEquals(contentType, response.getContentType());
+		assertEquals(contentType, response.getHeader("Content-Type"));
+		assertEquals("UTF-8", response.getCharacterEncoding());
 	}
 
-	public void testSetCharacterEncoding() {
+	public void testSetContentTypeThenCharacterEncoding() {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType("test/plain");
 		response.setCharacterEncoding("UTF-8");
-		assertEquals("Character encoding not set", "UTF-8",	response.getCharacterEncoding());
-		assertEquals("contentType field not set", "test/plain;charset=UTF-8", response.getContentType());
-		assertEquals("Content-Type header not set", "test/plain;charset=UTF-8", response.getHeader("Content-Type"));
+		assertEquals("test/plain", response.getContentType());
+		assertEquals("test/plain;charset=UTF-8", response.getHeader("Content-Type"));
+		assertEquals("UTF-8", response.getCharacterEncoding());
 	}
 
-	public void testSetCharacterEncodingOppositeOrder() {
+	public void testSetCharacterEncodingThenContentType() {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("test/plain");
-		assertEquals("Character encoding not set", "UTF-8",	response.getCharacterEncoding());
-		assertEquals("contentType field not set", "test/plain;charset=UTF-8", response.getContentType());
-		assertEquals("Content-Type header not set", "test/plain;charset=UTF-8", response.getHeader("Content-Type"));
+		assertEquals("test/plain", response.getContentType());
+		assertEquals("test/plain;charset=UTF-8", response.getHeader("Content-Type"));
+		assertEquals("UTF-8", response.getCharacterEncoding());
 	}
-	
-	public void testReplaceCharacterEncoding() {
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		response.setContentType("test/plain;charset=ISO-8859-1");
-		response.setCharacterEncoding("UTF-8");
-		assertEquals("Character encoding not set", "UTF-8",	response.getCharacterEncoding());
-		assertEquals("contentType field not set", "test/plain;charset=UTF-8", response.getContentType());
-		assertEquals("Content-Type header not set", "test/plain;charset=UTF-8", response.getHeader("Content-Type"));
-	}
-	
+
 	public void testContentLength() {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setContentLength(66);
-		assertEquals("Content length field not set", 66,	response.getContentLength());
-		assertEquals("Content-Length header not set", "66", response.getHeader("Content-Length"));
+		assertEquals(66, response.getContentLength());
+		assertEquals("66", response.getHeader("Content-Length"));
 	}
 	
 	public void testContentLengthHeader() {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader("Content-Length", "66");
-		assertEquals("Content length field not set", 66,	response.getContentLength());
-		assertEquals("Content-Length header not set", "66", response.getHeader("Content-Length"));
+		assertEquals(66,response.getContentLength());
+		assertEquals("66", response.getHeader("Content-Length"));
 	}
 	
 	public void testHttpHeaderNameCasingIsPreserved() throws Exception {

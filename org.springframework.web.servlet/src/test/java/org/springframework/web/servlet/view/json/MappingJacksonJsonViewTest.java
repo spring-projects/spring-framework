@@ -92,7 +92,7 @@ public class MappingJacksonJsonViewTest {
 		assertEquals("no-cache, no-store, max-age=0", response.getHeader("Cache-Control"));
 		assertNotNull(response.getHeader("Expires"));
 
-		assertEquals(MappingJacksonJsonView.DEFAULT_CONTENT_TYPE + ";charset=UTF-8", response.getContentType());
+		assertEquals(MappingJacksonJsonView.DEFAULT_CONTENT_TYPE, response.getContentType());
 
 		String jsonResult = response.getContentAsString();
 		assertTrue(jsonResult.length() > 0);
