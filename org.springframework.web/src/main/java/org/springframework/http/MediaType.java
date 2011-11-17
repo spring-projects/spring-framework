@@ -575,6 +575,9 @@ public class MediaType implements Comparable<MediaType> {
 		}
 		String type = fullType.substring(0, subIndex);
 		String subtype = fullType.substring(subIndex + 1, fullType.length());
+		if (WILDCARD_TYPE.equals(type) && !WILDCARD_TYPE.equals(subtype)) {
+			throw new IllegalArgumentException("A wildcard type is legal only in '*/*' (all media types).");
+		}
 
 		Map<String, String> parameters = null;
 		if (parts.length > 1) {

@@ -129,6 +129,11 @@ public class MediaTypeTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeTypeRange() {
+		MediaType.parseMediaType("*/json");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
 	public void parseMediaTypeIllegalType() {
 		MediaType.parseMediaType("audio(/basic");
 	}
