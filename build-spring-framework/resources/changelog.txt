@@ -15,15 +15,16 @@ Changes in version 3.1 RC2 (2011-11-15)
 * fixed MethodInvokingJobDetailFactoryBean's Quartz 2.0 support
 * RmiClientInterceptor detects nested SocketException as connect failure as well
 * fixed StandardServlet/PortletEnvironment to check for JNDI (for Google App Engine compatibility)
-* Use original request URI in FlashMap matching logic to account for URL rewriting
-* Support target request with multiple parameter values in FlahMap matching logic
-* Fix issue in SimpleMappingExceptionResolver causing exception when setting "statusCodes" property
-* The Form input tag allows type values other than "text" such as HTML5-specific types.
-* The Form hidden tag supports "disabled" attribute
-* Add ignoreDefaultModelOnRedirect attribute to <mvc:annotation-driven/>
-* Add methods to UriComponentsBuilder for replacing the path or the query.
-* Add ServletUriComponentsBuilder to build a UriComponents instance starting with a ServletRequest
-* Keep contentType field and Content-Type header in sync in MockHttpServletRequest and MockHttpServletResponse
+* using original request URI in FlashMap matching logic to account for URL rewriting
+* now supporting target request with multiple parameter values in FlashMap matching logic
+* fixed issue in SimpleMappingExceptionResolver causing exception when setting "statusCodes" property
+* form input tag now allows type values other than "text" such as HTML5-specific types
+* form hidden tag now supports "disabled" attribute
+* added ignoreDefaultModelOnRedirect attribute to <mvc:annotation-driven/>
+* added methods to UriComponentsBuilder for replacing the path or the query
+* added ServletUriComponentsBuilder to build a UriComponents instance starting with a ServletRequest
+* MockHttpServletRequest and MockHttpServletResponse now keep contentType field and Content-Type header in sync
+
 
 Changes in version 3.1 RC1 (2011-10-11)
 ---------------------------------------
