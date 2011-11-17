@@ -140,18 +140,17 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
 		this.charset = true;
-		if (this.contentType != null)  {
-			String type = removeCharset(this.contentType);
-			setContentType(type);
-		}
+		updateContentTypeHeader();
 	}
 	
-	private String removeCharset(String contentType) {
-		int index = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
-		if (index != -1) {
-			contentType = contentType.substring(0, contentType.lastIndexOf(';', index));
+	private void updateContentTypeHeader() {
+		if (this.contentType != null) {
+			StringBuilder sb = new StringBuilder(this.contentType);
+			if (this.contentType.toLowerCase().indexOf(CHARSET_PREFIX) == -1 && this.charset) {
+				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
+			}
+			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
 		}
-		return contentType;
 	}
 
 	public String getCharacterEncoding() {
@@ -204,11 +203,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			if (charsetIndex != -1) {
 				String encoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
 				this.characterEncoding = encoding;
+				this.charset = true;
 			}
-			else if (this.charset) {
-				this.contentType += ";" + CHARSET_PREFIX + this.characterEncoding;
-			}
-			doAddHeaderValue(CONTENT_TYPE_HEADER, this.contentType, true);
+			updateContentTypeHeader();
 		}
 	}
 
