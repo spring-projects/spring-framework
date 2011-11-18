@@ -123,7 +123,7 @@ class ConfigurationClassEnhancer {
 	 * {@code @Configuration} classes must de-register static CGLIB callbacks on
 	 * destruction, which is handled by the (private) {@code DisposableBeanMethodInterceptor}.
 	 * <p>Note that this interface is intended for framework-internal use only, however
-	 * must remain public in order to allow access to subclasses generated from other 
+	 * must remain public in order to allow access to subclasses generated from other
 	 * packages (i.e. user code).
 	 */
 	public interface EnhancedConfiguration extends DisposableBean {
