@@ -1199,6 +1199,13 @@ public class RelativePathUriTemplateController {
               indicated by the <classname>@SessionAttributes</classname>
               annotation at the handler type level.</para>
             </listitem>
+            
+            <listitem>
+              <para><classname>org.springframework.web.util.UriComponentsBuilder</classname>
+              a builder for preparing a URL relative to the current request's 
+              host, port, scheme, context path, and the literal part of the 
+              servlet mapping.</para>
+            </listitem>
           </itemizedlist></para>
 
         <para>The <interfacename>Errors</interfacename> or

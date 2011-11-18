@@ -130,6 +130,9 @@ import java.lang.annotation.Target;
  * for marking form processing as complete (triggering the cleanup of session
  * attributes that have been indicated by the {@link SessionAttributes} annotation
  * at the handler type level).
+ * <li>{@link org.springframework.web.util.UriComponentsBuilder} a builder for
+ * preparing a URL relative to the current request's host, port, scheme, context 
+ * path, and the literal part of the servlet mapping.
  * </ul>
  *
  * <p>The following return types are supported for handler methods:

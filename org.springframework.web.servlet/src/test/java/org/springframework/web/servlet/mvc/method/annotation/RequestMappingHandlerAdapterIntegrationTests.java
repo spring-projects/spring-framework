@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -85,6 +86,7 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * A test fixture with a controller with all supported method signature styles
@@ -142,7 +144,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		Class<?>[] parameterTypes = new Class<?>[] { int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
 				Color.class, HttpServletRequest.class, HttpServletResponse.class, User.class, OtherUser.class,
-				Model.class };
+				Model.class, UriComponentsBuilder.class };
 
 		String datePattern = "yyyy.MM.dd";
 		String formattedDate = "2011.03.16";
@@ -159,6 +161,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		request.setContent("Hello World".getBytes("UTF-8"));
 		request.setUserPrincipal(new User());
 		request.setContextPath("/contextPath");
+		request.setServletPath("/main");
 		System.setProperty("systemHeader", "systemHeaderValue");
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
 		uriTemplateVars.put("pathvar", "pathvarValue");
@@ -206,6 +209,8 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertTrue(model.get("customArg") instanceof Color);
 		assertEquals(User.class, model.get("user").getClass());
 		assertEquals(OtherUser.class, model.get("otherUser").getClass());
+		
+		assertEquals(new URI("http://localhost/contextPath/main/path"), model.get("url"));
 	}
 	
 	@Test
@@ -309,13 +314,15 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 						 	HttpServletResponse response,
 						 	User user,
 						 	@ModelAttribute OtherUser otherUser,
-						 	Model model) throws Exception {
+						 	Model model,
+						 	UriComponentsBuilder builder) throws Exception {
 
 			model.addAttribute("cookie", cookie).addAttribute("pathvar", pathvar).addAttribute("header", header)
 					.addAttribute("systemHeader", systemHeader).addAttribute("headerMap", headerMap)
 					.addAttribute("dateParam", dateParam).addAttribute("paramMap", paramMap)
 					.addAttribute("paramByConvention", paramByConvention).addAttribute("value", value)
-					.addAttribute("customArg", customArg).addAttribute(user);
+					.addAttribute("customArg", customArg).addAttribute(user)
+					.addAttribute("url", builder.path("/path").build().toUri());
 			
 			assertNotNull(request);
 			assertNotNull(response);

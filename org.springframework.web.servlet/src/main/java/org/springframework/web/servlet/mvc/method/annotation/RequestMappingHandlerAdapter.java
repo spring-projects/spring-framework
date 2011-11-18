@@ -89,6 +89,7 @@ import org.springframework.web.servlet.mvc.method.annotation.support.ServletCook
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletModelAttributeMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.support.UriComponentsBuilderMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.support.ViewNameMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -425,7 +426,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * Return the list of argument resolvers to use including built-in resolvers
 	 * and custom resolvers provided via {@link #setCustomArgumentResolvers}.
 	 */
-	protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
+	private List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
 
 		// Annotation-based argument resolution
@@ -449,6 +450,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		resolvers.add(new MapMethodProcessor());
 		resolvers.add(new ErrorsMethodArgumentResolver());
 		resolvers.add(new SessionStatusMethodArgumentResolver());
+		resolvers.add(new UriComponentsBuilderMethodArgumentResolver());
 
 		// Custom arguments
 		if (getCustomArgumentResolvers() != null) {
@@ -466,7 +468,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * Return the list of argument resolvers to use for {@code @InitBinder} 
 	 * methods including built-in and custom resolvers.
 	 */
-	protected List<HandlerMethodArgumentResolver> getDefaultInitBinderArgumentResolvers() {
+	private List<HandlerMethodArgumentResolver> getDefaultInitBinderArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
 
 		// Annotation-based argument resolution
@@ -494,7 +496,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * Return the list of return value handlers to use including built-in and 
 	 * custom handlers provided via {@link #setReturnValueHandlers}.
 	 */
-	protected List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
+	private List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
 
 		// Single-purpose return value types

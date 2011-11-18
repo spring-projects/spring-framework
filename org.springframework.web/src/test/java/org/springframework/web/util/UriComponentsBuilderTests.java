@@ -16,16 +16,18 @@
 
 package org.springframework.web.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
-
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 public class UriComponentsBuilderTests {
@@ -227,7 +229,6 @@ public class UriComponentsBuilderTests {
 		assertEquals(expectedQueryParams, result.getQueryParams());
 	}
 
-	
 	@Test
 	public void replaceQueryParam() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().queryParam("baz", "qux", 42);
@@ -243,4 +244,15 @@ public class UriComponentsBuilderTests {
 		assertNull("Query param should have been deleted", result.getQuery());
 	}
 
+	@Test
+	public void buildAndExpand() {
+		UriComponents result = UriComponentsBuilder.fromPath("/{foo}").buildAndExpand("fooValue");
+		assertEquals("/fooValue", result.toUriString());
+
+		Map<String, String> values = new HashMap<String, String>();
+		values.put("foo", "fooValue");
+		values.put("bar", "barValue");
+		result = UriComponentsBuilder.fromPath("/{foo}/{bar}").buildAndExpand(values);
+		assertEquals("/fooValue/barValue", result.toUriString());
+	}
 }
