@@ -62,7 +62,6 @@ public class UriComponentsTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void invalidCharacters() {
 		UriComponentsBuilder.fromPath("/{foo}").build(true);
-
 	}
 	
 	@Test(expected = IllegalArgumentException.class)

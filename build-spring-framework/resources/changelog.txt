@@ -23,8 +23,9 @@ Changes in version 3.1 RC2 (2011-11-15)
 * added ignoreDefaultModelOnRedirect attribute to <mvc:annotation-driven/>
 * added methods to UriComponentsBuilder for replacing the path or the query
 * added ServletUriComponentsBuilder to build a UriComponents instance starting with a ServletRequest
+* support UriComponentsBuilder as @Controller method argument
 * MockHttpServletRequest and MockHttpServletResponse now keep contentType field and Content-Type header in sync
-* Fix issue with cache ignoring prototype-scoped controllers in RequestMappingHandlerAdapter
+* fixed issue with cache ignoring prototype-scoped controllers in RequestMappingHandlerAdapter
 
 
 Changes in version 3.1 RC1 (2011-10-11)

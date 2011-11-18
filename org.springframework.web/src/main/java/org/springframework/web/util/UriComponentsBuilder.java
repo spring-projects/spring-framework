@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -221,6 +222,30 @@ public class UriComponentsBuilder {
 		return new UriComponents(scheme, userInfo, host, port, pathBuilder.build(), queryParams, fragment, encoded, true);
 	}
 
+	/**
+	 * Builds a {@code UriComponents} instance and replaces URI template variables 
+	 * with the values from a map. This is a shortcut method, which combines 
+	 * calls to {@link #build()} and then {@link UriComponents#expand(Map)}. 
+	 * 
+	 * @param uriVariables the map of URI variables
+	 * @return the URI components with expanded values
+	 */
+	public UriComponents buildAndExpand(Map<String, ?> uriVariables) {
+		return build(false).expand(uriVariables);
+	}
+
+	/**
+	 * Builds a {@code UriComponents} instance and replaces URI template variables 
+	 * with the values from an array. This is a shortcut method, which combines 
+	 * calls to {@link #build()} and then {@link UriComponents#expand(Object...)}. 
+	 * 
+	 * @param uriVariableValues URI variable values
+	 * @return the URI components with expanded values
+	 */
+	public UriComponents buildAndExpand(Object... uriVariableValues) {
+		return build(false).expand(uriVariableValues);
+	}
+	
     // URI components methods
 
 	/**
