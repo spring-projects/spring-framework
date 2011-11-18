@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,19 +89,44 @@ class ConfigurationClassEnhancer {
 		};
 	}
 
-
 	/**
 	 * Loads the specified class and generates a CGLIB subclass of it equipped with
 	 * container-aware callbacks capable of respecting scoping and other bean semantics.
-	 * @return fully-qualified name of the enhanced subclass
+	 * @return the enhanced subclass
 	 */
 	public Class<?> enhance(Class<?> configClass) {
+		if (EnhancedConfiguration.class.isAssignableFrom(configClass)) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Ignoring request to enhance %s as it has " +
+						"already been enhanced. This usually indicates that more than one " +
+						"ConfigurationClassPostProcessor has been registered (e.g. via " +
+						"<context:annotation-config>). This is harmless, but you may " +
+						"want check your configuration and remove one CCPP if possible",
+						configClass.getName()));
+			}
+			return configClass;
+		}
 		Class<?> enhancedClass = createClass(newEnhancer(configClass));
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Successfully enhanced %s; enhanced class name is: %s",
 					configClass.getName(), enhancedClass.getName()));
 		}
 		return enhancedClass;
+	}
+
+	/**
+	 * Marker interface to be implemented by all @Configuration CGLIB subclasses.
+	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance(Class)}
+	 * through checking to see if candidate classes are already assignable to it, e.g.
+	 * have already been enhanced.
+	 * <p>Also extends {@link DisposableBean}, as all enhanced
+	 * {@code @Configuration} classes must de-register static CGLIB callbacks on
+	 * destruction, which is handled by the (private) {@code DisposableBeanMethodInterceptor}.
+	 * <p>Note that this interface is intended for framework-internal use only, however
+	 * must remain public in order to allow access to subclasses generated from other 
+	 * packages (i.e. user code).
+	 */
+	public interface EnhancedConfiguration extends DisposableBean {
 	}
 
 	/**
@@ -114,7 +139,7 @@ class ConfigurationClassEnhancer {
 		// any performance problem.
 		enhancer.setUseCache(false);
 		enhancer.setSuperclass(superclass);
-		enhancer.setInterfaces(new Class[] {DisposableBean.class});
+		enhancer.setInterfaces(new Class[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setCallbackFilter(this.callbackFilter);
 		enhancer.setCallbackTypes(this.callbackTypes.toArray(new Class[this.callbackTypes.size()]));
@@ -131,8 +156,8 @@ class ConfigurationClassEnhancer {
 		Enhancer.registerStaticCallbacks(subclass, this.callbackInstances.toArray(new Callback[this.callbackInstances.size()]));
 		return subclass;
 	}
-	
-	
+
+
 	/**
 	 * Intercepts calls to {@link FactoryBean#getObject()}, delegating to calling
 	 * {@link BeanFactory#getBean(String)} in order to respect caching / scoping.
@@ -160,6 +185,7 @@ class ConfigurationClassEnhancer {
 	 * Intercepts the invocation of any {@link DisposableBean#destroy()} on @Configuration
 	 * class instances for the purpose of de-registering CGLIB callbacks. This helps avoid
 	 * garbage collection issues See SPR-7901.
+	 * @see EnhancedConfiguration
 	 */
 	private static class DisposableBeanMethodInterceptor implements MethodInterceptor {
 

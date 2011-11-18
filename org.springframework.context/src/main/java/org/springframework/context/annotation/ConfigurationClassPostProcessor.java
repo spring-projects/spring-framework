@@ -301,11 +301,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			try {
 				Class<?> configClass = beanDef.resolveBeanClass(this.beanClassLoader);
 				Class<?> enhancedClass = enhancer.enhance(configClass);
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Replacing bean definition '%s' existing class name '%s' " +
-							"with enhanced class name '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
+				if (configClass != enhancedClass) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format("Replacing bean definition '%s' existing class name '%s' " +
+								"with enhanced class name '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
+					}
+					beanDef.setBeanClass(enhancedClass);
 				}
-				beanDef.setBeanClass(enhancedClass);
 			}
 			catch (Throwable ex) {
 				throw new IllegalStateException("Cannot load configuration class: " + beanDef.getBeanClassName(), ex);
