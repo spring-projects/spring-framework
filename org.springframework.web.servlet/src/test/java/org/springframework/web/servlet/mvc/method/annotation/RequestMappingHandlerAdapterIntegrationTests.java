@@ -87,17 +87,14 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.support.ServletWebArgumentResolverAdapter;
 
 /**
- * Serves as a sandbox to invoke all types of controller methods using all features except for the kitchen sink.
- * Once a problem has been debugged and understood, tests demonstrating the issue are preferably added to the
- * appropriate, more fine-grained test fixture.
- *
- * <p>If you wish to add high-level tests, consider the following other "integration"-style tests:
- * <ul>
- * 	<li>{@link HandlerMethodAnnotationDetectionTests}
- * 	<li>{@link ServletAnnotationControllerHandlerMethodTests}
- * </ul>
+ * A test fixture with a controller with all supported method signature styles
+ * and arguments. A convenient place to test or confirm a problem with a 
+ * specific argument or return value type. 
  *
  * @author Rossen Stoyanchev
+ * 
+ * @see HandlerMethodAnnotationDetectionTests
+ * @see ServletAnnotationControllerHandlerMethodTests
  */
 public class RequestMappingHandlerAdapterIntegrationTests {
 
@@ -261,7 +258,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	@Test
 	public void handleAndCompleteSession() throws Exception {
 		HandlerMethod handlerMethod = handlerMethod("handleAndCompleteSession", SessionStatus.class);
-		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
+		handlerAdapter.handle(request, response, handlerMethod);
 
 		assertFalse(request.getSession().getAttributeNames().hasMoreElements());
 	}

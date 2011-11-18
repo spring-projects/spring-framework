@@ -71,6 +71,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -1494,6 +1495,29 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertTrue(RequestContextUtils.getOutputFlashMap(request).isEmpty());
 	}
 
+	@Test
+	public void prototypeController() throws Exception {
+		initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
+			public void initialize(GenericWebApplicationContext context) {
+				RootBeanDefinition beanDef = new RootBeanDefinition(PrototypeController.class);
+				beanDef.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+				context.registerBeanDefinition("controller", beanDef);
+			}
+		});
+		
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		request.addParameter("param", "1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+	
+		assertEquals("count:3", response.getContentAsString());
+
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+	
+		assertEquals("count:3", response.getContentAsString());
+	}
+	
 	/*
 	 * Controllers
 	 */
@@ -2828,6 +2852,28 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
+	@Controller
+	static class PrototypeController {
+
+		private int count;
+
+		@InitBinder
+		public void initBinder(WebDataBinder dataBinder) {
+			this.count++;
+		}
+		
+		@ModelAttribute
+		public void populate(Model model) {
+			this.count++;
+		}
+
+		@RequestMapping("/")
+		public void message(int param, Writer writer) throws IOException {
+			this.count++;
+			writer.write("count:" + this.count);
+		}
+	}
+	
 // Test cases deleted from the original SevletAnnotationControllerTests:
 	
 //	@Ignore("Controller interface => no method-level @RequestMapping annotation")	
