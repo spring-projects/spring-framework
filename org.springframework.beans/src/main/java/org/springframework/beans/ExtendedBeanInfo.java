@@ -16,6 +16,8 @@
 
 package org.springframework.beans;
 
+import static java.lang.String.format;
+
 import java.awt.Image;
 import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
@@ -30,6 +32,9 @@ import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -48,15 +53,20 @@ import org.springframework.util.StringUtils;
  * @see CachedIntrospectionResults
  */
 class ExtendedBeanInfo implements BeanInfo {
+
+	private final Log logger = LogFactory.getLog(getClass());
+
 	private final BeanInfo delegate;
+
 	private final SortedSet<PropertyDescriptor> propertyDescriptors =
 		new TreeSet<PropertyDescriptor>(new PropertyDescriptorComparator());
+
 
 	/**
 	 * Wrap the given delegate {@link BeanInfo} instance and find any non-void returning
 	 * setter methods, creating and adding a {@link PropertyDescriptor} for each.
 	 *
-	 * <p>The wrapped {@code BeanInfo} is not modified in any way by this process.
+	 * <p>Note that the wrapped {@code BeanInfo} is modified by this process.
 	 *
 	 * @see #getPropertyDescriptors()
 	 * @throws IntrospectionException if any problems occur creating and adding new {@code PropertyDescriptors}
@@ -92,20 +102,20 @@ class ExtendedBeanInfo implements BeanInfo {
 					if (writeMethod != null
 							&& writeMethod.getName().equals(method.getName())) {
 						// yes -> copy it, including corresponding getter method (if any -- may be null)
-						this.addOrUpdatePropertyDescriptor(propertyName, readMethod, writeMethod);
+						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod);
 						continue ALL_METHODS;
 					}
 					// has a getter corresponding to this setter already been found by the wrapped BeanInfo?
 					if (readMethod != null
 							&& readMethod.getName().equals(getterMethodNameFor(propertyName))
 							&& readMethod.getReturnType().equals(method.getParameterTypes()[0])) {
-						this.addOrUpdatePropertyDescriptor(propertyName, readMethod, method);
+						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, method);
 						continue ALL_METHODS;
 					}
 				}
 				// the setter method was not found by the wrapped BeanInfo -> add a new PropertyDescriptor for it
 				// no corresponding getter was detected, so the 'read method' parameter is null.
-				this.addOrUpdatePropertyDescriptor(propertyName, null, method);
+				this.addOrUpdatePropertyDescriptor(null, propertyName, null, method);
 				continue ALL_METHODS;
 			}
 
@@ -129,20 +139,20 @@ class ExtendedBeanInfo implements BeanInfo {
 					if (indexedWriteMethod != null
 							&& indexedWriteMethod.getName().equals(method.getName())) {
 						// yes -> copy it, including corresponding getter method (if any -- may be null)
-						this.addOrUpdatePropertyDescriptor(propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
+						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
 						continue ALL_METHODS;
 					}
 					// has a getter corresponding to this setter already been found by the wrapped BeanInfo?
 					if (indexedReadMethod != null
 							&& indexedReadMethod.getName().equals(getterMethodNameFor(propertyName))
 							&& indexedReadMethod.getReturnType().equals(method.getParameterTypes()[1])) {
-						this.addOrUpdatePropertyDescriptor(propertyName, readMethod, writeMethod, indexedReadMethod, method);
+						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, indexedReadMethod, method);
 						continue ALL_METHODS;
 					}
 				}
 				// the INDEXED setter method was not found by the wrapped BeanInfo -> add a new PropertyDescriptor
 				// for it. no corresponding INDEXED getter was detected, so the 'indexed read method' parameter is null.
-				this.addOrUpdatePropertyDescriptor(propertyName, null, null, null, method);
+				this.addOrUpdatePropertyDescriptor(null, propertyName, null, null, null, method);
 				continue ALL_METHODS;
 			}
 
@@ -154,7 +164,7 @@ class ExtendedBeanInfo implements BeanInfo {
 							&& existingPD.getName().equals(pd.getName())) {
 						if (existingPD.getReadMethod() == null) {
 							// no -> add it now
-							this.addOrUpdatePropertyDescriptor(pd.getName(), method, pd.getWriteMethod());
+							this.addOrUpdatePropertyDescriptor(pd, pd.getName(), method, pd.getWriteMethod());
 						}
 						// yes -> do not add a duplicate
 						continue ALL_METHODS;
@@ -164,9 +174,9 @@ class ExtendedBeanInfo implements BeanInfo {
 						|| (pd instanceof IndexedPropertyDescriptor && method == ((IndexedPropertyDescriptor) pd).getIndexedReadMethod())) {
 					// yes -> copy it, including corresponding setter method (if any -- may be null)
 					if (pd instanceof IndexedPropertyDescriptor) {
-						this.addOrUpdatePropertyDescriptor(pd.getName(), pd.getReadMethod(), pd.getWriteMethod(), ((IndexedPropertyDescriptor)pd).getIndexedReadMethod(), ((IndexedPropertyDescriptor)pd).getIndexedWriteMethod());
+						this.addOrUpdatePropertyDescriptor(pd, pd.getName(), pd.getReadMethod(), pd.getWriteMethod(), ((IndexedPropertyDescriptor)pd).getIndexedReadMethod(), ((IndexedPropertyDescriptor)pd).getIndexedWriteMethod());
 					} else {
-						this.addOrUpdatePropertyDescriptor(pd.getName(), pd.getReadMethod(), pd.getWriteMethod());
+						this.addOrUpdatePropertyDescriptor(pd, pd.getName(), pd.getReadMethod(), pd.getWriteMethod());
 					}
 					continue ALL_METHODS;
 				}
@@ -174,11 +184,13 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 	}
 
-	private void addOrUpdatePropertyDescriptor(String propertyName, Method readMethod, Method writeMethod) throws IntrospectionException {
-		addOrUpdatePropertyDescriptor(propertyName, readMethod, writeMethod, null, null);
+	private void addOrUpdatePropertyDescriptor(PropertyDescriptor pd, String propertyName, Method readMethod, Method writeMethod) throws IntrospectionException {
+		addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, null, null);
 	}
 
-	private void addOrUpdatePropertyDescriptor(String propertyName, Method readMethod, Method writeMethod, Method indexedReadMethod, Method indexedWriteMethod) throws IntrospectionException {
+	private void addOrUpdatePropertyDescriptor(PropertyDescriptor pd, String propertyName, Method readMethod, Method writeMethod, Method indexedReadMethod, Method indexedWriteMethod) throws IntrospectionException {
+		Assert.notNull(propertyName, "propertyName may not be null");
+		propertyName = pd == null ? propertyName : pd.getName();
 		for (PropertyDescriptor existingPD : this.propertyDescriptors) {
 			if (existingPD.getName().equals(propertyName)) {
 				// is there already a descriptor that captures this read method or its corresponding write method?
@@ -256,10 +268,32 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		// we haven't yet seen read or write methods for this property -> add a new descriptor
-		if (indexedReadMethod == null && indexedWriteMethod == null) {
-			this.propertyDescriptors.add(new PropertyDescriptor(propertyName, readMethod, writeMethod));
-		} else {
-			this.propertyDescriptors.add(new IndexedPropertyDescriptor(propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod));
+		if (pd == null) {
+			try {
+				if (indexedReadMethod == null && indexedWriteMethod == null) {
+					pd = new PropertyDescriptor(propertyName, readMethod, writeMethod);
+				}
+				else {
+					pd = new IndexedPropertyDescriptor(propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
+				}
+				this.propertyDescriptors.add(pd);
+			} catch (IntrospectionException ex) {
+				logger.warn(format("Could not create new PropertyDescriptor for readMethod [%s] writeMethod [%s] " +
+						"indexedReadMethod [%s] indexedWriteMethod [%s] for property [%s]. Reason: %s",
+						readMethod, writeMethod, indexedReadMethod, indexedWriteMethod, propertyName, ex.getMessage()));
+				// suppress exception and attempt to continue
+			}
+		}
+		else {
+			pd.setReadMethod(readMethod);
+			try {
+				pd.setWriteMethod(writeMethod);
+			} catch (IntrospectionException ex) {
+				logger.warn(format("Could not add write method [%s] for property [%s]. Reason: %s",
+						writeMethod, propertyName, ex.getMessage()));
+				// fall through -> add property descriptor as best we can
+			}
+			this.propertyDescriptors.add(pd);
 		}
 	}
 
