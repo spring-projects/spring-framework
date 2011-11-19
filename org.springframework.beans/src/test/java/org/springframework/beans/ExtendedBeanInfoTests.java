@@ -16,6 +16,7 @@
 
 package org.springframework.beans;
 
+import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -29,7 +30,9 @@ import java.beans.IndexedPropertyDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.ExtendedBeanInfo.PropertyDescriptorComparator;
 
@@ -116,10 +119,14 @@ public class ExtendedBeanInfoTests {
 		}
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
-		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+
+		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
+
+		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
+		assertThat(hasWriteMethodForProperty(bi, "foo"), is(true));
 
 		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
@@ -134,10 +141,14 @@ public class ExtendedBeanInfoTests {
 		}
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
-		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+
+		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
+
+		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
+		assertThat(hasWriteMethodForProperty(bi, "foo"), is(true));
 
 		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
@@ -161,10 +172,14 @@ public class ExtendedBeanInfoTests {
 		}
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
-		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+
+		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
+
+		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
+		assertThat(hasWriteMethodForProperty(bi, "foo"), is(true));
 
 		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
@@ -200,13 +215,20 @@ public class ExtendedBeanInfoTests {
 		assertThat(c.getBar(), is(42));
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
-		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
 
 		assertThat(hasReadMethodForProperty(bi, "bar"), is(true));
 		assertThat(hasWriteMethodForProperty(bi, "bar"), is(false));
+
+		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
+
+		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
+		assertThat(hasWriteMethodForProperty(bi, "foo"), is(true));
+
+		assertThat(hasReadMethodForProperty(bi, "bar"), is(true));
+		assertThat(hasWriteMethodForProperty(bi, "bar"), is(true));
 
 		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
@@ -430,10 +452,16 @@ public class ExtendedBeanInfoTests {
 		}
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
-		BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
 
 		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
 		assertThat(hasWriteMethodForProperty(bi, "foos"), is(false));
+		// again as above, standard Inspector picks up non-void return types on indexed write methods by default
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(true));
+
+		BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
+
+		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
+		assertThat(hasWriteMethodForProperty(bi, "foos"), is(true));
 		// again as above, standard Inspector picks up non-void return types on indexed write methods by default
 		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(true));
 
@@ -454,10 +482,14 @@ public class ExtendedBeanInfoTests {
 		}
 
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
-		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
+
+		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
+
+		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
+		assertThat(hasWriteMethodForProperty(bi, "foo"), is(true));
 
 		assertThat(hasReadMethodForProperty(ebi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(ebi, "foo"), is(true));
@@ -514,10 +546,16 @@ public class ExtendedBeanInfoTests {
 			public Object setDateFormat(int dateStyle, int timeStyle) { return new Object(); }
 		}
 		BeanInfo bi = Introspector.getBeanInfo(C.class);
-		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "dateFormat"), is(false));
 		assertThat(hasWriteMethodForProperty(bi, "dateFormat"), is(false));
+		assertThat(hasIndexedReadMethodForProperty(bi, "dateFormat"), is(false));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat"), is(true));
+
+		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
+
+		assertThat(hasReadMethodForProperty(bi, "dateFormat"), is(false));
+		assertThat(hasWriteMethodForProperty(bi, "dateFormat"), is(true));
 		assertThat(hasIndexedReadMethodForProperty(bi, "dateFormat"), is(false));
 		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat"), is(true));
 
@@ -625,4 +663,75 @@ public class ExtendedBeanInfoTests {
 		return false;
 	}
 
+	@Test
+	public void reproSpr8806_y() throws IntrospectionException, SecurityException, NoSuchMethodException {
+		Introspector.getBeanInfo(LawLibrary.class);
+	}
+
+	@Ignore @Test
+	public void reproSpr8806_x() throws IntrospectionException, SecurityException, NoSuchMethodException {
+		BeanInfo info = Introspector.getBeanInfo(LawLibrary.class);
+		for (PropertyDescriptor d : info.getPropertyDescriptors()) {
+			if (d.getName().equals("book")) {
+				Method readMethod = d.getReadMethod();
+				Method writeMethod = d.getWriteMethod();
+				System.out.println(format("READ : %s.%s (bridge:%s)",
+						readMethod.getDeclaringClass().getSimpleName(), readMethod.getName(), readMethod.isBridge()));
+				System.out.println(format("WRITE: %s.%s (bridge:%s)",
+						writeMethod.getDeclaringClass().getSimpleName(), writeMethod.getName(), writeMethod.isBridge()));
+				new PropertyDescriptor("book", readMethod, writeMethod);
+			}
+		}
+
+		Method readMethod = LawLibrary.class.getMethod("getBook");
+		Method writeMethod = LawLibrary.class.getMethod("setBook", Book.class);
+
+		System.out.println(format("read : %s.%s (bridge:%s)",
+				readMethod.getDeclaringClass().getSimpleName(), readMethod.getName(), readMethod.isBridge()));
+		System.out.println(format("write: %s.%s (bridge:%s)",
+				writeMethod.getDeclaringClass().getSimpleName(), writeMethod.getName(), writeMethod.isBridge()));
+
+
+		System.out.println("--------");
+		for (Method m : LawLibrary.class.getMethods()) {
+			if (m.getDeclaringClass() == Object.class) continue;
+			System.out.println(format("%s %s.%s(%s) [bridge:%s]",
+					m.getReturnType().getSimpleName(), m.getDeclaringClass().getSimpleName(),
+					m.getName(),
+					m.getParameterTypes().length == 1 ? m.getParameterTypes()[0].getSimpleName() : "",
+					m.isBridge()));
+		}
+
+		//new ExtendedBeanInfo(info);
+	}
+
+	@Test
+	public void reproSpr8806() throws IntrospectionException {
+		BeanInfo bi = Introspector.getBeanInfo(LawLibrary.class);
+		new ExtendedBeanInfo(bi); // throws
+	}
+
+	interface Book { }
+
+	interface TextBook extends Book { }
+
+	interface LawBook extends TextBook { }
+
+	interface BookOperations {
+		Book getBook();
+		void setBook(Book book);
+	}
+
+	interface TextBookOperations extends BookOperations {
+		TextBook getBook();
+	}
+
+	abstract class Library {
+		public Book getBook() { return null; }
+		public void setBook(Book book) { }
+	}
+
+	class LawLibrary extends Library implements TextBookOperations {
+		public LawBook getBook() { return null; }
+	}
 }
