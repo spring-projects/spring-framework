@@ -248,7 +248,7 @@
     the <literal>web.xml</literal> of your web application. You need to map
     requests that you want the <classname>DispatcherServlet</classname> to
     handle, by using a URL mapping in the same <literal>web.xml</literal>
-    file. This is standard J2EE Servlet configuration; the following example
+    file. This is standard Java EE Servlet configuration; the following example
     shows such a <classname>DispatcherServlet</classname> declaration and
     mapping:</para>
 
@@ -301,8 +301,7 @@
       </mediaobject></para>
 
     <para>Upon initialization of a <classname>DispatcherServlet</classname>,
-    the framework <!--Spring MVC or Spring Framework?--><emphasis><emphasis>looks
-    for a file named</emphasis>
+    Spring MVC looks for a file named <emphasis>
     <literal>[servlet-name]-servlet.xml</literal></emphasis> in the
     <literal>WEB-INF</literal> directory of your web application and creates
     the beans defined there, overriding the definitions of any beans defined
@@ -349,155 +348,219 @@
     look up the <interfacename>WebApplicationContext</interfacename> if you
     need access to it.</para>
 
-    <para>The Spring <classname>DispatcherServlet</classname> uses special
-    beans to process requests and render the appropriate views. These beans
-    are part of Spring Framework. You can configure them in the
-    <interfacename>WebApplicationContext</interfacename>, just as you
-    configure any other bean. However, for most beans, sensible defaults are
-    provided so you initially do not need to configure them. <!--Which beans have defaults? What do you mean you *initially* don't need to configure them? What determines whether you need to and --><!--when, if not *initially*? In table below, indicate which are defaults, which have to be configured.-->These
-    beans are described in the following table.</para>
+	<section id="mvc-servlet-special-bean-types">
+		<title>Special Bean Types In the <interfacename>WebApplicationContext</interfacename></title>
 
-    <table id="mvc-webappctx-special-beans-tbl">
-      <title>Special beans in the
-      <interfacename>WebApplicationContext</interfacename></title>
+	    <para>The Spring <classname>DispatcherServlet</classname> uses special
+	    beans to process requests and render the appropriate views. These beans
+	    are part of Spring MVC. You can choose which special beans to use
+	    by simply configuring one or more of them in the 
+	    <interfacename>WebApplicationContext</interfacename>. 
+	    However, you don't need to do that initially since Spring MVC
+	    maintains a list of default beans to use if you don't configure any. 
+	    More on that in the next section. First see the table below  
+	    listing the special bean types the 
+	    <classname>DispatcherServlet</classname> relies on.</para>
+	
+	    <table id="mvc-webappctx-special-beans-tbl">
+	      <title>Special bean types in the
+	      <interfacename>WebApplicationContext</interfacename></title>
+	
+	      <tgroup cols="2">
+	        <colspec colname="c1" colwidth="1*" />
+	
+	        <colspec colname="c2" colwidth="4*" />
+	
+	        <thead>
+	          <row>
+	            <entry>Bean type</entry>
+	
+	            <entry>Explanation</entry>
+	          </row>
+	        </thead>
+	
+	        <tbody>
+	          <row>
+	            <entry><link linkend="mvc-handlermapping">HandlerMapping</link></entry>
+	
+	            <entry>Maps incoming requests to handlers and a list of 
+	            pre- and post-processors (handler interceptors) based on some 
+	            criteria the details of which vary by <interfacename>HandlerMapping</interfacename>
+	            implementation. The most popular implementation supports 
+	            annotated controllers but other implementations exists as well.</entry>
+	          </row>
+	
+	          <row>
+	            <entry>HandlerAdapter</entry>
+	
+	            <entry>Helps the <interfacename>DispatcherServlet</interfacename> to 
+	            invoke a handler mapped to a request regardless of the handler
+	            is actually invoked. For example, invoking an annotated controller
+	            requires resolving various annotations. Thus the main purpose
+	            of a <interfacename>HandlerAdapter</interfacename> is to shield the 
+	            <classname>DispatcherServlet</classname> from such details.</entry>
+	          </row>
+	
+	          <row>
+	            <entry><link linkend="mvc-exceptionhandlers">HandlerExceptionResolver</link></entry>
+	
+	            <entry>Maps exceptions to views also allowing for more 
+	            complex exception handling code.</entry>
+	          </row>
+	
+	          <row>
+	            <entry><link linkend="mvc-viewresolver">ViewResolver</link></entry>
+	
+	            <entry>Resolves logical String-based view names to actual 
+	            <interface>View</interface> types.</entry>
+	          </row>
+	
+	          <row>
+	            <entry><link linkend="mvc-localeresolver">LocaleResolver</link></entry>
+	
+	            <entry>Resolves the locale a client is using,
+	            in order to be able to offer internationalized views</entry>
+	          </row>
+	
+	          <row>
+	            <entry><link linkend="mvc-themeresolver">ThemeResolver</link></entry>
+	
+	            <entry>Resolves themes your web application can use, for
+	            example, to offer personalized layouts</entry>
+	          </row>
+	
+	          <row>
+	            <entry><link linkend="mvc-multipart">MultipartResolver</link></entry>
+	
+	            <entry>Parses multi-part requests for example to support processing 
+	            file uploads from HTML forms.</entry>
+	          </row>
+	
+	          <row>
+	            <entry><link linkend="mvc-flash-attributes">FlashMapManager</link></entry>
+	
+	            <entry>Stores and retrieves the "input" and the "output" 
+	            <classname>FlashMap</classname> that can be used to pass attributes
+	            from one request to another, usually across a redirect.</entry>
+	          </row>
+	        </tbody>
+	      </tgroup>
+	    </table>	
+    
+	</section>
 
-      <tgroup cols="2">
-        <colspec colname="c1" colwidth="1*" />
+	<section id="mvc-servlet-config">
+		<title>Default DispatcherServlet Configuration</title>
+		
+		<para>As mentioned in the previous section for each special bean
+		the <classname>DispatcherServlet</classname> maintains a list 
+		of implementations to use by default. This information is
+		kept in the file <filename>DispatcherServlet.properties</filename>
+		in the package <classname>org.springframework.web.servlet</classname>.
+		</para>
+		
+		<para>All special beans have  some reasonable defaults of 
+		their own. Sooner or later though you'll need to customize
+		one or more of the properties these beans provide.
+		For example it's quite common to configure 
+		an <classname>InternalResourceViewResolver</classname> 
+		settings its <literal>prefix</literal> property to
+		the parent location of view files.</para>
+		
+		<para>Regardless of the details, the important concept 
+		to understand here is that once
+		you	configure a special bean such as an
+		<classname>InternalResourceViewResolver</classname>
+		in your <classname>WebApplicationContext</classname>, you
+		effectively override the list of default implementations
+		that would have been used otherwise for that special bean 
+		type. For example if you configure an 
+		<classname>InternalResourceViewResolver</classname>, 
+		the default list of <interfacename>ViewResolver</interfacename>
+		implementations is ignored.
+		</para>
+		
+		<para>In <xref linkend="mvc-config"/> you'll learn about
+		other options for configuring Spring MVC including 
+		MVC Java config and the MVC XML namespace both of which provide
+		a simple starting point and assume little knowledge of
+		how Spring MVC works. Regardless of how you choose to 
+		configure your application, the concepts explained in this
+		section are fundamental should be of help to you. 
+		</para>
+		
+	</section>
 
-        <colspec colname="c2" colwidth="4*" />
+	<section id="mvc-servlet-sequence">
+		<title>DispatcherServlet Processing Sequence</title>
 
-        <thead>
-          <row>
-            <entry>Bean type</entry>
-
-            <entry>Explanation</entry>
-          </row>
-        </thead>
-
-        <tbody>
-          <row>
-            <entry><link linkend="mvc-controller">controllers</link></entry>
-
-            <entry>Form the <literal>C</literal> part of the MVC.<!--Need info about controller function as with others in this list.Reader knows what C stands for.--></entry>
-          </row>
-
-          <row>
-            <entry><link linkend="mvc-handlermapping">handler
-            mappings</link></entry>
-
-            <entry>Handle the execution of a list of pre-processors and
-            post-processors and controllers that will be executed if they
-            match certain criteria (for example, a matching URL specified with
-            the controller).</entry>
-          </row>
-
-          <row>
-            <entry><link linkend="mvc-viewresolver">view
-            resolvers</link></entry>
-
-            <entry>Resolves view names to views.<!--If it's capable of resolving, just say *resolves*. Like above, handler mappings are capable of handling the execution, but you just say *handle the execution*--></entry>
-          </row>
-
-          <row>
-            <entry><link linkend="mvc-localeresolver">locale
-            resolver</link></entry>
-
-            <entry>A <link linkend="mvc-localeresolver">locale resolver</link>
-            is a component capable of resolving the locale a client is using,
-            in order to be able to offer internationalized views</entry>
-          </row>
-
-          <row>
-            <entry>Theme resolver</entry>
-
-            <entry>A <link linkend="mvc-themeresolver">theme resolver</link>
-            is capable of resolving themes your web application can use, for
-            example, to offer personalized layouts</entry>
-          </row>
-
-          <row>
-            <entry>multipart file resolver</entry>
-
-            <entry>Contains functionality to process file uploads from HTML
-            forms.<!--Here and next one, why not just say processes file uploads, maps executions instead of *contains functionality to*?--></entry>
-          </row>
-
-          <row>
-            <entry><link linkend="mvc-exceptionhandlers">handler exception
-            resolvers</link></entry>
-
-            <entry>Contains functionality to map exceptions to views or
-            implement other more complex exception handling code.</entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </table>
-
-    <para>After you set up a <classname>DispatcherServlet</classname>, and a
-    request comes in for that specific
-    <classname>DispatcherServlet</classname>, the
-    <classname>DispatcherServlet</classname> starts processing the request as
-    follows:</para>
-
-    <orderedlist>
-      <listitem>
-        <para>The <interfacename>WebApplicationContext</interfacename> is
-        searched for and bound in the request as an attribute that the
-        controller and other elements in the process can use. <!--Use to do *what*? Also revise to indicate *what* searches for the WebApplicationContext -->It
-        is bound by default under the key
-        <literal>DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE</literal>.</para>
-      </listitem>
-
-      <listitem>
-        <para>The locale resolver is bound to the request to enable elements
-        in the process to resolve the locale to use when processing the
-        request (rendering the view, preparing data, and so on). If you do not
-        need locale resolving, you do not need it.</para>
-
-        <!--Reword 'if you don't need local resolving, you don't need to use it '. Are you saying locale resolving is optional? If you don't configure it, will this step occur?-->
-      </listitem>
-
-      <listitem>
-        <para>The theme resolver is bound to the request to let elements such
-        as views determine which theme to use. If you do not use themes, you
-        can ignore it.</para>
-
-        <!-- MLP perhaps say that there are not side effect to this binding, etc... Clarify *ignore it*. Does this step still occur if you don't use themes? -->
-
-        <!--And what if you DO use themes, what do you do and when? Same question re locale resolving.-->
-      </listitem>
-
-      <listitem>
-        <para>If you specify a multipart file resolver, the request is
-        inspected for multiparts; if multiparts are found, the request is
-        wrapped in a <classname>MultipartHttpServletRequest</classname> for
-        further processing by other elements in the process. See <xref
-        linkend="mvc-multipart" /> for further information about multipart
-        handling.</para>
-      </listitem>
-
-      <listitem>
-        <para>An appropriate handler is searched for. If a handler is found,
-        the execution chain associated with the handler (preprocessors,
-        postprocessors, and controllers) is executed in order to prepare a
-        model or rendering.</para>
-      </listitem>
-
-      <listitem>
-        <para>If a model is returned, the view is rendered. If no model is
-        returned, (may be due to a preprocessor or postprocessor intercepting
-        the request, perhaps for security reasons), no view is rendered,
-        because the request could already have been fulfilled.</para>
-
-        <!--fulfilled how and by what?-->
-      </listitem>
-    </orderedlist>
-
-    <para>Handler exception resolvers that are declared in the
-    <interfacename>WebApplicationContext</interfacename> pick up exceptions
-    that are thrown during processing of the request. Using these exception
-    resolvers allows you to define custom behaviors to address
-    exceptions.</para>
+	    <para>After you set up a <classname>DispatcherServlet</classname>, and a
+	    request comes in for that specific
+	    <classname>DispatcherServlet</classname>, the
+	    <classname>DispatcherServlet</classname> starts processing the request as
+	    follows:</para>
+	
+	    <orderedlist>
+	      <listitem>
+	        <para>The <interfacename>WebApplicationContext</interfacename> is
+	        searched for and bound in the request as an attribute that the
+	        controller and other elements in the process can use. <!--Use to do *what*? Also revise to indicate *what* searches for the WebApplicationContext -->It
+	        is bound by default under the key
+	        <literal>DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE</literal>.</para>
+	      </listitem>
+	
+	      <listitem>
+	        <para>The locale resolver is bound to the request to enable elements
+	        in the process to resolve the locale to use when processing the
+	        request (rendering the view, preparing data, and so on). If you do not
+	        need locale resolving, you do not need it.</para>
+	
+	        <!--Reword 'if you don't need local resolving, you don't need to use it '. Are you saying locale resolving is optional? If you don't configure it, will this step occur?-->
+	      </listitem>
+	
+	      <listitem>
+	        <para>The theme resolver is bound to the request to let elements such
+	        as views determine which theme to use. If you do not use themes, you
+	        can ignore it.</para>
+	
+	        <!-- MLP perhaps say that there are not side effect to this binding, etc... Clarify *ignore it*. Does this step still occur if you don't use themes? -->
+	
+	        <!--And what if you DO use themes, what do you do and when? Same question re locale resolving.-->
+	      </listitem>
+	
+	      <listitem>
+	        <para>If you specify a multipart file resolver, the request is
+	        inspected for multiparts; if multiparts are found, the request is
+	        wrapped in a <classname>MultipartHttpServletRequest</classname> for
+	        further processing by other elements in the process. See <xref
+	        linkend="mvc-multipart" /> for further information about multipart
+	        handling.</para>
+	      </listitem>
+	
+	      <listitem>
+	        <para>An appropriate handler is searched for. If a handler is found,
+	        the execution chain associated with the handler (preprocessors,
+	        postprocessors, and controllers) is executed in order to prepare a
+	        model or rendering.</para>
+	      </listitem>
+	
+	      <listitem>
+	        <para>If a model is returned, the view is rendered. If no model is
+	        returned, (may be due to a preprocessor or postprocessor intercepting
+	        the request, perhaps for security reasons), no view is rendered,
+	        because the request could already have been fulfilled.</para>
+	
+	        <!--fulfilled how and by what?-->
+	      </listitem>
+	    </orderedlist>
+	
+	    <para>Handler exception resolvers that are declared in the
+	    <interfacename>WebApplicationContext</interfacename> pick up exceptions
+	    that are thrown during processing of the request. Using these exception
+	    resolvers allows you to define custom behaviors to address
+	    exceptions.</para>
+    		
+	</section>
 
     <para>The Spring <classname>DispatcherServlet</classname> also supports
     the return of the <emphasis>last-modification-date</emphasis>, as
@@ -1062,7 +1125,7 @@ public class RelativePathUriTemplateController {
               <note>
                 <para>Session access may not be thread-safe, in particular in
                 a Servlet environment. Consider setting the
-                <classname>AnnotationMethodHandlerAdapter</classname>'s
+                <classname>RequestMappingHandlerAdapter</classname>'s
                 "synchronizeOnSession" flag to "true" if multiple requests are
                 allowed to access a session concurrently.</para>
               </note>
@@ -3973,45 +4036,90 @@ public class SimpleController {
   <section id="mvc-config">
     <title>Configuring Spring MVC</title>
 
-    <para>Spring 3 introduces a <literal>mvc</literal> XML configuration
-    namespace that simplifies the setup of Spring MVC inside your web
-    application. Instead of registering low-level beans such as
-    AnnotationMethodHandlerAdapter, you can simply use the namespace and its
-    higher-level constructs. This is generally preferred unless you require
-    finer-grained control of the configuration at the bean level.</para>
+	<para><xref linkend="mvc-servlet-special-bean-types"/> and 
+	<xref linkend="mvc-servlet-config"/> explained about
+	Spring MVC's special beans and the default implementations 
+	used by the <classname>DispatcherServlet</classname>.
+	In this section you'll learn about two additional ways of 
+	configuring Spring MVC. Namely the MVC Java config and
+	the MVC XML namespace.
+	</para>
+	
+	<para>The MVC Java config and the MVC namespace provide 
+    similar default configuration that overrides 
+    the <classname>DispatcherServlet</classname> defaults.
+	The goal is to spare most applications from having to 
+    having to create the same configuration and also to
+	provide higher-level constructs for configuring 
+    Spring MVC that serve as a simple starting point and
+	require little or no prior knowledge of the underlying
+    configuration.</para>
+	
+	<para>You can choose either the MVC Java config or the 
+    MVC namespace depending on your preference. Also as you
+    will see further below, with the MVC Java config it is
+    easier to see the underlying configuration as well as 
+    to make fine-grained customizations directly to the	
+    created Spring MVC beans. 
+    But let's start from the beginning.
+	</para>
 
-    <para>The mvc namespace consists of three tags: mvc:annotation-driven,
-    mvc:interceptors, and mvc:view-controller. Each of these tags is
-    documented below and in the <ulink
-    url="http://static.springsource.org/schema/mvc/spring-mvc-3.0.xsd">XML
-    schema</ulink>.</para>
+	<section id="mvc-config-enable">
+		<title>Enabling MVC Java Config or the MVC XML Namespace</title>
+	
+		<para>To enable MVC Java config add the annotation 
+		<interfacename>@EnableWebMvc</interfacename> to one of your 
+		<interfacename>@Configuration</interfacename> classes:</para>
 
-    <section id="mvc-annotation-driven">
-      <title>mvc:annotation-driven</title>
+		<programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig {
 
-      <para>This tag registers the RequestMappingHandlerMapping and
-      RequestMappingHandlerAdapter beans that are required for Spring MVC to
-      dispatch requests to @Controllers. The tag configures those two beans
-      with sensible defaults based on what is present in your classpath. The
-      defaults are: <orderedlist>
+}</programlisting>
+
+		<para>To achieve the same in XML use the <literal>mvc:annotation-driven</literal> element:</para>
+
+		<programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd"&gt;
+
+    &lt;mvc:annotation-driven /&gt;
+
+&lt;beans&gt;</programlisting>
+	
+      <para>The above registers a
+      <classname>RequestMappingHandlerMapping</classname>, a 
+      <classname>RequestMappingHandlerAdapter</classname>, and an
+      <classname>ExceptionHandlerExceptionResolver</classname> (among others)
+      in support of processing requests with annotated controller methods using
+      annotations such as <interfacename>@RequestMapping </interfacename>,
+      <interfacename>@ExceptionHandler</interfacename>, and others.</para>
+
+	  <para>It also enables the following:
+	  <orderedlist>
           <listitem>
-            <para>Support for Spring 3's Type <link
-            linkend="core-convert">ConversionService</link> in addition to
-            JavaBeans PropertyEditors during Data Binding. A ConversionService
-            instance produced by the
-            <classname>org.springframework.format.support.FormattingConversionServiceFactoryBean</classname>
-            is used by default. This can be overridden by setting the
-            <literal>conversion-service</literal> attribute.</para>
+            <para>Spring 3 style type conversion through a <link
+            linkend="core-convert">ConversionService</link> instance 
+            in addition to the JavaBeans PropertyEditors used for Data Binding.</para>
           </listitem>
 
           <listitem>
             <para>Support for <link linkend="format">formatting</link> Number
-            fields using the @NumberFormat annotation</para>
+            fields using the <interfacename>@NumberFormat</interfacename> 
+            annotation through the
+            <interfacename>ConversionService</interfacename>.</para>
           </listitem>
 
           <listitem>
             <para>Support for <link linkend="format">formatting</link> Date,
-            Calendar, Long, and Joda Time fields using the @DateTimeFormat
+            Calendar, Long, and Joda Time fields using the 
+            <interfacename>@DateTimeFormat</interfacename>
             annotation, if Joda Time 1.3 or higher is present on the
             classpath.</para>
           </listitem>
@@ -4019,14 +4127,17 @@ public class SimpleController {
           <listitem>
             <para>Support for <link
             linkend="validation-mvc-jsr303">validating</link> @Controller
-            inputs with @Valid, if a JSR-303 Provider is present on the
-            classpath. The validation system can be explicitly configured by
-            setting the <literal>validator</literal> attribute.</para>
+            inputs with <interfacename>@Valid</interfacename>, 
+            if a JSR-303 Provider is present on the classpath.</para>
           </listitem>
 
           <listitem>
-            <para>HttpMessageConverter support for @RequestBody method
-            parameters and @ResponseBody method return values.</para>
+            <para>HttpMessageConverter support for 
+            <interfacename>@RequestBody</interfacename> method
+            parameters and <interfacename>@ResponseBody</interfacename>
+            method return values from 
+            <interfacename>@RequestMapping</interfacename> or
+            <interfacename>@ExceptionHandler</interfacename> methods.</para>
 
             <para>This is the complete list of HttpMessageConverters set up by
             mvc:annotation-driven: <itemizedlist>
@@ -4085,76 +4196,130 @@ public class SimpleController {
                 </listitem>
               </itemizedlist></para>
 
-            <note>
-              <para>You can provide your own HttpMessageConverters through the
-              mvc:message-converters sub-element of mvc:annotation-driven.
-              Message converters you provide will take precedence over the
-              ones registered by default.</para>
-            </note>
           </listitem>
-        </orderedlist> A typical usage is shown below: <programlisting
-      language="xml">
-&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:mvc="http://www.springframework.org/schema/mvc"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="
-        http://www.springframework.org/schema/beans 
-        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-        http://www.springframework.org/schema/mvc
-        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd"&gt;
+        </orderedlist>
+        </para>
+	</section>
+	
+	<section id="mvc-config-customize">
+		<title>Customizing the Provided Configuration</title>
+		
+		<para>To customize the default configuration in Java you simply
+		implement the <interfacename>WebMvcConfigurer</interfacename> 
+		interface or more likely extend the class
+		<classname>WebMvcConfigurerAdapter</classname> and override
+		the methods you need. Below is an example of some of the available
+		methods to override. See <interfacename>WebMvcConifgurer</interfacename> for 
+		a list of all methods and the Javadoc for further details:</para>
+		
+		<programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
 
-    &lt;!-- JSR-303 support will be detected on classpath and enabled automatically --&gt;
-    &lt;mvc:annotation-driven/&gt;
-    
-&lt;/beans&gt;</programlisting></para>
-    </section>
+  @Override
+  protected void addFormatters(FormatterRegistry registry) {
+    // Add formatters and/or converters
+  }
 
-    <section id="mvc-interceptors">
-      <title>mvc:interceptors</title>
+  @Override
+  public void configureMessageConverters(List&lt;HttpMessageConverter&lt;?&gt;&gt; converters) {
+    // Configure the list of HttpMessageConverters to use 
+  }
+  
+}</programlisting>
+		
+		<para>To customize the default configuration of 
+        <literal>&lt;mvc:annotation-driven /&gt;</literal> check what
+		attributes and sub-elements it supports. You can view the 
+		<ulink url="http://static.springsource.org/schema/mvc/spring-mvc-3.1.xsd">Spring MVC XML schema</ulink>
+		or use the code completion feature of your IDE to discover
+		what attributes and sub-elements are available. 
+		The sample below shows a subset of what is available:</para>
+		
+		<programlisting language="xml">&lt;mvc:annotation-driven conversion-service="conversionService"&gt;
+    &lt;mvc:message-converters&gt;
+        &lt;bean class="org.example.MyHttpMessageConverter"/&gt;
+        &lt;bean class="org.example.MyOtherHttpMessageConverter"/&gt;
+    &lt;/mvc:message-converters&gt;
+&lt;/mvc:annotation-driven&gt;
 
-      <para>This tag allows you to register custom HandlerInterceptors or
-      WebRequestInterceptors that should be applied to all HandlerMapping
-      beans. You can also restrict the URL paths that specific interceptors
-      apply to.</para>
+&lt;bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean"&gt;
+    &lt;property name="formatters"&gt;
+        &lt;list&gt;
+            &lt;bean class="org.example.MyFormatter"/&gt;
+            &lt;bean class="org.example.MyOtherFormatter"/&gt;
+        &lt;/list&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+		
+	</section>
 
-      <para>An example of registering an interceptor applied to all URL
-      paths:</para>
+    <section id="mvc-config-interceptors">
+      <title>Configuring Interceptors</title>
+
+      <para>You can configure <interfacename>HandlerInterceptors</interfacename>
+      or <interfacename>WebRequestInterceptors</interfacename> to be applied
+      to all incoming requests or restricted to specific URL path patterns.</para>
+
+      <para>An example of registering interceptors in Java:</para>
+
+      <programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+      
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(new LocalInterceptor());
+    registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/secure/*");
+ }
+
+}</programlisting>
+
+      <para>And in XML use the <literal>&lt;mvc:interceptors&gt;</literal> element:</para>
 
       <programlisting language="xml">&lt;mvc:interceptors&gt;
     &lt;bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" /&gt;
-&lt;/mvc:interceptors&gt;</programlisting>
-
-      <para>An example of registering an interceptor limited to a specific URL
-      path:</para>
-
-      <programlisting language="xml">&lt;mvc:interceptors&gt;
     &lt;mvc:interceptor&gt;
         &lt;mapping path="/secure/*"/&gt;
         &lt;bean class="org.example.SecurityInterceptor" /&gt;
     &lt;/mvc:interceptor&gt;
-&lt;/mvc:interceptors&gt;</programlisting>
+&lt;/mvc:interceptors&gt;
+</programlisting>
+
     </section>
 
-    <section id="mvc-view-controller">
-      <title>mvc:view-controller</title>
+    <section id="mvc-config-view-controller">
+      <title>Configuring View Controllers</title>
 
-      <para>This tag is a shortcut for defining a
+      <para>This is a shortcut for defining a
       <classname>ParameterizableViewController</classname> that immediately
       forwards to a view when invoked. Use it in static cases when there is no
-      Java Controller logic to execute before the view generates the
+      Java controller logic to execute before the view generates the
       response.</para>
 
-      <para>An example of view-controller that forwards to a home page is
-      shown below:</para>
+      <para>An example of forwarding a request for <literal>"/"</literal>
+      to a view called <literal>"home"</literal> in Java:</para>
+
+      <programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+      
+  @Override
+  public void addViewControllers(ViewControllerRegistry registry) {
+    registry.addViewController("/").setViewName("home");
+  }
+
+}</programlisting>
+
+	  <para>And the same in XML use the <literal>&lt;mvc:view-controller&gt;</literal> element:</para>
 
       <programlisting language="xml">&lt;mvc:view-controller path="/" view-name="home"/&gt;</programlisting>
     </section>
 
-    <section id="mvc-static-resources">
-      <title>mvc:resources</title>
+    <section id="mvc-config-static-resources">
+      <title>Configuring Serving of Resources</title>
 
-      <para>This tag allows static resource requests following a particular
+      <para>This option allows static resource requests following a particular
       URL pattern to be served by a
       <classname>ResourceHttpRequestHandler</classname> from any of a list of
       <classname>Resource</classname> locations. This provides a convenient
@@ -4169,14 +4334,39 @@ public class SimpleController {
       unnecessary overhead for resources that are already cached by the
       client. For example, to serve resource requests with a URL pattern of
       <code>/resources/**</code> from a <code>public-resources</code>
-      directory within the web application root, the tag would be used as
-      follows:</para>
+      directory within the web application root you would use:</para>
+
+	  <programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+      
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/resources/**").addResourceLocations("/public-resources/");
+  }
+
+}</programlisting>
+
+	  <para>And the same in XML:</para>
 
       <programlisting language="xml">&lt;mvc:resources mapping="/resources/**" location="/public-resources/"/&gt;</programlisting>
 
       <para>To serve these resources with a 1-year future expiration to ensure
       maximum use of the browser cache and a reduction in HTTP requests made
       by the browser:</para>
+
+	  <programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+      
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/resources/**").addResourceLocations("/public-resources/").setCachePeriod(31556926);
+  }
+
+}</programlisting>
+
+	  <para>And in XML:</para>
 
       <programlisting language="xml">&lt;mvc:resources mapping="/resources/**" location="/public-resources/" cache-period="31556926"/&gt;</programlisting>
 
@@ -4189,7 +4379,21 @@ public class SimpleController {
       given request. For example, to enable the serving of resources from both
       the web application root and from a known path of
       <code>/META-INF/public-web-resources/</code> in any jar on the
-      classpath, the tag would be specified as:</para>
+      classpath use:</para>
+
+	  <programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+      
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/resources/**")
+      .addResourceLocations("/", "classpath:/META-INF/public-web-resources/");
+  }
+
+}</programlisting>
+
+	  <para>And in XML:</para>
 
       <programlisting language="xml">&lt;mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/public-web-resources/"/&gt;</programlisting>
 
@@ -4213,18 +4417,36 @@ public class SimpleController {
       would be to manage the version of the application in a properties file,
       such as:</para>
 
-      <programlisting>
-application.version=1.0.0</programlisting>
+      <programlisting>application.version=1.0.0</programlisting>
 
       <para>and then to make the properties file's values accessible to SpEL
       as a bean using the <code>util:properties</code> tag:</para>
 
       <programlisting language="xml">&lt;util:properties id="applicationProps" location="/WEB-INF/spring/application.properties"/&gt;</programlisting>
-
+      
       <para>With the application version now accessible via SpEL, we can
       incorporate this into the use of the <code>resources</code> tag:</para>
 
       <programlisting language="xml">&lt;mvc:resources mapping="/resources-#{applicationProps['application.version']}/**" location="/public-resources/"/&gt;</programlisting>
+      
+      <para>In Java, you can use the <interfacename>@PropertySouce</interfacename>
+      annotation and then inject the <classname>Environment</classname> 
+      abstraction for access to all defined properties:</para>
+      
+      	  <programlisting language="java">@EnableWebMvc
+@Configuration
+@PropertySource("/WEB-INF/spring/application.properties")
+public class WebConfig extends WebMvcConfigurerAdapter {
+
+  @Inject Environment env;
+
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/resources-" + env.getProperty("application.version") + "/**")
+      .addResourceLocations("/public-resources/");
+  }
+
+}</programlisting>
 
       <para>and finally, to request the resource with the proper URL, we can
       take advantage of the Spring JSP tags:</para>
@@ -4232,7 +4454,7 @@ application.version=1.0.0</programlisting>
       <programlisting language="xml">&lt;spring:eval expression="@applicationProps['application.version']" var="applicationVersion"/&gt;
 
 &lt;spring:url value="/resources-{applicationVersion}" var="resourceUrl"&gt;
-	&lt;spring:param name="applicationVersion" value="${applicationVersion}"/&gt;
+    &lt;spring:param name="applicationVersion" value="${applicationVersion}"/&gt;
 &lt;/spring:url&gt;
 
 &lt;script src="${resourceUrl}/dojo/dojo.js" type="text/javascript"&gt; &lt;/script&gt;</programlisting>
@@ -4257,9 +4479,21 @@ application.version=1.0.0</programlisting>
       of the <code>DefaultServletHttpRequestHandler</code>, which is
       <code>Integer.MAX_VALUE</code>.</para>
 
-      <para>To enable the feature using the default setup, simply include the
-      tag in the form:</para>
+      <para>To enable the feature using the default setup use:</para>
 
+	  <programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+      
+  @Override
+  public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+    configurer.enable(); 
+  }
+
+}</programlisting>
+
+	  <para>Or in XML:</para>
+      
       <programlisting language="xml">&lt;mvc:default-servlet-handler/&gt;</programlisting>
 
       <para>The caveat to overriding the "/" Servlet mapping is that the
@@ -4274,29 +4508,125 @@ application.version=1.0.0</programlisting>
       the default Servlet name is unknown, then the default Servlet's name
       must be explicitly provided as in the following example:</para>
 
+	  <programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+      
+  @Override
+  public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+    configurer.enable("myCustomDefaultServlet"); 
+  }
+
+}</programlisting>
+
+      <para>Or in XML:</para>
+
       <programlisting language="xml">&lt;mvc:default-servlet-handler default-servlet-name="myCustomDefaultServlet"/&gt;</programlisting>
     </section>
+
+    <section id="mvc-resources">
+      <title>More Spring Web MVC Resources</title>
+    
+      <para>See the following links and pointers for more resources about Spring Web MVC:</para>
+    
+      <itemizedlist>
+        <listitem>
+          <para>There are many excellent articles and tutorials that show how to
+          build web applications with Spring MVC. Read them at the <ulink
+          url="http://www.springsource.org/documentation">Spring
+          Documentation</ulink> page.</para>
+        </listitem>
+    
+        <listitem>
+          <para><quote>Expert Spring Web MVC and Web Flow</quote> by Seth Ladd
+          and others (published by Apress) is an excellent hard copy source of
+          Spring Web MVC goodness.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+      
+    <section id="mvc-config-advanced-java">
+      <title>Advanced Customizations with MVC Java Config</title>
+        
+      <para>As you can see from the above examples, MVC Java config and
+      the MVC namespace provide higher level constructs that do not 
+      require deep knowledge of the underlying beans created for you. 
+      Instead it helps you to focus on your application needs.
+      However, at some point you may need more fine-grained control
+      or you may simply wish to understand the underlying configuration.</para>
+        
+      <para>The first step towards more fine-grained control is to see the 
+      underlying beans created for you. In MVC Java config you can 
+      see the Javadoc and the <interfacename>@Bean</interfacename>
+      methods in <classname>WebMvcConfigurationSupport</classname>.
+      The configuration in this class is automatically imported 
+      through the <interfacename>@EnableWebMvc</interfacename> annotation. 
+      In fact if you open <interfacename>@EnableWebMvc</interfacename> you can
+      see the <interfacename>@Import</interfacename> statement.</para>
+    
+      <para>The next step towards more fine-grained control is to 
+      customize a property on one of the beans created in
+      <classname>WebMvcConfigurationSupport</classname> or perhaps
+      to provide your own instance. This requires two things -- 
+      remove the <interfacename>@EnableWebMvc</interfacename> 
+      annotation in order to prevent the import and then 
+      extend directly from <classname>WebMvcConfigurationSupport</classname>.
+      Here is an example:
+      </para>
+      
+      <programlisting language="java">@Configuration
+public class WebConfig extends WebMvcConfigurationSupport {
+
+  @Override
+  public void addInterceptors(InterceptorRegistry registry){
+    // ...
+  }
+
+  @Override
+  @Bean
+  public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
+
+      // Create or let "super" create the adapter 
+      // Then customize one of its properties 
+  }
+  
+}</programlisting>
+    
+      <para>Note that modifying beans in this way does not prevent
+      you from using any of the higher-level constructs shown earlier in 
+      this section. </para>
+        
+    </section>
+      
+    <section id="mvc-config-advanced-xml">
+      <title>Advanced Customizations with the MVC Namespace</title>
+        
+      <para>Fine-grained control over the configuration created for
+      you is a bit harder with the MVC namespace.</para>
+        
+      <para>If you do need to do that, rather than replicating the 
+      configuration it provides, consider configuring a 
+      <interfacename>BeanPostProcessor</interfacename> that detects
+      the bean you want to customize by type and then modifying its 
+      properties as necessary. For example:</para>
+        
+    <programlisting language="java">@Component
+public class MyPostProcessor implements BeanPostProcessor {
+
+  public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
+    if (bean instanceof RequestMappingHandlerAdapter) {
+      // Modify properties of the adapter 
+    }
+  }
+
+}</programlisting>
+    
+      <para>Note that <classname>MyPostProcessor</classname> needs to be 
+      included in an <interfacename>&lt;component scan /&gt;</interfacename> 
+      in order for it to be detected or if you prefer you can declare it
+      explicitly with an XML bean declaration.</para>
+    </section>
+
   </section>
-
-  <section id="mvc-resources">
-    <title>More Spring Web MVC Resources</title>
-
-    <para>See the following links and pointers for more resources about Spring
-    Web MVC:</para>
-
-    <itemizedlist>
-      <listitem>
-        <para>There are many excellent articles and tutorials that show how to
-        build web applications with Spring MVC. Read them at the <ulink
-        url="http://www.springsource.org/documentation">Spring
-        Documentation</ulink> page.</para>
-      </listitem>
-
-      <listitem>
-        <para><quote>Expert Spring Web MVC and Web Flow</quote> by Seth Ladd
-        and others (published by Apress) is an excellent hard copy source of
-        Spring Web MVC goodness.</para>
-      </listitem>
-    </itemizedlist>
-  </section>
+  
 </chapter>
