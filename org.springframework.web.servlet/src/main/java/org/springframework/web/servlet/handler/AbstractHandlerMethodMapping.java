@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -52,10 +53,24 @@ import org.springframework.web.servlet.HandlerMapping;
  */
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping {
 
+	private boolean detectHandlerMethodsInAncestorContexts = false;
+
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>();
 
 	private final MultiValueMap<String, T> urlMap = new LinkedMultiValueMap<String, T>();
 
+	/**
+	 * Whether to detect handler methods in beans in ancestor ApplicationContexts.
+	 * <p>Default is "false": Only beans in the current ApplicationContext are
+	 * considered, i.e. only in the context that this HandlerMapping itself
+	 * is defined in (typically the current DispatcherServlet's context).
+	 * <p>Switch this flag on to detect handler beans in ancestor contexts
+	 * (typically the Spring root WebApplicationContext) as well.
+	 */
+	public void setDetectHandlerMethodsInAncestorContexts(boolean detectHandlerMethodsInAncestorContexts) {
+		this.detectHandlerMethodsInAncestorContexts = detectHandlerMethodsInAncestorContexts;
+	}
+	
 	/**
 	 * Return a map with all handler methods and their mappings.
 	 */
@@ -82,7 +97,12 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for request mappings in application context: " + getApplicationContext());
 		}
-		for (String beanName : getApplicationContext().getBeanNamesForType(Object.class)) {
+		
+		String[] beanNames = (this.detectHandlerMethodsInAncestorContexts ?
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(getApplicationContext(), Object.class) :
+				getApplicationContext().getBeanNamesForType(Object.class));
+
+		for (String beanName : beanNames) {
 			if (isHandler(getApplicationContext().getType(beanName))){
 				detectHandlerMethods(beanName);
 			}
