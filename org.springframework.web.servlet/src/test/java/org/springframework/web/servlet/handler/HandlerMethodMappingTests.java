@@ -27,9 +27,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -88,6 +91,24 @@ public class HandlerMethodMappingTests {
 		mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
 	}
 
+	@Test
+	public void testDetectHandlerMethodsInAncestorContexts() {
+		StaticApplicationContext cxt = new StaticApplicationContext();
+		cxt.registerSingleton("myHandler", MyHandler.class);
+		
+		AbstractHandlerMethodMapping<String> mapping1 = new MyHandlerMethodMapping();
+		mapping1.setApplicationContext(new StaticApplicationContext(cxt));
+
+		assertEquals(0, mapping1.getHandlerMethods().size());
+
+		AbstractHandlerMethodMapping<String> mapping2 = new MyHandlerMethodMapping();
+		mapping2.setDetectHandlerMethodsInAncestorContexts(true);
+		mapping2.setApplicationContext(new StaticApplicationContext(cxt));
+
+		assertEquals(2, mapping2.getHandlerMethods().size());
+	}
+
+	
 	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<String> {
 
 		private UrlPathHelper pathHelper = new UrlPathHelper();
@@ -123,13 +144,14 @@ public class HandlerMethodMappingTests {
 		}
 	}
 
-	private static class MyHandler {
+	@Controller
+	static class MyHandler {
 
-		@SuppressWarnings("unused")
+		@RequestMapping
 		public void handlerMethod1() {
 		}
 
-		@SuppressWarnings("unused")
+		@RequestMapping
 		public void handlerMethod2() {
 		}
 	}
