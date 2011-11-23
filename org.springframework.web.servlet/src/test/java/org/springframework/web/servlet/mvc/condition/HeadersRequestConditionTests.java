@@ -112,6 +112,15 @@ public class HeadersRequestConditionTests {
 	}
 
 	@Test
+	public void headerValueNoMatchNegated() {
+		HeadersRequestCondition condition = new HeadersRequestCondition("foo!=bar");
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("foo", "bar");
+
+		assertNull(condition.getMatchingCondition(request));
+	}
+
+	@Test
 	public void compareTo() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 

@@ -127,12 +127,21 @@ abstract class ServletAnnotationMappingUtils {
 							}
 
 						}
+						if (negated) {
+							found = !found;
+						}
 						if (!found) {
-							return negated;
+							return false;
 						}
 					}
-					else if (!value.equals(request.getHeader(key))) {
-						return negated;
+					else {
+						boolean match = value.equals(request.getHeader(key));
+						if (negated) {
+							match = !match;
+						}
+						if (!match) {
+							return false;
+						}
 					}
 				}
 			}

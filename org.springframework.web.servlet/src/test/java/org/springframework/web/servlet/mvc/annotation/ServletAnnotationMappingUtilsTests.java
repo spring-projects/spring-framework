@@ -143,6 +143,17 @@ public class ServletAnnotationMappingUtilsTests {
 		assertFalse("Invalid request method result", result);
 	}
 
+	// SPR-8862 
+	
+	@Test
+	public void checkHeadersKeyValueNoMatchWithNegation() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		request.addHeader("header1", "value1");
+		String[] headers = new String[]{"header1!=value1"};
+		boolean result = ServletAnnotationMappingUtils.checkHeaders(headers, request);
+		assertFalse("Invalid request method result", result);
+	}
+
 	@Test
 	public void checkHeadersAcceptMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
@@ -157,6 +168,15 @@ public class ServletAnnotationMappingUtilsTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 		request.addHeader("Accept", "application/pdf, text/html");
 		String[] headers = new String[]{"accept=audio/basic, application/xml"};
+		boolean result = ServletAnnotationMappingUtils.checkHeaders(headers, request);
+		assertFalse("Invalid request method result", result);
+	}
+
+	@Test
+	public void checkHeadersAcceptNoMatchWithNegation() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		request.addHeader("Accept", "application/pdf");
+		String[] headers = new String[]{"accept!=application/pdf"};
 		boolean result = ServletAnnotationMappingUtils.checkHeaders(headers, request);
 		assertFalse("Invalid request method result", result);
 	}
