@@ -299,7 +299,7 @@ public class AntPathMatcher implements PathMatcher {
 		else if (!StringUtils.hasText(pattern2)) {
 			return pattern1;
 		}
-		else if (match(pattern1, pattern2)) {
+		else if (!pattern1.contains("{") && match(pattern1, pattern2)) {
 			return pattern2;
 		}
 		else if (pattern1.endsWith("/*")) {

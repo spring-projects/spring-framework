@@ -148,10 +148,11 @@ public class ServletAnnotationMappingUtilsTests {
 	@Test
 	public void checkHeadersKeyValueNoMatchWithNegation() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
-		request.addHeader("header1", "value1");
-		String[] headers = new String[]{"header1!=value1"};
-		boolean result = ServletAnnotationMappingUtils.checkHeaders(headers, request);
-		assertFalse("Invalid request method result", result);
+		request.addHeader("Accept-Encoding", "gzip");
+		String[] headers1 = new String[]{"Accept-Encoding!=gzip"};
+		String[] headers2 = new String[]{"Accept-Encoding=gzip"};
+		assertFalse(ServletAnnotationMappingUtils.checkHeaders(headers1, request));
+		assertTrue(ServletAnnotationMappingUtils.checkHeaders(headers2, request));
 	}
 
 	@Test
