@@ -469,15 +469,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (beanInstance instanceof FactoryBean) {
 				if (!BeanFactoryUtils.isFactoryDereference(name)) {
 					Class type = getTypeForFactoryBean((FactoryBean) beanInstance);
-					return (type != null && typeToMatch.isAssignableFrom(type));
+					return (type != null && ClassUtils.isAssignable(typeToMatch, type));
 				}
 				else {
-					return typeToMatch.isAssignableFrom(beanInstance.getClass())					;
+					return ClassUtils.isAssignableValue(typeToMatch, beanInstance);
 				}
 			}
 			else {
 				return !BeanFactoryUtils.isFactoryDereference(name) &&
-						typeToMatch.isAssignableFrom(beanInstance.getClass());
+						ClassUtils.isAssignableValue(typeToMatch, beanInstance);
 			}
 		}
 		else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
