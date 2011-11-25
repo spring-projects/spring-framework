@@ -124,7 +124,7 @@
 			<xsd:complexContent>
 				<xsd:extension base="beans:identifiedType">
 					<xsd:sequence>
-						<xsd:element name="definitions" type="definitionsType" minOccurs="0" maxOccurs="unbounded"/>
+						<xsd:element name="caching" type="definitionsType" minOccurs="0" maxOccurs="unbounded"/>
 					</xsd:sequence>
 					<xsd:attribute name="cache-manager" type="xsd:string" default="cacheManager">
 						<xsd:annotation>
