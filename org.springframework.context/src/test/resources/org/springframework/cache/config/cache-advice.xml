@@ -8,58 +8,58 @@
        		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
 	<cache:advice id="cacheAdviceInterface" cache-manager="cacheManager">
-		<cache:definitions cache="default">
+		<cache:caching cache="default">
 			<cache:cacheable method="cache"/>
 			<cache:cacheable method="conditional" condition="#classField == 3"/>
 			<cache:cacheable method="key" key="#p0"/>
 			<cache:cacheable method="nam*" key="#root.methodName"/>
 			<cache:cacheable method="rootVars" key="#root.methodName + #root.method.name + #root.targetClass + #root.target"/>
 			<cache:cacheable method="nullValue" cache="default"/>
-		</cache:definitions>
-		<cache:definitions>
+		</cache:caching>
+		<cache:caching>
 			<cache:cache-evict method="invalidate" cache="default"/>
 			<cache:cache-evict method="evict" key="#p0" cache="default"/>
-		</cache:definitions>
-		<cache:definitions cache="default">
+		</cache:caching>
+		<cache:caching cache="default">
 			<cache:cache-put method="update"/>
 			<cache:cache-put method="conditionalUpdate" condition="#arg.equals(3)"/>
-		</cache:definitions>
-		<cache:definitions method="mult*Cache">
+		</cache:caching>
+		<cache:caching method="mult*Cache">
 			<cache:cacheable cache="primary"/>
 			<cache:cacheable cache="secondary"/>
-		</cache:definitions>
-		<cache:definitions method="multiEvict">
+		</cache:caching>
+		<cache:caching method="multiEvict">
 			<cache:cache-evict cache="primary"/>
 			<cache:cache-evict method="multiEvict" cache="secondary" key="#p0"/>
-		</cache:definitions>
-		<cache:definitions>
+		</cache:caching>
+		<cache:caching>
 			<cache:cacheable method="multiCacheAndEvict" cache="primary" key="#root.methodName"/>
 			<cache:cache-evict method="multiCacheAndEvict" cache="secondary"/>
 			<cache:cacheable method="multiConditionalCacheAndEvict" cache="primary" condition="#p0 == 3"/>
 			<cache:cache-evict method="multiConditionalCacheAndEvict" cache="secondary"/>
 			<cache:cache-put method="multiUpdate" cache="primary"/>
 			<cache:cache-put method="multiUpdate" cache="secondary"/>
-		</cache:definitions>
+		</cache:caching>
 	</cache:advice>
 
 	<cache:advice id="cacheAdviceClass" cache-manager="cacheManager" key-generator="keyGenerator">
-		<cache:definitions cache="default">
+		<cache:caching cache="default">
 			<cache:cacheable method="key" key="#p0"/>
 			<cache:cacheable method="nam*" key="#root.methodName + #root.caches[0].name"/>
 			<cache:cacheable method="rootVars" key="#root.methodName + #root.method.name + #root.targetClass + #root.target"/>
 			<cache:cacheable method="cache"/>
 			<cache:cacheable method="conditional"/>
 			<cache:cacheable method="null*"/>
-		</cache:definitions>
-		<cache:definitions>
+		</cache:caching>
+		<cache:caching>
 			<cache:cache-evict method="invalidate" cache="default"/>
 			<cache:cache-evict method="evict" key="#p0" cache="default"/>
-		</cache:definitions>
-		<cache:definitions cache="default">
+		</cache:caching>
+		<cache:caching cache="default">
 			<cache:cache-put method="update"/>
 			<cache:cache-put method="conditionalUpdate" condition="#arg.equals(3)"/>
-		</cache:definitions>
-		<cache:definitions>
+		</cache:caching>
+		<cache:caching>
 			<cache:cacheable method="multiCache" cache="primary"/>
 			<cache:cacheable method="multiCache" cache="secondary"/>
 			<cache:cache-evict method="multiEvict" cache="primary"/>
@@ -70,7 +70,7 @@
 			<cache:cache-evict method="multiConditionalCacheAndEvict" cache="secondary"/>
 			<cache:cache-put method="multiUpdate" cache="primary"/>
 			<cache:cache-put method="multiUpdate" cache="secondary"/>
-		</cache:definitions>		
+		</cache:caching>		
 	</cache:advice>
 		
 	<aop:config>

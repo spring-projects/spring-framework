@@ -219,6 +219,18 @@ public Book findBook(String name)]]></programlisting>
 			</table>
 		</section>
 	</section>
+
+	<section id="cache-annotations-put">
+		<title><literal>@CachePut</literal> annotation</title>
+		
+		<para>For cases where the cache needs to be updated without interferring with the method execution, one can use the <literal>@CachePut</literal> annotation. That is, the method will always
+		be executed and its result placed into the cache (according to the <literal>@CachePut</literal> options). It supports the same options as <literal>@Cacheable</literal> and should be used
+		for cache population rather then method flow optimization.</para>
+		
+		<para>Note that using <literal>@CachePut</literal> and <literal>@Cacheable</literal> annotations on the same method is generaly discouraged because they have different behaviours. While the latter
+		causes the method execution to be skipped by using the cache, the former forces the execution in order to execute a cache update. This leads to unexpected behaviour and with the exception of specific
+		corner-cases (such as annotations having conditions that exclude them from each other), such declarations should be avoided.</para>
+	</section>	
 	
 	<section id="cache-annotations-evict">
 		<title><literal>@CacheEvict</literal> annotation</title>
@@ -240,6 +252,18 @@ public void loadBooks(InputStream batch)]]></programlisting>
 		the cache) - this is not the case with <literal>@Cacheable</literal> which adds/update data into the cache and thus requires a result.</para>
 	</section>
 	
+	<section id="cache-annotations-caching">
+		<title><literal>@Caching</literal> annotation</title>
+		
+		<para>There are cases when multiple annotations of the same type, such as <literal>@CacheEvict</literal> or <literal>@CachePut</literal> need to be specified, for example because the condition or the key
+		expression is different between different caches. Unfortunately Java does not support such declarations however there is a workaround - using a <emphasis>enclosing</emphasis> annotation, in this case,
+		<literal>@Caching</literal>. <literal>@Caching</literal> allows multiple nested <literal>@Cacheable</literal>, <literal>@CachePut</literal> and <literal>@CacheEvict</literal> to be used on the same method:</para>
+		
+		<programlisting language="java"><![CDATA[@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#p0") })
+public Book importBooks(String deposit, Date date)]]></programlisting>
+				
+	</section>
+
 	<section id="cache-annotation-enable">
 		<title>Enable caching annotations</title>
 		
@@ -352,10 +376,10 @@ public void loadBooks(InputStream batch)]]></programlisting>
       		
       <sidebar>
         <title>Method visibility and
-        <interfacename>@Cacheable/@CacheEvcit</interfacename></title>
+        <interfacename>@Cacheable/@CachePut/@CacheEvict</interfacename></title>
 
         <para>When using proxies, you should apply the
-        <interfacename>@Cacheable/@CacheEvict</interfacename> annotations only to
+        <interfacename>@Cache*</interfacename> annotations only to
         methods with <emphasis>public</emphasis> visibility. If you do
         annotate protected, private or package-visible methods with these annotations,
         no error is raised, but the annotated method does not exhibit the configured
@@ -366,9 +390,9 @@ public void loadBooks(InputStream batch)]]></programlisting>
       <para><tip>
           <para>Spring recommends that you only annotate concrete classes (and
           methods of concrete classes) with the
-          <interfacename>@Cacheable/@CacheEvict</interfacename> annotation, as opposed
+          <interfacename>@Cache*</interfacename> annotation, as opposed
           to annotating interfaces. You certainly can place the
-          <interfacename>@Cacheable/@CacheEvict</interfacename> annotation on an
+          <interfacename>@Cache*</interfacename> annotation on an
           interface (or an interface method), but this works only as you would
           expect it to if you are using interface-based proxies. The fact that
           Java annotations are <emphasis>not inherited from interfaces</emphasis>
@@ -434,10 +458,10 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
       
 <!-- cache definitions -->
 <cache:advice id="cacheAdvice" cache-manager="cacheManager">
-   <cache:definitions cache="books">
+   <cache:caching cache="books">
       <cache:cacheable method="findBook" key="#isbn"/>
       <cache:cache-evict method="loadBooks" all-entries="true"/>
-   </cache:definitions>
+   </cache:caching>
 </cache:advice>
         
 <!-- apply the cacheable behaviour to all BookService interfaces -->

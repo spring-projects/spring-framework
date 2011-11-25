@@ -117,7 +117,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 	private static final String CACHE_EVICT_ELEMENT = "cache-evict";
 	private static final String CACHE_PUT_ELEMENT = "cache-put";
 	private static final String METHOD_ATTRIBUTE = "method";
-	private static final String DEFS_ELEMENT = "definitions";
+	private static final String DEFS_ELEMENT = "caching";
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {
