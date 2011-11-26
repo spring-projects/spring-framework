@@ -151,6 +151,11 @@ final class ConfigurationClass {
 		return getMetadata().getClassName().hashCode();
 	}
 
+	@Override
+	public String toString() {
+		return String.format("[ConfigurationClass:beanName=%s,resource=%s]", this.beanName, this.resource);
+	}
+
 
 	/**
 	 * Configuration classes must be non-final to accommodate CGLIB subclassing.
