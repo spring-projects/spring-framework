@@ -100,8 +100,9 @@ abstract class ConfigurationClassUtils {
 	}
 
 	public static boolean isLiteConfigurationCandidate(AnnotationMetadata metadata) {
-		return metadata.isAnnotated(Component.class.getName()) ||
-				metadata.hasAnnotatedMethods(Bean.class.getName());
+		return !metadata.isInterface() && // not an interface or an annotation
+				(metadata.isAnnotated(Component.class.getName()) ||
+				metadata.hasAnnotatedMethods(Bean.class.getName()));
 	}
 
 
