@@ -47,7 +47,7 @@ import org.springframework.mock.env.MockPropertySource;
  *
  * @author Chris Beams
  */
-public class EnvironmentTests {
+public class StandardEnvironmentTests {
 
 	private static final String ALLOWED_PROPERTY_NAME = "theanswer";
 	private static final String ALLOWED_PROPERTY_VALUE = "42";
