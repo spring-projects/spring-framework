@@ -220,24 +220,24 @@ public abstract class CommandLinePropertySource<T> extends PropertySource<T> {
 	}
 
 	/**
-	 * Return whether this {@code PropertySource} contains the given key.
-	 * <p>This implementation first checks to see if the key specified is the special
+	 * Return whether this {@code PropertySource} contains a property with the given name.
+	 * <p>This implementation first checks to see if the name specified is the special
 	 * {@linkplain #setNonOptionArgsPropertyName(String) "non-option arguments" property},
 	 * and if so delegates to the abstract {@link #getNonOptionArgs()} method
 	 * checking to see whether it returns an empty collection. Otherwise delegates to and
 	 * returns the value of the abstract {@link #containsOption(String)} method.
 	 */
 	@Override
-	public final boolean containsProperty(String key) {
-		if (this.nonOptionArgsPropertyName.equals(key)) {
+	public final boolean containsProperty(String name) {
+		if (this.nonOptionArgsPropertyName.equals(name)) {
 			return !this.getNonOptionArgs().isEmpty();
 		}
-		return this.containsOption(key);
+		return this.containsOption(name);
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * <p>This implementation first checks to see if the key specified is the special
+	 * <p>This implementation first checks to see if the name specified is the special
 	 * {@linkplain #setNonOptionArgsPropertyName(String) "non-option arguments" property},
 	 * and if so delegates to the abstract {@link #getNonOptionArgs()} method. If so
 	 * and the collection of non-option arguments is empty, this method returns {@code
@@ -246,8 +246,8 @@ public abstract class CommandLinePropertySource<T> extends PropertySource<T> {
 	 * #getOptionValues(String)} method.
 	 */
 	@Override
-	public final String getProperty(String key) {
-		if (this.nonOptionArgsPropertyName.equals(key)) {
+	public final String getProperty(String name) {
+		if (this.nonOptionArgsPropertyName.equals(name)) {
 			Collection<String> nonOptionArguments = this.getNonOptionArgs();
 			if (nonOptionArguments.isEmpty()) {
 				return null;
@@ -256,7 +256,7 @@ public abstract class CommandLinePropertySource<T> extends PropertySource<T> {
 				return StringUtils.collectionToCommaDelimitedString(nonOptionArguments);
 			}
 		}
-		Collection<String> optionValues = this.getOptionValues(key);
+		Collection<String> optionValues = this.getOptionValues(name);
 		if (optionValues == null) {
 			return null;
 		}

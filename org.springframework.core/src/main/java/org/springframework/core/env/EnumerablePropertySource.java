@@ -20,7 +20,7 @@ import org.springframework.util.Assert;
 
 /**
  * A {@link PropertySource} implementation capable of interrogating its
- * underlying source object to enumerate all possible property key/value
+ * underlying source object to enumerate all possible property name/value
  * pairs. Exposes the {@link #getPropertyNames()} method to allow callers
  * to introspect available properties without having to access the underlying
  * source object. This also facilitates a more efficient implementation of
@@ -56,10 +56,10 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 	public abstract String[] getPropertyNames();
 
 	/**
-	 * Return whether this {@code PropertySource} contains the given key.
-	 * <p>This implementation checks for the presence of the given key within
+	 * Return whether this {@code PropertySource} contains a property with the given name.
+	 * <p>This implementation checks for the presence of the given name within
 	 * the {@link #getPropertyNames()} array.
-	 * @param key the property key to find
+	 * @param name the property to find
 	 */
 	public boolean containsProperty(String name) {
 		Assert.notNull(name, "property name must not be null");
