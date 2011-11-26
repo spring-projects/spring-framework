@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class representing a source of key/value property pairs. The underlying
+ * Abstract base class representing a source of name/value property pairs. The underlying
  * {@linkplain #getSource() source object} may be of any type {@code T} that encapsulates
  * properties. Examples include {@link java.util.Properties} objects, {@link java.util.Map}
  * objects, {@code ServletContext} and {@code ServletConfig} objects (for access to init
@@ -98,22 +98,22 @@ public abstract class PropertySource<T> {
 	}
 
 	/**
-	 * Return whether this {@code PropertySource} contains the given key.
+	 * Return whether this {@code PropertySource} contains the given name.
 	 * <p>This implementation simply checks for a null return value
 	 * from {@link #getProperty(String)}. Subclasses may wish to
 	 * implement a more efficient algorithm if possible.
-	 * @param key the property key to find
+	 * @param name the property name to find
 	 */
-	public boolean containsProperty(String key) {
-		return this.getProperty(key) != null;
+	public boolean containsProperty(String name) {
+		return this.getProperty(name) != null;
 	}
 
 	/**
-	 * Return the value associated with the given key, {@code null} if not found.
-	 * @param key the property key to find
+	 * Return the value associated with the given name, {@code null} if not found.
+	 * @param name the property to find
 	 * @see PropertyResolver#getRequiredProperty(String)
 	 */
-	public abstract Object getProperty(String key);
+	public abstract Object getProperty(String name);
 
 	/**
 	 * Return a hashcode derived from the {@code name} property of this {@code PropertySource}
@@ -154,13 +154,13 @@ public abstract class PropertySource<T> {
 	}
 
 	/**
-	 * Produce concise output (type and name) if the current log level does not include debug.
-	 * If debug is enabled, produce verbose output including hashcode of the PropertySource instance
-	 * and every key/value property pair.
+	 * Produce concise output (type and name) if the current log level does not include
+	 * debug. If debug is enabled, produce verbose output including hashcode of the
+	 * PropertySource instance and every name/value property pair.
 	 *
 	 * This variable verbosity is useful as a property source such as system properties
-	 * or environment variables may contain an arbitrary number of property pairs, potentially
-	 * leading to difficult to read exception and log messages.
+	 * or environment variables may contain an arbitrary number of property pairs,
+	 * potentially leading to difficult to read exception and log messages.
 	 *
 	 * @see Log#isDebugEnabled()
 	 */
@@ -226,7 +226,7 @@ public abstract class PropertySource<T> {
 		 * Always return {@code null}.
 		 */
 		@Override
-		public String getProperty(String key) {
+		public String getProperty(String name) {
 			return null;
 		}
 	}
@@ -251,12 +251,12 @@ public abstract class PropertySource<T> {
 		}
 
 		@Override
-		public boolean containsProperty(String key) {
+		public boolean containsProperty(String name) {
 			throw new UnsupportedOperationException(USAGE_ERROR);
 		}
 
 		@Override
-		public String getProperty(String key) {
+		public String getProperty(String name) {
 			throw new UnsupportedOperationException(USAGE_ERROR);
 		}
 

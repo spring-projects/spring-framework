@@ -96,13 +96,13 @@ public class SimpleCommandLinePropertySource extends CommandLinePropertySource<C
 	}
 
 	@Override
-	protected boolean containsOption(String key) {
-		return this.source.containsOption(key);
+	protected boolean containsOption(String name) {
+		return this.source.containsOption(name);
 	}
 
 	@Override
-	protected List<String> getOptionValues(String key) {
-		return this.source.getOptionValues(key);
+	protected List<String> getOptionValues(String name) {
+		return this.source.getOptionValues(name);
 	}
 
 	@Override

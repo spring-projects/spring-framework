@@ -32,8 +32,8 @@ public class MapPropertySource extends EnumerablePropertySource<Map<String, Obje
 	}
 
 	@Override
-	public Object getProperty(String key) {
-		return this.source.get(key);
+	public Object getProperty(String name) {
+		return this.source.get(name);
 	}
 
 	@Override

@@ -73,13 +73,13 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 	}
 
 	@Override
-	protected boolean containsOption(String key) {
-		return this.source.has(key);
+	protected boolean containsOption(String name) {
+		return this.source.has(name);
 	}
 
 	@Override
-	public List<String> getOptionValues(String key) {
-		List<?> argValues = this.source.valuesOf(key);
+	public List<String> getOptionValues(String name) {
+		List<?> argValues = this.source.valuesOf(name);
 		List<String> stringArgValues = new ArrayList<String>();
 		for(Object argValue : argValues) {
 			if (!(argValue instanceof String)) {
@@ -88,7 +88,7 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 			stringArgValues.add((String)argValue);
 		}
 		if (stringArgValues.size() == 0) {
-			if (this.source.has(key)) {
+			if (this.source.has(name)) {
 				return Collections.emptyList();
 			}
 			else {
