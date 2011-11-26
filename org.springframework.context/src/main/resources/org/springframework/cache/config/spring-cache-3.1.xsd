@@ -27,6 +27,9 @@
 	to be created for the relevant annotated beans.
 
 	The default annotations supported are Spring's @Cacheable and @CacheEvict.
+
+	See org.springframework.cache.annotation.EnableCaching Javadoc
+	for information on code-based alternatives to this XML element.
 				]]></xsd:documentation>
 			</xsd:annotation>
 			<xsd:attribute name="cache-manager" type="xsd:string" default="cacheManager">
