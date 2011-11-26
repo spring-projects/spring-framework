@@ -47,9 +47,9 @@ import org.springframework.util.Assert;
  */
 public class AnnotationConfigApplicationContext extends GenericApplicationContext {
 
-	private final AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(this);
+	private final AnnotatedBeanDefinitionReader reader;
 
-	private final ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this);
+	private final ClassPathBeanDefinitionScanner scanner;
 
 
 	/**
@@ -57,7 +57,8 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
-		this.delegateEnvironment(super.getEnvironment());
+		this.reader = new AnnotatedBeanDefinitionReader(this);
+		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
 	/**
@@ -92,10 +93,6 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	@Override
 	public void setEnvironment(ConfigurableEnvironment environment) {
 		super.setEnvironment(environment);
-		delegateEnvironment(environment);
-	}
-
-	private void delegateEnvironment(ConfigurableEnvironment environment) {
 		this.reader.setEnvironment(environment);
 		this.scanner.setEnvironment(environment);
 	}

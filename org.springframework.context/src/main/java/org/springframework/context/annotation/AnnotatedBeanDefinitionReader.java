@@ -45,25 +45,41 @@ public class AnnotatedBeanDefinitionReader {
 
 	private final BeanDefinitionRegistry registry;
 
-	private Environment environment = new StandardEnvironment();
+	private Environment environment;
 
 	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
 	/**
-	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given bean factory.
+	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given registry.
+	 * If the registry is {@link EnvironmentCapable}, e.g. is an {@code ApplicationContext},
+	 * the {@link Environment} will be inherited, otherwise a new
+	 * {@link StandardEnvironment} will be created and used.
 	 * @param registry the {@code BeanFactory} to load bean definitions into,
 	 * in the form of a {@code BeanDefinitionRegistry}
+	 * @see #AnnotatedBeanDefinitionReader(BeanDefinitionRegistry, Environment)
+	 * @see #setEnvironment(Environment)
 	 */
 	public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry) {
-		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
-		this.registry = registry;
+		this(registry, getOrCreateEnvironment(registry));
+	}
 
-		// Inherit Environment if possible
-		if (this.registry instanceof EnvironmentCapable) {
-			this.environment = ((EnvironmentCapable) this.registry).getEnvironment();
-		}
+	/**
+	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given registry and using
+	 * the given {@link Environment}.
+	 * @param registry the {@code BeanFactory} to load bean definitions into,
+	 * in the form of a {@code BeanDefinitionRegistry}
+	 * @param environment the {@code Environment} to use when evaluating bean definition
+	 * profiles.
+	 * @since 3.1
+	 */
+	public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry, Environment environment) {
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
+		Assert.notNull(environment, "Environment must not be null");
+
+		this.registry = registry;
+		this.environment = environment;
 
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
@@ -144,4 +160,18 @@ public class AnnotatedBeanDefinitionReader {
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
+
+
+	/**
+	 * Get the Environment from the given registry if possible, otherwise return a new
+	 * StandardEnvironment.
+	 */
+	private static Environment getOrCreateEnvironment(BeanDefinitionRegistry registry) {
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
+		if (registry instanceof EnvironmentCapable) {
+			return ((EnvironmentCapable) registry).getEnvironment();
+		}
+		return new StandardEnvironment();
+	}
+
 }
