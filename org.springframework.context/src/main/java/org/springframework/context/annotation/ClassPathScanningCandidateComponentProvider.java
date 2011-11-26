@@ -73,7 +73,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Environment environment = new StandardEnvironment();
+	private Environment environment;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -95,9 +95,14 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @see #registerDefaultFilters()
 	 */
 	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters) {
+		this(useDefaultFilters, new StandardEnvironment());
+	}
+
+	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters, Environment environment) {
 		if (useDefaultFilters) {
 			registerDefaultFilters();
 		}
+		this.environment = environment;
 	}
 
 

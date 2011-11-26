@@ -27,15 +27,17 @@ import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
 
 /**
  * A bean definition scanner that detects bean candidates on the classpath,
- * registering corresponding bean definitions with a given registry (BeanFactory
- * or ApplicationContext).
+ * registering corresponding bean definitions with a given registry ({@code BeanFactory}
+ * or {@code ApplicationContext}).
  *
  * <p>Candidate classes are detected through configurable type filters. The
  * default filters include classes that are annotated with Spring's
@@ -73,29 +75,30 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 
 	/**
-	 * Create a new ClassPathBeanDefinitionScanner for the given bean factory.
-	 * @param registry the BeanFactory to load bean definitions into,
-	 * in the form of a BeanDefinitionRegistry
+	 * Create a new {@code ClassPathBeanDefinitionScanner} for the given bean factory.
+	 * @param registry the {@code BeanFactory} to load bean definitions into, in the form
+	 * of a {@code BeanDefinitionRegistry}
 	 */
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
 		this(registry, true);
 	}
 
 	/**
-	 * Create a new ClassPathBeanDefinitionScanner for the given bean factory.
-	 * <p>If the passed-in bean factory does not only implement the BeanDefinitionRegistry
-	 * interface but also the ResourceLoader interface, it will be used as default
-	 * ResourceLoader as well. This will usually be the case for
-	 * {@link org.springframework.context.ApplicationContext} implementations.
-	 * <p>If given a plain BeanDefinitionRegistry, the default ResourceLoader will be a
-	 * {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
+	 * Create a new {@code ClassPathBeanDefinitionScanner} for the given bean factory.
+	 * <p>If the passed-in bean factory does not only implement the
+	 * {@code BeanDefinitionRegistry} interface but also the {@code ResourceLoader}
+	 * interface, it will be used as default {@code ResourceLoader} as well. This will
+	 * usually be the case for {@link org.springframework.context.ApplicationContext}
+	 * implementations.
+	 * <p>If given a plain {@code BeanDefinitionRegistry}, the default {@code ResourceLoader}
+	 * will be a {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
 	 * <p>If the the passed-in bean factory also implements {@link EnvironmentCapable} its
 	 * environment will be used by this reader.  Otherwise, the reader will initialize and
 	 * use a {@link org.springframework.core.env.StandardEnvironment}. All
-	 * ApplicationContext implementations are EnvironmentCapable, while normal BeanFactory
-	 * implementations are not.
-	 * @param registry the BeanFactory to load bean definitions into,
-	 * in the form of a BeanDefinitionRegistry
+	 * {@code ApplicationContext} implementations are {@code EnvironmentCapable}, while
+	 * normal {@code BeanFactory} implementations are not.
+	 * @param registry the {@code BeanFactory} to load bean definitions into, in the form
+	 * of a {@code BeanDefinitionRegistry}
 	 * @param useDefaultFilters whether to include the default filters for the
 	 * {@link org.springframework.stereotype.Component @Component},
 	 * {@link org.springframework.stereotype.Repository @Repository},
@@ -106,7 +109,33 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @see #setEnvironment
 	 */
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters) {
-		super(useDefaultFilters);
+		this(registry, useDefaultFilters, getOrCreateEnvironment(registry));
+	}
+
+	/**
+	 * Create a new {@code ClassPathBeanDefinitionScanner} for the given bean factory and
+	 * using the given {@link Environment} when evaluating bean definition profile metadata.
+	 * <p>If the passed-in bean factory does not only implement the {@code
+	 * BeanDefinitionRegistry} interface but also the {@link ResourceLoader} interface, it
+	 * will be used as default {@code ResourceLoader} as well. This will usually be the
+	 * case for {@link org.springframework.context.ApplicationContext} implementations.
+	 * <p>If given a plain {@code BeanDefinitionRegistry}, the default {@code ResourceLoader}
+	 * will be a {@link org.springframework.core.io.support.PathMatchingResourcePatternResolver}.
+	 * @param registry the {@code BeanFactory} to load bean definitions into, in the form
+	 * of a {@code BeanDefinitionRegistry}
+	 * @param useDefaultFilters whether to include the default filters for the
+	 * @param environment the Spring {@link Environment} to use when evaluating bean
+	 * definition profile metadata.
+	 * {@link org.springframework.stereotype.Component @Component},
+	 * {@link org.springframework.stereotype.Repository @Repository},
+	 * {@link org.springframework.stereotype.Service @Service}, and
+	 * {@link org.springframework.stereotype.Controller @Controller} stereotype
+	 * annotations.
+	 * @since 3.1
+	 * @see #setResourceLoader
+	 */
+	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters, Environment environment) {
+		super(useDefaultFilters, environment);
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
@@ -114,11 +143,6 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		// Determine ResourceLoader to use.
 		if (this.registry instanceof ResourceLoader) {
 			setResourceLoader((ResourceLoader) this.registry);
-		}
-
-		// Inherit Environment if possible
-		if (this.registry instanceof EnvironmentCapable) {
-			setEnvironment(((EnvironmentCapable) this.registry).getEnvironment());
 		}
 	}
 
@@ -305,6 +329,19 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 		return (!(existingDefinition instanceof AnnotatedBeanDefinition) ||  // explicitly registered overriding bean
 				newDefinition.getSource().equals(existingDefinition.getSource()) ||  // scanned same file twice
 				newDefinition.equals(existingDefinition));  // scanned equivalent class twice
+	}
+
+
+	/**
+	 * Get the Environment from the given registry if possible, otherwise return a new
+	 * StandardEnvironment.
+	 */
+	private static Environment getOrCreateEnvironment(BeanDefinitionRegistry registry) {
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
+		if (registry instanceof EnvironmentCapable) {
+			return ((EnvironmentCapable) registry).getEnvironment();
+		}
+		return new StandardEnvironment();
 	}
 
 }
