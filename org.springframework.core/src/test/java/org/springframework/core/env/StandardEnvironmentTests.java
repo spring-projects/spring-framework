@@ -72,6 +72,13 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
+	public void propertySourceTypes() {
+		ConfigurableEnvironment env = new StandardEnvironment();
+		MutablePropertySources sources = env.getPropertySources();
+		assertThat(sources.get(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME), instanceOf(SystemEnvironmentPropertySource.class));
+	}
+
+	@Test
 	public void activeProfilesIsEmptyByDefault() {
 		assertThat(environment.getActiveProfiles().length, is(0));
 	}
