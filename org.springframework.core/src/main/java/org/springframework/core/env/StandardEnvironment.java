@@ -44,6 +44,7 @@ package org.springframework.core.env;
  * @author Chris Beams
  * @since 3.1
  * @see ConfigurableEnvironment
+ * @see SystemEnvironmentPropertySource
  * @see org.springframework.web.context.support.StandardServletEnvironment
  */
 public class StandardEnvironment extends AbstractEnvironment {
@@ -71,7 +72,7 @@ public class StandardEnvironment extends AbstractEnvironment {
 	@Override
 	protected void customizePropertySources(MutablePropertySources propertySources) {
 		propertySources.addLast(new MapPropertySource(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, getSystemProperties()));
-		propertySources.addLast(new MapPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, getSystemEnvironment()));
+		propertySources.addLast(new SystemEnvironmentPropertySource(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, getSystemEnvironment()));
 	}
 
 }
