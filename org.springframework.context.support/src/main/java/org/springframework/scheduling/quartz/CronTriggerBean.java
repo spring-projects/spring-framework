@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
  * Convenience subclass of Quartz's {@link org.quartz.CronTrigger} class,
  * making bean-style usage easier.
  *
- * <p>CronTrigger itself is already a JavaBean but lacks sensible defaults.
+ * <p><code>CronTrigger</code> itself is already a JavaBean but lacks sensible defaults.
  * This class uses the Spring bean name as job name, the Quartz default group
  * ("DEFAULT") as job group, the current time as start time, and indefinite
  * repetition, if not specified.
@@ -44,8 +44,10 @@ import org.springframework.util.Assert;
  * instead of registering the JobDetail separately.
  *
  * <p><b>NOTE: This convenience subclass does not work against Quartz 2.0.</b>
- * Use Quartz 2.0's native <code>CronTriggerImpl</code> class or the new
- * Quartz 2.0 builder API instead.
+ * Use Quartz 2.0's native <code>JobDetailImpl</code> class or the new Quartz 2.0
+ * builder API instead. Alternatively, switch to Spring's {@link CronTriggerFactoryBean}
+ * which largely is a drop-in replacement for this class and its properties and
+ * consistently works against Quartz 1.x as well as Quartz 2.0/2.1.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -72,6 +74,7 @@ public class CronTriggerBean extends CronTrigger
 
 	private long startDelay;
 
+
 	/**
 	 * Register objects in the JobDataMap via a given Map.
 	 * <p>These objects will be available to this Trigger only,
@@ -80,7 +83,7 @@ public class CronTriggerBean extends CronTrigger
 	 * (for example Spring-managed beans)
 	 * @see JobDetailBean#setJobDataAsMap
 	 */
-	public void setJobDataAsMap(Map jobDataAsMap) {
+	public void setJobDataAsMap(Map<String, ?> jobDataAsMap) {
 		getJobDataMap().putAll(jobDataAsMap);
 	}
 
@@ -111,6 +114,19 @@ public class CronTriggerBean extends CronTrigger
 	}
 
 	/**
+	 * Set the start delay in milliseconds.
+	 * <p>The start delay is added to the current system time (when the bean starts)
+	 * to control the {@link #setStartTime start time} of the trigger.
+	 * <p>If the start delay is non-zero, it will <strong>always</strong>
+	 * take precedence over start time.
+	 * @param startDelay the start delay, in milliseconds
+	 */
+	public void setStartDelay(long startDelay) {
+		Assert.state(startDelay >= 0, "Start delay cannot be negative.");
+		this.startDelay = startDelay;
+	}
+
+	/**
 	 * Set the JobDetail that this trigger should be associated with.
 	 * <p>This is typically used with a bean reference if the JobDetail
 	 * is a Spring-managed bean. Alternatively, the trigger can also
@@ -120,20 +136,6 @@ public class CronTriggerBean extends CronTrigger
 	 */
 	public void setJobDetail(JobDetail jobDetail) {
 		this.jobDetail = jobDetail;
-	}
-
-	/**
-	 * Set the start delay in milliseconds.
-	 * <p>The start delay is added to the current system time
-	 * (when the bean starts) to control the {@link #setStartTime start time}
-	 * of the trigger.
-	 * <p>If the start delay is non-zero it will <strong>always</strong>
-	 * take precedence over start time.
-	 * @param startDelay the start delay, in milliseconds.
-	 */
-	public void setStartDelay(long startDelay) {
-		Assert.state(startDelay >= 0, "Start delay cannot be negative.");
-		this.startDelay = startDelay;
 	}
 
 	public JobDetail getJobDetail() {
@@ -146,7 +148,7 @@ public class CronTriggerBean extends CronTrigger
 
 
 	public void afterPropertiesSet() throws Exception {
-		if(this.startDelay > 0) {
+		if (this.startDelay > 0) {
 			setStartTime(new Date(System.currentTimeMillis() + this.startDelay));
 		}
 

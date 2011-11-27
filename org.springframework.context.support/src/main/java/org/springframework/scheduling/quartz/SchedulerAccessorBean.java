@@ -29,7 +29,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * Spring bean-style class for accessing a Quartz Scheduler, i.e. for registering jobs,
  * triggers and listeners on a given {@link org.quartz.Scheduler} instance.
  *
- * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0, as of Spring 3.1.
+ * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0/2.1, as of Spring 3.1.
  *
  * @author Juergen Hoeller
  * @since 2.5.6

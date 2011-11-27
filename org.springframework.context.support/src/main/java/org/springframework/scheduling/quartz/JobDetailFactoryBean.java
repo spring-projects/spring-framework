@@ -18,40 +18,47 @@ package org.springframework.scheduling.quartz;
 
 import java.util.Map;
 
-import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 /**
- * Convenience subclass of Quartz's {@link org.quartz.JobDetail} class,
- * making bean-style usage easier.
+ * A Spring {@link FactoryBean} for creating a Quartz {@link org.quartz.JobDetail}
+ * instance, supporting bean-style usage for JobDetail configuration.
  *
- * <p><code>JobDetail</code> itself is already a JavaBean but lacks
+ * <p><code>JobDetail(Impl)</code> itself is already a JavaBean but lacks
  * sensible defaults. This class uses the Spring bean name as job name,
  * and the Quartz default group ("DEFAULT") as job group if not specified.
  *
- * <p><b>NOTE: This convenience subclass does not work against Quartz 2.0.</b>
- * Use Quartz 2.0's native <code>JobDetailImpl</code> class or the new Quartz 2.0
- * builder API instead. Alternatively, switch to Spring's {@link JobDetailFactoryBean}
- * which largely is a drop-in replacement for this class and its properties and
- * consistently works against Quartz 1.x as well as Quartz 2.0/2.1.
+ * <p><b>NOTE:</b> This FactoryBean works against both Quartz 1.x and Quartz 2.0/2.1,
+ * in contrast to the older {@link JobDetailBean} class.
  *
  * @author Juergen Hoeller
- * @since 18.02.2004
+ * @since 3.1
  * @see #setName
  * @see #setGroup
  * @see org.springframework.beans.factory.BeanNameAware
  * @see org.quartz.Scheduler#DEFAULT_GROUP
  */
-public class JobDetailBean extends JobDetail
-		implements BeanNameAware, ApplicationContextAware, InitializingBean {
+public class JobDetailFactoryBean
+		implements FactoryBean<JobDetail>, BeanNameAware, ApplicationContextAware, InitializingBean {
 
-	private Class actualJobClass;
+	private String name;
+
+	private String group;
+
+	private Class jobClass;
+
+	private JobDataMap jobDataMap = new JobDataMap();
 
 	private String beanName;
 
@@ -59,30 +66,43 @@ public class JobDetailBean extends JobDetail
 
 	private String applicationContextJobDataKey;
 
+	private JobDetail jobDetail;
+
 
 	/**
-	 * Overridden to support any job class, to allow a custom JobFactory
-	 * to adapt the given job class to the Quartz Job interface.
-	 * @see SchedulerFactoryBean#setJobFactory
+	 * Specify the job's name.
 	 */
-	@Override
-	public void setJobClass(Class jobClass) {
-		if (jobClass != null && !Job.class.isAssignableFrom(jobClass)) {
-			super.setJobClass(DelegatingJob.class);
-			this.actualJobClass = jobClass;
-		}
-		else {
-			super.setJobClass(jobClass);
-		}
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**
-	 * Overridden to support any job class, to allow a custom JobFactory
-	 * to adapt the given job class to the Quartz Job interface.
+	 * Specify the job's group.
 	 */
-	@Override
-	public Class getJobClass() {
-		return (this.actualJobClass != null ? this.actualJobClass : super.getJobClass());
+	public void setGroup(String group) {
+		this.group = group;
+	}
+
+	/**
+	 * Specify the job's implementation class.
+	 */
+	public void setJobClass(Class jobClass) {
+		this.jobClass = jobClass;
+	}
+
+	/**
+	 * Set the job's JobDataMap.
+	 * @see #setJobDataAsMap
+	 */
+	public void setJobDataMap(JobDataMap jobDataMap) {
+		this.jobDataMap = jobDataMap;
+	}
+
+	/**
+	 * Return the job's JobDataMap.
+	 */
+	public JobDataMap getJobDataMap() {
+		return this.jobDataMap;
 	}
 
 	/**
@@ -94,24 +114,10 @@ public class JobDetailBean extends JobDetail
 	 * reference into the JobDataMap but rather into the SchedulerContext.
 	 * @param jobDataAsMap Map with String keys and any objects as values
 	 * (for example Spring-managed beans)
-	 * @see SchedulerFactoryBean#setSchedulerContextAsMap
+	 * @see org.springframework.scheduling.quartz.SchedulerFactoryBean#setSchedulerContextAsMap
 	 */
-	public void setJobDataAsMap(Map jobDataAsMap) {
+	public void setJobDataAsMap(Map<String, ?> jobDataAsMap) {
 		getJobDataMap().putAll(jobDataAsMap);
-	}
-
-	/**
-	 * Set a list of JobListener names for this job, referring to
-	 * non-global JobListeners registered with the Scheduler.
-	 * <p>A JobListener name always refers to the name returned
-	 * by the JobListener implementation.
-	 * @see SchedulerFactoryBean#setJobListeners
-	 * @see org.quartz.JobListener#getName
-	 */
-	public void setJobListenerNames(String[] names) {
-		for (int i = 0; i < names.length; i++) {
-			addJobListener(names[i]);
-		}
 	}
 
 	public void setBeanName(String beanName) {
@@ -135,7 +141,7 @@ public class JobDetailBean extends JobDetail
 	 * <p><b>Note: When using persistent job stores where JobDetail contents will
 	 * be kept in the database, do not put an ApplicationContext reference into
 	 * the JobDataMap but rather into the SchedulerContext.</b>
-	 * @see SchedulerFactoryBean#setApplicationContextSchedulerContextKey
+	 * @see org.springframework.scheduling.quartz.SchedulerFactoryBean#setApplicationContextSchedulerContextKey
 	 * @see org.springframework.context.ApplicationContext
 	 */
 	public void setApplicationContextJobDataKey(String applicationContextJobDataKey) {
@@ -143,12 +149,13 @@ public class JobDetailBean extends JobDetail
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
-		if (getName() == null) {
-			setName(this.beanName);
+		if (this.name == null) {
+			this.name = this.beanName;
 		}
-		if (getGroup() == null) {
-			setGroup(Scheduler.DEFAULT_GROUP);
+		if (this.group == null) {
+			this.group = Scheduler.DEFAULT_GROUP;
 		}
 		if (this.applicationContextJobDataKey != null) {
 			if (this.applicationContext == null) {
@@ -158,6 +165,44 @@ public class JobDetailBean extends JobDetail
 			}
 			getJobDataMap().put(this.applicationContextJobDataKey, this.applicationContext);
 		}
+
+		/*
+		JobDetailImpl jdi = new JobDetailImpl();
+		jdi.setName(this.name);
+		jdi.setGroup(this.group);
+		jdi.setJobClass(this.jobClass);
+		jdi.setJobDataMap(this.jobDataMap);
+		this.jobDetail = jdi;
+		*/
+
+		Class jobDetailClass;
+		try {
+			jobDetailClass = getClass().getClassLoader().loadClass("org.quartz.impl.JobDetailImpl");
+		}
+		catch (ClassNotFoundException ex) {
+			jobDetailClass = JobDetail.class;
+		}
+		BeanWrapper bw = new BeanWrapperImpl(jobDetailClass);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("name", this.name);
+		pvs.add("group", this.group);
+		pvs.add("jobClass", this.jobClass);
+		pvs.add("jobDataMap", this.jobDataMap);
+		bw.setPropertyValues(pvs);
+		this.jobDetail = (JobDetail) bw.getWrappedInstance();
+	}
+
+
+	public JobDetail getObject() {
+		return this.jobDetail;
+	}
+
+	public Class<?> getObjectType() {
+		return JobDetail.class;
+	}
+
+	public boolean isSingleton() {
+		return true;
 	}
 
 }

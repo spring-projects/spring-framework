@@ -32,7 +32,7 @@ import org.springframework.core.Constants;
  * Convenience subclass of Quartz's {@link org.quartz.SimpleTrigger} class,
  * making bean-style usage easier.
  *
- * <p>SimpleTrigger itself is already a JavaBean but lacks sensible defaults.
+ * <p><code>SimpleTrigger</code> itself is already a JavaBean but lacks sensible defaults.
  * This class uses the Spring bean name as job name, the Quartz default group
  * ("DEFAULT") as job group, the current time as start time, and indefinite
  * repetition, if not specified.
@@ -43,8 +43,10 @@ import org.springframework.core.Constants;
  * instead of registering the JobDetail separately.
  *
  * <p><b>NOTE: This convenience subclass does not work against Quartz 2.0.</b>
- * Use Quartz 2.0's native <code>SimpleTriggerImpl</code> class or the new
- * Quartz 2.0 builder API instead.
+ * Use Quartz 2.0's native <code>JobDetailImpl</code> class or the new Quartz 2.0
+ * builder API instead. Alternatively, switch to Spring's {@link SimpleTriggerFactoryBean}
+ * which largely is a drop-in replacement for this class and its properties and
+ * consistently works against Quartz 1.x as well as Quartz 2.0/2.1.
  *
  * @author Juergen Hoeller
  * @since 18.02.2004
@@ -84,7 +86,7 @@ public class SimpleTriggerBean extends SimpleTrigger
 	 * (for example Spring-managed beans)
 	 * @see JobDetailBean#setJobDataAsMap
 	 */
-	public void setJobDataAsMap(Map jobDataAsMap) {
+	public void setJobDataAsMap(Map<String, ?> jobDataAsMap) {
 		getJobDataMap().putAll(jobDataAsMap);
 	}
 
@@ -118,14 +120,12 @@ public class SimpleTriggerBean extends SimpleTrigger
 	}
 
 	/**
-	 * Set the delay before starting the job for the first time.
-	 * The given number of milliseconds will be added to the current
-	 * time to calculate the start time. Default is 0.
-	 * <p>This delay will just be applied if no custom start time was
-	 * specified. However, in typical usage within a Spring context,
-	 * the start time will be the container startup time anyway.
-	 * Specifying a relative delay is appropriate in that case.
-	 * @see #setStartTime
+	 * Set the start delay in milliseconds.
+	 * <p>The start delay is added to the current system time (when the bean starts)
+	 * to control the {@link #setStartTime start time} of the trigger.
+	 * <p>If the start delay is non-zero, it will <strong>always</strong>
+	 * take precedence over start time.
+	 * @param startDelay the start delay, in milliseconds
 	 */
 	public void setStartDelay(long startDelay) {
 		this.startDelay = startDelay;
