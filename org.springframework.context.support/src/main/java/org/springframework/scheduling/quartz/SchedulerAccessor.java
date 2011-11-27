@@ -51,7 +51,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>For concrete usage, check out the {@link SchedulerFactoryBean} and
  * {@link SchedulerAccessorBean} classes.
  *
- * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0, as of Spring 3.1.
+ * <p>Compatible with Quartz 1.5+ as well as Quartz 2.0/2.1, as of Spring 3.1.
  *
  * @author Juergen Hoeller
  * @since 2.5.6
@@ -359,8 +359,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		boolean triggerExists = triggerExists(trigger);
 		if (!triggerExists || this.overwriteExistingJobs) {
 			// Check if the Trigger is aware of an associated JobDetail.
-			if (trigger instanceof JobDetailAwareTrigger) {
-				JobDetail jobDetail = ((JobDetailAwareTrigger) trigger).getJobDetail();
+			JobDetail jobDetail = findJobDetail(trigger);
+			if (jobDetail != null) {
 				// Automatically register the JobDetail too.
 				if (!this.jobDetails.contains(jobDetail) && addJobToScheduler(jobDetail)) {
 					this.jobDetails.add(jobDetail);
@@ -387,6 +387,21 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		}
 		else {
 			return false;
+		}
+	}
+
+	private JobDetail findJobDetail(Trigger trigger) {
+		if (trigger instanceof JobDetailAwareTrigger) {
+			return ((JobDetailAwareTrigger) trigger).getJobDetail();
+		}
+		else {
+			try {
+				Map jobDataMap = (Map) ReflectionUtils.invokeMethod(Trigger.class.getMethod("getJobDataMap"), trigger);
+				return (JobDetail) jobDataMap.get(JobDetailAwareTrigger.JOB_DETAIL_KEY);
+			}
+			catch (NoSuchMethodException ex) {
+				throw new IllegalStateException("Inconsistent Quartz API: " + ex);
+			}
 		}
 	}
 
