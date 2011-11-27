@@ -20,15 +20,12 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.ejb.HibernateEntityManager;
-import org.hibernate.ejb.HibernateEntityManagerFactory;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.datasource.ConnectionHandle;
@@ -38,8 +35,6 @@ import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -53,10 +48,6 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.0
  */
 public class HibernateJpaDialect extends DefaultJpaDialect {
-
-	private static final Method getEntityManagerFactoryMethod =
-			ClassUtils.getMethodIfAvailable(EntityManager.class, "getEntityManagerFactory");
-
 
 	@Override
 	public Object beginTransaction(EntityManager entityManager, TransactionDefinition definition)
@@ -88,22 +79,12 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 				previousFlushMode = flushMode;
 			}
 		}
-		if (getEntityManagerFactoryMethod != null) {
-			// We're on JPA 2.0, enabling our exposure of the underlying Session
-			// to the underlying SessionFactory as transaction resource reference.
-			EntityManagerFactory emf =
-					(EntityManagerFactory) ReflectionUtils.invokeMethod(getEntityManagerFactoryMethod, entityManager);
-			if (emf instanceof HibernateEntityManagerFactory) {
-				SessionFactory sf = ((HibernateEntityManagerFactory) emf).getSessionFactory();
-				TransactionSynchronizationManager.bindResource(sf, session);
-			}
-		}
 		return new SessionTransactionData(session, previousFlushMode);
 	}
 
 	@Override
 	public void cleanupTransaction(Object transactionData) {
-		((SessionTransactionData) transactionData).cleanup();
+		((SessionTransactionData) transactionData).resetFlushMode();
 	}
 
 	@Override
@@ -153,11 +134,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			this.previousFlushMode = previousFlushMode;
 		}
 
-		public void cleanup() {
-			SessionFactory sessionFactory = this.session.getSessionFactory();
-			if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
-				TransactionSynchronizationManager.unbindResource(sessionFactory);
-			}
+		public void resetFlushMode() {
 			if (this.previousFlushMode != null) {
 				this.session.setFlushMode(this.previousFlushMode);
 			}
