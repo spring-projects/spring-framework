@@ -263,8 +263,18 @@ public abstract class EntityManagerFactoryUtils {
 		EntityManagerHolder emHolder = (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
 		if (emHolder != null && emHolder.hasTimeout()) {
 			int timeoutValue = (int) emHolder.getTimeToLiveInMillis();
-			query.setHint("javax.persistence.lock.timeout", timeoutValue);
-			query.setHint("javax.persistence.query.timeout", timeoutValue);
+			try {
+				query.setHint("javax.persistence.lock.timeout", timeoutValue);
+			}
+			catch (IllegalArgumentException ex) {
+				// oh well, at least we tried...
+			}
+			try {
+				query.setHint("javax.persistence.query.timeout", timeoutValue);
+			}
+			catch (IllegalArgumentException ex) {
+				// once again, at least we tried...
+			}
 		}
 	}
 
