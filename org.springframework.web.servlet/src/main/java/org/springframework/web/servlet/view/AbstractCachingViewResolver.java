@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,9 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	/** Whether we should cache views, once resolved */
 	private boolean cache = true;
 
+	/** Whether we should refrain from resolving views again if unresolved once */
+	private boolean cacheUnresolved = false;
+
 	/** Map from view key to View instance */
 	private final Map<Object, View> viewCache = new HashMap<Object, View>();
 
@@ -63,6 +66,29 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		return this.cache;
 	}
 
+	/**
+	 * Whether a view name once resolved to {@code null} should be cached and
+	 * automatically resolved to {@code null} subsequently.
+	 * <p>Default is "false": unresolved view names are NOT being cached.
+	 * Note that this flag only applies if the general {@link #setCache "cache"}
+	 * flag is kept at its default of "true" as well.
+	 * <p>Of specific interest is the ability for some AbstractUrlBasedView
+	 * implementations (FreeMarker, Velocity, Tiles) to check if an underlying
+	 * resource exists via {@link AbstractUrlBasedView#checkResource(Locale)}.
+	 * With this flag set to "false", an underlying resource that re-appears
+	 * is noticed and used. With the flag set to "true", one check is made only.
+	 */
+	public void setCacheUnresolved(boolean cacheUnresolved) {
+		this.cacheUnresolved = cacheUnresolved;
+	}
+
+	/**
+	 * Return if caching of unresolved views is enabled.
+	 */
+	public boolean isCacheUnresolved() {
+		return this.cacheUnresolved;
+	}
+
 
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!isCache()) {
@@ -72,12 +98,14 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 			Object cacheKey = getCacheKey(viewName, locale);
 			synchronized (this.viewCache) {
 				View view = this.viewCache.get(cacheKey);
-				if (view == null) {
+				if (view == null && (!this.cacheUnresolved || !this.viewCache.containsKey(cacheKey))) {
 					// Ask the subclass to create the View object.
 					view = createView(viewName, locale);
-					this.viewCache.put(cacheKey, view);
-					if (logger.isTraceEnabled()) {
-						logger.trace("Cached view [" + cacheKey + "]");
+					if (view != null || this.cacheUnresolved) {
+						this.viewCache.put(cacheKey, view);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Cached view [" + cacheKey + "]");
+						}
 					}
 				}
 				return view;
