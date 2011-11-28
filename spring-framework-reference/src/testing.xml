@@ -1606,16 +1606,86 @@ public class TransferServiceTest {
         <section id="testcontext-ctx-management-caching">
           <title>Context caching</title>
 
-          <para>By default, once an
-          <interfacename>ApplicationContext</interfacename> has been loaded
-          for a test it will be reused for <emphasis
+          <para>Once the TestContext framework loads an
+          <interfacename>ApplicationContext</interfacename> for a test, that
+          context will be cached and reused for <emphasis
           role="bold">all</emphasis> subsequent tests that declare the same
-          <emphasis>unique</emphasis> context configuration within the same
-          process — for example, all tests run in a suite within an IDE or all
-          tests run for the same project with a build framework like Ant or
-          Maven. Thus the setup cost for loading an application context is
-          incurred only once (per test suite), and subsequent test execution
-          is much faster.</para>
+          unique context configuration within the same test suite. To
+          understand how caching works, it is important to understand what is
+          meant by <emphasis>unique</emphasis> and <emphasis>test
+          suite</emphasis>.</para>
+
+          <para>An <interfacename>ApplicationContext</interfacename> can be
+          <emphasis>uniquely</emphasis> identified by the combination of
+          configuration parameters that are used to load it. Consequently, the
+          unique combination of configuration parameters are used to generate
+          a <emphasis>key</emphasis> under which the context is cached. The
+          TestContext framework uses the following configuration parameters to
+          build the context cache key:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><varname>locations</varname> <emphasis>(from
+              @ContextConfiguration)</emphasis></para>
+            </listitem>
+
+            <listitem>
+              <para><varname>classes</varname> <emphasis>(from
+              @ContextConfiguration)</emphasis></para>
+            </listitem>
+
+            <listitem>
+              <para><varname>contextLoader</varname> <emphasis>(from
+              @ContextConfiguration)</emphasis></para>
+            </listitem>
+
+            <listitem>
+              <para><varname>activeProfiles</varname> <emphasis>(from
+              @ActiveProfiles)</emphasis></para>
+            </listitem>
+          </itemizedlist>
+
+          <para>For example, if <classname>TestClassA</classname> specifies
+          <literal>{"app-config.xml", "test-config.xml"}</literal> for the
+          <varname>locations</varname> (or <varname>value</varname>) attribute
+          of <interfacename>@ContextConfiguration</interfacename>, the
+          TestContext framework will load the corresponding
+          <interfacename>ApplicationContext</interfacename> and store it in a
+          <varname>static</varname> context cache under a key that is based
+          solely on those locations. So if <classname>TestClassB</classname>
+          also defines <literal>{"app-config.xml",
+          "test-config.xml"}</literal> for its locations (either explicitly or
+          implicitly through inheritance) and does not define a different
+          <interfacename>ContextLoader</interfacename> or different active
+          profiles, then the same
+          <interfacename>ApplicationContext</interfacename> will be shared by
+          both test classes. This means that the setup cost for loading an
+          application context is incurred only once (per test suite), and
+          subsequent test execution is much faster.</para>
+
+          <note>
+            <title>Test suites and forked processes</title>
+
+            <para>The Spring TestContext framework stores application contexts
+            in a <emphasis>static</emphasis> cache. This means that the
+            context is literally stored in a <varname>static</varname>
+            variable. In other words, if tests execute in separate processes
+            the static cache will be cleared between each test execution, and
+            this will effectively disable the caching mechanism.</para>
+
+            <para>To benefit from the caching mechanism, all tests must run
+            within the same process or test suite. This can be achieved by
+            executing all tests as a group within an IDE. Similarly, when
+            executing tests with a build framework such as Ant or Maven it is
+            important to make sure that the build framework does not
+            <emphasis>fork</emphasis> between tests. For example, if the
+            <ulink
+            url="http://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode">forkMode</ulink>
+            for the Maven Surefire plug-in is set to <literal>always</literal>
+            or <literal>pertest</literal>, the TestContext framework will not
+            be able to cache application contexts between test classes and the
+            build process will run significantly slower as a result.</para>
+          </note>
 
           <para>In the unlikely case that a test corrupts the application
           context and requires reloading — for example, by modifying a bean
@@ -1624,10 +1694,10 @@ public class TransferServiceTest {
           <interfacename>@DirtiesContext</interfacename> (see the discussion
           of <interfacename>@DirtiesContext</interfacename> in <xref
           linkend="integration-testing-annotations-spring" />). This instructs
-          Spring to reload the configuration and rebuild the application
-          context before executing the next test. Note that support for the
-          <interfacename>@DirtiesContext</interfacename> annotation is
-          provided by the
+          Spring to remove the context from the cache and rebuild the
+          application context before executing the next test. Note that
+          support for the <interfacename>@DirtiesContext</interfacename>
+          annotation is provided by the
           <classname>DirtiesContextTestExecutionListener</classname> which is
           enabled by default.</para>
         </section>
