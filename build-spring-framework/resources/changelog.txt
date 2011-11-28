@@ -3,18 +3,33 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1 RC2 (2011-11-15)
+Changes in version 3.1 RC2 (2011-11-28)
 ---------------------------------------
 
 * fixed OSGi manifest for spring-web bundle to not require Apache HttpComponents anymore
 * fixed GenericTypeResolver to consistently return null if not resolvable
 * added proper "contentLength()" implementation to ByteArrayResource
+* refined Resource "exists()" check for HTTP URLs to always return false for 404 status
 * LocaleEditor and StringToLocaleConverter do not restrict variant part through validation
+* LinkedCaseInsensitiveMap overrides putAll method as well (for IBM JDK 1.6 compatibility)
 * optimized DefaultListableBeanFactory's PropertyDescriptor caching for concurrent access
+* renamed ValueWrapperImpl to SimpleValueWrapper (for use in Cache implementations)
+* exposed EHCache 1.7's "statisticsEnabled"/"sampledStatisticsEnabled" on EhCacheFactoryBean
+* SpringValidatorAdapter accepts non-indexed set paths (for Hibernate Validator compatibility)
+* TransactionSynchronizationManager eagerly cleans up void ResourceHolders on any access
+* JDO PersistenceManager synchronization performs close attempt after completion (if necessary)
+* JPA EntityManagerFactoryUtils silently ignores IllegalArgumentExceptions from setHint calls
 * fixed HibernateTransactionManager for Hibernate 4.0 to refer to correct openSession() method
+* added "namingStrategy" property to Hibernate 4 LocalSessionFactoryBean variant
+* HibernateJpaDialect does NOT expose underlying Session for underlying SessionFactory anymore
 * fixed MethodInvokingJobDetailFactoryBean's Quartz 2.0 support
+* added Quartz 2.1 compatibility while preserving Quartz 2.0 support
+* introduced JobDetail/CronTrigger/SimpleTriggerFactoryBean variants for Quartz 2.0/2.1 support
+* SimpleJdbcTestUtils executeSqlScript properly closes its LineNumberReader after use
+* added "forwarder" property to ConnectorServerFactoryBean, accepting an MBeanServerForwarder
 * RmiClientInterceptor detects nested SocketException as connect failure as well
 * fixed StandardServlet/PortletEnvironment to check for JNDI (for Google App Engine compatibility)
+* Servlet/PortletContextResource's getFile prefers "file:" URL resolution over calling getRealPath
 * using original request URI in FlashMap matching logic to account for URL rewriting
 * now supporting target request with multiple parameter values in FlashMap matching logic
 * fixed issue in SimpleMappingExceptionResolver causing exception when setting "statusCodes" property
@@ -22,12 +37,16 @@ Changes in version 3.1 RC2 (2011-11-15)
 * form hidden tag now supports "disabled" attribute
 * added ignoreDefaultModelOnRedirect attribute to <mvc:annotation-driven/>
 * added methods to UriComponentsBuilder for replacing the path or the query
+* support UriComponentsBuilder as @Controller method argument
 * added ServletUriComponentsBuilder to build a UriComponents instance starting with a ServletRequest
-* added support for UriComponentsBuilder as @Controller method argument
-* MockHttpServletRequest and MockHttpServletResponse now keep contentType field and Content-Type header in sync
 * fixed issue with cache ignoring prototype-scoped controllers in RequestMappingHandlerAdapter
-* updated Spring MVC configuration section to include MVC Java config and the MVC namespace
 * fixed issue with setting Content-Length header depending on the charset of the response
+* added getObjectMapper() accessor to MappingJacksonHttpMessageConverter
+* AbstractCachingViewResolver caches unresolved view names by default ("cacheUnresolved"=true)
+* fixed "formMultiSelect"/"formCheckboxes" FreeMarker macros to compare against actual field value
+* MockHttpServletRequest/Response now keep contentType field and Content-Type header in sync
+* updated Spring MVC configuration section to include MVC Java config and the MVC namespace
+
 
 Changes in version 3.1 RC1 (2011-10-11)
 ---------------------------------------
