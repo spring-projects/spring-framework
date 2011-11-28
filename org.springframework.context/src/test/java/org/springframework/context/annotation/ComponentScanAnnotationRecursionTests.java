@@ -26,7 +26,7 @@ import org.springframework.context.annotation.componentscan.level2.Level2Config;
 import org.springframework.context.annotation.componentscan.level3.Level3Component;
 
 /**
- * Tests ensuring that configuration clasess marked with @ComponentScan
+ * Tests ensuring that configuration classes marked with @ComponentScan
  * may be processed recursively
  *
  * @author Chris Beams
@@ -50,11 +50,12 @@ public class ComponentScanAnnotationRecursionTests {
 		assertThat(ctx.getBean("level2Bean"), sameInstance(ctx.getBean("level2Bean")));
 	}
 
-	@Test(expected=CircularComponentScanException.class)
-	public void cycleDetection() {
+	public void evenCircularScansAreSupported() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(LeftConfig.class);
+		ctx.register(LeftConfig.class); // left scans right, and right scans left
 		ctx.refresh();
+		ctx.getBean("leftConfig");      // but this is handled gracefully
+		ctx.getBean("rightConfig");     // and beans from both packages are available
 	}
 
 }
