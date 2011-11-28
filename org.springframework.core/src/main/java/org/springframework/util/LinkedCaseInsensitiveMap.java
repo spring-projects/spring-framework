@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,16 @@ public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
 	public V put(String key, V value) {
 		this.caseInsensitiveKeys.put(convertKey(key), key);
 		return super.put(key, value);
+	}
+
+	@Override
+	public void putAll(Map<? extends String, ? extends V> map) {
+		if (map.isEmpty()) {
+			return;
+		}
+		for (Map.Entry<? extends String, ? extends V> entry : map.entrySet()) {
+			put(entry.getKey(), entry.getValue());
+		}
 	}
 
 	@Override
