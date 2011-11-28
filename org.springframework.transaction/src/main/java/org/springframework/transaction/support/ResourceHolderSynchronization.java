@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
 				releaseNecessary = true;
 			}
 			else {
-				releaseNecessary = !shouldReleaseBeforeCompletion();
+				releaseNecessary = shouldReleaseAfterCompletion(this.resourceHolder);
 			}
 			if (releaseNecessary) {
 				releaseResource(this.resourceHolder, this.resourceKey);
@@ -126,6 +126,17 @@ public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
 	 */
 	protected boolean shouldReleaseBeforeCompletion() {
 		return true;
+	}
+
+	/**
+	 * Return whether this holder's resource should be released after
+	 * transaction completion (<code>true</code>).
+	 * <p>The default implementation returns <code>!shouldReleaseBeforeCompletion()</code>,
+	 * releasing after completion if no attempt was made before completion.
+	 * @see #releaseResource
+	 */
+	protected boolean shouldReleaseAfterCompletion(H resourceHolder) {
+		return !shouldReleaseBeforeCompletion();
 	}
 
 	/**
