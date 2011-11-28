@@ -116,11 +116,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/1.6.2/com.springsource.net.sf.ehcache-1.6.2.jar!/" />
+          <root url="jar://$IVY_CACHE$/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/2.0.0/com.springsource.net.sf.ehcache-2.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/1.6.2/com.springsource.net.sf.ehcache-sources-1.6.2.jar!/" />
+          <root url="jar://$IVY_CACHE$/net.sourceforge.ehcache/com.springsource.net.sf.ehcache/2.0.0/com.springsource.net.sf.ehcache-sources-2.0.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
