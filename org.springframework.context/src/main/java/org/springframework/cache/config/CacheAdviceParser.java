@@ -68,7 +68,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			}
 		}
 
-		CacheOperation merge(Element element, ReaderContext readerCtx, CacheOperation op) {
+		<T extends CacheOperation> T merge(Element element, ReaderContext readerCtx, T op) {
 			String cache = element.getAttribute("cache");
 			String k = element.getAttribute("key");
 			String c = element.getAttribute("condition");
@@ -181,7 +181,17 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
-			CacheOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CacheEvictOperation());
+			CacheEvictOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CacheEvictOperation());
+
+			String wide = opElement.getAttribute("all-entries");
+			if (StringUtils.hasText(wide)) {
+				op.setCacheWide(Boolean.valueOf(wide.trim()));
+			}
+
+			String after = opElement.getAttribute("after-invocation");
+			if (StringUtils.hasText(after)) {
+				op.setAfterInvocation(Boolean.valueOf(after.trim()));
+			}
 
 			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
 			if (col == null) {

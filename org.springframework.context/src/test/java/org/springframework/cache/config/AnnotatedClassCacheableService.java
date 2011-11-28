@@ -18,10 +18,10 @@ package org.springframework.cache.config;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 
 /**
  * @author Costin Leau
@@ -44,8 +44,27 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	public void invalidate(Object arg1) {
 	}
 
+	@CacheEvict("default")
+	public void evictWithException(Object arg1) {
+		throw new RuntimeException("exception thrown - evict should NOT occur");
+	}
+
+	@CacheEvict(value = "default", allEntries = true)
+	public void evictAll(Object arg1) {
+	}
+
+	@CacheEvict(value = "default", afterInvocation = false)
+	public void evictEarly(Object arg1) {
+		throw new RuntimeException("exception thrown - evict should still occur");
+	}
+
 	@CacheEvict(value = "default", key = "#p0")
 	public void evict(Object arg1, Object arg2) {
+	}
+
+	@CacheEvict(value = "default", key = "#p0", afterInvocation = false)
+	public void invalidateEarly(Object arg1, Object arg2) {
+		throw new RuntimeException("exception thrown - evict should still occur");
 	}
 
 	@Cacheable(value = "default", key = "#p0")

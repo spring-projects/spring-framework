@@ -189,11 +189,10 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		// analyze caching information
 		if (!CollectionUtils.isEmpty(cacheOp)) {
-			Map<String, Collection<CacheOperationContext>> ops = createOperationContext(cacheOp, method, args, target,
-					targetClass);
+			Map<String, Collection<CacheOperationContext>> ops = createOperationContext(cacheOp, method, args, target, targetClass);
 
 			// start with evictions
-			inspectCacheEvicts(ops.get(EVICT));
+			inspectBeforeCacheEvicts(ops.get(EVICT));
 
 			// follow up with cacheable
 			CacheStatus status = inspectCacheables(ops.get(CACHEABLE));
@@ -213,6 +212,8 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 			retVal = invoker.invoke();
 
+			inspectAfterCacheEvicts(ops.get(EVICT));
+
 			if (!updates.isEmpty()) {
 				update(updates, retVal);
 			}
@@ -223,42 +224,51 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		return invoker.invoke();
 	}
 	
-	private void inspectCacheEvicts(Collection<CacheOperationContext> evictions) {
+	private void inspectBeforeCacheEvicts(Collection<CacheOperationContext> evictions) {
+		inspectAfterCacheEvicts(evictions, false);
+	}
+
+	private void inspectAfterCacheEvicts(Collection<CacheOperationContext> evictions) {
+		inspectAfterCacheEvicts(evictions, true);
+	}
+
+	private void inspectAfterCacheEvicts(Collection<CacheOperationContext> evictions, boolean afterInvocation) {
 
 		if (!evictions.isEmpty()) {
 
 			boolean log = logger.isTraceEnabled();
 
 			for (CacheOperationContext context : evictions) {
-				if (context.isConditionPassing()) {
-					CacheEvictOperation evictOp = (CacheEvictOperation) context.operation;
+				CacheEvictOperation evictOp = (CacheEvictOperation) context.operation;
 
-					// for each cache
-					// lazy key initialization
-					Object key = null;
+				if (afterInvocation == evictOp.isAfterInvocation()) {
+					if (context.isConditionPassing()) {
+						// for each cache
+						// lazy key initialization
+						Object key = null;
 
-					for (Cache cache : context.getCaches()) {
-						// cache-wide flush
-						if (evictOp.isCacheWide()) {
-							cache.clear();
-							if (log) {
-								logger.trace("Invalidating entire cache for operation " + evictOp + " on method " + context.method);
+						for (Cache cache : context.getCaches()) {
+							// cache-wide flush
+							if (evictOp.isCacheWide()) {
+								cache.clear();
+								if (log) {
+									logger.trace("Invalidating entire cache for operation " + evictOp + " on method " + context.method);
+								}
+							} else {
+								// check key
+								if (key == null) {
+									key = context.generateKey();
+								}
+								if (log) {
+									logger.trace("Invalidating cache key " + key + " for operation " + evictOp + " on method " + context.method);
+								}
+								cache.evict(key);
 							}
-						} else {
-							// check key
-							if (key == null) {
-								key = context.generateKey();
-							}
-							if (log) {
-								logger.trace("Invalidating cache key " + key + " for operation " + evictOp + " on method " + context.method);
-							}
-							cache.evict(key);
 						}
-					}
-				}
-				else {
-					if (log) {
-						logger.trace("Cache condition failed on method " + context.method + " for operation " + context.operation);
+					} else {
+						if (log) {
+							logger.trace("Cache condition failed on method " + context.method + " for operation " + context.operation);
+						}
 					}
 				}
 			}

@@ -27,7 +27,15 @@ public interface CacheableService<T> {
 
 	void invalidate(Object arg1);
 
+	void evictEarly(Object arg1);
+
+	void evictAll(Object arg1);
+
+	void evictWithException(Object arg1);
+
 	void evict(Object arg1, Object arg2);
+
+	void invalidateEarly(Object arg1, Object arg2);
 
 	T conditional(int field);
 

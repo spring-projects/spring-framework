@@ -85,6 +85,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		ceo.setCondition(caching.condition());
 		ceo.setKey(caching.key());
 		ceo.setCacheWide(caching.allEntries());
+		ceo.setAfterInvocation(caching.afterInvocation());
 		ceo.setName(ae.toString());
 		return ceo;
 	}

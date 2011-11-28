@@ -211,9 +211,17 @@
 									<xsd:attribute name="all-entries" type="xsd:boolean" use="optional">
 										<xsd:annotation>
 											<xsd:documentation><![CDATA[
-	The name of the backing cache.]]></xsd:documentation>
+	Whether all the entries should be evicted.]]></xsd:documentation>
 										</xsd:annotation>
 									</xsd:attribute>
+									<xsd:attribute name="after-invocation" type="xsd:boolean" use="optional">
+										<xsd:annotation>
+											<xsd:documentation><![CDATA[
+	Whether the eviction should occur after the method is successfully 
+	invoked (default) or before.]]></xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
+									
 								</xsd:extension>
 							</xsd:complexContent>
 						</xsd:complexType>
