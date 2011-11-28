@@ -16,13 +16,7 @@
 
 package org.springframework.cache.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -76,7 +70,7 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r1, r3);
 	}
 
-	public void testInvalidate(CacheableService<?> service) throws Exception {
+	public void testEvict(CacheableService<?> service) throws Exception {
 		Object o1 = new Object();
 
 		Object r1 = service.cache(o1);
@@ -90,7 +84,43 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r3, r4);
 	}
 
-	public void testInvalidateWKey(CacheableService<?> service) throws Exception {
+	public void testEvictEarly(CacheableService<?> service) throws Exception {
+		Object o1 = new Object();
+
+		Object r1 = service.cache(o1);
+		Object r2 = service.cache(o1);
+
+		assertSame(r1, r2);
+		try {
+			service.evictEarly(o1);
+		} catch (RuntimeException ex) {
+			// expected
+		}
+
+		Object r3 = service.cache(o1);
+		Object r4 = service.cache(o1);
+		assertNotSame(r1, r3);
+		assertSame(r3, r4);
+	}
+
+	public void testEvictException(CacheableService<?> service) throws Exception {
+		Object o1 = new Object();
+
+		Object r1 = service.cache(o1);
+		Object r2 = service.cache(o1);
+
+		assertSame(r1, r2);
+		try {
+			service.evictWithException(o1);
+		} catch (RuntimeException ex) {
+			// expected
+		}
+		// exception occurred, eviction skipped, data should still be in the cache
+		Object r3 = service.cache(o1);
+		assertSame(r1, r3);
+	}
+
+	public void testEvictWKey(CacheableService<?> service) throws Exception {
 		Object o1 = new Object();
 
 		Object r1 = service.cache(o1);
@@ -104,8 +134,48 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r3, r4);
 	}
 
-	public void testConditionalExpression(CacheableService<?> service)
-			throws Exception {
+	public void testEvictWKeyEarly(CacheableService<?> service) throws Exception {
+		Object o1 = new Object();
+
+		Object r1 = service.cache(o1);
+		Object r2 = service.cache(o1);
+
+		assertSame(r1, r2);
+
+		try {
+			service.invalidateEarly(o1, null);
+		} catch (Exception ex) {
+			// expected
+		}
+		Object r3 = service.cache(o1);
+		Object r4 = service.cache(o1);
+		assertNotSame(r1, r3);
+		assertSame(r3, r4);
+	}
+
+	public void testEvictAll(CacheableService<?> service) throws Exception {
+		Object o1 = new Object();
+
+		Object r1 = service.cache(o1);
+		Object r2 = service.cache(o1);
+
+		Object o2 = new Object();
+		Object r10 = service.cache(o2);
+
+		assertSame(r1, r2);
+		assertNotSame(r1, r10);
+		service.evictAll(new Object());
+		Cache cache = cm.getCache("default");
+		assertNull(cache.get(o1));
+		assertNull(cache.get(o2));
+
+		Object r3 = service.cache(o1);
+		Object r4 = service.cache(o1);
+		assertNotSame(r1, r3);
+		assertSame(r3, r4);
+	}
+
+	public void testConditionalExpression(CacheableService<?> service) throws Exception {
 		Object r1 = service.conditional(4);
 		Object r2 = service.conditional(4);
 
@@ -139,8 +209,7 @@ public abstract class AbstractAnnotationTests {
 		assertEquals(nr + 1, service.nullInvocations().intValue());
 	}
 
-	public void testMethodName(CacheableService<?> service, String keyName)
-			throws Exception {
+	public void testMethodName(CacheableService<?> service, String keyName) throws Exception {
 		Object key = new Object();
 		Object r1 = service.name(key);
 		assertSame(r1, service.name(key));
@@ -335,12 +404,32 @@ public abstract class AbstractAnnotationTests {
 
 	@Test
 	public void testInvalidate() throws Exception {
-		testInvalidate(cs);
+		testEvict(cs);
+	}
+
+	@Test
+	public void testEarlyInvalidate() throws Exception {
+		testEvictEarly(cs);
+	}
+
+	@Test
+	public void testEvictWithException() throws Exception {
+		testEvictException(cs);
+	}
+
+	@Test
+	public void testEvictAll() throws Exception {
+		testEvictAll(cs);
 	}
 
 	@Test
 	public void testInvalidateWithKey() throws Exception {
-		testInvalidateWKey(cs);
+		testEvictWKey(cs);
+	}
+
+	@Test
+	public void testEarlyInvalidateWithKey() throws Exception {
+		testEvictWKeyEarly(cs);
 	}
 
 	@Test
@@ -360,12 +449,32 @@ public abstract class AbstractAnnotationTests {
 
 	@Test
 	public void testClassCacheInvalidate() throws Exception {
-		testInvalidate(ccs);
+		testEvict(ccs);
+	}
+
+	@Test
+	public void testClassEarlyInvalidate() throws Exception {
+		testEvictEarly(ccs);
+	}
+
+	@Test
+	public void testClassEvictAll() throws Exception {
+		testEvictAll(ccs);
+	}
+
+	@Test
+	public void testClassEvictWithException() throws Exception {
+		testEvictException(ccs);
 	}
 
 	@Test
 	public void testClassCacheInvalidateWKey() throws Exception {
-		testInvalidateWKey(ccs);
+		testEvictWKey(ccs);
+	}
+
+	@Test
+	public void testClassEarlyInvalidateWithKey() throws Exception {
+		testEvictWKeyEarly(ccs);
 	}
 
 	@Test
@@ -383,8 +492,7 @@ public abstract class AbstractAnnotationTests {
 		assertNull(ccs.nullValue(new Object()));
 		// the check method is also cached
 		assertEquals(nr, ccs.nullInvocations().intValue());
-		assertEquals(nr + 1, AnnotatedClassCacheableService.nullInvocations
-				.intValue());
+		assertEquals(nr + 1, AnnotatedClassCacheableService.nullInvocations.intValue());
 	}
 
 	@Test

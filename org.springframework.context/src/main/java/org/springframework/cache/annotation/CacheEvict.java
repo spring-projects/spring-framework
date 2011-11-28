@@ -63,4 +63,10 @@ public @interface CacheEvict {
 	 */
 	boolean allEntries() default false;
 
+	/**
+	 * Whether the eviction should occur after the method is successfully invoked (default)
+	 * or before. The latter causes the eviction to occur irrespective of the method outcome (whether
+	 * it threw an exception or not) while the former does not.
+	 */
+	boolean afterInvocation() default true;
 }
