@@ -246,7 +246,7 @@
     <@bind path/>
     <select multiple="multiple" id="${status.expression}" name="${status.expression}" ${attributes}>
         <#list options?keys as value>
-        <#assign isSelected = contains(status.value?default([""]), value)>
+        <#assign isSelected = contains(status.actualValue?default([""]), value)>
         <option value="${value?html}"<#if isSelected> selected="selected"</#if>>${options[value]?html}</option>
         </#list>
     </select>
@@ -289,7 +289,7 @@
     <@bind path/>
     <#list options?keys as value>
     <#assign id="${status.expression}${value_index}">
-    <#assign isSelected = contains(status.value?default([""]), value)>
+    <#assign isSelected = contains(status.actualValue?default([""]), value)>
     <input type="checkbox" id="${id}" name="${status.expression}" value="${value?html}"<#if isSelected> checked="checked"</#if> ${attributes}<@closeTag/>
     <label for="${id}">${options[value]?html}</label>${separator}
     </#list>
