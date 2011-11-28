@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.EncodedResource;
@@ -134,9 +135,10 @@ public abstract class SimpleJdbcTestUtils {
 
 		long startTime = System.currentTimeMillis();
 		List<String> statements = new LinkedList<String>();
+		LineNumberReader reader = null;
 		try {
-			LineNumberReader lnr = new LineNumberReader(resource.getReader());
-			String script = JdbcTestUtils.readScript(lnr);
+			reader = new LineNumberReader(resource.getReader());
+			String script = JdbcTestUtils.readScript(reader);
 			char delimiter = ';';
 			if (!JdbcTestUtils.containsSqlScriptDelimiters(script, delimiter)) {
 				delimiter = '\n';
@@ -167,6 +169,17 @@ public abstract class SimpleJdbcTestUtils {
 		}
 		catch (IOException ex) {
 			throw new DataAccessResourceFailureException("Failed to open SQL script from " + resource, ex);
+		}
+		finally {
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+
 		}
 	}
 
