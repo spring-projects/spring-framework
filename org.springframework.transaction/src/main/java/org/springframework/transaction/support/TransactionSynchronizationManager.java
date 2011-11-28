@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,6 +154,10 @@ public abstract class TransactionSynchronizationManager {
 		// Transparently remove ResourceHolder that was marked as void...
 		if (value instanceof ResourceHolder && ((ResourceHolder) value).isVoid()) {
 			map.remove(actualKey);
+			// Remove entire ThreadLocal if empty...
+			if (map.isEmpty()) {
+				resources.remove();
+			}
 			value = null;
 		}
 		return value;
@@ -175,8 +179,13 @@ public abstract class TransactionSynchronizationManager {
 			map = new HashMap<Object, Object>();
 			resources.set(map);
 		}
-		if (map.put(actualKey, value) != null) {
-			throw new IllegalStateException("Already value [" + map.get(actualKey) + "] for key [" +
+		Object oldValue = map.put(actualKey, value);
+		// Transparently suppress a ResourceHolder that was marked as void...
+		if (oldValue instanceof ResourceHolder && ((ResourceHolder) oldValue).isVoid()) {
+			oldValue = null;
+		}
+		if (oldValue != null) {
+			throw new IllegalStateException("Already value [" + oldValue + "] for key [" +
 					actualKey + "] bound to thread [" + Thread.currentThread().getName() + "]");
 		}
 		if (logger.isTraceEnabled()) {
@@ -224,6 +233,10 @@ public abstract class TransactionSynchronizationManager {
 		// Remove entire ThreadLocal if empty...
 		if (map.isEmpty()) {
 			resources.remove();
+		}
+		// Transparently suppress a ResourceHolder that was marked as void...
+		if (value instanceof ResourceHolder && ((ResourceHolder) value).isVoid()) {
+			value = null;
 		}
 		if (value != null && logger.isTraceEnabled()) {
 			logger.trace("Removed value [" + value + "] for key [" + actualKey + "] from thread [" +
