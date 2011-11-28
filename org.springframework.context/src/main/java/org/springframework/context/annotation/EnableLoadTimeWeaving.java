@@ -117,8 +117,8 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * <p>The two examples are equivalent with one significant exception: in the XML case,
  * the functionality of {@code <context:spring-configured>} is implicitly enabled when
  * {@code aspectj-weaving} is "on".  This does not occur when using
- * {@code @EnableLoadTimeWeaving(aspectjWeaving=ENABLED)}, although this may change in
- * future revisions.
+ * {@code @EnableLoadTimeWeaving(aspectjWeaving=ENABLED)}. Instead you must explicitly add
+ * {@code @EnableSpringConfigured} (included in the {@code spring-aspects} module)
  *
  * @author Chris Beams
  * @since 3.1
