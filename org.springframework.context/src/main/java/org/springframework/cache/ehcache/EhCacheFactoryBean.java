@@ -99,6 +99,10 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 
 	private Set<CacheEventListener> cacheEventListeners;
 
+	private boolean statisticsEnabled = false;
+
+	private boolean sampledStatisticsEnabled = false;
+
 	private boolean disabled = false;
 
 	private String beanName;
@@ -269,6 +273,22 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 	}
 
 	/**
+	 * Set whether to enable EhCache statistics on this cache.
+	 * @see net.sf.ehcache.Cache#setStatisticsEnabled
+	 */
+	public void setStatisticsEnabled(boolean statisticsEnabled) {
+		this.statisticsEnabled = statisticsEnabled;
+	}
+
+	/**
+	 * Set whether to enable EhCache's sampled statistics on this cache.
+	 * @see net.sf.ehcache.Cache#setSampledStatisticsEnabled
+	 */
+	public void setSampledStatisticsEnabled(boolean sampledStatisticsEnabled) {
+		this.sampledStatisticsEnabled = sampledStatisticsEnabled;
+	}
+
+	/**
 	 * Set whether this cache should be marked as disabled.
 	 * @see net.sf.ehcache.Cache#setDisabled
 	 */
@@ -340,6 +360,12 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 			for (CacheEventListener listener : this.cacheEventListeners) {
 				cache.getCacheEventNotificationService().registerListener(listener);
 			}
+		}
+		if (this.statisticsEnabled) {
+			cache.setStatisticsEnabled(true);
+		}
+		if (this.sampledStatisticsEnabled) {
+			cache.setSampledStatisticsEnabled(true);
 		}
 		if (this.disabled) {
 			cache.setDisabled(true);
