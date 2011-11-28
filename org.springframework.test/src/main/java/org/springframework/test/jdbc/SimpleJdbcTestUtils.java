@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
  * @author Thomas Risberg
  * @since 2.5
  */
+@SuppressWarnings("deprecation")
 public abstract class SimpleJdbcTestUtils {
 
 	private static final Log logger = LogFactory.getLog(SimpleJdbcTestUtils.class);
@@ -86,9 +87,8 @@ public abstract class SimpleJdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and continueOnError was <code>false</code>
 	 */
-	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate,
-			ResourceLoader resourceLoader, String sqlResourcePath, boolean continueOnError)
-			throws DataAccessException {
+	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate, ResourceLoader resourceLoader,
+			String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 
 		Resource resource = resourceLoader.getResource(sqlResourcePath);
 		executeSqlScript(simpleJdbcTemplate, resource, continueOnError);
@@ -107,8 +107,8 @@ public abstract class SimpleJdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and continueOnError was <code>false</code>
 	 */
-	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate,
-			Resource resource, boolean continueOnError) throws DataAccessException {
+	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate, Resource resource,
+			boolean continueOnError) throws DataAccessException {
 
 		executeSqlScript(simpleJdbcTemplate, new EncodedResource(resource), continueOnError);
 	}
@@ -126,8 +126,8 @@ public abstract class SimpleJdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and continueOnError was <code>false</code>
 	 */
-	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate,
-			EncodedResource resource, boolean continueOnError) throws DataAccessException {
+	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate, EncodedResource resource,
+			boolean continueOnError) throws DataAccessException {
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Executing SQL script from " + resource);
@@ -135,12 +135,13 @@ public abstract class SimpleJdbcTestUtils {
 
 		long startTime = System.currentTimeMillis();
 		List<String> statements = new LinkedList<String>();
+		LineNumberReader reader = null;
 		try {
-			LineNumberReader lnr = new LineNumberReader(resource.getReader());
-			String script = JdbcTestUtils.readScript(lnr);
+			reader = new LineNumberReader(resource.getReader());
+			String script = JdbcTestUtils.readScript(reader);
 			char delimiter = ';';
 			if (!JdbcTestUtils.containsSqlScriptDelimiters(script, delimiter)) {
-				delimiter = '\n';			
+				delimiter = '\n';
 			}
 			JdbcTestUtils.splitSqlScript(script, delimiter, statements);
 			for (String statement : statements) {
@@ -168,6 +169,17 @@ public abstract class SimpleJdbcTestUtils {
 		}
 		catch (IOException ex) {
 			throw new DataAccessResourceFailureException("Failed to open SQL script from " + resource, ex);
+		}
+		finally {
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+
 		}
 	}
 
