@@ -21,7 +21,7 @@ import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.support.ValueWrapperImpl;
+import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.util.Assert;
 
 /**
@@ -63,7 +63,7 @@ public class EhCacheCache implements Cache {
 
 	public ValueWrapper get(Object key) {
 		Element element = this.cache.get(key);
-		return (element != null ? new ValueWrapperImpl(element.getObjectValue()) : null);
+		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);
 	}
 
 	public void put(Object key, Object value) {

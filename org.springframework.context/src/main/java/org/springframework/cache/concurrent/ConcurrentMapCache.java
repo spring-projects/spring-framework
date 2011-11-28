@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.support.ValueWrapperImpl;
+import org.springframework.cache.support.SimpleValueWrapper;
 
 /**
  * Simple {@link Cache} implementation based on the core JDK
@@ -96,7 +96,7 @@ public class ConcurrentMapCache implements Cache {
 
 	public ValueWrapper get(Object key) {
 		Object value = this.store.get(key);
-		return (value != null ? new ValueWrapperImpl(fromStoreValue(value)) : null);
+		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
 	}
 
 	public void put(Object key, Object value) {
