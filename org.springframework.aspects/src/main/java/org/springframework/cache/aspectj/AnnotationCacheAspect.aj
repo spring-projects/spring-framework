@@ -18,7 +18,9 @@ package org.springframework.cache.aspectj;
 
 import org.springframework.cache.annotation.AnnotationCacheOperationSource;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 
 /**
  * Concrete AspectJ cache aspect using Spring's @{@link Cacheable} annotation.
@@ -60,6 +62,20 @@ public aspect AnnotationCacheAspect extends AbstractCacheAspect {
 		execution(public * ((@CacheEvict *)+).*(..)) && @this(CacheEvict);
 
 	/**
+	 * Matches the execution of any public method in a type with the @{@link CachePut}
+	 * annotation, or any subtype of a type with the {@code CachePut} annotation.
+	 */
+	private pointcut executionOfAnyPublicMethodInAtCachePutType() :
+		execution(public * ((@CachePut *)+).*(..)) && @this(CachePut);
+
+	/**
+	 * Matches the execution of any public method in a type with the @{@link Caching}
+	 * annotation, or any subtype of a type with the {@code Caching} annotation.
+	 */
+	private pointcut executionOfAnyPublicMethodInAtCachingType() :
+		execution(public * ((@Caching *)+).*(..)) && @this(Caching);
+
+	/**
 	 * Matches the execution of any method with the @{@link Cacheable} annotation.
 	 */
 	private pointcut executionOfCacheableMethod() :
@@ -72,14 +88,29 @@ public aspect AnnotationCacheAspect extends AbstractCacheAspect {
 		execution(* *(..)) && @annotation(CacheEvict);
 
 	/**
+	 * Matches the execution of any method with the @{@link CachePut} annotation.
+	 */
+	private pointcut executionOfCachePutMethod() :
+		execution(* *(..)) && @annotation(CachePut);
+
+	/**
+	 * Matches the execution of any method with the @{@link Caching} annotation.
+	 */
+	private pointcut executionOfCachingMethod() :
+		execution(* *(..)) && @annotation(Caching);
+
+	/**
 	 * Definition of pointcut from super aspect - matched join points will have Spring
 	 * cache management applied.
 	 */
 	protected pointcut cacheMethodExecution(Object cachedObject) :
 		(executionOfAnyPublicMethodInAtCacheableType()
 				|| executionOfAnyPublicMethodInAtCacheEvictType()
+				|| executionOfAnyPublicMethodInAtCachePutType()
+				|| executionOfAnyPublicMethodInAtCachingType()
 				|| executionOfCacheableMethod()
-				|| executionOfCacheEvictMethod())
+				|| executionOfCacheEvictMethod()
+				|| executionOfCachePutMethod()
+				|| executionOfCachingMethod())
 			&& this(cachedObject);
-
 }

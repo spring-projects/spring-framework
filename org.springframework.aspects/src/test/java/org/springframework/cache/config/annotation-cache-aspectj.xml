@@ -13,13 +13,15 @@
 	
 	<bean id="cacheAspect" class="org.springframework.cache.aspectj.AnnotationCacheAspect" factory-method="aspectOf">
 		<property name="cacheManager" ref="cacheManager"/>
-		<property name="cacheOperationSource" ref="annotationSource"/>
+		<property name="cacheOperationSources" ref="annotationSource"/>
 	</bean>
 	
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
 			<set>
 				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="default"/>
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="primary"/>
+				<bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="secondary"/>
 			</set>
 		</property>
 	</bean>
