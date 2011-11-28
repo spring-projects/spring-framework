@@ -27,6 +27,7 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Context about a type to convert from or to.
+ *
  * @author Keith Donald
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -203,7 +204,7 @@ public class TypeDescriptor {
 	 * @return the type descriptor
 	 */
 	public static TypeDescriptor forObject(Object source) {
-		return source != null ? valueOf(source.getClass()) : null;
+		return (source != null ? valueOf(source.getClass()) : null);
 	}
 
 	/**
@@ -214,7 +215,7 @@ public class TypeDescriptor {
 	 * @see #getObjectType()
 	 */
 	public Class<?> getType() {
-		return type;
+		return this.type;
 	}
 
 	/**

@@ -168,6 +168,7 @@ public class BeanDefinitionReaderUtils {
 	public static String registerWithGeneratedName(
 			AbstractBeanDefinition definition, BeanDefinitionRegistry registry)
 			throws BeanDefinitionStoreException {
+
 		String generatedName = generateBeanName(definition, registry, false);
 		registry.registerBeanDefinition(generatedName, definition);
 		return generatedName;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,11 @@ public class TypedValue {
 
 	public static final TypedValue NULL = new TypedValue(null);
 
+
 	private final Object value;
 
 	private TypeDescriptor typeDescriptor;
+
 
 	/**
 	 * Create a TypedValue for a simple object. The type descriptor is inferred
@@ -42,8 +44,7 @@ public class TypedValue {
 	 */
 	public TypedValue(Object value) {
 		this.value = value;
-		// initialized when/if requested		
-		this.typeDescriptor = null;
+		this.typeDescriptor = null;  // initialized when/if requested
 	}
 
 	/**
@@ -56,6 +57,7 @@ public class TypedValue {
 		this.typeDescriptor = typeDescriptor;
 	}
 	
+
 	public Object getValue() {
 		return this.value;
 	}
@@ -66,6 +68,7 @@ public class TypedValue {
 		}
 		return this.typeDescriptor;
 	}
+
 
 	@Override
 	public String toString() {
