@@ -75,19 +75,13 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		try {
 			exporter.setNotificationListenerMappings(listeners);
 			fail("Must have thrown a ClassCastException when registering a non-NotificationListener instance as a NotificationListener.");
-		} catch (ClassCastException expected) {
+		}
+		catch (ClassCastException expected) {
 		}
 	}
 
-	// Note that @Ignore has no effect for JUnit 3.8 TestCase-based tests,
-	// but we leave it here to allow developers to easily search for ignored 
-	// tests. As a work-around, the method is prefixed with "ignore"
-	// instead of "test" as required by JUnit 3.x.
-	//
-	// See: https://jira.springsource.org/browse/SPR-8091
-	@Ignore("[SPR-8091] NotificationListenerBean constructor does not throw the expected IllegalArgumentException")
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void ignoreTestRegisterNullNotificationListenerType() throws Exception {
+	public void testRegisterNullNotificationListenerType() throws Exception {
 		Map listeners = new HashMap();
 		// put null in as a value...
 		listeners.put("*", null);
@@ -95,7 +89,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		try {
 			exporter.setNotificationListenerMappings(listeners);
 			fail("Must have thrown an IllegalArgumentException when registering a null instance as a NotificationListener.");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -116,7 +111,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		try {
 			exporter.afterPropertiesSet();
 			fail("Must have thrown an MBeanExportException when registering a NotificationListener on a non-existent MBean.");
-		} catch (MBeanExportException expected) {
+		}
+		catch (MBeanExportException expected) {
 			assertTrue(expected.contains(InstanceNotFoundException.class));
 		}
 	}
@@ -473,7 +469,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			MBeanExporter exporter = new MBeanExporter();
 			exporter.setAutodetectMode(-1);
 			fail("Must have failed when supplying an invalid negative out-of-range autodetect mode");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -482,7 +479,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			MBeanExporter exporter = new MBeanExporter();
 			exporter.setAutodetectMode(5);
 			fail("Must have failed when supplying an invalid positive out-of-range autodetect mode");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -491,7 +489,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			MBeanExporter exporter = new MBeanExporter();
 			exporter.setAutodetectModeName(null);
 			fail("Must have failed when supplying a null autodetect mode name");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -500,7 +499,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			MBeanExporter exporter = new MBeanExporter();
 			exporter.setAutodetectModeName("");
 			fail("Must have failed when supplying an empty autodetect mode name");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -509,7 +509,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			MBeanExporter exporter = new MBeanExporter();
 			exporter.setAutodetectModeName("  \t");
 			fail("Must have failed when supplying a whitespace-only autodetect mode name");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -518,7 +519,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			MBeanExporter exporter = new MBeanExporter();
 			exporter.setAutodetectModeName("That Hansel is... *sssooo* hot right now!");
 			fail("Must have failed when supplying a whitespace-only autodetect mode name");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -530,7 +532,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			exporter.setBeans(beans);
 			exporter.afterPropertiesSet();
 			fail("Expecting exception because MBeanExporter is not running in a BeanFactory and was passed bean name to (lookup and then) export");
-		} catch (MBeanExportException expected) {
+		}
+		catch (MBeanExportException expected) {
 		}
 	}
 
@@ -540,7 +543,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
 			exporter.afterPropertiesSet();
 			fail("Expecting exception because MBeanExporter is not running in a BeanFactory and was configured to autodetect beans");
-		} catch (MBeanExportException expected) {
+		}
+		catch (MBeanExportException expected) {
 		}
 	}
 
@@ -634,7 +638,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		try {
 			exporter.afterPropertiesSet();
 			fail("Must have failed during creation of RuntimeExceptionThrowingConstructorBean");
-		} catch (RuntimeException expected) {
+		}
+		catch (RuntimeException expected) {
 		}
 
 		assertIsNotRegistered("Must have unregistered all previously registered MBeans due to RuntimeException",

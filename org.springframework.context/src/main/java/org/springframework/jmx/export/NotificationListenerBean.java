@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.management.NotificationListener;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jmx.support.NotificationListenerHolder;
+import org.springframework.util.Assert;
 
 /**
  * Helper class that aggregates a {@link javax.management.NotificationListener},
@@ -55,6 +56,7 @@ public class NotificationListenerBean extends NotificationListenerHolder impleme
 	 * @param notificationListener the encapsulated listener
 	 */
 	public NotificationListenerBean(NotificationListener notificationListener) {
+		Assert.notNull(notificationListener, "NotificationListener must not be null");
 		setNotificationListener(notificationListener);
 	}
 
