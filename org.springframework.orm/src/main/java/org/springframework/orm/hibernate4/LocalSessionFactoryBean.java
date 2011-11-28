@@ -307,7 +307,9 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 			sfb.addPackages(this.annotatedPackages);
 		}
 
-		sfb.scanPackages(this.packagesToScan);
+		if (this.packagesToScan != null) {
+			sfb.scanPackages(this.packagesToScan);
+		}
 
 		this.sessionFactory = sfb.buildSessionFactory();
 	}
