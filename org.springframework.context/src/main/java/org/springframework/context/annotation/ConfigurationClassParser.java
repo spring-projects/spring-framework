@@ -197,13 +197,7 @@ class ConfigurationClassParser {
 			// check the set of scanned definitions for any further config classes and parse recursively if necessary
 			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), metadataReaderFactory)) {
-					try {
-						this.parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
-					} catch (ConflictingBeanDefinitionException ex) {
-						throw new CircularComponentScanException(
-								"A conflicting bean definition was detected while processing @ComponentScan annotations. " +
-								"This usually indicates a circle between scanned packages.", ex);
-					}
+					this.parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
 				}
 			}
 		}
