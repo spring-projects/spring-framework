@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,8 +100,12 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 						(con instanceof HttpURLConnection ? (HttpURLConnection) con : null);
 				if (httpCon != null) {
 					httpCon.setRequestMethod("HEAD");
-					if (httpCon.getResponseCode() == HttpURLConnection.HTTP_OK) {
+					int code = httpCon.getResponseCode();
+					if (code == HttpURLConnection.HTTP_OK) {
 						return true;
+					}
+					else if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+						return false;
 					}
 				}
 				if (con.getContentLength() >= 0) {
