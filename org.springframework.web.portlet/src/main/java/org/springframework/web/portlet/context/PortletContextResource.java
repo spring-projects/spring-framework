@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.core.io.AbstractFileResolvingResource;
 import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.portlet.util.PortletUtils;
 
@@ -135,14 +136,23 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 	}
 
 	/**
-	 * This implementation delegates to <code>PortletContext.getRealPath</code>,
-	 * but throws a FileNotFoundException if not found or not resolvable.
+	 * This implementation resolves "file:" URLs or alternatively delegates to
+	 * <code>PortletContext.getRealPath</code>, throwing a FileNotFoundException
+	 * if not found or not resolvable.
+	 * @see javax.portlet.PortletContext#getResource(String)
 	 * @see javax.portlet.PortletContext#getRealPath(String)
 	 */
 	@Override
 	public File getFile() throws IOException {
-		String realPath = PortletUtils.getRealPath(this.portletContext, this.path);
-		return new File(realPath);
+		URL url = getURL();
+		if (ResourceUtils.isFileURL(url)) {
+			// Proceed with file system resolution...
+			return super.getFile();
+		}
+		else {
+			String realPath = PortletUtils.getRealPath(this.portletContext, this.path);
+			return new File(realPath);
+		}
 	}
 
 	@Override
