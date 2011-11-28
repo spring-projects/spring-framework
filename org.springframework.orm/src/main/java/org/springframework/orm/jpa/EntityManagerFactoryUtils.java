@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,8 +258,18 @@ public abstract class EntityManagerFactoryUtils {
 		EntityManagerHolder emHolder = (EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
 		if (emHolder != null && emHolder.hasTimeout()) {
 			int timeoutValue = (int) emHolder.getTimeToLiveInMillis();
-			query.setHint("javax.persistence.lock.timeout", timeoutValue);
-			query.setHint("javax.persistence.query.timeout", timeoutValue);
+			try {
+				query.setHint("javax.persistence.lock.timeout", timeoutValue);
+			}
+			catch (IllegalArgumentException ex) {
+				// oh well, at least we tried...
+			}
+			try {
+				query.setHint("javax.persistence.query.timeout", timeoutValue);
+			}
+			catch (IllegalArgumentException ex) {
+				// once again, at least we tried...
+			}
 		}
 	}
 
