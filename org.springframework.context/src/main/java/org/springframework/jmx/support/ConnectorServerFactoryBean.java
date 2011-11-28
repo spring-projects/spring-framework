@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.management.remote.MBeanServerForwarder;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -63,6 +64,8 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 	private Map<String, Object> environment = new HashMap<String, Object>();
 
+	private MBeanServerForwarder forwarder;
+
 	private ObjectName objectName;
 
 	private boolean threaded = false;
@@ -95,6 +98,13 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 		if (environment != null) {
 			this.environment.putAll(environment);
 		}
+	}
+
+	/**
+	 * Set an MBeanServerForwarder to be applied to the <code>JMXConnectorServer</code>.
+	 */
+	public void setForwarder(MBeanServerForwarder forwarder) {
+		this.forwarder = forwarder;
 	}
 
 	/**
@@ -142,6 +152,11 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 		// Create the connector server now.
 		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(url, this.environment, this.server);
+
+		// Set the given MBeanServerForwarder, if any.
+		if (this.forwarder != null) {
+			this.connectorServer.setMBeanServerForwarder(this.forwarder);
+		}
 
 		// Do we want to register the connector with the MBean server?
 		if (this.objectName != null) {
