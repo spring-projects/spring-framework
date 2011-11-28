@@ -22,6 +22,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
@@ -31,12 +34,13 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.HibernateValidator;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -124,7 +128,53 @@ public class ValidatorFactoryTests {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(person, "person");
 		validator.validate(person, result);
 		assertEquals(1, result.getErrorCount());
-		ObjectError fieldError = result.getGlobalError();
+		ObjectError globalError = result.getGlobalError();
+		System.out.println(Arrays.asList(globalError.getCodes()));
+		System.out.println(globalError.getDefaultMessage());
+	}
+
+	@Test
+	public void testSpringValidationWithErrorInListElement() throws Exception {
+		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+		validator.afterPropertiesSet();
+		ValidPerson person = new ValidPerson();
+		person.getAddressList().add(new ValidAddress());
+		BeanPropertyBindingResult result = new BeanPropertyBindingResult(person, "person");
+		validator.validate(person, result);
+		assertEquals(3, result.getErrorCount());
+		FieldError fieldError = result.getFieldError("name");
+		assertEquals("name", fieldError.getField());
+		System.out.println(Arrays.asList(fieldError.getCodes()));
+		System.out.println(fieldError.getDefaultMessage());
+		fieldError = result.getFieldError("address.street");
+		assertEquals("address.street", fieldError.getField());
+		System.out.println(Arrays.asList(fieldError.getCodes()));
+		System.out.println(fieldError.getDefaultMessage());
+		fieldError = result.getFieldError("addressList[0].street");
+		assertEquals("addressList[0].street", fieldError.getField());
+		System.out.println(Arrays.asList(fieldError.getCodes()));
+		System.out.println(fieldError.getDefaultMessage());
+	}
+
+	@Test
+	public void testSpringValidationWithErrorInSetElement() throws Exception {
+		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+		validator.afterPropertiesSet();
+		ValidPerson person = new ValidPerson();
+		person.getAddressSet().add(new ValidAddress());
+		BeanPropertyBindingResult result = new BeanPropertyBindingResult(person, "person");
+		validator.validate(person, result);
+		assertEquals(3, result.getErrorCount());
+		FieldError fieldError = result.getFieldError("name");
+		assertEquals("name", fieldError.getField());
+		System.out.println(Arrays.asList(fieldError.getCodes()));
+		System.out.println(fieldError.getDefaultMessage());
+		fieldError = result.getFieldError("address.street");
+		assertEquals("address.street", fieldError.getField());
+		System.out.println(Arrays.asList(fieldError.getCodes()));
+		System.out.println(fieldError.getDefaultMessage());
+		fieldError = result.getFieldError("addressSet[].street");
+		assertEquals("addressSet[].street", fieldError.getField());
 		System.out.println(Arrays.asList(fieldError.getCodes()));
 		System.out.println(fieldError.getDefaultMessage());
 	}
@@ -138,6 +188,12 @@ public class ValidatorFactoryTests {
 
 		@Valid
 		private ValidAddress address = new ValidAddress();
+
+		@Valid
+		private List<ValidAddress> addressList = new LinkedList<ValidAddress>();
+
+		@Valid
+		private Set<ValidAddress> addressSet = new LinkedHashSet<ValidAddress>();
 
 		public String getName() {
 			return name;
@@ -153,6 +209,22 @@ public class ValidatorFactoryTests {
 
 		public void setAddress(ValidAddress address) {
 			this.address = address;
+		}
+
+		public List<ValidAddress> getAddressList() {
+			return addressList;
+		}
+
+		public void setAddressList(List<ValidAddress> addressList) {
+			this.addressList = addressList;
+		}
+
+		public Set<ValidAddress> getAddressSet() {
+			return addressSet;
+		}
+
+		public void setAddressSet(Set<ValidAddress> addressSet) {
+			this.addressSet = addressSet;
 		}
 	}
 

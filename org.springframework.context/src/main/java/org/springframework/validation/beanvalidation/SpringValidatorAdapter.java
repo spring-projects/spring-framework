@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,10 @@ import javax.validation.metadata.ConstraintDescriptor;
 import org.springframework.beans.NotReadablePropertyException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.Assert;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.validation.Validator;
 
 /**
@@ -89,10 +91,31 @@ public class SpringValidatorAdapter implements Validator, javax.validation.Valid
 			FieldError fieldError = errors.getFieldError(field);
 			if (fieldError == null || !fieldError.isBindingFailure()) {
 				try {
-					errors.rejectValue(field,
-							violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName(),
-							getArgumentsForConstraint(errors.getObjectName(), field, violation.getConstraintDescriptor()),
-							violation.getMessage());
+					String errorCode = violation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName();
+					Object[] errorArgs = getArgumentsForConstraint(errors.getObjectName(), field, violation.getConstraintDescriptor());
+					if (errors instanceof BindingResult) {
+						// can do custom FieldError registration with invalid value from ConstraintViolation,
+						// as necessary for Hibernate Validator compatibility (non-indexed set path in field)
+						BindingResult bindingResult = (BindingResult) errors;
+						String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
+						String nestedField = bindingResult.getNestedPath() + field;
+						ObjectError error;
+						if ("".equals(nestedField)) {
+							error = new ObjectError(
+									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage());
+						}
+						else {
+							error = new FieldError(
+									errors.getObjectName(), nestedField, violation.getInvalidValue(), false,
+									errorCodes, errorArgs, violation.getMessage());
+						}
+						bindingResult.addError(error);
+					}
+					else {
+						// got no BindingResult - can only do standard rejectValue call
+						// with automatic extraction of the current field value
+						errors.rejectValue(field, errorCode, errorArgs, violation.getMessage());
+					}
 				}
 				catch (NotReadablePropertyException ex) {
 					throw new IllegalStateException("JSR-303 validated property '" + field +
