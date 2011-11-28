@@ -360,6 +360,10 @@
 	Signals the current application context to apply dependency injection
 	to non-managed classes that are instantiated outside of the Spring bean
 	factory (typically classes annotated with the @Configurable annotation).
+
+	See Javadoc for org.springframework.context.annotation.EnableSpringConfigured in the
+	spring-aspects module for information on code-based alternatives to bootstrapping
+	this functionality.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:simpleType>

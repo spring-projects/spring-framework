@@ -27,6 +27,7 @@
 	</publications>
 
 	<dependencies>
+		<dependency org="net.sourceforge.cglib" name="com.springsource.net.sf.cglib" rev="2.2.0" conf="test->runtime"/>
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile, commons-logging->compile"/>
 		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="${aspectj.version}" conf="optional, aspectj->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="test->compile"/>
