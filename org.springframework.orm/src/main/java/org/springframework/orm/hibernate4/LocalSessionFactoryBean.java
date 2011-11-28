@@ -22,6 +22,7 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.NamingStrategy;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -67,6 +68,8 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 	private Resource[] mappingJarLocations;
 
 	private Resource[] mappingDirectoryLocations;
+
+	private NamingStrategy namingStrategy;
 
 	private Properties hibernateProperties;
 
@@ -176,6 +179,15 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 	}
 
 	/**
+	 * Set a Hibernate NamingStrategy for the SessionFactory, determining the
+	 * physical column and table names given the info in the mapping document.
+	 * @see org.hibernate.cfg.Configuration#setNamingStrategy
+	 */
+	public void setNamingStrategy(NamingStrategy namingStrategy) {
+		this.namingStrategy = namingStrategy;
+	}
+
+	/**
 	 * Set Hibernate properties, such as "hibernate.dialect".
 	 * <p>Note: Do not specify a transaction provider here when using
 	 * Spring-driven transactions. It is also advisable to omit connection
@@ -277,6 +289,10 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 				}
 				sfb.addDirectory(file);
 			}
+		}
+
+		if (this.namingStrategy != null) {
+			sfb.setNamingStrategy(this.namingStrategy);
 		}
 
 		if (this.hibernateProperties != null) {
