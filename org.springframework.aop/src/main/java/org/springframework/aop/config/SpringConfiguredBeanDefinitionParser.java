@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ import org.springframework.beans.factory.xml.ParserContext;
 
 /**
  * {@link BeanDefinitionParser} responsible for parsing the
- * <code>&lt;aop:spring-configured/&gt;</code> tag.
+ * {@code <aop:spring-configured/>} tag.
  *
  * <p><b>NOTE:</b> This is essentially a duplicate of Spring 2.5's
  * {@link org.springframework.context.config.SpringConfiguredBeanDefinitionParser}
- * for the <code>&lt;context:spring-configured/&gt;</code> tag, mirrored here
- * for compatibility with Spring 2.0's <code>&lt;aop:spring-configured/&gt;</code>
- * tag (avoiding a direct dependency on the context package).
+ * for the {@code <context:spring-configured/>} tag, mirrored here for compatibility with
+ * Spring 2.0's {@code <aop:spring-configured/>} tag (avoiding a direct dependency on the
+ * context package).
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -55,6 +55,7 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 			RootBeanDefinition def = new RootBeanDefinition();
 			def.setBeanClassName(BEAN_CONFIGURER_ASPECT_CLASS_NAME);
 			def.setFactoryMethodName("aspectOf");
+			def.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			def.setSource(parserContext.extractSource(element));
 			parserContext.registerBeanComponent(new BeanComponentDefinition(def, BEAN_CONFIGURER_ASPECT_BEAN_NAME));
 		}
