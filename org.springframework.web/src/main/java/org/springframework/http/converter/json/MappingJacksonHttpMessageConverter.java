@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -68,39 +68,49 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	/**
-	 * Sets the {@code ObjectMapper} for this view. If not set, a default
+	 * Set the {@code ObjectMapper} for this view. If not set, a default
 	 * {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
-	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further control of the JSON serialization
-	 * process. For example, an extended {@link org.codehaus.jackson.map.SerializerFactory} can be configured that provides
-	 * custom serializers for specific types. The other option for refining the serialization process is to use Jackson's
-	 * provided annotations on the types to be serialized, in which case a custom-configured ObjectMapper is unnecessary.
+	 * <p>Setting a custom-configured {@code ObjectMapper} is one way to take further control of the JSON
+	 * serialization process. For example, an extended {@link org.codehaus.jackson.map.SerializerFactory}
+	 * can be configured that provides custom serializers for specific types. The other option for refining
+	 * the serialization process is to use Jackson's provided annotations on the types to be serialized,
+	 * in which case a custom-configured ObjectMapper is unnecessary.
 	 */
 	public void setObjectMapper(ObjectMapper objectMapper) {
-		Assert.notNull(objectMapper, "'objectMapper' must not be null");
+		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
 	}
 
 	/**
-	 * Indicates whether the JSON output by this view should be prefixed with "{} &&". Default is false.
-	 * <p> Prefixing the JSON string in this manner is used to help prevent JSON Hijacking. The prefix renders the string
-	 * syntactically invalid as a script so that it cannot be hijacked. This prefix does not affect the evaluation of JSON,
-	 * but if JSON validation is performed on the string, the prefix would need to be ignored.
+	 * Return the underlying {@code ObjectMapper} for this view.
+	 */
+	public ObjectMapper getObjectMapper() {
+		return this.objectMapper;
+	}
+
+	/**
+	 * Indicate whether the JSON output by this view should be prefixed with "{} &&". Default is false.
+	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
+	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
+	 * This prefix does not affect the evaluation of JSON, but if JSON validation is performed on the
+	 * string, the prefix would need to be ignored.
 	 */
 	public void setPrefixJson(boolean prefixJson) {
 		this.prefixJson = prefixJson;
 	}
 
+
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		JavaType javaType = getJavaType(clazz);
-		return this.objectMapper.canDeserialize(javaType) && canRead(mediaType);
+		return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
 	}
 
 	/**
 	 * Returns the Jackson {@link JavaType} for the specific class.
-	 *
-	 * <p>Default implementation returns {@link TypeFactory#type(java.lang.reflect.Type)}, but this can be overridden
-	 * in subclasses, to allow for custom generic collection handling. For instance:
+	 * <p>The default implementation returns {@link TypeFactory#type(java.lang.reflect.Type)},
+	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
+	 * For instance:
 	 * <pre class="code">
 	 * protected JavaType getJavaType(Class&lt;?&gt; clazz) {
 	 *   if (List.class.isAssignableFrom(clazz)) {
@@ -110,7 +120,6 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	 *   }
 	 * }
 	 * </pre>
-	 *
 	 * @param clazz the class to return the java type for
 	 * @return the java type
 	 */
@@ -120,7 +129,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		return this.objectMapper.canSerialize(clazz) && canWrite(mediaType);
+		return (this.objectMapper.canSerialize(clazz) && canWrite(mediaType));
 	}
 
 	@Override
@@ -132,6 +141,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	@Override
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
+
 		JavaType javaType = getJavaType(clazz);
 		try {
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
