@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,11 @@
 
 package org.springframework.web.servlet.view;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -39,6 +32,7 @@ import javax.servlet.jsp.jstl.core.Config;
 import javax.servlet.jsp.jstl.fmt.LocalizationContext;
 
 import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
@@ -58,6 +52,8 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -499,7 +495,7 @@ public class ViewResolverTests {
 		vr.removeFromCache("example1", Locale.getDefault());
 		cached = vr.resolveViewName("example1", Locale.getDefault());
 		if (view == cached) {
-			// the chance of having the same reference (hashCode) twice if negligable).
+			// the chance of having the same reference (hashCode) twice if negligible).
 			fail("View wasn't removed from cache");
 		}
 	}
@@ -526,9 +522,13 @@ public class ViewResolverTests {
 		
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());
-		
-		assertEquals(2, count.intValue());
+		viewResolver.resolveViewName("view", Locale.getDefault());
+		viewResolver.resolveViewName("view", Locale.getDefault());
+		viewResolver.resolveViewName("view", Locale.getDefault());
+
+		assertEquals(3, count.intValue());
 	}
+
 
 	public static class TestView extends InternalResourceView {
 
