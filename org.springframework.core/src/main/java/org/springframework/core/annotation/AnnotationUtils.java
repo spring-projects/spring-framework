@@ -28,10 +28,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -352,49 +348,6 @@ public abstract class AnnotationUtils {
 			}
 		}
 		return attrs;
-	}
-
-	/**
-	 * Return a list of attribute maps for all declarations of the given annotation
-	 * on the given annotated class using the given MetadataReaderFactory to introspect
-	 * annotation metadata. Meta-annotations are ordered first in the list, and if the
-	 * target annotation is declared directly on the class, its map of attributes will be
-	 * ordered last in the list.
-	 * @param targetAnnotation the annotation to search for, both locally and as a meta-annotation
-	 * @param annotatedClassName the class to inspect
-	 * @param classValuesAsString whether class attributes should be returned as strings
-	 * @param metadataReaderFactory factory used to create metadata readers for each type
-	 * @since 3.1
-	 */
-	public static List<Map<String, Object>> findAllAnnotationAttributes(
-			Class<? extends Annotation> targetAnnotation, String annotatedClassName,
-			boolean classValuesAsString, MetadataReaderFactory metadataReaderFactory) throws IOException {
-
-		List<Map<String, Object>> allAttribs = new ArrayList<Map<String, Object>>();
-
-		MetadataReader reader = metadataReaderFactory.getMetadataReader(annotatedClassName);
-		AnnotationMetadata metadata = reader.getAnnotationMetadata();
-		String targetAnnotationType = targetAnnotation.getName();
-
-		for (String annotationType : metadata.getAnnotationTypes()) {
-			if (annotationType.equals(targetAnnotationType)) {
-				continue;
-			}
-			MetadataReader metaReader = metadataReaderFactory.getMetadataReader(annotationType);
-			Map<String, Object> targetAttribs =
-				metaReader.getAnnotationMetadata().getAnnotationAttributes(targetAnnotationType, classValuesAsString);
-			if (targetAttribs != null) {
-				allAttribs.add(targetAttribs);
-			}
-		}
-
-		Map<String, Object> localAttribs =
-			metadata.getAnnotationAttributes(targetAnnotationType, classValuesAsString);
-		if (localAttribs != null) {
-			allAttribs.add(localAttribs);
-		}
-
-		return allAttribs;
 	}
 
 	/**

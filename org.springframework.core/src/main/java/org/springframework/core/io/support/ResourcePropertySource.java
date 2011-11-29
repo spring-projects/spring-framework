@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io;
+package org.springframework.core.io.support;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.Resource;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * Subclass of {@link PropertiesPropertySource} that loads a {@link Properties}
- * object from a given {@link Resource} or resource location such as
+ * object from a given {@link org.springframework.core.io.Resource} or resource location such as
  * {@code "classpath:/com/myco/foo.properties"} or {@code "file:/path/to/file.properties"}.
  *
  * @author Chris Beams
