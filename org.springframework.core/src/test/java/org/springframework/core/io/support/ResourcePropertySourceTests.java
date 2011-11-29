@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+package org.springframework.core.io.support;
 
 import java.io.IOException;
 
-import org.easymock.internal.matchers.StartsWith;
 import org.junit.Test;
+
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ResourcePropertySource}.

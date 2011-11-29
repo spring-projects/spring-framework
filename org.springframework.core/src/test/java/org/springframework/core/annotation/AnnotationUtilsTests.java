@@ -219,21 +219,6 @@ public class AnnotationUtilsTests {
 		assertNotNull(order);
 	}
 
-	@Test
-	public void findAllComponentAnnotationAttributes() throws IOException {
-		List<Map<String,Object>> allAttribs =
-			AnnotationUtils.findAllAnnotationAttributes(Component.class,
-					HasLocalAndMetaComponentAnnotation.class.getName(), false,
-					new SimpleMetadataReaderFactory());
-
-		Object value = null;
-		for (Map<String, Object> attribs : allAttribs) {
-			value = attribs.get("value");
-		}
-
-		assertThat(allAttribs.size(), is(3));
-		assertEquals("local", value);
-	}
 
 	@Component(value="meta1")
 	@Retention(RetentionPolicy.RUNTIME)

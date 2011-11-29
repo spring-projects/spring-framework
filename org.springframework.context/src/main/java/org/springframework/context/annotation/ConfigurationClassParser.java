@@ -16,9 +16,9 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.ConfigurationClassUtils.isConfigurationCandidate;
-
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -35,11 +35,10 @@ import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.ResourcePropertySource;
+import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
@@ -167,7 +166,7 @@ class ConfigurationClassParser {
 		for (String memberClassName : metadata.getMemberClassNames()) {
 			MetadataReader reader = this.metadataReaderFactory.getMetadataReader(memberClassName);
 			AnnotationMetadata memberClassMetadata = reader.getAnnotationMetadata();
-			if (isConfigurationCandidate(memberClassMetadata)) {
+			if (ConfigurationClassUtils.isConfigurationCandidate(memberClassMetadata)) {
 				processConfigurationClass(new ConfigurationClass(reader, null));
 			}
 		}
@@ -204,7 +203,7 @@ class ConfigurationClassParser {
 
 		// process any @Import annotations
 		List<Map<String, Object>> allImportAttribs =
-			AnnotationUtils.findAllAnnotationAttributes(Import.class, metadata.getClassName(), true, metadataReaderFactory);
+			findAllAnnotationAttributes(Import.class, metadata.getClassName(), true);
 		for (Map<String, Object> importAttribs : allImportAttribs) {
 			processImport(configClass, (String[]) importAttribs.get("value"), true);
 		}
@@ -227,6 +226,48 @@ class ConfigurationClassParser {
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
+	}
+
+
+	/**
+	 * Return a list of attribute maps for all declarations of the given annotation
+	 * on the given annotated class using the given MetadataReaderFactory to introspect
+	 * annotation metadata. Meta-annotations are ordered first in the list, and if the
+	 * target annotation is declared directly on the class, its map of attributes will be
+	 * ordered last in the list.
+	 * @param targetAnnotation the annotation to search for, both locally and as a meta-annotation
+	 * @param annotatedClassName the class to inspect
+	 * @param classValuesAsString whether class attributes should be returned as strings
+	 */
+	private List<Map<String, Object>> findAllAnnotationAttributes(
+			Class<? extends Annotation> targetAnnotation, String annotatedClassName,
+			boolean classValuesAsString) throws IOException {
+
+		List<Map<String, Object>> allAttribs = new ArrayList<Map<String, Object>>();
+
+		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(annotatedClassName);
+		AnnotationMetadata metadata = reader.getAnnotationMetadata();
+		String targetAnnotationType = targetAnnotation.getName();
+
+		for (String annotationType : metadata.getAnnotationTypes()) {
+			if (annotationType.equals(targetAnnotationType)) {
+				continue;
+			}
+			MetadataReader metaReader = this.metadataReaderFactory.getMetadataReader(annotationType);
+			Map<String, Object> targetAttribs =
+				metaReader.getAnnotationMetadata().getAnnotationAttributes(targetAnnotationType, classValuesAsString);
+			if (targetAttribs != null) {
+				allAttribs.add(targetAttribs);
+			}
+		}
+
+		Map<String, Object> localAttribs =
+			metadata.getAnnotationAttributes(targetAnnotationType, classValuesAsString);
+		if (localAttribs != null) {
+			allAttribs.add(localAttribs);
+		}
+
+		return allAttribs;
 	}
 
 	private void processImport(ConfigurationClass configClass, String[] classesToImport, boolean checkForCircularImports) throws IOException {
