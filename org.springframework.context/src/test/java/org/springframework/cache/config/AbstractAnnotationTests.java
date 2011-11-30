@@ -307,6 +307,8 @@ public abstract class AbstractAnnotationTests {
 
 	public void testMultiEvict(CacheableService<?> service) {
 		Object o1 = new Object();
+		Object o2 = o1.toString() + "A";
+
 
 		Object r1 = service.multiCache(o1);
 		Object r2 = service.multiCache(o1);
@@ -314,6 +316,7 @@ public abstract class AbstractAnnotationTests {
 		Cache primary = cm.getCache("primary");
 		Cache secondary = cm.getCache("secondary");
 
+		primary.put(o2, o2);
 		assertSame(r1, r2);
 		assertSame(r1, primary.get(o1).get());
 		assertSame(r1, secondary.get(o1).get());
@@ -321,6 +324,7 @@ public abstract class AbstractAnnotationTests {
 		service.multiEvict(o1);
 		assertNull(primary.get(o1));
 		assertNull(secondary.get(o1));
+		assertNull(primary.get(o2));
 
 		Object r3 = service.multiCache(o1);
 		Object r4 = service.multiCache(o1);
