@@ -85,9 +85,8 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 				delegate.getHeaders().putAll(request.getHeaders());
 
-				if (body.length > 0) {
-					FileCopyUtils.copy(body, delegate.getBody());
-				}
+				FileCopyUtils.copy(body, delegate.getBody());
+
 				return delegate.execute();
 			}
 		}
