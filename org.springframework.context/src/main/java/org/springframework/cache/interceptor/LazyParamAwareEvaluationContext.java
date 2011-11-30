@@ -45,13 +45,13 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 
 	private final Class<?> targetClass;
 
-	private final Map<Method, Method> methodCache;
+	private final Map<String, Method> methodCache;
 
 	private boolean paramLoaded = false;
 
 
 	LazyParamAwareEvaluationContext(Object rootObject, ParameterNameDiscoverer paramDiscoverer, Method method,
-			Object[] args, Class<?> targetClass, Map<Method, Method> methodCache) {
+			Object[] args, Class<?> targetClass, Map<String, Method> methodCache) {
 		super(rootObject);
 
 		this.paramDiscoverer = paramDiscoverer;
@@ -85,13 +85,14 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 			return;
 		}
 
-		Method targetMethod = this.methodCache.get(this.method);
+		String mKey = toString(this.method);
+		Method targetMethod = this.methodCache.get(mKey);
 		if (targetMethod == null) {
 			targetMethod = AopUtils.getMostSpecificMethod(this.method, this.targetClass);
 			if (targetMethod == null) {
 				targetMethod = this.method;
 			}
-			this.methodCache.put(this.method, targetMethod);
+			this.methodCache.put(mKey, targetMethod);
 		}
 
 		// save arguments as indexed variables
@@ -108,4 +109,11 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 		}
 	}
 
+	private String toString(Method m) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(m.getDeclaringClass().getName());
+		sb.append("#");
+		sb.append(m.toString());
+		return sb.toString();
+	}
 }

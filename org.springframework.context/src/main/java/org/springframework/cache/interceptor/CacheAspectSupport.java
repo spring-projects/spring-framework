@@ -225,14 +225,14 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 	
 	private void inspectBeforeCacheEvicts(Collection<CacheOperationContext> evictions) {
-		inspectAfterCacheEvicts(evictions, false);
+		inspectCacheEvicts(evictions, false);
 	}
 
 	private void inspectAfterCacheEvicts(Collection<CacheOperationContext> evictions) {
-		inspectAfterCacheEvicts(evictions, true);
+		inspectCacheEvicts(evictions, true);
 	}
 
-	private void inspectAfterCacheEvicts(Collection<CacheOperationContext> evictions, boolean afterInvocation) {
+	private void inspectCacheEvicts(Collection<CacheOperationContext> evictions, boolean afterInvocation) {
 
 		if (!evictions.isEmpty()) {
 
@@ -276,8 +276,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 
 	private CacheStatus inspectCacheables(Collection<CacheOperationContext> cacheables) {
-		Map<CacheOperationContext, Object> cUpdates = new LinkedHashMap<CacheOperationContext, Object>(
-				cacheables.size());
+		Map<CacheOperationContext, Object> cUpdates = new LinkedHashMap<CacheOperationContext, Object>(cacheables.size());
 
 		boolean updateRequire = false;
 		Object retVal = null;
@@ -439,8 +438,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		// context passed around to avoid multiple creations
 		private final EvaluationContext evalContext;
 
-		public CacheOperationContext(CacheOperation operation, Method method, Object[] args, Object target,
-				Class<?> targetClass) {
+		public CacheOperationContext(CacheOperation operation, Method method, Object[] args, Object target, Class<?> targetClass) {
 			this.operation = operation;
 			this.caches = CacheAspectSupport.this.getCaches(operation);
 			this.target = target;

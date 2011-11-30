@@ -116,7 +116,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 		return counter.getAndIncrement();
 	}
 
-	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#p0") })
+	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#p0"),  @CacheEvict(value = "primary", key = "#p0 + 'A'") })
 	public Object multiEvict(Object arg1) {
 		return counter.getAndIncrement();
 	}
