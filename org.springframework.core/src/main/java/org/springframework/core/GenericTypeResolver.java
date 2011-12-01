@@ -242,7 +242,7 @@ public abstract class GenericTypeResolver {
 	 * @param typeVariableMap the TypeVariable Map to resolved against
 	 * @return the type if it resolves to a Class, or <code>Object.class</code> otherwise
 	 */
-	public static Class resolveType(Type genericType, Map<TypeVariable, Type> typeVariableMap) {
+	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> typeVariableMap) {
 		Type rawType = getRawType(genericType, typeVariableMap);
 		return (rawType instanceof Class ? (Class) rawType : Object.class);
 	}
