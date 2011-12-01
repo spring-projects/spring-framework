@@ -45,7 +45,7 @@ final class ArrayToObjectConverter implements ConditionalGenericConverter {
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(), targetType, this.conversionService);
 	}
-	
+
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;

@@ -49,7 +49,8 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor(), this.conversionService);
+		return ConversionUtils.canConvertElements(
+				sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor(), this.conversionService);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -68,7 +69,8 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 		else {
 			for (int i = 0; i < length; i++) {
 				Object sourceElement = Array.get(source, i);
-				Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
+				Object targetElement = this.conversionService.convert(sourceElement,
+						sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
 				target.add(targetElement);
 			}
 		}		

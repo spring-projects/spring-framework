@@ -241,7 +241,8 @@ public class TypeDescriptor {
 		if (value == null) {
 			return this;
 		}
-		return new TypeDescriptor(value.getClass(), elementTypeDescriptor, mapKeyTypeDescriptor, mapValueTypeDescriptor, annotations);
+		return new TypeDescriptor(value.getClass(), this.elementTypeDescriptor,
+				this.mapKeyTypeDescriptor, this.mapValueTypeDescriptor, this.annotations);
 	}
 
 	/**
@@ -513,7 +514,7 @@ public class TypeDescriptor {
 			return typeDescriptor.narrow(value);
 		}
 		else {
-			return value != null ? new TypeDescriptor(value.getClass(), null, null, null, annotations) : null;
+			return (value != null ? new TypeDescriptor(value.getClass(), null, null, null, this.annotations) : null);
 		}		
 	}
 

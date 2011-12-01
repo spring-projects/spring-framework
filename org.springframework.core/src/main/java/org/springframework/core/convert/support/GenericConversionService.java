@@ -163,12 +163,15 @@ public class GenericConversionService implements ConfigurableConversionService {
 			return handleResult(sourceType, targetType, convertNullSource(sourceType, targetType));
 		}
 		if (source != null && !sourceType.getObjectType().isInstance(source)) {
-			throw new IllegalArgumentException("The source to convert from must be an instance of " + sourceType + "; instead it was a " + source.getClass().getName());
+			throw new IllegalArgumentException("The source to convert from must be an instance of " +
+					sourceType + "; instead it was a " + source.getClass().getName());
 		}
 		GenericConverter converter = getConverter(sourceType, targetType);
 		if (converter != null) {
-			return handleResult(sourceType, targetType, ConversionUtils.invokeConverter(converter, source, sourceType, targetType));
-		}  else {
+			Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
+			return handleResult(sourceType, targetType, result);
+		}
+		else {
 			return handleConverterNotFound(source, sourceType, targetType);			
 		}
 	}
@@ -235,7 +238,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		ConverterCacheKey key = new ConverterCacheKey(sourceType, targetType);
 		GenericConverter converter = this.converterCache.get(key);
 		if (converter != null) {
-			return converter != NO_MATCH ? converter : null;
+			return (converter != NO_MATCH ? converter : null);
 		}
 		else {
 			converter = findConverterForClassPair(sourceType, targetType);
@@ -335,7 +338,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 				}
 			}
 			return null;
-		} else {
+		}
+		else {
 			HashSet<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
 			classQueue.addFirst(sourceObjectType);
@@ -393,7 +397,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 				}
 			}
 			return matchConverter(converters.get(Object.class), sourceType, targetType);
-		} else if (targetObjectType.isArray()) {
+		}
+		else if (targetObjectType.isArray()) {
 			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
 			classQueue.addFirst(targetObjectType);
 			while (!classQueue.isEmpty()) {
@@ -463,7 +468,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 			assertNotPrimitiveTargetType(sourceType, targetType);
 			return source;
 		}
-		else if (sourceType.isAssignableTo(targetType)) {
+		else if (sourceType.isAssignableTo(targetType) && targetType.getObjectType().isInstance(source)) {
 			return source;
 		}
 		else {
@@ -484,6 +489,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}		
 	}
 	
+
 	@SuppressWarnings("unchecked")
 	private final class ConverterAdapter implements GenericConverter {
 
@@ -515,7 +521,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 			return this.typeInfo.getSourceType().getName() + " -> " + this.typeInfo.getTargetType().getName() +
 					" : " + this.converter.toString();
 		}
-
 	}
 
 
