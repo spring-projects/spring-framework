@@ -16,9 +16,6 @@
 
 package org.springframework.beans.factory.annotation;
 
-import static org.springframework.core.BridgeMethodResolver.findBridgedMethod;
-import static org.springframework.core.BridgeMethodResolver.isJava6VisibilityBridgeMethodPair;
-
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
@@ -38,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -52,6 +50,7 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
@@ -343,10 +342,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				}
 			}
 			for (Method method : targetClass.getDeclaredMethods()) {
-				Method bridgedMethod = findBridgedMethod(method);
-				Annotation annotation = isJava6VisibilityBridgeMethodPair(method, bridgedMethod) ?
-						findAutowiredAnnotation(bridgedMethod) :
-						findAutowiredAnnotation(method);
+				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+				Annotation annotation = BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod) ?
+						findAutowiredAnnotation(bridgedMethod) : findAutowiredAnnotation(method);
 				if (annotation != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
 					if (Modifier.isStatic(method.getModifiers())) {
 						if (logger.isWarnEnabled()) {
