@@ -33,17 +33,16 @@ import org.springframework.util.Assert;
  * </ul>
  *
  * @author Arjen Poutsma
- * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
  * @since 3.0
+ * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
  */
 public abstract class UriUtils {
 
 	// encoding
 
 	/**
-	 * Encodes the given source URI into an encoded String. All various URI components are encoded according to their
-	 * respective valid character sets.
-	 *
+	 * Encodes the given source URI into an encoded String. All various URI components are
+	 * encoded according to their respective valid character sets.
 	 * @param uri the URI to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded URI
@@ -57,10 +56,10 @@ public abstract class UriUtils {
     }
 
 	/**
-	 * Encodes the given HTTP URI into an encoded String. All various URI components are encoded according to their
-	 * respective valid character sets. <p><strong>Note</strong> that this method does not support fragments ({@code #}),
+	 * Encodes the given HTTP URI into an encoded String. All various URI components are
+	 * encoded according to their respective valid character sets.
+	 * <p><strong>Note</strong> that this method does not support fragments ({@code #}),
 	 * as these are not supposed to be sent to the server, but retained by the client.
-	 *
 	 * @param httpUrl the HTTP URL to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded URL
@@ -74,12 +73,11 @@ public abstract class UriUtils {
 	}
 
 	/**
-	 * Encodes the given source URI components into an encoded String. All various URI components are optional, but encoded
-	 * according to their respective valid character sets.
-	 *
+	 * Encodes the given source URI components into an encoded String. All various URI components
+	 * are optional, but encoded according to their respective valid character sets.
 	 * @param scheme the scheme
 	 * @param authority the authority
-	 * @param userInfo  the user info
+	 * @param userInfo the user info
 	 * @param host the host
 	 * @param port the port
 	 * @param path the path
@@ -90,16 +88,11 @@ public abstract class UriUtils {
 	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
-	public static String encodeUriComponents(String scheme,
-											 String authority,
-											 String userInfo ,
-											 String host,
-											 String port,
-											 String path,
-											 String query,
-											 String fragment,
-											 String encoding) throws UnsupportedEncodingException {
-		int portAsInt = port != null ? Integer.parseInt(port) : -1;
+	public static String encodeUriComponents(String scheme, String authority, String userInfo,
+			String host, String port, String path, String query, String fragment, String encoding)
+			throws UnsupportedEncodingException {
+
+		int portAsInt = (port != null ? Integer.parseInt(port) : -1);
 
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		builder.scheme(scheme).userInfo(userInfo).host(host).port(portAsInt);
@@ -110,11 +103,11 @@ public abstract class UriUtils {
         return encoded.toUriString();
 	}
 
+
 	// encoding convenience methods
 
 	/**
 	 * Encodes the given URI scheme with the given encoding.
-	 *
 	 * @param scheme the scheme to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded scheme
@@ -126,7 +119,6 @@ public abstract class UriUtils {
 
 	/**
 	 * Encodes the given URI authority with the given encoding.
-	 *
 	 * @param authority the authority to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded authority
@@ -138,7 +130,6 @@ public abstract class UriUtils {
 
 	/**
 	 * Encodes the given URI user info with the given encoding.
-	 *
 	 * @param userInfo the user info to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded user info
@@ -150,7 +141,6 @@ public abstract class UriUtils {
 
 	/**
 	 * Encodes the given URI host with the given encoding.
-	 *
 	 * @param host the host to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded host
@@ -162,7 +152,6 @@ public abstract class UriUtils {
 
 	/**
 	 * Encodes the given URI port with the given encoding.
-	 *
 	 * @param port the port to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded port
@@ -174,7 +163,6 @@ public abstract class UriUtils {
 
 	/**
 	 * Encodes the given URI path with the given encoding.
-	 *
 	 * @param path the path to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded path
@@ -186,7 +174,6 @@ public abstract class UriUtils {
 
 	/**
 	 * Encodes the given URI path segment with the given encoding.
-	 *
 	 * @param segment the segment to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded segment
@@ -198,7 +185,6 @@ public abstract class UriUtils {
 
 	/**
 	 * Encodes the given URI query with the given encoding.
-	 *
 	 * @param query the query to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded query
@@ -210,7 +196,6 @@ public abstract class UriUtils {
 
 	/**
 	 * Encodes the given URI query parameter with the given encoding.
-	 *
 	 * @param queryParam the query parameter to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded query parameter
@@ -222,7 +207,6 @@ public abstract class UriUtils {
 
 	/**
 	 * Encodes the given URI fragment with the given encoding.
-	 *
 	 * @param fragment the fragment to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded fragment
@@ -243,7 +227,6 @@ public abstract class UriUtils {
 	 *     <li>Special characters {@code "-"}, {@code "_"}, {@code "."}, and {@code "*"} stay the same.</li>
 	 *     <li>A sequence "<code>%<i>xy</i></code>" is interpreted as a hexadecimal representation of the character.</li>
  	 * </ul>
-	 *
 	 * @param source the source string
 	 * @param encoding the encoding
 	 * @return the decoded URI
