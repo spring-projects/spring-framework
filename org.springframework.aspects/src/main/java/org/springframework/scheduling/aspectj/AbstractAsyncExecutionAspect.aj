@@ -45,7 +45,7 @@ public abstract aspect AbstractAsyncExecutionAspect {
 			this.asyncExecutor = (AsyncTaskExecutor) executor;
 		}
 		else {
-			this.asyncExecutor = new TaskExecutorAdapter(asyncExecutor);
+			this.asyncExecutor = new TaskExecutorAdapter(executor);
 		}
 	}
 
