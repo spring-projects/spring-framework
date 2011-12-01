@@ -70,17 +70,19 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 				copyRequired = true;
 			}
 		}
-		return copyRequired ? targetMap : sourceMap;
+		return (copyRequired ? targetMap : sourceMap);
 	}
 	
 	// internal helpers
 
 	private boolean canConvertKey(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return ConversionUtils.canConvertElements(sourceType.getMapKeyTypeDescriptor(), targetType.getMapKeyTypeDescriptor(), this.conversionService);
+		return ConversionUtils.canConvertElements(sourceType.getMapKeyTypeDescriptor(),
+				targetType.getMapKeyTypeDescriptor(), this.conversionService);
 	}
 	
 	private boolean canConvertValue(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return ConversionUtils.canConvertElements(sourceType.getMapValueTypeDescriptor(), targetType.getMapValueTypeDescriptor(), this.conversionService);
+		return ConversionUtils.canConvertElements(sourceType.getMapValueTypeDescriptor(),
+				targetType.getMapValueTypeDescriptor(), this.conversionService);
 	}
 	
 	private Object convertKey(Object sourceKey, TypeDescriptor sourceType, TypeDescriptor targetType) {

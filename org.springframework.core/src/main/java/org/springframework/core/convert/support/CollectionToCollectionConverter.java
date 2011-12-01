@@ -49,7 +49,8 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor(), conversionService);
+		return ConversionUtils.canConvertElements(
+				sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor(), this.conversionService);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -67,14 +68,15 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		}
 		else {
 			for (Object sourceElement : sourceCollection) {
-				Object targetElement = this.conversionService.convert(sourceElement, sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
+				Object targetElement = this.conversionService.convert(sourceElement,
+						sourceType.elementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
 				target.add(targetElement);
 				if (sourceElement != targetElement) {
 					copyRequired = true;
 				}
 			}
 		}
-		return copyRequired ? target : source;
+		return (copyRequired ? target : source);
 	}
 
 }
