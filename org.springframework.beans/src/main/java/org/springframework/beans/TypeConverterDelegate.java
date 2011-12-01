@@ -529,7 +529,7 @@ class TypeConverterDelegate {
 				methodParam.increaseNestingLevel();
 			}
 			Object convertedElement = convertIfNecessary(
-					indexedPropertyName, null, element, elementType, typeDescriptor);
+					indexedPropertyName, null, element, elementType, typeDescriptor.getElementTypeDescriptor());
 			if (methodParam != null) {
 				methodParam.decreaseNestingLevel();
 			}
@@ -623,11 +623,13 @@ class TypeConverterDelegate {
 				methodParam.increaseNestingLevel();
 				methodParam.setTypeIndexForCurrentLevel(0);
 			}
-			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType, typeDescriptor);
+			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key, keyType,
+					typeDescriptor.getMapKeyTypeDescriptor());
 			if (methodParam != null) {
 				methodParam.setTypeIndexForCurrentLevel(1);
 			}
-			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType, typeDescriptor);
+			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value, valueType,
+					typeDescriptor.getMapValueTypeDescriptor());
 			if (methodParam != null) {
 				methodParam.decreaseNestingLevel();
 			}
