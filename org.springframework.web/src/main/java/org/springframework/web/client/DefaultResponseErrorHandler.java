@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * Template method called from {@link #hasError(ClientHttpResponse)}.
 	 * <p>The default implementation checks if the given status code is
 	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR CLIENT_ERROR}
-	 * or {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR}. Can be overridden in subclasses.
+	 * or {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
+	 * Can be overridden in subclasses.
 	 * @param statusCode the HTTP status code
 	 * @return <code>true</code> if the response has an error; <code>false</code> otherwise
 	 */
@@ -59,17 +60,16 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * <p>The default implementation throws a {@link HttpClientErrorException} if the response status code is
-	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}, a {@link HttpServerErrorException} if it is
-	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}, and a {@link RestClientException} in other
-	 * cases.
+	 * This default implementation throws a {@link HttpClientErrorException} if the response status code
+	 * is {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}, a {@link HttpServerErrorException}
+	 * if it is {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR},
+	 * and a {@link RestClientException} in other cases.
 	 */
 	public void handleError(ClientHttpResponse response) throws IOException {
 		HttpStatus statusCode = response.getStatusCode();
 		MediaType contentType = response.getHeaders().getContentType();
 		Charset charset = contentType != null ? contentType.getCharSet() : null;
-		byte[] body = FileCopyUtils.copyToByteArray(response.getBody());
+		byte[] body = getResponseBody(response);
 		switch (statusCode.series()) {
 			case CLIENT_ERROR:
 				throw new HttpClientErrorException(statusCode, response.getStatusText(), body, charset);
@@ -80,5 +80,13 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 		}
 	}
 
-}
+	private byte[] getResponseBody(ClientHttpResponse response) {
+		try {
+			return FileCopyUtils.copyToByteArray(response.getBody());
+		}
+		catch (IOException ex) {
+			return new byte[0];
+		}
+	}
 
+}
