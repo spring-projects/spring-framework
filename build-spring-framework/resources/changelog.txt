@@ -11,14 +11,22 @@ Changes in version 3.0.7 (2011-12-19)
 * refined Resource "exists()" check for HTTP URLs to always return false for 404 status
 * LocaleEditor and StringToLocaleConverter do not restrict variant part through validation
 * LinkedCaseInsensitiveMap overrides putAll method as well (for IBM JDK 1.6 compatibility)
+* fixed nested element conversion with a DataBinder + ConversionService + PropertyEditor
+* CollectionCollection/MapToMapConverter preserve original Collection/Map if no converted elements
 * optimized DefaultListableBeanFactory's PropertyDescriptor caching for concurrent access
+* SpringValidatorAdapter accepts non-indexed set paths (for Hibernate Validator compatibility)
 * TransactionSynchronizationManager eagerly cleans up void ResourceHolders on any access
+* updated H2 error codes in sql-error-codes.xml
+* fixed NamedParameterJdbcTemplate to use correct maximum type for queryForInt/Long
+* SimpleJdbcTestUtils executeSqlScript properly closes its LineNumberReader after use
 * JDO PersistenceManager synchronization performs close attempt after completion (if necessary)
 * JPA EntityManagerFactoryUtils silently ignores IllegalArgumentExceptions from setHint calls
-* SimpleJdbcTestUtils executeSqlScript properly closes its LineNumberReader after use
 * added "forwarder" property to ConnectorServerFactoryBean, accepting an MBeanServerForwarder
 * RmiClientInterceptor detects nested SocketException as connect failure as well
+* fixed AbstractAsyncExecutionAspect's setExecutor method to correctly wrap in a TaskExecutorAdapter
 * Servlet/PortletContextResource's getFile prefers "file:" URL resolution over calling getRealPath
+* fixed ServletServerHttpRequest to reconstruct from "request.getParameterMap()" for form POST only
+* fixed @RequestMapping header matching to correctly process negated header conditions
 * added getObjectMapper() accessor to MappingJacksonHttpMessageConverter
 * AbstractCachingViewResolver allows for caching unresolved view names ("cacheUnresolved"=true)
 * fixed "formMultiSelect"/"formCheckboxes" FreeMarker macros to compare against actual field value
