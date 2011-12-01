@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,19 @@
 
 package org.springframework.scheduling.quartz;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Simple implementation of the Quartz Job interface, applying the
@@ -67,6 +72,22 @@ import org.springframework.beans.PropertyAccessorFactory;
  */
 public abstract class QuartzJobBean implements Job {
 
+	private static final Method getSchedulerMethod;
+
+	private static final Method getMergedJobDataMapMethod;
+
+
+	static {
+		try {
+			getSchedulerMethod = JobExecutionContext.class.getMethod("getScheduler");
+			getMergedJobDataMapMethod = JobExecutionContext.class.getMethod("getMergedJobDataMap");
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Incompatible Quartz API: " + ex);
+		}
+	}
+
+
 	/**
 	 * This implementation applies the passed-in job data map as bean property
 	 * values, and delegates to <code>executeInternal</code> afterwards.
@@ -74,10 +95,14 @@ public abstract class QuartzJobBean implements Job {
 	 */
 	public final void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
+			// Reflectively adapting to differences between Quartz 1.x and Quartz 2.0...
+			Scheduler scheduler = (Scheduler) ReflectionUtils.invokeMethod(getSchedulerMethod, context);
+			Map mergedJobDataMap = (Map) ReflectionUtils.invokeMethod(getMergedJobDataMapMethod, context);
+
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			MutablePropertyValues pvs = new MutablePropertyValues();
-			pvs.addPropertyValues(context.getScheduler().getContext());
-			pvs.addPropertyValues(context.getMergedJobDataMap());
+			pvs.addPropertyValues(scheduler.getContext());
+			pvs.addPropertyValues(mergedJobDataMap);
 			bw.setPropertyValues(pvs, true);
 		}
 		catch (SchedulerException ex) {
