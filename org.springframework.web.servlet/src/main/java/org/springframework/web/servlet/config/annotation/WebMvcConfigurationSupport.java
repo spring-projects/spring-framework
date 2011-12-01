@@ -464,9 +464,14 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	}
 
 	/**
-	 * Returns a {@link HandlerExceptionResolverComposite} that contains a list
-	 * of exception resolvers. To customize the list of exception resolvers,
-	 * consider overriding {@link #configureHandlerExceptionResolvers(List)}.
+	 * Returns a {@link HandlerExceptionResolverComposite} containing a list
+	 * of exception resolvers obtained either through 
+	 * {@link #configureHandlerExceptionResolvers(List)} or through
+	 * {@link #addDefaultHandlerExceptionResolvers(List)}.
+	 * <p><strong>Note:</strong> This method cannot be made final due to CGLib
+	 * constraints. Rather than overriding it, consider overriding
+	 * {@link #configureHandlerExceptionResolvers(List)}, which allows 
+	 * providing a list of resolvers.
 	 */
 	@Bean
 	public HandlerExceptionResolver handlerExceptionResolver() throws Exception {
