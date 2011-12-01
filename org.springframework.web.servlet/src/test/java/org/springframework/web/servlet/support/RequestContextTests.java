@@ -27,12 +27,13 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.util.WebUtils;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Dave Syer
- * 
+ * @author Rossen Stoyanchev
  */
 public class RequestContextTests {
 
@@ -51,14 +52,14 @@ public class RequestContextTests {
 	}
 
 	@Test
-	public void testGetContextUrlString() throws Exception {
+	public void testGetContextUrl() throws Exception {
 		request.setContextPath("foo/");
 		RequestContext context = new RequestContext(request, response, servletContext, model);
 		assertEquals("foo/bar", context.getContextUrl("bar"));
 	}
 
 	@Test
-	public void testGetContextUrlStringMap() throws Exception {
+	public void testGetContextUrlWithMap() throws Exception {
 		request.setContextPath("foo/");
 		RequestContext context = new RequestContext(request, response, servletContext, model);
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -66,7 +67,29 @@ public class RequestContextTests {
 		map.put("spam", "bucket");
 		assertEquals("foo/bar?spam=bucket", context.getContextUrl("{foo}?spam={spam}", map));
 	}
+	
+	@Test
+	public void testGetContextUrlWithMapEscaping() throws Exception {
+		request.setContextPath("foo/");
+		RequestContext context = new RequestContext(request, response, servletContext, model);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("foo", "bar baz");
+		map.put("spam", "&bucket=");
+		assertEquals("foo/bar%20baz?spam=%26bucket%3D", context.getContextUrl("{foo}?spam={spam}", map));
+	}
 
-	// TODO: test escaping of query params (not supported by UriTemplate but some features present in UriUtils).
+	@Test
+	public void testPathToServlet() throws Exception {
+		request.setContextPath("/app");
+		request.setServletPath("/servlet");
+		RequestContext context = new RequestContext(request, response, servletContext, model);
+		
+		assertEquals("/app/servlet", context.getPathToServlet());
+
+		request.setAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE, "/origApp");
+		request.setAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE, "/origServlet");
+		
+		assertEquals("/origApp/origServlet", context.getPathToServlet());
+	}
 
 }

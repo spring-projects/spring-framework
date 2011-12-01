@@ -281,6 +281,20 @@ public class UrlPathHelper {
 	}
 
 	/**
+	 * Return the servlet path for the given request, detecting an include request
+	 * URL if called within a RequestDispatcher include.
+	 * @param request current HTTP request
+	 * @return the servlet path
+	 */
+	public String getOriginatingServletPath(HttpServletRequest request) {
+		String servletPath = (String) request.getAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE);
+		if (servletPath == null) {
+			servletPath = request.getServletPath();
+		}
+		return servletPath;
+	}
+
+	/**
 	 * Return the query string part of the given request's URL. If this is a forwarded request,
 	 * correctly resolves to the query string of the original request.
 	 * @param request current HTTP request

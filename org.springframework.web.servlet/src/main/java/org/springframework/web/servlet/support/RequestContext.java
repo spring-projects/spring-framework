@@ -418,6 +418,21 @@ public class RequestContext {
 	}
 
 	/**
+	 * Return the path to URL mappings within the current servlet including the 
+	 * context path and the servlet path of the original request. This is useful
+	 * for building links to other resources within the application where a 
+	 * servlet mapping of the style {@code "/main/*"} is used.
+	 * <p>Delegates to the UrlPathHelper for decoding the context path.
+	 * @see javax.servlet.http.HttpServletRequest#getContextPath
+	 * @see javax.servlet.http.HttpServletRequest#getServletPath()
+	 * @see #getUrlPathHelper
+	 */
+	public String getPathToServlet() {
+		return this.urlPathHelper.getOriginatingContextPath(this.request)
+				+ this.urlPathHelper.getOriginatingServletPath(this.request);
+	}
+
+	/**
 	 * Return the request URI of the original request, that is, the invoked URL without parameters. This is particularly
 	 * useful as HTML form action target, possibly in combination with the original query string. <p><b>Note this
 	 * implementation will correctly resolve to the URI of any originating root request in the presence of a forwarded
