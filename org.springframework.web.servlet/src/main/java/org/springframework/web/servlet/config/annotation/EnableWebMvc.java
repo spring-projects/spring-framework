@@ -27,10 +27,7 @@ import org.springframework.context.annotation.Import;
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
- * &#064;ComponentScan(
- * 	basePackageClasses = { MyConfiguration.class },
- * 	excludeFilters = { @Filter(type = FilterType.ANNOTATION, value = Configuration.class) }
- * )
+ * &#064;ComponentScan(basePackageClasses = { MyConfiguration.class })
  * public class MyWebConfiguration {
  *
  * }
@@ -42,10 +39,7 @@ import org.springframework.context.annotation.Import;
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableWebMvc
- * &#064;ComponentScan(
- * 	basePackageClasses = { MyConfiguration.class },
- * 	excludeFilters = { @Filter(type = FilterType.ANNOTATION, value = Configuration.class) }
- * )
+ * &#064;ComponentScan(basePackageClasses = { MyConfiguration.class })
  * public class MyConfiguration extends WebMvcConfigurerAdapter {
  *
  * 	&#064;Override
@@ -59,7 +53,6 @@ import org.springframework.context.annotation.Import;
  * 	}
  *
  * 	// More overridden methods ...
- *
  * }
  * </pre>
  *
@@ -70,10 +63,7 @@ import org.springframework.context.annotation.Import;
  * 
  * <pre class="code">
  * &#064;Configuration
- * &#064;ComponentScan(
- * 	basePackageClasses = { MyConfiguration.class },
- * 	excludeFilters = { @Filter(type = FilterType.ANNOTATION, value = Configuration.class) }
- * )
+ * &#064;ComponentScan(basePackageClasses = { MyConfiguration.class })
  * public class MyConfiguration extends WebMvcConfigurationSupport {
  *
  * 	&#064;Override
@@ -86,7 +76,6 @@ import org.springframework.context.annotation.Import;
  *		// Create or delegate to "super" to create and
  *		// customize properties of RequestMapingHandlerAdapter
  *	}
- *
  * }
  * </pre>
  *
