@@ -200,7 +200,7 @@ public class CollectionToCollectionConverterTests {
 
 	@Test(expected=ConverterNotFoundException.class)
 	public void elementTypesNotConvertible() throws Exception {
-		List<Resource> resources = new ArrayList<Resource>();
+		List<String> resources = new ArrayList<String>();
 		resources.add(null);
 		resources.add(null);
 		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("strings")); 
