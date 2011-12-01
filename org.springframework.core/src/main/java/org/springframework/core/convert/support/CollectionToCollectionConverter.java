@@ -49,7 +49,8 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return ConversionUtils.canConvertElements(sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor(), conversionService);
+		return ConversionUtils.canConvertElements(
+				sourceType.getElementTypeDescriptor(), targetType.getElementTypeDescriptor(), this.conversionService);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -57,15 +58,25 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		if (source == null) {
 			return null;
 		}
+		boolean copyRequired = !targetType.getType().isInstance(source);
 		Collection<?> sourceCollection = (Collection<?>) source;
-		Collection target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
-		for (Object sourceElement : sourceCollection) {
-			Object targetElement = this.conversionService.convert(sourceElement,
-					sourceType.getElementTypeDescriptor(sourceElement),
-					targetType.getElementTypeDescriptor(sourceElement));
-			target.add(targetElement);
+		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
+		if (targetType.getElementTypeDescriptor() == null) {
+			for (Object element : sourceCollection) {
+				target.add(element);
+			}
 		}
-		return target;
+		else {
+			for (Object sourceElement : sourceCollection) {
+				Object targetElement = this.conversionService.convert(sourceElement,
+						sourceType.getElementTypeDescriptor(sourceElement), targetType.getElementTypeDescriptor());
+				target.add(targetElement);
+				if (sourceElement != targetElement) {
+					copyRequired = true;
+				}
+			}
+		}
+		return (copyRequired ? target : source);
 	}
 
 }

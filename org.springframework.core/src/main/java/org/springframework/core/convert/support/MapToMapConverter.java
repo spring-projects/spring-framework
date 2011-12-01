@@ -49,8 +49,7 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType.getMapKeyTypeDescriptor(), targetType.getMapKeyTypeDescriptor()) && 
-			this.conversionService.canConvert(sourceType.getMapValueTypeDescriptor(), targetType.getMapValueTypeDescriptor());
+		return canConvertKey(sourceType, targetType) && canConvertValue(sourceType, targetType);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -58,21 +57,46 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		if (source == null) {
 			return null;
 		}
-		Map<?, ?> sourceMap = (Map<?, ?>) source;
-		Map targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
-		for (Object entry : sourceMap.entrySet()) {
-			Map.Entry sourceMapEntry = (Map.Entry) entry;
-			Object sourceKey = sourceMapEntry.getKey();
-			Object sourceValue = sourceMapEntry.getValue();
-			Object targetKey = this.conversionService.convert(sourceKey,
-					sourceType.getMapKeyTypeDescriptor(sourceKey),
-					targetType.getMapKeyTypeDescriptor(sourceKey));
-			Object targetValue = this.conversionService.convert(sourceValue,
-					sourceType.getMapValueTypeDescriptor(sourceValue),
-					targetType.getMapValueTypeDescriptor(sourceValue));
+		boolean copyRequired = !targetType.getType().isInstance(source);
+		Map<Object, Object> sourceMap = (Map<Object, Object>) source;
+		Map<Object, Object> targetMap = CollectionFactory.createMap(targetType.getType(), sourceMap.size());
+		for (Map.Entry<Object, Object> entry : sourceMap.entrySet()) {
+			Object sourceKey = entry.getKey();
+			Object sourceValue = entry.getValue();
+			Object targetKey = convertKey(sourceKey, sourceType, targetType.getMapKeyTypeDescriptor());
+			Object targetValue = convertValue(sourceValue, sourceType, targetType.getMapValueTypeDescriptor());
 			targetMap.put(targetKey, targetValue);
+			if (sourceKey != targetKey || sourceValue != targetValue) {
+				copyRequired = true;
+			}
 		}
-		return targetMap;
+		return (copyRequired ? targetMap : sourceMap);
 	}
-	
+
+	// internal helpers
+
+	private boolean canConvertKey(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return ConversionUtils.canConvertElements(sourceType.getMapKeyTypeDescriptor(),
+				targetType.getMapKeyTypeDescriptor(), this.conversionService);
+	}
+
+	private boolean canConvertValue(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return ConversionUtils.canConvertElements(sourceType.getMapValueTypeDescriptor(),
+				targetType.getMapValueTypeDescriptor(), this.conversionService);
+	}
+
+	private Object convertKey(Object sourceKey, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (targetType == null) {
+			return sourceKey;
+		}
+		return this.conversionService.convert(sourceKey, sourceType.getMapKeyTypeDescriptor(sourceKey), targetType);
+	}
+
+	private Object convertValue(Object sourceValue, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (targetType == null) {
+			return sourceValue;
+		}
+		return this.conversionService.convert(sourceValue, sourceType.getMapValueTypeDescriptor(sourceValue), targetType);
+	}
+
 }

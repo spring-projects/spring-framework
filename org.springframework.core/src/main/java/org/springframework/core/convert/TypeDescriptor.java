@@ -281,7 +281,7 @@ public class TypeDescriptor {
 	 */
 	public TypeDescriptor getElementTypeDescriptor(Object element) {
 		TypeDescriptor elementType = getElementTypeDescriptor();
-		return (elementType != TypeDescriptor.UNKNOWN ? elementType : forObject(element));
+		return (!TypeDescriptor.UNKNOWN.equals(elementType) ? elementType : forObject(element));
 	}
 
 	/**
