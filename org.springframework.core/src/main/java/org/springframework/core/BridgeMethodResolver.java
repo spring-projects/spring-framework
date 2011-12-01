@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,14 +218,14 @@ public abstract class BridgeMethodResolver {
 	 * See also http://stas-blogspot.blogspot.com/2010/03/java-bridge-methods-explained.html
 	 * @return whether signatures match as described
 	 */
-	public static boolean isJava6VisibilityBridgeMethodPair(Method bridgeMethod, Method bridgedMethod) {
+	public static boolean isVisibilityBridgeMethodPair(Method bridgeMethod, Method bridgedMethod) {
 		Assert.isTrue(bridgeMethod != null);
 		Assert.isTrue(bridgedMethod != null);
 		if (bridgeMethod == bridgedMethod) {
 			return true;
 		}
-		return Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes())
-				&& bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType());
+		return Arrays.equals(bridgeMethod.getParameterTypes(), bridgedMethod.getParameterTypes()) &&
+				bridgeMethod.getReturnType().equals(bridgedMethod.getReturnType());
 	}
 
 
