@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ abstract class ServletAnnotationMappingUtils {
 	/**
 	 * Check whether the given request matches the specified parameter conditions.
 	 * @param params  the parameter conditions, following
-	 *                {@link org.springframework.web.bind.annotation.RequestMapping#params() RequestMapping.#params()}
+	 * {@link org.springframework.web.bind.annotation.RequestMapping#params() RequestMapping.#params()}
 	 * @param request the current HTTP request to check
 	 */
 	public static boolean checkParameters(String[] params, HttpServletRequest request) {
@@ -75,8 +75,12 @@ abstract class ServletAnnotationMappingUtils {
 					boolean negated = separator > 0 && param.charAt(separator - 1) == '!';
 					String key = !negated ? param.substring(0, separator) : param.substring(0, separator - 1);
 					String value = param.substring(separator + 1);
-					if (!value.equals(request.getParameter(key))) {
-						return negated;
+					boolean match = value.equals(request.getParameter(key));
+					if (negated) {
+						match = !match;
+					}
+					if (!match) {
+						return false;
 					}
 				}
 			}
@@ -87,7 +91,7 @@ abstract class ServletAnnotationMappingUtils {
 	/**
 	 * Check whether the given request matches the specified header conditions.
 	 * @param headers the header conditions, following
-	 *                {@link org.springframework.web.bind.annotation.RequestMapping#headers() RequestMapping.headers()}
+	 * {@link org.springframework.web.bind.annotation.RequestMapping#headers() RequestMapping.headers()}
 	 * @param request the current HTTP request to check
 	 */
 	public static boolean checkHeaders(String[] headers, HttpServletRequest request) {
@@ -105,7 +109,7 @@ abstract class ServletAnnotationMappingUtils {
 					}
 				}
 				else {
-					boolean negated = separator > 0 && header.charAt(separator - 1) == '!';
+					boolean negated = (separator > 0 && header.charAt(separator - 1) == '!');
 					String key = !negated ? header.substring(0, separator) : header.substring(0, separator - 1);
 					String value = header.substring(separator + 1);
 					if (isMediaTypeHeader(key)) {
@@ -123,12 +127,21 @@ abstract class ServletAnnotationMappingUtils {
 							}
 
 						}
+						if (negated) {
+							found = !found;
+						}
 						if (!found) {
-							return negated;
+							return false;
 						}
 					}
-					else if (!value.equals(request.getHeader(key))) {
-						return negated;
+					else {
+						boolean match = value.equals(request.getHeader(key));
+						if (negated) {
+							match = !match;
+						}
+						if (!match) {
+							return false;
+						}
 					}
 				}
 			}
