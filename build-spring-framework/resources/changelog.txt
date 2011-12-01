@@ -3,6 +3,12 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.1 GA (2011-12-12)
+--------------------------------------
+
+* fixed QuartzJobBean to work with Quartz 2.0/2.1 as well
+
+
 Changes in version 3.1 RC2 (2011-11-28)
 ---------------------------------------
 
@@ -17,6 +23,7 @@ Changes in version 3.1 RC2 (2011-11-28)
 * exposed EHCache 1.7's "statisticsEnabled"/"sampledStatisticsEnabled" on EhCacheFactoryBean
 * SpringValidatorAdapter accepts non-indexed set paths (for Hibernate Validator compatibility)
 * TransactionSynchronizationManager eagerly cleans up void ResourceHolders on any access
+* SimpleJdbcTestUtils executeSqlScript properly closes its LineNumberReader after use
 * JDO PersistenceManager synchronization performs close attempt after completion (if necessary)
 * JPA EntityManagerFactoryUtils silently ignores IllegalArgumentExceptions from setHint calls
 * fixed HibernateTransactionManager for Hibernate 4.0 to refer to correct openSession() method
@@ -25,7 +32,6 @@ Changes in version 3.1 RC2 (2011-11-28)
 * fixed MethodInvokingJobDetailFactoryBean's Quartz 2.0 support
 * added Quartz 2.1 compatibility while preserving Quartz 2.0 support
 * introduced JobDetail/CronTrigger/SimpleTriggerFactoryBean variants for Quartz 2.0/2.1 support
-* SimpleJdbcTestUtils executeSqlScript properly closes its LineNumberReader after use
 * added "forwarder" property to ConnectorServerFactoryBean, accepting an MBeanServerForwarder
 * RmiClientInterceptor detects nested SocketException as connect failure as well
 * fixed StandardServlet/PortletEnvironment to check for JNDI (for Google App Engine compatibility)
@@ -33,16 +39,17 @@ Changes in version 3.1 RC2 (2011-11-28)
 * using original request URI in FlashMap matching logic to account for URL rewriting
 * now supporting target request with multiple parameter values in FlashMap matching logic
 * fixed issue in SimpleMappingExceptionResolver causing exception when setting "statusCodes" property
-* form input tag now allows type values other than "text" such as HTML5-specific types
-* form hidden tag now supports "disabled" attribute
 * added ignoreDefaultModelOnRedirect attribute to <mvc:annotation-driven/>
 * added methods to UriComponentsBuilder for replacing the path or the query
 * support UriComponentsBuilder as @Controller method argument
 * added ServletUriComponentsBuilder to build a UriComponents instance starting with a ServletRequest
 * fixed issue with cache ignoring prototype-scoped controllers in RequestMappingHandlerAdapter
 * fixed issue with setting Content-Length header depending on the charset of the response
+* fixed @RequestMapping header matching to correctly process negated header conditions
 * added getObjectMapper() accessor to MappingJacksonHttpMessageConverter
 * AbstractCachingViewResolver caches unresolved view names by default ("cacheUnresolved"=true)
+* form input tag now allows type values other than "text" such as HTML5-specific types
+* form hidden tag now supports "disabled" attribute
 * fixed "formMultiSelect"/"formCheckboxes" FreeMarker macros to compare against actual field value
 * MockHttpServletRequest/Response now keep contentType field and Content-Type header in sync
 * updated Spring MVC configuration section to include MVC Java config and the MVC namespace
@@ -60,6 +67,7 @@ Changes in version 3.1 RC1 (2011-10-11)
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
 * introduced ForkJoinPoolFactoryBean for Java 7 (alternative: add new jsr166.jar to Java 6)
 * introduced extended WritableResource interface
+* CollectionCollection/MapToMapConverter preserve original Collection/Map if no converted elements
 * DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
 * DefaultListableBeanFactory's getBean(name, type) attempts type conversion if necessary
 * DefaultListableBeanFactory allows for init methods to register further bean definitions (again)
@@ -92,6 +100,8 @@ Changes in version 3.1 RC1 (2011-10-11)
 * JpaTransactionManager etc can find EntityManagerFactory by "persistenceUnitName" property now
 * HibernateJpaDialect exposes underlying Session for underlying SessionFactory
 * deprecated JpaTemplate/JpaInterceptor/JpaDaoSupport and JdoTemplate/JdoInterceptor/JdoDaoSupport
+* updated H2 error codes in sql-error-codes.xml
+* fixed NamedParameterJdbcTemplate to use correct maximum type for queryForInt/Long
 * jdbc:script's "separator" and "execution" attributes work nested with embedded-database as well
 * added "encoding" attribute to jdbc:script element
 * JavaMailSenderImpl detects and respects "mail.transport.protocol" property in existing Session
