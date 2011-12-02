@@ -428,6 +428,10 @@ public class GenericConversionService implements ConversionService, ConverterReg
 			return Collections.singleton(this.typeInfo);
 		}
 
+		public boolean matchesTargetType(TypeDescriptor targetType) {
+			return this.typeInfo.getTargetType().equals(targetType.getObjectType());
+		}
+
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (source == null) {
 				return convertNullSource(sourceType, targetType);
@@ -496,6 +500,12 @@ public class GenericConversionService implements ConversionService, ConverterReg
 					if (conditional.matches(sourceType, targetType)) {
 						return conditional;
 					}
+				}
+			}
+			if (this.defaultConverter instanceof ConverterAdapter) {
+				ConverterAdapter adapter = (ConverterAdapter) this.defaultConverter;
+				if (!adapter.matchesTargetType(targetType)) {
+					return null;
 				}
 			}
 			return this.defaultConverter;

@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import java.awt.Color;
+import java.awt.SystemColor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -136,6 +138,18 @@ public class GenericConversionServiceTests {
 		});
 		Integer result = conversionService.convert("3", Integer.class);
 		assertEquals(new Integer(3), result);
+	}
+
+	// SPR-8718
+
+	@Test(expected=ConverterNotFoundException.class)
+	public void convertSuperTarget() {
+		conversionService.addConverter(new ColorConverter());
+		conversionService.convert("#000000", SystemColor.class).getClass();
+	}
+
+	public class ColorConverter implements Converter<String, Color> {
+		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
 	}
 
 	@Test
