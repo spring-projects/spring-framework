@@ -30,6 +30,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.FileCopyUtils;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -38,11 +42,8 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.FileCopyUtils;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractHttpRequestFactoryTestCase {
 
@@ -233,16 +234,9 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 
 	private static class EchoServlet extends HttpServlet {
 
-		@Override
-		protected void doPut(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-			echo(request, response);
-		}
-
-		@Override
-		protected void doPost(HttpServletRequest request, HttpServletResponse response)
-				throws ServletException, IOException {
-			echo(request, response);
+        @Override
+        protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			echo(req, resp);
 		}
 
 		private void echo(HttpServletRequest request, HttpServletResponse response) throws IOException {

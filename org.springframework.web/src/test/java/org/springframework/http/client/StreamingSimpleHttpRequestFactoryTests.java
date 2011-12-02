@@ -22,15 +22,15 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.Random;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 
-import static org.junit.Assert.*;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class StreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
@@ -58,7 +58,7 @@ public class StreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestF
 
 		ClientHttpResponse response = null;
 		try {
-			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.POST);
+			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.GET);
 			response = request.execute();
 			assertEquals("Invalid response status", HttpStatus.OK, response.getStatusCode());
 			HttpHeaders responseHeaders = response.getHeaders();
