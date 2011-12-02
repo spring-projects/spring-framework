@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-20011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import javax.portlet.PortletContext;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.ITestBean;
@@ -37,6 +35,9 @@ import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.mock.web.portlet.MockPortletSession;
 import org.springframework.web.util.WebUtils;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
@@ -374,7 +375,7 @@ public final class PortletUtilsTests {
 	public void testGetSessionMutexWithExistingSessionMutexReturnsTheExistingSessionMutex() throws Exception {
 		MockPortletSession session = new MockPortletSession();
 		Object expectSessionMutex = new Object();
-		session.setAttribute(WebUtils.SESSION_MUTEX_ATTRIBUTE, expectSessionMutex);
+		session.setAttribute(WebUtils.SESSION_MUTEX_ATTRIBUTE, expectSessionMutex, PortletSession.APPLICATION_SCOPE);
 		Object actualSessionMutex = PortletUtils.getSessionMutex(session);
 		assertNotNull("PortletUtils.getSessionMutex(..) must never return a null mutex", actualSessionMutex);
 		assertSame("PortletUtils.getSessionMutex(..) must return the bound mutex attribute if a mutex has been bound as a Session attribute beforehand",
