@@ -29,10 +29,10 @@ import javax.portlet.PortletContext;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletRequestDispatcher;
+import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
-import javax.portlet.PortletResponse;
 import javax.portlet.filter.PortletRequestWrapper;
 import javax.portlet.filter.PortletResponseWrapper;
 import javax.servlet.http.Cookie;
@@ -271,7 +271,7 @@ public abstract class PortletUtils {
 	 */
 	public static Object getSessionMutex(PortletSession session) {
 		Assert.notNull(session, "Session must not be null");
-		Object mutex = session.getAttribute(WebUtils.SESSION_MUTEX_ATTRIBUTE);
+		Object mutex = session.getAttribute(WebUtils.SESSION_MUTEX_ATTRIBUTE, PortletSession.APPLICATION_SCOPE);
 		if (mutex == null) {
 			mutex = session;
 		}
