@@ -131,6 +131,8 @@ class TypeConverterDelegate {
 		// Custom editor for this type?
 		PropertyEditor editor = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
 
+		ConversionFailedException firstAttemptEx = null;
+
 		// No custom editor but custom ConversionService specified?
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
 		if (editor == null && conversionService != null && convertedValue != null && typeDescriptor != null) {
@@ -139,8 +141,10 @@ class TypeConverterDelegate {
 			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
 				try {
 					return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
-				} catch (ConversionFailedException e) {
+				}
+				catch (ConversionFailedException ex) {
 					// fallback to default conversion logic below
+					firstAttemptEx = ex;
 				}
 			}
 		}
@@ -216,6 +220,9 @@ class TypeConverterDelegate {
 			}
 
 			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
+				if (firstAttemptEx != null) {
+					throw firstAttemptEx;
+				}
 				// Definitely doesn't match: throw IllegalArgumentException/IllegalStateException
 				StringBuilder msg = new StringBuilder();
 				msg.append("Cannot convert value of type [").append(ClassUtils.getDescriptiveType(newValue));
@@ -234,6 +241,11 @@ class TypeConverterDelegate {
 					throw new IllegalStateException(msg.toString());
 				}
 			}
+		}
+
+		if (firstAttemptEx != null) {
+			logger.debug("Original ConversionService attempt failed - ignored since " +
+					"PropertyEditor based conversion eventually succeeded", firstAttemptEx);
 		}
 
 		return (T) convertedValue;
@@ -524,7 +536,7 @@ class TypeConverterDelegate {
 			Object element = it.next();
 			String indexedPropertyName = buildIndexedPropertyName(propertyName, i);
 			Object convertedElement = convertIfNecessary(indexedPropertyName, null, element,
-					(elementType != null ? elementType.getType() : null) , typeDescriptor.getElementTypeDescriptor());
+					(elementType != null ? elementType.getType() : null) , elementType);
 			try {
 				convertedCopy.add(convertedElement);
 			}
@@ -608,9 +620,9 @@ class TypeConverterDelegate {
 			Object value = entry.getValue();
 			String keyedPropertyName = buildKeyedPropertyName(propertyName, key);
 			Object convertedKey = convertIfNecessary(keyedPropertyName, null, key,
-					(keyType != null ? keyType.getType() : null), typeDescriptor.getMapKeyTypeDescriptor());
+					(keyType != null ? keyType.getType() : null), keyType);
 			Object convertedValue = convertIfNecessary(keyedPropertyName, null, value,
-					(valueType!= null ? valueType.getType() : null), typeDescriptor.getMapValueTypeDescriptor());
+					(valueType!= null ? valueType.getType() : null), valueType);
 			try {
 				convertedCopy.put(convertedKey, convertedValue);
 			}
