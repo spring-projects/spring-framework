@@ -718,7 +718,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	public void validate(Object... validationHints) {
 		Validator validator = getValidator();
-		if (validator instanceof SmartValidator) {
+		if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator) {
 			((SmartValidator) validator).validate(getTarget(), getBindingResult(), validationHints);
 		}
 		else if (validator != null) {
