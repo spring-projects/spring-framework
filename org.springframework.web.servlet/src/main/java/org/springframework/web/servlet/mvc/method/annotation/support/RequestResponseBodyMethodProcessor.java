@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -64,43 +65,30 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		return returnType.getMethodAnnotation(ResponseBody.class) != null;
 	}
 
-	public Object resolveArgument(MethodParameter parameter,
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest,
-								  WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+
 		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getParameterType());
-		if (isValidationApplicable(arg, parameter)) {
-			String name = Conventions.getVariableNameForParameter(parameter);
-			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
-			binder.validate();
-			BindingResult bindingResult = binder.getBindingResult();
-			if (bindingResult.hasErrors()) {
-				throw new MethodArgumentNotValidException(parameter, bindingResult);
+		Annotation[] annotations = parameter.getParameterAnnotations();
+		for (Annotation annot : annotations) {
+			if ("Valid".equals(annot.annotationType().getSimpleName())) {
+				String name = Conventions.getVariableNameForParameter(parameter);
+				WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
+				Object hints = AnnotationUtils.getValue(annot);
+				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+				BindingResult bindingResult = binder.getBindingResult();
+				if (bindingResult.hasErrors()) {
+					throw new MethodArgumentNotValidException(parameter, bindingResult);
+				}
 			}
 		}
 		return arg;
 	}
 
-	/**
-	 * Whether to validate the given {@code @RequestBody} method argument. 
-	 * The default implementation looks for {@code @javax.validation.Valid}.
-	 * @param argument the resolved argument value
-	 * @param parameter the method argument
-	 */
-	protected boolean isValidationApplicable(Object argument, MethodParameter parameter) {
-		Annotation[] annotations = parameter.getParameterAnnotations();
-		for (Annotation annot : annotations) {
-			if ("Valid".equals(annot.annotationType().getSimpleName())) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public void handleReturnValue(Object returnValue,
-								  MethodParameter returnType,
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest) throws IOException, HttpMediaTypeNotAcceptableException {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
+			throws IOException, HttpMediaTypeNotAcceptableException {
+
 		mavContainer.setRequestHandled(true);
 		if (returnValue != null) {
 			writeWithMessageConverters(returnValue, returnType, webRequest);

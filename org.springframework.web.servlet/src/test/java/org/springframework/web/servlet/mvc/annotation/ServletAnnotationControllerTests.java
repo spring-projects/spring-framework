@@ -16,14 +16,6 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.io.Serializable;
@@ -38,16 +30,17 @@ import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -55,11 +48,11 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Test;
+
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -67,6 +60,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.GenericBean;
 import org.springframework.beans.ITestBean;
+import org.springframework.beans.PropertyEditorRegistrar;
+import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +103,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Valid;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -141,6 +137,8 @@ import org.springframework.web.servlet.mvc.support.ControllerClassNameHandlerMap
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.NestedServletException;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -1718,6 +1716,61 @@ public class ServletAnnotationControllerTests {
 		assertEquals("templatePath", response.getContentAsString());
 	}
 
+	@Test
+	public void testMatchWithoutMethodLevelPath() throws Exception {
+		initServlet(NoPathGetAndM2PostController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/t1/m2");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(405, response.getStatus());
+	}
+
+	// SPR-8536
+
+	@Test
+	public void testHeadersCondition() throws Exception {
+		initServlet(HeadersConditionController.class);
+
+		// No "Accept" header
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("home", response.getForwardedUrl());
+
+		// Accept "*/*"
+		request = new MockHttpServletRequest("GET", "/");
+		request.addHeader("Accept", "*/*");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("home", response.getForwardedUrl());
+
+		// Accept "application/json"
+		request = new MockHttpServletRequest("GET", "/");
+		request.addHeader("Accept", "application/json");
+		response = new MockHttpServletResponse();
+		servlet.service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("application/json", response.getHeader("Content-Type"));
+		assertEquals("homeJson", response.getContentAsString());
+	}
+
+	@Test
+	public void redirectAttribute() throws Exception {
+		initServlet(RedirectAttributesController.class);
+		try {
+			servlet.service(new MockHttpServletRequest("GET", "/"), new MockHttpServletResponse());
+		}
+		catch (NestedServletException ex) {
+			assertTrue(ex.getMessage().contains("not assignable from the actual model"));
+		}
+	}
+
 	/*
 	 * See SPR-6021
 	 */
@@ -1868,60 +1921,59 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
-	public void testMatchWithoutMethodLevelPath() throws Exception {
-		initServlet(NoPathGetAndM2PostController.class);
+	public void parameterCsvAsIntegerSetWithCustomSeparator() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(CsvController.class));
+				RootBeanDefinition csDef = new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
+				RootBeanDefinition wbiDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
+				wbiDef.getPropertyValues().add("conversionService", csDef);
+				wbiDef.getPropertyValues().add("propertyEditorRegistrars", new RootBeanDefinition(ListEditorRegistrar.class));
+				RootBeanDefinition adapterDef = new RootBeanDefinition(AnnotationMethodHandlerAdapter.class);
+				adapterDef.getPropertyValues().add("webBindingInitializer", wbiDef);
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/t1/m2");
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setRequestURI("/integerSet");
+		request.setMethod("POST");
+		request.addParameter("content", "1;2");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals(405, response.getStatus());
+		assertEquals("1-2", response.getContentAsString());
 	}
-	
-	// SPR-8536
 
-	@Test
-	public void testHeadersCondition() throws Exception {
-		initServlet(HeadersConditionController.class);
+	public static class ListEditorRegistrar implements PropertyEditorRegistrar {
 
-		// No "Accept" header
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
-		MockHttpServletResponse response = new MockHttpServletResponse();
-		servlet.service(request, response);
-		
-		assertEquals(200, response.getStatus());
-		assertEquals("home", response.getForwardedUrl());
-
-		// Accept "*/*"
-		request = new MockHttpServletRequest("GET", "/");
-		request.addHeader("Accept", "*/*");
-		response = new MockHttpServletResponse();
-		servlet.service(request, response);
-
-		assertEquals(200, response.getStatus());
-		assertEquals("home", response.getForwardedUrl());
-
-		// Accept "application/json"
-		request = new MockHttpServletRequest("GET", "/");
-		request.addHeader("Accept", "application/json");
-		response = new MockHttpServletResponse();
-		servlet.service(request, response);
-		
-		assertEquals(200, response.getStatus());
-		assertEquals("application/json", response.getHeader("Content-Type"));
-		assertEquals("homeJson", response.getContentAsString());
-	}	
-
-	@Test
-	public void redirectAttribute() throws Exception {
-		initServlet(RedirectAttributesController.class);
-		try {
-			servlet.service(new MockHttpServletRequest("GET", "/"), new MockHttpServletResponse());
-		}
-		catch (NestedServletException ex) {
-			assertTrue(ex.getMessage().contains("not assignable from the actual model"));
+		public void registerCustomEditors(PropertyEditorRegistry registry) {
+			registry.registerCustomEditor(Set.class, new ListEditor());
 		}
 	}
-	
+
+	public static class ListEditor extends PropertyEditorSupport {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public String getAsText() {
+			return StringUtils.collectionToDelimitedString((Collection<String>) getValue(), ";");
+		}
+
+		@Override
+		public void setAsText(String text) throws IllegalArgumentException {
+			Set<String> s = new LinkedHashSet<String>();
+			for (String t : text.split(";")) {
+			  s.add(t);
+			}
+			setValue(s);
+		}
+	}
+
 
 	/*
 	 * Controllers
@@ -2226,7 +2278,7 @@ public class ServletAnnotationControllerTests {
 
 	public static class ValidTestBean extends TestBean {
 
-		@NotNull
+		@NotNull(groups = MyGroup.class)
 		private String validCountry;
 
 		public void setValidCountry(String validCountry) {
@@ -2264,9 +2316,7 @@ public class ServletAnnotationControllerTests {
 
 		@SuppressWarnings("unused")
 		@ModelAttribute("myCommand")
-		private ValidTestBean createTestBean(@RequestParam T defaultName,
-				Map<String, Object> model,
-				@RequestParam Date date) {
+		private ValidTestBean createTestBean(@RequestParam T defaultName, Map<String, Object> model, @RequestParam Date date) {
 			model.put("myKey", "myOriginalValue");
 			ValidTestBean tb = new ValidTestBean();
 			tb.setName(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
@@ -2275,7 +2325,7 @@ public class ServletAnnotationControllerTests {
 
 		@Override
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") @Valid TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute("myCommand") @Valid(MyGroup.class) TestBean tb, BindingResult errors, ModelMap model) {
 			if (!errors.hasFieldErrors("validCountry")) {
 				throw new IllegalStateException("Declarative validation not applied");
 			}
@@ -2333,7 +2383,7 @@ public class ServletAnnotationControllerTests {
 
 		@Override
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") @Valid TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute("myCommand") @Valid(MyGroup.class) TestBean tb, BindingResult errors, ModelMap model) {
 			if (!errors.hasFieldErrors("sex")) {
 				throw new IllegalStateException("requiredFields not applied");
 			}
@@ -2358,6 +2408,10 @@ public class ServletAnnotationControllerTests {
 			dateFormat.setLenient(false);
 			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 		}
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyGroup {
 	}
 
 	private static class MyWebBindingInitializer implements WebBindingInitializer {

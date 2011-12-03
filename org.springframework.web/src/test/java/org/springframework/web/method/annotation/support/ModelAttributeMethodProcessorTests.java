@@ -141,16 +141,6 @@ public class ModelAttributeMethodProcessorTests {
 	}
 	
 	@Test
-	public void validationApplicable() throws Exception {
-		assertTrue(processor.isValidationApplicable(null, paramNamedValidModelAttr));
-	}
-	
-	@Test
-	public void validationNotApplicable() throws Exception {
-		assertFalse(processor.isValidationApplicable(null, paramNonSimpleType));
-	}
-
-	@Test
 	public void bindExceptionRequired() throws Exception {
 		assertTrue(processor.isBindExceptionRequired(null, paramNonSimpleType));
 	}
