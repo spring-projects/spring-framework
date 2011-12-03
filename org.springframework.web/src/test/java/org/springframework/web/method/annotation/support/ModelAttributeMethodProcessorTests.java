@@ -16,29 +16,13 @@
 
 package org.springframework.web.method.annotation.support;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.notNull;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.TestBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -53,6 +37,11 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link ModelAttributeMethodProcessor}.
@@ -252,6 +241,10 @@ public class ModelAttributeMethodProcessorTests {
 		}
 
 		public void validate() {
+			validateInvoked = true;
+		}
+
+		public void validate(Object... validationHints) {
 			validateInvoked = true;
 		}
 	}

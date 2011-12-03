@@ -135,20 +135,22 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			try {
 				HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, partName);
 				arg = readWithMessageConverters(inputMessage, parameter, parameter.getParameterType());
-				Annotation[] annotations = parameter.getParameterAnnotations();
-				for (Annotation annot : annotations) {
-					if ("Valid".equals(annot.annotationType().getSimpleName())) {
-						WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
-						Object hints = AnnotationUtils.getValue(annot);
-						binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-						BindingResult bindingResult = binder.getBindingResult();
-						if (bindingResult.hasErrors()) {
-							throw new MethodArgumentNotValidException(parameter, bindingResult);
+				if (arg != null) {
+					Annotation[] annotations = parameter.getParameterAnnotations();
+					for (Annotation annot : annotations) {
+						if ("Valid".equals(annot.annotationType().getSimpleName())) {
+							WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
+							Object hints = AnnotationUtils.getValue(annot);
+							binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+							BindingResult bindingResult = binder.getBindingResult();
+							if (bindingResult.hasErrors()) {
+								throw new MethodArgumentNotValidException(parameter, bindingResult);
+							}
 						}
 					}
 				}
 			}
-			catch (MissingServletRequestPartException e) {
+			catch (MissingServletRequestPartException ex) {
 				// handled below
 				arg = null;
 			}
@@ -192,27 +194,6 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			}
 		}
 		return false;
-	}
-	
-	/**
-	 * Whether to validate the given {@code @RequestPart} method argument. 
-	 * The default implementation looks for {@code @javax.validation.Valid}.
-	 * @param argument the resolved argument value
-	 * @param parameter the method argument
-	 */
-	protected boolean isValidationApplicable(Object argument, MethodParameter parameter) {
-		if (argument == null) {
-			return false;
-		}
-		else {
-			Annotation[] annotations = parameter.getParameterAnnotations();
-			for (Annotation annot : annotations) {
-				if ("Valid".equals(annot.annotationType().getSimpleName())) {
-					return true;
-				}
-			}
-			return false;
-		}
 	}
 
 }
