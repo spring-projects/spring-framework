@@ -33,8 +33,8 @@ import java.lang.annotation.Target;
  * @since 2.5
  * @see Autowired
  */
-@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 public @interface Qualifier {
