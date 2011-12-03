@@ -20,8 +20,10 @@ import java.lang.annotation.Annotation;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
@@ -100,14 +102,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				mavContainer.getModel().get(name) : createAttribute(name, parameter, binderFactory, request);
 
 		WebDataBinder binder = binderFactory.createBinder(request, target, name);
-
 		if (binder.getTarget() != null) {
 			bindRequestParameters(binder, request);
-			
-			if (isValidationApplicable(binder.getTarget(), parameter)) {
-				binder.validate();
-			}
-			
+			validateIfApplicable(binder, parameter);
 			if (binder.getBindingResult().hasErrors()) {
 				if (isBindExceptionRequired(binder, parameter)) {
 					throw new BindException(binder.getBindingResult());
@@ -116,7 +113,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		}
 
 		mavContainer.addAllAttributes(binder.getBindingResult().getModel());
-
 		return binder.getTarget();
 	}
 
@@ -129,10 +125,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @param request the current request
 	 * @return the created model attribute, never {@code null}
 	 */
-	protected Object createAttribute(String attributeName, 
-									 MethodParameter parameter, 
-									 WebDataBinderFactory binderFactory, 
-									 NativeWebRequest request) throws Exception {
+	protected Object createAttribute(String attributeName, MethodParameter parameter,
+			WebDataBinderFactory binderFactory,  NativeWebRequest request) throws Exception {
+
 		return BeanUtils.instantiateClass(parameter.getParameterType());
 	}
 	
@@ -146,19 +141,19 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	}
 
 	/**
-	 * Whether to validate the model attribute.
-	 * The default implementation checks for {@code @javax.validation.Valid}. 
-	 * @param modelAttribute the model attribute
-	 * @param parameter the method argument
+	 * Validate the model attribute if applicable.
+	 * <p>The default implementation checks for {@code @javax.validation.Valid}.
+	 * @param binder the DataBinder to be used
+	 * @param parameter the method parameter
 	 */
-	protected boolean isValidationApplicable(Object modelAttribute, MethodParameter parameter) {
+	protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation annot : annotations) {
 			if ("Valid".equals(annot.annotationType().getSimpleName())) {
-				return true;
+				Object hints = AnnotationUtils.getValue(annot);
+				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
 			}
 		}
-		return false;
 	}
 
 	/**
