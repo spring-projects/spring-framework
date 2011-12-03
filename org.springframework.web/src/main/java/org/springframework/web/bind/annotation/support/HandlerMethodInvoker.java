@@ -34,6 +34,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.BridgeMethodResolver;
@@ -251,6 +252,7 @@ public class HandlerMethodInvoker {
 			boolean required = false;
 			String defaultValue = null;
 			boolean validate = false;
+			Object[] validationHints = null;
 			int annotationsFound = 0;
 			Annotation[] paramAnns = methodParam.getParameterAnnotations();
 
@@ -295,6 +297,8 @@ public class HandlerMethodInvoker {
 				}
 				else if ("Valid".equals(paramAnn.annotationType().getSimpleName())) {
 					validate = true;
+					Object value = AnnotationUtils.getValue(paramAnn);
+					validationHints = (value instanceof Object[] ? (Object[]) value : new Object[] {value});
 				}
 			}
 
@@ -360,7 +364,7 @@ public class HandlerMethodInvoker {
 						resolveModelAttribute(attrName, methodParam, implicitModel, webRequest, handler);
 				boolean assignBindingResult = (args.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 				if (binder.getTarget() != null) {
-					doBind(binder, webRequest, validate, !assignBindingResult);
+					doBind(binder, webRequest, validate, validationHints, !assignBindingResult);
 				}
 				args[i] = binder.getTarget();
 				if (assignBindingResult) {
@@ -803,12 +807,12 @@ public class HandlerMethodInvoker {
 		return new WebRequestDataBinder(target, objectName);
 	}
 
-	private void doBind(WebDataBinder binder, NativeWebRequest webRequest, boolean validate, boolean failOnErrors)
-			throws Exception {
+	private void doBind(WebDataBinder binder, NativeWebRequest webRequest, boolean validate,
+			Object[] validationHints, boolean failOnErrors) throws Exception {
 
 		doBind(binder, webRequest);
 		if (validate) {
-			binder.validate();
+			binder.validate(validationHints);
 		}
 		if (failOnErrors && binder.getBindingResult().hasErrors()) {
 			throw new BindException(binder.getBindingResult());

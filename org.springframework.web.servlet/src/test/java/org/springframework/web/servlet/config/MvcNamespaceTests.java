@@ -16,24 +16,18 @@
 
 package org.springframework.web.servlet.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
 import javax.servlet.RequestDispatcher;
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -53,6 +47,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Valid;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -74,6 +69,8 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -453,12 +450,8 @@ public class MvcNamespaceTests {
 		private boolean recordedValidationError;
 		
 		@RequestMapping
-		public void testBind(@RequestParam @DateTimeFormat(iso=ISO.DATE) Date date, @Valid TestBean bean, BindingResult result) {
-			if (result.getErrorCount() == 1) {
-				this.recordedValidationError = true;
-			} else {
-				this.recordedValidationError = false;
-			}
+		public void testBind(@RequestParam @DateTimeFormat(iso=ISO.DATE) Date date, @Valid(MyGroup.class) TestBean bean, BindingResult result) {
+			this.recordedValidationError = (result.getErrorCount() == 1);
 		}
 	}
 	
@@ -475,9 +468,13 @@ public class MvcNamespaceTests {
 		}
 	}
 	
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyGroup {
+	}
+
 	private static class TestBean {
 		
-		@NotNull
+		@NotNull(groups=MyGroup.class)
 		private String field;
 
 		@SuppressWarnings("unused")

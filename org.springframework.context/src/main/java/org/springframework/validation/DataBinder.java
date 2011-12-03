@@ -706,8 +706,22 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #getBindingResult()
 	 */
 	public void validate() {
+		this.validator.validate(getTarget(), getBindingResult());
+	}
+
+	/**
+	 * Invoke the specified Validator, if any, with the given validation hints.
+	 * <p>Note: Validation hints may get ignored by the actual target Validator.
+	 * @param validationHints one or more hint objects to be passed to a {@link SmartValidator}
+	 * @see #setValidator(Validator)
+	 * @see SmartValidator#validate(Object, Errors, Object...)
+	 */
+	public void validate(Object... validationHints) {
 		Validator validator = getValidator();
-		if (validator != null) {
+		if (validator instanceof SmartValidator) {
+			((SmartValidator) validator).validate(getTarget(), getBindingResult(), validationHints);
+		}
+		else if (validator != null) {
 			validator.validate(getTarget(), getBindingResult());
 		}
 	}

@@ -19,11 +19,11 @@ package org.springframework.web.servlet.mvc.method.annotation.support;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
@@ -106,14 +106,12 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		}
 	}
 
-	public Object resolveArgument(MethodParameter parameter, 
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest request, 
-								  WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
 
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 		if (!isMultipartRequest(servletRequest)) {
-			throw new MultipartException("The current request is not a multipart request.");
+			throw new MultipartException("The current request is not a multipart request");
 		}
 		
 		MultipartHttpServletRequest multipartRequest = 
@@ -137,15 +135,19 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			try {
 				HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, partName);
 				arg = readWithMessageConverters(inputMessage, parameter, parameter.getParameterType());
-				if (isValidationApplicable(arg, parameter)) {
-					WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
-					binder.validate();
-					BindingResult bindingResult = binder.getBindingResult();
-					if (bindingResult.hasErrors()) {
-						throw new MethodArgumentNotValidException(parameter, bindingResult);
+				Annotation[] annotations = parameter.getParameterAnnotations();
+				for (Annotation annot : annotations) {
+					if ("Valid".equals(annot.annotationType().getSimpleName())) {
+						WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
+						Object hints = AnnotationUtils.getValue(annot);
+						binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+						BindingResult bindingResult = binder.getBindingResult();
+						if (bindingResult.hasErrors()) {
+							throw new MethodArgumentNotValidException(parameter, bindingResult);
+						}
 					}
 				}
-			} 
+			}
 			catch (MissingServletRequestPartException e) {
 				// handled below
 				arg = null;
@@ -153,7 +155,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		}
 
 		RequestPart annot = parameter.getParameterAnnotation(RequestPart.class);
-		boolean isRequired = (annot != null) ? annot.required() : true;
+		boolean isRequired = (annot == null || annot.required());
 
 		if (arg == null && isRequired) {
 			throw new MissingServletRequestPartException(partName);

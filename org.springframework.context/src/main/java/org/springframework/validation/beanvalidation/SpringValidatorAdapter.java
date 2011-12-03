@@ -17,6 +17,7 @@
 package org.springframework.validation.beanvalidation;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-import org.springframework.validation.Validator;
+import org.springframework.validation.SmartValidator;
 
 /**
  * Adapter that takes a JSR-303 <code>javax.validator.Validator</code>
@@ -46,7 +47,7 @@ import org.springframework.validation.Validator;
  * @author Juergen Hoeller
  * @since 3.0
  */
-public class SpringValidatorAdapter implements Validator, javax.validation.Validator {
+public class SpringValidatorAdapter implements SmartValidator, javax.validation.Validator {
 
 	private static final Set<String> internalAnnotationAttributes = new HashSet<String>(3);
 
@@ -85,8 +86,29 @@ public class SpringValidatorAdapter implements Validator, javax.validation.Valid
 	}
 
 	public void validate(Object target, Errors errors) {
-		Set<ConstraintViolation<Object>> result = this.targetValidator.validate(target);
-		for (ConstraintViolation<Object> violation : result) {
+		processConstraintViolations(this.targetValidator.validate(target), errors);
+	}
+
+	public void validate(Object target, Errors errors, Object[] validationHints) {
+		Set<Class> groups = new LinkedHashSet<Class>();
+		if (validationHints != null) {
+			for (Object hint : validationHints) {
+				if (hint instanceof Class) {
+					groups.add((Class) hint);
+				}
+			}
+		}
+		processConstraintViolations(this.targetValidator.validate(target, groups.toArray(new Class[groups.size()])), errors);
+	}
+
+	/**
+	 * Process the given JSR-303 ConstraintViolations, adding corresponding errors to
+	 * the provided Spring {@link Errors} object.
+	 * @param violations the JSR-303 ConstraintViolation results
+	 * @param errors the Spring errors object to register to
+	 */
+	protected void processConstraintViolations(Set<ConstraintViolation<Object>> violations, Errors errors) {
+		for (ConstraintViolation<Object> violation : violations) {
 			String field = violation.getPropertyPath().toString();
 			FieldError fieldError = errors.getFieldError(field);
 			if (fieldError == null || !fieldError.isBindingFailure()) {

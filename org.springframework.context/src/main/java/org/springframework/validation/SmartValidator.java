@@ -1,0 +1,47 @@
+/*
+ * Copyright 2002-2011 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.validation;
+
+/**
+ * Extended variant of the {@link Validator} interface, adding support for
+ * validation 'hints'.
+ *
+ * @author Juergen Hoeller
+ * @since 3.1
+ */
+public interface SmartValidator extends Validator {
+
+	/**
+	 * Validate the supplied <code>target</code> object, which must be
+	 * of a {@link Class} for which the {@link #supports(Class)} method
+	 * typically has (or would) return <code>true</code>.
+	 * <p>The supplied {@link Errors errors} instance can be used to report
+	 * any resulting validation errors.
+	 * <p><b>This variant of <code>validate</code> supports validation hints,
+	 * such as validation groups against a JSR-303 provider</b> (in this case,
+	 * the provided hint objects need to be annotation arguments of type Class).
+	 * <p>Note: Validation hints may get ignored by the actual target Validator,
+	 * in which case this method is supposed to be behave just like its regular
+	 * {@link #validate(Object, Errors)} sibling.
+	 * @param target the object that is to be validated (can be <code>null</code>)
+	 * @param errors contextual state about the validation process (never <code>null</code>)
+	 * @param validationHints one or more hint objects to be passed to the validation engine
+	 * @see ValidationUtils
+	 */
+	void validate(Object target, Errors errors, Object... validationHints);
+
+}
