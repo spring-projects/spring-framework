@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,13 +32,25 @@ import java.lang.annotation.Target;
  * <p>A common use case is to assign default field values using
  * "#{systemProperties.myProp}" style expressions.
  *
+ * <p>Note that actual processing of the {@code @Value} annotation is performed
+ * by a {@link org.springframework.beans.factory.config.BeanPostProcessor
+ * BeanPostProcessor} which in turn means that you <em>cannot</em> use
+ * {@code @Value} within
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor
+ * BeanPostProcessor} or {@link BeanFactoryPostProcessor} types. Please
+ * consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
+ * class (which, by default, checks for the presence of this annotation).
+ *
  * @author Juergen Hoeller
  * @since 3.0
+ * @see AutowiredAnnotationBeanPostProcessor
+ * @see Autowired
  * @see org.springframework.beans.factory.config.BeanExpressionResolver
  * @see org.springframework.beans.factory.support.AutowireCandidateResolver#getSuggestedValue
  */
-@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface Value {
 
 	/**

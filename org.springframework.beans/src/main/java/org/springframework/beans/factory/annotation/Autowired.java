@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -46,16 +47,25 @@ import java.lang.annotation.Target;
  * declared value type. In case of a Map, the keys must be declared as
  * type String and will be resolved to the corresponding bean names.
  *
- * <p>Please do consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
+ * <p>Note that actual injection is performed through a
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor
+ * BeanPostProcessor} which in turn means that you <em>cannot</em>
+ * use {@code @Autowired} to inject references into
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor
+ * BeanPostProcessor} or {@link BeanFactoryPostProcessor} types. Please
+ * consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
  * class (which, by default, checks for the presence of this annotation).
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @since 2.5
  * @see AutowiredAnnotationBeanPostProcessor
+ * @see Qualifier
+ * @see Value
  */
-@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface Autowired {
 
 	/**
