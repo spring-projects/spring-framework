@@ -507,6 +507,13 @@ public abstract class AbstractEntityManagerFactoryBean implements
 					// Use hashCode of EntityManagerFactory proxy.
 					return System.identityHashCode(proxy);
 				}
+				else if (method.getName().equals("unwrap")) {
+					// Handle JPA 2.1 unwrap method - could be a proxy match.
+					Class targetClass = (Class) args[0];
+					if (targetClass == null || targetClass.isInstance(proxy)) {
+						return proxy;
+					}
+				}
 				return this.entityManagerFactoryBean.invokeProxyMethod(method, args);
 			}
 			catch (InvocationTargetException ex) {
