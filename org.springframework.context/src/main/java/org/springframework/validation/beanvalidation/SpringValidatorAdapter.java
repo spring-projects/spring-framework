@@ -127,8 +127,13 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage());
 						}
 						else {
+							Object invalidValue = violation.getInvalidValue();
+							if (!"".equals(field) && invalidValue == violation.getLeafBean()) {
+								// bean constraint with property path: retrieve the actual property value
+								invalidValue = bindingResult.getRawFieldValue(field);
+							}
 							error = new FieldError(
-									errors.getObjectName(), nestedField, violation.getInvalidValue(), false,
+									errors.getObjectName(), nestedField, invalidValue, false,
 									errorCodes, errorArgs, violation.getMessage());
 						}
 						bindingResult.addError(error);
