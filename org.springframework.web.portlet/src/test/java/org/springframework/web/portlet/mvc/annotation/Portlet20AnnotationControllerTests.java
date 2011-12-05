@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import javax.portlet.StateAwareResponse;
 import javax.portlet.WindowState;
 import javax.servlet.http.Cookie;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
@@ -93,6 +92,8 @@ import org.springframework.web.portlet.bind.annotation.RenderMapping;
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 import org.springframework.web.portlet.mvc.AbstractController;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -550,6 +551,16 @@ public class Portlet20AnnotationControllerTests {
 		response = new MockRenderResponse();
 		portlet.render(request, response);
 		assertEquals("myLargeView-value2", response.getContentAsString());
+
+		actionRequest = new MockActionRequest("else");
+		actionResponse = new MockActionResponse();
+		portlet.processAction(actionRequest, actionResponse);
+
+		request = new MockRenderRequest(PortletMode.VIEW, WindowState.MAXIMIZED);
+		request.setParameters(actionResponse.getRenderParameterMap());
+		response = new MockRenderResponse();
+		portlet.render(request, response);
+		assertEquals("myLargeView-value3", response.getContentAsString());
 
 		actionRequest = new MockActionRequest("error");
 		actionResponse = new MockActionResponse();
@@ -1112,6 +1123,11 @@ public class Portlet20AnnotationControllerTests {
 	@Controller
 	@RequestMapping("VIEW")
 	private static class DetailsController {
+
+		@ActionMapping("else")
+		public void myHandle(StateAwareResponse response) {
+			response.setRenderParameter("test", "value3");
+		}
 
 		@EventMapping("event3")
 		public void myHandle2(EventResponse response) throws IOException {
