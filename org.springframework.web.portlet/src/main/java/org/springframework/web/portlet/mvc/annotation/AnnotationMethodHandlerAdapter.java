@@ -237,16 +237,18 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	}
 
 	/**
-	 * Set a custom ModelAndViewResolvers to use for special method return types. Such a custom ModelAndViewResolver will kick
-	 * in first, having a chance to resolve an return value before the standard ModelAndView handling kicks in.
+	 * Set a custom ModelAndViewResolvers to use for special method return types.
+	 * Such a custom ModelAndViewResolver will kick in first, having a chance to
+	 * resolve an return value before the standard ModelAndView handling kicks in.
 	 */
 	public void setCustomModelAndViewResolver(ModelAndViewResolver customModelAndViewResolver) {
 		this.customModelAndViewResolvers = new ModelAndViewResolver[]{customModelAndViewResolver};
 	}
 
 	/**
-	 * Set one or more custom ModelAndViewResolvers to use for special method return types. Any such custom ModelAndViewResolver
-	 * will kick in first, having a chance to resolve an return value before the standard ModelAndView handling kicks in.
+	 * Set one or more custom ModelAndViewResolvers to use for special method return types.
+	 * Any such custom ModelAndViewResolver will kick in first, having a chance to
+	 * resolve an return value before the standard ModelAndView handling kicks in.
 	 */
 	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
 		this.customModelAndViewResolvers = customModelAndViewResolvers;
@@ -440,11 +442,11 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				return true;
 			}
 			RequestMappingInfo mappingInfo = new RequestMappingInfo();
-			RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 			ActionMapping actionMapping = AnnotationUtils.findAnnotation(method, ActionMapping.class);
 			RenderMapping renderMapping = AnnotationUtils.findAnnotation(method, RenderMapping.class);
 			ResourceMapping resourceMapping = AnnotationUtils.findAnnotation(method, ResourceMapping.class);
 			EventMapping eventMapping = AnnotationUtils.findAnnotation(method, EventMapping.class);
+			RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 			if (actionMapping != null) {
 				mappingInfo.initPhaseMapping(PortletRequest.ACTION_PHASE, actionMapping.value(), actionMapping.params());
 			}
