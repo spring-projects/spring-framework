@@ -78,14 +78,14 @@ import org.springframework.web.util.WebUtils;
  * media type. The default name of the parameter is <code>format</code> and it can be configured using the
  * {@link #setParameterName(String) parameterName} property.</li>
  * <li>If there is no match in the {@link #setMediaTypes(Map) mediaTypes} property and if the Java Activation
- * Framework (JAF) is both {@linkplain #setUseJaf enabled} and present on the class path,
+ * Framework (JAF) is both {@linkplain #setUseJaf enabled} and present on the classpath,
  * {@link FileTypeMap#getContentType(String)} is used instead.</li>
  * <li>If the previous steps did not result in a media type, and
  * {@link #setIgnoreAcceptHeader ignoreAcceptHeader} is {@code false}, the request {@code Accept} header is
  * used.</li>
  * </ol>
  *
- * Once the requested media type has been determined, this resolver queries each delegate view resolver for a
+ * <p>Once the requested media type has been determined, this resolver queries each delegate view resolver for a
  * {@link View} and determines if the requested media type is {@linkplain MediaType#includes(MediaType) compatible}
  * with the view's {@linkplain View#getContentType() content type}). The most compatible view is returned.
  *
@@ -407,7 +407,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * <p>The default implementation will check the {@linkplain #setMediaTypes(Map) media types}
 	 * property first for a defined mapping. If not present, and if the Java Activation Framework
 	 * can be found on the classpath, it will call {@link FileTypeMap#getContentType(String)}
-	 * <p>This method can be overriden to provide a different algorithm.
+	 * <p>This method can be overridden to provide a different algorithm.
 	 * @param filename the current request file name (i.e. {@code hotels.html})
 	 * @return the media type, if any
 	 */
@@ -418,8 +418,14 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 		extension = extension.toLowerCase(Locale.ENGLISH);
 		MediaType mediaType = this.mediaTypes.get(extension);
-		if (mediaType == null && this.useJaf && jafPresent) {
-			mediaType = ActivationMediaTypeFactory.getMediaType(filename);
+		if (mediaType == null) {
+			String mimeType = getServletContext().getMimeType(filename);
+			if (StringUtils.hasText(mimeType)) {
+				mediaType = new MediaType(mimeType);
+			}
+			else if (this.useJaf && jafPresent) {
+				mediaType = ActivationMediaTypeFactory.getMediaType(filename);
+			}
 			if (mediaType != null) {
 				this.mediaTypes.putIfAbsent(extension, mediaType);
 			}
@@ -506,6 +512,18 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	}
 
 
+	private static final View NOT_ACCEPTABLE_VIEW = new View() {
+
+		public String getContentType() {
+			return null;
+		}
+
+		public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
+		}
+	};
+
+
 	/**
 	 * Inner class to avoid hard-coded JAF dependency.
 	 */
@@ -549,22 +567,10 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			return FileTypeMap.getDefaultFileTypeMap();
 		}
 
-		public static MediaType getMediaType(String fileName) {
-			String mediaType = fileTypeMap.getContentType(fileName);
+		public static MediaType getMediaType(String filename) {
+			String mediaType = fileTypeMap.getContentType(filename);
 			return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
 		}
 	}
-
-
-	private static final View NOT_ACCEPTABLE_VIEW = new View() {
-
-		public String getContentType() {
-			return null;
-		}
-
-		public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
-			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
-		}
-	};
 
 }
