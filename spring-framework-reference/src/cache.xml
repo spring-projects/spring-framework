@@ -248,9 +248,9 @@ public void loadBooks(InputStream batch)]]></programlisting>
 		all the entires are removed in one operation as shown above. Note that the framework will ignore any key specified in this scenario as it does not apply (the entire cache is evicted not just
 		one entry).</para>
 		
-		<para>One can also indicate whether the eviction should occur after (the default) or before the method executes (the default) through the <literal>afterInvocation</literal> attribute.
+		<para>One can also indicate whether the eviction should occur after (the default) or before the method executes through the <literal>beforeInvocation</literal> attribute.
 		The former provides the same semantics as the rest of the annotations - once the method completes successfully, an action (in this case eviction) on the cache is executed. If the method does not
-		execute (as it might be cached) or an exception is thrown, the eviction does not occur. The latter (<literal>afterInvocation=false</literal>) causes the eviction to occur always, before the method
+		execute (as it might be cached) or an exception is thrown, the eviction does not occur. The latter (<literal>beforeInvocation=true</literal>) causes the eviction to occur always, before the method
 		is invoked - this is useful in cases where the eviction does not need to be tied to the method outcome.</para>
 		
 		<para>It is important to note that void methods can be used with <literal>@CacheEvict</literal> - as the methods act as triggers, the return values are ignored (as they don't interact with

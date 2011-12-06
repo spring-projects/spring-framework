@@ -20,8 +20,8 @@
 			<cache:cache-evict method="invalidate" cache="default"/>
 			<cache:cache-evict method="evict" key="#p0" cache="default"/>
 			<cache:cache-evict method="evictWithException" cache="default"/>
-			<cache:cache-evict method="evictEarly" cache="default" after-invocation="false"/>
-			<cache:cache-evict method="invalidateEarly" key="#p0" cache="default" after-invocation="false"/>
+			<cache:cache-evict method="evictEarly" cache="default" before-invocation="true"/>
+			<cache:cache-evict method="invalidateEarly" key="#p0" cache="default" before-invocation="true"/>
 			<cache:cache-evict method="evictAll" cache="default" all-entries="true"/>
 		</cache:caching>
 		<cache:caching cache="default">
@@ -60,8 +60,8 @@
 			<cache:cache-evict method="invalidate" cache="default"/>
 			<cache:cache-evict method="evict" key="#p0" cache="default"/>
 			<cache:cache-evict method="evictWithException" cache="default"/>
-			<cache:cache-evict method="evictEarly" cache="default" after-invocation="false"/>
-			<cache:cache-evict method="invalidateEarly" key="#p0" cache="default" after-invocation="false"/>
+			<cache:cache-evict method="evictEarly" cache="default" before-invocation="true"/>
+			<cache:cache-evict method="invalidateEarly" key="#p0" cache="default" before-invocation="true"/>
 			<cache:cache-evict method="evictAll" cache="default" all-entries="true"/>
 		</cache:caching>
 		<cache:caching cache="default">

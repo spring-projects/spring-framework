@@ -53,7 +53,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	public void evictAll(Object arg1) {
 	}
 
-	@CacheEvict(value = "default", afterInvocation = false)
+	@CacheEvict(value = "default", beforeInvocation = true)
 	public void evictEarly(Object arg1) {
 		throw new RuntimeException("exception thrown - evict should still occur");
 	}
@@ -62,7 +62,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	public void evict(Object arg1, Object arg2) {
 	}
 
-	@CacheEvict(value = "default", key = "#p0", afterInvocation = false)
+	@CacheEvict(value = "default", key = "#p0", beforeInvocation = true)
 	public void invalidateEarly(Object arg1, Object arg2) {
 		throw new RuntimeException("exception thrown - evict should still occur");
 	}
