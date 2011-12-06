@@ -52,52 +52,52 @@ public aspect AnnotationCacheAspect extends AbstractCacheAspect {
 	 * annotation, or any subtype of a type with the {@code @Cacheable} annotation.
 	 */
 	private pointcut executionOfAnyPublicMethodInAtCacheableType() :
-		execution(public * ((@Cacheable *)+).*(..)) && @this(Cacheable);
+		execution(public * ((@Cacheable *)+).*(..)) && within(@Cacheable *);
 
 	/**
 	 * Matches the execution of any public method in a type with the @{@link CacheEvict}
 	 * annotation, or any subtype of a type with the {@code CacheEvict} annotation.
 	 */
 	private pointcut executionOfAnyPublicMethodInAtCacheEvictType() :
-		execution(public * ((@CacheEvict *)+).*(..)) && @this(CacheEvict);
+		execution(public * ((@CacheEvict *)+).*(..)) && within(@CacheEvict *);
 
 	/**
 	 * Matches the execution of any public method in a type with the @{@link CachePut}
 	 * annotation, or any subtype of a type with the {@code CachePut} annotation.
 	 */
 	private pointcut executionOfAnyPublicMethodInAtCachePutType() :
-		execution(public * ((@CachePut *)+).*(..)) && @this(CachePut);
+		execution(public * ((@CachePut *)+).*(..)) && within(@CachePut *);
 
 	/**
 	 * Matches the execution of any public method in a type with the @{@link Caching}
 	 * annotation, or any subtype of a type with the {@code Caching} annotation.
 	 */
 	private pointcut executionOfAnyPublicMethodInAtCachingType() :
-		execution(public * ((@Caching *)+).*(..)) && @this(Caching);
+		execution(public * ((@Caching *)+).*(..)) && within(@Caching *);
 
 	/**
 	 * Matches the execution of any method with the @{@link Cacheable} annotation.
 	 */
 	private pointcut executionOfCacheableMethod() :
-		execution(* *(..)) && @annotation(Cacheable);
+		execution(@Cacheable * *(..));
 
 	/**
 	 * Matches the execution of any method with the @{@link CacheEvict} annotation.
 	 */
 	private pointcut executionOfCacheEvictMethod() :
-		execution(* *(..)) && @annotation(CacheEvict);
+		execution(@CacheEvict * *(..));
 
 	/**
 	 * Matches the execution of any method with the @{@link CachePut} annotation.
 	 */
 	private pointcut executionOfCachePutMethod() :
-		execution(* *(..)) && @annotation(CachePut);
+		execution(@CachePut * *(..));
 
 	/**
 	 * Matches the execution of any method with the @{@link Caching} annotation.
 	 */
 	private pointcut executionOfCachingMethod() :
-		execution(* *(..)) && @annotation(Caching);
+		execution(@Caching * *(..));
 
 	/**
 	 * Definition of pointcut from super aspect - matched join points will have Spring
