@@ -27,10 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
  * the class implements. AspectJ follows Java's rule that annotations on 
  * interfaces are <i>not</i> inherited.
  *
- * <p>A @Transactional annotation on a class specifies the default transaction
+ * <p>An @Transactional annotation on a class specifies the default transaction
  * semantics for the execution of any <b>public</b> operation in the class.
  *
- * <p>A @Transactional annotation on a method within the class overrides the
+ * <p>An @Transactional annotation on a method within the class overrides the
  * default transaction semantics given by the class annotation (if present). 
  * Any method may be annotated (regardless of visibility).
  * Annotating non-public methods directly is the only way
@@ -54,14 +54,14 @@ public aspect AnnotationTransactionAspect extends AbstractTransactionAspect {
 	 * Transactional annotation.
 	 */
 	private pointcut executionOfAnyPublicMethodInAtTransactionalType() :
-		execution(public * ((@Transactional *)+).*(..)) && @this(Transactional);
+		execution(* *(..)) && within(@Transactional *);
 
 	/**
 	 * Matches the execution of any method with the 
 	 * Transactional annotation.
 	 */
 	private pointcut executionOfTransactionalMethod() :
-		execution(* *(..)) && @annotation(Transactional);
+		execution(@Transactional * *(..));
 
 	/**
 	 * Definition of pointcut from super aspect - matched join points
