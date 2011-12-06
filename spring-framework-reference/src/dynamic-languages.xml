@@ -807,11 +807,6 @@ public class Main {
             <para><filename>cglib-nodep-2.1_3.jar</filename></para>
           </listitem>
         </itemizedlist>
-        <para>
-          All of these libraries are available in the Spring-with-dependencies
-          distribution of Spring (in addition to also being freely available
-          on the web).
-        </para>
       </sidebar>
       <para>From the BeanShell homepage...</para>
       <quote>
