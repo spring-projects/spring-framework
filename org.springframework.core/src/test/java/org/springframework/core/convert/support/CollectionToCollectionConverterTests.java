@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -288,6 +289,15 @@ public class CollectionToCollectionConverterTests {
 		vector.add("Element");
 		testCollectionConversionToArrayList(vector);
 	}
+
+	@Test
+	public void testCollectionsEmptyList() throws Exception {
+		CollectionToCollectionConverter converter = new CollectionToCollectionConverter(new GenericConversionService());
+		TypeDescriptor type = new TypeDescriptor(getClass().getField("list"));
+		converter.convert(list, type, TypeDescriptor.valueOf(Class.forName("java.util.Collections$EmptyList")));
+	}
+
+	public List list = Collections.emptyList();
 
 	@SuppressWarnings("rawtypes")
 	private void testCollectionConversionToArrayList(Collection<String> aSource) {
