@@ -41,7 +41,11 @@ import org.springframework.context.annotation.ComponentScanParserTests.CustomAnn
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.SerializationTestUtils;
 
+import example.scannable.CustomComponent;
+import example.scannable.CustomStereotype;
+import example.scannable.DefaultNamedComponent;
 import example.scannable.FooService;
+import example.scannable.MessageBean;
 import example.scannable.ScopedProxyTestBean;
 import example.scannable_scoped.CustomScopeAnnotationBean;
 import example.scannable_scoped.MyScope;
@@ -160,6 +164,24 @@ public class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
+	public void withMultipleAnnotationIncludeFilters1() throws IOException, ClassNotFoundException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ComponentScanWithMultipleAnnotationIncludeFilters1.class);
+		ctx.refresh();
+		ctx.getBean(DefaultNamedComponent.class); // @CustomStereotype-annotated
+		ctx.getBean(MessageBean.class);           // @CustomComponent-annotated
+	}
+
+	@Test
+	public void withMultipleAnnotationIncludeFilters2() throws IOException, ClassNotFoundException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ComponentScanWithMultipleAnnotationIncludeFilters2.class);
+		ctx.refresh();
+		ctx.getBean(DefaultNamedComponent.class); // @CustomStereotype-annotated
+		ctx.getBean(MessageBean.class);           // @CustomComponent-annotated
+	}
+
+	@Test
 	public void withBasePackagesAndValueAlias() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ComponentScanWithBasePackagesAndValueAlias.class);
@@ -222,7 +244,7 @@ class MyScopeMetadataResolver extends AnnotationScopeMetadataResolver {
 class ComponentScanWithCustomTypeFilter {
 	@Bean
 	@SuppressWarnings({ "rawtypes", "serial", "unchecked" })
-	public CustomAutowireConfigurer customAutowireConfigurer() {
+	public static CustomAutowireConfigurer customAutowireConfigurer() {
 		CustomAutowireConfigurer cac = new CustomAutowireConfigurer();
 		cac.setCustomQualifierTypes(new HashSet() {{ add(ComponentScanParserTests.CustomAnnotation.class); }});
 		return cac;
@@ -239,6 +261,23 @@ class ComponentScanWithCustomTypeFilter {
 		useDefaultFilters=false,
 		includeFilters=@Filter(type=FilterType.ASSIGNABLE_TYPE, value=ScopedProxyTestBean.class))
 class ComponentScanWithScopedProxy { }
+
+@Configuration
+@ComponentScan(basePackages="example.scannable",
+		useDefaultFilters=false,
+		includeFilters={
+			@Filter(CustomStereotype.class),
+			@Filter(CustomComponent.class)
+		}
+	)
+class ComponentScanWithMultipleAnnotationIncludeFilters1 { }
+
+@Configuration
+@ComponentScan(basePackages="example.scannable",
+		useDefaultFilters=false,
+		includeFilters=@Filter({CustomStereotype.class, CustomComponent.class})
+	)
+class ComponentScanWithMultipleAnnotationIncludeFilters2 { }
 
 @Configuration
 @ComponentScan(
