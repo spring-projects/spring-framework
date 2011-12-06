@@ -93,7 +93,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		ceo.setCondition(caching.condition());
 		ceo.setKey(caching.key());
 		ceo.setCacheWide(caching.allEntries());
-		ceo.setAfterInvocation(caching.afterInvocation());
+		ceo.setBeforeInvocation(caching.beforeInvocation());
 		ceo.setName(ae.toString());
 		return ceo;
 	}
@@ -152,6 +152,6 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 			}
 		}
 
-		return anns;
+		return (anns.isEmpty() ? null : anns);
 	}
 }

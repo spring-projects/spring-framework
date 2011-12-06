@@ -25,7 +25,7 @@ package org.springframework.cache.interceptor;
 public class CacheEvictOperation extends CacheOperation {
 
 	private boolean cacheWide = false;
-	private boolean afterInvocation = true;
+	private boolean beforeInvocation = false;
 
 	public void setCacheWide(boolean cacheWide) {
 		this.cacheWide = cacheWide;
@@ -35,12 +35,12 @@ public class CacheEvictOperation extends CacheOperation {
 		return this.cacheWide;
 	}
 
-	public void setAfterInvocation(boolean afterInvocation) {
-		this.afterInvocation = afterInvocation;
+	public void setBeforeInvocation(boolean beforeInvocation) {
+		this.beforeInvocation = beforeInvocation;
 	}
 
-	public boolean isAfterInvocation() {
-		return this.afterInvocation;
+	public boolean isBeforeInvocation() {
+		return this.beforeInvocation;
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class CacheEvictOperation extends CacheOperation {
 		sb.append(",");
 		sb.append(this.cacheWide);
 		sb.append(",");
-		sb.append(this.afterInvocation);
+		sb.append(this.beforeInvocation);
 		return sb;
 	}
 }

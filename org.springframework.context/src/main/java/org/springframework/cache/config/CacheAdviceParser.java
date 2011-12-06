@@ -188,9 +188,9 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 				op.setCacheWide(Boolean.valueOf(wide.trim()));
 			}
 
-			String after = opElement.getAttribute("after-invocation");
+			String after = opElement.getAttribute("before-invocation");
 			if (StringUtils.hasText(after)) {
-				op.setAfterInvocation(Boolean.valueOf(after.trim()));
+				op.setBeforeInvocation(Boolean.valueOf(after.trim()));
 			}
 
 			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);

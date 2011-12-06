@@ -214,7 +214,7 @@
 	Whether all the entries should be evicted.]]></xsd:documentation>
 										</xsd:annotation>
 									</xsd:attribute>
-									<xsd:attribute name="after-invocation" type="xsd:boolean" use="optional">
+									<xsd:attribute name="before-invocation" type="xsd:boolean" use="optional">
 										<xsd:annotation>
 											<xsd:documentation><![CDATA[
 	Whether the eviction should occur after the method is successfully 

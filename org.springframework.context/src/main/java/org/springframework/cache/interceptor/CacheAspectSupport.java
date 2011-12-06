@@ -225,14 +225,14 @@ public abstract class CacheAspectSupport implements InitializingBean {
 	}
 	
 	private void inspectBeforeCacheEvicts(Collection<CacheOperationContext> evictions) {
-		inspectCacheEvicts(evictions, false);
-	}
-
-	private void inspectAfterCacheEvicts(Collection<CacheOperationContext> evictions) {
 		inspectCacheEvicts(evictions, true);
 	}
 
-	private void inspectCacheEvicts(Collection<CacheOperationContext> evictions, boolean afterInvocation) {
+	private void inspectAfterCacheEvicts(Collection<CacheOperationContext> evictions) {
+		inspectCacheEvicts(evictions, false);
+	}
+
+	private void inspectCacheEvicts(Collection<CacheOperationContext> evictions, boolean beforeInvocation) {
 
 		if (!evictions.isEmpty()) {
 
@@ -241,7 +241,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 			for (CacheOperationContext context : evictions) {
 				CacheEvictOperation evictOp = (CacheEvictOperation) context.operation;
 
-				if (afterInvocation == evictOp.isAfterInvocation()) {
+				if (beforeInvocation == evictOp.isBeforeInvocation()) {
 					if (context.isConditionPassing()) {
 						// for each cache
 						// lazy key initialization
