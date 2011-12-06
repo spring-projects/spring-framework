@@ -17,14 +17,19 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import javax.activation.FileTypeMap;
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestHandler;
@@ -62,6 +67,9 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @since 3.0.4
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler {
+
+	private static final boolean jafPresent =
+			ClassUtils.isPresent("javax.activation.FileTypeMap", ResourceHttpRequestHandler.class.getClassLoader());
 
 	private List<Resource> locations;
 
@@ -109,15 +117,13 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		MediaType mediaType = getMediaType(resource);
 		if (mediaType != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Determined media type [" + mediaType + "] for " + resource);
+				logger.debug("Determined media type '" + mediaType + "' for " + resource);
 			}
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No media type found for " + resource + " - returning 404");
+				logger.debug("No media type found for " + resource + " - not sending a content-type header");
 			}
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
 		}
 
 		// header phase
@@ -190,7 +196,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 */
 	protected MediaType getMediaType(Resource resource) {
 		String mimeType = getServletContext().getMimeType(resource.getFilename());
-		return (StringUtils.hasText(mimeType) ? MediaType.parseMediaType(mimeType) : null);
+		if (StringUtils.hasText(mimeType)) {
+			return new MediaType(mimeType);
+		}
+		else if (jafPresent) {
+			return ActivationMediaTypeFactory.getMediaType(resource.getFilename());
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -207,7 +221,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
 		}
 		response.setContentLength((int) length);
-		response.setContentType(mediaType.toString());
+
+		if (mediaType != null) {
+			response.setContentType(mediaType.toString());
+		}
 	}
 
 	/**
@@ -219,6 +236,50 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 */
 	protected void writeContent(HttpServletResponse response, Resource resource) throws IOException {
 		FileCopyUtils.copy(resource.getInputStream(), response.getOutputStream());
+	}
+
+
+	/**
+	 * Inner class to avoid hard-coded JAF dependency.
+	 */
+	private static class ActivationMediaTypeFactory {
+
+		private static final FileTypeMap fileTypeMap;
+
+		static {
+			fileTypeMap = loadFileTypeMapFromContextSupportModule();
+		}
+
+		private static FileTypeMap loadFileTypeMapFromContextSupportModule() {
+			// see if we can find the extended mime.types from the context-support module
+			Resource mappingLocation = new ClassPathResource("org/springframework/mail/javamail/mime.types");
+			if (mappingLocation.exists()) {
+				InputStream inputStream = null;
+				try {
+					inputStream = mappingLocation.getInputStream();
+					return new MimetypesFileTypeMap(inputStream);
+				}
+				catch (IOException ex) {
+					// ignore
+				}
+				finally {
+					if (inputStream != null) {
+						try {
+							inputStream.close();
+						}
+						catch (IOException ex) {
+							// ignore
+						}
+					}
+				}
+			}
+			return FileTypeMap.getDefaultFileTypeMap();
+		}
+
+		public static MediaType getMediaType(String filename) {
+			String mediaType = fileTypeMap.getContentType(filename);
+			return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
+		}
 	}
 
 }
