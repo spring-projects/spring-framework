@@ -61,7 +61,7 @@ import javax.servlet.ServletException;
  *
  *    &#064;Override
  *    public void onStartup(ServletContext container) {
- *      XmlWebApplicationContext appContext = new XmlWebApplicationContext()
+ *      XmlWebApplicationContext appContext = new XmlWebApplicationContext();
  *      appContext.setConfigLocation("/WEB-INF/spring/dispatcher-config.xml");
  *
  *      ServletRegistration.Dynamic dispatcher =
