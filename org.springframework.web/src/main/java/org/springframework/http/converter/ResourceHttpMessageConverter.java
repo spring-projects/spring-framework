@@ -34,9 +34,9 @@ import org.springframework.util.StringUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write {@link Resource Resources}.
  *
- * <p>By default, this converter can read all media types. The Java Activation Framework (JAF) - if available - is used
- * to determine the {@code Content-Type} of written resources. If JAF is not available, {@code application/octet-stream}
- * is used.
+ * <p>By default, this converter can read all media types. The Java Activation Framework (JAF) -
+ * if available - is used to determine the {@code Content-Type} of written resources.
+ * If JAF is not available, {@code application/octet-stream} is used.
  *
  * @author Arjen Poutsma
  * @since 3.0.2
@@ -46,9 +46,12 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	private static final boolean jafPresent =
 			ClassUtils.isPresent("javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
 
+
 	public ResourceHttpMessageConverter() {
 		super(MediaType.ALL);
 	}
+
+
 	@Override
 	protected boolean supports(Class<?> clazz) {
 		return Resource.class.isAssignableFrom(clazz);
@@ -57,6 +60,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	@Override
 	protected Resource readInternal(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
+
 		byte[] body = FileCopyUtils.copyToByteArray(inputMessage.getBody());
 		return new ByteArrayResource(body);
 	}
@@ -72,21 +76,18 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	}
 
 	@Override
-	protected Long getContentLength(Resource resource, MediaType contentType) {
-		try {
-			return resource.contentLength();
-		}
-		catch (IOException e) {
-			return null;
-		}
+	protected Long getContentLength(Resource resource, MediaType contentType) throws IOException {
+		return resource.contentLength();
 	}
 
 	@Override
 	protected void writeInternal(Resource resource, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+
 		FileCopyUtils.copy(resource.getInputStream(), outputMessage.getBody());
 		outputMessage.getBody().flush();
 	}
+
 
 	/**
 	 * Inner class to avoid hard-coded JAF dependency.
