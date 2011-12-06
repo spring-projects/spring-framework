@@ -109,15 +109,13 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		MediaType mediaType = getMediaType(resource);
 		if (mediaType != null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Determined media type [" + mediaType + "] for " + resource);
+				logger.debug("Determined media type '" + mediaType + "' for " + resource);
 			}
 		}
 		else {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No media type found for " + resource + " - returning 404");
+				logger.debug("No media type found for " + resource + " - not sending a content-type header");
 			}
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
 		}
 
 		// header phase
@@ -207,7 +205,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
 		}
 		response.setContentLength((int) length);
-		response.setContentType(mediaType.toString());
+
+		if (mediaType != null) {
+			response.setContentType(mediaType.toString());
+		}
 	}
 
 	/**
