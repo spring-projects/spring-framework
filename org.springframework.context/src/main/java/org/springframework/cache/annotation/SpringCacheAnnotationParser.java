@@ -17,6 +17,7 @@
 package org.springframework.cache.annotation;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +26,6 @@ import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CachePutOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -43,31 +43,39 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	public Collection<CacheOperation> parseCacheAnnotations(AnnotatedElement ae) {
 		Collection<CacheOperation> ops = null;
 
-		Cacheable cache = AnnotationUtils.getAnnotation(ae, Cacheable.class);
-		if (cache != null) {
+		Collection<Cacheable> cacheables = getAnnotations(ae, Cacheable.class);
+		if (cacheables != null) {
 			ops = lazyInit(ops);
-			ops.add(parseCacheableAnnotation(ae, cache));
+			for (Cacheable cacheable : cacheables) {
+				ops.add(parseCacheableAnnotation(ae, cacheable));
+			}
 		}
-		CacheEvict evict = AnnotationUtils.getAnnotation(ae, CacheEvict.class);
-		if (evict != null) {
+		Collection<CacheEvict> evicts = getAnnotations(ae, CacheEvict.class);
+		if (evicts != null) {
 			ops = lazyInit(ops);
-			ops.add(parseEvictAnnotation(ae, evict));
+			for (CacheEvict e : evicts) {
+				ops.add(parseEvictAnnotation(ae, e));
+			}
 		}
-		CachePut update = AnnotationUtils.getAnnotation(ae, CachePut.class);
-		if (update != null) {
+		Collection<CachePut> updates = getAnnotations(ae, CachePut.class);
+		if (updates != null) {
 			ops = lazyInit(ops);
-			ops.add(parseUpdateAnnotation(ae, update));
+			for (CachePut p : updates) {
+				ops.add(parseUpdateAnnotation(ae, p));
+			}
 		}
-		Caching caching = AnnotationUtils.getAnnotation(ae, Caching.class);
+		Collection<Caching> caching = getAnnotations(ae, Caching.class);
 		if (caching != null) {
 			ops = lazyInit(ops);
-			ops.addAll(parseCachingAnnotation(ae, caching));
+			for (Caching c : caching) {
+				ops.addAll(parseCachingAnnotation(ae, c));
+			}
 		}
 		return ops;
 	}
 
-	private Collection<CacheOperation> lazyInit(Collection<CacheOperation> ops) {
-		return (ops != null ? ops : new ArrayList<CacheOperation>(2));
+	private <T extends Annotation> Collection<CacheOperation> lazyInit(Collection<CacheOperation> ops) {
+		return (ops != null ? ops : new ArrayList<CacheOperation>(1));
 	}
 
 	CacheableOperation parseCacheableAnnotation(AnnotatedElement ae, Cacheable caching) {
@@ -125,5 +133,25 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		}
 
 		return ops;
+	}
+
+	private static <T extends Annotation> Collection<T> getAnnotations(AnnotatedElement ae, Class<T> annotationType) {
+		Collection<T> anns = new ArrayList<T>(2);
+
+		// look at raw annotation
+		T ann = ae.getAnnotation(annotationType);
+		if (ann != null) {
+			anns.add(ann);
+		}
+
+		// scan meta-annotations
+		for (Annotation metaAnn : ae.getAnnotations()) {
+			ann = metaAnn.annotationType().getAnnotation(annotationType);
+			if (ann != null) {
+				anns.add(ann);
+			}
+		}
+
+		return anns;
 	}
 }
