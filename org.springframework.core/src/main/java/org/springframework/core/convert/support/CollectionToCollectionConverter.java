@@ -60,6 +60,9 @@ final class CollectionToCollectionConverter implements ConditionalGenericConvert
 		}
 		boolean copyRequired = !targetType.getType().isInstance(source);
 		Collection<?> sourceCollection = (Collection<?>) source;
+		if (!copyRequired && sourceCollection.isEmpty()) {
+			return sourceCollection;
+		}
 		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(), sourceCollection.size());
 		if (targetType.getElementTypeDescriptor() == null) {
 			for (Object element : sourceCollection) {
