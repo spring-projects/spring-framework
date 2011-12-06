@@ -144,13 +144,18 @@ public @interface ComponentScan {
 		FilterType type() default FilterType.ANNOTATION;
 
 		/**
-		 * The class to use as the filter.  In the case of {@link FilterType#ANNOTATION},
-		 * the class will be the annotation itself. In the case of
-		 * {@link FilterType#ASSIGNABLE_TYPE}, the class will be the type that detected
-		 * components should be assignable to. And in the case of {@link FilterType#CUSTOM},
-		 * the class will be an implementation of {@link TypeFilter}.
+		 * The class or classes to use as the filter. In the case of
+		 * {@link FilterType#ANNOTATION}, the class will be the annotation itself. In the
+		 * case of {@link FilterType#ASSIGNABLE_TYPE}, the class will be the type that
+		 * detected components should be assignable to. And in the case of
+		 * {@link FilterType#CUSTOM}, the class will be an implementation of
+		 * {@link TypeFilter}.
+		 * <p>When multiple classes are specified, OR logic is applied, e.g. "include
+		 * types annotated with {@code @Foo} OR {@code @Bar}".
+		 * <p>Specifying zero classes is permitted but will have no effect on component
+		 * scanning.
 		 */
-		Class<?> value();
+		Class<?>[] value(); //doco
 	}
 
 }

@@ -78,11 +78,15 @@ class ComponentScanAnnotationParser {
 
 		scanner.setResourcePattern((String)componentScanAttributes.get("resourcePattern"));
 
-		for (Filter filter : (Filter[])componentScanAttributes.get("includeFilters")) {
-			scanner.addIncludeFilter(createTypeFilter(filter));
+		for (Filter filterAnno : (Filter[])componentScanAttributes.get("includeFilters")) {
+			for (TypeFilter typeFilter : typeFiltersFor(filterAnno)) {
+				scanner.addIncludeFilter(typeFilter);
+			}
 		}
-		for (Filter filter : (Filter[])componentScanAttributes.get("excludeFilters")) {
-			scanner.addExcludeFilter(createTypeFilter(filter));
+		for (Filter filterAnno : (Filter[])componentScanAttributes.get("excludeFilters")) {
+			for (TypeFilter typeFilter : typeFiltersFor(filterAnno)) {
+				scanner.addExcludeFilter(typeFilter);
+			}
 		}
 
 		List<String> basePackages = new ArrayList<String>();
@@ -110,18 +114,31 @@ class ComponentScanAnnotationParser {
 		return scanner.doScan(basePackages.toArray(new String[]{}));
 	}
 
-	private TypeFilter createTypeFilter(Filter filter) {
-		switch (filter.type()) {
-			case ANNOTATION:
-				@SuppressWarnings("unchecked")
-				Class<Annotation> filterClass = (Class<Annotation>)filter.value();
-				return new AnnotationTypeFilter(filterClass);
-			case ASSIGNABLE_TYPE:
-				return new AssignableTypeFilter(filter.value());
-			case CUSTOM:
-				return BeanUtils.instantiateClass(filter.value(), TypeFilter.class);
-			default:
-				throw new IllegalArgumentException("unknown filter type " + filter.type());
+	private List<TypeFilter> typeFiltersFor(Filter filterAnno) {
+		List<TypeFilter> typeFilters = new ArrayList<TypeFilter>();
+		for (Class<?> filterClass : (Class<?>[])filterAnno.value()) {
+			switch (filterAnno.type()) {
+				case ANNOTATION:
+					Assert.isAssignable(Annotation.class, filterClass,
+							"An error occured when processing a @ComponentScan " +
+							"ANNOTATION type filter: ");
+					@SuppressWarnings("unchecked")
+					Class<Annotation> annoClass = (Class<Annotation>)filterClass;
+					typeFilters.add(new AnnotationTypeFilter(annoClass));
+					break;
+				case ASSIGNABLE_TYPE:
+					typeFilters.add(new AssignableTypeFilter(filterClass));
+					break;
+				case CUSTOM:
+					Assert.isAssignable(TypeFilter.class, filterClass,
+							"An error occured when processing a @ComponentScan " +
+							"CUSTOM type filter: ");
+					typeFilters.add(BeanUtils.instantiateClass(filterClass, TypeFilter.class));
+					break;
+				default:
+					throw new IllegalArgumentException("unknown filter type " + filterAnno.type());
+			}
 		}
+		return typeFilters;
 	}
 }
