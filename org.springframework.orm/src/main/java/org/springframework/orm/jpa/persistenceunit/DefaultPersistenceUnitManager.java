@@ -93,7 +93,7 @@ public class DefaultPersistenceUnitManager
 
 	public final static String ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME = "default";
 
-	private static final String RESOURCE_PATTERN = "/**/*.class";
+	private static final String ENTITY_CLASS_RESOURCE_PATTERN = "/**/*.class";
 
 
 	private static final boolean jpa2ApiPresent = ClassUtils.hasMethod(PersistenceUnitInfo.class, "getSharedCacheMode");
@@ -110,6 +110,8 @@ public class DefaultPersistenceUnitManager
 	private String defaultPersistenceUnitName = ORIGINAL_DEFAULT_PERSISTENCE_UNIT_NAME;
 
 	private String[] packagesToScan;
+
+	private String[] mappingResources;
 
 	private DataSourceLookup dataSourceLookup = new JndiDataSourceLookup();
 
@@ -179,6 +181,20 @@ public class DefaultPersistenceUnitManager
 	 */
 	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
+	}
+
+	/**
+	 * Specify one or more mapping resources (equivalent to <code>&lt;mapping-file&gt;</code>
+	 * entries in <code>persistence.xml</code>) for the default persistence unit.
+	 * Can be used on its own or in combination with entity scanning in the classpath,
+	 * in both cases avoiding <code>persistence.xml</code>.
+	 * <p>Note that mapping resources must be relative to the classpath root,
+	 * e.g. "META-INF/mappings.xml" or "com/mycompany/repository/mappings.xml",
+	 * so that they can be loaded through <code>ClassLoader.getResource</code>.
+	 * @see #setPackagesToScan
+	 */
+	public void setMappingResources(String... mappingResources) {
+		this.mappingResources = mappingResources;
 	}
 
 	/**
@@ -361,8 +377,8 @@ public class DefaultPersistenceUnitManager
 		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
 		List<SpringPersistenceUnitInfo> infos = new LinkedList<SpringPersistenceUnitInfo>();
 		infos.addAll(Arrays.asList(reader.readPersistenceUnitInfos(this.persistenceXmlLocations)));
-		if (this.packagesToScan != null) {
-			infos.add(scanPackages());
+		if (this.packagesToScan != null || this.mappingResources != null) {
+			infos.add(buildDefaultPersistenceUnitInfo());
 		}
 		return infos;
 	}
@@ -371,31 +387,38 @@ public class DefaultPersistenceUnitManager
 	 * Perform Spring-based scanning for entity classes.
 	 * @see #setPackagesToScan
 	 */
-	private SpringPersistenceUnitInfo scanPackages() {
+	private SpringPersistenceUnitInfo buildDefaultPersistenceUnitInfo() {
 		SpringPersistenceUnitInfo scannedUnit = new SpringPersistenceUnitInfo();
-		try {
-			scannedUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
-			scannedUnit.excludeUnlistedClasses();
+		scannedUnit.setPersistenceUnitName(this.defaultPersistenceUnitName);
+		scannedUnit.excludeUnlistedClasses();
+		if (this.packagesToScan != null) {
 			for (String pkg : this.packagesToScan) {
-				String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
-						ClassUtils.convertClassNameToResourcePath(pkg) + RESOURCE_PATTERN;
-				Resource[] resources = this.resourcePatternResolver.getResources(pattern);
-				MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
-				for (Resource resource : resources) {
-					if (resource.isReadable()) {
-						MetadataReader reader = readerFactory.getMetadataReader(resource);
-						String className = reader.getClassMetadata().getClassName();
-						if (matchesFilter(reader, readerFactory)) {
-							scannedUnit.addManagedClassName(className);
+				try {
+					String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
+							ClassUtils.convertClassNameToResourcePath(pkg) + ENTITY_CLASS_RESOURCE_PATTERN;
+					Resource[] resources = this.resourcePatternResolver.getResources(pattern);
+					MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory(this.resourcePatternResolver);
+					for (Resource resource : resources) {
+						if (resource.isReadable()) {
+							MetadataReader reader = readerFactory.getMetadataReader(resource);
+							String className = reader.getClassMetadata().getClassName();
+							if (matchesFilter(reader, readerFactory)) {
+								scannedUnit.addManagedClassName(className);
+							}
 						}
 					}
 				}
+				catch (IOException ex) {
+					throw new PersistenceException("Failed to scan classpath for unlisted classes", ex);
+				}
 			}
-			return scannedUnit;
 		}
-		catch (IOException ex) {
-			throw new PersistenceException("Failed to scan classpath for unlisted classes", ex);
+		if (this.mappingResources != null) {
+			for (String mappingFileName : this.mappingResources) {
+				scannedUnit.addMappingFileName(mappingFileName);
+			}
 		}
+		return scannedUnit;
 	}
 
 	/**
