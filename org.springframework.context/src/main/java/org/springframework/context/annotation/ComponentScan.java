@@ -128,7 +128,8 @@ public @interface ComponentScan {
 	 * Declares the type filter to be used as an {@linkplain ComponentScan#includeFilters()
 	 * include filter} or {@linkplain ComponentScan#includeFilters() exclude filter}.
 	 */
-	@Retention(RetentionPolicy.SOURCE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({})
 	@interface Filter {
 		/**
 		 * The type of filter to use.
