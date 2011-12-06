@@ -141,6 +141,21 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
+	 * Specify one or more mapping resources (equivalent to <code>&lt;mapping-file&gt;</code>
+	 * entries in <code>persistence.xml</code>) for the default persistence unit.
+	 * Can be used on its own or in combination with entity scanning in the classpath,
+	 * in both cases avoiding <code>persistence.xml</code>.
+	 * <p>Note that mapping resources must be relative to the classpath root,
+	 * e.g. "META-INF/mappings.xml" or "com/mycompany/repository/mappings.xml",
+	 * so that they can be loaded through <code>ClassLoader.getResource</code>.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @see #setPersistenceUnitManager
+	 */
+	public void setMappingResources(String... mappingResources) {
+		this.internalPersistenceUnitManager.setMappingResources(mappingResources);
+	}
+
+	/**
 	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
 	 * to use for accessing the database. This is an alternative to keeping the
 	 * JDBC configuration in <code>persistence.xml</code>, passing in a Spring-managed
