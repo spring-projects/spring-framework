@@ -195,16 +195,18 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * @return the corresponding media type, or <code>null</code> if none found
 	 */
 	protected MediaType getMediaType(Resource resource) {
+		MediaType mediaType = null;
 		String mimeType = getServletContext().getMimeType(resource.getFilename());
 		if (StringUtils.hasText(mimeType)) {
-			return new MediaType(mimeType);
+			mediaType = MediaType.parseMediaType(mimeType);
 		}
-		else if (jafPresent) {
-			return ActivationMediaTypeFactory.getMediaType(resource.getFilename());
+		if (jafPresent && (mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType))) {
+			MediaType jafMediaType = ActivationMediaTypeFactory.getMediaType(resource.getFilename());
+			if (jafMediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(jafMediaType)) {
+				mediaType = jafMediaType;
+			}
 		}
-		else {
-			return null;
-		}
+		return mediaType;
 	}
 
 	/**

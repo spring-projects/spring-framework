@@ -16,16 +16,6 @@
 
 package org.springframework.web.servlet.view;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +28,7 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -48,6 +39,9 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -60,7 +54,11 @@ public class ContentNegotiatingViewResolverTests {
 
 	@Before
 	public void createViewResolver() {
+		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		wac.setServletContext(new MockServletContext());
+		wac.refresh();
 		viewResolver = new ContentNegotiatingViewResolver();
+		viewResolver.setApplicationContext(wac);
 		request = new MockHttpServletRequest("GET", "/test");
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 	}
@@ -79,14 +77,15 @@ public class ContentNegotiatingViewResolverTests {
 
 	@Test
 	public void getMediaTypeFromFilenameJaf() {
-		assertEquals("Invalid content type", new MediaType("text", "html"),
-				viewResolver.getMediaTypeFromFilename("test.html"));
+		assertEquals("Invalid content type", new MediaType("application", "vnd.ms-excel"),
+				viewResolver.getMediaTypeFromFilename("test.xls"));
 	}
 
 	@Test
 	public void getMediaTypeFromFilenameNoJaf() {
 		viewResolver.setUseJaf(false);
-		assertNull("Invalid content type", viewResolver.getMediaTypeFromFilename("test.html"));
+		assertEquals("Invalid content type", MediaType.APPLICATION_OCTET_STREAM,
+				viewResolver.getMediaTypeFromFilename("test.xls"));
 	}
 
 	@Test

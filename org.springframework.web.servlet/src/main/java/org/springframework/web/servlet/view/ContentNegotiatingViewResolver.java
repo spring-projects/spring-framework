@@ -130,7 +130,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private boolean ignoreAcceptHeader = false;
 
-	private boolean useJaf = true;
+	private boolean useJaf = jafPresent;
 
 	private ConcurrentMap<String, MediaType> mediaTypes = new ConcurrentHashMap<String, MediaType>();
 
@@ -421,10 +421,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		if (mediaType == null) {
 			String mimeType = getServletContext().getMimeType(filename);
 			if (StringUtils.hasText(mimeType)) {
-				mediaType = new MediaType(mimeType);
+				mediaType = MediaType.parseMediaType(mimeType);
 			}
-			else if (this.useJaf && jafPresent) {
-				mediaType = ActivationMediaTypeFactory.getMediaType(filename);
+			if (this.useJaf && (mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType))) {
+				MediaType jafMediaType = ActivationMediaTypeFactory.getMediaType(filename);
+				if (jafMediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(jafMediaType)) {
+					mediaType = jafMediaType;
+				}
 			}
 			if (mediaType != null) {
 				this.mediaTypes.putIfAbsent(extension, mediaType);
