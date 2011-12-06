@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ import org.springframework.util.StringUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write {@link Resource Resources}.
  *
- * <p>By default, this converter can read all media types. The Java Activation Framework (JAF) - if available - is used
- * to determine the {@code Content-Type} of written resources. If JAF is not available, {@code application/octet-stream}
- * is used.
+ * <p>By default, this converter can read all media types. The Java Activation Framework (JAF) -
+ * if available - is used to determine the {@code Content-Type} of written resources.
+ * If JAF is not available, {@code application/octet-stream} is used.
  *
  * @author Arjen Poutsma
  * @since 3.0.2
@@ -48,6 +48,7 @@ public class ResourceHttpMessageConverter implements HttpMessageConverter<Resour
 
 	private static final boolean jafPresent =
 			ClassUtils.isPresent("javax.activation.FileTypeMap", ResourceHttpMessageConverter.class.getClassLoader());
+
 
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		return Resource.class.isAssignableFrom(clazz);
