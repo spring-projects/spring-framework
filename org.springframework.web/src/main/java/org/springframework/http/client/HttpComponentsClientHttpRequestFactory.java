@@ -19,6 +19,10 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -35,10 +39,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.CoreConnectionPNames;
-
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.http.HttpMethod;
-import org.springframework.util.Assert;
+import org.apache.http.protocol.HttpContext;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that uses
@@ -126,11 +127,10 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
 	}
 
-
-	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+    public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
-		return new HttpComponentsClientHttpRequest(getHttpClient(), httpRequest);
+		return new HttpComponentsClientHttpRequest(getHttpClient(), httpRequest, createHttpContext(httpMethod, uri));
 	}
 
 	/**
@@ -168,6 +168,17 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	protected void postProcessHttpRequest(HttpUriRequest request) {
 	}
+
+    /**
+     * Template methods that creates a {@link HttpContext} for the given HTTP method and URI.
+     * <p>The default implementation returns {@code null}.
+     * @param httpMethod the HTTP method
+     * @param uri the URI
+     * @return the http context
+     */
+    protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
+        return null;
+    }
 
 	/**
 	 * Shutdown hook that closes the underlying

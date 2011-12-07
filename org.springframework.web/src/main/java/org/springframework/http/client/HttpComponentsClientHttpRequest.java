@@ -21,6 +21,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
@@ -28,9 +31,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HTTP;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.apache.http.protocol.HttpContext;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
@@ -49,10 +50,13 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 
 	private final HttpUriRequest httpRequest;
 
+    private final HttpContext httpContext;
 
-	public HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest) {
+
+    public HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
+        this.httpContext = httpContext;
 	}
 
 
@@ -81,7 +85,7 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 			HttpEntity requestEntity = new ByteArrayEntity(bufferedOutput);
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
-		HttpResponse httpResponse = this.httpClient.execute(this.httpRequest);
+		HttpResponse httpResponse = this.httpClient.execute(this.httpRequest, this.httpContext);
 		return new HttpComponentsClientHttpResponse(httpResponse);
 	}
 
