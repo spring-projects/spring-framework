@@ -512,9 +512,13 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	private Object convertForProperty(String propertyName, Object oldValue, Object newValue, PropertyDescriptor pd)
 			throws TypeMismatchException {
-		GenericTypeAwarePropertyDescriptor gpd = (GenericTypeAwarePropertyDescriptor) pd;
-		Class<?> beanClass = gpd.getBeanClass();
+
 		return convertIfNecessary(propertyName, oldValue, newValue, pd.getPropertyType(), new TypeDescriptor(property(pd)));
+	}
+
+	private Property property(PropertyDescriptor pd) {
+		GenericTypeAwarePropertyDescriptor typeAware = (GenericTypeAwarePropertyDescriptor) pd;
+		return new Property(typeAware.getBeanClass(), typeAware.getReadMethod(), typeAware.getWriteMethod());
 	}
 
 
@@ -970,7 +974,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					if (isExtractOldValueForEditor() && arrayIndex < Array.getLength(propValue)) {
 						oldValue = Array.get(propValue, arrayIndex);
 					}
-					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType, TypeDescriptor.nested(property(pd), tokens.keys.length));
+					Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(),
+							requiredType, TypeDescriptor.nested(property(pd), tokens.keys.length));
 					Array.set(propValue, arrayIndex, convertedValue);
 				}
 				catch (IndexOutOfBoundsException ex) {
@@ -984,12 +989,13 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						pd.getReadMethod(), tokens.keys.length);
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
-				int size = list.size();
 				Object oldValue = null;
-				if (isExtractOldValueForEditor() && index < size) {
+				if (isExtractOldValueForEditor() && index < list.size()) {
 					oldValue = list.get(index);
 				}
-				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType, TypeDescriptor.nested(property(pd), tokens.keys.length));
+				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(),
+						requiredType, TypeDescriptor.nested(property(pd), tokens.keys.length));
+				int size = list.size();
 				if (index >= size && index < this.autoGrowCollectionLimit) {
 					for (int i = size; i < index; i++) {
 						try {
@@ -1023,7 +1029,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				Map map = (Map) propValue;
 				// IMPORTANT: Do not pass full property name in here - property editors
 				// must not kick in for map keys but rather only for map values.
-				TypeDescriptor typeDescriptor = mapKeyType != null ? TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class);
+				TypeDescriptor typeDescriptor = (mapKeyType != null ?
+						TypeDescriptor.valueOf(mapKeyType) : TypeDescriptor.valueOf(Object.class));
 				Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
 				Object oldValue = null;
 				if (isExtractOldValueForEditor()) {
@@ -1031,8 +1038,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 				// Pass full property name and old value in here, since we want full
 				// conversion ability for map values.
-				Object convertedMapValue = convertIfNecessary(
-						propertyName, oldValue, pv.getValue(), mapValueType, TypeDescriptor.nested(property(pd), tokens.keys.length));
+				Object convertedMapValue = convertIfNecessary(propertyName, oldValue, pv.getValue(),
+						mapValueType, TypeDescriptor.nested(property(pd), tokens.keys.length));
 				map.put(convertedMapKey, convertedMapValue);
 			}
 			else {
@@ -1193,11 +1200,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		public String actualName;
 
 		public String[] keys;
-	}
-	
-	private Property property(PropertyDescriptor pd) {
-		GenericTypeAwarePropertyDescriptor typeAware = (GenericTypeAwarePropertyDescriptor) pd;
-		return new Property(typeAware.getBeanClass(), typeAware.getReadMethod(), typeAware.getWriteMethod());
 	}
 
 }

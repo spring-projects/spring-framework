@@ -27,11 +27,16 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * A description of a JavaBeans Property that allows us to avoid a dependency on java.beans.PropertyDescriptor.
- * java.beans is not available in a number of environments (e.g. Android, Java ME), so this is desirable.
- * Used to build a TypeDescriptor from a property location.
+ * A description of a JavaBeans Property that allows us to avoid a dependency on
+ * <code>java.beans.PropertyDescriptor</code>. The <code>java.beans</code> package
+ * is not available in a number of environments (e.g. Android, Java ME), so this is
+ * desirable for portability of Spring's core conversion facility.
+ *
+ * <p>Used to build a TypeDescriptor from a property location.
  * The built TypeDescriptor can then be used to convert from/to the property type.
+ *
  * @author Keith Donald
+ * @since 3.1
  * @see TypeDescriptor#TypeDescriptor(Property)
  * @see TypeDescriptor#nested(Property, int)
  */
@@ -49,6 +54,7 @@ public final class Property {
 
 	private final Annotation[] annotations;
 
+
 	public Property(Class<?> objectType, Method readMethod, Method writeMethod) {
 		this.objectType = objectType;
 		this.readMethod = readMethod;
@@ -58,72 +64,77 @@ public final class Property {
 		this.annotations = resolveAnnotations();
 	}
 
+
 	/**
 	 * The object declaring this property, either directly or in a superclass the object extends.
 	 */
 	public Class<?> getObjectType() {
-		return objectType;
+		return this.objectType;
 	}
 
 	/**
-	 * The name of the property e.g. 'foo'.
+	 * The name of the property: e.g. 'foo'
 	 */
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	/**
-	 * The property type e.g. java.lang.String.
+	 * The property type: e.g. <code>java.lang.String</code>
 	 */
 	public Class<?> getType() {
-		return methodParameter.getParameterType();
+		return this.methodParameter.getParameterType();
 	}
 
 	/**
-	 * The property getter method e.g. getFoo()
+	 * The property getter method: e.g. <code>getFoo()</code>
 	 */
 	public Method getReadMethod() {
-		return readMethod;
+		return this.readMethod;
 	}
 
 	/**
-	 * The property setter method e.g. setFoo(String).
+	 * The property setter method: e.g. <code>setFoo(String)</code>
 	 */
 	public Method getWriteMethod() {
-		return writeMethod;
+		return this.writeMethod;
 	}
+
 
 	// package private
 	
 	MethodParameter getMethodParameter() {
-		return methodParameter;
+		return this.methodParameter;
 	}
 
 	Annotation[] getAnnotations() {
-		return annotations;
+		return this.annotations;
 	}
+
 
 	// internal helpers
 	
 	private String resolveName() {
-		if (readMethod != null) {
-			int index = readMethod.getName().indexOf("get");
+		if (this.readMethod != null) {
+			int index = this.readMethod.getName().indexOf("get");
 			if (index != -1) {
 				index += 3;
-			} else {
-				index = readMethod.getName().indexOf("is");
+			}
+			else {
+				index = this.readMethod.getName().indexOf("is");
 				if (index == -1) {
 					throw new IllegalArgumentException("Not a getter method");
 				}
 				index += 2;
 			}
-			return StringUtils.uncapitalize(readMethod.getName().substring(index));
-		} else {
-			int index = writeMethod.getName().indexOf("set") + 3;
+			return StringUtils.uncapitalize(this.readMethod.getName().substring(index));
+		}
+		else {
+			int index = this.writeMethod.getName().indexOf("set") + 3;
 			if (index == -1) {
 				throw new IllegalArgumentException("Not a setter method");
 			}
-			return StringUtils.uncapitalize(writeMethod.getName().substring(index));
+			return StringUtils.uncapitalize(this.writeMethod.getName().substring(index));
 		}
 	}
 
@@ -204,7 +215,8 @@ public final class Property {
 	private Class<?> declaringClass() {
 		if (getReadMethod() != null) {
 			return getReadMethod().getDeclaringClass();
-		} else {
+		}
+		else {
 			return getWriteMethod().getDeclaringClass();
 		}
 	}

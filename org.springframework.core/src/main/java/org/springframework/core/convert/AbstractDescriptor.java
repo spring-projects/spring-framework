@@ -20,6 +20,8 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 /**
  * @author Keith Donald
  * @since 3.1
@@ -28,15 +30,15 @@ abstract class AbstractDescriptor {
 
 	private final Class<?> type;
 
+
 	protected AbstractDescriptor(Class<?> type) {
-		if (type == null) {
-			throw new IllegalArgumentException("type cannot be null");
-		}
+		Assert.notNull(type, "Type must not be null");
 		this.type = type;
 	}
 	
+
 	public Class<?> getType() {
-		return type;		
+		return this.type;
 	}
 
 	public TypeDescriptor getElementTypeDescriptor() {
@@ -73,27 +75,33 @@ abstract class AbstractDescriptor {
 		}
 	}
 
-	public abstract Annotation[] getAnnotations();
-
 	public AbstractDescriptor nested() {
 		if (isCollection()) {
 			Class<?> elementType = resolveCollectionElementType();
-			return elementType != null ? nested(elementType, 0) : null;
+			return (elementType != null ? nested(elementType, 0) : null);
 		}
 		else if (isArray()) {
 			return nested(getType().getComponentType(), 0);
 		}
 		else if (isMap()) {
 			Class<?> mapValueType = resolveMapValueType();
-			return mapValueType != null ? nested(mapValueType, 1) : null;
+			return (mapValueType != null ? nested(mapValueType, 1) : null);
+		}
+		else if (Object.class.equals(getType())) {
+			// could be a collection type but we don't know about its element type,
+			// so let's just assume there is an element type of type Object
+			return this;
 		}
 		else {
 			throw new IllegalStateException("Not a collection, array, or map: cannot resolve nested value types");
 		}
 	}
 	
+
 	// subclassing hooks
 	
+	public abstract Annotation[] getAnnotations();
+
 	protected abstract Class<?> resolveCollectionElementType();
 	
 	protected abstract Class<?> resolveMapKeyType();
@@ -102,6 +110,7 @@ abstract class AbstractDescriptor {
 	
 	protected abstract AbstractDescriptor nested(Class<?> type, int typeIndex);
 	
+
 	// internal helpers
 	
 	private boolean isCollection() {
