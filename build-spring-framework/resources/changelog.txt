@@ -12,6 +12,8 @@ Changes in version 3.0.7 (2011-12-19)
 * LocaleEditor and StringToLocaleConverter do not restrict variant part through validation
 * LinkedCaseInsensitiveMap overrides putAll method as well (for IBM JDK 1.6 compatibility)
 * fixed nested element conversion with a DataBinder + ConversionService + PropertyEditor
+* ConversionService prevents Converter from trying to convert to a subtype of its actual target type
+* ConversionService is able to work with "Collections.emptyList()" as target type (again)
 * CollectionCollection/MapToMapConverter preserve original Collection/Map if no converted elements
 * optimized DefaultListableBeanFactory's PropertyDescriptor caching for concurrent access
 * SpringValidatorAdapter accepts non-indexed set paths (for Hibernate Validator compatibility)
@@ -25,9 +27,11 @@ Changes in version 3.0.7 (2011-12-19)
 * RmiClientInterceptor detects nested SocketException as connect failure as well
 * fixed AbstractAsyncExecutionAspect's setExecutor method to correctly wrap in a TaskExecutorAdapter
 * Servlet/PortletContextResource's getFile prefers "file:" URL resolution over calling getRealPath
+* Portlet session mutex uses global session attribute to be shared among all portlets in the session
 * fixed ServletServerHttpRequest to reconstruct from "request.getParameterMap()" for form POST only
 * fixed @RequestMapping header matching to correctly process negated header conditions
 * added getObjectMapper() accessor to MappingJacksonHttpMessageConverter
+* ResourceHttpRequestHandler sends content without content-type header if no media type found
 * AbstractCachingViewResolver allows for caching unresolved view names ("cacheUnresolved"=true)
 * fixed "formMultiSelect"/"formCheckboxes" FreeMarker macros to compare against actual field value
 
