@@ -22,7 +22,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -1551,6 +1557,20 @@ public class DataBinderTests extends TestCase {
 		}
 	}
 
+	public void testNestedGrowingList() {
+		Form form = new Form();
+		DataBinder binder = new DataBinder(form, "form");
+		MutablePropertyValues mpv = new MutablePropertyValues();
+		mpv.add("f[list][0]", "firstValue");
+		mpv.add("f[list][1]", "secondValue");
+		binder.bind(mpv);
+		assertFalse(binder.getBindingResult().hasErrors());
+		List<Object> list = (List<Object>) form.getF().get("list");
+		assertEquals("firstValue", list.get(0));
+		assertEquals("secondValue", list.get(1));
+		assertEquals(2, list.size());
+	  }
+
 
 	private static class BeanWithIntegerList {
 
@@ -1642,6 +1662,96 @@ public class DataBinderTests extends TestCase {
 			if (tb.getAge() < 32) {
 				errors.rejectValue("age", "TOO_YOUNG", "simply too young");
 			}
+		}
+	}
+
+
+	private static class GrowingList<E> extends AbstractList<E> {
+
+		private List<E> list;
+
+		public GrowingList() {
+			this.list = new ArrayList<E>();
+		}
+
+		public List<E> getWrappedList() {
+			return list;
+		}
+
+		public E get(int index) {
+			if (index >= list.size()) {
+				for (int i = list.size(); i < index; i++) {
+					list.add(null);
+				}
+				list.add(null);
+				return null;
+			}
+			else {
+				return list.get(index);
+			}
+		}
+
+		public int size() {
+			return list.size();
+		}
+
+		public boolean add(E o) {
+			return list.add(o);
+		}
+
+		public void add(int index, E element) {
+			list.add(index, element);
+		}
+
+		public boolean addAll(int index, Collection<? extends E> c) {
+			return list.addAll(index, c);
+		}
+
+		public void clear() {
+			list.clear();
+		}
+
+		public int indexOf(Object o) {
+			return list.indexOf(o);
+		}
+
+		public Iterator<E> iterator() {
+			return list.iterator();
+		}
+
+		public int lastIndexOf(Object o) {
+			return list.lastIndexOf(o);
+		}
+
+		public ListIterator<E> listIterator() {
+			return list.listIterator();
+		}
+
+		public ListIterator<E> listIterator(int index) {
+			return list.listIterator(index);
+		}
+
+		public E remove(int index) {
+			return list.remove(index);
+		}
+
+		public E set(int index, E element) {
+			return list.set(index, element);
+		}
+	}
+
+
+	private static class Form {
+
+		private final Map<String, Object> f;
+
+		public Form() {
+			f = new HashMap<String, Object>();
+			f.put("list", new GrowingList<Object>());
+		}
+
+		public Map<String, Object> getF() {
+			return f;
 		}
 	}
 

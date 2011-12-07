@@ -977,13 +977,13 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						pd.getReadMethod(), tokens.keys.length);
 				List list = (List) propValue;
 				int index = Integer.parseInt(key);
-				int size = list.size();
 				Object oldValue = null;
-				if (isExtractOldValueForEditor() && index < size) {
+				if (isExtractOldValueForEditor() && index < list.size()) {
 					oldValue = list.get(index);
 				}
 				Object convertedValue = convertIfNecessary(propertyName, oldValue, pv.getValue(), requiredType,
 						new PropertyTypeDescriptor(pd, new MethodParameter(pd.getReadMethod(), -1), requiredType));
+				int size = list.size();
 				if (index >= size && index < this.autoGrowCollectionLimit) {
 					for (int i = size; i < index; i++) {
 						try {
