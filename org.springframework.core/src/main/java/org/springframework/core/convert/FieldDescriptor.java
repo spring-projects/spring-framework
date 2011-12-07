@@ -53,7 +53,7 @@ class FieldDescriptor extends AbstractDescriptor {
 
 	@Override
 	public Annotation[] getAnnotations() {
-		return TypeDescriptor.nullSafeAnnotations(field.getAnnotations());
+		return TypeDescriptor.nullSafeAnnotations(this.field.getAnnotations());
 	}
 	
 	@Override

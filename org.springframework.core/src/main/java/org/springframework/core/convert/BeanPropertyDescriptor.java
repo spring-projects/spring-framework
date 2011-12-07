@@ -20,6 +20,10 @@ import java.lang.annotation.Annotation;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 
+/**
+ * @author Keith Donald
+ * @since 3.1
+ */
 class BeanPropertyDescriptor extends AbstractDescriptor {
 
 	private final Property property;
@@ -28,6 +32,7 @@ class BeanPropertyDescriptor extends AbstractDescriptor {
 	
 	private final Annotation[] annotations;
 	
+
 	public BeanPropertyDescriptor(Property property) {
 		super(property.getType());
 		this.property = property;
@@ -35,24 +40,25 @@ class BeanPropertyDescriptor extends AbstractDescriptor {
 		this.annotations = property.getAnnotations();
 	}
 
+
 	@Override
 	public Annotation[] getAnnotations() {
-		return annotations;
+		return this.annotations;
 	}
 	
 	@Override
 	protected Class<?> resolveCollectionElementType() {
-		return GenericCollectionTypeResolver.getCollectionParameterType(methodParameter);
+		return GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter);
 	}
 
 	@Override
 	protected Class<?> resolveMapKeyType() {
-		return GenericCollectionTypeResolver.getMapKeyParameterType(methodParameter);
+		return GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter);
 	}
 
 	@Override
 	protected Class<?> resolveMapValueType() {
-		return GenericCollectionTypeResolver.getMapValueParameterType(methodParameter);
+		return GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter);
 	}
 
 	@Override
@@ -60,9 +66,10 @@ class BeanPropertyDescriptor extends AbstractDescriptor {
 		MethodParameter methodParameter = new MethodParameter(this.methodParameter);
 		methodParameter.increaseNestingLevel();
 		methodParameter.setTypeIndexForCurrentLevel(typeIndex);			
-		return new BeanPropertyDescriptor(type, property, methodParameter, annotations);
+		return new BeanPropertyDescriptor(type, this.property, methodParameter, this.annotations);
 	}
 	
+
 	// internal
 
 	private BeanPropertyDescriptor(Class<?> type, Property propertyDescriptor, MethodParameter methodParameter, Annotation[] annotations) {

@@ -164,12 +164,12 @@ public class TypeDescriptor {
 
 	/**
 	 * Creates a type descriptor for a nested type declared within the field.
-	 * For example, if the field is a List&lt;String&gt; and the nestingLevel is 1, the nested type descriptor will be String.class.
-	 * If the field is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class. 
-	 * If the field is a Map<Integer, String> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value. 
-	 * If the field is a List<Map<Integer, String>> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
-	 * Returns null if a nested type cannot be obtained because it was not declared.
-	 * For example, if the field is a List&lt;?&gt;, the nested type descriptor returned will be null.
+	 * <p>For example, if the field is a <code>List&lt;String&gt;</code> and the nestingLevel is 1, the nested type descriptor will be <code>String.class</code>.
+	 * If the field is a <code>List&lt;List&lt;String&gt;&gt;</code> and the nestingLevel is 2, the nested type descriptor will also be a <code>String.class</code>.
+	 * If the field is a <code>Map&lt;Integer, String&gt;</code> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value.
+	 * If the field is a <code>List&lt;Map&lt;Integer, String&gt;&gt;</code> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
+	 * Returns <code>null</code> if a nested type cannot be obtained because it was not declared.
+	 * For example, if the field is a <code>List&lt;?&gt;</code>, the nested type descriptor returned will be <code>null</code>.
 	 * @param field the field
 	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the field.
 	 * @return the nested type descriptor at the specified nestingLevel, or null if it could not be obtained
@@ -181,15 +181,15 @@ public class TypeDescriptor {
 
 	/**
 	 * Creates a type descriptor for a nested type declared within the property.
-	 * For example, if the property is a List&lt;String&gt; and the nestingLevel is 1, the nested type descriptor will be String.class.
-	 * If the property is a List<List<String>> and the nestingLevel is 2, the nested type descriptor will also be a String.class. 
-	 * If the field is a Map<Integer, String> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value. 
-	 * If the property is a List<Map<Integer, String>> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
-	 * Returns null if a nested type cannot be obtained because it was not declared.
-	 * For example, if the property is a List&lt;?&gt;, the nested type descriptor returned will be null.
+	 * <p>For example, if the property is a <code>List&lt;String&gt;</code> and the nestingLevel is 1, the nested type descriptor will be <code>String.class</code>.
+	 * If the property is a <code>List&lt;List&lt;String&gt;&gt;</code> and the nestingLevel is 2, the nested type descriptor will also be a <code>String.class</code>.
+	 * If the property is a <code>Map&lt;Integer, String&gt;</code> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value.
+	 * If the property is a <code>List&lt;Map&lt;Integer, String&gt;&gt;</code> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
+	 * Returns <code>null</code> if a nested type cannot be obtained because it was not declared.
+	 * For example, if the property is a <code>List&lt;?&gt;</code>, the nested type descriptor returned will be <code>null</code>.
 	 * @param property the property
 	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the property.
-	 * @return the nested type descriptor at the specified nestingLevel, or null if it could not be obtained
+	 * @return the nested type descriptor at the specified nestingLevel, or <code>null</code> if it could not be obtained
 	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types.
 	 */
 	public static TypeDescriptor nested(Property property, int nestingLevel) {
