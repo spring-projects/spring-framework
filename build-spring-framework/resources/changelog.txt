@@ -6,11 +6,21 @@ http://www.springsource.org
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------
 
+* ConversionService is able to work with "Collections.emptyList()" as target type (again)
 * fixed QuartzJobBean to work with Quartz 2.0/2.1 as well
+* added "mappingResources" property to LocalContainerEntityManagerFactoryBean (pointing to orm.xml)
+* optimized AnnotationTransactionAspect and AnnotationCacheAspect pointcuts to avoid runtime checks
+* renamed @CacheEvict's "afterInvocation" attribute to "beforeInvocation" (for better readability)
+* added SmartValidator interface with general support for validation hints
+* added custom @Valid annotation with support for JSR-303 validation groups
+* JSR-303 SpringValidatorAdapter and MVC data binding provide support for validation groups
+* restored SpringValidatorAdapter's ability to handle bean constraints with property paths
+* ResourceHttpRequestHandler sends content without content-type header if no media type found
+* ResourceHttpRequestHandler and ContentNegotiatingViewResolver use consistent mime type resolution
+* Portlet MVC annotation mapping allows for distributing action names across controllers
 * added String constants to MediaType
-* renamed attribute @CacheEvict#afterInvocation to beforeInvocation (for better readability)
 
-
+ 
 Changes in version 3.1 RC2 (2011-11-28)
 ---------------------------------------
 
@@ -38,6 +48,7 @@ Changes in version 3.1 RC2 (2011-11-28)
 * RmiClientInterceptor detects nested SocketException as connect failure as well
 * fixed StandardServlet/PortletEnvironment to check for JNDI (for Google App Engine compatibility)
 * Servlet/PortletContextResource's getFile prefers "file:" URL resolution over calling getRealPath
+* Portlet session mutex uses global session attribute to be shared among all portlets in the session
 * using original request URI in FlashMap matching logic to account for URL rewriting
 * now supporting target request with multiple parameter values in FlashMap matching logic
 * fixed issue in SimpleMappingExceptionResolver causing exception when setting "statusCodes" property
@@ -69,6 +80,7 @@ Changes in version 3.1 RC1 (2011-10-11)
 * prepared Spring's DataSource and RowSet adapters for forward compatibility with JDBC 4.1
 * introduced ForkJoinPoolFactoryBean for Java 7 (alternative: add new jsr166.jar to Java 6)
 * introduced extended WritableResource interface
+* ConversionService prevents Converter from trying to convert to a subtype of its actual target type
 * CollectionCollection/MapToMapConverter preserve original Collection/Map if no converted elements
 * DefaultListableBeanFactory is only deserializable through a SerializedBeanFactoryReference
 * DefaultListableBeanFactory's getBean(name, type) attempts type conversion if necessary
