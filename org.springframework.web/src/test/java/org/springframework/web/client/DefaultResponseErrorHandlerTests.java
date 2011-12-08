@@ -19,16 +19,17 @@ package org.springframework.web.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /** @author Arjen Poutsma */
 public class DefaultResponseErrorHandlerTests {
@@ -89,6 +90,23 @@ public class DefaultResponseErrorHandlerTests {
 		expect(response.getStatusText()).andReturn("Not Found");
 		expect(response.getHeaders()).andReturn(headers);
 		expect(response.getBody()).andThrow(new IOException());
+
+		replay(response);
+
+		handler.handleError(response);
+
+		verify(response);
+	}
+
+	@Test(expected = HttpClientErrorException.class)
+	public void handleErrorNullResponse() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+
+		expect(response.getStatusCode()).andReturn(HttpStatus.NOT_FOUND);
+		expect(response.getStatusText()).andReturn("Not Found");
+		expect(response.getHeaders()).andReturn(headers);
+		expect(response.getBody()).andReturn(null);
 
 		replay(response);
 

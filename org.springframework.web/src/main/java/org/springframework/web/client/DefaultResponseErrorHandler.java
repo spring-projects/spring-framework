@@ -17,6 +17,7 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpStatus;
@@ -82,11 +83,15 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	private byte[] getResponseBody(ClientHttpResponse response) {
 		try {
-			return FileCopyUtils.copyToByteArray(response.getBody());
+            InputStream responseBody = response.getBody();
+            if (responseBody != null) {
+                return FileCopyUtils.copyToByteArray(responseBody);
+            }
 		}
 		catch (IOException ex) {
-			return new byte[0];
+            // ignore
 		}
+        return new byte[0];
 	}
 
 }
