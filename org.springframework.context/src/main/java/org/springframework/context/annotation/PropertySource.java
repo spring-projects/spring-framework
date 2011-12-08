@@ -54,7 +54,17 @@ import java.lang.annotation.Target;
  * configuration class and then used when populating the {@code TestBean} object. Given
  * the configuration above, a call to {@code testBean.getName()} will return "myTestBean".
  *
- * <h3>Resolving placeholders within @PropertySource resource locations</h3>
+ * <h3>Resolving ${...} placeholders in {@code <bean>} and {@code @Value} annotations</h3>
+ * In order to resolve ${...} placeholders in {@code <bean>} definitions or {@code @Value}
+ * annotations using properties from a {@code PropertySource}, one must register
+ * a {@code PropertySourcesPlaceholderConfigurer}. This happens automatically when using
+ * {@code <context:property-placeholder>} in XML, but must be explicitly registered using
+ * a {@code static} {@code @Bean} method when using {@code @Configuration} classes. See
+ * the "Working with externalized values" section of @{@link Configuration} Javadoc and
+ * "a note on BeanFactoryPostProcessor-returning @Bean methods" of @{@link Bean} Javadoc
+ * for details and examples.
+ *
+ * <h3>Resolving ${...} placeholders within {@code @PropertySource} resource locations</h3>
  * Any ${...} placeholders present in a {@code @PropertySource} {@linkplain #value()
  * resource location} will be resolved against the set of property sources already
  * registered against the environment.  For example:
