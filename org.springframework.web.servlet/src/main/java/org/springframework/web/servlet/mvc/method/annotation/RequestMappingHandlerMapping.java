@@ -44,13 +44,24 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private boolean useSuffixPatternMatch = true;
 
+	private boolean useTrailingSlashMatch = true;
+	
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
-	 * requests. If enabled a method mapped to "/users" also matches to 
-	 * "/users.*". The default value is "true". 
+	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
+	 * <p>The default value is {@code true}. 
 	 */
 	public void setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
+	}
+	
+	/**
+	 * Whether to match to URLs irrespective of the presence of a trailing slash.
+	 * If enabled a method mapped to "/users" also matches to "/users/".
+	 * <p>The default value is {@code true}.
+	 */
+	public void setUseTrailingSlashMatch(boolean useTrailingSlashMatch) {
+		this.useTrailingSlashMatch = useTrailingSlashMatch;
 	}
 
 	/**
@@ -58,6 +69,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	public boolean useSuffixPatternMatch() {
 		return this.useSuffixPatternMatch;
+	}
+	/**
+	 * Whether to match to URLs irrespective of the presence of a trailing  slash.
+	 */
+	public boolean useTrailingSlashMatch() {
+		return this.useTrailingSlashMatch;
 	}
 
 	/**
@@ -125,7 +142,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private RequestMappingInfo createRequestMappingInfo(RequestMapping annotation, RequestCondition<?> customCondition) {
 		return new RequestMappingInfo(
 				new PatternsRequestCondition(annotation.value(), 
-						getUrlPathHelper(), getPathMatcher(), useSuffixPatternMatch),
+						getUrlPathHelper(), getPathMatcher(), this.useSuffixPatternMatch, this.useTrailingSlashMatch),
 				new RequestMethodsRequestCondition(annotation.method()),
 				new ParamsRequestCondition(annotation.params()),
 				new HeadersRequestCondition(annotation.headers()),

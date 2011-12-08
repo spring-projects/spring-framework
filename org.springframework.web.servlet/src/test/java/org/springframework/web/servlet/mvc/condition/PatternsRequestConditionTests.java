@@ -106,7 +106,7 @@ public class PatternsRequestConditionTests {
 		assertNotNull(match);
 		assertEquals("/{foo}.*", match.getPatterns().iterator().next());
 
-		condition = new PatternsRequestCondition(new String[] {"/{foo}"}, null, null, false);
+		condition = new PatternsRequestCondition(new String[] {"/{foo}"}, null, null, false, false);
 		match = condition.getMatchingCondition(request);
 
 		assertNotNull(match);
@@ -121,15 +121,19 @@ public class PatternsRequestConditionTests {
 		PatternsRequestCondition match = condition.getMatchingCondition(request);
 
 		assertNotNull(match);
-		assertEquals("/foo/", match.getPatterns().iterator().next());
+		assertEquals("Should match by default", "/foo/", match.getPatterns().iterator().next());
 		
-		boolean useSuffixPatternMatch = false;
-		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, null, useSuffixPatternMatch);
+		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, null, false, true);
 		match = condition.getMatchingCondition(request);
 
 		assertNotNull(match);
 		assertEquals("Trailing slash should be insensitive to useSuffixPatternMatch settings (SPR-6164, SPR-5636)", 
 				"/foo/", match.getPatterns().iterator().next());
+
+		condition = new PatternsRequestCondition(new String[] {"/foo"}, null, null, false, false);
+		match = condition.getMatchingCondition(request);
+
+		assertNull(match);
 	}
 
 	@Test

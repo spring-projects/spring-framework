@@ -19,6 +19,7 @@ Changes in version 3.1 GA (2011-12-12)
 * ResourceHttpRequestHandler and ContentNegotiatingViewResolver use consistent mime type resolution
 * Portlet MVC annotation mapping allows for distributing action names across controllers
 * added String constants to MediaType
+* add useTrailingSlashMatch property to RequestMappingHandlerMapping
 
  
 Changes in version 3.1 RC2 (2011-11-28)
