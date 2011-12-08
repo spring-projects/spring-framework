@@ -2,11 +2,15 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:p="http://www.springframework.org/schema/p"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
-       		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+       		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+       		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-	<bean id="annotationSource" class="org.springframework.cache.annotation.AnnotationCacheOperationSource"/>
-	
+
+	<!--
 	<aop:config>
 		<aop:advisor advice-ref="debugInterceptor" pointcut="execution(* *..CacheableService.*(..))" order="1"/>
 	</aop:config>
@@ -15,7 +19,12 @@
 		<property name="cacheManager" ref="cacheManager"/>
 		<property name="cacheOperationSources" ref="annotationSource"/>
 	</bean>
-	
+
+	<bean id="annotationSource" class="org.springframework.cache.annotation.AnnotationCacheOperationSource"/>
+	-->
+	 
+	<cache:annotation-driven mode="aspectj"/>
+
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
 			<set>
