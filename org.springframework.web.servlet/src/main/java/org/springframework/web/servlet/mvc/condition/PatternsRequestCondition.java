@@ -50,13 +50,15 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 	private final boolean useSuffixPatternMatch;
 
+	private final boolean useTrailingSlashMatch;
+	
 	/**
 	 * Creates a new instance with the given URL patterns.
 	 * Each pattern that is not empty and does not start with "/" is pre-pended with "/".
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request. 
 	 */
 	public PatternsRequestCondition(String... patterns) {
-		this(asList(patterns), null, null, true);
+		this(asList(patterns), null, null, true, true);
 	}
 
 	/**
@@ -66,12 +68,14 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param urlPathHelper a {@link UrlPathHelper} for determining the lookup path for a request
 	 * @param pathMatcher a {@link PathMatcher} for pattern path matching
 	 * @param useSuffixPatternMatch whether to enable matching by suffix (".*")
+	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
 	 */
 	public PatternsRequestCondition(String[] patterns, 
 									UrlPathHelper urlPathHelper, 
 									PathMatcher pathMatcher, 
-									boolean useSuffixPatternMatch) {
-		this(asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch);
+									boolean useSuffixPatternMatch,
+									boolean useTrailingSlashMatch) {
+		this(asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch, useTrailingSlashMatch);
 	}
 
 	/**
@@ -80,11 +84,13 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	private PatternsRequestCondition(Collection<String> patterns, 
 									 UrlPathHelper urlPathHelper, 
 									 PathMatcher pathMatcher, 
-									 boolean useSuffixPatternMatch) {
+									 boolean useSuffixPatternMatch,
+									 boolean useTrailingSlashMatch) {
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
 		this.urlPathHelper = urlPathHelper != null ? urlPathHelper : new UrlPathHelper();
 		this.pathMatcher = pathMatcher != null ? pathMatcher : new AntPathMatcher();
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
+		this.useTrailingSlashMatch = useTrailingSlashMatch;
 	}
 
 	private static List<String> asList(String... patterns) {
@@ -106,12 +112,12 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	}
 
 	public Set<String> getPatterns() {
-		return patterns;
+		return this.patterns;
 	}
 
 	@Override
 	protected Collection<String> getContent() {
-		return patterns;
+		return this.patterns;
 	}
 
 	@Override
@@ -134,7 +140,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
 			for (String pattern1 : this.patterns) {
 				for (String pattern2 : other.patterns) {
-					result.add(pathMatcher.combine(pattern1, pattern2));
+					result.add(this.pathMatcher.combine(pattern1, pattern2));
 				}
 			}
 		}
@@ -147,7 +153,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		else {
 			result.add("");
 		}
-		return new PatternsRequestCondition(result, urlPathHelper, pathMatcher, useSuffixPatternMatch);
+		return new PatternsRequestCondition(result, this.urlPathHelper, this.pathMatcher, this.useSuffixPatternMatch,
+				this.useTrailingSlashMatch);
 	}
 
 	/**
@@ -170,10 +177,10 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * 		or {@code null} if no patterns match.
 	 */
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (patterns.isEmpty()) {
+		if (this.patterns.isEmpty()) {
 			return this;
 		}
-		String lookupPath = urlPathHelper.getLookupPathForRequest(request);
+		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
 		List<String> matches = new ArrayList<String>();
 		for (String pattern : patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
@@ -181,27 +188,30 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 				matches.add(match);
 			}
 		}
-		Collections.sort(matches, pathMatcher.getPatternComparator(lookupPath));
+		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
 		return matches.isEmpty() ? null : 
-			new PatternsRequestCondition(matches, urlPathHelper, pathMatcher, useSuffixPatternMatch);
+			new PatternsRequestCondition(matches, this.urlPathHelper, this.pathMatcher, this.useSuffixPatternMatch,
+					this.useTrailingSlashMatch);
 	}
 
 	private String getMatchingPattern(String pattern, String lookupPath) {
 		if (pattern.equals(lookupPath)) {
 			return pattern;
 		}
-		if (useSuffixPatternMatch) {
+		if (this.useSuffixPatternMatch) {
 			boolean hasSuffix = pattern.indexOf('.') != -1;
-			if (!hasSuffix && pathMatcher.match(pattern + ".*", lookupPath)) {
+			if (!hasSuffix && this.pathMatcher.match(pattern + ".*", lookupPath)) {
 				return pattern + ".*";
 			}
 		}
-		if (pathMatcher.match(pattern, lookupPath)) {
+		if (this.pathMatcher.match(pattern, lookupPath)) {
 			return pattern;
 		}
 		boolean endsWithSlash = pattern.endsWith("/");
-		if (!endsWithSlash && pathMatcher.match(pattern + "/", lookupPath)) {
-			return pattern +"/";
+		if (this.useTrailingSlashMatch) {
+			if (!endsWithSlash && this.pathMatcher.match(pattern + "/", lookupPath)) {
+				return pattern +"/";
+			}
 		}
 		return null;
 	}
@@ -219,8 +229,8 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * the best matches on top.
 	 */
 	public int compareTo(PatternsRequestCondition other, HttpServletRequest request) {
-		String lookupPath = urlPathHelper.getLookupPathForRequest(request);
-		Comparator<String> patternComparator = pathMatcher.getPatternComparator(lookupPath);
+		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);
 
 		Iterator<String> iterator = patterns.iterator();
 		Iterator<String> iteratorOther = other.patterns.iterator();
