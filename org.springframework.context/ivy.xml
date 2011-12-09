@@ -51,11 +51,7 @@
 		<dependency org="org.beanshell" name="com.springsource.bsh" rev="2.0.0.b4" conf="optional, beanshell->compile"/>
 		<dependency org="org.codehaus.groovy" name="com.springsource.org.codehaus.groovy" rev="1.6.5" conf="optional, groovy->compile"/>
 		<dependency org="org.codehaus.jsr166-mirror" name="com.springsource.jsr166" rev="1.7.0" conf="provided->compile"/>
-		<!-- the following works -->
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.1.0.GA" conf="optional->compile"/>
-		<!-- the following upgrade to 4.2.0.Final *should* work, but results in NoClassDefFound errors for net.sf.ehcache.store.MemoryStoreEvictionPolicy
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.2.0.Final" conf="optional->compile"/>
-		-->
 		<dependency org="org.joda" name="com.springsource.org.joda.time" rev="1.6.0" conf="optional->compile"/>
 		<dependency org="org.jruby" name="com.springsource.org.jruby" rev="1.4.0" conf="optional, jruby->compile"/>
 		<dependency org="org.springframework" name="org.springframework.asm" rev="latest.integration" conf="compile->compile"/>
@@ -74,7 +70,7 @@
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="${junit.version}" conf="test->runtime"/>
 		<dependency org="org.hamcrest" name="com.springsource.org.hamcrest" rev="1.1.0" conf="test->runtime"/>
-		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="${slf4j.version}" conf="test->runtime"/>
+		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.6.1" conf="test->runtime"/>
 	</dependencies>
 
 </ivy-module>

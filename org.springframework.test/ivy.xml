@@ -36,7 +36,7 @@
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.1.GA" conf="test->compile"/>
 		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="${junit.version}" conf="optional->compile"/>
-		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="${slf4j.version}" conf="test->compile"/>
+		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.5.3" conf="test->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration" conf="optional->compile"/>
