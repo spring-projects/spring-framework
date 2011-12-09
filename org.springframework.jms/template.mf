@@ -11,6 +11,7 @@ Import-Template:
  org.aopalliance.*;version="[1.0.0, 2.0.0)";resolution:=optional,
  org.apache.commons.logging.*;version="[1.1.1, 2.0.0)",
  org.apache.commons.pool.*;version="[1.3.0, 2.0.0)";resolution:=optional,
+ org.codehaus.jackson.*;version="[1.4.2, 2.0.0)";resolution:=optional,
  org.springframework.aop.*;version=${spring.osgi.range};resolution:=optional,
  org.springframework.beans.*;version=${spring.osgi.range},
  org.springframework.context.*;version=${spring.osgi.range};resolution:=optional,
