@@ -47,7 +47,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
-import org.springframework.validation.annotation.Valid;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -450,7 +450,7 @@ public class MvcNamespaceTests {
 		private boolean recordedValidationError;
 		
 		@RequestMapping
-		public void testBind(@RequestParam @DateTimeFormat(iso=ISO.DATE) Date date, @Valid(MyGroup.class) TestBean bean, BindingResult result) {
+		public void testBind(@RequestParam @DateTimeFormat(iso=ISO.DATE) Date date, @Validated(MyGroup.class) TestBean bean, BindingResult result) {
 			this.recordedValidationError = (result.getErrorCount() == 1);
 		}
 	}

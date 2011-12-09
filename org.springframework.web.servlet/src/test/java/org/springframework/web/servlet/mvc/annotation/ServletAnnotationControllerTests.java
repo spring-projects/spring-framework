@@ -103,7 +103,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.annotation.Valid;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -2325,7 +2325,7 @@ public class ServletAnnotationControllerTests {
 
 		@Override
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") @Valid(MyGroup.class) TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute("myCommand") @Validated(MyGroup.class) TestBean tb, BindingResult errors, ModelMap model) {
 			if (!errors.hasFieldErrors("validCountry")) {
 				throw new IllegalStateException("Declarative validation not applied");
 			}
@@ -2383,7 +2383,7 @@ public class ServletAnnotationControllerTests {
 
 		@Override
 		@RequestMapping("/myPath.do")
-		public String myHandle(@ModelAttribute("myCommand") @Valid(MyGroup.class) TestBean tb, BindingResult errors, ModelMap model) {
+		public String myHandle(@ModelAttribute("myCommand") @Validated(MyGroup.class) TestBean tb, BindingResult errors, ModelMap model) {
 			if (!errors.hasFieldErrors("sex")) {
 				throw new IllegalStateException("requiredFields not applied");
 			}
@@ -2410,8 +2410,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MyGroup {
+	public interface MyGroup {
 	}
 
 	private static class MyWebBindingInitializer implements WebBindingInitializer {

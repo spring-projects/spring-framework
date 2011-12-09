@@ -71,7 +71,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getParameterType());
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation annot : annotations) {
-			if ("Valid".equals(annot.annotationType().getSimpleName())) {
+			if (annot.annotationType().getSimpleName().startsWith("Valid")) {
 				String name = Conventions.getVariableNameForParameter(parameter);
 				WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
 				Object hints = AnnotationUtils.getValue(annot);

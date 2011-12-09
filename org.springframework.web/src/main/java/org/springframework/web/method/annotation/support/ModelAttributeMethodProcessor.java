@@ -149,7 +149,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation annot : annotations) {
-			if ("Valid".equals(annot.annotationType().getSimpleName())) {
+			if (annot.annotationType().getSimpleName().startsWith("Valid")) {
 				Object hints = AnnotationUtils.getValue(annot);
 				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
 			}

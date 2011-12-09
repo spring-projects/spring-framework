@@ -295,7 +295,7 @@ public class HandlerMethodInvoker {
 				else if (Value.class.isInstance(paramAnn)) {
 					defaultValue = ((Value) paramAnn).value();
 				}
-				else if ("Valid".equals(paramAnn.annotationType().getSimpleName())) {
+				else if (paramAnn.annotationType().getSimpleName().startsWith("Valid")) {
 					validate = true;
 					Object value = AnnotationUtils.getValue(paramAnn);
 					validationHints = (value instanceof Object[] ? (Object[]) value : new Object[] {value});

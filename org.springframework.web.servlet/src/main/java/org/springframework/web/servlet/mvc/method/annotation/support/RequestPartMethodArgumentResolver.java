@@ -138,7 +138,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 				if (arg != null) {
 					Annotation[] annotations = parameter.getParameterAnnotations();
 					for (Annotation annot : annotations) {
-						if ("Valid".equals(annot.annotationType().getSimpleName())) {
+						if (annot.annotationType().getSimpleName().startsWith("Valid")) {
 							WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
 							Object hints = AnnotationUtils.getValue(annot);
 							binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
