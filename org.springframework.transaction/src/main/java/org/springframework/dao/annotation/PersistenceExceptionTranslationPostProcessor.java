@@ -86,7 +86,7 @@ public class PersistenceExceptionTranslationPostProcessor extends ProxyConfig
 	 * @param repositoryAnnotationType the desired annotation type
 	 */
 	public void setRepositoryAnnotationType(Class<? extends Annotation> repositoryAnnotationType) {
-		Assert.notNull(repositoryAnnotationType, "'requiredAnnotationType' must not be null");
+		Assert.notNull(repositoryAnnotationType, "'repositoryAnnotationType' must not be null");
 		this.repositoryAnnotationType = repositoryAnnotationType;
 	}
 
