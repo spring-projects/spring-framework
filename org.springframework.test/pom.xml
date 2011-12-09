@@ -76,7 +76,7 @@
     <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-core</artifactId>
-      <version>3.3.1.GA</version>
+      <version>3.6.0.Final</version>
       <optional>true</optional>
       <scope>test</scope>
     </dependency>
