@@ -103,7 +103,7 @@ public abstract class TransactionAspectUtils {
 	 * value (through &lt;qualifier<&gt; or @Qualifier)
 	 */
 	private static boolean isQualifierMatch(String qualifier, String beanName, ConfigurableListableBeanFactory bf) {
-		if (bf.containsBeanDefinition(beanName)) {
+		if (bf.containsBean(beanName)) {
 			BeanDefinition bd = bf.getMergedBeanDefinition(beanName);
 			if (bd instanceof AbstractBeanDefinition) {
 				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
