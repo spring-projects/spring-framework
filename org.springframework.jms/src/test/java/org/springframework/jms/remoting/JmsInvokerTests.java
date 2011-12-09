@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.jms.remoting;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Enumeration;
-
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -70,10 +69,10 @@ public class JmsInvokerTests extends TestCase {
 		queueControl = MockControl.createControl(Queue.class);
 		mockQueue = (Queue) queueControl.getMock();
 
-		mockConnectionFactory.createQueueConnection();
+		mockConnectionFactory.createConnection();
 		connectionFactoryControl.setReturnValue(mockConnection, 8);
 
-		mockConnection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+		mockConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		connectionControl.setReturnValue(mockSession, 8);
 
 		mockConnection.start();
@@ -409,6 +408,6 @@ public class JmsInvokerTests extends TestCase {
 		public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
 			return new MockObjectMessage((Serializable) object);
 		}
-	};
+	}
 
 }
