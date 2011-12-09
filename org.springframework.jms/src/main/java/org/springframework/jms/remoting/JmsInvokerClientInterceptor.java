@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.remoting.support.DefaultRemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocation;
 import org.springframework.remoting.support.RemoteInvocationFactory;
 import org.springframework.remoting.support.RemoteInvocationResult;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a
@@ -73,6 +74,8 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * @see org.springframework.jms.remoting.JmsInvokerProxyFactoryBean
  */
 public class JmsInvokerClientInterceptor implements MethodInterceptor, InitializingBean {
+
+	private static final boolean jms11Available = ClassUtils.hasMethod(ConnectionFactory.class, "createConnection");
 
 	private ConnectionFactory connectionFactory;
 
@@ -193,7 +196,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 		}
 
 		RemoteInvocation invocation = createRemoteInvocation(methodInvocation);
-		RemoteInvocationResult result = null;
+		RemoteInvocationResult result;
 		try {
 			result = executeRequest(invocation);
 		}
@@ -255,39 +258,27 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	}
 
 	/**
-	 * Create a new JMS Connection for this JMS invoker,
-	 * ideally a <code>javax.jms.QueueConnection</code>.
-	 * <p>The default implementation uses the
-	 * <code>javax.jms.QueueConnectionFactory</code> API if available,
-	 * falling back to a standard JMS 1.1 ConnectionFactory otherwise.
-	 * This is necessary for working with generic JMS 1.1 connection pools
-	 * (such as ActiveMQ's <code>org.apache.activemq.pool.PooledConnectionFactory</code>).
+	 * Create a new JMS Connection for this JMS invoker.
 	 */
 	protected Connection createConnection() throws JMSException {
 		ConnectionFactory cf = getConnectionFactory();
-		if (cf instanceof QueueConnectionFactory) {
-			return ((QueueConnectionFactory) cf).createQueueConnection();
+		if (jms11Available) {
+			return cf.createConnection();
 		}
 		else {
-			return cf.createConnection();
+			return ((QueueConnectionFactory) cf).createQueueConnection();
 		}
 	}
 
 	/**
-	 * Create a new JMS Session for this JMS invoker,
-	 * ideally a <code>javax.jms.QueueSession</code>.
-	 * <p>The default implementation uses the
-	 * <code>javax.jms.QueueConnection</code> API if available,
-	 * falling back to a standard JMS 1.1 Connection otherwise.
-	 * This is necessary for working with generic JMS 1.1 connection pools
-	 * (such as ActiveMQ's <code>org.apache.activemq.pool.PooledConnectionFactory</code>).
+	 * Create a new JMS Session for this JMS invoker.
 	 */
 	protected Session createSession(Connection con) throws JMSException {
-		if (con instanceof QueueConnection) {
-			return ((QueueConnection) con).createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+		if (jms11Available) {
+			return con.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		}
 		else {
-			return con.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			return ((QueueConnection) con).createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
 		}
 	}
 
@@ -352,8 +343,17 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 		MessageProducer producer = null;
 		MessageConsumer consumer = null;
 		try {
-			if (session instanceof QueueSession) {
+			if (jms11Available) {
+				// Standard JMS 1.1 API usage...
+				responseQueue = session.createTemporaryQueue();
+				producer = session.createProducer(queue);
+				consumer = session.createConsumer(responseQueue);
+				requestMessage.setJMSReplyTo(responseQueue);
+				producer.send(requestMessage);
+			}
+			else {
 				// Perform all calls on QueueSession reference for JMS 1.0.2 compatibility...
+				// DEPRECATED but kept around with the deprecated JmsTemplate102 etc classes for the time being.
 				QueueSession queueSession = (QueueSession) session;
 				responseQueue = queueSession.createTemporaryQueue();
 				QueueSender sender = queueSession.createSender(queue);
@@ -361,14 +361,6 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 				consumer = queueSession.createReceiver(responseQueue);
 				requestMessage.setJMSReplyTo(responseQueue);
 				sender.send(requestMessage);
-			}
-			else {
-				// Standard JMS 1.1 API usage...
-				responseQueue = session.createTemporaryQueue();
-				producer = session.createProducer(queue);
-				consumer = session.createConsumer(responseQueue);
-				requestMessage.setJMSReplyTo(responseQueue);
-				producer.send(requestMessage);
 			}
 			long timeout = getReceiveTimeout();
 			return (timeout > 0 ? consumer.receive(timeout) : consumer.receive());
