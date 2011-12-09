@@ -303,11 +303,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.validator/4.1.0.GA/com.springsource.org.hibernate.validator-4.1.0.GA.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.validator/4.2.0.Final/com.springsource.org.hibernate.validator-4.2.0.Final.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.validator/4.1.0.GA/com.springsource.org.hibernate.validator-sources-4.1.0.GA.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.validator/4.2.0.Final/com.springsource.org.hibernate.validator-sources-4.2.0.Final.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
