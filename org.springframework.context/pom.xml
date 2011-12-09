@@ -208,7 +208,7 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>com.springsource.org.hibernate.validator</artifactId>
-			<version>4.1.0.GA</version>
+			<version>4.2.0.Final</version>
 			<scope>compile</scope>
 			<optional>true</optional>
 			<exclusions>

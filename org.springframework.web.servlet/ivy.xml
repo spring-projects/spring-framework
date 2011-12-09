@@ -103,7 +103,7 @@
                     conf="test->compile"/>
 		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" conf="provided->runtime"/>
 		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.GA" conf="test->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.1.0.GA" conf="test->runtime"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.validator" rev="4.2.0.Final" conf="test->runtime"/>
 		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="${slf4j.version}" conf="test->runtime"/>
 		<dependency org="org.joda" name="com.springsource.org.joda.time" rev="1.6.0" conf="test->runtime"/>
 		<dependency org="org.mortbay.jetty" name="com.springsource.org.mortbay.jetty.server" rev="6.1.9"
