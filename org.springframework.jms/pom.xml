@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
+  <groupId>org.springframework</groupId>
   <artifactId>spring-jms</artifactId>
   <packaging>jar</packaging>
+  <version>3.1.0.BUILD-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework</groupId>
     <artifactId>spring-parent</artifactId>
