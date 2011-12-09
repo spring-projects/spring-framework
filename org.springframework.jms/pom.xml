@@ -90,6 +90,12 @@
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
+	<dependency>
+		<groupId>org.codehaus.jackson</groupId>
+		<artifactId>jackson-mapper-asl</artifactId>
+		<version>1.4.2</version>
+		<optional>true</optional>
+	</dependency>
   </dependencies>
   <build>
     <pluginManagement>
