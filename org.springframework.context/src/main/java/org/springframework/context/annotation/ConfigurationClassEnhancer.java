@@ -252,13 +252,14 @@ class ConfigurationClassEnhancer {
 			// is the same as that of referring to a FactoryBean within XML. See SPR-6602.
 			if (factoryContainsBean('&'+beanName) && factoryContainsBean(beanName)) {
 				Object factoryBean = this.beanFactory.getBean('&'+beanName);
-			    if (factoryBean instanceof ScopedProxyFactoryBean) {
-			    	// pass through - scoped proxy factory beans are a special case and should not
-			    	// be further proxied
-			    } else {
-			    	// it is a candidate FactoryBean - go ahead with enhancement
-			    	return enhanceFactoryBean(factoryBean.getClass(), beanName);
-			    }
+				if (factoryBean instanceof ScopedProxyFactoryBean) {
+					// pass through - scoped proxy factory beans are a special case and should not
+					// be further proxied
+				}
+				else {
+					// it is a candidate FactoryBean - go ahead with enhancement
+					return enhanceFactoryBean(factoryBean.getClass(), beanName);
+				}
 			}
 
 			boolean factoryIsCaller = beanMethod.equals(SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod());
