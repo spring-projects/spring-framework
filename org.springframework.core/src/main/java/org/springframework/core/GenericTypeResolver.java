@@ -112,6 +112,7 @@ public abstract class GenericTypeResolver {
 	 * if not resolvable or if the single argument is of type {@link WildcardType}.
 	 */
 	public static Class<?> resolveReturnTypeArgument(Method method, Class<?> genericIfc) {
+		Assert.notNull(method, "method must not be null");
 		Type returnType = method.getReturnType();
 		Type genericReturnType = method.getGenericReturnType();
 		if (returnType.equals(genericIfc)) {

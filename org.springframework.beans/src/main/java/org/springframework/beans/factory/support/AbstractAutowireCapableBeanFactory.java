@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,6 +105,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @author Mark Fisher
  * @author Costin Leau
+ * @author Chris Beams
  * @since 13.02.2004
  * @see RootBeanDefinition
  * @see DefaultListableBeanFactory
@@ -663,9 +664,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	@Override
 	protected Class<?> getTypeForFactoryBean(String beanName, RootBeanDefinition mbd) {
-		Class<?> objectType = null;
+		class Holder { Class<?> value = null; }
+		final Holder objectType = new Holder();
 		String factoryBeanName = mbd.getFactoryBeanName();
-		String factoryMethodName = mbd.getFactoryMethodName();
+		final String factoryMethodName = mbd.getFactoryMethodName();
 		if (factoryBeanName != null && factoryMethodName != null) {
 			// Try to obtain the FactoryBean's object type without instantiating it at all.
 			BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
@@ -675,10 +677,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					// CGLIB subclass methods hide generic parameters. look at the superclass.
 					fbClass = fbClass.getSuperclass();
 				}
-				Method m = ReflectionUtils.findMethod(fbClass, factoryMethodName);
-				objectType = GenericTypeResolver.resolveReturnTypeArgument(m, FactoryBean.class);
-				if (objectType != null) {
-					return objectType;
+				// find the given factory method, taking into account that in the case of
+				// @Bean methods, there may be parameters present.
+				ReflectionUtils.doWithMethods(fbClass,
+					new ReflectionUtils.MethodCallback() {
+						public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+							if (method.getName().equals(factoryMethodName) &&
+									FactoryBean.class.isAssignableFrom(method.getReturnType())) {
+								objectType.value = GenericTypeResolver.resolveReturnTypeArgument(method, FactoryBean.class);
+							}
+						}
+					});
+				if (objectType.value != null) {
+					return objectType.value;
 				}
 			}
 		}
@@ -689,9 +700,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		if (fb != null) {
 			// Try to obtain the FactoryBean's object type from this early stage of the instance.
-			objectType = getTypeForFactoryBean(fb);
-			if (objectType != null) {
-				return objectType;
+			objectType.value = getTypeForFactoryBean(fb);
+			if (objectType.value != null) {
+				return objectType.value;
 			}
 		}
 
