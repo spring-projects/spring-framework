@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,8 +35,13 @@ import org.springframework.stereotype.Component;
  * the instance returned from the method.
  *
  * <p>In this context, scope means the lifecycle of an instance, such as
- * {@code singleton}, {@code prototype}, and so forth.
- * 
+ * {@code singleton}, {@code prototype}, and so forth. Scopes provided out of the box in
+ * Spring may be referred to using the {@code SCOPE_*} constants available in
+ * via {@link ConfigurableBeanFactory} and {@code WebApplicationContext} interfaces.
+ *
+ * <p>To register additional custom scopes, see
+ * {@link org.springframework.beans.factory.config.CustomScopeConfigurer CustomScopeConfigurer}.
+ *
  * @author Mark Fisher
  * @author Chris Beams
  * @since 2.5
@@ -50,9 +55,12 @@ public @interface Scope {
 
 	/**
 	 * Specifies the scope to use for the annotated component/bean.
-	 * @return the specified scope
+	 * @see ConfigurableBeanFactory#SCOPE_SINGLETON
+	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
+	 * @see org.springframework.web.context.WebApplicationContext#SCOPE_REQUEST
+	 * @see org.springframework.web.context.WebApplicationContext#SCOPE_SESSION
 	 */
-	String value() default BeanDefinition.SCOPE_SINGLETON;
+	String value() default ConfigurableBeanFactory.SCOPE_SINGLETON;
 
 	/**
 	 * Specifies whether a component should be configured as a scoped proxy
