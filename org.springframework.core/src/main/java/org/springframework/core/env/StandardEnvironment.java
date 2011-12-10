@@ -41,6 +41,10 @@ package org.springframework.core.env;
  * instance available from {@link #getPropertySources()}. See
  * {@link ConfigurableEnvironment} Javadoc for usage examples.
  *
+ * <p>See {@link SystemEnvironmentPropertySource} Javadoc for details on special handling
+ * of property names in shell environments (e.g. Bash) that disallow period characters in
+ * variable names.
+ *
  * @author Chris Beams
  * @since 3.1
  * @see ConfigurableEnvironment
