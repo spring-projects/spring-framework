@@ -26,19 +26,18 @@ package org.springframework.validation;
 public interface SmartValidator extends Validator {
 
 	/**
-	 * Validate the supplied <code>target</code> object, which must be
-	 * of a {@link Class} for which the {@link #supports(Class)} method
-	 * typically has (or would) return <code>true</code>.
-	 * <p>The supplied {@link Errors errors} instance can be used to report
-	 * any resulting validation errors.
-	 * <p><b>This variant of <code>validate</code> supports validation hints,
-	 * such as validation groups against a JSR-303 provider</b> (in this case,
-	 * the provided hint objects need to be annotation arguments of type Class).
-	 * <p>Note: Validation hints may get ignored by the actual target Validator,
+	 * Validate the supplied {@code target} object, which must be of a {@link Class} for
+	 * which the {@link #supports(Class)} method typically has (or would) return {@code true}.
+	 * <p>The supplied {@link Errors errors} instance can be used to report any
+	 * resulting validation errors.
+	 * <p><b>This variant of {@code validate} supports validation hints, such as
+	 * validation groups against a JSR-303 provider</b> (in this case, the provided hint
+	 * objects need to be annotation arguments of type {@code Class}).
+	 * <p>Note: Validation hints may get ignored by the actual target {@code Validator},
 	 * in which case this method is supposed to be behave just like its regular
 	 * {@link #validate(Object, Errors)} sibling.
-	 * @param target the object that is to be validated (can be <code>null</code>)
-	 * @param errors contextual state about the validation process (never <code>null</code>)
+	 * @param target the object that is to be validated (can be {@code null})
+	 * @param errors contextual state about the validation process (never {@code null})
 	 * @param validationHints one or more hint objects to be passed to the validation engine
 	 * @see ValidationUtils
 	 */

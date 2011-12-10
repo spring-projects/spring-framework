@@ -58,6 +58,6 @@ public @interface Validated {
 	 * <p>Other {@link org.springframework.validation.SmartValidator} implementations may
 	 * support class arguments in other ways as well.
 	 */
-	Class[] value() default {};
+	Class<?>[] value() default {};
 
 }

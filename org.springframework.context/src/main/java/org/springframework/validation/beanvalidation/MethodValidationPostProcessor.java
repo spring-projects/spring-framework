@@ -46,13 +46,15 @@ import org.springframework.validation.annotation.Validated;
  *
  * <p>Applicable methods have JSR-303 constraint annotations on their parameters
  * and/or on their return value (in the latter case specified at the method level,
- * typically as inline annotation).
+ * typically as inline annotation), e.g.:
  *
- * <p>E.g.: <code>public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)</code>
+ * <pre class="code">
+ * public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)
+ * </pre>
  *
  * <p>Target classes with such annotated methods need to be annotated with Spring's
  * {@link Validated} annotation at the type level, for their methods to be searched for
- * inline constraint annotations. Validation groups can be specified through {@link Validated}
+ * inline constraint annotations. Validation groups can be specified through {@code @Validated}
  * as well. By default, JSR-303 will validate against its default group only.
  *
  * <p>As of Spring 3.1, this functionality requires Hibernate Validator 4.2 or higher.
@@ -64,6 +66,7 @@ import org.springframework.validation.annotation.Validated;
  * @see MethodValidationInterceptor
  * @see org.hibernate.validator.method.MethodValidator
  */
+@SuppressWarnings("serial")
 public class MethodValidationPostProcessor extends ProxyConfig
 		implements BeanPostProcessor, BeanClassLoaderAware, Ordered, InitializingBean {
 
