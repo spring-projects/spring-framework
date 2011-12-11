@@ -7,19 +7,24 @@ Changes in version 3.1 GA (2011-12-12)
 --------------------------------------
 
 * ConversionService is able to work with "Collections.emptyList()" as target type (again)
-* fixed QuartzJobBean to work with Quartz 2.0/2.1 as well
-* added "mappingResources" property to LocalContainerEntityManagerFactoryBean (pointing to orm.xml)
-* optimized AnnotationTransactionAspect and AnnotationCacheAspect pointcuts to avoid runtime checks
-* renamed @CacheEvict's "afterInvocation" attribute to "beforeInvocation" (for better readability)
+* restored DataBinder's ability to bind to an auto-growing List with unknown element type
 * added SmartValidator interface with general support for validation hints
-* added custom @Valid annotation with support for JSR-303 validation groups
+* added custom @Validated annotation with support for JSR-303 validation groups
 * JSR-303 SpringValidatorAdapter and MVC data binding provide support for validation groups
 * restored SpringValidatorAdapter's ability to handle bean constraints with property paths
+* added MethodValidationInterceptor/PostProcessor for Hibernate Validator 4.2 based method validation
+* fixed QuartzJobBean to work with Quartz 2.0/2.1 as well
+* @Transactional qualifiers match against transaction manager definitions in parent contexts as well
+* optimized AnnotationTransactionAspect and AnnotationCacheAspect pointcuts to avoid runtime checks
+* renamed @CacheEvict's "afterInvocation" attribute to "beforeInvocation" (for better readability)
+* added "mappingResources" property to LocalContainerEntityManagerFactoryBean (pointing to orm.xml)
+* JmsInvokerClientInterceptor/FactoryBean always uses createConnection/createSession when on JMS 1.1
+* added out-of-the-box MappingJacksonMessageConverter impl for Spring's JMS MessageConverter facility
 * ResourceHttpRequestHandler sends content without content-type header if no media type found
 * ResourceHttpRequestHandler and ContentNegotiatingViewResolver use consistent mime type resolution
+* added "useTrailingSlashMatch" property to RequestMappingHandlerMapping
 * Portlet MVC annotation mapping allows for distributing action names across controllers
 * added String constants to MediaType
-* add useTrailingSlashMatch property to RequestMappingHandlerMapping
 
  
 Changes in version 3.1 RC2 (2011-11-28)
