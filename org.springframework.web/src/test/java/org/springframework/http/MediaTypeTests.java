@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConversionServiceFactory;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -125,6 +126,11 @@ public class MediaTypeTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void parseMediaTypeNoSubtypeSlash() {
 		MediaType.parseMediaType("audio/");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void parseMediaTypeTypeRange() {
+		MediaType.parseMediaType("*/json");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -494,6 +500,13 @@ public class MediaTypeTests {
 		assertTrue(conversionService.canConvert(String.class, MediaType.class));
 		MediaType mediaType = MediaType.parseMediaType("application/xml");
 		assertEquals(mediaType, conversionService.convert("application/xml", MediaType.class));
+	}
+
+	@Test
+	public void isConcrete() {
+		assertTrue("text/plain not concrete", MediaType.TEXT_PLAIN.isConcrete());
+		assertFalse("*/* concrete", MediaType.ALL.isConcrete());
+		assertFalse("text/* concrete", new MediaType("text", "*").isConcrete());
 	}
 
 }

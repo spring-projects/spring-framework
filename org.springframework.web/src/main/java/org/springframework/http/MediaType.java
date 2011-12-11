@@ -404,7 +404,6 @@ public class MediaType implements Comparable<MediaType> {
 			int otherPlusIdx = other.subtype.indexOf('+');
 			if (thisPlusIdx != -1 && otherPlusIdx != -1) {
 				String thisSubtypeNoSuffix = this.subtype.substring(0, thisPlusIdx);
-
 				String thisSubtypeSuffix = this.subtype.substring(thisPlusIdx + 1);
 				String otherSubtypeSuffix = other.subtype.substring(otherPlusIdx + 1);
 				if (thisSubtypeSuffix.equals(otherSubtypeSuffix) && WILDCARD_TYPE.equals(thisSubtypeNoSuffix)) {
@@ -575,6 +574,9 @@ public class MediaType implements Comparable<MediaType> {
 		}
 		String type = fullType.substring(0, subIndex);
 		String subtype = fullType.substring(subIndex + 1, fullType.length());
+		if (WILDCARD_TYPE.equals(type) && !WILDCARD_TYPE.equals(subtype)) {
+			throw new IllegalArgumentException("A wildcard type is legal only in '*/*' (all media types).");
+		}
 
 		Map<String, String> parameters = null;
 		if (parts.length > 1) {
