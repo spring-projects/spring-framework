@@ -110,7 +110,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	public Object postProcessAfterInitialization(final Object bean, String beanName) {
-		Class<?> targetClass = AopUtils.getTargetClass(bean);
+		final Class<?> targetClass = AopUtils.getTargetClass(bean);
 		ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				Scheduled annotation = AnnotationUtils.getAnnotation(method, Scheduled.class);
@@ -119,6 +119,22 @@ public class ScheduledAnnotationBeanPostProcessor
 							"Only void-returning methods may be annotated with @Scheduled.");
 					Assert.isTrue(method.getParameterTypes().length == 0,
 							"Only no-arg methods may be annotated with @Scheduled.");
+					if (AopUtils.isJdkDynamicProxy(bean)) {
+						try {
+							// found a @Scheduled method on the target class for this JDK proxy -> is it
+							// also present on the proxy itself?
+							method = bean.getClass().getMethod(method.getName(), method.getParameterTypes());
+						} catch (SecurityException ex) {
+							ReflectionUtils.handleReflectionException(ex);
+						} catch (NoSuchMethodException ex) {
+							throw new IllegalStateException(String.format(
+									"@Scheduled method '%s' found on bean target class '%s', " +
+									"but not found in any interface(s) for bean JDK proxy. Either " +
+									"pull the method up to an interface or switch to subclass (CGLIB) " +
+									"proxies by setting proxy-target-class/proxyTargetClass " +
+									"attribute to 'true'", method.getName(), targetClass.getSimpleName()));
+						}
+					}
 					Runnable runnable = new ScheduledMethodRunnable(bean, method);
 					boolean processedSchedule = false;
 					String errorMessage = "Exactly one of 'cron', 'fixedDelay', or 'fixedRate' is required.";
