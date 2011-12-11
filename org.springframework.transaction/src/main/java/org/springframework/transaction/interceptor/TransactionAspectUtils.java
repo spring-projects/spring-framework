@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -103,24 +104,29 @@ public abstract class TransactionAspectUtils {
 	 * value (through &lt;qualifier<&gt; or @Qualifier)
 	 */
 	private static boolean isQualifierMatch(String qualifier, String beanName, ConfigurableListableBeanFactory bf) {
-		if (bf.containsBeanDefinition(beanName)) {
-			BeanDefinition bd = bf.getMergedBeanDefinition(beanName);
-			if (bd instanceof AbstractBeanDefinition) {
-				AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
-				AutowireCandidateQualifier candidate = abd.getQualifier(Qualifier.class.getName());
-				if ((candidate != null && qualifier.equals(candidate.getAttribute(AutowireCandidateQualifier.VALUE_KEY))) ||
-						qualifier.equals(beanName) || ObjectUtils.containsElement(bf.getAliases(beanName), qualifier)) {
-					return true;
-				}
-			}
-			if (bd instanceof RootBeanDefinition) {
-				Method factoryMethod = ((RootBeanDefinition) bd).getResolvedFactoryMethod();
-				if (factoryMethod != null) {
-					Qualifier targetAnnotation = factoryMethod.getAnnotation(Qualifier.class);
-					if (targetAnnotation != null && qualifier.equals(targetAnnotation.value())) {
+		if (bf.containsBean(beanName)) {
+			try {
+				BeanDefinition bd = bf.getMergedBeanDefinition(beanName);
+				if (bd instanceof AbstractBeanDefinition) {
+					AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
+					AutowireCandidateQualifier candidate = abd.getQualifier(Qualifier.class.getName());
+					if ((candidate != null && qualifier.equals(candidate.getAttribute(AutowireCandidateQualifier.VALUE_KEY))) ||
+							qualifier.equals(beanName) || ObjectUtils.containsElement(bf.getAliases(beanName), qualifier)) {
 						return true;
 					}
 				}
+				if (bd instanceof RootBeanDefinition) {
+					Method factoryMethod = ((RootBeanDefinition) bd).getResolvedFactoryMethod();
+					if (factoryMethod != null) {
+						Qualifier targetAnnotation = factoryMethod.getAnnotation(Qualifier.class);
+						if (targetAnnotation != null && qualifier.equals(targetAnnotation.value())) {
+							return true;
+						}
+					}
+				}
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// ignore - can't compare qualifiers for a manually registered singleton object
 			}
 		}
 		return false;
