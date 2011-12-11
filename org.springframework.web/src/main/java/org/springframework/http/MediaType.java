@@ -474,7 +474,6 @@ public class MediaType implements Comparable<MediaType> {
 			int otherPlusIdx = other.subtype.indexOf('+');
 			if (thisPlusIdx != -1 && otherPlusIdx != -1) {
 				String thisSubtypeNoSuffix = this.subtype.substring(0, thisPlusIdx);
-
 				String thisSubtypeSuffix = this.subtype.substring(thisPlusIdx + 1);
 				String otherSubtypeSuffix = other.subtype.substring(otherPlusIdx + 1);
 				if (thisSubtypeSuffix.equals(otherSubtypeSuffix) && WILDCARD_TYPE.equals(thisSubtypeNoSuffix)) {

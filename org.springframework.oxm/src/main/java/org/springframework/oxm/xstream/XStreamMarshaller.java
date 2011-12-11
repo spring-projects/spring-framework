@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,11 +110,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	private ClassLoader classLoader;
 
+
 	/**
 	 * Returns the XStream instance used by this marshaller.
 	 */
 	public XStream getXStream() {
-		return xstream;
+		return this.xstream;
 	}
 
 	/**
@@ -150,7 +151,6 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	/**
 	 * Sets an alias/type map, consisting of string aliases mapped to classes. Keys are aliases; values are either
 	 * {@code Class} instances, or String class names.
-	 *
 	 * @see XStream#alias(String, Class)
 	 */
 	public void setAliases(Map<String, ?> aliases) throws ClassNotFoundException {
@@ -165,7 +165,6 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * Sets the aliases by type map, consisting of string aliases mapped to classes. Any class that is assignable to
 	 * this type will be aliased to the same name. Keys are aliases; values are either
 	 * {@code Class} instances, or String class names.
-	 *
 	 * @see XStream#aliasType(String, Class)
 	 */
 	public void setAliasesByType(Map<String, ?> aliases) throws ClassNotFoundException {
@@ -325,9 +324,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Set the auto-detection mode of XStream.
-	 * <p><strong>Note</strong> that auto-detection implies that the XStream is configured while it is processing the
-	 * XML steams, and thus introduces a potential concurrency problem.
+	 * Set the autodetection mode of XStream.
+	 * <p><strong>Note</strong> that auto-detection implies that the XStream is configured while
+	 * it is processing the XML streams, and thus introduces a potential concurrency problem.
 	 * @see XStream#autodetectAnnotations(boolean)
 	 */
 	public void setAutodetectAnnotations(boolean autodetectAnnotations) {
@@ -358,21 +357,23 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		this.supportedClasses = supportedClasses;
 	}
 
-	public final void afterPropertiesSet() throws Exception {
-		customizeXStream(getXStream());
-	}
-
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
+
+	public final void afterPropertiesSet() throws Exception {
+		customizeXStream(getXStream());
+	}
+
 	/**
 	 * Template to allow for customizing of the given {@link XStream}.
-	 * <p>Default implementation is empty.
+	 * <p>The default implementation is empty.
 	 * @param xstream the {@code XStream} instance
 	 */
 	protected void customizeXStream(XStream xstream) {
 	}
+
 
 	public boolean supports(Class clazz) {
 		if (ObjectUtils.isEmpty(this.supportedClasses)) {
@@ -438,8 +439,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected void marshalWriter(Object graph, Writer writer) throws XmlMappingException, IOException {
-		if (streamDriver != null) {
-			marshal(graph, streamDriver.createWriter(writer));
+		if (this.streamDriver != null) {
+			marshal(graph, this.streamDriver.createWriter(writer));
 		}
 		else {
 			marshal(graph, new CompactWriter(writer));
@@ -466,6 +467,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 			}
 		}
 	}
+
 
 	// Unmarshalling
 
