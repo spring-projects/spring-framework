@@ -509,6 +509,4 @@ public class MediaTypeTests {
 		assertFalse("text/* concrete", new MediaType("text", "*").isConcrete());
 	}
 
-
-
 }
