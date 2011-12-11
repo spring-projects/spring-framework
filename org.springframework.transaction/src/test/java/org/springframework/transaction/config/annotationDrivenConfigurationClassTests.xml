@@ -18,8 +18,6 @@
 
 	<bean id="txCheckingInterceptor" class="org.springframework.transaction.config.AnnotationDrivenTests$TransactionCheckingInterceptor"/>
 
-	<bean id="transactionManagerConfig" class="org.springframework.transaction.config.TransactionManagerConfiguration"/>
-
 	<bean id="service" class="org.springframework.transaction.config.TransactionalService"/>
 
 </beans>
