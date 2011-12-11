@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,9 @@
 
 package org.springframework.jms.support.converter;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.jms.BytesMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -36,20 +28,25 @@ import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+
 /**
  * @author Arjen Poutsma
  * @author Dave Syer
  */
-public class JsonMessageConverterTests {
+public class MappingJacksonMessageConverterTests {
 
-	private JsonMessageConverter converter;
+	private MappingJacksonMessageConverter converter;
 
 	private Session sessionMock;
 
 	@Before
 	public void setUp() throws Exception {
 		sessionMock = createMock(Session.class);
-		converter = new JsonMessageConverter();
+		converter = new MappingJacksonMessageConverter();
+		converter.setEncodingPropertyName("__encoding__");
+		converter.setTypeIdPropertyName("__typeid__");
 	}
 
 	@Test
@@ -58,11 +55,8 @@ public class JsonMessageConverterTests {
 		Object toBeMarshalled = new Object();
 
 		expect(sessionMock.createBytesMessage()).andReturn(bytesMessageMock);
-		bytesMessageMock.setStringProperty(
-				JsonMessageConverter.DEFAULT_ENCODING_PROPERTY_NAME, "UTF-8");
-		bytesMessageMock.setStringProperty(
-				DefaultJavaTypeMapper.CLASSID_PROPERTY_NAME,
-				Object.class.getName());
+		bytesMessageMock.setStringProperty("__encoding__", "UTF-8");
+		bytesMessageMock.setStringProperty("__typeid__", Object.class.getName());
 		bytesMessageMock.writeBytes(isA(byte[].class));
 
 		replay(sessionMock, bytesMessageMock);
@@ -88,12 +82,10 @@ public class JsonMessageConverterTests {
 		};
 
 		expect(
-				bytesMessageMock
-						.getStringProperty(DefaultJavaTypeMapper.CLASSID_PROPERTY_NAME))
+				bytesMessageMock.getStringProperty("__typeid__"))
 				.andReturn(Object.class.getName());
 		expect(
-				bytesMessageMock
-						.propertyExists(JsonMessageConverter.DEFAULT_ENCODING_PROPERTY_NAME))
+				bytesMessageMock.propertyExists("__encoding__"))
 				.andReturn(false);
 		expect(bytesMessageMock.getBodyLength()).andReturn(
 				new Long(bytes.length));
@@ -114,11 +106,8 @@ public class JsonMessageConverterTests {
 		TextMessage textMessageMock = createMock(TextMessage.class);
 		Object toBeMarshalled = new Object();
 
-		textMessageMock.setStringProperty(
-				DefaultJavaTypeMapper.CLASSID_PROPERTY_NAME,
-				Object.class.getName());
-		expect(sessionMock.createTextMessage(isA(String.class))).andReturn(
-				textMessageMock);
+		textMessageMock.setStringProperty("__typeid__", Object.class.getName());
+		expect(sessionMock.createTextMessage(isA(String.class))).andReturn( textMessageMock);
 
 		replay(sessionMock, textMessageMock);
 
@@ -134,15 +123,7 @@ public class JsonMessageConverterTests {
 		Map<String, String> toBeMarshalled = new HashMap<String, String>();
 		toBeMarshalled.put("foo", "bar");
 
-		textMessageMock.setStringProperty(
-				DefaultJavaTypeMapper.CLASSID_PROPERTY_NAME,
-				HashMap.class.getName());
-		textMessageMock.setStringProperty(
-				DefaultJavaTypeMapper.CONTENT_CLASSID_PROPERTY_NAME,
-				Object.class.getName());
-		textMessageMock.setStringProperty(
-				DefaultJavaTypeMapper.KEY_CLASSID_PROPERTY_NAME,
-				Object.class.getName());
+		textMessageMock.setStringProperty("__typeid__", HashMap.class.getName());
 		expect(sessionMock.createTextMessage(isA(String.class))).andReturn(
 				textMessageMock);
 
@@ -161,8 +142,7 @@ public class JsonMessageConverterTests {
 
 		String text = "{\"foo\":\"bar\"}";
 		expect(
-				textMessageMock
-						.getStringProperty(DefaultJavaTypeMapper.CLASSID_PROPERTY_NAME))
+				textMessageMock.getStringProperty("__typeid__"))
 				.andReturn(Object.class.getName());
 		expect(textMessageMock.getText()).andReturn(text);
 
@@ -182,17 +162,8 @@ public class JsonMessageConverterTests {
 
 		String text = "{\"foo\":\"bar\"}";
 		expect(
-				textMessageMock
-						.getStringProperty(DefaultJavaTypeMapper.CLASSID_PROPERTY_NAME))
+				textMessageMock.getStringProperty("__typeid__"))
 				.andReturn(HashMap.class.getName());
-		expect(
-				textMessageMock
-						.getStringProperty(DefaultJavaTypeMapper.CONTENT_CLASSID_PROPERTY_NAME))
-				.andReturn(Object.class.getName());
-		expect(
-				textMessageMock
-						.getStringProperty(DefaultJavaTypeMapper.KEY_CLASSID_PROPERTY_NAME))
-				.andReturn(Object.class.getName());
 		expect(textMessageMock.getText()).andReturn(text);
 
 		replay(sessionMock, textMessageMock);
