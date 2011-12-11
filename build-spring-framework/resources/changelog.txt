@@ -11,12 +11,15 @@ Changes in version 3.0.7 (2011-12-19)
 * refined Resource "exists()" check for HTTP URLs to always return false for 404 status
 * LocaleEditor and StringToLocaleConverter do not restrict variant part through validation
 * LinkedCaseInsensitiveMap overrides putAll method as well (for IBM JDK 1.6 compatibility)
-* fixed nested element conversion with a DataBinder + ConversionService + PropertyEditor
 * ConversionService prevents Converter from trying to convert to a subtype of its actual target type
 * ConversionService is able to work with "Collections.emptyList()" as target type (again)
 * CollectionCollection/MapToMapConverter preserve original Collection/Map if no converted elements
+* fixed nested element conversion with a DataBinder + ConversionService + PropertyEditor
+* restored DataBinder's ability to bind to an auto-growing List with unknown element type
 * optimized DefaultListableBeanFactory's PropertyDescriptor caching for concurrent access
 * SpringValidatorAdapter accepts non-indexed set paths (for Hibernate Validator compatibility)
+* fixed AbstractAsyncExecutionAspect's setExecutor method to correctly wrap in a TaskExecutorAdapter
+* @Transactional qualifiers match against transaction manager definitions in parent contexts as well
 * TransactionSynchronizationManager eagerly cleans up void ResourceHolders on any access
 * updated H2 error codes in sql-error-codes.xml
 * fixed NamedParameterJdbcTemplate to use correct maximum type for queryForInt/Long
@@ -24,8 +27,8 @@ Changes in version 3.0.7 (2011-12-19)
 * JDO PersistenceManager synchronization performs close attempt after completion (if necessary)
 * JPA EntityManagerFactoryUtils silently ignores IllegalArgumentExceptions from setHint calls
 * added "forwarder" property to ConnectorServerFactoryBean, accepting an MBeanServerForwarder
+* JmsInvokerClientInterceptor/FactoryBean always uses createConnection/createSession when on JMS 1.1
 * RmiClientInterceptor detects nested SocketException as connect failure as well
-* fixed AbstractAsyncExecutionAspect's setExecutor method to correctly wrap in a TaskExecutorAdapter
 * Servlet/PortletContextResource's getFile prefers "file:" URL resolution over calling getRealPath
 * Portlet session mutex uses global session attribute to be shared among all portlets in the session
 * fixed ServletServerHttpRequest to reconstruct from "request.getParameterMap()" for form POST only
