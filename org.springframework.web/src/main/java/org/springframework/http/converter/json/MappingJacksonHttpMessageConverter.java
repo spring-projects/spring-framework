@@ -16,16 +16,13 @@
 
 package org.springframework.http.converter.json;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 
 import org.codehaus.jackson.JsonEncoding;
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
@@ -54,6 +51,7 @@ import org.springframework.util.Assert;
 public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -106,27 +104,6 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
 	}
 
-	/**
-	 * Returns the Jackson {@link JavaType} for the specific class.
-	 * <p>The default implementation returns {@link TypeFactory#type(java.lang.reflect.Type)},
-	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
-	 * For instance:
-	 * <pre class="code">
-	 * protected JavaType getJavaType(Class&lt;?&gt; clazz) {
-	 *   if (List.class.isAssignableFrom(clazz)) {
-	 *     return TypeFactory.collectionType(ArrayList.class, MyBean.class);
-	 *   } else {
-	 *     return super.getJavaType(clazz);
-	 *   }
-	 * }
-	 * </pre>
-	 * @param clazz the class to return the java type for
-	 * @return the java type
-	 */
-	protected JavaType getJavaType(Class<?> clazz) {
-		return TypeFactory.type(clazz);
-	}
-
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		return (this.objectMapper.canSerialize(clazz) && canWrite(mediaType));
@@ -146,36 +123,57 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		try {
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
-		catch (JsonParseException ex) {
-			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
-		}
-		catch (JsonMappingException ex) {
-			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
-		}
-		catch (EOFException ex) {
+		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
 		}
 	}
 
 	@Override
-	protected void writeInternal(Object o, HttpOutputMessage outputMessage)
+	protected void writeInternal(Object object, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		JsonEncoding encoding = getEncoding(outputMessage.getHeaders().getContentType());
+		JsonEncoding encoding = getJsonEncoding(outputMessage.getHeaders().getContentType());
 		JsonGenerator jsonGenerator =
 				this.objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(), encoding);
 		try {
 			if (this.prefixJson) {
 				jsonGenerator.writeRaw("{} && ");
 			}
-			this.objectMapper.writeValue(jsonGenerator, o);
+			this.objectMapper.writeValue(jsonGenerator, object);
 		}
-		catch (JsonGenerationException ex) {
+		catch (JsonProcessingException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
 	}
 
-	private JsonEncoding getEncoding(MediaType contentType) {
+
+	/**
+	 * Return the Jackson {@link JavaType} for the specified class.
+	 * <p>The default implementation returns {@link TypeFactory#type(java.lang.reflect.Type)},
+	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
+	 * For instance:
+	 * <pre class="code">
+	 * protected JavaType getJavaType(Class&lt;?&gt; clazz) {
+	 *   if (List.class.isAssignableFrom(clazz)) {
+	 *     return TypeFactory.collectionType(ArrayList.class, MyBean.class);
+	 *   } else {
+	 *     return super.getJavaType(clazz);
+	 *   }
+	 * }
+	 * </pre>
+	 * @param clazz the class to return the java type for
+	 * @return the java type
+	 */
+	protected JavaType getJavaType(Class<?> clazz) {
+		return TypeFactory.type(clazz);
+	}
+
+	/**
+	 * Determine the JSON encoding to use for the given content type.
+	 * @param contentType the media type as requested by the caller
+	 * @return the JSON encoding to use (never <code>null</code>)
+	 */
+	protected JsonEncoding getJsonEncoding(MediaType contentType) {
 		if (contentType != null && contentType.getCharSet() != null) {
 			Charset charset = contentType.getCharSet();
 			for (JsonEncoding encoding : JsonEncoding.values()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,11 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 
 	private MessageType targetType = MessageType.BYTES;
 
+
 	/**
-	 * Construct a new <code>MarshallingMessageConverter</code> with no {@link Marshaller} or {@link Unmarshaller} set.
-	 * The marshaller must be set after construction by invoking {@link #setMarshaller(Marshaller)} and
-	 * {@link #setUnmarshaller(Unmarshaller)} .
+	 * Construct a new <code>MarshallingMessageConverter</code> with no {@link Marshaller}
+	 * or {@link Unmarshaller} set. The marshaller must be set after construction by invoking
+	 * {@link #setMarshaller(Marshaller)} and {@link #setUnmarshaller(Unmarshaller)} .
 	 */
 	public MarshallingMessageConverter() {
 	}
@@ -80,7 +81,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 		if (!(marshaller instanceof Unmarshaller)) {
 			throw new IllegalArgumentException(
 					"Marshaller [" + marshaller + "] does not implement the Unmarshaller " +
-					"interface. Please set an Unmarshaller explicitely by using the " +
+					"interface. Please set an Unmarshaller explicitly by using the " +
 					"MarshallingMessageConverter(Marshaller, Unmarshaller) constructor.");
 		}
 		else {
@@ -127,6 +128,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	 * @see MessageType#TEXT
 	 */
 	public void setTargetType(MessageType targetType) {
+		Assert.notNull(targetType, "MessageType must not be null");
 		this.targetType = targetType;
 	}
 
@@ -251,8 +253,8 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	protected Message marshalToMessage(Object object, Session session, Marshaller marshaller, MessageType targetType)
 			throws JMSException, IOException, XmlMappingException {
 
-		throw new IllegalArgumentException(
-				"Unsupported message type [" + targetType + "]. Cannot marshal to the specified message type.");
+		throw new IllegalArgumentException("Unsupported message type [" + targetType +
+				"]. MarshallingMessageConverter by default only supports TextMessages and BytesMessages.");
 	}
 
 
@@ -308,8 +310,8 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	protected Object unmarshalFromMessage(Message message, Unmarshaller unmarshaller)
 			throws JMSException, IOException, XmlMappingException {
 
-		throw new IllegalArgumentException(
-				"MarshallingMessageConverter only supports TextMessages and BytesMessages");
+		throw new IllegalArgumentException("Unsupported message type [" + message.getClass() +
+				"]. MarshallingMessageConverter by default only supports TextMessages and BytesMessages.");
 	}
 
 }
