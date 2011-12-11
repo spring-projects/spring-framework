@@ -16,6 +16,7 @@
 
 package org.springframework.orm.hibernate4;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import javax.sql.DataSource;
 
@@ -44,6 +45,8 @@ import org.springframework.transaction.support.AbstractPlatformTransactionManage
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.transaction.PlatformTransactionManager}
@@ -101,6 +104,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @SuppressWarnings("serial")
 public class HibernateTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
+
+	/**
+	 * A Method handle for the <code>SessionFactory.getCurrentSession()</code> method.
+	 * The return value differs between Hibernate 3.x and 4.x; for cross-compilation purposes,
+	 * we have to use reflection here as long as we keep compiling against Hibernate 3.x jars.
+	 */
+	private static final Method getCurrentSessionMethod =
+			ClassUtils.getMethod(SessionFactory.class, "getCurrentSession");
+
 
 	private SessionFactory sessionFactory;
 
@@ -281,7 +293,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 		else if (this.hibernateManagedSession) {
 			try {
-				Session session = getSessionFactory().getCurrentSession();
+				Session session = (Session) ReflectionUtils.invokeMethod(getCurrentSessionMethod, this.sessionFactory);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found Hibernate-managed Session [" + session + "] for Spring-managed transaction");
 				}
