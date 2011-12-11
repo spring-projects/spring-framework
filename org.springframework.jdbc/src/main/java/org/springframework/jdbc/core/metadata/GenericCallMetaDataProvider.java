@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,48 +95,60 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 	}
 
-	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName)
-			throws SQLException {
+	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, String catalogName,
+			String schemaName, String procedureName) throws SQLException {
 
 		this.procedureColumnMetaDataUsed = true;
 		processProcedureColumns(databaseMetaData, catalogName, schemaName,  procedureName);
 	}
 
 	public List<CallParameterMetaData> getCallParameterMetaData() {
-		return callParameterMetaData;
+		return this.callParameterMetaData;
 	}
 
 	public String procedureNameToUse(String procedureName) {
-		if (procedureName == null)
+		if (procedureName == null) {
 			return null;
-		else if (isStoresUpperCaseIdentifiers())
+		}
+		else if (isStoresUpperCaseIdentifiers()) {
 			return procedureName.toUpperCase();
-		else if(isStoresLowerCaseIdentifiers())
+		}
+		else if(isStoresLowerCaseIdentifiers()) {
 			return procedureName.toLowerCase();
-		else
+		}
+		else {
 			return procedureName;
+		}
 	}
 
 	public String catalogNameToUse(String catalogName) {
-		if (catalogName == null)
+		if (catalogName == null) {
 			return null;
-		else if (isStoresUpperCaseIdentifiers())
+		}
+		else if (isStoresUpperCaseIdentifiers()) {
 			return catalogName.toUpperCase();
-		else if(isStoresLowerCaseIdentifiers())
+		}
+		else if(isStoresLowerCaseIdentifiers()) {
 			return catalogName.toLowerCase();
-		else
-		return catalogName;
+		}
+		else {
+			return catalogName;
+		}
 	}
 
 	public String schemaNameToUse(String schemaName) {
-		if (schemaName == null)
+		if (schemaName == null) {
 			return null;
-		else if (isStoresUpperCaseIdentifiers())
+		}
+		else if (isStoresUpperCaseIdentifiers()) {
 			return schemaName.toUpperCase();
-		else if(isStoresLowerCaseIdentifiers())
+		}
+		else if(isStoresLowerCaseIdentifiers()) {
 			return schemaName.toLowerCase();
-		else
-		return schemaName;
+		}
+		else {
+			return schemaName;
+		}
 	}
 
 	public String metaDataCatalogNameToUse(String catalogName) {

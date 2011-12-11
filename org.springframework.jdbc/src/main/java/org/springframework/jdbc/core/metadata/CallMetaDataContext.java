@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,8 +239,8 @@ public class CallMetaDataContext {
 	}
 
 	/**
-	 * Get the name of the single out parameter for this call.  If there are multiple parameters then the name of
-	 * the first one is returned.
+	 * Get the name of the single out parameter for this call.
+	 * If there are multiple parameters, the name of the first one will be returned.
 	 */
 	public String getScalarOutParameterName() {
 		if (isFunction()) {
@@ -255,14 +255,14 @@ public class CallMetaDataContext {
 	}
 
 	/**
-	 * Get the List of SqlParameter objects to be used in call execution
+	 * Get the List of SqlParameter objects to be used in call execution.
 	 */
 	public List<SqlParameter> getCallParameters() {
 		return this.callParameters;
 	}
 
 	/**
-	 * Initialize this class with metadata from the database 
+	 * Initialize this class with metadata from the database.
 	 * @param dataSource the DataSource used to retrieve metadata
 	 */
 	public void initializeMetaData(DataSource dataSource) {
@@ -270,9 +270,9 @@ public class CallMetaDataContext {
 	}
 
 	/**
-	 * Process the list of parameters provided and if procedure column metadata is used the
-	 * parameters will be matched against the metadata information and any missing ones will
-	 * be automatically included
+	 * Process the list of parameters provided, and if procedure column metadata is used,
+	 * the parameters will be matched against the metadata information and any missing
+	 * ones will be automatically included.
 	 * @param parameters the list of parameters to use as a base
 	 */
 	public void processParameters(List<SqlParameter> parameters) {
@@ -280,7 +280,7 @@ public class CallMetaDataContext {
 	}
 
 	/**
-	 * Reconcile the provided parameters with available metadata and add new ones where appropriate
+	 * Reconcile the provided parameters with available metadata and add new ones where appropriate.
 	 */
 	protected List<SqlParameter> reconcileParameters(List<SqlParameter> parameters) {
 		final List<SqlParameter> declaredReturnParameters = new ArrayList<SqlParameter>();
@@ -289,7 +289,7 @@ public class CallMetaDataContext {
 		List<String> outParameterNames = new ArrayList<String>();
 		List<String> metaDataParameterNames = new ArrayList<String>();
 
-		// get the names of the meta data parameters
+		// Get the names of the meta data parameters
 		for (CallParameterMetaData meta : this.metaDataProvider.getCallParameterMetaData()) {
 			if (meta.getParameterType() != DatabaseMetaData.procedureColumnReturn) {
 				metaDataParameterNames.add(meta.getParameterName().toLowerCase());
@@ -424,7 +424,6 @@ public class CallMetaDataContext {
 		}
 
 		return workParameters;
-
 	}
 
 	/**
@@ -565,8 +564,8 @@ public class CallMetaDataContext {
 	public String createCallString() {
 		String callString;
 		int parameterCount = 0;
-		String catalogNameToUse = null;
-		String schemaNameToUse = null;
+		String catalogNameToUse;
+		String schemaNameToUse;
 
 		// For Oracle where catalogs are not supported we need to reverse the schema name
 		// and the catalog name since the cataog is used for the package name
