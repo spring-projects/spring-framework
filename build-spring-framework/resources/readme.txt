@@ -1,5 +1,5 @@
-SPRING FRAMEWORK 3.1 RC2 (November 2011)
-----------------------------------------
+SPRING FRAMEWORK 3.1 GA (December 2011)
+---------------------------------------
 http://www.springsource.org
 
 1. INTRODUCTION
