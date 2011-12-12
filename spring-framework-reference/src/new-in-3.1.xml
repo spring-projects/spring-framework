@@ -124,13 +124,17 @@
 
         <listitem>
           <para>See
-          org.springframework.context.annotation.EnableLoadTimeWeaving
+          org.springframework.transaction.annotation.EnableTransactionManagement
           Javadoc</para>
         </listitem>
 
         <listitem>
           <para>See
-          org.springframework.context.annotation.EnableAspectJAutoProxy
+          org.springframework.cache.annotation.EnableCaching Javadoc</para>
+        </listitem>
+
+        <listitem>
+          <para>See org.springframework.web.servlet.config.annotation.EnableWebMvc
           Javadoc</para>
         </listitem>
 
@@ -146,12 +150,19 @@
 
         <listitem>
           <para>See
-          org.springframework.transaction.annotation.EnableTransactionManagement
+          org.springframework.context.annotation.EnableAspectJAutoProxy
           Javadoc</para>
         </listitem>
 
         <listitem>
-          <para>See org.springframework.web.servlet.config.annotation.EnableWebMvc
+          <para>See
+          org.springframework.context.annotation.EnableLoadTimeWeaving
+          Javadoc</para>
+        </listitem>
+
+        <listitem>
+          <para>See
+          org.springframework.beans.factory.aspectj.EnableSpringConfigured
           Javadoc</para>
         </listitem>
       </itemizedlist>
