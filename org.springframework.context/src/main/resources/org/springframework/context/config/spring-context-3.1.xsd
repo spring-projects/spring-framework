@@ -89,10 +89,20 @@
 	<xsd:element name="property-placeholder">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Activates replacement of ${...} placeholders, resolved against the specified properties file or
-	Properties object (if any). Defines a PropertySourcesPlaceholderConfigurer within the context.
-	For backward compatibility with versions earlier than Spring 3.1, a PropertyPlaceholderConfigurer will be
-	registered if the 'system-properties-mode' attribute has been explicitly assigned a value.
+	Activates replacement of ${...} placeholders by registering a
+	PropertySourcesPlaceholderConfigurer within the application context. Properties will
+	be resolved against the specified properties file or Properties object -- so called
+	"local properties", if any, and against the Spring Environment's current set of
+	PropertySources.
+
+	Note that as of Spring 3.1 the system-properties-mode attribute has been removed in
+	favor of the more flexible PropertySources mechanism. However, Spring 3.1-based
+	applications may continue to use the 3.0 (and older) versions of the spring-context
+	schema in order to preserve system-properties-mode behavior. In this case, the
+	traditional PropertyPlaceholderConfigurer component will be registered instead of the
+	new PropertySourcesPlaceholderConfigurer.
+
+	See ConfigurableEnvironment Javadoc for more information on using.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
@@ -103,7 +113,39 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:complexContent>
-				<xsd:extension base="propertyPlaceholder" />
+				<xsd:extension base="propertyPlaceholder">
+					<xsd:attribute name="system-properties-mode" default="ENVIRONMENT">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Controls how to resolve placeholders against system properties. As of Spring 3.1, this
+	attribute value defaults to "ENVIRONMENT", indicating that resolution of placeholders
+	against system properties is handled via PropertySourcesPlaceholderConfigurer and its
+	delegation to the current Spring Environment object.
+
+	For maximum backward compatibility, this attribute is preserved going forward with the
+	3.1 version of the context schema, and any values other than the default "ENVIRONMENT"
+	will cause a traditional PropertyPlaceholderConfigurer to be registered instead of the
+	newer PropertySourcesPlaceholderConfigurer variant. In this case, the Spring Environment
+	and its property sources are not interrogated when resolving placeholders. Users are
+	encouraged to consider this attribute deprecated, and to take advantage of
+	Environment/PropertySource mechanisms. See ConfigurableEnvironment Javadoc for examples.
+
+	"ENVIRONMENT" indicates placeholders should be resolved against the current Environment and against any local properties;
+	"NEVER" indicates placeholders should be resolved only against local properties and never against system properties;
+	"FALLBACK" indicates placeholders should be resolved against any local properties and then against system properties;
+	"OVERRIDE" indicates placeholders should be resolved first against system properties and then against any local properties;
+							]]></xsd:documentation>
+						</xsd:annotation>
+						<xsd:simpleType>
+							<xsd:restriction base="xsd:string">
+								<xsd:enumeration value="ENVIRONMENT"/>
+								<xsd:enumeration value="NEVER"/>
+								<xsd:enumeration value="FALLBACK"/>
+								<xsd:enumeration value="OVERRIDE"/>
+							</xsd:restriction>
+						</xsd:simpleType>
+					</xsd:attribute>
+				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>
@@ -360,10 +402,6 @@
 	Signals the current application context to apply dependency injection
 	to non-managed classes that are instantiated outside of the Spring bean
 	factory (typically classes annotated with the @Configurable annotation).
-
-	See Javadoc for org.springframework.context.annotation.EnableSpringConfigured in the
-	spring-aspects module for information on code-based alternatives to bootstrapping
-	this functionality.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:simpleType>

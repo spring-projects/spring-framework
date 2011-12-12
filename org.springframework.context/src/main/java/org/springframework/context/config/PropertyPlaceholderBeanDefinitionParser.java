@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the &lt;context:property-placeholder/&gt; element.
+ * Parser for the {@code <context:property-placeholder/>} element.
  *
  * @author Juergen Hoeller
  * @author Dave Syer
@@ -33,13 +33,22 @@ import org.springframework.util.StringUtils;
  */
 class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBeanDefinitionParser {
 
+	private static final String SYSTEM_PROPERTIES_MODE_ATTRIB = "system-properties-mode";
+	private static final String SYSTEM_PROPERTIES_MODE_DEFAULT = "ENVIRONMENT";
+
 	@Override
 	protected Class<?> getBeanClass(Element element) {
-		if (element.hasAttribute("system-properties-mode")) {
-			return PropertyPlaceholderConfigurer.class;
+		// As of Spring 3.1, the default value of system-properties-mode has changed from
+		// 'FALLBACK' to 'ENVIRONMENT'. This latter value indicates that resolution of
+		// placeholders against system properties is a function of the Environment and
+		// its current set of PropertySources
+		if (element.getAttribute(SYSTEM_PROPERTIES_MODE_ATTRIB).equals(SYSTEM_PROPERTIES_MODE_DEFAULT)) {
+			return PropertySourcesPlaceholderConfigurer.class;
 		}
 
-		return PropertySourcesPlaceholderConfigurer.class;
+		// the user has explicitly specified a value for system-properties-mode. Revert
+		// to PropertyPlaceholderConfigurer to ensure backward compatibility.
+		return PropertyPlaceholderConfigurer.class;
 	}
 
 	@Override
@@ -49,8 +58,9 @@ class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBea
 		builder.addPropertyValue("ignoreUnresolvablePlaceholders",
 				Boolean.valueOf(element.getAttribute("ignore-unresolvable")));
 
-		String systemPropertiesModeName = element.getAttribute("system-properties-mode");
-		if (StringUtils.hasLength(systemPropertiesModeName)) {
+		String systemPropertiesModeName = element.getAttribute(SYSTEM_PROPERTIES_MODE_ATTRIB);
+		if (StringUtils.hasLength(systemPropertiesModeName) &&
+				!systemPropertiesModeName.equals(SYSTEM_PROPERTIES_MODE_DEFAULT)) {
 			builder.addPropertyValue("systemPropertiesModeName", "SYSTEM_PROPERTIES_MODE_"+systemPropertiesModeName);
 		}
 	}
