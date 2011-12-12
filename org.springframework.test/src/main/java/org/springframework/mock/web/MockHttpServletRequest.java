@@ -306,7 +306,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private void updateContentTypeHeader() {
 		if (this.contentType != null) {
 			StringBuilder sb = new StringBuilder(this.contentType);
-			if (this.contentType.toLowerCase().indexOf(CHARSET_PREFIX) == -1 && this.characterEncoding != null) {
+			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) && this.characterEncoding != null) {
 				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
 			}
 			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);

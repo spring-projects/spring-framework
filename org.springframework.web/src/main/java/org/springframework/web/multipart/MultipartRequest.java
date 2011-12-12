@@ -79,6 +79,7 @@ public interface MultipartRequest {
 	 * Determine the content type of the specified request part.
 	 * @param paramOrFileName the name of the part
 	 * @return the associated content type, or <code>null</code> if not defined
+	 * @since 3.1
 	 */
 	String getMultipartContentType(String paramOrFileName);
 

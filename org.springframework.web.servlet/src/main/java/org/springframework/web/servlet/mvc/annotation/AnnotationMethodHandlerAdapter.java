@@ -990,7 +990,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
 			HttpOutputMessage outputMessage = createHttpOutputMessage(webRequest);
 			if (responseEntity instanceof ResponseEntity && outputMessage instanceof ServerHttpResponse) {
-				((ServerHttpResponse)outputMessage).setStatusCode(((ResponseEntity) responseEntity).getStatusCode());
+				((ServerHttpResponse) outputMessage).setStatusCode(((ResponseEntity) responseEntity).getStatusCode());
 			}
 			HttpHeaders entityHeaders = responseEntity.getHeaders();
 			if (!entityHeaders.isEmpty()) {
