@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
 /**
  * Spring JMS {@link MessageConverter} that uses a {@link Marshaller} and {@link Unmarshaller}.
  * Marshals an object to a {@link BytesMessage}, or to a {@link TextMessage} if the
- * {@link #setTargetType marshalTo} is set to {@link MessageType#TEXT}.
+ * {@link #setTargetType targetType} is set to {@link MessageType#TEXT}.
  * Unmarshals from a {@link TextMessage} or {@link BytesMessage} to an object.
  *
  * @author Arjen Poutsma
@@ -160,7 +160,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 			throw new MessageConversionException("Could not marshal [" + object + "]", ex);
 		}
 		catch (IOException ex) {
-			throw new MessageConversionException("Could not marshal  [" + object + "]", ex);
+			throw new MessageConversionException("Could not marshal [" + object + "]", ex);
 		}
 	}
 
@@ -299,7 +299,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	 * Template method that allows for custom message unmarshalling.
 	 * Invoked when {@link #fromMessage(Message)} is invoked with a message
 	 * that is not a {@link TextMessage} or {@link BytesMessage}.
-	 * <p>The default implemenetation throws an {@link IllegalArgumentException}.
+	 * <p>The default implementation throws an {@link IllegalArgumentException}.
 	 * @param message the message
 	 * @param unmarshaller the unmarshaller to use
 	 * @return the unmarshalled object
