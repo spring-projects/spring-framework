@@ -36,9 +36,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
-import org.springframework.web.method.annotation.support.MapMethodProcessor;
-import org.springframework.web.method.annotation.support.ModelAttributeMethodProcessor;
-import org.springframework.web.method.annotation.support.ModelMethodProcessor;
+import org.springframework.web.method.annotation.MapMethodProcessor;
+import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
+import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -47,13 +47,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.HttpEntityMethodProcessor;
-import org.springframework.web.servlet.mvc.method.annotation.support.ModelAndViewMethodReturnValueHandler;
-import org.springframework.web.servlet.mvc.method.annotation.support.RequestResponseBodyMethodProcessor;
-import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.ServletResponseMethodArgumentResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.ViewMethodReturnValueHandler;
-import org.springframework.web.servlet.mvc.method.annotation.support.ViewNameMethodReturnValueHandler;
 
 /**
  * An {@link AbstractHandlerMethodExceptionResolver} that resolves exceptions
@@ -310,7 +303,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
 		Class<?> handlerType = handlerMethod.getBeanType();
 		Method method = getExceptionHandlerMethodResolver(handlerType).resolveMethod(exception);
-		return (method != null) ? new ServletInvocableHandlerMethod(handlerMethod.getBean(), method) : null;
+		return (method != null ? new ServletInvocableHandlerMethod(handlerMethod.getBean(), method) : null);
 	}
 
 	/**

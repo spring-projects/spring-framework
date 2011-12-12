@@ -31,16 +31,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.annotation.support.ModelMethodProcessor;
+import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.method.annotation.support.RedirectAttributesMethodArgumentResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.ServletRequestMethodArgumentResolver;
-import org.springframework.web.servlet.mvc.method.annotation.support.ViewNameMethodReturnValueHandler;
 
 /**
  * Unit tests for {@link RequestMappingHandlerAdapter}.
