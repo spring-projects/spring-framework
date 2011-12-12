@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,9 +143,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/**
 	 * Any number of these characters are considered delimiters between
 	 * multiple values in a single init-param String value.
-	 * @see #initializeWebApplicationContext
 	 */
-	private String INIT_PARAM_DELIMITERS = ",; \t\n";
+	private static final String INIT_PARAM_DELIMITERS = ",; \t\n";
+
 
 	/** ServletContext attribute to find the WebApplicationContext in */
 	private String contextAttribute;
@@ -188,7 +188,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/** Actual ApplicationContextInitializer instances to apply to the context */
 	private ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
-		new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
 
 	/**
@@ -408,8 +408,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * means that your controllers will receive those requests; make sure
 	 * that those endpoints are actually able to handle an OPTIONS request.
 	 * <p>Note that HttpServlet's default OPTIONS processing will be applied
-	 * in any case. Your controllers are simply available to override the
-	 * default headers and optionally generate a response body.
+	 * in any case if your controllers happen to not set the 'Allow' header
+	 * (as required for an OPTIONS response).
 	 */
 	public void setDispatchOptionsRequest(boolean dispatchOptionsRequest) {
 		this.dispatchOptionsRequest = dispatchOptionsRequest;
@@ -425,9 +425,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * means that your controllers will receive those requests; make sure
 	 * that those endpoints are actually able to handle a TRACE request.
 	 * <p>Note that HttpServlet's default TRACE processing will be applied
-	 * in any case. Your controllers are simply available to override the
-	 * default headers and the default body, calling <code>response.reset()</code>
-	 * if necessary.
+	 * in any case if your controllers happen to not generate a response
+	 * of content type 'message/http' (as required for a TRACE response).
 	 */
 	public void setDispatchTraceRequest(boolean dispatchTraceRequest) {
 		this.dispatchTraceRequest = dispatchTraceRequest;
@@ -661,13 +660,15 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	@SuppressWarnings("unchecked")
 	protected void applyInitializers(ConfigurableApplicationContext wac) {
 		if (this.contextInitializerClasses != null) {
-			String[] initializerClassNames = StringUtils.tokenizeToStringArray(this.contextInitializerClasses, INIT_PARAM_DELIMITERS);
-			for(String initializerClassName : initializerClassNames) {
-				ApplicationContextInitializer<ConfigurableApplicationContext> initializer = null;
+			String[] initializerClassNames =
+					StringUtils.tokenizeToStringArray(this.contextInitializerClasses, INIT_PARAM_DELIMITERS);
+			for (String initializerClassName : initializerClassNames) {
+				ApplicationContextInitializer<ConfigurableApplicationContext> initializer;
 				try {
 					Class<?> initializerClass = ClassUtils.forName(initializerClassName, wac.getClassLoader());
 					initializer = BeanUtils.instantiateClass(initializerClass, ApplicationContextInitializer.class);
-				} catch (Exception ex) {
+				}
+				catch (Exception ex) {
 					throw new IllegalArgumentException(
 							String.format("Could not instantiate class [%s] specified via " +
 							"'contextInitializerClasses' init-param", initializerClassName), ex);
@@ -675,9 +676,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				this.contextInitializers.add(initializer);
 			}
 		}
-
 		Collections.sort(this.contextInitializers, new AnnotationAwareOrderComparator());
-
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
 			initializer.initialize(wac);
 		}
@@ -814,32 +813,41 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Delegate OPTIONS requests to {@link #processRequest}, if desired.
-	 * <p>Applies HttpServlet's standard OPTIONS processing first.
+	 * <p>Applies HttpServlet's standard OPTIONS processing otherwise,
+	 * and also if there is still no 'Allow' header set after dispatching.
 	 * @see #doService
 	 */
 	@Override
 	protected void doOptions(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		super.doOptions(request, response);
 		if (this.dispatchOptionsRequest) {
 			processRequest(request, response);
+			if (response.containsHeader("Allow")) {
+				// Proper OPTIONS response coming from a handler - we're done.
+				return;
+			}
 		}
+		super.doOptions(request, response);
 	}
 
 	/**
 	 * Delegate TRACE requests to {@link #processRequest}, if desired.
-	 * <p>Applies HttpServlet's standard TRACE processing first.
+	 * <p>Applies HttpServlet's standard TRACE processing otherwise.
 	 * @see #doService
 	 */
 	@Override
 	protected void doTrace(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		super.doTrace(request, response);
 		if (this.dispatchTraceRequest) {
 			processRequest(request, response);
+			if ("message/http".equals(response.getContentType())) {
+				// Proper TRACE response coming from a handler - we're done.
+				return;
+			}
 		}
+		super.doTrace(request, response);
 	}
 
 
