@@ -3412,7 +3412,7 @@ background=/themes/cool/img/coolBg.jpg</programlisting>
       <filename>MultipartFile</filename> in the method parameters:</para>
 
       <programlisting language="java">@Controller
-public class FileUpoadController {
+public class FileUploadController {
 
     @RequestMapping(value = "/form", method = RequestMethod.POST)
     public String handleFormUpload(@RequestParam("name") String name, 
@@ -3440,7 +3440,7 @@ public class FileUpoadController {
       parameter:</para>
 
       <programlisting language="java">@Controller
-public class FileUpoadController {
+public class FileUploadController {
 
     @RequestMapping(value = "/form", method = RequestMethod.POST)
     public String handleFormUpload(@RequestParam("name") String name,
