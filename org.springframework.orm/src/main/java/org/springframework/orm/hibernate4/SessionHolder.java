@@ -73,7 +73,6 @@ public class SessionHolder extends ResourceHolderSupport {
 	@Override
 	public void clear() {
 		super.clear();
-		this.session = null;
 		this.transaction = null;
 		this.previousFlushMode = null;
 	}
