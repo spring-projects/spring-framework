@@ -376,7 +376,10 @@ public class ContextLoader {
 
 		wac.setParent(parent);
 		wac.setServletContext(sc);
-		wac.setConfigLocation(sc.getInitParameter(CONFIG_LOCATION_PARAM));
+		String initParameter = sc.getInitParameter(CONFIG_LOCATION_PARAM);
+		if (initParameter != null) {
+			wac.setConfigLocation(initParameter);
+		}
 		customizeContext(sc, wac);
 		wac.refresh();
 	}
