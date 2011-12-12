@@ -194,7 +194,8 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	public ServletConfig getServletConfig() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				"GenericWebApplicationContext does not support getServletConfig()");
 	}
 
 	public void setNamespace(String namespace) {
@@ -202,27 +203,29 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	}
 
 	public String getNamespace() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				"GenericWebApplicationContext does not support getNamespace()");
 	}
 
 	public void setConfigLocation(String configLocation) {
 		if (StringUtils.hasText(configLocation)) {
 			throw new UnsupportedOperationException(
-					"GenericWebApplicationContext does not support configLocation. Do " +
-					"you still have an 'contextConfigLocations' init-param set?");
+					"GenericWebApplicationContext does not support setConfigLocation(). " +
+					"Do you still have an 'contextConfigLocations' init-param set?");
 		}
 	}
 
 	public void setConfigLocations(String[] configLocations) {
 		if (!ObjectUtils.isEmpty(configLocations)) {
 			throw new UnsupportedOperationException(
-					"GenericWebApplicationContext does not support configLocations. Do " +
-					"you still have an 'contextConfigLocations' init-param set?");
+					"GenericWebApplicationContext does not support setConfigLocations(). " +
+					"Do you still have an 'contextConfigLocations' init-param set?");
 		}
 	}
 
 	public String[] getConfigLocations() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				"GenericWebApplicationContext does not support getConfigLocations()");
 	}
 
 }
