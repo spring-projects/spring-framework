@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.context.support;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -28,6 +27,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.SmartLifecycle;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher
@@ -55,7 +56,8 @@ public class DefaultLifecycleProcessorTests {
 		Object contextLifecycleProcessor = new DirectFieldAccessor(context).getPropertyValue("lifecycleProcessor");
 		assertNotNull(contextLifecycleProcessor);
 		assertSame(bean, contextLifecycleProcessor);
-		assertEquals(1000L, new DirectFieldAccessor(contextLifecycleProcessor).getPropertyValue("timeoutPerShutdownPhase"));
+		assertEquals(1000L, new DirectFieldAccessor(contextLifecycleProcessor).getPropertyValue(
+				"timeoutPerShutdownPhase"));
 	}
 
 	@Test
@@ -114,6 +116,28 @@ public class DefaultLifecycleProcessorTests {
 		assertTrue(bean.isRunning());
 		assertEquals(1, startedBeans.size());
 		context.stop();
+	}
+
+	@Test
+	public void singleSmartLifecycleAutoStartupWithNonAutoStartupDependency() throws Exception {
+		CopyOnWriteArrayList<Lifecycle> startedBeans = new CopyOnWriteArrayList<Lifecycle>();
+		TestSmartLifecycleBean bean = TestSmartLifecycleBean.forStartupTests(1, startedBeans);
+		bean.setAutoStartup(true);
+		TestSmartLifecycleBean dependency = TestSmartLifecycleBean.forStartupTests(1, startedBeans);
+		dependency.setAutoStartup(false);
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.getBeanFactory().registerSingleton("bean", bean);
+		context.getBeanFactory().registerSingleton("dependency", dependency);
+		context.getBeanFactory().registerDependentBean("dependency", "bean");
+		assertFalse(bean.isRunning());
+		assertFalse(dependency.isRunning());
+		context.refresh();
+		assertTrue(bean.isRunning());
+		assertFalse(dependency.isRunning());
+		context.stop();
+		assertFalse(bean.isRunning());
+		assertFalse(dependency.isRunning());
+		assertEquals(1, startedBeans.size());
 	}
 
 	@Test
@@ -578,7 +602,6 @@ public class DefaultLifecycleProcessorTests {
 			}
 			this.running = false;
 		}
-
 	}
 
 

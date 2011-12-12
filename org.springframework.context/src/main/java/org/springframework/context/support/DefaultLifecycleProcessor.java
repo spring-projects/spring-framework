@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,15 +125,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new HashMap<Integer, LifecycleGroup>();
 		for (Map.Entry<String, ? extends Lifecycle> entry : lifecycleBeans.entrySet()) {
-			Lifecycle lifecycle = entry.getValue();
-			if (!autoStartupOnly || (lifecycle instanceof SmartLifecycle && ((SmartLifecycle) lifecycle).isAutoStartup())) {
-				int phase = getPhase(lifecycle);
+			Lifecycle bean = entry.getValue();
+			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
+				int phase = getPhase(bean);
 				LifecycleGroup group = phases.get(phase);
 				if (group == null) {
-					group = new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans);
+					group = new LifecycleGroup(phase, this.timeoutPerShutdownPhase, lifecycleBeans, autoStartupOnly);
 					phases.put(phase, group);
 				}
-				group.add(entry.getKey(), lifecycle);
+				group.add(entry.getKey(), bean);
 			}
 		}
 		if (phases.size() > 0) {
@@ -151,14 +151,15 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @param lifecycleBeans Map with bean name as key and Lifecycle instance as value
 	 * @param beanName the name of the bean to start
 	 */
-	private void doStart(Map<String, ? extends Lifecycle> lifecycleBeans, String beanName) {
+	private void doStart(Map<String, ? extends Lifecycle> lifecycleBeans, String beanName, boolean autoStartupOnly) {
 		Lifecycle bean = lifecycleBeans.remove(beanName);
 		if (bean != null && !this.equals(bean)) {
 			String[] dependenciesForBean = this.beanFactory.getDependenciesForBean(beanName);
 			for (String dependency : dependenciesForBean) {
-				doStart(lifecycleBeans, dependency);
+				doStart(lifecycleBeans, dependency, autoStartupOnly);
 			}
-			if (!bean.isRunning()) {
+			if (!bean.isRunning() &&
+					(!autoStartupOnly || !(bean instanceof SmartLifecycle) || ((SmartLifecycle) bean).isAutoStartup())) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Starting bean '" + beanName + "' of type [" + bean.getClass() + "]");
 				}
@@ -179,14 +180,14 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new HashMap<Integer, LifecycleGroup>();
 		for (Map.Entry<String, Lifecycle> entry : lifecycleBeans.entrySet()) {
-			Lifecycle lifecycle = entry.getValue();
-			int shutdownOrder = getPhase(lifecycle);
+			Lifecycle bean = entry.getValue();
+			int shutdownOrder = getPhase(bean);
 			LifecycleGroup group = phases.get(shutdownOrder);
 			if (group == null) {
-				group = new LifecycleGroup(shutdownOrder, this.timeoutPerShutdownPhase, lifecycleBeans);
+				group = new LifecycleGroup(shutdownOrder, this.timeoutPerShutdownPhase, lifecycleBeans, false);
 				phases.put(shutdownOrder, group);
 			}
-			group.add(entry.getKey(), lifecycle);
+			group.add(entry.getKey(), bean);
 		}
 		if (phases.size() > 0) {
 			List<Integer> keys = new ArrayList<Integer>(phases.keySet());
@@ -309,10 +310,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		private final long timeout;
 
-		public LifecycleGroup(int phase, long timeout, Map<String, ? extends Lifecycle> lifecycleBeans) {
+		private final boolean autoStartupOnly;
+
+		public LifecycleGroup(int phase, long timeout, Map<String, ? extends Lifecycle> lifecycleBeans, boolean autoStartupOnly) {
 			this.phase = phase;
 			this.timeout = timeout;
 			this.lifecycleBeans = lifecycleBeans;
+			this.autoStartupOnly = autoStartupOnly;
 		}
 
 		public void add(String name, Lifecycle bean) {
@@ -332,7 +336,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			Collections.sort(this.members);
 			for (LifecycleGroupMember member : this.members) {
 				if (this.lifecycleBeans.containsKey(member.name)) {
-					doStart(this.lifecycleBeans, member.name);
+					doStart(this.lifecycleBeans, member.name, this.autoStartupOnly);
 				}
 			}
 		}
