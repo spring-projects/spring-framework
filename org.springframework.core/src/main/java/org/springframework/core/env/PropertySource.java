@@ -182,17 +182,15 @@ public abstract class PropertySource<T> {
 	 * <p>Primarily for internal use, but given a collection of {@code PropertySource} objects, may be
 	 * used as follows:
 	 * <pre class="code">
-	 * {@code  
-	 *   List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
-	 *   sources.add(new MapPropertySource("sourceA", mapA));
-	 *   sources.add(new MapPropertySource("sourceB", mapB));
-	 *   assert sources.contains(PropertySource.named("sourceA"));
-	 *   assert sources.contains(PropertySource.named("sourceB"));
-	 *   assert !sources.contains(PropertySource.named("sourceC"));
-	 * }
-	 * </pre>
+	 * {@code List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
+	 * sources.add(new MapPropertySource("sourceA", mapA));
+	 * sources.add(new MapPropertySource("sourceB", mapB));
+	 * assert sources.contains(PropertySource.named("sourceA"));
+	 * assert sources.contains(PropertySource.named("sourceB"));
+	 * assert !sources.contains(PropertySource.named("sourceC"));
+	 * }</pre>
 	 *
-	 * <p>The returned {@code PropertySource} will throw {@code UnsupportedOperationException}
+	 * The returned {@code PropertySource} will throw {@code UnsupportedOperationException}
 	 * if any methods other than {@code equals(Object)}, {@code hashCode()}, and {@code toString()}
 	 * are called.
 	 *
