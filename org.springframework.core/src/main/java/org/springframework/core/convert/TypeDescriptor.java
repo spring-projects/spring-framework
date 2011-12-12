@@ -324,7 +324,7 @@ public class TypeDescriptor {
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor(Object key) {
 		TypeDescriptor keyType = getMapKeyTypeDescriptor();
-		return (keyType != TypeDescriptor.UNKNOWN ? keyType : TypeDescriptor.forObject(key));
+		return (!TypeDescriptor.UNKNOWN.equals(keyType) ? keyType : TypeDescriptor.forObject(key));
 	}
 
 	/**
@@ -353,7 +353,7 @@ public class TypeDescriptor {
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor(Object value) {
 		TypeDescriptor valueType = getMapValueTypeDescriptor();
-		return (valueType != TypeDescriptor.UNKNOWN ? valueType : TypeDescriptor.forObject(value));
+		return (!TypeDescriptor.UNKNOWN.equals(valueType) ? valueType : TypeDescriptor.forObject(value));
 	}
 
 	/**
