@@ -6,12 +6,12 @@
 	<groupId>org.springframework</groupId>
 	<artifactId>spring-orm</artifactId>
 	<packaging>jar</packaging>
-	<version>3.1.0.BUILD-SNAPSHOT</version>
+	<version>3.2.0.BUILD-SNAPSHOT</version>
 	<parent>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-parent</artifactId>
 		<relativePath>../org.springframework.spring-parent</relativePath>
-		<version>3.1.0.BUILD-SNAPSHOT</version>
+		<version>3.2.0.BUILD-SNAPSHOT</version>
 	</parent>
 	<dependencies>
 		<dependency>
