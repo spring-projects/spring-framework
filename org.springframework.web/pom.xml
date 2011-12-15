@@ -34,8 +34,8 @@
 		</dependency>
 		<dependency>
 			<groupId>javax.faces</groupId>
-			<artifactId>jsf-api</artifactId>
-			<version>1.2_08</version>
+			<artifactId>com.springsource.javax.faces</artifactId>
+			<version>1.2.0.08</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

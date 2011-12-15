@@ -76,6 +76,7 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 
 
 	@SuppressWarnings("deprecation")
+	@org.junit.Ignore // causes https://gist.github.com/1165828
 	protected static class DefaultProfileValueSourceTestCase extends AbstractAnnotationAwareTransactionalTests {
 
 		int invocationCount = 0;
@@ -133,6 +134,7 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 	}
 
 	@ProfileValueSourceConfiguration(HardCodedProfileValueSource.class)
+	@org.junit.Ignore // causes https://gist.github.com/1165832
 	protected static class HardCodedProfileValueSourceTestCase extends DefaultProfileValueSourceTestCase {
 	}
 

@@ -29,6 +29,7 @@ import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@org.junit.Ignore // TODO fix this issue https://gist.github.com/1174579
 public class JibxMarshallerTests extends AbstractMarshallerTests {
 
 	@Override

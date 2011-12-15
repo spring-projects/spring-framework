@@ -58,6 +58,7 @@ public class RepeatedJUnit38SpringContextTests extends TestCase {
 	 * explicitly configured with an empty list, thus disabling all default
 	 * listeners.
 	 */
+	@org.junit.Ignore // causes https://gist.github.com/1165825
 	@SuppressWarnings("deprecation")
 	@TestExecutionListeners(listeners = {}, inheritListeners = false)
 	protected static class RepeatedTestCase extends AbstractJUnit38SpringContextTests {

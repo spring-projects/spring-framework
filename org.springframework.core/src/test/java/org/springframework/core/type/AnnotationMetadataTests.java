@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
-import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -114,7 +113,6 @@ public class AnnotationMetadataTests extends TestCase {
 		@Autowired
 		public void doWork(@Qualifier("myColor") java.awt.Color color) {
 		}
-		@Test
 
 		public void doSleep()  {
 		}

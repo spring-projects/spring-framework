@@ -151,6 +151,7 @@ public class RepeatedSpringRunnerTests {
 	 * href="http://jira.springframework.org/browse/SPR-6011"
 	 * target="_blank">SPR-6011</a>.
 	 */
+	@org.junit.Ignore // causing timeouts on cbeams' MBP
 	public static final class TimedRepeatedTestCase extends AbstractRepeatedTestCase {
 
 		@Test

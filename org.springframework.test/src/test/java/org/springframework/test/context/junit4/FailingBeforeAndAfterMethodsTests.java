@@ -146,26 +146,32 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+	@org.junit.Ignore
 	@TestExecutionListeners(AlwaysFailingBeforeTestClassTestExecutionListener.class)
 	public static class AlwaysFailingBeforeTestClassTestCase extends BaseTestCase {
 	}
 
+	@org.junit.Ignore
 	@TestExecutionListeners(AlwaysFailingAfterTestClassTestExecutionListener.class)
 	public static class AlwaysFailingAfterTestClassTestCase extends BaseTestCase {
 	}
 
+	@org.junit.Ignore
 	@TestExecutionListeners(AlwaysFailingPrepareTestInstanceTestExecutionListener.class)
 	public static class AlwaysFailingPrepareTestInstanceTestCase extends BaseTestCase {
 	}
 
+	@org.junit.Ignore
 	@TestExecutionListeners(AlwaysFailingBeforeTestMethodTestExecutionListener.class)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
 	}
 
+	@org.junit.Ignore
 	@TestExecutionListeners(AlwaysFailingAfterTestMethodTestExecutionListener.class)
 	public static class AlwaysFailingAfterTestMethodTestCase extends BaseTestCase {
 	}
 
+	@org.junit.Ignore
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingBeforeTransactionTestCase extends AbstractTransactionalJUnit4SpringContextTests {
 
@@ -179,6 +185,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+	@org.junit.Ignore
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingAfterTransactionTestCase extends AbstractTransactionalJUnit4SpringContextTests {
 

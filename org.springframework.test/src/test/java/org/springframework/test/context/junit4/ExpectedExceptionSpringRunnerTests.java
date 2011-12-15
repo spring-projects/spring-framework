@@ -59,6 +59,7 @@ public class ExpectedExceptionSpringRunnerTests {
 	}
 
 
+	@org.junit.Ignore
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners({})
 	public static final class ExpectedExceptionSpringRunnerTestCase {

@@ -104,6 +104,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+	@org.junit.Ignore
 	@SuppressWarnings("deprecation")
 	@TestExecutionListeners(listeners = AlwaysFailingBeforeTestMethodTestExecutionListener.class, inheritListeners = false)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends AbstractJUnit38SpringContextTests {
@@ -112,6 +113,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+	@org.junit.Ignore
 	@SuppressWarnings("deprecation")
 	@TestExecutionListeners(listeners = AlwaysFailingAfterTestMethodTestExecutionListener.class, inheritListeners = false)
 	public static class AlwaysFailingAfterTestMethodTestCase extends AbstractJUnit38SpringContextTests {
@@ -120,6 +122,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+	@org.junit.Ignore
 	@SuppressWarnings("deprecation")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingBeforeTransactionalTestCase extends AbstractTransactionalJUnit38SpringContextTests {
@@ -133,6 +136,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
+	@org.junit.Ignore
 	@SuppressWarnings("deprecation")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingAfterTransactionalTestCase extends AbstractTransactionalJUnit38SpringContextTests {
