@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2010 SpringSource
+   
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+   
+       http://www.apache.org/licenses/LICENSE-2.0
+   
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project name="documentation-docbook" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<import file="common.xml"/>
+	
+	<filterset id="docbook.filters" />
+
+<!-- Main targets -->
+	<target name="doc-html" depends="docbook.init"
+			description="Creates both the single and multi-page HTML versions of the reference documentation.">
+		<delete quiet="true" dir="${docbook.output.dir}/html"/>
+		<delete quiet="true" dir="${docbook.output.dir}/htmlsingle"/>
+		<mkdir dir="${docbook.output.dir}"/>
+
+		<mkdir dir="${docbook.staging.dir}"/>
+		<copy todir="${docbook.staging.dir}">
+			<fileset dir="${docbook.src.dir}" erroronmissingdir="false">
+				<include name="**/*.xml"/>
+			</fileset>
+			<filterset>
+				<filterset refid="docbook.filters"/>
+			</filterset>
+		</copy>
+		<copy todir="${docbook.staging.dir}/images">
+			<fileset dir="${docbook.images.dir}" erroronmissingdir="false">
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+
+		<ant antfile="${docbook.dir}/build-docbook.xml" inheritAll="false">
+			<property name="dbf.basedir" value="${docbook.dir}"/>
+			<property name="docbook.dir" value=""/>
+			<property name="docbook.file" value="${ant.project.name}"/>
+			<property name="docbook.src.dir" value="${docbook.staging.dir}"/>
+			<property name="images.src.dir" value="${docbook.staging.dir}/images"/>
+			<property name="src.dir" value="${docbook.build.dir}"/>
+			<property name="css.src.dir" value="${docbook.css.dir}"/>
+			<property name="styles.src.dir" value="${docbook.styles.dir}"/>
+			<property name="target.dir" value="${docbook.target.dir}"/>
+			<target name="html"/>
+			<target name="htmlsingle"/>
+		</ant>
+		<move file="${docbook.target.dir}/html" todir="${docbook.output.dir}"/>
+		<move file="${docbook.target.dir}/htmlsingle" todir="${docbook.output.dir}"/>
+
+		<delete quiet="true" dir="${docbook.target.dir}"/>
+	</target>
+
+	<target name="doc-pdf" depends="docbook.init"
+			description="Creates the PDF version of the reference documentation.">
+		<delete quiet="true" dir="${docbook.output.dir}/pdf"/>
+		<mkdir dir="${docbook.output.dir}"/>
+
+		<mkdir dir="${docbook.staging.dir}"/>
+		<copy todir="${docbook.staging.dir}">
+			<fileset dir="${docbook.src.dir}" erroronmissingdir="false">
+				<include name="**/*.xml"/>
+			</fileset>
+			<filterset>
+				<filterset refid="docbook.filters"/>
+			</filterset>
+		</copy>
+		<copy todir="${docbook.staging.dir}/images">
+			<fileset dir="${docbook.images.dir}" erroronmissingdir="false">
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+
+		<ant antfile="${docbook.dir}/build-docbook.xml" inheritAll="false">
+			<property name="dbf.basedir" value="${docbook.dir}"/>
+			<property name="docbook.dir" value=""/>
+			<property name="docbook.file" value="${ant.project.name}"/>
+			<property name="docbook.src.dir" value="${docbook.staging.dir}"/>
+			<property name="images.src.dir" value="${docbook.staging.dir}/images"/>
+			<property name="src.dir" value="${docbook.build.dir}"/>
+			<property name="css.src.dir" value="${docbook.css.dir}"/>
+			<property name="styles.src.dir" value="${docbook.styles.dir}"/>
+			<property name="target.dir" value="${docbook.target.dir}"/>
+			<target name="pdf"/>
+		</ant>
+		<move file="${docbook.target.dir}/pdf" todir="${docbook.output.dir}"/>
+
+		<delete quiet="true" dir="${docbook.target.dir}"/>
+	</target>
+
+	<target name="doc" depends="docbook.init, ivy.init, resolve"
+			description="Creates both the single and multi-page HTML versions and the PDF version of the reference documentation.">
+		<delete quiet="true" dir="${docbook.output.dir}/html"/>
+		<delete quiet="true" dir="${docbook.output.dir}/htmlsingle"/>
+		<delete quiet="true" dir="${docbook.output.dir}/pdf"/>
+		<mkdir dir="${docbook.output.dir}"/>
+
+		<mkdir dir="${docbook.staging.dir}"/>
+		<copy todir="${docbook.staging.dir}">
+			<fileset dir="${docbook.src.dir}" erroronmissingdir="false">
+				<include name="**/*.xml"/>
+			</fileset>
+			<filterset>
+				<filterset refid="docbook.filters"/>
+			</filterset>
+		</copy>
+		<copy todir="${docbook.staging.dir}/images">
+			<fileset dir="${docbook.images.dir}" erroronmissingdir="false">
+				<include name="**/*"/>
+			</fileset>
+		</copy>
+
+		<ant antfile="${docbook.dir}/build-docbook.xml" inheritAll="false">
+			<property name="dbf.basedir" value="${docbook.dir}"/>
+			<property name="docbook.dir" value=""/>
+			<property name="docbook.file" value="${ant.project.name}"/>
+			<property name="docbook.src.dir" value="${docbook.staging.dir}"/>
+			<property name="images.src.dir" value="${docbook.staging.dir}/images"/>
+			<property name="src.dir" value="${docbook.build.dir}"/>
+			<property name="css.src.dir" value="${docbook.css.dir}"/>
+			<property name="styles.src.dir" value="${docbook.styles.dir}"/>
+			<property name="target.dir" value="${docbook.target.dir}"/>
+			<target name="html"/>
+			<target name="htmlsingle"/>
+			<target name="pdf"/>
+		</ant>
+		<move file="${docbook.target.dir}/htmlsingle/${ant.project.name}.zip"
+				tofile="${docbook.target.dir}/htmlsingle/${ant.project.name}-single.zip"/>
+		<move file="${docbook.target.dir}/html" todir="${docbook.output.dir}"/>
+		<move file="${docbook.target.dir}/htmlsingle" todir="${docbook.output.dir}"/>
+		<move file="${docbook.target.dir}/pdf" todir="${docbook.output.dir}"/>
+
+		<ivy:publish resolver="integration" pubdate="${timestamp}" status="${release.type}">
+			<artifacts pattern="${docbook.output.dir}/html/[artifact].[ext]"/>
+			<artifacts pattern="${docbook.output.dir}/htmlsingle/[artifact].[ext]"/>
+			<artifacts pattern="${docbook.output.dir}/pdf/[artifact].[ext]"/>
+			<artifacts pattern="${ivy.output.dir}/[artifact].[ext]"/>
+			<artifacts pattern="${license.dir}/[artifact].[ext]"/>
+		</ivy:publish>
+
+		<delete quiet="true" dir="${docbook.target.dir}"/>
+	</target>
+
+<!-- Other targets -->
+	<target name="docbook.init" depends="ivy.init, docbook.download.init" if="docbook.download.needed">
+		<ivy:cachepath resolveId="docbook.framework" pathid="docbook.framework" organisation="org.apache.velocity"
+				module="org.apache.velocity.docbookframework.dist"
+				revision="${org.apache.velocity.docbookframework.dist.version}" conf="runtime" type="zip" inline="true"
+				log="download-only"/>
+		<unzip dest="${docbook.dir}">
+			<path refid="docbook.framework"/>
+			<globmapper from="DocBook-Framework-${org.apache.velocity.docbookframework.dist.version}/*" to="*"/>
+		</unzip>
+		<ivy:retrieve resolveId="xslthl" pattern="${docbook.dir}/lib/[artifact]-[revision].[ext]"
+				organisation="net.sourceforge.xslthl" module="com.springsource.net.sf.xslthl"
+				revision="${com.springsource.net.sf.xslthl.version}" conf="runtime" type="jar" inline="true"
+				log="download-only"/>
+		<ivy:retrieve resolveId="xerces" pattern="${docbook.dir}/lib/[artifact]-[revision].[ext]"
+				organisation="org.apache.xerces" module="com.springsource.org.apache.xerces"
+				revision="${com.springsource.org.apache.xerces.version}" conf="runtime" type="jar" inline="true"
+				log="download-only"/>
+	</target>
+
+	<target name="docbook.download.init">
+		<condition property="docbook.download.needed">
+			<not>
+				<available file="${docbook.dir}" type="dir"/>
+			</not>
+		</condition>
+	</target>
+
+</project>

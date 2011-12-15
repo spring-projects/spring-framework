@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2010 SpringSource
+   
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+   
+       http://www.apache.org/licenses/LICENSE-2.0
+   
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project name="artifact-weaving" xmlns:ivy="antlib:org.apache.ivy.ant"
+		xmlns:bundlor="antlib:com.springsource.bundlor.ant">
+
+	<import file="common.xml"/>
+	<import file="../common/artifact.xml"/>
+
+	<target name="jar" depends="ivy.init, resolve.aspects, artifact-common.jar"
+			description="Creates a JAR file containing the output of a compilation of the source tree."/>
+
+<!-- Other targets -->
+	<target name="compile.init" depends="ivy.init">
+		<ivy:cachepath resolveId="ajc.classpath" pathid="ajc.classpath" organisation="org.aspectj"
+				module="com.springsource.org.aspectj.tools" revision="${org.aspectj.tools.version}" conf="runtime"
+				type="jar" inline="true" log="download-only"/>
+		<taskdef resource="org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties" classpathref="ajc.classpath"/>
+
+		<ivy:cachepath resolveId="spring.ant.classpath" pathid="spring.ant.classpath"
+				organisation="org.springframework.build" module="org.springframework.build.ant"
+				revision="${org.springframework.build.ant.version}" conf="runtime" type="jar" inline="true"
+				log="download-only"/>
+		<ivy:cachepath resolveId="ecj.classpath" pathid="ecj.classpath" organisation="org.eclipse.jdt"
+				module="com.springsource.org.eclipse.jdt.core.compiler.batch" revision="${org.eclipse.jdt.core.compiler.batch.version}"
+				conf="runtime" type="jar" inline="true" log="download-only"/>
+		<taskdef resource="org/springframework/build/ant/antlib.xml" uri="antlib:org.springframework.build">
+			<classpath>
+				<path refid="spring.ant.classpath"/>
+				<path refid="ecj.classpath"/>
+			</classpath>
+		</taskdef>
+	</target>
+
+	<target name="bundlor" depends="bundlor.init" unless="disable.bundlor">
+		<bundlor:bundlor inputPath="${main.output.dir}" outputPath="${main.output.dir}"
+				bundleVersion="${bundle.version}" manifestTemplatePath="${manifest.template.file}"
+				failOnWarnings="${fail.on.warnings}">
+			<propertyset refid="bundlor.properties"/>
+			<propertyset>
+				<propertyref builtin="all"/>
+			</propertyset>
+		</bundlor:bundlor>
+	</target>
+
+</project>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2010 SpringSource
+   
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+   
+       http://www.apache.org/licenses/LICENSE-2.0
+   
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project name="artifact-common" xmlns:ivy="antlib:org.apache.ivy.ant"
+		xmlns:bundlor="antlib:com.springsource.bundlor.ant">
+
+<!-- Main targets -->
+	<target name="javadoc-all" depends="ivy.init, resolve.compile, src.init" if="src.exists"
+			description="Creates javadoc documentation for all classes.">
+		<java-doc input.dir="${main.java.dir}" output.dir="${javadoc-all.output.dir}" classpath.id="compile.classpath"
+				access="private"/>
+	</target>
+
+	<target name="javadoc-api" depends="ivy.init, resolve.compile, src.init" if="src.exists"
+			description="Creates javadoc documentation for all classes.">
+		<java-doc input.dir="${main.java.dir}" output.dir="${javadoc-api.output.dir}" classpath.id="compile.classpath"
+				access="protected" exclude.package.names="${javadoc.exclude.package.names}"/>
+	</target>
+
+	<target name="jar" depends="ivy.init, resolve.compile, compile.init, jar.init"
+			description="Creates a JAR file containing the output of a compilation of the source tree.">
+		<delete quiet="true" file="${ivy.output.file}"/>
+		<mkdir dir="${ivy.output.dir}"/>
+		<delete quiet="true" file="${jar.output.file}"/>
+		<mkdir dir="${jar.output.dir}"/>
+		<delete quiet="true" file="${source-jar.output.file}"/>
+		<mkdir dir="${source-jar.output.dir}"/>
+
+		<compile classpath.id="compile.classpath" input.dir="${main.java.dir}" output.dir="${main.output.dir}"
+				resources.dir="${main.resources.dir}"/>
+		<ivy:retrieve resolveId="additional.classpath" conf="additional" type="jar" transitive="false"
+				pattern="${main.output.dir}/[artifact]-[revision].[ext]" log="download-only"/>
+		<antcall target="bundlor"/>
+		<jar destfile="${jar.output.file}" basedir="${main.output.dir}" index="true" filesetmanifest="merge">
+			<manifest>
+				<attribute name="Bundle-ManifestVersion" value="2"/>
+				<attribute name="Bundle-Version" value="${bundle.version}"/>
+				<attribute name="Bundle-Creator" value="${user.name}"/>
+				<attribute name="Implementation-Title" value="${implementation.title}"/>
+				<attribute name="Implementation-Version" value="${implementation.version}"/>
+			</manifest>
+		</jar>
+		<jar destfile="${source-jar.output.file}" basedir="${main.java.dir}" index="true"/>
+		<ivy:publish resolver="integration" pubdate="${timestamp}" status="${release.type}">
+			<artifacts pattern="${ivy.output.dir}/[artifact].[ext]"/>
+			<artifacts pattern="${jar.output.dir}/[artifact].[ext]"/>
+			<artifacts pattern="${source-jar.output.dir}/[artifact].[ext]"/>
+			<artifacts pattern="${license.dir}/[artifact].[ext]"/>
+		</ivy:publish>
+	</target>
+
+<!-- Other targets -->
+	<propertyset id="bundlor.properties"/>
+
+	<target name="compile.init" depends="ivy.init"/>
+
+	<target name="jar.init">
+		<fail message="The 'integration.repo.dir' property must be set on this project.">
+			<condition>
+				<not>
+					<isset property="integration.repo.dir"/>
+				</not>
+			</condition>
+		</fail>
+		<fail message="The 'ivy.cache.dir' property must be set on this project.">
+			<condition>
+				<not>
+					<isset property="ivy.cache.dir"/>
+				</not>
+			</condition>
+		</fail>
+		<fail message="The 'version' property must be set on this project.">
+			<condition>
+				<not>
+					<isset property="version"/>
+				</not>
+			</condition>
+		</fail>
+	</target>
+
+	<target name="bundlor" depends="bundlor.init" unless="disable.bundlor">
+		<bundlor:bundlor inputPath="${main.output.dir}" outputPath="${main.output.dir}"
+				bundleVersion="${bundle.version}" manifestTemplatePath="${manifest.template.file}"
+				failOnWarnings="${fail.on.warnings}">
+			<propertyset refid="bundlor.properties"/>
+			<propertyset>
+				<propertyref builtin="all"/>
+			</propertyset>
+		</bundlor:bundlor>
+	</target>
+
+	<target name="bundlor.init" depends="ivy.init" unless="disable.bundlor">
+		<ivy:cachepath resolveId="bundlor.classpath" pathid="bundlor.classpath" organisation="com.springsource.bundlor"
+				module="com.springsource.bundlor.ant" revision="${bundlor.ant.version}" conf="ant" inline="true"
+				type="jar" log="download-only"/>
+		<taskdef resource="com/springsource/bundlor/ant/antlib.xml" uri="antlib:com.springsource.bundlor.ant"
+				classpathref="bundlor.classpath"/>
+	</target>
+
+	<target name="javadoc.prep" depends="src.init" if="src.exists">
+		<mkdir dir="${javadoc.prep.dir}"/>
+		<copy todir="${javadoc.prep.dir}">
+			<fileset dir="${main.java.dir}" erroronmissingdir="false"/>
+		</copy>
+	</target>
+
+</project>

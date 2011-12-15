@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2010 SpringSource
+   
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+   
+       http://www.apache.org/licenses/LICENSE-2.0
+   
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project name="quality-common" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:osgi="antlib:org.springframework.build.osgi">
+
+<!-- Main targets -->
+	<target name="test" depends="jar, test.pre, test.do, test.post"
+			description="Executes all tests resulting from a compilation of the test tree returning test success metrics."/>
+
+	<target name="clover" depends="clover.pre, clover.do, clover.post"
+			description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
+
+	<target name="findbugs" depends="findbugs.pre, findbugs.do"
+			description="Checks all code from the source tree for bugs."/>
+
+	<target name="osgi-validate" depends="ivy.init, osgi.init"
+			description="Validates that a bundle can resolve against it's dependencies.">
+		<ivy:cachepath resolveId="osgi.optional.classpath" pathid="osgi.optional.classpath"
+				conf="compile,optional,provided,dm-server-provided" type="jar" log="download-only"/>
+		<osgi:validate bundlePath="${jar.output.file}">
+			<equinoxPath refid="equinox.classpath"/>
+			<supportingBundlesPath refid="osgi.optional.classpath"/>
+		</osgi:validate>
+
+		<ivy:cachepath resolveId="osgi.compile.classpath" pathid="osgi.compile.classpath"
+				conf="compile,provided,dm-server-provided" type="jar" log="download-only"/>
+		<osgi:validate bundlePath="${jar.output.file}">
+			<equinoxPath refid="equinox.classpath"/>
+			<supportingBundlesPath refid="osgi.compile.classpath"/>
+		</osgi:validate>
+	</target>
+
+<!-- Other targets -->
+	<target name="test.pre" depends="test.init" if="test.exists">
+		<delete dir="${test-results.output.dir}" quiet="true"/>
+		<mkdir dir="${test-results.output.dir}/xml"/>
+	</target>
+
+	<target name="test.do" depends="ivy.init, resolve.test, compile.init, test.init" if="test.exists">
+		<path id="test.compile.classpath">
+			<pathelement location="${jar.output.file}"/>
+			<path refid="compile.classpath"/>
+			<path refid="test.classpath"/>
+		</path>
+		<test-compile classpath.id="test.compile.classpath" input.dir="${test.java.dir}" output.dir="${test.output.dir}"
+				resources.dir="${test.resources.dir}"/>
+
+		<path id="test.run.classpath">
+			<pathelement location="${jar.output.file}"/>
+			<pathelement location="${test.output.dir}"/>
+			<path refid="compile.classpath"/>
+			<path refid="test.classpath"/>
+			<path refid="runtime.classpath"/>
+		</path>
+		<test-run classpath.id="test.run.classpath"/>
+	</target>
+
+	<target name="test.post" depends="test.init" if="test.exists">
+		<mkdir dir="${test-results.output.dir}/html"/>
+		<junitreport>
+			<fileset dir="${test-results.output.dir}/xml" erroronmissingdir="false"/>
+			<report format="frames" todir="${test-results.output.dir}/html"/>
+		</junitreport>
+		<delete file="TESTS-TestSuites.xml"/>
+	</target>
+
+	<target name="clover.init" depends="ivy.init">
+		<ivy:cachepath resolveId="clover.classpath" pathid="clover.classpath" organisation="com.atlassian.clover"
+				module="com.springsource.com.cenqua.clover" revision="${com.springsource.com.cenqua.clover.version}"
+				conf="runtime" type="jar" inline="true" log="download-only"/>
+		<taskdef resource="cloverlib.xml" classpathref="clover.classpath"/>
+	</target>
+
+	<target name="clover.pre">
+		<delete dir="${clover.output.dir}" quiet="true"/>
+		<mkdir dir="${clover.output.dir}"/>
+	</target>
+
+	<target name="clover.do" depends="ivy.init, resolve.test, compile.init, clover.instrument, test.init"
+			if="test.exists">
+		<path id="test.compile.classpath">
+			<pathelement location="${main.output.dir}"/>
+			<path refid="compile.classpath" />
+			<path refid="test.classpath"/>
+		</path>
+
+		<path id="clover.run.classpath">
+			<pathelement location="${main.output.dir}"/>
+			<pathelement location="${test.output.dir}"/>
+			<path refid="clover.classpath"/>
+			<path refid="compile.classpath"/>
+			<path refid="test.classpath"/>
+			<path refid="runtime.classpath"/>
+		</path>
+		<test-run classpath.id="clover.run.classpath"/>
+	</target>
+
+	<target name="clover.instrument" depends="ivy.init, resolve.test, compile.init, clover.init">
+		<instrument input.dir="${main.java.dir}" output.dir="${main.clover.dir}"/>
+		<path id="clover.compile.classpath">
+			<path refid="clover.classpath"/>
+			<path refid="compile.classpath"/>
+		</path>
+		<compile classpath.id="clover.compile.classpath" input.dir="${main.clover.dir}" output.dir="${main.output.dir}"
+				resources.dir="${main.resources.dir}"/>
+
+		<instrument input.dir="${test.java.dir}" output.dir="${test.clover.dir}"/>
+		<path id="test.compile.classpath">
+			<pathelement location="${main.output.dir}"/>
+			<path refid="clover.classpath"/>
+			<path refid="compile.classpath"/>
+			<path refid="test.classpath"/>
+		</path>
+		<test-compile classpath.id="test.compile.classpath" input.dir="${test.clover.dir}" output.dir="${test.output.dir}"
+				resources.dir="${test.resources.dir}"/>
+		<delete dir="${clover.staging.dir}" quiet="true"/>
+	</target>
+
+	<target name="clover.post" depends="clover.init">
+		<clover-report initstring="${clover.db.file}">
+			<current outfile="${clover.output.dir}/clover.xml">
+				<format type="xml"/>
+				<testsources dir="${test.java.dir}">
+					<include name="**/*.java"/>
+					<include name="*.java"/>
+				</testsources>
+			</current>
+		</clover-report>
+		<clover-report initstring="${clover.db.file}">
+			<current outfile="${clover.output.dir}/html">
+				<format type="html"/>
+				<testsources dir="${test.java.dir}">
+					<include name="**/*.java"/>
+					<include name="*.java"/>
+				</testsources>
+			</current>
+		</clover-report>
+		<clover-report initstring="${clover.db.file}">
+			<current outfile="${clover.output.dir}/clover.pdf" summary="true">
+				<format type="pdf"/>
+				<testsources dir="${test.java.dir}">
+					<include name="**/*.java"/>
+					<include name="*.java"/>
+				</testsources>
+			</current>
+		</clover-report>
+		<clover-check initstring="${clover.db.file}" target="${clover.coverage}" haltOnFailure="${clover.enforce}">
+			<testsources dir="${test.java.dir}">
+				<include name="**/*.java"/>
+				<include name="*.java"/>
+			</testsources>
+		</clover-check>
+	</target>
+
+	<target name="findbugs.init" depends="ivy.init, findbugs.download">
+		<ivy:cachepath resolveId="findbugs.classpath" pathid="findbugs.classpath" organisation="edu.umd.cs.findbugs"
+				module="com.springsource.edu.umd.cs.findbugs.ant" revision="${edu.umd.cs.findbugs.version}"
+				conf="runtime" type="jar" inline="true" log="download-only"/>
+		<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
+				classpathref="findbugs.classpath"/>
+	</target>
+
+	<target name="findbugs.download" depends="findbugs.download.init" if="findbugs.download.needed">
+		<ivy:cachepath resolveId="findbugs" pathid="findbugs" organisation="edu.umd.cs.findbugs"
+				module="edu.umd.cs.findbugs.dist" revision="${edu.umd.cs.findbugs.version}" conf="runtime" type="zip"
+				inline="true" log="download-only"/>
+		<unzip dest="${findbugs.dir}">
+			<path refid="findbugs"/>
+			<globmapper from="findbugs-${edu.umd.cs.findbugs.version}/*" to="*"/>
+		</unzip>
+	</target>
+
+	<target name="findbugs.download.init">
+		<condition property="findbugs.download.needed">
+			<not>
+				<available file="${findbugs.dir}" type="dir"/>
+			</not>
+		</condition>
+	</target>
+
+	<target name="findbugs.pre" depends="src.init" if="src.exists">
+		<delete dir="${findbugs.output.dir}" quiet="true"/>
+		<mkdir dir="${findbugs.output.dir}"/>
+	</target>
+
+	<target name="findbugs.do" depends="ivy.init, resolve.compile, compile.init, findbugs.init, src.init" if="src.exists">
+		<findbugs home="${findbugs.dir}" output="xml" outputFile="${findbugs.output.file}"
+				excludeFilter="${findbugs.exclude.file}" jvmargs="-Xmx1024M" errorProperty="findbugs.errors" warningsProperty="findbugs.warnings">
+			<class location="${main.output.dir}"/>
+			<auxClasspath>
+				<!-- Require something to always be in this classpath so findbugs on windows runs -->
+				<path location="." />
+				<path refid="compile.classpath"/>
+			</auxClasspath>
+			<sourcepath location="${main.java.dir}"/>
+		</findbugs>
+		<antcall target="findbugs.post"/>
+	</target>
+
+	<target name="findbugs.post" if="findbugs.enforce">
+		<fail if="findbugs.errors" message="FindBugs errors found"/>
+		<fail if="findbugs.warnings" message="FindBugs warnings found"/>
+	</target>
+
+	<target name="osgi.init" depends="ivy.init">
+		<ivy:cachepath resolveId="equinox.classpath" pathid="equinox.classpath" organisation="org.eclipse.osgi"
+			module="org.eclipse.osgi" revision="${org.eclipse.osgi.version}" type="jar" inline="true"
+			log="download-only"/>
+		<ivy:cachepath resolveId="ant.osgi.classpath" pathid="ant.osgi.classpath"
+				organisation="org.springframework.build" module="org.springframework.build.osgi"
+				revision="${org.springframework.build.osgi.version}" conf="runtime" type="jar" inline="true"
+				log="download-only"/>
+		<taskdef resource="org/springframework/build/osgi/antlib.xml" uri="antlib:org.springframework.build.osgi"
+			classpathref="ant.osgi.classpath"/>
+	</target>
+
+<!-- Macros -->
+	<macrodef name="test-run">
+		<attribute name="classpath.id"/>
+		<sequential>
+			<condition property="test.halt" value="false" else="true">
+				<istrue value="${ci.build}"/>
+			</condition>
+			<mkdir dir="${test-results.output.dir}/xml"/>
+			<junit forkmode="${test.forkmode}" dir="${basedir}" haltonerror="${test.halt}" haltonfailure="${test.halt}">
+				<jvmarg line="${test.vm.args}"/>
+				<syspropertyset>
+					<propertyref builtin="commandline"/>
+				</syspropertyset>
+				<classpath refid="@{classpath.id}"/>
+				<test fork="yes" todir="${test-results.output.dir}/xml" name="${testcase}" if="testcase"/>
+				<batchtest fork="yes" todir="${test-results.output.dir}/xml" unless="testcase">
+					<fileset dir="${test.output.dir}" erroronmissingdir="false">
+						<include name="**/*Test.class"/>
+						<include name="**/*Tests.class"/>
+						<exclude name="**/Abstract*.class"/>
+					</fileset>
+				</batchtest>
+				<formatter type="brief" usefile="false"/>
+				<formatter type="xml"/>
+			</junit>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="instrument">
+		<attribute name="input.dir"/>
+		<attribute name="output.dir"/>
+		<sequential>
+			<clover-instr initstring="${clover.db.file}" destdir="@{output.dir}">
+				<fileset dir="@{input.dir}" erroronmissingdir="false">
+					<include name="**/*.java"/>
+					<include name="*.java"/>
+				</fileset>
+			</clover-instr>
+			<copy todir="@{output.dir}">
+				<fileset dir="@{input.dir}" erroronmissingdir="false">
+					<exclude name="**/*.java"/>
+					<exclude name="*.java"/>
+				</fileset>
+			</copy>
+		</sequential>
+	</macrodef>
+</project>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2010 SpringSource
+   
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+   
+       http://www.apache.org/licenses/LICENSE-2.0
+   
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project name="publish-library" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:maven="antlib:org.apache.maven.artifact.ant">
+
+	<import file="common.xml"/>
+	<import file="../common/publish.xml"/>
+
+	<target name="publish-ivy" depends="ivy.init, resolve">
+		<delete quiet="true" file="${ivy.output.file}"/>
+		<mkdir dir="${ivy.output.dir}" />
+
+		<ivy:publish resolver="${publication.resolver.prefix}-library-publish" pubdate="${timestamp}"
+				status="${release.type}">
+			<artifacts pattern="${libd.output.dir}/[artifact].[ext]"/>
+			<artifacts pattern="${ivy.output.dir}/[artifact].[ext]"/>
+			<artifacts pattern="${license.dir}/[artifact].[ext]"/>
+		</ivy:publish>
+	</target>
+
+	<target name="publish-maven" depends="create.pom, ivy.init, maven.init, resolve" unless="local.build">
+		<maven:deploy file="${libd.output.file}">
+			<remoteRepository url="s3://${publish.bucket}/maven/libraries/${adjusted.release.type}">
+				<authentication username="${accessKey}" passphrase="${secretKey}"/>
+			</remoteRepository>
+			<pom file="${pom.output.file}"/>
+		</maven:deploy>
+	</target>
+
+	<target name="publish-maven-central" depends="maven.init">
+		<property name="maven.central.repository" value="s3://maven.springframework.org/${adjusted.release.type}"/>
+		<maven:deploy file="${libd.output.file}">
+			<remoteRepository url="${maven.central.repository}">
+				<authentication username="${accessKey}" passphrase="${secretKey}"/>
+			</remoteRepository>
+			<pom file="${local.pom.output.file}"/>
+		</maven:deploy>
+	</target>
+
+	<target name="install-maven" depends="create.pom, snapshot.pom, maven.init">
+		<maven:install file="${libd.output.file}">
+			<pom file="${pom.output.file}"/>
+		</maven:install>
+	</target>
+
+	<target name="install-maven-central" depends="maven.init">
+		<maven:install file="${libd.output.file}">
+			<pom file="${local.pom.output.file}"/>
+		</maven:install>
+	</target>
+
+	<target name="create.pom" depends="ivy.init, resolve">
+		<delete quiet="true" file="${pom.output.file}"/>
+		<mkdir dir="${pom.output.dir}"/>
+
+		<ivy:makepom ivyfile="${ivy.output.file}" pomfile="${pom.output.file}">
+			<mapping conf="compile" scope="compile"/>
+			<mapping conf="provided" scope="provided"/>
+			<mapping conf="dm-server-provided" scope="provided"/>
+			<mapping conf="runtime" scope="runtime"/>
+			<mapping conf="test" scope="test"/>
+		</ivy:makepom>
+
+		<replaceregexp match="&lt;packaging&gt;jar&lt;/packaging&gt;"
+				replace="&lt;packaging&gt;libd&lt;/packaging&gt;"
+				file="${pom.output.file}"/>
+	</target>
+
+</project>
