@@ -2,6 +2,7 @@ SPRING FRAMEWORK CHANGELOG
 ==========================
 http://www.springsource.org
 
+EDIT.
 
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------
