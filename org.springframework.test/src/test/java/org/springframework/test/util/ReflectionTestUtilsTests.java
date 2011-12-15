@@ -191,4 +191,66 @@ public class ReflectionTestUtilsTests extends TestCase {
 		}.runTest();
 	}
 
+	@Test
+	public void invokeMethodWithAutoboxingAndUnboxing() {
+		// IntelliJ IDEA 11 won't accept int assignment here
+		Integer difference = invokeMethod(component, "subtract", 5, 2);
+		assertEquals("subtract(5, 2)", 3, difference.intValue());
+	}
+
+	@Ignore("[SPR-8644] findMethod() does not currently support var-args")
+	@Test
+	public void invokeMethodWithPrimitiveVarArgs() {
+		// IntelliJ IDEA 11 won't accept int assignment here
+		Integer sum = invokeMethod(component, "add", 1, 2, 3, 4);
+		assertEquals("add(1,2,3,4)", 10, sum.intValue());
+	}
+
+	@Test
+	public void invokeMethodWithPrimitiveVarArgsAsSingleArgument() {
+		// IntelliJ IDEA 11 won't accept int assignment here
+		Integer sum = invokeMethod(component, "add", new int[] { 1, 2, 3, 4 });
+		assertEquals("add(1,2,3,4)", 10, sum.intValue());
+	}
+
+	@Test
+	public void invokeMethodsSimulatingLifecycleEvents() {
+		assertNull("number", component.getNumber());
+		assertNull("text", component.getText());
+
+		// Simulate autowiring a configuration method
+		invokeMethod(component, "configure", new Integer(42), "enigma");
+		assertEquals("number should have been configured", new Integer(42), component.getNumber());
+		assertEquals("text should have been configured", "enigma", component.getText());
+
+		// Simulate @PostConstruct life-cycle event
+		invokeMethod(component, "init");
+		// assertions in init() should succeed
+
+		// Simulate @PreDestroy life-cycle event
+		invokeMethod(component, "destroy");
+		assertNull("number", component.getNumber());
+		assertNull("text", component.getText());
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void invokeMethodWithIncompatibleArgumentTypes() {
+		invokeMethod(component, "subtract", "foo", 2.0);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void invokeInitMethodBeforeAutowiring() {
+		invokeMethod(component, "init");
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void invokeMethodWithTooFewArguments() {
+		invokeMethod(component, "configure", new Integer(42));
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void invokeMethodWithTooManyArguments() {
+		invokeMethod(component, "configure", new Integer(42), "enigma", "baz", "quux");
+	}
+
 }
