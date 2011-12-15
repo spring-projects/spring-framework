@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2010 SpringSource
+   
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+   
+       http://www.apache.org/licenses/LICENSE-2.0
+   
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project name="common-multi-bundle" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<tstamp>
+		<format property="timestamp" pattern="yyyyMMddHHmmss" timezone="GMT"/>
+	</tstamp>
+
+<!-- Properties -->
+	<dirname property="spring.build.dir" file="${ant.file.common-multi-bundle}/.."/>
+	<property file="${spring.build.dir}/common/common.properties"/>
+
+<!-- Global targets -->
+	<condition property="adjusted.release.type" value="snapshot" else="${release.type}">
+		<equals arg1="integration" arg2="${release.type}"/>
+	</condition>
+
+<!-- Main targets -->
+	<target name="clean"
+			description="Removes the target directory.">
+		<delete quiet="true" dir="${target.dir}"/>
+		<all-bundles target="clean"/>
+	</target>
+
+	<target name="clean-integration"
+			description="Removes the integration repository directory.">
+		<fail message="The 'integration.repo.dir' property must be set on this project.">
+			<condition>
+				<not>
+					<isset property="integration.repo.dir"/>
+				</not>
+			</condition>
+		</fail>
+		<delete quiet="true" dir="${integration.repo.dir}"/>
+	</target>
+
+	<target name="clean-ivy" depends="ivy.init"
+			description="Removes the ivy cache directory.">
+		<fail message="The 'ivy.cache.dir' property must be set on this project.">
+			<condition>
+				<not>
+					<isset property="ivy.cache.dir"/>
+				</not>
+			</condition>
+		</fail>
+		<delete quiet="true" dir="${ivy.cache.dir}"/>
+	</target>
+
+<!-- Other targets -->
+	<target name="ivy.init" unless="ivy.initialized">
+		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant">
+			<classpath>
+				<path location="${ivy.lib.dir}/ivy.jar"/>
+				<path location="${ivy.lib.dir}/org.springframework.build.aws.ivy.jar"/>
+				<path location="${ivy.lib.dir}/commons-codec.jar"/>
+				<path location="${ivy.lib.dir}/commons-httpclient.jar"/>
+				<path location="${ivy.lib.dir}/commons-logging.jar"/>
+				<path location="${ivy.lib.dir}/jets3t.jar"/>
+				<path location="${ivy.lib.dir}"/>
+			</classpath>
+		</taskdef>
+		<ivy:settings file="${ivy.settings.file}"/>
+		<property name="ivy.initialized" value="true"/>
+	</target>
+
+<!-- Macros -->
+	<macrodef name="all-bundles">
+		<attribute name="target"/>
+		<attribute name="buildpathRef" default="bundles"/>
+		<element name="inherited-properties" optional="true" implicit="true"/>
+		<sequential>
+			<subant target="@{target}" verbose="true" buildpathRef="@{buildpathRef}">
+				<inherited-properties/>
+				<propertyset>
+					<propertyref builtin="commandline"/>
+				</propertyset>
+				<property name="timestamp" value="${timestamp}"/>
+			</subant>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="java-doc">
+		<attribute name="input.dir"/>
+		<attribute name="output.dir"/>
+		<attribute name="classpath.id"/>
+		<attribute name="access"/>
+		<attribute name="exclude.package.names" default=""/>
+		<sequential>
+			<delete quiet="true" dir="@{output.dir}"/>
+			<mkdir dir="@{output.dir}"/>
+			<javadoc.links sourcepath="@{input.dir}" destdir="@{output.dir}" classpathref="@{classpath.id}"
+					access="@{access}" excludepackagenames="@{exclude.package.names}" maxmemory="${javadoc.max.memory}"
+					stylesheetfile="${javadoc.stylesheet.file}" splitindex="true"  useexternalfile="true">
+				<header><![CDATA[<!-- Begin Google Analytics code --> <script type="text/javascript"> var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www."); document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E")); </script> <script type="text/javascript"> var pageTracker = _gat._getTracker("UA-2728886-3"); pageTracker._setDomainName("none"); pageTracker._setAllowLinker(true); pageTracker._trackPageview(); </script> <!-- End Google Analytics code -->]]></header>
+			</javadoc.links>
+			<copy toDir="@{output.dir}/resources">
+				<fileset dir="${javadoc.resources.dir}" erroronmissingdir="false"/>
+			</copy>
+		</sequential>
+	</macrodef>
+
+	<presetdef name="javadoc.links">
+		<javadoc/>
+	</presetdef>
+
+</project>
