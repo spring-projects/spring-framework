@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2010 SpringSource
+   
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+   
+       http://www.apache.org/licenses/LICENSE-2.0
+   
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project name="publish-multi-bundle" xmlns:ivy="antlib:org.apache.ivy.ant"
+		xmlns:aws="antlib:org.springframework.build.aws">
+
+	<import file="common.xml"/>
+
+<!-- Main targets -->
+	<target name="publish"
+			description="Publishes all artifacts to remote repositories">
+		<all-bundles target="publish"/>
+	</target>
+
+	<target name="publish-ivy"
+			description="Publishes all ivy artifacts to remote repositories">
+		<all-bundles target="publish-ivy"/>
+	</target>
+
+	<target name="publish-maven"
+			description="Publishes all maven artifacts to remote repositories">
+		<all-bundles target="publish-maven"/>
+	</target>
+
+	<target name="publish-maven-central">
+		<all-bundles target="publish-maven-central"/>
+	</target>
+
+	<target name="install-maven">
+		<all-bundles target="install-maven"/>
+	</target>
+
+	<target name="install-maven-central">
+		<all-bundles target="install-maven-central"/>
+	</target>
+
+	<target name="publish-package" depends="aws.init">
+		<fail message="The 'project.name' property must be set on this project.">
+			<condition>
+				<not>
+					<isset property="project.name"/>
+				</not>
+			</condition>
+		</fail>
+		<checksum file="${package.output.file}" algorithm="sha1"/>
+		<aws:s3 accessKey="${accessKey}" secretKey="${secretKey}">
+			<upload bucketName="dist.${bucket.basename}" file="${package.output.file}"
+					toFile="${adjusted.release.type}/${project.key}/${package.file.name}" publicRead="true">
+				<metadata name="project.name" value="${project.name}"/>
+				<metadata name="release.type" value="${release.type}"/>
+				<metadata name="bundle.version" value="${bundle.version}"/>
+				<metadata name="package.file.name" value="${package.file.name}"/>
+			</upload>
+			<upload bucketName="dist.${bucket.basename}" file="${package.output.file}.sha1"
+					toFile="${adjusted.release.type}/${project.key}/${package.file.name}.sha1" publicRead="true">
+			</upload>
+		</aws:s3>
+	</target>
+
+<!-- Other targets -->
+	<target name="aws.init" depends="ivy.init">
+		<ivy:cachepath resolveId="spring.aws.ant.classpath" pathid="spring.aws.ant.classpath"
+				organisation="org.springframework.build" module="org.springframework.build.aws.ant"
+				revision="${org.springframework.build.aws.ant.version}" conf="runtime" type="jar" inline="true"
+				log="download-only"/>
+		<taskdef resource="org/springframework/build/aws/ant/antlib.xml" uri="antlib:org.springframework.build.aws"
+			classpathref="spring.aws.ant.classpath" />
+	</target>
+
+</project>

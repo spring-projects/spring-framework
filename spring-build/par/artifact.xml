@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2010 SpringSource
+   
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+   
+       http://www.apache.org/licenses/LICENSE-2.0
+   
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project name="artifact-par" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<import file="common.xml"/>
+	<import file="../multi-bundle/artifact.xml"/>
+
+<!-- Main targets -->
+	<target name="jar" depends="ivy.init"
+			description="Creates a PAR file containing the output of the list of bundles.">
+		<delete dir="${par.staging.dir}" quiet="true"/>
+		<mkdir dir="${par.staging.dir}"/>
+		<delete dir="${par.output.file}" quiet="true"/>
+		<mkdir dir="${jar.output.dir}"/>
+
+		<all-bundles target="jar"/>
+		<all-bundles target="copy-dist-jar">
+			<property name="copy.to.dir" value="${par.staging.dir}"/>
+		</all-bundles>
+		<all-bundles target="copy-ext-jars">
+			<property name="copy.to.dir" value="${par.staging.dir}"/>
+		</all-bundles>
+		<antcall target="collect-additional"/>
+		<jar destfile="${par.output.file}" basedir="${par.staging.dir}" index="true" filesetmanifest="merge">
+			<manifest>
+				<attribute name="Application-SymbolicName" value="${ant.project.name}"/>
+				<attribute name="Application-Version" value="${bundle.version}"/>
+				<attribute name="Application-Name" value="${application.name}"/>
+				<attribute name="Application-Description" value="${application.description}"/>
+				<attribute name="Application-Creator" value="${user.name}"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="collect-additional" depends="ivy.file.exists" if="ivy.file.exists">
+		<add-jars output.dir="${par.staging.dir}"/>
+	</target>
+
+	<target name="collect-provided"
+			description="Collects all the JARs expected to be provided for a PAR file.">
+		<delete dir="${par.provided.dir}" quiet="true"/>
+		<mkdir dir="${par.provided.dir}"/>
+
+		<all-bundles target="copy-provided-jars">
+			<property name="copy.to.dir" value="${par.provided.bundles.dir}"/>
+		</all-bundles>
+		<all-bundles target="copy-provided-libs">
+			<property name="copy.to.dir" value="${par.provided.libraries.dir}"/>
+		</all-bundles>
+	</target>
+
+</project>
