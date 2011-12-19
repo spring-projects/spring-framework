@@ -4,12 +4,12 @@
   <groupId>org.springframework</groupId>
   <artifactId>spring-jdbc</artifactId>
   <packaging>jar</packaging>
-  <version>3.0.7.RELEASE</version>
+  <version>3.0.8.BUILD-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework</groupId>
     <artifactId>spring-parent</artifactId>
     <relativePath>../org.springframework.spring-parent</relativePath>
-    <version>3.0.7.RELEASE</version>
+    <version>3.0.8.BUILD-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
