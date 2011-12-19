@@ -6,12 +6,12 @@
 	<groupId>org.springframework</groupId>
 	<artifactId>spring-webmvc</artifactId>
 	<packaging>jar</packaging>
-	<version>3.0.6.BUILD-SNAPSHOT</version>
+	<version>3.0.7.BUILD-SNAPSHOT</version>
 	<parent>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-parent</artifactId>
 		<relativePath>../org.springframework.spring-parent</relativePath>
-		<version>3.0.6.BUILD-SNAPSHOT</version>
+		<version>3.0.7.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<profiles>
