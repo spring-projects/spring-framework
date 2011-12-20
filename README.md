@@ -7,8 +7,8 @@ to specific deployment environments.
 
 The framework also serves as the foundation for
 [Spring Integration](https://github.com/SpringSource/spring-integration),
-[Spring Batch](https://github.com/SpringSource/spring-batch) and the rest of the Spring family of
-projects. Browse the repositories under the
+[Spring Batch](https://github.com/SpringSource/spring-batch) and the rest of the Spring
+[family of projects](http://springsource.org/projects). Browse the repositories under the
 [SpringSource organization](https://github.com/SpringSource) on GitHub for a full list.
 
 [.NET](https://github.com/SpringSource/spring-net) and
@@ -45,7 +45,8 @@ are available via the project wiki.
 contributor license agreement ([CLA](https://support.springsource.com/spring_committer_signup)).
 Trivial changes like typo fixes are especially appreciated (just
 [fork and edit!](https://github.com/blog/844-forking-with-the-edit-button)). For larger changes,
-please create a JIRA issue first and discuss your ideas with the Spring team.
+please search through JIRA for similiar issues, creating a new one if necessary, and discuss your
+ideas with the Spring team.
 
 ## Staying in touch
 Follow [@springframework](http://twitter.com/springframework) and its
