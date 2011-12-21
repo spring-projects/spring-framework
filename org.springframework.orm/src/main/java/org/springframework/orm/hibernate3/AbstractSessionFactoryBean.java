@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,11 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
-import org.hibernate.JDBCException;
 import org.hibernate.SessionFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.support.PersistenceExceptionTranslator;
-import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
  * Abstract {@link org.springframework.beans.factory.FactoryBean} that creates
@@ -54,8 +50,8 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  */
-public abstract class AbstractSessionFactoryBean
-		implements FactoryBean<SessionFactory>, InitializingBean, DisposableBean, PersistenceExceptionTranslator {
+public abstract class AbstractSessionFactoryBean extends HibernateExceptionTranslator
+		implements FactoryBean<SessionFactory>, InitializingBean, DisposableBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -65,8 +61,6 @@ public abstract class AbstractSessionFactoryBean
 	private boolean useTransactionAwareDataSource = false;
 
 	private boolean exposeTransactionAwareSessionFactory = true;
-
-	private SQLExceptionTranslator jdbcExceptionTranslator;
 
 	private SessionFactory sessionFactory;
 
@@ -184,23 +178,6 @@ public abstract class AbstractSessionFactoryBean
 		return this.exposeTransactionAwareSessionFactory;
 	}
 
-	/**
-	 * Set the JDBC exception translator for the SessionFactory,
-	 * exposed via the PersistenceExceptionTranslator interface.
-	 * <p>Applied to any SQLException root cause of a Hibernate JDBCException,
-	 * overriding Hibernate's default SQLException translation (which is
-	 * based on Hibernate's Dialect for a specific target database).
-	 * @param jdbcExceptionTranslator the exception translator
-	 * @see java.sql.SQLException
-	 * @see org.hibernate.JDBCException
-	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
-	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
-	 * @see org.springframework.dao.support.PersistenceExceptionTranslator
-	 */
-	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
-		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
-	}
-
 
 	/**
 	 * Build and expose the SessionFactory.
@@ -266,41 +243,6 @@ public abstract class AbstractSessionFactoryBean
 
 	public boolean isSingleton() {
 		return true;
-	}
-
-
-	/**
-	 * Implementation of the PersistenceExceptionTranslator interface,
-	 * as autodetected by Spring's PersistenceExceptionTranslationPostProcessor.
-	 * <p>Converts the exception if it is a HibernateException;
-	 * else returns <code>null</code> to indicate an unknown exception.
-	 * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
-	 * @see #convertHibernateAccessException
-	 */
-	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
-		if (ex instanceof HibernateException) {
-			return convertHibernateAccessException((HibernateException) ex);
-		}
-		return null;
-	}
-
-	/**
-	 * Convert the given HibernateException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy.
-	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
-	 * Hibernate JDBCException, else rely on Hibernate's default translation.
-	 * @param ex HibernateException that occured
-	 * @return a corresponding DataAccessException
-	 * @see SessionFactoryUtils#convertHibernateAccessException
-	 * @see #setJdbcExceptionTranslator
-	 */
-	protected DataAccessException convertHibernateAccessException(HibernateException ex) {
-		if (this.jdbcExceptionTranslator != null && ex instanceof JDBCException) {
-			JDBCException jdbcEx = (JDBCException) ex;
-			return this.jdbcExceptionTranslator.translate(
-					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
-		}
-		return SessionFactoryUtils.convertHibernateAccessException(ex);
 	}
 
 
