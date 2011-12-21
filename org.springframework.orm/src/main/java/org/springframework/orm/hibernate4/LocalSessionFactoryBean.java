@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Properties;
 import javax.sql.DataSource;
 
+import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.NamingStrategy;
 
@@ -68,6 +69,8 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 	private Resource[] mappingJarLocations;
 
 	private Resource[] mappingDirectoryLocations;
+
+	private Interceptor entityInterceptor;
 
 	private NamingStrategy namingStrategy;
 
@@ -176,6 +179,16 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 	 */
 	public void setMappingDirectoryLocations(Resource[] mappingDirectoryLocations) {
 		this.mappingDirectoryLocations = mappingDirectoryLocations;
+	}
+
+	/**
+	 * Set a Hibernate entity interceptor that allows to inspect and change
+	 * property values before writing to and reading from the database.
+	 * Will get applied to any new Session created by this factory.
+	 * @see org.hibernate.cfg.Configuration#setInterceptor
+	 */
+	public void setEntityInterceptor(Interceptor entityInterceptor) {
+		this.entityInterceptor = entityInterceptor;
 	}
 
 	/**
@@ -289,6 +302,10 @@ public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, Res
 				}
 				sfb.addDirectory(file);
 			}
+		}
+
+		if (this.entityInterceptor != null) {
+			sfb.setInterceptor(this.entityInterceptor);
 		}
 
 		if (this.namingStrategy != null) {
