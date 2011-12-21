@@ -23,7 +23,13 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
 
 /**
  * {@link PersistenceExceptionTranslator} capable of translating {@link HibernateException}
- * instances to Spring's {@link org.springframework.dao.DataAccessException} hierarchy.
+ * instances to Spring's {@link DataAccessException} hierarchy.
+ *
+ * <p>Extended by {@link LocalSessionFactoryBean}, so there is no need to declare this
+ * translator in addition to a {@code LocalSessionFactoryBean}.
+ *
+ * <p>When configuring the container with {@code @Configuration} classes, a {@code @Bean}
+ * of this type must be registered manually.
  *
  * @author Juergen Hoeller
  * @since 3.1

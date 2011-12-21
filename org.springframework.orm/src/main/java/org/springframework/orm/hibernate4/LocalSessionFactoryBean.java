@@ -53,8 +53,8 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * @see #setDataSource
  * @see #setPackagesToScan
  */
-public class LocalSessionFactoryBean implements FactoryBean<SessionFactory>, ResourceLoaderAware,
-		InitializingBean, DisposableBean {
+public class LocalSessionFactoryBean extends HibernateExceptionTranslator
+		implements FactoryBean<SessionFactory>, ResourceLoaderAware, InitializingBean, DisposableBean {
 
 	private DataSource dataSource;
 

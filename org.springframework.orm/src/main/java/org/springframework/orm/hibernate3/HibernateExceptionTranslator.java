@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate3;
 
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
+
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
@@ -26,14 +27,15 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  * {@link PersistenceExceptionTranslator} capable of translating {@link HibernateException}
  * instances to Spring's {@link DataAccessException} hierarchy.
  *
- * <p>When configuring the Spring container via XML, note that this translator is
- * automatically used internally by {@link SessionFactoryBean} types. When configuring
- * the container with {@code @Configuration} classes, a {@code @Bean} of this type
- * must be registered manually.
+ * <p>Extended by {@link LocalSessionFactoryBean}, so there is no need to declare this
+ * translator in addition to a {@code LocalSessionFactoryBean}.
  *
+ * <p>When configuring the container with {@code @Configuration} classes, a {@code @Bean}
+ * of this type must be registered manually.
+ *
+ * @author Juergen Hoeller
  * @author Chris Beams
  * @since 3.1
- * @see SessionFactoryBuilder
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  * @see SessionFactoryUtils#convertHibernateAccessException(HibernateException)
  * @see SQLExceptionTranslator
@@ -41,6 +43,25 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 public class HibernateExceptionTranslator implements PersistenceExceptionTranslator {
 
 	private SQLExceptionTranslator jdbcExceptionTranslator;
+
+
+	/**
+	 * Set the JDBC exception translator for the SessionFactory,
+	 * exposed via the PersistenceExceptionTranslator interface.
+	 * <p>Applied to any SQLException root cause of a Hibernate JDBCException,
+	 * overriding Hibernate's default SQLException translation (which is
+	 * based on Hibernate's Dialect for a specific target database).
+	 * @param jdbcExceptionTranslator the exception translator
+	 * @see java.sql.SQLException
+	 * @see org.hibernate.JDBCException
+	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
+	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
+	 * @see org.springframework.dao.support.PersistenceExceptionTranslator
+	 */
+	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
+		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
+	}
+
 
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException) {
@@ -66,23 +87,6 @@ public class HibernateExceptionTranslator implements PersistenceExceptionTransla
 					"Hibernate operation: " + jdbcEx.getMessage(), jdbcEx.getSQL(), jdbcEx.getSQLException());
 		}
 		return SessionFactoryUtils.convertHibernateAccessException(ex);
-	}
-
-	/**
-	 * Set the JDBC exception translator for the SessionFactory,
-	 * exposed via the PersistenceExceptionTranslator interface.
-	 * <p>Applied to any SQLException root cause of a Hibernate JDBCException,
-	 * overriding Hibernate's default SQLException translation (which is
-	 * based on Hibernate's Dialect for a specific target database).
-	 * @param jdbcExceptionTranslator the exception translator
-	 * @see java.sql.SQLException
-	 * @see org.hibernate.JDBCException
-	 * @see org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator
-	 * @see org.springframework.jdbc.support.SQLStateSQLExceptionTranslator
-	 * @see org.springframework.dao.support.PersistenceExceptionTranslator
-	 */
-	public void setJdbcExceptionTranslator(SQLExceptionTranslator jdbcExceptionTranslator) {
-		this.jdbcExceptionTranslator = jdbcExceptionTranslator;
 	}
 
 }
