@@ -6,7 +6,9 @@ http://www.springsource.org
 Changes in version 3.1.1 (2012-01-16)
 -------------------------------------
 
+* officially deprecated TopLinkJpaDialect in favor of EclipseLink and Spring's EclipseLinkJpaDialect
 * fixed LocalContainerEntityManagerFactoryBean's "packagesToScan" to avoid additional provider scan
+* Hibernate 4 LocalSessionFactoryBean implements PersistenceExceptionTranslator interface as well
 * added "entityInterceptor" property to Hibernate 4 LocalSessionFactoryBean
 * corrected fix for QuartzJobBean to work with Quartz 2.0/2.1
 
