@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jpa.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
@@ -35,7 +34,8 @@ import org.springframework.transaction.TransactionException;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for Eclipse
- * Persistence Services (EclipseLink). Developed and tested against EclipseLink 1.0.
+ * Persistence Services (EclipseLink). Developed and tested against EclipseLink
+ * 1.0 as well as 2.0-2.3.
  *
  * <p>By default, this class acquires a EclipseLink transaction to get the JDBC Connection
  * early. This allows mixing JDBC and JPA/EclipseLink operations in the same transaction.
