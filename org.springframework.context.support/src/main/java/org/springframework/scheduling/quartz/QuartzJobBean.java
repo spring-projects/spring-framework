@@ -79,10 +79,12 @@ public abstract class QuartzJobBean implements Job {
 
 	static {
 		try {
-			getSchedulerMethod = JobExecutionContext.class.getMethod("getScheduler");
-			getMergedJobDataMapMethod = JobExecutionContext.class.getMethod("getMergedJobDataMap");
+			Class jobExecutionContextClass =
+					QuartzJobBean.class.getClassLoader().loadClass("org.quartz.JobExecutionContext");
+			getSchedulerMethod = jobExecutionContextClass.getMethod("getScheduler");
+			getMergedJobDataMapMethod = jobExecutionContextClass.getMethod("getMergedJobDataMap");
 		}
-		catch (NoSuchMethodException ex) {
+		catch (Exception ex) {
 			throw new IllegalStateException("Incompatible Quartz API: " + ex);
 		}
 	}
