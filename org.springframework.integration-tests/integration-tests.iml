@@ -282,11 +282,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../ivy-cache/repository/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-1.0.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-1.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../ivy-cache/repository/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-sources-1.0.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.sun.syndication/com.springsource.com.sun.syndication/1.0.0/com.springsource.com.sun.syndication-sources-1.0.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -359,11 +359,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../ivy-cache/repository/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-1.1.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-1.1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../ivy-cache/repository/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-sources-1.1.0.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.apache.openjpa/com.springsource.org.apache.openjpa/1.1.0/com.springsource.org.apache.openjpa-sources-1.1.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
