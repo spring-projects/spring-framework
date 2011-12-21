@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jpa.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
@@ -34,8 +33,8 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 
 /**
- * {@link org.springframework.orm.jpa.JpaDialect} implementation for
- * Apache OpenJPA. Developed and tested against OpenJPA 0.9.7.
+ * {@link org.springframework.orm.jpa.JpaDialect} implementation for Apache OpenJPA.
+ * Developed and tested against OpenJPA 1.1 as well as 2.0/2.1.
  *
  * @author Costin Leau
  * @author Juergen Hoeller

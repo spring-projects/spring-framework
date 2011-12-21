@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
 
 package org.springframework.orm.jpa.vendor;
 
-import java.util.Map;
-import java.util.Properties;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
-
 import javax.persistence.EntityManager;
 import javax.persistence.spi.PersistenceProvider;
 
@@ -42,7 +40,10 @@ import org.springframework.orm.jpa.JpaDialect;
  * @since 2.0
  * @see oracle.toplink.essentials.ejb.cmp3.EntityManagerFactoryProvider
  * @see oracle.toplink.essentials.ejb.cmp3.EntityManager
+ * @deprecated as of Spring 3.1, in favor of the EclipseLink project and
+ * Spring's corresponding {@link EclipseLinkJpaVendorAdapter}
  */
+@Deprecated
 public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	private final PersistenceProvider persistenceProvider = new EntityManagerFactoryProvider();

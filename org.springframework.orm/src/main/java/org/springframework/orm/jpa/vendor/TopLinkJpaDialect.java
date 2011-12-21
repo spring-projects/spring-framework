@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.orm.jpa.vendor;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
@@ -50,7 +49,10 @@ import org.springframework.transaction.TransactionException;
  * @since 2.0
  * @see #setLazyDatabaseTransaction
  * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
+ * @deprecated as of Spring 3.1, in favor of the EclipseLink project and
+ * Spring's corresponding {@link EclipseLinkJpaDialect}
  */
+@Deprecated
 public class TopLinkJpaDialect extends DefaultJpaDialect {
 	
 	private boolean lazyDatabaseTransaction = false;
