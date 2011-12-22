@@ -76,7 +76,8 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	 * Registers a
 	 * <pre>
 	 * <bean id="cacheAspect" class="org.springframework.cache.aspectj.AnnotationCacheAspect" factory-method="aspectOf">
-	 *   <property name="cacheManagerBeanName" value="cacheManager"/>
+	 *   <property name="cacheManager" ref="cacheManager"/>
+	 *   <property name="keyGenerator" ref="keyGenerator"/>
 	 * </bean>
 	 *
 	 * </pre>
@@ -89,6 +90,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 			def.setBeanClassName(CACHE_ASPECT_CLASS_NAME);
 			def.setFactoryMethodName("aspectOf");
 			parseCacheManagerProperty(element, def);
+			CacheNamespaceHandler.parseKeyGenerator(element, def);
 			parserContext.registerBeanComponent(new BeanComponentDefinition(def, CACHE_ASPECT_BEAN_NAME));
 		}
 	}

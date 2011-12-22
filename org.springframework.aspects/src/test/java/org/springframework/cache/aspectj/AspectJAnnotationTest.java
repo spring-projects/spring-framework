@@ -16,6 +16,8 @@
 
 package org.springframework.cache.aspectj;
 
+import org.junit.Assert;
+import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 
@@ -29,5 +31,11 @@ public class AspectJAnnotationTest extends AbstractAnnotationTest {
 	@Override
 	protected ApplicationContext getApplicationContext() {
 		return new GenericXmlApplicationContext("/org/springframework/cache/config/annotation-cache-aspectj.xml");
+	}
+
+	@Test
+	public void testKeyStrategy() throws Exception {
+		AnnotationCacheAspect aspect = ctx.getBean("org.springframework.cache.config.internalCacheAspect", AnnotationCacheAspect.class);
+		Assert.assertSame(ctx.getBean("keyGenerator"), aspect.getKeyGenerator());
 	}
 }
