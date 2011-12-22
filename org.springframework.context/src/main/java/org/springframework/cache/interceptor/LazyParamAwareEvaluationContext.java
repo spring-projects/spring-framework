@@ -97,6 +97,7 @@ class LazyParamAwareEvaluationContext extends StandardEvaluationContext {
 
 		// save arguments as indexed variables
 		for (int i = 0; i < this.args.length; i++) {
+			setVariable("a" + i, this.args[i]);
 			setVariable("p" + i, this.args[i]);
 		}
 
