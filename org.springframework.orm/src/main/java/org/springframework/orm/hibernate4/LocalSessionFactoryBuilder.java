@@ -77,6 +77,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Create a new LocalSessionFactoryBuilder for the given DataSource.
 	 * @param dataSource the JDBC DataSource that the resulting Hibernate SessionFactory should be using
+	 * (may be <code>null</code>)
 	 */
 	public LocalSessionFactoryBuilder(DataSource dataSource) {
 		this(dataSource, new PathMatchingResourcePatternResolver());
@@ -85,6 +86,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Create a new LocalSessionFactoryBuilder for the given DataSource.
 	 * @param dataSource the JDBC DataSource that the resulting Hibernate SessionFactory should be using
+	 * (may be <code>null</code>)
 	 * @param classLoader the ClassLoader to load application classes from
 	 */
 	public LocalSessionFactoryBuilder(DataSource dataSource, ClassLoader classLoader) {
@@ -94,11 +96,14 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Create a new LocalSessionFactoryBuilder for the given DataSource.
 	 * @param dataSource the JDBC DataSource that the resulting Hibernate SessionFactory should be using
+	 * (may be <code>null</code>)
 	 * @param classLoader the ResourceLoader to load application classes from
 	 */
 	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader) {
 		getProperties().put(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
-		getProperties().put(Environment.DATASOURCE, dataSource);
+		if (dataSource != null) {
+			getProperties().put(Environment.DATASOURCE, dataSource);
+		}
 		getProperties().put("hibernate.classLoader.application", resourceLoader.getClassLoader());
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
