@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,9 @@ class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBea
 	
 	@Override
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
-	
 		super.doParse(element, builder);
-
 		builder.addPropertyValue("ignoreUnresolvablePlaceholders",
 				Boolean.valueOf(element.getAttribute("ignore-unresolvable")));
-
 		String systemPropertiesModeName = element.getAttribute("system-properties-mode");
 		if (StringUtils.hasLength(systemPropertiesModeName)) {
 			builder.addPropertyValue("systemPropertiesModeName", "SYSTEM_PROPERTIES_MODE_"+systemPropertiesModeName);
