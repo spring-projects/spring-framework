@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.0.7 (2011-12-19)
+Changes in version 3.0.7 (2011-12-22)
 -------------------------------------
 
 * fixed GenericTypeResolver to consistently return null if not resolvable
@@ -33,7 +33,7 @@ Changes in version 3.0.7 (2011-12-19)
 * Portlet session mutex uses global session attribute to be shared among all portlets in the session
 * fixed ServletServerHttpRequest to reconstruct from "request.getParameterMap()" for form POST only
 * fixed @RequestMapping header matching to correctly process negated header conditions
-* added getObjectMapper() accessor to MappingJacksonHttpMessageConverter
+* added "getObjectMapper()" accessor to MappingJacksonHttpMessageConverter
 * ResourceHttpRequestHandler sends content without content-type header if no media type found
 * AbstractCachingViewResolver allows for caching unresolved view names ("cacheUnresolved"=true)
 * fixed "formMultiSelect"/"formCheckboxes" FreeMarker macros to compare against actual field value

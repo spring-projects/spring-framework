@@ -1,4 +1,4 @@
-SPRING FRAMEWORK 3.0.7 (November 2011)
+SPRING FRAMEWORK 3.0.7 (December 2011)
 --------------------------------------
 http://www.springsource.org
 
