@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ abstract class AbstractPropertyLoadingBeanDefinitionParser extends AbstractSingl
 
 		String fileEncoding = element.getAttribute("file-encoding");
 		if (StringUtils.hasLength(fileEncoding)) {
-			builder.addPropertyReference("fileEncoding", fileEncoding);
+			builder.addPropertyValue("fileEncoding", fileEncoding);
 		}
 
 		String order = element.getAttribute("order");
