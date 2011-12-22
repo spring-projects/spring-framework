@@ -6,8 +6,10 @@ http://www.springsource.org
 Changes in version 3.1.1 (2012-01-16)
 -------------------------------------
 
+* context:property-placeholder's "file-encoding" attribute value is being applied correctly
 * officially deprecated TopLinkJpaDialect in favor of EclipseLink and Spring's EclipseLinkJpaDialect
 * fixed LocalContainerEntityManagerFactoryBean's "packagesToScan" to avoid additional provider scan
+* added protected "isPersistenceUnitOverrideAllowed()" method to DefaultPersistenceUnitManager
 * Hibernate 4 LocalSessionFactoryBean implements PersistenceExceptionTranslator interface as well
 * Hibernate 4 LocalSessionFactoryBean does not insist on a "dataSource" reference being set
 * Hibernate synchronization properly unbinds Session even in case of afterCompletion exception
