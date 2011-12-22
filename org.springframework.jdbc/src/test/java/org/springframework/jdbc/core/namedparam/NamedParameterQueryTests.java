@@ -518,7 +518,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(mockResultSetMetaData);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getDouble(1);
+		mockResultSet.getInt(1);
 		ctrlResultSet.setReturnValue(22.0d);
 		mockResultSet.wasNull();
 		ctrlResultSet.setReturnValue(false);
@@ -561,7 +561,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(mockResultSetMetaData);
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getDouble(1);
+		mockResultSet.getLong(1);
 		ctrlResultSet.setReturnValue(87.0d);
 		mockResultSet.wasNull();
 		ctrlResultSet.setReturnValue(false);
