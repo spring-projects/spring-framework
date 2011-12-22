@@ -10,3 +10,4 @@ org.springframework.jdbc/derby.log
 org.springframework.spring-parent/.classpath
 org.springframework.spring-parent/.project
 org.springframework.test/test-output/
+spring-build/lib/docbook
