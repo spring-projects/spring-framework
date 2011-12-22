@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,9 +117,12 @@ public class PropertyTypeDescriptor extends TypeDescriptor {
 		return anns;
 	}
 
+	@Override
 	public TypeDescriptor forElementType(Class<?> elementType) {
 		if (elementType != null) {
-			return new PropertyTypeDescriptor(this.propertyDescriptor, getMethodParameter(), elementType);
+			MethodParameter nested = new MethodParameter(getMethodParameter());
+			nested.increaseNestingLevel();
+			return new PropertyTypeDescriptor(this.propertyDescriptor, nested, elementType);
 		}
 		else {
 			return super.forElementType(null);
