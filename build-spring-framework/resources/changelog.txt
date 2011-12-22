@@ -6,13 +6,16 @@ http://www.springsource.org
 Changes in version 3.1.1 (2012-01-16)
 -------------------------------------
 
+* official support for Hibernate 4.0 GA
 * context:property-placeholder's "file-encoding" attribute value is being applied correctly
+* DataBinder correctly handles ParseException from Formatter for String->String case
+* CacheNamespaceHandler actually parses cache:annotation-driven's "key-generator" attribute
 * officially deprecated TopLinkJpaDialect in favor of EclipseLink and Spring's EclipseLinkJpaDialect
 * fixed LocalContainerEntityManagerFactoryBean's "packagesToScan" to avoid additional provider scan
 * added protected "isPersistenceUnitOverrideAllowed()" method to DefaultPersistenceUnitManager
+* Hibernate synchronization properly unbinds Session even in case of afterCompletion exception
 * Hibernate 4 LocalSessionFactoryBean implements PersistenceExceptionTranslator interface as well
 * Hibernate 4 LocalSessionFactoryBean does not insist on a "dataSource" reference being set
-* Hibernate synchronization properly unbinds Session even in case of afterCompletion exception
 * added "entityInterceptor" property to Hibernate 4 LocalSessionFactoryBean
 * corrected fix for QuartzJobBean to work with Quartz 2.0/2.1
 
