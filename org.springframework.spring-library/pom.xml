@@ -14,7 +14,7 @@
   <groupId>org.springframework</groupId>
   <artifactId>spring-library</artifactId>
   <packaging>libd</packaging>
-  <version>3.0.7.BUILD-SNAPSHOT</version>
+  <version>3.0.7.RELEASE</version>
   <name>Spring Framework</name>
   <description>Spring is a layered Java/J2EE application platform, based on code published in Expert
   One-on-One J2EE Design and Development by Rod Johnson (Wrox, 2002). </description>
