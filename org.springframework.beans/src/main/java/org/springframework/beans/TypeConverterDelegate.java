@@ -244,6 +244,9 @@ class TypeConverterDelegate {
 		}
 
 		if (firstAttemptEx != null) {
+			if (editor == null) {
+				throw firstAttemptEx;
+			}
 			logger.debug("Original ConversionService attempt failed - ignored since " +
 					"PropertyEditor based conversion eventually succeeded", firstAttemptEx);
 		}
