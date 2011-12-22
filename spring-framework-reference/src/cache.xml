@@ -195,10 +195,10 @@ public Book findBook(String name)]]></programlisting>
 							<entry><screen>#root.targetClass</screen></entry>
 						</row>
 						<row>
-							<entry>params</entry>
+							<entry>args</entry>
 							<entry>root object</entry>
 							<entry>The arguments (as array) used for invoking the target</entry>
-							<entry><screen>#root.params[0]</screen></entry>
+							<entry><screen>#root.args[0]</screen></entry>
 						</row>
 						<row>
 							<entry>caches</entry>
@@ -207,12 +207,12 @@ public Book findBook(String name)]]></programlisting>
 							<entry><screen>#root.caches[0].name</screen></entry>
 						</row>
 						<row>
-							<entry><emphasis>parameter name</emphasis></entry>
+							<entry><emphasis>argument name</emphasis></entry>
 							<entry>evaluation context</entry>
-							<entry>Name of any of the method parameter. If for some reason the names are not available (ex: no debug information),
-							the parameter names are also available under the <literal><![CDATA[p<#arg>]]></literal> where
-							<emphasis><![CDATA[#arg]]></emphasis> stands for the parameter index (starting from 0).</entry>
-							<entry><screen>iban</screen> or <screen>p0</screen></entry>
+							<entry>Name of any of the method argument. If for some reason the names are not available (ex: no debug information),
+							the argument names are also available under the <literal><![CDATA[a<#arg>]]></literal> where
+							<emphasis><![CDATA[#arg]]></emphasis> stands for the argument index (starting from 0).</entry>
+							<entry><screen>iban</screen> or <screen>a0</screen> (one can also use <screen>p0</screen> or <literal><![CDATA[p<#arg>]]></literal> notation as an alias).</entry>
 						</row>
 					</tbody>
 				 </tgroup>
