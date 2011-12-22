@@ -353,7 +353,7 @@ public class DefaultPersistenceUnitManager
 			}
 			postProcessPersistenceUnitInfo(pui);
 			String name = pui.getPersistenceUnitName();
-			if (!this.persistenceUnitInfoNames.add(name)) {
+			if (!this.persistenceUnitInfoNames.add(name) && !isPersistenceUnitOverrideAllowed()) {
 				StringBuilder msg = new StringBuilder();
 				msg.append("Conflicting persistence unit definitions for name '").append(name).append("': ");
 				msg.append(pui.getPersistenceUnitRootUrl()).append(", ");
@@ -478,7 +478,7 @@ public class DefaultPersistenceUnitManager
 
 	/**
 	 * Hook method allowing subclasses to customize each PersistenceUnitInfo.
-	 * <p>Default implementation delegates to all registered PersistenceUnitPostProcessors.
+	 * <p>The default implementation delegates to all registered PersistenceUnitPostProcessors.
 	 * It is usually preferable to register further entity classes, jar files etc there
 	 * rather than in a subclass of this manager, to be able to reuse the post-processors.
 	 * @param pui the chosen PersistenceUnitInfo, as read from <code>persistence.xml</code>.
@@ -492,6 +492,15 @@ public class DefaultPersistenceUnitManager
 				postProcessor.postProcessPersistenceUnitInfo(pui);
 			}
 		}
+	}
+
+	/**
+	 * Return whether an override of a same-named persistence unit is allowed.
+	 * <p>Default is <code>false</code>. May be overridden to return <code>true</code>,
+	 * for example if {@link #postProcessPersistenceUnitInfo} is able to handle that case.
+	 */
+	protected boolean isPersistenceUnitOverrideAllowed() {
+		return false;
 	}
 
 
