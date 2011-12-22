@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,32 +218,40 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	}
 
 	public void afterCompletion(int status) {
-		if (!this.hibernateTransactionCompletion || !this.newSession) {
-			// No Hibernate TransactionManagerLookup: apply afterTransactionCompletion callback.
-			// Always perform explicit afterTransactionCompletion callback for pre-bound Session,
-			// even with Hibernate TransactionManagerLookup (which only applies to new Sessions).
-			Session session = this.sessionHolder.getSession();
-			// Provide correct transaction status for releasing the Session's cache locks,
-			// if possible. Else, closing will release all cache locks assuming a rollback.
-			if (session instanceof SessionImplementor) {
-				((SessionImplementor) session).afterTransactionCompletion(status == STATUS_COMMITTED, null);
+		try {
+			if (!this.hibernateTransactionCompletion || !this.newSession) {
+				// No Hibernate TransactionManagerLookup: apply afterTransactionCompletion callback.
+				// Always perform explicit afterTransactionCompletion callback for pre-bound Session,
+				// even with Hibernate TransactionManagerLookup (which only applies to new Sessions).
+				Session session = this.sessionHolder.getSession();
+				// Provide correct transaction status for releasing the Session's cache locks,
+				// if possible. Else, closing will release all cache locks assuming a rollback.
+				try {
+					if (session instanceof SessionImplementor) {
+						((SessionImplementor) session).afterTransactionCompletion(status == STATUS_COMMITTED, null);
+					}
+				}
+				finally {
+					// Close the Hibernate Session here if necessary
+					// (closed in beforeCompletion in case of TransactionManagerLookup).
+					if (this.newSession) {
+						SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
+					}
+					else if (!this.hibernateTransactionCompletion) {
+						session.disconnect();
+					}
+				}
 			}
-			// Close the Hibernate Session here if necessary
-			// (closed in beforeCompletion in case of TransactionManagerLookup).
-			if (this.newSession) {
-				SessionFactoryUtils.closeSessionOrRegisterDeferredClose(session, this.sessionFactory);
-			}
-			else if (!this.hibernateTransactionCompletion) {
-				session.disconnect();
+			if (!this.newSession && status != STATUS_COMMITTED) {
+				// Clear all pending inserts/updates/deletes in the Session.
+				// Necessary for pre-bound Sessions, to avoid inconsistent state.
+				this.sessionHolder.getSession().clear();
 			}
 		}
-		if (!this.newSession && status != STATUS_COMMITTED) {
-			// Clear all pending inserts/updates/deletes in the Session.
-			// Necessary for pre-bound Sessions, to avoid inconsistent state.
-			this.sessionHolder.getSession().clear();
-		}
-		if (this.sessionHolder.doesNotHoldNonDefaultSession()) {
-			this.sessionHolder.setSynchronizedWithTransaction(false);
+		finally {
+			if (this.sessionHolder.doesNotHoldNonDefaultSession()) {
+				this.sessionHolder.setSynchronizedWithTransaction(false);
+			}
 		}
 	}
 

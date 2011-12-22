@@ -111,12 +111,16 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	}
 
 	public void afterCompletion(int status) {
-		if (status != STATUS_COMMITTED) {
-			// Clear all pending inserts/updates/deletes in the Session.
-			// Necessary for pre-bound Sessions, to avoid inconsistent state.
-			this.sessionHolder.getSession().clear();
+		try {
+			if (status != STATUS_COMMITTED) {
+				// Clear all pending inserts/updates/deletes in the Session.
+				// Necessary for pre-bound Sessions, to avoid inconsistent state.
+				this.sessionHolder.getSession().clear();
+			}
 		}
-		this.sessionHolder.setSynchronizedWithTransaction(false);
+		finally {
+			this.sessionHolder.setSynchronizedWithTransaction(false);
+		}
 	}
 
 }
