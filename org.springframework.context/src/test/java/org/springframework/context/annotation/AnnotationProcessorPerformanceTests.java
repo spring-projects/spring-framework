@@ -65,7 +65,7 @@ public class AnnotationProcessorPerformanceTests {
 		}
 		sw.stop();
 		//System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 5000);
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class AnnotationProcessorPerformanceTests {
 		}
 		sw.stop();
 		//System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 5000);
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class AnnotationProcessorPerformanceTests {
 		}
 		sw.stop();
 		//System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 5000);
 	}
 
 	@Test
@@ -145,7 +145,7 @@ public class AnnotationProcessorPerformanceTests {
 		}
 		sw.stop();
 		//System.out.println(sw.getTotalTimeMillis());
-		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
+		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 5000);
 	}
 
 
