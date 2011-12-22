@@ -114,6 +114,10 @@ public class AnnotationCacheOperationSourceTest {
 		@EvictBar
 		public void multipleStereotype() {
 		}
+
+		@Caching(cacheable = { @Cacheable(value = "test", key = "a"), @Cacheable(value = "test", key = "b") })
+		public void multipleCaching() {
+		}
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

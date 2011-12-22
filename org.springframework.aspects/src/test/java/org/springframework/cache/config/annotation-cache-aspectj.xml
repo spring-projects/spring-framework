@@ -23,7 +23,9 @@
 	<bean id="annotationSource" class="org.springframework.cache.annotation.AnnotationCacheOperationSource"/>
 	-->
 	 
-	<cache:annotation-driven mode="aspectj"/>
+	<cache:annotation-driven mode="aspectj" key-generator="keyGenerator"/>
+	
+	<bean id="keyGenerator" class="org.springframework.cache.config.SomeKeyGenerator" />
 
 	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
 		<property name="caches">
