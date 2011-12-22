@@ -244,7 +244,7 @@ class TypeConverterDelegate {
 		}
 
 		if (firstAttemptEx != null) {
-			if (editor == null) {
+			if (editor == null && convertedValue == newValue) {
 				throw firstAttemptEx;
 			}
 			logger.debug("Original ConversionService attempt failed - ignored since " +
