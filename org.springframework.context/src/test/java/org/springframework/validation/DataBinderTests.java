@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.ParseException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,6 +53,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.convert.support.ConversionServiceFactory;
+import org.springframework.format.Formatter;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.util.StringUtils;
@@ -371,6 +373,28 @@ public class DataBinderTests extends TestCase {
 		finally {
 			LocaleContextHolder.resetLocaleContext();
 		}
+	}
+
+	public void testBindingErrorWithStringFormatter() {
+		TestBean tb = new TestBean();
+		DataBinder binder = new DataBinder(tb);
+		FormattingConversionService conversionService = new FormattingConversionService();
+		ConversionServiceFactory.addDefaultConverters(conversionService);
+		conversionService.addFormatterForFieldType(String.class, new Formatter<String>() {
+			public String parse(String text, Locale locale) throws ParseException {
+				throw new ParseException(text, 0);
+			}
+			public String print(String object, Locale locale) {
+				return object;
+			}
+		});
+		binder.setConversionService(conversionService);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("name", "test");
+
+		binder.bind(pvs);
+		assertTrue(binder.getBindingResult().hasFieldErrors("name"));
+		assertEquals("test", binder.getBindingResult().getFieldValue("name"));
 	}
 
 	public void testBindingWithFormatterAgainstList() {
