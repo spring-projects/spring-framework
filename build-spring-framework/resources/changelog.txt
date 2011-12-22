@@ -17,6 +17,7 @@ Changes in version 3.0.7 (2011-12-22)
 * fixed nested element conversion with a DataBinder + ConversionService + PropertyEditor
 * restored DataBinder's ability to bind to an auto-growing List with unknown element type
 * optimized DefaultListableBeanFactory's PropertyDescriptor caching for concurrent access
+* context:property-placeholder's "file-encoding" attribute value is being applied correctly
 * SpringValidatorAdapter accepts non-indexed set paths (for Hibernate Validator compatibility)
 * fixed AbstractAsyncExecutionAspect's setExecutor method to correctly wrap in a TaskExecutorAdapter
 * @Transactional qualifiers match against transaction manager definitions in parent contexts as well
@@ -24,6 +25,7 @@ Changes in version 3.0.7 (2011-12-22)
 * updated H2 error codes in sql-error-codes.xml
 * fixed NamedParameterJdbcTemplate to use correct maximum type for queryForInt/Long
 * SimpleJdbcTestUtils executeSqlScript properly closes its LineNumberReader after use
+* Hibernate synchronization properly unbinds Session even in case of afterCompletion exception
 * JDO PersistenceManager synchronization performs close attempt after completion (if necessary)
 * JPA EntityManagerFactoryUtils silently ignores IllegalArgumentExceptions from setHint calls
 * added "forwarder" property to ConnectorServerFactoryBean, accepting an MBeanServerForwarder
