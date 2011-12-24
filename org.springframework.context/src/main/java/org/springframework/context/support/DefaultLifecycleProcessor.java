@@ -58,6 +58,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	private volatile ConfigurableListableBeanFactory beanFactory;
 
+	private volatile boolean ignorePhaseOfDependencies = true;
 
 	/**
 	 * Specify the maximum time allotted in milliseconds for the shutdown of
@@ -66,6 +67,21 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	public void setTimeoutPerShutdownPhase(long timeoutPerShutdownPhase) {
 		this.timeoutPerShutdownPhase = timeoutPerShutdownPhase;
+	}
+
+	/**
+	 * Specifies whether a lifecycle bean which other lifecycle beans depend on
+	 * (either explicitly or via {@link DependsOn}) } should be started
+	 * (stopped) before (after) its dependents, irrespective of their phase. The
+	 * backwards-compatible default is true, a dependency bean is always started
+	 * (stopped) before (after) the beans that depend on it even if its
+	 * {@link Phased#getPhase()} method indicates that it should be started
+	 * later (earlier). If false, lifecycle beans are never started or stopped
+	 * in an order that disregards their phase.
+	 */
+	public void setIgnorePhaseOfDependencies( final boolean ignorePhaseOfDependencies )
+	{
+		this.ignorePhaseOfDependencies = ignorePhaseOfDependencies;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) {
@@ -154,9 +170,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	private void doStart(Map<String, ? extends Lifecycle> lifecycleBeans, String beanName, boolean autoStartupOnly) {
 		Lifecycle bean = lifecycleBeans.remove(beanName);
 		if (bean != null && !this.equals(bean)) {
-			String[] dependenciesForBean = this.beanFactory.getDependenciesForBean(beanName);
-			for (String dependency : dependenciesForBean) {
-				doStart(lifecycleBeans, dependency, autoStartupOnly);
+			final String[] dependencies = this.beanFactory.getDependenciesForBean(beanName);
+			final int currentPhase = getPhase( bean );
+			for (final String dependency : dependencies) {
+				final Lifecycle dependencyBean = lifecycleBeans.get( dependency );
+				if( ignorePhaseOfDependencies || dependencyBean == null || getPhase( dependencyBean ) <= currentPhase ) {
+					doStart(lifecycleBeans, dependency, autoStartupOnly);
+				}
 			}
 			if (!bean.isRunning() &&
 					(!autoStartupOnly || !(bean instanceof SmartLifecycle) || ((SmartLifecycle) bean).isAutoStartup())) {
@@ -209,9 +229,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 		Lifecycle bean = lifecycleBeans.remove(beanName);
 		if (bean != null) {
-			String[] dependentBeans = this.beanFactory.getDependentBeans(beanName);
-			for (String dependentBean : dependentBeans) {
-				doStop(lifecycleBeans, dependentBean, latch, countDownBeanNames);
+			final String[] dependents = this.beanFactory.getDependentBeans(beanName);
+			final int currentPhase = getPhase( bean );
+			for (final String dependent : dependents) {
+				final Lifecycle dependentBean = lifecycleBeans.get( dependent );
+				if( ignorePhaseOfDependencies || dependentBean == null || getPhase( dependentBean ) >= currentPhase ) {
+					doStop(lifecycleBeans, dependent, latch, countDownBeanNames);
+				}
 			}
 			try {
 				if (bean.isRunning()) {
