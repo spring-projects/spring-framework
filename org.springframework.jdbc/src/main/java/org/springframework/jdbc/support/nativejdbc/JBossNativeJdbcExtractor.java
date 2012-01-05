@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Implementation of the {@link NativeJdbcExtractor} interface for JBoss,
- * supporting JBoss Application Server 3.2.4+.
+ * supporting JBoss Application Server 3.2.4+. As of Spring 3.1.1, it also
+ * supports JBoss 7.
  *
  * <p>Returns the underlying native Connection, Statement, etc to
  * application code instead of JBoss' wrapper implementations.
@@ -47,11 +48,11 @@ import org.springframework.util.ReflectionUtils;
  */
 public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
-	private static final String WRAPPED_CONNECTION_NAME = "org.jboss.resource.adapter.jdbc.WrappedConnection";
+	// JBoss 7
+	private static final String JBOSS_JCA_PREFIX = "org.jboss.jca.adapters.jdbc.";
 
-	private static final String WRAPPED_STATEMENT_NAME = "org.jboss.resource.adapter.jdbc.WrappedStatement";
-
-	private static final String WRAPPED_RESULT_SET_NAME = "org.jboss.resource.adapter.jdbc.WrappedResultSet";
+	// JBoss <= 6
+	private static final String JBOSS_RESOURCE_PREFIX = "org.jboss.resource.adapter.jdbc.";
 
 
 	private Class wrappedConnectionClass;
@@ -72,10 +73,26 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	 * so we can get the underlying vendor connection using reflection.
 	 */
 	public JBossNativeJdbcExtractor() {
+		String prefix = JBOSS_JCA_PREFIX;
 		try {
-			this.wrappedConnectionClass = getClass().getClassLoader().loadClass(WRAPPED_CONNECTION_NAME);
-			this.wrappedStatementClass = getClass().getClassLoader().loadClass(WRAPPED_STATEMENT_NAME);
-			this.wrappedResultSetClass = getClass().getClassLoader().loadClass(WRAPPED_RESULT_SET_NAME);
+			// trying JBoss 7 jca package first...
+			this.wrappedConnectionClass = getClass().getClassLoader().loadClass(prefix + "WrappedConnection");
+		}
+		catch (ClassNotFoundException ex) {
+			// JBoss 7 jca package not found -> try traditional resource package.
+			prefix = JBOSS_RESOURCE_PREFIX;
+			try {
+				this.wrappedConnectionClass = getClass().getClassLoader().loadClass(prefix + "WrappedConnection");
+			}
+			catch (ClassNotFoundException ex2) {
+				throw new IllegalStateException("Could not initialize JBossNativeJdbcExtractor: neither JBoss 7's [" +
+						JBOSS_JCA_PREFIX + ".WrappedConnection] nor traditional JBoss [" + JBOSS_RESOURCE_PREFIX +
+						".WrappedConnection] found");
+			}
+		}
+		try {
+			this.wrappedStatementClass = getClass().getClassLoader().loadClass(prefix + "WrappedStatement");
+			this.wrappedResultSetClass = getClass().getClassLoader().loadClass(prefix + "WrappedResultSet");
 			this.getUnderlyingConnectionMethod =
 			    this.wrappedConnectionClass.getMethod("getUnderlyingConnection", (Class[]) null);
 			this.getUnderlyingStatementMethod =
@@ -85,7 +102,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
-					"Could not initialize JBossNativeJdbcExtractor because JBoss API classes are not available: " + ex);
+					"Could not initialize JBossNativeJdbcExtractor because of missing JBoss API methods/classes: " + ex);
 		}
 	}
 
