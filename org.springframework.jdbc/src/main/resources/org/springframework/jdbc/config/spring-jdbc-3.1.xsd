@@ -12,7 +12,7 @@
 
 	<xsd:element name="embedded-database">
 		<xsd:annotation>
-			<xsd:documentation source="java:org.springframework.jdbc.embedded.EmbeddedDataSourceFactoryBean"><![CDATA[
+			<xsd:documentation source="java:org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean"><![CDATA[
 	Creates an embedded database instance and makes it available to other beans as a javax.sql.DataSource.
 			]]></xsd:documentation>
 			<xsd:appinfo>
@@ -47,7 +47,7 @@
 
 	<xsd:element name="initialize-database">
 		<xsd:annotation>
-			<xsd:documentation source="java:org.springframework.jdbc.embedded.DataSourceInitializer"><![CDATA[
+			<xsd:documentation source="java:org.springframework.jdbc.datasource.init.DataSourceInitializer"><![CDATA[
 	Initializes a database instance with SQL scripts provided in nested <script/> elements.
 			]]></xsd:documentation>
 		</xsd:annotation>
