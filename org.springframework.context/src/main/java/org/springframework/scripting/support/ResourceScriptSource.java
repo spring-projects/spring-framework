@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.io.Reader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
+import org.springframework.scripting.ReadableScriptSource;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -39,12 +40,13 @@ import org.springframework.util.StringUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.0
  * @see org.springframework.core.io.Resource#getInputStream()
  * @see org.springframework.core.io.Resource#getFile()
  * @see org.springframework.core.io.ResourceLoader
  */
-public class ResourceScriptSource implements ScriptSource {
+public class ResourceScriptSource implements ScriptSource, ReadableScriptSource {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -75,15 +77,7 @@ public class ResourceScriptSource implements ScriptSource {
 	}
 
 	public String getScriptAsString() throws IOException {
-		synchronized (this.lastModifiedMonitor) {
-			this.lastModified = retrieveLastModifiedTime();
-		}
-
-		InputStream stream = this.resource.getInputStream();
-		Reader reader = (StringUtils.hasText(encoding) ? new InputStreamReader(stream, encoding)
-				: new InputStreamReader(stream));
-
-		return FileCopyUtils.copyToString(reader);
+		return FileCopyUtils.copyToString(getScriptAsReader());
 	}
 
 	public boolean isModified() {
@@ -125,5 +119,18 @@ public class ResourceScriptSource implements ScriptSource {
 	@Override
 	public String toString() {
 		return this.resource.toString();
+	}
+
+	public Reader getScriptAsReader() throws IOException {
+		synchronized (this.lastModifiedMonitor) {
+			this.lastModified = retrieveLastModifiedTime();
+		}
+
+		InputStream stream = this.resource.getInputStream();
+		return (StringUtils.hasText(encoding) ? new InputStreamReader(stream, encoding) : new InputStreamReader(stream));
+	}
+
+	public String suggestedScriptName() {
+		return getResource().getFilename();
 	}
 }
