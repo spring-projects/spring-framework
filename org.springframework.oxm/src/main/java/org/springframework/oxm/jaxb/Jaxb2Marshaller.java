@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *		http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,9 +31,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.activation.DataHandler;
@@ -48,7 +50,10 @@ import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.ValidationEventHandler;
 import javax.xml.bind.ValidationException;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.attachment.AttachmentMarshaller;
 import javax.xml.bind.attachment.AttachmentUnmarshaller;
@@ -69,6 +74,13 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.oxm.GenericMarshaller;
 import org.springframework.oxm.GenericUnmarshaller;
 import org.springframework.oxm.MarshallingFailureException;
@@ -102,9 +114,15 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * on this bean, possibly customize the marshaller and unmarshaller by setting properties, schemas, adapters, and
  * listeners, and to refer to it.
  *
+ * As an alternative, you can now set the <code>packagesToScan</code> property instead of <code>contextPath</code> or
+ * <code>classesToBeBound</code> and any classes annotated with JAXB annotations will be added to the JAXBContext.
+ *
  * @author Arjen Poutsma
+ * @author David Harrigan
+ *
  * @see #setContextPath(String)
  * @see #setClassesToBeBound(Class[])
+ * @see #setPackagesToScan(String[])
  * @see #setJaxbContextProperties(Map)
  * @see #setMarshallerProperties(Map)
  * @see #setUnmarshallerProperties(Map)
@@ -120,7 +138,15 @@ public class Jaxb2Marshaller
 		InitializingBean {
 
 	private static final String CID = "cid:";
+	private static final String RESOURCE_PATTERN = "/**/*.class";
 
+	private final ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+	private final TypeFilter[] jaxb2TypeFilters = new TypeFilter[]{
+			new AnnotationTypeFilter(XmlRootElement.class, false),
+			new AnnotationTypeFilter(XmlType.class, false),
+			new AnnotationTypeFilter(XmlSeeAlso.class, false),
+			new AnnotationTypeFilter(XmlEnum.class, false)
+	};
 
 	/**
 	 * Logger available to subclasses.
@@ -130,6 +156,8 @@ public class Jaxb2Marshaller
 	private String contextPath;
 
 	private Class<?>[] classesToBeBound;
+
+	private String[] packagesToScan;
 
 	private Map<String, ?> jaxbContextProperties;
 
@@ -161,7 +189,7 @@ public class Jaxb2Marshaller
 
 	private boolean supportJaxbElementClass = false;
 
-    private LSResourceResolver schemaResourceResolver;
+	private LSResourceResolver schemaResourceResolver;
 
 
 	/**
@@ -202,6 +230,22 @@ public class Jaxb2Marshaller
 	 */
 	public Class<?>[] getClassesToBeBound() {
 		return this.classesToBeBound;
+	}
+
+	/**
+	 * Set packages to scan for classes with JAXB Annotations.
+	 * Setting this property or {@link #setClassesToBeBound "classesToBeBound"} is required.
+	 */
+	public void setPackagesToScan(final String[] packagesToScan) {
+		Assert.notEmpty(packagesToScan, "'packagesToScan' must not be empty");
+		this.packagesToScan = packagesToScan;
+	}
+
+	/**
+	 * Return the list of packages to be scanned for classes with JAXB Annotations.
+	 */
+	public String[] getPackagesToScan() {
+		return this.packagesToScan;
 	}
 
 	/**
@@ -289,17 +333,17 @@ public class Jaxb2Marshaller
 		this.schemaLanguage = schemaLanguage;
 	}
 
-    /**
-     * Sets the resource resolver, as used to load the schema resources.
-     * @see SchemaFactory#setResourceResolver(org.w3c.dom.ls.LSResourceResolver)
-     * @see #setSchema(Resource)
-     * @see #setSchemas(Resource[])
-     */
-    public void setSchemaResourceResolver(LSResourceResolver schemaResourceResolver) {
-        this.schemaResourceResolver = schemaResourceResolver;
-    }
+	/**
+	 * Sets the resource resolver, as used to load the schema resources.
+	 * @see SchemaFactory#setResourceResolver(org.w3c.dom.ls.LSResourceResolver)
+	 * @see #setSchema(Resource)
+	 * @see #setSchemas(Resource[])
+	 */
+	public void setSchemaResourceResolver(LSResourceResolver schemaResourceResolver) {
+		this.schemaResourceResolver = schemaResourceResolver;
+	}
 
-    /**
+	/**
 	 * Specify whether MTOM support should be enabled or not.
 	 * Default is <code>false</code>: marshalling using XOP/MTOM not being enabled.
 	 */
@@ -336,14 +380,21 @@ public class Jaxb2Marshaller
 		this.beanClassLoader = classLoader;
 	}
 
-
 	public final void afterPropertiesSet() throws Exception {
 		if (StringUtils.hasLength(getContextPath()) && !ObjectUtils.isEmpty(getClassesToBeBound())) {
-			throw new IllegalArgumentException("Specify either 'contextPath' or 'classesToBeBound property'; not both");
+			throw new IllegalArgumentException("Specify either 'contextPath' or 'classesToBeBound' property; not both");
 		}
-		else if (!StringUtils.hasLength(getContextPath()) && ObjectUtils.isEmpty(getClassesToBeBound())) {
-			throw new IllegalArgumentException("Setting either 'contextPath' or 'classesToBeBound' is required");
+		else if(StringUtils.hasLength(getContextPath()) && !ObjectUtils.isEmpty(getPackagesToScan())) {
+			throw new IllegalArgumentException("Specify either 'contextPath' or 'packagesToScan' property; not both");
 		}
+		else if (!StringUtils.hasLength(getContextPath()) && ObjectUtils.isEmpty(getClassesToBeBound()) && ObjectUtils.isEmpty(getPackagesToScan())) {
+			throw new IllegalArgumentException("Setting either 'contextPath' or 'classesToBeBound' or 'packagesToScan' is required");
+		}
+
+		if(!ObjectUtils.isEmpty(getClassesToBeBound()) && !ObjectUtils.isEmpty(getPackagesToScan())) {
+			throw new IllegalArgumentException("Setting either 'classesToBeBound' or 'packagesToScan' is required; not both");
+		}
+
 		if (!this.lazyInit) {
 			getJaxbContext();
 		}
@@ -360,6 +411,9 @@ public class Jaxb2Marshaller
 				}
 				else if (!ObjectUtils.isEmpty(getClassesToBeBound())) {
 					this.jaxbContext = createJaxbContextFromClasses();
+				}
+				else if (!ObjectUtils.isEmpty(getPackagesToScan())) {
+					this.jaxbContext = createJaxbContextFromPackages();
 				}
 			}
 			catch (JAXBException ex) {
@@ -404,6 +458,64 @@ public class Jaxb2Marshaller
 		}
 	}
 
+	private JAXBContext createJaxbContextFromPackages() throws JAXBException {
+		if (logger.isInfoEnabled()) {
+			logger.info("Creating JAXBContext from scanned packages [" +
+					StringUtils.arrayToCommaDelimitedString(getPackagesToScan()) + "]");
+		}
+		if (this.jaxbContextProperties != null) {
+			return JAXBContext.newInstance(getClassesToBeBoundFromPackages(), this.jaxbContextProperties);
+		}
+		else {
+			return JAXBContext.newInstance(getClassesToBeBoundFromPackages());
+		}
+	}
+
+	private Class<?>[] getClassesToBeBoundFromPackages() {
+		final List<Class<?>> annotatedClasses = new ArrayList<Class<?>>();
+		try {
+			if (packagesToScan != null) {
+				for (final String pkg : packagesToScan) {
+					final String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + ClassUtils.convertClassNameToResourcePath(pkg) + RESOURCE_PATTERN;
+					final Resource[] resources = resourcePatternResolver.getResources(pattern);
+					final MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resourcePatternResolver);
+					for (final Resource resource : resources) {
+						final MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
+						final String className = metadataReader.getClassMetadata().getClassName();
+						if (matchesFilter(metadataReader, metadataReaderFactory)) {
+							final Class<?> jaxb2AnnotatedClass = resourcePatternResolver.getClassLoader().loadClass(className);
+							annotatedClasses.add(jaxb2AnnotatedClass);
+						}
+					}
+				}
+			}
+		} catch (final IOException ex) {
+			throw new UncategorizedMappingException("Failed to scan classpath for unlisted classes", ex);
+		} catch (final ClassNotFoundException ex) {
+			throw new UncategorizedMappingException("Failed to load annotated classes from classpath", ex);
+		}
+		return annotatedClasses.toArray(new Class<?>[0]);
+	}
+
+	/**
+	 * Determine if any of the classes matches our list of acceptable annotations.
+	 *
+	 * @param metadataReader for the resource.
+	 * @param metadataReaderFactory for the resource.
+	 * @return true if the class contains the annotation.
+	 * @throws IOException if anything goes wrong.
+	 */
+	private boolean matchesFilter(final MetadataReader metadataReader, final MetadataReaderFactory metadataReaderFactory) throws IOException {
+		if (jaxb2TypeFilters != null) {
+			for (final TypeFilter typeFilter : jaxb2TypeFilters) {
+				if (typeFilter.match(metadataReader, metadataReaderFactory)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private Schema loadSchema(Resource[] resources, String schemaLanguage) throws IOException, SAXException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting validation schema to " + StringUtils.arrayToCommaDelimitedString(this.schemaResources));
@@ -420,9 +532,9 @@ public class Jaxb2Marshaller
 			schemaSources[i] = new SAXSource(xmlReader, inputSource);
 		}
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(schemaLanguage);
-        if (schemaResourceResolver != null) {
-            schemaFactory.setResourceResolver(schemaResourceResolver);
-        }
+		if (schemaResourceResolver != null) {
+			schemaFactory.setResourceResolver(schemaResourceResolver);
+		}
 		return schemaFactory.newSchema(schemaSources);
 	}
 
