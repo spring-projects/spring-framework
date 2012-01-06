@@ -35,10 +35,6 @@
                             </xsd:complexType>
                         </xsd:element>
                     </xsd:sequence>
-                    <xsd:sequence>
-                        <xsd:element name="packages-to-scan" minOccurs="0" maxOccurs="unbounded">
-                        </xsd:element>
-                    </xsd:sequence>
                     <xsd:attribute name="contextPath" type="xsd:string">
                         <xsd:annotation>
                             <xsd:documentation>The JAXB Context path</xsd:documentation>

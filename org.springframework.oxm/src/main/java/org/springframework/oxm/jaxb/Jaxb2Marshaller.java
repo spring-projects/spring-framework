@@ -119,6 +119,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
  *
  * @author Arjen Poutsma
  * @author David Harrigan
+ * 
  * @see #setContextPath(String)
  * @see #setClassesToBeBound(Class[])
  * @see #setPackagesToScan(String[])
@@ -381,14 +382,19 @@ public class Jaxb2Marshaller
 
     public final void afterPropertiesSet() throws Exception {
         if (StringUtils.hasLength(getContextPath()) && !ObjectUtils.isEmpty(getClassesToBeBound())) {
-            throw new IllegalArgumentException("Specify either 'contextPath' or 'classesToBeBound property'; not both");
+            throw new IllegalArgumentException("Specify either 'contextPath' or 'classesToBeBound' property; not both");
         }
-        else if (!StringUtils.hasLength(getContextPath()) && ObjectUtils.isEmpty(getClassesToBeBound())) {
-            throw new IllegalArgumentException("Setting either 'contextPath' or 'classesToBeBound' is required");
+        else if(StringUtils.hasLength(getContextPath()) && !ObjectUtils.isEmpty(getPackagesToScan())) {
+        	throw new IllegalArgumentException("Specify either 'contextPath' or 'packagesToScan' property; not both");
+        }         
+        else if (!StringUtils.hasLength(getContextPath()) && ObjectUtils.isEmpty(getClassesToBeBound()) && ObjectUtils.isEmpty(getPackagesToScan())) {
+            throw new IllegalArgumentException("Setting either 'contextPath' or 'classesToBeBound' or 'packagesToScan' is required");
         }
-        else if (!ObjectUtils.isEmpty(getClassesToBeBound()) && ObjectUtils.isEmpty(getPackagesToScan())) {
-            throw new IllegalArgumentException("Setting either 'classesToBeBound' or 'packagesToScan' is required");
+        
+        if(!ObjectUtils.isEmpty(getClassesToBeBound()) && !ObjectUtils.isEmpty(getPackagesToScan())) {
+        	throw new IllegalArgumentException("Setting either 'classesToBeBound' or 'packagesToScan' is required; not both");
         }
+        
         if (!this.lazyInit) {
             getJaxbContext();
         }
