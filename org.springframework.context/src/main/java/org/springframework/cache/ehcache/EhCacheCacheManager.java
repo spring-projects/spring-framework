@@ -39,7 +39,15 @@ public class EhCacheCacheManager extends AbstractCacheManager {
 
 
 	/**
-	 * Set the backing EhCache {@link net.sf.ehcache.CacheManager}.
+	 * Returns the backing Ehcache {@link net.sf.ehcache.CacheManager}.
+	 * @return
+	 */
+	public net.sf.ehcache.CacheManager getCacheManager() {
+		return cacheManager;
+	}
+
+	/**
+	 * Sets the backing EhCache {@link net.sf.ehcache.CacheManager}.
 	 */
 	public void setCacheManager(net.sf.ehcache.CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
@@ -75,5 +83,4 @@ public class EhCacheCacheManager extends AbstractCacheManager {
 		}
 		return cache;
 	}
-
 }
