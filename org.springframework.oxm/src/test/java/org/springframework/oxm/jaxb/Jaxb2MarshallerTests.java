@@ -59,6 +59,7 @@ import static org.junit.Assert.assertTrue;
 public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
 	private static final String CONTEXT_PATH = "org.springframework.oxm.jaxb.test";
+	private static final String ANNOTATIONS_CONTEXT_PATH = CONTEXT_PATH + ".annotations";
 
 	private Jaxb2Marshaller marshaller;
 
@@ -277,6 +278,13 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.marshal(object, new StreamResult(writer), mimeContainer);
 		verify(mimeContainer);
 		assertTrue("No XML written", writer.toString().length() > 0);
+	}
+
+	@Test
+	public void supportsPackagesToScan() throws Exception {
+		 marshaller = new Jaxb2Marshaller();
+		 marshaller.setPackagesToScan(new String[]{ANNOTATIONS_CONTEXT_PATH});
+		 marshaller.afterPropertiesSet();
 	}
 
 	@XmlRootElement

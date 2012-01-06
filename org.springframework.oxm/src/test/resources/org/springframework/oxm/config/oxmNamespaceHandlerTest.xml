@@ -25,6 +25,14 @@
 		<oxm:class-to-be-bound name="org.springframework.oxm.jaxb.test.FlightType" />
 	</oxm:jaxb2-marshaller>
 
+	<bean id="jaxb2PackagesMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="packagesToScan">
+			<list>
+				<value>org.springframework.oxm.jaxb.test.annotations</value>
+			</list>
+		</property>
+	</bean>
+
 	<!-- Castor -->
 	
 	<oxm:castor-marshaller id="castorEncodingMarshaller" encoding="ISO-8859-1" />
