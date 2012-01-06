@@ -114,8 +114,8 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 * Returns:
 	 * <ul>
 	 * 	<li>0 if the two conditions have the same number of header expressions
-	 * 	<li>Less than 1 if "this" instance has more header expressions
-	 * 	<li>Greater than 1 if the "other" instance has more header expressions
+	 * 	<li>Less than 0 if "this" instance has more header expressions
+	 * 	<li>Greater than 0 if the "other" instance has more header expressions
 	 * </ul>   
 	 * 
 	 * <p>It is assumed that both instances have been obtained via 
