@@ -31,12 +31,10 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link org.springframework.scripting.ScriptSource} implementation
- * based on Spring's {@link org.springframework.core.io.Resource}
- * abstraction. Loads the script text from the underlying Resource's
- * {@link org.springframework.core.io.Resource#getFile() File} or
- * {@link org.springframework.core.io.Resource#getInputStream() InputStream},
- * and tracks the last-modified timestamp of the file (if possible).
+ * {@link ScriptSource} implementation based on Spring's {@link Resource} abstraction.
+ * Loads the script text from the underlying {@code Resource}'s
+ * {@link Resource#getFile() File} or {@link Resource#getInputStream() InputStream}, and
+ * tracks the last-modified timestamp of the file (if possible).
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -109,16 +107,11 @@ public class ResourceScriptSource implements ScriptSource, ReadableScriptSource 
 	/**
 	 * Sets the encoding used for reading the script resource. The default value is "UTF-8".
 	 * A null value, implies the platform default.
-	 * 
+	 *
 	 * @param encoding charset encoding used for reading the script.
 	 */
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
-	}
-
-	@Override
-	public String toString() {
-		return this.resource.toString();
 	}
 
 	public Reader getScriptAsReader() throws IOException {
@@ -127,10 +120,16 @@ public class ResourceScriptSource implements ScriptSource, ReadableScriptSource 
 		}
 
 		InputStream stream = this.resource.getInputStream();
-		return (StringUtils.hasText(encoding) ? new InputStreamReader(stream, encoding) : new InputStreamReader(stream));
+		return (StringUtils.hasText(encoding) ?
+				new InputStreamReader(stream, encoding) : new InputStreamReader(stream));
 	}
 
 	public String suggestedScriptName() {
 		return getResource().getFilename();
+	}
+
+	@Override
+	public String toString() {
+		return this.resource.toString();
 	}
 }

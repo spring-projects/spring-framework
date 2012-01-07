@@ -1,5 +1,7 @@
 require 'java'
 
-puts java.util.UUID.randomUUID().to_s
-# return the file length 
+# perform some computation for good measure
+uuid = java.util.UUID.randomUUID()
+
+# return the argument passed in
 $arg

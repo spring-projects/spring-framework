@@ -20,25 +20,26 @@ import java.util.Map;
 
 /**
  * Script evaluator.
- * 
+ *
  * @author Costin Leau
+ * @since 3.1.1
  */
 public interface ScriptEvaluator {
 
 	/**
-	 * Evaluates the given script (without any arguments) and returns the result (if any).
-	 * 
+	 * Evaluate the given script (without any arguments) and returns the result (if any).
+	 *
 	 * @param script script to evaluate
-	 * @return script result (can be null)
+	 * @return script result (may be {@code null})
 	 */
 	Object evaluate(ScriptSource script);
 
 	/**
 	 * Evaluates the given script and returns the result (if any).
-	 * 
+	 *
 	 * @param script script to evaluate
-	 * @param arguments script arguments.
-	 * @return script result (can be null)
+	 * @param arguments script arguments
+	 * @return script result (may be {@code null})
 	 */
 	Object evaluate(ScriptSource script, Map<String, Object> arguments);
 

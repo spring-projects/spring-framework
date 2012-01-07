@@ -24,10 +24,9 @@ import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 
 /**
- * Static implementation of the
- * {@link org.springframework.scripting.ScriptSource} interface,
- * encapsulating a given String that contains the script source text.
- * Supports programmatic updates of the script String.
+ * Static implementation of the {@link ScriptSource} interface, encapsulating a given
+ * String that contains the script source text. Supports programmatic updates of the
+ * script String.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -55,8 +54,7 @@ public class StaticScriptSource implements ScriptSource, ReadableScriptSource {
 	/**
 	 * Create a new StaticScriptSource for the given script.
 	 * @param script the script String
-	 * @param className the suggested class name for the script
-	 * (may be <code>null</code>)
+	 * @param className the suggested class name for the script (may be {@code null})
 	 */
 	public StaticScriptSource(String script, String className) {
 		this(script, className, className);
@@ -65,11 +63,8 @@ public class StaticScriptSource implements ScriptSource, ReadableScriptSource {
 	/**
 	 * Create a new StaticScriptSource for the given script.
 	 * @param script the script String
-	 * @param className the suggested class name for the script
-	 * (may be <code>null</code>)
-	 * @param scriptName the suggested name for the script
-	 * (may be <code>null</code>)
-	 * 
+	 * @param className the suggested class name for the script (may be {@code null})
+	 * @param scriptName the suggested name for the script (may be {@code null})
 	 */
 	public StaticScriptSource(String script, String className, String scriptName) {
 		setScript(script);

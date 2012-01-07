@@ -16,7 +16,7 @@
 
 package org.springframework.scripting.jsr223;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,15 +27,23 @@ import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.scripting.support.StaticScriptSource;
 
-public class Jsr223EvaluatorTest {
+/**
+ * Unit tests for {@link Jsr223ScriptEvaluator}.
+ *
+ * @author Costin Leau
+ * @author Chris Beams
+ * @since 3.1.1
+ */
+public class Jsr223ScriptEvaluatorTests {
 
 	@Test
 	public void testRhinoScript() throws Exception {
-		ScriptSource script = new StaticScriptSource("print('Hello, world!')");
+		ScriptSource script = new StaticScriptSource("'Hello, js!' // return a greeting");
 
 		Jsr223ScriptEvaluator eval = new Jsr223ScriptEvaluator();
 		eval.setLanguage("javascript");
-		eval.evaluate(script);
+		Object result = eval.evaluate(script);
+		assertEquals("Hello, js!", result);
 	}
 
 	@Test
@@ -43,20 +51,21 @@ public class Jsr223EvaluatorTest {
 		ScriptSource script = new ResourceScriptSource(new UrlResource(getClass().getResource("basic-script.js")));
 
 		Jsr223ScriptEvaluator eval = new Jsr223ScriptEvaluator();
+		String arg1 = "testArg";
 
 		Map<String, Object> args = new LinkedHashMap<String, Object>();
-		args.put("arg", eval);
-		assertSame(eval, eval.evaluate(script, args));
+		args.put("arg", arg1);
+		assertEquals(arg1, eval.evaluate(script, args));
 	}
-
 
 	@Test
 	public void testRubyScript() throws Exception {
-		ScriptSource script = new StaticScriptSource("puts 'Hello, world!'");
+		ScriptSource script = new StaticScriptSource("'Hello, ruby!' # return a greeting");
 
 		Jsr223ScriptEvaluator eval = new Jsr223ScriptEvaluator(getClass().getClassLoader());
 		eval.setLanguage("ruby");
-		eval.evaluate(script);
+		Object result = eval.evaluate(script);
+		assertEquals("Hello, ruby!", result);
 	}
 
 	@Test
@@ -64,10 +73,11 @@ public class Jsr223EvaluatorTest {
 		ScriptSource script = new ResourceScriptSource(new UrlResource(getClass().getResource("basic-script.rb")));
 
 		Jsr223ScriptEvaluator eval = new Jsr223ScriptEvaluator(getClass().getClassLoader());
+		String arg1 = "testArg";
 
 		Map<String, Object> args = new LinkedHashMap<String, Object>();
-		args.put("arg", eval);
+		args.put("arg", arg1);
 
-		assertSame(eval, eval.evaluate(script, args));
+		assertEquals(arg1, eval.evaluate(script, args));
 	}
 }

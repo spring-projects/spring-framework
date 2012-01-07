@@ -1,6 +1,7 @@
 importPackage(java.util);
 
+// perform some computation for good measure
+var uuid = UUID.randomUUID();
 
-println(UUID.randomUUID())
-// return the file length 
+// return the argument passed in
 arg

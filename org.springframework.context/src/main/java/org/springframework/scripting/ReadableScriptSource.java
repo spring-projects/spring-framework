@@ -20,32 +20,34 @@ import java.io.IOException;
 import java.io.Reader;
 
 /**
- * Extension to {@link ScriptSource} that provides a {@link Reader} implementation
- * for the target source (suitable for streaming).
- * 
+ * Extension to {@link ScriptSource} that provides a {@link Reader} implementation for the
+ * target source (suitable for streaming).
+ *
  * @author Costin Leau
+ * @since 3.1.1
  */
 public interface ReadableScriptSource extends ScriptSource {
 
 	/**
-	 * Retrieves the script source text as {@link Reader}.
-	 * 
+	 * Retrieve the script source text as {@link Reader}.
+	 *
 	 * @return reader for the underlying script
 	 * @throws IOException if script retrieval failed
 	 */
 	Reader getScriptAsReader() throws IOException;
 
 	/**
-	 * Determines a name for the underlying script.
-	 * 
-	 * @return the suggested script name, or <code>null</code> if none available
+	 * Determine a name for the underlying script.
+	 *
+	 * @return the suggested script name, or {@code null} if none available
 	 */
 	String suggestedScriptName();
 
 	/**
-	 * Indicate whether the underlying script data has been modified since
-	 * the last time {@link #getScriptAsString()} or {@link #getScriptAsReader() } was called.
-	 * Returns <code>true</code> if the script has not been read yet.
+	 * Indicate whether the underlying script data has been modified since the last time
+	 * {@link #getScriptAsString()} or {@link #getScriptAsReader()} was called. Return
+	 * {@code true} if the script has not been read yet.
+	 *
 	 * @return whether the script data has been modified
 	 */
 	boolean isModified();
