@@ -37,7 +37,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * Test fixture with {@link ModelAndViewMethodReturnValueHandler}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class ModelAndViewMethodReturnValueHandlerTests {
@@ -57,7 +57,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 		this.returnParamModelAndView = getReturnValueParam("modelAndView");
 	}
-	
+
 	@Test
 	public void supportsReturnType() throws Exception {
 		assertTrue(handler.supportsReturnType(returnParamModelAndView));
@@ -68,7 +68,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	public void handleViewReference() throws Exception {
 		ModelAndView mav = new ModelAndView("viewName", "attrName", "attrValue");
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
-		
+
 		assertEquals("viewName", mavContainer.getView());
 		assertEquals("attrValue", mavContainer.getModel().get("attrName"));
 	}
@@ -77,7 +77,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	public void handleViewInstance() throws Exception {
 		ModelAndView mav = new ModelAndView(new RedirectView(), "attrName", "attrValue");
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
-		
+
 		assertEquals(RedirectView.class, mavContainer.getView().getClass());
 		assertEquals("attrValue", mavContainer.getModel().get("attrName"));
 	}
@@ -85,7 +85,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	@Test
 	public void handleNull() throws Exception {
 		handler.handleReturnValue(null, returnParamModelAndView, mavContainer, webRequest);
-		
+
 		assertTrue(mavContainer.isRequestHandled());
 	}
 
@@ -93,10 +93,10 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	public void handleRedirectAttributesWithViewReference() throws Exception {
 		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
-		
+
 		ModelAndView mav = new ModelAndView(new RedirectView(), "attrName", "attrValue");
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
-		
+
 		assertEquals(RedirectView.class, mavContainer.getView().getClass());
 		assertEquals("attrValue", mavContainer.getModel().get("attrName"));
 		assertSame("RedirectAttributes should be used if controller redirects", redirectAttributes,
@@ -107,24 +107,24 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	public void handleRedirectAttributesWithViewInstance() throws Exception {
 		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
-		
+
 		ModelAndView mav = new ModelAndView("redirect:viewName", "attrName", "attrValue");
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
-		
+
 		ModelMap model = mavContainer.getModel();
 		assertEquals("redirect:viewName", mavContainer.getViewName());
 		assertEquals("attrValue", model.get("attrName"));
 		assertSame("RedirectAttributes should be used if controller redirects", redirectAttributes, model);
 	}
-	
+
 	@Test
 	public void handleRedirectAttributesWithoutRedirect() throws Exception {
 		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
-		
+
 		ModelAndView mav = new ModelAndView();
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
-		
+
 		ModelMap model = mavContainer.getModel();
 		assertEquals(null, mavContainer.getView());
 		assertTrue(mavContainer.getModel().isEmpty());
@@ -136,7 +136,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		Method method = getClass().getDeclaredMethod(methodName);
 		return new MethodParameter(method, -1);
 	}
-	
+
 	ModelAndView modelAndView() {
 		return null;
 	}
@@ -144,5 +144,5 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 	String viewName() {
 		return null;
 	}
-	
+
 }

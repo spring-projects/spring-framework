@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * Resolves request-related method argument values of the following types: 
+ * Resolves request-related method argument values of the following types:
  * <ul>
  * <li>{@link WebRequest}
  * <li>{@link ServletRequest}
@@ -57,20 +57,20 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
-		return WebRequest.class.isAssignableFrom(paramType) || 
+		return WebRequest.class.isAssignableFrom(paramType) ||
 				ServletRequest.class.isAssignableFrom(paramType) ||
 				MultipartRequest.class.isAssignableFrom(paramType) ||
-				HttpSession.class.isAssignableFrom(paramType) || 
+				HttpSession.class.isAssignableFrom(paramType) ||
 				Principal.class.isAssignableFrom(paramType) ||
-				Locale.class.equals(paramType) || 
+				Locale.class.equals(paramType) ||
 				InputStream.class.isAssignableFrom(paramType) ||
 				Reader.class.isAssignableFrom(paramType);
 	}
 
-	public Object resolveArgument(MethodParameter parameter,
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest, 
-								  WebDataBinderFactory binderFactory) throws IOException {
+	public Object resolveArgument(
+			MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+			throws IOException {
 		
 		Class<?> paramType = parameter.getParameterType();
 		if (WebRequest.class.isAssignableFrom(paramType)) {

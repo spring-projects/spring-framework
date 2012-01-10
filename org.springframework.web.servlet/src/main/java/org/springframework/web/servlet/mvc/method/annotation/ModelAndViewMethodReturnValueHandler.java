@@ -25,15 +25,15 @@ import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
 
 /**
- * Handles return values of type {@link ModelAndView} copying view and model 
+ * Handles return values of type {@link ModelAndView} copying view and model
  * information to the {@link ModelAndViewContainer}.
- *  
- * <p>If the return value is {@code null}, the 
- * {@link ModelAndViewContainer#setRequestHandled(boolean)} flag is set to 
+ *
+ * <p>If the return value is {@code null}, the
+ * {@link ModelAndViewContainer#setRequestHandled(boolean)} flag is set to
  * {@code false} to indicate the request was handled directly.
- * 
- * <p>A {@link ModelAndView} return type has a set purpose. Therefore this 
- * handler should be configured ahead of handlers that support any return 
+ *
+ * <p>A {@link ModelAndView} return type has a set purpose. Therefore this
+ * handler should be configured ahead of handlers that support any return
  * value type annotated with {@code @ModelAttribute} or {@code @ResponseBody}
  * to ensure they don't take over.
  *
@@ -41,20 +41,21 @@ import org.springframework.web.servlet.View;
  * @since 3.1
  */
 public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
-	
+
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return ModelAndView.class.isAssignableFrom(returnType.getParameterType());
 	}
 
-	public void handleReturnValue(Object returnValue,
-								  MethodParameter returnType, 
-								  ModelAndViewContainer mavContainer, 
-								  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(
+			Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
+			throws Exception {
+
 		if (returnValue == null) {
 			mavContainer.setRequestHandled(true);
 			return;
 		}
-		
+
 		ModelAndView mav = (ModelAndView) returnValue;
 		if (mav.isReference()) {
 			String viewName = mav.getViewName();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,13 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves {@link Map} method arguments annotated with {@code @RequestHeader}. 
- * For individual header values annotated with {@code @RequestHeader} see 
+ * Resolves {@link Map} method arguments annotated with {@code @RequestHeader}.
+ * For individual header values annotated with {@code @RequestHeader} see
  * {@link RequestHeaderMethodArgumentResolver} instead.
- * 
- * <p>The created {@link Map} contains all request header name/value pairs. 
+ *
+ * <p>The created {@link Map} contains all request header name/value pairs.
  * The method parameter type may be a {@link MultiValueMap} to receive all
- * values for a header, not only the first one. 
+ * values for a header, not only the first one.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -50,10 +50,11 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 				&& Map.class.isAssignableFrom(parameter.getParameterType());
 	}
 
-	public Object resolveArgument(MethodParameter parameter,
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest,
-								  WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(
+			MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+			throws Exception {
+
 		Class<?> paramType = parameter.getParameterType();
 
 		if (MultiValueMap.class.isAssignableFrom(paramType)) {
