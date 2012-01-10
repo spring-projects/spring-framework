@@ -17,6 +17,7 @@
 package org.springframework.web.servlet;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * A strategy interface for storing, retrieving, and managing {@code FlashMap}
@@ -64,8 +65,9 @@ public interface FlashMapManager {
 	 * 	<li>Clean expired FlashMap instances.
 	 * </ol>
 	 * @param request the current request
+	 * @param response the current response
 	 */
-	void requestStarted(HttpServletRequest request);
+	void requestStarted(HttpServletRequest request, HttpServletResponse response);
 
 	/**
 	 * Start the expiration period of the "output" FlashMap save it in the
@@ -73,7 +75,8 @@ public interface FlashMapManager {
 	 * <p>The "output" FlashMap should not be saved if it is empty or if it was
 	 * not created by the current FlashMapManager instance.
 	 * @param request the current request
+	 * @param response the current response
 	 */
-	void requestCompleted(HttpServletRequest request);
+	void requestCompleted(HttpServletRequest request, HttpServletResponse response);
 
 }

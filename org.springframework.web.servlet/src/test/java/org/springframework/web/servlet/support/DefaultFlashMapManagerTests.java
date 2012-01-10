@@ -32,6 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.util.WebUtils;
 
@@ -46,15 +47,18 @@ public class DefaultFlashMapManagerTests {
 
 	private MockHttpServletRequest request;
 	
+	private MockHttpServletResponse response;
+	
 	@Before
 	public void setup() {
 		this.flashMapManager = new DefaultFlashMapManager();
 		this.request = new MockHttpServletRequest();
+		this.response = new MockHttpServletResponse();
 	}
 	
 	@Test
 	public void requestStarted() {
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
 		
 		assertNotNull("Current FlashMap not found", flashMap);
@@ -64,7 +68,7 @@ public class DefaultFlashMapManagerTests {
 	public void requestStartedAlready() {
 		FlashMap flashMap = new FlashMap();
 		this.request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 		
 		assertSame(flashMap, RequestContextUtils.getOutputFlashMap(request));
 	}
@@ -79,7 +83,7 @@ public class DefaultFlashMapManagerTests {
 		allMaps.add(flashMap);
 	
 		this.request.setRequestURI("/path");
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 		
 		assertEquals(flashMap, RequestContextUtils.getInputFlashMap(this.request));
 		assertEquals("Input FlashMap should have been removed", 0, getFlashMaps().size());		
@@ -98,7 +102,7 @@ public class DefaultFlashMapManagerTests {
 	
 		this.request.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/accounts");
 		this.request.setRequestURI("/mvc/accounts");
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 		
 		assertEquals(flashMap, RequestContextUtils.getInputFlashMap(this.request));
 		assertEquals("Input FlashMap should have been removed", 0, getFlashMaps().size());		
@@ -114,7 +118,7 @@ public class DefaultFlashMapManagerTests {
 		allMaps.add(flashMap);
 	
 		this.request.setRequestURI("/path/");
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 		
 		assertEquals(flashMap, RequestContextUtils.getInputFlashMap(this.request));
 		assertEquals("Input FlashMap should have been removed", 0, getFlashMaps().size());		
@@ -130,21 +134,21 @@ public class DefaultFlashMapManagerTests {
 		allMaps.add(flashMap);
 	
 		this.request.setParameter("number", (String) null);
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 
 		assertNull(RequestContextUtils.getInputFlashMap(this.request));
 		assertEquals("FlashMap should not have been removed", 1, getFlashMaps().size());		
 
 		clearFlashMapRequestAttributes();
 		this.request.setParameter("number", "two");
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 
 		assertNull(RequestContextUtils.getInputFlashMap(this.request));
 		assertEquals("FlashMap should not have been removed", 1, getFlashMaps().size());		
 
 		clearFlashMapRequestAttributes();
 		this.request.setParameter("number", "one");
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 
 		assertEquals(flashMap, RequestContextUtils.getInputFlashMap(this.request));
 		assertEquals("Input FlashMap should have been removed", 0, getFlashMaps().size());		
@@ -163,14 +167,14 @@ public class DefaultFlashMapManagerTests {
 		allMaps.add(flashMap);
 	
 		this.request.setParameter("id", "1");
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 
 		assertNull(RequestContextUtils.getInputFlashMap(this.request));
 		assertEquals("FlashMap should not have been removed", 1, getFlashMaps().size());		
 
 		clearFlashMapRequestAttributes();
 		this.request.addParameter("id", "2");
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 
 		assertEquals(flashMap, RequestContextUtils.getInputFlashMap(this.request));
 		assertEquals("Input FlashMap should have been removed", 0, getFlashMaps().size());		
@@ -196,7 +200,7 @@ public class DefaultFlashMapManagerTests {
 		Collections.shuffle(allMaps);
 
 		this.request.setRequestURI("/one/two");
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 		
 		assertEquals(flashMapTwo, request.getAttribute(INPUT_FLASH_MAP_ATTRIBUTE));
 	}
@@ -210,15 +214,15 @@ public class DefaultFlashMapManagerTests {
 			flashMap.startExpirationPeriod(0);
 		}
 		Thread.sleep(100);
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 		
 		assertEquals(0, allMaps.size());
 	}
 
 	@Test
 	public void saveFlashMapWithoutAttributes() throws InterruptedException {
-		this.flashMapManager.requestStarted(this.request);
-		this.flashMapManager.requestCompleted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
+		this.flashMapManager.requestCompleted(this.request, this.response);
 
 		assertNull(getFlashMaps());
 	}
@@ -227,19 +231,19 @@ public class DefaultFlashMapManagerTests {
 	public void saveFlashMapNotCreatedByThisManager() throws InterruptedException {
 		FlashMap flashMap = new FlashMap();
 		this.request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
-		this.flashMapManager.requestCompleted(this.request);
+		this.flashMapManager.requestCompleted(this.request, this.response);
 
 		assertNull(getFlashMaps());
 	}
 	
 	@Test
 	public void saveFlashMapWithAttributes() throws InterruptedException {
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(this.request);
 		flashMap.put("name", "value");
 
 		this.flashMapManager.setFlashMapTimeout(0);
-		this.flashMapManager.requestCompleted(this.request);
+		this.flashMapManager.requestCompleted(this.request, this.response);
 
 		Thread.sleep(100);
 		
@@ -252,49 +256,49 @@ public class DefaultFlashMapManagerTests {
 
 	@Test
 	public void decodeTargetPath() throws InterruptedException {
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(this.request);
 		flashMap.put("key", "value");
 
 		flashMap.setTargetRequestPath("/once%20upon%20a%20time");
-		this.flashMapManager.requestCompleted(this.request);
+		this.flashMapManager.requestCompleted(this.request, this.response);
 		
 		assertEquals("/once upon a time", flashMap.getTargetRequestPath());
 	}
 
 	@Test
 	public void normalizeTargetPath() throws InterruptedException {
-		this.flashMapManager.requestStarted(this.request);
+		this.flashMapManager.requestStarted(this.request, this.response);
 		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(this.request);
 		flashMap.put("key", "value");
 
 		flashMap.setTargetRequestPath(".");
 		this.request.setRequestURI("/once/upon/a/time");
-		this.flashMapManager.requestCompleted(this.request);
+		this.flashMapManager.requestCompleted(this.request, this.response);
 
 		assertEquals("/once/upon/a", flashMap.getTargetRequestPath());
 
 		flashMap.setTargetRequestPath("./");
 		this.request.setRequestURI("/once/upon/a/time");
-		this.flashMapManager.requestCompleted(this.request);
+		this.flashMapManager.requestCompleted(this.request, this.response);
 
 		assertEquals("/once/upon/a/", flashMap.getTargetRequestPath());
 
 		flashMap.setTargetRequestPath("..");
 		this.request.setRequestURI("/once/upon/a/time");
-		this.flashMapManager.requestCompleted(this.request);
+		this.flashMapManager.requestCompleted(this.request, this.response);
 
 		assertEquals("/once/upon", flashMap.getTargetRequestPath());
 
 		flashMap.setTargetRequestPath("../");
 		this.request.setRequestURI("/once/upon/a/time");
-		this.flashMapManager.requestCompleted(this.request);
+		this.flashMapManager.requestCompleted(this.request, this.response);
 
 		assertEquals("/once/upon/", flashMap.getTargetRequestPath());
 
 		flashMap.setTargetRequestPath("../../only");
 		this.request.setRequestURI("/once/upon/a/time");
-		this.flashMapManager.requestCompleted(this.request);
+		this.flashMapManager.requestCompleted(this.request, this.response);
 
 		assertEquals("/once/only", flashMap.getTargetRequestPath());
 	}
