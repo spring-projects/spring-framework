@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 /**
  * Resolves method parameters by delegating to a list of registered {@link HandlerMethodArgumentResolver}s.
- * Previously resolved method parameters are cached for faster lookups. 
- * 
+ * Previously resolved method parameters are cached for faster lookups.
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -40,12 +40,12 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<HandlerMethodArgumentResolver> argumentResolvers = 
+	private final List<HandlerMethodArgumentResolver> argumentResolvers =
 		new ArrayList<HandlerMethodArgumentResolver>();
 
 	private final Map<MethodParameter, HandlerMethodArgumentResolver> argumentResolverCache =
 		new ConcurrentHashMap<MethodParameter, HandlerMethodArgumentResolver>();
-	
+
 	/**
 	 * Return a read-only list with the contained resolvers, or an empty list.
 	 */
@@ -54,7 +54,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	}
 
 	/**
-	 * Whether the given {@linkplain MethodParameter method parameter} is supported by any registered 
+	 * Whether the given {@linkplain MethodParameter method parameter} is supported by any registered
 	 * {@link HandlerMethodArgumentResolver}.
 	 */
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -65,10 +65,11 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 * Iterate over registered {@link HandlerMethodArgumentResolver}s and invoke the one that supports it.
 	 * @exception IllegalStateException if no suitable {@link HandlerMethodArgumentResolver} is found.
 	 */
-	public Object resolveArgument(MethodParameter parameter, 
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest, 
-								  WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(
+			MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+			throws Exception {
+
 		HandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);
 		Assert.notNull(resolver, "Unknown parameter type [" + parameter.getParameterType().getName() + "]");
 		return resolver.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
@@ -94,7 +95,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Add the given {@link HandlerMethodArgumentResolver}.
 	 */

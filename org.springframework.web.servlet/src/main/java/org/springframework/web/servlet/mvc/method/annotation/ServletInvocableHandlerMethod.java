@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,9 +89,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
 	 * @param providedArgs argument values to try to use without the need for view resolution
 	 */
-	public final void invokeAndHandle(NativeWebRequest request,
-									  ModelAndViewContainer mavContainer,
-									  Object...providedArgs) throws Exception {
+	public final void invokeAndHandle(
+			NativeWebRequest request, ModelAndViewContainer mavContainer,
+			Object... providedArgs) throws Exception {
 
 		Object returnValue = invokeForRequest(request, mavContainer, providedArgs);
 
@@ -124,7 +124,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		sb.append("[value=" + returnValue + "]");
 		return getDetailedErrorMessage(sb.toString());
 	}
-	
+
 	/**
 	 * Set the response status according to the {@link ResponseStatus} annotation.
 	 */

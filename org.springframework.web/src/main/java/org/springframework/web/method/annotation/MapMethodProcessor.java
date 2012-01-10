@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Resolves {@link Map} method arguments and handles {@link Map} return values.
- * 
- * <p>A Map return value can be interpreted in more than one ways depending 
- * on the presence of annotations like {@code @ModelAttribute} or 
+ *
+ * <p>A Map return value can be interpreted in more than one ways depending
+ * on the presence of annotations like {@code @ModelAttribute} or
  * {@code @ResponseBody}. Therefore this handler should be configured after
  * the handlers that support these annotations.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -42,10 +42,11 @@ public class MapMethodProcessor implements HandlerMethodArgumentResolver, Handle
 		return Map.class.isAssignableFrom(parameter.getParameterType());
 	}
 
-	public Object resolveArgument(MethodParameter parameter, 
-								  ModelAndViewContainer mavContainer, 
-								  NativeWebRequest webRequest,
-								  WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(
+			MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+			throws Exception {
+
 		return mavContainer.getModel();
 	}
 
@@ -54,10 +55,11 @@ public class MapMethodProcessor implements HandlerMethodArgumentResolver, Handle
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void handleReturnValue(Object returnValue, 
-								  MethodParameter returnType, 
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(
+			Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
+			throws Exception {
+
 		if (returnValue == null) {
 			return;
 		}
@@ -66,7 +68,7 @@ public class MapMethodProcessor implements HandlerMethodArgumentResolver, Handle
 		}
 		else {
 			// should not happen
-			throw new UnsupportedOperationException("Unexpected return type: " + 
+			throw new UnsupportedOperationException("Unexpected return type: " +
 					returnType.getParameterType().getName() + " in method: " + returnType.getMethod());
 		}
 	}

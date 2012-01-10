@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import org.springframework.web.servlet.RequestToViewNameTranslator;
  * Handles return values of types {@code void} and {@code String} interpreting
  * them as view name reference.
  *
- * <p>A {@code null} return value, either due to a {@code void} return type or 
- * as the actual return value is left as-is allowing the configured 
+ * <p>A {@code null} return value, either due to a {@code void} return type or
+ * as the actual return value is left as-is allowing the configured
  * {@link RequestToViewNameTranslator} to select a view name by convention.
  *
- * <p>A String return value can be interpreted in more than one ways depending 
- * on the presence of annotations like {@code @ModelAttribute} or 
+ * <p>A String return value can be interpreted in more than one ways depending
+ * on the presence of annotations like {@code @ModelAttribute} or
  * {@code @ResponseBody}. Therefore this handler should be configured after
  * the handlers that support these annotations.
  *
@@ -45,10 +45,11 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 		return (void.class.equals(paramType) || String.class.equals(paramType));
 	}
 
-	public void handleReturnValue(Object returnValue,
-								  MethodParameter returnType,
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(
+			Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
+			throws Exception {
+
 		if (returnValue == null) {
 			return;
 		}
@@ -61,7 +62,7 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 		}
 		else {
 			// should not happen
-			throw new UnsupportedOperationException("Unexpected return type: " + 
+			throw new UnsupportedOperationException("Unexpected return type: " +
 					returnType.getParameterType().getName() + " in method: " + returnType.getMethod());
 		}
 	}
@@ -69,7 +70,7 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 	/**
 	 * Whether the given view name is a redirect view reference.
 	 * @param viewName the view name to check, never {@code null}
-	 * @return "true" if the given view name is recognized as a redirect view 
+	 * @return "true" if the given view name is recognized as a redirect view
 	 * reference; "false" otherwise.
 	 */
 	protected boolean isRedirectViewName(String viewName) {

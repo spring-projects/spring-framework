@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 /**
- * Resolves method arguments of type {@link RedirectAttributes}. 
- * 
+ * Resolves method arguments of type {@link RedirectAttributes}.
+ *
  * <p>This resolver must be listed ahead of {@link org.springframework.web.method.annotation.ModelMethodProcessor} and
  * {@link org.springframework.web.method.annotation.MapMethodProcessor}, which support {@link Map} and {@link Model}
  * arguments both of which are "super" types of {@code RedirectAttributes}
@@ -46,10 +46,11 @@ public class RedirectAttributesMethodArgumentResolver implements HandlerMethodAr
 		return RedirectAttributes.class.isAssignableFrom(parameter.getParameterType());
 	}
 
-	public Object resolveArgument(MethodParameter parameter, 
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest, 
-								  WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(
+			MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+			throws Exception {
+
 		DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
 		ModelMap redirectAttributes  = new RedirectAttributesModelMap(dataBinder);
 		mavContainer.setRedirectModel(redirectAttributes);

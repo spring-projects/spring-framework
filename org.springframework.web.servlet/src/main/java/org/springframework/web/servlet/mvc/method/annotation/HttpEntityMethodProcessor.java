@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,13 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Resolves {@link HttpEntity} method argument values and also handles
- * both {@link HttpEntity} and {@link ResponseEntity} return values.  
- * 
- * <p>An {@link HttpEntity} return type has a set purpose. Therefore this 
- * handler should be configured ahead of handlers that support any return 
+ * both {@link HttpEntity} and {@link ResponseEntity} return values.
+ *
+ * <p>An {@link HttpEntity} return type has a set purpose. Therefore this
+ * handler should be configured ahead of handlers that support any return
  * value type annotated with {@code @ModelAttribute} or {@code @ResponseBody}
  * to ensure they don't take over.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -66,10 +66,9 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		return HttpEntity.class.equals(parameterType) || ResponseEntity.class.equals(parameterType);
 	}
 
-	public Object resolveArgument(MethodParameter parameter,
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest, 
-								  WebDataBinderFactory binderFactory) 
+	public Object resolveArgument(
+			MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
 			throws IOException, HttpMediaTypeNotSupportedException {
 
 		HttpInputMessage inputMessage = createInputMessage(webRequest);
@@ -100,11 +99,11 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				+ "in method " + parameter.getMethod() + "is not parameterized");
 	}
 
-	public void handleReturnValue(Object returnValue, 
-								  MethodParameter returnType, 
-								  ModelAndViewContainer mavContainer, 
-								  NativeWebRequest webRequest) throws Exception {
-		
+	public void handleReturnValue(
+			Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
+			throws Exception {
+
 		mavContainer.setRequestHandled(true);
 
 		if (returnValue == null) {

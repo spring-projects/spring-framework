@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,17 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Handles method return values by delegating to a list of registered {@link HandlerMethodReturnValueHandler}s. 
- * Previously resolved return types are cached for faster lookups. 
- * 
+ * Handles method return values by delegating to a list of registered {@link HandlerMethodReturnValueHandler}s.
+ * Previously resolved return types are cached for faster lookups.
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodReturnValueHandler {
-	
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = 
+	private final List<HandlerMethodReturnValueHandler> returnValueHandlers =
 		new ArrayList<HandlerMethodReturnValueHandler>();
 
 	private final Map<MethodParameter, HandlerMethodReturnValueHandler> returnValueHandlerCache =
@@ -53,7 +53,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	}
 
 	/**
-	 * Whether the given {@linkplain MethodParameter method return type} is supported by any registered 
+	 * Whether the given {@linkplain MethodParameter method return type} is supported by any registered
 	 * {@link HandlerMethodReturnValueHandler}.
 	 */
 	public boolean supportsReturnType(MethodParameter returnType) {
@@ -64,10 +64,11 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	 * Iterate over registered {@link HandlerMethodReturnValueHandler}s and invoke the one that supports it.
 	 * @exception IllegalStateException if no suitable {@link HandlerMethodReturnValueHandler} is found.
 	 */
-	public void handleReturnValue(Object returnValue, 
-								  MethodParameter returnType, 
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest) throws Exception {
+	public void handleReturnValue(
+			Object returnValue, MethodParameter returnType,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
+			throws Exception {
+
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
 		Assert.notNull(handler, "Unknown return value type [" + returnType.getParameterType().getName() + "]");
 		handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
@@ -92,8 +93,8 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 			}
 		}
 		return result;
-	}	
-	
+	}
+
 	/**
 	 * Add the given {@link HandlerMethodReturnValueHandler}.
 	 */
