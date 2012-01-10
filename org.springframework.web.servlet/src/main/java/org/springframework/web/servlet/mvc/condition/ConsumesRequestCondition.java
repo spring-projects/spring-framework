@@ -173,8 +173,8 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * Returns:
 	 * <ul>
 	 * 	<li>0 if the two conditions have the same number of expressions
-	 * 	<li>Less than 1 if "this" has more or more specific media type expressions
-	 * 	<li>Greater than 1 if "other" has more or more specific media type expressions
+	 * 	<li>Less than 0 if "this" has more or more specific media type expressions
+	 * 	<li>Greater than 0 if "other" has more or more specific media type expressions
 	 * </ul>   
 	 * 
 	 * <p>It is assumed that both instances have been obtained via 

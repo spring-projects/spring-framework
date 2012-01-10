@@ -111,8 +111,8 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * Returns:
 	 * <ul>
 	 * 	<li>0 if the two conditions contain the same number of HTTP request methods.
-	 * 	<li>Less than 1 if "this" instance has an HTTP request method but "other" doesn't.
-	 * 	<li>Greater than 1 "other" has an HTTP request method but "this" doesn't.
+	 * 	<li>Less than 0 if "this" instance has an HTTP request method but "other" doesn't.
+	 * 	<li>Greater than 0 "other" has an HTTP request method but "this" doesn't.
 	 * </ul>   
 	 * 
 	 * <p>It is assumed that both instances have been obtained via 

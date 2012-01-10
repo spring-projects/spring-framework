@@ -105,8 +105,8 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * Returns:
 	 * <ul>
 	 * 	<li>0 if the two conditions have the same number of parameter expressions
-	 * 	<li>Less than 1 if "this" instance has more parameter expressions
-	 * 	<li>Greater than 1 if the "other" instance has more parameter expressions
+	 * 	<li>Less than 0 if "this" instance has more parameter expressions
+	 * 	<li>Greater than 0 if the "other" instance has more parameter expressions
 	 * </ul>   
 	 * 
 	 * <p>It is assumed that both instances have been obtained via 

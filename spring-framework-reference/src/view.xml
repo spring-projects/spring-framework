@@ -707,6 +707,10 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
             <para><literal>path="lastName"</literal> - displays all errors
             associated with the <literal>lastName</literal> field</para>
           </listitem>
+
+          <listitem>
+            <para>if <literal>path</literal> is omitted - object errors only are displayed</para>
+          </listitem>
         </itemizedlist>
 
         <para>The example below will display a list of errors at the top of

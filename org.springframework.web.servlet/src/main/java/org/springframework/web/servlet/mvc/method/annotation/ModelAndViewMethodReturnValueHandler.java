@@ -21,6 +21,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.SmartView;
+import org.springframework.web.servlet.View;
 
 /**
  * Handles return values of type {@link ModelAndView} copying view and model 
@@ -48,17 +50,29 @@ public class ModelAndViewMethodReturnValueHandler implements HandlerMethodReturn
 								  MethodParameter returnType, 
 								  ModelAndViewContainer mavContainer, 
 								  NativeWebRequest webRequest) throws Exception {
-		if (returnValue != null) {
-			ModelAndView mav = (ModelAndView) returnValue;
-			mavContainer.setViewName(mav.getViewName());
-			if (!mav.isReference()) {
-				mavContainer.setView(mav.getView());
+		if (returnValue == null) {
+			mavContainer.setRequestHandled(true);
+			return;
+		}
+		
+		ModelAndView mav = (ModelAndView) returnValue;
+		if (mav.isReference()) {
+			String viewName = mav.getViewName();
+			mavContainer.setViewName(viewName);
+			if (viewName != null && viewName.startsWith("redirect:")) {
+				mavContainer.setRedirectModelScenario(true);
 			}
-			mavContainer.addAllAttributes(mav.getModel());
 		}
 		else {
-			mavContainer.setRequestHandled(true);
+			View view = mav.getView();
+			mavContainer.setView(view);
+			if (view instanceof SmartView) {
+				if (((SmartView) view).isRedirectView()) {
+					mavContainer.setRedirectModelScenario(true);
+				}
+			}
 		}
+		mavContainer.addAllAttributes(mav.getModel());
 	}
 
 }

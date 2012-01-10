@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
+import org.hibernate.NonUniqueObjectException;
 import org.hibernate.NonUniqueResultException;
 import org.hibernate.ObjectDeletedException;
 import org.hibernate.PersistentObjectException;
@@ -47,6 +48,7 @@ import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
@@ -164,6 +166,17 @@ public abstract class SessionFactoryUtils {
 		if (ex instanceof JDBCException) {
 			return new HibernateJdbcException((JDBCException) ex);
 		}
+		// end of JDBCException (subclass) handling
+
+		if (ex instanceof QueryException) {
+			return new HibernateQueryException((QueryException) ex);
+		}
+		if (ex instanceof NonUniqueResultException) {
+			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, ex);
+		}
+		if (ex instanceof NonUniqueObjectException) {
+			return new DuplicateKeyException(ex.getMessage(), ex);
+		}
 		if (ex instanceof PropertyValueException) {
 			return new DataIntegrityViolationException(ex.getMessage(), ex);
 		}
@@ -176,17 +189,11 @@ public abstract class SessionFactoryUtils {
 		if (ex instanceof ObjectDeletedException) {
 			return new InvalidDataAccessApiUsageException(ex.getMessage(), ex);
 		}
-		if (ex instanceof QueryException) {
-			return new HibernateQueryException((QueryException) ex);
-		}
 		if (ex instanceof UnresolvableObjectException) {
 			return new HibernateObjectRetrievalFailureException((UnresolvableObjectException) ex);
 		}
 		if (ex instanceof WrongClassException) {
 			return new HibernateObjectRetrievalFailureException((WrongClassException) ex);
-		}
-		if (ex instanceof NonUniqueResultException) {
-			return new IncorrectResultSizeDataAccessException(ex.getMessage(), 1, ex);
 		}
 		if (ex instanceof StaleObjectStateException) {
 			return new HibernateOptimisticLockingFailureException((StaleObjectStateException) ex);
