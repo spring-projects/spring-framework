@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,14 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -86,14 +94,6 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.ls.LSResourceResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * Implementation of the <code>Marshaller</code> interface for JAXB 2.0.
@@ -161,7 +161,7 @@ public class Jaxb2Marshaller
 
 	private boolean supportJaxbElementClass = false;
 
-    private LSResourceResolver schemaResourceResolver;
+	private LSResourceResolver schemaResourceResolver;
 
 
 	/**
@@ -289,17 +289,18 @@ public class Jaxb2Marshaller
 		this.schemaLanguage = schemaLanguage;
 	}
 
-    /**
-     * Sets the resource resolver, as used to load the schema resources.
-     * @see SchemaFactory#setResourceResolver(org.w3c.dom.ls.LSResourceResolver)
-     * @see #setSchema(Resource)
-     * @see #setSchemas(Resource[])
-     */
-    public void setSchemaResourceResolver(LSResourceResolver schemaResourceResolver) {
-        this.schemaResourceResolver = schemaResourceResolver;
-    }
+	/**
+	 * Sets the resource resolver, as used to load the schema resources.
+	 *
+	 * @see SchemaFactory#setResourceResolver(org.w3c.dom.ls.LSResourceResolver)
+	 * @see #setSchema(Resource)
+	 * @see #setSchemas(Resource[])
+	 */
+	public void setSchemaResourceResolver(LSResourceResolver schemaResourceResolver) {
+		this.schemaResourceResolver = schemaResourceResolver;
+	}
 
-    /**
+	/**
 	 * Specify whether MTOM support should be enabled or not.
 	 * Default is <code>false</code>: marshalling using XOP/MTOM not being enabled.
 	 */
@@ -420,9 +421,9 @@ public class Jaxb2Marshaller
 			schemaSources[i] = new SAXSource(xmlReader, inputSource);
 		}
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(schemaLanguage);
-        if (schemaResourceResolver != null) {
-            schemaFactory.setResourceResolver(schemaResourceResolver);
-        }
+		if (schemaResourceResolver != null) {
+			schemaFactory.setResourceResolver(schemaResourceResolver);
+		}
 		return schemaFactory.newSchema(schemaSources);
 	}
 
