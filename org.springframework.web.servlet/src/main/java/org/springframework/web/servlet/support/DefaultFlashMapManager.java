@@ -27,6 +27,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -48,17 +49,39 @@ public class DefaultFlashMapManager implements FlashMapManager {
 
 	private static final Log logger = LogFactory.getLog(DefaultFlashMapManager.class);
 	
-	private int flashTimeout = 180;
+	private int flashMapTimeout = 180;
 
-	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	/**
 	 * Set the amount of time in seconds after a {@link FlashMap} is saved 
 	 * (at request completion) and before it expires. 
 	 * <p>The default value is 180 seconds.
 	 */
-	public void setFlashMapTimeout(int flashTimeout) {
-		this.flashTimeout = flashTimeout;
+	public void setFlashMapTimeout(int flashMapTimeout) {
+		this.flashMapTimeout = flashMapTimeout;
+	}
+	
+	/**
+	 * Return the amount of time in seconds before a FlashMap expires.
+	 */
+	public int getFlashMapTimeout() {
+		return flashMapTimeout;
+	}
+
+	/**
+	 * Set the UrlPathHelper to use to obtain the request URI.
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
+		this.urlPathHelper = urlPathHelper;
+	}
+
+	/**
+	 * Return the UrlPathHelper implementation for the request URI.
+	 */
+	public UrlPathHelper getUrlPathHelper() {
+		return urlPathHelper;
 	}
 
 	/**
@@ -215,7 +238,7 @@ public class DefaultFlashMapManager implements FlashMapManager {
 	protected void onSaveFlashMap(FlashMap flashMap, HttpServletRequest request, HttpServletResponse response) {
 		String targetPath = flashMap.getTargetRequestPath();
 		flashMap.setTargetRequestPath(decodeAndNormalizePath(targetPath, request));
-		flashMap.startExpirationPeriod(this.flashTimeout);
+		flashMap.startExpirationPeriod(this.flashMapTimeout);
 	}
 
 	/**
