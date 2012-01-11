@@ -20,7 +20,7 @@ Changes in version 3.1.1 (2012-02-06)
 * Hibernate 4 LocalSessionFactoryBean does not insist on a "dataSource" reference being set
 * added "entityInterceptor" property to Hibernate 4 LocalSessionFactoryBean
 * corrected fix for QuartzJobBean to work with Quartz 2.0/2.1
-
+* Make AbstractHandlerMethodExceptionResolver an abstract class
 
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------

@@ -23,13 +23,14 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Abstract base class for {@link org.springframework.web.servlet.HandlerExceptionResolver HandlerExceptionResolver} 
- * implementations that support handling exceptions from {@link HandlerMethod}s rather than handlers.
+ * Abstract base class for
+ * {@link org.springframework.web.servlet.HandlerExceptionResolver HandlerExceptionResolver}
+ * implementations that support handling exceptions from handlers of type {@link HandlerMethod}.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class AbstractHandlerMethodExceptionResolver extends AbstractHandlerExceptionResolver {
+public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	/**
 	 * Checks if the handler is a {@link HandlerMethod} instance and performs the check against the bean 
@@ -52,10 +53,10 @@ public class AbstractHandlerMethodExceptionResolver extends AbstractHandlerExcep
 	}
 	
 	@Override
-	protected final ModelAndView doResolveException(HttpServletRequest request, 
-													HttpServletResponse response, 
-													Object handler, 
-													Exception ex) {
+	protected final ModelAndView doResolveException(
+			HttpServletRequest request, HttpServletResponse response,
+			Object handler, Exception ex) {
+
 		return doResolveHandlerMethodException(request, response, (HandlerMethod) handler, ex);
 	}
 	
@@ -73,11 +74,8 @@ public class AbstractHandlerMethodExceptionResolver extends AbstractHandlerExcep
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to, or <code>null</code> for default processing
 	 */
-	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request, 
-														   HttpServletResponse response, 
-														   HandlerMethod handlerMethod, 
-														   Exception ex) {
-		return null;
-	}
-	
+	protected abstract ModelAndView doResolveHandlerMethodException(
+			HttpServletRequest request, HttpServletResponse response,
+			HandlerMethod handlerMethod, Exception ex);
+
 }
