@@ -38,7 +38,9 @@ step-by-step instructions.
 ## Building from source
 Instructions on
 [building Spring from source](https://github.com/SpringSource/spring-framework/wiki/Building-from-source)
-are available via the project wiki.
+are available via the project wiki. Eclipse formatting preferences can be imported from the
+file **eclipse-code-formatter.xml** located at the root of the project. This will help you keep
+to our coding conventions when submitting pull requests.
 
 ## Contributing
 [Pull requests](http://help.github.com/send-pull-requests) are welcome; you'll be asked to sign our
