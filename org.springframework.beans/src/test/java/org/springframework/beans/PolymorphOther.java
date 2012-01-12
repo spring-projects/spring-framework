@@ -1,16 +1,12 @@
 package org.springframework.beans;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
-
-import static junit.framework.Assert.*;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 
 
 /**
@@ -36,8 +32,7 @@ import org.springframework.beans.BeanWrapperImpl;
  */
 public class PolymorphOther {
 	
-	private Log log = LogFactory.getLog(PolymorphOther.class);
-	
+
 	@Test
 	public void testBasicWorkingCats() {
 		// Let's start with the overly specific resident.
@@ -79,7 +74,7 @@ public class PolymorphOther {
 		//  could read the cast and create the object based on the indicated type...
 		try {
 			beanWrapper.setPropertyValue("(org.springframework.beans.Pitbull)dogs[0].aggro", true);
-		} catch (NotWritablePropertyException nwpe) {
+		} catch (Exception nwpe) {
 			nwpe.printStackTrace();
 			fail("I couldn't assign a pitbull-specific field to my dog class :(");
 		}
@@ -98,7 +93,7 @@ public class PolymorphOther {
 			beanWrapper.setPropertyValue("(org.springframework.beans.Pitbull)pets[1].name", "The Fonz");
 			beanWrapper.setPropertyValue("(org.springframework.beans.Pitbull)pets[1].barkDecibels", 120);
 			beanWrapper.setPropertyValue("(org.springframework.beans.Pitbull)pets[1].aggro", true);
-		} catch (NotWritablePropertyException nwpe) {
+		} catch (Exception nwpe) {
 			nwpe.printStackTrace();
 			fail("No can has interfaces :(");
 		}
