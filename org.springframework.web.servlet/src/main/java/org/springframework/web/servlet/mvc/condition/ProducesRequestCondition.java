@@ -173,7 +173,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * <ol>
 	 * 	<li>Sort 'Accept' header media types by quality value via
 	 * 	{@link MediaType#sortByQualityValue(List)} and iterate the list.
-	 * 	<li>Get the lowest index of matching media types from each "produces" 
+	 * 	<li>Get the first index of matching media types in each "produces"
 	 * 	condition first matching with {@link MediaType#equals(Object)} and 
 	 * 	then with {@link MediaType#includes(MediaType)}.
 	 *  <li>If a lower index is found, the condition at that index wins.
@@ -220,7 +220,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 	private int indexOfEqualMediaType(MediaType mediaType) {
 		for (int i = 0; i < getExpressionsToCompare().size(); i++) {
-			if (mediaType.equals(getExpressionsToCompare().get(i).getMediaType())) {
+			MediaType currentMediaType = getExpressionsToCompare().get(i).getMediaType();
+			if (mediaType.getType().equalsIgnoreCase(currentMediaType.getType()) &&
+					mediaType.getSubtype().equalsIgnoreCase(currentMediaType.getSubtype())) {
 				return i;
 			}
 		}
