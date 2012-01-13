@@ -331,7 +331,7 @@ public class MediaType implements Comparable<MediaType> {
 				String attribute = entry.getKey();
 				String value = entry.getValue();
 				checkParameters(attribute, value);
-				m.put(attribute, unquote(value));
+				m.put(attribute, value);
 			}
 			this.parameters = Collections.unmodifiableMap(m);
 		}
@@ -428,7 +428,7 @@ public class MediaType implements Comparable<MediaType> {
 	 */
 	public Charset getCharSet() {
 		String charSet = getParameter(PARAM_CHARSET);
-		return (charSet != null ? Charset.forName(charSet) : null);
+		return (charSet != null ? Charset.forName(unquote(charSet)) : null);
 	}
 
 	/**
@@ -438,7 +438,7 @@ public class MediaType implements Comparable<MediaType> {
 	 */
 	public double getQualityValue() {
 		String qualityFactory = getParameter(PARAM_QUALITY_FACTOR);
-		return (qualityFactory != null ? Double.parseDouble(qualityFactory) : 1D);
+		return (qualityFactory != null ? Double.parseDouble(unquote(qualityFactory)) : 1D);
 	}
 
 	/**
