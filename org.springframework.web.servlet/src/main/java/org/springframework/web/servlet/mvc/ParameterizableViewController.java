@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * <p>Trivial controller that always returns a named view. The view
@@ -87,12 +88,13 @@ public class ParameterizableViewController extends AbstractController {
 
 	/**
 	 * Return a ModelAndView object with the specified view name.
+	 * The content of {@link RequestContextUtils#getInputFlashMap} is also added to the model.
 	 * @see #getViewName()
 	 */
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-		return new ModelAndView(getViewName());
+		return new ModelAndView(getViewName(), RequestContextUtils.getInputFlashMap(request));
 	}
 
 }

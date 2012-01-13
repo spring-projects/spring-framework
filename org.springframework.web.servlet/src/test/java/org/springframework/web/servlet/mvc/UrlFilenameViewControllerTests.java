@@ -20,8 +20,10 @@ import junit.framework.TestCase;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -148,6 +150,17 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		ModelAndView mv = ctrl.handleRequest(request, response);
 		assertEquals("products/view", mv.getViewName());
 		assertTrue(mv.getModel().isEmpty());
+	}
+
+	public void testWithFlashAttributes() throws Exception {
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
+		request.setAttribute(FlashMapManager.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = ctrl.handleRequest(request, response);
+		assertEquals("index", mv.getViewName());
+		assertEquals(1, mv.getModel().size());
+		assertEquals("value", mv.getModel().get("name"));
 	}
 
 	private void exposePathInMapping(MockHttpServletRequest request, String mapping) {
