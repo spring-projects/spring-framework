@@ -2600,6 +2600,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
       of a <classname>DefaultLobHandler</classname>. You typically set this
       value through dependency injection.<!--Rewording ok? (What does what through dependency injection?) TR: Revised.--></para>
 
+      <!--
       <programlistingco>
         <areaspec>
           <area coords="8" id="jdbc.lobhandler.variableref" />
@@ -2631,7 +2632,7 @@ clobReader.close();</programlisting>
         <calloutlist>
           <callout arearefs="jdbc.lobhandler.variableref">
             <para>Pass in the lobHandler that in this example is a plain
-            <classname>DefaultLobHandler</classname><!--*Here* where?(deleted *Here we*) I don't see this in example.Use the lobHandler to do what? TR: Revised.--></para>
+            <classname>DefaultLobHandler</classname></para>
           </callout>
 
           <callout arearefs="jdbc.lobhandler.setClob">
@@ -2647,13 +2648,14 @@ clobReader.close();</programlisting>
           </callout>
         </calloutlist>
       </programlistingco>
+      -->
 
       <para>Now it's time to read the LOB data from the database. Again, you
       use a <code>JdbcTemplate</code> with the same instance variable
       <code>l</code><code>obHandler </code>and a reference to a
       <classname>DefaultLobHandler</classname>.</para>
 
-      <para><programlistingco>
+      <para><!--<programlistingco>
           <areaspec>
             <area coords="5" id="jdbc.lobhandler.getClob" />
 
@@ -2681,10 +2683,10 @@ clobReader.close();</programlisting>
 
             <callout arearefs="jdbc.lobhandler.setBlob">
               <para>Using the method <classname>getBlobAsBytes,</classname>
-              retrieve the contents of the BLOB.<!--MISSING THE NUMBER 2 IN SNIPPET ABOVE. ADD WHERE APPROPRIATE. TR: ?; OK AS IS.--></para>
+              retrieve the contents of the BLOB.</para>
             </callout>
           </calloutlist>
-        </programlistingco></para>
+        </programlistingco>--></para>
     </section>
 
     <section id="jdbc-in-clause">

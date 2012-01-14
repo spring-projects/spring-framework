@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sidebar xmlns="http://docbook.org/ns/docbook" version="5.0"
     xmlns:xlink="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="spring-web-flow-sidebar">
+    xmlns:xi="http://www.w3.org/2001/XInclude">
   <title>Spring Web Flow</title>
 
   <para>Spring Web Flow (SWF) aims to be the best solution for the management

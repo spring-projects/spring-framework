@@ -404,16 +404,16 @@
          http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
 
   <lineannotation>&lt;!-- an HTTP <interfacename>Session</interfacename>-scoped bean exposed as a proxy --&gt;</lineannotation>
-  &lt;bean id="userPreferences" class="com.foo.UserPreferences" <emphasis role="bold">scope="session"</emphasis>&gt;
+  &lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"&gt;
 
         <lineannotation>&lt;!-- instructs the container to proxy the surrounding bean --&gt;</lineannotation>
-        <emphasis role="bold">&lt;aop:scoped-proxy/&gt;</emphasis>
+        &lt;aop:scoped-proxy/&gt;
   &lt;/bean&gt;
 
-  <lineannotation>&lt;!-- a singleton-scoped bean <emphasis role="bold">injected with a proxy to the above bean</emphasis> --&gt;</lineannotation>
+  <lineannotation>&lt;!-- a singleton-scoped bean injected with a proxy to the above bean --&gt;</lineannotation>
   &lt;bean id="userService" class="com.foo.SimpleUserService"&gt;
 
-      <lineannotation>&lt;!-- a reference to the <emphasis role="bold">proxied</emphasis> <literal>userPreferences</literal> bean --&gt;</lineannotation>
+      <lineannotation>&lt;!-- a reference to the proxied <literal>userPreferences</literal> bean --&gt;</lineannotation>
       &lt;property name="userPreferences" ref="userPreferences"/&gt;
 
   &lt;/bean&gt;
@@ -489,7 +489,7 @@
         objects:</para>
 
       <programlisting language="xml">&lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"&gt;
-  <emphasis role="bold"><literal>&lt;aop:scoped-proxy/&gt;</literal></emphasis>
+  <literal>&lt;aop:scoped-proxy/&gt;</literal>
 &lt;/bean&gt;
 
 &lt;bean id="userManager" class="com.foo.UserManager"&gt;
@@ -524,7 +524,7 @@
 
         <programlisting language="xml"><lineannotation>&lt;!-- <classname>DefaultUserPreferences</classname> implements the <interfacename>UserPreferences</interfacename> interface --&gt;</lineannotation>
 &lt;bean id="userPreferences" class="com.foo.DefaultUserPreferences" scope="session"&gt;
-  &lt;aop:scoped-proxy <emphasis role="bold">proxy-target-class="false"<literal/></emphasis>/&gt;
+  &lt;aop:scoped-proxy proxy-target-class="false"<literal/>/&gt;
 &lt;/bean&gt;
 
 &lt;bean id="userManager" class="com.foo.UserManager"&gt;
@@ -633,7 +633,7 @@
 
       <programlisting language="java">
 Scope threadScope = new SimpleThreadScope();
-beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", threadScope);</programlisting>
+beanFactory.registerScope("thread", threadScope);</programlisting>
 
       <para>You then create bean definitions that adhere to the scoping rules of
         your custom <interfacename>Scope</interfacename>:</para>
@@ -657,10 +657,10 @@ beanFactory.registerScope("<emphasis role="bold">thread</emphasis>", threadScope
 
   &lt;bean class="org.springframework.beans.factory.config.CustomScopeConfigurer"&gt;
       &lt;property name="scopes"&gt;
-          &lt;map&gt;<emphasis role="bold">
+          &lt;map&gt;
               &lt;entry key="thread"&gt;
                   &lt;bean class="org.springframework.context.support.SimpleThreadScope"/&gt;
-              &lt;/entry&gt;</emphasis>
+              &lt;/entry&gt;
           &lt;/map&gt;
       &lt;/property&gt;
   &lt;/bean&gt;

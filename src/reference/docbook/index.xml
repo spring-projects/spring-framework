@@ -232,7 +232,7 @@
       <para>This document is a reference guide to Spring Framework features.
       If you have any requests, comments, or questions on this document,
       please post them on the user mailing list or on the support forums at
-      <ulink url="http://forum.springsource.org/"></ulink>.<!--Missing link above. PDF shows it as http://forum.springsource.org/--></para>
+      <ulink url="http://forum.springsource.org/"></ulink>.<!-- Missing link above. PDF shows it as http://forum.springsource.org/ --></para>
     </partintro>
 
     <xi:include href="overview.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
@@ -490,8 +490,6 @@
                 xmlns:xi="http://www.w3.org/2001/XInclude" />
   </part>
 
-  <!-- back matter -->
-
   <part id="spring-appendices">
     <title>Appendices</title>
 
@@ -511,8 +509,9 @@
 
     <xi:include href="spring.tld.xml"
                 xmlns:xi="http://www.w3.org/2001/XInclude" />
-
+<!--
     <xi:include href="spring-form.tld.xml"
                 xmlns:xi="http://www.w3.org/2001/XInclude" />
+-->
   </part>
 </book>

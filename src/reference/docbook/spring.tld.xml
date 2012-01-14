@@ -55,7 +55,7 @@
 		</para>
       <table id="spring.tld.bind.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -119,6 +119,7 @@
          </tgroup>
       </table>
    </section>
+
    <section id="spring.tld.escapeBody">
       <title>The <literal>escapeBody</literal> tag</title>
       <para>
@@ -128,7 +129,7 @@
 		</para>
       <table id="spring.tld.escapeBody.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -185,7 +186,7 @@
 		</para>
       <table id="spring.tld.hasBindErrors.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -242,7 +243,7 @@
 		</para>
       <table id="spring.tld.htmlEscape.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -284,7 +285,7 @@
 		</para>
       <table id="spring.tld.message.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -453,7 +454,7 @@
 		</para>
       <table id="spring.tld.nestedPath.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -496,7 +497,7 @@
 		</para>
       <table id="spring.tld.theme.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -662,7 +663,7 @@
 		</para>
       <table id="spring.tld.transform.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -751,7 +752,7 @@
 		</para>
       <table id="spring.tld.url.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -868,7 +869,7 @@
 		</para>
       <table id="spring.tld.eval.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>

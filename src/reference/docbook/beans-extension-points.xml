@@ -161,7 +161,7 @@ public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor 
   <lineannotation>// simply return the instantiated bean as-is</lineannotation>
   public Object postProcessBeforeInitialization(Object bean, String beanName)
                                                                      throws BeansException {
-      return bean; <lineannotation>// we could potentially return <emphasis>any</emphasis> object reference here...</lineannotation>
+      return bean; <lineannotation>// we could potentially return any object reference here...</lineannotation>
   }
 
   public Object postProcessAfterInitialization(Object bean, String beanName)
@@ -351,10 +351,10 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
 
 &lt;bean id="dataSource" destroy-method="close"
     class="org.apache.commons.dbcp.BasicDataSource"&gt;
-  &lt;property name="driverClassName" value="<emphasis role="bold">${jdbc.driverClassName}</emphasis>"/&gt;
-  &lt;property name="url" value="<emphasis role="bold">${jdbc.url}</emphasis>"/&gt;
-  &lt;property name="username" value="<emphasis role="bold">${jdbc.username}</emphasis>"/&gt;
-  &lt;property name="password" value="<emphasis role="bold">${jdbc.password}</emphasis>"/&gt;
+  &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+  &lt;property name="url" value="${jdbc.url}"/&gt;
+  &lt;property name="username" value="${jdbc.username}"/&gt;
+  &lt;property name="password" value="${jdbc.password}"/&gt;
 &lt;/bean&gt;</programlisting>
 
       <para>The actual values come from another file in the standard Java
@@ -472,7 +472,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         already non-null (presumably initialized by the constructors). In this
         example...</para>
 
-      <programlisting language="java">foo.fred.bob.sammy=123</programlisting>
+      <programlisting>foo.fred.bob.sammy=123</programlisting>
 
       <para>... the <literal>sammy</literal> property of the
         <literal>bob</literal> property of the <literal>fred</literal> property
@@ -491,6 +491,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
         configuration element:</para>
 
       <programlisting language="xml">&lt;context:property-override location="classpath:override.properties"/&gt;</programlisting>
+
     </section>
   </section>
 

@@ -2572,7 +2572,8 @@ public @interface Idempotent {
     the value of the <literal>proxy-target-class</literal> attribute of the
     <literal>&lt;aop:config&gt;</literal> element to true:</para>
 
-    <programlisting language="xml">&lt;aop:config <emphasis role="bold">proxy-target-class="true"</emphasis>&gt;
+    <!-- removed <emphasis> below to solve NPE problem -->
+    <programlisting language="xml">&lt;aop:config proxy-target-class="true"&gt;
     <lineannotation>&lt;!-- other beans defined here... --&gt;</lineannotation>
 &lt;/aop:config&gt;</programlisting>
 
@@ -2581,7 +2582,8 @@ public @interface Idempotent {
     <literal>&lt;aop:aspectj-autoproxy&gt;</literal> element to
     <literal>true</literal>:</para>
 
-    <programlisting language="xml">&lt;aop:aspectj-autoproxy <emphasis role="bold">proxy-target-class="true"</emphasis>/&gt;</programlisting>
+    <!-- removed <emphasis> below to solve NPE problem -->
+    <programlisting language="xml">&lt;aop:aspectj-autoproxy proxy-target-class="true"/&gt;</programlisting>
 
     <note>
       <para>Multiple <literal>&lt;aop:config/&gt;</literal> sections are
@@ -3596,6 +3598,7 @@ http://www.springframework.org/schema/context
         <literal>&lt;context:load-time-weaver/&gt;</literal> element. Find
         below an example of doing just that:</para>
 
+        <!-- removed <emphasis> below to solve NPE problem -->
         <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -3607,7 +3610,7 @@ http://www.springframework.org/schema/context
     http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
 
     &lt;context:load-time-weaver
-            <emphasis role="bold">weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"</emphasis>/&gt;
+            weaver-class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/&gt;
 
 &lt;/beans&gt;</programlisting>
 

@@ -209,8 +209,7 @@ productList.url=/WEB-INF/jsp/productlist.jsp</programlisting>
         best practice), then you can bind the form to the named variable like
         so:</para>
 
-        <programlisting language="xml">&lt;form:form <lineannotation><emphasis
-              role="bold">commandName="user"</emphasis></lineannotation>&gt;
+        <programlisting language="xml">&lt;form:form commandName="user"&gt;
       &lt;table&gt;
           &lt;tr&gt;
               &lt;td&gt;First Name:&lt;/td&gt;

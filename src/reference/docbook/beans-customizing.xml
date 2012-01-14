@@ -168,7 +168,7 @@
   }
 }</programlisting>
 
-      <programlisting language="xml">&lt;beans <emphasis role="bold">default-init-method="init"</emphasis>&gt;
+      <programlisting language="xml">&lt;beans default-init-method="init"&gt;
 
   &lt;bean id="blogService" class="com.foo.DefaultBlogService"&gt;
       &lt;property name="blogDao" ref="blogDao" /&gt;
