@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="org.springframework.integration-tests">
-	<property file="${basedir}/../build.properties"/>
-	<property file="${basedir}/../build.versions"/>
-	<import file="${basedir}/../spring-build/standard/default.xml"/>
-
-	<target name="publish" description="Publishes all artifacts to remote repositories"/>
-
-</project>

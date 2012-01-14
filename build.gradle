@@ -1,14 +1,4 @@
-description = 'Spring Framework'
-
-configure(subprojects - project(":spring-integration-tests")) {
-    apply plugin: 'maven'
-}
-
-configure(allprojects - project(":spring-integration-tests")) {
-    group = 'org.springframework'
-}
-
-configure(subprojects) {
+configure(allprojects) {
     apply plugin: 'java'
     apply plugin: 'eclipse'
     apply plugin: 'idea'
@@ -40,11 +30,28 @@ configure(subprojects) {
     eclipse.classpath.file.whenMerged { classpath ->
         classpath.entries.findAll { entry -> entry.path.contains('servlet-api') }*.exported = false
     }
-
 }
 
+configure(rootProject) {
+    description = 'Spring Framework'
 
-configure(subprojects - project(":spring-asm") - project(":spring-integration-tests")) {
+    // don't publish the default jar for the root project
+    configurations.archives.artifacts.clear()
+
+    dependencies { // for integration tests
+        testCompile project(":spring-test")
+        testCompile project(":spring-webmvc-portlet")
+        testCompile "org.hibernate:hibernate-core:4.0.0.CR7"
+        testCompile "javax.servlet:servlet-api:2.5"
+    }
+}
+
+configure(subprojects) {
+    apply plugin: 'maven'
+    group = 'org.springframework'
+}
+
+configure(subprojects - project(":spring-asm")) {
 
     task sourcesJar(type: Jar, dependsOn:classes) {
         classifier = 'sources'
@@ -63,8 +70,7 @@ project('spring-core') {
         // depend on spring-asm project in order to have it show up as a
         // <dependency> in the generated pom
         compile project(":spring-asm")
-        // depend directly on the spring-asm jar to avoid errors in
-        // Eclipse/STS
+        // depend directly on the spring-asm jar to avoid errors in Eclipse/STS
         compile files(project(":spring-asm").jar.archivePath) {
             builtBy project(":spring-asm").jar
         }
@@ -262,7 +268,7 @@ project('spring-web') {
 }
 
 project('spring-orm') {
-    description = 'Spring Object/XML Mapping'
+    description = 'Spring Object/Relational Mapping'
     dependencies {
         compile("org.hibernate:com.springsource.org.hibernate:3.3.1.GA") { optional = true } // for orm.hibernate3
         compile("org.hibernate:hibernate-cglib-repack:2.1_3") { optional = true }
@@ -339,7 +345,7 @@ project('spring-webmvc-portlet') {
 }
 
 project('spring-test') {
-    description = 'Spring Test'
+    description = 'Spring TestContext Framework'
     dependencies {
         compile project(":spring-webmvc-portlet")
         compile("javax.activation:activation:1.0") { provided = true }
@@ -370,16 +376,6 @@ project('spring-aspects') {
         ajc "org.aspectj:aspectjtools:1.6.8"
         compile "org.aspectj:aspectjrt:1.6.8"
         testCompile project(":spring-test")
-    }
-}
-
-project('spring-integration-tests') {
-    description = 'Spring Integration Tests'
-    dependencies {
-        testCompile project(":spring-test")
-        testCompile project(":spring-webmvc-portlet")
-        testCompile "org.hibernate:hibernate-core:4.0.0.CR7"
-        testCompile "javax.servlet:servlet-api:2.5"
     }
 }
 

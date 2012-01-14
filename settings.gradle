@@ -20,7 +20,6 @@ include 'org.springframework.test'
 include 'org.springframework.web.portlet'
 include 'org.springframework.web.struts'
 include 'org.springframework.aspects'
-include 'org.springframework.integration-tests'
 
 // transform project names to maven-central artifact naming
 // e.g.: org.springframework.context.support => spring-context-support
