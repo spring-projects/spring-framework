@@ -2600,93 +2600,74 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
       of a <classname>DefaultLobHandler</classname>. You typically set this
       value through dependency injection.<!--Rewording ok? (What does what through dependency injection?) TR: Revised.--></para>
 
-      <!--
-      <programlistingco>
-        <areaspec>
-          <area coords="8" id="jdbc.lobhandler.variableref" />
-
-          <area coords="12" id="jdbc.lobhandler.setClob" />
-
-          <area coords="13" id="jdbc.lobhandler.setBlob" />
-        </areaspec>
-
-        <programlisting language="java">final File blobIn = new File("spring2004.jpg");
+      <programlisting language="java"><![CDATA[final File blobIn = new File("spring2004.jpg");
 final InputStream blobIs = new FileInputStream(blobIn);
 final File clobIn = new File("large.txt");
 final InputStream clobIs = new FileInputStream(clobIn);
 final InputStreamReader clobReader = new InputStreamReader(clobIs);
 jdbcTemplate.execute(
   "INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
-  new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
+  new AbstractLobCreatingPreparedStatementCallback(lobHandler) {]]><co id="lobHandler"/><![CDATA[
       protected void setValues(PreparedStatement ps, LobCreator lobCreator) 
           throws SQLException {
         ps.setLong(1, 1L);
-        lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length());
-        lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length());
+        lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length());]]><co id="setClobAsCharacterStream"/><![CDATA[
+        lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length());]]><co id="setBlobAsBinaryStream"/><![CDATA[
       }
   }
 );
 blobIs.close();
-clobReader.close();</programlisting>
+clobReader.close();]]></programlisting>
 
-        <calloutlist>
-          <callout arearefs="jdbc.lobhandler.variableref">
-            <para>Pass in the lobHandler that in this example is a plain
-            <classname>DefaultLobHandler</classname></para>
-          </callout>
+      <calloutlist>
+        <callout arearefs="lobHandler">
+          <para>Pass in the lobHandler that in this example is a plain
+          <classname>DefaultLobHandler</classname></para>
+        </callout>
 
-          <callout arearefs="jdbc.lobhandler.setClob">
-            <para>Using the method
-            <classname>setClobAsCharacterStream</classname>, pass in the
-            contents of the CLOB.</para>
-          </callout>
+        <callout arearefs="setClobAsCharacterStream">
+          <para>Using the method
+          <classname>setClobAsCharacterStream</classname>, pass in the
+          contents of the CLOB.</para>
+        </callout>
 
-          <callout arearefs="jdbc.lobhandler.setBlob">
-            <para>Using the method
-            <classname>setBlobAsBinaryStream</classname>, pass in the contents
-            of the BLOB.</para>
-          </callout>
-        </calloutlist>
-      </programlistingco>
-      -->
+        <callout arearefs="setBlobAsBinaryStream">
+          <para>Using the method
+          <classname>setBlobAsBinaryStream</classname>, pass in the contents
+          of the BLOB.</para>
+        </callout>
+      </calloutlist>
 
       <para>Now it's time to read the LOB data from the database. Again, you
       use a <code>JdbcTemplate</code> with the same instance variable
       <code>l</code><code>obHandler </code>and a reference to a
       <classname>DefaultLobHandler</classname>.</para>
 
-      <para><!--<programlistingco>
-          <areaspec>
-            <area coords="5" id="jdbc.lobhandler.getClob" />
-
-            <area coords="7" id="jdbc.lobhandler.getBlob" />
-          </areaspec>
-
-          <programlisting language="java">List&lt;Map&lt;String, Object&gt;&gt; l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
-        new RowMapper&lt;Map&lt;String, Object&gt;&gt;() {
-          public Map&lt;String, Object&gt; mapRow(ResultSet rs, int i) throws SQLException {
-            Map&lt;String, Object&gt; results = new HashMap&lt;String, Object&gt;();
-            String clobText = lobHandler.getClobAsString(rs, "a_clob");
+      <para>
+        <programlisting language="java"><![CDATA[List<Map<String, Object>> l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
+        new RowMapper<Map<String, Object>>() {
+          public Map<String, Object> mapRow(ResultSet rs, int i) throws SQLException {
+            Map<String, Object> results = new HashMap<String, Object>();
+            String clobText = lobHandler.getClobAsString(rs, "a_clob");]]><co id="getClobAsString"/><![CDATA[
             results.put("CLOB", clobText);
-            byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");
+            byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");]]><co id="getBlobAsBytes"/><![CDATA[
             results.put("BLOB", blobBytes);
             return results;
           }
-        });
-</programlisting>
+        });]]></programlisting>
 
-          <calloutlist>
-            <callout arearefs="jdbc.lobhandler.setClob">
-              <para>Using the method <classname>getClobAsString,
-              </classname>retrieve the contents of the CLOB.</para>
-            </callout>
+        <calloutlist>
+          <callout arearefs="getClobAsString">
+            <para>Using the method <classname>getClobAsString,
+            </classname>retrieve the contents of the CLOB.</para>
+          </callout>
 
-            <callout arearefs="jdbc.lobhandler.setBlob">
-              <para>Using the method <classname>getBlobAsBytes,</classname>
-              retrieve the contents of the BLOB.</para>
-            </callout>
-          </calloutlist>
-        </programlistingco>--></para>
+          <callout arearefs="getBlobAsBytes">
+            <para>Using the method <classname>getBlobAsBytes,</classname>
+            retrieve the contents of the BLOB.</para>
+          </callout>
+        </calloutlist>
+      </para>
     </section>
 
     <section id="jdbc-in-clause">

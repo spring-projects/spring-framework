@@ -718,7 +718,8 @@ TR: OK AS IS. images don't show up in the editor, but they do show up in the gen
 
       <para><mediaobject>
           <imageobject role="fo">
-            <imagedata align="center" fileref="images/tx.png" format="PNG" />
+            <imagedata align="center" fileref="images/tx.png" format="PNG"
+                width="400"/>
           </imageobject>
 
           <imageobject role="html">
@@ -1847,13 +1848,18 @@ TR: REVISED, PLS REVIEW - changed it back; it's not just settings, the section d
         <title>Required</title>
 
         <para><mediaobject>
-            <imageobject>
+            <imageobject role="fo">
               <imagedata align="center" fileref="images/tx_prop_required.png"
-                         format="PNG" />
+                  format="PNG" width="400"/>
             </imageobject>
 
-            <caption><para>PROPAGATION_REQUIRED</para></caption>
-          </mediaobject></para>
+            <imageobject role="html">
+              <imagedata align="center" fileref="images/tx_prop_required.png"
+                  format="PNG" width="400"/>
+            </imageobject>
+
+              <caption><para>PROPAGATION_REQUIRED</para></caption>
+            </mediaobject></para>
 
         <para>When the propagation setting is
         <literal>PROPAGATION_REQUIRED</literal>, a

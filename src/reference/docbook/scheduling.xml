@@ -821,7 +821,7 @@ public class ExampleJob extends QuartzJobBean {
       <classname>SchedulerFactoryBean</classname> for you to set, such as the
       calendars used by the job details, properties to customize Quartz with,
       etc. Have a look at the <ulink
-      url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean
       Javadoc</ulink> for more information.</para>
     </section>
   </section>

@@ -63,7 +63,7 @@
       <para>Renders an HTML 'input' tag with type 'checkbox'.</para>
       <table id="spring-form.tld.checkbox.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -464,7 +464,7 @@
       <para>Renders multiple HTML 'input' tags with type 'checkbox'.</para>
       <table id="spring-form.tld.checkboxes.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -907,7 +907,7 @@
       <para>Renders field errors in an HTML 'span' tag.</para>
       <table id="spring-form.tld.errors.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -1224,7 +1224,7 @@
       <para>Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.</para>
       <table id="spring-form.tld.form.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -1627,7 +1627,7 @@
       <para>Renders an HTML 'input' tag with type 'hidden' using the bound value.</para>
       <table id="spring-form.tld.hidden.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -1692,7 +1692,7 @@
       <para>Renders an HTML 'input' tag with type 'text' using the bound value.</para>
       <table id="spring-form.tld.input.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -2149,7 +2149,7 @@
       <para>Renders a form field label in an HTML 'label' tag.</para>
       <table id="spring-form.tld.label.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -2466,7 +2466,7 @@
       <para>Renders a single HTML 'option'. Sets 'selected' as appropriate based on bound value.</para>
       <table id="spring-form.tld.option.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -2797,7 +2797,7 @@
       <para>Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bound value.</para>
       <table id="spring-form.tld.options.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -3142,7 +3142,7 @@
       <para>Renders an HTML 'input' tag with type 'password' using the bound value.</para>
       <table id="spring-form.tld.password.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -3613,7 +3613,7 @@
       <para>Renders an HTML 'input' tag with type 'radio'.</para>
       <table id="spring-form.tld.radiobutton.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -4014,7 +4014,7 @@
       <para>Renders multiple HTML 'input' tags with type 'radio'.</para>
       <table id="spring-form.tld.radiobuttons.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -4457,7 +4457,7 @@
       <para>Renders an HTML 'select' element. Supports databinding to the selected option.</para>
       <table id="spring-form.tld.select.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>
@@ -4900,7 +4900,7 @@
       <para>Renders an HTML 'textarea'.</para>
       <table id="spring-form.tld.textarea.table">
          <title>Attributes</title>
-         <tgroup cols="3">
+         <tgroup cols="4">
             <colspec align="center" colname="Attribute"/>
             <colspec align="center" colname="Required"/>
             <colspec align="center" colname="Runtime.Expression"/>

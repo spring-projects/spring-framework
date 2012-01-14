@@ -150,7 +150,7 @@ component-scanning in the exact same way as when using Spring annotations:
               <row>
                 <entry>@Component</entry>
                 <entry>@Named</entry>
-                <entry>&mdash;</entry>
+                <entry>&#151;</entry>
               </row>
               <row>
                 <entry>@Scope("singleton")</entry>
@@ -174,21 +174,21 @@ component-scanning in the exact same way as when using Spring annotations:
               <row>
                 <entry>@Qualifier</entry>
                 <entry>@Named</entry>
-                <entry>&mdash;</entry>
+                <entry>&#151;</entry>
               </row>  
                <row>
                 <entry>@Value</entry>
-                <entry>&mdash;</entry>
+                <entry>&#151;</entry>
                 <entry>no equivalent</entry>
               </row> 
                <row>
                 <entry>@Required</entry>
-                <entry>&mdash;</entry>
+                <entry>&#151;</entry>
                 <entry>no equivalent</entry>
               </row> 
                <row>
                 <entry>@Lazy</entry>
-                <entry>&mdash;</entry>
+                <entry>&#151;</entry>
                 <entry>no equivalent</entry>
               </row> 
             </tbody>     

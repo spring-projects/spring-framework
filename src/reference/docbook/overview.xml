@@ -97,7 +97,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
     <para><mediaobject>
         <imageobject role="fo">
           <imagedata align="left" fileref="images/spring-overview.png"
-                     format="PNG" />
+                     format="PNG" width="400" />
         </imageobject>
 
         <imageobject role="html">
@@ -259,7 +259,7 @@ TR: OK. Added to diagram.--></para>
     <para><mediaobject>
         <imageobject role="fo">
           <imagedata align="center" fileref="images/overview-full.png"
-                     format="PNG" />
+                     format="PNG" width="400" />
         </imageobject>
 
         <imageobject role="html">
@@ -289,7 +289,8 @@ TR: OK. Added to diagram.--></para>
     <para><mediaobject>
         <imageobject role="fo">
           <imagedata align="center"
-                     fileref="images/overview-thirdparty-web.png" format="PNG" />
+                     fileref="images/overview-thirdparty-web.png" format="PNG"
+                     width="400"/>
         </imageobject>
 
         <imageobject role="html">
@@ -315,7 +316,7 @@ TR: OK. Added to diagram.--></para>
     <para><mediaobject>
         <imageobject role="fo">
           <imagedata align="center" fileref="images/overview-remoting.png"
-                     format="PNG" />
+                     format="PNG" width="400" />
         </imageobject>
 
         <imageobject role="html">
@@ -335,7 +336,7 @@ TR: OK. Added to diagram.--></para>
     <para><mediaobject>
         <imageobject role="fo">
           <imagedata align="center" fileref="images/overview-ejb.png"
-                     format="PNG" />
+                     format="PNG" width="400" />
         </imageobject>
 
         <imageobject role="html">
@@ -620,7 +621,7 @@ TR: OK. Added to diagram.--></para>
         <programlisting>&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.release&lt;/id&gt;
-      &lt;url&gt;http://maven.springframework.org/release/&lt;/url&gt;
+      &lt;url&gt;http://repo.springsource.org/release/&lt;/url&gt;
       &lt;snapshots&gt;&lt;enabled&gt;false&lt;/enabled&gt;&lt;/snapshots&gt;
    &lt;/repository&gt;
 &lt;/repositories&gt;</programlisting>
@@ -630,7 +631,7 @@ TR: OK. Added to diagram.--></para>
         <programlisting>&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.milestone&lt;/id&gt;
-      &lt;url&gt;http://maven.springframework.org/milestone/&lt;/url&gt;
+      &lt;url&gt;http://repo.springsource.org/milestone/&lt;/url&gt;
       &lt;snapshots&gt;&lt;enabled&gt;false&lt;/enabled&gt;&lt;/snapshots&gt;
    &lt;/repository&gt;
 &lt;/repositories&gt;</programlisting>
@@ -640,7 +641,7 @@ TR: OK. Added to diagram.--></para>
         <programlisting>&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.snapshot&lt;/id&gt;
-      &lt;url&gt;http://maven.springframework.org/snapshot/&lt;/url&gt;
+      &lt;url&gt;http://repo.springsource.org/snapshot/&lt;/url&gt;
       &lt;snapshots&gt;&lt;enabled&gt;true&lt;/enabled&gt;&lt;/snapshots&gt;
    &lt;/repository&gt;
 &lt;/repositories&gt;</programlisting>

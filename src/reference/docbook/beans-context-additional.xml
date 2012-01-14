@@ -13,7 +13,7 @@
     functionality for managing and manipulating beans, including in a
     programmatic way. The <literal>org.springframework.context</literal> package
     adds the <ulink
-    url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/ApplicationContext.html"
+    url="http://static.springframework.org/spring/docs/current/api/org/springframework/context/ApplicationContext.html"
     ><interfacename>ApplicationContext</interfacename></ulink> interface, which
     extends the <interfacename>BeanFactory</interfacename> interface, in
     addition to extending other interfaces to provide additional functionality
@@ -635,7 +635,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <interfacename>TaskExecutor</interfacename> abstraction.</para>
 
     <para>Check out the JavaDoc of the <ulink
-      url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/jca/context/SpringContextResourceAdapter.html"
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/jca/context/SpringContextResourceAdapter.html"
       >SpringContextResourceAdapter</ulink> class for the configuration details
       involved in RAR deployment.</para>
 

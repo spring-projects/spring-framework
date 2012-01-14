@@ -231,7 +231,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
       <para>Using callback interfaces or annotations in conjunction with a
         custom <interfacename>BeanPostProcessor</interfacename> implementation
         is a common means of extending the Spring IoC container. An example is
-        Spring's <classname>RequiredAnnotationBeanPostProcessor</classname> &mdash; a
+        Spring's <classname>RequiredAnnotationBeanPostProcessor</classname> &#151; a
         <interfacename>BeanPostProcessor</interfacename> implementation that
         ships with the Spring distribution which ensures that JavaBean
         properties on beans that are marked with an (arbitrary) annotation are

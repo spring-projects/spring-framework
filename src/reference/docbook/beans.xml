@@ -29,11 +29,11 @@ The footnote should x-ref to first section in that chapter but I can't find the 
     <para>The <literal>org.springframework.beans</literal> and
       <literal>org.springframework.context</literal> packages are the basis for
       Spring Framework's IoC container. The <interfacename><ulink
-      url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/BeanFactory.html"
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/BeanFactory.html"
       >BeanFactory</ulink></interfacename> interface provides an advanced
       configuration mechanism capable of managing any type of object.
       <literal><ulink
-      url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/ApplicationContext.html"
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/context/ApplicationContext.html"
       >ApplicationContext</ulink></literal> is a sub-interface of
       <interfacename>BeanFactory.</interfacename> It adds easier integration
       with Spring's AOP features; message resource handling (for use in
@@ -80,9 +80,9 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       <classname>ApplicationContext</classname> interface are supplied
       out-of-the-box with Spring. In standalone applications it is common to
       create an instance of <ulink
-      url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/support/ClassPathXmlApplicationContext.html"
+      url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/ClassPathXmlApplicationContext.html"
       ><classname>ClassPathXmlApplicationContext</classname></ulink> or <ulink
-      url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/support/FileSystemXmlApplicationContext.html"
+      url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/FileSystemXmlApplicationContext.html"
       ><classname>FileSystemXmlApplicationContext</classname></ulink>.
       <!-- MLP: Beverly to review --> While XML has been the traditional format
       for defining configuration metadata you can instruct the container to use
@@ -109,7 +109,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
     <para><mediaobject>
       <imageobject>
         <imagedata align="center" fileref="images/container-magic.png"
-          format="PNG"/>
+          format="PNG" width="400" />
       </imageobject>
 
       <caption><para>The Spring IoC container</para></caption>
@@ -1170,7 +1170,7 @@ cfg.postProcessBeanFactory(factory);</programlisting>
         a single ApplicationContext as a parent to WebApplicationContexts across
         WAR files. In this case you should look into using the utility class
         <ulink
-        url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html"
+        url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html"
         ><classname>ContextSingletonBeanFactoryLocator</classname></ulink>
         locator that is described in this <ulink
         url="http://blog.springsource.com/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/"

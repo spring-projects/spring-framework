@@ -232,7 +232,8 @@
 
     <para><mediaobject>
         <imageobject role="fo">
-          <imagedata align="center" fileref="images/mvc.png" format="PNG" />
+          <imagedata align="center" fileref="images/mvc.png" format="PNG"
+              width="400" />
         </imageobject>
 
         <imageobject role="html">
@@ -290,7 +291,7 @@
     <para><mediaobject>
         <imageobject role="fo">
           <imagedata align="center" fileref="images/mvc-contexts.gif"
-                     format="GIF" />
+                     format="GIF" width="400" />
         </imageobject>
 
         <imageobject role="html">

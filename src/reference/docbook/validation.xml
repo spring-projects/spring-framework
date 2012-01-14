@@ -211,9 +211,9 @@
     <para>More information on the
       <interfacename>MessageCodesResolver</interfacename> and the default
       strategy can be found online with the Javadocs for <ulink
-      url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/validation/MessageCodesResolver.html"
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/validation/MessageCodesResolver.html"
       >MessageCodesResolver</ulink> and <ulink
-      url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/validation/DefaultMessageCodesResolver.html"
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/validation/DefaultMessageCodesResolver.html"
       >DefaultMessageCodesResolver</ulink> respectively.</para>
   </section>
 

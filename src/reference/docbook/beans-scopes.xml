@@ -95,7 +95,7 @@
     <para>As of Spring 3.0, a <emphasis>thread scope</emphasis> is available,
       but is not registered by default. For more information, see the
       documentation for <ulink
-      url="http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/support/SimpleThreadScope.html"
+      url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/SimpleThreadScope.html"
       >SimpleThreadScope</ulink>. For instructions on how to register this or
       any other custom scope, see <xref
       linkend="beans-factory-scopes-custom-using"/>.</para>
@@ -118,7 +118,8 @@
 
     <para><mediaobject>
       <imageobject role="fo">
-        <imagedata align="center" fileref="images/singleton.png" format="PNG"/>
+        <imagedata align="center" fileref="images/singleton.png" format="PNG"
+            width="400"/>
       </imageobject>
 
       <imageobject role="html">
@@ -163,7 +164,8 @@
 
     <para><mediaobject>
       <imageobject role="fo">
-        <imagedata align="center" fileref="images/prototype.png" format="PNG"/>
+        <imagedata align="center" fileref="images/prototype.png" format="PNG"
+            width="400" />
       </imageobject>
 
       <imageobject role="html">
@@ -556,7 +558,7 @@
         implement your own scopes, see the <interfacename>Scope</interfacename>
         implementations that are supplied with the Spring Framework itself and
         the <ulink
-        url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/Scope.html"
+        url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/config/Scope.html"
         >Scope Javadoc</ulink>, which explains the methods you need to implement
         in more detail.</para>
 

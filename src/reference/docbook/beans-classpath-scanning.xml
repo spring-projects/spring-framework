@@ -391,7 +391,7 @@ public class MovieFinderImpl implements MovieFinder {
     <note>
       <para>If you do not want to rely on the default bean-naming strategy, you
         can provide a custom bean-naming strategy. First, implement the <ulink
-        url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/support/BeanNameGenerator.html"
+        url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/support/BeanNameGenerator.html"
         ><interfacename>BeanNameGenerator</interfacename></ulink> interface, and
         be sure to include a default no-arg constructor. Then, provide the
         fully-qualified class name when configuring the scanner:</para>
@@ -428,7 +428,7 @@ public class MovieFinderImpl implements MovieFinder {
     <note>
       <para>To provide a custom strategy for scope resolution rather than
         relying on the annotation-based approach, implement the <ulink
-        url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/context/annotation/ScopeMetadataResolver.html"
+        url="http://static.springframework.org/spring/docs/current/api/org/springframework/context/annotation/ScopeMetadataResolver.html"
         ><interfacename>ScopeMetadataResolver</interfacename></ulink> interface,
         and be sure to include a default no-arg constructor. Then, provide the
         fully-qualified class name when configuring the scanner:</para>

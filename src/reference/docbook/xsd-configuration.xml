@@ -140,7 +140,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <section id="xsd-config-body-schemas-util-frfb">
                     <title>Setting a bean property or constructor arg from a field value</title>
                     <para>
-                        <ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></ulink>
+                        <ulink url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></ulink>
                         is a <interfacename>FactoryBean</interfacename> which retrieves a
                         <literal>static</literal> or non-static field value. It is typically
                         used for retrieving <literal>public</literal> <literal>static</literal>
@@ -149,7 +149,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                     </para>
                     <para>
                         Find below an example which shows how a <literal>static</literal> field is exposed, by
-                        using the <ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)"><literal>staticField</literal></ulink>
+                        using the <ulink url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)"><literal>staticField</literal></ulink>
                         property:
                     </para>
                     <programlisting language="xml"><![CDATA[<bean id="myField"
@@ -176,7 +176,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                     <para>
                         It is also possible to access a non-static (instance) field of another bean,
                         as described in the API documentation for the
-                        <ulink url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></ulink>
+                        <ulink url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html"><classname>FieldRetrievingFactoryBean</classname></ulink>
                         class.
                     </para>
                     <para>

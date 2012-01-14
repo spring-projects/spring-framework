@@ -59,8 +59,14 @@
     hierarchy.)</para>
 
     <mediaobject>
-      <imageobject>
-        <imagedata align="center" fileref="images/DataAccessException.gif" />
+      <imageobject role="fo">
+        <imagedata align="center" fileref="images/DataAccessException.gif"
+            format="PNG" width="400"/>
+      </imageobject>
+
+      <imageobject role="html">
+        <imagedata align="center" fileref="images/DataAccessException.gif"
+            format="PNG" width="400"/>
       </imageobject>
     </mediaobject>
   </section>

@@ -31,9 +31,8 @@
   use and also on the Spring libraries, but these dependencies should be easy
   to isolate from the rest of your code base.</para>
 
-  <para>This document provides a reference guide to Spring's features. Since
-  this document is still to be considered very much work-in-progress, if you
-  have any requests or comments, please post them on the user mailing list or
-  on the support forums at <ulink url="http://forum.springsource.org/" />.
+  <para>This document provides a reference guide to Spring's features. If you
+  have any requests or comments, please add an issue at
+  <ulink url="http://jira.springsource.org/SPR" />.
   </para>
 </preface>
