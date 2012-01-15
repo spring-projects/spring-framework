@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,7 @@ import org.springframework.transaction.support.TransactionSynchronizationUtils;
  * @see #receiveAndExecute
  * @see #setTransactionManager
  */
-public abstract class AbstractPollingMessageListenerContainer extends AbstractMessageListenerContainer
-		implements BeanNameAware {
+public abstract class AbstractPollingMessageListenerContainer extends AbstractMessageListenerContainer {
 
 	/**
 	 * The default receive timeout: 1000 ms = 1 second.
@@ -100,6 +99,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	private volatile Boolean commitAfterNoMessageReceived;
 
 
+	@Override
 	public void setSessionTransacted(boolean sessionTransacted) {
 		super.setSessionTransacted(sessionTransacted);
 		this.sessionTransactedCalled = true;
@@ -188,6 +188,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	}
 
 
+	@Override
 	public void initialize() {
 		// Set sessionTransacted=true in case of a non-JTA transaction manager.
 		if (!this.sessionTransactedCalled &&
@@ -374,6 +375,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * container's "sessionTransacted" flag being set to "true".
 	 * @see org.springframework.jms.connection.JmsResourceHolder
 	 */
+	@Override
 	protected boolean isSessionLocallyTransacted(Session session) {
 		if (!super.isSessionLocallyTransacted(session)) {
 			return false;
