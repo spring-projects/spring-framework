@@ -41,26 +41,6 @@ configure(allprojects) {
     }
 }
 
-configure(rootProject) {
-    description = 'Spring Framework'
-
-    apply plugin: 'docbook-reference'
-
-    reference {
-        sourceDir = file('src/reference/docbook')
-    }
-
-    // don't publish the default jar for the root project
-    configurations.archives.artifacts.clear()
-
-    dependencies { // for integration tests
-        testCompile project(":spring-test")
-        testCompile project(":spring-webmvc-portlet")
-        testCompile "org.hibernate:hibernate-core:4.0.0.CR7"
-        testCompile "javax.servlet:servlet-api:2.5"
-    }
-}
-
 configure(subprojects) {
     apply plugin: 'maven'
     group = 'org.springframework'
@@ -403,26 +383,140 @@ project('spring-aspects') {
     }
 }
 
-task apidocs(type: Javadoc) {
-    subprojects.each { project ->
-        source project.sourceSets.main.allJava
-    }
-    subprojects.each { subproject ->
-        if(classpath) {
-            classpath += subproject.sourceSets.main.classes + subproject.sourceSets.main.compileClasspath
-        }
-        else {
-            classpath = subproject.sourceSets.main.classes + subproject.sourceSets.main.compileClasspath
-        }
-    }
-    destinationDir = file('build/docs/javadoc')
-    maxMemory = '1024m'
-}
+configure(rootProject) {
+    description = 'Spring Framework'
 
-task wrapper(type: Wrapper) {
-    description = 'Generates gradlew[.bat] scripts'
-    gradleVersion = '1.0-milestone-8'
-    distributionUrl = 'http://repo.gradle.org/gradle/distributions-snapshots/gradle-1.0-milestone-8-20120112000036+0100-bin.zip'
-    jarFile = '.wrapper/gradle-wrapper.jar'
+    apply plugin: 'docbook-reference'
+
+    reference {
+        sourceDir = file('src/reference/docbook')
+    }
+
+    // don't publish the default jar for the root project
+    configurations.archives.artifacts.clear()
+
+    dependencies { // for integration tests
+        testCompile project(":spring-test")
+        testCompile project(":spring-webmvc-portlet")
+        testCompile "org.hibernate:hibernate-core:4.0.0.CR7"
+        testCompile "javax.servlet:servlet-api:2.5"
+    }
+
+    task api(type: Javadoc) {
+        group = 'Documentation'
+        description = 'Generates aggregated Javadoc API documentation.'
+        title = "${rootProject.description} ${version} API"
+        options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+        options.author = true
+        options.header = rootProject.description
+        options.overview = 'src/api/overview.html'
+        options.links(
+            'http://docs.jboss.org/jbossas/javadoc/4.0.5/connector'
+        )
+        source subprojects.collect { project ->
+            project.sourceSets.main.allJava
+        }
+        destinationDir = new File(buildDir, "api")
+        classpath = files(subprojects.collect { project ->
+            project.sourceSets.main.compileClasspath
+        })
+        maxMemory = '1024m'
+    }
+
+    task docsZip(type: Zip) {
+        group = 'Distribution'
+        classifier = 'docs'
+        description = "Builds -${classifier} archive containing api and reference " +
+            "for deployment at static.springframework.org/spring-framework/docs."
+
+        from('src/dist') {
+            include 'changelog.txt'
+        }
+
+        from (api) {
+            into 'api'
+        }
+
+        from (reference) {
+            into 'reference'
+        }
+    }
+
+    task schemaZip(type: Zip) {
+        group = 'Distribution'
+        classifier = 'schema'
+        description = "Builds -${classifier} archive containing all " +
+            "XSDs for deployment at static.springframework.org/schema."
+
+        subprojects.each { subproject ->
+            def Properties schemas = new Properties();
+
+            subproject.sourceSets.main.resources.find {
+                it.path.endsWith('META-INF/spring.schemas')
+            }?.withInputStream { schemas.load(it) }
+
+            for (def key : schemas.keySet()) {
+                def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
+                assert shortName != key
+                File xsdFile = subproject.sourceSets.main.resources.find {
+                    it.path.endsWith(schemas.get(key))
+                }
+                assert xsdFile != null
+                into (shortName) {
+                    from xsdFile.path
+                }
+            }
+        }
+    }
+
+    task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
+        group = 'Distribution'
+        classifier = 'dist'
+        description = "Builds -${classifier} archive, containing all jars and docs, " +
+                      "suitable for community download page."
+
+        baseDir = "${project.name}-${project.version}";
+
+        from('src/dist') {
+            include 'readme.txt'
+            include 'license.txt'
+            include 'notice.txt'
+            into "${baseDir}"
+            expand(copyright: new Date().format('yyyy'), version: project.version)
+        }
+
+        from(zipTree(docsZip.archivePath)) {
+            into "${baseDir}/docs"
+        }
+
+        from(zipTree(schemaZip.archivePath)) {
+            into "${baseDir}/schema"
+        }
+
+        subprojects.each { subproject ->
+            into ("${baseDir}/libs") {
+                from subproject.jar
+                if (subproject.tasks.findByPath('sourcesJar')) {
+                    from subproject.sourcesJar
+                }
+                if (subproject.tasks.findByPath('javadocJar')) {
+                    from subproject.javadocJar
+                }
+            }
+        }
+    }
+
+    artifacts {
+        archives docsZip
+        archives schemaZip
+        archives distZip
+    }
+
+    task wrapper(type: Wrapper) {
+        description = 'Generates gradlew[.bat] scripts'
+        gradleVersion = '1.0-milestone-8'
+        distributionUrl = 'http://repo.gradle.org/gradle/distributions-snapshots/gradle-1.0-milestone-8-20120112000036+0100-bin.zip'
+        jarFile = '.wrapper/gradle-wrapper.jar'
+    }
 }
 
