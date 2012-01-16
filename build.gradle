@@ -53,20 +53,69 @@ configure(subprojects) {
             expand(copyright: new Date().format('yyyy'), version: project.version)
         }
     }
-}
 
-configure(subprojects - project(":spring-asm")) {
+    javadoc {
+        options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+        options.author = true
+        options.header = project.name
+        //options.overview = "${projectDir}/src/main/java/overview.html"
+    }
 
     task sourcesJar(type: Jar, dependsOn:classes) {
         classifier = 'sources'
-        from sourceSets.main.allSource
+        from sourceSets.main.allJava
+    }
+
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
     }
 
     artifacts {
         archives sourcesJar
+        archives javadocJar
     }
 }
 
+
+project("spring-asm") {
+    description = 'Spring ASM'
+    asmVersion = '2.2.3'
+
+    configurations {
+        asm
+        jarjar
+    }
+    dependencies {
+        asm "asm:asm:${asmVersion}@jar", "asm:asm-commons:${asmVersion}@jar"
+        jarjar 'com.googlecode.jarjar:jarjar:1.1'
+    }
+
+    task repackageAsm(type: Jar) { jar ->
+        jar.baseName = "asm-repack"
+        jar.version = asmVersion
+
+        doLast() {
+            project.ant {
+                taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
+                    classpath: configurations.jarjar.asPath
+                jarjar(destfile: archivePath, index: "true", filesetmanifest: "merge") {
+                    configurations.asm.each { jarfile ->
+                        zipfileset(src: jarfile)
+                    }
+                    rule(pattern: 'org.objectweb.asm.**', result: 'org.springframework.asm.@1')
+                }
+            }
+        }
+    }
+
+    jar {
+        dependsOn repackageAsm
+        from(zipTree(repackageAsm.archivePath)) {
+            exclude 'META-INF/INDEX.LIST'
+        }
+    }
+}
 
 project('spring-core') {
     description = 'Spring Core'
@@ -374,8 +423,8 @@ project('spring-struts') {
 project('spring-aspects') {
     description = 'Spring Aspects'
     apply from: 'aspectJ.gradle'
-    compileJava.dependsOn project(":spring-orm").jar
     dependencies {
+        compile project(":spring-orm")
         aspects project(":spring-orm")
         ajc "org.aspectj:aspectjtools:1.6.8"
         compile "org.aspectj:aspectjrt:1.6.8"
