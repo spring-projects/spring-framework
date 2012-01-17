@@ -25,8 +25,10 @@ import org.springframework.oxm.Unmarshaller;
 
 /**
  * @author Arjen Poutsma
+ *
+ * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does
+ * not occur by default. The Gradle build should succeed, however.
  */
-@org.junit.Ignore // TODO fix this issue https://gist.github.com/1174575
 public class JibxUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	@Override

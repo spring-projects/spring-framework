@@ -29,7 +29,12 @@ import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@org.junit.Ignore // TODO fix this issue https://gist.github.com/1174579
+/**
+ * @author Arjen Poutsma
+ *
+ * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does
+ * not occur by default. The Gradle build should succeed, however.
+ */
 public class JibxMarshallerTests extends AbstractMarshallerTests {
 
 	@Override

@@ -227,6 +227,7 @@ project('spring-tx') {
 
 project('spring-oxm') {
     description = 'Spring Object/XML Marshalling'
+    apply from: 'oxm.gradle'
     dependencies {
         compile project(":spring-context")
         compile "commons-lang:commons-lang:2.5"
@@ -238,10 +239,9 @@ project('spring-oxm') {
         testCompile "org.codehaus.jettison:jettison:1.0.1"
         testCompile "xmlunit:xmlunit:1.2"
         testCompile "xmlpull:xmlpull:1.1.3.4a"
-        // this is a workaround until we have xjc/etc generation plugged in
-        // in order for this to work, you must FIRST run `ant test` within the
-        // .oxm module.  that will create/populate the target/test-classes dir
-        testCompile(files("target/test-classes"))
+        testCompile(files(genCastor.classesDir).builtBy(genCastor))
+        testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
+        testCompile(files(genXmlbeans.classesDir).builtBy(genXmlbeans))
     }
 }
 
