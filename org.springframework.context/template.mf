@@ -4,7 +4,7 @@ Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Package: 
  javax.persistence;version="[1.0.0, 3.0.0)";resolution:=optional,
- org.springframework.orm.jpa.support;version="${spring.osgi.range.nq}";resolution:=optional,
+ org.springframework.orm.jpa.support;version=${spring.osgi.range};resolution:=optional,
  com.ibm.websphere.management;version="0";resolution:=optional
 Import-Template: 
  bsh.*;version="[2.0.0.b4, 3.0.0)";resolution:=optional,
