@@ -25,14 +25,13 @@ configure(allprojects) {
     test.systemProperty("java.awt.headless", "true")
 
     repositories {
-        maven {
-            url "http://repo.springsource.org/libs-release"
-            url "http://repo.springsource.org/plugins-release"
-        }
+        maven { url "http://repo.springsource.org/libs-release" }
+        maven { url "http://repo.springsource.org/ebr-maven-external" }
+        maven { url "http://repo.springsource.org/plugins-release" }
     }
 
     dependencies {
-        testCompile "org.junit:com.springsource.org.junit:4.9.0"
+        testCompile "junit:junit:4.9"
         testCompile "org.easymock:easymock:2.5.1"
         testCompile "org.hamcrest:hamcrest-all:1.1"
     }
@@ -206,7 +205,7 @@ project('spring-context') {
         compile project(":spring-instrument")
         compile("backport-util-concurrent:backport-util-concurrent:3.0") { optional = true }
         compile("javax.annotation:jsr250-api:1.0") { optional = true }
-        compile("javax.ejb:com.springsource.javax.ejb:3.0.0") { optional = true }
+        compile("javax.ejb:ejb-api:3.0") { optional = true }
         compile("javax.inject:javax.inject:1") { optional = true }
         compile("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1") { optional = true }
         compile("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1") { optional = true }
@@ -223,7 +222,7 @@ project('spring-context') {
         compile("net.sf.ehcache:ehcache-core:2.0.0") { optional = true }
         compile("org.codehaus.jsr166-mirror:jsr166:1.7.0") { provided = true }
         testCompile "commons-dbcp:commons-dbcp:1.2.2"
-        testCompile("javax.xml:jaxrpc-api:1.1") { optional = true }
+        testCompile("javax.xml:jaxrpc-api:1.1")
         testCompile("javax.inject:com.springsource.org.atinject.tck:1.0.0")
     }
 }
@@ -232,8 +231,8 @@ project('spring-tx') {
     description = 'Spring Transaction'
     dependencies {
         compile project(":spring-context")
-        compile("com.ibm.websphere:com.springsource.com.ibm.websphere.uow:6.0.2.17") { provided = true }
-        compile("javax.resource:com.springsource.javax.resource:1.5.0") { optional = true }
+        compile("com.ibm.websphere:uow:6.0.2.17") { provided = true }
+        compile("javax.resource:connector-api:1.5") { optional = true }
         compile "aopalliance:aopalliance:1.0" // NOT optional, as opposed to in :spring-aop
         testCompile "org.easymock:easymockclassextension:2.3"
     }
@@ -275,8 +274,8 @@ project('spring-jdbc') {
         compile("c3p0:c3p0:0.9.1.2") { optional = true }
         compile("hsqldb:hsqldb:1.8.0.7") { optional = true }
         compile("com.h2database:h2:1.0.71") { optional = true }
-        compile("org.apache.derby:com.springsource.org.apache.derby:10.5.1000001.764942") { optional = true }
-        compile("org.apache.derby:com.springsource.org.apache.derby.client:10.5.1000001.764942") { optional = true }
+        compile("org.apache.derby:derby:10.5.3.0_1") { optional = true }
+        compile("org.apache.derby:derbyclient:10.5.3.0_1") { optional = true }
     }
 }
 
@@ -284,7 +283,7 @@ project('spring-context-support') {
     description = 'Spring Context Support'
     dependencies {
         compile project(":spring-jdbc")
-        compile("com.bea.commonj:com.springsource.commonj:1.1.0") { optional = true }
+        compile("org.codehaus.fabric3.api:commonj:1.1.0") { optional = true }
         compile("opensymphony:quartz:1.6.2") { optional = true }
         compile("javax.mail:mail:1.4") { optional = true }
         compile("velocity:velocity:1.5") { optional = true }
@@ -308,10 +307,10 @@ project('spring-web') {
     description = 'Spring Web'
     dependencies {
         compile project(":spring-oxm")
-        compile("com.caucho:com.springsource.com.caucho:3.2.1") { optional = true }
+        compile("com.caucho:hessian:3.2.1") { optional = true } // NOTE: unavailable in maven central
         compile("rome:rome:1.0") { optional = true }
         compile("javax.el:el-api:1.0") { optional = true } // as opposed to 'provided' in spring-core
-        compile("javax.faces:com.springsource.javax.faces:1.2.0.08") { optional = true }
+        compile("javax.faces:jsf-api:1.2_08") { optional = true }
         compile("javax.portlet:portlet-api:2.0") { provided = true }
         compile("org.apache.tomcat:tomcat-servlet-api:7.0.8") { provided = true } // servlet-api 3.0
         compile("javax.servlet.jsp:jsp-api:2.1") { provided = true }
@@ -326,7 +325,6 @@ project('spring-web') {
         compile("org.mortbay.jetty:jetty:6.1.9") { optional = true
             exclude group: 'org.mortbay.jetty', module: 'servlet-api-2.5'
         }
-        compile("com.sun.syndication:com.springsource.com.sun.syndication:1.0.0") { optional = true }
         testCompile "xmlunit:xmlunit:1.2"
     }
 
@@ -337,28 +335,28 @@ project('spring-web') {
 project('spring-orm') {
     description = 'Spring Object/Relational Mapping'
     dependencies {
-        compile("org.hibernate:com.springsource.org.hibernate:3.3.1.GA") { optional = true } // for orm.hibernate3
+        // compiling against both hibernate 3 and 4 here in order to support
+        // our respective orm.hibernate3 and orm.hibernate4 packages
+        compile("org.hibernate:com.springsource.org.hibernate:3.3.1.GA") { optional = true }
+        compile("org.hibernate:hibernate-core:4.0.0.CR7") { optional = true }
         compile("org.hibernate:hibernate-cglib-repack:2.1_3") { optional = true }
         compile("org.hibernate:hibernate-annotations:3.4.0.GA") { optional = true }
-        //compile("javax.persistence:persistence-api:1.0") { optional = true }
         compile("org.hibernate:hibernate-entitymanager:4.0.0.CR4") { optional = true }
         compile("org.apache.openjpa:openjpa:1.1.0") { optional = true }
-        compile("org.eclipse.persistence:com.springsource.org.eclipse.persistence:1.0.1") { optional = true }
-        compile("org.eclipse.persistence:com.springsource.org.eclipse.persistence.jpa:1.0.1") { optional = true }
-        compile("com.oracle.toplink.essentials:com.springsource.oracle.toplink.essentials:2.0.0.b41-beta2") { optional = true }
+        compile("org.eclipse.persistence:org.eclipse.persistence.core:1.0.1") { optional = true }
+        compile("org.eclipse.persistence:org.eclipse.persistence.jpa:1.0.1") { optional = true }
+        compile("toplink.essentials:toplink-essentials:2.0-41b") { optional = true }
         compile("javax.jdo:jdo-api:3.0") { optional = true }
         compile("org.apache.ibatis:ibatis-sqlmap:2.3.4.726") { optional = true }
         testCompile "javax.servlet:servlet-api:2.5"
         testCompile "org.slf4j:slf4j-jcl:1.5.3"
         testCompile "commons-dbcp:commons-dbcp:1.2.2"
-        testCompile "org.eclipse.persistence:com.springsource.org.eclipse.persistence.asm:1.0.1"
-        testCompile "org.eclipse.persistence:com.springsource.org.eclipse.persistence.antlr:1.0.1"
-        testCompile "org.hibernate:com.springsource.org.hibernate:3.3.1.GA" // for orm.hibernate3
+        testCompile "org.eclipse.persistence:org.eclipse.persistence.asm:1.0.1"
+        testCompile "org.eclipse.persistence:org.eclipse.persistence.antlr:1.0.1"
         compile(project(":spring-web")) {
             exclude group: 'javax.persistence', module: 'persistence-api'
         }
         compile project(":spring-jdbc")
-        compile("org.hibernate:hibernate-core:4.0.0.CR7") { optional = true }
     }
 }
 
@@ -417,7 +415,7 @@ project('spring-test') {
         compile project(":spring-webmvc-portlet")
         compile("javax.activation:activation:1.0") { provided = true }
         compile("org.testng:testng:5.10:jdk15") { optional = true }
-        compile("org.junit:com.springsource.org.junit:4.9.0") { optional = true }
+        compile("junit:junit:4.9") { optional = true }
         compile("javax.servlet:servlet-api:2.5") { provided = true }
         testCompile "org.slf4j:slf4j-jcl:1.5.3"
     }
