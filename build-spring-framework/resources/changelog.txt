@@ -23,7 +23,10 @@ Changes in version 3.1.1 (2012-02-06)
 * corrected fix for QuartzJobBean to work with Quartz 2.0/2.1
 * JMS CachingConnectionFactory never caches consumers for temporary queues and topics
 * JMS SimpleMessageListenerContainer silently falls back to lazy registration of consumers
-
+* fix regresion in UriUtils
+* allow adding flash attributes in methods with a ModelAndView return value
+* preserve quotes in MediaType parameters
+* make flash attributes available in the model of ParameterizableViewController and UrlFilenameViewController
 
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------
