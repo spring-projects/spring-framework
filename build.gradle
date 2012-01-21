@@ -432,13 +432,17 @@ project('spring-struts') {
 
 project('spring-aspects') {
     description = 'Spring Aspects'
-    apply from: 'aspectJ.gradle'
+    apply from: 'aspects.gradle'
     dependencies {
         compile project(":spring-orm")
         aspects project(":spring-orm")
         ajc "org.aspectj:aspectjtools:1.6.8"
         compile "org.aspectj:aspectjrt:1.6.8"
         testCompile project(":spring-test")
+    }
+    eclipse.project {
+        natures += 'org.eclipse.ajdt.ui.ajnature'
+        buildCommand 'org.eclipse.ajdt.core.ajbuilder'
     }
 }
 
