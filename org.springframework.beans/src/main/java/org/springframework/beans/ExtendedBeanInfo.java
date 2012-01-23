@@ -170,8 +170,8 @@ class ExtendedBeanInfo implements BeanInfo {
 						continue ALL_METHODS;
 					}
 				}
-				if (method == pd.getReadMethod()
-						|| (pd instanceof IndexedPropertyDescriptor && method == ((IndexedPropertyDescriptor) pd).getIndexedReadMethod())) {
+				if (method.equals(pd.getReadMethod())
+						|| (pd instanceof IndexedPropertyDescriptor && method.equals((IndexedPropertyDescriptor) pd).getIndexedReadMethod()))) {
 					// yes -> copy it, including corresponding setter method (if any -- may be null)
 					if (pd instanceof IndexedPropertyDescriptor) {
 						this.addOrUpdatePropertyDescriptor(pd, pd.getName(), pd.getReadMethod(), pd.getWriteMethod(), ((IndexedPropertyDescriptor)pd).getIndexedReadMethod(), ((IndexedPropertyDescriptor)pd).getIndexedWriteMethod());
