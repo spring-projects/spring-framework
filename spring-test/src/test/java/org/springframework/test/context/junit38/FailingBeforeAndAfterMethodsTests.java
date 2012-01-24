@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@SuppressWarnings("deprecation")
 	@TestExecutionListeners(listeners = AlwaysFailingBeforeTestMethodTestExecutionListener.class, inheritListeners = false)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends AbstractJUnit38SpringContextTests {
@@ -113,7 +113,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@SuppressWarnings("deprecation")
 	@TestExecutionListeners(listeners = AlwaysFailingAfterTestMethodTestExecutionListener.class, inheritListeners = false)
 	public static class AlwaysFailingAfterTestMethodTestCase extends AbstractJUnit38SpringContextTests {
@@ -122,7 +122,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@SuppressWarnings("deprecation")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingBeforeTransactionalTestCase extends AbstractTransactionalJUnit38SpringContextTests {
@@ -136,7 +136,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@SuppressWarnings("deprecation")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingAfterTransactionalTestCase extends AbstractTransactionalJUnit38SpringContextTests {

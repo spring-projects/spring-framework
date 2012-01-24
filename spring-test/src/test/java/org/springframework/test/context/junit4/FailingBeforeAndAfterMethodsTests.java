@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,32 +146,32 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@TestExecutionListeners(AlwaysFailingBeforeTestClassTestExecutionListener.class)
 	public static class AlwaysFailingBeforeTestClassTestCase extends BaseTestCase {
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@TestExecutionListeners(AlwaysFailingAfterTestClassTestExecutionListener.class)
 	public static class AlwaysFailingAfterTestClassTestCase extends BaseTestCase {
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@TestExecutionListeners(AlwaysFailingPrepareTestInstanceTestExecutionListener.class)
 	public static class AlwaysFailingPrepareTestInstanceTestCase extends BaseTestCase {
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@TestExecutionListeners(AlwaysFailingBeforeTestMethodTestExecutionListener.class)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@TestExecutionListeners(AlwaysFailingAfterTestMethodTestExecutionListener.class)
 	public static class AlwaysFailingAfterTestMethodTestCase extends BaseTestCase {
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingBeforeTransactionTestCase extends AbstractTransactionalJUnit4SpringContextTests {
 
@@ -185,7 +185,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore
+	@org.junit.Ignore // TODO SPR-8116
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingAfterTransactionTestCase extends AbstractTransactionalJUnit4SpringContextTests {
 

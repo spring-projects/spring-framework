@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,8 @@ public class RepeatedSpringRunnerTests {
 	 * href="http://jira.springframework.org/browse/SPR-6011"
 	 * target="_blank">SPR-6011</a>.
 	 */
-	@org.junit.Ignore // causing timeouts on cbeams' MBP
+	@org.junit.Ignore // TODO SPR-8116 causing timeouts on cbeams' (otherwise fast) MBP.
+	// Timeouts are 2x-4x their expected range. Something seems wrong indeed.
 	public static final class TimedRepeatedTestCase extends AbstractRepeatedTestCase {
 
 		@Test

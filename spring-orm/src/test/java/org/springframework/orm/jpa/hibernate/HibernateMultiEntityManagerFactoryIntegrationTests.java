@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrat
  *
  * @author Juergen Hoeller
  */
-@org.junit.Ignore // until we work out JPA 1 vs 2 classpath issues in .orm
+@org.junit.Ignore // TODO SPR-8116 work out JPA 1 vs 2 classpath issues in spring-orm
 public class HibernateMultiEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
 

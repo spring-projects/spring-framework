@@ -201,7 +201,6 @@ public class ReflectionTestUtilsTests {
 		}.runTest();
 	}
 
-	/* TODO uncomment and fix this compilation issue: https://gist.github.com/1177807
 	@Test
 	public void invokeMethodWithAutoboxingAndUnboxing() {
 		// IntelliJ IDEA 11 won't accept int assignment here
@@ -223,7 +222,6 @@ public class ReflectionTestUtilsTests {
 		Integer sum = invokeMethod(component, "add", new int[] { 1, 2, 3, 4 });
 		assertEquals("add(1,2,3,4)", 10, sum.intValue());
 	}
-	*/
 
 	@Test
 	public void invokeMethodsSimulatingLifecycleEvents() {

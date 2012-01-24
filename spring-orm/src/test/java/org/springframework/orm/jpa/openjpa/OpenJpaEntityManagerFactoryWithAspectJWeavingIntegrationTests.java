@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,12 @@ package org.springframework.orm.jpa.openjpa;
  *
  * @author Ramnivas Laddad
  */
-@org.junit.Ignore // TODO this test causes gradle to hang. uncomment and figure out why
+@org.junit.Ignore // TODO SPR-8116 this test causes gradle to hang.
+// when run independently e.g. `./gradlew :spring-orm:test -Dtest.single=OpenJpaEntity...`
+// it works fine. When run together with all other tests e.g. `./gradlew :spring-orm:test`
+// it hangs on the 'testCanSerializeProxies' test method. Note that this test DOES pass in
+// Eclipse, even when the entire 'spring-orm' module is run. Run gradle with '-i' to
+// get more details when reproducing the hanging test.
 public class OpenJpaEntityManagerFactoryWithAspectJWeavingIntegrationTests extends OpenJpaEntityManagerFactoryIntegrationTests {
 
 	protected String[] getConfigLocations() {

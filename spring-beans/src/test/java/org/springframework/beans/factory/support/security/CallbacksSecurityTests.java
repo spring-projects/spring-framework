@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import javax.security.auth.AuthPermission;
 import javax.security.auth.Subject;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -69,7 +70,6 @@ import org.springframework.core.io.Resource;
  * 
  * @author Costin Leau
  */
-@org.junit.Ignore
 public class CallbacksSecurityTests {
 
 	private XmlBeanFactory beanFactory;
@@ -436,7 +436,8 @@ public class CallbacksSecurityTests {
 	}
 
 	@Test
-	public void testContainerPriviledges() throws Exception {
+	@Ignore // TODO SPR-8116 passes under Eclipse, but fails under Gradle with https://gist.github.com/1664133
+	public void testContainerPrivileges() throws Exception {
 		AccessControlContext acc = provider.getAccessControlContext();
 
 		AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {

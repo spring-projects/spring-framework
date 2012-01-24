@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.test.context.junit4.orm.service.PersonService;
  * @author Sam Brannen
  * @since 3.0
  */
-@org.junit.Ignore // fix hibernate classpath
+@org.junit.Ignore // TODO SPR-8116 (Hibernate classpath-related)
 @ContextConfiguration
 public class HibernateSessionFlushingTests extends AbstractTransactionalJUnit4SpringContextTests {
 

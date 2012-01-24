@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,8 @@ public class TimedSpringRunnerTests {
 	}
 
 
-	@org.junit.Ignore // causing timeouts on cbeams' MBP
+	@org.junit.Ignore // TODO SPR-8116 causing timeouts on cbeams' (otherwise fast) MBP.
+	// Timeouts are 2x-5x their expected range. Something seems wrong indeed.
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners( {})
 	public static final class TimedSpringRunnerTestCase {
