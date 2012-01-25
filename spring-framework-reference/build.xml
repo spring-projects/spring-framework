@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="spring-framework-reference" default="doc">
-
-	<property name="doc.type" value="reference"/>
-	<property name="docbook.build.dir" value="${basedir}"/>
-	<property file="${basedir}/../build.properties"/>
-	<import file="${basedir}/../spring-build/docbook/default.xml"/>
-
-</project>
