@@ -200,16 +200,16 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-=======================================================================   
+=======================================================================
 
-SPRING FRAMEWORK 3.1 SUBCOMPONENTS: 
+SPRING FRAMEWORK 3.1 SUBCOMPONENTS:
 
 Spring Framework 3.1 includes a number of subcomponents with
-separate copyright notices and license terms.  The product that 
-includes this file does not necessarily use all the open source 
+separate copyright notices and license terms.  The product that
+includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
 code for these subcomponents is subject to the terms and
-conditions of the following licenses. 
+conditions of the following licenses.
 
 >>> asm-2.2.3:
 
@@ -243,19 +243,27 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 THE POSSIBILITY OF SUCH DAMAGE.
 
-Copyright (c) 1999-2009, OW2 Consortium <http://www.ow2.org/>	
-		
-=======================================================================   
+Copyright (c) 1999-2009, OW2 Consortium <http://www.ow2.org/>
 
-To the extent any open source subcomponents are licensed under the EPL and/or other 
-similar licenses that require the source code and/or modifications to 
-source code to be made available (as would be noted above), you may obtain a 
-copy of the source code corresponding to the binaries for such open source 
-components and modifications thereto, if any, (the "Source Files"), by 
-downloading the Source Files from http://www.springsource.org/download, 
-or by sending a request, with your name and address to: VMware, Inc., 3401 Hillview 
-Avenue, Palo Alto, CA 94304, United States of America or email info@vmware.com.  All 
-such requests should clearly specify:  OPEN SOURCE FILES REQUEST, Attention General 
-Counsel.  VMware shall mail a copy of the Source Files to you on a CD or equivalent 
-physical medium.  This offer to obtain a copy of the Source Files is valid for three 
-years from the date you acquired this Software product.
+=======================================================================
+
+To the extent any open source subcomponents are licensed under the EPL and/or
+other similar licenses that require the source code and/or modifications to
+source code to be made available (as would be noted above), you may obtain a
+copy of the source code corresponding to the binaries for such open source
+components and modifications thereto, if any, (the "Source Files"), by
+downloading the Source Files from http://www.springsource.org/download, or by
+sending a request, with your name and address to:
+
+    VMware, Inc., 3401 Hillview Avenue
+    Palo Alto, CA 94304
+    United States of America
+
+or email info@vmware.com.  All such requests should clearly specify:
+
+    OPEN SOURCE FILES REQUEST
+    Attention General Counsel
+
+VMware shall mail a copy of the Source Files to you on a CD or equivalent
+physical medium. This offer to obtain a copy of the Source Files is valid for
+three years from the date you acquired this Software product.

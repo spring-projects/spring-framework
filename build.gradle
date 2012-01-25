@@ -64,6 +64,15 @@ configure(rootProject) {
 configure(subprojects) {
     apply plugin: 'maven'
     group = 'org.springframework'
+
+    jar {
+        from("${rootProject.projectDir}/src/dist") {
+            include "license.txt"
+            include "notice.txt"
+            into "META-INF"
+            expand(copyright: new Date().format('yyyy'), version: project.version)
+        }
+    }
 }
 
 configure(subprojects - project(":spring-asm")) {
