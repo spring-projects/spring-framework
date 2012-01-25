@@ -48,6 +48,9 @@ configure(subprojects) { subproject ->
     apply from: "${rootProject.projectDir}/publish-maven.gradle"
 
     jar {
+        manifest.attributes['Implementation-Title'] = subproject.name
+        manifest.attributes['Implementation-Version'] = subproject.version
+
         from("${rootProject.projectDir}/src/dist") {
             include "license.txt"
             include "notice.txt"
