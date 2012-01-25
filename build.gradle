@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        maven { url 'https://repo.springsource.org/plugins-snapshot' }
+    }
+    dependencies {
+        classpath 'org.springframework.build.gradle:docbook-reference-plugin:0.1.2-SNAPSHOT'
+    }
+}
+
 configure(allprojects) {
     apply plugin: 'java'
     apply plugin: 'eclipse'
@@ -34,6 +43,12 @@ configure(allprojects) {
 
 configure(rootProject) {
     description = 'Spring Framework'
+
+    apply plugin: 'docbook-reference'
+
+    reference {
+        sourceDir = file('src/reference/docbook')
+    }
 
     // don't publish the default jar for the root project
     configurations.archives.artifacts.clear()
