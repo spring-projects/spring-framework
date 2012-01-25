@@ -4,7 +4,6 @@ buildscript {
     }
     dependencies {
         classpath 'org.springframework.build.gradle:docbook-reference-plugin:0.1.2-SNAPSHOT'
-        classpath 'org.springframework.build.gradle:bundlor-plugin:0.1.2-SNAPSHOT'
     }
 }
 
@@ -29,7 +28,6 @@ configure(allprojects) {
     repositories {
         maven { url "http://repo.springsource.org/libs-release" }
         maven { url "http://repo.springsource.org/ebr-maven-external" }
-        maven { url "http://repo.springsource.org/plugins-release" }
     }
 
     dependencies {
@@ -80,16 +78,6 @@ configure(subprojects) { subproject ->
         archives javadocJar
     }
 }
-
-configure(subprojects - project(":spring-aspects")) {
-    apply plugin: 'bundlor'
-    bundlor {
-        manifestTemplate = new File("${projectDir}/template.mf").text
-            .replace('${spring.osgi.range}', /"[$version, $version]"/)
-            .replace('${aj.osgi.range}', '"[1.6.8, 2.0.0)"')
-    }
-}
-
 
 
 project("spring-asm") {

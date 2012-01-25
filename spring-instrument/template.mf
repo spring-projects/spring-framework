@@ -1,5 +1,0 @@
-Bundle-SymbolicName: org.springframework.instrument
-Bundle-Name: Spring Instrument
-Bundle-Vendor: SpringSource
-Bundle-ManifestVersion: 2
-Premain-Class: org.springframework.instrument.InstrumentationSavingAgent
