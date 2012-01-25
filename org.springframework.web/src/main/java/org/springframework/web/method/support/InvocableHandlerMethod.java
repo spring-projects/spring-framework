@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,16 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.HandlerMethod;
 
 /**
- * Provides a method for invoking the handler method for a given request after resolving its method argument 
+ * Provides a method for invoking the handler method for a given request after resolving its method argument
  * values through registered {@link HandlerMethodArgumentResolver}s.
- * 
- * <p>Argument resolution often requires a {@link WebDataBinder} for data binding or for type conversion. 
+ *
+ * <p>Argument resolution often requires a {@link WebDataBinder} for data binding or for type conversion.
  * Use the {@link #setDataBinderFactory(WebDataBinderFactory)} property to supply a binder factory to pass to
- * argument resolvers. 
- * 
- * <p>Use {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)} to customize 
+ * argument resolvers.
+ *
+ * <p>Use {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)} to customize
  * the list of argument resolvers.
- *  
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -99,20 +99,20 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Invoke the method after resolving its argument values in the context of the given request. <p>Argument 
-	 * values are commonly resolved through {@link HandlerMethodArgumentResolver}s. The {@code provideArgs} 
-	 * parameter however may supply argument values to be used directly, i.e. without argument resolution. 
-	 * Examples of provided argument values include a {@link WebDataBinder}, a {@link SessionStatus}, or 
+	 * Invoke the method after resolving its argument values in the context of the given request. <p>Argument
+	 * values are commonly resolved through {@link HandlerMethodArgumentResolver}s. The {@code provideArgs}
+	 * parameter however may supply argument values to be used directly, i.e. without argument resolution.
+	 * Examples of provided argument values include a {@link WebDataBinder}, a {@link SessionStatus}, or
 	 * a thrown exception instance. Provided argument values are checked before argument resolvers.
-	 * 
+	 *
 	 * @param request the current request
 	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
 	 * @param providedArgs argument values to try to use without view resolution
 	 * @return the raw value returned by the invoked method
-	 * @exception Exception raised if no suitable argument resolver can be found, or the method raised an exception 
+	 * @exception Exception raised if no suitable argument resolver can be found, or the method raised an exception
 	 */
-	public final Object invokeForRequest(NativeWebRequest request, 
-										 ModelAndViewContainer mavContainer, 
+	public final Object invokeForRequest(NativeWebRequest request,
+										 ModelAndViewContainer mavContainer,
 										 Object... providedArgs) throws Exception {
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
 
@@ -135,9 +135,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Get the method argument values for the current request.
 	 */
-	private Object[] getMethodArgumentValues(NativeWebRequest request, 
-											 ModelAndViewContainer mavContainer, 
-											 Object... providedArgs) throws Exception {
+	private Object[] getMethodArgumentValues(
+			NativeWebRequest request, ModelAndViewContainer mavContainer,
+			Object... providedArgs) throws Exception {
+
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
@@ -187,7 +188,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Attempt to resolve a method parameter from the list of provided argument values.
 	 */
@@ -202,7 +203,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Invoke the handler method with the given argument values.
 	 */
@@ -215,7 +216,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			String msg = getInvocationErrorMessage(e.getMessage(), args);
 			throw new IllegalArgumentException(msg, e);
 		}
-		catch (InvocationTargetException e) { 
+		catch (InvocationTargetException e) {
 			// Unwrap for HandlerExceptionResolvers ...
 			Throwable targetException = e.getTargetException();
 			if (targetException instanceof RuntimeException) {
@@ -233,7 +234,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 	}
-	
+
 	private String getInvocationErrorMessage(String message, Object[] resolvedArgs) {
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(message));
 		sb.append("Resolved arguments: \n");

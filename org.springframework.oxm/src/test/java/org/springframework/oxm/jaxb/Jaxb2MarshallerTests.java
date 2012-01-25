@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,6 +277,13 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.marshal(object, new StreamResult(writer), mimeContainer);
 		verify(mimeContainer);
 		assertTrue("No XML written", writer.toString().length() > 0);
+	}
+
+	@Test
+	public void supportsPackagesToScan() throws Exception {
+		marshaller = new Jaxb2Marshaller();
+		marshaller.setPackagesToScan(new String[] {CONTEXT_PATH});
+		marshaller.afterPropertiesSet();
 	}
 
 	@XmlRootElement

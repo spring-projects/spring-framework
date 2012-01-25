@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Resolves {@link Errors} method arguments.
- * 
+ *
  * <p>An {@code Errors} method argument is expected to appear immediately after
  * the model attribute in the method signature. It is resolved by expecting the
  * last two attributes added to the model to be the model attribute and its
- * {@link BindingResult}. 
- * 
+ * {@link BindingResult}.
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -45,10 +45,11 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 		return Errors.class.isAssignableFrom(paramType);
 	}
 
-	public Object resolveArgument(MethodParameter parameter, 
-								  ModelAndViewContainer mavContainer, 
-								  NativeWebRequest webRequest,
-								  WebDataBinderFactory binderFactory) throws Exception {
+	public Object resolveArgument(
+			MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+			throws Exception {
+
 		ModelMap model = mavContainer.getModel();
 		if (model.size() > 0) {
 			int lastIndex = model.size()-1;

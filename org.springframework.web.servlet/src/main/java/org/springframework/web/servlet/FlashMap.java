@@ -63,6 +63,8 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	/**
 	 * Create a new instance with an id uniquely identifying the creator of 
 	 * this FlashMap.
+	 * @param createdBy identifies the FlashMapManager instance that created
+	 * 	and will manage this FlashMap instance (e.g. via a hashCode)  
 	 */
 	public FlashMap(int createdBy) {
 		this.createdBy = createdBy;

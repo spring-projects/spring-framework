@@ -22,10 +22,12 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
@@ -47,24 +49,46 @@ public class DefaultFlashMapManager implements FlashMapManager {
 
 	private static final Log logger = LogFactory.getLog(DefaultFlashMapManager.class);
 	
-	private int flashTimeout = 180;
+	private int flashMapTimeout = 180;
 
-	private final UrlPathHelper urlPathHelper = new UrlPathHelper();
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	/**
 	 * Set the amount of time in seconds after a {@link FlashMap} is saved 
 	 * (at request completion) and before it expires. 
 	 * <p>The default value is 180 seconds.
 	 */
-	public void setFlashMapTimeout(int flashTimeout) {
-		this.flashTimeout = flashTimeout;
+	public void setFlashMapTimeout(int flashMapTimeout) {
+		this.flashMapTimeout = flashMapTimeout;
+	}
+	
+	/**
+	 * Return the amount of time in seconds before a FlashMap expires.
+	 */
+	public int getFlashMapTimeout() {
+		return flashMapTimeout;
+	}
+
+	/**
+	 * Set the UrlPathHelper to use to obtain the request URI.
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
+		this.urlPathHelper = urlPathHelper;
+	}
+
+	/**
+	 * Return the UrlPathHelper implementation for the request URI.
+	 */
+	public UrlPathHelper getUrlPathHelper() {
+		return urlPathHelper;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * <p>An HTTP session is never created by this method.
 	 */
-	public void requestStarted(HttpServletRequest request) {
+	public final void requestStarted(HttpServletRequest request, HttpServletResponse response) {
 		if (request.getAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE) != null) {
 			return;
 		}
@@ -164,9 +188,9 @@ public class DefaultFlashMapManager implements FlashMapManager {
 	}
 	
 	/**
-	 * Iterate all flash maps and remove expired ones.
+	 * Check and remove expired FlashMaps instances.
 	 */
-	private void removeExpiredFlashMaps(HttpServletRequest request) {
+	protected void removeExpiredFlashMaps(HttpServletRequest request) {
 		List<FlashMap> allMaps = retrieveFlashMaps(request, false);
 		if (CollectionUtils.isEmpty(allMaps)) {
 			return;
@@ -189,7 +213,7 @@ public class DefaultFlashMapManager implements FlashMapManager {
 	 * {@inheritDoc}
 	 * <p>An HTTP session is never created if the "output" FlashMap is empty.
 	 */
-	public void requestCompleted(HttpServletRequest request) {
+	public void requestCompleted(HttpServletRequest request, HttpServletResponse response) {
 		FlashMap flashMap = (FlashMap) request.getAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE);
 		if (flashMap == null) {
 			throw new IllegalStateException("requestCompleted called but \"output\" FlashMap was never created");
@@ -198,24 +222,35 @@ public class DefaultFlashMapManager implements FlashMapManager {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Saving FlashMap=" + flashMap);
 			}
-			onSaveFlashMap(flashMap, request);
-			retrieveFlashMaps(request, true).add(flashMap);
+			onSaveFlashMap(flashMap, request, response);
+			saveFlashMap(flashMap, request, response);
 		}
 	}
 	
 	/**
-	 * Update a FlashMap before it is stored in the HTTP Session.
+	 * Update a FlashMap before it is stored in the underlying storage.
 	 * <p>The default implementation starts the expiration period and ensures the
 	 * target request path is decoded and normalized if it is relative. 
 	 * @param flashMap the flash map to be saved
 	 * @param request the current request
+	 * @param response the current response
 	 */
-	protected void onSaveFlashMap(FlashMap flashMap, HttpServletRequest request) {
+	protected void onSaveFlashMap(FlashMap flashMap, HttpServletRequest request, HttpServletResponse response) {
 		String targetPath = flashMap.getTargetRequestPath();
 		flashMap.setTargetRequestPath(decodeAndNormalizePath(targetPath, request));
-		flashMap.startExpirationPeriod(this.flashTimeout);
+		flashMap.startExpirationPeriod(this.flashMapTimeout);
 	}
 
+	/**
+	 * Save the FlashMap in the underlying storage.
+	 * @param flashMap the FlashMap to save
+	 * @param request the current request
+	 * @param response the current response
+	 */
+	protected void saveFlashMap(FlashMap flashMap, HttpServletRequest request, HttpServletResponse response) {
+		retrieveFlashMaps(request, true).add(flashMap);
+	}
+	
 	private String decodeAndNormalizePath(String path, HttpServletRequest request) {
 		if (path != null) {
 			path = this.urlPathHelper.decodeRequestString(request, path);

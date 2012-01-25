@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,20 +47,20 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		return ServletResponse.class.isAssignableFrom(paramType)
-				|| OutputStream.class.isAssignableFrom(paramType) 
+				|| OutputStream.class.isAssignableFrom(paramType)
 				|| Writer.class.isAssignableFrom(paramType);
 	}
 
 	/**
-	 * Set {@link ModelAndViewContainer#setRequestHandled(boolean)} to 
-	 * {@code false} to indicate that the method signature provides access 
-	 * to the response. If subsequently the underlying method returns 
+	 * Set {@link ModelAndViewContainer#setRequestHandled(boolean)} to
+	 * {@code false} to indicate that the method signature provides access
+	 * to the response. If subsequently the underlying method returns
 	 * {@code null}, the request is considered directly handled.
 	 */
-	public Object resolveArgument(MethodParameter parameter,
-								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest, 
-								  WebDataBinderFactory binderFactory) throws IOException {
+	public Object resolveArgument(
+			MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
+			throws IOException {
 		
 		mavContainer.setRequestHandled(true);
 

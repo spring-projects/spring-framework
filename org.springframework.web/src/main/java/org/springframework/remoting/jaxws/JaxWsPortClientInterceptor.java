@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -407,7 +407,13 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 */
 	protected Object getPortStub(Service service, QName portQName) {
 		if (this.webServiceFeatures != null) {
-			return new FeaturePortProvider().getPortStub(service, portQName, this.webServiceFeatures);
+			try {
+				return new FeaturePortProvider().getPortStub(service, portQName, this.webServiceFeatures);
+			}
+			catch (LinkageError ex) {
+				throw new IllegalStateException(
+						"Specifying the 'webServiceFeatures' property requires JAX-WS 2.1 or higher at runtime", ex);
+			}
 		}
 		else {
 			return (portQName != null ? service.getPort(portQName, getServiceInterface()) :
@@ -526,6 +532,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 			throw new RemoteProxyFailureException("Invocation of stub method failed: " + method, ex);
 		}
 	}
+
 
 	/**
 	 * Inner class in order to avoid a hard-coded JAX-WS 2.1 dependency.

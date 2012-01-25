@@ -18,6 +18,8 @@ package org.springframework.web.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
 
@@ -38,38 +40,107 @@ import org.springframework.util.Assert;
  */
 public abstract class UriUtils {
 
+	private static final String SCHEME_PATTERN = "([^:/?#]+):";
+
+	private static final String HTTP_PATTERN = "(http|https):";
+
+	private static final String USERINFO_PATTERN = "([^@/]*)";
+
+	private static final String HOST_PATTERN = "([^/?#:]*)";
+
+	private static final String PORT_PATTERN = "(\\d*)";
+
+	private static final String PATH_PATTERN = "([^?#]*)";
+
+	private static final String QUERY_PATTERN = "([^#]*)";
+
+	private static final String LAST_PATTERN = "(.*)";
+
+	// Regex patterns that matches URIs. See RFC 3986, appendix B
+	private static final Pattern URI_PATTERN = Pattern.compile(
+			"^(" + SCHEME_PATTERN + ")?" + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN +
+					")?" + ")?" + PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
+
+	private static final Pattern HTTP_URL_PATTERN = Pattern.compile(
+			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
+					PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
 	// encoding
 
 	/**
 	 * Encodes the given source URI into an encoded String. All various URI components are
 	 * encoded according to their respective valid character sets.
+	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&" 
+	 * characters in query parameter names and query parameter values because they cannot 
+	 * be parsed in a reliable way. Instead use:
+	 * <pre>
+	 *  UriComponents uriComponents = UriComponentsBuilder.fromUri("/path?name={value}").buildAndExpand("a=b");
+	 *  String encodedUri = uriComponents.encode().toUriString();
+	 * </pre>
 	 * @param uri the URI to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded URI
 	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
+	 * @deprecated in favor of {@link UriComponentsBuilder}; see note about query param encoding
 	 */
 	public static String encodeUri(String uri, String encoding) throws UnsupportedEncodingException {
-        UriComponents uriComponents = UriComponentsBuilder.fromUriString(uri).build();
-        UriComponents encoded = uriComponents.encode(encoding);
-        return encoded.toUriString();
-    }
+		Assert.notNull(uri, "'uri' must not be null");
+		Assert.hasLength(encoding, "'encoding' must not be empty");
+		Matcher m = URI_PATTERN.matcher(uri);
+		if (m.matches()) {
+			String scheme = m.group(2);
+			String authority = m.group(3);
+			String userinfo = m.group(5);
+			String host = m.group(6);
+			String port = m.group(8);
+			String path = m.group(9);
+			String query = m.group(11);
+			String fragment = m.group(13);
+
+			return encodeUriComponents(scheme, authority, userinfo, host, port, path, query, fragment, encoding);
+		}
+		else {
+			throw new IllegalArgumentException("[" + uri + "] is not a valid URI");
+		}
+	}
 
 	/**
 	 * Encodes the given HTTP URI into an encoded String. All various URI components are
 	 * encoded according to their respective valid character sets.
 	 * <p><strong>Note</strong> that this method does not support fragments ({@code #}),
 	 * as these are not supposed to be sent to the server, but retained by the client.
+	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&" 
+	 * characters in query parameter names and query parameter values because they cannot 
+	 * be parsed in a reliable way. Instead use:
+	 * <pre>
+	 *  UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("/path?name={value}").buildAndExpand("a=b");
+	 *  String encodedUri = uriComponents.encode().toUriString();
+	 * </pre>
 	 * @param httpUrl the HTTP URL to be encoded
 	 * @param encoding the character encoding to encode to
 	 * @return the encoded URL
 	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
+	 * @deprecated in favor of {@link UriComponentsBuilder}; see note about query param encoding
 	 */
 	public static String encodeHttpUrl(String httpUrl, String encoding) throws UnsupportedEncodingException {
-        UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(httpUrl).build();
-        UriComponents encoded = uriComponents.encode(encoding);
-        return encoded.toUriString();
+		Assert.notNull(httpUrl, "'httpUrl' must not be null");
+		Assert.hasLength(encoding, "'encoding' must not be empty");
+		Matcher m = HTTP_URL_PATTERN.matcher(httpUrl);
+		if (m.matches()) {
+			String scheme = m.group(1);
+			String authority = m.group(2);
+			String userinfo = m.group(4);
+			String host = m.group(5);
+			String portString = m.group(7);
+			String path = m.group(8);
+			String query = m.group(10);
+
+			return encodeUriComponents(scheme, authority, userinfo, host, portString, path, query, null, encoding);
+		}
+		else {
+			throw new IllegalArgumentException("[" + httpUrl + "] is not a valid HTTP URL");
+		}
 	}
 
 	/**
@@ -87,20 +158,48 @@ public abstract class UriUtils {
 	 * @return the encoded URI
 	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
+	 * @deprecated in favor of {@link UriComponentsBuilder}
 	 */
 	public static String encodeUriComponents(String scheme, String authority, String userInfo,
 			String host, String port, String path, String query, String fragment, String encoding)
 			throws UnsupportedEncodingException {
 
-		int portAsInt = (port != null ? Integer.parseInt(port) : -1);
+        Assert.hasLength(encoding, "'encoding' must not be empty");
+        StringBuilder sb = new StringBuilder();
 
-		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		builder.scheme(scheme).userInfo(userInfo).host(host).port(portAsInt);
-		builder.path(path).query(query).fragment(fragment);
+        if (scheme != null) {
+                sb.append(encodeScheme(scheme, encoding));
+                sb.append(':');
+        }
 
-		UriComponents encoded = builder.build().encode(encoding);
+        if (authority != null) {
+                sb.append("//");
+                if (userInfo != null) {
+                        sb.append(encodeUserInfo(userInfo, encoding));
+                        sb.append('@');
+                }
+                if (host != null) {
+                        sb.append(encodeHost(host, encoding));
+                }
+                if (port != null) {
+                        sb.append(':');
+                        sb.append(encodePort(port, encoding));
+                }
+        }
 
-        return encoded.toUriString();
+        sb.append(encodePath(path, encoding));
+
+        if (query != null) {
+                sb.append('?');
+                sb.append(encodeQuery(query, encoding));
+        }
+
+        if (fragment != null) {
+                sb.append('#');
+                sb.append(encodeFragment(fragment, encoding));
+        }
+
+        return sb.toString();
 	}
 
 

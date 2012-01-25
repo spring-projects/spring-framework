@@ -20,8 +20,8 @@ Instructions on
 via Maven and other build systems are available via the project wiki.
 
 ## Documentation
-See the current [Javadoc](http://static.springsource.org/spring/docs/current/javadoc-api)
-and [Reference docs](http://static.springsource.org/spring/docs/current/spring-framework-reference).
+See the current [Javadoc](http://static.springsource.org/spring-framework/docs/current/api)
+and [Reference docs](http://static.springsource.org/spring-framework/docs/current/reference).
 
 ## Getting support
 Check out the [Spring forums](http://forum.springsource.org) and the

@@ -12,6 +12,7 @@ Import-Template:
  org.exolab.castor.*;version="[1.2.0, 2.0.0)";resolution:=optional,
  org.jibx.runtime.*;version="[1.1.5, 2.0.0)";resolution:=optional,
  org.springframework.beans.*;version=${spring.osgi.range},
+ org.springframework.context.*;version=${spring.osgi.range},
  org.springframework.core.*;version=${spring.osgi.range},
  org.springframework.util.*;version=${spring.osgi.range},
  org.w3c.dom.*;version="0",

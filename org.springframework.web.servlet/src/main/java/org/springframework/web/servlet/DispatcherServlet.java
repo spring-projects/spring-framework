@@ -815,7 +815,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		this.flashMapManager.requestStarted(request);
+		this.flashMapManager.requestStarted(request, response);
 
 		// Make framework objects available to handlers and view objects.
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
@@ -827,7 +827,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			doDispatch(request, response);
 		}
 		finally {
-			this.flashMapManager.requestCompleted(request);
+			this.flashMapManager.requestCompleted(request, response);
 			
 			// Restore the original attribute snapshot, in case of an include.
 			if (attributesSnapshot != null) {
