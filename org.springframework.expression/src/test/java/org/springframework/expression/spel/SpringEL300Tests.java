@@ -17,8 +17,10 @@
 package org.springframework.expression.spel;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -38,6 +40,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.MethodExecutor;
+import org.springframework.expression.MethodResolver;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
@@ -1190,6 +1193,38 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		public Map<String, String> getSecondContext() {return secondContext;}
 		public Map<String, String> getThirdContext() {return thirdContext;}
 		public Map<String, String> getFourthContext() {return fourthContext;}
+	}
+
+	/**
+	 * Test the ability to subclass the ReflectiveMethodResolver and change how it determines the set of methods for a type.
+	 */
+	@Test
+	public void testCustomStaticFunctions_SPR9038() {
+		try {
+			ExpressionParser parser = new SpelExpressionParser();
+			StandardEvaluationContext context = new StandardEvaluationContext();
+			List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
+			methodResolvers.add(new ReflectiveMethodResolver() {
+				@Override
+				protected Method[] getMethods(Class<?> type) {
+					try {
+						return new Method[] { Integer.class.getDeclaredMethod("parseInt", new Class[] { String.class,
+								Integer.TYPE }) };
+					} catch (NoSuchMethodException e1) {
+						return new Method[0];
+					}
+				}
+			});
+
+			context.setMethodResolvers(methodResolvers);
+			org.springframework.expression.Expression expression = parser.parseExpression("parseInt('-FF', 16)");
+
+			Integer result = expression.getValue(context, "", Integer.class);
+			assertEquals("Equal assertion failed: ", -255, result.intValue());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Unexpected exception: "+e.toString());
+		}
 	}
 
 }

@@ -87,7 +87,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
-			Method[] methods = type.getMethods();
+			Method[] methods = getMethods(type);
 			
 			// If a filter is registered for this type, call it
 			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
@@ -193,5 +193,14 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			this.filters.put(type,filter);
 		}
 	}
+	
+	/**
+	 * Return the methods on the type. Subclasses may override this to alter the returned set of methods.
+	 * 
+	 * @param type the class for which to return the methods
+	 */
+    protected Method[] getMethods(Class<?> type) {
+        return type.getMethods();
+    }
 
 }
