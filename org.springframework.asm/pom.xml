@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework</groupId>
   <artifactId>spring-asm</artifactId>
@@ -11,45 +13,50 @@
     <relativePath>../org.springframework.spring-parent</relativePath>
     <version>3.1.1.BUILD-SNAPSHOT</version>
   </parent>
-
-
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-	<executions>
-	  <execution>
-            <id>jarjar</id>	    
-	    <phase>process-classes</phase>
-	    <goals>
-	      <goal>run</goal> 
-	    </goals>            
-	    <configuration>
-	      <tasks>
-	        <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="maven.plugin.classpath" /> 
-		<jarjar jarfile="${project.build.directory}${file.separator}${project.build.finalName}-jarjar.jar">
- 		  <zipfileset src="${project.build.directory}/jarjar-staging/com.springsource.org.objectweb.asm.jar"/>
-		  <zipfileset src="${project.build.directory}/jarjar-staging/com.springsource.org.objectweb.asm.commons.jar"/>
-   		  <rule pattern="org.objectweb.asm.**" result="org.springframework.asm.@1"/>
-		</jarjar>
-		<unjar src="${project.build.directory}${file.separator}${project.build.finalName}-jarjar.jar"
-		       dest="${project.build.outputDirectory}">
-		  <patternset>
-		    <include name="**/*.class"/>
+        <executions>
+          <execution>
+            <id>jarjar</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpathref="maven.plugin.classpath" />
+                <jarjar jarfile="${project.build.directory}${file.separator}${project.build.finalName}-jarjar.jar">
+                  <zipfileset src="${project.build.directory}/jarjar-staging/com.springsource.org.objectweb.asm.jar"/>
+                  <zipfileset src="${project.build.directory}/jarjar-staging/com.springsource.org.objectweb.asm.commons.jar"/>
+                  <rule pattern="org.objectweb.asm.**" result="org.springframework.asm.@1"/>
+                </jarjar>
+                <unjar src="${project.build.directory}${file.separator}${project.build.finalName}-jarjar.jar"
+                    dest="${project.build.outputDirectory}">
+                  <patternset>
+                    <include name="**/*.class"/>
                     <exclude name="*"/>
                   </patternset>
-		</unjar>
-	      </tasks>
-	    </configuration>
-	  </execution>
-	</executions>
-	<dependencies>
-	  <dependency>
-	    <groupId>com.google.code</groupId> 
-	    <artifactId>jarjar</artifactId> 
-	    <version>1.0</version> 
-	  </dependency>
-	</dependencies>
+                </unjar>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.google.code</groupId>
+            <artifactId>jarjar</artifactId>
+            <version>1.0</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
