@@ -20,7 +20,7 @@
     <para>Spring also features integration classes for supporting scheduling
     with the <classname>Timer</classname>, part of the JDK since 1.3, and the
     Quartz Scheduler (<ulink
-    url="http://www.opensymphony.com/quartz/"></ulink>). Both of those
+    url="http://quartz-scheduler.org"></ulink>). Both of those
     schedulers are set up using a <interfacename>FactoryBean</interfacename>
     with optional references to <classname>Timer</classname> or
     <classname>Trigger</classname> instances, respectively. Furthermore, a
@@ -640,13 +640,13 @@ public class SampleBeanInititalizer {
   </section>
 
   <section id="scheduling-quartz">
-    <title>Using the OpenSymphony Quartz Scheduler</title>
+    <title>Using the Quartz Scheduler</title>
 
     <para>Quartz uses <classname>Trigger</classname>,
     <classname>Job</classname> and <classname>JobDetail</classname> objects to
     realize scheduling of all kinds of jobs. For the basic concepts behind
     Quartz, have a look at <ulink
-    url="http://www.opensymphony.com/quartz"></ulink>. For convenience
+    url="http://quartz-scheduler.org"></ulink>. For convenience
     purposes, Spring offers a couple of classes that simplify the usage of
     Quartz within Spring-based applications.</para>
 
