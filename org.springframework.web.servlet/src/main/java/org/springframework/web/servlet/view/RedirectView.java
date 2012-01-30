@@ -106,6 +106,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	private HttpStatus statusCode;
 
+	private boolean expandUriTemplateVariables = true;
 
 	/**
 	 * Constructor for use as a bean.
@@ -226,6 +227,18 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	}
 
 	/**
+	 * Whether to treat the redirect URL as a URI template.
+	 * Set this flag to <code>false</code> if the redirect URL contains open
+	 * and close curly braces "{", "}" and you don't want them interpreted
+	 * as URI variables.
+	 * <p>Defaults to <code>true</code>.
+	 * @param expandUriTemplateVariables
+	 */
+	public void setExpandUriTemplateVariables(boolean expandUriTemplateVariables) {
+		this.expandUriTemplateVariables = expandUriTemplateVariables;
+	}
+
+	/**
 	 * Returns "true" indicating this view performs a redirect.
 	 */
 	public boolean isRedirectView() {
@@ -288,7 +301,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
 		}
 
-		if (StringUtils.hasText(targetUrl)) {
+		if (this.expandUriTemplateVariables && StringUtils.hasText(targetUrl)) {
 			Map<String, String> variables = getCurrentRequestUriVariables(request);
 			targetUrl = replaceUriTemplateVariables(targetUrl.toString(), model, variables, enc);
 		}

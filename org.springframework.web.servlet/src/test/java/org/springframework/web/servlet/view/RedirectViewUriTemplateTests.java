@@ -121,5 +121,17 @@ public class RedirectViewUriTemplateTests {
 
 		assertEquals("", this.response.getRedirectedUrl());
 	}
+
+	// SPR-9016
+
+	@Test
+	public void dontApplyUriVariables() throws Exception {
+		String url = "/test#{'one','abc'}";
+		RedirectView redirectView = new RedirectView(url, true);
+		redirectView.setExpandUriTemplateVariables(false);
+		redirectView.renderMergedOutputModel(new ModelMap(), this.request, this.response);
+
+		assertEquals(url, this.response.getRedirectedUrl());
+	}
 	
 }

@@ -27,6 +27,7 @@ Changes in version 3.1.1 (2012-02-06)
 * allow adding flash attributes in methods with a ModelAndView return value
 * preserve quotes in MediaType parameters
 * make flash attributes available in the model of ParameterizableViewController and UrlFilenameViewController
+* add property to RedirectView to disable expanding URI variables in redirect URL
 
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------
