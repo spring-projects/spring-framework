@@ -18,12 +18,14 @@ package org.springframework.web.servlet.handler;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -237,18 +239,16 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #handleNoMatch(Set, String, HttpServletRequest)
 	 */
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
-		List<T> mappings = urlMap.get(lookupPath);
-		if (mappings == null) {
-			mappings = new ArrayList<T>(handlerMethods.keySet());
-		}
-			
 		List<Match> matches = new ArrayList<Match>();
-		
-		for (T mapping : mappings) {
-			T match = getMatchingMapping(mapping, request);
-			if (match != null) {
-				matches.add(new Match(match, handlerMethods.get(mapping)));
-			}
+
+		List<T> directPathMatches = this.urlMap.get(lookupPath);
+		if (directPathMatches != null) {
+			addMatchingMappings(directPathMatches, matches, request);
+		}
+
+		if (matches.isEmpty()) {
+			// No choice but to go through all mappings
+			addMatchingMappings(this.handlerMethods.keySet(), matches, request);
 		}
 
 		if (!matches.isEmpty()) {
@@ -276,6 +276,15 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 		else {
 			return handleNoMatch(handlerMethods.keySet(), lookupPath, request);
+		}
+	}
+
+	private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
+		for (T mapping : mappings) {
+			T match = getMatchingMapping(mapping, request);
+			if (match != null) {
+				matches.add(new Match(match, handlerMethods.get(mapping)));
+			}
 		}
 	}
 

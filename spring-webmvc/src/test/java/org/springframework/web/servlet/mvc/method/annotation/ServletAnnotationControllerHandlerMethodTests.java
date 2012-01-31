@@ -1182,6 +1182,19 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals("myParam-42", response.getContentAsString());
 	}
 
+	// SPR-9062
+
+	@Test
+	public void ambiguousPathAndRequestMethod() throws Exception {
+		initServletWithControllers(AmbiguousPathAndRequestMethodController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bug/EXISTING");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals("Pattern", response.getContentAsString());
+	}
+
 	@Test
 	public void bridgeMethods() throws Exception {
 		initServletWithControllers(TestControllerImpl.class);
@@ -2546,6 +2559,20 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		@RequestMapping(params = "myParam")
 		public void param(@RequestParam("myParam") int myParam, Writer writer) throws IOException {
 			writer.write("myParam-" + myParam);
+		}
+	}
+
+	@Controller
+	static class AmbiguousPathAndRequestMethodController {
+
+		@RequestMapping(value = "/bug/EXISTING", method = RequestMethod.POST)
+		public void directMatch(Writer writer) throws IOException {
+			writer.write("Direct");
+		}
+
+		@RequestMapping(value = "/bug/{type}", method = RequestMethod.GET)
+		public void patternMatch(Writer writer) throws IOException {
+			writer.write("Pattern");
 		}
 	}
 

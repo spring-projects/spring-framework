@@ -133,7 +133,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * fashion. The behavior when one does not want concurrent jobs to be
 	 * executed is realized through adding the {@link StatefulJob} interface.
 	 * More information on stateful versus stateless jobs can be found
-	 * <a href="http://www.opensymphony.com/quartz/tutorial.html#jobsMore">here</a>.
+	 * <a href="http://www.quartz-scheduler.org/documentation/quartz-2.1.x/tutorials/tutorial-lesson-03">here</a>.
 	 * <p>The default setting is to run jobs concurrently.
 	 */
 	public void setConcurrent(boolean concurrent) {
