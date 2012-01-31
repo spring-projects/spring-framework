@@ -1,0 +1,130 @@
+configurations {
+    castor
+    xjc
+    xmlbeans
+    jibx
+}
+dependencies {
+    castor "org.codehaus.castor:castor-anttasks:1.2"
+    castor "velocity:velocity:1.5"
+    xjc "com.sun.xml:com.springsource.com.sun.tools.xjc:2.1.7"
+    xmlbeans "org.apache.xmlbeans:com.springsource.org.apache.xmlbeans:2.4.0"
+    jibx "org.jibx:jibx-bind:1.1.5"
+    jibx "bcel:bcel:5.1"
+}
+
+genSourcesDir = "${buildDir}/generated-sources"
+flightSchema = "${projectDir}/src/test/resources/org/springframework/oxm/flight.xsd"
+
+task genCastor {
+    orderSchema = "${projectDir}/src/test/resources/org/springframework/oxm/order.xsd"
+    castorBuilderProperties = "${projectDir}/src/test/castor/castorbuilder.properties"
+
+    sourcesDir = "${genSourcesDir}/castor"
+    classesDir = "${buildDir}/classes/castor"
+
+    inputs.files flightSchema, orderSchema, castorBuilderProperties
+    outputs.dir classesDir
+
+    doLast() {
+        project.ant {
+            taskdef name: "castor", classname: "org.castor.anttask.CastorCodeGenTask",
+                    classpath: configurations.castor.asPath
+            mkdir(dir: sourcesDir)
+            mkdir(dir: classesDir)
+
+            castor(types: "j2", warnings: false, file: flightSchema, todir: sourcesDir,
+                    package: "org.springframework.oxm.castor", properties: castorBuilderProperties)
+
+            castor(types: "j2", warnings: false, file: orderSchema, todir: sourcesDir,
+                    package: "org.springframework.oxm.castor", properties: castorBuilderProperties)
+
+            javac(destdir: classesDir, source: 1.5, target: 1.5, debug: true,
+                    debugLevel: "lines,vars,source", classpath: configurations.castor.asPath) {
+                src(path: sourcesDir)
+                include(name: "**/*.java")
+                include(name: "*.java")
+            }
+
+            copy(todir: classesDir) {
+                fileset(dir: sourcesDir, erroronmissingdir: false) {
+                    exclude(name: "**/*.java")
+                }
+            }
+        }
+    }
+}
+
+task genJaxb {
+    sourcesDir = "${genSourcesDir}/jaxb"
+    classesDir = "${buildDir}/classes/jaxb"
+
+    inputs.files flightSchema
+    outputs.dir classesDir
+
+    doLast() {
+        project.ant {
+            taskdef name: "xjc", classname: "com.sun.tools.xjc.XJCTask",
+                    classpath: configurations.xjc.asPath
+            mkdir(dir: sourcesDir)
+            mkdir(dir: classesDir)
+
+            xjc(destdir: sourcesDir, schema: flightSchema,
+                    package: "org.springframework.oxm.jaxb.test") {
+                produces(dir: sourcesDir, includes: "**/*.java")
+            }
+
+            javac(destdir: classesDir, source: 1.5, target: 1.5, debug: true,
+                    debugLevel: "lines,vars,source",
+                    classpath: configurations.castor.asPath) {
+                src(path: sourcesDir)
+                include(name: "**/*.java")
+                include(name: "*.java")
+            }
+
+            copy(todir: classesDir) {
+                fileset(dir: sourcesDir, erroronmissingdir: false) {
+                    exclude(name: "**/*.java")
+                }
+            }
+        }
+    }
+}
+
+task genXmlbeans {
+    classesDir = "${buildDir}/classes/xmlbeans"
+
+    inputs.files flightSchema
+    outputs.dir classesDir
+
+    doLast() {
+        project.ant {
+            taskdef name: "xmlbeans",
+                    classname: "org.apache.xmlbeans.impl.tool.XMLBean",
+                    classpath: configurations.xmlbeans.asPath
+
+            xmlbeans(classgendir: classesDir, schema: flightSchema,
+                    compiler: "modern", verbose: "false",
+                    classpath: configurations.xmlbeans.asPath)
+        }
+    }
+}
+
+// add jibx binding to the normal test compilation process
+compileTestJava {
+    bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
+
+    doLast() {
+        project.ant {
+            taskdef(name: "jibx",
+                    classname: "org.jibx.binding.ant.CompileTask",
+                    classpath: configurations.jibx.asPath)
+
+            jibx(verbose: true, load: true, binding: bindingXml) {
+                classpathset(dir: sourceSets.test.output.classesDir) {
+                    include(name: "**/jibx/**/*")
+                }
+            }
+        }
+    }
+}

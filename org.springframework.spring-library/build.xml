@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="org.springframework.spring-library" xmlns:maven="antlib:org.apache.maven.artifact.ant">
-
-	<property file="${basedir}/../build.properties"/>
-	<import file="${basedir}/../build-spring-framework/package-library.xml"/>
-	<import file="${basedir}/../spring-build/library/default.xml"/>
-
-</project>

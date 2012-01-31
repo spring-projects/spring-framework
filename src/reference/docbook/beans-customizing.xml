@@ -1,0 +1,666 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xml:id="beans-factory-nature">
+  <title>Customizing the nature of a bean</title>
+
+  <section id="beans-factory-lifecycle">
+    <title>Lifecycle callbacks</title>
+
+    <!-- MLP Beverly to review: Old Text: The Spring Framework provides several callback interfaces to
+    change the behavior of your bean in the container; they include -->
+
+    <para>To interact with the container's management of the bean lifecycle, you
+      can implement the Spring <interfacename>InitializingBean</interfacename>
+      and <interfacename>DisposableBean</interfacename> interfaces. The
+      container calls <methodname>afterPropertiesSet()</methodname> for the
+      former and <methodname>destroy()</methodname> for the latter to allow the
+      bean to perform certain actions upon initialization and destruction of
+      your beans. You can also achieve the same integration with the container
+      without coupling your classes to Spring interfaces through the use of
+      init-method and destroy method object definition metadata.</para>
+
+    <para>Internally, the Spring Framework uses
+      <interfacename>BeanPostProcessor</interfacename> implementations to
+      process any callback interfaces it can find and call the appropriate
+      methods. If you need custom features or other lifecycle behavior Spring
+      does not offer out-of-the-box, you can implement a
+      <interfacename>BeanPostProcessor</interfacename> yourself. For more
+      information, see <xref linkend="beans-factory-extension"/>.</para>
+
+    <para>In addition to the initialization and destruction callbacks,
+      Spring-managed objects may also implement the
+      <interfacename>Lifecycle</interfacename> interface so that those objects
+      can participate in the startup and shutdown process as driven by the
+      container's own lifecycle.</para>
+
+    <para>The lifecycle callback interfaces are described in this
+      section.</para>
+
+    <section id="beans-factory-lifecycle-initializingbean">
+      <title>Initialization callbacks</title>
+
+      <para>The
+        <interfacename>org.springframework.beans.factory.InitializingBean</interfacename>
+        interface allows a bean to perform initialization work after all
+        necessary properties on the bean have been set by the container. The
+        <interfacename>InitializingBean</interfacename> interface specifies a
+        single method:</para>
+
+      <programlisting language="java">void afterPropertiesSet() throws Exception;</programlisting>
+
+      <para>It is recommended that you do not use the
+        <interfacename>InitializingBean</interfacename> interface because it
+        unnecessarily couples the code to Spring. Alternatively, specify a POJO
+        initialization method. In the case of XML-based configuration metadata,
+        you use the <literal>init-method</literal> attribute to specify the name
+        of the method that has a void no-argument signature. For example, the
+        following definition:</para>
+
+      <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/&gt;</programlisting>
+
+      <programlisting language="java">public class ExampleBean {
+
+  public void init() {
+      <lineannotation>// do some initialization work</lineannotation>
+  }
+}</programlisting>
+
+      <para>...is exactly the same as...</para>
+
+      <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;</programlisting>
+
+      <programlisting language="java">public class AnotherExampleBean implements InitializingBean {
+
+  public void afterPropertiesSet() {
+      <lineannotation>// do some initialization work</lineannotation>
+  }
+}</programlisting>
+
+      <para>... but does not couple the code to Spring.</para>
+    </section>
+
+    <section id="beans-factory-lifecycle-disposablebean">
+      <title>Destruction callbacks</title>
+
+      <para>Implementing the
+        <interfacename>org.springframework.beans.factory.DisposableBean</interfacename>
+        interface allows a bean to get a callback when the container containing
+        it is destroyed. The <interfacename>DisposableBean</interfacename>
+        interface specifies a single method:</para>
+
+      <programlisting language="java">void destroy() throws Exception;</programlisting>
+
+      <para>It is recommended that you do not use the
+        <interfacename>DisposableBean</interfacename> callback interface because
+        it unnecessarily couples the code to Spring. Alternatively, specify a
+        generic method that is supported by bean definitions. With XML-based
+        configuration metadata, you use the <literal>destroy-method</literal>
+        attribute on the <literal>&lt;bean/&gt;</literal>. For example, the
+        following definition:</para>
+
+      <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/&gt;</programlisting>
+
+      <programlisting language="java">public class ExampleBean {
+
+  public void cleanup() {
+      <lineannotation>// do some destruction work (like releasing pooled connections)</lineannotation>
+  }
+}</programlisting>
+
+      <para>...is exactly the same as...</para>
+
+      <programlisting language="xml">&lt;bean id="exampleInitBean" class="examples.AnotherExampleBean"/&gt;</programlisting>
+
+      <programlisting language="java">public class AnotherExampleBean implements DisposableBean {
+
+  public void destroy() {
+      <lineannotation>// do some destruction work (like releasing pooled connections)</lineannotation>
+  }
+}</programlisting>
+
+      <para>... but does not couple the code to Spring.</para>
+    </section>
+
+    <section id="beans-factory-lifecycle-default-init-destroy-methods">
+      <title>Default initialization and destroy methods</title>
+
+      <para>When you write initialization and destroy method callbacks that do
+        not use the Spring-specific
+        <interfacename>InitializingBean</interfacename> and
+        <interfacename>DisposableBean</interfacename> callback interfaces, you
+        typically write methods with names such as <literal>init()</literal>,
+        <literal>initialize()</literal>, <literal>dispose()</literal>, and so
+        on. Ideally, the names of such lifecycle callback methods are
+        standardized across a project so that all developers use the same method
+        names and ensure consistency.</para>
+
+      <para>You can configure the Spring container to <literal>look</literal>
+        for named initialization and destroy callback method names on
+        <emphasis>every</emphasis> bean. This means that you, as an application
+        developer, can write your application classes and use an initialization
+        callback called <literal>init()</literal>, without having to configure
+        an <literal>init-method="init"</literal> attribute with each bean
+        definition. The Spring IoC container calls that method when the bean is
+        created (and in accordance with the standard lifecycle callback contract
+        described previously). This feature also enforces a consistent naming
+        convention for initialization and destroy method callbacks.</para>
+
+      <para>Suppose that your initialization callback methods are named
+        <literal>init()</literal> and destroy callback methods are named
+        <literal>destroy()</literal>. Your class will resemble the class in the
+        following example.</para>
+
+      <programlisting language="java">public class DefaultBlogService implements BlogService {
+
+  private BlogDao blogDao;
+
+  public void setBlogDao(BlogDao blogDao) {
+      this.blogDao = blogDao;
+  }
+
+  <lineannotation>// this is (unsurprisingly) the initialization callback method</lineannotation>
+  public void init() {
+      if (this.blogDao == null) {
+          throw new IllegalStateException("The [blogDao] property must be set.");
+      }
+  }
+}</programlisting>
+
+      <programlisting language="xml">&lt;beans default-init-method="init"&gt;
+
+  &lt;bean id="blogService" class="com.foo.DefaultBlogService"&gt;
+      &lt;property name="blogDao" ref="blogDao" /&gt;
+  &lt;/bean&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <para>The presence of the <literal>default-init-method</literal> attribute
+        on the top-level <literal>&lt;beans/&gt;</literal> element attribute
+        causes the Spring IoC container to recognize a method called
+        <literal>init</literal> on beans as the initialization method callback.
+        When a bean is created and assembled, if the bean class has such a
+        method, it is invoked at the appropriate time.</para>
+
+      <para>You configure destroy method callbacks similarly (in XML, that is)
+        by using the <literal>default-destroy-method</literal> attribute on the
+        top-level <literal>&lt;beans/&gt;</literal> element.</para>
+
+      <para>Where existing bean classes already have callback methods that are
+        named at variance with the convention, you can override the default by
+        specifying (in XML, that is) the method name using the
+        <literal>init-method</literal> and <literal>destroy-method</literal>
+        attributes of the &lt;bean/&gt; itself.</para>
+
+      <para>The Spring container guarantees that a configured initialization
+        callback is called immediately after a bean is supplied with all
+        dependencies. Thus the initialization callback is called on the raw bean
+        reference, which means that AOP interceptors and so forth are not yet
+        applied to the bean. A target bean is fully created
+        <emphasis>first</emphasis>, <emphasis>then</emphasis> an AOP proxy (for
+        example) with its interceptor chain is applied. If the target bean and
+        the proxy are defined separately, your code can even interact with the
+        raw target bean, bypassing the proxy. Hence, it would be inconsistent to
+        apply the interceptors to the init method, because doing so would couple
+        the lifecycle of the target bean with its proxy/interceptors and leave
+        strange semantics when your code interacts directly to the raw target
+        bean.</para>
+    </section>
+
+    <section id="beans-factory-lifecycle-combined-effects">
+      <title>Combining lifecycle mechanisms</title>
+
+      <para>As of Spring 2.5, you have three options for controlling bean
+        lifecycle behavior: the <link
+        linkend="beans-factory-lifecycle-initializingbean"
+        ><interfacename>InitializingBean</interfacename></link> and <link
+        linkend="beans-factory-lifecycle-disposablebean"
+        ><interfacename>DisposableBean</interfacename></link> callback
+        interfaces; custom <literal>init()</literal> and
+        <literal>destroy()</literal> methods; and the <link
+        linkend="beans-postconstruct-and-predestroy-annotations"
+        ><interfacename>@PostConstruct</interfacename> and
+        <interfacename>@PreDestroy</interfacename> annotations</link>. You can
+        combine these mechanisms to control a given bean.</para>
+
+      <note>
+        <para>If multiple lifecycle mechanisms are configured for a bean, and
+          each mechanism is configured with a different method name, then each
+          configured method is executed in the order listed below. However, if
+          the same method name is configured - for example,
+          <literal>init()</literal> for an initialization method - for more than
+          one of these lifecycle mechanisms, that method is executed once, as
+          explained in the preceding section.</para>
+      </note>
+
+      <para>Multiple lifecycle mechanisms configured for the same bean, with
+        different initialization methods, are called as follows:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Methods annotated with
+            <interfacename>@PostConstruct</interfacename></para>
+        </listitem>
+
+        <listitem>
+          <para><literal>afterPropertiesSet()</literal> as defined by the
+            <interfacename>InitializingBean</interfacename> callback
+            interface</para>
+        </listitem>
+
+        <listitem>
+          <para>A custom configured <literal>init()</literal> method</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Destroy methods are called in the same order:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Methods annotated with
+            <interfacename>@PreDestroy</interfacename></para>
+        </listitem>
+
+        <listitem>
+          <para><literal>destroy()</literal> as defined by the
+            <interfacename>DisposableBean</interfacename> callback
+            interface</para>
+        </listitem>
+
+        <listitem>
+          <para>A custom configured <literal>destroy()</literal> method</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section id="beans-factory-lifecycle-processor">
+      <title>Startup and shutdown callbacks</title>
+
+      <para>The <interfacename>Lifecycle</interfacename> interface defines the
+        essential methods for any object that has its own lifecycle requirements
+        (e.g. starts and stops some background process):</para>
+
+      <programlisting language="java">public interface Lifecycle {
+
+  void start();
+
+  void stop();
+
+  boolean isRunning();
+
+}</programlisting>
+
+      <para>Any Spring-managed object may implement that interface. Then, when
+        the ApplicationContext itself starts and stops, it will cascade those
+        calls to all Lifecycle implementations defined within that context. It
+        does this by delegating to a
+        <interfacename>LifecycleProcessor</interfacename>:</para>
+
+      <programlisting language="java">public interface LifecycleProcessor extends Lifecycle {
+
+  void onRefresh();
+
+  void onClose();
+
+}</programlisting>
+
+      <para>Notice that the <interfacename>LifecycleProcessor</interfacename> is
+        itself an extension of the <interfacename>Lifecycle</interfacename>
+        interface. It also adds two other methods for reacting to the context
+        being refreshed and closed.</para>
+
+      <para>The order of startup and shutdown invocations can be important. If a
+        "depends-on" relationship exists between any two objects, the dependent
+        side will start <emphasis>after</emphasis> its dependency, and it will
+        stop <emphasis>before</emphasis> its dependency. However, at times the
+        direct dependencies are unknown. You may only know that objects of a
+        certain type should start prior to objects of another type. In those
+        cases, the <interfacename>SmartLifecycle</interfacename> interface
+        defines another option, namely the <methodname>getPhase()</methodname>
+        method as defined on its super-interface,
+        <interfacename>Phased</interfacename>.</para>
+
+      <programlisting language="java">public interface Phased {
+
+  int getPhase();
+
+}
+
+
+public interface SmartLifecycle extends Lifecycle, Phased {
+
+  boolean isAutoStartup();
+
+  void stop(Runnable callback);
+
+}</programlisting>
+
+      <para>When starting, the objects with the lowest phase start first, and
+        when stopping, the reverse order is followed. Therefore, an object that
+        implements <interfacename>SmartLifecycle</interfacename> and whose
+        getPhase() method returns <literal>Integer.MIN_VALUE</literal> would be
+        among the first to start and the last to stop. At the other end of the
+        spectrum, a phase value of <literal>Integer.MAX_VALUE</literal> would
+        indicate that the object should be started last and stopped first
+        (likely because it depends on other processes to be running). When
+        considering the phase value, it's also important to know that the
+        default phase for any "normal" <interfacename>Lifecycle</interfacename>
+        object that does not implement
+        <interfacename>SmartLifecycle</interfacename> would be 0. Therefore, any
+        negative phase value would indicate that an object should start before
+        those standard components (and stop after them), and vice versa for any
+        positive phase value.</para>
+
+      <para>As you can see the stop method defined by
+        <interfacename>SmartLifecycle</interfacename> accepts a callback. Any
+        implementation <emphasis>must</emphasis> invoke that callback's run()
+        method after that implementation's shutdown process is complete. That
+        enables asynchronous shutdown where necessary since the default
+        implementation of the <interfacename>LifecycleProcessor</interfacename>
+        interface, <classname>DefaultLifecycleProcessor</classname>, will wait
+        up to its timeout value for the group of objects within each phase to
+        invoke that callback. The default per-phase timeout is 30 seconds. You
+        can override the default lifecycle processor instance by defining a bean
+        named "lifecycleProcessor" within the context. If you only want to
+        modify the timeout, then defining the following would be
+        sufficient:</para>
+
+      <programlisting language="xml">&lt;bean id="lifecycleProcessor" class="org.springframework.context.support.DefaultLifecycleProcessor"&gt;
+  &lt;!-- timeout value in milliseconds --&gt;
+  &lt;property name="timeoutPerShutdownPhase" value="10000"/&gt;
+&lt;/bean&gt;</programlisting>
+
+      <para>As mentioned, the <interfacename>LifecycleProcessor</interfacename>
+        interface defines callback methods for the refreshing and closing of the
+        context as well. The latter will simply drive the shutdown process as if
+        stop() had been called explicitly, but it will happen when the context
+        is closing. The 'refresh' callback on the other hand enables another
+        feature of <interfacename>SmartLifecycle</interfacename> beans. When the
+        context is refreshed (after all objects have been instantiated and
+        initialized), that callback will be invoked, and at that point the
+        default lifecycle processor will check the boolean value returned by
+        each <interfacename>SmartLifecycle</interfacename> object's
+        <methodname>isAutoStartup()</methodname> method. If "true", then that
+        object will be started at that point rather than waiting for an explicit
+        invocation of the context's or its own start() method (unlike the
+        context refresh, the context start does not happen automatically for a
+        standard context implementation). The "phase" value as well as any
+        "depends-on" relationships will determine the startup order in the same
+        way as described above.</para>
+    </section>
+
+    <section id="beans-factory-shutdown">
+      <title>Shutting down the Spring IoC container gracefully in non-web
+        applications</title>
+
+      <note>
+        <para>This section applies only to non-web applications. Spring's
+          web-based <interfacename>ApplicationContext</interfacename>
+          implementations already have code in place to shut down the Spring IoC
+          container gracefully when the relevant web application is shut
+          down.</para>
+      </note>
+
+      <para>If you are using Spring's IoC container in a non-web application
+        environment; for example, in a rich client desktop environment; you
+        register a shutdown hook with the JVM. Doing so ensures a graceful
+        shutdown and calls the relevant destroy methods on your singleton beans
+        so that all resources are released. Of course, you must still configure
+        and implement these destroy callbacks correctly.</para>
+
+      <para>To register a shutdown hook, you call the
+        <methodname>registerShutdownHook()</methodname> method that is declared
+        on the <classname>AbstractApplicationContext</classname> class:</para>
+
+      <programlisting language="java">import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public final class Boot {
+
+  public static void main(final String[] args) throws Exception {
+      AbstractApplicationContext ctx
+          = new ClassPathXmlApplicationContext(new String []{"beans.xml"});
+
+      <lineannotation>// add a shutdown hook for the above context... </lineannotation>
+      ctx.registerShutdownHook();
+
+      <lineannotation>// app runs here...</lineannotation>
+
+      <lineannotation>// main method exits, hook is called prior to the app shutting down...</lineannotation>
+  }
+}</programlisting>
+    </section>
+  </section>
+
+  <section id="beans-factory-aware">
+    <title><interfacename>ApplicationContextAware</interfacename> and
+      <interfacename>BeanNameAware</interfacename></title>
+
+    <para>When an <interfacename>ApplicationContext</interfacename> creates a
+      class that implements the
+      <interfacename>org.springframework.context.ApplicationContextAware</interfacename>
+      interface, the class is provided with a reference to that
+      <interfacename>ApplicationContext</interfacename>.</para>
+
+    <programlisting language="java">public interface ApplicationContextAware {
+
+  void setApplicationContext(ApplicationContext applicationContext) throws BeansException;
+}</programlisting>
+
+    <para>Thus beans can manipulate programmatically the
+      <interfacename>ApplicationContext</interfacename> that created them,
+      through the <interfacename>ApplicationContext</interfacename> interface,
+      or by casting the reference to a known subclass of this interface, such as
+      <classname>ConfigurableApplicationContext</classname>, which exposes
+      additional functionality. One use would be the programmatic retrieval of
+      other beans. Sometimes this capability is useful; however, in general you
+      should avoid it, because it couples the code to Spring and does not follow
+      the Inversion of Control style, where collaborators are provided to beans
+      as properties. Other methods of the ApplicationContext provide access to
+      file resources, publishing application events, and accessing a
+      MessageSource. These additional features are described in <xref
+      linkend="context-introduction"/></para>
+
+    <para>As of Spring 2.5, autowiring is another alternative to obtain
+      reference to the <interfacename>ApplicationContext</interfacename>. The
+      "traditional" <literal>constructor</literal> and <literal>byType</literal>
+      autowiring modes (as described in <xref linkend="beans-factory-autowire"
+      />) can provide a dependency of type
+      <interfacename>ApplicationContext</interfacename> for a constructor
+      argument or setter method parameter, respectively. For more flexibility,
+      including the ability to autowire fields and multiple parameter methods,
+      use the new annotation-based autowiring features. If you do, the
+      <interfacename>ApplicationFactory</interfacename> is autowired into a
+      field, constructor argument, or method parameter that is expecting the
+      <interfacename>BeanFactory</interfacename> type if the field, constructor,
+      or method in question carries the
+      <interfacename>@Autowired</interfacename> annotation. For more
+      information, see <xref linkend="beans-autowired-annotation"/>.</para>
+
+    <para>When an ApplicationContext creates a class that implements the
+      <interfacename>org.springframework.beans.factory.BeanNameAware</interfacename>
+      interface, the class is provided with a reference to the name defined in
+      its associated object definition.</para>
+
+    <programlisting language="java">public interface BeanNameAware {
+
+  void setBeanName(string name) throws BeansException;
+}</programlisting>
+
+    <para>The callback is invoked after population of normal bean properties but
+      before an initialization callback such as
+      <interfacename>InitializingBean</interfacename>s
+      <emphasis>afterPropertiesSet</emphasis> or a custom init-method.</para>
+  </section>
+
+  <section id="aware-list">
+    <title>Other <interfacename>Aware</interfacename> interfaces</title>
+
+    <para>Besides <interfacename>ApplicationContextAware</interfacename> and
+      <interfacename>BeanNameAware</interfacename> discussed above, Spring
+      offers a range of
+      <emphasis><interfacename>Aware</interfacename></emphasis> interfaces that
+      allow beans to indicate to the container that they require a certain
+      <emphasis>infrastructure</emphasis> dependency. The most important
+      <interfacename>Aware</interfacename> interfaces are summarized below - as
+      a general rule, the name is a good indication of the dependency
+      type:</para>
+
+    <table id="beans-factory-nature-aware-list" pgwide="1">
+      <title><interfacename>Aware</interfacename> interfaces</title>
+
+      <tgroup cols="3">
+        <colspec align="left"/>
+
+        <thead>
+          <row>
+            <entry>Name</entry>
+
+            <entry>Injected Dependency</entry>
+
+            <entry>Explained in...</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry><para><classname>ApplicationContextAware</classname></para></entry>
+
+            <entry><para>Declaring
+              <interfacename>ApplicationContext</interfacename></para></entry>
+
+            <entry><para><xref linkend="beans-factory-aware"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>ApplicationEventPublisherAware</classname></para></entry>
+
+            <entry><para>Event publisher of the enclosing
+              <interfacename>ApplicationContext</interfacename></para></entry>
+
+            <entry><para><xref linkend="context-introduction"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>BeanClassLoaderAware</classname></para></entry>
+
+            <entry><para>Class loader used to load the bean
+              classes.</para></entry>
+
+            <entry><para><xref linkend="beans-factory-class"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>BeanFactoryAware</classname></para></entry>
+
+            <entry><para>Declaring
+              <interfacename>BeanFactory</interfacename></para></entry>
+
+            <entry><para><xref linkend="beans-factory-aware"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>BeanNameAware</classname></para></entry>
+
+            <entry><para>Name of the declaring bean</para></entry>
+
+            <entry><para><xref linkend="beans-factory-aware"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>BootstrapContextAware</classname></para></entry>
+
+            <entry><para>Resource adapter
+              <interfacename>BootstrapContext</interfacename> the container runs
+              in. Typically available only in JCA aware
+              <interfacename>ApplicationContext</interfacename>s</para></entry>
+
+            <entry><para><xref linkend="cci"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>LoadTimeWeaverAware</classname></para></entry>
+
+            <entry><para>Defined <emphasis>weaver</emphasis> for processing
+              class definition at load time</para></entry>
+
+            <entry><para><xref linkend="aop-aj-ltw"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>MessageSourceAware</classname></para></entry>
+
+            <entry><para>Configured strategy for resolving messages (with
+              support for parametrization and
+              internationalization)</para></entry>
+
+            <entry><para><xref linkend="context-introduction"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>NotificationPublisherAware</classname></para></entry>
+
+            <entry><para>Spring JMX notification publisher</para></entry>
+
+            <entry><para><xref linkend="jmx-notifications"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>PortletConfigAware</classname></para></entry>
+
+            <entry><para>Current <interfacename>PortletConfig</interfacename>
+              the container runs in. Valid only in a web-aware Spring
+              <interfacename>ApplicationContext</interfacename></para></entry>
+
+            <entry><para><xref linkend="portlet"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>PortletContextAware</classname></para></entry>
+
+            <entry><para>Current <interfacename>PortletContext</interfacename>
+              the container runs in. Valid only in a web-aware Spring
+              <interfacename>ApplicationContext</interfacename></para></entry>
+
+            <entry><para><xref linkend="portlet"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>ResourceLoaderAware</classname></para></entry>
+
+            <entry><para>Configured loader for low-level access to
+              resources</para></entry>
+
+            <entry><para><xref linkend="resources"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>ServletConfigAware</classname></para></entry>
+
+            <entry><para>Current <interfacename>ServletConfig</interfacename>
+              the container runs in. Valid only in a web-aware Spring
+              <interfacename>ApplicationContext</interfacename></para></entry>
+
+            <entry><para><xref linkend="mvc"/></para></entry>
+          </row>
+
+          <row>
+            <entry><para><classname>ServletContextAware</classname></para></entry>
+
+            <entry><para>Current <interfacename>ServletContext</interfacename>
+              the container runs in. Valid only in a web-aware Spring
+              <interfacename>ApplicationContext</interfacename></para></entry>
+
+            <entry><para><xref linkend="mvc"/></para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+
+    <para>Note again that usage of these interfaces ties your code to the Spring
+      API and does not follow the Inversion of Control style. As such, they are
+      recommended for infrastructure beans that require programmatic access to
+      the container.</para>
+  </section>
+</section>

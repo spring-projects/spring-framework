@@ -31,14 +31,31 @@ Check out the [Spring forums](http://forum.springsource.org) and the
 ## Issue Tracking
 Spring's JIRA issue tracker can be found [here](http://jira.springsource.org/browse/SPR). Think
 you've found a bug? Please consider submitting a reproduction project via the
-[spring-framework-issues](https://github.com/springsource/spring-framework-issues) repository. The
-[readme](https://github.com/springsource/spring-framework-issues#readme) provides simple
-step-by-step instructions.
+[spring-framework-issues](https://github.com/SpringSource/spring-framework-issues) repository. The
+[readme](https://github.com/SpringSource/spring-framework-issues#readme) provides simple
+step-by-step instructions.  <a name="building_from_source"/>
+
 
 ## Building from source
-Instructions on
-[building Spring from source](https://github.com/SpringSource/spring-framework/wiki/Building-from-source)
-are available via the project wiki.
+The Spring Framework uses a [Gradle](http://gradle.org)-based build system. In the instructions
+below, [`./gradlew`](http://vimeo.com/34436402) is invoked from the root of the source tree and
+serves as a cross-platform, self-contained bootstrap mechanism for the build. The only
+prerequisites are [git](http://help.github.com/set-up-git-redirect) and JDK 1.6+.
+
+### check out sources
+`git clone git://github.com/SpringSource/spring-framework.git`
+
+### compile and test, build all jars, distribution zips and docs
+`./gradlew build`
+
+### install all spring-\* jars into your local Maven cache
+`./gradlew install`
+
+### import sources into your IDE
+Run `./import-into-eclipse.sh` or read `import-into-idea.md` as appropriate.
+
+... and discover more commands with `./gradlew tasks`. See also the
+[Gradle build and release FAQ](https://github.com/SpringSource/spring-framework/wiki/Gradle-build-and-release-FAQ).
 
 ## Contributing
 [Pull requests](http://help.github.com/send-pull-requests) are welcome; you'll be asked to sign our

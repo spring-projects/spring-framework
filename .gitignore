@@ -10,9 +10,16 @@ integration-repo
 ivy-cache
 jxl.log
 jmx.log
-org.springframework.jdbc/derby.log
-org.springframework.spring-parent/.classpath
-org.springframework.spring-parent/.project
-org.springframework.test/test-output/
-target
-spring-build/lib/docbook
+spring-jdbc/derby.log
+spring-test/test-output/
+.gradle
+build
+.classpath
+.project
+argfile*
+
+# IDEA metadata and output dirs
+*.iml
+*.ipr
+*.iws
+out

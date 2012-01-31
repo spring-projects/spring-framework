@@ -1,4 +1,0 @@
-# common dependency versions
-aspectj.version=1.6.8.RELEASE
-junit.version=4.9.0
-testng.version=5.12.1

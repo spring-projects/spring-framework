@@ -1,0 +1,1970 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xml:id="aop-api">
+  <title>Spring AOP APIs</title>
+
+  <section id="aop-api-introduction">
+    <title>Introduction</title>
+
+    <para>The previous chapter described the Spring 2.0 and later version's
+    support for AOP using @AspectJ and schema-based aspect definitions. In
+    this chapter we discuss the lower-level Spring AOP APIs and the AOP
+    support used in Spring 1.2 applications. For new applications, we
+    recommend the use of the Spring 2.0 and later AOP support described in the
+    previous chapter, but when working with existing applications, or when
+    reading books and articles, you may come across Spring 1.2 style examples.
+    Spring 3.0 is backwards compatible with Spring 1.2 and everything
+    described in this chapter is fully supported in Spring 3.0.</para>
+  </section>
+
+  <section id="aop-api-pointcuts">
+    <title>Pointcut API in Spring</title>
+
+    <para>Let's look at how Spring handles the crucial pointcut
+    concept.</para>
+
+    <section id="aop-api-concepts">
+      <title>Concepts</title>
+
+      <para>Spring's pointcut model enables pointcut reuse independent of
+      advice types. It's possible to target different advice using the same
+      pointcut.</para>
+
+      <para>The <literal>org.springframework.aop.Pointcut</literal> interface
+      is the central interface, used to target advices to particular classes
+      and methods. The complete interface is shown below:</para>
+
+      <programlisting language="java">public interface Pointcut {
+
+    ClassFilter getClassFilter();
+
+    MethodMatcher getMethodMatcher();
+
+}</programlisting>
+
+      <para>Splitting the <interfacename>Pointcut</interfacename> interface
+      into two parts allows reuse of class and method matching parts, and
+      fine-grained composition operations (such as performing a "union" with
+      another method matcher).</para>
+
+      <para>The <interfacename>ClassFilter</interfacename> interface is used
+      to restrict the pointcut to a given set of target classes. If the
+      <literal>matches()</literal> method always returns true, all target
+      classes will be matched:</para>
+
+      <programlisting language="java">public interface ClassFilter {
+
+    boolean matches(Class clazz);
+}</programlisting>
+
+      <para>The <interfacename>MethodMatcher</interfacename> interface is
+      normally more important. The complete interface is shown below:</para>
+
+      <programlisting language="java">public interface MethodMatcher {
+
+    boolean matches(Method m, Class targetClass);
+
+    boolean isRuntime();
+
+    boolean matches(Method m, Class targetClass, Object[] args);
+}</programlisting>
+
+      <para>The <literal>matches(Method, Class) </literal>method is used to
+      test whether this pointcut will ever match a given method on a target
+      class. This evaluation can be performed when an AOP proxy is created, to
+      avoid the need for a test on every method invocation. If the 2-argument
+      matches method returns true for a given method, and the
+      <literal>isRuntime()</literal> method for the MethodMatcher returns
+      true, the 3-argument matches method will be invoked on every method
+      invocation. This enables a pointcut to look at the arguments passed to
+      the method invocation immediately before the target advice is to
+      execute.</para>
+
+      <para>Most MethodMatchers are static, meaning that their
+      <literal>isRuntime()</literal> method returns false. In this case, the
+      3-argument matches method will never be invoked.</para>
+
+      <tip>
+        <para>If possible, try to make pointcuts static, allowing the AOP
+        framework to cache the results of pointcut evaluation when an AOP
+        proxy is created.</para>
+      </tip>
+    </section>
+
+    <section id="aop-api-pointcut-ops">
+      <title>Operations on pointcuts</title>
+
+      <para>Spring supports operations on pointcuts: notably,
+      <emphasis>union</emphasis> and <emphasis>intersection</emphasis>.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Union means the methods that either pointcut matches.</para>
+        </listitem>
+
+        <listitem>
+          <para>Intersection means the methods that both pointcuts
+          match.</para>
+        </listitem>
+
+        <listitem>
+          <para>Union is usually more useful.</para>
+        </listitem>
+
+        <listitem>
+          <para>Pointcuts can be composed using the static methods in the
+          <emphasis>org.springframework.aop.support.Pointcuts</emphasis>
+          class, or using the <emphasis>ComposablePointcut</emphasis> class in
+          the same package. However, using AspectJ pointcut expressions is
+          usually a simpler approach.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section id="aop-api-pointcuts-aspectj">
+      <title>AspectJ expression pointcuts</title>
+
+      <para>Since 2.0, the most important type of pointcut used by Spring is
+      <literal>org.springframework.aop.aspectj.AspectJExpressionPointcut</literal>.
+      This is a pointcut that uses an AspectJ supplied library to parse an
+      AspectJ pointcut expression string.</para>
+
+      <para>See the previous chapter for a discussion of supported AspectJ
+      pointcut primitives.</para>
+    </section>
+
+    <section id="aop-api-pointcuts-impls">
+      <title>Convenience pointcut implementations</title>
+
+      <para>Spring provides several convenient pointcut implementations. Some
+      can be used out of the box; others are intended to be subclassed in
+      application-specific pointcuts.</para>
+
+      <section id="aop-api-pointcuts-static">
+        <title>Static pointcuts</title>
+
+        <para>Static pointcuts are based on method and target class, and
+        cannot take into account the method's arguments. Static pointcuts are
+        sufficient - <emphasis>and best</emphasis> - for most usages. It's
+        possible for Spring to evaluate a static pointcut only once, when a
+        method is first invoked: after that, there is no need to evaluate the
+        pointcut again with each method invocation.</para>
+
+        <para>Let's consider some static pointcut implementations included
+        with Spring.</para>
+
+        <section id="aop-api-pointcuts-regex">
+          <title>Regular expression pointcuts</title>
+
+          <para>One obvious way to specify static pointcuts is regular
+          expressions. Several AOP frameworks besides Spring make this
+          possible.
+          <literal>org.springframework.aop.support.JdkRegexpMethodPointcut</literal>
+          is a generic regular expression pointcut, using the regular
+          expression support in JDK 1.4+.</para>
+
+          <para>Using the <literal>JdkRegexpMethodPointcut</literal> class,
+          you can provide a list of pattern Strings. If any of these is a
+          match, the pointcut will evaluate to true. (So the result is
+          effectively the union of these pointcuts.)</para>
+
+          <para>The usage is shown below:</para>
+
+          <para><programlisting language="xml">&lt;bean id="settersAndAbsquatulatePointcut" 
+    class="org.springframework.aop.support.JdkRegexpMethodPointcut"&gt;
+    &lt;property name="patterns"&gt;
+        &lt;list&gt;
+            &lt;value&gt;.*set.*&lt;/value&gt;
+            &lt;value&gt;.*absquatulate&lt;/value&gt;
+        &lt;/list&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+          <para>Spring provides a convenience class,
+          <literal>RegexpMethodPointcutAdvisor</literal>, that allows us to
+          also reference an Advice (remember that an Advice can be an
+          interceptor, before advice, throws advice etc.). Behind the scenes,
+          Spring will use a <literal>JdkRegexpMethodPointcut</literal>. Using
+          <literal>RegexpMethodPointcutAdvisor</literal> simplifies wiring, as
+          the one bean encapsulates both pointcut and advice, as shown
+          below:</para>
+
+          <para><programlisting language="xml">&lt;bean id="settersAndAbsquatulateAdvisor" 
+    class="org.springframework.aop.support.RegexpMethodPointcutAdvisor"&gt;
+    &lt;property name="advice"&gt;
+        &lt;ref local="beanNameOfAopAllianceInterceptor"/&gt;
+    &lt;/property&gt;
+    &lt;property name="patterns"&gt;
+        &lt;list&gt;
+            &lt;value&gt;.*set.*&lt;/value&gt;
+            &lt;value&gt;.*absquatulate&lt;/value&gt;
+        &lt;/list&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+          <para><emphasis>RegexpMethodPointcutAdvisor</emphasis> can be used
+          with any Advice type.</para>
+        </section>
+
+        <section id="aop-api-pointcuts-attribute-driven">
+          <title>Attribute-driven pointcuts</title>
+
+          <para>An important type of static pointcut is a
+          <emphasis>metadata-driven</emphasis> pointcut. This uses the values
+          of metadata attributes: typically, source-level metadata.</para>
+        </section>
+      </section>
+
+      <section id="aop-api-pointcuts-dynamic">
+        <title>Dynamic pointcuts</title>
+
+        <para>Dynamic pointcuts are costlier to evaluate than static
+        pointcuts. They take into account method
+        <emphasis>arguments</emphasis>, as well as static information. This
+        means that they must be evaluated with every method invocation; the
+        result cannot be cached, as arguments will vary.</para>
+
+        <para>The main example is the <literal>control flow</literal>
+        pointcut.</para>
+
+        <section id="aop-api-pointcuts-cflow">
+          <title>Control flow pointcuts</title>
+
+          <para>Spring control flow pointcuts are conceptually similar to
+          AspectJ <emphasis>cflow</emphasis> pointcuts, although less
+          powerful. (There is currently no way to specify that a pointcut
+          executes below a join point matched by another pointcut.) A control
+          flow pointcut matches the current call stack. For example, it might
+          fire if the join point was invoked by a method in the
+          <literal>com.mycompany.web</literal> package, or by the
+          <literal>SomeCaller</literal> class. Control flow pointcuts are
+          specified using the
+          <literal>org.springframework.aop.support.ControlFlowPointcut
+          </literal>class.<note>
+              <para>Control flow pointcuts are significantly more expensive to
+              evaluate at runtime than even other dynamic pointcuts. In Java
+              1.4, the cost is about 5 times that of other dynamic
+              pointcuts.</para>
+            </note></para>
+        </section>
+      </section>
+    </section>
+
+    <section id="aop-api-pointcuts-superclasses">
+      <title>Pointcut superclasses</title>
+
+      <para>Spring provides useful pointcut superclasses to help you to
+      implement your own pointcuts.</para>
+
+      <para>Because static pointcuts are most useful, you'll probably subclass
+      StaticMethodMatcherPointcut, as shown below. This requires implementing
+      just one abstract method (although it's possible to override other
+      methods to customize behavior):</para>
+
+      <para><programlisting language="java">class TestStaticPointcut extends StaticMethodMatcherPointcut {
+
+    public boolean matches(Method m, Class targetClass) {
+        // return true if custom criteria match
+    }
+}</programlisting>There are also superclasses for dynamic pointcuts.</para>
+
+      <para>You can use custom pointcuts with any advice type in Spring 1.0
+      RC2 and above.</para>
+    </section>
+
+    <section id="aop-api-pointcuts-custom">
+      <title>Custom pointcuts</title>
+
+      <para>Because pointcuts in Spring AOP are Java classes, rather than
+      language features (as in AspectJ) it's possible to declare custom
+      pointcuts, whether static or dynamic. Custom pointcuts in Spring can be
+      arbitrarily complex. However, using the AspectJ pointcut expression
+      language is recommended if possible.</para>
+
+      <note>
+        <para>Later versions of Spring may offer support for "semantic
+        pointcuts" as offered by JAC: for example, "all methods that change
+        instance variables in the target object."</para>
+      </note>
+    </section>
+  </section>
+
+  <section id="aop-api-advice">
+    <title>Advice API in Spring</title>
+
+    <para>Let's now look at how Spring AOP handles advice.</para>
+
+    <section id="aop-api-advice-lifecycle">
+      <title>Advice lifecycles</title>
+
+      <para>Each advice is a Spring bean. An advice instance can be shared
+      across all advised objects, or unique to each advised object. This
+      corresponds to <emphasis>per-class</emphasis> or
+      <emphasis>per-instance</emphasis> advice.</para>
+
+      <para>Per-class advice is used most often. It is appropriate for generic
+      advice such as transaction advisors. These do not depend on the state of
+      the proxied object or add new state; they merely act on the method and
+      arguments.</para>
+
+      <para>Per-instance advice is appropriate for introductions, to support
+      mixins. In this case, the advice adds state to the proxied
+      object.</para>
+
+      <para>It's possible to use a mix of shared and per-instance advice in
+      the same AOP proxy.</para>
+    </section>
+
+    <section id="aop-api-advice-types">
+      <title>Advice types in Spring</title>
+
+      <para>Spring provides several advice types out of the box, and is
+      extensible to support arbitrary advice types. Let us look at the basic
+      concepts and standard advice types.</para>
+
+      <section id="aop-api-advice-around">
+        <title>Interception around advice</title>
+
+        <para>The most fundamental advice type in Spring is
+        <emphasis>interception around advice</emphasis>.</para>
+
+        <para>Spring is compliant with the AOP Alliance interface for around
+        advice using method interception. MethodInterceptors implementing
+        around advice should implement the following interface:</para>
+
+        <programlisting language="java">public interface MethodInterceptor extends Interceptor {
+  
+    Object invoke(MethodInvocation invocation) throws Throwable;
+}</programlisting>
+
+        <para>The <classname>MethodInvocation</classname> argument to the
+        <methodname>invoke()</methodname> method exposes the method being
+        invoked; the target join point; the AOP proxy; and the arguments to
+        the method. The <methodname>invoke()</methodname> method should return
+        the invocation's result: the return value of the join point.</para>
+
+        <para>A simple <classname>MethodInterceptor</classname> implementation
+        looks as follows:</para>
+
+        <programlisting language="java">public class DebugInterceptor implements MethodInterceptor {
+
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        System.out.println("Before: invocation=[" + invocation + "]");
+        Object rval = invocation.proceed();
+        System.out.println("Invocation returned");
+        return rval;
+    }
+}</programlisting>
+
+        <para>Note the call to the MethodInvocation's
+        <methodname>proceed()</methodname> method. This proceeds down the
+        interceptor chain towards the join point. Most interceptors will
+        invoke this method, and return its return value. However, a
+        MethodInterceptor, like any around advice, can return a different
+        value or throw an exception rather than invoke the proceed method.
+        However, you don't want to do this without good reason!</para>
+
+        <note>
+          <para>MethodInterceptors offer interoperability with other AOP
+          Alliance-compliant AOP implementations. The other advice types
+          discussed in the remainder of this section implement common AOP
+          concepts, but in a Spring-specific way. While there is an advantage
+          in using the most specific advice type, stick with MethodInterceptor
+          around advice if you are likely to want to run the aspect in another
+          AOP framework. Note that pointcuts are not currently interoperable
+          between frameworks, and the AOP Alliance does not currently define
+          pointcut interfaces.</para>
+        </note>
+      </section>
+
+      <section id="aop-api-advice-before">
+        <title>Before advice</title>
+
+        <para>A simpler advice type is a <emphasis role="bold">before
+        advice</emphasis>. This does not need a
+        <literal>MethodInvocation</literal> object, since it will only be
+        called before entering the method.</para>
+
+        <para>The main advantage of a before advice is that there is no need
+        to invoke the <literal>proceed() </literal>method, and therefore no
+        possibility of inadvertently failing to proceed down the interceptor
+        chain.</para>
+
+        <para>The <literal>MethodBeforeAdvice</literal> interface is shown
+        below. (Spring's API design would allow for field before advice,
+        although the usual objects apply to field interception and it's
+        unlikely that Spring will ever implement it).</para>
+
+        <programlisting language="java">public interface MethodBeforeAdvice extends BeforeAdvice {
+
+    void before(Method m, Object[] args, Object target) throws Throwable;
+}</programlisting>
+
+        <para>Note the return type is <literal>void</literal>. Before advice
+        can insert custom behavior before the join point executes, but cannot
+        change the return value. If a before advice throws an exception, this
+        will abort further execution of the interceptor chain. The exception
+        will propagate back up the interceptor chain. If it is unchecked, or
+        on the signature of the invoked method, it will be passed directly to
+        the client; otherwise it will be wrapped in an unchecked exception by
+        the AOP proxy.</para>
+
+        <para>An example of a before advice in Spring, which counts all method
+        invocations:</para>
+
+        <programlisting language="java">public class CountingBeforeAdvice implements MethodBeforeAdvice {
+
+    private int count;
+
+    public void before(Method m, Object[] args, Object target) throws Throwable {
+        ++count;
+    }
+
+    public int getCount() { 
+        return count; 
+    }
+}</programlisting>
+
+        <tip>
+          <para>Before advice can be used with any pointcut.</para>
+        </tip>
+      </section>
+
+      <section id="aop-api-advice-throws">
+        <title>Throws advice</title>
+
+        <para><emphasis role="bold">Throws advice</emphasis> is invoked after
+        the return of the join point if the join point threw an exception.
+        Spring offers typed throws advice. Note that this means that the
+        <literal>org.springframework.aop.ThrowsAdvice</literal> interface does
+        not contain any methods: It is a tag interface identifying that the
+        given object implements one or more typed throws advice methods. These
+        should be in the form of:</para>
+
+        <programlisting language="java">afterThrowing([Method, args, target], subclassOfThrowable) </programlisting>
+
+        <para>Only the last argument is required. The method signatures may
+        have either one or four arguments, depending on whether the advice
+        method is interested in the method and arguments. The following
+        classes are examples of throws advice.</para>
+
+        <para>The advice below is invoked if a
+        <exceptionname>RemoteException</exceptionname> is thrown (including
+        subclasses):</para>
+
+        <programlisting language="java">public class RemoteThrowsAdvice implements ThrowsAdvice {
+
+    public void afterThrowing(RemoteException ex) throws Throwable {
+        <lineannotation>// Do something with remote exception</lineannotation>
+    }
+}</programlisting>
+
+        <para>The following advice is invoked if a
+        <exceptionname>ServletException</exceptionname> is thrown. Unlike the
+        above advice, it declares 4 arguments, so that it has access to the
+        invoked method, method arguments and target object:</para>
+
+        <programlisting language="java">public class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
+
+    public void afterThrowing(Method m, Object[] args, Object target, ServletException ex) {
+        <lineannotation>// Do something with all arguments</lineannotation>
+    }
+}</programlisting>
+
+        <para>The final example illustrates how these two methods could be
+        used in a single class, which handles both
+        <literal>RemoteException</literal> and
+        <literal>ServletException</literal>. Any number of throws advice
+        methods can be combined in a single class.</para>
+
+        <programlisting language="java">public static class CombinedThrowsAdvice implements ThrowsAdvice {
+
+    public void afterThrowing(RemoteException ex) throws Throwable {
+        // Do something with remote exception
+    }
+ 
+    public void afterThrowing(Method m, Object[] args, Object target, ServletException ex) {
+        // Do something with all arguments
+    }
+}</programlisting>
+
+        <para><emphasis>Note:</emphasis> If a throws-advice method throws an
+        exception itself, it will override the original exception (i.e. change
+        the exception thrown to the user). The overriding exception will
+        typically be a RuntimeException; this is compatible with any method
+        signature. However, if a throws-advice method throws a checked
+        exception, it will have to match the declared exceptions of the target
+        method and is hence to some degree coupled to specific target method
+        signatures. <emphasis>Do not throw an undeclared checked exception
+        that is incompatible with the target method's
+        signature!</emphasis></para>
+
+        <tip>
+          <para>Throws advice can be used with any pointcut.</para>
+        </tip>
+      </section>
+
+      <section id="aop-api-advice-after-returning">
+        <title>After Returning advice</title>
+
+        <para>An after returning advice in Spring must implement the
+        <emphasis>org.springframework.aop.AfterReturningAdvice</emphasis>
+        interface, shown below:</para>
+
+        <programlisting language="java">public interface AfterReturningAdvice extends Advice {
+
+    void afterReturning(Object returnValue, Method m, Object[] args, Object target) 
+            throws Throwable;
+}</programlisting>
+
+        <para>An after returning advice has access to the return value (which
+        it cannot modify), invoked method, methods arguments and
+        target.</para>
+
+        <para>The following after returning advice counts all successful
+        method invocations that have not thrown exceptions:</para>
+
+        <programlisting language="java">public class CountingAfterReturningAdvice implements AfterReturningAdvice {
+
+    private int count;
+
+    public void afterReturning(Object returnValue, Method m, Object[] args, Object target)
+            throws Throwable {
+        ++count;
+    }
+
+    public int getCount() {
+        return count;
+    }
+}</programlisting>
+
+        <para>This advice doesn't change the execution path. If it throws an
+        exception, this will be thrown up the interceptor chain instead of the
+        return value.</para>
+
+        <tip>
+          <para>After returning advice can be used with any pointcut.</para>
+        </tip>
+      </section>
+
+      <section id="aop-api-advice-introduction">
+         
+
+        <title>Introduction advice</title>
+
+         
+
+        <para>Spring treats introduction advice as a special kind of
+        interception advice.</para>
+
+         
+
+        <para>Introduction requires an <literal>IntroductionAdvisor</literal>,
+        and an <literal>IntroductionInterceptor</literal>, implementing the
+        following interface:</para>
+
+         
+
+        <programlisting language="java">public interface IntroductionInterceptor extends MethodInterceptor {
+
+    boolean implementsInterface(Class intf);
+}</programlisting>
+
+         
+
+        <para>The <literal>invoke() </literal>method inherited from the AOP
+        Alliance <literal>MethodInterceptor</literal> interface must implement
+        the introduction: that is, if the invoked method is on an introduced
+        interface, the introduction interceptor is responsible for handling
+        the method call - it cannot invoke
+        <literal>proceed()</literal>.</para>
+
+         
+
+        <para>Introduction advice cannot be used with any pointcut, as it
+        applies only at class, rather than method, level. You can only use
+        introduction advice with the <literal>IntroductionAdvisor</literal>,
+        which has the following methods:</para>
+
+         
+
+        <programlisting language="java">public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
+
+	ClassFilter getClassFilter();
+
+	void validateInterfaces() throws IllegalArgumentException;
+}
+
+public interface IntroductionInfo {
+
+	Class[] getInterfaces();
+}</programlisting>
+
+         
+
+        <para>There is no <interfacename>MethodMatcher</interfacename>, and
+        hence no <interfacename>Pointcut</interfacename>, associated with
+        introduction advice. Only class filtering is logical.</para>
+
+         
+
+        <para>The <literal>getInterfaces()</literal> method returns the
+        interfaces introduced by this advisor.</para>
+
+         The 
+
+        <literal>validateInterfaces()</literal>
+
+         method is used internally to see whether or not the introduced interfaces can be implemented by the configured 
+
+        <literal>IntroductionInterceptor</literal>
+
+         . 
+
+        <para>Let's look at a simple example from the Spring test suite. Let's
+        suppose we want to introduce the following interface to one or more
+        objects:</para>
+
+         
+
+        <para>
+          <programlisting language="java">public interface Lockable {
+    void lock();
+    void unlock();
+    boolean locked();
+}</programlisting>
+        </para>
+
+         
+
+        <para>This illustrates a <emphasis role="bold">mixin</emphasis>. We
+        want to be able to cast advised objects to Lockable, whatever their
+        type, and call lock and unlock methods. If we call the lock() method,
+        we want all setter methods to throw a
+        <literal>LockedException</literal>. Thus we can add an aspect that
+        provides the ability to make objects immutable, without them having
+        any knowledge of it: a good example of AOP.</para>
+
+         
+
+        <para>Firstly, we'll need an
+        <literal>IntroductionInterceptor</literal> that does the heavy
+        lifting. In this case, we extend the
+        <literal>org.springframework.aop.support.DelegatingIntroductionInterceptor</literal>
+        convenience class. We could implement IntroductionInterceptor
+        directly, but using
+        <literal>DelegatingIntroductionInterceptor</literal> is best for most
+        cases.</para>
+
+         
+
+        <para>The <literal>DelegatingIntroductionInterceptor</literal> is
+        designed to delegate an introduction to an actual implementation of
+        the introduced interface(s), concealing the use of interception to do
+        so. The delegate can be set to any object using a constructor
+        argument; the default delegate (when the no-arg constructor is used)
+        is this. Thus in the example below, the delegate is the
+        <literal>LockMixin</literal> subclass of
+        <literal>DelegatingIntroductionInterceptor</literal>. Given a delegate
+        (by default itself), a
+        <literal>DelegatingIntroductionInterceptor</literal> instance looks
+        for all interfaces implemented by the delegate (other than
+        IntroductionInterceptor), and will support introductions against any
+        of them. It's possible for subclasses such as
+        <literal>LockMixin</literal> to call the
+        <literal>suppressInterface(Class intf) </literal>method to suppress
+        interfaces that should not be exposed. However, no matter how many
+        interfaces an <literal>IntroductionInterceptor</literal> is prepared
+        to support, the <literal>IntroductionAdvisor</literal> used will
+        control which interfaces are actually exposed. An introduced interface
+        will conceal any implementation of the same interface by the
+        target.</para>
+
+         
+
+        <para>Thus LockMixin subclasses
+        <literal>DelegatingIntroductionInterceptor</literal> and implements
+        Lockable itself. The superclass automatically picks up that Lockable
+        can be supported for introduction, so we don't need to specify that.
+        We could introduce any number of interfaces in this way.</para>
+
+         
+
+        <para>Note the use of the <literal>locked</literal> instance variable.
+        This effectively adds additional state to that held in the target
+        object.</para>
+
+         
+
+        <para>
+          <programlisting language="java">public class LockMixin extends DelegatingIntroductionInterceptor 
+    implements Lockable {
+
+    private boolean locked;
+
+    public void lock() {
+        this.locked = true;
+    }
+
+    public void unlock() {
+        this.locked = false;
+    }
+
+    public boolean locked() {
+        return this.locked;
+    }
+
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        if (locked() &amp;&amp; invocation.getMethod().getName().indexOf("set") == 0)
+            throw new LockedException();
+        return super.invoke(invocation);
+    }
+
+}</programlisting>
+        </para>
+
+         
+
+        <para>Often it isn't necessary to override the <literal>invoke()
+        </literal>method: the
+        <literal>DelegatingIntroductionInterceptor</literal> implementation -
+        which calls the delegate method if the method is introduced, otherwise
+        proceeds towards the join point - is usually sufficient. In the
+        present case, we need to add a check: no setter method can be invoked
+        if in locked mode.</para>
+
+         
+
+        <para>The introduction advisor required is simple. All it needs to do
+        is hold a distinct <literal>LockMixin</literal> instance, and specify
+        the introduced interfaces - in this case, just
+        <literal>Lockable</literal>. A more complex example might take a
+        reference to the introduction interceptor (which would be defined as a
+        prototype): in this case, there's no configuration relevant for a
+        <literal>LockMixin</literal>, so we simply create it using
+        <literal>new</literal>.</para>
+
+         
+
+        <para>
+          <programlisting language="java">public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
+
+    public LockMixinAdvisor() {
+        super(new LockMixin(), Lockable.class);
+    }
+}</programlisting>
+        </para>
+
+         
+
+        <para>We can apply this advisor very simply: it requires no
+        configuration. (However, it <emphasis>is</emphasis> necessary: It's
+        impossible to use an <literal>IntroductionInterceptor</literal>
+        without an <emphasis>IntroductionAdvisor</emphasis>.) As usual with
+        introductions, the advisor must be per-instance, as it is stateful. We
+        need a different instance of <literal>LockMixinAdvisor</literal>, and
+        hence <literal>LockMixin</literal>, for each advised object. The
+        advisor comprises part of the advised object's state.</para>
+
+         
+
+        <para>We can apply this advisor programmatically, using the
+        <literal>Advised.addAdvisor() </literal>method, or (the recommended
+        way) in XML configuration, like any other advisor. All proxy creation
+        choices discussed below, including "auto proxy creators," correctly
+        handle introductions and stateful mixins.</para>
+
+         
+      </section>
+    </section>
+  </section>
+
+  <section id="aop-api-advisor">
+    <title>Advisor API in Spring</title>
+
+    <para>In Spring, an Advisor is an aspect that contains just a single
+    advice object associated with a pointcut expression.</para>
+
+    <para>Apart from the special case of introductions, any advisor can be
+    used with any advice.
+    <literal>org.springframework.aop.support.DefaultPointcutAdvisor</literal>
+    is the most commonly used advisor class. For example, it can be used with
+    a <literal>MethodInterceptor</literal>, <literal>BeforeAdvice</literal> or
+    <literal>ThrowsAdvice</literal>.</para>
+
+    <para>It is possible to mix advisor and advice types in Spring in the same
+    AOP proxy. For example, you could use a interception around advice, throws
+    advice and before advice in one proxy configuration: Spring will
+    automatically create the necessary interceptor chain.</para>
+  </section>
+
+  <section id="aop-pfb">
+    <title>Using the ProxyFactoryBean to create AOP proxies</title>
+
+    <para>If you're using the Spring IoC container (an ApplicationContext or
+    BeanFactory) for your business objects - and you should be! - you will
+    want to use one of Spring's AOP FactoryBeans. (Remember that a factory
+    bean introduces a layer of indirection, enabling it to create objects of a
+    different type.)</para>
+
+    <note>
+      <para>The Spring 2.0 AOP support also uses factory beans under the
+      covers.</para>
+    </note>
+
+    <para>The basic way to create an AOP proxy in Spring is to use the
+    <emphasis>org.springframework.aop.framework.ProxyFactoryBean</emphasis>.
+    This gives complete control over the pointcuts and advice that will apply,
+    and their ordering. However, there are simpler options that are preferable
+    if you don't need such control.</para>
+
+    <section id="aop-pfb-1">
+      <title>Basics</title>
+
+      <para>The <literal>ProxyFactoryBean</literal>, like other Spring
+      <literal>FactoryBean</literal> implementations, introduces a level of
+      indirection. If you define a <literal>ProxyFactoryBean</literal> with
+      name <literal>foo</literal>, what objects referencing
+      <literal>foo</literal> see is not the
+      <literal>ProxyFactoryBean</literal> instance itself, but an object
+      created by the <literal>ProxyFactoryBean</literal>'s implementation of
+      the <literal>getObject() </literal>method. This method will create an
+      AOP proxy wrapping a target object.</para>
+
+      <para>One of the most important benefits of using a
+      <literal>ProxyFactoryBean</literal> or another IoC-aware class to create
+      AOP proxies, is that it means that advices and pointcuts can also be
+      managed by IoC. This is a powerful feature, enabling certain approaches
+      that are hard to achieve with other AOP frameworks. For example, an
+      advice may itself reference application objects (besides the target,
+      which should be available in any AOP framework), benefiting from all the
+      pluggability provided by Dependency Injection.</para>
+    </section>
+
+    <section id="aop-pfb-2">
+      <title>JavaBean properties</title>
+
+      <para>In common with most <interfacename>FactoryBean</interfacename>
+      implementations provided with Spring, the
+      <classname>ProxyFactoryBean</classname> class is itself a JavaBean. Its
+      properties are used to:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Specify the target you want to proxy.</para>
+        </listitem>
+
+        <listitem>
+          <para>Specify whether to use CGLIB (see below and also
+          <xref linkend="aop-pfb-proxy-types" />).</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Some key properties are inherited from
+      <classname>org.springframework.aop.framework.ProxyConfig</classname>
+      (the superclass for all AOP proxy factories in Spring). These key
+      properties include:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><literal>proxyTargetClass</literal>: <literal>true</literal>
+          if the target class is to be proxied, rather than the target class'
+          interfaces. If this property value is set to
+          <literal>true</literal>, then CGLIB proxies will be created (but see
+          also <xref linkend="aop-pfb-proxy-types" />).</para>
+        </listitem>
+
+        <listitem>
+          <para><literal>optimize</literal>: controls whether or not
+          aggressive optimizations are applied to proxies <emphasis>created
+          via CGLIB</emphasis>. One should not blithely use this setting
+          unless one fully understands how the relevant AOP proxy handles
+          optimization. This is currently used only for CGLIB proxies; it has
+          no effect with JDK dynamic proxies.</para>
+        </listitem>
+
+        <listitem>
+          <para><literal>frozen</literal>: if a proxy configuration is
+          <literal>frozen</literal>, then changes to the configuration are no
+          longer allowed. This is useful both as a slight optimization and for
+          those cases when you don't want callers to be able to manipulate the
+          proxy (via the <interfacename>Advised</interfacename> interface)
+          after the proxy has been created. The default value of this property
+          is <literal>false</literal>, so changes such as adding additional
+          advice are allowed.</para>
+        </listitem>
+
+        <listitem>
+          <para><literal>exposeProxy</literal>: determines whether or not the
+          current proxy should be exposed in a
+          <classname>ThreadLocal</classname> so that it can be accessed by the
+          target. If a target needs to obtain the proxy and the
+          <literal>exposeProxy</literal> property is set to
+          <literal>true</literal>, the target can use the
+          <methodname>AopContext.currentProxy()</methodname> method.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Other properties specific to
+      <classname>ProxyFactoryBean</classname> include:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><literal>proxyInterfaces</literal>: array of String interface
+          names. If this isn't supplied, a CGLIB proxy for the target class
+          will be used (but see also <xref linkend="aop-pfb-proxy-types" />).</para>
+        </listitem>
+
+        <listitem>
+          <para><literal>interceptorNames</literal>: String array of
+          <interfacename>Advisor</interfacename>, interceptor or other advice
+          names to apply. Ordering is significant, on a first come-first
+          served basis. That is to say that the first interceptor in the list
+          will be the first to be able to intercept the invocation.</para>
+
+          <para>The names are bean names in the current factory, including
+          bean names from ancestor factories. You can't mention bean
+          references here since doing so would result in the
+          <classname>ProxyFactoryBean</classname> ignoring the singleton
+          setting of the advice.</para>
+
+          <para>You can append an interceptor name with an asterisk
+          (<literal>*</literal>). This will result in the application of all
+          advisor beans with names starting with the part before the asterisk
+          to be applied. An example of using this feature can be found in
+          <xref linkend="aop-global-advisors" />.</para>
+        </listitem>
+
+        <listitem>
+          <para>singleton: whether or not the factory should return a single
+          object, no matter how often the <literal>getObject()</literal>
+          method is called. Several <interfacename>FactoryBean</interfacename>
+          implementations offer such a method. The default value is
+          <literal>true</literal>. If you want to use stateful advice - for
+          example, for stateful mixins - use prototype advices along with a
+          singleton value of <literal>false</literal>.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section id="aop-pfb-proxy-types">
+      <title>JDK- and CGLIB-based proxies</title>
+
+      <para>This section serves as the definitive documentation on how the
+      <classname>ProxyFactoryBean</classname> chooses to create one of either
+      a JDK- and CGLIB-based proxy for a particular target object (that is to
+      be proxied).</para>
+
+      <note>
+        <para>The behavior of the <classname>ProxyFactoryBean</classname> with
+        regard to creating JDK- or CGLIB-based proxies changed between
+        versions 1.2.x and 2.0 of Spring. The
+        <classname>ProxyFactoryBean</classname> now exhibits similar semantics
+        with regard to auto-detecting interfaces as those of the
+        <classname>TransactionProxyFactoryBean</classname> class.</para>
+      </note>
+
+      <para>If the class of a target object that is to be proxied (hereafter
+      simply referred to as the target class) doesn't implement any
+      interfaces, then a CGLIB-based proxy will be created. This is the
+      easiest scenario, because JDK proxies are interface based, and no
+      interfaces means JDK proxying isn't even possible. One simply plugs in
+      the target bean, and specifies the list of interceptors via the
+      <literal>interceptorNames</literal> property. Note that a CGLIB-based
+      proxy will be created even if the <literal>proxyTargetClass</literal>
+      property of the <classname>ProxyFactoryBean</classname> has been set to
+      <literal>false</literal>. (Obviously this makes no sense, and is best
+      removed from the bean definition because it is at best redundant, and at
+      worst confusing.)</para>
+
+      <para>If the target class implements one (or more) interfaces, then the
+      type of proxy that is created depends on the configuration of the
+      <classname>ProxyFactoryBean</classname>.</para>
+
+      <para>If the <literal>proxyTargetClass</literal> property of the
+      <classname>ProxyFactoryBean</classname> has been set to
+      <literal>true</literal>, then a CGLIB-based proxy will be created. This
+      makes sense, and is in keeping with the principle of least surprise.
+      Even if the <literal>proxyInterfaces</literal> property of the
+      <classname>ProxyFactoryBean</classname> has been set to one or more
+      fully qualified interface names, the fact that the
+      <literal>proxyTargetClass</literal> property is set to
+      <literal>true</literal> <emphasis>will</emphasis> cause CGLIB-based
+      proxying to be in effect.</para>
+
+      <para>If the <literal>proxyInterfaces</literal> property of the
+      <classname>ProxyFactoryBean</classname> has been set to one or more
+      fully qualified interface names, then a JDK-based proxy will be created.
+      The created proxy will implement all of the interfaces that were
+      specified in the <literal>proxyInterfaces</literal> property; if the
+      target class happens to implement a whole lot more interfaces than those
+      specified in the <literal>proxyInterfaces</literal> property, that is
+      all well and good but those additional interfaces will not be
+      implemented by the returned proxy.</para>
+
+      <para>If the <literal>proxyInterfaces</literal> property of the
+      <classname>ProxyFactoryBean</classname> has <emphasis>not</emphasis>
+      been set, but the target class <emphasis>does implement one (or
+      more)</emphasis> interfaces, then the
+      <classname>ProxyFactoryBean</classname> will auto-detect the fact that
+      the target class does actually implement at least one interface, and a
+      JDK-based proxy will be created. The interfaces that are actually
+      proxied will be <emphasis>all</emphasis> of the interfaces that the
+      target class implements; in effect, this is the same as simply supplying
+      a list of each and every interface that the target class implements to
+      the <literal>proxyInterfaces</literal> property. However, it is
+      significantly less work, and less prone to typos.</para>
+    </section>
+
+    <section id="aop-api-proxying-intf">
+      <title>Proxying interfaces</title>
+
+      <para>Let's look at a simple example of
+      <classname>ProxyFactoryBean</classname> in action. This example
+      involves:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>A <emphasis>target bean</emphasis> that will be proxied. This
+          is the "personTarget" bean definition in the example below.</para>
+        </listitem>
+
+        <listitem>
+          <para>An Advisor and an Interceptor used to provide advice.</para>
+        </listitem>
+
+        <listitem>
+          <para>An AOP proxy bean definition specifying the target object (the
+          personTarget bean) and the interfaces to proxy, along with the
+          advices to apply.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para><programlisting language="xml">&lt;bean id="personTarget" class="com.mycompany.PersonImpl"&gt;
+    &lt;property name="name" value="Tony"/&gt;
+    &lt;property name="age" value="51"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="myAdvisor" class="com.mycompany.MyAdvisor"&gt;
+    &lt;property name="someProperty" value="Custom string property value"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"&gt;
+&lt;/bean&gt;
+
+&lt;bean id="person" 
+    class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+    &lt;property name="proxyInterfaces" value="com.mycompany.Person"/&gt;
+
+    &lt;property name="target" ref="personTarget"/&gt;
+    &lt;property name="interceptorNames"&gt;
+        &lt;list&gt;
+            &lt;value&gt;myAdvisor&lt;/value&gt;
+            &lt;value&gt;debugInterceptor&lt;/value&gt;
+        &lt;/list&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+      <para>Note that the <literal>interceptorNames</literal> property takes a
+      list of String: the bean names of the interceptor or advisors in the
+      current factory. Advisors, interceptors, before, after returning and
+      throws advice objects can be used. The ordering of advisors is
+      significant.</para>
+
+      <note>
+        <para>You might be wondering why the list doesn't hold bean
+        references. The reason for this is that if the ProxyFactoryBean's
+        singleton property is set to false, it must be able to return
+        independent proxy instances. If any of the advisors is itself a
+        prototype, an independent instance would need to be returned, so it's
+        necessary to be able to obtain an instance of the prototype from the
+        factory; holding a reference isn't sufficient.</para>
+      </note>
+
+      <para>The "person" bean definition above can be used in place of a
+      Person implementation, as follows:</para>
+
+      <programlisting language="java">Person person = (Person) factory.getBean("person");</programlisting>
+
+      <para>Other beans in the same IoC context can express a strongly typed
+      dependency on it, as with an ordinary Java object:</para>
+
+      <para><programlisting language="xml">&lt;bean id="personUser" class="com.mycompany.PersonUser"&gt;
+  &lt;property name="person"&gt;&lt;ref local="person"/&gt;&lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+      <para>The <literal>PersonUser</literal> class in this example would
+      expose a property of type Person. As far as it's concerned, the AOP
+      proxy can be used transparently in place of a "real" person
+      implementation. However, its class would be a dynamic proxy class. It
+      would be possible to cast it to the <literal>Advised</literal> interface
+      (discussed below).</para>
+
+      <para>It's possible to conceal the distinction between target and proxy
+      using an anonymous <emphasis>inner bean</emphasis>, as follows. Only the
+      <literal>ProxyFactoryBean</literal> definition is different; the advice
+      is included only for completeness:</para>
+
+      <para><programlisting language="xml">&lt;bean id="myAdvisor" class="com.mycompany.MyAdvisor"&gt;
+  &lt;property name="someProperty" value="Custom string property value"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/&gt;
+
+&lt;bean id="person" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+  &lt;property name="proxyInterfaces" value="com.mycompany.Person"/&gt;
+  &lt;!-- Use inner bean, not local reference to target --&gt;
+  &lt;property name="target"&gt;
+    &lt;bean class="com.mycompany.PersonImpl"&gt;
+      &lt;property name="name" value="Tony"/&gt;
+      &lt;property name="age" value="51"/&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
+  &lt;property name="interceptorNames"&gt;
+    &lt;list&gt;
+      &lt;value&gt;myAdvisor&lt;/value&gt;
+      &lt;value&gt;debugInterceptor&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+      <para>This has the advantage that there's only one object of type
+      <literal>Person</literal>: useful if we want to prevent users of the
+      application context from obtaining a reference to the un-advised object,
+      or need to avoid any ambiguity with Spring IoC
+      <emphasis>autowiring</emphasis>. There's also arguably an advantage in
+      that the ProxyFactoryBean definition is self-contained. However, there
+      are times when being able to obtain the un-advised target from the
+      factory might actually be an <emphasis>advantage</emphasis>: for
+      example, in certain test scenarios.</para>
+    </section>
+
+    <section id="aop-api-proxying-class">
+      <title>Proxying classes</title>
+
+      <para>What if you need to proxy a class, rather than one or more
+      interfaces?</para>
+
+      <para>Imagine that in our example above, there was no
+      <literal>Person</literal> interface: we needed to advise a class called
+      <literal>Person</literal> that didn't implement any business interface.
+      In this case, you can configure Spring to use CGLIB proxying, rather
+      than dynamic proxies. Simply set the <literal>proxyTargetClass</literal>
+      property on the ProxyFactoryBean above to true. While it's best to
+      program to interfaces, rather than classes, the ability to advise
+      classes that don't implement interfaces can be useful when working with
+      legacy code. (In general, Spring isn't prescriptive. While it makes it
+      easy to apply good practices, it avoids forcing a particular
+      approach.)</para>
+
+      <para>If you want to, you can force the use of CGLIB in any case, even
+      if you do have interfaces.</para>
+
+      <para>CGLIB proxying works by generating a subclass of the target class
+      at runtime. Spring configures this generated subclass to delegate method
+      calls to the original target: the subclass is used to implement the
+      <emphasis>Decorator</emphasis> pattern, weaving in the advice.</para>
+
+      <para>CGLIB proxying should generally be transparent to users. However,
+      there are some issues to consider:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><literal>Final</literal> methods can't be advised, as they
+          can't be overridden.</para>
+        </listitem>
+
+        <listitem>
+          <para>You'll need the CGLIB 2 binaries on your classpath; dynamic
+          proxies are available with the JDK.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>There's little performance difference between CGLIB proxying and
+      dynamic proxies. As of Spring 1.0, dynamic proxies are slightly faster.
+      However, this may change in the future. Performance should not be a
+      decisive consideration in this case.</para>
+    </section>
+
+    <section id="aop-global-advisors">
+      <title>Using 'global' advisors</title>
+
+      <para>By appending an asterisk to an interceptor name, all advisors with
+      bean names matching the part before the asterisk, will be added to the
+      advisor chain. This can come in handy if you need to add a standard set
+      of 'global' advisors: <programlisting language="xml">
+&lt;bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+  &lt;property name="target" ref="service"/&gt;
+  &lt;property name="interceptorNames"&gt;
+    &lt;list&gt;
+      &lt;value&gt;global*&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id="global_debug" class="org.springframework.aop.interceptor.DebugInterceptor"/&gt;
+&lt;bean id="global_performance" class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor"/&gt;
+</programlisting></para>
+    </section>
+  </section>
+
+  <section id="aop-concise-proxy">
+    <title>Concise proxy definitions</title>
+
+    <para>Especially when defining transactional proxies, you may end up with
+    many similar proxy definitions. The use of parent and child bean
+    definitions, along with inner bean definitions, can result in much cleaner
+    and more concise proxy definitions.</para>
+
+    <para>First a parent, <emphasis>template</emphasis>, bean definition is
+    created for the proxy:</para>
+
+    <para><programlisting language="xml">&lt;bean id="txProxyTemplate" abstract="true"
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
+  &lt;property name="transactionManager" ref="transactionManager"/&gt;
+  &lt;property name="transactionAttributes"&gt;
+    &lt;props&gt;
+      &lt;prop key="*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+    <para>This will never be instantiated itself, so may actually be
+    incomplete. Then each proxy which needs to be created is just a child bean
+    definition, which wraps the target of the proxy as an inner bean
+    definition, since the target will never be used on its own
+    anyway.<programlisting language="xml">&lt;bean id="myService" parent="txProxyTemplate"&gt;
+  &lt;property name="target"&gt;
+    &lt;bean class="org.springframework.samples.MyServiceImpl"&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+    <para>It is of course possible to override properties from the parent
+    template, such as in this case, the transaction propagation
+    settings:<programlisting language="xml">&lt;bean id="mySpecialService" parent="txProxyTemplate"&gt;
+  &lt;property name="target"&gt;
+    &lt;bean class="org.springframework.samples.MySpecialServiceImpl"&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
+  &lt;property name="transactionAttributes"&gt;
+    &lt;props&gt;
+      &lt;prop key="get*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+      &lt;prop key="find*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+      &lt;prop key="load*"&gt;PROPAGATION_REQUIRED,readOnly&lt;/prop&gt;
+      &lt;prop key="store*"&gt;PROPAGATION_REQUIRED&lt;/prop&gt;
+    &lt;/props&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+    <para>Note that in the example above, we have explicitly marked the parent
+    bean definition as <emphasis>abstract</emphasis> by using the
+    <emphasis>abstract</emphasis> attribute, as described <link
+    linkend="beans-child-bean-definitions">previously</link>, so that it may
+    not actually ever be instantiated. Application contexts (but not simple
+    bean factories) will by default pre-instantiate all singletons. It is
+    therefore important (at least for singleton beans) that if you have a
+    (parent) bean definition which you intend to use only as a template, and
+    this definition specifies a class, you must make sure to set the
+    <emphasis>abstract</emphasis> attribute to <emphasis>true</emphasis>,
+    otherwise the application context will actually try to pre-instantiate
+    it.</para>
+  </section>
+
+  <section id="aop-prog">
+    <title>Creating AOP proxies programmatically with the ProxyFactory</title>
+
+    <para>It's easy to create AOP proxies programmatically using Spring. This
+    enables you to use Spring AOP without dependency on Spring IoC.</para>
+
+    <para>The following listing shows creation of a proxy for a target object,
+    with one interceptor and one advisor. The interfaces implemented by the
+    target object will automatically be proxied:</para>
+
+    <para><programlisting language="java">ProxyFactory factory = new ProxyFactory(myBusinessInterfaceImpl);
+factory.addAdvice(myMethodInterceptor);
+factory.addAdvisor(myAdvisor);
+MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();</programlisting></para>
+
+    <para>The first step is to construct an object of type
+    <literal>org.springframework.aop.framework.ProxyFactory</literal>. You can
+    create this with a target object, as in the above example, or specify the
+    interfaces to be proxied in an alternate constructor.</para>
+
+    <para>You can add advices (with interceptors as a specialized kind of advice)
+    and/or advisors, and manipulate them for the life of the ProxyFactory.
+    If you add an IntroductionInterceptionAroundAdvisor, you can cause the proxy
+    to implement additional interfaces.</para>
+
+    <para>There are also convenience methods on ProxyFactory (inherited from
+    <classname>AdvisedSupport</classname>) which allow you to add other advice
+    types such as before and throws advice. AdvisedSupport is the superclass
+    of both ProxyFactory and ProxyFactoryBean.</para>
+
+    <tip>
+      <para>Integrating AOP proxy creation with the IoC framework is best
+      practice in most applications. We recommend that you externalize
+      configuration from Java code with AOP, as in general.</para>
+    </tip>
+  </section>
+
+  <section id="aop-api-advised">
+    <title>Manipulating advised objects</title>
+
+    <para>However you create AOP proxies, you can manipulate them using the
+    <literal>org.springframework.aop.framework.Advised</literal> interface.
+    Any AOP proxy can be cast to this interface, whichever other interfaces it
+    implements. This interface includes the following methods:</para>
+
+    <programlisting language="java">Advisor[] getAdvisors();
+
+void addAdvice(Advice advice) throws AopConfigException;
+
+void addAdvice(int pos, Advice advice) 
+        throws AopConfigException;
+
+void addAdvisor(Advisor advisor) throws AopConfigException;
+
+void addAdvisor(int pos, Advisor advisor) throws AopConfigException;
+
+int indexOf(Advisor advisor);
+
+boolean removeAdvisor(Advisor advisor) throws AopConfigException;
+
+void removeAdvisor(int index) throws AopConfigException;
+
+boolean replaceAdvisor(Advisor a, Advisor b) throws AopConfigException;
+
+boolean isFrozen();</programlisting>
+
+    <para>The <literal>getAdvisors()</literal> method will return an Advisor
+    for every advisor, interceptor or other advice type that has been added to
+    the factory. If you added an Advisor, the returned advisor at this index
+    will be the object that you added. If you added an interceptor or other
+    advice type, Spring will have wrapped this in an advisor with a pointcut
+    that always returns true. Thus if you added a
+    <literal>MethodInterceptor</literal>, the advisor returned for this index
+    will be an <literal>DefaultPointcutAdvisor</literal> returning your
+    <literal>MethodInterceptor</literal> and a pointcut that matches all
+    classes and methods.</para>
+
+    <para>The <literal>addAdvisor()</literal> methods can be used to add any
+    Advisor. Usually the advisor holding pointcut and advice will be the
+    generic <literal>DefaultPointcutAdvisor</literal>, which can be used with
+    any advice or pointcut (but not for introductions).</para>
+
+    <para>By default, it's possible to add or remove advisors or interceptors
+    even once a proxy has been created. The only restriction is that it's
+    impossible to add or remove an introduction advisor, as existing proxies
+    from the factory will not show the interface change. (You can obtain a new
+    proxy from the factory to avoid this problem.)</para>
+
+    <para>A simple example of casting an AOP proxy to the
+    <literal>Advised</literal> interface and examining and manipulating its
+    advice:</para>
+
+    <para><programlisting language="java">Advised advised = (Advised) myObject;
+Advisor[] advisors = advised.getAdvisors();
+int oldAdvisorCount = advisors.length;
+System.out.println(oldAdvisorCount + " advisors");
+
+// Add an advice like an interceptor without a pointcut
+// Will match all proxied methods
+// Can use for interceptors, before, after returning or throws advice
+advised.addAdvice(new DebugInterceptor());
+
+// Add selective advice using a pointcut
+advised.addAdvisor(new DefaultPointcutAdvisor(mySpecialPointcut, myAdvice));
+
+assertEquals("Added two advisors",
+     oldAdvisorCount + 2, advised.getAdvisors().length);</programlisting></para>
+
+    <note>
+      <para>It's questionable whether it's advisable (no pun intended) to
+      modify advice on a business object in production, although there are no
+      doubt legitimate usage cases. However, it can be very useful in
+      development: for example, in tests. I have sometimes found it very
+      useful to be able to add test code in the form of an interceptor or
+      other advice, getting inside a method invocation I want to test. (For
+      example, the advice can get inside a transaction created for that
+      method: for example, to run SQL to check that a database was correctly
+      updated, before marking the transaction for roll back.)</para>
+    </note>
+
+    <para>Depending on how you created the proxy, you can usually set a
+    <literal>frozen</literal> flag, in which case the
+    <literal>Advised</literal> <literal>isFrozen()</literal> method will
+    return true, and any attempts to modify advice through addition or removal
+    will result in an <literal>AopConfigException</literal>. The ability to
+    freeze the state of an advised object is useful in some cases, for
+    example, to prevent calling code removing a security interceptor. It may
+    also be used in Spring 1.1 to allow aggressive optimization if runtime
+    advice modification is known not to be required.</para>
+  </section>
+
+  <section id="aop-autoproxy">
+    <title>Using the "autoproxy" facility</title>
+
+    <para>So far we've considered explicit creation of AOP proxies using a
+    <literal>ProxyFactoryBean</literal> or similar factory bean.</para>
+
+    <para>Spring also allows us to use "autoproxy" bean definitions, which can
+    automatically proxy selected bean definitions. This is built on Spring
+    "bean post processor" infrastructure, which enables modification of any
+    bean definition as the container loads.</para>
+
+    <para>In this model, you set up some special bean definitions in your XML
+    bean definition file to configure the auto proxy infrastructure. This
+    allows you just to declare the targets eligible for autoproxying: you
+    don't need to use <literal>ProxyFactoryBean</literal>.</para>
+
+    <para>There are two ways to do this:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Using an autoproxy creator that refers to specific beans in the
+        current context.</para>
+      </listitem>
+
+      <listitem>
+        <para>A special case of autoproxy creation that deserves to be
+        considered separately; autoproxy creation driven by source-level
+        metadata attributes.</para>
+      </listitem>
+    </itemizedlist>
+
+    <section id="aop-autoproxy-choices">
+      <title>Autoproxy bean definitions</title>
+
+      <para>The <literal>org.springframework.aop.framework.autoproxy</literal>
+      package provides the following standard autoproxy creators.</para>
+
+      <section id="aop-api-autoproxy">
+        <title>BeanNameAutoProxyCreator</title>
+
+        <para>The <literal>BeanNameAutoProxyCreator</literal> class is a
+        <literal>BeanPostProcessor</literal> that automatically creates AOP
+        proxies for beans with names matching literal values or
+        wildcards.</para>
+
+        <para><programlisting language="xml">&lt;bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator"&gt;
+  &lt;property name="beanNames" value="jdk*,onlyJdk"/&gt;
+  &lt;property name="interceptorNames"&gt;
+    &lt;list&gt;
+      &lt;value&gt;myInterceptor&lt;/value&gt;
+    &lt;/list&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+        <para>As with <literal>ProxyFactoryBean</literal>, there is an
+        <literal>interceptorNames</literal> property rather than a list of
+        interceptors, to allow correct behavior for prototype advisors. Named
+        "interceptors" can be advisors or any advice type.</para>
+
+        <para>As with auto proxying in general, the main point of using
+        <literal>BeanNameAutoProxyCreator</literal> is to apply the same
+        configuration consistently to multiple objects, with minimal volume of
+        configuration. It is a popular choice for applying declarative
+        transactions to multiple objects.</para>
+
+        <para>Bean definitions whose names match, such as "jdkMyBean" and
+        "onlyJdk" in the above example, are plain old bean definitions with
+        the target class. An AOP proxy will be created automatically by the
+        <literal>BeanNameAutoProxyCreator</literal>. The same advice will be
+        applied to all matching beans. Note that if advisors are used (rather
+        than the interceptor in the above example), the pointcuts may apply
+        differently to different beans.</para>
+      </section>
+
+      <section id="aop-api-autoproxy-default">
+        <title>DefaultAdvisorAutoProxyCreator</title>
+
+        <para>A more general and extremely powerful auto proxy creator is
+        <literal>DefaultAdvisorAutoProxyCreator</literal>. This will
+        automagically apply eligible advisors in the current context, without
+        the need to include specific bean names in the autoproxy advisor's
+        bean definition. It offers the same merit of consistent configuration
+        and avoidance of duplication as
+        <literal>BeanNameAutoProxyCreator</literal>.</para>
+
+        <para>Using this mechanism involves:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Specifying a
+            <literal>DefaultAdvisorAutoProxyCreator</literal> bean
+            definition.</para>
+          </listitem>
+
+          <listitem>
+            <para>Specifying any number of Advisors in the same or related
+            contexts. Note that these <emphasis>must</emphasis> be Advisors,
+            not just interceptors or other advices. This is necessary because
+            there must be a pointcut to evaluate, to check the eligibility of
+            each advice to candidate bean definitions.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>The <literal>DefaultAdvisorAutoProxyCreator</literal> will
+        automatically evaluate the pointcut contained in each advisor, to see
+        what (if any) advice it should apply to each business object (such as
+        "businessObject1" and "businessObject2" in the example).</para>
+
+        <para>This means that any number of advisors can be applied
+        automatically to each business object. If no pointcut in any of the
+        advisors matches any method in a business object, the object will not
+        be proxied. As bean definitions are added for new business objects,
+        they will automatically be proxied if necessary.</para>
+
+        <para>Autoproxying in general has the advantage of making it
+        impossible for callers or dependencies to obtain an un-advised object.
+        Calling getBean("businessObject1") on this ApplicationContext will
+        return an AOP proxy, not the target business object. (The "inner bean"
+        idiom shown earlier also offers this benefit.)</para>
+
+        <para><programlisting language="xml">&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+
+&lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
+  &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="customAdvisor" class="com.mycompany.MyAdvisor"/&gt;
+
+&lt;bean id="businessObject1" class="com.mycompany.BusinessObject1"&gt;
+  &lt;!-- Properties omitted --&gt;
+&lt;/bean&gt;
+
+&lt;bean id="businessObject2" class="com.mycompany.BusinessObject2"/&gt;
+</programlisting></para>
+
+        <para>The <literal>DefaultAdvisorAutoProxyCreator</literal> is very
+        useful if you want to apply the same advice consistently to many
+        business objects. Once the infrastructure definitions are in place,
+        you can simply add new business objects without including specific
+        proxy configuration. You can also drop in additional aspects very
+        easily - for example, tracing or performance monitoring aspects - with
+        minimal change to configuration.</para>
+
+        <para>The DefaultAdvisorAutoProxyCreator offers support for filtering
+        (using a naming convention so that only certain advisors are
+        evaluated, allowing use of multiple, differently configured,
+        AdvisorAutoProxyCreators in the same factory) and ordering. Advisors
+        can implement the <literal>org.springframework.core.Ordered</literal>
+        interface to ensure correct ordering if this is an issue. The
+        TransactionAttributeSourceAdvisor used in the above example has a
+        configurable order value; the default setting is unordered.</para>
+      </section>
+
+      <section id="aop-api-autoproxy-abstract">
+        <title>AbstractAdvisorAutoProxyCreator</title>
+
+        <para>This is the superclass of DefaultAdvisorAutoProxyCreator. You
+        can create your own autoproxy creators by subclassing this class, in
+        the unlikely event that advisor definitions offer insufficient
+        customization to the behavior of the framework
+        <literal>DefaultAdvisorAutoProxyCreator</literal>.</para>
+      </section>
+    </section>
+
+    <section id="aop-autoproxy-metadata">
+      <title>Using metadata-driven auto-proxying</title>
+
+      <para>A particularly important type of autoproxying is driven by
+      metadata. This produces a similar programming model to .NET
+      <literal>ServicedComponents</literal>. Instead of using XML deployment
+      descriptors as in EJB, configuration for transaction management and
+      other enterprise services is held in source-level attributes.</para>
+
+      <para>In this case, you use the
+      <literal>DefaultAdvisorAutoProxyCreator</literal>, in combination with
+      Advisors that understand metadata attributes. The metadata specifics are
+      held in the pointcut part of the candidate advisors, rather than in the
+      autoproxy creation class itself.</para>
+
+      <para>This is really a special case of the
+      <literal>DefaultAdvisorAutoProxyCreator</literal>, but deserves
+      consideration on its own. (The metadata-aware code is in the pointcuts
+      contained in the advisors, not the AOP framework itself.)</para>
+
+      <para>The <literal>/attributes</literal> directory of the JPetStore
+      sample application shows the use of attribute-driven autoproxying. In
+      this case, there's no need to use the
+      <literal>TransactionProxyFactoryBean</literal>. Simply defining
+      transactional attributes on business objects is sufficient, because of
+      the use of metadata-aware pointcuts. The bean definitions include the
+      following code, in <literal>/WEB-INF/declarativeServices.xml</literal>.
+      Note that this is generic, and can be used outside the JPetStore:</para>
+
+      <para><programlisting language="xml">&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+
+&lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
+  &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="transactionInterceptor"
+    class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+  &lt;property name="transactionManager" ref="transactionManager"/&gt;
+  &lt;property name="transactionAttributeSource"&gt;
+    &lt;bean class="org.springframework.transaction.interceptor.AttributesTransactionAttributeSource"&gt;
+      &lt;property name="attributes" ref="attributes"/&gt;
+    &lt;/bean&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id="attributes" class="org.springframework.metadata.commons.CommonsAttributes"/&gt;</programlisting></para>
+
+      <para>The <literal>DefaultAdvisorAutoProxyCreator</literal> bean
+      definition (the name is not significant, hence it can even be omitted)
+      will pick up all eligible pointcuts in the current application context.
+      In this case, the "transactionAdvisor" bean definition, of type
+      <literal>TransactionAttributeSourceAdvisor</literal>, will apply to
+      classes or methods carrying a transaction attribute. The
+      TransactionAttributeSourceAdvisor depends on a TransactionInterceptor,
+      via constructor dependency. The example resolves this via autowiring.
+      The <literal>AttributesTransactionAttributeSource</literal> depends on
+      an implementation of the
+      <literal>org.springframework.metadata.Attributes</literal> interface. In
+      this fragment, the "attributes" bean satisfies this, using the Jakarta
+      Commons Attributes API to obtain attribute information. (The application
+      code must have been compiled using the Commons Attributes compilation
+      task.)</para>
+
+      <para>The <literal>/annotation</literal> directory of the JPetStore
+      sample application contains an analogous example for auto-proxying
+      driven by JDK 1.5+ annotations. The following configuration enables
+      automatic detection of Spring's <literal>Transactional</literal>
+      annotation, leading to implicit proxies for beans containing that
+      annotation:</para>
+
+      <para><programlisting language="xml">&lt;bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/&gt;
+
+&lt;bean class="org.springframework.transaction.interceptor.TransactionAttributeSourceAdvisor"&gt;
+  &lt;property name="transactionInterceptor" ref="transactionInterceptor"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="transactionInterceptor"
+    class="org.springframework.transaction.interceptor.TransactionInterceptor"&gt;
+  &lt;property name="transactionManager" ref="transactionManager"/&gt;
+  &lt;property name="transactionAttributeSource"&gt;
+    &lt;bean class="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource"/&gt;
+  &lt;/property&gt;
+&lt;/bean&gt;</programlisting></para>
+
+      <para>The <literal>TransactionInterceptor</literal> defined here depends
+      on a <literal>PlatformTransactionManager</literal> definition, which is
+      not included in this generic file (although it could be) because it will
+      be specific to the application's transaction requirements (typically
+      JTA, as in this example, or Hibernate, JDO or JDBC):</para>
+
+      <programlisting language="xml">&lt;bean id="transactionManager" 
+    class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;</programlisting>
+
+      <tip>
+        <para>If you require only declarative transaction management, using
+        these generic XML definitions will result in Spring automatically
+        proxying all classes or methods with transaction attributes. You won't
+        need to work directly with AOP, and the programming model is similar
+        to that of .NET ServicedComponents.</para>
+      </tip>
+
+      <para>This mechanism is extensible. It's possible to do autoproxying
+      based on custom attributes. You need to:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Define your custom attribute.</para>
+        </listitem>
+
+        <listitem>
+          <para>Specify an Advisor with the necessary advice, including a
+          pointcut that is triggered by the presence of the custom attribute
+          on a class or method. You may be able to use an existing advice,
+          merely implementing a static pointcut that picks up the custom
+          attribute.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>It's possible for such advisors to be unique to each advised class
+      (for example, mixins): they simply need to be defined as prototype,
+      rather than singleton, bean definitions. For example, the
+      <literal>LockMixin</literal> introduction interceptor from the Spring
+      test suite, shown above, could be used in conjunction with an
+      attribute-driven pointcut to target a mixin, as shown here. We use the
+      generic <literal>DefaultPointcutAdvisor</literal>, configured using
+      JavaBean properties:</para>
+
+      <para><programlisting language="xml">&lt;bean id="lockMixin" class="org.springframework.aop.LockMixin"
+    scope="prototype"/&gt;
+
+&lt;bean id="lockableAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor"
+    scope="prototype"&gt;
+  &lt;property name="pointcut" ref="myAttributeAwarePointcut"/&gt;
+  &lt;property name="advice" ref="lockMixin"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="anyBean" class="anyclass" ...</programlisting></para>
+
+      <para>If the attribute aware pointcut matches any methods in the
+      <literal>anyBean</literal> or other bean definitions, the mixin will be
+      applied. Note that both <literal>lockMixin</literal> and
+      <literal>lockableAdvisor</literal> definitions are prototypes. The
+      <literal>myAttributeAwarePointcut</literal> pointcut can be a singleton
+      definition, as it doesn't hold state for individual advised
+      objects.</para>
+    </section>
+  </section>
+
+  <section id="aop-targetsource">
+    <title>Using TargetSources</title>
+
+    <para>Spring offers the concept of a <emphasis>TargetSource</emphasis>,
+    expressed in the <literal>org.springframework.aop.TargetSource</literal>
+    interface. This interface is responsible for returning the "target object"
+    implementing the join point. The <literal>TargetSource</literal>
+    implementation is asked for a target instance each time the AOP proxy
+    handles a method invocation.</para>
+
+    <para>Developers using Spring AOP don't normally need to work directly
+    with TargetSources, but this provides a powerful means of supporting
+    pooling, hot swappable and other sophisticated targets. For example, a
+    pooling TargetSource can return a different target instance for each
+    invocation, using a pool to manage instances.</para>
+
+    <para>If you do not specify a TargetSource, a default implementation is
+    used that wraps a local object. The same target is returned for each
+    invocation (as you would expect).</para>
+
+    <para>Let's look at the standard target sources provided with Spring, and
+    how you can use them.</para>
+
+    <tip>
+      <para>When using a custom target source, your target will usually need
+      to be a prototype rather than a singleton bean definition. This allows
+      Spring to create a new target instance when required.</para>
+    </tip>
+
+    <section id="aop-ts-swap">
+      <title>Hot swappable target sources</title>
+
+      <para>The
+      <literal>org.springframework.aop.target.HotSwappableTargetSource</literal>
+      exists to allow the target of an AOP proxy to be switched while allowing
+      callers to keep their references to it.</para>
+
+      <para>Changing the target source's target takes effect immediately. The
+      <literal>HotSwappableTargetSource</literal> is threadsafe.</para>
+
+      <para>You can change the target via the <literal>swap()</literal> method
+      on HotSwappableTargetSource as follows:</para>
+
+      <para><programlisting language="java">HotSwappableTargetSource swapper = 
+    (HotSwappableTargetSource) beanFactory.getBean("swapper");
+Object oldTarget = swapper.swap(newTarget);</programlisting></para>
+
+      <para>The XML definitions required look as follows:</para>
+
+      <para><programlisting language="xml">&lt;bean id="initialTarget" class="mycompany.OldTarget"/&gt;
+
+&lt;bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource"&gt;
+  &lt;constructor-arg ref="initialTarget"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="swappable" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+  &lt;property name="targetSource" ref="swapper"/&gt;
+&lt;/bean&gt;</programlisting></para>
+
+      <para>The above <literal>swap()</literal> call changes the target of the
+      swappable bean. Clients who hold a reference to that bean will be
+      unaware of the change, but will immediately start hitting the new
+      target.</para>
+
+      <para>Although this example doesn't add any advice - and it's not
+      necessary to add advice to use a <literal>TargetSource</literal> - of
+      course any <literal>TargetSource</literal> can be used in conjunction
+      with arbitrary advice.</para>
+    </section>
+
+    <section id="aop-ts-pool">
+      <title>Pooling target sources</title>
+
+      <para>Using a pooling target source provides a similar programming model
+      to stateless session EJBs, in which a pool of identical instances is
+      maintained, with method invocations going to free objects in the
+      pool.</para>
+
+      <para>A crucial difference between Spring pooling and SLSB pooling is
+      that Spring pooling can be applied to any POJO. As with Spring in
+      general, this service can be applied in a non-invasive way.</para>
+
+      <para>Spring provides out-of-the-box support for Jakarta Commons Pool
+      1.3, which provides a fairly efficient pooling implementation. You'll
+      need the commons-pool Jar on your application's classpath to use this
+      feature. It's also possible to subclass
+      <literal>org.springframework.aop.target.AbstractPoolingTargetSource</literal>
+      to support any other pooling API.</para>
+
+      <para>Sample configuration is shown below:</para>
+
+      <para><programlisting language="xml">&lt;bean id="businessObjectTarget" class="com.mycompany.MyBusinessObject" 
+    scope="prototype"&gt;
+  ... properties omitted
+&lt;/bean&gt;
+
+&lt;bean id="poolTargetSource" class="org.springframework.aop.target.CommonsPoolTargetSource"&gt;
+  &lt;property name="targetBeanName" value="businessObjectTarget"/&gt;
+  &lt;property name="maxSize" value="25"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="businessObject" class="org.springframework.aop.framework.ProxyFactoryBean"&gt;
+  &lt;property name="targetSource" ref="poolTargetSource"/&gt;
+  &lt;property name="interceptorNames" value="myInterceptor"/&gt;
+&lt;/bean&gt;</programlisting></para>
+
+      <para>Note that the target object - "businessObjectTarget" in the
+      example - <emphasis>must</emphasis> be a prototype. This allows the
+      <literal>PoolingTargetSource</literal> implementation to create new
+      instances of the target to grow the pool as necessary. See the javadoc
+      for <literal>AbstractPoolingTargetSource</literal> and the concrete
+      subclass you wish to use for information about its properties: "maxSize"
+      is the most basic, and always guaranteed to be present.</para>
+
+      <para>In this case, "myInterceptor" is the name of an interceptor that
+      would need to be defined in the same IoC context. However, it isn't
+      necessary to specify interceptors to use pooling. If you want only
+      pooling, and no other advice, don't set the interceptorNames property at
+      all.</para>
+
+      <para>It's possible to configure Spring so as to be able to cast any
+      pooled object to the
+      <literal>org.springframework.aop.target.PoolingConfig</literal>
+      interface, which exposes information about the configuration and current
+      size of the pool through an introduction. You'll need to define an
+      advisor like this:</para>
+
+      <para><programlisting language="xml">&lt;bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"&gt;
+  &lt;property name="targetObject" ref="poolTargetSource"/&gt;
+  &lt;property name="targetMethod" value="getPoolingConfigMixin"/&gt;
+&lt;/bean&gt;</programlisting></para>
+
+      <para>This advisor is obtained by calling a convenience method on the
+      <literal>AbstractPoolingTargetSource</literal> class, hence the use of
+      MethodInvokingFactoryBean. This advisor's name ("poolConfigAdvisor"
+      here) must be in the list of interceptors names in the ProxyFactoryBean
+      exposing the pooled object.</para>
+
+      <para>The cast will look as follows:</para>
+
+      <programlisting language="java">PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
+System.out.println("Max pool size is " + conf.getMaxSize());</programlisting>
+
+      <note>
+        <para>Pooling stateless service objects is not usually necessary. We
+        don't believe it should be the default choice, as most stateless
+        objects are naturally thread safe, and instance pooling is problematic
+        if resources are cached.</para>
+      </note>
+
+      <para>Simpler pooling is available using autoproxying. It's possible to
+      set the TargetSources used by any autoproxy creator.</para>
+    </section>
+
+    <section id="aop-ts-prototype">
+      <title>Prototype target sources</title>
+
+      <para>Setting up a "prototype" target source is similar to a pooling
+      TargetSource. In this case, a new instance of the target will be created
+      on every method invocation. Although the cost of creating a new object
+      isn't high in a modern JVM, the cost of wiring up the new object
+      (satisfying its IoC dependencies) may be more expensive. Thus you
+      shouldn't use this approach without very good reason.</para>
+
+      <para>To do this, you could modify the
+      <literal>poolTargetSource</literal> definition shown above as follows.
+      (I've also changed the name, for clarity.)</para>
+
+      <programlisting language="xml">&lt;bean id="prototypeTargetSource" class="org.springframework.aop.target.PrototypeTargetSource"&gt;
+  &lt;property name="targetBeanName" ref="businessObjectTarget"/&gt;
+&lt;/bean&gt;</programlisting>
+
+      <para>There's only one property: the name of the target bean.
+      Inheritance is used in the TargetSource implementations to ensure
+      consistent naming. As with the pooling target source, the target bean
+      must be a prototype bean definition.</para>
+    </section>
+
+    <section id="aop-ts-threadlocal">
+      <title><classname>ThreadLocal</classname> target sources</title>
+
+      <para><classname>ThreadLocal</classname> target sources are useful if
+      you need an object to be created for each incoming request (per thread
+      that is). The concept of a <classname>ThreadLocal</classname> provide a
+      JDK-wide facility to transparently store resource alongside a thread.
+      Setting up a <classname>ThreadLocalTargetSource</classname> is pretty
+      much the same as was explained for the other types of target
+      source:</para>
+
+      <programlisting language="xml">&lt;bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource"&gt;
+  &lt;property name="targetBeanName" value="businessObjectTarget"/&gt;
+&lt;/bean&gt;</programlisting>
+
+      <note>
+        <para>ThreadLocals come with serious issues (potentially resulting in
+        memory leaks) when incorrectly using them in a multi-threaded and
+        multi-classloader environments. One should always consider wrapping a
+        threadlocal in some other class and never directly use the
+        <classname>ThreadLocal</classname> itself (except of course in the
+        wrapper class). Also, one should always remember to correctly set and
+        unset (where the latter simply involved a call to
+        <literal>ThreadLocal.set(null)</literal>) the resource local to the
+        thread. Unsetting should be done in any case since not unsetting it
+        might result in problematic behavior. Spring's ThreadLocal support
+        does this for you and should always be considered in favor of using
+        ThreadLocals without other proper handling code.</para>
+      </note>
+    </section>
+  </section>
+
+  <section id="aop-extensibility">
+    <title>Defining new <interfacename>Advice</interfacename> types</title>
+
+    <para>Spring AOP is designed to be extensible. While the interception
+    implementation strategy is presently used internally, it is possible to
+    support arbitrary advice types in addition to the out-of-the-box
+    interception around advice, before, throws advice and after returning
+    advice.</para>
+
+    <para>The <literal>org.springframework.aop.framework.adapter</literal>
+    package is an SPI package allowing support for new custom advice types to
+    be added without changing the core framework. The only constraint on a
+    custom <interfacename>Advice</interfacename> type is that it must
+    implement the <interfacename>org.aopalliance.aop.Advice</interfacename>
+    tag interface.</para>
+
+    <para>Please refer to the
+    <literal>org.springframework.aop.framework.adapter</literal> package's
+    Javadocs for further information.</para>
+  </section>
+
+  <section id="aop-api-resources">
+    <title>Further resources</title>
+
+    <para>Please refer to the Spring sample applications for further examples
+    of Spring AOP:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The JPetStore's default configuration illustrates the use of the
+        <classname>TransactionProxyFactoryBean</classname> for declarative
+        transaction management.</para>
+      </listitem>
+
+      <listitem>
+        <para>The <literal>/attributes</literal> directory of the JPetStore
+        illustrates the use of attribute-driven declarative transaction
+        management.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+</chapter>

@@ -1,0 +1,1623 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xml:id="jmx">
+  <title>JMX</title>
+
+  <section id="jmx-introduction">
+    <title>Introduction</title>
+
+    <para>The JMX support in Spring provides you with the features to easily
+    and transparently integrate your Spring application into a JMX
+    infrastructure.</para>
+
+    <sidebar>
+      <title>JMX?</title>
+
+      <para>This chapter is not an introduction to JMX... it doesn't try to
+      explain the motivations of why one might want to use JMX (or indeed what
+      the letters JMX actually stand for). If you are new to JMX, check out
+      <xref linkend="jmx-resources" /> at the end of this chapter.</para>
+    </sidebar>
+
+    <para>Specifically, Spring's JMX support provides four core
+    features:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The automatic registration of <emphasis>any</emphasis> Spring
+        bean as a JMX MBean</para>
+      </listitem>
+
+      <listitem>
+        <para>A flexible mechanism for controlling the management interface of
+        your beans</para>
+      </listitem>
+
+      <listitem>
+        <para>The declarative exposure of MBeans over remote, JSR-160
+        connectors</para>
+      </listitem>
+
+      <listitem>
+        <para>The simple proxying of both local and remote MBean
+        resources</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>These features are designed to work without coupling your
+    application components to either Spring or JMX interfaces and classes.
+    Indeed, for the most part your application classes need not be aware of
+    either Spring or JMX in order to take advantage of the Spring JMX
+    features.</para>
+  </section>
+
+  <section id="jmx-exporting">
+    <title>Exporting your beans to JMX</title>
+
+    <para>The core class in Spring's JMX framework is the
+    <classname>MBeanExporter</classname>. This class is responsible for taking
+    your Spring beans and registering them with a JMX
+    <interfacename>MBeanServer</interfacename>. For example, consider the following
+    class:</para>
+
+    <programlisting language="java"><![CDATA[package org.springframework.jmx;
+
+public class JmxTestBean implements IJmxTestBean {
+
+    private String name;
+    private int age;
+    private boolean isSuperman;
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int add(int x, int y) {
+        return x + y;
+    }
+
+    public void dontExposeMe() {
+        throw new RuntimeException();
+    }
+}]]></programlisting>
+
+    <para>To expose the properties and methods of this bean as attributes and
+    operations of an MBean you simply configure an instance of the
+    <classname>MBeanExporter</classname> class in your configuration file and
+    pass in the bean as shown below:</para>
+
+    <programlisting language="xml"><![CDATA[<beans>
+
+  ]]><lineannotation>&lt;!-- this bean must <emphasis role="bold">not</emphasis> be lazily initialized if the exporting is to happen --&gt;</lineannotation><![CDATA[
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"]]> <emphasis
+        role="bold">lazy-init="false"</emphasis><![CDATA[>
+    <property name="beans">
+      <map>
+        <entry key="bean:name=testBean1" value-ref="testBean"/>
+      </map>
+    </property>
+  </bean>
+
+  <bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+</beans>]]></programlisting>
+
+    <para>The pertinent bean definition from the above configuration snippet
+    is the <literal>exporter</literal> bean. The <literal>beans</literal>
+    property tells the <classname>MBeanExporter</classname> exactly which of
+    your beans must be exported to the JMX <interfacename>MBeanServer</interfacename>.
+    In the default configuration, the key of each entry in the
+    <literal>beans</literal> <interfacename>Map</interfacename> is used as the
+    <classname>ObjectName</classname> for the bean referenced by the
+    corresponding entry value. This behavior can be changed as described in
+    <xref linkend="jmx-naming"/>.</para>
+
+    <para>With this configuration the <literal>testBean</literal> bean is
+    exposed as an MBean under the <classname>ObjectName</classname>
+    <literal>bean:name=testBean1</literal>. By default, all
+    <emphasis>public</emphasis> properties of the bean are exposed as
+    attributes and all <emphasis>public</emphasis> methods (bar those
+    inherited from the <classname>Object</classname> class) are exposed as
+    operations.</para>
+
+    <section id="jmx-exporting-mbeanserver">
+      <title>Creating an <interfacename>MBeanServer</interfacename></title>
+
+      <para>The above configuration assumes that the application is running in
+      an environment that has one (and only one)
+      <interfacename>MBeanServer</interfacename> already running. In this case, Spring
+      will attempt to locate the running <interfacename>MBeanServer</interfacename>
+      and register your beans with that server (if any). This behavior is
+      useful when your application is running inside a container such as
+      Tomcat or IBM WebSphere that has its own
+      <interfacename>MBeanServer</interfacename>.</para>
+
+      <para>However, this approach is of no use in a standalone environment,
+      or when running inside a container that does not provide an
+      <interfacename>MBeanServer</interfacename>. To address this you can create an
+      <interfacename>MBeanServer</interfacename> instance declaratively by adding an
+      instance of the
+      <classname>org.springframework.jmx.support.MBeanServerFactoryBean</classname>
+      class to your configuration. You can also ensure that a specific
+      <interfacename>MBeanServer</interfacename> is used by setting the value of the
+      <classname>MBeanExporter</classname>'s <literal>server</literal>
+      property to the <interfacename>MBeanServer</interfacename> value returned by an
+      <classname>MBeanServerFactoryBean</classname>; for example:</para>
+
+      <programlisting language="xml"><![CDATA[<beans>
+
+  <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean"/>
+
+  ]]><lineannotation>&lt;!--
+    this bean needs to be eagerly pre-instantiated in order for the exporting to occur;
+    this means that it must <emphasis role="bold">not</emphasis> be marked as lazily initialized
+  --&gt;</lineannotation><![CDATA[
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    <property name="beans">
+      <map>
+        <entry key="bean:name=testBean1" value-ref="testBean"/>
+      </map>
+    </property>
+    <property name="server" ref="mbeanServer"/>
+  </bean>
+
+  <bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+</beans>]]></programlisting>
+
+      <para>Here an instance of <interfacename>MBeanServer</interfacename> is created
+      by the <classname>MBeanServerFactoryBean</classname> and is supplied to
+      the <classname>MBeanExporter</classname> via the server property. When
+      you supply your own <interfacename>MBeanServer</interfacename> instance, the
+      <classname>MBeanExporter</classname> will not attempt to locate a
+      running <interfacename>MBeanServer</interfacename> and will use the supplied
+      <interfacename>MBeanServer</interfacename> instance. For this to work correctly,
+      you must (of course) have a JMX implementation on your classpath.</para>
+    </section>
+
+    <section id="jmx-mbean-server">
+      <title>Reusing an existing <interfacename>MBeanServer</interfacename></title>
+
+      <para>If no server is specified, the <classname>MBeanExporter</classname>
+      tries to automatically detect a running <interfacename>MBeanServer</interfacename>.
+      This works in most environment where only one
+      <interfacename>MBeanServer</interfacename> instance is used, however when multiple
+      instances exist, the exporter might pick the wrong server. In such
+      cases, one should use the <interfacename>MBeanServer</interfacename>
+      <literal>agentId</literal> to indicate which instance to be used:</para>
+
+      <programlisting language="xml"><![CDATA[<beans>
+   <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
+     ]]><lineannotation>&lt;!-- indicate to first look for a server --&gt;</lineannotation><![CDATA[
+     <property name="locateExistingServerIfPossible" value="true"/>
+     ]]><lineannotation>&lt;!-- search for the <interfacename>MBeanServer</interfacename> instance with the given agentId --&gt;</lineannotation><![CDATA[
+     <property name="agentId" value="]]><emphasis><![CDATA[<MBeanServer instance agentId>]]></emphasis><![CDATA["/>
+   </bean>
+   
+   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+     <property name="server" ref="mbeanServer"/>
+   ...
+   </bean>
+</beans>]]></programlisting>
+
+      <para>For platforms/cases where the existing <interfacename>MBeanServer</interfacename>
+      has a dynamic (or unknown) <literal>agentId</literal> which is retrieved through lookup
+      methods, one should use <link linkend="beans-factory-class-static-factory-method">factory-method</link>:</para>
+
+      <programlisting language="xml"><![CDATA[<beans>
+   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+     <property name="server">
+       ]]><lineannotation>&lt;!-- Custom <literal>MBeanServerLocator</literal> --&gt;</lineannotation><![CDATA[
+       <bean class="platform.package.MBeanServerLocator" factory-method="locateMBeanServer"/>
+     </property>
+     
+     ]]><lineannotation>&lt;!-- other beans here --&gt;</lineannotation><![CDATA[
+     
+   </bean>
+</beans>]]></programlisting>
+    </section>
+
+    <section id="jmx-exporting-lazy">
+      <title>Lazy-initialized MBeans</title>
+
+      <para>If you configure a bean with the
+      <classname>MBeanExporter</classname> that is also configured for lazy
+      initialization, then the <classname>MBeanExporter</classname> will
+      <emphasis role="bold">not</emphasis> break this contract and will avoid
+      instantiating the bean. Instead, it will register a proxy with
+      the <interfacename>MBeanServer</interfacename> and will defer obtaining the bean
+      from the container until the first invocation on the proxy occurs.</para>
+    </section>
+
+    <section id="jmx-exporting-auto">
+      <title>Automatic registration of MBeans</title>
+
+      <para>Any beans that are exported through the
+      <classname>MBeanExporter</classname> and are already valid MBeans are
+      registered as-is with the <interfacename>MBeanServer</interfacename> without
+      further intervention from Spring. MBeans can be automatically detected
+      by the <classname>MBeanExporter</classname> by setting the
+      <literal>autodetect</literal> property to <literal>true</literal>:</para>
+
+      <programlisting language="xml"><![CDATA[<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+  <property name="autodetect" value="true"/>
+</bean>
+
+<bean name="spring:mbean=true" class="org.springframework.jmx.export.TestDynamicMBean"/>]]></programlisting>
+
+      <para>Here, the bean called <literal>spring:mbean=true</literal> is
+      already a valid JMX MBean and will be automatically registered by
+      Spring. By default, beans that are autodetected for JMX registration
+      have their bean name used as the <classname>ObjectName</classname>. This
+      behavior can be overridden as detailed in <xref linkend="jmx-naming" />.</para>
+    </section>
+
+    <section id="jmx-exporting-registration-behavior">
+      <title>Controlling the registration behavior</title>
+
+      <para>Consider the scenario where a Spring
+      <classname>MBeanExporter</classname> attempts to register an
+      <classname>MBean</classname> with an <interfacename>MBeanServer</interfacename>
+      using the <classname>ObjectName</classname>
+      <literal>'bean:name=testBean1'</literal>. If an
+      <classname>MBean</classname> instance has already been registered under
+      that same <classname>ObjectName</classname>, the default behavior is to
+      fail (and throw an
+      <exceptionname>InstanceAlreadyExistsException</exceptionname>).</para>
+
+      <para>It is possible to control the behavior of exactly what happens
+      when an <classname>MBean</classname> is registered with an
+      <interfacename>MBeanServer</interfacename>. Spring's JMX support allows for
+      three different registration behaviors to control the registration
+      behavior when the registration process finds that an
+      <classname>MBean</classname> has already been registered under the same
+      <classname>ObjectName</classname>; these registration behaviors are
+      summarized on the following table:</para>
+
+      <table id="jmx-registration-behaviors">
+          <title>Registration Behaviors</title>
+
+          <tgroup cols="2">
+            <colspec align="left" />
+
+            <colspec colnum="1" colwidth="*" />
+
+            <colspec colnum="2" colwidth="*" />
+
+            <thead>
+              <row>
+                <entry align="center">Registration behavior</entry>
+
+                <entry align="center">Explanation</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><para><literal>REGISTRATION_FAIL_ON_EXISTING</literal></para></entry>
+
+                <entry><para> This is the default registration behavior. If an
+                <classname>MBean</classname> instance has already been
+                registered under the same <classname>ObjectName</classname>,
+                the <classname>MBean</classname> that is being registered will
+                not be registered and an
+                <exceptionname>InstanceAlreadyExistsException</exceptionname> will be
+                thrown. The existing <classname>MBean</classname> is
+                unaffected. </para></entry>
+              </row>
+
+              <row>
+                <entry><para><literal>REGISTRATION_IGNORE_EXISTING</literal></para></entry>
+
+                <entry><para> If an <classname>MBean</classname> instance has
+                already been registered under the same
+                <classname>ObjectName</classname>, the
+                <classname>MBean</classname> that is being registered will
+                <emphasis>not</emphasis> be registered. The existing
+                <classname>MBean</classname> is unaffected, and no
+                <exceptionname>Exception</exceptionname> will be thrown. </para>
+                <para> This is useful in settings where multiple applications
+                want to share a common <classname>MBean</classname> in a
+                shared <interfacename>MBeanServer</interfacename>. </para></entry>
+              </row>
+
+              <row>
+                <entry><para><literal>REGISTRATION_REPLACE_EXISTING</literal></para></entry>
+
+                <entry><para> If an <classname>MBean</classname> instance has
+                already been registered under the same
+                <classname>ObjectName</classname>, the existing
+                <classname>MBean</classname> that was previously registered
+                will be unregistered and the new <classname>MBean</classname>
+                will be registered in its place (the new
+                <classname>MBean</classname> effectively replaces the previous
+                instance). </para></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+      <para>The above values are defined as constants on the
+      <classname>MBeanRegistrationSupport</classname> class (the
+      <classname>MBeanExporter</classname> class derives from this
+      superclass). If you want to change the default registration behavior,
+      you simply need to set the value of the
+      <literal>registrationBehaviorName</literal> property on your
+      <classname>MBeanExporter</classname> definition to one of those
+      values.</para>
+
+      <para>The following example illustrates how to effect a change from the
+      default registration behavior to the
+      <literal>REGISTRATION_REPLACE_EXISTING</literal> behavior:</para>
+
+      <programlisting language="xml"><![CDATA[<beans>
+
+    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+        <property name="beans">
+            <map>
+                <entry key="bean:name=testBean1" value-ref="testBean"/>
+            </map>
+        </property>
+        <property name="registrationBehaviorName" value="REGISTRATION_REPLACE_EXISTING"/>
+    </bean>
+
+    <bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+        <property name="name" value="TEST"/>
+        <property name="age" value="100"/>
+    </bean>
+
+</beans>]]></programlisting>
+    </section>
+  </section>
+
+  <section id="jmx-interface">
+    <title>Controlling the management interface of your beans</title>
+
+    <para>In the previous example, you had little control over the management
+    interface of your bean; <emphasis>all</emphasis> of the
+    <emphasis>public</emphasis> properties and methods of each exported bean
+    was exposed as JMX attributes and operations respectively. To exercise
+    finer-grained control over exactly which properties and methods of your
+    exported beans are actually exposed as JMX attributes and operations,
+    Spring JMX provides a comprehensive and extensible mechanism for
+    controlling the management interfaces of your beans.</para>
+
+    <section id="jmx-interface-assembler">
+      <title>The <interfacename>MBeanInfoAssembler</interfacename>
+      Interface</title>
+
+      <para>Behind the scenes, the <classname>MBeanExporter</classname>
+      delegates to an implementation of the
+      <classname>org.springframework.jmx.export.assembler.MBeanInfoAssembler</classname>
+      interface which is responsible for defining the management interface of
+      each bean that is being exposed. The default implementation,
+      <classname>org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler</classname>,
+      simply defines a management interface that exposes all public properties
+      and methods (as you saw in the previous examples). Spring provides two
+      additional implementations of the
+      <interfacename>MBeanInfoAssembler</interfacename> interface that allow
+      you to control the generated management interface using either
+      source-level metadata or any arbitrary interface.</para>
+    </section>
+
+    <section id="jmx-interface-metadata">
+      <title>Using Source-Level Metadata (JDK 5.0 annotations)</title>
+
+      <para>Using the <classname>MetadataMBeanInfoAssembler</classname> you
+      can define the management interfaces for your beans using source level
+      metadata. The reading of metadata is encapsulated by the
+      <classname>org.springframework.jmx.export.metadata.JmxAttributeSource</classname>
+      interface. Spring JMX provides a default implementation which uses JDK 5.0 annotations, namely
+      <classname>org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource</classname>. The
+      <classname>MetadataMBeanInfoAssembler</classname>
+      <emphasis>must</emphasis> be configured with an implementation instance
+      of the <classname>JmxAttributeSource</classname> interface for it to
+      function correctly (there is <emphasis>no</emphasis> default).</para>
+
+      <para>To mark a bean for export to JMX, you should annotate the bean
+      class with the <classname>ManagedResource</classname> annotation. Each
+      method you wish to expose as an operation must be marked with the
+      <classname>ManagedOperation</classname> annotation and each property you
+      wish to expose must be marked with the
+      <classname>ManagedAttribute</classname> annotation. When marking
+      properties you can omit either the annotation of the getter or the
+      setter to create a write-only or read-only attribute
+      respectively.</para>
+
+      <para>The example below shows the annotated version of the 
+        <classname>JmxTestBean</classname> class that you saw earlier:</para>
+      <programlisting language="java"><![CDATA[package org.springframework.jmx;
+
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+
+@ManagedResource(objectName="bean:name=testBean4", description="My Managed Bean", log=true,
+    logFile="jmx.log", currencyTimeLimit=15, persistPolicy="OnUpdate", persistPeriod=200,
+    persistLocation="foo", persistName="bar")
+public class AnnotationTestBean implements IJmxTestBean {
+
+  private String name;
+  private int age;
+
+  @ManagedAttribute(description="The Age Attribute", currencyTimeLimit=15)
+  public int getAge() {
+    return age;
+  }
+
+  public void setAge(int age) {
+    this.age = age;
+  }
+
+  @ManagedAttribute(description="The Name Attribute",
+      currencyTimeLimit=20,
+      defaultValue="bar",
+      persistPolicy="OnUpdate")
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  @ManagedAttribute(defaultValue="foo", persistPeriod=300)
+  public String getName() {
+    return name;
+  }
+
+  @ManagedOperation(description="Add two numbers")
+  @ManagedOperationParameters({
+    @ManagedOperationParameter(name = "x", description = "The first number"),
+    @ManagedOperationParameter(name = "y", description = "The second number")})
+  public int add(int x, int y) {
+    return x + y;
+  }
+
+  public void dontExposeMe() {
+    throw new RuntimeException();
+  }
+}]]></programlisting>
+
+      <para>Here you can see that the <classname>JmxTestBean</classname> class
+      is marked with the <classname>ManagedResource</classname> annotation and
+        that this <classname>ManagedResource</classname> annotation is configured
+      with a set of properties. These properties can be used to configure
+      various aspects of the MBean that is generated by the
+      <classname>MBeanExporter</classname>, and are explained in greater
+      detail later in section entitled <xref
+      linkend="jmx-interface-metadata-types" />.</para>
+
+      <para>You will also notice that both the <literal>age</literal> and
+      <literal>name</literal> properties are annotated with the
+      <classname>ManagedAttribute</classname> annotation, but in the case of
+      the <literal>age</literal> property, only the getter is marked. This
+      will cause both of these properties to be included in the management
+      interface as attributes, but the <literal>age</literal> attribute will
+      be read-only.</para>
+
+      <para>Finally, you will notice that the <literal>add(int, int)</literal>
+      method is marked with the <classname>ManagedOperation</classname>
+      attribute whereas the <literal>dontExposeMe()</literal> method is not.
+      This will cause the management interface to contain only one operation,
+      <literal>add(int, int)</literal>, when using the
+      <classname>MetadataMBeanInfoAssembler</classname>.</para>
+
+      <para>The configuration below shows how you configure the
+      <classname>MBeanExporter</classname> to use the
+      <classname>MetadataMBeanInfoAssembler</classname>:</para>
+      <programlisting language="xml"><![CDATA[<beans>
+    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+        <property name="assembler" ref="assembler"/>
+        <property name="namingStrategy" ref="namingStrategy"/>
+        <property name="autodetect" value="true"/>
+    </bean>
+
+    <bean id="jmxAttributeSource"
+          class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+
+    ]]><lineannotation>&lt;!-- will create management interface using annotation metadata --&gt;</lineannotation><![CDATA[
+    <bean id="assembler"
+          class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+        <property name="attributeSource" ref="jmxAttributeSource"/>
+    </bean>
+
+    ]]><lineannotation>&lt;!-- will pick up the <classname>ObjectName</classname> from the annotation --&gt;</lineannotation><![CDATA[
+    <bean id="namingStrategy"
+          class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+        <property name="attributeSource" ref="jmxAttributeSource"/>
+    </bean>
+
+    <bean id="testBean" class="org.springframework.jmx.AnnotationTestBean">
+        <property name="name" value="TEST"/>
+        <property name="age" value="100"/>
+    </bean>
+</beans>]]></programlisting>
+      
+
+      <para>Here you can see that an
+      <classname>MetadataMBeanInfoAssembler</classname> bean has been
+      configured with an instance of the
+        <classname>AnnotationJmxAttributeSource</classname> class and passed to
+      the <classname>MBeanExporter</classname> through the assembler property.
+      This is all that is required to take advantage of metadata-driven
+      management interfaces for your Spring-exposed MBeans.</para>
+    </section>
+
+    <section id="jmx-interface-metadata-types">
+      <title>Source-Level Metadata Types</title>
+
+      <para>The following source level metadata types are available for use in
+      Spring JMX:</para>
+
+      <para><table id="jmx-metadata-types">
+          <title>Source-Level Metadata Types</title>
+
+          <tgroup cols="3">
+            <colspec align="left" />
+
+            <colspec colname="spycolgen1" colnum="1" colwidth="*" />
+
+            <colspec colname="spycolgen2" colnum="2" colwidth="*" />
+
+            <thead>
+              <row>
+                <entry align="center">Purpose</entry>
+
+                <entry align="center">Annotation</entry>
+
+                <entry align="center">Annotation Type</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry>Mark all instances of a <classname>Class</classname> as
+                JMX managed resources</entry>
+
+                <entry><literal>@ManagedResource</literal></entry>
+
+                <entry>Class</entry>
+              </row>
+
+              <row>
+                <entry>Mark a method as a JMX operation</entry>
+
+                <entry><literal>@ManagedOperation</literal></entry>
+
+                <entry>Method</entry>
+              </row>
+
+              <row>
+                <entry>Mark a getter or setter as one half of a JMX
+                attribute</entry>
+
+                <entry><classname>@ManagedAttribute</classname></entry>
+
+                <entry>Method (only getters and setters)</entry>
+              </row>
+
+              <row>
+                <entry>Define descriptions for operation parameters</entry>
+
+                <entry><classname>@ManagedOperationParameter</classname> and
+                <classname>@ManagedOperationParameters</classname></entry>
+
+                <entry>Method</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table></para>
+
+      <para>The following configuration parameters are available for use on
+      these source-level metadata types:</para>
+
+      <para><table id="jmx-metadata-parameters">
+          <title>Source-Level Metadata Parameters</title>
+
+          <tgroup cols="3">
+            <colspec align="left" />
+
+            <colspec colname="spycolgen1" colnum="1" colwidth="*" />
+
+            <colspec colname="spycolgen2" colnum="2" colwidth="*" />
+
+            <thead>
+              <row>
+                <entry align="center">Parameter</entry>
+
+                <entry align="center">Description</entry>
+
+                <entry align="center">Applies to</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><classname>ObjectName</classname></entry>
+
+                <entry>Used by <classname>MetadataNamingStrategy</classname>
+                to determine the <classname>ObjectName</classname> of a
+                managed resource</entry>
+
+                <entry><classname>ManagedResource</classname></entry>
+              </row>
+
+              <row>
+                <entry><literal>description</literal></entry>
+
+                <entry>Sets the friendly description of the resource,
+                attribute or operation</entry>
+
+                <entry><classname>ManagedResource</classname>,
+                <classname>ManagedAttribute</classname>,
+                <classname>ManagedOperation</classname>,
+                <classname>ManagedOperationParameter</classname></entry>
+              </row>
+
+              <row>
+                <entry><literal>currencyTimeLimit</literal></entry>
+
+                <entry>Sets the value of the
+                <literal>currencyTimeLimit</literal> descriptor field</entry>
+
+                <entry><classname>ManagedResource</classname>,
+                <classname>ManagedAttribute</classname></entry>
+              </row>
+
+              <row>
+                <entry><literal>defaultValue</literal></entry>
+
+                <entry>Sets the value of the <literal>defaultValue</literal>
+                descriptor field</entry>
+
+                <entry><classname>ManagedAttribute</classname></entry>
+              </row>
+
+              <row>
+                <entry><literal>log</literal></entry>
+
+                <entry>Sets the value of the <literal>log</literal> descriptor
+                field</entry>
+
+                <entry><classname>ManagedResource</classname></entry>
+              </row>
+
+              <row>
+                <entry><literal>logFile</literal></entry>
+
+                <entry>Sets the value of the <literal>logFile</literal>
+                descriptor field</entry>
+
+                <entry><classname>ManagedResource</classname></entry>
+              </row>
+
+              <row>
+                <entry><literal>persistPolicy</literal></entry>
+
+                <entry>Sets the value of the <literal>persistPolicy</literal>
+                descriptor field</entry>
+
+                <entry><classname>ManagedResource</classname></entry>
+              </row>
+
+              <row>
+                <entry><literal>persistPeriod</literal></entry>
+
+                <entry>Sets the value of the <literal>persistPeriod</literal>
+                descriptor field</entry>
+
+                <entry><classname>ManagedResource</classname></entry>
+              </row>
+
+              <row>
+                <entry><literal>persistLocation</literal></entry>
+
+                <entry>Sets the value of the
+                <literal>persistLocation</literal> descriptor field</entry>
+
+                <entry><classname>ManagedResource</classname></entry>
+              </row>
+
+              <row>
+                <entry><literal>persistName</literal></entry>
+
+                <entry>Sets the value of the <literal>persistName</literal>
+                descriptor field</entry>
+
+                <entry><classname>ManagedResource</classname></entry>
+              </row>
+
+              <row>
+                <entry><literal>name</literal></entry>
+
+                <entry>Sets the display name of an operation parameter</entry>
+
+                <entry><literal>ManagedOperationParameter</literal></entry>
+              </row>
+
+              <row>
+                <entry><literal>index</literal></entry>
+
+                <entry>Sets the index of an operation parameter</entry>
+
+                <entry><literal>ManagedOperationParameter</literal></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table></para>
+    </section>
+
+    <section id="jmx-interface-autodetect">
+      <title>The <classname>AutodetectCapableMBeanInfoAssembler</classname>
+      interface</title>
+
+      <para>To simplify configuration even further, Spring introduces the
+      <classname>AutodetectCapableMBeanInfoAssembler</classname> interface
+      which extends the <interfacename>MBeanInfoAssembler</interfacename>
+      interface to add support for autodetection of MBean resources. If you
+      configure the <classname>MBeanExporter</classname> with an instance of
+      <classname>AutodetectCapableMBeanInfoAssembler</classname> then it is
+      allowed to "vote" on the inclusion of beans for exposure to JMX.</para>
+
+      <para>Out of the box, the only implementation of the
+      <classname>AutodetectCapableMBeanInfo</classname> interface is the
+      <classname>MetadataMBeanInfoAssembler</classname> which will vote to
+      include any bean which is marked with the
+      <classname>ManagedResource</classname> attribute. The default approach
+      in this case is to use the bean name as the
+      <classname>ObjectName</classname> which results in a configuration like
+      this:</para>
+
+      <programlisting language="xml"><![CDATA[<beans>
+
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    ]]><lineannotation>&lt;!-- notice how no <literal>'beans'</literal> are explicitly configured here --&gt;</lineannotation><![CDATA[
+    <property name="autodetect" value="true"/>
+    <property name="assembler" ref="assembler"/>
+  </bean>
+
+  <bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+  <bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+    <property name="attributeSource">
+        <bean class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+    </property>
+  </bean>
+
+</beans>]]></programlisting>
+
+      <para>Notice that in this configuration no beans are passed to the
+      <classname>MBeanExporter</classname>; however, the
+      <classname>JmxTestBean</classname> will still be registered since it is
+      marked with the <classname>ManagedResource</classname> attribute and the
+      <classname>MetadataMBeanInfoAssembler</classname> detects this and votes
+      to include it. The only problem with this approach is that the name of
+      the <classname>JmxTestBean</classname> now has business meaning. You can
+      address this issue by changing the default behavior for
+      <classname>ObjectName</classname> creation as defined in
+      <xref linkend="jmx-naming" />.</para>
+    </section>
+
+    <section id="jmx-interface-java">
+      <title>Defining management interfaces using Java interfaces</title>
+
+      <para>In addition to the
+      <classname>MetadataMBeanInfoAssembler</classname>, Spring also includes
+      the <classname>InterfaceBasedMBeanInfoAssembler</classname> which allows
+      you to constrain the methods and properties that are exposed based on
+      the set of methods defined in a collection of interfaces.</para>
+
+      <para>Although the standard mechanism for exposing MBeans is to use
+      interfaces and a simple naming scheme, the
+      <classname>InterfaceBasedMBeanInfoAssembler</classname> extends this
+      functionality by removing the need for naming conventions, allowing you
+      to use more than one interface and removing the need for your beans to
+      implement the MBean interfaces.</para>
+
+      <para>Consider this interface that is used to define a management
+      interface for the <classname>JmxTestBean</classname> class that you saw
+      earlier:</para>
+
+      <programlisting language="java"><![CDATA[public interface IJmxTestBean {
+
+  public int add(int x, int y);
+
+  public long myOperation();
+
+  public int getAge();
+
+  public void setAge(int age);
+
+  public void setName(String name);
+
+  public String getName();
+}]]></programlisting>
+
+      <para>This interface defines the methods and properties that will be
+      exposed as operations and attributes on the JMX MBean. The code below
+      shows how to configure Spring JMX to use this interface as the
+      definition for the management interface:</para>
+
+      <programlisting language="xml"><![CDATA[<beans>
+
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    <property name="beans">
+      <map>
+        <entry key="bean:name=testBean5" value-ref="testBean"/>
+      </map>
+    </property>
+    <property name="assembler">
+      <bean class="org.springframework.jmx.export.assembler.InterfaceBasedMBeanInfoAssembler">
+        <property name="managedInterfaces">
+          <value>org.springframework.jmx.IJmxTestBean</value>
+        </property>
+      </bean>
+    </property>
+  </bean>
+
+  <bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+</beans>]]></programlisting>
+
+      <para>Here you can see that the
+      <classname>InterfaceBasedMBeanInfoAssembler</classname> is configured to
+      use the <interfacename>IJmxTestBean</interfacename> interface when
+      constructing the management interface for any bean. It is important to
+      understand that beans processed by the
+      <classname>InterfaceBasedMBeanInfoAssembler</classname> are
+      <emphasis>not</emphasis> required to implement the interface used to
+      generate the JMX management interface.</para>
+
+      <para>In the case above, the <interfacename>IJmxTestBean</interfacename>
+      interface is used to construct all management interfaces for all beans.
+      In many cases this is not the desired behavior and you may want to use
+      different interfaces for different beans. In this case, you can pass
+      <classname>InterfaceBasedMBeanInfoAssembler</classname> a
+      <classname>Properties</classname> instance via the
+      <literal>interfaceMappings</literal> property, where the key of each
+      entry is the bean name and the value of each entry is a comma-separated
+      list of interface names to use for that bean.</para>
+
+      <para>If no management interface is specified through either the
+      <literal>managedInterfaces</literal> or
+      <literal>interfaceMappings</literal> properties, then the
+      <classname>InterfaceBasedMBeanInfoAssembler</classname> will reflect on
+      the bean and use all of the interfaces implemented by that bean to
+      create the management interface.</para>
+    </section>
+
+    <section id="jmx-interface-methodnames">
+      <title>Using
+      <classname>MethodNameBasedMBeanInfoAssembler</classname></title>
+
+      <para>The <classname>MethodNameBasedMBeanInfoAssembler</classname>
+      allows you to specify a list of method names that will be exposed to JMX
+      as attributes and operations. The code below shows a sample
+      configuration for this:</para>
+
+      <programlisting language="xml"><![CDATA[<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    <property name="beans">
+      <map>
+        <entry key="bean:name=testBean5" value-ref="testBean"/>
+      </map>
+    </property>
+    <property name="assembler">
+      <bean class="org.springframework.jmx.export.assembler.MethodNameBasedMBeanInfoAssembler">
+        <property name="managedMethods">
+          <value>add,myOperation,getName,setName,getAge</value>
+        </property>
+      </bean>
+    </property>
+</bean>]]></programlisting>
+
+      <para>Here you can see that the methods <literal>add</literal> and
+      <literal>myOperation</literal> will be exposed as JMX operations and
+      <literal>getName()</literal>, <literal>setName(String)</literal> and
+      <literal>getAge()</literal> will be exposed as the appropriate half of a
+      JMX attribute. In the code above, the method mappings apply to beans
+      that are exposed to JMX. To control method exposure on a bean-by-bean
+      basis, use the <literal>methodMappings</literal> property of
+      <classname>MethodNameMBeanInfoAssembler</classname> to map bean names to
+      lists of method names.</para>
+    </section>
+  </section>
+
+  <section id="jmx-naming">
+    <title>Controlling the <classname>ObjectName</classname>s for your beans</title>
+
+    <para>Behind the scenes, the <classname>MBeanExporter</classname>
+    delegates to an implementation of the
+    <classname>ObjectNamingStrategy</classname> to obtain
+    <classname>ObjectName</classname>s for each of the beans it is
+    registering. The default implementation,
+    <classname>KeyNamingStrategy</classname>, will, by default, use the key of
+    the <literal>beans</literal> <interfacename>Map</interfacename> as the
+    <classname>ObjectName</classname>. In addition, the
+    <classname>KeyNamingStrategy</classname> can map the key of the
+    <literal>beans</literal> <interfacename>Map</interfacename> to an entry in a
+    <classname>Properties</classname> file (or files) to resolve the
+    <classname>ObjectName</classname>. In addition to the
+    <classname>KeyNamingStrategy</classname>, Spring provides two additional
+    <classname>ObjectNamingStrategy</classname> implementations: the
+    <classname>IdentityNamingStrategy</classname> that builds an
+    <classname>ObjectName</classname> based on the JVM identity of the bean
+    and the <classname>MetadataNamingStrategy</classname> that uses source
+    level metadata to obtain the <classname>ObjectName</classname>.</para>
+
+    <section id="jmx-naming-properties">
+      <title>Reading <classname>ObjectName</classname>s from <classname>Properties</classname></title>
+
+      <para>You can configure your own
+      <classname>KeyNamingStrategy</classname> instance and configure it to
+      read <classname>ObjectName</classname>s from a
+      <classname>Properties</classname> instance rather than use bean key. The
+      <classname>KeyNamingStrategy</classname> will attempt to locate an entry
+      in the <classname>Properties</classname> with a key corresponding to the
+      bean key. If no entry is found or if the
+      <classname>Properties</classname> instance is <literal>null</literal>
+      then the bean key itself is used.</para>
+
+      <para>The code below shows a sample configuration for the
+      <classname>KeyNamingStrategy</classname>:</para>
+
+      <programlisting language="xml"><![CDATA[<beans>
+
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    <property name="beans">
+      <map>
+        <entry key="testBean" value-ref="testBean"/>
+      </map>
+    </property>
+    <property name="namingStrategy" ref="namingStrategy"/>
+  </bean>
+
+  <bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+  <bean id="namingStrategy" class="org.springframework.jmx.export.naming.KeyNamingStrategy">
+    <property name="mappings">
+      <props>
+        <prop key="testBean">bean:name=testBean1</prop>
+      </props>
+    </property>
+    <property name="mappingLocations">
+      <value>names1.properties,names2.properties</value>
+    </property>
+  </bean
+
+</beans>]]></programlisting>
+
+      <para>Here an instance of <classname>KeyNamingStrategy</classname> is
+      configured with a <classname>Properties</classname> instance that is
+      merged from the <classname>Properties</classname> instance defined by
+      the mapping property and the properties files located in the paths
+      defined by the mappings property. In this configuration, the
+      <literal>testBean</literal> bean will be given the
+      <classname>ObjectName</classname> <literal>bean:name=testBean1</literal>
+      since this is the entry in the <classname>Properties</classname>
+      instance that has a key corresponding to the bean key.</para>
+
+      <para>If no entry in the <classname>Properties</classname> instance can
+      be found then the bean key name is used as the
+      <classname>ObjectName</classname>.</para>
+    </section>
+
+    <section id="jmx-naming-metadata">
+      <title>Using the <classname>MetadataNamingStrategy</classname></title>
+
+      <para>The <classname>MetadataNamingStrategy</classname> uses
+      the <literal>objectName</literal> property of the
+      <classname>ManagedResource</classname> attribute on each bean to create
+      the <classname>ObjectName</classname>. The code below shows the
+      configuration for the
+      <classname>MetadataNamingStrategy</classname>:</para>
+
+      <programlisting language="xml"><![CDATA[<beans>
+
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    <property name="beans">
+      <map>
+        <entry key="testBean" value-ref="testBean"/>
+      </map>
+    </property>
+    <property name="namingStrategy" ref="namingStrategy"/>
+  </bean>
+
+  <bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+  <bean id="namingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+    <property name="attributeSource" ref="attributeSource"/>
+  </bean>
+
+  <bean id="attributeSource"
+      class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/>
+
+</beans>]]></programlisting>
+
+      <para>If no <literal>objectName</literal> has been provided for
+      the <classname>ManagedResource</classname> attribute, then an
+      <classname>ObjectName</classname> will be created with the
+      following format:
+      <emphasis>[fully-qualified-package-name]:type=[short-classname],name=[bean-name]</emphasis>.
+      For example, the generated <classname>ObjectName</classname> for the
+      following bean would be: <emphasis>com.foo:type=MyClass,name=myBean</emphasis>.
+      </para>
+
+      <programlisting language="xml"><![CDATA[<bean id="myBean" class="com.foo.MyClass"/>]]></programlisting>
+
+    </section>
+
+    <section id="jmx-context-mbeanexport">
+      <title>The <literal>&lt;context:mbean-export/&gt;</literal> element</title>
+      <para>If you are using at least Java 5, then a convenience subclass of
+      <classname>MBeanExporter</classname> is available:
+      <classname>AnnotationMBeanExporter</classname>.
+      When defining an instance of this subclass, the <literal>namingStrategy</literal>,
+      <literal>assembler</literal>, and <literal>attributeSource</literal>
+      configuration is no longer needed, since it will always use standard Java
+      annotation-based metadata (autodetection is always enabled as well). In fact,
+      an even simpler syntax is supported by Spring's
+      '<literal>context</literal>' namespace.. Rather than defining an
+      <classname>MBeanExporter</classname> bean, just provide this single element:</para>
+
+      <programlisting language="xml"><![CDATA[<context:mbean-export/>]]></programlisting>
+
+      <para>You can provide a reference to a particular MBean server if
+      necessary, and the <literal>defaultDomain</literal> attribute
+      (a property of <classname>AnnotationMBeanExporter</classname>)
+      accepts an alternate value for the generated MBean
+      <classname>ObjectNames</classname>' domains. This would be used
+      in place of the fully qualified package name as described in the
+      previous section on
+      <link linkend="jmx-naming-metadata"><classname>MetadataNamingStrategy</classname></link>.
+      </para>
+
+      <programlisting language="xml"><![CDATA[<context:mbean-export server="myMBeanServer" default-domain="myDomain"/>]]></programlisting>.
+
+      <note>
+        <para>Do not use interface-based AOP proxies in combination with autodetection of
+        JMX annotations in your bean classes. Interface-based proxies 'hide' the target class,
+        which also hides the JMX managed resource annotations. Hence, use target-class proxies
+        in that case: through setting the 'proxy-target-class' flag on <literal>&lt;aop:config/&gt;</literal>,
+        <literal>&lt;tx:annotation-driven/&gt;</literal>, etc. Otherwise, your JMX beans
+        might be silently ignored at startup...</para>
+      </note>
+
+    </section>
+  </section>
+
+  <section id="jmx-jsr160">
+    <title>JSR-160 Connectors</title>
+
+    <para>For remote access, Spring JMX module offers two
+    <classname>FactoryBean</classname> implementations inside the
+    <literal>org.springframework.jmx.support</literal> package for creating
+    both server- and client-side connectors.</para>
+
+    <section id="jmx-jsr160-server">
+      <title>Server-side Connectors</title>
+
+      <para>To have Spring JMX create, start and expose a JSR-160
+      <classname>JMXConnectorServer</classname> use the following
+      configuration:</para>
+
+      <programlisting language="xml">&lt;bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean"/&gt;</programlisting>
+
+      <para>By default <literal>ConnectorServerFactoryBean</literal> creates a
+      <classname>JMXConnectorServer</classname> bound to
+      <literal>"service:jmx:jmxmp://localhost:9875"</literal>. The
+      <literal>serverConnector</literal> bean thus exposes the local
+      <interfacename>MBeanServer</interfacename> to clients through the JMXMP protocol
+      on localhost, port 9875. Note that the JMXMP protocol is marked as
+      optional by the JSR 160 specification: currently, the main open-source
+      JMX implementation, MX4J, and the one provided with J2SE 5.0 do
+      <emphasis>not</emphasis> support JMXMP.</para>
+
+      <para>To specify another URL and register the
+      <classname>JMXConnectorServer</classname> itself with the
+      <interfacename>MBeanServer</interfacename> use the <literal>serviceUrl</literal>
+      and <classname>ObjectName</classname> properties respectively:</para>
+
+      <programlisting language="xml"><![CDATA[<bean id="serverConnector"
+      class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+  <property name="objectName" value="connector:name=rmi"/>
+  <property name="serviceUrl" 
+            value="service:jmx:rmi://localhost/jndi/rmi://localhost:1099/myconnector"/>
+</bean>]]></programlisting>
+
+      <para>If the <classname>ObjectName</classname> property is set Spring
+      will automatically register your connector with the
+      <interfacename>MBeanServer</interfacename> under that
+      <classname>ObjectName</classname>. The example below shows the full set
+      of parameters which you can pass to the
+      <classname>ConnectorServerFactoryBean</classname> when creating a
+      JMXConnector:</para>
+
+      <programlisting language="xml"><![CDATA[<bean id="serverConnector"
+      class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+  <property name="objectName" value="connector:name=iiop"/>
+  <property name="serviceUrl" 
+               value="service:jmx:iiop://localhost/jndi/iiop://localhost:900/myconnector"/>
+  <property name="threaded" value="true"/>
+  <property name="daemon" value="true"/>
+  <property name="environment">
+    <map>
+      <entry key="someKey" value="someValue"/>
+    </map>
+  </property>
+</bean>]]></programlisting>
+
+      <para>Note that when using a RMI-based connector you need the lookup
+      service (tnameserv or rmiregistry) to be started in order for the name
+      registration to complete. If you are using Spring to export remote
+      services for you via RMI, then Spring will already have constructed an
+      RMI registry. If not, you can easily start a registry using the
+      following snippet of configuration:</para>
+
+      <programlisting language="xml"><![CDATA[<bean id="registry" class="org.springframework.remoting.rmi.RmiRegistryFactoryBean">
+  <property name="port" value="1099"/>
+</bean>]]></programlisting>
+    </section>
+
+    <section id="jmx-jsr160-client">
+      <title>Client-side Connectors</title>
+
+      <para>To create an <classname>MBeanServerConnection</classname> to a
+      remote JSR-160 enabled <interfacename>MBeanServer</interfacename> use the
+      <classname>MBeanServerConnectionFactoryBean</classname> as shown
+      below:</para>
+
+      <programlisting language="xml"><![CDATA[<bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+  <property name="serviceUrl" value="service:jmx:rmi://localhost/jndi/rmi://localhost:1099/jmxrmi"/>
+</bean>]]></programlisting>
+    </section>
+
+    <section id="jmx-jsr160-protocols">
+      <title>JMX over Burlap/Hessian/SOAP</title>
+
+      <para>JSR-160 permits extensions to the way in which communication is
+      done between the client and the server. The examples above are using the
+      mandatory RMI-based implementation required by the JSR-160 specification
+      (IIOP and JRMP) and the (optional) JMXMP. By using other providers or
+      JMX implementations (such as <ulink
+      url="http://mx4j.sourceforge.net">MX4J</ulink>) you can take advantage
+      of protocols like SOAP, Hessian, Burlap over simple HTTP or SSL and
+      others:</para>
+
+      <programlisting language="xml"><![CDATA[<bean id="serverConnector" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+  <property name="objectName" value="connector:name=burlap"/>
+  <property name="serviceUrl" value="service:jmx:burlap://localhost:9874"/>
+</bean>]]></programlisting>
+
+      <para>In the case of the above example, MX4J 3.0.0 was used; see the
+      official MX4J documentation for more information.</para>
+    </section>
+  </section>
+
+  <section id="jmx-proxy">
+    <title>Accessing MBeans via Proxies</title>
+
+    <para>Spring JMX allows you to create proxies that re-route calls to
+    MBeans registered in a local or remote <interfacename>MBeanServer</interfacename>.
+    These proxies provide you with a standard Java interface through which you
+    can interact with your MBeans. The code below shows how to configure a
+    proxy for an MBean running in a local
+    <interfacename>MBeanServer</interfacename>:</para>
+
+    <programlisting language="xml"><![CDATA[<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
+    <property name="objectName" value="bean:name=testBean"/>
+    <property name="proxyInterface" value="org.springframework.jmx.IJmxTestBean"/>
+</bean>]]></programlisting>
+
+    <para>Here you can see that a proxy is created for the MBean registered
+    under the <classname>ObjectName</classname>:
+    <literal>bean:name=testBean</literal>. The set of interfaces that the
+    proxy will implement is controlled by the
+    <literal>proxyInterfaces</literal> property and the rules for mapping
+    methods and properties on these interfaces to operations and attributes on
+    the MBean are the same rules used by the
+    <classname>InterfaceBasedMBeanInfoAssembler</classname>.</para>
+
+    <para>The <classname>MBeanProxyFactoryBean</classname> can create a proxy
+    to any MBean that is accessible via an
+    <classname>MBeanServerConnection</classname>. By default, the local
+    <interfacename>MBeanServer</interfacename> is located and used, but you can
+    override this and provide an <classname>MBeanServerConnection</classname>
+    pointing to a remote <interfacename>MBeanServer</interfacename> to cater for
+    proxies pointing to remote MBeans:</para>
+
+    <programlisting language="xml"><![CDATA[<bean id="clientConnector"
+      class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+  <property name="serviceUrl" value="service:jmx:rmi://remotehost:9875"/>
+</bean>
+
+<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
+  <property name="objectName" value="bean:name=testBean"/>
+  <property name="proxyInterface" value="org.springframework.jmx.IJmxTestBean"/>
+  <property name="server" ref="clientConnector"/>
+</bean>]]></programlisting>
+
+    <para>Here you can see that we create an
+    <classname>MBeanServerConnection</classname> pointing to a remote machine
+    using the <classname>MBeanServerConnectionFactoryBean</classname>. This
+    <classname>MBeanServerConnection</classname> is then passed to the
+    <classname>MBeanProxyFactoryBean</classname> via the
+    <literal>server</literal> property. The proxy that is created will forward
+    all invocations to the <interfacename>MBeanServer</interfacename> via this
+    <classname>MBeanServerConnection</classname>.</para>
+  </section>
+
+  <section id="jmx-notifications">
+    <title>Notifications</title>
+
+    <para>Spring's JMX offering includes comprehensive support for JMX
+    notifications.</para>
+
+    <section id="jmx-notifications-listeners">
+      <title>Registering Listeners for Notifications</title>
+
+      <para>Spring's JMX support makes it very easy to register any number of
+      <classname>NotificationListeners</classname> with any number of MBeans
+      (this includes MBeans exported by Spring's
+      <classname>MBeanExporter</classname> and MBeans registered via some
+      other mechanism). By way of an example, consider the scenario where one
+	  would like to be informed (via a <classname>Notification</classname>)
+	  each and every time an attribute of a target MBean changes.</para>
+
+      <programlisting language="java"><![CDATA[package com.example;
+
+import javax.management.AttributeChangeNotification;
+import javax.management.Notification;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+
+public class ConsoleLoggingNotificationListener
+               implements NotificationListener, NotificationFilter {
+
+    public void handleNotification(Notification notification, Object handback) {
+        System.out.println(notification);
+        System.out.println(handback);
+    }
+
+    public boolean isNotificationEnabled(Notification notification) {
+        return AttributeChangeNotification.class.isAssignableFrom(notification.getClass());
+    }
+}]]></programlisting>
+
+      <programlisting language="xml"><![CDATA[<beans>
+
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    <property name="beans">
+      <map>
+        <entry key="bean:name=testBean1" value-ref="testBean"/>
+      </map>
+    </property>
+    <property name="notificationListenerMappings">
+      <map>
+        <entry key="bean:name=testBean1">
+          <bean class="com.example.ConsoleLoggingNotificationListener"/>
+        </entry>
+      </map>
+    </property>
+  </bean>
+
+  <bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+</beans>]]></programlisting>
+
+		<para>With the above configuration in place, every time a JMX
+		<classname>Notification</classname> is broadcast from the target MBean
+		(<literal>bean:name=testBean1</literal>), the
+		<classname>ConsoleLoggingNotificationListener</classname> bean that was
+		registered as a listener via the
+		<literal>notificationListenerMappings</literal> property will be
+		notified. The <classname>ConsoleLoggingNotificationListener</classname>
+		bean can then take whatever action it deems appropriate in response to
+		the <classname>Notification</classname>.</para>
+
+		<para>You can also use straight bean names as the link between exported beans
+		and listeners:</para>
+
+		<programlisting language="xml"><![CDATA[<beans>
+
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    <property name="beans">
+      <map>
+        <entry key="bean:name=testBean1" value-ref="testBean"/>
+      </map>
+    </property>
+    <property name="notificationListenerMappings">
+      <map>
+        <entry key="]]><emphasis role="bold">testBean</emphasis><![CDATA[">
+          <bean class="com.example.ConsoleLoggingNotificationListener"/>
+        </entry>
+      </map>
+    </property>
+  </bean>
+
+  <bean id="]]><emphasis role="bold">testBean</emphasis><![CDATA[" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+</beans>]]></programlisting>
+
+		<para>If one wants to register a single <classname>NotificationListener</classname>
+		instance for all of the beans that the enclosing <classname>MBeanExporter</classname>
+		is exporting, one can use the special wildcard <literal>'*'</literal> (sans quotes)
+		as the key for an entry in the <literal>notificationListenerMappings</literal>
+		property map; for example:</para>
+
+		<programlisting language="xml"><![CDATA[<property name="notificationListenerMappings">
+  <map>
+    <entry key="*">
+      <bean class="com.example.ConsoleLoggingNotificationListener"/>
+    </entry>
+  </map>
+</property>]]></programlisting>
+
+      <para>If one needs to do the inverse (that is, register a number of distinct
+      listeners against an MBean), then one has to use the
+      <literal>notificationListeners</literal> list property instead (and in
+      preference to the <literal>notificationListenerMappings</literal>
+      property). This time, instead of configuring simply a
+      <classname>NotificationListener</classname> for a single MBean, one
+      configures <classname>NotificationListenerBean</classname> instances...
+      a <classname>NotificationListenerBean</classname> encapsulates a
+      <classname>NotificationListener</classname> and the
+      <classname>ObjectName</classname> (or
+      <classname>ObjectNames</classname>) that it is to be registered against
+      in an <interfacename>MBeanServer</interfacename>. The
+      <classname>NotificationListenerBean</classname> also encapsulates a
+      number of other properties such as a
+      <classname>NotificationFilter</classname> and an arbitrary handback
+      object that can be used in advanced JMX notification scenarios.</para>
+
+      <para>The configuration when using
+      <classname>NotificationListenerBean</classname> instances is not wildly
+      different to what was presented previously:</para>
+
+      <programlisting language="xml"><![CDATA[<beans>
+
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    <property name="beans">
+      <map>
+        <entry key="bean:name=testBean1" value-ref="testBean"/>
+      </map>
+    </property>
+    <property name="notificationListeners">
+        <list>
+            <bean class="org.springframework.jmx.export.NotificationListenerBean">
+                <constructor-arg>
+                    <bean class="com.example.ConsoleLoggingNotificationListener"/>
+                </constructor-arg>
+                <property name="mappedObjectNames">
+                    <list>
+                        <value>bean:name=testBean1</value>
+                    </list>
+                </property>
+            </bean>
+        </list>
+    </property>
+  </bean>
+
+  <bean id="testBean" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+</beans>]]></programlisting>
+
+      <para>The above example is equivalent to the first notification example.
+      Lets assume then that we want to be given a handback object every time a
+      <classname>Notification</classname> is raised, and that additionally we
+      want to filter out extraneous <classname>Notifications</classname> by
+      supplying a <classname>NotificationFilter</classname>. (For a full
+      discussion of just what a handback object is, and indeed what a
+      <classname>NotificationFilter</classname> is, please do consult that
+      section of the JMX specification (1.2) entitled <literal>'The JMX
+      Notification Model'</literal>.)</para>
+
+      <programlisting language="xml"><![CDATA[<beans>
+
+  <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    <property name="beans">
+      <map>
+        <entry key="bean:name=testBean1" value-ref="testBean1"/>
+        <entry key="bean:name=testBean2" value-ref="testBean2"/>
+      </map>
+    </property>
+    <property name="notificationListeners">
+        <list>
+            <bean class="org.springframework.jmx.export.NotificationListenerBean">
+                <constructor-arg ref="customerNotificationListener"/>
+                <property name="mappedObjectNames">
+                    <list>
+                        ]]><lineannotation>&lt;!-- handles notifications from two distinct MBeans --&gt;</lineannotation><![CDATA[
+                        <value>bean:name=testBean1</value>
+                        <value>bean:name=testBean2</value>
+                    </list>
+                </property>
+                <property name="handback">
+                    <bean class="java.lang.String">
+                        <constructor-arg value="This could be anything..."/>
+                    </bean>
+                </property>
+                <property name="notificationFilter" ref="customerNotificationListener"/>
+            </bean>
+        </list>
+    </property>
+  </bean>
+  
+  ]]><lineannotation>&lt;!-- implements both the <interfacename>NotificationListener</interfacename> and <interfacename>NotificationFilter</interfacename> interfaces --&gt;</lineannotation><![CDATA[
+  <bean id="customerNotificationListener" class="com.example.ConsoleLoggingNotificationListener"/>
+
+  <bean id="testBean1" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="TEST"/>
+    <property name="age" value="100"/>
+  </bean>
+
+  <bean id="testBean2" class="org.springframework.jmx.JmxTestBean">
+    <property name="name" value="ANOTHER TEST"/>
+    <property name="age" value="200"/>
+  </bean>
+
+</beans>]]></programlisting>
+    </section>
+
+    <section id="jmx-notifications-publishing">
+      <title>Publishing Notifications</title>
+
+      <para>Spring provides support not just for registering to receive
+      <classname>Notifications</classname>, but also for publishing
+      <classname>Notifications</classname>.</para>
+
+      <note>
+        <para>Please note that this section is really only relevant to Spring
+        managed beans that have been exposed as MBeans via an
+        <classname>MBeanExporter</classname>; any existing, user-defined
+        MBeans should use the standard JMX APIs for notification publication.</para>
+      </note>
+
+      <para>The key interface in Spring's JMX notification publication support
+      is the <classname>NotificationPublisher</classname> interface (defined
+      in the <literal>org.springframework.jmx.export.notification</literal>
+      package). Any bean that is going to be exported as an MBean via an
+      <classname>MBeanExporter</classname> instance can implement the related
+      <classname>NotificationPublisherAware</classname> interface to gain
+      access to a <classname>NotificationPublisher</classname> instance. The
+      <classname>NotificationPublisherAware</classname> interface simply
+      supplies an instance of a <classname>NotificationPublisher</classname>
+      to the implementing bean via a simple setter method, which the bean can
+      then use to publish <classname>Notifications</classname>.</para>
+
+      <para>As stated in the Javadoc for the
+      <classname>NotificationPublisher</classname> class, managed beans that
+      are publishing events via the
+      <classname>NotificationPublisher</classname> mechanism are
+      <emphasis>not</emphasis> responsible for the state management of any
+      notification listeners and the like ... Spring's JMX support will take
+      care of handling all the JMX infrastructure issues. All one need do as
+      an application developer is implement the
+      <classname>NotificationPublisherAware</classname> interface and start
+      publishing events using the supplied
+      <classname>NotificationPublisher</classname> instance. Note that the
+      <classname>NotificationPublisher</classname> will be set
+      <emphasis>after</emphasis> the managed bean has been registered with an
+      <interfacename>MBeanServer</interfacename>.</para>
+
+      <para>Using a <classname>NotificationPublisher</classname> instance is
+      quite straightforward... one simply creates a JMX
+      <classname>Notification</classname> instance (or an instance of an
+      appropriate <classname>Notification</classname> subclass), populates
+      the notification with the data pertinent to the event that is to be
+      published, and one then invokes the
+      <methodname>sendNotification(Notification)</methodname> on the
+      <classname>NotificationPublisher</classname> instance, passing in the
+      <classname>Notification</classname>.</para>
+
+      <para>Find below a simple example... in this scenario, exported
+      instances of the <classname>JmxTestBean</classname> are going to publish
+      a <classname>NotificationEvent</classname> every time the
+      <literal>add(int, int)</literal> operation is invoked.</para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.jmx;
+			
+import org.springframework.jmx.export.notification.NotificationPublisherAware;
+import org.springframework.jmx.export.notification.NotificationPublisher;
+import javax.management.Notification;
+
+public class JmxTestBean implements IJmxTestBean, NotificationPublisherAware {
+
+    private String name;
+    private int age;
+    private boolean isSuperman;
+    private NotificationPublisher publisher;
+
+    ]]><lineannotation>// other getters and setters omitted for clarity</lineannotation><![CDATA[
+
+    public int add(int x, int y) {
+        int answer = x + y;
+        this.publisher.sendNotification(new Notification("add", this, 0));
+        return answer;
+    }
+
+    public void dontExposeMe() {
+        throw new RuntimeException();
+    }
+    
+    public void setNotificationPublisher(NotificationPublisher notificationPublisher) {
+        this.publisher = notificationPublisher;
+    }
+}]]></programlisting>
+
+      <para>The <classname>NotificationPublisher</classname> interface and the
+      machinery to get it all working is one of the nicer features of Spring's JMX support.
+	  It does however come with the price tag of coupling your classes to both Spring and JMX; as
+	  always, the advice here is to be pragmatic... if you need the functionality offered by the
+      <classname>NotificationPublisher</classname> and you can accept the coupling to both Spring
+	  and JMX, then do so.</para>
+    </section>
+  </section>
+
+  <section id="jmx-resources">
+    <title>Further Resources</title>
+
+    <para>This section contains links to further resources about JMX.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The <ulink url="http://java.sun.com/products/JavaManagement/">JMX homepage</ulink> at Sun</para>
+      </listitem>
+
+      <listitem>
+        <para>The <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html">JMX specification</ulink> (JSR-000003)</para>
+      </listitem>
+
+      <listitem>
+        <para>The <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr160/index.html">JMX Remote API specification</ulink> (JSR-000160)</para>
+      </listitem>
+
+      <listitem>
+        <para>The <ulink url="http://mx4j.sourceforge.net/">MX4J
+        homepage</ulink> (an Open Source implementation of various JMX
+        specs)</para>
+      </listitem>
+
+      <listitem>
+        <para><ulink url="http://java.sun.com/developer/technicalArticles/J2SE/jmx.html">Getting Started with JMX</ulink> - an introductory article from Sun.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+</chapter>

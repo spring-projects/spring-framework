@@ -1,0 +1,1800 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xml:id="validation">
+  <title>Validation, Data Binding, and Type Conversion</title>
+
+  <section id="validation-introduction">
+    <title>Introduction</title>
+
+    <para>There are pros and cons for considering validation as business logic,
+      and Spring offers a design for validation (and data binding) that does not
+      exclude either one of them. Specifically validation should not be tied to
+      the web tier, should be easy to localize and it should be possible to plug
+      in any validator available. Considering the above, Spring has come up with
+      a <interfacename>Validator</interfacename> interface that is both basic
+      ands eminently usable in every layer of an application. </para>
+
+    <para>Data binding is useful for allowing user input to be dynamically bound
+      to the domain model of an application (or whatever objects you use to
+      process user input). Spring provides the so-called
+      <interfacename>DataBinder</interfacename> to do exactly that. The
+      <interfacename>Validator</interfacename> and the
+      <interfacename>DataBinder</interfacename> make up the
+      <literal>validation</literal> package, which is primarily used in but not
+      limited to the MVC framework. </para>
+
+    <para>The <interfacename>BeanWrapper</interfacename> is a fundamental
+      concept in the Spring Framework and is used in a lot of places. However,
+      you probably will not have the need to use the
+      <interfacename>BeanWrapper</interfacename> directly. Because this is
+      reference documentation however, we felt that some explanation might be in
+      order. We will explain the <interfacename>BeanWrapper</interfacename> in
+      this chapter since, if you were going to use it at all, you would most
+      likely do so when trying to bind data to objects.</para>
+
+    <para>Spring's DataBinder and the lower-level BeanWrapper both use
+      PropertyEditors to parse and format property values. The
+      <interfacename>PropertyEditor</interfacename> concept is part of the
+      JavaBeans specification, and is also explained in this chapter. Spring 3
+      introduces a "core.convert" package that provides a general type
+      conversion facility, as well as a higher-level "format" package for
+      formatting UI field values. These new packages may be used as simpler
+      alternatives to PropertyEditors, and will also be discussed in this
+      chapter.</para>
+  </section>
+
+  <section id="validator">
+    <title>Validation using Spring's <interfacename>Validator</interfacename>
+      interface</title>
+
+    <para>Spring features a <interfacename>Validator</interfacename> interface
+      that you can use to validate objects. The
+      <interfacename>Validator</interfacename> interface works using an
+      <interfacename>Errors</interfacename> object so that while validating,
+      validators can report validation failures to the
+      <interfacename>Errors</interfacename> object.</para>
+
+    <para>Let's consider a small data object:</para>
+
+    <programlisting language="java"><![CDATA[public class Person {
+
+  private String name;
+  private int age;
+
+  ]]><lineannotation>// the usual getters and setters...</lineannotation><![CDATA[
+}]]></programlisting>
+
+    <para>We're going to provide validation behavior for the
+      <classname>Person</classname> class by implementing the following two
+      methods of the
+      <interfacename>org.springframework.validation.Validator</interfacename>
+      interface: <itemizedlist spacing="compact">
+      <listitem>
+        <para><methodname>supports(Class)</methodname> - Can this
+          <interfacename>Validator</interfacename> validate instances of the
+          supplied <classname>Class</classname>?</para>
+      </listitem>
+      <listitem>
+        <para><methodname>validate(Object,
+          org.springframework.validation.Errors)</methodname> - validates the
+          given object and in case of validation errors, registers those with
+          the given <interfacename>Errors</interfacename> object</para>
+      </listitem>
+      </itemizedlist> </para>
+
+    <para> Implementing a <interfacename>Validator</interfacename> is fairly
+      straightforward, especially when you know of the
+      <classname>ValidationUtils</classname> helper class that the Spring
+      Framework also provides.</para>
+
+    <programlisting language="java"><![CDATA[public class PersonValidator implements Validator {
+
+    ]]><lineannotation>/**
+    * This <interfacename>Validator</interfacename> validates <emphasis role="bold">just</emphasis> <classname>Person</classname> instances
+    */</lineannotation><![CDATA[
+    public boolean supports(Class clazz) {
+        return Person.class.equals(clazz);
+    }
+
+    public void validate(Object obj, Errors e) {
+        ValidationUtils.rejectIfEmpty(e, "name", "name.empty");
+        Person p = (Person) obj;
+        if (p.getAge() < 0) {
+            e.rejectValue("age", "negativevalue");
+        } else if (p.getAge() > 110) {
+            e.rejectValue("age", "too.darn.old");
+        }
+    }
+}]]></programlisting>
+
+    <para>As you can see, the <literal>static</literal>
+      <methodname>rejectIfEmpty(..)</methodname> method on the
+      <classname>ValidationUtils</classname> class is used to reject the
+      <literal>'name'</literal> property if it is <literal>null</literal> or the
+      empty string. Have a look at the Javadoc for the
+      <classname>ValidationUtils</classname> class to see what functionality it
+      provides besides the example shown previously.</para>
+
+    <para>While it is certainly possible to implement a single
+      <interfacename>Validator</interfacename> class to validate each of the
+      nested objects in a rich object, it may be better to encapsulate the
+      validation logic for each nested class of object in its own
+      <interfacename>Validator</interfacename> implementation. A simple example
+      of a <emphasis>'rich'</emphasis> object would be a
+      <classname>Customer</classname> that is composed of two
+      <classname>String</classname> properties (a first and second name) and a
+      complex <classname>Address</classname> object.
+      <classname>Address</classname> objects may be used independently of
+      <classname>Customer</classname> objects, and so a distinct
+      <classname>AddressValidator</classname> has been implemented. If you want
+      your <classname>CustomerValidator</classname> to reuse the logic contained
+      within the <classname>AddressValidator</classname> class without resorting
+      to copy-and-paste, you can dependency-inject or instantiate an
+      <classname>AddressValidator</classname> within your
+      <classname>CustomerValidator</classname>, and use it like so:</para>
+
+    <programlisting language="java"><![CDATA[public class CustomerValidator implements Validator {
+
+    private final Validator addressValidator;
+
+    public CustomerValidator(Validator addressValidator) {
+        if (addressValidator == null) {
+            throw new IllegalArgumentException(
+              "The supplied [Validator] is required and must not be null.");
+        }
+        if (!addressValidator.supports(Address.class)) {
+            throw new IllegalArgumentException(
+              "The supplied [Validator] must support the validation of [Address] instances.");
+        }
+        this.addressValidator = addressValidator;
+    }
+
+    ]]><lineannotation>/**
+    * This <interfacename>Validator</interfacename> validates <classname>Customer</classname> instances, and any subclasses of <classname>Customer</classname> too
+    */</lineannotation><![CDATA[
+    public boolean supports(Class clazz) {
+        return Customer.class.isAssignableFrom(clazz);
+    }
+
+    public void validate(Object target, Errors errors) {
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "firstName", "field.required");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "surname", "field.required");
+        Customer customer = (Customer) target;
+        try {
+            errors.pushNestedPath("address");
+            ValidationUtils.invokeValidator(this.addressValidator, customer.getAddress(), errors);
+        } finally {
+            errors.popNestedPath();
+        }
+    }
+}]]></programlisting>
+
+    <para>Validation errors are reported to the
+      <interfacename>Errors</interfacename> object passed to the validator. In
+      case of Spring Web MVC you can use <literal>&lt;spring:bind/&gt;</literal>
+      tag to inspect the error messages, but of course you can also inspect the
+      errors object yourself. More information about the methods it offers can
+      be found from the Javadoc.</para>
+  </section>
+
+  <section id="validation-conversion">
+    <title>Resolving codes to error messages</title>
+
+    <para>We've talked about databinding and validation. Outputting messages
+      corresponding to validation errors is the last thing we need to discuss.
+      In the example we've shown above, we rejected the <literal>name</literal>
+      and the <literal>age</literal> field. If we're going to output the error
+      messages by using a <interfacename>MessageSource</interfacename>, we will
+      do so using the error code we've given when rejecting the field ('name'
+      and 'age' in this case). When you call (either directly, or indirectly,
+      using for example the <classname>ValidationUtils</classname> class)
+      <literal>rejectValue</literal> or one of the other
+      <literal>reject</literal> methods from the
+      <interfacename>Errors</interfacename> interface, the underlying
+      implementation will not only register the code you've passed in, but also
+      a number of additional error codes. What error codes it registers is
+      determined by the <interfacename>MessageCodesResolver</interfacename> that
+      is used. By default, the
+      <classname>DefaultMessageCodesResolver</classname> is used, which for
+      example not only registers a message with the code you gave, but also
+      messages that include the field name you passed to the reject method. So
+      in case you reject a field using <literal>rejectValue("age",
+      "too.darn.old")</literal>, apart from the <literal>too.darn.old</literal>
+      code, Spring will also register <literal>too.darn.old.age</literal> and
+      <literal>too.darn.old.age.int</literal> (so the first will include the
+      field name and the second will include the type of the field); this is
+      done as a convenience to aid developers in targeting error messages and
+      suchlike.</para>
+
+    <para>More information on the
+      <interfacename>MessageCodesResolver</interfacename> and the default
+      strategy can be found online with the Javadocs for <ulink
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/validation/MessageCodesResolver.html"
+      >MessageCodesResolver</ulink> and <ulink
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/validation/DefaultMessageCodesResolver.html"
+      >DefaultMessageCodesResolver</ulink> respectively.</para>
+  </section>
+
+  <section id="beans-beans">
+    <title>Bean manipulation and the
+      <interfacename>BeanWrapper</interfacename></title>
+
+    <para>The <literal>org.springframework.beans</literal> package adheres to
+      the JavaBeans standard provided by Sun. A JavaBean is simply a class with
+      a default no-argument constructor, which follows a naming convention where
+      (by way of an example) a property named <literal>bingoMadness</literal>
+      would have a setter method <methodname>setBingoMadness(..)</methodname>
+      and a getter method <methodname>getBingoMadness()</methodname>. For more
+      information about JavaBeans and the specification, please refer to Sun's
+      website ( <ulink url="http://java.sun.com/products/javabeans/"
+      >java.sun.com/products/javabeans</ulink>).</para>
+
+    <para>One quite important class in the beans package is the
+      <interfacename>BeanWrapper</interfacename> interface and its corresponding
+      implementation (<classname>BeanWrapperImpl</classname>). As quoted from
+      the Javadoc, the <interfacename>BeanWrapper</interfacename> offers
+      functionality to set and get property values (individually or in bulk),
+      get property descriptors, and to query properties to determine if they are
+      readable or writable. Also, the <interfacename>BeanWrapper</interfacename>
+      offers support for nested properties, enabling the setting of properties
+      on sub-properties to an unlimited depth. Then, the
+      <interfacename>BeanWrapper</interfacename> supports the ability to add
+      standard JavaBeans <interfacename>PropertyChangeListeners</interfacename>
+      and <interfacename>VetoableChangeListeners</interfacename>, without the
+      need for supporting code in the target class. Last but not least, the
+      <interfacename>BeanWrapper</interfacename> provides support for the
+      setting of indexed properties. The
+      <interfacename>BeanWrapper</interfacename> usually isn't used by
+      application code directly, but by the
+      <interfacename>DataBinder</interfacename> and the
+      <interfacename>BeanFactory</interfacename>.</para>
+
+    <para>The way the <interfacename>BeanWrapper</interfacename> works is partly
+      indicated by its name: <emphasis>it wraps a bean</emphasis> to perform
+      actions on that bean, like setting and retrieving properties.</para>
+
+    <section id="beans-beans-conventions">
+      <title>Setting and getting basic and nested properties</title>
+
+      <para>Setting and getting properties is done using the
+        <literal>setPropertyValue(s)</literal> and
+        <literal>getPropertyValue(s)</literal> methods that both come with a
+        couple of overloaded variants. They're all described in more detail in
+        the Javadoc Spring comes with. What's important to know is that there
+        are a couple of conventions for indicating properties of an object. A
+        couple of examples:</para>
+
+      <table id="beans-beans-conventions-properties-tbl">
+        <title>Examples of properties</title>
+
+        <tgroup cols="2">
+          <colspec colname="c1" colwidth="1*"/>
+          <colspec colname="c2" colwidth="3*"/>
+          <thead>
+            <row>
+              <entry>Expression</entry>
+              <entry>Explanation</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><literal>name</literal></entry>
+
+              <entry>Indicates the property <literal>name</literal>
+                corresponding to the methods <methodname>getName()</methodname>
+                or <methodname>isName()</methodname> and
+                <methodname>setName(..)</methodname></entry>
+            </row>
+
+            <row>
+              <entry><literal>account.name</literal></entry>
+
+              <entry>Indicates the nested property <literal>name</literal> of
+                the property <literal>account</literal> corresponding e.g. to
+                the methods <literal>getAccount().setName()</literal> or
+                <literal>getAccount().getName()</literal></entry>
+            </row>
+
+            <row>
+              <entry><literal>account[2]</literal></entry>
+
+              <entry>Indicates the <emphasis>third</emphasis> element of the
+                indexed property <literal>account</literal>. Indexed properties
+                can be of type <literal>array</literal>, <literal>list</literal>
+                or other <emphasis>naturally ordered</emphasis>
+                collection</entry>
+            </row>
+
+            <row>
+              <entry><literal>account[COMPANYNAME]</literal></entry>
+
+              <entry>Indicates the value of the map entry indexed by the key
+                <emphasis>COMPANYNAME</emphasis> of the Map property
+                <literal>account</literal></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <para>Below you'll find some examples of working with the
+        <interfacename>BeanWrapper</interfacename> to get and set
+        properties.</para>
+
+      <para><emphasis>(This next section is not vitally important to you if
+        you're not planning to work with the
+        <interfacename>BeanWrapper</interfacename> directly. If you're just
+        using the <interfacename>DataBinder</interfacename> and the
+        <interfacename>BeanFactory</interfacename> and their out-of-the-box
+        implementation, you should skip ahead to the section about
+        <interfacename>PropertyEditors</interfacename>.)</emphasis></para>
+
+      <para>Consider the following two classes:</para>
+
+      <programlisting language="java"><![CDATA[public class Company {
+    private String name;
+    private Employee managingDirector;
+
+    public String getName() {
+        return this.name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public Employee getManagingDirector() {
+        return this.managingDirector;
+    }
+    public void setManagingDirector(Employee managingDirector) {
+        this.managingDirector = managingDirector;
+    }
+}]]></programlisting>
+
+      <programlisting language="java"><![CDATA[public class Employee {
+    private String name;
+    private float salary;
+
+    public String getName() {
+        return this.name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public float getSalary() {
+        return salary;
+    }
+    public void setSalary(float salary) {
+        this.salary = salary;
+    }
+}]]></programlisting>
+
+      <para>The following code snippets show some examples of how to retrieve
+        and manipulate some of the properties of instantiated
+        <literal>Companies</literal> and <literal>Employees</literal>:</para>
+
+      <programlisting language="java"><![CDATA[BeanWrapper company = BeanWrapperImpl(new Company());
+]]><lineannotation>// setting the company name..</lineannotation><![CDATA[
+company.setPropertyValue("name", "Some Company Inc.");
+]]><lineannotation>// ... can also be done like this:</lineannotation><![CDATA[
+PropertyValue value = new PropertyValue("name", "Some Company Inc.");
+company.setPropertyValue(value);
+
+]]><lineannotation>// ok, let's create the director and tie it to the company:</lineannotation><![CDATA[
+BeanWrapper jim = BeanWrapperImpl(new Employee());
+jim.setPropertyValue("name", "Jim Stravinsky");
+company.setPropertyValue("managingDirector", jim.getWrappedInstance());
+
+]]><lineannotation>// retrieving the salary of the managingDirector through the company</lineannotation><![CDATA[
+Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></programlisting>
+    </section>
+
+    <section id="beans-beans-conversion">
+      <title>Built-in <interface>PropertyEditor</interface>
+        implementations</title>
+
+      <para>Spring uses the concept of <literal>PropertyEditors</literal> to
+        effect the conversion between an <classname>Object</classname> and a
+        <classname>String</classname>. If you think about it, it sometimes might
+        be handy to be able to represent properties in a different way than the
+        object itself. For example, a <classname>Date</classname> can be
+        represented in a human readable way (as the
+        <classname>String</classname> '<literal>2007-14-09</literal>'), while
+        we're still able to convert the human readable form back to the original
+        date (or even better: convert any date entered in a human readable form,
+        back to <classname>Date</classname> objects). This behavior can be
+        achieved by <emphasis>registering custom editors</emphasis>, of type
+        <interfacename>java.beans.PropertyEditor</interfacename>. Registering
+        custom editors on a <interfacename>BeanWrapper</interfacename> or
+        alternately in a specific IoC container as mentioned in the previous
+        chapter, gives it the knowledge of how to convert properties to the
+        desired type. Read more about
+        <interfacename>PropertyEditors</interfacename> in the Javadoc of the
+        <literal>java.beans</literal> package provided by Sun.</para>
+
+      <para>A couple of examples where property editing is used in Spring:
+        <itemizedlist spacing="compact">
+        <listitem>
+          <para><emphasis>setting properties on beans</emphasis> is done using
+            <literal>PropertyEditors</literal>. When mentioning
+            <literal>java.lang.String</literal> as the value of a property of
+            some bean you're declaring in XML file, Spring will (if the setter
+            of the corresponding property has a
+            <classname>Class</classname>-parameter) use the
+            <classname>ClassEditor</classname> to try to resolve the parameter
+            to a <classname>Class</classname> object.</para>
+        </listitem>
+
+        <listitem>
+          <para><emphasis>parsing HTTP request parameters</emphasis> in Spring's
+            MVC framework is done using all kinds of
+            <literal>PropertyEditors</literal> that you can manually bind in all
+            subclasses of the <classname>CommandController</classname>.</para>
+        </listitem>
+        </itemizedlist> </para>
+
+      <para>Spring has a number of built-in <literal>PropertyEditors</literal>
+        to make life easy. Each of those is listed below and they are all
+        located in the
+        <literal>org.springframework.beans.propertyeditors</literal> package.
+        Most, but not all (as indicated below), are registered by default by
+        <classname>BeanWrapperImpl</classname>. Where the property editor is
+        configurable in some fashion, you can of course still register your own
+        variant to override the default one:</para>
+
+      <table id="beans-beans-property-editors-tbl">
+        <title>Built-in <literal>PropertyEditors</literal></title>
+
+        <tgroup cols="2">
+          <colspec colname="c1" colwidth="3*"/>
+          <colspec colname="c2" colwidth="5*"/>
+
+          <thead>
+            <row>
+              <entry>Class</entry>
+              <entry>Explanation</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><classname>ByteArrayPropertyEditor</classname></entry>
+
+              <entry>Editor for byte arrays. Strings will simply be converted to
+                their corresponding byte representations. Registered by default
+                by <classname>BeanWrapperImpl</classname>.</entry>
+            </row>
+
+            <row>
+              <entry><classname>ClassEditor</classname></entry>
+
+              <entry>Parses Strings representing classes to actual classes and
+                the other way around. When a class is not found, an
+                <classname>IllegalArgumentException</classname> is thrown.
+                Registered by default by
+                <classname>BeanWrapperImpl</classname>.</entry>
+            </row>
+
+            <row>
+              <entry><classname>CustomBooleanEditor</classname></entry>
+
+              <entry>Customizable property editor for
+                <classname>Boolean</classname> properties. Registered by default
+                by <classname>BeanWrapperImpl</classname>, but, can be
+                overridden by registering custom instance of it as custom
+                editor.</entry>
+            </row>
+            <row>
+              <entry><classname>CustomCollectionEditor</classname></entry>
+              <entry>Property editor for Collections, converting any source
+                <interfacename>Collection</interfacename> to a given target
+                <interfacename>Collection</interfacename> type.</entry>
+            </row>
+            <row>
+              <entry><classname>CustomDateEditor</classname></entry>
+
+              <entry>Customizable property editor for java.util.Date, supporting
+                a custom DateFormat. NOT registered by default. Must be user
+                registered as needed with appropriate format.</entry>
+            </row>
+
+            <row>
+              <entry><classname>CustomNumberEditor</classname></entry>
+
+              <entry>Customizable property editor for any Number subclass like
+                <classname>Integer</classname>, <classname>Long</classname>,
+                <classname>Float</classname>, <classname>Double</classname>.
+                Registered by default by <classname>BeanWrapperImpl</classname>,
+                but can be overridden by registering custom instance of it as a
+                custom editor.</entry>
+            </row>
+
+            <row>
+              <entry><classname>FileEditor</classname></entry>
+
+              <entry>Capable of resolving Strings to
+                <classname>java.io.File</classname> objects. Registered by
+                default by <classname>BeanWrapperImpl</classname>. </entry>
+            </row>
+
+            <row>
+              <entry><classname>InputStreamEditor</classname></entry>
+
+              <entry>One-way property editor, capable of taking a text string
+                and producing (via an intermediate
+                <classname>ResourceEditor</classname> and
+                <interfacename>Resource</interfacename>) an
+                <interfacename>InputStream</interfacename>, so
+                <interfacename>InputStream</interfacename> properties may be
+                directly set as Strings. Note that the default usage will not
+                close the <interfacename>InputStream</interfacename> for you!
+                Registered by default by
+                <classname>BeanWrapperImpl</classname>.</entry>
+            </row>
+
+            <row>
+              <entry><classname>LocaleEditor</classname></entry>
+
+              <entry>Capable of resolving Strings to
+                <classname>Locale</classname> objects and vice versa (the String
+                format is [language]_[country]_[variant], which is the same
+                thing the toString() method of Locale provides). Registered by
+                default by <classname>BeanWrapperImpl</classname>.</entry>
+            </row>
+
+            <row>
+              <entry><classname>PatternEditor</classname></entry>
+
+              <entry>Capable of resolving Strings to JDK 1.5
+                <classname>Pattern</classname> objects and vice versa.</entry>
+            </row>
+
+            <row>
+              <entry><classname>PropertiesEditor</classname></entry>
+
+              <entry>Capable of converting Strings (formatted using the format
+                as defined in the Javadoc for the java.lang.Properties class) to
+                <classname>Properties</classname> objects. Registered by default
+                by <classname>BeanWrapperImpl</classname>.</entry>
+            </row>
+
+            <row>
+              <entry><classname>StringTrimmerEditor</classname></entry>
+
+              <entry>Property editor that trims Strings. Optionally allows
+                transforming an empty string into a <literal>null</literal>
+                value. NOT registered by default; must be user registered as
+                needed.</entry>
+            </row>
+
+            <row>
+              <entry><classname>URLEditor</classname></entry>
+
+              <entry>Capable of resolving a String representation of a URL to an
+                actual <classname>URL</classname> object. Registered by default
+                by <classname>BeanWrapperImpl</classname>.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <para> Spring uses the
+        <interfacename>java.beans.PropertyEditorManager</interfacename> to set
+        the search path for property editors that might be needed. The search
+        path also includes <literal>sun.bean.editors</literal>, which includes
+        <interfacename>PropertyEditor</interfacename> implementations for types
+        such as <classname>Font</classname>, <classname>Color</classname>, and
+        most of the primitive types. Note also that the standard JavaBeans
+        infrastructure will automatically discover
+        <interfacename>PropertyEditor</interfacename> classes (without you
+        having to register them explicitly) if they are in the same package as
+        the class they handle, and have the same name as that class, with
+        <literal>'Editor'</literal> appended; for example, one could have the
+        following class and package structure, which would be sufficient for the
+        <classname>FooEditor</classname> class to be recognized and used as the
+        <interfacename>PropertyEditor</interfacename> for
+        <classname>Foo</classname>-typed properties. </para>
+      <programlisting><![CDATA[com
+  chank
+    pop
+      Foo
+      FooEditor   ]]><lineannotation>// the <interfacename>PropertyEditor</interfacename> for the <classname>Foo</classname> class</lineannotation></programlisting>
+
+      <para>Note that you can also use the standard
+        <interfacename>BeanInfo</interfacename> JavaBeans mechanism here as well
+        (described <ulink
+        url="http://java.sun.com/docs/books/tutorial/javabeans/customization/index.html"
+        >in not-amazing-detail here</ulink>). Find below an example of using the
+        <interfacename>BeanInfo</interfacename> mechanism for explicitly
+        registering one or more <interfacename>PropertyEditor</interfacename>
+        instances with the properties of an associated class.</para>
+      <programlisting><![CDATA[com
+  chank
+    pop
+      Foo
+      FooBeanInfo   ]]><lineannotation>// the <interfacename>BeanInfo</interfacename> for the <classname>Foo</classname> class</lineannotation></programlisting>
+
+      <para> Here is the Java source code for the referenced
+        <classname>FooBeanInfo</classname> class. This would associate a
+        <classname>CustomNumberEditor</classname> with the
+        <literal>age</literal> property of the <classname>Foo</classname> class. </para>
+
+      <programlisting language="java"><![CDATA[public class FooBeanInfo extends SimpleBeanInfo {
+
+    public PropertyDescriptor[] getPropertyDescriptors() {
+        try {
+            final PropertyEditor numberPE = new CustomNumberEditor(Integer.class, true);
+            PropertyDescriptor ageDescriptor = new PropertyDescriptor("age", Foo.class) {
+                public PropertyEditor createPropertyEditor(Object bean) {
+                    return numberPE;
+                };
+            };
+            return new PropertyDescriptor[] { ageDescriptor };
+        }
+        catch (IntrospectionException ex) {
+            throw new Error(ex.toString());
+        }
+    }
+}]]></programlisting>
+
+      <section id="beans-beans-conversion-customeditor-registration">
+        <title>Registering additional custom
+          <interfacename>PropertyEditors</interfacename></title>
+
+        <para>When setting bean properties as a string value, a Spring IoC
+          container ultimately uses standard JavaBeans
+          <literal>PropertyEditors</literal> to convert these Strings to the
+          complex type of the property. Spring pre-registers a number of custom
+          <literal>PropertyEditors</literal> (for example, to convert a
+          classname expressed as a string into a real
+          <classname>Class</classname> object). Additionally, Java's standard
+          JavaBeans <interfacename>PropertyEditor</interfacename> lookup
+          mechanism allows a <classname>PropertyEditor</classname> for a class
+          simply to be named appropriately and placed in the same package as the
+          class it provides support for, to be found automatically.</para>
+
+        <para>If there is a need to register other custom
+          <literal>PropertyEditors</literal>, there are several mechanisms
+          available. The most manual approach, which is not normally convenient
+          or recommended, is to simply use the
+          <methodname>registerCustomEditor()</methodname> method of the
+          <interfacename>ConfigurableBeanFactory</interfacename> interface,
+          assuming you have a <interfacename>BeanFactory</interfacename>
+          reference. Another, slightly more convenient, mechanism is to use a
+          special bean factory post-processor called
+          <classname>CustomEditorConfigurer</classname>. Although bean factory
+          post-processors can be used with
+          <interfacename>BeanFactory</interfacename> implementations, the
+          <classname>CustomEditorConfigurer</classname> has a nested property
+          setup, so it is strongly recommended that it is used with the
+          <interfacename>ApplicationContext</interfacename>, where it may be
+          deployed in similar fashion to any other bean, and automatically
+          detected and applied.</para>
+
+        <para>Note that all bean factories and application contexts
+          automatically use a number of built-in property editors, through their
+          use of something called a <interfacename>BeanWrapper</interfacename>
+          to handle property conversions. The standard property editors that the
+          <interfacename>BeanWrapper</interfacename> registers are listed in
+          <link linkend="beans-beans-conversion">the previous section</link>.
+          Additionally, <literal>ApplicationContexts</literal> also override or
+          add an additional number of editors to handle resource lookups in a
+          manner appropriate to the specific application context type.</para>
+
+        <para>Standard JavaBeans <interfacename>PropertyEditor</interfacename>
+          instances are used to convert property values expressed as strings to
+          the actual complex type of the property.
+          <classname>CustomEditorConfigurer</classname>, a bean factory
+          post-processor, may be used to conveniently add support for additional
+          <interfacename>PropertyEditor</interfacename> instances to an
+          <interfacename>ApplicationContext</interfacename>.</para>
+
+        <para>Consider a user class <classname>ExoticType</classname>, and
+          another class <classname>DependsOnExoticType</classname> which needs
+          <classname>ExoticType</classname> set as a property:</para>
+
+        <programlisting language="java"><![CDATA[package example;
+
+public class ExoticType {
+
+    private String name;
+
+    public ExoticType(String name) {
+        this.name = name;
+    }
+}
+
+public class DependsOnExoticType {
+
+    private ExoticType type;
+
+    public void setType(ExoticType type) {
+        this.type = type;
+    }
+}]]></programlisting>
+
+        <para>When things are properly set up, we want to be able to assign the
+          type property as a string, which a
+          <interfacename>PropertyEditor</interfacename> will behind the scenes
+          convert into an actual <classname>ExoticType</classname>
+          instance:</para>
+
+        <programlisting language="xml"><![CDATA[<bean id="sample" class="example.DependsOnExoticType">
+    <property name="type" value="aNameForExoticType"/>
+</bean>]]></programlisting>
+
+        <para>The <interfacename>PropertyEditor</interfacename> implementation
+          could look similar to this:</para>
+        <programlisting language="java"><lineannotation>// converts string representation to <classname>ExoticType</classname> object</lineannotation><![CDATA[
+package example;
+
+public class ExoticTypeEditor extends PropertyEditorSupport {
+
+    public void setAsText(String text) {
+        setValue(new ExoticType(text.toUpperCase()));
+    }
+}]]></programlisting>
+
+        <para>Finally, we use <classname>CustomEditorConfigurer</classname> to
+          register the new <interfacename>PropertyEditor</interfacename> with
+          the <interfacename>ApplicationContext</interfacename>, which will then
+          be able to use it as needed:</para>
+
+        <programlisting language="xml"><![CDATA[<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+  <property name="customEditors">
+    <map>
+      <entry key="example.ExoticType" value="example.ExoticTypeEditor"/>
+    </map>
+  </property>
+</bean>]]></programlisting>
+
+        <section id="beans-beans-conversion-customeditor-registration-per">
+          <title>Using
+            <interfacename>PropertyEditorRegistrars</interfacename></title>
+
+          <para>Another mechanism for registering property editors with the
+            Spring container is to create and use a
+            <interfacename>PropertyEditorRegistrar</interfacename>. This
+            interface is particularly useful when you need to use the same set
+            of property editors in several different situations: write a
+            corresponding registrar and reuse that in each case.
+            <literal>PropertyEditorRegistrars</literal> work in conjunction with
+            an interface called
+            <interfacename>PropertyEditorRegistry</interfacename>, an interface
+            that is implemented by the Spring
+            <interfacename>BeanWrapper</interfacename> (and
+            <interfacename>DataBinder</interfacename>).
+            <literal>PropertyEditorRegistrars</literal> are particularly
+            convenient when used in conjunction with the
+            <classname>CustomEditorConfigurer</classname> (introduced <link
+            linkend="beans-beans-conversion-customeditor-registration"
+            >here</link>), which exposes a property called
+            <methodname>setPropertyEditorRegistrars(..)</methodname>:
+            <literal>PropertyEditorRegistrars</literal> added to a
+            <classname>CustomEditorConfigurer</classname> in this fashion can
+            easily be shared with <interfacename>DataBinder</interfacename> and
+            Spring MVC <interfacename>Controllers</interfacename>. Furthermore,
+            it avoids the need for synchronization on custom editors: a
+            <interfacename>PropertyEditorRegistrar</interfacename> is expected
+            to create fresh <interfacename>PropertyEditor</interfacename>
+            instances for each bean creation attempt.</para>
+
+          <para>Using a <interfacename>PropertyEditorRegistrar</interfacename>
+            is perhaps best illustrated with an example. First off, you need to
+            create your own
+            <interfacename>PropertyEditorRegistrar</interfacename>
+            implementation:</para>
+
+          <programlisting language="java"><![CDATA[package com.foo.editors.spring;
+
+public final class CustomPropertyEditorRegistrar implements PropertyEditorRegistrar {
+
+    public void registerCustomEditors(PropertyEditorRegistry registry) {
+
+        ]]><lineannotation>// it is expected that new <interfacename>PropertyEditor</interfacename> instances are created</lineannotation><![CDATA[
+        registry.registerCustomEditor(ExoticType.class, new ExoticTypeEditor());
+
+        ]]><lineannotation>// you could register as many custom property editors as are required here...</lineannotation><![CDATA[
+    }
+}]]></programlisting>
+
+          <para>See also the
+            <classname>org.springframework.beans.support.ResourceEditorRegistrar</classname>
+            for an example
+            <interfacename>PropertyEditorRegistrar</interfacename>
+            implementation. Notice how in its implementation of the
+            <methodname>registerCustomEditors(..)</methodname> method it creates
+            new instances of each property editor.</para>
+
+          <para>Next we configure a
+            <classname>CustomEditorConfigurer</classname> and inject an instance
+            of our <classname>CustomPropertyEditorRegistrar</classname> into
+            it:</para>
+          <programlisting language="xml"><![CDATA[<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+    <property name="propertyEditorRegistrars">
+        <list>
+            <ref bean="customPropertyEditorRegistrar"/>
+        </list>
+    </property>
+</bean>
+
+<bean id="customPropertyEditorRegistrar"
+      class="com.foo.editors.spring.CustomPropertyEditorRegistrar"/>]]></programlisting>
+
+          <para>Finally, and in a bit of a departure from the focus of this
+            chapter, for those of you using <link linkend="mvc">Spring's MVC web
+            framework</link>, using
+            <interfacename>PropertyEditorRegistrars</interfacename> in
+            conjunction with data-binding
+            <interfacename>Controllers</interfacename> (such as
+            <classname>SimpleFormController</classname>) can be very convenient.
+            Find below an example of using a
+            <interfacename>PropertyEditorRegistrar</interfacename> in the
+            implementation of an <methodname>initBinder(..)</methodname>
+            method:</para>
+
+          <programlisting language="java"><![CDATA[public final class RegisterUserController extends SimpleFormController {
+
+    private final PropertyEditorRegistrar customPropertyEditorRegistrar;
+
+    public RegisterUserController(PropertyEditorRegistrar propertyEditorRegistrar) {
+        this.customPropertyEditorRegistrar = propertyEditorRegistrar;
+    }
+
+    protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder)
+                        throws Exception {
+        ]]><emphasis role="bold">this.customPropertyEditorRegistrar.registerCustomEditors(binder);</emphasis><![CDATA[
+    }
+
+    ]]><lineannotation>// other methods to do with registering a <classname>User</classname></lineannotation><![CDATA[
+}]]></programlisting>
+
+          <para>This style of <interfacename>PropertyEditor</interfacename>
+            registration can lead to concise code (the implementation of
+            <methodname>initBinder(..)</methodname> is just one line long!), and
+            allows common <interfacename>PropertyEditor</interfacename>
+            registration code to be encapsulated in a class and then shared
+            amongst as many <interfacename>Controllers</interfacename> as
+            needed.</para>
+        </section>
+      </section>
+    </section>
+  </section>
+
+  <section id="core-convert">
+    <title>Spring 3 Type Conversion</title>
+
+    <para> Spring 3 introduces a <filename>core.convert</filename> package that
+      provides a general type conversion system. The system defines an SPI to
+      implement type conversion logic, as well as an API to execute type
+      conversions at runtime. Within a Spring container, this system can be used
+      as an alternative to PropertyEditors to convert externalized bean property
+      value strings to required property types. The public API may also be used
+      anywhere in your application where type conversion is needed. </para>
+
+    <section id="core-convert-Converter-API">
+      <title>Converter SPI</title>
+
+      <para> The SPI to implement type conversion logic is simple and strongly
+        typed: </para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert.converter;
+
+public interface Converter<S, T> {
+
+    T convert(S source);
+
+}]]></programlisting>
+
+      <para> To create your own Converter, simply implement the interface above.
+        Parameterize S as the type you are converting from, and T as the type
+        you are converting to. For each call to convert(S), the source argument
+        is guaranteed to be NOT null. Your Converter may throw any Exception if
+        conversion fails. An IllegalArgumentException should be thrown to report
+        an invalid source value. Take care to ensure your Converter
+        implementation is thread-safe. </para>
+
+      <para> Several converter implementations are provided in the
+        <filename>core.convert.support</filename> package as a convenience.
+        These include converters from Strings to Numbers and other common types.
+        Consider <classname>StringToInteger</classname> as an example Converter
+        implementation: </para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert.support;
+
+final class StringToInteger implements Converter<String, Integer> {
+
+    public Integer convert(String source) {
+        return Integer.valueOf(source);
+    }
+
+}]]></programlisting>
+    </section>
+
+    <section id="core-convert-ConverterFactory-SPI">
+      <title>ConverterFactory</title>
+
+      <para> When you need to centralize the conversion logic for an entire
+        class hierarchy, for example, when converting from String to
+        java.lang.Enum objects, implement
+        <interfacename>ConverterFactory</interfacename>: </para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert.converter;
+
+public interface ConverterFactory<S, R> {
+
+    <T extends R> Converter<S, T> getConverter(Class<T> targetType);
+
+}]]></programlisting>
+
+      <para> Parameterize S to be the type you are converting from and R to be
+        the base type defining the <emphasis>range</emphasis> of classes you can
+        convert to. Then implement getConverter(Class&lt;T&gt;), where T is a
+        subclass of R. </para>
+
+      <para> Consider the <classname>StringToEnum</classname> ConverterFactory
+        as an example: </para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert.support;
+
+final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
+
+    public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
+        return new StringToEnumConverter(targetType);
+    }
+
+    private final class StringToEnumConverter<T extends Enum> implements Converter<String, T> {
+
+        private Class<T> enumType;
+
+        public StringToEnumConverter(Class<T> enumType) {
+            this.enumType = enumType;
+        }
+
+        public T convert(String source) {
+            return (T) Enum.valueOf(this.enumType, source.trim());
+        }
+    }
+}]]></programlisting>
+    </section>
+
+    <section id="core-convert-GenericConverter-SPI">
+      <title>GenericConverter</title>
+
+      <para> When you require a sophisticated Converter implementation, consider
+        the GenericConverter interface. With a more flexible but less strongly
+        typed signature, a GenericConverter supports converting between multiple
+        source and target types. In addition, a GenericConverter makes available
+        source and target field context you can use when implementing your
+        conversion logic. Such context allows a type conversion to be driven by
+        a field annotation, or generic information declared on a field
+        signature. </para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert.converter;
+
+public interface GenericConverter {
+
+    public Set<ConvertiblePair> getConvertibleTypes();
+
+    Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+
+}]]></programlisting>
+
+      <para> To implement a GenericConverter, have getConvertibleTypes() return
+        the supported source-&gt;target type pairs. Then implement
+        convert(Object, TypeDescriptor, TypeDescriptor) to implement your
+        conversion logic. The source TypeDescriptor provides access to the
+        source field holding the value being converted. The target
+        TypeDescriptor provides access to the target field where the converted
+        value will be set. </para>
+
+      <para> A good example of a GenericConverter is a converter that converts
+        between a Java Array and a Collection. Such an
+        ArrayToCollectionConverter introspects the field that declares the
+        target Collection type to resolve the Collection's element type. This
+        allows each element in the source array to be converted to the
+        Collection element type before the Collection is set on the target
+        field. </para>
+      <note>
+        <para> Because GenericConverter is a more complex SPI interface, only
+          use it when you need it. Favor Converter or ConverterFactory for basic
+          type conversion needs. </para>
+      </note>
+
+      <section id="core-convert-ConditionalGenericConverter-SPI">
+        <title>ConditionalGenericConverter</title>
+
+        <para> Sometimes you only want a Converter to execute if a specific
+          condition holds true. For example, you might only want to execute a
+          Converter if a specific annotation is present on the target field. Or
+          you might only want to execute a Converter if a specific method, such
+          as static valueOf method, is defined on the target class.
+          ConditionalGenericConverter is an subinterface of GenericConverter
+          that allows you to define such custom matching criteria: </para>
+
+        <programlisting language="java"><![CDATA[public interface ConditionalGenericConverter extends GenericConverter {
+
+    boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
+
+}]]></programlisting>
+
+        <para> A good example of a ConditionalGenericConverter is an
+          EntityConverter that converts between an persistent entity identifier
+          and an entity reference. Such a EntityConverter might only match if
+          the target entity type declares a static finder method e.g.
+          findAccount(Long). You would perform such a finder method check in the
+          implementation of matches(TypeDescriptor, TypeDescriptor). </para>
+      </section>
+    </section>
+
+    <section id="core-convert-ConversionService-API">
+      <title>ConversionService API</title>
+
+      <para> The ConversionService defines a unified API for executing type
+        conversion logic at runtime. Converters are often executed behind this
+        facade interface: </para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.core.convert;
+
+public interface ConversionService {
+
+    boolean canConvert(Class<?> sourceType, Class<?> targetType);
+
+    <T> T convert(Object source, Class<T> targetType);
+
+    boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
+
+    Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+
+}]]></programlisting>
+
+      <para> Most ConversionService implementations also implement
+        <interface>ConverterRegistry</interface>, which provides an SPI for
+        registering converters. Internally, a ConversionService implementation
+        delegates to its registered converters to carry out type conversion
+        logic. </para>
+
+      <para> A robust ConversionService implementation is provided in the
+        <filename>core.convert.support</filename> package.
+        <classname>GenericConversionService</classname> is the general-purpose
+        implementation suitable for use in most environments.
+        <classname>ConversionServiceFactory</classname> provides a convenient
+        factory for creating common ConversionService configurations. </para>
+    </section>
+
+    <section id="core-convert-Spring-config">
+      <title>Configuring a ConversionService</title>
+
+      <para> A ConversionService is a stateless object designed to be
+        instantiated at application startup, then shared between multiple
+        threads. In a Spring application, you typically configure a
+        ConversionService instance per Spring container (or ApplicationContext).
+        That ConversionService will be picked up by Spring and then used
+        whenever a type conversion needs to be performed by the framework. You
+        may also inject this ConversionService into any of your beans and invoke
+        it directly. </para>
+      <note>
+        <para> If no ConversionService is registered with Spring, the original
+          PropertyEditor-based system is used. </para>
+      </note>
+
+      <para> To register a default ConversionService with Spring, add the
+        following bean definition with id <code>conversionService</code>: </para>
+      <programlisting language="xml"><![CDATA[<bean id="conversionService"
+      class="org.springframework.context.support.ConversionServiceFactoryBean"/>]]>
+      </programlisting>
+
+      <para> A default ConversionService can convert between strings, numbers,
+        enums, collections, maps, and other common types. To suppliment or
+        override the default converters with your own custom converter(s), set
+        the <code>converters</code> property. Property values may implement
+        either of the Converter, ConverterFactory, or GenericConverter
+        interfaces. </para>
+
+      <programlisting language="xml"><![CDATA[<bean id="conversionService"
+      class="org.springframework.context.support.ConversionServiceFactoryBean">
+    <property name="converters">
+        <list>
+            <bean class="example.MyCustomConverter"/>
+        </list>
+    </property>
+</bean>]]></programlisting>
+
+      <para>It is also common to use a ConversionService within a Spring MVC
+        application. See <xref linkend="format-configuring-FormattingConversionService"/>
+        for details on use with
+        <literal>&lt;mvc:annotation-driven/&gt;</literal>.</para>
+
+      <para>In certain situations you may wish to apply formatting during
+        conversion. See <xref linkend="format-FormatterRegistry-SPI"/> for
+        details on using
+        <classname>FormattingConversionServiceFactoryBean</classname>.</para>
+    </section>
+
+    <section id="core-convert-programmatic-usage">
+      <title>Using a ConversionService programatically</title>
+
+      <para> To work with a ConversionService instance programatically, simply
+        inject a reference to it like you would for any other bean: </para>
+
+      <programlisting language="java"><![CDATA[@Service
+public class MyService {
+
+    @Autowired
+    public MyService(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+
+    public void doIt() {
+        this.conversionService.convert(...)
+    }
+}]]></programlisting>
+    </section>
+  </section>
+
+  <section id="format">
+    <title>Spring 3 Field Formatting</title>
+
+    <para> As discussed in the previous section, <link linkend="core-convert"
+      ><filename>core.convert</filename></link> is a general-purpose type
+      conversion system. It provides a unified ConversionService API as well as
+      a strongly-typed Converter SPI for implementing conversion logic from one
+      type to another. A Spring Container uses this system to bind bean property
+      values. In addition, both the Spring Expression Language (SpEL) and
+      DataBinder use this system to bind field values. For example, when SpEL
+      needs to coerce a <classname>Short</classname> to a
+      <classname>Long</classname> to complete an
+      <function>expression.setValue(Object bean, Object value)</function>
+      attempt, the core.convert system performs the coercion. </para>
+
+    <para> Now consider the type conversion requirements of a typical client
+      environment such as a web or desktop application. In such environments,
+      you typically convert <emphasis>from String</emphasis> to support the
+      client postback process, as well as back <emphasis>to String</emphasis> to
+      support the view rendering process. In addition, you often need to
+      localize String values. The more general <emphasis>core.convert</emphasis>
+      Converter SPI does not address such <emphasis>formatting</emphasis>
+      requirements directly. To directly address them, Spring 3 introduces a
+      convenient Formatter SPI that provides a simple and robust alternative to
+      PropertyEditors for client environments. </para>
+
+    <para> In general, use the Converter SPI when you need to implement
+      general-purpose type conversion logic; for example, for converting between
+      a java.util.Date and and java.lang.Long. Use the Formatter SPI when you're
+      working in a client environment, such as a web application, and need to
+      parse and print localized field values. The ConversionService provides a
+      unified type conversion API for both SPIs. </para>
+
+    <section id="format-Formatter-SPI">
+      <title>Formatter SPI</title>
+
+      <para> The Formatter SPI to implement field formatting logic is simple and
+        strongly typed: </para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.format;
+
+public interface Formatter<T> extends Printer<T>, Parser<T> {
+}]]></programlisting>
+
+      <para> Where Formatter extends from the Printer and Parser building-block
+        interfaces: </para>
+
+      <programlisting language="java"><![CDATA[public interface Printer<T> {
+    String print(T fieldValue, Locale locale);
+}]]></programlisting>
+
+      <programlisting language="java"><![CDATA[import java.text.ParseException;
+
+public interface Parser<T> {
+    T parse(String clientValue, Locale locale) throws ParseException;
+}]]></programlisting>
+
+      <para> To create your own Formatter, simply implement the Formatter
+        interface above. Parameterize T to be the type of object you wish to
+        format, for example, <classname>java.util.Date</classname>. Implement
+        the <methodname>print()</methodname> operation to print an instance of T
+        for display in the client locale. Implement the
+        <methodname>parse()</methodname> operation to parse an instance of T from
+        the formatted representation returned from the client locale. Your
+        Formatter should throw a ParseException or IllegalArgumentException if a
+        parse attempt fails. Take care to ensure your Formatter implementation
+        is thread-safe. </para>
+
+      <para> Several Formatter implementations are provided in
+        <filename>format</filename> subpackages as a convenience. The
+        <filename>number</filename> package provides a NumberFormatter,
+        CurrencyFormatter, and PercentFormatter to format java.lang.Number
+        objects using a java.text.NumberFormat. The
+        <filename>datetime</filename> package provides a DateFormatter to format
+        java.util.Date objects with a java.text.DateFormat. The
+        <filename>datetime.joda</filename> package provides comprehensive
+        datetime formatting support based on the <ulink
+        url="http://joda-time.sourceforge.net">Joda Time library</ulink>. </para>
+
+      <para> Consider <classname>DateFormatter</classname> as an example
+        <interfacename>Formatter</interfacename> implementation: </para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.format.datetime;
+
+public final class DateFormatter implements Formatter<Date> {
+
+    private String pattern;
+
+    public DateFormatter(String pattern) {
+        this.pattern = pattern;
+    }
+
+    public String print(Date date, Locale locale) {
+        if (date == null) {
+            return "";
+        }
+        return getDateFormat(locale).format(date);
+    }
+
+    public Date parse(String formatted, Locale locale) throws ParseException {
+        if (formatted.length() == 0) {
+            return null;
+        }
+        return getDateFormat(locale).parse(formatted);
+    }
+
+    protected DateFormat getDateFormat(Locale locale) {
+        DateFormat dateFormat = new SimpleDateFormat(this.pattern, locale);
+        dateFormat.setLenient(false);
+        return dateFormat;
+    }
+
+}]]></programlisting>
+
+      <para> The Spring team welcomes community-driven Formatter contributions;
+        see <ulink url="http://jira.springframework.org"
+        >http://jira.springframework.org</ulink> to contribute. </para>
+    </section>
+
+    <section id="format-CustomFormatAnnotations">
+      <title>Annotation-driven Formatting</title>
+
+      <para> As you will see, field formatting can be configured by field type
+        or annotation. To bind an Annotation to a formatter, implement
+        AnnotationFormatterFactory: </para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.format;
+
+public interface AnnotationFormatterFactory<A extends Annotation> {
+
+    Set<Class<?>> getFieldTypes();
+
+    Printer<?> getPrinter(A annotation, Class<?> fieldType);
+
+    Parser<?> getParser(A annotation, Class<?> fieldType);
+
+}]]></programlisting>
+
+      <para> Parameterize A to be the field annotationType you wish to associate
+        formatting logic with, for example
+        <code>org.springframework.format.annotation.DateTimeFormat</code>. Have
+        <methodname>getFieldTypes()</methodname> return the types of fields the
+        annotation may be used on. Have <methodname>getPrinter()</methodname>
+        return a Printer to print the value of an annotated field. Have
+        <methodname>getParser()</methodname> return a Parser to parse a
+        clientValue for an annotated field. </para>
+
+      <para> The example AnnotationFormatterFactory implementation below binds
+        the @NumberFormat Annotation to a formatter. This annotation allows
+        either a number style or pattern to be specified: </para>
+
+      <programlisting language="java"><![CDATA[public final class NumberFormatAnnotationFormatterFactory
+        implements AnnotationFormatterFactory<NumberFormat> {
+
+    public Set<Class<?>> getFieldTypes() {
+        return new HashSet<Class<?>>(asList(new Class<?>[] {
+            Short.class, Integer.class, Long.class, Float.class,
+            Double.class, BigDecimal.class, BigInteger.class }));
+    }
+
+    public Printer<Number> getPrinter(NumberFormat annotation, Class<?> fieldType) {
+        return configureFormatterFrom(annotation, fieldType);
+    }
+
+    public Parser<Number> getParser(NumberFormat annotation, Class<?> fieldType) {
+        return configureFormatterFrom(annotation, fieldType);
+    }
+
+    private Formatter<Number> configureFormatterFrom(NumberFormat annotation,
+                                                     Class<?> fieldType) {
+        if (!annotation.pattern().isEmpty()) {
+            return new NumberFormatter(annotation.pattern());
+        } else {
+            Style style = annotation.style();
+            if (style == Style.PERCENT) {
+                return new PercentFormatter();
+            } else if (style == Style.CURRENCY) {
+                return new CurrencyFormatter();
+            } else {
+                return new NumberFormatter();
+            }
+        }
+    }
+}]]></programlisting>
+
+      <para> To trigger formatting, simply annotate fields with @NumberFormat: </para>
+
+      <programlisting language="java"><![CDATA[public class MyModel {
+
+    @NumberFormat(style=Style.CURRENCY)
+    private BigDecimal decimal;
+
+}]]></programlisting>
+
+      <section id="format-annotations-api">
+        <title>Format Annotation API</title>
+
+        <para> A portable format annotation API exists in the
+          <filename>org.springframework.format.annotation</filename> package.
+          Use @NumberFormat to format java.lang.Number fields. Use
+          @DateTimeFormat to format java.util.Date, java.util.Calendar,
+          java.util.Long, or Joda Time fields. </para>
+
+        <para> The example below uses @DateTimeFormat to format a java.util.Date
+          as a ISO Date (yyyy-MM-dd): </para>
+
+        <programlisting language="java"><![CDATA[public class MyModel {
+
+    @DateTimeFormat(iso=ISO.DATE)
+    private Date date;
+
+}]]></programlisting>
+      </section>
+    </section>
+
+    <section id="format-FormatterRegistry-SPI">
+      <title>FormatterRegistry SPI</title>
+
+      <para> The FormatterRegistry is an SPI for registering formatters and 
+      	converters. <classname>FormattingConversionService</classname> is 
+      	an implementation of FormatterRegistry suitable for most environments. 
+      	This implementation may be configured programatically or declaratively 
+      	as a Spring bean using 
+      	<classname>FormattingConversionServiceFactoryBean</classname>.
+      	Because this implemementation also implements
+        <classname>ConversionService</classname>, it can be directly 
+        configured for use with Spring's DataBinder and the Spring Expression 
+        Language (SpEL).
+      </para>
+
+      <para> Review the FormatterRegistry SPI below: </para>
+
+      <programlisting language="java"><![CDATA[package org.springframework.format;
+
+public interface FormatterRegistry extends ConverterRegistry {
+
+    void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser);
+
+    void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter);
+
+    void addFormatterForFieldType(Formatter<?> formatter);
+
+    void addFormatterForAnnotation(AnnotationFormatterFactory<?, ?> factory);
+
+}]]></programlisting>
+
+      <para> As shown above, Formatters can be registered by fieldType or
+        annotation. 
+      </para>
+      <para> The FormatterRegistry SPI allows you to configure Formatting rules
+        centrally, instead of duplicating such configuration across your
+        Controllers. For example, you might want to enforce that all Date fields
+        are formatted a certain way, or fields with a specific annotation are
+        formatted in a certain way. With a shared FormatterRegistry, you define
+        these rules once and they are applied whenever formatting is needed. 
+      </para>      
+    </section>
+
+    <section id="format-FormatterRegistrar-SPI">
+      <title>FormatterRegistrar SPI</title>
+	
+	  <para> The FormatterRegistrar is an SPI for registering formatters and 
+	  	converters through the FormatterRegistry: 
+	  </para>
+	  
+      <programlisting language="java"><![CDATA[package org.springframework.format;
+
+public interface FormatterRegistrar {
+
+    void registerFormatters(FormatterRegistry registry);
+
+}]]></programlisting>
+
+	    <para> A FormatterRegistrar is useful when registering multiple related 
+	        converters and formatters for a given formatting category, such as Date 
+	        formatting. It can also be useful where declarative registration is
+	        insufficient. For example when a formatter needs to be indexed under a 
+	        specific field type different from its own &lt;T&gt; or when registering
+	        a Printer/Parser pair. The next section provides more information on 
+	        converter and formatter registration.
+	    </para>
+	</section>
+      
+    <section id="format-configuring-FormattingConversionService">
+      <title>Configuring Formatting in Spring MVC</title>
+
+      <para> In a Spring MVC application, you may configure a custom
+        ConversionService instance explicity as an attribute of the
+        <literal>annotation-driven</literal> element of the MVC namespace. This
+        ConversionService will then be used anytime a type conversion is
+        required during Controller model binding. If not configured explicitly,
+        Spring MVC will automatically register default formatters and converters
+        for common types such as numbers and dates. </para>
+
+      <para> To rely on default formatting rules, no custom configuration is
+        required in your Spring MVC config XML: </para>
+
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+    <mvc:annotation-driven/>
+
+</beans>]]></programlisting>
+
+      <para> With this one-line of configuation, default formatters for Numbers
+        and Date types will be installed, including support for the
+        @NumberFormat and @DateTimeFormat annotations. Full support for the Joda
+        Time formatting library is also installed if Joda Time is present on the
+        classpath. </para>
+
+      <para> To inject a ConversionService instance with custom formatters and
+        converters registered, set the conversion-service attribute and then 
+        specify custom converters, formatters, or FormatterRegistrars as properties
+        of the FormattingConversionServiceFactoryBean: </para>
+      <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+    <mvc:annotation-driven conversion-service="conversionService"/>
+
+    <bean id="conversionService"
+          class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="org.example.MyConverter"/>
+            </set>
+        </property>
+        <property name="formatters">
+            <set>
+                <bean class="org.example.MyFormatter"/>
+                <bean class="org.example.MyAnnotationFormatterFactory"/>
+            </set>
+        </property>
+        <property name="formatterRegistrars">
+            <set>
+                <bean class="org.example.MyFormatterRegistrar"/>
+            </set>
+        </property>
+    </bean>
+
+</beans>
+]]></programlisting>
+
+      <note>
+	      <para> See <xref linkend="format-FormatterRegistrar-SPI"/> and  
+	        the <classname>FormattingConversionServiceFactoryBean</classname> 
+	        for more information on when to use FormatterRegistrars.
+	      </para>
+      </note>
+
+    </section>
+  </section>
+
+  <section id="validation-beanvalidation">
+    <title>Spring 3 Validation</title>
+
+    <para> Spring 3 introduces several enhancements to its validation support.
+      First, the JSR-303 Bean Validation API is now fully supported. Second,
+      when used programatically, Spring's DataBinder can now validate objects as
+      well as bind to them. Third, Spring MVC now has support for declaratively
+      validating @Controller inputs. </para>
+
+    <section id="validation-beanvalidation-overview">
+      <title>Overview of the JSR-303 Bean Validation API</title>
+
+      <para> JSR-303 standardizes validation constraint declaration and metadata
+        for the Java platform. Using this API, you annotate domain model
+        properties with declarative validation constraints and the runtime
+        enforces them. There are a number of built-in constraints you can take
+        advantage of. You may also define your own custom constraints. </para>
+
+      <para> To illustrate, consider a simple PersonForm model with two
+        properties: </para>
+
+      <programlisting language="java"><![CDATA[public class PersonForm {
+    private String name;
+    private int age;
+}]]></programlisting>
+
+      <para> JSR-303 allows you to define declarative validation constraints
+        against such properties: </para>
+
+      <programlisting language="java"><![CDATA[public class PersonForm {
+
+    @NotNull
+    @Size(max=64)
+    private String name;
+
+    @Min(0)
+    private int age;
+
+}]]></programlisting>
+
+      <para> When an instance of this class is validated by a JSR-303 Validator,
+        these constraints will be enforced. </para>
+
+      <para> For general information on JSR-303, see the <ulink
+        url="http://jcp.org/en/jsr/detail?id=303">Bean Validation
+        Specification</ulink>. For information on the specific capabilities of
+        the default reference implementation, see the <ulink
+        url="https://www.hibernate.org/412.html">Hibernate Validator</ulink>
+        documentation. To learn how to setup a JSR-303 implementation as a
+        Spring bean, keep reading. </para>
+    </section>
+
+    <section id="validation-beanvalidation-spring">
+      <title>Configuring a Bean Validation Implementation</title>
+
+      <para> Spring provides full support for the JSR-303 Bean Validation API.
+        This includes convenient support for bootstrapping a JSR-303
+        implementation as a Spring bean. This allows for a
+        <code>javax.validation.ValidatorFactory</code> or
+        <code>javax.validation.Validator</code> to be injected wherever
+        validation is needed in your application. </para>
+
+      <para> Use the <classname>LocalValidatorFactoryBean</classname> to
+        configure a default JSR-303 Validator as a Spring bean: </para>
+
+      <programlisting language="xml"><![CDATA[<bean id="validator"
+      class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>]]></programlisting>
+
+      <para> The basic configuration above will trigger JSR-303 to initialize
+        using its default bootstrap mechanism. A JSR-303 provider, such as
+        Hibernate Validator, is expected to be present in the classpath and will
+        be detected automatically. </para>
+
+      <section id="validation-beanvalidation-spring-inject">
+        <title>Injecting a Validator</title>
+
+        <para> <classname>LocalValidatorFactoryBean</classname> implements both
+          <code>javax.validation.ValidatorFactory</code> and
+          <code>javax.validation.Validator</code>, as well as Spring's
+          <code>org.springframework.validation.Validator</code>. You may inject
+          a reference to either of these interfaces into beans that need to
+          invoke validation logic. </para>
+
+        <para> Inject a reference to <code>javax.validation.Validator</code> if
+          you prefer to work with the JSR-303 API directly: </para>
+
+        <programlisting language="java"><![CDATA[import javax.validation.Validator;
+
+@Service
+public class MyService {
+
+    @Autowired
+    private Validator validator;]]></programlisting>
+
+        <para> Inject a reference to
+          <code>org.springframework.validation.Validator</code> if your bean
+          requires the Spring Validation API: </para>
+
+        <programlisting language="java"><![CDATA[import org.springframework.validation.Validator;
+
+@Service
+public class MyService {
+
+    @Autowired
+    private Validator validator;
+
+}]]></programlisting>
+      </section>
+
+      <section id="validation-beanvalidation-spring-constraints">
+        <title>Configuring Custom Constraints</title>
+
+        <para> Each JSR-303 validation constraint consists of two parts. First,
+          a @Constraint annotation that declares the constraint and its
+          configurable properties. Second, an implementation of the
+          <code>javax.validation.ConstraintValidator</code> interface that
+          implements the constraint's behavior. To associate a declaration with
+          an implementation, each @Constraint annotation references a
+          corresponding ValidationConstraint implementation class. At runtime, a
+          <code>ConstraintValidatorFactory</code> instantiates the referenced
+          implementation when the constraint annotation is encountered in your
+          domain model. </para>
+
+        <para> By default, the <classname>LocalValidatorFactoryBean</classname>
+          configures a <code>SpringConstraintValidatorFactory</code> that uses
+          Spring to create ConstraintValidator instances. This allows your
+          custom ConstraintValidators to benefit from dependency injection like
+          any other Spring bean. </para>
+
+        <para> Shown below is an example of a custom @Constraint declaration,
+          followed by an associated <code>ConstraintValidator</code>
+          implementation that uses Spring for dependency injection: </para>
+
+        <programlisting language="java"><![CDATA[@Target({ElementType.METHOD, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy=MyConstraintValidator.class)
+public @interface MyConstraint {
+}]]></programlisting>
+
+        <programlisting language="java"><![CDATA[import javax.validation.ConstraintValidator;
+
+public class MyConstraintValidator implements ConstraintValidator {
+
+    @Autowired;
+    private Foo aDependency;
+
+    ...
+}]]></programlisting>
+
+        <para> As you can see, a ConstraintValidator implementation may have its
+          dependencies @Autowired like any other Spring bean. </para>
+      </section>
+
+      <section id="validation-beanvalidation-spring-other">
+        <title>Additional Configuration Options</title>
+
+        <para> The default <classname>LocalValidatorFactoryBean</classname>
+          configuration should prove sufficient for most cases. There are a
+          number of other configuration options for various JSR-303 constructs,
+          from message interpolation to traversal resolution. See the JavaDocs
+          of <classname>LocalValidatorFactoryBean</classname> for more
+          information on these options. </para>
+      </section>
+    </section>
+
+    <section id="validation-binder">
+      <title>Configuring a DataBinder</title>
+
+      <para> Since Spring 3, a DataBinder instance can be configured with a
+        Validator. Once configured, the Validator may be invoked by calling
+        <code>binder.validate()</code>. Any validation Errors are automatically
+        added to the binder's BindingResult. </para>
+
+      <para> When working with the DataBinder programatically, this can be used
+        to invoke validation logic after binding to a target object: </para>
+
+      <programlisting language="java">Foo target = new Foo();
+DataBinder binder = new DataBinder(target);
+binder.setValidator(new FooValidator());
+
+<lineannotation>// bind to the target object</lineannotation>
+binder.bind(propertyValues);
+
+<lineannotation>// validate the target object</lineannotation>
+binder.validate();
+
+<lineannotation>// get BindingResult that includes any validation errors</lineannotation>
+BindingResult results = binder.getBindingResult();</programlisting>
+    </section>
+
+    <section id="validation-mvc">
+      <title>Spring MVC 3 Validation</title>
+
+      <para> Beginning with Spring 3, Spring MVC has the ability to
+        automatically validate @Controller inputs. In previous versions it was
+        up to the developer to manually invoke validation logic. </para>
+
+      <section id="validation-mvc-triggering">
+        <title>Triggering @Controller Input Validation</title>
+
+        <para> To trigger validation of a @Controller input, simply annotate the
+          input argument as @Valid: </para>
+
+        <programlisting language="java">@Controller
+public class MyController {
+
+    @RequestMapping("/foo", method=RequestMethod.POST)
+    public void processFoo(<emphasis role="bold">@Valid</emphasis> Foo foo) { <lineannotation>/* ... */</lineannotation> }
+</programlisting>
+
+        <para> Spring MVC will validate a @Valid object after binding so-long as
+          an appropriate Validator has been configured. </para>
+        <note>
+          <para> The @Valid annotation is part of the standard JSR-303 Bean
+            Validation API, and is not a Spring-specific construct. </para>
+        </note>
+      </section>
+
+      <section id="validation-mvc-configuring">
+        <title>Configuring a Validator for use by Spring MVC</title>
+
+        <para> The Validator instance invoked when a @Valid method argument is
+          encountered may be configured in two ways. First, you may call
+          binder.setValidator(Validator) within a @Controller's @InitBinder
+          callback. This allows you to configure a Validator instance per
+          @Controller class: </para>
+
+        <programlisting language="java"><![CDATA[@Controller
+public class MyController {
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.setValidator(new FooValidator());
+    }
+
+    @RequestMapping("/foo", method=RequestMethod.POST)
+    public void processFoo(@Valid Foo foo) { ... }
+
+}]]></programlisting>
+
+        <para> Second, you may call setValidator(Validator) on the global
+          WebBindingInitializer. This allows you to configure a Validator
+          instance across all @Controllers. This can be achieved easily by using
+          the Spring MVC namespace: </para>
+
+        <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+    <mvc:annotation-driven validator="globalValidator"/>
+
+</beans>
+]]></programlisting>
+      </section>
+
+      <section id="validation-mvc-jsr303">
+        <title>Configuring a JSR-303 Validator for use by Spring MVC</title>
+
+        <para> With JSR-303, a single <code>javax.validation.Validator</code>
+          instance typically validates <emphasis>all</emphasis> model objects
+          that declare validation constraints. To configure a JSR-303-backed
+          Validator with Spring MVC, simply add a JSR-303 Provider, such as
+          Hibernate Validator, to your classpath. Spring MVC will detect it and
+          automatically enable JSR-303 support across all Controllers. </para>
+
+        <para> The Spring MVC configuration required to enable JSR-303 support
+          is shown below: </para>
+
+        <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+    <!-- JSR-303 support will be detected on classpath and enabled automatically -->
+    <mvc:annotation-driven/>
+
+</beans>
+]]></programlisting>
+
+        <para> With this minimal configuration, anytime a @Valid @Controller
+          input is encountered, it will be validated by the JSR-303 provider.
+          JSR-303, in turn, will enforce any constraints declared against the
+          input. Any ConstraintViolations will automatically be exposed as
+          errors in the BindingResult renderable by standard Spring MVC form
+          tags. </para>
+      </section>
+    </section>
+  </section>
+</chapter>
