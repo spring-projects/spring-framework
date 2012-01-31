@@ -1,0 +1,1180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xml:id="beans">
+  <title>The IoC container</title>
+
+  <section id="beans-introduction">
+    <title>Introduction to the Spring IoC container and beans</title>
+
+    <para>This chapter covers the Spring Framework implementation of the
+      Inversion of Control (IoC) <footnote>
+      <para>See <xref linkend="background-ioc"/></para>
+      </footnote>principle. IoC is also known as <emphasis>dependency
+      injection</emphasis> (DI). It is a process whereby objects define their
+      dependencies, that is, the other objects they work with, only through
+      constructor arguments, arguments to a factory method, or properties that
+      are set on the object instance after it is constructed or returned from a
+      factory method. The container then <emphasis>injects</emphasis> those
+      dependencies when it creates the bean. This process is fundamentally the
+      inverse, hence the name <emphasis>Inversion of Control</emphasis> (IoC),
+      of the bean itself controlling the instantiation or location of its
+      dependencies by using direct construction of classes, or a mechanism such
+      as the <emphasis>Service Locator</emphasis> pattern.</para>
+
+    <!--I copied and pasted preceding from "Injecting Dependencies" to give background on IoC, since that's what chapter is about.
+The footnote should x-ref to first section in that chapter but I can't find the file. The current xref doesn't work.-->
+
+    <para>The <literal>org.springframework.beans</literal> and
+      <literal>org.springframework.context</literal> packages are the basis for
+      Spring Framework's IoC container. The <interfacename><ulink
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/BeanFactory.html"
+      >BeanFactory</ulink></interfacename> interface provides an advanced
+      configuration mechanism capable of managing any type of object.
+      <literal><ulink
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/context/ApplicationContext.html"
+      >ApplicationContext</ulink></literal> is a sub-interface of
+      <interfacename>BeanFactory.</interfacename> It adds easier integration
+      with Spring's AOP features; message resource handling (for use in
+      internationalization), event publication; and application-layer specific
+      contexts such as the <interfacename>WebApplicationContext</interfacename>
+      for use in web applications.</para>
+
+    <para>In short, the <interfacename>BeanFactory</interfacename> provides the
+      configuration framework and basic functionality, and the
+      <interfacename>ApplicationContext</interfacename> adds more
+      enterprise-specific functionality. The
+      <interfacename>ApplicationContext</interfacename> is a complete superset
+      of the <interfacename>BeanFactory</interfacename>, and is used exclusively
+      in this chapter in descriptions of Spring's IoC container.
+      <!--API spec says ApplicationContext is a subinterface of BeanFactory, so is it right to call it a superset?-->For
+      more information on using the <classname>BeanFactory</classname> instead
+      of the <classname>ApplicationContext,</classname> refer to <xref
+      linkend="beans-beanfactory"/>.</para>
+
+    <para>In Spring, the objects that form the backbone of your application and
+      that are managed by the Spring IoC <firstterm>container</firstterm> are
+      called <firstterm>beans</firstterm>. A bean is an object that is
+      instantiated, assembled, and otherwise managed by a Spring IoC container.
+      Otherwise, a bean is simply one of many objects in your application.
+      Beans, and the <firstterm>dependencies</firstterm> among them, are
+      reflected in the <firstterm>configuration metadata</firstterm> used by a
+      container.</para>
+  </section>
+
+  <section id="beans-basics">
+    <title>Container overview</title>
+
+    <para>The interface
+      <classname>org.springframework.context.ApplicationContext</classname>
+      represents the Spring IoC container and is responsible for instantiating,
+      configuring, and assembling the aforementioned beans. The container gets
+      its instructions on what objects to instantiate, configure, and assemble
+      by reading configuration metadata. The configuration metadata is
+      represented in XML, Java annotations, or Java code. It allows you to
+      express the objects that compose your application and the rich
+      interdependencies between such objects.</para>
+
+    <para>Several implementations of the
+      <classname>ApplicationContext</classname> interface are supplied
+      out-of-the-box with Spring. In standalone applications it is common to
+      create an instance of <ulink
+      url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/ClassPathXmlApplicationContext.html"
+      ><classname>ClassPathXmlApplicationContext</classname></ulink> or <ulink
+      url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/FileSystemXmlApplicationContext.html"
+      ><classname>FileSystemXmlApplicationContext</classname></ulink>.
+      <!-- MLP: Beverly to review --> While XML has been the traditional format
+      for defining configuration metadata you can instruct the container to use
+      Java annotations or code as the metadata format by providng a small amount
+      of XML configuration to declaratively enable support for these additional
+      metadata formats.</para>
+
+    <para>In most application scenarios, explicit user code is not required to
+      instantiate one or more instances of a Spring IoC container. For example,
+      in a web application scenario, a simple eight (or so) lines of boilerplate
+      J2EE web descriptor XML in the <literal>web.xml</literal> file of the
+      application will typically suffice (see <xref linkend="context-create"/>).
+      If you are using the <ulink url="http://www.springsource.com/produts/sts"
+      >SpringSource Tool Suite</ulink> Eclipse-powered development environment
+      or <ulink url="http://www.springsource.org/roo">Spring Roo</ulink> this
+      boilerplate configuration can be easily created with few mouse clicks or
+      keystrokes.</para>
+
+    <para>The following diagram is a high-level view of how Spring works. Your
+      application classes are combined with configuration metadata so that after
+      the <classname>ApplicationContext</classname> is created and initialized,
+      you have a fully configured and executable system or application.</para>
+
+    <para><mediaobject>
+      <imageobject>
+        <imagedata align="center" fileref="images/container-magic.png"
+          format="PNG" width="400" />
+      </imageobject>
+
+      <caption><para>The Spring IoC container</para></caption>
+      </mediaobject></para>
+
+    <section id="beans-factory-metadata">
+      <title>Configuration metadata</title>
+
+      <para>As the preceding diagram shows, the Spring IoC container consumes a
+        form of <emphasis>configuration metadata</emphasis>; this configuration
+        metadata represents how you as an application developer tell the Spring
+        container to instantiate, configure, and assemble the objects in your
+        application.</para>
+
+      <para>Configuration metadata is traditionally supplied in a simple and
+        intuitive XML format, which is what most of this chapter uses to convey
+        key concepts and features of the Spring IoC container.</para>
+
+      <note>
+        <para>XML-based metadata is <emphasis>not</emphasis> the only allowed
+          form of configuration metadata. The Spring IoC container itself is
+          <emphasis>totally</emphasis> decoupled from the format in which this
+          configuration metadata is actually written.</para>
+      </note>
+
+      <para>For information about using other forms of metadata with the Spring
+        container, see:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para><link linkend="beans-annotation-config">Annotation-based
+            configuration</link>: Spring 2.5 introduced support for
+            annotation-based configuration metadata.</para>
+        </listitem>
+
+        <listitem>
+          <para><link linkend="beans-java">Java-based configuration</link>:
+            Starting with Spring 3.0, many features provided by the <ulink
+            url="http://www.springsource.org/javaconfig">Spring JavaConfig
+            project</ulink> became part of the core Spring Framework. Thus you
+            can define beans external to your application classes by using Java
+            rather than XML files. To use these new features, see the
+            <interfacename>@Configuration</interfacename>, <interfacename>@Bean,
+            @Import</interfacename> and
+            <interfacename>@DependsOn</interfacename> annotations.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>Spring configuration consists of at least one and typically more
+        than one bean definition that the container must manage. XML-based
+        configuration metadata shows these beans configured as
+        <literal>&lt;bean/&gt;</literal> elements inside a top-level
+        <literal>&lt;beans/&gt;</literal> element.</para>
+
+      <para>These bean definitions correspond to the actual objects that make up
+        your application. Typically you define service layer objects, data
+        access objects (DAOs), presentation objects such as Struts
+        <interfacename>Action</interfacename> instances, infrastructure objects
+        such as Hibernate <interfacename>SessionFactories</interfacename>, JMS
+        <interfacename>Queues</interfacename>, and so forth. Typically one does
+        not configure fine-grained domain objects in the container, because it
+        is usually the responsibility of DAOs and business logic to create and
+        load domain objects. However, you can use Spring's integration with
+        AspectJ to configure objects that have been created outside the control
+        of an IoC container. See <link linkend="aop-atconfigurable">Using
+        AspectJ to dependency-inject domain objects with Spring</link>.</para>
+
+      <para>The following example shows the basic structure of XML-based
+        configuration metadata:</para>
+
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+
+  &lt;bean id="..." class="..."&gt;
+    &lt;!-- collaborators and configuration for this bean go here --&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="..." class="..."&gt;
+    &lt;!-- collaborators and configuration for this bean go here --&gt;
+  &lt;/bean&gt;
+
+  &lt;!-- more bean definitions go here --&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <para>The <literal>id</literal> attribute is a string that you use to
+        identify the individual bean definition. The <literal>class</literal>
+        attribute defines the type of the bean and uses the fully qualified
+        classname. The value of the id attribute refers to collaborating
+        objects. The XML for referring to collaborating objects is not shown in
+        this example; see <link linkend="beans-dependencies">Dependencies</link>
+        for more information.</para>
+    </section>
+
+    <section id="beans-factory-instantiation">
+      <title>Instantiating a container</title>
+
+      <para>Instantiating a Spring IoC container is straightforward. The
+        location path or paths supplied to an
+        <interfacename>ApplicationContext</interfacename> constructor are
+        actually resource strings that allow the container to load configuration
+        metadata from a variety of external resources such as the local file
+        system, from the Java <literal>CLASSPATH</literal>, and so on.</para>
+
+      <programlisting language="java">ApplicationContext context =
+    new ClassPathXmlApplicationContext(new String[] {"services.xml", "daos.xml"});</programlisting>
+
+      <note>
+        <para>After you learn about Spring's IoC container, you may want to know
+          more about Spring's <interfacename>Resource</interfacename>
+          abstraction, as described in <xref linkend="resources"/>, which
+          provides a convenient mechanism for reading an InputSream from
+          locations defined in a URI syntax. In particular,
+          <classname>Resource</classname> paths are used to construct
+          applications contexts as described in <xref
+          linkend="resources-app-ctx"/>.</para>
+      </note>
+
+      <para>The following example shows the service layer objects
+        <literal>(services.xml)</literal> configuration file:</para>
+
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+
+  &lt;!-- services --&gt;
+
+  &lt;bean id="petStore"
+        class="org.springframework.samples.jpetstore.services.PetStoreServiceImpl"&gt;
+    &lt;property name="accountDao" ref="accountDao"/&gt;
+    &lt;property name="itemDao" ref="itemDao"/&gt;
+    &lt;!-- additional collaborators and configuration for this bean go here --&gt;
+  &lt;/bean&gt;
+
+  &lt;!-- more bean definitions for services go here --&gt;
+
+&lt;/beans&gt;
+</programlisting>
+
+      <para>The following example shows the data access objects
+        <literal>daos.xml</literal> file:</para>
+
+      <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+
+  &lt;bean id="accountDao"
+      class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapAccountDao"&gt;
+    &lt;!-- additional collaborators and configuration for this bean go here --&gt;
+  &lt;/bean&gt;
+
+  &lt;bean id="itemDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapItemDao"&gt;
+    &lt;!-- additional collaborators and configuration for this bean go here --&gt;
+  &lt;/bean&gt;
+
+  &lt;!-- more bean definitions for data access objects go here --&gt;
+
+&lt;/beans&gt;</programlisting>
+
+      <para>In the preceding example, the service layer consists of the class
+        <classname>PetStoreServiceImpl</classname>, and two data access objects
+        of the type <classname>SqlMapAccountDao</classname> and SqlMapItemDao
+        are based on the <ulink url="http://ibatis.apache.org/">iBatis</ulink>
+        Object/Relational mapping framework. The <literal>property
+        name</literal> element refers to the name of the JavaBean property, and
+        the <literal>ref</literal> element refers to the name of another bean
+        definition. This linkage between id and ref elements expresses the
+        dependency between collaborating objects. For details of configuring an
+        object's dependencies, see <link linkend="beans-dependencies"
+        >Dependencies</link>.</para>
+
+      <section id="beans-factory-xml-import">
+        <title>Composing XML-based configuration metadata</title>
+
+        <para>It can be useful to have bean definitions span multiple XML files.
+          Often each individual XML configuration file represents a logical
+          layer or module in your architecture.</para>
+
+        <para>You can use the application context constructor to load bean
+          definitions from all these XML fragments. This constructor takes
+          multiple <interfacename>Resource</interfacename> locations, as was
+          shown in the previous section. Alternatively, use one or more
+          occurrences of the <literal>&lt;import/&gt;</literal> element to load
+          bean definitions from another file or files. For example:</para>
+
+        <programlisting language="xml">&lt;beans&gt;
+
+    &lt;import resource="services.xml"/&gt;
+    &lt;import resource="resources/messageSource.xml"/&gt;
+    &lt;import resource="/resources/themeSource.xml"/&gt;
+
+    &lt;bean id="bean1" class="..."/&gt;
+    &lt;bean id="bean2" class="..."/&gt;
+
+&lt;/beans&gt;</programlisting>
+
+        <para>In the preceding example, external bean definitions are loaded
+          from three files, <literal>services.xml</literal>,
+          <literal>messageSource.xml</literal>, and
+          <literal>themeSource.xml</literal>. All location paths are relative to
+          the definition file doing the importing, so
+          <literal>services.xml</literal> must be in the same directory or
+          classpath location as the file doing the importing, while
+          <literal>messageSource.xml</literal> and
+          <literal>themeSource.xml</literal> must be in a
+          <literal>resources</literal> location below the location of the
+          importing file. As you can see, a leading slash is ignored, but given
+          that these paths are relative, it is better form not to use the slash
+          at all. The contents of the files being imported, including the top
+          level <literal>&lt;beans/&gt;</literal> element, must be valid XML
+          bean definitions according to the Spring Schema or DTD.</para>
+
+        <note>
+          <para>It is possible, but not recommended, to reference files in
+            parent directories using a relative "../" path. Doing so creates a
+            dependency on a file that is outside the current application. In
+            particular, this reference is not recommended for "classpath:" URLs
+            (for example, "classpath:../services.xml"), where the runtime
+            resolution process chooses the "nearest" classpath root and then
+            looks into its parent directory. Classpath configuration changes may
+            lead to the choice of a different, incorrect directory.</para>
+
+          <para>You can always use fully qualified resource locations instead of
+            relative paths: for example, "file:C:/config/services.xml" or
+            "classpath:/config/services.xml". However, be aware that you are
+            coupling your application's configuration to specific absolute
+            locations. It is generally preferable to keep an indirection for
+            such absolute locations, for example, through "${...}" placeholders
+            that are resolved against JVM system properties at runtime.</para>
+        </note>
+      </section>
+    </section>
+
+    <section id="beans-factory-client">
+      <title>Using the container</title>
+
+      <para>The <interfacename>ApplicationContext</interfacename> is the
+        interface for an advanced factory capable of maintaining a registry of
+        different beans and their dependencies. Using the method <methodname>T
+        getBean(Stringname, Class&lt;T&gt; requiredType)</methodname> you can
+        retrieve instances of your beans.</para>
+
+      <para>The <interfacename>ApplicationContext</interfacename> enables you to
+        read bean definitions and access them as follows:</para>
+
+      <programlisting language="java">// create and configure beans
+ApplicationContext context =
+    new ClassPathXmlApplicationContext(new String[] {"services.xml", "daos.xml"});
+
+// retrieve configured instance
+PetStoreServiceImpl service = context.getBean("petStore", PetStoreServiceImpl.class);
+
+// use configured instance
+List userList service.getUsernameList();
+</programlisting>
+
+      <para>You use <methodname>getBean()</methodname> to retrieve instances of
+        your beans. The <interfacename>ApplicationContext</interfacename>
+        interface has a few other methods for retrieving beans, but ideally your
+        application code should never use them. Indeed, your application code
+        should have no calls to the <methodname>getBean()</methodname> method at
+        all, and thus no dependency on Spring APIs at all. For example, Spring's
+        integration with web frameworks provides for dependency injection for
+        various web framework classes such as controllers and JSF-managed
+        beans.</para>
+    </section>
+  </section>
+
+  <section id="beans-definition">
+    <title>Bean overview</title>
+
+    <para>A Spring IoC container manages one or more <emphasis>beans</emphasis>.
+      These beans are created with the configuration metadata that you supply to
+      the container, for example, in the form of XML
+      <literal>&lt;bean/&gt;</literal> definitions.</para>
+
+    <para>Within the container itself, these bean definitions are represented as
+      <interfacename>BeanDefinition</interfacename> objects, which contain
+      (among other information) the following metadata:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><emphasis>A package-qualified class name:</emphasis> typically the
+          actual implementation class of the bean being defined.</para>
+      </listitem>
+
+      <listitem>
+        <para>Bean behavioral configuration elements, which state how the bean
+          should behave in the container (scope, lifecycle callbacks, and so
+          forth).</para>
+      </listitem>
+
+      <listitem>
+        <para>References to other beans that are needed for the bean to do its
+          work; these references are also called
+          <emphasis>collaborators</emphasis> or
+          <emphasis>dependencies</emphasis>.</para>
+      </listitem>
+
+      <listitem>
+        <para>Other configuration settings to set in the newly created object,
+          for example, the number of connections to use in a bean that manages a
+          connection pool, or the size limit of the pool.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>This metadata translates to a set of properties that make up each bean
+      definition.</para>
+
+    <table id="beans-factory-bean-definition-tbl">
+      <title>The bean definition</title>
+
+      <tgroup cols="2">
+        <colspec colname="c1" colwidth="2*"/>
+
+        <colspec colname="c2" colwidth="4*"/>
+
+        <thead>
+          <row>
+            <entry>Property</entry>
+
+            <entry>Explained in...</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry>class</entry>
+
+            <entry><para> <xref linkend="beans-factory-class"/> </para></entry>
+          </row>
+
+          <row>
+            <entry>name</entry>
+
+            <entry><para> <xref linkend="beans-beanname"/> </para></entry>
+          </row>
+
+          <row>
+            <entry>scope</entry>
+
+            <entry><para> <xref linkend="beans-factory-scopes"/> </para></entry>
+          </row>
+
+          <row>
+            <entry>constructor arguments</entry>
+
+            <entry><para> <xref linkend="beans-factory-collaborators"/>
+              </para></entry>
+          </row>
+
+          <row>
+            <entry>properties</entry>
+
+            <entry><para> <xref linkend="beans-factory-collaborators"/>
+              </para></entry>
+          </row>
+
+          <row>
+            <entry>autowiring mode</entry>
+
+            <entry><para> <xref linkend="beans-factory-autowire"/>
+              </para></entry>
+          </row>
+
+          <row>
+            <entry>lazy-initialization mode</entry>
+
+            <entry><para> <xref linkend="beans-factory-lazy-init"/>
+              </para></entry>
+          </row>
+
+          <row>
+            <entry>initialization method</entry>
+
+            <entry><para> <xref
+              linkend="beans-factory-lifecycle-initializingbean"/>
+              </para></entry>
+          </row>
+
+          <row>
+            <entry>destruction method</entry>
+
+            <entry><para> <xref linkend="beans-factory-lifecycle-disposablebean"
+              /> </para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+
+    <para>In addition to bean definitions that contain information on how to
+      create a specific bean, the
+      <interfacename>ApplicationContext</interfacename> implementations also
+      permit the registration of existing objects that are created outside the
+      container, by users. This is done by accessing the ApplicationContext's
+      BeanFactory via the method <methodname>getBeanFactory()</methodname> which
+      returns the BeanFactory implementation
+      <classname>DefaultListableBeanFactory</classname>.
+      <classname>DefaultListableBeanFactory</classname> supports this
+      registration through the methods
+      <methodname>registerSingleton(..)</methodname> and
+      <methodname>registerBeanDefinition(..)</methodname>. However, typical
+      applications work solely with beans defined through metadata bean
+      definitions.</para>
+
+    <section id="beans-beanname">
+      <title>Naming beans</title>
+
+      <para>Every bean has one or more identifiers. These identifiers must be
+        unique within the container that hosts the bean. A bean usually has only
+        one identifier, but if it requires more than one, the extra ones can be
+        considered aliases.</para>
+
+      <para>In XML-based configuration metadata, you use the
+        <literal>id</literal> and/or <literal>name</literal> attributes to
+        specify the bean identifier(s). The <literal>id</literal> attribute
+        allows you to specify exactly one id.  Conventionally these names are
+        alphanumeric ('myBean', 'fooService', etc), but may special characters
+        as well.  If you want to introduce other aliases to the bean, you can
+        also specify them in the <literal>name</literal> attribute, separated by
+        a comma (<literal>,</literal>), semicolon (<literal>;</literal>), or
+        white space.  As a historical note, in versions prior to Spring 3.1, the
+        <literal>id</literal> attribute was typed as an
+        <literal>xsd:ID</literal>, which constrained possible characters.  As of
+        3.1, it is now <literal>xsd:string</literal>.  Note that bean id
+        uniqueness is still enforced by the container, though no longer by XML
+        parsers.</para>
+
+      <para>You are not required to supply a name or id for a bean. If no name
+        or id is supplied explicitly, the container generates a unique name for
+        that bean. However, if you want to refer to that bean by name, through
+        the use of the <literal>ref</literal> element or <link lang=""
+        linkend="beans-servicelocator">Service Locator</link> style lookup,
+        you must provide a name. Motivations for not supplying a name are
+        related to using <link linkend="beans-inner-beans">inner beans</link>
+        and <link linkend="beans-factory-autowire">autowiring
+        collaborators</link>.</para>
+
+      <sidebar>
+        <title>Bean naming conventions</title>
+
+        <para>The convention is to use the standard Java convention for instance
+          field names when naming beans. That is, bean names start with a
+          lowercase letter, and are camel-cased from then on. Examples of such
+          names would be (without quotes) <literal>'accountManager'</literal>,
+          <literal>'accountService'</literal>, <literal>'userDao'</literal>,
+          <literal>'loginController'</literal>, and so forth.</para>
+
+        <para>Naming beans consistently makes your configuration easier to read
+          and understand, and if you are using Spring AOP it helps a lot when
+          applying advice to a set of beans related by name.</para>
+      </sidebar>
+
+      <section id="beans-beanname-alias">
+        <title>Aliasing a bean outside the bean definition</title>
+
+        <para>In a bean definition itself, you can supply more than one name for
+          the bean, by using a combination of up to one name specified by the
+          <literal>id</literal> attribute, and any number of other names in the
+          <literal>name</literal> attribute. These names can be equivalent
+          aliases to the same bean, and are useful for some situations, such as
+          allowing each component in an application to refer to a common
+          dependency by using a bean name that is specific to that component
+          itself.</para>
+
+        <para>Specifying all aliases where the bean is actually defined is not
+          always adequate, however. It is sometimes desirable to introduce an
+          alias for a bean that is defined elsewhere. This is commonly the case
+          in large systems where configuration is split amongst each subsystem,
+          each subsystem having its own set of object definitions. In XML-based
+          configuration metadata, you can use the
+          <literal>&lt;alias/&gt;</literal> element to accomplish this.</para>
+
+        <programlisting language="xml">&lt;alias name="fromName" alias="toName"/&gt;</programlisting>
+
+        <para>In this case, a bean in the same container which is named
+          <literal>fromName</literal>, may also after the use of this alias
+          definition, be referred to as <literal>toName</literal>.</para>
+
+        <!-- MLP: Beverly to review -->
+
+        <para>For example, the configuration metadata for subsystem A may refer
+          to a DataSource via the name 'subsystemA-dataSource. The configuration
+          metadata for subsystem B may refer to a DataSource via the name
+          'subsystemB-dataSource'. When composing the main application that uses
+          both these subsystems the main application refers to the DataSource
+          via the name 'myApp-dataSource'. To have all three names refer to the
+          same object you add to the MyApp configuration metadata the following
+          aliases definitions:</para>
+
+        <programlisting language="xml">&lt;alias name="subsystemA-dataSource" alias="subsystemB-dataSource"/&gt;
+&lt;alias name="subsystemA-dataSource" alias="myApp-dataSource" /&gt;</programlisting>
+
+        <para>Now each component and the main application can refer to the
+          dataSource through a name that is unique and guaranteed not to clash
+          with any other definition (effectively creating a namespace), yet they
+          refer to the same bean.</para>
+      </section>
+    </section>
+
+    <section id="beans-factory-class">
+      <title>Instantiating beans</title>
+
+      <para>A bean definition essentially is a recipe for creating one or more
+        objects. The container looks at the recipe for a named bean when asked,
+        and uses the configuration metadata encapsulated by that bean definition
+        to create (or acquire) an actual object.</para>
+
+      <para>If you use XML-based configuration metadata, you specify the type
+        (or class) of object that is to be instantiated in the
+        <literal>class</literal> attribute of the
+        <literal>&lt;bean/&gt;</literal> element. This <literal>class</literal>
+        attribute, which internally is a <classname>Class</classname> property
+        on a <interfacename>BeanDefinition</interfacename> instance, is usually
+        mandatory. (For exceptions, see <xref
+        linkend="beans-factory-class-instance-factory-method"/> and <xref
+        linkend="beans-child-bean-definitions"/>.) You use the
+        <classname>Class</classname> property in one of two ways: <itemizedlist>
+        <listitem>
+          <para>Typically, to specify the bean class to be constructed in the
+            case where the container itself directly creates the bean by calling
+            its constructor reflectively, somewhat equivalent to Java code using
+            the <code>new</code> operator.</para>
+        </listitem>
+        </itemizedlist></para>
+
+      <itemizedlist>
+        <listitem>
+          <para>To specify the actual class containing the
+            <literal>static</literal> factory method that will be invoked to
+            create the object, in the less common case where the container
+            invokes a <literal>static</literal>, <emphasis>factory</emphasis>
+            method on a class to create the bean. The object type returned from
+            the invocation of the <literal>static</literal> factory method may
+            be the same class or another class entirely.</para>
+        </listitem>
+      </itemizedlist>
+
+      <sidebar>
+        <title>Inner class names</title>
+
+        <para>If you want to configure a bean definition for a
+          <literal>static</literal> nested class, you have to use the
+          <emphasis>binary</emphasis> name of the inner class.</para>
+
+        <para>For example, if you have a class called <classname>Foo</classname>
+          in the <literal>com.example</literal> package, and this
+          <classname>Foo</classname> class has a <literal>static</literal> inner
+          class called <classname>Bar</classname>, the value of the
+          <literal>'class'</literal> attribute on a bean definition would
+          be...</para>
+
+        <para><classname>com.example.Foo$Bar</classname></para>
+
+        <para>Notice the use of the <literal>$</literal> character in the name
+          to separate the inner class name from the outer class name.</para>
+      </sidebar>
+
+      <section id="beans-factory-class-ctor">
+        <title>Instantiation with a constructor</title>
+
+        <para>When you create a bean by the constructor approach, all normal
+          classes are usable by and compatible with Spring. That is, the class
+          being developed does not need to implement any specific interfaces or
+          to be coded in a specific fashion. Simply specifying the bean class
+          should suffice. However, depending on what type of IoC you use for
+          that specific bean, you may need a default (empty) constructor.</para>
+
+        <para>The Spring IoC container can manage virtually
+          <emphasis>any</emphasis> class you want it to manage; it is not
+          limited to managing true JavaBeans. Most Spring users prefer actual
+          JavaBeans with only a default (no-argument) constructor and
+          appropriate setters and getters modeled after the properties in the
+          container. You can also have more exotic non-bean-style classes in
+          your container. If, for example, you need to use a legacy connection
+          pool that absolutely does not adhere to the JavaBean specification,
+          Spring can manage it as well.</para>
+
+        <para>With XML-based configuration metadata you can specify your bean
+          class as follows:</para>
+
+        <programlisting language="xml">&lt;bean id="exampleBean" class="examples.ExampleBean"/&gt;
+
+&lt;bean name="anotherExample" class="examples.ExampleBeanTwo"/&gt;</programlisting>
+
+        <para>For details about the mechanism for supplying arguments to the
+          constructor (if required) and setting object instance properties after
+          the object is constructed, see <link
+          linkend="beans-factory-collaborators">Injecting
+          Dependencies</link>.</para>
+      </section>
+
+      <section id="beans-factory-class-static-factory-method">
+        <title>Instantiation with a static factory method</title>
+
+        <para>When defining a bean that you create with a static factory method,
+          you use the <literal>class</literal> attribute to specify the class
+          containing the <literal>static</literal> factory method and an
+          attribute named <literal>factory-method</literal> to specify the name
+          of the factory method itself. You should be able to call this method
+          (with optional arguments as described later) and return a live object,
+          which subsequently is treated as if it had been created through a
+          constructor. One use for such a bean definition is to call
+          <literal>static</literal> factories in legacy code.</para>
+
+        <para>The following bean definition specifies that the bean will be
+          created by calling a factory-method. The definition does not specify
+          the type (class) of the returned object, only the class containing the
+          factory method. In this example, the
+          <methodname>createInstance()</methodname> method must be a
+          <emphasis>static</emphasis> method.</para>
+
+        <programlisting language="xml">&lt;bean id="clientService"
+      class="examples.ClientService"
+      factory-method="createInstance"/&gt;</programlisting>
+
+        <programlisting language="java">public class ClientService {
+  private static ClientService clientService = new ClientService();
+  private ClientService() {}
+
+  public static ClientService createInstance() {
+    return clientService;
+  }
+}</programlisting>
+
+        <para>For details about the mechanism for supplying (optional) arguments
+          to the factory method and setting object instance properties after the
+          object is returned from the factory, see <link
+          linkend="beans-factory-properties-detailed">Dependencies and
+          configuration in detail</link>.</para>
+      </section>
+
+      <section id="beans-factory-class-instance-factory-method">
+        <title>Instantiation using an instance factory method</title>
+
+        <para>Similar to instantiation through a <link
+          linkend="beans-factory-class-static-factory-method">static factory
+          method</link>, instantiation with an instance factory method invokes a
+          non-static method of an existing bean from the container to create a
+          new bean. To use this mechanism, leave the <literal>class
+          </literal>attribute empty, and in the <literal>factory-bean</literal>
+          attribute, specify the name of a bean in the current (or
+          parent/ancestor) container that contains the instance method that is
+          to be invoked to create the object. Set the name of the factory method
+          itself with the <literal>factory-method</literal> attribute.</para>
+
+        <programlisting language="xml"><lineannotation>&lt;!-- the factory bean, which contains a method called <methodname>createInstance()</methodname> --&gt;</lineannotation>
+&lt;bean id="serviceLocator" class="examples.DefaultServiceLocator"&gt;
+  <lineannotation>&lt;!-- inject any dependencies required by this locator bean --&gt;</lineannotation>
+&lt;/bean&gt;
+
+<lineannotation>&lt;!-- the bean to be created via the factory bean --&gt;</lineannotation>
+&lt;bean id="clientService"
+      factory-bean="serviceLocator"
+      factory-method="createClientServiceInstance"/&gt;</programlisting>
+
+        <programlisting language="java">public class DefaultServiceLocator {
+  private static ClientService clientService = new ClientServiceImpl();
+  private DefaultServiceLocator() {}
+
+  public ClientService createClientServiceInstance() {
+    return clientService;
+  }
+}</programlisting>
+
+        <para>One factory class can also hold more than one factory method as
+          shown here:</para>
+
+        <programlisting language="xml">
+&lt;bean id="serviceLocator" class="examples.DefaultServiceLocator"&gt;
+  <lineannotation>&lt;!-- inject any dependencies required by this locator bean --&gt;</lineannotation>
+&lt;/bean&gt;
+&lt;bean id="clientService"
+      factory-bean="serviceLocator"
+      factory-method="createClientServiceInstance"/&gt;
+
+&lt;bean id="accountService"
+      factory-bean="serviceLocator"
+      factory-method="createAccountServiceInstance"/&gt;</programlisting>
+
+        <programlisting language="java">public class DefaultServiceLocator {
+  private static ClientService clientService = new ClientServiceImpl();
+  private static AccountService accountService = new AccountServiceImpl();
+
+  private DefaultServiceLocator() {}
+
+  public ClientService createClientServiceInstance() {
+    return clientService;
+  }
+
+  public AccountService createAccountServiceInstance() {
+    return accountService;
+  }
+}</programlisting>
+
+        <para>This approach shows that the factory bean itself can be managed
+          and configured through dependency injection (DI). See <link
+          linkend="beans-factory-properties-detailed"><link
+          linkend="beans-factory-properties-detailed">Dependencies and
+          configuration in detail</link>.</link></para>
+
+        <note>
+          <para>In Spring documentation,<emphasis> factory bean</emphasis>
+            refers to a bean that is configured in the Spring container that
+            will create objects through an <link
+            linkend="beans-factory-class-instance-factory-method"
+            >instance</link> or <link
+            linkend="beans-factory-class-static-factory-method">static</link>
+            factory method. By contrast,
+            <interfacename>FactoryBean</interfacename> (notice the
+            capitalization) refers to a Spring-specific <link
+            linkend="beans-factory-extension-factorybean">
+            <interfacename>FactoryBean</interfacename> </link>.</para>
+        </note>
+      </section>
+    </section>
+  </section>
+
+  <xi:include href="beans-dependencies.xml"
+    xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+  <xi:include href="beans-scopes.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+  <xi:include href="beans-customizing.xml"
+    xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+  <section id="beans-child-bean-definitions">
+    <title>Bean definition inheritance</title>
+
+    <para>A bean definition can contain a lot of configuration information,
+      including constructor arguments, property values, and container-specific
+      information such as initialization method, static factory method name, and
+      so on. A child bean definition inherits configuration data from a parent
+      definition. The child definition can override some values, or add others,
+      as needed. Using parent and child bean definitions can save a lot of
+      typing. Effectively, this is a form of templating.</para>
+
+    <para>If you work with an <interfacename>ApplicationContext</interfacename>
+      interface programmatically, child bean definitions are represented by the
+      <classname>ChildBeanDefinition</classname> class. Most users do not work
+      with them on this level, instead configuring bean definitions
+      declaratively in something like the
+      <classname>ClassPathXmlApplicationContext</classname>. When you use
+      XML-based configuration metadata, you indicate a child bean definition by
+      using the <literal>parent</literal> attribute, specifying the parent bean
+      as the value of this attribute.</para>
+
+    <programlisting language="xml">&lt;bean id="inheritedTestBean" abstract="true"
+    class="org.springframework.beans.TestBean"&gt;
+  &lt;property name="name" value="parent"/&gt;
+  &lt;property name="age" value="1"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="inheritsWithDifferentClass"
+      class="org.springframework.beans.DerivedTestBean"
+      <emphasis role="bold">parent="inheritedTestBean"</emphasis> init-method="initialize"&gt;
+
+  &lt;property name="name" value="override"/&gt;
+  <lineannotation>&lt;!-- the age property value of 1 will be inherited from  parent --&gt;</lineannotation>
+
+&lt;/bean&gt;</programlisting>
+
+    <para>A child bean definition uses the bean class from the parent definition
+      if none is specified, but can also override it. In the latter case, the
+      child bean class must be compatible with the parent, that is, it must
+      accept the parent's property values.</para>
+
+    <para>A child bean definition inherits constructor argument values, property
+      values, and method overrides from the parent, with the option to add new
+      values. Any initialization method, destroy method, and/or
+      <literal>static</literal> factory method settings that you specify will
+      override the corresponding parent settings.</para>
+
+    <para>The remaining settings are <emphasis>always</emphasis> taken from the
+      child definition: <emphasis>depends on</emphasis>, <emphasis>autowire
+      mode</emphasis>, <emphasis>dependency check</emphasis>,
+      <emphasis>singleton</emphasis>, <emphasis>scope</emphasis>, <emphasis>lazy
+      init</emphasis>.</para>
+
+    <para>The preceding example explicitly marks the parent bean definition as
+      abstract by using the <literal>abstract</literal> attribute. If the parent
+      definition does not specify a class, explicitly marking the parent bean
+      definition as <literal>abstract</literal> is required, as follows:</para>
+
+    <programlisting language="xml">&lt;bean id="inheritedTestBeanWithoutClass" abstract="true"&gt;
+    &lt;property name="name" value="parent"/&gt;
+    &lt;property name="age" value="1"/&gt;
+&lt;/bean&gt;
+
+&lt;bean id="inheritsWithClass" class="org.springframework.beans.DerivedTestBean"
+    parent="inheritedTestBeanWithoutClass" init-method="initialize"&gt;
+  &lt;property name="name" value="override"/&gt;
+  <lineannotation>&lt;!-- age will inherit the value of <literal>1</literal> from the parent bean definition--&gt;</lineannotation>
+&lt;/bean&gt;</programlisting>
+
+    <para>The parent bean cannot be instantiated on its own because it is
+      incomplete, and it is also explicitly marked as
+      <literal>abstract</literal>. When a definition is
+      <literal>abstract</literal> like this, it is usable only as a pure
+      template bean definition that serves as a parent definition for child
+      definitions. Trying to use such an <literal>abstract</literal> parent bean
+      on its own, by referring to it as a ref property of another bean or doing
+      an explicit <methodname>getBean()</methodname> call with the parent bean
+      id, returns an error. Similarly, the container's internal
+      <methodname>preInstantiateSingletons()</methodname> method ignores bean
+      definitions that are defined as abstract.</para>
+
+    <note>
+      <para><literal>ApplicationContext</literal> pre-instantiates all
+        singletons by default. Therefore, it is important (at least for
+        singleton beans) that if you have a (parent) bean definition which you
+        intend to use only as a template, and this definition specifies a class,
+        you must make sure to set the <emphasis>abstract</emphasis> attribute to
+        <emphasis>true</emphasis>, otherwise the application context will
+        actually (attempt to) pre-instantiate the <literal>abstract</literal>
+        bean.</para>
+    </note>
+  </section>
+
+  <xi:include href="beans-extension-points.xml"
+    xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+  <xi:include href="beans-annotation-config.xml"
+    xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+  <xi:include href="beans-classpath-scanning.xml"
+    xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+  <xi:include href="beans-standard-annotations.xml"
+    xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+  <xi:include href="beans-java.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+  <section id="context-load-time-weaver">
+    <title>Registering a <interfacename>LoadTimeWeaver</interfacename></title>
+
+    <para>The <literal>context</literal> namespace introduced in Spring 2.5
+      provides a <literal>load-time-weaver</literal>
+      element.<!--Need to explain purpose of LoadTimeWeaver? Is this section ok here? --></para>
+
+    <programlisting language="xml">&lt;beans&gt;
+
+     &lt;context:load-time-weaver/&gt;
+
+&lt;/beans&gt;</programlisting>
+
+    <para>Adding this element to an XML-based Spring configuration file
+      activates a Spring <interfacename>LoadTimeWeaver</interfacename> for the
+      <interfacename>ApplicationContext</interfacename>. Any bean within that
+      <interfacename>ApplicationContext</interfacename> may implement
+      <interfacename>LoadTimeWeaverAware</interfacename>, thereby receiving a
+      reference to the load-time weaver instance. This is particularly useful in
+      combination with <link linkend="orm-jpa">Spring's JPA support</link> where
+      load-time weaving may be necessary for JPA class transformation. Consult
+      the <classname>LocalContainerEntityManagerFactoryBean</classname> Javadoc
+      for more detail. For more on AspectJ load-time weaving, see <xref
+      linkend="aop-aj-ltw"/>.</para>
+  </section>
+
+  <xi:include href="beans-context-additional.xml"
+    xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+  <section id="beans-beanfactory">
+    <title>The BeanFactory</title>
+
+    <para>The <classname>BeanFactory</classname> provides the underlying basis
+      for Spring's IoC functionality but it is only used directly in integration
+      with other third-party frameworks and is now largely historical in nature
+      for most users of Spring. The <classname>BeanFactory</classname> and
+      related interfaces, such as <classname>BeanFactoryAware</classname>,
+      <classname>InitializingBean</classname>,
+      <classname>DisposableBean</classname>, are still present in Spring for the
+      purposes of backward compatibility with the large number of third-party
+      frameworks that integrate with Spring. Often third-party components that
+      can not use more modern equivalents such as <code>@PostConstruct</code> or
+      <code>@PreDestroy</code> in order to remain compatible with JDK 1.4 or to
+      avoid a dependency on JSR-250.</para>
+
+    <para>This section provides additional background into the differences
+      between the <interfacename>BeanFactory</interfacename> and
+      <interfacename>ApplicationContext</interfacename> and how one might access
+      the IoC container directly through a classic singleton lookup.</para>
+
+    <section id="context-introduction-ctx-vs-beanfactory">
+      <title><interfacename>BeanFactory</interfacename> or
+        <interfacename>ApplicationContext</interfacename>?</title>
+
+      <para>Use an <interfacename>ApplicationContext</interfacename> unless you
+        have a good reason for not doing so.</para>
+
+      <para>Because the <interfacename>ApplicationContext</interfacename>
+        includes all functionality of the
+        <interfacename>BeanFactory</interfacename>, it is generally recommended
+        over the <interfacename>BeanFactory</interfacename>, except for a few
+        situations such as in an <classname>Applet</classname> where memory
+        consumption might be critical and a few extra kilobytes might make a
+        difference. However, for most typical enterprise applications and
+        systems, the <interfacename>ApplicationContext</interfacename> is what
+        you will want to use. Spring 2.0 and later makes
+        <emphasis>heavy</emphasis> use of the <link
+        linkend="beans-factory-extension-bpp"
+        ><interfacename>BeanPostProcessor</interfacename> extension point</link>
+        (to effect proxying and so on). If you use only a plain
+        <interfacename>BeanFactory</interfacename>, a fair amount of support
+        such as transactions and AOP will not take effect, at least not without
+        some extra steps on your part. This situation could be confusing because
+        nothing is actually wrong with the configuration.</para>
+
+      <para>The following table lists features provided by the
+        <interfacename>BeanFactory</interfacename> and
+        <interfacename>ApplicationContext</interfacename> interfaces and
+        implementations.</para>
+
+      <table id="context-introduction-ctx-vs-beanfactory-feature-matrix"
+        pgwide="1">
+        <title>Feature Matrix</title>
+
+        <tgroup cols="3">
+          <colspec align="left"/>
+
+          <thead>
+            <row>
+              <entry align="center">Feature</entry>
+
+              <entry align="center"
+                ><interfacename>BeanFactory</interfacename></entry>
+
+              <entry align="center"
+                ><interfacename>ApplicationContext</interfacename></entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><para>Bean instantiation/wiring</para></entry>
+
+              <entry align="center"><para>Yes</para></entry>
+
+              <entry align="center"><para>Yes</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Automatic
+                <interfacename>BeanPostProcessor</interfacename>
+                registration</para></entry>
+
+              <entry align="center"><para>No</para></entry>
+
+              <entry align="center"><para>Yes</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Automatic
+                <interfacename>BeanFactoryPostProcessor</interfacename>
+                registration</para></entry>
+
+              <entry align="center"><para>No</para></entry>
+
+              <entry align="center"><para>Yes</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Convenient
+                <interfacename>MessageSource</interfacename> access (for
+                i18n)</para></entry>
+
+              <entry align="center"><para>No</para></entry>
+
+              <entry align="center"><para>Yes</para></entry>
+            </row>
+
+            <row>
+              <entry><para><interfacename>ApplicationEvent</interfacename>
+                publication</para></entry>
+
+              <entry align="center"><para>No</para></entry>
+
+              <entry align="center"><para>Yes</para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <para>To explicitly register a bean post-processor with a
+        <interfacename>BeanFactory</interfacename> implementation, you must
+        write code like this:</para>
+
+      <programlisting language="java">ConfigurableBeanFactory factory = new XmlBeanFactory(...);
+
+<lineannotation>// now register any needed <interfacename>BeanPostProcessor</interfacename> instances</lineannotation>
+MyBeanPostProcessor postProcessor = new MyBeanPostProcessor();
+factory.addBeanPostProcessor(postProcessor);
+
+<lineannotation>// now start using the factory</lineannotation></programlisting>
+
+      <para>To explicitly register a
+        <classname>BeanFactoryPostProcessor</classname> when using a
+        <interfacename>BeanFactory</interfacename> implementation, you must
+        write code like this:</para>
+
+      <programlisting language="java">XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
+
+<lineannotation>// bring in some property values from a <classname>Properties</classname> file</lineannotation>
+PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
+cfg.setLocation(new FileSystemResource("jdbc.properties"));
+
+<lineannotation>// now actually do the replacement</lineannotation>
+cfg.postProcessBeanFactory(factory);</programlisting>
+
+      <para>In both cases, the explicit registration step is inconvenient, which
+        is one reason why the various
+        <interfacename>ApplicationContext</interfacename> implementations are
+        preferred above plain <interfacename>BeanFactory</interfacename>
+        implementations in the vast majority of Spring-backed applications,
+        especially when using <literal>BeanFactoryPostProcessors</literal> and
+        <classname>BeanPostProcessors</classname>. These mechanisms implement
+        important functionality such as property placeholder replacement and
+        AOP.</para>
+    </section>
+
+    <section id="beans-servicelocator">
+      <title>Glue code and the evil singleton</title>
+
+      <para>It is best to write most application code in a dependency-injection
+        (DI) style, where that code is served out of a Spring IoC container, has
+        its own dependencies supplied by the container when it is created, and
+        is completely unaware of the container. However, for the small glue
+        layers of code that are sometimes needed to tie other code together, you
+        sometimes need a singleton (or quasi-singleton) style access to a Spring
+        IoC container. For example, third-party code may try to construct new
+        objects directly (<literal>Class.forName()</literal> style), without the
+        ability to get these objects out of a Spring IoC container.
+        <!--Can you reword the phrase singleton style access, above and next parragraph? Seems awkward.-->If
+        the object constructed by the third-party code is a small stub or proxy,
+        which then uses a singleton style access to a Spring IoC container to
+        get a real object to delegate to, then inversion of control has still
+        been achieved for the majority of the code (the object coming out of the
+        container). Thus most code is still unaware of the container or how it
+        is accessed, and remains decoupled from other code, with all ensuing
+        benefits. EJBs may also use this stub/proxy approach to delegate to a
+        plain Java implementation object, retrieved from a Spring IoC container.
+        While the Spring IoC container itself ideally does not have to be a
+        singleton, it may be unrealistic in terms of memory usage or
+        initialization times (when using beans in the Spring IoC container such
+        as a Hibernate <interfacename>SessionFactory</interfacename>) for each
+        bean to use its own, non-singleton Spring IoC container.</para>
+
+      <para>Looking up the application context in a service locator style is
+        sometimes the only option for accessing shared Spring-managed
+        components, such as in an EJB 2.1 environment, or when you want to share
+        a single ApplicationContext as a parent to WebApplicationContexts across
+        WAR files. In this case you should look into using the utility class
+        <ulink
+        url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html"
+        ><classname>ContextSingletonBeanFactoryLocator</classname></ulink>
+        locator that is described in this <ulink
+        url="http://blog.springsource.com/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/"
+        >SpringSource team blog entry</ulink>.</para>
+    </section>
+  </section>
+</chapter>

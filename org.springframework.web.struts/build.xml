@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="org.springframework.web.struts">
-	<property file="${basedir}/../build.properties"/>
-	<property file="${basedir}/../build.versions"/>
-	<import file="${basedir}/../build-spring-framework/package-bundle.xml"/>
-	<import file="${basedir}/../spring-build/standard/default.xml"/>
-</project>

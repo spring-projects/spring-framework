@@ -1,6 +1,0 @@
-Bundle-SymbolicName: org.springframework.instrument.tomcat
-Bundle-Name: Spring Instrument Tomcat Weaver
-Bundle-Vendor: SpringSource
-Bundle-ManifestVersion: 2
-Import-Template: 
- org.apache.catalina.*;version="[6.0.16, 7.0.0)"

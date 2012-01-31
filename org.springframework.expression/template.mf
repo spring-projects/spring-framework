@@ -1,8 +1,0 @@
-Bundle-SymbolicName: org.springframework.expression
-Bundle-Name: Spring Expression Language
-Bundle-Vendor: SpringSource
-Bundle-ManifestVersion: 2
-Import-Template: 
- org.apache.commons.logging;version="[1.1.1, 2.0.0)",
- org.springframework.core.*;version=${spring.osgi.range},
- org.springframework.util.*;version=${spring.osgi.range}

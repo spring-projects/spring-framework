@@ -1,0 +1,66 @@
+// redefine the compileJava and compileTestJava tasks in order to
+// compile sources with ajc instead of javac
+
+configurations {
+    ajc
+    aspects
+    ajInpath
+}
+
+task compileJava(overwrite: true)  {
+    dependsOn JavaPlugin.PROCESS_RESOURCES_TASK_NAME
+    dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileJava")
+
+    def outputDir = project.sourceSets.main.output.classesDir
+
+    inputs.files(project.sourceSets.main.allSource + project.sourceSets.main.compileClasspath)
+    outputs.dir outputDir
+
+    doLast{
+        ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
+                classpath: configurations.ajc.asPath)
+
+        ant.iajc(source: sourceCompatibility, target: targetCompatibility,
+                maxmem: "1024m", fork: "true", Xlint: "ignore",
+                destDir: outputDir.absolutePath,
+                aspectPath: configurations.aspects.asPath,
+                inpath: configurations.ajInpath.asPath,
+                sourceRootCopyFilter: "**/*.java",
+                classpath: configurations.compile.asPath) {
+            sourceroots {
+                sourceSets.main.java.srcDirs.each {
+                    pathelement(location:it.absolutePath)
+                }
+            }
+        }
+    }
+}
+
+task compileTestJava(overwrite: true)  {
+    dependsOn JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME
+    dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileTestJava")
+    dependsOn jar
+
+    def outputDir = project.sourceSets.test.output.classesDir
+
+    inputs.files(project.sourceSets.test.allSource + project.sourceSets.test.compileClasspath)
+    outputs.dir outputDir
+
+    doLast{
+        ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
+                classpath: configurations.ajc.asPath)
+
+        ant.iajc(source: sourceCompatibility, target: targetCompatibility,
+                maxmem: "1024m", fork: "true", Xlint: "ignore",
+                destDir: outputDir.absolutePath,
+                aspectPath: jar.archivePath,
+                inpath: configurations.ajInpath.asPath,
+                classpath: configurations.testRuntime.asPath + configurations.compile.asPath + jar.archivePath) {
+            sourceroots {
+                sourceSets.test.java.srcDirs.each {
+                    pathelement(location:it.absolutePath)
+                }
+            }
+        }
+    }
+}
