@@ -284,7 +284,10 @@ project('spring-context-support') {
         compile("velocity:velocity:1.5", optional)
         compile("commons-collections:commons-collections:3.2", optional)
         compile("org.freemarker:freemarker:2.3.15", optional)
-        compile("jasperreports:jasperreports:2.0.5") { transitive = false; optional = true }
+        compile("jasperreports:jasperreports:2.0.5") { dep ->
+            optional dep
+            transitive = false
+        }
         compile("commons-digester:commons-digester:1.8.1", optional)
         compile("commons-beanutils:commons-beanutils:1.8.0", optional)
         compile("com.lowagie:itext:2.0.8", optional)
