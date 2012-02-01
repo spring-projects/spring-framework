@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,7 +208,27 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getThemeSource
 	 */
 	public static final String THEME_SOURCE_ATTRIBUTE = DispatcherServlet.class.getName() + ".THEME_SOURCE";
-	
+
+	/**
+	 * Name of request attribute that holds a read-only {@code Map<String,?>}
+	 * with "input" flash attributes saved by a previous request, if any.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getInputFlashMap(HttpServletRequest)
+	 */
+	public static final String INPUT_FLASH_MAP_ATTRIBUTE = DispatcherServlet.class.getName() + ".INPUT_FLASH_MAP";
+
+	/**
+	 * Name of request attribute that holds the "output" {@link FlashMap} with
+	 * attributes to save for a subsequent request.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getOutputFlashMap(HttpServletRequest)
+	 */
+	public static final String OUTPUT_FLASH_MAP_ATTRIBUTE = DispatcherServlet.class.getName() + ".OUTPUT_FLASH_MAP";
+
+	/**
+	 * Name of request attribute that holds the {@link FlashMapManager}.
+	 * @see org.springframework.web.servlet.support.RequestContextUtils#getFlashMapManager(HttpServletRequest)
+	 */
+	public static final String FLASH_MAP_MANAGER_ATTRIBUTE = DispatcherServlet.class.getName() + ".FLASH_MAP_MANAGER";
+
 	/** Log category to use when no mapped handler is found for a request. */
 	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
 
@@ -815,20 +835,23 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		this.flashMapManager.requestStarted(request, response);
-
 		// Make framework objects available to handlers and view objects.
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 		request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
+		request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
+		request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE, this.flashMapManager);
+
+		Map<String, ?> flashMap = this.flashMapManager.getFlashMapForRequest(request);
+		if (flashMap != null) {
+			request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, flashMap);
+		}
 
 		try {
 			doDispatch(request, response);
 		}
 		finally {
-			this.flashMapManager.requestCompleted(request, response);
-			
 			// Restore the original attribute snapshot, in case of an include.
 			if (attributesSnapshot != null) {
 				restoreAttributesAfterInclude(request, attributesSnapshot);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,14 @@
 
 package org.springframework.web.servlet;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * A strategy interface for storing, retrieving, and managing {@code FlashMap}
- * instances. See {@link FlashMap} for a general overview of flash attributes.
- * 
- * <p>A FlashMapManager is invoked at the beginning and at the end of requests.
- * For each request it retrieves an "input" FlashMap with attributes passed 
- * from a previous request (if any) and creates an "output" FlashMap with 
- * attributes to pass to a subsequent request. "Input" and "output" FlashMap 
- * instances are exposed as request attributes and are accessible via methods
- * in {@code org.springframework.web.servlet.support.RequestContextUtils}.
- * 
- * <p>Annotated controllers will usually not use this FlashMap directly.
- * See {@code org.springframework.web.servlet.mvc.support.RedirectAttributes}.
+ * A strategy interface for retrieving and saving FlashMap instances.
+ * See {@link FlashMap} for a general overview of flash attributes.
  * 
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -41,42 +33,27 @@ import javax.servlet.http.HttpServletResponse;
 public interface FlashMapManager {
 
 	/**
-	 * Name of request attribute that holds a read-only 
-	 * {@code Map<String, Object>} with "input" flash attributes if any.
-	 * @see org.springframework.web.servlet.support.RequestContextUtils#getInputFlashMap(HttpServletRequest)
+	 * Get a Map with flash attributes saved by a previous request.
+	 * See {@link FlashMap} for details on how FlashMap instances
+	 * identifies the target requests they're saved for.
+	 * If found, the Map is removed from the underlying storage.
+	 * @param request the current request
+	 * @return a read-only Map with flash attributes or {@code null}
 	 */
-	String INPUT_FLASH_MAP_ATTRIBUTE = FlashMapManager.class.getName() + ".INPUT_FLASH_MAP";
+	Map<String, ?> getFlashMapForRequest(HttpServletRequest request);
 
 	/**
-	 * Name of request attribute that holds the "output" {@link FlashMap} with
-	 * attributes to save for a subsequent request.
-	 * @see org.springframework.web.servlet.support.RequestContextUtils#getOutputFlashMap(HttpServletRequest)
-	 */
-	String OUTPUT_FLASH_MAP_ATTRIBUTE = FlashMapManager.class.getName() + ".OUTPUT_FLASH_MAP";
-
-	/**
-	 * Perform the following tasks unless the {@link #OUTPUT_FLASH_MAP_ATTRIBUTE} 
-	 * request attribute exists:
-	 * <ol>
-	 * 	<li>Find the "input" FlashMap, expose it under the request attribute 
-	 * {@link #INPUT_FLASH_MAP_ATTRIBUTE}, and remove it from underlying storage.
-	 * 	<li>Create the "output" FlashMap and expose it under the request 
-	 * attribute {@link #OUTPUT_FLASH_MAP_ATTRIBUTE}.
-	 * 	<li>Clean expired FlashMap instances.
-	 * </ol>
+	 * Save the given FlashMap, in some underlying storage, mark the beginning
+	 * of its expiration period, and remove other expired FlashMap instances.
+	 * The method has no impact if the FlashMap is empty and there are no
+	 * expired FlashMap instances to be removed.
+	 * <p><strong>Note:</strong> Invoke this method prior to a redirect in order
+	 * to allow saving the FlashMap in the HTTP session or perhaps in a response
+	 * cookie before the response is committed.
+	 * @param flashMap the FlashMap to save
 	 * @param request the current request
 	 * @param response the current response
 	 */
-	void requestStarted(HttpServletRequest request, HttpServletResponse response);
-
-	/**
-	 * Start the expiration period of the "output" FlashMap save it in the
-	 * underlying storage.
-	 * <p>The "output" FlashMap should not be saved if it is empty or if it was
-	 * not created by the current FlashMapManager instance.
-	 * @param request the current request
-	 * @param response the current response
-	 */
-	void requestCompleted(HttpServletRequest request, HttpServletResponse response);
+	void save(FlashMap flashMap, HttpServletRequest request, HttpServletResponse response);
 
 }

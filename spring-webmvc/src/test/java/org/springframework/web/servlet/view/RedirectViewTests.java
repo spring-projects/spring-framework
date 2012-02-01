@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,9 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
+import org.springframework.web.servlet.support.RequestDataValueProcessorWrapper;
+import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -75,11 +76,20 @@ public class RedirectViewTests {
 		RedirectView rv = new RedirectView();
 		rv.setUrl("http://url.somewhere.com");
 		rv.setHttp10Compatible(false);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletRequest request = createRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
+		request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
+		request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE, new SessionFlashMapManager());
 		rv.render(new HashMap<String, Object>(), request, response);
 		assertEquals(303, response.getStatus());
 		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
+	}
+
+	private MockHttpServletRequest createRequest() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
+		request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE, new SessionFlashMapManager());
+		return request;
 	}
 
 	@Test
@@ -88,7 +98,7 @@ public class RedirectViewTests {
 		rv.setUrl("http://url.somewhere.com");
 		rv.setHttp10Compatible(false);
 		rv.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletRequest request = createRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		rv.render(new HashMap<String, Object>(), request, response);
 		assertEquals(301, response.getStatus());
@@ -100,7 +110,7 @@ public class RedirectViewTests {
 		RedirectView rv = new RedirectView();
 		rv.setUrl("http://url.somewhere.com");
 		rv.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletRequest request = createRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		rv.render(new HashMap<String, Object>(), request, response);
 		assertEquals(301, response.getStatus());
@@ -112,7 +122,7 @@ public class RedirectViewTests {
 		RedirectView rv = new RedirectView();
 		rv.setUrl("http://url.somewhere.com");
 		rv.setHttp10Compatible(false);
-		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletRequest request = createRequest();
 		request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.CREATED);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		rv.render(new HashMap<String, Object>(), request, response);
@@ -125,11 +135,11 @@ public class RedirectViewTests {
 		RedirectView rv = new RedirectView();
 		rv.setUrl("http://url.somewhere.com/path");
 		rv.setHttp10Compatible(false);
-		HttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletRequest request = createRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("successMessage", "yay!");
-		request.setAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
+		request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, flashMap);
 		ModelMap model = new ModelMap("id", "1");
 		rv.render(model, request, response);
 		assertEquals(303, response.getStatus());
@@ -153,7 +163,7 @@ public class RedirectViewTests {
 		rv.setApplicationContext(wac);	// Init RedirectView with WebAppCxt
 		rv.setUrl("/path");
 
-		HttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletRequest request = createRequest();
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
 		HttpServletResponse response = new MockHttpServletResponse();
 
@@ -182,7 +192,7 @@ public class RedirectViewTests {
 			RedirectView rv = new RedirectView();
 			rv.setUrl("/path");
 
-			HttpServletRequest request = new MockHttpServletRequest();
+			MockHttpServletRequest request = createRequest();
 			HttpServletResponse response = new MockHttpServletResponse();
 
 			EasyMock.expect(mockProcessor.processUrl(request, "/path")).andReturn("/path?key=123");
@@ -361,6 +371,11 @@ public class RedirectViewTests {
 			expectedUrlForEncoding = "/context" + expectedUrlForEncoding;
 			expect(request.getContextPath()).andReturn("/context");
 		}
+
+		expect(request.getAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE)).andReturn(new FlashMap());
+
+		FlashMapManager flashMapManager = new SessionFlashMapManager();
+		expect(request.getAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE)).andReturn(flashMapManager);
 		
 		HttpServletResponse response = createMock("response", HttpServletResponse.class);
 		expect(response.encodeRedirectURL(expectedUrlForEncoding)).andReturn(expectedUrlForEncoding);

@@ -29,6 +29,7 @@ Changes in version 3.1.1 (2012-02-06)
 * make flash attributes available in the model of ParameterizableViewController and UrlFilenameViewController
 * add property to RedirectView to disable expanding URI variables in redirect URL
 * fix request mapping bug involving direct vs pattern path matches with HTTP methods
+* revise the FlashMapManager contract and implemenation to address a flaw in its design
 
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------
