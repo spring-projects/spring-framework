@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -227,10 +227,20 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 	
 	@Test(expected=MultipartException.class)
-	public void notMultipartRequest() throws Exception {
+	public void isMultipartRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		resolver.resolveArgument(paramMultipartFile, new ModelAndViewContainer(), new ServletWebRequest(request), null);
 		fail("Expected exception");
+	}
+
+	// SPR-9079
+
+	@Test
+	public void isMultipartRequestPut() throws Exception {
+		this.multipartRequest.setMethod("PUT");
+		Object actual = resolver.resolveArgument(paramMultipartFile, null, webRequest, null);
+		assertNotNull(actual);
+		assertSame(multipartFile1, actual);
 	}
 
 	private void testResolveArgument(SimpleBean argValue, MethodParameter parameter) throws IOException, Exception {

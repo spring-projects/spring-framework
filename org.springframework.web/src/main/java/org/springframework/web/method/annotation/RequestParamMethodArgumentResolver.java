@@ -179,17 +179,10 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	private void assertIsMultipartRequest(HttpServletRequest request) {
-		if (!isMultipartRequest(request)) {
-			throw new MultipartException("The current request is not a multipart request.");
-		}
-	}
-	
-	private boolean isMultipartRequest(HttpServletRequest request) {
-		if (!"post".equals(request.getMethod().toLowerCase())) {
-			return false;
-		}
 		String contentType = request.getContentType();
-		return (contentType != null && contentType.toLowerCase().startsWith("multipart/"));
+		if (contentType == null || !contentType.toLowerCase().startsWith("multipart/")) {
+			throw new MultipartException("The current request is not a multipart request");
+		}
 	}
 	
 	private boolean isMultipartFileCollection(MethodParameter parameter) {

@@ -30,6 +30,7 @@ Changes in version 3.1.1 (2012-02-06)
 * add property to RedirectView to disable expanding URI variables in redirect URL
 * fix request mapping bug involving direct vs pattern path matches with HTTP methods
 * revise the FlashMapManager contract and implemenation to address a flaw in its design
+* Remove check for HTTP "POST" when resolving multipart request controller method arguments
 
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------
