@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,27 +38,30 @@ import org.springframework.expression.spel.SpelMessage;
 import org.springframework.util.CollectionUtils;
 
 /**
- * A method resolver that uses reflection to locate the method that should be invoked.
+ * Reflection-based {@link MethodResolver} used by default in
+ * {@link StandardEvaluationContext} unless explicit method resolvers have been specified.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0
+ * @see StandardEvaluationContext#addMethodResolver(MethodResolver)
  */
 public class ReflectiveMethodResolver implements MethodResolver {
 
 	private static Method[] NO_METHODS = new Method[0];
 
 	private Map<Class<?>, MethodFilter> filters = null;
-	
+
 	// Using distance will ensure a more accurate match is discovered, 
 	// more closely following the Java rules.
 	private boolean useDistance = false;
 
-	
+
 	public ReflectiveMethodResolver() {
-		
+
 	}
-	
+
 	/**
 	 * This constructors allows the ReflectiveMethodResolver to be configured such that it will
 	 * use a distance computation to check which is the better of two close matches (when there
@@ -71,7 +74,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	public ReflectiveMethodResolver(boolean useDistance) {
 		this.useDistance = useDistance;
 	}
-	
+
 	/**
 	 * Locate a method on a type. There are three kinds of match that might occur:
 	 * <ol>
@@ -87,15 +90,15 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
-			Method[] methods = type.getMethods();
-			
+			Method[] methods = getMethods(type);
+
 			// If a filter is registered for this type, call it
 			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
 			if (filter != null) {
-			    List<Method> methodsForFiltering = new ArrayList<Method>();
-			    for (Method method: methods) {
-			    	methodsForFiltering.add(method);
-			    }
+				List<Method> methodsForFiltering = new ArrayList<Method>();
+				for (Method method: methods) {
+					methodsForFiltering.add(method);
+				}
 				List<Method> methodsFiltered = filter.filter(methodsForFiltering);
 				if (CollectionUtils.isEmpty(methodsFiltered)) {
 					methods = NO_METHODS;
@@ -124,7 +127,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 					continue;
 				}
 				if (method.getName().equals(name)) {
-					Class[] paramTypes = method.getParameterTypes();
+					Class<?>[] paramTypes = method.getParameterTypes();
 					List<TypeDescriptor> paramDescriptors = new ArrayList<TypeDescriptor>(paramTypes.length);
 					for (int i = 0; i < paramTypes.length; i++) {
 						paramDescriptors.add(new TypeDescriptor(new MethodParameter(method, i)));
@@ -192,6 +195,18 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		else {
 			this.filters.put(type,filter);
 		}
+	}
+
+	/**
+	 * Return the set of methods for this type. The default implementation returns the
+	 * result of Class#getMethods for the given {@code type}, but subclasses may override
+	 * in order to alter the results, e.g. specifying static methods declared elsewhere.
+	 *
+	 * @param type the class for which to return the methods
+	 * @since 3.1.1
+	 */
+	protected Method[] getMethods(Class<?> type) {
+		return type.getMethods();
 	}
 
 }
