@@ -23,13 +23,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * A builder for {@link UriComponents} that offers static factory methods to 
- * extract information from an {@code HttpServletRequest}. 
+ * A UriComponentsBuilder that extracts information from an HttpServletRequest.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -50,24 +48,25 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	/**
-	 * Return a builder initialized with the host, port, scheme, and the 
-	 * context path of the given request.
+	 * Prepare a builder from the host, port, scheme, and context path of
+	 * an HttpServletRequest.
 	 */
 	public static ServletUriComponentsBuilder fromContextPath(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = fromRequest(request);
-		builder.replacePath(new UrlPathHelper().getContextPath(request));
+		builder.replacePath(request.getContextPath());
 		builder.replaceQuery(null);
 		return builder;
 	}
 
 	/**
-	 * Return a builder initialized with the host, port, scheme, context path, 
-	 * and the servlet mapping of the given request.
-	 * 
-	 * <p>For example if the servlet is mapped by name, i.e. {@code "/main/*"}, 
-	 * then the resulting path will be {@code /appContext/main}. If the servlet
-	 * path is not mapped by name, i.e. {@code "/"} or {@code "*.html"}, then 
-	 * the resulting path will contain the context path only.
+	 * Prepare a builder from the host, port, scheme, context path, and
+	 * servlet mapping of an HttpServletRequest. The results may vary depending
+	 * on the type of servlet mapping used.
+	 *
+	 * <p>If the servlet is mapped by name, e.g. {@code "/main/*"}, the path
+	 * will end with "/main". If the servlet is mapped otherwise, e.g.
+	 * {@code "/"} or {@code "*.do"}, the result will be the same as
+	 * if calling {@link #fromContextPath(HttpServletRequest)}.
 	 */
 	public static ServletUriComponentsBuilder fromServletMapping(HttpServletRequest request) {
 		ServletUriComponentsBuilder builder = fromContextPath(request);
@@ -78,8 +77,19 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	/**
-	 * Return a builder initialized with all available information in the given
-	 * request including scheme, host, port, path, and query string.
+	 * Prepare a builder from the host, port, scheme, and path of
+	 * an HttpSevletRequest.
+	 */
+	public static ServletUriComponentsBuilder fromRequestUri(HttpServletRequest request) {
+		ServletUriComponentsBuilder builder = fromRequest(request);
+		builder.replacePath(request.getRequestURI());
+		builder.replaceQuery(null);
+		return builder;
+	}
+
+	/**
+	 * Prepare a builder by copying the scheme, host, port, path, and
+	 * query string of an HttpServletRequest.
 	 */
 	public static ServletUriComponentsBuilder fromRequest(HttpServletRequest request) {
 		String scheme = request.getScheme();
@@ -91,30 +101,38 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		if ((scheme.equals("http") && port != 80) || (scheme.equals("https") && port != 443)) {
 			builder.port(port);
 		}
-		builder.path(new UrlPathHelper().getRequestUri(request));
+		builder.path(request.getRequestURI());
 		builder.query(request.getQueryString());
 		return builder;
 	}
-	
+
 	/**
-	 * Equivalent to {@link #fromContextPath(HttpServletRequest)} except the
-	 * request is obtained via {@link RequestContextHolder}.
+	 * Same as {@link #fromContextPath(HttpServletRequest)} except the
+	 * request is obtained through {@link RequestContextHolder}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentContextPath() {
 		return fromContextPath(getCurrentRequest());
 	}
 
 	/**
-	 * Equivalent to {@link #fromServletMapping(HttpServletRequest)} except the
-	 * request is obtained via {@link RequestContextHolder}.
+	 * Same as {@link #fromServletMapping(HttpServletRequest)} except the
+	 * request is obtained through {@link RequestContextHolder}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentServletMapping() {
 		return fromServletMapping(getCurrentRequest());
 	}
 
 	/**
-	 * Equivalent to {@link #fromRequest(HttpServletRequest)} except the
-	 * request is obtained via {@link RequestContextHolder}.
+	 * Same as {@link #fromRequestUri(HttpServletRequest)} except the
+	 * request is obtained through {@link RequestContextHolder}.
+	 */
+	public static ServletUriComponentsBuilder fromCurrentRequestUri() {
+		return fromRequestUri(getCurrentRequest());
+	}
+
+	/**
+	 * Same as {@link #fromRequest(HttpServletRequest)} except the
+	 * request is obtained through {@link RequestContextHolder}.
 	 */
 	public static ServletUriComponentsBuilder fromCurrentRequest() {
 		return fromRequest(getCurrentRequest());
@@ -128,5 +146,5 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		Assert.state(servletRequest != null, "Could not find current HttpServletRequest");
 		return servletRequest;
 	}
-	
+
 }
