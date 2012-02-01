@@ -17,8 +17,10 @@
 package org.springframework.expression.spel;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -38,6 +40,7 @@ import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.MethodExecutor;
+import org.springframework.expression.MethodResolver;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
@@ -50,12 +53,12 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
 
 /**
  * Tests based on Jiras up to the release of Spring 3.0.0
- * 
+ *
  * @author Andy Clement
  * @author Clark Duplichien
  */
 public class SpringEL300Tests extends ExpressionTestCase {
-	
+
 	@Test
 	public void testNPE_SPR5661() {
 		evaluate("joinThreeStrings('a',null,'c')", "anullc", String.class);
@@ -66,7 +69,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	public void testSWF1086() {
 		evaluate("printDouble(T(java.math.BigDecimal).valueOf(14.35))", "anullc", String.class);
 	}
-	
+
 	@Test
 	public void testDoubleCoercion() {
 		evaluate("printDouble(14.35)", "14.35", String.class);
@@ -92,15 +95,15 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			// success
 		}
 		eContext.setTypeLocator(new MyTypeLocator());
-		
+
 		// varargs
 		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull3(null,'a','b')");
 		Assert.assertEquals("ab",expr.getValue(eContext));
-		
+
 		// varargs 2 - null is packed into the varargs
 		expr = new SpelExpressionParser().parseRaw("tryToInvokeWithNull3(12,'a',null,'c')");
 		Assert.assertEquals("anullc",expr.getValue(eContext));
-		
+
 		// check we can find the ctor ok
 		expr = new SpelExpressionParser().parseRaw("new Spr5899Class().toString()");
 		Assert.assertEquals("instance",expr.getValue(eContext));
@@ -116,7 +119,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		expr = new SpelExpressionParser().parseRaw("new Spr5899Class(null,'a', null, 'b').toString()");
 		Assert.assertEquals("instance",expr.getValue(eContext));
 	}
-	
+
 	static class MyTypeLocator extends StandardTypeLocator {
 
 		public Class<?> findType(String typename) throws EvaluationException {
@@ -132,12 +135,12 @@ public class SpringEL300Tests extends ExpressionTestCase {
 
 	static class Spr5899Class {
 		 public Spr5899Class() {}
-		 public Spr5899Class(Integer i) {  }
-		 public Spr5899Class(Integer i, String... s) {  }
-		 
+		 public Spr5899Class(Integer i) { }
+		 public Spr5899Class(Integer i, String... s) { }
+
 		 public Integer tryToInvokeWithNull(Integer value) { return value; }
 		 public Integer tryToInvokeWithNull2(int i) { return new Integer(i); }
-		 public String tryToInvokeWithNull3(Integer value,String... strings) { 
+		 public String tryToInvokeWithNull3(Integer value,String... strings) {
 			 StringBuilder sb = new StringBuilder();
 			 for (int i=0;i<strings.length;i++) {
 				 if (strings[i]==null) {
@@ -148,12 +151,12 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			 }
 			 return sb.toString();
 		 }
-		 
+
 		 public String toString() {
 			 return "instance";
 		 }
 	}
-	
+
 	@Test
 	public void testSPR5905_InnerTypeReferences() throws Exception {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Spr5899Class());
@@ -166,7 +169,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		expr = new SpelExpressionParser().parseRaw("new org.springframework.expression.spel.SpringEL300Tests$Outer$Inner().run2()");
 		Assert.assertEquals(13,expr.getValue(eContext));
 }
-	
+
 	static class Outer {
 		static class Inner {
 			public Inner() {}
@@ -179,27 +182,26 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testSPR5804() throws Exception {
-		Map m = new HashMap();
+		Map<String,String> m = new HashMap<String,String>();
 		m.put("foo", "bar");
 		StandardEvaluationContext eContext = new StandardEvaluationContext(m); // root is a map instance
 		eContext.addPropertyAccessor(new MapAccessor());
 		Expression expr = new SpelExpressionParser().parseRaw("['foo']");
 		Assert.assertEquals("bar", expr.getValue(eContext));
 	}
-	
+
 	@Test
 	public void testSPR5847() throws Exception {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new TestProperties());
 		String name = null;
 		Expression expr = null;
-		
+
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties['username']");
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("Dave",name);
-		
+
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties[username]");
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("Dave",name);
@@ -209,7 +211,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		eContext.addPropertyAccessor(new MapAccessor());
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("Dave",name);
-		
+
 		// --- dotted property names
 
 		// lookup foo on the root, then bar on that, then use that as the key into jdbcProperties
@@ -222,9 +224,9 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		expr = new SpelExpressionParser().parseRaw("jdbcProperties['foo.bar']");
 		eContext.addPropertyAccessor(new MapAccessor());
 		name = expr.getValue(eContext,String.class);
-		Assert.assertEquals("Elephant",name);	
+		Assert.assertEquals("Elephant",name);
 	}
-	
+
 	static class TestProperties {
 		public Properties jdbcProperties = new Properties();
 		public Properties foo = new Properties();
@@ -239,11 +241,11 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	static class MapAccessor implements PropertyAccessor {
 
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			return (((Map) target).containsKey(name));
+			return (((Map<?,?>) target).containsKey(name));
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(((Map) target).get(name));
+			return new TypedValue(((Map<?,?>) target).get(name));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -252,22 +254,22 @@ public class SpringEL300Tests extends ExpressionTestCase {
 
 		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-			((Map) target).put(name, newValue);
+			((Map<String, Object>) target).put(name, newValue);
 		}
 
-		public Class[] getSpecificTargetClasses() {
+		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] {Map.class};
 		}
-		
+
 	}
-	
+
 	@Test
 	public void testNPE_SPR5673() throws Exception {
 		ParserContext hashes = TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT;
 		ParserContext dollars = TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT;
-		
+
 		checkTemplateParsing("abc${'def'} ghi","abcdef ghi");
-		
+
 		checkTemplateParsingError("abc${ {}( 'abc'","Missing closing ')' for '(' at position 8");
 		checkTemplateParsingError("abc${ {}[ 'abc'","Missing closing ']' for '[' at position 8");
 		checkTemplateParsingError("abc${ {}{ 'abc'","Missing closing '}' for '{' at position 8");
@@ -278,7 +280,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		checkTemplateParsingError("abc${ ] }","Found closing ']' at position 6 without an opening '['");
 		checkTemplateParsingError("abc${ } }","No expression defined within delimiter '${}' at character 3");
 		checkTemplateParsingError("abc$[ } ]",DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT,"Found closing '}' at position 6 without an opening '{'");
-		
+
 		checkTemplateParsing("abc ${\"def''g}hi\"} jkl","abc def'g}hi jkl");
 		checkTemplateParsing("abc ${'def''g}hi'} jkl","abc def'g}hi jkl");
 		checkTemplateParsing("}","}");
@@ -295,7 +297,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		checkTemplateParsing("Hello ${'inner literal that''s got {[(])]}an escaped quote in it'} World","Hello inner literal that's got {[(])]}an escaped quote in it World");
 		checkTemplateParsingError("Hello ${","No ending suffix '}' for expression starting at character 6: ${");
 	}
-	
+
 	@Test
 	public void testAccessingNullPropertyViaReflection_SPR5663() throws AccessException {
 		PropertyAccessor propertyAccessor = new ReflectivePropertyAccessor();
@@ -315,33 +317,33 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			// success
 		}
 	}
-	
+
 
 	@Test
 	public void testNestedProperties_SPR6923() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new Foo());
 		String name = null;
 		Expression expr = null;
-		
+
 		expr = new SpelExpressionParser().parseRaw("resource.resource.server");
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("abc",name);
 	}
-	
+
 	static class Foo {
 		public ResourceSummary resource = new ResourceSummary();
 	}
-	
+
 	static class ResourceSummary {
 		ResourceSummary() {
 			this.resource = new Resource();
 		}
 		private final Resource resource;
 		public Resource getResource() {
-	        return resource;
-	    }
+			return resource;
+		}
 	}
-	
+
 	static class Resource {
 		public String getServer() {
 			return "abc";
@@ -374,9 +376,8 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		name = expr.getValue(eContext,String.class); // will be using the cached accessor this time
 		Assert.assertEquals("hello",name);
 	}
-	
+
 	/** $ related identifiers */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testDollarPrefixedIdentifier_SPR7100() {
 		Holder h = new Holder();
@@ -390,7 +391,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		h.map.put("$_$","tribble");
 		String name = null;
 		Expression expr = null;
-		
+
 		expr = new SpelExpressionParser().parseRaw("map.$foo");
 		name = expr.getValue(eContext,String.class);
 		Assert.assertEquals("wibble",name);
@@ -430,8 +431,11 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		name = expr.getValue(eContext,String.class); // will be using the cached accessor this time
 		Assert.assertEquals("wobble",name);
 	}
-	
-	/** Should be accessing (setting) Goo.wibble field because 'bar' variable evaluates to "wibble" */
+
+	/**
+	 * Should be accessing (setting) Goo.wibble field because 'bar' variable evaluates to
+	 * "wibble"
+	 */
 	@Test
 	public void testIndexingAsAPropertyAccess_SPR6968_4() {
 		Goo g = Goo.instance;
@@ -458,7 +462,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		expr.getValue(eContext,String.class); // will be using the cached accessor this time
 		Assert.assertEquals("world",g.value);
 	}
-	
+
 	@Test
 	public void testDollars() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
@@ -467,7 +471,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		eContext.setVariable("file_name","$foo");
 		Assert.assertEquals("wibble",expr.getValue(eContext,String.class));
 	}
-	
+
 	@Test
 	public void testDollars2() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
@@ -476,12 +480,12 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		eContext.setVariable("file_name","$foo");
 		Assert.assertEquals("wibble",expr.getValue(eContext,String.class));
 	}
-	
+
 	static class XX {
 		public Map<String,String> m;
-		
+
 		public String floo ="bar";
-		
+
 		public XX() {
 			 m = new HashMap<String,String>();
 			m.put("$foo","wibble");
@@ -490,34 +494,34 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	}
 
 	static class Goo {
-		
+
 		public static Goo instance = new Goo();
 		public String bar = "key";
 		public String value = null;
 
 		public String wibble = "wobble";
-		
+
 		public String getKey() {
 			return "hello";
 		}
-		
+
 		public void setKey(String s) {
 			value = s;
 		}
-		
+
 	}
-	
+
 	static class Holder {
-		
-		public Map map = new HashMap();
+
+		public Map<String,String> map = new HashMap<String,String>();
 	}
-	
+
 	// ---
 
 	private void checkTemplateParsing(String expression, String expectedValue) throws Exception {
 		checkTemplateParsing(expression,TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedValue);
 	}
-	
+
 	private void checkTemplateParsing(String expression, ParserContext context, String expectedValue) throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression(expression,context);
@@ -527,7 +531,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	private void checkTemplateParsingError(String expression,String expectedMessage) throws Exception {
 		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT,expectedMessage);
 	}
-	
+
 	private void checkTemplateParsingError(String expression,ParserContext context, String expectedMessage) throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		try {
@@ -540,7 +544,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			Assert.assertEquals(expectedMessage,e.getMessage());
 		}
 	}
-	
+
 	private static final ParserContext DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
 		public String getExpressionPrefix() {
 			return "$[";
@@ -552,28 +556,13 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			return true;
 		}
 	};
-	
-//	@Test
-//	public void testFails() {
-//		
-//		StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
-//		evaluationContext.setVariable("target", new Foo2());
-//		for (int i = 0; i < 300000; i++) {
-//			evaluationContext.addPropertyAccessor(new MapAccessor());
-//			ExpressionParser parser = new SpelExpressionParser();
-//			Expression expression = parser.parseExpression("#target.execute(payload)");
-//			Message message = new Message();
-//			message.setPayload(i+"");
-//			expression.getValue(evaluationContext, message);
-//		}	
-//	}
-	
+
 	static class Foo2 {
 		public void execute(String str){
 			System.out.println("Value: " + str);
 		}
 	}
-	
+
 	static class Message{
 		private String payload;
 
@@ -587,7 +576,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	}
 
 	// bean resolver tests
-	
+
 	@Test
 	public void beanResolution() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
@@ -601,7 +590,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			Assert.assertEquals(SpelMessage.NO_BEAN_RESOLVER_REGISTERED,see.getMessageCode());
 			Assert.assertEquals("foo",see.getInserts()[0]);
 		}
-		
+
 		eContext.setBeanResolver(new MyBeanResolver());
 
 		// bean exists
@@ -622,11 +611,11 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			Assert.assertTrue(see.getCause() instanceof AccessException);
 			Assert.assertTrue(((AccessException)see.getCause()).getMessage().startsWith("DONT"));
 		}
-		
+
 		// bean exists
 		expr = new SpelExpressionParser().parseRaw("@'foo.bar'");
 		Assert.assertEquals("trouble",expr.getValue(eContext,String.class));
-		
+
 		// bean exists
 		try {
 			expr = new SpelExpressionParser().parseRaw("@378");
@@ -635,7 +624,7 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			Assert.assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
 		}
 	}
-	
+
 	static class MyBeanResolver implements BeanResolver {
 		public Object resolve(EvaluationContext context, String beanname) throws AccessException {
 			if (beanname.equals("foo")) {
@@ -648,14 +637,14 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			return null;
 		}
 	}
-	
+
 	// end bean resolver tests
 
 	@Test
 	public void elvis_SPR7209_1() {
 		StandardEvaluationContext eContext = new StandardEvaluationContext(new XX());
 		Expression expr = null;
-		
+
 		// Different parts of elvis expression are null
 		expr = new SpelExpressionParser().parseRaw("(?:'default')");
 		Assert.assertEquals("default", expr.getValue());
@@ -696,68 +685,67 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		expr = new SpelExpressionParser().parseRaw("''?:'default'");
 		Assert.assertEquals("default", expr.getValue());
 	}
-	
-	@Test
-	@SuppressWarnings("unchecked")
-	public void testMapOfMap_SPR7244() throws Exception {
-        Map<String,Object> map = new LinkedHashMap();
-        map.put("uri", "http:");
-        Map nameMap = new LinkedHashMap();
-        nameMap.put("givenName", "Arthur");
-        map.put("value", nameMap);
-        
-        StandardEvaluationContext ctx = new StandardEvaluationContext(map);
-        ExpressionParser parser = new SpelExpressionParser();
-        String el1 = "#root['value'].get('givenName')";
-        Expression exp = parser.parseExpression(el1);
-        Object evaluated = exp.getValue(ctx);
-        Assert.assertEquals("Arthur", evaluated);
 
-        String el2 = "#root['value']['givenName']";
-        exp = parser.parseExpression(el2);
-        evaluated = exp.getValue(ctx);
-        Assert.assertEquals("Arthur",evaluated);
-    }
-	
+	@Test
+	public void testMapOfMap_SPR7244() throws Exception {
+		Map<String,Object> map = new LinkedHashMap<String,Object>();
+		map.put("uri", "http:");
+		Map<String,String> nameMap = new LinkedHashMap<String,String>();
+		nameMap.put("givenName", "Arthur");
+		map.put("value", nameMap);
+
+		StandardEvaluationContext ctx = new StandardEvaluationContext(map);
+		ExpressionParser parser = new SpelExpressionParser();
+		String el1 = "#root['value'].get('givenName')";
+		Expression exp = parser.parseExpression(el1);
+		Object evaluated = exp.getValue(ctx);
+		Assert.assertEquals("Arthur", evaluated);
+
+		String el2 = "#root['value']['givenName']";
+		exp = parser.parseExpression(el2);
+		evaluated = exp.getValue(ctx);
+		Assert.assertEquals("Arthur",evaluated);
+	}
+
 	@Test
 	public void testProjectionTypeDescriptors_1() throws Exception {
-        StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
-        SpelExpressionParser parser = new SpelExpressionParser();
-        String el1 = "ls.![#this.equals('abc')]";
-        SpelExpression exp = parser.parseRaw(el1);
-        List value = (List)exp.getValue(ctx);
-        // value is list containing [true,false]
-        Assert.assertEquals(Boolean.class,value.get(0).getClass());
-        TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
-        Assert.assertEquals(null, evaluated.getElementTypeDescriptor());
+		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
+		SpelExpressionParser parser = new SpelExpressionParser();
+		String el1 = "ls.![#this.equals('abc')]";
+		SpelExpression exp = parser.parseRaw(el1);
+		List<?> value = (List<?>)exp.getValue(ctx);
+		// value is list containing [true,false]
+		Assert.assertEquals(Boolean.class,value.get(0).getClass());
+		TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
+		Assert.assertEquals(null, evaluated.getElementTypeDescriptor());
 	}
-	
+
 	@Test
 	public void testProjectionTypeDescriptors_2() throws Exception {
-        StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
-        SpelExpressionParser parser = new SpelExpressionParser();
-        String el1 = "as.![#this.equals('abc')]";
-        SpelExpression exp = parser.parseRaw(el1);
-        Object[] value = (Object[])exp.getValue(ctx);
-        // value is array containing [true,false]
-        Assert.assertEquals(Boolean.class,value[0].getClass());
-        TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
-        Assert.assertEquals(Boolean.class, evaluated.getElementTypeDescriptor().getType());
+		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
+		SpelExpressionParser parser = new SpelExpressionParser();
+		String el1 = "as.![#this.equals('abc')]";
+		SpelExpression exp = parser.parseRaw(el1);
+		Object[] value = (Object[])exp.getValue(ctx);
+		// value is array containing [true,false]
+		Assert.assertEquals(Boolean.class,value[0].getClass());
+		TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
+		Assert.assertEquals(Boolean.class, evaluated.getElementTypeDescriptor().getType());
 	}
-	
+
 	@Test
 	public void testProjectionTypeDescriptors_3() throws Exception {
-        StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
-        SpelExpressionParser parser = new SpelExpressionParser();
-        String el1 = "ms.![key.equals('abc')]";
-        SpelExpression exp = parser.parseRaw(el1);
-        List value = (List)exp.getValue(ctx);
-        // value is list containing [true,false]
-        Assert.assertEquals(Boolean.class,value.get(0).getClass());
-        TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
-        Assert.assertEquals(null, evaluated.getElementTypeDescriptor());
+		StandardEvaluationContext ctx = new StandardEvaluationContext(new C());
+		SpelExpressionParser parser = new SpelExpressionParser();
+		String el1 = "ms.![key.equals('abc')]";
+		SpelExpression exp = parser.parseRaw(el1);
+		List<?> value = (List<?>)exp.getValue(ctx);
+		// value is list containing [true,false]
+		Assert.assertEquals(Boolean.class,value.get(0).getClass());
+		TypeDescriptor evaluated = exp.getValueTypeDescriptor(ctx);
+		Assert.assertEquals(null, evaluated.getElementTypeDescriptor());
 	}
-	
+
 	static class C {
 		public List<String> ls;
 		public String[] as;
@@ -772,19 +760,19 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			ms.put("def","pqr");
 		}
 	}
-	
+
 	static class D {
 		public String a;
-		
+
 		private D(String s) {
 			a=s;
 		}
-		
+
 		public String toString() {
 			return "D("+a+")";
 		}
 	}
-	
+
 	@Test
 	public void testGreaterThanWithNulls_SPR7840() throws Exception {
 		List<D> list = new ArrayList<D>();
@@ -794,30 +782,31 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		list.add(new D("ccc"));
 		list.add(new D(null));
 		list.add(new D("zzz"));
-		
-        StandardEvaluationContext ctx = new StandardEvaluationContext(list);
-        SpelExpressionParser parser = new SpelExpressionParser();        
 
-        String el1 = "#root.?[a < 'hhh']";
-        SpelExpression exp = parser.parseRaw(el1);
-        Object value = exp.getValue(ctx);
-        assertEquals("[D(aaa), D(bbb), D(null), D(ccc), D(null)]",value.toString());        
+		StandardEvaluationContext ctx = new StandardEvaluationContext(list);
+		SpelExpressionParser parser = new SpelExpressionParser();
 
-        String el2 = "#root.?[a > 'hhh']";
-        SpelExpression exp2 = parser.parseRaw(el2);
-        Object value2 = exp2.getValue(ctx);
-        assertEquals("[D(zzz)]",value2.toString());
-        
-        // trim out the nulls first
-        String el3 = "#root.?[a!=null].?[a < 'hhh']";
-        SpelExpression exp3 = parser.parseRaw(el3);
-        Object value3 = exp3.getValue(ctx);
-        assertEquals("[D(aaa), D(bbb), D(ccc)]",value3.toString());
+		String el1 = "#root.?[a < 'hhh']";
+		SpelExpression exp = parser.parseRaw(el1);
+		Object value = exp.getValue(ctx);
+		assertEquals("[D(aaa), D(bbb), D(null), D(ccc), D(null)]",value.toString());
+
+		String el2 = "#root.?[a > 'hhh']";
+		SpelExpression exp2 = parser.parseRaw(el2);
+		Object value2 = exp2.getValue(ctx);
+		assertEquals("[D(zzz)]",value2.toString());
+
+		// trim out the nulls first
+		String el3 = "#root.?[a!=null].?[a < 'hhh']";
+		SpelExpression exp3 = parser.parseRaw(el3);
+		Object value3 = exp3.getValue(ctx);
+		assertEquals("[D(aaa), D(bbb), D(ccc)]",value3.toString());
 	}
 
 	/**
-	 * Test whether {@link ReflectiveMethodResolver} follows Java Method Invocation Conversion order. And more precisely
-	 * that widening reference conversion is 'higher' than a unboxing conversion.
+	 * Test whether {@link ReflectiveMethodResolver} follows Java Method Invocation
+	 * Conversion order. And more precisely that widening reference conversion is 'higher'
+	 * than a unboxing conversion.
 	 */
 	@Test
 	public void testConversionPriority_8224() throws Exception {
@@ -904,16 +893,16 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	}
 
 
-	
+
 	@Test
 	public void varargsAndPrimitives_SPR8174() throws Exception  {
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
 		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
-		
+
 		args.add(TypeDescriptor.forObject(34L));
 		ReflectionUtil<Integer> ru = new ReflectionUtil<Integer>();
 		MethodExecutor me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"methodToCall",args);
-		
+
 		args.set(0,TypeDescriptor.forObject(23));
 		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
 		me.execute(emptyEvalContext, ru, 45);
@@ -941,127 +930,126 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		args.set(0,TypeDescriptor.forObject((byte)23));
 		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
 		me.execute(emptyEvalContext, ru, (byte)23);
-		
+
 		args.set(0,TypeDescriptor.forObject(true));
 		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"foo",args);
 		me.execute(emptyEvalContext, ru, true);
-		
+
 		// trickier:
 		args.set(0,TypeDescriptor.forObject(12));
 		args.add(TypeDescriptor.forObject(23f));
 		me = new ReflectiveMethodResolver().resolve(emptyEvalContext,ru,"bar",args);
 		me.execute(emptyEvalContext, ru, 12,23f);
-		
+
 	}
-	
-	
-	
+
+
+
 	public class ReflectionUtil<T extends Number> {
-	      public Object methodToCall(T param) {
-	    	  System.out.println(param+" "+param.getClass());
-	            return "Object methodToCall(T param)";
-	      }
-	      
-	      public void foo(int... array) {
-	    	  if (array.length==0) {
-	    		  throw new RuntimeException();
-	    	  }
-	      }	      
-	      public void foo(float...array) {
-	    	  if (array.length==0) {
-	    		  throw new RuntimeException();
-	    	  }
-	      }
-	      public void foo(double...array) {
-	    	  if (array.length==0) {
-	    		  throw new RuntimeException();
-	    	  }
-	      }
-	      public void foo(short...array) {
-	    	  if (array.length==0) {
-	    		  throw new RuntimeException();
-	    	  }
-	      }
-	      public void foo(long...array) {
-	    	  if (array.length==0) {
-	    		  throw new RuntimeException();
-	    	  }
-	      }
-	      public void foo(boolean...array) {
-	    	  if (array.length==0) {
-	    		  throw new RuntimeException();
-	    	  }
-	      }
-	      public void foo(char...array) {
-	    	  if (array.length==0) {
-	    		  throw new RuntimeException();
-	    	  }
-	      }
-	      public void foo(byte...array) {
-	    	  if (array.length==0) {
-	    		  throw new RuntimeException();
-	    	  }
-	      }
-	      
-	      public void bar(int... array) {
-	    	  if (array.length==0) {
-	    		  throw new RuntimeException();
-	    	  }
-	      }
-	}    
-	
+		public Object methodToCall(T param) {
+			System.out.println(param+" "+param.getClass());
+				return "Object methodToCall(T param)";
+		}
+
+		public void foo(int... array) {
+			if (array.length==0) {
+				throw new RuntimeException();
+			}
+		}
+		public void foo(float...array) {
+			if (array.length==0) {
+				throw new RuntimeException();
+			}
+		}
+		public void foo(double...array) {
+			if (array.length==0) {
+				throw new RuntimeException();
+			}
+		}
+		public void foo(short...array) {
+			if (array.length==0) {
+				throw new RuntimeException();
+			}
+		}
+		public void foo(long...array) {
+			if (array.length==0) {
+				throw new RuntimeException();
+			}
+		}
+		public void foo(boolean...array) {
+			if (array.length==0) {
+				throw new RuntimeException();
+			}
+		}
+		public void foo(char...array) {
+			if (array.length==0) {
+				throw new RuntimeException();
+			}
+		}
+		public void foo(byte...array) {
+			if (array.length==0) {
+				throw new RuntimeException();
+			}
+		}
+
+		public void bar(int... array) {
+			if (array.length==0) {
+				throw new RuntimeException();
+			}
+		}
+	}
+
 
 	@Test
 	public void testReservedWords_8228() throws Exception {
 		// "DIV","EQ","GE","GT","LE","LT","MOD","NE","NOT"
-        @SuppressWarnings("unused")
-        class Reserver {
-        	public Reserver getReserver() {
-        		return this;
-        	}
-        	public String NE = "abc";
-        	public String ne = "def";
-        	
-        	public int DIV = 1;
-        	public int div = 3;
-        	
-        	public Map m = new HashMap();
-        	
-        	@SuppressWarnings("unchecked")
+		@SuppressWarnings("unused")
+		class Reserver {
+			public Reserver getReserver() {
+				return this;
+			}
+			public String NE = "abc";
+			public String ne = "def";
+
+			public int DIV = 1;
+			public int div = 3;
+
+			public Map<String,String> m = new HashMap<String,String>();
+
 			Reserver() {
-        		m.put("NE","xyz");
-        	}
-        }
-        StandardEvaluationContext ctx = new StandardEvaluationContext(new Reserver());
-        SpelExpressionParser parser = new SpelExpressionParser();
-        String ex = "getReserver().NE";
-        SpelExpression exp = null;
-        exp = parser.parseRaw(ex);
-        String value = (String)exp.getValue(ctx);
-        Assert.assertEquals("abc",value);
+				m.put("NE","xyz");
+			}
+		}
+		StandardEvaluationContext ctx = new StandardEvaluationContext(new Reserver());
+		SpelExpressionParser parser = new SpelExpressionParser();
+		String ex = "getReserver().NE";
+		SpelExpression exp = null;
+		exp = parser.parseRaw(ex);
+		String value = (String)exp.getValue(ctx);
+		Assert.assertEquals("abc",value);
 
-        ex = "getReserver().ne";
-        exp = parser.parseRaw(ex);
-        value = (String)exp.getValue(ctx);
-        Assert.assertEquals("def",value);
+		ex = "getReserver().ne";
+		exp = parser.parseRaw(ex);
+		value = (String)exp.getValue(ctx);
+		Assert.assertEquals("def",value);
 
-        ex = "getReserver().m[NE]";
-        exp = parser.parseRaw(ex);
-        value = (String)exp.getValue(ctx);
-        Assert.assertEquals("xyz",value);
-        
-        ex = "getReserver().DIV";
-        exp = parser.parseRaw(ex);
-        Assert.assertEquals(1,exp.getValue(ctx));
+		ex = "getReserver().m[NE]";
+		exp = parser.parseRaw(ex);
+		value = (String)exp.getValue(ctx);
+		Assert.assertEquals("xyz",value);
 
-        ex = "getReserver().div";
-        exp = parser.parseRaw(ex);
-        Assert.assertEquals(3,exp.getValue(ctx));
-        
-        exp = parser.parseRaw("NE");
-        Assert.assertEquals("abc",exp.getValue(ctx));
+		ex = "getReserver().DIV";
+		exp = parser.parseRaw(ex);
+		Assert.assertEquals(1,exp.getValue(ctx));
+
+		ex = "getReserver().div";
+		exp = parser.parseRaw(ex);
+		Assert.assertEquals(3,exp.getValue(ctx));
+
+		exp = parser.parseRaw("NE");
+		Assert.assertEquals("abc",exp.getValue(ctx));
 	}
-	
+
 	/**
 	 * We add property accessors in the order:
 	 * First, Second, Third, Fourth.
@@ -1071,39 +1059,24 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	@Test
 	public void testPropertyAccessorOrder_8211() {
 		ExpressionParser expressionParser = new SpelExpressionParser();
-		StandardEvaluationContext evaluationContext = 
+		StandardEvaluationContext evaluationContext =
 			new StandardEvaluationContext(new ContextObject());
-		
+
 		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("firstContext"));
 		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("secondContext"));
 		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("thirdContext"));
 		evaluationContext.addPropertyAccessor(new TestPropertyAccessor("fourthContext"));
-		
-		assertEquals("first", 
+
+		assertEquals("first",
 			expressionParser.parseExpression("shouldBeFirst").getValue(evaluationContext));
-		assertEquals("second", 
+		assertEquals("second",
 				expressionParser.parseExpression("shouldBeSecond").getValue(evaluationContext));
-		assertEquals("third", 
+		assertEquals("third",
 				expressionParser.parseExpression("shouldBeThird").getValue(evaluationContext));
-		assertEquals("fourth", 
+		assertEquals("fourth",
 				expressionParser.parseExpression("shouldBeFourth").getValue(evaluationContext));
 	}
-	
-	// test not quite complete, it doesn't check that the list of resolvers at the end of 
-	// PropertyOrFieldReference.getPropertyAccessorsToTry() doesn't contain duplicates, which
-	// is what it is trying to test by having a property accessor that returns specific
-	// classes Integer and Number
-//	@Test
-//	public void testPropertyAccessorOrder_8211_2() {
-//		ExpressionParser expressionParser = new SpelExpressionParser();
-//		StandardEvaluationContext evaluationContext = 
-//			new StandardEvaluationContext(new Integer(42));
-//		
-//		evaluationContext.addPropertyAccessor(new TestPropertyAccessor2());
-//		
-//		assertEquals("42", expressionParser.parseExpression("x").getValue(evaluationContext));
-//	}
-	
+
 	class TestPropertyAccessor implements PropertyAccessor {
 		private String mapName;
 		public TestPropertyAccessor(String mapName) {
@@ -1139,38 +1112,13 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		}
 
 	}
-	
-//	class TestPropertyAccessor2 implements PropertyAccessor {
-//
-//		public Class[] getSpecificTargetClasses() {
-//			return new Class[]{Integer.class,Number.class};
-//		}
-//
-//		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-//			return true;
-//		}
-//
-//		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-//			return new TypedValue(target.toString(),TypeDescriptor.valueOf(String.class));
-//		}
-//
-//		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
-//			return false;
-//		}
-//
-//		public void write(EvaluationContext context, Object target, String name, Object newValue)
-//				throws AccessException {
-//			throw new UnsupportedOperationException();
-//		}
-//		
-//	}
 
 	class ContextObject {
 		public Map<String, String> firstContext = new HashMap<String, String>();
 		public Map<String, String> secondContext = new HashMap<String, String>();
 		public Map<String, String> thirdContext = new HashMap<String, String>();
 		public Map<String, String> fourthContext = new HashMap<String, String>();
-		
+
 		public ContextObject() {
 			firstContext.put("shouldBeFirst", "first");
 			secondContext.put("shouldBeFirst", "second");
@@ -1180,16 +1128,51 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			secondContext.put("shouldBeSecond", "second");
 			thirdContext.put("shouldBeSecond", "third");
 			fourthContext.put("shouldBeSecond", "fourth");
-			
+
 			thirdContext.put("shouldBeThird", "third");
 			fourthContext.put("shouldBeThird", "fourth");
-			
+
 			fourthContext.put("shouldBeFourth", "fourth");
 		}
 		public Map<String, String> getFirstContext() {return firstContext;}
 		public Map<String, String> getSecondContext() {return secondContext;}
 		public Map<String, String> getThirdContext() {return thirdContext;}
 		public Map<String, String> getFourthContext() {return fourthContext;}
+	}
+
+	/**
+	 * Test the ability to subclass the ReflectiveMethodResolver and change how it
+	 * determines the set of methods for a type.
+	 */
+	@Test
+	public void testCustomStaticFunctions_SPR9038() {
+		try {
+			ExpressionParser parser = new SpelExpressionParser();
+			StandardEvaluationContext context = new StandardEvaluationContext();
+			List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
+			methodResolvers.add(new ReflectiveMethodResolver() {
+				@Override
+				protected Method[] getMethods(Class<?> type) {
+					try {
+						return new Method[] {
+								Integer.class.getDeclaredMethod("parseInt", new Class[] {
+										String.class, Integer.TYPE }) };
+					} catch (NoSuchMethodException e1) {
+						return new Method[0];
+					}
+				}
+			});
+
+			context.setMethodResolvers(methodResolvers);
+			org.springframework.expression.Expression expression =
+					parser.parseExpression("parseInt('-FF', 16)");
+
+			Integer result = expression.getValue(context, "", Integer.class);
+			assertEquals("Equal assertion failed: ", -255, result.intValue());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Unexpected exception: "+e.toString());
+		}
 	}
 
 }
