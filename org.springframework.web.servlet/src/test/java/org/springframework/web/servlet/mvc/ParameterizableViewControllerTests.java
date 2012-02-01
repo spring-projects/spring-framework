@@ -16,14 +16,16 @@
 
 package org.springframework.web.servlet.mvc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.servlet.FlashMapManager;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -62,7 +64,7 @@ public class ParameterizableViewControllerTests {
 
 	@Test
 	public void handleRequestWithFlashAttributes() throws Exception {
-		this.request.setAttribute(FlashMapManager.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));
+		this.request.setAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());
 		assertEquals(1, mav.getModel().size());
 		assertEquals("value", mav.getModel().get("name"));
