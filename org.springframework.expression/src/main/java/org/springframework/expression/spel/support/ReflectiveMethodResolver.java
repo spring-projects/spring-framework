@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2011 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,14 +195,17 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			this.filters.put(type,filter);
 		}
 	}
-	
+
 	/**
-	 * Return the methods on the type. Subclasses may override this to alter the returned set of methods.
-	 * 
+	 * Return the set of methods for this type. The default implementation returns the
+	 * result of Class#getMethods for the given {@code type}, but subclasses may override
+	 * in order to alter the results, e.g. specifying static methods declared elsewhere.
+	 *
 	 * @param type the class for which to return the methods
+	 * @since 3.1.1
 	 */
-    protected Method[] getMethods(Class<?> type) {
-        return type.getMethods();
-    }
+	protected Method[] getMethods(Class<?> type) {
+		return type.getMethods();
+	}
 
 }

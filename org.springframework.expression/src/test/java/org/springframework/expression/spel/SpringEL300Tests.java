@@ -1141,7 +1141,8 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	}
 
 	/**
-	 * Test the ability to subclass the ReflectiveMethodResolver and change how it determines the set of methods for a type.
+	 * Test the ability to subclass the ReflectiveMethodResolver and change how it
+	 * determines the set of methods for a type.
 	 */
 	@Test
 	public void testCustomStaticFunctions_SPR9038() {
@@ -1153,8 +1154,9 @@ public class SpringEL300Tests extends ExpressionTestCase {
 				@Override
 				protected Method[] getMethods(Class<?> type) {
 					try {
-						return new Method[] { Integer.class.getDeclaredMethod("parseInt", new Class[] { String.class,
-								Integer.TYPE }) };
+						return new Method[] {
+								Integer.class.getDeclaredMethod("parseInt", new Class[] {
+										String.class, Integer.TYPE }) };
 					} catch (NoSuchMethodException e1) {
 						return new Method[0];
 					}
@@ -1162,7 +1164,8 @@ public class SpringEL300Tests extends ExpressionTestCase {
 			});
 
 			context.setMethodResolvers(methodResolvers);
-			org.springframework.expression.Expression expression = parser.parseExpression("parseInt('-FF', 16)");
+			org.springframework.expression.Expression expression =
+					parser.parseExpression("parseInt('-FF', 16)");
 
 			Integer result = expression.getValue(context, "", Integer.class);
 			assertEquals("Equal assertion failed: ", -255, result.intValue());
