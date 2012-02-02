@@ -445,7 +445,8 @@ project('spring-aspects') {
     }
     eclipse.project {
         natures += 'org.eclipse.ajdt.ui.ajnature'
-        buildCommand 'org.eclipse.ajdt.core.ajbuilder'
+        buildCommands = [new org.gradle.plugins.ide.eclipse.model.
+                BuildCommand('org.eclipse.ajdt.core.ajbuilder')]
     }
 }
 

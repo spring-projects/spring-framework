@@ -116,9 +116,5 @@ STEP 5: Enable Git support for all projects
 
 When complete, you'll hvae have Git support enabled for all projects.
 
-Note: if any projects have errors after adding Git support
-(e.g. spring-aspects), simply go to Project > Clean... and clean that
-project. This should remove any errors.
-
 You're ready to code! Goodbye!
 EOM
