@@ -31,6 +31,9 @@ Changes in version 3.1.1 (2012-02-06)
 * fix request mapping bug involving direct vs pattern path matches with HTTP methods
 * revise the FlashMapManager contract and implemenation to address a flaw in its design
 * Remove check for HTTP "POST" when resolving multipart request controller method arguments
+* add normalize() method to UriComponents
+* remove empty path segments from input to UriComponentsBuilder
+* add fromRequestUri(request) and fromCurrentRequestUri() methods to ServletUriCommonentsBuilder
 
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------
