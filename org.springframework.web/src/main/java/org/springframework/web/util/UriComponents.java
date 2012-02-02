@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -286,7 +286,7 @@ public final class UriComponents {
 		if (source == null) {
 			return null;
 		}
-		
+
 		Assert.hasLength(encoding, "'encoding' must not be empty");
 
 		byte[] bytes = encodeBytes(source.getBytes(encoding), type);
@@ -406,7 +406,7 @@ public final class UriComponents {
 
 	private UriComponents expandInternal(UriTemplateVariables uriVariables) {
 		Assert.state(!encoded, "Cannot expand an already encoded UriComponents object");
-		
+
 		String expandedScheme = expandUriComponent(this.scheme, uriVariables);
 		String expandedUserInfo = expandUriComponent(this.userInfo, uriVariables);
 		String expandedHost = expandUriComponent(this.host, uriVariables);
@@ -457,6 +457,16 @@ public final class UriComponents {
 	private static String getVariableValueAsString(Object variableValue) {
 		return variableValue != null ? variableValue.toString() : "";
 	}
+
+    /**
+     * Normalize the path removing sequences like "path/..".
+     * @see StringUtils#cleanPath(String)
+     */
+    public UriComponents normalize() {
+		String normalizedPath = StringUtils.cleanPath(getPath());
+		return new UriComponents(scheme, userInfo, host, this.port, new FullPathComponent(normalizedPath),
+				queryParams, fragment, encoded, false);
+    }
 
 	// other functionality
 
@@ -930,7 +940,7 @@ public final class UriComponents {
 		}
 	}
 
-	
+
 
 	/**
 	 * Represents an empty path.
