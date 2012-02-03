@@ -34,6 +34,7 @@ Changes in version 3.1.1 (2012-02-06)
 * add normalize() method to UriComponents
 * remove empty path segments from input to UriComponentsBuilder
 * add fromRequestUri(request) and fromCurrentRequestUri() methods to ServletUriCommonentsBuilder
+* improve @SessionAttributes handling to provide better support for clustered sessions
 
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------
