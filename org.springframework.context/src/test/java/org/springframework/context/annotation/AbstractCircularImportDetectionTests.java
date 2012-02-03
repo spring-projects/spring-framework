@@ -42,7 +42,7 @@ public abstract class AbstractCircularImportDetectionTests {
 	public void simpleCircularImportIsDetected() throws Exception {
 		boolean threw = false;
 		try {
-			newParser().parse(loadAsConfigurationSource(A.class), null);
+			newParser().parse(loadAsConfigurationSource(A.class), "A");
 		} catch (BeanDefinitionParsingException ex) {
 			assertTrue("Wrong message. Got: " + ex.getMessage(),
 					ex.getMessage().contains(
@@ -59,7 +59,7 @@ public abstract class AbstractCircularImportDetectionTests {
 	public void complexCircularImportIsDetected() throws Exception {
 		boolean threw = false;
 		try {
-			newParser().parse(loadAsConfigurationSource(X.class), null);
+			newParser().parse(loadAsConfigurationSource(X.class), "X");
 		}
 		catch (BeanDefinitionParsingException ex) {
 			assertTrue("Wrong message. Got: " + ex.getMessage(),

@@ -119,8 +119,7 @@ class ConfigurationClassParser {
 	/**
 	 * Parse the specified {@link Configuration @Configuration} class.
 	 * @param clazz the Class to parse
-	 * @param beanName may be null, but if populated represents the bean id
-	 * (assumes that this configuration class was configured via XML)
+	 * @param beanName must not be null (as of Spring 3.1.1)
 	 */
 	public void parse(Class<?> clazz, String beanName) throws IOException {
 		processConfigurationClass(new ConfigurationClass(clazz, beanName));
@@ -167,7 +166,7 @@ class ConfigurationClassParser {
 			MetadataReader reader = this.metadataReaderFactory.getMetadataReader(memberClassName);
 			AnnotationMetadata memberClassMetadata = reader.getAnnotationMetadata();
 			if (ConfigurationClassUtils.isConfigurationCandidate(memberClassMetadata)) {
-				processConfigurationClass(new ConfigurationClass(reader, null));
+				processConfigurationClass(new ConfigurationClass(reader, true));
 			}
 		}
 
@@ -300,7 +299,7 @@ class ConfigurationClassParser {
 				else {
 					// the candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
 					this.importStack.registerImport(importingClassMetadata.getClassName(), candidate);
-					processConfigurationClass(new ConfigurationClass(reader, null));
+					processConfigurationClass(new ConfigurationClass(reader, true));
 				}
 			}
 			this.importStack.pop();

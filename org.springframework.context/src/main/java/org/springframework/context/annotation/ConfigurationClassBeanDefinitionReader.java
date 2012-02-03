@@ -122,32 +122,43 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Register the {@link Configuration} class itself as a bean definition.
 	 */
 	private void doLoadBeanDefinitionForConfigurationClassIfNecessary(ConfigurationClass configClass) {
-		if (configClass.getBeanName() != null) {
-			// a bean definition already exists for this configuration class -> nothing to do
+		if (!configClass.isImported()) {
 			return;
 		}
 
-		// no bean definition exists yet -> this must be an imported configuration class (@Import).
 		BeanDefinition configBeanDef = new GenericBeanDefinition();
 		String className = configClass.getMetadata().getClassName();
 		configBeanDef.setBeanClassName(className);
+		MetadataReader reader;
+		try {
+			reader = this.metadataReaderFactory.getMetadataReader(className);
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Could not create MetadataReader for class " + className);
+		}
 		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
-			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName((AbstractBeanDefinition)configBeanDef, this.registry);
+			Map<String, Object> configAttributes =
+					reader.getAnnotationMetadata().getAnnotationAttributes(Configuration.class.getName());
+
+			// has the 'value' attribute of @Configuration been set?
+			String configBeanName = (String) configAttributes.get("value");
+			if (StringUtils.hasText(configBeanName)) {
+				// yes -> register the configuration class bean with this name
+				this.registry.registerBeanDefinition(configBeanName, configBeanDef);
+			}
+			else {
+				// no -> register the configuration class bean with a generated name
+				configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName((AbstractBeanDefinition)configBeanDef, this.registry);
+			}
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Registered bean definition for imported @Configuration class %s", configBeanName));
 			}
 		}
 		else {
-			try {
-				MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
-				AnnotationMetadata metadata = reader.getAnnotationMetadata();
-				this.problemReporter.error(
-						new InvalidConfigurationImportProblem(className, reader.getResource(), metadata));
-			}
-			catch (IOException ex) {
-				throw new IllegalStateException("Could not create MetadataReader for class " + className);
-			}
+			AnnotationMetadata metadata = reader.getAnnotationMetadata();
+			this.problemReporter.error(
+					new InvalidConfigurationImportProblem(className, reader.getResource(), metadata));
 		}
 	}
 
