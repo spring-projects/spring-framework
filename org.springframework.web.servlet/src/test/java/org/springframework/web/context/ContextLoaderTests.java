@@ -17,6 +17,7 @@
 package org.springframework.web.context;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -129,6 +130,19 @@ public final class ContextLoaderTests {
 		TestBean testBean = wac.getBean(TestBean.class);
 		assertThat(testBean.getName(), equalTo("testName"));
 		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+	}
+
+	@Test
+	public void testRegisteredContextInitializerCanAccessServletContextParamsViaEnvironment() {
+		MockServletContext sc = new MockServletContext("");
+		// config file doesn't matter.  just a placeholder
+		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
+				"/org/springframework/web/context/WEB-INF/empty-context.xml");
+
+		sc.addInitParameter("someProperty", "someValue");
+		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM, EnvApplicationContextInitializer.class.getName());
+		ContextLoaderListener listener = new ContextLoaderListener();
+		listener.contextInitialized(new ServletContextEvent(sc));
 	}
 
 	@Test
@@ -321,6 +335,15 @@ public final class ContextLoaderTests {
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {
 			ServletContext ctx = applicationContext.getServletContext(); // type-safe access to servlet-specific methods
 			ctx.setAttribute("initialized", true);
+		}
+	}
+
+	private static class EnvApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+		public void initialize(ConfigurableWebApplicationContext applicationContext) {
+			// test that ApplicationContextInitializers can access ServletContext properties
+			// via the environment (SPR-8991)
+			String value = applicationContext.getEnvironment().getRequiredProperty("someProperty");
+			assertThat(value, is("someValue"));
 		}
 	}
 
