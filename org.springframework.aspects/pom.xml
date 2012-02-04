@@ -61,7 +61,7 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <version>${project.version}</version>
-      <scope>compile</scope>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>javax.persistence</groupId>
