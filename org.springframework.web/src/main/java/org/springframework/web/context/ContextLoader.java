@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
@@ -463,11 +463,18 @@ public class ContextLoader {
 	 * @see ApplicationContextInitializer#initialize(ConfigurableApplicationContext)
 	 */
 	protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
+		List<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>> initializerClasses =
+				determineContextInitializerClasses(servletContext);
+
+		if (initializerClasses.size() == 0) {
+			// no ApplicationContextInitializers have been declared -> nothing to do
+			return;
+		}
+
 		ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances =
 			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
-		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass :
-				determineContextInitializerClasses(servletContext)) {
+		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : initializerClasses) {
 			Class<?> contextClass = applicationContext.getClass();
 			Class<?> initializerContextClass =
 				GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);

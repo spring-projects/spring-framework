@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public final class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithRegisteredContextConfigurer() {
+	public void testContextLoaderListenerWithRegisteredContextInitializer() {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
@@ -132,7 +132,7 @@ public final class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithUnkownContextConfigurer() {
+	public void testContextLoaderListenerWithUnkownContextInitializer() {
 		MockServletContext sc = new MockServletContext("");
 		// config file doesn't matter.  just a placeholder
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
