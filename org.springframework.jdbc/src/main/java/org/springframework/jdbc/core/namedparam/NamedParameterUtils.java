@@ -85,12 +85,18 @@ public abstract class NamedParameterUtils {
 		int escapes = 0;
 		int i = 0;
 		while (i < statement.length) {
-			int skipToPosition = skipCommentsAndQuotes(statement, i);
-			if (i != skipToPosition) {
-				if (skipToPosition >= statement.length) {
+			int skipToPosition = i;
+			while (i < statement.length) {
+				skipToPosition = skipCommentsAndQuotes(statement, i);
+				if (i == skipToPosition) {
 					break;
 				}
-				i = skipToPosition;
+				else {
+					i = skipToPosition;
+				}
+			}
+			if (i >= statement.length) {
+				break;
 			}
 			char c = statement[i];
 			if (c == ':' || c == '&') {
