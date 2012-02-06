@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,12 +85,18 @@ public abstract class NamedParameterUtils {
 		int escapes = 0;
 		int i = 0;
 		while (i < statement.length) {
-			int skipToPosition = skipCommentsAndQuotes(statement, i);
-			if (i != skipToPosition) {
-				if (skipToPosition >= statement.length) {
+			int skipToPosition = i;
+			while (i < statement.length) {
+				skipToPosition = skipCommentsAndQuotes(statement, i);
+				if (i == skipToPosition) {
 					break;
 				}
-				i = skipToPosition;
+				else {
+					i = skipToPosition;
+				}
+			}
+			if (i >= statement.length) {
+				break;
 			}
 			char c = statement[i];
 			if (c == ':' || c == '&') {
