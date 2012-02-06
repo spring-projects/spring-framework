@@ -30,6 +30,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -55,19 +56,66 @@ final class ConfigurationClass {
 
 	private String beanName;
 
+	private final boolean imported;
 
+
+	/**
+	 * Create a new {@link ConfigurationClass} with the given name.
+	 * @param metadataReader reader used to parse the underlying {@link Class}
+	 * @param beanName must not be {@code null}
+	 * @throws IllegalArgumentException if beanName is null (as of Spring 3.1.1)
+	 * @see ConfigurationClass#ConfigurationClass(Class, boolean)
+	 */
 	public ConfigurationClass(MetadataReader metadataReader, String beanName) {
+		Assert.hasText(beanName, "bean name must not be null");
 		this.metadata = metadataReader.getAnnotationMetadata();
 		this.resource = metadataReader.getResource();
 		this.beanName = beanName;
+		this.imported = false;
 	}
 
+	/**
+	 * Create a new {@link ConfigurationClass} representing a class that was imported
+	 * using the {@link Import} annotation or automatically processed as a nested
+	 * configuration class (if imported is {@code true}).
+	 * @param metadataReader reader used to parse the underlying {@link Class}
+	 * @param beanName name of the {@code @Configuration} class bean
+	 * @since 3.1.1
+	 */
+	public ConfigurationClass(MetadataReader metadataReader, boolean imported) {
+		this.metadata = metadataReader.getAnnotationMetadata();
+		this.resource = metadataReader.getResource();
+		this.imported = imported;
+	}
+
+	/**
+	 * Create a new {@link ConfigurationClass} with the given name.
+	 * @param clazz the underlying {@link Class} to represent
+	 * @param beanName name of the {@code @Configuration} class bean
+	 * @throws IllegalArgumentException if beanName is null (as of Spring 3.1.1)
+	 * @see ConfigurationClass#ConfigurationClass(Class, boolean)
+	 */
 	public ConfigurationClass(Class<?> clazz, String beanName) {
+		Assert.hasText(beanName, "bean name must not be null");
 		this.metadata = new StandardAnnotationMetadata(clazz);
 		this.resource = new DescriptiveResource(clazz.toString());
 		this.beanName = beanName;
+		this.imported = false;
 	}
 
+	/**
+	 * Create a new {@link ConfigurationClass} representing a class that was imported
+	 * using the {@link Import} annotation or automatically processed as a nested
+	 * configuration class (if imported is {@code true}).
+	 * @param clazz the underlying {@link Class} to represent
+	 * @param beanName name of the {@code @Configuration} class bean
+	 * @since 3.1.1
+	 */
+	public ConfigurationClass(Class<?> clazz, boolean imported) {
+		this.metadata = new StandardAnnotationMetadata(clazz);
+		this.resource = new DescriptiveResource(clazz.toString());
+		this.imported = imported;
+	}
 
 	public AnnotationMetadata getMetadata() {
 		return this.metadata;
@@ -79,6 +127,15 @@ final class ConfigurationClass {
 
 	public String getSimpleName() {
 		return ClassUtils.getShortName(getMetadata().getClassName());
+	}
+
+	/**
+	 * Return whether this configuration class was registered via @{@link Import} or
+	 * automatically registered due to being nested within another configuration class.
+	 * @since 3.1.1
+	 */
+	public boolean isImported() {
+		return this.imported;
 	}
 
 	public void setBeanName(String beanName) {
@@ -180,6 +237,5 @@ final class ConfigurationClass {
 					getSimpleName(), count, methodName), new Location(getResource(), getMetadata()));
 		}
 	}
-
 
 }
