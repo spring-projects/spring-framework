@@ -276,7 +276,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		}
 
 		FlashMapManager flashMapManager = RequestContextUtils.getFlashMapManager(request);
-		flashMapManager.save(flashMap, request, response);
+		flashMapManager.saveOutputFlashMap(flashMap, request, response);
 
 		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
 	}
