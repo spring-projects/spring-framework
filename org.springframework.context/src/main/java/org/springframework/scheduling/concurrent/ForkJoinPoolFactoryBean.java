@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.InitializingBean;
  * (ideally on the VM bootstrap classpath).
  *
  * <p>For details on the ForkJoinPool API and its use with RecursiveActions, see the
- * <a href="http://download.java.net/jdk7/docs/api/java/util/concurrent/ForkJoinPool.html">JDK 7 javadoc</a>.
+ * <a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ForkJoinPool.html">JDK 7 javadoc</a>.
  *
  * <p><code>jsr166.jar</code>, containing <code>java.util.concurrent</code> updates for Java 6, can be obtained
  * from the <a href="http://gee.cs.oswego.edu/dl/concurrency-interest/">concurrency interest website</a>.
