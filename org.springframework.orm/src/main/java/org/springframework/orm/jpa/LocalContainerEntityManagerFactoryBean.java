@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,6 +121,17 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 */
 	public void setPersistenceXmlLocation(String persistenceXmlLocation) {
 		this.internalPersistenceUnitManager.setPersistenceXmlLocation(persistenceXmlLocation);
+	}
+
+	/**
+	 * Uses the specified persistence unit name as the name of the default
+	 * persistence unit, if applicable.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 */
+	@Override
+	public void setPersistenceUnitName(String persistenceUnitName) {
+		super.setPersistenceUnitName(persistenceUnitName);
+		this.internalPersistenceUnitManager.setDefaultPersistenceUnitName(persistenceUnitName);
 	}
 
 	/**
