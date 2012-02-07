@@ -1002,6 +1002,9 @@ public final class UriComponents {
 		}
 
 		public Object getValue(String name) {
+			if (!this.uriVariables.containsKey(name)) {
+				throw new IllegalArgumentException("Map has no value for '" + name + "'");
+			}
 			return this.uriVariables.get(name);
 		}
 	}
@@ -1010,6 +1013,7 @@ public final class UriComponents {
 	 * URI template variables backed by a variable argument array.
 	 */
 	private static class VarArgsTemplateVariables implements UriTemplateVariables {
+
 		private final Iterator<Object> valueIterator;
 
 		public VarArgsTemplateVariables(Object... uriVariableValues) {
@@ -1018,7 +1022,7 @@ public final class UriComponents {
 
 		public Object getValue(String name) {
 			if (!valueIterator.hasNext()) {
-				throw new IllegalArgumentException("Not enough variable values available to expand [" + name + "]");
+				throw new IllegalArgumentException("Not enough variable values available to expand '" + name + "'");
 			}
 			return valueIterator.next();
 		}
