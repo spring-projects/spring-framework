@@ -25,7 +25,7 @@ import org.springframework.expression.spel.ExpressionState;
  * Implements the multiply operator. Conversions and promotions:
  * http://java.sun.com/docs/books/jls/third_edition/html/conversions.html Section 5.6.2:
  *
- * <p>If any of the operands is of a reference type, unboxing conversion (ค5.1.8) is performed. Then:<br>
+ * <p>If any of the operands is of a reference type, unboxing conversion (ยง5.1.8) is performed. Then:<br>
  * If either operand is of type double, the other is converted to double.<br>
  * Otherwise, if either operand is of type float, the other is converted to float.<br>
  * Otherwise, if either operand is of type long, the other is converted to long.<br>
