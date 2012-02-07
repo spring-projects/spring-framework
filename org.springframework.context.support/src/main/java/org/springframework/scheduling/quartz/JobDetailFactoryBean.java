@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,10 @@ public class JobDetailFactoryBean
 	private Class jobClass;
 
 	private JobDataMap jobDataMap = new JobDataMap();
+
+	private boolean durability = false;
+
+	private String description;
 
 	private String beanName;
 
@@ -120,6 +124,21 @@ public class JobDetailFactoryBean
 		getJobDataMap().putAll(jobDataAsMap);
 	}
 
+	/**
+	 * Specify the job's durability, i.e. whether it should remain stored
+	 * in the job store even if no triggers point to it anymore.
+	 */
+	public void setDurability(boolean durability) {
+		this.durability = durability;
+	}
+
+	/**
+	 * Set a textual description for this job.
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -172,6 +191,8 @@ public class JobDetailFactoryBean
 		jdi.setGroup(this.group);
 		jdi.setJobClass(this.jobClass);
 		jdi.setJobDataMap(this.jobDataMap);
+		jdi.setDurability(this.durability);
+		jdi.setDescription(this.description);
 		this.jobDetail = jdi;
 		*/
 
@@ -188,6 +209,8 @@ public class JobDetailFactoryBean
 		pvs.add("group", this.group);
 		pvs.add("jobClass", this.jobClass);
 		pvs.add("jobDataMap", this.jobDataMap);
+		pvs.add("durability", this.durability);
+		pvs.add("description", this.description);
 		bw.setPropertyValues(pvs);
 		this.jobDetail = (JobDetail) bw.getWrappedInstance();
 	}
