@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import static org.springframework.context.annotation.MetadataUtils.attributesFor;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
@@ -128,8 +131,9 @@ class ConfigurationClassParser {
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
 		AnnotationMetadata metadata = configClass.getMetadata();
-		if (this.environment != null && ProfileHelper.isProfileAnnotationPresent(metadata)) {
-			if (!this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata))) {
+		if (this.environment != null && metadata.isAnnotated(Profile.class.getName())) {
+			AnnotationAttributes profile = MetadataUtils.attributesFor(metadata, Profile.class);
+			if (!this.environment.acceptsProfiles(profile.getStringArray("value"))) {
 				return;
 			}
 		}
@@ -172,11 +176,11 @@ class ConfigurationClassParser {
 		}
 
 		// process any @PropertySource annotations
-		Map<String, Object> propertySourceAttributes =
-			metadata.getAnnotationAttributes(org.springframework.context.annotation.PropertySource.class.getName());
-		if (propertySourceAttributes != null) {
-			String name = (String) propertySourceAttributes.get("name");
-			String[] locations = (String[]) propertySourceAttributes.get("value");
+		AnnotationAttributes propertySource =
+				attributesFor(metadata, org.springframework.context.annotation.PropertySource.class);
+		if (propertySource != null) {
+			String name = propertySource.getString("name");
+			String[] locations = propertySource.getStringArray("value");
 			ClassLoader classLoader = this.resourceLoader.getClassLoader();
 			for (String location : locations) {
 				location = this.environment.resolveRequiredPlaceholders(location);
@@ -188,34 +192,32 @@ class ConfigurationClassParser {
 		}
 
 		// process any @ComponentScan annotions
-		AnnotationAttributes componentScan = MetadataUtils.attributesFor(metadata, ComponentScan.class);
+		AnnotationAttributes componentScan = attributesFor(metadata, ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
 			Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScan);
 
 			// check the set of scanned definitions for any further config classes and parse recursively if necessary
 			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
-				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), metadataReaderFactory)) {
+				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
 					this.parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
 				}
 			}
 		}
 
 		// process any @Import annotations
-		List<Map<String, Object>> allImportAttribs =
+		List<AnnotationAttributes> imports =
 			findAllAnnotationAttributes(Import.class, metadata.getClassName(), true);
-		for (Map<String, Object> importAttribs : allImportAttribs) {
-			processImport(configClass, (String[]) importAttribs.get("value"), true);
+		for (AnnotationAttributes importAnno : imports) {
+			processImport(configClass, importAnno.getStringArray("value"), true);
 		}
 
 		// process any @ImportResource annotations
 		if (metadata.isAnnotated(ImportResource.class.getName())) {
-			String[] resources = (String[]) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("value");
-			Class<?> readerClass = (Class<?>) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("reader");
-			if (readerClass == null) {
-				throw new IllegalStateException("No reader class associated with imported resources: " +
-						StringUtils.arrayToCommaDelimitedString(resources));
-			}
+			AnnotationAttributes importResource = attributesFor(metadata, ImportResource.class);
+			String[] resources = importResource.getStringArray("value");
+			Class<? extends BeanDefinitionReader> readerClass =
+					importResource.getClass("reader", BeanDefinitionReader.class);
 			for (String resource : resources) {
 				configClass.addImportedResource(resource, readerClass);
 			}
@@ -239,11 +241,11 @@ class ConfigurationClassParser {
 	 * @param annotatedClassName the class to inspect
 	 * @param classValuesAsString whether class attributes should be returned as strings
 	 */
-	private List<Map<String, Object>> findAllAnnotationAttributes(
+	private List<AnnotationAttributes> findAllAnnotationAttributes(
 			Class<? extends Annotation> targetAnnotation, String annotatedClassName,
 			boolean classValuesAsString) throws IOException {
 
-		List<Map<String, Object>> allAttribs = new ArrayList<Map<String, Object>>();
+		List<AnnotationAttributes> allAttribs = new ArrayList<AnnotationAttributes>();
 
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(annotatedClassName);
 		AnnotationMetadata metadata = reader.getAnnotationMetadata();
@@ -253,16 +255,17 @@ class ConfigurationClassParser {
 			if (annotationType.equals(targetAnnotationType)) {
 				continue;
 			}
-			MetadataReader metaReader = this.metadataReaderFactory.getMetadataReader(annotationType);
-			Map<String, Object> targetAttribs =
-				metaReader.getAnnotationMetadata().getAnnotationAttributes(targetAnnotationType, classValuesAsString);
+			AnnotationMetadata metaAnnotations =
+					this.metadataReaderFactory.getMetadataReader(annotationType).getAnnotationMetadata();
+			AnnotationAttributes targetAttribs =
+					AnnotationAttributes.fromMap(metaAnnotations.getAnnotationAttributes(targetAnnotationType, classValuesAsString));
 			if (targetAttribs != null) {
 				allAttribs.add(targetAttribs);
 			}
 		}
 
-		Map<String, Object> localAttribs =
-			metadata.getAnnotationAttributes(targetAnnotationType, classValuesAsString);
+		AnnotationAttributes localAttribs =
+				AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(targetAnnotationType, classValuesAsString));
 		if (localAttribs != null) {
 			allAttribs.add(localAttribs);
 		}

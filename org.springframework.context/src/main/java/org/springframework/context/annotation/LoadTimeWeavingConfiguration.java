@@ -27,6 +27,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.EnableLoadTimeWeaving.AspectJWeaving;
 import org.springframework.context.weaving.AspectJWeavingEnabler;
 import org.springframework.context.weaving.DefaultContextLoadTimeWeaver;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.util.Assert;
@@ -46,7 +47,7 @@ import org.springframework.util.Assert;
 @Configuration
 public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoaderAware {
 
-	private Map<String, Object> enableLTW;
+	private AnnotationAttributes enableLTW;
 
 	@Autowired(required=false)
 	private LoadTimeWeavingConfigurer ltwConfigurer;
@@ -54,7 +55,7 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 	private ClassLoader beanClassLoader;
 
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
-		this.enableLTW = importMetadata.getAnnotationAttributes(EnableLoadTimeWeaving.class.getName(), false);
+		this.enableLTW = MetadataUtils.attributesFor(importMetadata, EnableLoadTimeWeaving.class);
 		Assert.notNull(this.enableLTW,
 				"@EnableLoadTimeWeaving is not present on importing class " +
 				importMetadata.getClassName());
@@ -79,7 +80,7 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 			loadTimeWeaver = new DefaultContextLoadTimeWeaver(this.beanClassLoader);
 		}
 
-		switch ((AspectJWeaving) this.enableLTW.get("aspectjWeaving")) {
+		switch (this.enableLTW.getEnum("aspectjWeaving", AspectJWeaving.class)) {
 			case DISABLED:
 				// AJ weaving is disabled -> do nothing
 				break;

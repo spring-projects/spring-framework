@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,19 @@ package org.springframework.context.annotation;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.springframework.context.annotation.MetadataUtils.attributesFor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 
@@ -55,8 +56,8 @@ public class ImportAwareTests {
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
 		assertThat("import metadata was not injected", importMetadata, notNullValue());
 		assertThat(importMetadata.getClassName(), is(ImportingConfig.class.getName()));
-		Map<String, Object> importAttribs = importMetadata.getAnnotationAttributes(Import.class.getName());
-		Class<?>[] importedClasses = (Class<?>[])importAttribs.get("value");
+		AnnotationAttributes importAttribs = attributesFor(importMetadata, Import.class);
+		Class<?>[] importedClasses = importAttribs.getClassArray("value");
 		assertThat(importedClasses[0].getName(), is(ImportedConfig.class.getName()));
 	}
 
@@ -72,8 +73,8 @@ public class ImportAwareTests {
 		AnnotationMetadata importMetadata = importAwareConfig.importMetadata;
 		assertThat("import metadata was not injected", importMetadata, notNullValue());
 		assertThat(importMetadata.getClassName(), is(IndirectlyImportingConfig.class.getName()));
-		Map<String, Object> enableAttribs = importMetadata.getAnnotationAttributes(EnableImportedConfig.class.getName());
-		String foo = (String)enableAttribs.get("foo");
+		AnnotationAttributes enableAttribs = attributesFor(importMetadata, EnableImportedConfig.class);
+		String foo = enableAttribs.getString("foo");
 		assertThat(foo, is("xyz"));
 	}
 
@@ -129,7 +130,6 @@ public class ImportAwareTests {
 		}
 
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			System.out.println("ImportAwareTests.BPP.setBeanFactory()");
 		}
 	}
 }

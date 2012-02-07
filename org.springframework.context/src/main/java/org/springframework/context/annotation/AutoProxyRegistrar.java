@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import static org.springframework.context.annotation.MetadataUtils.attributesFor;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -23,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
 /**
@@ -58,7 +61,7 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 		boolean candidateFound = false;
 		Set<String> annoTypes = importingClassMetadata.getAnnotationTypes();
 		for (String annoType : annoTypes) {
-			Map<String, Object> candidate = importingClassMetadata.getAnnotationAttributes(annoType);
+			AnnotationAttributes candidate = attributesFor(importingClassMetadata, annoType);
 			Object mode = candidate.get("mode");
 			Object proxyTargetClass = candidate.get("proxyTargetClass");
 			if (mode != null && proxyTargetClass != null

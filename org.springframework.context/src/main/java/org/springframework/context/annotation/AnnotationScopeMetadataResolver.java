@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.context.annotation;
 
+import static org.springframework.context.annotation.MetadataUtils.attributesFor;
+
 import java.lang.annotation.Annotation;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.util.Assert;
 
 /**
@@ -75,11 +77,11 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 		ScopeMetadata metadata = new ScopeMetadata();
 		if (definition instanceof AnnotatedBeanDefinition) {
 			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
-			Map<String, Object> attributes =
-					annDef.getMetadata().getAnnotationAttributes(this.scopeAnnotationType.getName());
+			AnnotationAttributes attributes =
+					attributesFor(annDef.getMetadata(), this.scopeAnnotationType);
 			if (attributes != null) {
-				metadata.setScopeName((String) attributes.get("value"));
-				ScopedProxyMode proxyMode = (ScopedProxyMode) attributes.get("proxyMode");
+				metadata.setScopeName(attributes.getString("value"));
+				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode", ScopedProxyMode.class);
 				if (proxyMode == null || proxyMode == ScopedProxyMode.DEFAULT) {
 					proxyMode = this.defaultProxyMode;
 				}

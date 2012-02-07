@@ -25,6 +25,7 @@ import java.util.Set;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
@@ -50,7 +51,8 @@ final class ConfigurationClass {
 
 	private final Resource resource;
 
-	private final Map<String, Class<?>> importedResources = new LinkedHashMap<String, Class<?>>();
+	private final Map<String, Class<? extends BeanDefinitionReader>> importedResources =
+			new LinkedHashMap<String, Class<? extends BeanDefinitionReader>>();
 
 	private final Set<BeanMethod> beanMethods = new LinkedHashSet<BeanMethod>();
 
@@ -154,11 +156,12 @@ final class ConfigurationClass {
 		return this.beanMethods;
 	}
 
-	public void addImportedResource(String importedResource, Class<?> readerClass) {
+	public void addImportedResource(
+			String importedResource, Class<? extends BeanDefinitionReader> readerClass) {
 		this.importedResources.put(importedResource, readerClass);
 	}
 
-	public Map<String, Class<?>> getImportedResources() {
+	public Map<String, Class<? extends BeanDefinitionReader>> getImportedResources() {
 		return this.importedResources;
 	}
 

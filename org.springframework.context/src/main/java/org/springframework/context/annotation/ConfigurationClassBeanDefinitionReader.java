@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import static org.springframework.context.annotation.MetadataUtils.attributesFor;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -43,6 +45,7 @@ import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -187,15 +190,14 @@ class ConfigurationClassBeanDefinitionReader {
 		beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);
 
 		// consider role
-		Map<String, Object> roleAttributes = metadata.getAnnotationAttributes(Role.class.getName());
-		if (roleAttributes != null) {
-			int role = (Integer) roleAttributes.get("value");
-			beanDef.setRole(role);
+		AnnotationAttributes role = attributesFor(metadata, Role.class);
+		if (role != null) {
+			beanDef.setRole(role.getInt("value"));
 		}
 
 		// consider name and any aliases
-		Map<String, Object> beanAttributes = metadata.getAnnotationAttributes(Bean.class.getName());
-		List<String> names = new ArrayList<String>(Arrays.asList((String[]) beanAttributes.get("name")));
+		AnnotationAttributes bean = attributesFor(metadata, Bean.class);
+		List<String> names = new ArrayList<String>(Arrays.asList(bean.getStringArray("name")));
 		String beanName = (names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
 		for (String alias : names) {
 			this.registry.registerAlias(beanName, alias);
@@ -222,40 +224,43 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// is this bean to be instantiated lazily?
 		if (metadata.isAnnotated(Lazy.class.getName())) {
-			beanDef.setLazyInit((Boolean) metadata.getAnnotationAttributes(Lazy.class.getName()).get("value"));
+			AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
+			beanDef.setLazyInit(lazy.getBoolean("value"));
 		}
 		else if (configClass.getMetadata().isAnnotated(Lazy.class.getName())){
-			beanDef.setLazyInit((Boolean) configClass.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value"));
+			AnnotationAttributes lazy = attributesFor(configClass.getMetadata(), Lazy.class);
+			beanDef.setLazyInit(lazy.getBoolean("value"));
 		}
 
 		if (metadata.isAnnotated(DependsOn.class.getName())) {
-			String[] dependsOn = (String[]) metadata.getAnnotationAttributes(DependsOn.class.getName()).get("value");
-			if (dependsOn.length > 0) {
-				beanDef.setDependsOn(dependsOn);
+			AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
+			String[] otherBeans = dependsOn.getStringArray("value");
+			if (otherBeans.length > 0) {
+				beanDef.setDependsOn(otherBeans);
 			}
 		}
 
-		Autowire autowire = (Autowire) beanAttributes.get("autowire");
+		Autowire autowire = bean.getEnum("autowire", Autowire.class);
 		if (autowire.isAutowire()) {
 			beanDef.setAutowireMode(autowire.value());
 		}
 
-		String initMethodName = (String) beanAttributes.get("initMethod");
+		String initMethodName = bean.getString("initMethod");
 		if (StringUtils.hasText(initMethodName)) {
 			beanDef.setInitMethodName(initMethodName);
 		}
 
-		String destroyMethodName = (String) beanAttributes.get("destroyMethod");
+		String destroyMethodName = bean.getString("destroyMethod");
 		if (StringUtils.hasText(destroyMethodName)) {
 			beanDef.setDestroyMethodName(destroyMethodName);
 		}
 
 		// consider scoping
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
-		Map<String, Object> scopeAttributes = metadata.getAnnotationAttributes(Scope.class.getName());
-		if (scopeAttributes != null) {
-			beanDef.setScope((String) scopeAttributes.get("value"));
-			proxyMode = (ScopedProxyMode) scopeAttributes.get("proxyMode");
+		AnnotationAttributes scope = attributesFor(metadata, Scope.class);
+		if (scope != null) {
+			beanDef.setScope(scope.getString("value"));
+			proxyMode = scope.getEnum("proxyMode", ScopedProxyMode.class);
 			if (proxyMode == ScopedProxyMode.DEFAULT) {
 				proxyMode = ScopedProxyMode.NO;
 			}
@@ -277,15 +282,17 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 
-	private void loadBeanDefinitionsFromImportedResources(Map<String, Class<?>> importedResources) {
+	private void loadBeanDefinitionsFromImportedResources(
+			Map<String, Class<? extends BeanDefinitionReader>> importedResources) {
+
 		Map<Class<?>, BeanDefinitionReader> readerInstanceCache = new HashMap<Class<?>, BeanDefinitionReader>();
-		for (Map.Entry<String, Class<?>> entry : importedResources.entrySet()) {
+		for (Map.Entry<String, Class<? extends BeanDefinitionReader>> entry : importedResources.entrySet()) {
 			String resource = entry.getKey();
-			Class<?> readerClass = entry.getValue();
+			Class<? extends BeanDefinitionReader> readerClass = entry.getValue();
 			if (!readerInstanceCache.containsKey(readerClass)) {
 				try {
 					// Instantiate the specified BeanDefinitionReader
-					BeanDefinitionReader readerInstance = (BeanDefinitionReader)
+					BeanDefinitionReader readerInstance =
 							readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
 
 					// Delegate the current ResourceLoader to it if possible
