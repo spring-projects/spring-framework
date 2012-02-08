@@ -8,7 +8,10 @@ Changes in version 3.1.1 (2012-02-13)
 
 * official support for Hibernate 4.0 GA (as released in the meantime)
 * JBossNativeJdbcExtractor is compatible with JBoss AS 7 as well
+* restored JBossLoadTimeWeaver compatibility with JBoss AS 5.1
+* Provider injection works with generically typed collections of beans as well
 * context:property-placeholder's "file-encoding" attribute value is being applied correctly
+* optimized converter lookup in GenericConversionService to avoid contention in JDK proxy check
 * DataBinder correctly handles ParseException from Formatter for String->String case
 * CacheNamespaceHandler actually parses cache:annotation-driven's "key-generator" attribute
 * officially deprecated TopLinkJpaDialect in favor of EclipseLink and Spring's EclipseLinkJpaDialect
@@ -38,7 +41,8 @@ Changes in version 3.1.1 (2012-02-13)
 * added property to RedirectView to disable expanding URI variables in redirect URL
 * fixed request mapping bug involving direct vs pattern path matches with HTTP methods
 * removed check for HTTP "POST" when resolving multipart request controller method arguments
-* update @RequestMapping and reference docs wrt differences between @MVC 3.1 and @MVC 2.5-3.0
+* updated @RequestMapping and reference docs wrt differences between @MVC 3.1 and @MVC 2.5-3.0
+
 
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------
