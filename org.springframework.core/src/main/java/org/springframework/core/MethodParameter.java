@@ -21,6 +21,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
@@ -231,6 +232,29 @@ public class MethodParameter {
 			}
 		}
 		return this.genericParameterType;
+	}
+
+	public Class<?> getNestedParameterType() {
+		if (this.nestingLevel > 1) {
+			Type type = getGenericParameterType();
+			if (type instanceof ParameterizedType) {
+				Integer index = getTypeIndexForCurrentLevel();
+				Type arg = ((ParameterizedType) type).getActualTypeArguments()[index != null ? index : 0];
+				if (arg instanceof Class) {
+					return (Class) arg;
+				}
+				else if (arg instanceof ParameterizedType) {
+					arg = ((ParameterizedType) arg).getRawType();
+					if (arg instanceof Class) {
+						return (Class) arg;
+					}
+				}
+			}
+			return Object.class;
+		}
+		else {
+			return getParameterType();
+		}
 	}
 
 	/**
