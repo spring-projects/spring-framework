@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,16 @@ public class EmptyResultDataAccessException extends IncorrectResultSizeDataAcces
 	 */
 	public EmptyResultDataAccessException(String msg, int expectedSize) {
 		super(msg, expectedSize, 0);
+	}
+
+	/**
+	 * Constructor for EmptyResultDataAccessException.
+	 * @param msg the detail message
+	 * @param expectedSize the expected result size
+	 * @param ex the wrapped exception
+	 */
+	public EmptyResultDataAccessException(String msg, int expectedSize, Throwable ex) {
+		super(msg, expectedSize, 0, ex);
 	}
 
 }
