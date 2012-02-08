@@ -946,6 +946,7 @@
       <module fileurl="file://$PROJECT_DIR$/org.springframework.jms/jms.iml" filepath="$PROJECT_DIR$/org.springframework.jms/jms.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.orm/orm.iml" filepath="$PROJECT_DIR$/org.springframework.orm/orm.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.oxm/oxm.iml" filepath="$PROJECT_DIR$/org.springframework.oxm/oxm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-framework-reference/reference.iml" filepath="$PROJECT_DIR$/spring-framework-reference/reference.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.test/test.iml" filepath="$PROJECT_DIR$/org.springframework.test/test.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.transaction/transaction.iml" filepath="$PROJECT_DIR$/org.springframework.transaction/transaction.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.web/web.iml" filepath="$PROJECT_DIR$/org.springframework.web/web.iml" />
