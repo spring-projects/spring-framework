@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,12 +119,11 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 						// can do custom FieldError registration with invalid value from ConstraintViolation,
 						// as necessary for Hibernate Validator compatibility (non-indexed set path in field)
 						BindingResult bindingResult = (BindingResult) errors;
-						String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
 						String nestedField = bindingResult.getNestedPath() + field;
-						ObjectError error;
 						if ("".equals(nestedField)) {
-							error = new ObjectError(
-									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage());
+							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode);
+							bindingResult.addError(new ObjectError(
+									errors.getObjectName(), errorCodes, errorArgs, violation.getMessage()));
 						}
 						else {
 							Object invalidValue = violation.getInvalidValue();
@@ -132,11 +131,11 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 								// bean constraint with property path: retrieve the actual property value
 								invalidValue = bindingResult.getRawFieldValue(field);
 							}
-							error = new FieldError(
+							String[] errorCodes = bindingResult.resolveMessageCodes(errorCode, field);
+							bindingResult.addError(new FieldError(
 									errors.getObjectName(), nestedField, invalidValue, false,
-									errorCodes, errorArgs, violation.getMessage());
+									errorCodes, errorArgs, violation.getMessage()));
 						}
-						bindingResult.addError(error);
 					}
 					else {
 						// got no BindingResult - can only do standard rejectValue call

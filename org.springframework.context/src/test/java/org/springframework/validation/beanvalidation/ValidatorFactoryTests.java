@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,11 +110,22 @@ public class ValidatorFactoryTests {
 		assertEquals(2, result.getErrorCount());
 		FieldError fieldError = result.getFieldError("name");
 		assertEquals("name", fieldError.getField());
-		System.out.println(Arrays.asList(fieldError.getCodes()));
+		List<String> errorCodes = Arrays.asList(fieldError.getCodes());
+		assertEquals(4, errorCodes.size());
+		assertTrue(errorCodes.contains("NotNull.person.name"));
+		assertTrue(errorCodes.contains("NotNull.name"));
+		assertTrue(errorCodes.contains("NotNull.java.lang.String"));
+		assertTrue(errorCodes.contains("NotNull"));
 		System.out.println(fieldError.getDefaultMessage());
 		fieldError = result.getFieldError("address.street");
 		assertEquals("address.street", fieldError.getField());
-		System.out.println(Arrays.asList(fieldError.getCodes()));
+		errorCodes = Arrays.asList(fieldError.getCodes());
+		assertEquals(5, errorCodes.size());
+		assertTrue(errorCodes.contains("NotNull.person.address.street"));
+		assertTrue(errorCodes.contains("NotNull.address.street"));
+		assertTrue(errorCodes.contains("NotNull.street"));
+		assertTrue(errorCodes.contains("NotNull.java.lang.String"));
+		assertTrue(errorCodes.contains("NotNull"));
 		System.out.println(fieldError.getDefaultMessage());
 	}
 
@@ -129,7 +140,10 @@ public class ValidatorFactoryTests {
 		validator.validate(person, result);
 		assertEquals(1, result.getErrorCount());
 		ObjectError globalError = result.getGlobalError();
-		System.out.println(Arrays.asList(globalError.getCodes()));
+		List<String> errorCodes = Arrays.asList(globalError.getCodes());
+		assertEquals(2, errorCodes.size());
+		assertTrue(errorCodes.contains("NameAddressValid.person"));
+		assertTrue(errorCodes.contains("NameAddressValid"));
 		System.out.println(globalError.getDefaultMessage());
 	}
 
