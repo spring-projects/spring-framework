@@ -36,7 +36,7 @@
 	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate.ejb/3.4.0.GA/com.springsource.org.hibernate.ejb-3.4.0.GA.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate.annotations/3.4.0.GA/com.springsource.org.hibernate.annotations-3.4.0.GA.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate.annotations.common/3.3.0.ga/com.springsource.org.hibernate.annotations.common-3.3.0.ga.jar" sourcepath="/IVY_CACHE/org.hibernate/com.springsource.org.hibernate.annotations.common/3.3.0.ga/com.springsource.org.hibernate.annotations-sources-3.3.0.common.ga.jar"/>
-	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate.core/4.0.0.CR7/com.springsource.org.hibernate.core-4.0.0.CR7.jar"/>
+	<classpathentry kind="var" path="IVY_CACHE/org.hibernate/com.springsource.org.hibernate.core/4.1.0.Final/com.springsource.org.hibernate.core-4.1.0.Final.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.hsqldb/com.springsource.org.hsqldb/1.8.0.9/com.springsource.org.hsqldb-1.8.0.9.jar" sourcepath="/IVY_CACHE/org.hsqldb/com.springsource.org.hsqldb/1.8.0.9/com.springsource.org.hsqldb-sources-1.8.0.9.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.jboss.javassist/com.springsource.javassist/3.3.0.ga/com.springsource.javassist-3.3.0.ga.jar" sourcepath="/IVY_CACHE/org.jboss.javassist/com.springsource.javassist/3.3.0.ga/com.springsource.javassist-sources-3.3.0.ga.jar"/>
 	<classpathentry kind="var" path="IVY_CACHE/org.junit/com.springsource.org.junit/4.9.0/com.springsource.org.junit-4.9.0.jar" sourcepath="/IVY_CACHE/org.junit/com.springsource.org.junit/4.9.0/com.springsource.org.junit-sources-4.9.0.jar"/>

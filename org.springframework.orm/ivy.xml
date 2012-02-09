@@ -43,7 +43,7 @@
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.1.GA" conf="optional, hibernate->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.4.0.GA" conf="optional, hibernate-jpa->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.4.0.GA" conf="optional, hibernate-jpa->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.core" rev="4.0.0.CR7" conf="optional, hibernate->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.core" rev="4.1.0.Final" conf="optional, hibernate->compile"/>
 		<dependency org="javax.jdo" name="com.springsource.javax.jdo" rev="2.1.0" conf="provided, jdo->compile"/>
 		<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" conf="provided, jpa->compile"/>
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet" rev="2.5.0" conf="provided, web->compile"/>
