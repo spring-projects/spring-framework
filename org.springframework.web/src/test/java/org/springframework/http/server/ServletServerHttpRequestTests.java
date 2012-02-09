@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package org.springframework.http.server;
 
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.junit.Before;
@@ -24,6 +25,7 @@ import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 
@@ -67,6 +69,8 @@ public class ServletServerHttpRequestTests {
 		mockRequest.addHeader(headerName, headerValue1);
 		String headerValue2 = "value2";
 		mockRequest.addHeader(headerName, headerValue2);
+		mockRequest.setContentType("text/plain");
+		mockRequest.setCharacterEncoding("UTF-8");
 
 		HttpHeaders headers = request.getHeaders();
 		assertNotNull("No HttpHeaders returned", headers);
@@ -75,6 +79,8 @@ public class ServletServerHttpRequestTests {
 		assertEquals("Invalid header values returned", 2, headerValues.size());
 		assertTrue("Invalid header values returned", headerValues.contains(headerValue1));
 		assertTrue("Invalid header values returned", headerValues.contains(headerValue2));
+		assertEquals("Invalid Content-Type", new MediaType("text", "plain", Charset.forName("UTF-8")),
+				headers.getContentType());
 	}
 
 	@Test

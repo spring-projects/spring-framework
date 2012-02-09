@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,19 @@
 
 package org.springframework.http.server;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.util.FileCopyUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -56,12 +59,16 @@ public class ServletServerHttpResponseTests {
 		headers.add(headerName, headerValue1);
 		String headerValue2 = "value2";
 		headers.add(headerName, headerValue2);
+		headers.setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
 
 		response.close();
 		assertTrue("Header not set", mockResponse.getHeaderNames().contains(headerName));
 		List headerValues = mockResponse.getHeaders(headerName);
 		assertTrue("Header not set", headerValues.contains(headerValue1));
 		assertTrue("Header not set", headerValues.contains(headerValue2));
+		assertEquals("Invalid Content-Type", "text/plain;charset=UTF-8", mockResponse.getHeader("Content-Type"));
+		assertEquals("Invalid Content-Type", "text/plain;charset=UTF-8", mockResponse.getContentType());
+		assertEquals("Invalid Content-Type", "UTF-8", mockResponse.getCharacterEncoding());
 	}
 
 	@Test
