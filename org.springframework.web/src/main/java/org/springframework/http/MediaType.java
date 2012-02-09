@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -448,6 +448,14 @@ public class MediaType implements Comparable<MediaType> {
 	 */
 	public String getParameter(String name) {
 		return this.parameters.get(name);
+	}
+
+	/**
+	 * Return all generic parameter values.
+	 * @return a read-only map, possibly empty, never <code>null</code>
+	 */
+	public Map<String, String> getParameters() {
+	        return parameters;
 	}
 
 	/**

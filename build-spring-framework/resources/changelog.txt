@@ -42,6 +42,7 @@ Changes in version 3.1.1 (2012-02-13)
 * fixed request mapping bug involving direct vs pattern path matches with HTTP methods
 * removed check for HTTP "POST" when resolving multipart request controller method arguments
 * updated @RequestMapping and reference docs wrt differences between @MVC 3.1 and @MVC 2.5-3.0
+* ServletServerHttpRequest/Response fall back on the Content-Type and encoding of the request
 
 
 Changes in version 3.1 GA (2011-12-12)
