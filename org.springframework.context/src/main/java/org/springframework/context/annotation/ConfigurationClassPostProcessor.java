@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,8 +199,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ConfigurationClassBeanDefinitionReader getConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry) {
 		if (this.reader == null) {
-			this.reader = new ConfigurationClassBeanDefinitionReader(
-					registry, this.sourceExtractor, this.problemReporter, this.metadataReaderFactory, this.resourceLoader);
+			this.reader = new ConfigurationClassBeanDefinitionReader(registry, this.sourceExtractor,
+					this.problemReporter, this.metadataReaderFactory, this.resourceLoader, this.environment);
 		}
 		return this.reader;
 	}

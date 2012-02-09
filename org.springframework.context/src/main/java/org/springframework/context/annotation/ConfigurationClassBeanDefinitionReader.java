@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.MetadataUtils.attributesFor;
-
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,6 +27,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
@@ -46,6 +45,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -53,6 +53,8 @@ import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Reads a given fully-populated set of ConfigurationClass instances, registering bean
@@ -79,7 +81,10 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final MetadataReaderFactory metadataReaderFactory;
 
-	private ResourceLoader resourceLoader;
+	private final ResourceLoader resourceLoader;
+
+	private final Environment environment;
+
 
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
@@ -89,13 +94,14 @@ class ConfigurationClassBeanDefinitionReader {
 	 */
 	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
 			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
-			ResourceLoader resourceLoader) {
+			ResourceLoader resourceLoader, Environment environment) {
 
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
 		this.problemReporter = problemReporter;
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.resourceLoader = resourceLoader;
+		this.environment = environment;
 	}
 
 
@@ -294,12 +300,12 @@ class ConfigurationClassBeanDefinitionReader {
 					// Instantiate the specified BeanDefinitionReader
 					BeanDefinitionReader readerInstance =
 							readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
-
 					// Delegate the current ResourceLoader to it if possible
 					if (readerInstance instanceof AbstractBeanDefinitionReader) {
-						((AbstractBeanDefinitionReader)readerInstance).setResourceLoader(this.resourceLoader);
+						AbstractBeanDefinitionReader abdr = ((AbstractBeanDefinitionReader) readerInstance);
+						abdr.setResourceLoader(this.resourceLoader);
+						abdr.setEnvironment(this.environment);
 					}
-
 					readerInstanceCache.put(readerClass, readerInstance);
 				}
 				catch (Exception ex) {
@@ -354,6 +360,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 * declare at least one {@link Bean @Bean} method.
 	 */
 	private static class InvalidConfigurationImportProblem extends Problem {
+
 		public InvalidConfigurationImportProblem(String className, Resource resource, AnnotationMetadata metadata) {
 			super(String.format("%s was @Import'ed but is not annotated with @Configuration " +
 					"nor does it declare any @Bean methods; it does not implement ImportSelector " +
