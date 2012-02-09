@@ -337,10 +337,10 @@ project('spring-orm') {
         // compiling against both hibernate 3 and 4 here in order to support
         // our respective orm.hibernate3 and orm.hibernate4 packages
         compile("org.hibernate:com.springsource.org.hibernate:3.3.1.GA", optional)
-        compile("org.hibernate:hibernate-core:4.0.0.CR7", optional)
+        compile("org.hibernate:hibernate-core:4.1.0.Final", optional)
         compile("org.hibernate:hibernate-cglib-repack:2.1_3", optional)
         compile("org.hibernate:hibernate-annotations:3.4.0.GA", optional)
-        compile("org.hibernate:hibernate-entitymanager:4.0.0.CR4", optional)
+        compile("org.hibernate:hibernate-entitymanager:4.1.0.Final", optional)
         compile("org.apache.openjpa:openjpa:1.1.0", optional)
         compile("org.eclipse.persistence:org.eclipse.persistence.core:1.0.1", optional)
         compile("org.eclipse.persistence:org.eclipse.persistence.jpa:1.0.1", optional)
@@ -465,7 +465,7 @@ configure(rootProject) {
     dependencies { // for integration tests
         testCompile project(":spring-test")
         testCompile project(":spring-webmvc-portlet")
-        testCompile "org.hibernate:hibernate-core:4.0.0.CR7"
+        testCompile "org.hibernate:hibernate-core:4.1.0.Final"
         testCompile "javax.servlet:servlet-api:2.5"
     }
 
