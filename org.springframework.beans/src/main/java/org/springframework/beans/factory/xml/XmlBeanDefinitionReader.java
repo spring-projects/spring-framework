@@ -18,7 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
@@ -333,9 +333,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
         // Try to set the systemId of the input source.
         // This will make the baseURL property of dom nodes available.
         try {
-          URL resourceUrl = r.getURL();
-          if (resourceUrl != null) {
-            inputSource.setSystemId(resourceUrl.toExternalForm());
+          URI resourceUri = r.getURI();
+          if (resourceUri != null) {
+            inputSource.setSystemId(resourceUri.toString());
           }
         } catch (IOException e) {
           // ignore
