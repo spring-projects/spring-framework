@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.io.AbstractFileResolvingResource;
+
 import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DefaultPropertiesPersister;
@@ -179,9 +179,7 @@ public abstract class PropertiesLoaderSupport {
 				InputStream is = null;
 				try {
 					is = location.getInputStream();
-
-					String filename = (location instanceof AbstractFileResolvingResource) ?
-							location.getFilename() : null;
+					String filename = location.getFilename();
 					if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
 						this.propertiesPersister.loadFromXml(props, is);
 					}
