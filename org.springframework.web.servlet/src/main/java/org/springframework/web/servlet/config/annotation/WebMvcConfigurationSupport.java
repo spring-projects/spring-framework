@@ -134,7 +134,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public abstract class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
+public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
 	private ServletContext servletContext;
 
@@ -419,9 +419,9 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 					String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
 					clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
 				} catch (ClassNotFoundException e) {
-					throw new BeanInitializationException("Could not find default validator");
+					throw new BeanInitializationException("Could not find default validator", e);
 				} catch (LinkageError e) {
-					throw new BeanInitializationException("Could not find default validator");
+					throw new BeanInitializationException("Could not find default validator", e);
 				}
 				validator = (Validator) BeanUtils.instantiate(clazz);
 			}
@@ -474,7 +474,7 @@ public abstract class WebMvcConfigurationSupport implements ApplicationContextAw
 	 * providing a list of resolvers.
 	 */
 	@Bean
-	public HandlerExceptionResolver handlerExceptionResolver() throws Exception {
+	public HandlerExceptionResolver handlerExceptionResolver() {
 		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<HandlerExceptionResolver>();
 		configureHandlerExceptionResolvers(exceptionResolvers);
 		
