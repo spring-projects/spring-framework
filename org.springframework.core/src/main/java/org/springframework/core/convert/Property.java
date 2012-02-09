@@ -142,10 +142,20 @@ public final class Property {
 	private MethodParameter resolveMethodParameter() {
 		MethodParameter read = resolveReadMethodParameter();
 		MethodParameter write = resolveWriteMethodParameter();
-		if (read == null && write == null) {
-			throw new IllegalStateException("Property is neither readable nor writeable");
+		if (write == null) {
+			if (read == null) {
+				throw new IllegalStateException("Property is neither readable nor writeable");
+			}
+			return read;
 		}
-		return (write != null ? write : read);
+		if (read != null) {
+			Class<?> readType = read.getParameterType();
+			Class<?> writeType = write.getParameterType();
+			if (!writeType.equals(readType) && writeType.isAssignableFrom(readType)) {
+				return read;
+			}
+		}
+		return write;
 	}
 	
 	private MethodParameter resolveReadMethodParameter() {
