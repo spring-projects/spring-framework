@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans;
 
-import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -30,9 +29,7 @@ import java.beans.IndexedPropertyDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.ExtendedBeanInfo.PropertyDescriptorComparator;
 
@@ -664,51 +661,12 @@ public class ExtendedBeanInfoTests {
 	}
 
 	@Test
-	public void reproSpr8806_y() throws IntrospectionException, SecurityException, NoSuchMethodException {
-		Introspector.getBeanInfo(LawLibrary.class);
-	}
-
-	@Ignore @Test
-	public void reproSpr8806_x() throws IntrospectionException, SecurityException, NoSuchMethodException {
-		BeanInfo info = Introspector.getBeanInfo(LawLibrary.class);
-		for (PropertyDescriptor d : info.getPropertyDescriptors()) {
-			if (d.getName().equals("book")) {
-				Method readMethod = d.getReadMethod();
-				Method writeMethod = d.getWriteMethod();
-				System.out.println(format("READ : %s.%s (bridge:%s)",
-						readMethod.getDeclaringClass().getSimpleName(), readMethod.getName(), readMethod.isBridge()));
-				System.out.println(format("WRITE: %s.%s (bridge:%s)",
-						writeMethod.getDeclaringClass().getSimpleName(), writeMethod.getName(), writeMethod.isBridge()));
-				new PropertyDescriptor("book", readMethod, writeMethod);
-			}
-		}
-
-		Method readMethod = LawLibrary.class.getMethod("getBook");
-		Method writeMethod = LawLibrary.class.getMethod("setBook", Book.class);
-
-		System.out.println(format("read : %s.%s (bridge:%s)",
-				readMethod.getDeclaringClass().getSimpleName(), readMethod.getName(), readMethod.isBridge()));
-		System.out.println(format("write: %s.%s (bridge:%s)",
-				writeMethod.getDeclaringClass().getSimpleName(), writeMethod.getName(), writeMethod.isBridge()));
-
-
-		System.out.println("--------");
-		for (Method m : LawLibrary.class.getMethods()) {
-			if (m.getDeclaringClass() == Object.class) continue;
-			System.out.println(format("%s %s.%s(%s) [bridge:%s]",
-					m.getReturnType().getSimpleName(), m.getDeclaringClass().getSimpleName(),
-					m.getName(),
-					m.getParameterTypes().length == 1 ? m.getParameterTypes()[0].getSimpleName() : "",
-					m.isBridge()));
-		}
-
-		//new ExtendedBeanInfo(info);
-	}
-
-	@Test
 	public void reproSpr8806() throws IntrospectionException {
-		BeanInfo bi = Introspector.getBeanInfo(LawLibrary.class);
-		new ExtendedBeanInfo(bi); // throws
+		// does not throw
+		Introspector.getBeanInfo(LawLibrary.class);
+
+		// does not throw after the changes introduced in SPR-8806
+		new ExtendedBeanInfo(Introspector.getBeanInfo(LawLibrary.class)); 
 	}
 
 	interface Book { }
