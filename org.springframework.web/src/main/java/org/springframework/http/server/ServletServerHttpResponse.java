@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,14 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 				for (String headerValue : entry.getValue()) {
 					this.servletResponse.addHeader(headerName, headerValue);
 				}
+			}
+			// HttpServletResponse exposes some headers as properties: we should include those if not already present
+			if (this.servletResponse.getContentType() == null && this.headers.getContentType() != null) {
+				this.servletResponse.setContentType(this.headers.getContentType().toString());
+			}
+			if (this.servletResponse.getCharacterEncoding() == null && this.headers.getContentType() != null &&
+					this.headers.getContentType().getCharSet() != null) {
+				this.servletResponse.setCharacterEncoding(this.headers.getContentType().getCharSet().name());
 			}
 			this.headersWritten = true;
 		}
