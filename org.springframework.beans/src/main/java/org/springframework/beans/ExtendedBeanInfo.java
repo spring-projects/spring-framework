@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -159,24 +160,27 @@ class ExtendedBeanInfo implements BeanInfo {
 			// the method is not a setter, but is it a getter?
 			for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
 				// have we already copied this read method to a property descriptor locally?
+				String propertyName = pd.getName();
+				Method readMethod = pd.getReadMethod();
+				Method mostSpecificReadMethod = ClassUtils.getMostSpecificMethod(readMethod, method.getDeclaringClass());
 				for (PropertyDescriptor existingPD : this.propertyDescriptors) {
-					if (method.equals(pd.getReadMethod())
-							&& existingPD.getName().equals(pd.getName())) {
+					if (method.equals(mostSpecificReadMethod)
+							&& existingPD.getName().equals(propertyName)) {
 						if (existingPD.getReadMethod() == null) {
 							// no -> add it now
-							this.addOrUpdatePropertyDescriptor(pd, pd.getName(), method, pd.getWriteMethod());
+							this.addOrUpdatePropertyDescriptor(pd, propertyName, method, pd.getWriteMethod());
 						}
 						// yes -> do not add a duplicate
 						continue ALL_METHODS;
 					}
 				}
-				if (method.equals(pd.getReadMethod())
+				if (method.equals(mostSpecificReadMethod)
 						|| (pd instanceof IndexedPropertyDescriptor && method.equals(((IndexedPropertyDescriptor) pd).getIndexedReadMethod()))) {
 					// yes -> copy it, including corresponding setter method (if any -- may be null)
 					if (pd instanceof IndexedPropertyDescriptor) {
-						this.addOrUpdatePropertyDescriptor(pd, pd.getName(), pd.getReadMethod(), pd.getWriteMethod(), ((IndexedPropertyDescriptor)pd).getIndexedReadMethod(), ((IndexedPropertyDescriptor)pd).getIndexedWriteMethod());
+						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, pd.getWriteMethod(), ((IndexedPropertyDescriptor)pd).getIndexedReadMethod(), ((IndexedPropertyDescriptor)pd).getIndexedWriteMethod());
 					} else {
-						this.addOrUpdatePropertyDescriptor(pd, pd.getName(), pd.getReadMethod(), pd.getWriteMethod());
+						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, pd.getWriteMethod());
 					}
 					continue ALL_METHODS;
 				}

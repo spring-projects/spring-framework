@@ -22,6 +22,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.beans.BeanInfo;
@@ -29,9 +30,11 @@ import java.beans.IndexedPropertyDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 
 import org.junit.Test;
 import org.springframework.beans.ExtendedBeanInfo.PropertyDescriptorComparator;
+import org.springframework.util.ClassUtils;
 
 import test.beans.TestBean;
 
@@ -660,13 +663,14 @@ public class ExtendedBeanInfoTests {
 		return false;
 	}
 
+
 	@Test
 	public void reproSpr8806() throws IntrospectionException {
 		// does not throw
 		Introspector.getBeanInfo(LawLibrary.class);
 
 		// does not throw after the changes introduced in SPR-8806
-		new ExtendedBeanInfo(Introspector.getBeanInfo(LawLibrary.class)); 
+		new ExtendedBeanInfo(Introspector.getBeanInfo(LawLibrary.class));
 	}
 
 	interface Book { }
@@ -691,5 +695,52 @@ public class ExtendedBeanInfoTests {
 
 	class LawLibrary extends Library implements TextBookOperations {
 		public LawBook getBook() { return null; }
+	}
+
+
+	/**
+	 * java.beans.Introspector returns the "wrong" declaring class for overridden read
+	 * methods, which in turn violates expectations in {@link ExtendedBeanInfo} regarding
+	 * method equality. Spring's {@link ClassUtils#getMostSpecificMethod(Method, Class)}
+	 * helps out here, and is now put into use in ExtendedBeanInfo as well
+	 */
+	@Test
+	public void demonstrateCauseSpr8949() throws IntrospectionException {
+		BeanInfo info = Introspector.getBeanInfo(B.class);
+
+		for (PropertyDescriptor pd : info.getPropertyDescriptors()) {
+			if ("targetMethod".equals(pd.getName())) {
+				Method readMethod = pd.getReadMethod();
+				assertTrue(readMethod.getDeclaringClass().equals(A.class)); // we expected B!
+
+				Method msReadMethod = ClassUtils.getMostSpecificMethod(readMethod, B.class);
+				assertTrue(msReadMethod.getDeclaringClass().equals(B.class)); // and now we get it.
+			}
+		}
+	}
+
+	@Test
+	public void cornerSpr8949() throws IntrospectionException {
+		BeanInfo bi = Introspector.getBeanInfo(B.class);
+		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
+
+		assertThat(hasReadMethodForProperty(bi, "targetMethod"), is(true));
+		assertThat(hasWriteMethodForProperty(bi, "targetMethod"), is(false));
+
+		assertThat(hasReadMethodForProperty(ebi, "targetMethod"), is(true));
+		assertThat(hasWriteMethodForProperty(ebi, "targetMethod"), is(false));
+	}
+
+	static class A {
+		public boolean isTargetMethod() {
+			return false;
+		}
+	}
+
+	static class B extends A {
+		@Override
+		public boolean isTargetMethod() {
+			return false;
+		}
 	}
 }
