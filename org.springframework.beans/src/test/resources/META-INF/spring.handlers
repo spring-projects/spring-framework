@@ -1,1 +1,2 @@
 http\://www.foo.com/schema/component=com.foo.ComponentNamespaceHandler
+testBaseUri=org.springframework.beans.factory.xml.XmlBeanDefinitionReaderTests$TestBaseUriNamespaceHandler

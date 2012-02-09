@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         targetNamespace="testBaseUri"
+         elementFormDefault="qualified"
+         attributeFormDefault="unqualified">
+
+   <xsd:element name="test">
+      <xsd:complexType>
+         <xsd:attribute name="id" type="xsd:ID"/>
+      </xsd:complexType>
+   </xsd:element>
+
+</xsd:schema>
