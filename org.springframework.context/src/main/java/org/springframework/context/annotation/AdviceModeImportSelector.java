@@ -73,8 +73,7 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 				"@%s is not present on importing class '%s' as expected",
 				annoType.getSimpleName(), importingClassMetadata.getClassName()));
 
-		AdviceMode adviceMode =
-				attributes.getEnum(this.getAdviceModeAttributeName(), AdviceMode.class);
+		AdviceMode adviceMode = attributes.getEnum(this.getAdviceModeAttributeName());
 
 		String[] imports = selectImports(adviceMode);
 		Assert.notNull(imports, String.format("Unknown AdviceMode: '%s'", adviceMode));

@@ -18,8 +18,6 @@ package org.springframework.context.annotation;
 
 import static org.springframework.context.weaving.AspectJWeavingEnabler.ASPECTJ_AOP_XML_RESOURCE;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -80,7 +78,8 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 			loadTimeWeaver = new DefaultContextLoadTimeWeaver(this.beanClassLoader);
 		}
 
-		switch (this.enableLTW.getEnum("aspectjWeaving", AspectJWeaving.class)) {
+		AspectJWeaving aspectJWeaving = this.enableLTW.getEnum("aspectjWeaving");
+		switch (aspectJWeaving) {
 			case DISABLED:
 				// AJ weaving is disabled -> do nothing
 				break;

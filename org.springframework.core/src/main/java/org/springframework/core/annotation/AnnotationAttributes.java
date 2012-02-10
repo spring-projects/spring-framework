@@ -92,16 +92,18 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		return doGet(attributeName, Boolean.class);
 	}
 
-	public int getInt(String attributeName) {
-		return doGet(attributeName, Integer.class);
-	}
-
-	public <E extends Enum<?>> E getEnum(String attributeName, Class<E> enumType) {
-		return doGet(attributeName, enumType);
+	@SuppressWarnings("unchecked")
+	public <N extends Number> N getNumber(String attributeName) {
+		return (N) doGet(attributeName, Integer.class);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> Class<? extends T> getClass(String attributeName, Class<T> expectedType) {
+	public <E extends Enum<?>> E getEnum(String attributeName) {
+		return (E) doGet(attributeName, Enum.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> Class<? extends T> getClass(String attributeName) {
 		return (Class<T>)doGet(attributeName, Class.class);
 	}
 

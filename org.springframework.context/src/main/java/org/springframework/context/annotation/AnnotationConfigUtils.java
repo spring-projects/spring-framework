@@ -232,8 +232,8 @@ public class AnnotationConfigUtils {
 		}
 		if (abd instanceof AbstractBeanDefinition) {
 			if (metadata.isAnnotated(Role.class.getName())) {
-				((AbstractBeanDefinition)abd).setRole(
-						attributesFor(metadata, Role.class).getInt("value"));
+				int role = attributesFor(metadata, Role.class).getNumber("value");
+				((AbstractBeanDefinition)abd).setRole(role);
 			}
 		}
 	}

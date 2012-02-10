@@ -70,15 +70,15 @@ class ComponentScanAnnotationParser {
 		Assert.notNull(this.resourceLoader, "ResourceLoader must not be null");
 		scanner.setResourceLoader(this.resourceLoader);
 
-		scanner.setBeanNameGenerator(BeanUtils.instantiateClass(
-				componentScan.getClass("nameGenerator", BeanNameGenerator.class)));
+		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
+		scanner.setBeanNameGenerator(BeanUtils.instantiateClass(generatorClass));
 
-		ScopedProxyMode scopedProxyMode = componentScan.getEnum("scopedProxy", ScopedProxyMode.class);
+		ScopedProxyMode scopedProxyMode = componentScan.getEnum("scopedProxy");
 		if (scopedProxyMode != ScopedProxyMode.DEFAULT) {
 			scanner.setScopedProxyMode(scopedProxyMode);
 		} else {
-			scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(
-					componentScan.getClass("scopeResolver", ScopeMetadataResolver.class)));
+			Class<? extends ScopeMetadataResolver> resolverClass = componentScan.getClass("scopeResolver");
+			scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(resolverClass));
 		}
 
 		scanner.setResourcePattern(componentScan.getString("resourcePattern"));
@@ -118,7 +118,7 @@ class ComponentScanAnnotationParser {
 
 	private List<TypeFilter> typeFiltersFor(AnnotationAttributes filterAttributes) {
 		List<TypeFilter> typeFilters = new ArrayList<TypeFilter>();
-		FilterType filterType = filterAttributes.getEnum("type", FilterType.class);
+		FilterType filterType = filterAttributes.getEnum("type");
 
 		for (Class<?> filterClass : filterAttributes.getClassArray("value")) {
 			switch (filterType) {

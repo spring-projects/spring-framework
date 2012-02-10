@@ -81,7 +81,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 					attributesFor(annDef.getMetadata(), this.scopeAnnotationType);
 			if (attributes != null) {
 				metadata.setScopeName(attributes.getString("value"));
-				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode", ScopedProxyMode.class);
+				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode");
 				if (proxyMode == null || proxyMode == ScopedProxyMode.DEFAULT) {
 					proxyMode = this.defaultProxyMode;
 				}

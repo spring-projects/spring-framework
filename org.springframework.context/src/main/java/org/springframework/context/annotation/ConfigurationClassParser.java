@@ -216,8 +216,7 @@ class ConfigurationClassParser {
 		if (metadata.isAnnotated(ImportResource.class.getName())) {
 			AnnotationAttributes importResource = attributesFor(metadata, ImportResource.class);
 			String[] resources = importResource.getStringArray("value");
-			Class<? extends BeanDefinitionReader> readerClass =
-					importResource.getClass("reader", BeanDefinitionReader.class);
+			Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
 			for (String resource : resources) {
 				configClass.addImportedResource(resource, readerClass);
 			}

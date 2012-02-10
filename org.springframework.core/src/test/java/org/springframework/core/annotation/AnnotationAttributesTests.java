@@ -55,11 +55,11 @@ public class AnnotationAttributesTests {
 		assertThat(a.getStringArray("names"), equalTo(new String[] { "dave", "frank", "hal" }));
 		assertThat(a.getBoolean("bool1"), equalTo(true));
 		assertThat(a.getBoolean("bool2"), equalTo(false));
-		assertThat(a.getEnum("color", Color.class), equalTo(Color.RED));
-		assertTrue(a.getClass("clazz", Number.class).equals(Integer.class));
+		assertThat(a.<Color>getEnum("color"), equalTo(Color.RED));
+		assertTrue(a.getClass("clazz").equals(Integer.class));
 		assertThat(a.getClassArray("classes"), equalTo(new Class[] { Number.class, Short.class, Integer.class }));
-		assertThat(a.getInt("number"), equalTo(42));
-		assertThat(a.getAnnotation("anno").getInt("value"), equalTo(10));
+		assertThat(a.<Integer>getNumber("number"), equalTo(42));
+		assertThat(a.getAnnotation("anno").<Integer>getNumber("value"), equalTo(10));
 		assertThat(a.getAnnotationArray("annoArray")[0].getString("name"), equalTo("algernon"));
 	}
 
@@ -68,13 +68,13 @@ public class AnnotationAttributesTests {
 		AnnotationAttributes a = new AnnotationAttributes();
 		a.put("color", "RED");
 		try {
-			a.getEnum("", Color.class);
+			a.getEnum("");
 			fail();
 		} catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), equalTo("attributeName must not be null or empty"));
 		}
 		try {
-			a.getEnum(null, Color.class);
+			a.getEnum(null);
 			fail();
 		} catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), equalTo("attributeName must not be null or empty"));
@@ -86,7 +86,7 @@ public class AnnotationAttributesTests {
 		AnnotationAttributes a = new AnnotationAttributes();
 		a.put("color", "RED");
 		try {
-			a.getEnum("colour", Color.class);
+			a.getEnum("colour");
 			fail();
 		} catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), equalTo("Attribute 'colour' not found"));
@@ -98,11 +98,11 @@ public class AnnotationAttributesTests {
 		AnnotationAttributes a = new AnnotationAttributes();
 		a.put("color", "RED");
 		try {
-			a.getEnum("color", Color.class);
+			a.getEnum("color");
 			fail();
 		} catch (IllegalArgumentException ex) {
 			String expected =
-					"Attribute 'color' is of type [String], but [Color] was expected";
+					"Attribute 'color' is of type [String], but [Enum] was expected";
 			assertThat(ex.getMessage().substring(0, expected.length()), equalTo(expected));
 		}
 	}

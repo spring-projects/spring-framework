@@ -46,7 +46,7 @@ public class ProxyAsyncConfiguration extends AbstractAsyncConfiguration {
 
 		AsyncAnnotationBeanPostProcessor bpp = new AsyncAnnotationBeanPostProcessor();
 
-		Class<? extends Annotation> customAsyncAnnotation = enableAsync.getClass("annotation", Annotation.class);
+		Class<? extends Annotation> customAsyncAnnotation = enableAsync.getClass("annotation");
 		if (customAsyncAnnotation != AnnotationUtils.getDefaultValue(EnableAsync.class, "annotation")) {
 			bpp.setAsyncAnnotationType(customAsyncAnnotation);
 		}
@@ -56,8 +56,7 @@ public class ProxyAsyncConfiguration extends AbstractAsyncConfiguration {
 		}
 
 		bpp.setProxyTargetClass(this.enableAsync.getBoolean("proxyTargetClass"));
-
-		bpp.setOrder(this.enableAsync.getInt("order"));
+		bpp.setOrder(this.enableAsync.<Integer>getNumber("order"));
 
 		return bpp;
 	}

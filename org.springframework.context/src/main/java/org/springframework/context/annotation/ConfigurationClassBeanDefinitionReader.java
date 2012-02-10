@@ -198,7 +198,7 @@ class ConfigurationClassBeanDefinitionReader {
 		// consider role
 		AnnotationAttributes role = attributesFor(metadata, Role.class);
 		if (role != null) {
-			beanDef.setRole(role.getInt("value"));
+			beanDef.setRole(role.<Integer>getNumber("value"));
 		}
 
 		// consider name and any aliases
@@ -246,7 +246,7 @@ class ConfigurationClassBeanDefinitionReader {
 			}
 		}
 
-		Autowire autowire = bean.getEnum("autowire", Autowire.class);
+		Autowire autowire = bean.getEnum("autowire");
 		if (autowire.isAutowire()) {
 			beanDef.setAutowireMode(autowire.value());
 		}
@@ -266,7 +266,7 @@ class ConfigurationClassBeanDefinitionReader {
 		AnnotationAttributes scope = attributesFor(metadata, Scope.class);
 		if (scope != null) {
 			beanDef.setScope(scope.getString("value"));
-			proxyMode = scope.getEnum("proxyMode", ScopedProxyMode.class);
+			proxyMode = scope.getEnum("proxyMode");
 			if (proxyMode == ScopedProxyMode.DEFAULT) {
 				proxyMode = ScopedProxyMode.NO;
 			}
