@@ -111,9 +111,9 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 					this.servletRequest.getCharacterEncoding() != null) {
 				MediaType oldContentType = this.headers.getContentType();
 				Charset charSet = Charset.forName(this.servletRequest.getCharacterEncoding());
-                Map<String, String> params = new HashMap<String, String>(oldContentType.getParameters());
-                params.put("charset", charSet.toString());
-                MediaType newContentType = new MediaType(oldContentType.getType(), oldContentType.getSubtype(), params);
+				Map<String, String> params = new HashMap<String, String>(oldContentType.getParameters());
+				params.put("charset", charSet.toString());
+				MediaType newContentType = new MediaType(oldContentType.getType(), oldContentType.getSubtype(), params);
 				this.headers.setContentType(newContentType);
 			}
 			if (this.headers.getContentLength() == -1 && this.servletRequest.getContentLength() != -1) {
