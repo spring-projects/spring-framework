@@ -281,7 +281,6 @@ public class MethodParameter {
 	 * @param annotationType the annotation type to look for
 	 * @return the annotation object, or <code>null</code> if not found
 	 */
-	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
 		return getAnnotatedElement().getAnnotation(annotationType);
 	}

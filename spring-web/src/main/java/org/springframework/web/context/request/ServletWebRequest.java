@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,12 +87,10 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return getResponse();
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T getNativeRequest(Class<T> requiredType) {
 		return WebUtils.getNativeRequest(getRequest(), requiredType);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T getNativeResponse(Class<T> requiredType) {
 		return WebUtils.getNativeResponse(getResponse(), requiredType);
 	}
@@ -102,13 +100,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return getRequest().getHeader(headerName);
 	}
 
-	@SuppressWarnings("unchecked")
 	public String[] getHeaderValues(String headerName) {
 		String[] headerValues = StringUtils.toStringArray(getRequest().getHeaders(headerName));
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Iterator<String> getHeaderNames() {
 		return CollectionUtils.toIterator(getRequest().getHeaderNames());
 	}
@@ -121,12 +117,10 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return getRequest().getParameterValues(paramName);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Iterator<String> getParameterNames() {
 		return CollectionUtils.toIterator(getRequest().getParameterNames());
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<String, String[]> getParameterMap() {
 		return getRequest().getParameterMap();
 	}

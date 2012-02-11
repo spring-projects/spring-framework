@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,6 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * (if necessary for proxy creation).
 	 * @return the proxy object
 	 */
-	@SuppressWarnings("unchecked")
 	public Object getProxy() {
 		return createAopProxy().getProxy();
 	}
@@ -107,7 +106,6 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * (or <code>null</code> for the low-level proxy facility's default)
 	 * @return the proxy object
 	 */
-	@SuppressWarnings("unchecked")
 	public Object getProxy(ClassLoader classLoader) {
 		return createAopProxy().getProxy(classLoader);
 	}
