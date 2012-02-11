@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,6 @@ public class DestructionAwareAttributeHolder implements Serializable {
 	 *            the name of the attribute to be returned
 	 * @return the attribute value or <code>null</code> if not available
 	 */
-	@SuppressWarnings("unchecked")
 	public Object getAttribute(String name) {
 		return attributes.get(name);
 	}
@@ -75,7 +74,6 @@ public class DestructionAwareAttributeHolder implements Serializable {
 	 * @return any previously object stored under the same name, if any,
 	 *         <code>null</code> otherwise
 	 */
-	@SuppressWarnings("unchecked")
 	public Object setAttribute(String name, Object value) {
 		return attributes.put(name, value);
 	}
@@ -101,7 +99,6 @@ public class DestructionAwareAttributeHolder implements Serializable {
 	 * @return the removed object, or <code>null</code> if no object was present
 	 * @see #registerDestructionCallback
 	 */
-	@SuppressWarnings("unchecked")
 	public Object removeAttribute(String name) {
 		Object value = attributes.remove(name);
 
