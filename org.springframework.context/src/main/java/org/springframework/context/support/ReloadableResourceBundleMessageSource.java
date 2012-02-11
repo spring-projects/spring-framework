@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * @see java.util.ResourceBundle
 	 */
 	public void setBasename(String basename) {
-		setBasenames(new String[] {basename});
+		setBasenames(basename);
 	}
 
 	/**
@@ -153,7 +153,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * @see #setBasename
 	 * @see java.util.ResourceBundle
 	 */
-	public void setBasenames(String[] basenames) {
+	public void setBasenames(String... basenames) {
 		if (basenames != null) {
 			this.basenames = new String[basenames.length];
 			for (int i = 0; i < basenames.length; i++) {
