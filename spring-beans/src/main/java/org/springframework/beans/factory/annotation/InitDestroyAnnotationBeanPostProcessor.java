@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,20 +247,28 @@ public class InitDestroyAnnotationBeanPostProcessor
 		public LifecycleMetadata(Class<?> targetClass, Collection<LifecycleElement> initMethods,
 				Collection<LifecycleElement> destroyMethods) {
 
-			this.initMethods = Collections.synchronizedSet(new LinkedHashSet<LifecycleElement>());
-			for (LifecycleElement element : initMethods) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found init method on class [" + targetClass.getName() + "]: " + element);
+			if (!initMethods.isEmpty()) {
+				this.initMethods = Collections.synchronizedSet(new LinkedHashSet<LifecycleElement>(initMethods.size()));
+				for (LifecycleElement element : initMethods) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found init method on class [" + targetClass.getName() + "]: " + element);
+					}
+					this.initMethods.add(element);
 				}
-				this.initMethods.add(element);
+			} else {
+				this.initMethods = Collections.emptySet();
 			}
 
-			this.destroyMethods = Collections.synchronizedSet(new LinkedHashSet<LifecycleElement>());
-			for (LifecycleElement element : destroyMethods) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found destroy method on class [" + targetClass.getName() + "]: " + element);
+			if (!destroyMethods.isEmpty()) {
+				this.destroyMethods = Collections.synchronizedSet(new LinkedHashSet<LifecycleElement>(destroyMethods.size()));
+				for (LifecycleElement element : destroyMethods) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found destroy method on class [" + targetClass.getName() + "]: " + element);
+					}
+					this.destroyMethods.add(element);
 				}
-				this.destroyMethods.add(element);
+			} else {
+				this.destroyMethods = Collections.emptySet();
 			}
 		}
 
