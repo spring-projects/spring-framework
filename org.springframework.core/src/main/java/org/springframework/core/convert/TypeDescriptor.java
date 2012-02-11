@@ -547,13 +547,12 @@ public class TypeDescriptor {
 		if (!ObjectUtils.nullSafeEquals(getType(), other.getType())) {
 			return false;
 		}
-		Annotation[] ann = getAnnotations();
-		Annotation[] otherAnn = other.getAnnotations();
-		if (ann.length != otherAnn.length) {
+		Annotation[] annotations = getAnnotations();
+		if (annotations.length != other.getAnnotations().length) {
 			return false;
 		}
-		for (int i = 0; i < ann.length; i++) {
-			if (!ann[i].annotationType().equals(otherAnn[i].annotationType())) {
+		for (Annotation ann : annotations) {
+			if (other.getAnnotation(ann.annotationType()) == null) {
 				return false;
 			}
 		}
