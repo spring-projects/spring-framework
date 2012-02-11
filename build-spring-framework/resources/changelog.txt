@@ -6,11 +6,13 @@ http://www.springsource.org
 Changes in version 3.1.1 (2012-02-13)
 -------------------------------------
 
-* official support for Hibernate 4.0 GA (as released in the meantime)
+* official support for Hibernate 4.0 GA as well as Hibernate 4.1
 * JBossNativeJdbcExtractor is compatible with JBoss AS 7 as well
 * restored JBossLoadTimeWeaver compatibility with JBoss AS 5.1
 * Provider injection works with generically typed collections of beans as well
+* @ActiveProfiles mechanism in test context framework works with @ImportResource as well
 * context:property-placeholder's "file-encoding" attribute value is being applied correctly
+* clarified Resource's "getFilename" method to return null if resource type does not have a filename
 * optimized converter lookup in GenericConversionService to avoid contention in JDK proxy check
 * DataBinder correctly handles ParseException from Formatter for String->String case
 * CacheNamespaceHandler actually parses cache:annotation-driven's "key-generator" attribute
