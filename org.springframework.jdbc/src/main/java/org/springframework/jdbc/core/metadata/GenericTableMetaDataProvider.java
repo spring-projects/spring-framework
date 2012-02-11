@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,8 +181,13 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 				setGeneratedKeysColumnNameArraySupported(false);
 			}
 			else {
-				logger.debug("GeneratedKeysColumnNameArray is supported for " + databaseProductName);
-				setGeneratedKeysColumnNameArraySupported(true);
+				if (isGetGeneratedKeysSupported()) {
+					logger.debug("GeneratedKeysColumnNameArray is supported for " + databaseProductName);
+					setGeneratedKeysColumnNameArraySupported(true);
+				}
+				else {
+					setGeneratedKeysColumnNameArraySupported(false);
+				}
 			}
 		}
 		catch (SQLException se) {
@@ -307,7 +312,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 				tmd.setTableName(tables.getString("TABLE_NAME"));
 				tmd.setType(tables.getString("TABLE_TYPE"));
 				if (tmd.getSchemaName() == null) {
-					tableMeta.put(userName.toUpperCase(), tmd);
+					tableMeta.put(userName != null ? userName.toUpperCase() : "", tmd);
 				}
 				else {
 					tableMeta.put(tmd.getSchemaName().toUpperCase(), tmd);
@@ -335,7 +340,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			if (schemaName == null) {
 				tmd = tableMeta.get(getDefaultSchema());
 				if (tmd == null) {
-					tmd = tableMeta.get(userName.toUpperCase());
+					tmd = tableMeta.get(userName != null ? userName.toUpperCase() : "");
 				}
 				if (tmd == null) {
 					tmd = tableMeta.get("PUBLIC");
