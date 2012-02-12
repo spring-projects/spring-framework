@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.jdbc.support;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 import javax.sql.DataSource;
@@ -130,7 +131,7 @@ public class SQLErrorCodesFactory {
 			logger.warn("Error loading SQL error codes from config file", ex);
 			errorCodes = Collections.emptyMap();
 		}
-
+		
 		this.errorCodesMap = errorCodes;
 	}
 	
@@ -159,7 +160,7 @@ public class SQLErrorCodesFactory {
 	 */
 	public SQLErrorCodes getErrorCodes(String dbName) {
 		Assert.notNull(dbName, "Database product name must not be null");
-
+		
 		SQLErrorCodes sec = this.errorCodesMap.get(dbName);
 		if (sec == null) {
 			for (SQLErrorCodes candidate : this.errorCodesMap.values()) {
@@ -170,6 +171,7 @@ public class SQLErrorCodesFactory {
 			}
 		}
 		if (sec != null) {
+			checkSqlExceptionTranslatorRegistry(dbName, sec);
 			if (logger.isDebugEnabled()) {
 				logger.debug("SQL error codes for '" + dbName + "' found");
 			}
@@ -244,6 +246,26 @@ public class SQLErrorCodesFactory {
 			this.dataSourceCache.put(dataSource, sec);
 			return sec;
 		}
+	}
+
+	private void checkSqlExceptionTranslatorRegistry(String dbName, SQLErrorCodes dbCodes) {
+		// Check the custom sql exception translator registry for any entries
+		SQLExceptionTranslator customTranslator =
+				CustomSQLExceptionTranslatorRegistry.getInstance().findSqlExceptionTranslatorForDatabase(dbName);
+		if (customTranslator != null) {
+			if (dbCodes.getCustomSqlExceptionTranslator() != null) {
+				logger.warn("Overriding already defined custom translator '" +
+						dbCodes.getCustomSqlExceptionTranslator().getClass().getSimpleName() +
+						" with '" + customTranslator.getClass().getSimpleName() +
+						"' found in the CustomSQLExceptionTranslatorRegistry for database " + dbName);
+			}
+			else {
+				logger.info("Using custom translator '" + customTranslator.getClass().getSimpleName() +
+						"' found in the CustomSQLExceptionTranslatorRegistry for database " + dbName);
+			}
+			dbCodes.setCustomSqlExceptionTranslator(customTranslator);
+		}
+		
 	}
 
 }
