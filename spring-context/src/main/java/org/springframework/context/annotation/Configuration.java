@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Indicates that a class declares one or more @{@link Bean} methods and may be processed
+ * Indicates that a class declares one or more {@link Bean @Bean} methods and may be processed
  * by the Spring container to generate bean definitions and service requests for those
  * beans at runtime, for example:
  * <pre class="code">
@@ -76,14 +76,14 @@ import org.springframework.stereotype.Component;
  * post processors that facilitate handling {@code @Configuration} classes.
  *
  * <h3>Via component scanning</h3>
- * <p>{@code @Configuration} is meta-annotated with @{@link Component}, therefore
+ * <p>{@code @Configuration} is meta-annotated with {@link Component @Component}, therefore
  * {@code @Configuration} classes are candidates for component scanning (typically using
  * Spring XML's {@code <context:component-scan/>} element) and therefore may also take
- * advantage of @{@link Autowired}/@{@link Inject} at the field and method level (but not
- * at the constructor level).
+ * advantage of {@link Autowired @Autowired}/{@link javax.inject.Inject @Inject}
+ * at the field and method level (but not at the constructor level).
  * <p>{@code @Configuration} classes may not only be bootstrapped using
  * component scanning, but may also themselves <em>configure</em> component scanning using
- * the @{@link ComponentScan} annotation:
+ * the {@link ComponentScan @ComponentScan} annotation:
  * <pre class="code">
  * &#064;Configuration
  * &#064;ComponentScan("com.acme.app.services")
@@ -91,7 +91,7 @@ import org.springframework.stereotype.Component;
  *     // various &#064;Bean definitions ...
  * }</pre>
  *
- * See @{@link ComponentScan} Javadoc for details.
+ * See {@link ComponentScan @ComponentScan} Javadoc for details.
  * 
  *
  * <h2>Working with externalized values</h2>
@@ -115,7 +115,8 @@ import org.springframework.stereotype.Component;
  *
  * Properties resolved through the {@code Environment} reside in one or more "property
  * source" objects, and {@code @Configuration} classes may contribute property sources to
- * the {@code Environment} object using the @{@link PropertySources} annotation:
+ * the {@code Environment} object using
+ * the {@link org.springframework.core.env.PropertySources @PropertySources} annotation:
  * <pre class="code">
  * &#064;Configuration
  * &#064;PropertySource("classpath:/com/acme/app.properties")
@@ -129,11 +130,11 @@ import org.springframework.stereotype.Component;
  * }</pre>
  *
  * See {@link org.springframework.core.env.Environment Environment}
- * and @{@link PropertySource} Javadoc for further details.
+ * and {@link PropertySource @PropertySource} Javadoc for further details.
  * 
  * <h3>Using the {@code @Value} annotation</h3>
  * Externalized values may be 'wired into' {@code @Configuration} classes using
- * the @{@link Value} annotation:
+ * the {@link Value @Value} annotation:
  * <pre class="code">
  * &#064;Configuration
  * &#064;PropertySource("classpath:/com/acme/app.properties")
@@ -151,13 +152,13 @@ import org.springframework.stereotype.Component;
  * PropertySourcesPlaceholderConfigurer}, usually enabled via XML with
  * {@code <context:property-placeholder/>}.  See the section below on composing
  * {@code @Configuration} classes with Spring XML using {@code @ImportResource},
- * see @{@link Value} Javadoc, and see @{@link Bean} Javadoc for details on working with
+ * see {@link Value @Value} Javadoc, and see {@link Bean @Bean} Javadoc for details on working with
  * {@code BeanFactoryPostProcessor} types such as
  * {@code PropertySourcesPlaceholderConfigurer}.
  *
  * <h2>Composing {@code @Configuration} classes</h2>
  * <h3>With the {@code @Import} annotation</h3>
- * <p>{@code @Configuration} classes may be composed using the @{@link Import} annotation,
+ * <p>{@code @Configuration} classes may be composed using the {@link Import @Import} annotation,
  * not unlike the way that {@code <import>} works in Spring XML. Because
  * {@code @Configuration} objects are managed as Spring beans within the container,
  * imported configurations may be injected using {@code @Autowired} or {@code @Inject}:
@@ -189,7 +190,7 @@ import org.springframework.stereotype.Component;
  * new AnnotationConfigApplicationContext(AppConfig.class);</pre>
  *
  * <h3>With the {@code @Profile} annotation</h3>
- * {@code @Configuration} classes may be marked with the @{@link Profile} annotation to 
+ * {@code @Configuration} classes may be marked with the {@link Profile @Profile} annotation to 
  * indicate they should be processed only if a given profile or profiles are
  * <em>active</em>:
  * <pre class="code">
@@ -211,14 +212,14 @@ import org.springframework.stereotype.Component;
  *     }
  * }</pre>
  *
- * See @{@link Profile} and {@link org.springframework.core.env.Environment Environment}
+ * See {@link Profile @Profile} and {@link org.springframework.core.env.Environment Environment}
  * Javadoc for further details.
  *
  * <h3>With Spring XML using the {@code @ImportResource} annotation</h3>
  * As mentioned above, {@code @Configuration} classes may be declared as regular Spring
  * {@code <bean>} definitions within Spring XML files. It is also possible to
  * import Spring XML configuration files into {@code @Configuration} classes using
- * the @{@link ImportResource} annotation. Bean definitions imported from XML can be
+ * the {@link ImportResource @ImportResource} annotation. Bean definitions imported from XML can be
  * injected using {@code @Autowired} or {@code @Import}:
  * <pre class="code">
  * &#064;Configuration
@@ -267,7 +268,7 @@ import org.springframework.stereotype.Component;
  * <h2>Configuring lazy initialization</h2>
  * <p>By default, {@code @Bean} methods will be <em>eagerly instantiated</em> at container
  * bootstrap time.  To avoid this, {@code @Configuration} may be used in conjunction with
- * the @{@link Lazy} annotation to indicate that all {@code @Bean} methods declared within
+ * the {@link Lazy @Lazy} annotation to indicate that all {@code @Bean} methods declared within
  * the class are by default lazily initialized. Note that {@code @Lazy} may be used on
  * individual {@code @Bean} methods as well.
  *
@@ -309,7 +310,7 @@ import org.springframework.stereotype.Component;
  *    <li>&#064;Configuration classes must be non-final
  *    <li>&#064;Configuration classes must be non-local (may not be declared within a method)
  *    <li>&#064;Configuration classes must have a default/no-arg constructor and may not
- *        use @{@link Autowired} constructor parameters. Any nested configuration classes
+ *        use {@link Autowired @Autowired} constructor parameters. Any nested configuration classes
  *        must be {@code static}
  * </ul>
  *

@@ -50,9 +50,9 @@ import org.springframework.util.ObjectUtils;
  * 
  * @author Sam Brannen
  * @since 3.1
- * @see #processContextConfiguration()
- * @see #detectDefaultConfigurationClasses()
- * @see #loadBeanDefinitions()
+ * @see #processContextConfiguration(ContextConfigurationAttributes)
+ * @see #detectDefaultConfigurationClasses(Class)
+ * @see #loadBeanDefinitions(GenericApplicationContext, MergedContextConfiguration)
  */
 public class AnnotationConfigContextLoader extends AbstractGenericContextLoader {
 
@@ -72,9 +72,9 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * supplied configuration attributes. Otherwise, properties in the supplied
 	 * configuration attributes will not be modified.
 	 * @param configAttributes the context configuration attributes to process
-	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration()
+	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration(ContextConfigurationAttributes)
 	 * @see #isGenerateDefaultLocations()
-	 * @see #detectDefaultConfigurationClasses()
+	 * @see #detectDefaultConfigurationClasses(Class)
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && isGenerateDefaultLocations()) {

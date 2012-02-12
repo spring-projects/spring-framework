@@ -129,7 +129,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * The custom {@link RequestCondition} can be of any type so long as the 
 	 * same condition type is returned from all calls to this method in order
 	 * to ensure custom request conditions can be combined and compared. 
-	 * @param method the handler method for which to create the condition
+	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
 	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {

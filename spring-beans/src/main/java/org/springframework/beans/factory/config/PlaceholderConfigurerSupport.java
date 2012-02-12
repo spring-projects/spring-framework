@@ -36,8 +36,8 @@ import org.springframework.util.StringValueResolver;
  *
  *<pre class="code">{@code
  *<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"/>
- *    <property name="driverClassName" value="}${driver}{@code"/>
- *    <property name="url" value="jdbc:}${dbname}{@code"/>
+ *    <property name="driverClassName" value="}${driver}{@code "/>
+ *    <property name="url" value="jdbc:}${dbname}{@code "/>
  *</bean>
  *}</pre>
  *
@@ -76,7 +76,7 @@ import org.springframework.util.StringValueResolver;
  * <p>Example XML property with default value:
  *
  *<pre class="code">{@code
- *  <property name="url" value="jdbc:}${dbname:defaultdb}{@code"/>
+ *  <property name="url" value="jdbc:}${dbname:defaultdb}{@code "/>
  *}</pre>
  *
  * @author Chris Beams

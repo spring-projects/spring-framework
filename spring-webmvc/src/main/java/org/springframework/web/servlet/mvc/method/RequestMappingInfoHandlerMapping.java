@@ -57,7 +57,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * Check if the given RequestMappingInfo matches the current request and 
 	 * return a (potentially new) instance with conditions that match the 
 	 * current request -- for example with a subset of URL patterns.
-	 * @returns an info in case of a match; or {@code null} otherwise. 
+	 * @return an info in case of a match; or {@code null} otherwise. 
 	 */
 	@Override
 	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo info, HttpServletRequest request) {

@@ -228,7 +228,6 @@ public interface JdoOperations {
 	 * to rely on auto-flushing at transaction completion.
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#flush()
-	 * @see JdoDialect#flush(javax.jdo.PersistenceManager)
 	 */
 	void flush() throws DataAccessException;
 

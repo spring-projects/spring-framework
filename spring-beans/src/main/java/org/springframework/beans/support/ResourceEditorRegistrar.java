@@ -34,7 +34,6 @@ import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
-import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ContextResource;
@@ -71,7 +70,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.context.ApplicationContext
 	 * @deprecated as of Spring 3.1 in favor of
-	 * {@link #ResourceEditorRegistrar(ResourceLoader, Environment)}
+	 * {@link #ResourceEditorRegistrar(ResourceLoader, PropertyResolver)}
 	 */
 	@Deprecated
 	public ResourceEditorRegistrar(ResourceLoader resourceLoader) {

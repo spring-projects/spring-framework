@@ -22,7 +22,7 @@ import java.lang.reflect.Type;
  * Subinterface of {@link Marshaller} that has support for Java 5 generics.
  *
  * @author Arjen Poutsma
- * @sicne 3.0.1
+ * @since 3.0.1
  */
 public interface GenericMarshaller extends Marshaller {
 

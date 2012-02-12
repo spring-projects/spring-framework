@@ -56,7 +56,7 @@ public interface PropertyResolver {
 	 * Return the property value associated with the given key, or {@code null}
 	 * if the key cannot be resolved.
 	 * @param key the property name to resolve
-	 * @param T the expected type of the property value
+	 * @param targetType the expected type of the property value
 	 * @see #getRequiredProperty(String, Class)
 	 */
 	<T> T getProperty(String key, Class<T> targetType);
@@ -65,11 +65,11 @@ public interface PropertyResolver {
 	 * Return the property value associated with the given key, or
 	 * {@code defaultValue} if the key cannot be resolved.
 	 * @param key the property name to resolve
-	 * @param T the expected type of the property value
+	 * @param targetType the expected type of the property value
 	 * @param defaultValue the default value to return if no value is found
 	 * @see #getRequiredProperty(String, Class)
 	 */
-	<T> T getProperty(String string, Class<T> targetType, T defaultValue);
+	<T> T getProperty(String key, Class<T> targetType, T defaultValue);
 
 	/**
 	 * Convert the property value associated with the given key to a {@code Class}

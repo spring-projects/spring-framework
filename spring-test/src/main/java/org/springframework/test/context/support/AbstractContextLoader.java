@@ -39,7 +39,8 @@ import org.springframework.util.StringUtils;
  * <p>As of Spring 3.1, <code>AbstractContextLoader</code> also provides a basis
  * for all concrete implementations of the {@link SmartContextLoader} SPI. For
  * backwards compatibility with the {@code ContextLoader} SPI, 
- * {@link #processContextConfiguration()} delegates to {@link #processLocations()}. 
+ * {@link #processContextConfiguration(ContextConfigurationAttributes)} delegates
+ * to {@link #processLocations(Class, String...)}. 
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -59,7 +60,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 
 	/**
 	 * For backwards compatibility with the {@link ContextLoader} SPI, the
-	 * default implementation simply delegates to {@link #processLocations()},
+	 * default implementation simply delegates to {@link #processLocations(Class, String...)},
 	 * passing it the {@link ContextConfigurationAttributes#getDeclaringClass()
 	 * declaring class} and {@link ContextConfigurationAttributes#getLocations()
 	 * resource locations} retrieved from the supplied
@@ -70,7 +71,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * <p>Can be overridden in subclasses &mdash; for example, to process
 	 * configuration classes instead of resource locations.
 	 * @since 3.1
-	 * @see #processLocations()
+	 * @see #processLocations(Class, String...)
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(),
@@ -96,10 +97,10 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @return a processed array of application context resource locations
 	 * @since 2.5
 	 * @see #isGenerateDefaultLocations()
-	 * @see #generateDefaultLocations()
-	 * @see #modifyLocations()
-	 * @see org.springframework.test.context.ContextLoader#processLocations()
-	 * @see #processContextConfiguration()
+	 * @see #generateDefaultLocations(Class)
+	 * @see #modifyLocations(Class, String...)
+	 * @see org.springframework.test.context.ContextLoader#processLocations(Class, String...)
+	 * @see #processContextConfiguration(ContextConfigurationAttributes)
 	 */
 	public final String[] processLocations(Class<?> clazz, String... locations) {
 		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ? generateDefaultLocations(clazz)
@@ -189,14 +190,15 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	/**
 	 * Determine whether or not <em>default</em> resource locations should be
 	 * generated if the <code>locations</code> provided to
-	 * {@link #processLocations()} are <code>null</code> or empty.
+	 * {@link #processLocations(Class, String...)} are <code>null</code> or empty.
 	 * <p>As of Spring 3.1, the semantics of this method have been overloaded
 	 * to include detection of either default resource locations or default
 	 * configuration classes. Consequently, this method can also be used to 
 	 * determine whether or not <em>default</em> configuration classes should be
 	 * detected if the <code>classes</code> present in the
 	 * {@link ContextConfigurationAttributes configuration attributes} supplied
-	 * to {@link #processContextConfiguration()} are <code>null</code> or empty.
+	 * to {@link #processContextConfiguration(ContextConfigurationAttributes)}
+	 * are <code>null</code> or empty.
 	 * <p>Can be overridden by subclasses to change the default behavior.
 	 * @return always <code>true</code> by default
 	 * @since 2.5
@@ -211,7 +213,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * <p>Must be implemented by subclasses.
 	 * @return the resource suffix; should not be <code>null</code> or empty
 	 * @since 2.5
-	 * @see #generateDefaultLocations()
+	 * @see #generateDefaultLocations(Class)
 	 */
 	protected abstract String getResourceSuffix();
 

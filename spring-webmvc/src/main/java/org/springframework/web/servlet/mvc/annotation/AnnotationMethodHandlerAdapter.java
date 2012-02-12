@@ -443,7 +443,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	/**
 	 * This method always returns -1 since an annotated controller can have many methods,
 	 * each requiring separate lastModified calculations. Instead, an
-	 * @{@link RequestMapping}-annotated method can calculate the lastModified value, call
+	 * {@link RequestMapping}-annotated method can calculate the lastModified value, call
 	 * {@link org.springframework.web.context.request.WebRequest#checkNotModified(long)}
 	 * to check it, and return {@code null} if that returns {@code true}.
 	 * @see org.springframework.web.context.request.WebRequest#checkNotModified(long)

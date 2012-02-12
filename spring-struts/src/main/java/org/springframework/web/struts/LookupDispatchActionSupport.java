@@ -51,7 +51,6 @@ import org.springframework.web.util.WebUtils;
  * @see ContextLoaderPlugIn#SERVLET_CONTEXT_PREFIX
  * @see WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
  * @see org.springframework.web.context.ContextLoaderListener
- * @see org.springframework.web.context.ContextLoaderServlet
  * @see ActionSupport
  * @see DispatchActionSupport
  * @see MappingDispatchActionSupport

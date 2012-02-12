@@ -28,8 +28,9 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
- * Base class for dynamic {@link TargetSource} implementations that create new prototype
- * bean instances to support a pooling or new-instance-per-invocation strategy.
+ * Base class for dynamic {@link org.springframework.aop.TargetSource} implementations
+ * that create new prototype bean instances to support a pooling or
+ * new-instance-per-invocation strategy.
  *
  * <p>Such TargetSources must run in a {@link BeanFactory}, as it needs to
  * call the <code>getBean</code> method to create a new prototype instance.

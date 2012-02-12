@@ -44,7 +44,6 @@ public class BeanFactoryCacheOperationSourceAdvisor extends AbstractBeanFactoryP
 	 * Set the cache operation attribute source which is used to find cache
 	 * attributes. This should usually be identical to the source reference
 	 * set on the cache interceptor itself.
-	 * @see CacheInterceptor#setCacheAttributeSource
 	 */
 	public void setCacheOperationSource(CacheOperationSource cacheOperationSource) {
 		this.cacheOperationSource = cacheOperationSource;

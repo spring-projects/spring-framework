@@ -170,7 +170,6 @@ public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, Initi
 	 * @see #setTransactionConfigProperties
 	 * @see com.ibatis.sqlmap.client.SqlMapClient#getDataSource
 	 * @see SqlMapClientTemplate#setDataSource
-	 * @see SqlMapClientTemplate#queryForPaginatedList
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
