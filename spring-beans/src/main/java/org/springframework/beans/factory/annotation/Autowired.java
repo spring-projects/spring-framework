@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
  * a special case of such a general config method. Such config methods
  * do not have to be public.
  *
- * <p>In the case of multiple argument methods, the 'required' parameter is 
+ * <p>In the case of multiple argument methods, the 'required' parameter is
  * applicable for all arguments.
  *
  * <p>In case of a {@link java.util.Collection} or {@link java.util.Map}
@@ -52,8 +52,9 @@ import java.lang.annotation.Target;
  * BeanPostProcessor} which in turn means that you <em>cannot</em>
  * use {@code @Autowired} to inject references into
  * {@link org.springframework.beans.factory.config.BeanPostProcessor
- * BeanPostProcessor} or {@link BeanFactoryPostProcessor} types. Please
- * consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
+ * BeanPostProcessor} or
+ * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessor}
+ * types. Please consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
  * class (which, by default, checks for the presence of this annotation).
  *
  * @author Juergen Hoeller

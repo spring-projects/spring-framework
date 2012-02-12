@@ -20,7 +20,7 @@ package org.springframework.core.convert;
  * Thrown when a suitable converter could not be found in a conversion service.
  *
  * @author Keith Donald
- * @since 3.0 
+ * @since 3.0
  */
 @SuppressWarnings("serial")
 public final class ConverterNotFoundException extends ConversionException {
@@ -34,7 +34,6 @@ public final class ConverterNotFoundException extends ConversionException {
 	 * Creates a new conversion executor not found exception.
 	 * @param sourceType the source type requested to convert from
 	 * @param targetType the target type requested to convert to
-	 * @param message a descriptive message
 	 */
 	public ConverterNotFoundException(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		super("No converter found capable of converting from type " + sourceType + " to type " + targetType);

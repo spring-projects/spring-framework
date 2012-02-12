@@ -28,8 +28,8 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
  * @author Chris Beams
  * @since 2.5
  * @see ComponentScan
- * @see ComponentScan.IncludeFilter
- * @see ComponentScan.ExcludeFilter
+ * @see ComponentScan#includeFilters()
+ * @see ComponentScan#excludeFilters()
  * @see org.springframework.core.type.filter.TypeFilter
  */
 public enum FilterType {

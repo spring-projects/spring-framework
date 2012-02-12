@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,9 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
- * Base class for dynamic {@link TargetSource} implementations that create new prototype
- * bean instances to support a pooling or new-instance-per-invocation strategy.
+ * Base class for dynamic {@link org.springframework.aop.TargetSource} implementations
+ * that create new prototype bean instances to support a pooling or
+ * new-instance-per-invocation strategy.
  *
  * <p>Such TargetSources must run in a {@link BeanFactory}, as it needs to
  * call the <code>getBean</code> method to create a new prototype instance.

@@ -57,7 +57,7 @@ import java.util.concurrent.Callable;
  * As a consequence, such an argument will never be <code>null</code>.
  * <i>Note that session access may not be thread-safe, in particular in a
  * Servlet environment: Consider switching the
- * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter#setSynchronizeOnSession "synchronizeOnSession"}
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
  * flag to "true" if multiple requests are allowed to access a session concurrently.</i>
  * <li>{@link org.springframework.web.context.request.WebRequest} or
  * {@link org.springframework.web.context.request.NativeWebRequest}.
@@ -242,8 +242,7 @@ import java.util.concurrent.Callable;
  * @see SessionAttributes
  * @see InitBinder
  * @see org.springframework.web.context.request.WebRequest
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodMapping
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
  * @see org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping
  * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */

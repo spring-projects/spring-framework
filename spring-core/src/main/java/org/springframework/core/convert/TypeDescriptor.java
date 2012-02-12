@@ -74,7 +74,7 @@ public class TypeDescriptor {
 
 	/**
 	 * Create a new type descriptor from a {@link MethodParameter}.
-	 * Use this constructor when a source or target conversion point is a constructor parameter, method parameter, or method return value. 
+	 * Use this constructor when a source or target conversion point is a constructor parameter, method parameter, or method return value.
 	 * @param methodParameter the method parameter
 	 */
 	public TypeDescriptor(MethodParameter methodParameter) {
@@ -204,7 +204,7 @@ public class TypeDescriptor {
 	 * Create a new type descriptor for an object.
 	 * Use this factory method to introspect a source object before asking the conversion system to convert it to some another type.
 	 * If the provided object is null, returns null, else calls {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
-	 * @param object the source object
+	 * @param source the source object
 	 * @return the type descriptor
 	 */
 	public static TypeDescriptor forObject(Object source) {
@@ -287,7 +287,7 @@ public class TypeDescriptor {
 
 	/**
 	 * Returns true if an object of this type descriptor can be assigned to the location described by the given type descriptor.
-	 * For example, valueOf(String.class).isAssignableTo(valueOf(CharSequence.class)) returns true because a String value can be assigned to a CharSequence variable. 
+	 * For example, valueOf(String.class).isAssignableTo(valueOf(CharSequence.class)) returns true because a String value can be assigned to a CharSequence variable.
 	 * On the other hand, valueOf(Number.class).isAssignableTo(valueOf(Integer.class)) returns false because, while all Integers are Numbers, not all Numbers are Integers.
 	 * <p>
 	 * For arrays, collections, and maps, element and key/value types are checked if declared.
@@ -348,7 +348,7 @@ public class TypeDescriptor {
 	 * Narrows the {@link #getElementTypeDescriptor() elementType} property to the class of the provided collection or array element.
 	 * For example, if this describes a java.util.List&lt;java.lang.Number&lt; and the element argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
 	 * If this describes a java.util.List&lt;?&gt; and the element argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
-	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned. 
+	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned.
 	 * @param element the collection or array element
 	 * @return a element type descriptor, narrowed to the type of the provided element
 	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
@@ -383,7 +383,7 @@ public class TypeDescriptor {
 	 * Narrows the {@link #getMapKeyTypeDescriptor() mapKeyType} property to the class of the provided map key.
 	 * For example, if this describes a java.util.Map&lt;java.lang.Number, java.lang.String&lt; and the key argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
 	 * If this describes a java.util.Map&lt;?, ?&gt; and the key argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
-	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned. 
+	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned.
 	 * @param mapKey the map key
 	 * @return the map key type descriptor
 	 * @throws IllegalStateException if this type is not a java.util.Map.
@@ -409,10 +409,10 @@ public class TypeDescriptor {
 	 * Narrows the {@link #getMapValueTypeDescriptor() mapValueType} property to the class of the provided map value.
 	 * For example, if this describes a java.util.Map&lt;java.lang.String, java.lang.Number&lt; and the value argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer.
 	 * If this describes a java.util.Map&lt;?, ?&gt; and the value argument is a java.lang.Integer, the returned TypeDescriptor will be java.lang.Integer as well.
-	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned. 
+	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned.
 	 * @param mapValue the map value
 	 * @return the map value type descriptor
-	 * @throws IllegalStateException if this type is not a java.util.Map. 
+	 * @throws IllegalStateException if this type is not a java.util.Map.
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor(Object mapValue) {
 		return narrow(mapValue, getMapValueTypeDescriptor());		
