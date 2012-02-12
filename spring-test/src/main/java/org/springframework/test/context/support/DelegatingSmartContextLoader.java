@@ -34,7 +34,7 @@ import org.springframework.util.ObjectUtils;
  * {@code DelegatingSmartContextLoader} is an implementation of the {@link SmartContextLoader}
  * SPI that delegates to a set of <em>candidate</em> SmartContextLoaders (i.e.,
  * {@link GenericXmlContextLoader} and {@link AnnotationConfigContextLoader}) to
- * determine which context loader is appropriate for a given test class’s configuration.
+ * determine which context loader is appropriate for a given test class's configuration.
  * Each candidate is given a chance to {@link #processContextConfiguration process} the
  * {@link ContextConfigurationAttributes} for each class in the test class hierarchy that
  * is annotated with {@link ContextConfiguration @ContextConfiguration}, and the candidate
