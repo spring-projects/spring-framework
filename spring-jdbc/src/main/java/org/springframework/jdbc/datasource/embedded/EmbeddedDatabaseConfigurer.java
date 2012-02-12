@@ -29,7 +29,7 @@ public interface EmbeddedDatabaseConfigurer {
 	
 	/**
 	 * Configure the properties required to create and connect to the embedded database instance.
-	 * @param dataSource the data source to configure
+	 * @param properties connection properties to configure
 	 * @param databaseName the name of the test database
 	 */
 	void configureConnectionProperties(ConnectionProperties properties, String databaseName);

@@ -200,7 +200,7 @@ public class TypeDescriptor {
 	 * Create a new type descriptor for an object.
 	 * Use this factory method to introspect a source object before asking the conversion system to convert it to some another type.
 	 * If the provided object is null, returns null, else calls {@link #valueOf(Class)} to build a TypeDescriptor from the object's class.
-	 * @param object the source object
+	 * @param source the source object
 	 * @return the type descriptor
 	 */
 	public static TypeDescriptor forObject(Object source) {

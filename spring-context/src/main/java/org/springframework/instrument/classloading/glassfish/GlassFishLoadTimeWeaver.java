@@ -23,7 +23,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link LoadTimeWeaver} implementation for GlassFish's {@link InstrumentableClassLoader}.
+ * {@link LoadTimeWeaver} implementation for GlassFish's
+ * {@link org.glassfish.api.deployment.InstrumentableClassLoader InstrumentableClassLoader}.
  * 
  * <p>As of Spring 3.0, GlassFish V3 is supported as well.
  *
@@ -49,7 +50,8 @@ public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 	 * Creates a new instance of the <code>GlassFishLoadTimeWeaver</code> class.
 	 * @param classLoader the specific {@link ClassLoader} to use; must not be <code>null</code>
 	 * @throws IllegalArgumentException if the supplied <code>classLoader</code> is <code>null</code>;
-	 * or if the supplied <code>classLoader</code> is not an {@link InstrumentableClassLoader}
+	 * or if the supplied <code>classLoader</code> is not an
+	 * {@link org.glassfish.api.deployment.InstrumentableClassLoader InstrumentableClassLoader}
 	 */
 	public GlassFishLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");

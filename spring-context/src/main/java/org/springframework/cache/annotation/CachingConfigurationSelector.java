@@ -30,7 +30,7 @@ import org.springframework.context.annotation.AutoProxyRegistrar;
  * @since 3.1
  * @see EnableCaching
  * @see ProxyCachingConfiguration
- * @see AnnotationConfigUtils.CACHE_ASPECT_CONFIGURATION_CLASS_NAME
+ * @see AnnotationConfigUtils#CACHE_ASPECT_CONFIGURATION_CLASS_NAME
  */
 public class CachingConfigurationSelector extends AdviceModeImportSelector<EnableCaching> {
 

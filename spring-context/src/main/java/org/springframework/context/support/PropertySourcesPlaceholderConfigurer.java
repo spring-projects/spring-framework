@@ -108,7 +108,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	 * <p>Processing occurs by replacing ${...} placeholders in bean definitions by resolving each
 	 * against this configurer's set of {@link PropertySources}, which includes:
 	 * <ul>
-	 * <li>all {@linkplain Environment#getPropertySources environment property sources}, if an
+	 * <li>all {@linkplain org.springframework.core.env.ConfigurableEnvironment#getPropertySources environment property sources}, if an
 	 * {@code Environment} {@linkplain #setEnvironment is present}
 	 * <li>{@linkplain #mergeProperties merged local properties}, if {@linkplain #setLocation any}
 	 * {@linkplain #setLocations have} {@linkplain #setProperties been}

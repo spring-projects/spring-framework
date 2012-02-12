@@ -346,7 +346,6 @@ public class MappingJacksonMessageConverter implements MessageConverter {
 	 * <p>The default implementation parses the configured type id property name
 	 * and consults the configured type id mapping. This can be overridden with
 	 * a different strategy, e.g. doing some heuristics based on message origin.
-	 * @param object the payload object to set a type id for
 	 * @param message the JMS Message to set the type id on
 	 * @throws JMSException if thrown by JMS methods
 	 * @see #setTypeIdOnMessage(Object, javax.jms.Message)

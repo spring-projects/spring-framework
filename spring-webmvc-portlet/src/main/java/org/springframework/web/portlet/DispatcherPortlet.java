@@ -963,7 +963,6 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * Return the HandlerExecutionChain for this request.
 	 * Try all handler mappings in order.
 	 * @param request current portlet request
-	 * @param cache whether to cache the HandlerExecutionChain in a request attribute
 	 * @return the HandlerExceutionChain, or null if no handler could be found
 	 */
 	protected HandlerExecutionChain getHandler(PortletRequest request) throws Exception {

@@ -29,7 +29,8 @@ import java.lang.annotation.Target;
  *
  * @author Arjen Poutsma
  * @see RequestMapping
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
+ * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  * @since 3.0
  */
 @Target(ElementType.PARAMETER)

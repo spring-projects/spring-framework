@@ -1012,8 +1012,8 @@ public interface JdbcOperations {
 	 * Each batch should be of size indicated in 'batchSize'.
 	 * @param sql the SQL statement to execute.
 	 * @param batchArgs the List of Object arrays containing the batch of arguments for the query
-	 * @param argTypes SQL types of the arguments
-	 * (constants from <code>java.sql.Types</code>)
+	 * @param batchSize batch size
+	 * @param pss ParameterizedPreparedStatementSetter to use
 	 * @return an array containing for each batch another array containing the numbers of rows affected 
 	 * by each update in the batch
 	 */

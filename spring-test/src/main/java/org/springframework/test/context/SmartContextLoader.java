@@ -110,7 +110,8 @@ public interface SmartContextLoader extends ContextLoader {
 	 * @return a new application context
 	 * @throws Exception if context loading failed
 	 * @see #processContextConfiguration(ContextConfigurationAttributes)
-	 * @see org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors()
+	 * @see org.springframework.context.annotation.AnnotationConfigUtils
+	 * #registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)
 	 * @see org.springframework.test.context.MergedContextConfiguration#getActiveProfiles()
 	 * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment()
 	 */

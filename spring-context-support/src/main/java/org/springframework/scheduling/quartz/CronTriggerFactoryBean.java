@@ -56,9 +56,7 @@ import org.springframework.util.ReflectionUtils;
  * @since 3.1
  * @see #setName
  * @see #setGroup
- * @see #setStartTime
- * @see #setJobName
- * @see #setJobGroup
+ * @see #setStartDelay
  * @see #setJobDetail
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean#setTriggers
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean#setJobDetails

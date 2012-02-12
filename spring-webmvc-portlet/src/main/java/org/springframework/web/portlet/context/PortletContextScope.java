@@ -54,7 +54,7 @@ public class PortletContextScope implements Scope, DisposableBean {
 
 	/**
 	 * Create a new Scope wrapper for the given PortletContext.
-	 * @param PortletContext the PortletContext to wrap
+	 * @param portletContext the PortletContext to wrap
 	 */
 	public PortletContextScope(PortletContext portletContext) {
 		Assert.notNull(portletContext, "PortletContext must not be null");

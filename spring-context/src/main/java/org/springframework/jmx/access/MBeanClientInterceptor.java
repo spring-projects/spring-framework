@@ -526,7 +526,7 @@ public class MBeanClientInterceptor
 	 * Convert the given result object (from attribute access or operation invocation)
 	 * to the specified target class for returning from the proxy method.
 	 * @param result the result object as returned by the <code>MBeanServer</code>
-	 * @param targetClass the result type of the proxy method that's been invoked
+	 * @param parameter the method parameter of the proxy method that's been invoked
 	 * @return the converted result object, or the passed-in object if no conversion
 	 * is necessary
 	 */

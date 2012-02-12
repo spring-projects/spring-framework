@@ -76,7 +76,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 	/**
 	 * Create a new MethodValidationInterceptor using the given JSR-303 Validator.
-	 * @param validatorFactory the JSR-303 Validator to use
+	 * @param validator the JSR-303 Validator to use
 	 */
 	public MethodValidationInterceptor(Validator validator) {
 		this.validator = validator.unwrap(MethodValidator.class);

@@ -24,7 +24,7 @@ import org.springframework.core.serializer.Serializer;
 import org.springframework.util.Assert;
 
 /**
- * A {@Link Converter} that delegates to a {@link org.springframework.core.serializer.Serializer}
+ * A {@link Converter} that delegates to a {@link org.springframework.core.serializer.Serializer}
  * to convert an object to a byte array.
  *
  * @author Gary Russell
