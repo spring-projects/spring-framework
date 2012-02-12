@@ -70,7 +70,7 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 	 * <p>It is only recommended to switch this flag to "true" when no JDBC access
 	 * code is involved in any of the transactions, and when it is acceptable to
 	 * perform read operations outside of the transactional JDBC Connection.
-	 * @see oracle.toplink.sessions.UnitOfWork#beginEarlyTransaction()
+	 * @see org.eclipse.persistence.sessions.UnitOfWork#beginEarlyTransaction()
 	 */
 	public void setLazyDatabaseTransaction(boolean lazyDatabaseTransaction) {
 		this.lazyDatabaseTransaction = lazyDatabaseTransaction;

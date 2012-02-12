@@ -143,7 +143,7 @@ public class ContextConfigurationAttributes {
 	 * @return the resource locations; potentially <code>null</code> or <em>empty</em>
 	 * @see ContextConfiguration#value
 	 * @see ContextConfiguration#locations
-	 * @see #setLocations()
+	 * @see #setLocations(String[])
 	 */
 	public String[] getLocations() {
 		return locations;
@@ -166,7 +166,7 @@ public class ContextConfigurationAttributes {
 	 * declared via {@link ContextConfiguration @ContextConfiguration}.
 	 * @return the configuration classes; potentially <code>null</code> or <em>empty</em>
 	 * @see ContextConfiguration#classes
-	 * @see #setClasses()
+	 * @see #setClasses(Class[])
 	 */
 	public Class<?>[] getClasses() {
 		return classes;

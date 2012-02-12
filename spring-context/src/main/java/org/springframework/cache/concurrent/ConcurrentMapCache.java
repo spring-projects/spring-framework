@@ -115,7 +115,7 @@ public class ConcurrentMapCache implements Cache {
 	/**
 	 * Convert the given value from the internal store to a user value
 	 * returned from the get method (adapting <code>null</code>).
-	 * @param userValue the store value
+	 * @param storeValue the store value
 	 * @return the value to return to the user
 	 */
 	protected Object fromStoreValue(Object storeValue) {

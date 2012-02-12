@@ -37,8 +37,9 @@ import java.lang.annotation.Target;
  * BeanPostProcessor} which in turn means that you <em>cannot</em> use
  * {@code @Value} within
  * {@link org.springframework.beans.factory.config.BeanPostProcessor
- * BeanPostProcessor} or {@link BeanFactoryPostProcessor} types. Please
- * consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
+ * BeanPostProcessor} or
+ * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessor}
+ * types. Please consult the javadoc for the {@link AutowiredAnnotationBeanPostProcessor}
  * class (which, by default, checks for the presence of this annotation).
  *
  * @author Juergen Hoeller

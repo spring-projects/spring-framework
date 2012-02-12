@@ -136,7 +136,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * <p>Calls to {@link #register} are idempotent; adding the same
 	 * annotated class more than once has no additional effect.
 	 * @param annotatedClasses one or more annotated classes,
-	 * e.g. {@link Configuration @Configuration} classes
+	 * e.g. {@link org.springframework.context.annotation.Configuration @Configuration} classes
 	 * @see #scan(String...)
 	 * @see #loadBeanDefinitions(DefaultListableBeanFactory)
 	 * @see #setConfigLocation(String)
@@ -178,8 +178,8 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 	 * annotation.
 	 * @see #register(Class...)
 	 * @see #scan(String...)
-	 * @see #setConfigLocation()
-	 * @see #setConfigLocations()
+	 * @see #setConfigLocation(String)
+	 * @see #setConfigLocations(String[])
 	 * @see AnnotatedBeanDefinitionReader
 	 * @see ClassPathBeanDefinitionScanner
 	 */
@@ -264,7 +264,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 
 	/**
 	 * Set the {@link ScopeMetadataResolver} to use for detected bean classes.
-	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
+	 * <p>The default is an {@link org.springframework.context.annotation.AnnotationScopeMetadataResolver}.
 	 */
 	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
 		this.scopeMetadataResolver = scopeMetadataResolver;

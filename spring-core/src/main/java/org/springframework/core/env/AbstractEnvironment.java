@@ -40,9 +40,9 @@ import org.springframework.util.StringUtils;
  *
  * <p>Concrete subclasses differ primarily on which {@link PropertySource} objects they
  * add by default. {@code AbstractEnvironment} adds none. Subclasses should contribute
- * property sources through the protected {@link #customizePropertySources()} hook, while
- * clients should customize using {@link ConfigurableEnvironment#getPropertySources()} and
- * working against the {@link MutablePropertySources} API. See
+ * property sources through the protected {@link #customizePropertySources(MutablePropertySources)}
+ * hook, while clients should customize using {@link ConfigurableEnvironment#getPropertySources()}
+ * and working against the {@link MutablePropertySources} API. See
  * {@link ConfigurableEnvironment} Javadoc for usage examples.
  *
  * @author Chris Beams

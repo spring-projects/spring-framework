@@ -157,7 +157,7 @@ public @interface EnableTransactionManagement {
 
 	/**
 	 * Indicate how transactional advice should be applied. The default is
-	 * {@link AdviceMode.PROXY}.
+	 * {@link AdviceMode#PROXY}.
 	 * @see AdviceMode
 	 */
 	AdviceMode mode() default AdviceMode.PROXY;

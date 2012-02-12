@@ -226,7 +226,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	/**
 	 * Specify annotated entity classes to register with this Hibernate SessionFactory.
-	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(String)
+	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(Class)
 	 */
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;

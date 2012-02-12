@@ -41,7 +41,7 @@ public interface CacheAnnotationParser {
 	 * @param ae the annotated method or class
 	 * @return CacheOperation the configured caching operation,
 	 * or {@code null} if none was found
-	 * @see AnnotationCacheOperationSource#determineCacheOperation
+	 * @see AnnotationCacheOperationSource#determineCacheOperations(AnnotatedElement)
 	 */
 	Collection<CacheOperation> parseCacheAnnotations(AnnotatedElement ae);
 }

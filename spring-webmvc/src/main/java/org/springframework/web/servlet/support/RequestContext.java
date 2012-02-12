@@ -148,7 +148,7 @@ public class RequestContext {
 	 * @param model the model attributes for the current view (can be <code>null</code>, using the request attributes
 	 * for Errors retrieval)
 	 * @see org.springframework.web.servlet.DispatcherServlet
-	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.ServletContext, Map)
+	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext, Map)
 	 */
 	public RequestContext(HttpServletRequest request, Map<String, Object> model) {
 		initContext(request, null, null, model);
@@ -404,7 +404,7 @@ public class RequestContext {
 	 * <code>{bar=baz,spam=nuts}</code> and the result will be <code>[contextpath]/foo/baz?spam=nuts</code>.
 	 * 
 	 * @param relativeUrl the relative URL part
-	 * @param a map of parameters to insert as placeholders in the url
+	 * @param params a map of parameters to insert as placeholders in the url
 	 * @return a URL that points back to the server with an absolute path (also URL-encoded accordingly)
 	 */
 	public String getContextUrl(String relativeUrl, Map<String, ?> params) {
