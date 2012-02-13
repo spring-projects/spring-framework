@@ -131,19 +131,13 @@ class ExtendedBeanInfo implements BeanInfo {
 					Method indexedReadMethod = ipd.getIndexedReadMethod();
 					Method indexedWriteMethod = ipd.getIndexedWriteMethod();
 					// has the setter already been found by the wrapped BeanInfo?
-					if (indexedWriteMethod != null
-							&& indexedWriteMethod.getName().equals(method.getName())) {
-						// yes -> copy it, including corresponding getter method (if any -- may be null)
-						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
-						continue ALL_METHODS;
+					if (!(indexedWriteMethod != null
+							&& indexedWriteMethod.getName().equals(method.getName()))) {
+						indexedWriteMethod = method;
 					}
-					// has a getter corresponding to this setter already been found by the wrapped BeanInfo?
-					if (indexedReadMethod != null
-							&& indexedReadMethod.getName().equals(getterMethodNameFor(propertyName))
-							&& indexedReadMethod.getReturnType().equals(method.getParameterTypes()[1])) {
-						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, indexedReadMethod, method);
-						continue ALL_METHODS;
-					}
+					// yes -> copy it, including corresponding getter method (if any -- may be null)
+					this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
+					continue ALL_METHODS;
 				}
 				// the INDEXED setter method was not found by the wrapped BeanInfo -> add a new PropertyDescriptor
 				// for it. no corresponding INDEXED getter was detected, so the 'indexed read method' parameter is null.
@@ -292,6 +286,16 @@ class ExtendedBeanInfo implements BeanInfo {
 				logger.debug(format("Could not add write method [%s] for property [%s]. Reason: %s",
 						writeMethod, propertyName, ex.getMessage()));
 				// fall through -> add property descriptor as best we can
+			}
+			if (pd instanceof IndexedPropertyDescriptor) {
+				((IndexedPropertyDescriptor)pd).setIndexedReadMethod(indexedReadMethod);
+				try {
+					((IndexedPropertyDescriptor)pd).setIndexedWriteMethod(indexedWriteMethod);
+				} catch (IntrospectionException ex) {
+					logger.debug(format("Could not add indexed write method [%s] for property [%s]. Reason: %s",
+							indexedWriteMethod, propertyName, ex.getMessage()));
+					// fall through -> add property descriptor as best we can
+				}
 			}
 			this.propertyDescriptors.add(pd);
 		}
