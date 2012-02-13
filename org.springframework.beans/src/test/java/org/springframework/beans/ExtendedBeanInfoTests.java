@@ -742,16 +742,28 @@ public class ExtendedBeanInfoTests {
 		assertThat(hasWriteMethodForProperty(ebi, "targetMethod"), is(false));
 	}
 
-	static class X {
-		public boolean isTargetMethod() {
-			return false;
+	@Test
+	public void cornerSpr8937() throws IntrospectionException {
+		@SuppressWarnings("unused") class A {
+			public void setAddress(String addr){ }
+			public void setAddress(int index, String addr) { }
+			public String getAddress(int index){ return null; }
+		}
+
+		{ // baseline. ExtendedBeanInfo needs to behave exactly like the following
+			BeanInfo bi = Introspector.getBeanInfo(A.class);
+			assertThat(hasReadMethodForProperty(bi, "address"), is(false));
+			assertThat(hasWriteMethodForProperty(bi, "address"), is(false));
+			assertThat(hasIndexedReadMethodForProperty(bi, "address"), is(true));
+			assertThat(hasIndexedWriteMethodForProperty(bi, "address"), is(true));
+		}
+		{
+			ExtendedBeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(A.class));
+			assertThat(hasReadMethodForProperty(bi, "address"), is(false));
+			assertThat(hasWriteMethodForProperty(bi, "address"), is(false));
+			assertThat(hasIndexedReadMethodForProperty(bi, "address"), is(true));
+			assertThat(hasIndexedWriteMethodForProperty(bi, "address"), is(true));
 		}
 	}
 
-	static class Y extends X {
-		@Override
-		public boolean isTargetMethod() {
-			return false;
-		}
-	}
 }

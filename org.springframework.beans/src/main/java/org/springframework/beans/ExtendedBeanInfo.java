@@ -219,7 +219,9 @@ class ExtendedBeanInfo implements BeanInfo {
 					}
 				}
 				// update the existing descriptor's write method
-				if (writeMethod != null) {
+				if (writeMethod != null
+						&& !(existingPD instanceof IndexedPropertyDescriptor &&
+								!writeMethod.getParameterTypes()[0].isArray())) {
 					existingPD.setWriteMethod(writeMethod);
 				}
 
