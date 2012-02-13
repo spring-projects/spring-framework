@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,4 +268,30 @@ public class NamedParameterUtilsTests {
 		assertEquals(expectedSql, newSql);
 	}
 
+	/*
+	 * SPR-8280
+	 */
+	@Test
+	public void parseSqlStatementWithQuotedSingleQuote() {
+		String sql = "SELECT ':foo'':doo', :xxx FROM DUAL";
+		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(1, psql.getTotalParameterCount());
+		assertEquals("xxx", psql.getParameterNames().get(0));
+	}
+
+	@Test
+	public void parseSqlStatementWithQuotesAndCommentBefore() {
+		String sql = "SELECT /*:doo*/':foo', :xxx FROM DUAL";
+		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(1, psql.getTotalParameterCount());
+		assertEquals("xxx", psql.getParameterNames().get(0));
+	}
+
+	@Test
+	public void parseSqlStatementWithQuotesAndCommentAfter() {
+		String sql2 = "SELECT ':foo'/*:doo*/, :xxx FROM DUAL";
+		ParsedSql psql2 = NamedParameterUtils.parseSqlStatement(sql2);
+		assertEquals(1, psql2.getTotalParameterCount());
+		assertEquals("xxx", psql2.getParameterNames().get(0));
+	}
 }

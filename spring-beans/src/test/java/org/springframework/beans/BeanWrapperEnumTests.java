@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 import test.beans.CustomEnum;
 import test.beans.GenericBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -104,6 +105,16 @@ public final class BeanWrapperEnumTests {
 		GenericBean<?> gb = new GenericBean<Object>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("customEnumSet", "VALUE_1,VALUE_2");
+		assertEquals(2, gb.getCustomEnumSet().size());
+		assertTrue(gb.getCustomEnumSet().contains(CustomEnum.VALUE_1));
+		assertTrue(gb.getCustomEnumSet().contains(CustomEnum.VALUE_2));
+	}
+
+	@Test
+	public void testCustomEnumSetWithGetterSetterMismatch() {
+		GenericBean<?> gb = new GenericBean<Object>();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		bw.setPropertyValue("customEnumSetMismatch", new String[] {"VALUE_1", "VALUE_2"});
 		assertEquals(2, gb.getCustomEnumSet().size());
 		assertTrue(gb.getCustomEnumSet().contains(CustomEnum.VALUE_1));
 		assertTrue(gb.getCustomEnumSet().contains(CustomEnum.VALUE_2));

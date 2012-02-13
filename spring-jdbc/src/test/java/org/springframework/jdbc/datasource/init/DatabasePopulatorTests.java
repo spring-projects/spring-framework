@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
 
-import javax.sql.DataSource;
-
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.core.io.ClassRelativeResourceLoader;
@@ -49,7 +47,7 @@ public class DatabasePopulatorTests {
 		assertEquals(name, jdbcTemplate.queryForObject("select NAME from T_TEST", String.class));
 	}
 
-	private void assertUsersDatabaseCreated(DataSource db) {
+	private void assertUsersDatabaseCreated() {
 		assertEquals("Sam", jdbcTemplate.queryForObject("select first_name from users where last_name = 'Brannen'",
 				String.class));
 	}
@@ -191,7 +189,22 @@ public class DatabasePopulatorTests {
 			connection.close();
 		}
 
-		assertUsersDatabaseCreated(db);
+		assertUsersDatabaseCreated();
+	}
+
+	@Test
+	public void testBuildWithSelectStatements() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-select.sql"));
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
+
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
 	}
 
 }

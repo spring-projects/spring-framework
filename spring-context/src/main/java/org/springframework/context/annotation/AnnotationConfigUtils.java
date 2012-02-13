@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation;
 
+import static org.springframework.context.annotation.MetadataUtils.attributesFor;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -27,6 +29,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -217,21 +220,20 @@ public class AnnotationConfigUtils {
 	}
 
 	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
-		if (abd.getMetadata().isAnnotated(Primary.class.getName())) {
+		AnnotationMetadata metadata = abd.getMetadata();
+		if (metadata.isAnnotated(Primary.class.getName())) {
 			abd.setPrimary(true);
 		}
-		if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
-			Boolean value = (Boolean) abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
-			abd.setLazyInit(value);
+		if (metadata.isAnnotated(Lazy.class.getName())) {
+			abd.setLazyInit(attributesFor(metadata, Lazy.class).getBoolean("value"));
 		}
-		if (abd.getMetadata().isAnnotated(DependsOn.class.getName())) {
-			String[] value = (String[]) abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
-			abd.setDependsOn(value);
+		if (metadata.isAnnotated(DependsOn.class.getName())) {
+			abd.setDependsOn(attributesFor(metadata, DependsOn.class).getStringArray("value"));
 		}
 		if (abd instanceof AbstractBeanDefinition) {
-			if (abd.getMetadata().isAnnotated(Role.class.getName())) {
-				int value = (Integer) abd.getMetadata().getAnnotationAttributes(Role.class.getName()).get("value");
-				((AbstractBeanDefinition)abd).setRole(value);
+			if (metadata.isAnnotated(Role.class.getName())) {
+				int role = attributesFor(metadata, Role.class).getNumber("value");
+				((AbstractBeanDefinition)abd).setRole(role);
 			}
 		}
 	}

@@ -859,6 +859,69 @@ public class ClinicController {
         mechanisms see <xref linkend="aop-proxying" />.</para>
       </tip>
 
+      <section id="mvc-ann-requestmapping-31-vs-30">
+        <title>New Support Classes for <classname>@RequestMapping</classname> methods in Spring MVC 3.1</title>
+
+        <para>Spring 3.1 introduced a new set of support classes for
+        <classname>@RequestMapping</classname> methods called
+        <classname>RequestMappingHandlerMapping</classname> and
+        <classname>RequestMappingHandlerAdapter</classname> respectively.
+        They are recommended for use and even required to take advantage of
+        new features in Spring MVC 3.1 and going forward. The new support
+        classes are enabled by default by the MVC namespace and MVC Java
+        config (<classname>@EnableWebMvc</classname>) but must be configured
+        explicitly if using neither. This section describes a few
+        important differences between the old and the new support classes.
+        </para>
+
+        <para>Prior to Spring 3.1, type and method-level request mappings were
+        examined in two separate stages -- a controller was selected first
+        by the <classname>DefaultAnnotationHandlerMapping</classname> and the
+        actual method to invoke was narrowed down second by
+        the <classname>AnnotationMethodHandlerAdapter</classname>.</para>
+
+        <para>With the new support classes in Spring 3.1, the
+        <classname>RequestMappingHandlerMapping</classname> is the only place
+        where a decision is made about which method should process the request.
+        Think of controller methods as a collection of unique endpoints
+        with mappings for each method derived from type and method-level
+        <classname>@RequestMapping</classname> information.</para>
+
+        <para>This enables some new possibilities. For once a
+        <classname>HandlerInterceptor</classname> or a
+        <classname>HandlerExceptionResolver</classname> can now expect the
+        Object-based handler to be a <classname>HandlerMethod</classname>,
+        which allows them to examine the exact method, its parameters and
+        associated annotations. The processing for a URL no longer needs to
+        be split across different controllers.
+        </para>
+
+        <para>There are also several things no longer possible:</para>
+        <itemizedlist>
+            <listitem><para>Select a controller first with a
+            <classname>SimpleUrlHandlerMapping</classname> or
+            <classname>BeanNameUrlHandlerMapping</classname> and then narrow
+            the method based on <classname>@RequestMapping</classname>
+            annotations.</para></listitem>
+            <listitem><para>Rely on method names as a fall-back mechanism to
+            disambiguate between two <classname>@RequestMapping</classname> methods
+            that don't have an explicit path mapping URL path but otherwise
+            match equally, e.g. by HTTP method. In the new support classes
+            <classname>@RequestMapping</classname> methods have to be mapped
+            uniquely.</para></listitem>
+            <listitem><para>Have a single default method (without an explicit
+            path mapping) with which requests are processed if no other
+            controller method matches more concretely. In the new support
+            classes if a matching method is not found a 404 error
+            is raised.</para></listitem>
+        </itemizedlist>
+
+        <para>The above features are still supported with the existing support
+        classes. However to take advantage of new Spring MVC 3.1 features
+        you'll need to use the new support classes.</para>
+
+      </section>
+
       <section id="mvc-ann-requestmapping-uri-templates">
         <title>URI Template Patterns</title>
 
@@ -1105,6 +1168,17 @@ public class RelativePathUriTemplateController {
       used in arbitrary order with the only exception of
       <classname>BindingResult</classname> arguments. This is described in the
       next section.</para>
+
+      <note><para>Spring 3.1 introduced a new set of support classes for
+      <classname>@RequestMapping</classname> methods called
+      <classname>RequestMappingHandlerMapping</classname> and
+      <classname>RequestMappingHandlerAdapter</classname> respectively.
+      They are recommended for use and even required to take advantage
+      of new features in Spring MVC 3.1 and going forward.
+      The new support classes are enabled by default from the MVC namespace and
+      with use of the MVC Java config (<code>@EnableWebMvc</code>) but must be
+      configured explicitly if using neither.
+      </para></note>
 
       <section id="mvc-ann-arguments">
         <title>Supported method argument types</title>
@@ -1503,16 +1577,18 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
 &lt;bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller"/&gt;</programlisting>
 
         <para>An <classname>@RequestBody</classname> method parameter can be
-        annotated with <classname>@Valid</classname>, in which case it will
+        annotated with <classname>@Valid</classname>, in which case it will be
         validated using the configured <classname>Validator</classname>
         instance. When using the MVC namespace a JSR-303 validator is
         configured automatically assuming a JSR-303 implementation is
-        available on the classpath. If validation fails a
-        <classname>RequestBodyNotValidException</classname> is raised. The
-        exception is handled by the
-        <classname>DefaultHandlerExceptionResolver</classname> and results in
-        a <literal>400</literal> error sent back to the client along with a
-        message containing the validation errors.</para>
+        available on the classpath.</para>
+        <para>Unlike <classname>@ModelAttribute</classname> parameters, for which
+        a <classname>BindingResult</classname> can be used to examine the errors,
+        <classname>@RequestBody</classname> validation errors always result in a
+        <classname>MethodArgumentNotValidException</classname> being raised.
+        The exception is handled in the
+        <classname>DefaultHandlerExceptionResolver</classname>, which sends
+        a <literal>400</literal> error back to the client.</para>
 
         <note>
           <para>Also see <xref linkend="mvc-annotation-driven" /> for

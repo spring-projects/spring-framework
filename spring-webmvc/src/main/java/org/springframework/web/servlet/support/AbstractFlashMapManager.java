@@ -19,7 +19,6 @@ package org.springframework.web.servlet.support;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +48,8 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	private int flashMapTimeout = 180;
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
+
+	private static final Object writeLock = new Object();
 
 	/**
 	 * Set the amount of time in seconds after a {@link FlashMap} is saved
@@ -81,34 +82,30 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		return this.urlPathHelper;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * <p>Does not cause an HTTP session to be created.
-	 */
-	public final Map<String, ?> getFlashMapForRequest(HttpServletRequest request) {
-		List<FlashMap> flashMaps = retrieveFlashMaps(request);
-		if (CollectionUtils.isEmpty(flashMaps)) {
+	public final FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
+		List<FlashMap> allMaps = retrieveFlashMaps(request);
+		if (CollectionUtils.isEmpty(allMaps)) {
 			return null;
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieved FlashMap(s): " + flashMaps);
+			logger.debug("Retrieved FlashMap(s): " + allMaps);
 		}
-		List<FlashMap> result = new ArrayList<FlashMap>();
-		for (FlashMap flashMap : flashMaps) {
-			if (isFlashMapForRequest(flashMap, request)) {
-				result.add(flashMap);
-			}
+		List<FlashMap> mapsToRemove = getExpiredFlashMaps(allMaps);
+		FlashMap match = getMatchingFlashMap(allMaps, request);
+		if (match != null) {
+			mapsToRemove.add(match);
 		}
-		if (!result.isEmpty()) {
-			Collections.sort(result);
+		if (!mapsToRemove.isEmpty()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Found matching FlashMap(s): " + result);
+				logger.debug("Removing FlashMap(s): " + allMaps);
 			}
-			FlashMap match = result.remove(0);
-			flashMaps.remove(match);
-			return Collections.unmodifiableMap(match);
+			synchronized (writeLock) {
+				allMaps = retrieveFlashMaps(request);
+				allMaps.removeAll(mapsToRemove);
+				updateFlashMaps(allMaps, request, response);
+			}
 		}
-		return null;
+		return match;
 	}
 
 	/**
@@ -119,9 +116,43 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	protected abstract List<FlashMap> retrieveFlashMaps(HttpServletRequest request);
 
 	/**
+	 * Return a list of expired FlashMap instances contained in the given list.
+	 */
+	private List<FlashMap> getExpiredFlashMaps(List<FlashMap> allMaps) {
+		List<FlashMap> result = new ArrayList<FlashMap>();
+		for (FlashMap map : allMaps) {
+			if (map.isExpired()) {
+				result.add(map);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Return a FlashMap contained in the given list that matches the request.
+	 * @return a matching FlashMap or {@code null}
+	 */
+	private FlashMap getMatchingFlashMap(List<FlashMap> allMaps, HttpServletRequest request) {
+		List<FlashMap> result = new ArrayList<FlashMap>();
+		for (FlashMap flashMap : allMaps) {
+			if (isFlashMapForRequest(flashMap, request)) {
+				result.add(flashMap);
+			}
+		}
+		if (!result.isEmpty()) {
+			Collections.sort(result);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found matching FlashMap(s): " + result);
+			}
+			return result.get(0);
+		}
+		return null;
+	}
+
+	/**
 	 * Whether the given FlashMap matches the current request.
-	 * The default implementation uses the target request path and query params
-	 * saved in the FlashMap.
+	 * The default implementation uses the target request path and query
+	 * parameters saved in the FlashMap.
 	 */
 	protected boolean isFlashMapForRequest(FlashMap flashMap, HttpServletRequest request) {
 		if (flashMap.getTargetRequestPath() != null) {
@@ -142,37 +173,21 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * <p>The FlashMap, if not empty, is saved to the HTTP session.
-	 */
-	public final void save(FlashMap flashMap, HttpServletRequest request, HttpServletResponse response) {
-		Assert.notNull(flashMap, "FlashMap must not be null");
-
-		List<FlashMap> flashMaps = retrieveFlashMaps(request);
-		if (flashMap.isEmpty() && (flashMaps == null)) {
+	public final void saveOutputFlashMap(FlashMap flashMap, HttpServletRequest request, HttpServletResponse response) {
+		if (CollectionUtils.isEmpty(flashMap)) {
 			return;
 		}
-		synchronized (this) {
-			boolean update = false;
-			flashMaps = retrieveFlashMaps(request);
-			if (!CollectionUtils.isEmpty(flashMaps)) {
-				update = removeExpired(flashMaps);
-			}
-			if (!flashMap.isEmpty()) {
-				String path = decodeAndNormalizePath(flashMap.getTargetRequestPath(), request);
-				flashMap.setTargetRequestPath(path);
-				flashMap.startExpirationPeriod(this.flashMapTimeout);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Saving FlashMap=" + flashMap);
-				}
-				flashMaps = (flashMaps == null) ? new CopyOnWriteArrayList<FlashMap>() : flashMaps;
-				flashMaps.add(flashMap);
-				update = true;
-			}
-			if (update) {
-				updateFlashMaps(flashMaps, request, response);
-			}
+		String path = decodeAndNormalizePath(flashMap.getTargetRequestPath(), request);
+		flashMap.setTargetRequestPath(path);
+		flashMap.startExpirationPeriod(this.flashMapTimeout);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Saving FlashMap=" + flashMap);
+		}
+		synchronized (writeLock) {
+			List<FlashMap> allMaps = retrieveFlashMaps(request);
+			allMaps = (allMaps == null) ? new CopyOnWriteArrayList<FlashMap>() : allMaps;
+			allMaps.add(flashMap);
+			updateFlashMaps(allMaps, request, response);
 		}
 	}
 
@@ -196,26 +211,5 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	 */
 	protected abstract void updateFlashMaps(List<FlashMap> flashMaps, HttpServletRequest request,
 			HttpServletResponse response);
-
-	/**
-	 * Remove expired FlashMap instances from the given List.
-	 */
-	protected boolean removeExpired(List<FlashMap> flashMaps) {
-		List<FlashMap> expired = new ArrayList<FlashMap>();
-		for (FlashMap flashMap : flashMaps) {
-			if (flashMap.isExpired()) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Removing expired FlashMap: " + flashMap);
-				}
-				expired.add(flashMap);
-			}
-		}
-		if (expired.isEmpty()) {
-			return false;
-		}
-		else {
-			return flashMaps.removeAll(expired);
-		}
-	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package org.springframework.scheduling.annotation;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
@@ -37,12 +37,13 @@ import org.springframework.util.Assert;
 @Configuration
 public abstract class AbstractAsyncConfiguration implements ImportAware {
 
-	protected Map<String, Object> enableAsync;
+	protected AnnotationAttributes enableAsync;
 	protected Executor executor;
 
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
-		enableAsync = importMetadata.getAnnotationAttributes(EnableAsync.class.getName(), false);
-		Assert.notNull(enableAsync,
+		this.enableAsync = AnnotationAttributes.fromMap(
+				importMetadata.getAnnotationAttributes(EnableAsync.class.getName(), false));
+		Assert.notNull(this.enableAsync,
 				"@EnableAsync is not present on importing class " +
 				importMetadata.getClassName());
 	}

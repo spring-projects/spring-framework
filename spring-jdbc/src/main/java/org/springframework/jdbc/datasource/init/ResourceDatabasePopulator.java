@@ -181,9 +181,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 			for (String statement : statements) {
 				lineNumber++;
 				try {
-					int rowsAffected = stmt.executeUpdate(statement);
+					stmt.execute(statement);
+					int rowsAffected = stmt.getUpdateCount();
 					if (logger.isDebugEnabled()) {
-						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
+						logger.debug(rowsAffected + " returned as updateCount for SQL: " + statement);
 					}
 				}
 				catch (SQLException ex) {

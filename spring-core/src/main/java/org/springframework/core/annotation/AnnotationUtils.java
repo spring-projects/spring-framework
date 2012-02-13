@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -300,25 +299,58 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Retrieve the given annotation's attributes as a Map, preserving all attribute types as-is.
+	 * Retrieve the given annotation's attributes as a Map, preserving all attribute types
+	 * as-is.
+	 * <p>Note: As of Spring 3.1.1, the returned map is actually an
+	 * {@link AnnotationAttributes} instance, however the Map signature of this method has
+	 * been preserved for binary compatibility.
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @return the Map of annotation attributes, with attribute names as keys and
 	 * corresponding attribute values as values
 	 */
 	public static Map<String, Object> getAnnotationAttributes(Annotation annotation) {
-		return getAnnotationAttributes(annotation, false);
+		return getAnnotationAttributes(annotation, false, false);
 	}
 
 	/**
-	 * Retrieve the given annotation's attributes as a Map.
+	 * Retrieve the given annotation's attributes as a Map. Equivalent to calling
+	 * {@link #getAnnotationAttributes(Annotation, boolean, boolean)} with
+	 * the {@code nestedAnnotationsAsMap} parameter set to {@code false}.
+	 * <p>Note: As of Spring 3.1.1, the returned map is actually an
+	 * {@link AnnotationAttributes} instance, however the Map signature of this method has
+	 * been preserved for binary compatibility.
 	 * @param annotation the annotation to retrieve the attributes for
-	 * @param classValuesAsString whether to turn Class references into Strings (for compatibility with
-	 * {@link org.springframework.core.type.AnnotationMetadata} or to preserve them as Class references
+	 * @param classValuesAsString whether to turn Class references into Strings (for
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata} or to
+	 * preserve them as Class references
 	 * @return the Map of annotation attributes, with attribute names as keys and
 	 * corresponding attribute values as values
 	 */
 	public static Map<String, Object> getAnnotationAttributes(Annotation annotation, boolean classValuesAsString) {
-		Map<String, Object> attrs = new HashMap<String, Object>();
+		return getAnnotationAttributes(annotation, classValuesAsString, false);
+	}
+
+	/**
+	 * Retrieve the given annotation's attributes as an {@link AnnotationAttributes}
+	 * map structure. Implemented in Spring 3.1.1 to provide fully recursive annotation
+	 * reading capabilities on par with that of the reflection-based
+	 * {@link org.springframework.core.type.StandardAnnotationMetadata}.
+	 * @param annotation the annotation to retrieve the attributes for
+	 * @param classValuesAsString whether to turn Class references into Strings (for
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata} or to
+	 * preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to turn nested Annotation instances into
+	 * {@link AnnotationAttributes} maps (for compatibility with
+	 * {@link org.springframework.core.type.AnnotationMetadata} or to preserve them as
+	 * Annotation instances
+	 * @return the annotation attributes (a specialized Map) with attribute names as keys
+	 * and corresponding attribute values as values
+	 * @since 3.1.1
+	 */
+	public static AnnotationAttributes getAnnotationAttributes(
+			Annotation annotation, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+
+		AnnotationAttributes attrs = new AnnotationAttributes();
 		Method[] methods = annotation.annotationType().getDeclaredMethods();
 		for (Method method : methods) {
 			if (method.getParameterTypes().length == 0 && method.getReturnType() != void.class) {
@@ -337,7 +369,22 @@ public abstract class AnnotationUtils {
 							value = newValue;
 						}
 					}
-					attrs.put(method.getName(), value);
+					if (nestedAnnotationsAsMap && value instanceof Annotation) {
+						attrs.put(method.getName(), getAnnotationAttributes(
+								(Annotation)value, classValuesAsString, nestedAnnotationsAsMap));
+					}
+					else if (nestedAnnotationsAsMap && value instanceof Annotation[]) {
+						Annotation[] realAnnotations = (Annotation[])value;
+						AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
+						for (int i = 0; i < realAnnotations.length; i++) {
+							mappedAnnotations[i] = getAnnotationAttributes(
+									realAnnotations[i], classValuesAsString, nestedAnnotationsAsMap);
+						}
+						attrs.put(method.getName(), mappedAnnotations);
+					}
+					else {
+						attrs.put(method.getName(), value);
+					}
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException("Could not obtain annotation attribute values", ex);

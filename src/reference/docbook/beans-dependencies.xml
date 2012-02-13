@@ -1438,7 +1438,7 @@ package fiona.apple;
 
 <lineannotation>// Spring-API imports</lineannotation>
 import org.springframework.beans.BeansException;
-import org.springframework.context.Applicationcontext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class CommandManager implements ApplicationContextAware {

@@ -2,15 +2,15 @@
 /**
  *
  * Package providing integration of
- * <a href="http://www.hibernate.org">Hibernate3</a>
+ * <a href="http://www.hibernate.org">Hibernate 3.x</a>
  * with Spring concepts.
- * 
+ *
  * <p>Contains SessionFactory helper classes, a template plus callback
  * for Hibernate access, and an implementation of Spring's transaction SPI
  * for local Hibernate transactions.
- * 
+ *
  * <p><b>This package supports Hibernate 3.x only.</b>
- * See the org.springframework.orm.hibernate package for Hibernate 2.1 support.
+ * See the <code>org.springframework.orm.hibernate4</code> package for Hibernate 4.x support.
  *
  */
 package org.springframework.orm.hibernate3;

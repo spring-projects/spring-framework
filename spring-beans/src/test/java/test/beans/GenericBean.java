@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -242,6 +243,17 @@ public class GenericBean<T> {
 
 	public void setCustomEnumSet(Set<CustomEnum> customEnumSet) {
 		this.customEnumSet = customEnumSet;
+	}
+
+	public Set<CustomEnum> getCustomEnumSetMismatch() {
+		return customEnumSet;
+	}
+
+	public void setCustomEnumSetMismatch(Set<String> customEnumSet) {
+		this.customEnumSet = new HashSet<CustomEnum>(customEnumSet.size());
+		for (Iterator<String> iterator = customEnumSet.iterator(); iterator.hasNext(); ) {
+			this.customEnumSet.add(CustomEnum.valueOf(iterator.next()));
+		}
 	}
 
 	public static GenericBean createInstance(Set<Integer> integerSet) {

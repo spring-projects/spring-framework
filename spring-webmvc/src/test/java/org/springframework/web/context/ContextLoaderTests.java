@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.context;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -116,7 +117,7 @@ public final class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithRegisteredContextConfigurer() {
+	public void testContextLoaderListenerWithRegisteredContextInitializer() {
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
@@ -132,7 +133,20 @@ public final class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithUnkownContextConfigurer() {
+	public void testRegisteredContextInitializerCanAccessServletContextParamsViaEnvironment() {
+		MockServletContext sc = new MockServletContext("");
+		// config file doesn't matter.  just a placeholder
+		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
+				"/org/springframework/web/context/WEB-INF/empty-context.xml");
+
+		sc.addInitParameter("someProperty", "someValue");
+		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM, EnvApplicationContextInitializer.class.getName());
+		ContextLoaderListener listener = new ContextLoaderListener();
+		listener.contextInitialized(new ServletContextEvent(sc));
+	}
+
+	@Test
+	public void testContextLoaderListenerWithUnkownContextInitializer() {
 		MockServletContext sc = new MockServletContext("");
 		// config file doesn't matter.  just a placeholder
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
@@ -321,6 +335,15 @@ public final class ContextLoaderTests {
 		public void initialize(ConfigurableWebApplicationContext applicationContext) {
 			ServletContext ctx = applicationContext.getServletContext(); // type-safe access to servlet-specific methods
 			ctx.setAttribute("initialized", true);
+		}
+	}
+
+	private static class EnvApplicationContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+		public void initialize(ConfigurableWebApplicationContext applicationContext) {
+			// test that ApplicationContextInitializers can access ServletContext properties
+			// via the environment (SPR-8991)
+			String value = applicationContext.getEnvironment().getRequiredProperty("someProperty");
+			assertThat(value, is("someValue"));
 		}
 	}
 

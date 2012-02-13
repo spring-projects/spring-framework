@@ -1580,7 +1580,7 @@ String body = response.getBody();</programlisting>
       </section>
 
       <section id="rest-byte-converter">
-        <title>ByteArrayMessageConverter</title>
+        <title>ByteArrayHttpMessageConverter</title>
 
         <para>An <interfacename>HttpMessageConverter</interfacename>
         implementation that can read and write byte arrays from the HTTP

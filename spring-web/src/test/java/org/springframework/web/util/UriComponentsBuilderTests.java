@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class UriComponentsBuilderTests {
 		URI expected = new URI("http://example.com/foo?bar#baz");
 		assertEquals("Invalid result URI", expected, result.toUri());
 	}
-	
+
 	@Test
 	public void fromPath() throws URISyntaxException {
 		UriComponents result = UriComponentsBuilder.fromPath("foo").queryParam("bar").fragment("baz").build();
@@ -177,32 +177,41 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
+	public void pathSegmentsSomeEmpty() {
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().pathSegment("", "foo", "", "bar");
+		UriComponents result = builder.build();
+
+		assertEquals("/foo/bar", result.getPath());
+		assertEquals(Arrays.asList("foo", "bar"), result.getPathSegments());
+	}
+
+	@Test
 	public void replacePath() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://www.ietf.org/rfc/rfc2396.txt");
 		builder.replacePath("/rfc/rfc3986.txt");
 		UriComponents result = builder.build();
 
 		assertEquals("http://www.ietf.org/rfc/rfc3986.txt", result.toUriString());
-		
+
 		builder = UriComponentsBuilder.fromUriString("http://www.ietf.org/rfc/rfc2396.txt");
 		builder.replacePath(null);
 		result = builder.build();
 
 		assertEquals("http://www.ietf.org", result.toUriString());
 	}
-	
+
 	@Test
 	public void replaceQuery() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("http://example.com/foo?foo=bar&baz=qux");
 		builder.replaceQuery("baz=42");
 		UriComponents result = builder.build();
-		
+
 		assertEquals("http://example.com/foo?baz=42", result.toUriString());
 
 		builder = UriComponentsBuilder.fromUriString("http://example.com/foo?foo=bar&baz=qux");
 		builder.replaceQuery(null);
 		result = builder.build();
-		
+
 		assertEquals("http://example.com/foo", result.toUriString());
 	}
 
@@ -234,13 +243,13 @@ public class UriComponentsBuilderTests {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance().queryParam("baz", "qux", 42);
 		builder.replaceQueryParam("baz", "xuq", 24);
 		UriComponents result = builder.build();
-		
+
 		assertEquals("baz=xuq&baz=24", result.getQuery());
 
 		builder = UriComponentsBuilder.newInstance().queryParam("baz", "qux", 42);
 		builder.replaceQueryParam("baz");
 		result = builder.build();
-		
+
 		assertNull("Query param should have been deleted", result.getQuery());
 	}
 

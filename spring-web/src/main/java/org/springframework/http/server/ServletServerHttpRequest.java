@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,19 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 
 /**
@@ -90,13 +94,30 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			for (Enumeration headerNames = this.servletRequest.getHeaderNames(); headerNames.hasMoreElements();) {
+			for (Enumeration<?> headerNames = this.servletRequest.getHeaderNames(); headerNames.hasMoreElements();) {
 				String headerName = (String) headerNames.nextElement();
-				for (Enumeration headerValues = this.servletRequest.getHeaders(headerName);
+				for (Enumeration<?> headerValues = this.servletRequest.getHeaders(headerName);
 						headerValues.hasMoreElements();) {
 					String headerValue = (String) headerValues.nextElement();
 					this.headers.add(headerName, headerValue);
 				}
+			}
+			// HttpServletRequest exposes some headers as properties: we should include those if not already present
+			if (this.headers.getContentType() == null && this.servletRequest.getContentType() != null) {
+				MediaType contentType = MediaType.parseMediaType(this.servletRequest.getContentType());
+				this.headers.setContentType(contentType);
+			}
+			if (this.headers.getContentType() != null && this.headers.getContentType().getCharSet() == null &&
+					this.servletRequest.getCharacterEncoding() != null) {
+				MediaType oldContentType = this.headers.getContentType();
+				Charset charSet = Charset.forName(this.servletRequest.getCharacterEncoding());
+				Map<String, String> params = new HashMap<String, String>(oldContentType.getParameters());
+				params.put("charset", charSet.toString());
+				MediaType newContentType = new MediaType(oldContentType.getType(), oldContentType.getSubtype(), params);
+				this.headers.setContentType(newContentType);
+			}
+			if (this.headers.getContentLength() == -1 && this.servletRequest.getContentLength() != -1) {
+				this.headers.setContentLength(this.servletRequest.getContentLength());
 			}
 		}
 		return this.headers;

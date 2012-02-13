@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert;
 
 import java.lang.annotation.Annotation;
@@ -59,6 +60,7 @@ public class TypeDescriptor {
 		typeDescriptorCache.put(String.class, new TypeDescriptor(String.class));
 	}
 
+
 	private final Class<?> type;
 
 	private final TypeDescriptor elementTypeDescriptor;
@@ -68,6 +70,7 @@ public class TypeDescriptor {
 	private final TypeDescriptor mapValueTypeDescriptor;
 
 	private final Annotation[] annotations;
+
 
 	/**
 	 * Create a new type descriptor from a {@link MethodParameter}.
@@ -95,6 +98,7 @@ public class TypeDescriptor {
 	public TypeDescriptor(Property property) {
 		this(new BeanPropertyDescriptor(property));
 	}
+
 
 	/**
 	 * Create a new type descriptor from the given type.
@@ -206,6 +210,7 @@ public class TypeDescriptor {
 	public static TypeDescriptor forObject(Object source) {
 		return (source != null ? valueOf(source.getClass()) : null);
 	}
+
 
 	/**
 	 * The type of the backing class, method parameter, field, or property described by this TypeDescriptor.
@@ -477,6 +482,7 @@ public class TypeDescriptor {
 
 	private TypeDescriptor(Class<?> type, TypeDescriptor elementTypeDescriptor, TypeDescriptor mapKeyTypeDescriptor,
 			TypeDescriptor mapValueTypeDescriptor, Annotation[] annotations) {
+
 		this.type = type;
 		this.elementTypeDescriptor = elementTypeDescriptor;
 		this.mapKeyTypeDescriptor = mapKeyTypeDescriptor;
@@ -538,15 +544,24 @@ public class TypeDescriptor {
 			return false;
 		}
 		TypeDescriptor other = (TypeDescriptor) obj;
-		boolean annotatedTypeEquals = ObjectUtils.nullSafeEquals(getType(), other.getType()) && ObjectUtils.nullSafeEquals(getAnnotations(), other.getAnnotations());
-		if (!annotatedTypeEquals) {
+		if (!ObjectUtils.nullSafeEquals(getType(), other.getType())) {
 			return false;
+		}
+		Annotation[] annotations = getAnnotations();
+		if (annotations.length != other.getAnnotations().length) {
+			return false;
+		}
+		for (Annotation ann : annotations) {
+			if (other.getAnnotation(ann.annotationType()) == null) {
+				return false;
+			}
 		}
 		if (isCollection() || isArray()) {
 			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), other.getElementTypeDescriptor());
 		}
 		else if (isMap()) {
-			return ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), other.getMapKeyTypeDescriptor()) && ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), other.getMapValueTypeDescriptor());
+			return ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), other.getMapKeyTypeDescriptor()) &&
+					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), other.getMapValueTypeDescriptor());
 		}
 		else {
 			return true;

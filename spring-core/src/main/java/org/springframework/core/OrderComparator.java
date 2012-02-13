@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class OrderComparator implements Comparator<Object> {
 	/**
 	 * Shared default instance of OrderComparator.
 	 */
-	public static OrderComparator INSTANCE = new OrderComparator();
+	public static final OrderComparator INSTANCE = new OrderComparator();
 
 
 	public int compare(Object o1, Object o2) {

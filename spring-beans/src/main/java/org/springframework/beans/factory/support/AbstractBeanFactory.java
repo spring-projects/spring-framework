@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1328,8 +1328,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param mbd the corresponding bean definition
 	 */
 	protected boolean isFactoryBean(String beanName, RootBeanDefinition mbd) {
-		Class<?> beanClass = predictBeanType(beanName, mbd, FactoryBean.class);
-		return (beanClass != null && FactoryBean.class.isAssignableFrom(beanClass));
+		Class<?> predictedType = predictBeanType(beanName, mbd, FactoryBean.class);
+		return (predictedType != null && FactoryBean.class.isAssignableFrom(predictedType)) ||
+				(mbd.hasBeanClass() && FactoryBean.class.isAssignableFrom(mbd.getBeanClass()));
 	}
 
 	/**

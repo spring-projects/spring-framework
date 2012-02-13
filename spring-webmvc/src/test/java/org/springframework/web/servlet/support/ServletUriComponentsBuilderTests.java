@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ public class ServletUriComponentsBuilderTests {
 	public void fromRequest() {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
-
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
 
 		assertEquals("http://localhost/mvc-showcase/data/param?foo=123", result);
@@ -52,11 +51,10 @@ public class ServletUriComponentsBuilderTests {
 
 	@Test
 	public void fromRequestEncodedPath() {
-		request.setRequestURI("/mvc-showcase/data/foo%20bar;jsessionid=123");
-
+		request.setRequestURI("/mvc-showcase/data/foo%20bar");
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
 
-		assertEquals("http://localhost/mvc-showcase/data/foo bar", result);
+		assertEquals("http://localhost/mvc-showcase/data/foo%20bar", result);
 	}
 
 	@Test
@@ -71,17 +69,24 @@ public class ServletUriComponentsBuilderTests {
 	public void fromRequestAtypicalHttpsPort() {
 		request.setScheme("https");
 		request.setServerPort(9043);
-		
 		String result = ServletUriComponentsBuilder.fromRequest(request).build().toUriString();
 		
 		assertEquals("https://localhost:9043", result);
 	}
 
 	@Test
+	public void fromRequestUri() {
+		request.setRequestURI("/mvc-showcase/data/param");
+		request.setQueryString("foo=123");
+		String result = ServletUriComponentsBuilder.fromRequestUri(request).build().toUriString();
+
+		assertEquals("http://localhost/mvc-showcase/data/param", result);
+	}
+
+	@Test
 	public void fromContextPath() {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
-		
 		String result = ServletUriComponentsBuilder.fromContextPath(request).build().toUriString();
 		
 		assertEquals("http://localhost/mvc-showcase", result);
@@ -92,7 +97,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setRequestURI("/mvc-showcase/app/simple");
 		request.setServletPath("/app");
 		request.setQueryString("foo=123");
-		
 		String result = ServletUriComponentsBuilder.fromServletMapping(request).build().toUriString();
 		
 		assertEquals("http://localhost/mvc-showcase/app", result);
@@ -103,7 +107,6 @@ public class ServletUriComponentsBuilderTests {
 		request.setRequestURI("/mvc-showcase/data/param");
 		request.setQueryString("foo=123");
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this.request));
-
 		try {
 			String result = ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString();
 

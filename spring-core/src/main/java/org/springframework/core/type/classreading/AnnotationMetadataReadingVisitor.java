@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Set;
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.CollectionUtils;
@@ -50,7 +51,7 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 
 	private final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>(4);
 
-	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>(4);
+	private final Map<String, AnnotationAttributes> attributeMap = new LinkedHashMap<String, AnnotationAttributes>(4);
 
 	private final MultiValueMap<String, MethodMetadata> methodMetadataMap = new LinkedMultiValueMap<String, MethodMetadata>();
 
@@ -99,20 +100,41 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 		return this.attributeMap.containsKey(annotationType);
 	}
 
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
+	public AnnotationAttributes getAnnotationAttributes(String annotationType) {
 		return getAnnotationAttributes(annotationType, false);
 	}
 
-	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		Map<String, Object> raw = this.attributeMap.get(annotationType);
-		if (raw == null) {
+	public AnnotationAttributes getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
+		return getAnnotationAttributes(annotationType, classValuesAsString, false);
+	}
+
+	public AnnotationAttributes getAnnotationAttributes(
+			String annotationType, boolean classValuesAsString, boolean nestedAttributesAsMap) {
+
+		AnnotationAttributes raw = this.attributeMap.get(annotationType);
+		return convertClassValues(raw, classValuesAsString, nestedAttributesAsMap);
+	}
+
+	private AnnotationAttributes convertClassValues(
+			AnnotationAttributes original, boolean classValuesAsString, boolean nestedAttributesAsMap) {
+
+		if (original == null) {
 			return null;
 		}
-		Map<String, Object> result = new LinkedHashMap<String, Object>(raw.size());
-		for (Map.Entry<String, Object> entry : raw.entrySet()) {
+		AnnotationAttributes result = new AnnotationAttributes(original.size());
+		for (Map.Entry<String, Object> entry : original.entrySet()) {
 			try {
 				Object value = entry.getValue();
-				if (value instanceof Type) {
+				if (value instanceof AnnotationAttributes) {
+					value = convertClassValues((AnnotationAttributes)value, classValuesAsString, nestedAttributesAsMap);
+				}
+				else if (value instanceof AnnotationAttributes[]) {
+					AnnotationAttributes[] values = (AnnotationAttributes[])value;
+					for (int i = 0; i < values.length; i++) {
+						values[i] = convertClassValues(values[i], classValuesAsString, nestedAttributesAsMap);
+					}
+				}
+				else if (value instanceof Type) {
 					value = (classValuesAsString ? ((Type) value).getClassName() :
 							this.classLoader.loadClass(((Type) value).getClassName()));
 				}
@@ -127,10 +149,10 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 				}
 				else if (classValuesAsString) {
 					if (value instanceof Class) {
-						value = ((Class) value).getName();
+						value = ((Class<?>) value).getName();
 					}
 					else if (value instanceof Class[]) {
-						Class[] clazzArray = (Class[]) value;
+						Class<?>[] clazzArray = (Class[]) value;
 						String[] newValue = new String[clazzArray.length];
 						for (int i = 0; i < clazzArray.length; i++) {
 							newValue[i] = clazzArray[i].getName();

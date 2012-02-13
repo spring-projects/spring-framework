@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1000,27 +1000,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		private final String beanName;
 
-		private final Class type;
-
 		public DependencyObjectFactory(DependencyDescriptor descriptor, String beanName) {
 			this.descriptor = descriptor;
 			this.beanName = beanName;
-			this.type = determineObjectFactoryType();
-		}
-
-		private Class determineObjectFactoryType() {
-			Type type = this.descriptor.getGenericDependencyType();
-			if (type instanceof ParameterizedType) {
-				Type arg = ((ParameterizedType) type).getActualTypeArguments()[0];
-				if (arg instanceof Class) {
-					return (Class) arg;
-				}
-			}
-			return Object.class;
+			this.descriptor.increaseNestingLevel();
 		}
 
 		public Object getObject() throws BeansException {
-			return doResolveDependency(this.descriptor, this.type, this.beanName, null, null);
+			return doResolveDependency(this.descriptor, this.descriptor.getDependencyType(), this.beanName, null, null);
 		}
 	}
 
