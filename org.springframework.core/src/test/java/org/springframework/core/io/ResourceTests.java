@@ -16,6 +16,7 @@
 
 package org.springframework.core.io;
 
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
@@ -215,13 +216,8 @@ public class ResourceTests {
 		catch (FileNotFoundException ex) {
 			assertTrue(ex.getMessage().indexOf(name) != -1);
 		}
-		try {
-			resource.getFilename();
-			fail("IllegalStateException should have been thrown");
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().indexOf(name) != -1);
-		}
+
+		assertThat(resource.getFilename(), nullValue());
 	}
 
 }
