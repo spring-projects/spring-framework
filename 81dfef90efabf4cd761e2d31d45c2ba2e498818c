@@ -1,0 +1,30 @@
+tree 74b7f8361eb901d90a02ab803e2ab06df5d43ded
+parent b787a68f2050df179f7036b209aa741230a02477
+author Chris Beams <cbeams@vmware.com> 1329137474 +0100
+committer Chris Beams <cbeams@vmware.com> 1329141666 +0100
+
+Compensate for changes in JDK 7 Introspector
+
+Prior to JDK 7, java.beans.Introspector registered indexed write methods
+irrespective of return type, for example either of the following methods
+were legal
+
+    void setFoo(int i, Foo foo)
+    Object setFoo(int i, Foo foo)
+
+This was considered a bug and disallowed starting with JDK 7, such that
+only the former signature is a candidate.
+
+Supporting non-void returning setter methods is exactly what
+ExtendedBeanInfo was designed to do, and prior to this commit, the
+implementation of ExtendedBeanInfo assumed this (somewhat surprising)
+behavior from the underlying Introspector, and because it worked out of
+the box, took no extra steps to recognize and register these methods.
+For this reason, non-void returning indexed write methods were not
+registered under JDK 7+, causing test failures in ExtendedBeanInfoTests.
+
+Now the implementation is careful to detect these methods without any
+assumption about Introspector behavior, such that they are registered in
+exactly the same fashion across JDK versions.
+
+Issue: SPR-9014
