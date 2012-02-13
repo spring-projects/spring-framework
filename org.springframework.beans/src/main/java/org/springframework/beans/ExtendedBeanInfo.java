@@ -75,12 +75,6 @@ class ExtendedBeanInfo implements BeanInfo {
 	public ExtendedBeanInfo(BeanInfo delegate) throws IntrospectionException {
 		this.delegate = delegate;
 
-		// PropertyDescriptor instances from the delegate object are never added directly, but always
-		// copied to the local collection of #propertyDescriptors and returned by calls to
-		// #getPropertyDescriptors(). this algorithm iterates through all methods (method descriptors)
-		// in the wrapped BeanInfo object, copying any existing PropertyDescriptor or creating a new
-		// one for any non-standard setter methods found.
-
 		ALL_METHODS:
 		for (MethodDescriptor md : delegate.getMethodDescriptors()) {
 			Method method = md.getMethod();
@@ -282,7 +276,7 @@ class ExtendedBeanInfo implements BeanInfo {
 				}
 				this.propertyDescriptors.add(pd);
 			} catch (IntrospectionException ex) {
-				logger.warn(format("Could not create new PropertyDescriptor for readMethod [%s] writeMethod [%s] " +
+				logger.debug(format("Could not create new PropertyDescriptor for readMethod [%s] writeMethod [%s] " +
 						"indexedReadMethod [%s] indexedWriteMethod [%s] for property [%s]. Reason: %s",
 						readMethod, writeMethod, indexedReadMethod, indexedWriteMethod, propertyName, ex.getMessage()));
 				// suppress exception and attempt to continue
@@ -293,7 +287,7 @@ class ExtendedBeanInfo implements BeanInfo {
 			try {
 				pd.setWriteMethod(writeMethod);
 			} catch (IntrospectionException ex) {
-				logger.warn(format("Could not add write method [%s] for property [%s]. Reason: %s",
+				logger.debug(format("Could not add write method [%s] for property [%s]. Reason: %s",
 						writeMethod, propertyName, ex.getMessage()));
 				// fall through -> add property descriptor as best we can
 			}

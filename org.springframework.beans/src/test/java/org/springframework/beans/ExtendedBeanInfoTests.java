@@ -698,17 +698,31 @@ public class ExtendedBeanInfoTests {
 	}
 
 
-	/**
-	 * java.beans.Introspector returns the "wrong" declaring class for overridden read
-	 * methods, which in turn violates expectations in {@link ExtendedBeanInfo} regarding
-	 * method equality. Spring's {@link ClassUtils#getMostSpecificMethod(Method, Class)}
-	 * helps out here, and is now put into use in ExtendedBeanInfo as well
-	 */
 	@Test
-	public void demonstrateCauseSpr8949() throws IntrospectionException {
-		BeanInfo info = Introspector.getBeanInfo(B.class);
+	public void cornerSpr8949() throws IntrospectionException {
+		class A {
+			@SuppressWarnings("unused")
+			public boolean isTargetMethod() {
+				return false;
+			}
+		}
 
-		for (PropertyDescriptor pd : info.getPropertyDescriptors()) {
+		class B extends A {
+			@Override
+			public boolean isTargetMethod() {
+				return false;
+			}
+		}
+
+		BeanInfo bi = Introspector.getBeanInfo(B.class);
+
+		/* first, demonstrate the 'problem':
+		 * java.beans.Introspector returns the "wrong" declaring class for overridden read
+		 * methods, which in turn violates expectations in {@link ExtendedBeanInfo} regarding
+		 * method equality. Spring's {@link ClassUtils#getMostSpecificMethod(Method, Class)}
+		 * helps out here, and is now put into use in ExtendedBeanInfo as well
+		 */
+		for (PropertyDescriptor pd : bi.getPropertyDescriptors()) {
 			if ("targetMethod".equals(pd.getName())) {
 				Method readMethod = pd.getReadMethod();
 				assertTrue(readMethod.getDeclaringClass().equals(A.class)); // we expected B!
@@ -717,11 +731,8 @@ public class ExtendedBeanInfoTests {
 				assertTrue(msReadMethod.getDeclaringClass().equals(B.class)); // and now we get it.
 			}
 		}
-	}
 
-	@Test
-	public void cornerSpr8949() throws IntrospectionException {
-		BeanInfo bi = Introspector.getBeanInfo(B.class);
+		// and now demonstrate that we've indeed fixed the problem
 		ExtendedBeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "targetMethod"), is(true));
@@ -731,13 +742,13 @@ public class ExtendedBeanInfoTests {
 		assertThat(hasWriteMethodForProperty(ebi, "targetMethod"), is(false));
 	}
 
-	static class A {
+	static class X {
 		public boolean isTargetMethod() {
 			return false;
 		}
 	}
 
-	static class B extends A {
+	static class Y extends X {
 		@Override
 		public boolean isTargetMethod() {
 			return false;
