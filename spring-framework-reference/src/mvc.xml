@@ -1575,16 +1575,18 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
 &lt;bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller"/&gt;</programlisting>
 
         <para>An <classname>@RequestBody</classname> method parameter can be
-        annotated with <classname>@Valid</classname>, in which case it will
+        annotated with <classname>@Valid</classname>, in which case it will be
         validated using the configured <classname>Validator</classname>
         instance. When using the MVC namespace a JSR-303 validator is
         configured automatically assuming a JSR-303 implementation is
-        available on the classpath. If validation fails a
-        <classname>RequestBodyNotValidException</classname> is raised. The
-        exception is handled by the
-        <classname>DefaultHandlerExceptionResolver</classname> and results in
-        a <literal>400</literal> error sent back to the client along with a
-        message containing the validation errors.</para>
+        available on the classpath.</para>
+        <para>Unlike <classname>@ModelAttribute</classname> parameters, for which
+        a <classname>BindingResult</classname> can be used to examine the errors,
+        <classname>@RequestBody</classname> validation errors always result in a
+        <classname>MethodArgumentNotValidException</classname> being raised.
+        The exception is handled in the
+        <classname>DefaultHandlerExceptionResolver</classname>, which sends
+        a <literal>400</literal> error back to the client.</para>
 
         <note>
           <para>Also see <xref linkend="mvc-annotation-driven" /> for
