@@ -87,6 +87,11 @@ public class VfsResource extends AbstractResource {
 	}
 
 	@Override
+	public long contentLength() throws IOException {
+		return VfsUtils.getSize(this.resource);
+	}
+
+	@Override
 	public long lastModified() throws IOException {
 		return VfsUtils.getLastModified(this.resource);
 	}

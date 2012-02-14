@@ -25,6 +25,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.springframework.core.NestedIOException;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -108,12 +109,13 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation checks the length of the underlying File,
-	 * if available.
-	 * @see #getFile()
+	 * This implementation reads the entire InputStream to calculate the
+	 * content length. Subclasses will almost always be able to provide
+	 * a more optimal version of this, e.g. checking a File length.
+	 * @see #getInputStream()
 	 */
 	public long contentLength() throws IOException {
-		return getFile().length();
+		return FileCopyUtils.copyToByteArray(getInputStream()).length;
 	}
 
 	/**

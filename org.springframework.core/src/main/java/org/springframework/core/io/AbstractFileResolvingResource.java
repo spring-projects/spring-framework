@@ -152,7 +152,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		URL url = getURL();
 		if (ResourceUtils.isFileURL(url)) {
 			// Proceed with file system resolution...
-			return super.contentLength();
+			return getFile().length();
 		}
 		else {
 			// Try a URL connection content-length header...
