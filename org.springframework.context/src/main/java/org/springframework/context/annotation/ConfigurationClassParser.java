@@ -77,6 +77,8 @@ class ConfigurationClassParser {
 
 	private final ImportStack importStack = new ImportStack();
 
+	private final Set<String> knownSuperclasses = new LinkedHashSet<String>();
+
 	private final Set<ConfigurationClass> configurationClasses =
 		new LinkedHashSet<ConfigurationClass>();
 
@@ -138,23 +140,12 @@ class ConfigurationClassParser {
 			}
 		}
 
-		while (metadata != null) {
-			doProcessConfigurationClass(configClass, metadata);
-			String superClassName = metadata.getSuperClassName();
-			if (superClassName != null && !Object.class.getName().equals(superClassName)) {
-				if (metadata instanceof StandardAnnotationMetadata) {
-					Class<?> clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
-					metadata = new StandardAnnotationMetadata(clazz.getSuperclass(), true);
-				}
-				else {
-					MetadataReader reader = this.metadataReaderFactory.getMetadataReader(superClassName);
-					metadata = reader.getAnnotationMetadata();
-				}
-			}
-			else {
-				metadata = null;
-			}
+		// recursively process the configuration class and its superclass hierarchy
+		do {
+			metadata = doProcessConfigurationClass(configClass, metadata);
 		}
+		while (metadata != null);
+
 		if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
 			// Explicit bean definition found, probably replacing an import.
 			// Let's remove the old one and go with the new one.
@@ -164,7 +155,11 @@ class ConfigurationClassParser {
 		this.configurationClasses.add(configClass);
 	}
 
-	protected void doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
+	/**
+	 * @return annotation metadata of superclass, null if none found or previously processed
+	 */
+	protected AnnotationMetadata doProcessConfigurationClass(
+			ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
 
 		// recursively process any member (nested) classes first
 		for (String memberClassName : metadata.getMemberClassNames()) {
@@ -227,8 +222,26 @@ class ConfigurationClassParser {
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
-	}
 
+		// process superclass, if any
+		if (metadata.hasSuperClass()) {
+			String superclass = metadata.getSuperClassName();
+			if (this.knownSuperclasses.add(superclass)) {
+				// superclass found, return its annotation metadata and recurse
+				if (metadata instanceof StandardAnnotationMetadata) {
+					Class<?> clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
+					return new StandardAnnotationMetadata(clazz.getSuperclass(), true);
+				}
+				else {
+					MetadataReader reader = this.metadataReaderFactory.getMetadataReader(superclass);
+					return reader.getAnnotationMetadata();
+				}
+			}
+		}
+
+		// no superclass, processing is complete
+		return null;
+	}
 
 	/**
 	 * Return a list of attribute maps for all declarations of the given annotation
