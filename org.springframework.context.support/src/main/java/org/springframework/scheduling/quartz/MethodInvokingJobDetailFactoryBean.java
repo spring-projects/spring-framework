@@ -94,7 +94,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		try {
 			Class jobExecutionContextClass =
 					QuartzJobBean.class.getClassLoader().loadClass("org.quartz.JobExecutionContext");
-			setResultMethod = jobExecutionContextClass.getMethod("setResult");
+			setResultMethod = jobExecutionContextClass.getMethod("setResult", Object.class);
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException("Incompatible Quartz API: " + ex);
