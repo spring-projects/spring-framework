@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Properties;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Convenient utility methods for loading of <code>java.util.Properties</code>,
@@ -106,7 +107,7 @@ public abstract class PropertiesLoaderUtils {
 			InputStream is = null;
 			try {
 				URLConnection con = url.openConnection();
-				con.setUseCaches(false);
+				ResourceUtils.useCachesIfNecessary(con);
 				is = con.getInputStream();
 				properties.load(is);
 			}

@@ -95,7 +95,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			else {
 				// Try a URL connection content-length header...
 				URLConnection con = url.openConnection();
-				con.setUseCaches(false);
+				ResourceUtils.useCachesIfNecessary(con);
 				HttpURLConnection httpCon =
 						(con instanceof HttpURLConnection ? (HttpURLConnection) con : null);
 				if (httpCon != null) {
@@ -157,7 +157,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		else {
 			// Try a URL connection content-length header...
 			URLConnection con = url.openConnection();
-			con.setUseCaches(false);
+			ResourceUtils.useCachesIfNecessary(con);
 			if (con instanceof HttpURLConnection) {
 				((HttpURLConnection) con).setRequestMethod("HEAD");
 			}
@@ -175,7 +175,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		else {
 			// Try a URL connection last-modified header...
 			URLConnection con = url.openConnection();
-			con.setUseCaches(false);
+			ResourceUtils.useCachesIfNecessary(con);
 			if (con instanceof HttpURLConnection) {
 				((HttpURLConnection) con).setRequestMethod("HEAD");
 			}

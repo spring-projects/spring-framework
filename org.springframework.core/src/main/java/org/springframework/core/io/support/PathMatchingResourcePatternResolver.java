@@ -433,7 +433,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (con instanceof JarURLConnection) {
 			// Should usually be the case for traditional JAR files.
 			JarURLConnection jarCon = (JarURLConnection) con;
-			jarCon.setUseCaches(jarCon.getClass().getName().startsWith("JNLP"));
+			ResourceUtils.useCachesIfNecessary(jarCon);
 			jarFile = jarCon.getJarFile();
 			jarFileUrl = jarCon.getJarFileURL().toExternalForm();
 			JarEntry jarEntry = jarCon.getJarEntry();
