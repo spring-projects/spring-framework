@@ -8,7 +8,7 @@
 	<jdbc:embedded-database id="dataSource" type="H2"/>
 
 	<bean class="org.springframework.jdbc.support.CustomSQLExceptionTranslatorRegistrar">
-		<property name="sqlExceptionTranslators">
+		<property name="translators">
 			<map>
 				<entry key="H2">
 					<bean class="org.springframework.jdbc.support.CustomSqlExceptionTranslator"/>
