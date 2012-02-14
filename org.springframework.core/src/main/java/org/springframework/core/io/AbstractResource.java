@@ -25,7 +25,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.springframework.core.NestedIOException;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -115,7 +114,22 @@ public abstract class AbstractResource implements Resource {
 	 * @see #getInputStream()
 	 */
 	public long contentLength() throws IOException {
-		return FileCopyUtils.copyToByteArray(getInputStream()).length;
+		InputStream is = getInputStream();
+		try {
+			long size = 0;
+			byte[] buf = new byte[255];
+			for (int read = is.read(buf); read != -1;) {
+				size += read;
+			}
+			return size;
+		}
+		finally {
+			try {
+				is.close();
+			}
+			catch (IOException ex) {
+			}
+		}
 	}
 
 	/**
