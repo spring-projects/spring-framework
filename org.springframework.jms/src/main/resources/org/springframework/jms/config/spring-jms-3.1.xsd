@@ -233,6 +233,14 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="receive-timeout" type="xsd:int">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The timeout to use for receive calls (in milliseconds).
+	The default is 1000 ms (1 sec); -1 indicates no timeout at all.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="phase" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
