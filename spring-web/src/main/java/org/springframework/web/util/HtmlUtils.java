@@ -63,6 +63,17 @@ public abstract class HtmlUtils {
 		StringBuilder escaped = new StringBuilder(input.length() * 2);
 		for (int i = 0; i < input.length(); i++) {
 			char character = input.charAt(i);
+			// avoid escaping escaped
+			if (character == HtmlCharacterEntityReferences.REFERENCE_START) {
+				int referenceEndIndex = input.indexOf(HtmlCharacterEntityReferences.REFERENCE_END, i);
+				if (referenceEndIndex != -1) {
+					String potentialEntityReference = input.substring(i+1, referenceEndIndex);
+					if (characterEntityReferences.convertToCharacter(potentialEntityReference) != HtmlCharacterEntityReferences.CHAR_NULL) {
+						escaped.append(character);
+						continue;
+					}
+				}
+			}
 			String reference = characterEntityReferences.convertToReference(character);
 			if (reference != null) {
 				escaped.append(reference);
