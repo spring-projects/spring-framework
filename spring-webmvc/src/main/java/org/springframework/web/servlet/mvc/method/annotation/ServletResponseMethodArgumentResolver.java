@@ -62,7 +62,10 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
 			throws IOException {
 		
-		mavContainer.setRequestHandled(true);
+		// mavContainer is null for init-binder methods
+		if (mavContainer != null) {
+			mavContainer.setRequestHandled(true);
+		}
 
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		Class<?> paramType = parameter.getParameterType();
