@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.MetadataUtils.attributesFor;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -31,6 +29,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Utility class that allows for convenient registration of common

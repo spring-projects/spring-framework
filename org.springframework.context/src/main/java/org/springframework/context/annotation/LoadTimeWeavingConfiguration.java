@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.weaving.AspectJWeavingEnabler.ASPECTJ_AOP_XML_RESOURCE;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -29,6 +27,8 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.util.Assert;
+
+import static org.springframework.context.weaving.AspectJWeavingEnabler.*;
 
 /**
  * {@code @Configuration} class that registers a {@link LoadTimeWeaver} bean.

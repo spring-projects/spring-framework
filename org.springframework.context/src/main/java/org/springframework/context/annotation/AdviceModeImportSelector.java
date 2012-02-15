@@ -16,14 +16,14 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.MetadataUtils.attributesFor;
-
 import java.lang.annotation.Annotation;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Convenient base class for {@link ImportSelector} implementations that select imports
