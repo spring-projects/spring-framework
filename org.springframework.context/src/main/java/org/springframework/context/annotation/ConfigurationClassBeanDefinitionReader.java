@@ -16,7 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -37,12 +37,10 @@ import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SourceExtractor;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
@@ -50,7 +48,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.StringUtils;
 
@@ -84,6 +81,8 @@ class ConfigurationClassBeanDefinitionReader {
 	private final ResourceLoader resourceLoader;
 
 	private final Environment environment;
+
+	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
 
 
 	/**
@@ -135,39 +134,21 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
-		BeanDefinition configBeanDef = new GenericBeanDefinition();
-		String className = configClass.getMetadata().getClassName();
+		AnnotationMetadata metadata = configClass.getMetadata();
+		BeanDefinition configBeanDef = new AnnotatedGenericBeanDefinition(metadata);
+		String className = metadata.getClassName();
 		configBeanDef.setBeanClassName(className);
-		MetadataReader reader;
-		try {
-			reader = this.metadataReaderFactory.getMetadataReader(className);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Could not create MetadataReader for class " + className);
-		}
 		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
-			Map<String, Object> configAttributes =
-					reader.getAnnotationMetadata().getAnnotationAttributes(Configuration.class.getName());
-
-			// has the 'value' attribute of @Configuration been set?
-			String configBeanName = (String) configAttributes.get("value");
-			if (StringUtils.hasText(configBeanName)) {
-				// yes -> register the configuration class bean with this name
-				this.registry.registerBeanDefinition(configBeanName, configBeanDef);
-			}
-			else {
-				// no -> register the configuration class bean with a generated name
-				configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName((AbstractBeanDefinition)configBeanDef, this.registry);
-			}
+			String configBeanName = this.beanNameGenerator.generateBeanName(configBeanDef, this.registry);
+			this.registry.registerBeanDefinition(configBeanName, configBeanDef);
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Registered bean definition for imported @Configuration class %s", configBeanName));
 			}
 		}
 		else {
-			AnnotationMetadata metadata = reader.getAnnotationMetadata();
 			this.problemReporter.error(
-					new InvalidConfigurationImportProblem(className, reader.getResource(), metadata));
+					new InvalidConfigurationImportProblem(className, configClass.getResource(), metadata));
 		}
 	}
 
