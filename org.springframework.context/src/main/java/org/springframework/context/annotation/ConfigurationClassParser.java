@@ -36,6 +36,7 @@ import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
@@ -100,14 +101,16 @@ class ConfigurationClassParser {
 	 */
 	public ConfigurationClassParser(MetadataReaderFactory metadataReaderFactory,
 			ProblemReporter problemReporter, Environment environment,
-			ResourceLoader resourceLoader, BeanDefinitionRegistry registry) {
+			ResourceLoader resourceLoader, BeanNameGenerator beanNameGenerator,
+			BeanDefinitionRegistry registry) {
+
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.problemReporter = problemReporter;
 		this.environment = environment;
 		this.resourceLoader = resourceLoader;
 		this.registry = registry;
-		this.componentScanParser =
-			new ComponentScanAnnotationParser(this.resourceLoader, this.environment, this.registry);
+		this.componentScanParser = new ComponentScanAnnotationParser(
+				resourceLoader, environment, beanNameGenerator, registry);
 	}
 
 

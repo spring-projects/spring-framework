@@ -57,6 +57,17 @@ public class AnnotationConfigUtils {
 			"org.springframework.context.annotation.internalConfigurationAnnotationProcessor";
 
 	/**
+	 * The bean name of the internally managed BeanNameGenerator for use when processing
+	 * {@link Configuration} classes. Set by {@link AnnotationConfigApplicationContext}
+	 * and {@code AnnotationConfigWebApplicationContext} during bootstrap in order to make
+	 * any custom name generation strategy available to the underlying
+	 * {@link ConfigurationClassPostProcessor}.
+	 * @since 3.1.1
+	 */
+	public static final String CONFIGURATION_BEAN_NAME_GENERATOR =
+			"org.springframework.context.annotation.internalConfigurationBeanNameGenerator";
+
+	/**
 	 * The bean name of the internally managed Autowired annotation processor.
 	 */
 	public static final String AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
@@ -248,5 +259,6 @@ public class AnnotationConfigUtils {
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
+
 
 }

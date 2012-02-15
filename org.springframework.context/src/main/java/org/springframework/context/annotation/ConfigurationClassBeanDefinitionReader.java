@@ -49,6 +49,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.context.annotation.MetadataUtils.*;
@@ -82,7 +83,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final Environment environment;
 
-	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
+	private final BeanNameGenerator beanNameGenerator;
 
 
 	/**
@@ -91,16 +92,20 @@ class ConfigurationClassBeanDefinitionReader {
 	 * @param problemReporter 
 	 * @param metadataReaderFactory 
 	 */
-	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
+	public ConfigurationClassBeanDefinitionReader(
+			BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
 			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
-			ResourceLoader resourceLoader, Environment environment) {
+			ResourceLoader resourceLoader, Environment environment,
+			BeanNameGenerator beanNameGenerator) {
 
+		Assert.notNull(beanNameGenerator, "BeanNameGenerator must not be null");
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
 		this.problemReporter = problemReporter;
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.resourceLoader = resourceLoader;
 		this.environment = environment;
+		this.beanNameGenerator = beanNameGenerator;
 	}
 
 

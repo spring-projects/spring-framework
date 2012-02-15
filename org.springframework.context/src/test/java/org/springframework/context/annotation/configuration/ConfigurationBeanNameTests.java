@@ -31,7 +31,8 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests ensuring that configuration class bean names as expressed via @Configuration
- * or @Component 'value' attributes are indeed respected
+ * or @Component 'value' attributes are indeed respected, and that customization of bean
+ * naming through a BeanNameGenerator strategy works as expected.
  *
  * @author Chris Beams
  * @since 3.1.1
@@ -57,6 +58,23 @@ public class ConfigurationBeanNameTests {
 		assertThat(ctx.containsBean("outer"), is(false));
 		assertThat(ctx.containsBean("imported"), is(false));
 		assertThat(ctx.containsBean("nested"), is(true));
+		assertThat(ctx.containsBean("nestedBean"), is(true));
+	}
+
+	@Test
+	public void registerOuterConfig_withBeanNameGenerator() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.setBeanNameGenerator(new AnnotationBeanNameGenerator() {
+			public String generateBeanName(
+					BeanDefinition definition, BeanDefinitionRegistry registry) {
+				return "custom-" + super.generateBeanName(definition, registry);
+			}
+		});
+		ctx.register(A.class);
+		ctx.refresh();
+		assertThat(ctx.containsBean("custom-outer"), is(true));
+		assertThat(ctx.containsBean("custom-imported"), is(true));
+		assertThat(ctx.containsBean("custom-nested"), is(true));
 		assertThat(ctx.containsBean("nestedBean"), is(true));
 	}
 

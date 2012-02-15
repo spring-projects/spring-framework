@@ -19,8 +19,15 @@ package org.springframework.web.context.support;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.annotation.AnnotationBeanNameGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static org.hamcrest.CoreMatchers.*;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Chris Beams
@@ -49,8 +56,24 @@ public class AnnotationConfigWebApplicationContextTests {
 		assertNotNull(bean);
 	}
 
+	@Test
+	public void withBeanNameGenerator() {
+		AnnotationConfigWebApplicationContext ctx =
+			new AnnotationConfigWebApplicationContext();
+		ctx.setBeanNameGenerator(new AnnotationBeanNameGenerator() {
+			@Override
+			public String generateBeanName(BeanDefinition definition,
+					BeanDefinitionRegistry registry) {
+				return "custom-" + super.generateBeanName(definition, registry);
+			}
+		});
+		ctx.setConfigLocation(Config.class.getName());
+		ctx.refresh();
+		assertThat(ctx.containsBean("custom-myConfig"), is(true));
+	}
 
-	@Configuration
+
+	@Configuration("myConfig")
 	static class Config {
 		@Bean
 		public TestBean myTestBean() {
