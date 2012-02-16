@@ -118,6 +118,29 @@ public class PropertySourceAnnotationTests {
 		System.clearProperty("path.to.properties");
 	}
 
+	/**
+	 * Corner bug reported in SPR-9127.
+	 */
+	@Test
+	public void withNameAndMultipleResourceLocations() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithNameAndMultipleResourceLocations.class);
+		ctx.refresh();
+		assertThat(ctx.getEnvironment().containsProperty("from.p1"), is(true));
+		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
+	}
+
+
+	@Configuration
+	@PropertySource(
+			name = "psName",
+			value = {
+					"classpath:org/springframework/context/annotation/p1.properties",
+					"classpath:org/springframework/context/annotation/p2.properties"
+			})
+	static class ConfigWithNameAndMultipleResourceValues {
+	}
+
 
 	@Configuration
 	@PropertySource(value="classpath:${unresolvable}/p1.properties")
@@ -177,5 +200,16 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySource("classpath:org/springframework/context/annotation/p2.properties")
 	static class P2Config {
+	}
+
+
+	@Configuration
+	@PropertySource(
+			name = "psName",
+			value = {
+					"classpath:org/springframework/context/annotation/p1.properties",
+					"classpath:org/springframework/context/annotation/p2.properties"
+			})
+	static class ConfigWithNameAndMultipleResourceLocations {
 	}
 }
