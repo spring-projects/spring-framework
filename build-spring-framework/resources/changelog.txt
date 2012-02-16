@@ -3,10 +3,10 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1.1 (2012-02-15)
+Changes in version 3.1.1 (2012-02-16)
 -------------------------------------
 
-* official support for Hibernate 4.0 GA as well as Hibernate 4.1
+* official support for Hibernate 4.0.0/4.0.1 as well as Hibernate 4.1
 * JBossNativeJdbcExtractor is compatible with JBoss AS 7 as well
 * restored JBossLoadTimeWeaver compatibility with JBoss AS 5.1
 * Provider injection works with generically typed collections of beans as well
@@ -34,20 +34,21 @@ Changes in version 3.1.1 (2012-02-15)
 * fixed QuartzJobBean and MethodInvokingJobDetailFactoryBean for compatibility with Quartz 2.0/2.1
 * JMS CachingConnectionFactory never caches consumers for temporary queues and topics
 * JMS SimpleMessageListenerContainer silently falls back to lazy registration of consumers
-* Servlet/PortletContextResource's "isReadable()" implementation returns false for directories
+* added "receive-timeout" attribute to jms:listener-container element in JMS namespace
+* ServletServerHttpRequest/Response fall back on the Content-Type and encoding of the request
 * preserve quotes in MediaType parameters
 * added "normalize()" method to UriComponents
 * remove empty path segments from input to UriComponentsBuilder
 * added "fromRequestUri(request)" and "fromCurrentRequestUri()" methods to ServletUriComponentsBuilder
+* Servlet/PortletContextResource's "isReadable()" implementation returns false for directories
 * allow adding flash attributes in methods with a ModelAndView return value
 * make flash attributes available in the model of Parameterizable/UrlFilenameViewController
 * revised the FlashMapManager contract and implementation to address a flaw in its design
+* removed check for HTTP POST when resolving multipart request controller method arguments
+* fixed request mapping bug involving direct vs pattern path matches with HTTP methods
+* updated @RequestMapping and reference docs wrt differences between @MVC 3.1 and @MVC 2.5-3.0
 * improved @SessionAttributes handling to provide better support for clustered sessions
 * added property to RedirectView to disable expanding URI variables in redirect URL
-* fixed request mapping bug involving direct vs pattern path matches with HTTP methods
-* removed check for HTTP "POST" when resolving multipart request controller method arguments
-* updated @RequestMapping and reference docs wrt differences between @MVC 3.1 and @MVC 2.5-3.0
-* ServletServerHttpRequest/Response fall back on the Content-Type and encoding of the request
 
 
 Changes in version 3.1 GA (2011-12-12)
