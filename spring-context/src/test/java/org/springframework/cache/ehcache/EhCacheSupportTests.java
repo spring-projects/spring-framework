@@ -82,7 +82,7 @@ public class EhCacheSupportTests extends TestCase {
 		EhCacheManagerFactoryBean cacheManagerFb = null;
 		try {
 			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
-			assertEquals(Ehcache.class, cacheFb.getObjectType());
+			assertTrue(Ehcache.class.isAssignableFrom(cacheFb.getObjectType()));
 			assertTrue("Singleton property", cacheFb.isSingleton());
 			if (useCacheManagerFb) {
 				cacheManagerFb = new EhCacheManagerFactoryBean();
