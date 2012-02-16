@@ -16,22 +16,11 @@
 
 package org.springframework.jdbc.support;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
-import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.util.Assert;
-import org.springframework.util.PatternMatchUtils;
 
 /**
  * Registry for custom {@link org.springframework.jdbc.support.SQLExceptionTranslator} instances associated with
@@ -39,21 +28,12 @@ import org.springframework.util.PatternMatchUtils;
  * named "sql-error-codes.xml".
  *
  * @author Thomas Risberg
- * @since 3.1
+ * @since 3.1.1
  * @see SQLErrorCodesFactory
  */
 public class CustomSQLExceptionTranslatorRegistry {
 
 	private static final Log logger = LogFactory.getLog(CustomSQLExceptionTranslatorRegistry.class);
-
-	/**
-	 * Map registry to hold custom translators specific databases.
-	 * Key is the database product name as defined in the
-	 * {@link org.springframework.jdbc.support.SQLErrorCodesFactory}.
-	 */
-	private final Map<String, SQLExceptionTranslator> sqlExceptionTranslatorRegistry =
-			new HashMap<String, SQLExceptionTranslator>();
-
 
 	/**
 	 * Keep track of a single instance so we can return it to classes that request it.
@@ -70,7 +50,15 @@ public class CustomSQLExceptionTranslatorRegistry {
 
 
 	/**
-	 * Create a new instance of the {@link org.springframework.jdbc.support.CustomSQLExceptionTranslatorRegistry} class.
+	 * Map registry to hold custom translators specific databases.
+	 * Key is the database product name as defined in the
+	 * {@link org.springframework.jdbc.support.SQLErrorCodesFactory}.
+	 */
+	private final Map<String, SQLExceptionTranslator> translatorMap = new HashMap<String, SQLExceptionTranslator>();
+
+
+	/**
+	 * Create a new instance of the {@link CustomSQLExceptionTranslatorRegistry} class.
 	 * <p>Not public to enforce Singleton design pattern.
 	 */
 	private CustomSQLExceptionTranslatorRegistry() {
@@ -78,25 +66,28 @@ public class CustomSQLExceptionTranslatorRegistry {
 
 	/**
 	 * Register a new custom translator for the specified database name.
-	 *
 	 * @param dbName the database name
-	 * @param sqlExceptionTranslator the custom translator
+	 * @param translator the custom translator
 	 */
-	public void registerSqlExceptionTranslator(String dbName, SQLExceptionTranslator sqlExceptionTranslator) {
-		SQLExceptionTranslator replaced = sqlExceptionTranslatorRegistry.put(dbName, sqlExceptionTranslator);
+	public void registerTranslator(String dbName, SQLExceptionTranslator translator) {
+		SQLExceptionTranslator replaced = translatorMap.put(dbName, translator);
 		if (replaced != null) {
-			logger.warn("Replacing custom translator '" + replaced +
-					"' for database " + dbName +
-					" with '" + sqlExceptionTranslator + "'");
+			logger.warn("Replacing custom translator [" + replaced + "] for database '" + dbName +
+					"' with [" + translator + "]");
 		}
 		else {
-			logger.info("Adding custom translator '" + sqlExceptionTranslator.getClass().getSimpleName() +
-					"' for database " + dbName);
+			logger.info("Adding custom translator of type [" + translator.getClass().getName() +
+					"] for database '" + dbName + "'");
 		}
 	}
 
-	public SQLExceptionTranslator findSqlExceptionTranslatorForDatabase(String dbName) {
-		return sqlExceptionTranslatorRegistry.get(dbName);
+	/**
+	 * Find a custom translator for the specified database.
+	 * @param dbName the database name
+	 * @return the custom translator, or <code>null</code> if none found
+	 */
+	public SQLExceptionTranslator findTranslatorForDatabase(String dbName) {
+		return this.translatorMap.get(dbName);
 	}
 
 }

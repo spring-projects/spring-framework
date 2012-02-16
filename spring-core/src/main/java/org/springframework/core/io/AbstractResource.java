@@ -108,12 +108,28 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation checks the length of the underlying File,
-	 * if available.
-	 * @see #getFile()
+	 * This implementation reads the entire InputStream to calculate the
+	 * content length. Subclasses will almost always be able to provide
+	 * a more optimal version of this, e.g. checking a File length.
+	 * @see #getInputStream()
 	 */
 	public long contentLength() throws IOException {
-		return getFile().length();
+		InputStream is = getInputStream();
+		try {
+			long size = 0;
+			byte[] buf = new byte[255];
+			for (int read = is.read(buf); read != -1;) {
+				size += read;
+			}
+			return size;
+		}
+		finally {
+			try {
+				is.close();
+			}
+			catch (IOException ex) {
+			}
+		}
 	}
 
 	/**

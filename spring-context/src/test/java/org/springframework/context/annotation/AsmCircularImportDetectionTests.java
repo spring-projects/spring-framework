@@ -40,6 +40,7 @@ public class AsmCircularImportDetectionTests extends AbstractCircularImportDetec
 				new FailFastProblemReporter(),
 				new StandardEnvironment(),
 				new DefaultResourceLoader(),
+				new AnnotationBeanNameGenerator(),
 				new DefaultListableBeanFactory());
 	}
 

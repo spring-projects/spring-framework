@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.MetadataUtils.attributesFor;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -31,6 +29,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Utility class that allows for convenient registration of common
@@ -55,6 +55,17 @@ public class AnnotationConfigUtils {
 	 */
 	public static final String CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalConfigurationAnnotationProcessor";
+
+	/**
+	 * The bean name of the internally managed BeanNameGenerator for use when processing
+	 * {@link Configuration} classes. Set by {@link AnnotationConfigApplicationContext}
+	 * and {@code AnnotationConfigWebApplicationContext} during bootstrap in order to make
+	 * any custom name generation strategy available to the underlying
+	 * {@link ConfigurationClassPostProcessor}.
+	 * @since 3.1.1
+	 */
+	public static final String CONFIGURATION_BEAN_NAME_GENERATOR =
+			"org.springframework.context.annotation.internalConfigurationBeanNameGenerator";
 
 	/**
 	 * The bean name of the internally managed Autowired annotation processor.
@@ -248,5 +259,6 @@ public class AnnotationConfigUtils {
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
+
 
 }

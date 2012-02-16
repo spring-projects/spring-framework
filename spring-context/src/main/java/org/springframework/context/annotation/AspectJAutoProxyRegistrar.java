@@ -16,12 +16,12 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.MetadataUtils.attributesFor;
-
 import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Registers an {@link org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator

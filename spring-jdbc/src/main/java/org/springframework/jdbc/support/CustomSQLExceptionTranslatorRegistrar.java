@@ -16,53 +16,42 @@
 
 package org.springframework.jdbc.support;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * Registry for registering custom {@link org.springframework.jdbc.support.SQLExceptionTranslator}.
+ * Registry for registering custom {@link org.springframework.jdbc.support.SQLExceptionTranslator}
+ * instances for specific databases.
  *
  * @author Thomas Risberg
- * @since 3.1
+ * @since 3.1.1
  */
 public class CustomSQLExceptionTranslatorRegistrar implements InitializingBean {
-
-	private static final Log logger = LogFactory.getLog(CustomSQLExceptionTranslatorRegistrar.class);
 
 	/**
 	 * Map registry to hold custom translators specific databases.
 	 * Key is the database product name as defined in the
 	 * {@link org.springframework.jdbc.support.SQLErrorCodesFactory}.
 	 */
-	private final Map<String, SQLExceptionTranslator> sqlExceptionTranslators =
-			new HashMap<String, SQLExceptionTranslator>();
+	private final Map<String, SQLExceptionTranslator> translators = new HashMap<String, SQLExceptionTranslator>();
+
 
 	/**
-	 * Setter for a Map of translators where the key must be the database name as defined in the
-	 * sql-error-codes.xml file. This method is used when this registry is used in an application context.
-	 * <p>Note that any existing translators will remain unless there is a match in the database name at which
-	 * point the new translator will replace the existing one.
-	 *
-	 * @param sqlExceptionTranslators
+	 * Setter for a Map of {@link SQLExceptionTranslator} references where the key must
+	 * be the database name as defined in the <code>sql-error-codes.xml</code> file.
+	 * <p>Note that any existing translators will remain unless there is a match in the
+	 * database name, at which point the new translator will replace the existing one.
 	 */
-	public void setSqlExceptionTranslators(Map<String, SQLExceptionTranslator> sqlExceptionTranslators) {
-		this.sqlExceptionTranslators.putAll(sqlExceptionTranslators);
+	public void setTranslators(Map<String, SQLExceptionTranslator> translators) {
+		this.translators.putAll(translators);
 	}
 
-	public void afterPropertiesSet() throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Registering custom SQL exception translators for database(s): " +
-					sqlExceptionTranslators.keySet());
-		}
-		for (String dbName : sqlExceptionTranslators.keySet()) {
-			CustomSQLExceptionTranslatorRegistry.getInstance()
-					.registerSqlExceptionTranslator(dbName, sqlExceptionTranslators.get(dbName));
+	public void afterPropertiesSet() {
+		for (String dbName : this.translators.keySet()) {
+			CustomSQLExceptionTranslatorRegistry.getInstance().registerTranslator(dbName, this.translators.get(dbName));
 		}
 	}
+
 }

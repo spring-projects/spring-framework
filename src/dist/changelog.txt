@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1.1 (2012-02-13)
+Changes in version 3.1.1 (2012-02-15)
 -------------------------------------
 
 * official support for Hibernate 4.0 GA as well as Hibernate 4.1
@@ -13,9 +13,12 @@ Changes in version 3.1.1 (2012-02-13)
 * @ActiveProfiles mechanism in test context framework works with @ImportResource as well
 * context:property-placeholder's "file-encoding" attribute value is being applied correctly
 * clarified Resource's "getFilename" method to return null if resource type does not have a filename
+* Resource "contentLength()" implementations work with OSGi bundle resources and JBoss VFS resources
+* PathMatchingResourcePatternResolver preserves caching for JNLP (Java Web Start) jar connections
 * optimized converter lookup in GenericConversionService to avoid contention in JDK proxy check
 * DataBinder correctly handles ParseException from Formatter for String->String case
 * CacheNamespaceHandler actually parses cache:annotation-driven's "key-generator" attribute
+* introduced CustomSQLExceptionTranslatorRegistry/Registrar for JDBC error code translation
 * officially deprecated TopLinkJpaDialect in favor of EclipseLink and Spring's EclipseLinkJpaDialect
 * fixed LocalContainerEntityManagerFactoryBean's "packagesToScan" to avoid additional provider scan
 * LocalContainerEntityManagerFactoryBean's "persistenceUnitName" applies to "packagesToScan" as well
@@ -28,7 +31,7 @@ Changes in version 3.1.1 (2012-02-13)
 * added "entityInterceptor" property to Hibernate 4 LocalSessionFactoryBean
 * added "getConfiguration" accessor to Hibernate 4 LocalSessionFactoryBean
 * added "durability" and "description" properties to JobDetailFactoryBean
-* corrected fix for QuartzJobBean to work with Quartz 2.0/2.1
+* fixed QuartzJobBean and MethodInvokingJobDetailFactoryBean for compatibility with Quartz 2.0/2.1
 * JMS CachingConnectionFactory never caches consumers for temporary queues and topics
 * JMS SimpleMessageListenerContainer silently falls back to lazy registration of consumers
 * Servlet/PortletContextResource's "isReadable()" implementation returns false for directories

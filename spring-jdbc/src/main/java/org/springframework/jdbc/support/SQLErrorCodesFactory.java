@@ -17,7 +17,6 @@
 package org.springframework.jdbc.support;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 import javax.sql.DataSource;
@@ -171,7 +170,7 @@ public class SQLErrorCodesFactory {
 			}
 		}
 		if (sec != null) {
-			checkSqlExceptionTranslatorRegistry(dbName, sec);
+			checkCustomTranslatorRegistry(dbName, sec);
 			if (logger.isDebugEnabled()) {
 				logger.debug("SQL error codes for '" + dbName + "' found");
 			}
@@ -248,10 +247,12 @@ public class SQLErrorCodesFactory {
 		}
 	}
 
-	private void checkSqlExceptionTranslatorRegistry(String dbName, SQLErrorCodes dbCodes) {
-		// Check the custom sql exception translator registry for any entries
+	/**
+	 * Check the {@link CustomSQLExceptionTranslatorRegistry} for any entries.
+	 */
+	private void checkCustomTranslatorRegistry(String dbName, SQLErrorCodes dbCodes) {
 		SQLExceptionTranslator customTranslator =
-				CustomSQLExceptionTranslatorRegistry.getInstance().findSqlExceptionTranslatorForDatabase(dbName);
+				CustomSQLExceptionTranslatorRegistry.getInstance().findTranslatorForDatabase(dbName);
 		if (customTranslator != null) {
 			if (dbCodes.getCustomSqlExceptionTranslator() != null) {
 				logger.warn("Overriding already defined custom translator '" +
@@ -265,7 +266,6 @@ public class SQLErrorCodesFactory {
 			}
 			dbCodes.setCustomSqlExceptionTranslator(customTranslator);
 		}
-		
 	}
 
 }

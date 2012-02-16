@@ -16,14 +16,14 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.MetadataUtils.attributesFor;
-
 import java.lang.annotation.Annotation;
 
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.util.Assert;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * A {@link ScopeMetadataResolver} implementation that by default checks for
