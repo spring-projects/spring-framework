@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cache.ehcache;
 
 import junit.framework.TestCase;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
@@ -82,7 +83,8 @@ public class EhCacheSupportTests extends TestCase {
 		EhCacheManagerFactoryBean cacheManagerFb = null;
 		try {
 			EhCacheFactoryBean cacheFb = new EhCacheFactoryBean();
-			assertEquals(Ehcache.class, cacheFb.getObjectType());
+			Class<? extends Ehcache> objectType = cacheFb.getObjectType();
+			assertTrue(Ehcache.class.isAssignableFrom(objectType));
 			assertTrue("Singleton property", cacheFb.isSingleton());
 			if (useCacheManagerFb) {
 				cacheManagerFb = new EhCacheManagerFactoryBean();
@@ -94,6 +96,8 @@ public class EhCacheSupportTests extends TestCase {
 			cacheFb.setCacheName("myCache1");
 			cacheFb.afterPropertiesSet();
 			cache = (Cache) cacheFb.getObject();
+			Class<? extends Ehcache> objectType2 = cacheFb.getObjectType();
+			assertSame(objectType, objectType2);
 			CacheConfiguration config = cache.getCacheConfiguration();
 			assertEquals("myCache1", cache.getName());
 			if (useCacheManagerFb){
@@ -166,6 +170,7 @@ public class EhCacheSupportTests extends TestCase {
 			cacheFb.setCacheManager(cm);
 			cacheFb.setCacheName("myCache1");
 			cacheFb.setBlocking(true);
+			assertEquals(cacheFb.getObjectType(), BlockingCache.class);
 			cacheFb.afterPropertiesSet();
 			Ehcache myCache1 = cm.getEhcache("myCache1");
 			assertTrue(myCache1 instanceof BlockingCache);
@@ -188,6 +193,7 @@ public class EhCacheSupportTests extends TestCase {
 					return key;
 				}
 			});
+			assertEquals(cacheFb.getObjectType(), SelfPopulatingCache.class);
 			cacheFb.afterPropertiesSet();
 			Ehcache myCache1 = cm.getEhcache("myCache1");
 			assertTrue(myCache1 instanceof SelfPopulatingCache);
@@ -213,6 +219,7 @@ public class EhCacheSupportTests extends TestCase {
 				public void updateEntryValue(Object key, Object value) throws Exception {
 				}
 			});
+			assertEquals(cacheFb.getObjectType(), UpdatingSelfPopulatingCache.class);
 			cacheFb.afterPropertiesSet();
 			Ehcache myCache1 = cm.getEhcache("myCache1");
 			assertTrue(myCache1 instanceof UpdatingSelfPopulatingCache);
