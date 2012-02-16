@@ -130,15 +130,11 @@ public class PropertySourceAnnotationTests {
 		assertThat(ctx.getEnvironment().containsProperty("from.p2"), is(true));
 	}
 
-
-	@Configuration
-	@PropertySource(
-			name = "psName",
-			value = {
-					"classpath:org/springframework/context/annotation/p1.properties",
-					"classpath:org/springframework/context/annotation/p2.properties"
-			})
-	static class ConfigWithNameAndMultipleResourceValues {
+	@Test(expected=IllegalArgumentException.class)
+	public void withEmptyResourceLocations() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithEmptyResourceLocations.class);
+		ctx.refresh();
 	}
 
 
@@ -211,5 +207,11 @@ public class PropertySourceAnnotationTests {
 					"classpath:org/springframework/context/annotation/p2.properties"
 			})
 	static class ConfigWithNameAndMultipleResourceLocations {
+	}
+
+
+	@Configuration
+	@PropertySource(value = {})
+	static class ConfigWithEmptyResourceLocations {
 	}
 }

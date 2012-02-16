@@ -181,6 +181,9 @@ class ConfigurationClassParser {
 			String name = propertySource.getString("name");
 			String[] locations = propertySource.getStringArray("value");
 			int nLocations = locations.length;
+			if (nLocations == 0) {
+				throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
+			}
 			for (int i = 0; i < nLocations; i++) {
 				locations[0] = this.environment.resolveRequiredPlaceholders(locations[0]);
 			}
