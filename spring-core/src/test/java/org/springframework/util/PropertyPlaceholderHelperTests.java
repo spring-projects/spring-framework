@@ -65,6 +65,16 @@ public class PropertyPlaceholderHelperTests {
 		props.setProperty("inner", "ar");
 
 		assertEquals("foo=bar", this.helper.replacePlaceholders(text, props));
+		
+		// SPR-5369
+		text = "${top}";
+		props = new Properties();
+		props.setProperty("top", "${child}+${child}");
+		props.setProperty("child", "${${differentiator}.grandchild}");
+		props.setProperty("differentiator", "first");
+		props.setProperty("first.grandchild", "actualValue");
+
+		assertEquals("actualValue+actualValue", this.helper.replacePlaceholders(text, props));
 	}
 
 	@Test
