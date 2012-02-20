@@ -38,6 +38,7 @@ import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ResourceLoader;
@@ -179,13 +180,30 @@ class ConfigurationClassParser {
 		if (propertySource != null) {
 			String name = propertySource.getString("name");
 			String[] locations = propertySource.getStringArray("value");
+			int nLocations = locations.length;
+			if (nLocations == 0) {
+				throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
+			}
+			for (int i = 0; i < nLocations; i++) {
+				locations[0] = this.environment.resolveRequiredPlaceholders(locations[0]);
+			}
 			ClassLoader classLoader = this.resourceLoader.getClassLoader();
-			for (String location : locations) {
-				location = this.environment.resolveRequiredPlaceholders(location);
-				ResourcePropertySource ps = StringUtils.hasText(name) ?
-						new ResourcePropertySource(name, location, classLoader) :
-						new ResourcePropertySource(location, classLoader);
-				this.propertySources.push(ps);
+			if (!StringUtils.hasText(name)) {
+				for (String location : locations) {
+					this.propertySources.push(new ResourcePropertySource(location, classLoader));
+				}
+			}
+			else {
+				if (nLocations == 1) {
+					this.propertySources.push(new ResourcePropertySource(name, locations[0], classLoader));
+				}
+				else {
+					CompositePropertySource ps = new CompositePropertySource(name);
+					for (String location : locations) {
+						ps.addPropertySource(new ResourcePropertySource(location, classLoader));
+					}
+					this.propertySources.push(ps);
+				}
 			}
 		}
 
