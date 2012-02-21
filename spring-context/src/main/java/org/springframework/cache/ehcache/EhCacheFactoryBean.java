@@ -399,7 +399,24 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 	}
 
 	public Class<? extends Ehcache> getObjectType() {
-		return (this.cache != null ? this.cache.getClass() : Ehcache.class);
+		if (this.cache != null) {
+			return this.cache.getClass();
+		}
+		
+		if (this.cacheEntryFactory != null) {
+			if (this.cacheEntryFactory instanceof UpdatingCacheEntryFactory) {
+				return UpdatingSelfPopulatingCache.class;
+			}
+			else {
+				return SelfPopulatingCache.class;
+			}
+		}
+		
+		if (this.blocking) {
+			return BlockingCache.class;
+		}
+		
+		return Cache.class;
 	}
 
 	public boolean isSingleton() {
