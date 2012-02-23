@@ -1,0 +1,5 @@
+#com.springsource.sts.gradle.core.preferences.GradleProjectPreferences
+#Tue Feb 21 14:38:31 CET 2012
+com.springsource.sts.gradle.classpath.enableSorting=false
+com.springsource.sts.gradle.rootprojectloc=
+com.springsource.sts.gradle.linkedresources=
