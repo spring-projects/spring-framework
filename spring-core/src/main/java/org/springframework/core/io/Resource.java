@@ -18,6 +18,7 @@ package org.springframework.core.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 
@@ -132,4 +133,9 @@ public interface Resource extends InputStreamSource {
 	 */
 	String getDescription();
 
+	/**
+	 * {@inheritDoc}
+	 * @return the input stream for the underlying resource (must not be {@code null}).
+	 */
+	public InputStream getInputStream() throws IOException;
 }
