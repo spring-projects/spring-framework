@@ -69,7 +69,9 @@ public class TypeDescriptor {
 
 	private final TypeDescriptor mapValueTypeDescriptor;
 
-	private final Annotation[] annotations;
+	private final AbstractDescriptor rootDescriptor;
+	
+	private Annotation[] annotations;
 
 
 	/**
@@ -247,7 +249,7 @@ public class TypeDescriptor {
 			return this;
 		}
 		return new TypeDescriptor(value.getClass(), this.elementTypeDescriptor,
-				this.mapKeyTypeDescriptor, this.mapValueTypeDescriptor, this.annotations);
+				this.mapKeyTypeDescriptor, this.mapValueTypeDescriptor, getAnnotations());
 	}
 
 	/**
@@ -269,7 +271,16 @@ public class TypeDescriptor {
 	 * @return the annotations, or an empty array if none.
 	 */
 	public Annotation[] getAnnotations() {
+		if (this.annotations == null)
+		{
+			if (rootDescriptor == null)
+				return TypeDescriptor.EMPTY_ANNOTATION_ARRAY;
+			else
+				this.annotations= rootDescriptor.getAnnotations();
+		}
 		return this.annotations;
+			
+		
 	}
 
 	/**
@@ -458,7 +469,7 @@ public class TypeDescriptor {
 		this.elementTypeDescriptor = descriptor.getElementTypeDescriptor();
 		this.mapKeyTypeDescriptor = descriptor.getMapKeyTypeDescriptor();
 		this.mapValueTypeDescriptor = descriptor.getMapValueTypeDescriptor();
-		this.annotations = descriptor.getAnnotations();
+		this.rootDescriptor = descriptor;
 	}
 
 	static Annotation[] nullSafeAnnotations(Annotation[] annotations) {
@@ -488,6 +499,7 @@ public class TypeDescriptor {
 		this.mapKeyTypeDescriptor = mapKeyTypeDescriptor;
 		this.mapValueTypeDescriptor = mapValueTypeDescriptor;
 		this.annotations = annotations;
+		this.rootDescriptor=null;
 	}
 
 	private static TypeDescriptor nested(AbstractDescriptor descriptor, int nestingLevel) {
@@ -520,7 +532,7 @@ public class TypeDescriptor {
 			return typeDescriptor.narrow(value);
 		}
 		else {
-			return (value != null ? new TypeDescriptor(value.getClass(), null, null, null, this.annotations) : null);
+			return (value != null ? new TypeDescriptor(value.getClass(), null, null, null, getAnnotations()) : null);
 		}		
 	}
 
@@ -546,15 +558,6 @@ public class TypeDescriptor {
 		TypeDescriptor other = (TypeDescriptor) obj;
 		if (!ObjectUtils.nullSafeEquals(getType(), other.getType())) {
 			return false;
-		}
-		Annotation[] annotations = getAnnotations();
-		if (annotations.length != other.getAnnotations().length) {
-			return false;
-		}
-		for (Annotation ann : annotations) {
-			if (other.getAnnotation(ann.annotationType()) == null) {
-				return false;
-			}
 		}
 		if (isCollection() || isArray()) {
 			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), other.getElementTypeDescriptor());

@@ -53,7 +53,7 @@ public final class Property {
 	
 	private final MethodParameter methodParameter;
 
-	private final Annotation[] annotations;
+	private Annotation[] annotations;
 
 
 	public Property(Class<?> objectType, Method readMethod, Method writeMethod) {
@@ -62,7 +62,7 @@ public final class Property {
 		this.writeMethod = writeMethod;
 		this.methodParameter = resolveMethodParameter();
 		this.name = resolveName();
-		this.annotations = resolveAnnotations();
+//		this.annotations = resolveAnnotations();
 	}
 
 
@@ -109,7 +109,13 @@ public final class Property {
 	}
 
 	Annotation[] getAnnotations() {
-		return this.annotations;
+		if(this.annotations == null)
+		{
+			this.annotations = resolveAnnotations();
+			return this.annotations;
+		}
+		else
+			return this.annotations;
 	}
 
 
