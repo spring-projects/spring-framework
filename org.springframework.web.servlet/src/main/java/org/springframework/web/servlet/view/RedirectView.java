@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.FlashMap;
+import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.SmartView;
 import org.springframework.web.servlet.View;
@@ -106,6 +107,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	private HttpStatus statusCode;
 
+	private boolean expandUriTemplateVariables = true;
 
 	/**
 	 * Constructor for use as a bean.
@@ -226,6 +228,18 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	}
 
 	/**
+	 * Whether to treat the redirect URL as a URI template.
+	 * Set this flag to <code>false</code> if the redirect URL contains open
+	 * and close curly braces "{", "}" and you don't want them interpreted
+	 * as URI variables.
+	 * <p>Defaults to <code>true</code>.
+	 * @param expandUriTemplateVariables
+	 */
+	public void setExpandUriTemplateVariables(boolean expandUriTemplateVariables) {
+		this.expandUriTemplateVariables = expandUriTemplateVariables;
+	}
+
+	/**
 	 * Returns "true" indicating this view performs a redirect.
 	 */
 	public boolean isRedirectView() {
@@ -260,7 +274,10 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			flashMap.setTargetRequestPath(uriComponents.getPath());
 			flashMap.addTargetRequestParams(uriComponents.getQueryParams());
 		}
-		
+
+		FlashMapManager flashMapManager = RequestContextUtils.getFlashMapManager(request);
+		flashMapManager.saveOutputFlashMap(flashMap, request, response);
+
 		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
 	}
 
@@ -288,7 +305,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			enc = WebUtils.DEFAULT_CHARACTER_ENCODING;
 		}
 
-		if (StringUtils.hasText(targetUrl)) {
+		if (this.expandUriTemplateVariables && StringUtils.hasText(targetUrl)) {
 			Map<String, String> variables = getCurrentRequestUriVariables(request);
 			targetUrl = replaceUriTemplateVariables(targetUrl.toString(), model, variables, enc);
 		}

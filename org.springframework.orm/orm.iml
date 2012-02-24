@@ -221,11 +221,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.core/4.0.0.CR7/com.springsource.org.hibernate.core-4.0.0.CR7.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.core/4.1.0.Final/com.springsource.org.hibernate.core-4.1.0.Final.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.core/4.0.0.CR7/com.springsource.org.hibernate.core-sources-4.0.0.CR7.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate.core/4.1.0.Final/com.springsource.org.hibernate.core-sources-4.1.0.Final.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

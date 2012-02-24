@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework</groupId>
   <artifactId>spring-test</artifactId>
   <packaging>jar</packaging>
-  <version>3.1.1.BUILD-SNAPSHOT</version>
+  <version>3.1.2.BUILD-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework</groupId>
     <artifactId>spring-parent</artifactId>
     <relativePath>../org.springframework.spring-parent</relativePath>
-    <version>3.1.1.BUILD-SNAPSHOT</version>
+    <version>3.1.2.BUILD-SNAPSHOT</version>
   </parent>
-
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
   <dependencies>
     <dependency>
       <groupId>javax.activation</groupId>
@@ -29,7 +37,7 @@
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
       <version>1</version>
-      <scope>test</scope> 
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>javax.persistence</groupId>
@@ -54,7 +62,7 @@
       <artifactId>jsp-api</artifactId>
       <version>2.1</version>
       <scope>provided</scope>
-    </dependency> 
+    </dependency>
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jta_1.1_spec</artifactId>
@@ -157,7 +165,5 @@
       <classifier>jdk15</classifier>
       <optional>true</optional>
     </dependency>
-
   </dependencies>
-
 </project>

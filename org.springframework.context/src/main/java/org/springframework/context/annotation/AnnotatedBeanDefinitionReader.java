@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
@@ -136,8 +137,9 @@ public class AnnotatedBeanDefinitionReader {
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		AnnotationMetadata metadata = abd.getMetadata();
 
-		if (ProfileHelper.isProfileAnnotationPresent(metadata)) {
-			if (!this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata))) {
+		if (metadata.isAnnotated(Profile.class.getName())) {
+			AnnotationAttributes profile = MetadataUtils.attributesFor(metadata, Profile.class);
+			if (!this.environment.acceptsProfiles(profile.getStringArray("value"))) {
 				return;
 			}
 		}

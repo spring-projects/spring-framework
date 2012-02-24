@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,10 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Utility class that allows for convenient registration of common
@@ -52,6 +55,17 @@ public class AnnotationConfigUtils {
 	 */
 	public static final String CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalConfigurationAnnotationProcessor";
+
+	/**
+	 * The bean name of the internally managed BeanNameGenerator for use when processing
+	 * {@link Configuration} classes. Set by {@link AnnotationConfigApplicationContext}
+	 * and {@code AnnotationConfigWebApplicationContext} during bootstrap in order to make
+	 * any custom name generation strategy available to the underlying
+	 * {@link ConfigurationClassPostProcessor}.
+	 * @since 3.1.1
+	 */
+	public static final String CONFIGURATION_BEAN_NAME_GENERATOR =
+			"org.springframework.context.annotation.internalConfigurationBeanNameGenerator";
 
 	/**
 	 * The bean name of the internally managed Autowired annotation processor.
@@ -217,21 +231,20 @@ public class AnnotationConfigUtils {
 	}
 
 	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
-		if (abd.getMetadata().isAnnotated(Primary.class.getName())) {
+		AnnotationMetadata metadata = abd.getMetadata();
+		if (metadata.isAnnotated(Primary.class.getName())) {
 			abd.setPrimary(true);
 		}
-		if (abd.getMetadata().isAnnotated(Lazy.class.getName())) {
-			Boolean value = (Boolean) abd.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value");
-			abd.setLazyInit(value);
+		if (metadata.isAnnotated(Lazy.class.getName())) {
+			abd.setLazyInit(attributesFor(metadata, Lazy.class).getBoolean("value"));
 		}
-		if (abd.getMetadata().isAnnotated(DependsOn.class.getName())) {
-			String[] value = (String[]) abd.getMetadata().getAnnotationAttributes(DependsOn.class.getName()).get("value");
-			abd.setDependsOn(value);
+		if (metadata.isAnnotated(DependsOn.class.getName())) {
+			abd.setDependsOn(attributesFor(metadata, DependsOn.class).getStringArray("value"));
 		}
 		if (abd instanceof AbstractBeanDefinition) {
-			if (abd.getMetadata().isAnnotated(Role.class.getName())) {
-				int value = (Integer) abd.getMetadata().getAnnotationAttributes(Role.class.getName()).get("value");
-				((AbstractBeanDefinition)abd).setRole(value);
+			if (metadata.isAnnotated(Role.class.getName())) {
+				Integer role = attributesFor(metadata, Role.class).getNumber("value");
+				((AbstractBeanDefinition)abd).setRole(role);
 			}
 		}
 	}
@@ -246,5 +259,6 @@ public class AnnotationConfigUtils {
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
+
 
 }

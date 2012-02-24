@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 
@@ -116,8 +117,10 @@ public interface Resource extends InputStreamSource {
 	Resource createRelative(String relativePath) throws IOException;
 
 	/**
-	 * Return a filename for this resource, i.e. typically the last
+	 * Determine a filename for this resource, i.e. typically the last
 	 * part of the path: for example, "myfile.txt".
+	 * <p>Returns <code>null</code> if this type of resource does not
+	 * have a filename.
 	 */
 	String getFilename();
 
@@ -130,4 +133,9 @@ public interface Resource extends InputStreamSource {
 	 */
 	String getDescription();
 
+	/**
+	 * {@inheritDoc}
+	 * @return the input stream for the underlying resource (must not be {@code null}).
+	 */
+	public InputStream getInputStream() throws IOException;
 }

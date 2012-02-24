@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Utility methods for resolving resource locations to files in the
@@ -326,6 +327,16 @@ public abstract class ResourceUtils {
 	 */
 	public static URI toURI(String location) throws URISyntaxException {
 		return new URI(StringUtils.replace(location, " ", "%20"));
+	}
+
+	/**
+	 * Set the {@link URLConnection#setUseCaches "useCaches"} flag on the
+	 * given connection, preferring <code>false</code> but leaving the
+	 * flag at <code>true</code> for JNLP based resources.
+	 * @param con the URLConnection to set the flag on
+	 */
+	public static void useCachesIfNecessary(URLConnection con) {
+		con.setUseCaches(con.getClass().getName().startsWith("JNLP"));
 	}
 
 }

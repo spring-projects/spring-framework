@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,6 +103,28 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 			return (url != null);
 		}
 		catch (MalformedURLException ex) {
+			return false;
+		}
+	}
+
+	/**
+	 * This implementation delegates to <code>PortletContext.getResourceAsStream</code>,
+	 * which returns <code>null</code> in case of a non-readable resource (e.g. a directory).
+	 * @see javax.portlet.PortletContext#getResourceAsStream(String)
+	 */
+	@Override
+	public boolean isReadable() {
+		InputStream is = this.portletContext.getResourceAsStream(this.path);
+		if (is != null) {
+			try {
+				is.close();
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+			return true;
+		}
+		else {
 			return false;
 		}
 	}

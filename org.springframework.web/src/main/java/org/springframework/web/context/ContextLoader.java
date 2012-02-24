@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
@@ -44,6 +44,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * Performs the actual initialization work for the root application context.
@@ -463,11 +464,18 @@ public class ContextLoader {
 	 * @see ApplicationContextInitializer#initialize(ConfigurableApplicationContext)
 	 */
 	protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
+		List<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>> initializerClasses =
+				determineContextInitializerClasses(servletContext);
+
+		if (initializerClasses.size() == 0) {
+			// no ApplicationContextInitializers have been declared -> nothing to do
+			return;
+		}
+
 		ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances =
 			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
-		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass :
-				determineContextInitializerClasses(servletContext)) {
+		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : initializerClasses) {
 			Class<?> contextClass = applicationContext.getClass();
 			Class<?> initializerContextClass =
 				GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
@@ -479,6 +487,13 @@ public class ContextLoader {
 		}
 
 		Collections.sort(initializerInstances, new AnnotationAwareOrderComparator());
+
+		// eagerly attempt to initialize servlet property sources in case initializers
+		// below depend on accessing context-params via the Environment API. Note that
+		// depending on application context implementation, this initialization will be
+		// attempted again during context refresh.
+		WebApplicationContextUtils.initServletPropertySources(
+				applicationContext.getEnvironment().getPropertySources(), servletContext);
 
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
 			initializer.initialize(applicationContext);

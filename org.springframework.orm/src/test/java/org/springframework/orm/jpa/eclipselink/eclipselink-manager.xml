@@ -5,6 +5,10 @@
 
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="persistenceXmlLocation" value="org/springframework/orm/jpa/domain/persistence.xml"/>
+		<!--
+		<property name="persistenceUnitName" value="Person"/>
+		<property name="packagesToScan" value="org.springframework.orm.jpa.domain"/>
+		-->
 		<property name="dataSource" ref="dataSource"/>
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">

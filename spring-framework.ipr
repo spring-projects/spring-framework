@@ -445,7 +445,7 @@
           <option name="m_maxLength" value="64" />
         </inspection_tool>
         <inspection_tool class="JUnitTestClassNamingConvention" enabled="true" level="WARNING" enabled_by_default="true">
-          <option name="m_regex" value="[A-Z][A-Za-z\d]*Test" />
+          <option name="m_regex" value="[A-Z][A-Za-z\d]*Tests" />
           <option name="m_minLength" value="8" />
           <option name="m_maxLength" value="64" />
         </inspection_tool>
@@ -891,6 +891,31 @@
             <option name="CONTINUATION_INDENT_SIZE" value="8" />
           </indentOptions>
         </codeStyleSettings>
+        <codeStyleSettings language="Scala">
+          <option name="KEEP_LINE_BREAKS" value="false" />
+          <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
+          <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+          <option name="BLANK_LINES_AROUND_FIELD" value="1" />
+          <option name="BLANK_LINES_AFTER_CLASS_HEADER" value="1" />
+          <option name="ELSE_ON_NEW_LINE" value="true" />
+          <option name="WHILE_ON_NEW_LINE" value="true" />
+          <option name="CATCH_ON_NEW_LINE" value="true" />
+          <option name="FINALLY_ON_NEW_LINE" value="true" />
+          <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
+          <option name="ALIGN_MULTILINE_FOR" value="false" />
+          <option name="CALL_PARAMETERS_WRAP" value="1" />
+          <option name="METHOD_PARAMETERS_WRAP" value="5" />
+          <option name="EXTENDS_LIST_WRAP" value="1" />
+          <option name="EXTENDS_KEYWORD_WRAP" value="1" />
+          <option name="METHOD_CALL_CHAIN_WRAP" value="1" />
+          <option name="BINARY_OPERATION_WRAP" value="1" />
+          <option name="FOR_STATEMENT_WRAP" value="5" />
+          <option name="IF_BRACE_FORCE" value="3" />
+          <option name="DOWHILE_BRACE_FORCE" value="3" />
+          <option name="WHILE_BRACE_FORCE" value="3" />
+          <option name="FOR_BRACE_FORCE" value="3" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
+        </codeStyleSettings>
         <codeStyleSettings language="XML">
           <indentOptions>
             <option name="USE_TAB_CHARACTER" value="true" />
@@ -921,6 +946,7 @@
       <module fileurl="file://$PROJECT_DIR$/org.springframework.jms/jms.iml" filepath="$PROJECT_DIR$/org.springframework.jms/jms.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.orm/orm.iml" filepath="$PROJECT_DIR$/org.springframework.orm/orm.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.oxm/oxm.iml" filepath="$PROJECT_DIR$/org.springframework.oxm/oxm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-framework-reference/reference.iml" filepath="$PROJECT_DIR$/spring-framework-reference/reference.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.test/test.iml" filepath="$PROJECT_DIR$/org.springframework.test/test.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.transaction/transaction.iml" filepath="$PROJECT_DIR$/org.springframework.transaction/transaction.iml" />
       <module fileurl="file://$PROJECT_DIR$/org.springframework.web/web.iml" filepath="$PROJECT_DIR$/org.springframework.web/web.iml" />
@@ -1176,11 +1202,11 @@
     </library>
     <library name="JUnit">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.junit/com.springsource.org.junit/4.8.1/com.springsource.org.junit-4.8.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.junit/com.springsource.org.junit/4.9.0/com.springsource.org.junit-4.9.0.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.junit/com.springsource.org.junit/4.8.1/com.springsource.org.junit-sources-4.8.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.junit/com.springsource.org.junit/4.9.0/com.springsource.org.junit-sources-4.9.0.jar!/" />
       </SOURCES>
     </library>
     <library name="Log4j">

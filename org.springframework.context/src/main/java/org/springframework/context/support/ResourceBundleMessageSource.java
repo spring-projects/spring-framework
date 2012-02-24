@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
 	public void setBasename(String basename) {
-		setBasenames(new String[] {basename});
+		setBasenames(basename);
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @see #setBasename
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
-	public void setBasenames(String[] basenames)  {
+	public void setBasenames(String... basenames)  {
 		if (basenames != null) {
 			this.basenames = new String[basenames.length];
 			for (int i = 0; i < basenames.length; i++) {

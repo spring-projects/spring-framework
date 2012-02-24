@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -86,7 +87,8 @@ public abstract class AbstractUrlViewController extends AbstractController {
 
 	/**
 	 * Retrieves the URL path to use for lookup and delegates to
-	 * {@link #getViewNameForRequest}.
+	 * {@link #getViewNameForRequest}. Also adds the content of 
+	 * {@link RequestContextUtils#getInputFlashMap} to the model.
 	 */
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) {
@@ -95,7 +97,7 @@ public abstract class AbstractUrlViewController extends AbstractController {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Returning view name '" + viewName + "' for lookup path [" + lookupPath + "]");
 		}
-		return new ModelAndView(viewName);
+		return new ModelAndView(viewName, RequestContextUtils.getInputFlashMap(request));
 	}
 
 	/**

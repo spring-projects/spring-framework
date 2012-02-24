@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Default implementation of the {@link PersistenceUnitManager} interface.
@@ -328,7 +329,7 @@ public class DefaultPersistenceUnitManager
 	/**
 	 * Prepare the PersistenceUnitInfos according to the configuration
 	 * of this manager: scanning for <code>persistence.xml</code> files,
-	 * parsing all matching files, configurating and post-processing them.
+	 * parsing all matching files, configuring and post-processing them.
 	 * <p>PersistenceUnitInfos cannot be obtained before this preparation
 	 * method has been invoked.
 	 * @see #obtainDefaultPersistenceUnitInfo()
@@ -404,6 +405,12 @@ public class DefaultPersistenceUnitManager
 							String className = reader.getClassMetadata().getClassName();
 							if (matchesFilter(reader, readerFactory)) {
 								scannedUnit.addManagedClassName(className);
+								if (scannedUnit.getPersistenceUnitRootUrl() == null) {
+									URL url = resource.getURL();
+									if (ResourceUtils.isJarURL(url)) {
+										scannedUnit.setPersistenceUnitRootUrl(ResourceUtils.extractJarFileURL(url));
+									}
+								}
 							}
 						}
 					}

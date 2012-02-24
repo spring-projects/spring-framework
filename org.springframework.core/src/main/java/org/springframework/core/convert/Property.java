@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.convert;
 
 import java.lang.annotation.Annotation;
@@ -141,13 +142,20 @@ public final class Property {
 	private MethodParameter resolveMethodParameter() {
 		MethodParameter read = resolveReadMethodParameter();
 		MethodParameter write = resolveWriteMethodParameter();
-		if (read == null && write == null) {
-			throw new IllegalStateException("Property is neither readable nor writeable");
+		if (write == null) {
+			if (read == null) {
+				throw new IllegalStateException("Property is neither readable nor writeable");
+			}
+			return read;
 		}
-		if (read != null && write != null && !write.getParameterType().isAssignableFrom(read.getParameterType())) {
-			throw new IllegalStateException("Write parameter is not assignable from read parameter");
+		if (read != null) {
+			Class<?> readType = read.getParameterType();
+			Class<?> writeType = write.getParameterType();
+			if (!writeType.equals(readType) && writeType.isAssignableFrom(readType)) {
+				return read;
+			}
 		}
-		return read != null ? read : write;
+		return write;
 	}
 	
 	private MethodParameter resolveReadMethodParameter() {

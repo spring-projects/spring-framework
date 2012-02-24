@@ -16,3 +16,11 @@ org.springframework.spring-parent/.project
 org.springframework.test/test-output/
 target
 spring-build/lib/docbook
+
+# ignore files and directories related to gradle build
+/.classpath
+/.project
+/.gradle
+/build
+/spring-*
+!/spring-framework-reference

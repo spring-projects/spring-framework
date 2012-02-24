@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,8 @@ abstract class ConfigurationClassUtils {
 		// Check already loaded Class if present...
 		// since we possibly can't even load the class file for this Class.
 		if (beanDef instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) beanDef).hasBeanClass()) {
-			metadata = new StandardAnnotationMetadata(((AbstractBeanDefinition) beanDef).getBeanClass());
+			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
+			metadata = new StandardAnnotationMetadata(beanClass, true);
 		}
 		else {
 			String className = beanDef.getBeanClassName();

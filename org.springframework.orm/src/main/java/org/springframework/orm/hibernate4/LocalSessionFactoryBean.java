@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.sql.DataSource;
 
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.NamingStrategy;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -37,16 +38,15 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
 
 /**
- * {@link org.springframework.beans.factory.FactoryBean} that creates a
- * Hibernate {@link org.hibernate.SessionFactory}. This is the usual way to
- * set up a shared Hibernate SessionFactory in a Spring application context;
- * the SessionFactory can then be passed to Hibernate-based DAOs via
- * dependency injection.
+ * {@link org.springframework.beans.factory.FactoryBean} that creates a Hibernate
+ * {@link org.hibernate.SessionFactory}. This is the usual way to set up a shared
+ * Hibernate SessionFactory in a Spring application context; the SessionFactory can
+ * then be passed to Hibernate-based data access objects via dependency injection.
  *
- * <p><b>NOTE:</b> This variant of LocalSessionFactoryBean requires Hibernate 4.0
- * or higher. It is similar in role to the same-named class in the <code>orm.hibernate3</code>
- * package. However, in practice, it is closer to <code>AnnotationSessionFactoryBean</code>
- * since its core purpose is to bootstrap a <code>SessionFactory</code> from annotation scanning.
+ * <p><b>NOTE:</b> This variant of LocalSessionFactoryBean requires Hibernate 4.0 or higher.
+ * It is similar in role to the same-named class in the <code>orm.hibernate3</code> package.
+ * However, in practice, it is closer to <code>AnnotationSessionFactoryBean</code> since
+ * its core purpose is to bootstrap a <code>SessionFactory</code> from annotation scanning.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -83,6 +83,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	private String[] packagesToScan;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+
+	private Configuration configuration;
 
 	private SessionFactory sessionFactory;
 
@@ -328,7 +330,36 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 			sfb.scanPackages(this.packagesToScan);
 		}
 
-		this.sessionFactory = sfb.buildSessionFactory();
+		// Build SessionFactory instance.
+		this.configuration = sfb;
+		this.sessionFactory = buildSessionFactory(sfb);
+	}
+
+	/**
+	 * Subclasses can override this method to perform custom initialization
+	 * of the SessionFactory instance, creating it via the given Configuration
+	 * object that got prepared by this LocalSessionFactoryBean.
+	 * <p>The default implementation invokes LocalSessionFactoryBuilder's buildSessionFactory.
+	 * A custom implementation could prepare the instance in a specific way (e.g. applying
+	 * a custom ServiceRegistry) or use a custom SessionFactoryImpl subclass.
+	 * @param sfb LocalSessionFactoryBuilder prepared by this LocalSessionFactoryBean
+	 * @return the SessionFactory instance
+	 * @see LocalSessionFactoryBuilder#buildSessionFactory
+	 */
+	protected SessionFactory buildSessionFactory(LocalSessionFactoryBuilder sfb) {
+		return sfb.buildSessionFactory();
+	}
+
+	/**
+	 * Return the Hibernate Configuration object used to build the SessionFactory.
+	 * Allows for access to configuration metadata stored there (rarely needed).
+	 * @throws IllegalStateException if the Configuration object has not been initialized yet
+	 */
+	public final Configuration getConfiguration() {
+		if (this.configuration == null) {
+			throw new IllegalStateException("Configuration not initialized yet");
+		}
+		return this.configuration;
 	}
 
 

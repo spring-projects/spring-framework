@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
 /**
@@ -32,7 +31,7 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  * @since 3.0
  */
-final class SimpleClientHttpResponse implements ClientHttpResponse {
+final class SimpleClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final HttpURLConnection connection;
 
@@ -44,8 +43,8 @@ final class SimpleClientHttpResponse implements ClientHttpResponse {
 	}
 
 
-	public HttpStatus getStatusCode() throws IOException {
-		return HttpStatus.valueOf(this.connection.getResponseCode());
+	public int getRawStatusCode() throws IOException {
+		return this.connection.getResponseCode();
 	}
 
 	public String getStatusText() throws IOException {

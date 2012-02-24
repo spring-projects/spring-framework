@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ package org.springframework.http;
  * @author Arjen Poutsma
  * @see HttpStatus.Series
  * @see <a href="http://www.iana.org/assignments/http-status-codes">HTTP Status Code Registry</a>
+ * @see <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">List of HTTP status codes - Wikipedia</a>
  */
 public enum HttpStatus {
 
@@ -44,6 +45,12 @@ public enum HttpStatus {
 	 * @see <a href="http://tools.ietf.org/html/rfc2518#section-10.1">WebDAV</a>
 	 */
 	PROCESSING(102, "Processing"),
+	/**
+	 * {@code 103 Checkpoint}.
+	 * @see <a href="http://code.google.com/p/gears/wiki/ResumableHttpRequestsProposal">A proposal for supporting
+	 * resumable POST/PUT HTTP requests in HTTP/1.0</a>
+	 */
+	CHECKPOINT(103, "Checkpoint"),
 
 	// 2xx Success
 
@@ -140,6 +147,12 @@ public enum HttpStatus {
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.3.8">HTTP/1.1</a>
 	 */
 	TEMPORARY_REDIRECT(307, "Temporary Redirect"),
+	/**
+	 * {@code 308 Resume Incomplete}.
+	 * @see <a href="http://code.google.com/p/gears/wiki/ResumableHttpRequestsProposal">A proposal for supporting
+	 * resumable POST/PUT HTTP requests in HTTP/1.0</a>
+	 */
+	RESUME_INCOMPLETE(308, "Resume Incomplete"),
 
 	// --- 4xx Client Error ---
 
@@ -187,7 +200,7 @@ public enum HttpStatus {
 	 * {@code 408 Request Timeout}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.9">HTTP/1.1</a>
 	 */
-	REQUEST_TIMEOUT(408, "Request Time-out"),
+	REQUEST_TIMEOUT(408, "Request Timeout"),
 	/**
 	 * {@code 409 Conflict}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.10">HTTP/1.1</a>
@@ -217,7 +230,7 @@ public enum HttpStatus {
 	 * {@code 414 Request-URI Too Long}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.15">HTTP/1.1</a>
 	 */
-	REQUEST_URI_TOO_LONG(414, "Request-URI Too Large"),
+	REQUEST_URI_TOO_LONG(414, "Request-URI Too Long"),
 	/**
 	 * {@code 415 Unsupported Media Type}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.16">HTTP/1.1</a>
@@ -233,6 +246,11 @@ public enum HttpStatus {
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.18">HTTP/1.1</a>
 	 */
 	EXPECTATION_FAILED(417, "Expectation Failed"),
+	/**
+	 * {@code 418 I'm a teapot}.
+	 * @see <a href="http://tools.ietf.org/html/rfc2324#section-2.3.2">HTCPCP/1.0</a>
+	 */
+	I_AM_A_TEAPOT(418, "I'm a teapot"),
 	/**
 	 * {@code 419 Insufficient Space on Resource}.
 	 * @see <a href="http://tools.ietf.org/html/draft-ietf-webdav-protocol-05#section-10.4">WebDAV Draft</a>
@@ -268,6 +286,24 @@ public enum HttpStatus {
 	 * @see <a href="http://tools.ietf.org/html/rfc2817#section-6">Upgrading to TLS Within HTTP/1.1</a>
 	 */
 	UPGRADE_REQUIRED(426, "Upgrade Required"),
+	/**
+	 * {@code 428 Precondition Required}.
+	 * @see <a href="http://tools.ietf.org/html/draft-nottingham-http-new-status-02#section-3">Additional HTTP Status
+	 * Codes</a>
+	 */
+	PRECONDITION_REQUIRED(428, "Precondition Required"),
+	/**
+	 * {@code 429 Too Many Requests}.
+	 * @see <a href="http://tools.ietf.org/html/draft-nottingham-http-new-status-02#section-4">Additional HTTP Status
+	 * Codes</a>
+	 */
+	TOO_MANY_REQUESTS(429, "Too Many Requests"),
+	/**
+	 * {@code 431 Request Header Fields Too Large}.
+	 * @see <a href="http://tools.ietf.org/html/draft-nottingham-http-new-status-02#section-5">Additional HTTP Status
+	 * Codes</a>
+	 */
+	REQUEST_HEADER_FIELDS_TOO_LARGE(431, "Request Header Fields Too Large"),
 
 	// --- 5xx Server Error ---
 
@@ -295,7 +331,7 @@ public enum HttpStatus {
 	 * {@code 504 Gateway Timeout}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.5.5">HTTP/1.1</a>
 	 */
-	GATEWAY_TIMEOUT(504, "Gateway Time-out"),
+	GATEWAY_TIMEOUT(504, "Gateway Timeout"),
 	/**
 	 * {@code 505 HTTP Version Not Supported}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.5.6">HTTP/1.1</a>
@@ -317,10 +353,21 @@ public enum HttpStatus {
  	 */
 	LOOP_DETECTED(508, "Loop Detected"),
 	/**
+	 * {@code 509 Bandwidth Limit Exceeded}
+ 	 */
+	BANDWIDTH_LIMIT_EXCEEDED(509, "Bandwidth Limit Exceeded"),
+	/**
 	 * {@code 510 Not Extended}
 	 * @see <a href="http://tools.ietf.org/html/rfc2774#section-7">HTTP Extension Framework</a>
 	 */
-	NOT_EXTENDED(510, "Not Extended");
+	NOT_EXTENDED(510, "Not Extended"),
+	/**
+	 * {@code 511 Network Authentication Required}.
+	 * @see <a href="http://tools.ietf.org/html/draft-nottingham-http-new-status-02#section-6">Additional HTTP Status
+	 * Codes</a>
+	 */
+	NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required");
+
 
 
 	private final int value;

@@ -110,9 +110,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
 
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
-		if (!isMultipartRequest(servletRequest)) {
-			throw new MultipartException("The current request is not a multipart request");
-		}
+		assertIsMultipartRequest(servletRequest);
 		
 		MultipartHttpServletRequest multipartRequest = 
 			WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
@@ -166,12 +164,11 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		return arg;
 	}
 
-	private boolean isMultipartRequest(HttpServletRequest request) {
-		if (!"post".equals(request.getMethod().toLowerCase())) {
-			return false;
-		}
+	private static void assertIsMultipartRequest(HttpServletRequest request) {
 		String contentType = request.getContentType();
-		return (contentType != null && contentType.toLowerCase().startsWith("multipart/"));
+		if (contentType == null || !contentType.toLowerCase().startsWith("multipart/")) {
+			throw new MultipartException("The current request is not a multipart request");
+		}
 	}
 	
 	private String getPartName(MethodParameter parameter) {

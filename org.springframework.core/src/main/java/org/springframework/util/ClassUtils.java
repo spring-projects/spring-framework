@@ -22,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -712,6 +713,9 @@ public abstract class ClassUtils {
 	 * Call {@link org.springframework.core.BridgeMethodResolver#findBridgedMethod}
 	 * if bridge method resolution is desirable (e.g. for obtaining metadata from
 	 * the original method definition).
+	 * <p><b>NOTE:</b>Since Spring 3.1.1, if java security settings disallow reflective
+	 * access (e.g. calls to {@code Class#getDeclaredMethods} etc, this implementation
+	 * will fall back to returning the originally provided method.
 	 * @param method the method to be invoked, which may come from an interface
 	 * @param targetClass the target class for the current invocation.
 	 * May be <code>null</code> or may not even implement the method.
@@ -722,7 +726,12 @@ public abstract class ClassUtils {
 		Method specificMethod = null;
 		if (method != null && isOverridable(method, targetClass) &&
 				targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
-			specificMethod = ReflectionUtils.findMethod(targetClass, method.getName(), method.getParameterTypes());
+			try {
+				specificMethod = ReflectionUtils.findMethod(targetClass, method.getName(), method.getParameterTypes());
+			} catch (AccessControlException ex) {
+				// security settings are disallowing reflective access; leave
+				// 'specificMethod' null and fall back to 'method' below
+			}
 		}
 		return (specificMethod != null ? specificMethod : method);
 	}

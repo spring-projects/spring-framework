@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 package org.springframework.context.annotation;
 
-import java.util.Map;
-
 import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Registers an {@link org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator
@@ -41,12 +42,11 @@ class AspectJAutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 	public void registerBeanDefinitions(
 			AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 
-		Map<String, Object> enableAJAutoProxy =
-			importingClassMetadata.getAnnotationAttributes(EnableAspectJAutoProxy.class.getName());
-
 		AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);
 
-		if ((Boolean)enableAJAutoProxy.get("proxyTargetClass")) {
+		AnnotationAttributes enableAJAutoProxy =
+				attributesFor(importingClassMetadata, EnableAspectJAutoProxy.class);
+		if (enableAJAutoProxy.getBoolean("proxyTargetClass")) {
 			AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 		}
 	}

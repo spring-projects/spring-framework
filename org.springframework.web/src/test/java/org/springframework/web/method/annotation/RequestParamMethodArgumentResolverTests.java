@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -183,9 +182,25 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test(expected = MultipartException.class)
-	public void notMultipartRequest() throws Exception {
+	public void isMultipartRequest() throws Exception {
 		resolver.resolveArgument(paramMultiPartFile, null, webRequest, null);
 		fail("Expected exception: request is not a multipart request");
+	}
+
+	// SPR-9079
+
+	@Test
+	public void isMultipartRequestHttpPut() throws Exception {
+		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
+		MultipartFile expected = new MockMultipartFile("multipartFileList", "Hello World".getBytes());
+		request.addFile(expected);
+		request.setMethod("PUT");
+		webRequest = new ServletWebRequest(request);
+
+		Object actual = resolver.resolveArgument(paramMultipartFileList, null, webRequest, null);
+
+		assertTrue(actual instanceof List);
+		assertEquals(expected, ((List<?>) actual).get(0));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

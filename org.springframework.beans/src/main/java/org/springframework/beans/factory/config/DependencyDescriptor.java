@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import org.springframework.core.GenericCollectionTypeResolver;
@@ -55,6 +56,8 @@ public class DependencyDescriptor implements Serializable {
 	private final boolean required;
 
 	private final boolean eager;
+
+	private int nestingLevel = 1;
 
 	private transient Annotation[] fieldAnnotations;
 
@@ -153,6 +156,13 @@ public class DependencyDescriptor implements Serializable {
 	}
 
 
+	public void increaseNestingLevel() {
+		this.nestingLevel++;
+		if (this.methodParameter != null) {
+			this.methodParameter.increaseNestingLevel();
+		}
+	}
+
 	/**
 	 * Initialize parameter name discovery for the underlying method parameter, if any.
 	 * <p>This method does not actually try to retrieve the parameter name at
@@ -178,15 +188,30 @@ public class DependencyDescriptor implements Serializable {
 	 * @return the declared type (never <code>null</code>)
 	 */
 	public Class<?> getDependencyType() {
-		return (this.field != null ? this.field.getType() : this.methodParameter.getParameterType());
-	}
-
-	/**
-	 * Determine the generic type of the wrapped parameter/field.
-	 * @return the generic type (never <code>null</code>)
-	 */
-	public Type getGenericDependencyType() {
-		return (this.field != null ? this.field.getGenericType() : this.methodParameter.getGenericParameterType());
+		if (this.field != null) {
+			if (this.nestingLevel > 1) {
+				Type type = this.field.getGenericType();
+				if (type instanceof ParameterizedType) {
+					Type arg = ((ParameterizedType) type).getActualTypeArguments()[0];
+					if (arg instanceof Class) {
+						return (Class) arg;
+					}
+					else if (arg instanceof ParameterizedType) {
+						arg = ((ParameterizedType) arg).getRawType();
+						if (arg instanceof Class) {
+							return (Class) arg;
+						}
+					}
+				}
+				return Object.class;
+			}
+			else {
+				return this.field.getType();
+			}
+		}
+		else {
+			return this.methodParameter.getNestedParameterType();
+		}
 	}
 
 	/**
@@ -195,7 +220,7 @@ public class DependencyDescriptor implements Serializable {
 	 */
 	public Class<?> getCollectionType() {
 		return (this.field != null ?
-				GenericCollectionTypeResolver.getCollectionFieldType(this.field) :
+				GenericCollectionTypeResolver.getCollectionFieldType(this.field, this.nestingLevel) :
 				GenericCollectionTypeResolver.getCollectionParameterType(this.methodParameter));
 	}
 
@@ -205,7 +230,7 @@ public class DependencyDescriptor implements Serializable {
 	 */
 	public Class<?> getMapKeyType() {
 		return (this.field != null ?
-				GenericCollectionTypeResolver.getMapKeyFieldType(this.field) :
+				GenericCollectionTypeResolver.getMapKeyFieldType(this.field, this.nestingLevel) :
 				GenericCollectionTypeResolver.getMapKeyParameterType(this.methodParameter));
 	}
 
@@ -215,7 +240,7 @@ public class DependencyDescriptor implements Serializable {
 	 */
 	public Class<?> getMapValueType() {
 		return (this.field != null ?
-				GenericCollectionTypeResolver.getMapValueFieldType(this.field) :
+				GenericCollectionTypeResolver.getMapValueFieldType(this.field, this.nestingLevel) :
 				GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter));
 	}
 
@@ -248,13 +273,18 @@ public class DependencyDescriptor implements Serializable {
 			if (this.fieldName != null) {
 				this.field = this.declaringClass.getDeclaredField(this.fieldName);
 			}
-			else if (this.methodName != null) {
-				this.methodParameter = new MethodParameter(
-						this.declaringClass.getDeclaredMethod(this.methodName, this.parameterTypes), this.parameterIndex);
-			}
 			else {
-				this.methodParameter = new MethodParameter(
-						this.declaringClass.getDeclaredConstructor(this.parameterTypes), this.parameterIndex);
+				if (this.methodName != null) {
+					this.methodParameter = new MethodParameter(
+							this.declaringClass.getDeclaredMethod(this.methodName, this.parameterTypes), this.parameterIndex);
+				}
+				else {
+					this.methodParameter = new MethodParameter(
+							this.declaringClass.getDeclaredConstructor(this.parameterTypes), this.parameterIndex);
+				}
+				for (int i = 1; i < this.nestingLevel; i++) {
+					this.methodParameter.increaseNestingLevel();
+				}
 			}
 		}
 		catch (Throwable ex) {

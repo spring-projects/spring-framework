@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 
 	private boolean pubSubNoLocal = false;
 
+	private boolean connectLazily = false;
+
 	private int concurrentConsumers = 1;
 
 	private Executor taskExecutor;
@@ -87,6 +89,20 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 */
 	protected boolean isPubSubNoLocal() {
 		return this.pubSubNoLocal;
+	}
+
+	/**
+	 * Specify whether to connect lazily, i.e. whether to establish the JMS Connection
+	 * and the corresponding Sessions and MessageConsumers as late as possible -
+	 * in the start phase of this container.
+	 * <p>Default is "false": connecting early, i.e. during the bean initialization phase.
+	 * Set this flag to "true" in order to switch to lazy connecting if your target broker
+	 * is likely to not have started up yet and you prefer to not even try a connection.
+	 * @see #start()
+	 * @see #initialize()
+	 */
+	public void setConnectLazily(boolean connectLazily) {
+		this.connectLazily = connectLazily;
 	}
 
 	/**
@@ -159,6 +175,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		this.taskExecutor = taskExecutor;
 	}
 
+	@Override
 	protected void validateConfiguration() {
 		super.validateConfiguration();
 		if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
@@ -174,6 +191,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	/**
 	 * Always use a shared JMS Connection.
 	 */
+	@Override
 	protected final boolean sharedConnectionEnabled() {
 		return true;
 	}
@@ -183,15 +201,25 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * in the form of a JMS Session plus associated MessageConsumer.
 	 * @see #createListenerConsumer
 	 */
+	@Override
 	protected void doInitialize() throws JMSException {
-		establishSharedConnection();
-		initializeConsumers();
+		if (!this.connectLazily) {
+			try {
+				establishSharedConnection();
+			}
+			catch (JMSException ex) {
+				logger.debug("Could not connect on initialization - registering message consumers lazily", ex);
+				return;
+			}
+			initializeConsumers();
+		}
 	}
 
 	/**
 	 * Re-initializes this container's JMS message consumers,
 	 * if not initialized already.
 	 */
+	@Override
 	protected void doStart() throws JMSException {
 		super.doStart();
 		initializeConsumers();
@@ -200,6 +228,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	/**
 	 * Registers this listener container as JMS ExceptionListener on the shared connection.
 	 */
+	@Override
 	protected void prepareSharedConnection(Connection connection) throws JMSException {
 		super.prepareSharedConnection(connection);
 		connection.setExceptionListener(this);
@@ -320,6 +349,7 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	/**
 	 * Destroy the registered JMS Sessions and associated MessageConsumers.
 	 */
+	@Override
 	protected void doShutdown() throws JMSException {
 		logger.debug("Closing JMS MessageConsumers");
 		for (MessageConsumer consumer : this.consumers) {

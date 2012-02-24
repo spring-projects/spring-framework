@@ -70,6 +70,16 @@ public class ServletResponseMethodArgumentResolverTests {
 		assertTrue(mavContainer.isRequestHandled());
 	}
 
+	// SPR-8983
+
+	public void servletResponseNoMavContainer() throws Exception {
+		MethodParameter servletResponseParameter = new MethodParameter(method, 0);
+		assertTrue("ServletResponse not supported", resolver.supportsParameter(servletResponseParameter));
+
+		Object result = resolver.resolveArgument(servletResponseParameter, null, webRequest, null);
+		assertSame("Invalid result", servletResponse, result);
+	}
+
 	@Test
 	public void outputStream() throws Exception {
 		MethodParameter outputStreamParameter = new MethodParameter(method, 1);

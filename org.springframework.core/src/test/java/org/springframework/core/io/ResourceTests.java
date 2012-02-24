@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.core.io;
 
-import static org.junit.Assert.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,8 +27,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.util.FileCopyUtils;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 09.09.2004
  */
 public class ResourceTests {
@@ -173,13 +175,11 @@ public class ResourceTests {
 		assertEquals(new UrlResource("file:dir/subdir"), relative);
 	}
 
-	/*
-	 * @Test
+	@Ignore @Test // this test is quite slow. TODO: re-enable with JUnit categories
 	public void testNonFileResourceExists() throws Exception {
 		Resource resource = new UrlResource("http://www.springframework.org");
 		assertTrue(resource.exists());
 	}
-	*/
 
 	@Test
 	public void testAbstractResourceExceptions() throws Exception {
@@ -215,13 +215,34 @@ public class ResourceTests {
 		catch (FileNotFoundException ex) {
 			assertTrue(ex.getMessage().indexOf(name) != -1);
 		}
-		try {
-			resource.getFilename();
-			fail("IllegalStateException should have been thrown");
-		}
-		catch (IllegalStateException ex) {
-			assertTrue(ex.getMessage().indexOf(name) != -1);
-		}
+
+		assertThat(resource.getFilename(), nullValue());
+	}
+
+	@Test
+	public void testContentLength() throws IOException {
+		AbstractResource resource = new AbstractResource() {
+			public InputStream getInputStream() throws IOException {
+				return new ByteArrayInputStream(new byte[] { 'a', 'b', 'c' });
+			}
+			public String getDescription() {
+				return null;
+			}
+		};
+		assertThat(resource.contentLength(), is(3L));
+	}
+
+	@Test(expected=IllegalStateException.class)
+	public void testContentLength_withNullInputStream() throws IOException {
+		AbstractResource resource = new AbstractResource() {
+			public InputStream getInputStream() throws IOException {
+				return null;
+			}
+			public String getDescription() {
+				return null;
+			}
+		};
+		resource.contentLength();
 	}
 
 }

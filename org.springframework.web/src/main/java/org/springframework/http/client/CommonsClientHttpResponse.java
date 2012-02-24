@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethod;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 
 /**
  * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
@@ -37,7 +36,7 @@ import org.springframework.http.HttpStatus;
  * @deprecated In favor of {@link HttpComponentsClientHttpResponse}
  */
 @Deprecated
-final class CommonsClientHttpResponse implements ClientHttpResponse {
+final class CommonsClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final HttpMethod httpMethod;
 
@@ -49,8 +48,8 @@ final class CommonsClientHttpResponse implements ClientHttpResponse {
 	}
 
 
-	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(this.httpMethod.getStatusCode());
+	public int getRawStatusCode() {
+		return this.httpMethod.getStatusCode();
 	}
 
 	public String getStatusText() {

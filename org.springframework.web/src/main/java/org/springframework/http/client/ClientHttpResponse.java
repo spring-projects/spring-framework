@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,13 @@ public interface ClientHttpResponse extends HttpInputMessage {
 	 * @throws IOException in case of I/O errors
 	 */
 	HttpStatus getStatusCode() throws IOException;
+
+	/**
+	 * Return the HTTP status code of the response as integer
+	 * @return the HTTP status as an integer
+	 * @throws IOException in case of I/O errors
+	 */
+	int getRawStatusCode() throws IOException;
 
 	/**
 	 * Return the HTTP status text of the response.

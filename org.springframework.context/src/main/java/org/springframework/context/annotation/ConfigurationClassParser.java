@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,11 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
+import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ResourceLoader;
@@ -46,6 +50,8 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Parses a {@link Configuration} class definition, populating a collection of
@@ -73,6 +79,8 @@ class ConfigurationClassParser {
 
 	private final ImportStack importStack = new ImportStack();
 
+	private final Set<String> knownSuperclasses = new LinkedHashSet<String>();
+
 	private final Set<ConfigurationClass> configurationClasses =
 		new LinkedHashSet<ConfigurationClass>();
 
@@ -94,14 +102,16 @@ class ConfigurationClassParser {
 	 */
 	public ConfigurationClassParser(MetadataReaderFactory metadataReaderFactory,
 			ProblemReporter problemReporter, Environment environment,
-			ResourceLoader resourceLoader, BeanDefinitionRegistry registry) {
+			ResourceLoader resourceLoader, BeanNameGenerator beanNameGenerator,
+			BeanDefinitionRegistry registry) {
+
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.problemReporter = problemReporter;
 		this.environment = environment;
 		this.resourceLoader = resourceLoader;
 		this.registry = registry;
-		this.componentScanParser =
-			new ComponentScanAnnotationParser(this.resourceLoader, this.environment, this.registry);
+		this.componentScanParser = new ComponentScanAnnotationParser(
+				resourceLoader, environment, beanNameGenerator, registry);
 	}
 
 
@@ -119,8 +129,7 @@ class ConfigurationClassParser {
 	/**
 	 * Parse the specified {@link Configuration @Configuration} class.
 	 * @param clazz the Class to parse
-	 * @param beanName may be null, but if populated represents the bean id
-	 * (assumes that this configuration class was configured via XML)
+	 * @param beanName must not be null (as of Spring 3.1.1)
 	 */
 	public void parse(Class<?> clazz, String beanName) throws IOException {
 		processConfigurationClass(new ConfigurationClass(clazz, beanName));
@@ -128,29 +137,19 @@ class ConfigurationClassParser {
 
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
 		AnnotationMetadata metadata = configClass.getMetadata();
-		if (this.environment != null && ProfileHelper.isProfileAnnotationPresent(metadata)) {
-			if (!this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata))) {
+		if (this.environment != null && metadata.isAnnotated(Profile.class.getName())) {
+			AnnotationAttributes profile = MetadataUtils.attributesFor(metadata, Profile.class);
+			if (!this.environment.acceptsProfiles(profile.getStringArray("value"))) {
 				return;
 			}
 		}
 
-		while (metadata != null) {
-			doProcessConfigurationClass(configClass, metadata);
-			String superClassName = metadata.getSuperClassName();
-			if (superClassName != null && !Object.class.getName().equals(superClassName)) {
-				if (metadata instanceof StandardAnnotationMetadata) {
-					Class<?> clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
-					metadata = new StandardAnnotationMetadata(clazz.getSuperclass());
-				}
-				else {
-					MetadataReader reader = this.metadataReaderFactory.getMetadataReader(superClassName);
-					metadata = reader.getAnnotationMetadata();
-				}
-			}
-			else {
-				metadata = null;
-			}
+		// recursively process the configuration class and its superclass hierarchy
+		do {
+			metadata = doProcessConfigurationClass(configClass, metadata);
 		}
+		while (metadata != null);
+
 		if (this.configurationClasses.contains(configClass) && configClass.getBeanName() != null) {
 			// Explicit bean definition found, probably replacing an import.
 			// Let's remove the old one and go with the new one.
@@ -160,62 +159,80 @@ class ConfigurationClassParser {
 		this.configurationClasses.add(configClass);
 	}
 
-	protected void doProcessConfigurationClass(ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
+	/**
+	 * @return annotation metadata of superclass, null if none found or previously processed
+	 */
+	protected AnnotationMetadata doProcessConfigurationClass(
+			ConfigurationClass configClass, AnnotationMetadata metadata) throws IOException {
 
 		// recursively process any member (nested) classes first
 		for (String memberClassName : metadata.getMemberClassNames()) {
 			MetadataReader reader = this.metadataReaderFactory.getMetadataReader(memberClassName);
 			AnnotationMetadata memberClassMetadata = reader.getAnnotationMetadata();
 			if (ConfigurationClassUtils.isConfigurationCandidate(memberClassMetadata)) {
-				processConfigurationClass(new ConfigurationClass(reader, null));
+				processConfigurationClass(new ConfigurationClass(reader, true));
 			}
 		}
 
 		// process any @PropertySource annotations
-		Map<String, Object> propertySourceAttributes =
-			metadata.getAnnotationAttributes(org.springframework.context.annotation.PropertySource.class.getName());
-		if (propertySourceAttributes != null) {
-			String name = (String) propertySourceAttributes.get("name");
-			String[] locations = (String[]) propertySourceAttributes.get("value");
+		AnnotationAttributes propertySource =
+				attributesFor(metadata, org.springframework.context.annotation.PropertySource.class);
+		if (propertySource != null) {
+			String name = propertySource.getString("name");
+			String[] locations = propertySource.getStringArray("value");
+			int nLocations = locations.length;
+			if (nLocations == 0) {
+				throw new IllegalArgumentException("At least one @PropertySource(value) location is required");
+			}
+			for (int i = 0; i < nLocations; i++) {
+				locations[i] = this.environment.resolveRequiredPlaceholders(locations[i]);
+			}
 			ClassLoader classLoader = this.resourceLoader.getClassLoader();
-			for (String location : locations) {
-				location = this.environment.resolveRequiredPlaceholders(location);
-				ResourcePropertySource ps = StringUtils.hasText(name) ?
-						new ResourcePropertySource(name, location, classLoader) :
-						new ResourcePropertySource(location, classLoader);
-				this.propertySources.push(ps);
+			if (!StringUtils.hasText(name)) {
+				for (String location : locations) {
+					this.propertySources.push(new ResourcePropertySource(location, classLoader));
+				}
+			}
+			else {
+				if (nLocations == 1) {
+					this.propertySources.push(new ResourcePropertySource(name, locations[0], classLoader));
+				}
+				else {
+					CompositePropertySource ps = new CompositePropertySource(name);
+					for (String location : locations) {
+						ps.addPropertySource(new ResourcePropertySource(location, classLoader));
+					}
+					this.propertySources.push(ps);
+				}
 			}
 		}
 
 		// process any @ComponentScan annotions
-		Map<String, Object> componentScanAttributes = metadata.getAnnotationAttributes(ComponentScan.class.getName());
-		if (componentScanAttributes != null) {
+		AnnotationAttributes componentScan = attributesFor(metadata, ComponentScan.class);
+		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
-			Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScanAttributes);
+			Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScan);
 
 			// check the set of scanned definitions for any further config classes and parse recursively if necessary
 			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
-				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), metadataReaderFactory)) {
+				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
 					this.parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
 				}
 			}
 		}
 
 		// process any @Import annotations
-		List<Map<String, Object>> allImportAttribs =
+		List<AnnotationAttributes> imports =
 			findAllAnnotationAttributes(Import.class, metadata.getClassName(), true);
-		for (Map<String, Object> importAttribs : allImportAttribs) {
-			processImport(configClass, (String[]) importAttribs.get("value"), true);
+		for (AnnotationAttributes importAnno : imports) {
+			processImport(configClass, importAnno.getStringArray("value"), true);
 		}
 
 		// process any @ImportResource annotations
 		if (metadata.isAnnotated(ImportResource.class.getName())) {
-			String[] resources = (String[]) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("value");
-			Class<?> readerClass = (Class<?>) metadata.getAnnotationAttributes(ImportResource.class.getName()).get("reader");
-			if (readerClass == null) {
-				throw new IllegalStateException("No reader class associated with imported resources: " +
-						StringUtils.arrayToCommaDelimitedString(resources));
-			}
+			AnnotationAttributes importResource = attributesFor(metadata, ImportResource.class);
+			String[] resources = importResource.getStringArray("value");
+			Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
 			for (String resource : resources) {
 				configClass.addImportedResource(resource, readerClass);
 			}
@@ -226,8 +243,26 @@ class ConfigurationClassParser {
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
-	}
 
+		// process superclass, if any
+		if (metadata.hasSuperClass()) {
+			String superclass = metadata.getSuperClassName();
+			if (this.knownSuperclasses.add(superclass)) {
+				// superclass found, return its annotation metadata and recurse
+				if (metadata instanceof StandardAnnotationMetadata) {
+					Class<?> clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
+					return new StandardAnnotationMetadata(clazz.getSuperclass(), true);
+				}
+				else {
+					MetadataReader reader = this.metadataReaderFactory.getMetadataReader(superclass);
+					return reader.getAnnotationMetadata();
+				}
+			}
+		}
+
+		// no superclass, processing is complete
+		return null;
+	}
 
 	/**
 	 * Return a list of attribute maps for all declarations of the given annotation
@@ -239,11 +274,11 @@ class ConfigurationClassParser {
 	 * @param annotatedClassName the class to inspect
 	 * @param classValuesAsString whether class attributes should be returned as strings
 	 */
-	private List<Map<String, Object>> findAllAnnotationAttributes(
+	private List<AnnotationAttributes> findAllAnnotationAttributes(
 			Class<? extends Annotation> targetAnnotation, String annotatedClassName,
 			boolean classValuesAsString) throws IOException {
 
-		List<Map<String, Object>> allAttribs = new ArrayList<Map<String, Object>>();
+		List<AnnotationAttributes> allAttribs = new ArrayList<AnnotationAttributes>();
 
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(annotatedClassName);
 		AnnotationMetadata metadata = reader.getAnnotationMetadata();
@@ -253,16 +288,17 @@ class ConfigurationClassParser {
 			if (annotationType.equals(targetAnnotationType)) {
 				continue;
 			}
-			MetadataReader metaReader = this.metadataReaderFactory.getMetadataReader(annotationType);
-			Map<String, Object> targetAttribs =
-				metaReader.getAnnotationMetadata().getAnnotationAttributes(targetAnnotationType, classValuesAsString);
+			AnnotationMetadata metaAnnotations =
+					this.metadataReaderFactory.getMetadataReader(annotationType).getAnnotationMetadata();
+			AnnotationAttributes targetAttribs =
+					AnnotationAttributes.fromMap(metaAnnotations.getAnnotationAttributes(targetAnnotationType, classValuesAsString));
 			if (targetAttribs != null) {
 				allAttribs.add(targetAttribs);
 			}
 		}
 
-		Map<String, Object> localAttribs =
-			metadata.getAnnotationAttributes(targetAnnotationType, classValuesAsString);
+		AnnotationAttributes localAttribs =
+				AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(targetAnnotationType, classValuesAsString));
 		if (localAttribs != null) {
 			allAttribs.add(localAttribs);
 		}
@@ -300,7 +336,7 @@ class ConfigurationClassParser {
 				else {
 					// the candidate class not an ImportSelector or ImportBeanDefinitionRegistrar -> process it as a @Configuration class
 					this.importStack.registerImport(importingClassMetadata.getClassName(), candidate);
-					processConfigurationClass(new ConfigurationClass(reader, null));
+					processConfigurationClass(new ConfigurationClass(reader, true));
 				}
 			}
 			this.importStack.pop();

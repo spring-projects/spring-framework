@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -470,6 +470,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 	}
 
+	@Override
 	protected void validateConfiguration() {
 		super.validateConfiguration();
 		synchronized (this.lifecycleMonitor) {
@@ -484,6 +485,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	// Implementation of AbstractMessageListenerContainer's template methods
 	//-------------------------------------------------------------------------
 
+	@Override
 	public void initialize() {
 		// Adapt default cache level.
 		if (this.cacheLevel == CACHE_AUTO) {
@@ -516,6 +518,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #scheduleNewInvoker
 	 * @see #setTaskExecutor
 	 */
+	@Override
 	protected void doInitialize() throws JMSException {
 		synchronized (this.lifecycleMonitor) {
 			for (int i = 0; i < this.concurrentConsumers; i++) {
@@ -527,6 +530,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	/**
 	 * Destroy the registered JMS Sessions and associated MessageConsumers.
 	 */
+	@Override
 	protected void doShutdown() throws JMSException {
 		logger.debug("Waiting for shutdown of message listener invokers");
 		try {
@@ -549,6 +553,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	/**
 	 * Overridden to reset the stop callback, if any.
 	 */
+	@Override
 	public void start() throws JmsException {
 		synchronized (this.lifecycleMonitor) {
 			this.stopCallback = null;
@@ -658,6 +663,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #setCacheLevel
 	 * @see #CACHE_CONNECTION
 	 */
+	@Override
 	protected final boolean sharedConnectionEnabled() {
 		return (getCacheLevel() >= CACHE_CONNECTION);
 	}
@@ -666,6 +672,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Re-executes the given task via this listener container's TaskExecutor.
 	 * @see #setTaskExecutor
 	 */
+	@Override
 	protected void doRescheduleTask(Object task) {
 		this.taskExecutor.execute((Runnable) task);
 	}
@@ -674,6 +681,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * Tries scheduling a new invoker, since we know messages are coming in...
 	 * @see #scheduleNewInvokerIfAppropriate()
 	 */
+	@Override
 	protected void messageReceived(Object invoker, Session session) {
 		((AsyncMessageListenerInvoker) invoker).setIdle(false);
 		scheduleNewInvokerIfAppropriate();
@@ -682,6 +690,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	/**
 	 * Marks the affected invoker as idle.
 	 */
+	@Override
 	protected void noMessageReceived(Object invoker, Session session) {
 		((AsyncMessageListenerInvoker) invoker).setIdle(true);
 	}
@@ -745,6 +754,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * asynchronous invokers to establish the shared Connection on first access.
 	 * @see #refreshConnectionUntilSuccessful()
 	 */
+	@Override
 	protected void establishSharedConnection() {
 		try {
 			super.establishSharedConnection();
@@ -760,6 +770,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * <code>Connection.start()</code>, relying on listeners to perform
 	 * appropriate recovery.
 	 */
+	@Override
 	protected void startSharedConnection() {
 		try {
 			super.startSharedConnection();
@@ -774,6 +785,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * <code>Connection.stop()</code>, relying on listeners to perform
 	 * appropriate recovery after a restart.
 	 */
+	@Override
 	protected void stopSharedConnection() {
 		try {
 			super.stopSharedConnection();

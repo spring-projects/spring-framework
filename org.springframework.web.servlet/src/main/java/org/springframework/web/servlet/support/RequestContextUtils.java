@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public abstract class RequestContextUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, ?> getInputFlashMap(HttpServletRequest request) {
-		return (Map<String, ?>) request.getAttribute(FlashMapManager.INPUT_FLASH_MAP_ATTRIBUTE);
+		return (Map<String, ?>) request.getAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE);
 	}
 
 	/**
@@ -175,7 +175,16 @@ public abstract class RequestContextUtils {
 	 * @see FlashMap
 	 */
 	public static FlashMap getOutputFlashMap(HttpServletRequest request) {
-		return (FlashMap) request.getAttribute(FlashMapManager.OUTPUT_FLASH_MAP_ATTRIBUTE);
+		return (FlashMap) request.getAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE);
+	}
+
+	/**
+	 * Return the FlashMapManager instance to save flash attributes with
+	 * before a redirect.
+	 * @param request the current request
+	 */
+	public static FlashMapManager getFlashMapManager(HttpServletRequest request) {
+		return (FlashMapManager) request.getAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE);
 	}
 
 }

@@ -1,5 +1,5 @@
  /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.context.annotation;
 
 import java.lang.annotation.Annotation;
-import java.util.Map;
 
 import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Convenient base class for {@link ImportSelector} implementations that select imports
@@ -64,26 +66,16 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 	 * returns {@code null}
 	 */
 	public final String[] selectImports(AnnotationMetadata importingClassMetadata) {
-		Class<?> annoType = GenericTypeResolver.resolveTypeArgument(getClass(), AdviceModeImportSelector.class);
+		Class<?> annoType = GenericTypeResolver.resolveTypeArgument(this.getClass(), AdviceModeImportSelector.class);
 
-		Map<String, Object> attributes = importingClassMetadata.getAnnotationAttributes(annoType.getName());
+		AnnotationAttributes attributes = attributesFor(importingClassMetadata, annoType);
 		Assert.notNull(attributes, String.format(
 				"@%s is not present on importing class '%s' as expected",
 				annoType.getSimpleName(), importingClassMetadata.getClassName()));
 
-		String modeAttrName = getAdviceModeAttributeName();
-		Assert.hasText(modeAttrName);
+		AdviceMode adviceMode = attributes.getEnum(this.getAdviceModeAttributeName());
 
-		Object adviceMode = attributes.get(modeAttrName);
-		Assert.notNull(adviceMode, String.format(
-				"Advice mode attribute @%s#%s() does not exist",
-				annoType.getSimpleName(), modeAttrName));
-
-		Assert.isInstanceOf(AdviceMode.class, adviceMode, String.format(
-				"Incorrect type for advice mode attribute '@%s#%s()': ",
-				annoType.getSimpleName(), modeAttrName));
-
-		String[] imports = selectImports((AdviceMode) adviceMode);
+		String[] imports = selectImports(adviceMode);
 		Assert.notNull(imports, String.format("Unknown AdviceMode: '%s'", adviceMode));
 
 		return imports;

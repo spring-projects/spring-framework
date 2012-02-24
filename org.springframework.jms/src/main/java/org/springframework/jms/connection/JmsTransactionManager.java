@@ -87,6 +87,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @see TransactionAwareConnectionFactoryProxy
  * @see org.springframework.jms.core.JmsTemplate
  */
+@SuppressWarnings("serial")
 public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
@@ -191,14 +192,6 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 					getConnectionFactory(), txObject.getResourceHolder());
 		}
 		catch (JMSException ex) {
-			if (session != null) {
-				try {
-					session.close();
-				}
-				catch (Throwable ex2) {
-					// ignore
-				}
-			}
 			if (con != null) {
 				try {
 					con.close();

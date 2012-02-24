@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -73,12 +74,6 @@ class ExtendedBeanInfo implements BeanInfo {
 	 */
 	public ExtendedBeanInfo(BeanInfo delegate) throws IntrospectionException {
 		this.delegate = delegate;
-
-		// PropertyDescriptor instances from the delegate object are never added directly, but always
-		// copied to the local collection of #propertyDescriptors and returned by calls to
-		// #getPropertyDescriptors(). this algorithm iterates through all methods (method descriptors)
-		// in the wrapped BeanInfo object, copying any existing PropertyDescriptor or creating a new
-		// one for any non-standard setter methods found.
 
 		ALL_METHODS:
 		for (MethodDescriptor md : delegate.getMethodDescriptors()) {
@@ -136,19 +131,13 @@ class ExtendedBeanInfo implements BeanInfo {
 					Method indexedReadMethod = ipd.getIndexedReadMethod();
 					Method indexedWriteMethod = ipd.getIndexedWriteMethod();
 					// has the setter already been found by the wrapped BeanInfo?
-					if (indexedWriteMethod != null
-							&& indexedWriteMethod.getName().equals(method.getName())) {
-						// yes -> copy it, including corresponding getter method (if any -- may be null)
-						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
-						continue ALL_METHODS;
+					if (!(indexedWriteMethod != null
+							&& indexedWriteMethod.getName().equals(method.getName()))) {
+						indexedWriteMethod = method;
 					}
-					// has a getter corresponding to this setter already been found by the wrapped BeanInfo?
-					if (indexedReadMethod != null
-							&& indexedReadMethod.getName().equals(getterMethodNameFor(propertyName))
-							&& indexedReadMethod.getReturnType().equals(method.getParameterTypes()[1])) {
-						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, indexedReadMethod, method);
-						continue ALL_METHODS;
-					}
+					// yes -> copy it, including corresponding getter method (if any -- may be null)
+					this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
+					continue ALL_METHODS;
 				}
 				// the INDEXED setter method was not found by the wrapped BeanInfo -> add a new PropertyDescriptor
 				// for it. no corresponding INDEXED getter was detected, so the 'indexed read method' parameter is null.
@@ -159,24 +148,27 @@ class ExtendedBeanInfo implements BeanInfo {
 			// the method is not a setter, but is it a getter?
 			for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
 				// have we already copied this read method to a property descriptor locally?
+				String propertyName = pd.getName();
+				Method readMethod = pd.getReadMethod();
+				Method mostSpecificReadMethod = ClassUtils.getMostSpecificMethod(readMethod, method.getDeclaringClass());
 				for (PropertyDescriptor existingPD : this.propertyDescriptors) {
-					if (method.equals(pd.getReadMethod())
-							&& existingPD.getName().equals(pd.getName())) {
+					if (method.equals(mostSpecificReadMethod)
+							&& existingPD.getName().equals(propertyName)) {
 						if (existingPD.getReadMethod() == null) {
 							// no -> add it now
-							this.addOrUpdatePropertyDescriptor(pd, pd.getName(), method, pd.getWriteMethod());
+							this.addOrUpdatePropertyDescriptor(pd, propertyName, method, pd.getWriteMethod());
 						}
 						// yes -> do not add a duplicate
 						continue ALL_METHODS;
 					}
 				}
-				if (method == pd.getReadMethod()
-						|| (pd instanceof IndexedPropertyDescriptor && method == ((IndexedPropertyDescriptor) pd).getIndexedReadMethod())) {
+				if (method.equals(mostSpecificReadMethod)
+						|| (pd instanceof IndexedPropertyDescriptor && method.equals(((IndexedPropertyDescriptor) pd).getIndexedReadMethod()))) {
 					// yes -> copy it, including corresponding setter method (if any -- may be null)
 					if (pd instanceof IndexedPropertyDescriptor) {
-						this.addOrUpdatePropertyDescriptor(pd, pd.getName(), pd.getReadMethod(), pd.getWriteMethod(), ((IndexedPropertyDescriptor)pd).getIndexedReadMethod(), ((IndexedPropertyDescriptor)pd).getIndexedWriteMethod());
+						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, pd.getWriteMethod(), ((IndexedPropertyDescriptor)pd).getIndexedReadMethod(), ((IndexedPropertyDescriptor)pd).getIndexedWriteMethod());
 					} else {
-						this.addOrUpdatePropertyDescriptor(pd, pd.getName(), pd.getReadMethod(), pd.getWriteMethod());
+						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, pd.getWriteMethod());
 					}
 					continue ALL_METHODS;
 				}
@@ -221,7 +213,9 @@ class ExtendedBeanInfo implements BeanInfo {
 					}
 				}
 				// update the existing descriptor's write method
-				if (writeMethod != null) {
+				if (writeMethod != null
+						&& !(existingPD instanceof IndexedPropertyDescriptor &&
+								!writeMethod.getParameterTypes()[0].isArray())) {
 					existingPD.setWriteMethod(writeMethod);
 				}
 
@@ -278,7 +272,7 @@ class ExtendedBeanInfo implements BeanInfo {
 				}
 				this.propertyDescriptors.add(pd);
 			} catch (IntrospectionException ex) {
-				logger.warn(format("Could not create new PropertyDescriptor for readMethod [%s] writeMethod [%s] " +
+				logger.debug(format("Could not create new PropertyDescriptor for readMethod [%s] writeMethod [%s] " +
 						"indexedReadMethod [%s] indexedWriteMethod [%s] for property [%s]. Reason: %s",
 						readMethod, writeMethod, indexedReadMethod, indexedWriteMethod, propertyName, ex.getMessage()));
 				// suppress exception and attempt to continue
@@ -289,9 +283,19 @@ class ExtendedBeanInfo implements BeanInfo {
 			try {
 				pd.setWriteMethod(writeMethod);
 			} catch (IntrospectionException ex) {
-				logger.warn(format("Could not add write method [%s] for property [%s]. Reason: %s",
+				logger.debug(format("Could not add write method [%s] for property [%s]. Reason: %s",
 						writeMethod, propertyName, ex.getMessage()));
 				// fall through -> add property descriptor as best we can
+			}
+			if (pd instanceof IndexedPropertyDescriptor) {
+				((IndexedPropertyDescriptor)pd).setIndexedReadMethod(indexedReadMethod);
+				try {
+					((IndexedPropertyDescriptor)pd).setIndexedWriteMethod(indexedWriteMethod);
+				} catch (IntrospectionException ex) {
+					logger.debug(format("Could not add indexed write method [%s] for property [%s]. Reason: %s",
+							indexedWriteMethod, propertyName, ex.getMessage()));
+					// fall through -> add property descriptor as best we can
+				}
 			}
 			this.propertyDescriptors.add(pd);
 		}

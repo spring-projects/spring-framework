@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -291,6 +291,10 @@ public class InterceptingClientHttpRequestFactoryTests {
 			return statusCode;
 		}
 
+		public int getRawStatusCode() throws IOException {
+			return statusCode.value();
+		}
+
 		public String getStatusText() throws IOException {
 			return statusText;
 		}
@@ -300,7 +304,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 		}
 
 		public InputStream getBody() throws IOException {
-			return null;  //To change body of implemented methods use File | Settings | File Templates.
+			return null;
 		}
 
 		public void close() {

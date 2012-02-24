@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +31,16 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.context.request.WebRequest;
 
 /**
- * Manages controller-specific session attributes declared via 
- * {@link SessionAttributes @SessionAttributes}. Actual storage is 
- * performed via {@link SessionAttributeStore}.
- * 
- * <p>When a controller annotated with {@code @SessionAttributes} adds 
- * attributes to its model, those attributes are checked against names and 
- * types specified via {@code @SessionAttributes}. Matching model attributes 
- * are saved in the HTTP session and remain there until the controller calls 
+ * Manages controller-specific session attributes declared via
+ * {@link SessionAttributes @SessionAttributes}. Actual storage is
+ * delegated to a {@link SessionAttributeStore} instance.
+ *
+ * <p>When a controller annotated with {@code @SessionAttributes} adds
+ * attributes to its model, those attributes are checked against names and
+ * types specified via {@code @SessionAttributes}. Matching model attributes
+ * are saved in the HTTP session and remain there until the controller calls
  * {@link SessionStatus#setComplete()}.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -50,51 +50,53 @@ public class SessionAttributesHandler {
 
 	private final Set<Class<?>> attributeTypes = new HashSet<Class<?>>();
 
-	private final Set<String> resolvedAttributeNames = Collections.synchronizedSet(new HashSet<String>(4));
+	private final Set<String> knownAttributeNames = Collections.synchronizedSet(new HashSet<String>(4));
 
 	private final SessionAttributeStore sessionAttributeStore;
 
 	/**
-	 * Creates a new instance for a controller type. Session attribute names/types
-	 * are extracted from a type-level {@code @SessionAttributes} if found.
+	 * Create a new instance for a controller type. Session attribute names and
+	 * types are extracted from the {@code @SessionAttributes} annotation, if
+	 * present, on the given type.
 	 * @param handlerType the controller type
 	 * @param sessionAttributeStore used for session access
 	 */
 	public SessionAttributesHandler(Class<?> handlerType, SessionAttributeStore sessionAttributeStore) {
 		Assert.notNull(sessionAttributeStore, "SessionAttributeStore may not be null.");
 		this.sessionAttributeStore = sessionAttributeStore;
-		
+
 		SessionAttributes annotation = AnnotationUtils.findAnnotation(handlerType, SessionAttributes.class);
 		if (annotation != null) {
-			this.attributeNames.addAll(Arrays.asList(annotation.value())); 
+			this.attributeNames.addAll(Arrays.asList(annotation.value()));
 			this.attributeTypes.addAll(Arrays.<Class<?>>asList(annotation.types()));
-		}		
+		}
+
+		this.knownAttributeNames.addAll(this.attributeNames);
 	}
 
 	/**
-	 * Whether the controller represented by this instance has declared session 
-	 * attribute names or types of interest via {@link SessionAttributes}. 
+	 * Whether the controller represented by this instance has declared any
+	 * session attributes through an {@link SessionAttributes} annotation.
 	 */
 	public boolean hasSessionAttributes() {
-		return ((this.attributeNames.size() > 0) || (this.attributeTypes.size() > 0)); 
+		return ((this.attributeNames.size() > 0) || (this.attributeTypes.size() > 0));
 	}
-	
+
 	/**
-	 * Whether the attribute name and/or type match those specified in the
-	 * controller's {@code @SessionAttributes} annotation. 
-	 * 
+	 * Whether the attribute name or type match the names and types specified
+	 * via {@code @SessionAttributes} in underlying controller.
+	 *
 	 * <p>Attributes successfully resolved through this method are "remembered"
-	 * and used in {@link #retrieveAttributes(WebRequest)} and 
-	 * {@link #cleanupAttributes(WebRequest)}. In other words, retrieval and 
-	 * cleanup only affect attributes previously resolved through here.
-	 * 
-	 * @param attributeName the attribute name to check; must not be null
-	 * @param attributeType the type for the attribute; or {@code null}
+	 * and subsequently used in {@link #retrieveAttributes(WebRequest)} and
+	 * {@link #cleanupAttributes(WebRequest)}.
+	 *
+	 * @param attributeName the attribute name to check, never {@code null}
+	 * @param attributeType the type for the attribute, possibly {@code null}
 	 */
 	public boolean isHandlerSessionAttribute(String attributeName, Class<?> attributeType) {
 		Assert.notNull(attributeName, "Attribute name must not be null");
 		if (this.attributeNames.contains(attributeName) || this.attributeTypes.contains(attributeType)) {
-			this.resolvedAttributeNames.add(attributeName);
+			this.knownAttributeNames.add(attributeName);
 			return true;
 		}
 		else {
@@ -103,8 +105,8 @@ public class SessionAttributesHandler {
 	}
 
 	/**
-	 * Stores a subset of the given attributes in the session. Attributes not 
-	 * declared as session attributes via {@code @SessionAttributes} are ignored. 
+	 * Store a subset of the given attributes in the session. Attributes not
+	 * declared as session attributes via {@code @SessionAttributes} are ignored.
 	 * @param request the current request
 	 * @param attributes candidate attributes for session storage
 	 */
@@ -112,23 +114,23 @@ public class SessionAttributesHandler {
 		for (String name : attributes.keySet()) {
 			Object value = attributes.get(name);
 			Class<?> attrType = (value != null) ? value.getClass() : null;
-			
+
 			if (isHandlerSessionAttribute(name, attrType)) {
 				this.sessionAttributeStore.storeAttribute(request, name, value);
 			}
 		}
 	}
-	
+
 	/**
-	 * Retrieve "known" attributes from the session -- i.e. attributes listed 
-	 * in {@code @SessionAttributes} and previously stored in the in the model 
-	 * at least once. 
+	 * Retrieve "known" attributes from the session, i.e. attributes listed
+	 * by name in {@code @SessionAttributes} or attributes previously stored
+	 * in the model that matched by type.
 	 * @param request the current request
-	 * @return a map with handler session attributes; possibly empty.
+	 * @return a map with handler session attributes, possibly empty
 	 */
 	public Map<String, Object> retrieveAttributes(WebRequest request) {
 		Map<String, Object> attributes = new HashMap<String, Object>();
-		for (String name : this.resolvedAttributeNames) {
+		for (String name : this.knownAttributeNames) {
 			Object value = this.sessionAttributeStore.retrieveAttribute(request, name);
 			if (value != null) {
 				attributes.put(name, value);
@@ -138,13 +140,13 @@ public class SessionAttributesHandler {
 	}
 
 	/**
-	 * Cleans "known" attributes from the session - i.e. attributes listed
-	 * in {@code @SessionAttributes} and previously stored in the in the model 
-	 * at least once.
+	 * Remove "known" attributes from the session, i.e. attributes listed
+	 * by name in {@code @SessionAttributes} or attributes previously stored
+	 * in the model that matched by type.
 	 * @param request the current request
 	 */
 	public void cleanupAttributes(WebRequest request) {
-		for (String attributeName : this.resolvedAttributeNames) {
+		for (String attributeName : this.knownAttributeNames) {
 			this.sessionAttributeStore.cleanupAttribute(request, attributeName);
 		}
 	}
@@ -158,5 +160,5 @@ public class SessionAttributesHandler {
 	Object retrieveAttribute(WebRequest request, String attributeName) {
 		return this.sessionAttributeStore.retrieveAttribute(request, attributeName);
 	}
-	
+
 }

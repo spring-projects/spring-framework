@@ -128,6 +128,9 @@ public class UriUtilsTests {
 		assertEquals("Invalid encoded URI", "http://example.com/query=foo@bar",
 				UriUtils.encodeUri("http://example.com/query=foo@bar", ENC));
 
+		// SPR-8974
+		assertEquals("http://example.org?format=json&url=http://another.com?foo=bar",
+				UriUtils.encodeUri("http://example.org?format=json&url=http://another.com?foo=bar", ENC));
 	}
 
 	@Test

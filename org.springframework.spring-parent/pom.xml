@@ -1,27 +1,25 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-  <!--
-      
-      This POM cannot be used to build Spring; it is a work in progress and should only be used as
-      part of a Maven repository upload bundle using artifacts created by the spring build system. 
-      
-	-->
-
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework</groupId>
   <artifactId>spring-parent</artifactId>
   <packaging>pom</packaging>
   <name>Spring Framework - Parent</name>
-  <version>3.1.1.BUILD-SNAPSHOT</version>
+  <version>3.1.2.BUILD-SNAPSHOT</version>
   <description>Spring Framework Parent</description>
   <scm>
     <url>https://fisheye.springframework.org/browse/spring-framework</url>
     <connection>scm:svn:https://src.springframework.org/svn/spring-framework/trunk</connection>
     <developerConnection>scm:svn:https://src.springframework.org/svn/spring-framework/trunk</developerConnection>
   </scm>
-
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -36,10 +34,10 @@
         </exclusions>
       </dependency>
       <dependency>
-		<groupId>javax.inject</groupId>
-		<artifactId>com.springsource.javax.inject</artifactId>
-		<version>1.0.0</version>
-		<scope>provided</scope> 
+    <groupId>javax.inject</groupId>
+    <artifactId>com.springsource.javax.inject</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -54,54 +52,53 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-		<groupId>org.aspectj</groupId>
-		<artifactId>aspectjweaver</artifactId>
-		<version>1.6.8</version>
-		<optional>true</optional>
+    <groupId>org.aspectj</groupId>
+    <artifactId>aspectjweaver</artifactId>
+    <version>1.6.8</version>
+    <optional>true</optional>
       </dependency>
       <dependency>
-		<groupId>org.easymock</groupId>
-		<artifactId>easymock</artifactId>
-		<version>2.5.1</version>
-		<scope>test</scope>
+    <groupId>org.easymock</groupId>
+    <artifactId>easymock</artifactId>
+    <version>2.5.1</version>
+    <scope>test</scope>
       </dependency>
       <dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-api</artifactId>
-		<version>1.5.10</version>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>1.5.10</version>
       </dependency>
       <dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-log4j12</artifactId>
-		<version>1.5.10</version>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-log4j12</artifactId>
+    <version>1.5.10</version>
       </dependency>
       <dependency>
-		<groupId>log4j</groupId>
-		<artifactId>log4j</artifactId>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
         <version>1.2.15</version>
-		<scope>test</scope>
-		<exclusions>
-		  <exclusion>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-		  </exclusion>
-		  <exclusion>
-			<groupId>javax.jms</groupId>
-			<artifactId>jms</artifactId>
-		  </exclusion>
-		  <exclusion>
-			<groupId>com.sun.jdmk</groupId>
-			<artifactId>jmxtools</artifactId>
-		  </exclusion>
-		  <exclusion>
-			<groupId>com.sun.jmx</groupId>
-			<artifactId>jmxri</artifactId>
-		  </exclusion>
-		</exclusions>
+    <scope>test</scope>
+    <exclusions>
+      <exclusion>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      </exclusion>
+      <exclusion>
+      <groupId>javax.jms</groupId>
+      <artifactId>jms</artifactId>
+      </exclusion>
+      <exclusion>
+      <groupId>com.sun.jdmk</groupId>
+      <artifactId>jmxtools</artifactId>
+      </exclusion>
+      <exclusion>
+      <groupId>com.sun.jmx</groupId>
+      <artifactId>jmxri</artifactId>
+      </exclusion>
+    </exclusions>
       </dependency>
     </dependencies>
   </dependencyManagement>
-
   <profiles>
     <profile>
       <id>strict</id>
@@ -172,14 +169,14 @@
     </profile>
     <profile>
       <id>build</id>
-	  <repositories>
-		<repository>
-		  <id>org.springframework.repository.maven</id>
-		  <name>SpringSource Maven Repository</name>
-		  <url>http://repository.springframework.org/maven/</url>
-		  <snapshots><enabled>false</enabled></snapshots>
-		</repository>
-	  </repositories>
+    <repositories>
+    <repository>
+      <id>org.springframework.repository.maven</id>
+      <name>SpringSource Maven Repository</name>
+      <url>http://repository.springframework.org/maven/</url>
+      <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+    </repositories>
     </profile>
     <profile>
       <id>legacy-build</id>
@@ -208,7 +205,7 @@
           <id>sun-repo-2</id>
           <url>http://download.java.net/maven/2/</url>
           <snapshots><enabled>false</enabled></snapshots>
-        </repository>    
+        </repository>
         <!-- fallback to S2 bundle repo for com.ibm.websphere.uow, oracle.classloader, com.sun.enterprise.loader, caucho -->
         <repository>
           <id>com.springsource.repository.bundles.release</id>
@@ -225,22 +222,21 @@
       </repositories>
     </profile>
   </profiles>
-
   <build>
-	<extensions>
-	  <extension>
-		<groupId>org.springframework.build.aws</groupId>
-		<artifactId>org.springframework.build.aws.maven</artifactId>
-		<version>2.0.0.RELEASE</version>
-	  </extension>
-	</extensions>
+    <extensions>
+      <extension>
+      <groupId>org.springframework.build.aws</groupId>
+      <artifactId>org.springframework.build.aws.maven</artifactId>
+      <version>2.0.0.RELEASE</version>
+      </extension>
+    </extensions>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-		<configuration>
-		  <source>1.5</source>
-		  <target>1.6</target>
+        <configuration>
+          <source>1.5</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
       <plugin>
@@ -254,21 +250,19 @@
             <exclude>**/Abstract*.java</exclude>
           </excludes>
           <junitArtifactName>junit:junit</junitArtifactName>
-		  <argLine>-Xmx512m</argLine>
+          <argLine>-Xmx512m</argLine>
         </configuration>
       </plugin>
     </plugins>
   </build>
-
-	<distributionManagement>
-		<repository>
-			<id>staging</id>
-			<url>file:///${user.dir}/target/staging</url>
-		</repository>
-		<snapshotRepository>
-			<id>staging</id>
-			<url>file:///${user.dir}/target/staging</url>
-		</snapshotRepository>
-	</distributionManagement>
-
+  <distributionManagement>
+    <repository>
+      <id>staging</id>
+      <url>file:///${user.dir}/target/staging</url>
+    </repository>
+    <snapshotRepository>
+      <id>staging</id>
+      <url>file:///${user.dir}/target/staging</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

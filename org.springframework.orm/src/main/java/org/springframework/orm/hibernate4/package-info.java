@@ -2,15 +2,15 @@
 /**
  *
  * Package providing integration of
- * <a href="http://www.hibernate.org">Hibernate 4.0</a>
+ * <a href="http://www.hibernate.org">Hibernate 4.x</a>
  * with Spring concepts.
- * 
+ *
  * <p>Contains an implementation of Spring's transaction SPI for local Hibernate transactions.
- * This package is intentionally rather minimal, relying on native Hibernate builder APIs
- * for building a SessionFactory (for example in an @Bean method in a @Configuration class).
+ * This package is intentionally rather minimal, with no template classes or the like,
+ * in order to follow native Hibernate recommendations as closely as possible.
  *
  * <p><b>This package supports Hibernate 4.x only.</b>
- * See the org.springframework.orm.hibernate3 package for Hibernate 3.x support.
+ * See the <code>org.springframework.orm.hibernate3</code> package for Hibernate 3.x support.
  *
  */
 package org.springframework.orm.hibernate4;

@@ -173,9 +173,12 @@ public class MediaTypeTests {
 		MediaType.parseMediaType("text/html; charset=foo-bar");
 	}
 
+	// SPR-8917
+
 	@Test
 	public void parseMediaTypeQuotedParameterValue() {
-		MediaType.parseMediaType("audio/*;attr=\"v>alue\"");
+		MediaType mediaType = MediaType.parseMediaType("audio/*;attr=\"v>alue\"");
+		assertEquals("\"v>alue\"", mediaType.getParameter("attr"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)

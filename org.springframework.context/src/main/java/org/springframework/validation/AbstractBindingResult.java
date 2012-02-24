@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,13 +120,6 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		this.errors.addAll(errors.getAllErrors());
 	}
 
-	/**
-	 * Resolve the given error code into message codes.
-	 * Calls the MessageCodesResolver with appropriate parameters.
-	 * @param errorCode the error code to resolve into message codes
-	 * @return the resolved message codes
-	 * @see #setMessageCodesResolver
-	 */
 	public String[] resolveMessageCodes(String errorCode) {
 		return getMessageCodesResolver().resolveMessageCodes(errorCode, getObjectName());
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -331,7 +331,7 @@ public class MediaType implements Comparable<MediaType> {
 				String attribute = entry.getKey();
 				String value = entry.getValue();
 				checkParameters(attribute, value);
-				m.put(attribute, unquote(value));
+				m.put(attribute, value);
 			}
 			this.parameters = Collections.unmodifiableMap(m);
 		}
@@ -428,7 +428,7 @@ public class MediaType implements Comparable<MediaType> {
 	 */
 	public Charset getCharSet() {
 		String charSet = getParameter(PARAM_CHARSET);
-		return (charSet != null ? Charset.forName(charSet) : null);
+		return (charSet != null ? Charset.forName(unquote(charSet)) : null);
 	}
 
 	/**
@@ -438,7 +438,7 @@ public class MediaType implements Comparable<MediaType> {
 	 */
 	public double getQualityValue() {
 		String qualityFactory = getParameter(PARAM_QUALITY_FACTOR);
-		return (qualityFactory != null ? Double.parseDouble(qualityFactory) : 1D);
+		return (qualityFactory != null ? Double.parseDouble(unquote(qualityFactory)) : 1D);
 	}
 
 	/**
@@ -448,6 +448,14 @@ public class MediaType implements Comparable<MediaType> {
 	 */
 	public String getParameter(String name) {
 		return this.parameters.get(name);
+	}
+
+	/**
+	 * Return all generic parameter values.
+	 * @return a read-only map, possibly empty, never <code>null</code>
+	 */
+	public Map<String, String> getParameters() {
+	        return parameters;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 
 /**
  * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
@@ -38,20 +37,20 @@ import org.springframework.http.HttpStatus;
  * @since 3.1
  * @see HttpComponentsClientHttpRequest#execute()
  */
-final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
+final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
 
 	private final HttpResponse httpResponse;
 
 	private HttpHeaders headers;
 
 
-	public HttpComponentsClientHttpResponse(HttpResponse httpResponse) {
+	HttpComponentsClientHttpResponse(HttpResponse httpResponse) {
 		this.httpResponse = httpResponse;
 	}
 
 
-	public HttpStatus getStatusCode() throws IOException {
-		return HttpStatus.valueOf(this.httpResponse.getStatusLine().getStatusCode());
+	public int getRawStatusCode() throws IOException {
+		return this.httpResponse.getStatusLine().getStatusCode();
 	}
 
 	public String getStatusText() throws IOException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,8 @@ public class IncorrectResultSizeDataAccessException extends DataRetrievalFailure
 	/**
 	 * Constructor for IncorrectResultSizeDataAccessException.
 	 * @param msg the detail message
-	 * @param ex the wrapped exception
 	 * @param expectedSize the expected result size
+	 * @param ex the wrapped exception
 	 */
 	public IncorrectResultSizeDataAccessException(String msg, int expectedSize, Throwable ex) {
 		super(msg, ex);
@@ -89,19 +89,32 @@ public class IncorrectResultSizeDataAccessException extends DataRetrievalFailure
 		this.actualSize = actualSize;
 	}
 
+	/**
+	 * Constructor for IncorrectResultSizeDataAccessException.
+	 * @param msg the detail message
+	 * @param expectedSize the expected result size
+	 * @param actualSize the actual result size (or -1 if unknown)
+	 * @param ex the wrapped exception
+	 */
+	public IncorrectResultSizeDataAccessException(String msg, int expectedSize, int actualSize, Throwable ex) {
+		super(msg, ex);
+		this.expectedSize = expectedSize;
+		this.actualSize = actualSize;
+	}
+
 
 	/**
 	 * Return the expected result size.
 	 */
 	public int getExpectedSize() {
-		return expectedSize;
+		return this.expectedSize;
 	}
 
 	/**
 	 * Return the actual result size (or -1 if unknown).
 	 */
 	public int getActualSize() {
-		return actualSize;
+		return this.actualSize;
 	}
 
 }

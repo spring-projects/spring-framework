@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scheduling.quartz;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +41,7 @@ import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MethodInvoker;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.beans.factory.FactoryBean} that exposes a
@@ -80,12 +82,22 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 
 	private static Class<?> jobDetailImplClass;
 
+	private static Method setResultMethod;
+
 	static {
 		try {
 			jobDetailImplClass = Class.forName("org.quartz.impl.JobDetailImpl");
 		}
 		catch (ClassNotFoundException ex) {
 			jobDetailImplClass = null;
+		}
+		try {
+			Class jobExecutionContextClass =
+					QuartzJobBean.class.getClassLoader().loadClass("org.quartz.JobExecutionContext");
+			setResultMethod = jobExecutionContextClass.getMethod("setResult", Object.class);
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Incompatible Quartz API: " + ex);
 		}
 	}
 
@@ -133,7 +145,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	 * fashion. The behavior when one does not want concurrent jobs to be
 	 * executed is realized through adding the {@link StatefulJob} interface.
 	 * More information on stateful versus stateless jobs can be found
-	 * <a href="http://www.opensymphony.com/quartz/tutorial.html#jobsMore">here</a>.
+	 * <a href="http://www.quartz-scheduler.org/documentation/quartz-2.1.x/tutorials/tutorial-lesson-03">here</a>.
 	 * <p>The default setting is to run jobs concurrently.
 	 */
 	public void setConcurrent(boolean concurrent) {
@@ -296,7 +308,7 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		@Override
 		protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 			try {
-				context.setResult(this.methodInvoker.invoke());
+				ReflectionUtils.invokeMethod(setResultMethod, context, this.methodInvoker.invoke());
 			}
 			catch (InvocationTargetException ex) {
 				if (ex.getTargetException() instanceof JobExecutionException) {

@@ -51,52 +51,52 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	protected final void addInterceptors(InterceptorRegistry registry) {
+	protected void addInterceptors(InterceptorRegistry registry) {
 		configurers.addInterceptors(registry);
 	}
 
 	@Override
-	protected final void addViewControllers(ViewControllerRegistry registry) {
+	protected void addViewControllers(ViewControllerRegistry registry) {
 		configurers.addViewControllers(registry);
 	}
 
 	@Override
-	protected final void addResourceHandlers(ResourceHandlerRegistry registry) {
+	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
 		configurers.addResourceHandlers(registry);
 	}
 
 	@Override
-	protected final void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+	protected void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 		configurers.configureDefaultServletHandling(configurer);
 	}
 	
 	@Override
-	protected final void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		configurers.addArgumentResolvers(argumentResolvers);
 	}
 
 	@Override
-	protected final void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		configurers.addReturnValueHandlers(returnValueHandlers);
 	}
 
 	@Override
-	protected final void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		configurers.configureMessageConverters(converters);
 	}
 
 	@Override
-	protected final void addFormatters(FormatterRegistry registry) {
+	protected void addFormatters(FormatterRegistry registry) {
 		configurers.addFormatters(registry);
 	}
 
 	@Override
-	protected final Validator getValidator() {
+	protected Validator getValidator() {
 		return configurers.getValidator();
 	}
 
 	@Override
-	protected final void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+	protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		configurers.configureHandlerExceptionResolvers(exceptionResolvers);
 	}
 

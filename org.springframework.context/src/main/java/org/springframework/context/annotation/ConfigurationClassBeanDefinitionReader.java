@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +26,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -36,20 +37,22 @@ import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SourceExtractor;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
-import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Reads a given fully-populated set of ConfigurationClass instances, registering bean
@@ -76,7 +79,12 @@ class ConfigurationClassBeanDefinitionReader {
 
 	private final MetadataReaderFactory metadataReaderFactory;
 
-	private ResourceLoader resourceLoader;
+	private final ResourceLoader resourceLoader;
+
+	private final Environment environment;
+
+	private final BeanNameGenerator beanNameGenerator;
+
 
 	/**
 	 * Create a new {@link ConfigurationClassBeanDefinitionReader} instance that will be used
@@ -84,15 +92,20 @@ class ConfigurationClassBeanDefinitionReader {
 	 * @param problemReporter 
 	 * @param metadataReaderFactory 
 	 */
-	public ConfigurationClassBeanDefinitionReader(BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
+	public ConfigurationClassBeanDefinitionReader(
+			BeanDefinitionRegistry registry, SourceExtractor sourceExtractor,
 			ProblemReporter problemReporter, MetadataReaderFactory metadataReaderFactory,
-			ResourceLoader resourceLoader) {
+			ResourceLoader resourceLoader, Environment environment,
+			BeanNameGenerator beanNameGenerator) {
 
+		Assert.notNull(beanNameGenerator, "BeanNameGenerator must not be null");
 		this.registry = registry;
 		this.sourceExtractor = sourceExtractor;
 		this.problemReporter = problemReporter;
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.resourceLoader = resourceLoader;
+		this.environment = environment;
+		this.beanNameGenerator = beanNameGenerator;
 	}
 
 
@@ -122,32 +135,25 @@ class ConfigurationClassBeanDefinitionReader {
 	 * Register the {@link Configuration} class itself as a bean definition.
 	 */
 	private void doLoadBeanDefinitionForConfigurationClassIfNecessary(ConfigurationClass configClass) {
-		if (configClass.getBeanName() != null) {
-			// a bean definition already exists for this configuration class -> nothing to do
+		if (!configClass.isImported()) {
 			return;
 		}
 
-		// no bean definition exists yet -> this must be an imported configuration class (@Import).
-		BeanDefinition configBeanDef = new GenericBeanDefinition();
-		String className = configClass.getMetadata().getClassName();
+		AnnotationMetadata metadata = configClass.getMetadata();
+		BeanDefinition configBeanDef = new AnnotatedGenericBeanDefinition(metadata);
+		String className = metadata.getClassName();
 		configBeanDef.setBeanClassName(className);
 		if (ConfigurationClassUtils.checkConfigurationClassCandidate(configBeanDef, this.metadataReaderFactory)) {
-			String configBeanName = BeanDefinitionReaderUtils.registerWithGeneratedName((AbstractBeanDefinition)configBeanDef, this.registry);
+			String configBeanName = this.beanNameGenerator.generateBeanName(configBeanDef, this.registry);
+			this.registry.registerBeanDefinition(configBeanName, configBeanDef);
 			configClass.setBeanName(configBeanName);
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Registered bean definition for imported @Configuration class %s", configBeanName));
 			}
 		}
 		else {
-			try {
-				MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
-				AnnotationMetadata metadata = reader.getAnnotationMetadata();
-				this.problemReporter.error(
-						new InvalidConfigurationImportProblem(className, reader.getResource(), metadata));
-			}
-			catch (IOException ex) {
-				throw new IllegalStateException("Could not create MetadataReader for class " + className);
-			}
+			this.problemReporter.error(
+					new InvalidConfigurationImportProblem(className, configClass.getResource(), metadata));
 		}
 	}
 
@@ -176,15 +182,14 @@ class ConfigurationClassBeanDefinitionReader {
 		beanDef.setAttribute(RequiredAnnotationBeanPostProcessor.SKIP_REQUIRED_CHECK_ATTRIBUTE, Boolean.TRUE);
 
 		// consider role
-		Map<String, Object> roleAttributes = metadata.getAnnotationAttributes(Role.class.getName());
-		if (roleAttributes != null) {
-			int role = (Integer) roleAttributes.get("value");
-			beanDef.setRole(role);
+		AnnotationAttributes role = attributesFor(metadata, Role.class);
+		if (role != null) {
+			beanDef.setRole(role.<Integer>getNumber("value"));
 		}
 
 		// consider name and any aliases
-		Map<String, Object> beanAttributes = metadata.getAnnotationAttributes(Bean.class.getName());
-		List<String> names = new ArrayList<String>(Arrays.asList((String[]) beanAttributes.get("name")));
+		AnnotationAttributes bean = attributesFor(metadata, Bean.class);
+		List<String> names = new ArrayList<String>(Arrays.asList(bean.getStringArray("name")));
 		String beanName = (names.size() > 0 ? names.remove(0) : beanMethod.getMetadata().getMethodName());
 		for (String alias : names) {
 			this.registry.registerAlias(beanName, alias);
@@ -211,40 +216,43 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// is this bean to be instantiated lazily?
 		if (metadata.isAnnotated(Lazy.class.getName())) {
-			beanDef.setLazyInit((Boolean) metadata.getAnnotationAttributes(Lazy.class.getName()).get("value"));
+			AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
+			beanDef.setLazyInit(lazy.getBoolean("value"));
 		}
 		else if (configClass.getMetadata().isAnnotated(Lazy.class.getName())){
-			beanDef.setLazyInit((Boolean) configClass.getMetadata().getAnnotationAttributes(Lazy.class.getName()).get("value"));
+			AnnotationAttributes lazy = attributesFor(configClass.getMetadata(), Lazy.class);
+			beanDef.setLazyInit(lazy.getBoolean("value"));
 		}
 
 		if (metadata.isAnnotated(DependsOn.class.getName())) {
-			String[] dependsOn = (String[]) metadata.getAnnotationAttributes(DependsOn.class.getName()).get("value");
-			if (dependsOn.length > 0) {
-				beanDef.setDependsOn(dependsOn);
+			AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
+			String[] otherBeans = dependsOn.getStringArray("value");
+			if (otherBeans.length > 0) {
+				beanDef.setDependsOn(otherBeans);
 			}
 		}
 
-		Autowire autowire = (Autowire) beanAttributes.get("autowire");
+		Autowire autowire = bean.getEnum("autowire");
 		if (autowire.isAutowire()) {
 			beanDef.setAutowireMode(autowire.value());
 		}
 
-		String initMethodName = (String) beanAttributes.get("initMethod");
+		String initMethodName = bean.getString("initMethod");
 		if (StringUtils.hasText(initMethodName)) {
 			beanDef.setInitMethodName(initMethodName);
 		}
 
-		String destroyMethodName = (String) beanAttributes.get("destroyMethod");
+		String destroyMethodName = bean.getString("destroyMethod");
 		if (StringUtils.hasText(destroyMethodName)) {
 			beanDef.setDestroyMethodName(destroyMethodName);
 		}
 
 		// consider scoping
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
-		Map<String, Object> scopeAttributes = metadata.getAnnotationAttributes(Scope.class.getName());
-		if (scopeAttributes != null) {
-			beanDef.setScope((String) scopeAttributes.get("value"));
-			proxyMode = (ScopedProxyMode) scopeAttributes.get("proxyMode");
+		AnnotationAttributes scope = attributesFor(metadata, Scope.class);
+		if (scope != null) {
+			beanDef.setScope(scope.getString("value"));
+			proxyMode = scope.getEnum("proxyMode");
 			if (proxyMode == ScopedProxyMode.DEFAULT) {
 				proxyMode = ScopedProxyMode.NO;
 			}
@@ -266,22 +274,24 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 
-	private void loadBeanDefinitionsFromImportedResources(Map<String, Class<?>> importedResources) {
+	private void loadBeanDefinitionsFromImportedResources(
+			Map<String, Class<? extends BeanDefinitionReader>> importedResources) {
+
 		Map<Class<?>, BeanDefinitionReader> readerInstanceCache = new HashMap<Class<?>, BeanDefinitionReader>();
-		for (Map.Entry<String, Class<?>> entry : importedResources.entrySet()) {
+		for (Map.Entry<String, Class<? extends BeanDefinitionReader>> entry : importedResources.entrySet()) {
 			String resource = entry.getKey();
-			Class<?> readerClass = entry.getValue();
+			Class<? extends BeanDefinitionReader> readerClass = entry.getValue();
 			if (!readerInstanceCache.containsKey(readerClass)) {
 				try {
 					// Instantiate the specified BeanDefinitionReader
-					BeanDefinitionReader readerInstance = (BeanDefinitionReader)
+					BeanDefinitionReader readerInstance =
 							readerClass.getConstructor(BeanDefinitionRegistry.class).newInstance(this.registry);
-
 					// Delegate the current ResourceLoader to it if possible
 					if (readerInstance instanceof AbstractBeanDefinitionReader) {
-						((AbstractBeanDefinitionReader)readerInstance).setResourceLoader(this.resourceLoader);
+						AbstractBeanDefinitionReader abdr = ((AbstractBeanDefinitionReader) readerInstance);
+						abdr.setResourceLoader(this.resourceLoader);
+						abdr.setEnvironment(this.environment);
 					}
-
 					readerInstanceCache.put(readerClass, readerInstance);
 				}
 				catch (Exception ex) {
@@ -336,6 +346,7 @@ class ConfigurationClassBeanDefinitionReader {
 	 * declare at least one {@link Bean @Bean} method.
 	 */
 	private static class InvalidConfigurationImportProblem extends Problem {
+
 		public InvalidConfigurationImportProblem(String className, Resource resource, AnnotationMetadata metadata) {
 			super(String.format("%s was @Import'ed but is not annotated with @Configuration " +
 					"nor does it declare any @Bean methods; it does not implement ImportSelector " +

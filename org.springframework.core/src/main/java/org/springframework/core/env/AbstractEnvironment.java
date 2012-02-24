@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@
 
 package org.springframework.core.env;
 
-import static java.lang.String.format;
-import static org.springframework.util.StringUtils.commaDelimitedListToStringArray;
-import static org.springframework.util.StringUtils.trimAllWhitespace;
-
 import java.security.AccessControlException;
+
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -28,9 +25,13 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import static java.lang.String.*;
+import static org.springframework.util.StringUtils.*;
 
 /**
  * Abstract base class for {@link Environment} implementations. Supports the notion of
@@ -89,18 +90,38 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Set<String> activeProfiles = new LinkedHashSet<String>();
-	private Set<String> defaultProfiles = new LinkedHashSet<String>(this.getReservedDefaultProfiles());
 
-	private final MutablePropertySources propertySources = new MutablePropertySources(logger);
-	private final ConfigurablePropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
+	private Set<String> defaultProfiles =
+			new LinkedHashSet<String>(this.getReservedDefaultProfiles());
+
+	private final MutablePropertySources propertySources =
+			new MutablePropertySources(this.logger);
+
+	private final ConfigurablePropertyResolver propertyResolver =
+			new PropertySourcesPropertyResolver(this.propertySources);
 
 
+	/**
+	 * Create a new {@code Environment} instance, calling back to
+	 * {@link #customizePropertySources(MutablePropertySources)} during construction to
+	 * allow subclasses to contribute or manipulate {@link PropertySource} instances as
+	 * appropriate.
+	 * @see #customizePropertySources(MutablePropertySources)
+	 */
 	public AbstractEnvironment() {
 		String name = this.getClass().getSimpleName();
-		logger.debug(String.format("Initializing new %s", name));
-		this.customizePropertySources(propertySources);
-		logger.debug(String.format("Initialized %s with PropertySources %s", name, propertySources));
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug(format("Initializing new %s", name));
+		}
+
+		this.customizePropertySources(this.propertySources);
+
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug(format(
+					"Initialized %s with PropertySources %s", name, this.propertySources));
+		}
 	}
+
 
 	/**
 	 * Customize the set of {@link PropertySource} objects to be searched by this
@@ -163,6 +184,17 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * env.getPropertySources().addLast(new PropertySourceX(...));
 	 * </pre>
 	 *
+	 * <h2>A warning about instance variable access</h2>
+	 * Instance variables declared in subclasses and having default initial values should
+	 * <em>not</em> be accessed from within this method. Due to Java object creation
+	 * lifecycle constraints, any initial value will not yet be assigned when this
+	 * callback is invoked by the {@link #AbstractEnvironment()} constructor, which may
+	 * lead to a {@code NullPointerException} or other problems. If you need to access
+	 * default values of instance variables, leave this method as a no-op and perform
+	 * property source manipulation and instance variable access directly within the
+	 * subclass constructor. Note that <em>assigning</em> values to instance variables is
+	 * not problematic; it is only attempting to read default values that must be avoided.
+	 *
 	 * @see MutablePropertySources
 	 * @see PropertySourcesPropertyResolver
 	 * @see org.springframework.context.ApplicationContextInitializer
@@ -217,7 +249,9 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	public void addActiveProfile(String profile) {
-		logger.debug(String.format("Activating profile '%s'", profile));
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug(format("Activating profile '%s'", profile));
+		}
 		this.validateProfile(profile);
 		this.activeProfiles.add(profile);
 	}
@@ -312,8 +346,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
-							logger.info(format("Caught AccessControlException when accessing system environment variable " +
-									"[%s]; its value will be returned [null]. Reason: %s", variableName, ex.getMessage()));
+							logger.info(format("Caught AccessControlException when " +
+									"accessing system environment variable [%s]; its " +
+									"value will be returned [null]. Reason: %s",
+									variableName, ex.getMessage()));
 						}
 						return null;
 					}
@@ -338,8 +374,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 					}
 					catch (AccessControlException ex) {
 						if (logger.isInfoEnabled()) {
-							logger.info(format("Caught AccessControlException when accessing system property " +
-									"[%s]; its value will be returned [null]. Reason: %s", propertyName, ex.getMessage()));
+							logger.info(format("Caught AccessControlException when " +
+									"accessing system property [%s]; its value will be " +
+									"returned [null]. Reason: %s",
+									propertyName, ex.getMessage()));
 						}
 						return null;
 					}
@@ -428,7 +466,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@Override
 	public String toString() {
 		return format("%s {activeProfiles=%s, defaultProfiles=%s, propertySources=%s}",
-				getClass().getSimpleName(), this.activeProfiles, this.defaultProfiles, this.propertySources);
+				getClass().getSimpleName(), this.activeProfiles, this.defaultProfiles,
+				this.propertySources);
 	}
 
 }
