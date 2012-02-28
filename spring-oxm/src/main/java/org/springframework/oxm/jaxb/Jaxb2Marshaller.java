@@ -457,6 +457,7 @@ public class Jaxb2Marshaller
 		if (logger.isDebugEnabled()) {
 			logger.debug("Found JAXB2 classes: [" + StringUtils.arrayToCommaDelimitedString(jaxb2Classes) + "]");
 		}
+		this.classesToBeBound = jaxb2Classes;
 		if (this.jaxbContextProperties != null) {
 			return JAXBContext.newInstance(jaxb2Classes, this.jaxbContextProperties);
 		}
