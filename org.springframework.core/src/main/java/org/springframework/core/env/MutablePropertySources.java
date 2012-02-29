@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,8 @@ public class MutablePropertySources implements PropertySources {
 	}
 
 	public PropertySource<?> get(String name) {
-		return this.propertySourceList.get(this.propertySourceList.indexOf(PropertySource.named(name)));
+		int index = this.propertySourceList.indexOf(PropertySource.named(name));
+		return index == -1 ? null : this.propertySourceList.get(index);
 	}
 
 	public Iterator<PropertySource<?>> iterator() {
@@ -146,10 +147,7 @@ public class MutablePropertySources implements PropertySources {
 	public PropertySource<?> remove(String name) {
 		logger.debug(String.format("Removing [%s] PropertySource", name));
 		int index = this.propertySourceList.indexOf(PropertySource.named(name));
-		if (index >= 0) {
-			return this.propertySourceList.remove(index);
-		}
-		return null;
+		return index == -1 ? null : this.propertySourceList.remove(index);
 	}
 
 	/**
@@ -210,11 +208,13 @@ public class MutablePropertySources implements PropertySources {
 
 	/**
 	 * Assert that the named property source is present and return its index.
+	 * @param name the {@linkplain PropertySource#getName() name of the property source}
+	 * to find
 	 * @throws IllegalArgumentException if the named property source is not present
 	 */
-	private int assertPresentAndGetIndex(String propertySourceName) {
-		int index = this.propertySourceList.indexOf(PropertySource.named(propertySourceName));
-		Assert.isTrue(index >= 0, String.format(NON_EXISTENT_PROPERTY_SOURCE_MESSAGE, propertySourceName));
+	private int assertPresentAndGetIndex(String name) {
+		int index = this.propertySourceList.indexOf(PropertySource.named(name));
+		Assert.isTrue(index >= 0, String.format(NON_EXISTENT_PROPERTY_SOURCE_MESSAGE, name));
 		return index;
 	}
 

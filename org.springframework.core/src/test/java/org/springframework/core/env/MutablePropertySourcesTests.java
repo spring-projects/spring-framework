@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,21 @@
 
 package org.springframework.core.env;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
 import org.junit.Test;
 import org.springframework.mock.env.MockPropertySource;
 
-public class PropertySourcesTests {
+import static java.lang.String.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.core.env.MutablePropertySources.*;
+
+/**
+ * Unit tests for {@link MutablePropertySources}
+ *
+ * @author Chris Beams
+ */
+public class MutablePropertySourcesTests {
+
 	@Test
 	public void test() {
 		MutablePropertySources sources = new MutablePropertySources();
@@ -104,7 +107,7 @@ public class PropertySourcesTests {
 			fail("expected non-existent PropertySource exception");
 		} catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(),
-					equalTo(String.format(MutablePropertySources.NON_EXISTENT_PROPERTY_SOURCE_MESSAGE, bogusPS)));
+					equalTo(format(NON_EXISTENT_PROPERTY_SOURCE_MESSAGE, bogusPS)));
 		}
 
 		sources.addFirst(new MockPropertySource("a"));
@@ -126,7 +129,7 @@ public class PropertySourcesTests {
 			fail("expected non-existent PropertySource exception");
 		} catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(),
-					equalTo(String.format(MutablePropertySources.NON_EXISTENT_PROPERTY_SOURCE_MESSAGE, bogusPS)));
+					equalTo(format(NON_EXISTENT_PROPERTY_SOURCE_MESSAGE, bogusPS)));
 		}
 
 		try {
@@ -134,7 +137,7 @@ public class PropertySourcesTests {
 			fail("expected exception");
 		} catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(),
-					equalTo(String.format(MutablePropertySources.ILLEGAL_RELATIVE_ADDITION_MESSAGE, "b")));
+					equalTo(format(ILLEGAL_RELATIVE_ADDITION_MESSAGE, "b")));
 		}
 
 		try {
@@ -142,8 +145,14 @@ public class PropertySourcesTests {
 			fail("expected exception");
 		} catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(),
-					equalTo(String.format(MutablePropertySources.ILLEGAL_RELATIVE_ADDITION_MESSAGE, "b")));
+					equalTo(format(ILLEGAL_RELATIVE_ADDITION_MESSAGE, "b")));
 		}
+	}
+
+	@Test
+	public void getNonExistentPropertySourceReturnsNull() {
+		MutablePropertySources sources = new MutablePropertySources();
+		assertThat(sources.get("bogus"), nullValue());
 	}
 
 }
