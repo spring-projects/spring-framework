@@ -50,7 +50,7 @@ public class CustomizedGenericXmlContextLoaderTests {
 				assertFalse("The context should not yet have been refreshed.", context.isActive());
 				builder.append(expectedContents);
 			}
-		}.loadContext("classpath:/org/springframework/test/context/support/CustomizedGenericXmlContextLoaderTests-context.xml");
+		}.loadContext(null, "classpath:/org/springframework/test/context/support/CustomizedGenericXmlContextLoaderTests-context.xml");
 
 		assertEquals("customizeContext() should have been called.", expectedContents, builder.toString());
 	}

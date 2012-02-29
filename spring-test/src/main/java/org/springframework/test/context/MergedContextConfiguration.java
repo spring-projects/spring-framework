@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -28,8 +29,8 @@ import org.springframework.util.StringUtils;
 /**
  * {@code MergedContextConfiguration} encapsulates the <em>merged</em>
  * context configuration declared on a test class and all of its superclasses
- * via {@link ContextConfiguration @ContextConfiguration} and
- * {@link ActiveProfiles @ActiveProfiles}.
+ * via {@link ContextConfiguration @ContextConfiguration}, {@link ParentContextConfiguration @ParentContextConfiguration} 
+ * and {@link ActiveProfiles @ActiveProfiles}.
  * 
  * <p>Merged resource locations, configuration classes, and active profiles
  * represent all declared values in the test class hierarchy taking into
@@ -42,7 +43,7 @@ import org.springframework.util.StringUtils;
  * to load an {@link org.springframework.context.ApplicationContext ApplicationContext}.
  * 
  * <p>{@code MergedContextConfiguration} is also used by the {@link TestContext}
- * as the context cache key for caching an
+ * as the element of the context cache key({@link ContextCacheKey}) for caching an
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * that was loaded using properties of this {@code MergedContextConfiguration}.
  * 
@@ -51,7 +52,7 @@ import org.springframework.util.StringUtils;
  * @see ContextConfiguration
  * @see ActiveProfiles
  * @see ContextConfigurationAttributes
- * @see SmartContextLoader#loadContext(MergedContextConfiguration)
+ * @see SmartContextLoader#loadContext(ApplicationContext, MergedContextConfiguration)
  */
 public class MergedContextConfiguration implements Serializable {
 

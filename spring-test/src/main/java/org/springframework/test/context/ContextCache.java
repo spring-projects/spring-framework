@@ -16,6 +16,8 @@
 
 package org.springframework.test.context;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,7 +31,7 @@ import org.springframework.util.Assert;
  * in a test environment.
  *
  * <p>Maintains a cache of {@link ApplicationContext contexts} keyed by
- * {@link MergedContextConfiguration} instances. This has significant performance
+ * {@link ContextCacheKey} instances. This has significant performance
  * benefits if initializing the context would take time. While initializing a
  * Spring context itself is very quick, some beans in a context, such as a
  * {@link org.springframework.orm.hibernate3.LocalSessionFactoryBean LocalSessionFactoryBean}
@@ -45,7 +47,7 @@ class ContextCache {
 	/**
 	 * Map of context keys to Spring ApplicationContext instances.
 	 */
-	private final Map<MergedContextConfiguration, ApplicationContext> contextMap = new ConcurrentHashMap<MergedContextConfiguration, ApplicationContext>();
+	private final Map<ContextCacheKey, ApplicationContext> contextMap = new ConcurrentHashMap<ContextCacheKey, ApplicationContext>();
 
 	private int hitCount;
 
@@ -72,7 +74,7 @@ class ContextCache {
 	 * Return whether there is a cached context for the given key.
 	 * @param key the context key (never <code>null</code>)
 	 */
-	boolean contains(MergedContextConfiguration key) {
+	boolean contains(ContextCacheKey key) {
 		Assert.notNull(key, "Key must not be null");
 		return this.contextMap.containsKey(key);
 	}
@@ -86,7 +88,7 @@ class ContextCache {
 	 * or <code>null</code> if not found in the cache.
 	 * @see #remove
 	 */
-	ApplicationContext get(MergedContextConfiguration key) {
+	ApplicationContext get(ContextCacheKey key) {
 		Assert.notNull(key, "Key must not be null");
 		ApplicationContext context = this.contextMap.get(key);
 		if (context == null) {
@@ -96,6 +98,33 @@ class ContextCache {
 			incrementHitCount();
 		}
 		return context;
+	}
+
+	/**
+	 * Obtain cache keys of child application contexts by parent cache key.
+	 *
+	 * Child {@link ContextCacheKey} contains parent's {@link MergedContextConfiguration}.
+	 * So, iterate the keys and returns all {@link ContextCacheKey}s that contains parent's
+	 * {@link MergedContextConfiguration}.
+	 *
+	 * @param parentKey
+	 * @return list of {@link ContextCacheKey} which shares same parent {@link ApplicationContext}.
+	 */
+	List<ContextCacheKey> getChildKeys(ContextCacheKey parentKey) {
+
+		List<ContextCacheKey> result = new ArrayList<ContextCacheKey>();
+
+		MergedContextConfiguration childMergedConfig = parentKey.getMergedContextConfiguration();
+
+		for (ContextCacheKey key : contextMap.keySet()) {
+			MergedContextConfiguration candidate = key.getMergedContextConfiguration();
+			if (childMergedConfig.equals(candidate)) {
+				result.add(key);
+			}
+		}
+
+		return result;
+
 	}
 
 	/**
@@ -136,7 +165,7 @@ class ContextCache {
 	 * @param key the context key (never <code>null</code>)
 	 * @param context the ApplicationContext instance (never <code>null</code>)
 	 */
-	void put(MergedContextConfiguration key, ApplicationContext context) {
+	void put(ContextCacheKey key, ApplicationContext context) {
 		Assert.notNull(key, "Key must not be null");
 		Assert.notNull(context, "ApplicationContext must not be null");
 		this.contextMap.put(key, context);
@@ -149,7 +178,7 @@ class ContextCache {
 	 * or <code>null</code> if not found in the cache.
 	 * @see #setDirty
 	 */
-	ApplicationContext remove(MergedContextConfiguration key) {
+	ApplicationContext remove(ContextCacheKey key) {
 		return this.contextMap.remove(key);
 	}
 
@@ -164,7 +193,7 @@ class ContextCache {
 	 * @param key the context key (never <code>null</code>)
 	 * @see #remove
 	 */
-	void setDirty(MergedContextConfiguration key) {
+	void setDirty(ContextCacheKey key) {
 		Assert.notNull(key, "Key must not be null");
 		ApplicationContext context = remove(key);
 		if (context instanceof ConfigurableApplicationContext) {

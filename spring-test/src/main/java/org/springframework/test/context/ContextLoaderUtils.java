@@ -19,8 +19,10 @@ package org.springframework.test.context;
 import static org.springframework.beans.BeanUtils.instantiateClass;
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,24 +67,26 @@ abstract class ContextLoaderUtils {
 	 * <code>null</code> or <em>empty</em>, the <em>standard</em>
 	 * default context loader class name {@value #DEFAULT_CONTEXT_LOADER_CLASS_NAME}
 	 * will be used. For details on the class resolution process, see
-	 * {@link #resolveContextLoaderClass()}.
+	 * {@link #resolveContextLoaderClass(Class, Class, String)}
+	 * @param configAnnotationType annotation class to process. either {@link ContextConfiguration} or {@link ParentContextConfiguration}
 	 * @param testClass the test class for which the {@code ContextLoader}
 	 * should be resolved (must not be <code>null</code>)
 	 * @param defaultContextLoaderClassName the name of the default
 	 * {@code ContextLoader} class to use (may be <code>null</code>)
 	 * @return the resolved {@code ContextLoader} for the supplied
 	 * <code>testClass</code> (never <code>null</code>)
-	 * @see #resolveContextLoaderClass()
+	 * @see #resolveContextLoaderClass(Class, Class, String)
 	 */
-	static ContextLoader resolveContextLoader(Class<?> testClass, String defaultContextLoaderClassName) {
+	static ContextLoader resolveContextLoader(Class<? extends Annotation> configAnnotationType, Class<?> testClass, String defaultContextLoaderClassName) {
+		Assert.notNull(configAnnotationType, "Configuration annotation class must not be null");
 		Assert.notNull(testClass, "Test class must not be null");
 
 		if (!StringUtils.hasText(defaultContextLoaderClassName)) {
 			defaultContextLoaderClassName = DEFAULT_CONTEXT_LOADER_CLASS_NAME;
 		}
 
-		Class<? extends ContextLoader> contextLoaderClass = resolveContextLoaderClass(testClass,
-			defaultContextLoaderClassName);
+		Class<? extends ContextLoader> contextLoaderClass = resolveContextLoaderClass(configAnnotationType, testClass,
+				defaultContextLoaderClassName);
 
 		return instantiateClass(contextLoaderClass, ContextLoader.class);
 	}
@@ -112,37 +116,23 @@ abstract class ContextLoaderUtils {
 	 * could not be loaded 
 	 */
 	@SuppressWarnings("unchecked")
-	static Class<? extends ContextLoader> resolveContextLoaderClass(Class<?> testClass,
+	static Class<? extends ContextLoader> resolveContextLoaderClass(Class<? extends Annotation> configAnnotationType, Class<?> testClass,
 			String defaultContextLoaderClassName) {
 		Assert.notNull(testClass, "Class must not be null");
 		Assert.hasText(defaultContextLoaderClassName, "Default ContextLoader class name must not be null or empty");
 
-		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, testClass);
-		Assert.notNull(declaringClass, String.format(
-			"Could not find an 'annotation declaring class' for annotation type [%s] and test class [%s]",
-			annotationType, testClass));
+		List<ContextConfigurationAttributes> attributes = getConfigurationAttributes(configAnnotationType, testClass);
 
-		while (declaringClass != null) {
-			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
-
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format(
-					"Processing ContextLoader for @ContextConfiguration [%s] and declaring class [%s]",
-					contextConfiguration, declaringClass));
-			}
-
-			Class<? extends ContextLoader> contextLoaderClass = contextConfiguration.loader();
+		for (ContextConfigurationAttributes attribute : attributes) {
+			Class<? extends ContextLoader> contextLoaderClass = attribute.getContextLoaderClass();
 			if (!ContextLoader.class.equals(contextLoaderClass)) {
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format(
-						"Found explicit ContextLoader class [%s] for @ContextConfiguration [%s] and declaring class [%s]",
-						contextLoaderClass, contextConfiguration, declaringClass));
+							"Found explicit ContextLoader class [%s] for annotation [%s] and declaring class [%s]",
+							contextLoaderClass, configAnnotationType, attribute.getDeclaringClass()));
 				}
 				return contextLoaderClass;
 			}
-
-			declaringClass = findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass());
 		}
 
 		try {
@@ -165,11 +155,12 @@ abstract class ContextLoaderUtils {
 	 * attributes} for the supplied {@link Class class} and its superclasses.
 	 * <p>Note that the {@link ContextConfiguration#inheritLocations
 	 * inheritLocations} flag of {@link ContextConfiguration
-	 * &#064;ContextConfiguration} will be taken into consideration.
+	 * &#064;ContextConfiguration} and {@link ParentContextConfiguration} will be taken into consideration.
 	 * Specifically, if the <code>inheritLocations</code> flag is set to
 	 * <code>true</code>, configuration attributes defined in the annotated
 	 * class will be appended to the configuration attributes defined in
 	 * superclasses.
+	 * @param annotationType annotation to process. either {@link ContextConfiguration} or {@link ParentContextConfiguration}
 	 * @param clazz the class for which to resolve the configuration attributes (must
 	 * not be <code>null</code>)
 	 * @return the list of configuration attributes for the specified class,
@@ -178,35 +169,65 @@ abstract class ContextLoaderUtils {
 	 * @throws IllegalArgumentException if the supplied class is <code>null</code> or
 	 * if {@code @ContextConfiguration} is not <em>present</em> on the supplied class
 	 */
-	static List<ContextConfigurationAttributes> resolveContextConfigurationAttributes(Class<?> clazz) {
+	static List<ContextConfigurationAttributes> resolveContextConfigurationAttributes(Class<? extends Annotation> annotationType,
+			Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 
-		final List<ContextConfigurationAttributes> attributesList = new ArrayList<ContextConfigurationAttributes>();
+		final List<ContextConfigurationAttributes> attributesList = getConfigurationAttributes(annotationType, clazz);
+		Assert.notNull(clazz, "AttributeList must not be null");
 
-		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, clazz);
-		Assert.notNull(declaringClass, String.format(
-			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]", annotationType,
-			clazz));
+		final int size = attributesList.size();
+		for (int i = 0; i < size; i++) {
+			ContextConfigurationAttributes attributes = attributesList.get(i);
 
-		while (declaringClass != null) {
-			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
+			// if inheritLocation=false, remove rest of the attributes.
+			if (!attributes.isInheritLocations()) {
+				final int nextIndex = i + 1;
+				for (int j = nextIndex; j < size; j++) {
+					attributesList.remove(j);
+				}
+				break;
+			}
+		}
 
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
-					contextConfiguration, declaringClass));
+		Collections.reverse(attributesList); // change to parent first order
+		return attributesList;
+
+	}
+
+	private static List<ContextConfigurationAttributes> getConfigurationAttributes(Class<? extends Annotation> annotationType,
+			Class<?> baseSearchClass) {
+
+		List<ContextConfigurationAttributes> attributesList = new ArrayList<ContextConfigurationAttributes>();
+		Class<?> searchClass = baseSearchClass;
+		while(true){
+			Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, searchClass);
+
+			if (declaringClass == null) {
+				break;
 			}
 
-			ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
-				contextConfiguration);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Resolved context configuration attributes: " + attributes);
+			Annotation contextConfiguration = declaringClass.getAnnotation(annotationType);
+			Assert.isTrue(contextConfiguration instanceof ContextConfiguration || contextConfiguration instanceof ParentContextConfiguration,
+					String.format("context configuration must be instance of [%s] or [%s] but was [%s]",
+							ContextConfiguration.class, ParentContextConfiguration.class, contextConfiguration));
+
+			ContextConfigurationAttributes attributes;
+			if (contextConfiguration instanceof ContextConfiguration) {
+				attributes = new ContextConfigurationAttributes(declaringClass, (ContextConfiguration)contextConfiguration);
+			}else {
+				attributes = new ContextConfigurationAttributes(declaringClass, (ParentContextConfiguration)contextConfiguration);
 			}
 
-			attributesList.add(0, attributes);
+			attributesList.add(attributes);
+			searchClass = declaringClass.getSuperclass();
+		}
 
-			declaringClass = contextConfiguration.inheritLocations() ? findAnnotationDeclaringClass(annotationType,
-				declaringClass.getSuperclass()) : null;
+		if (attributesList.isEmpty()) {
+			String msg = String.format(
+					"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
+					ContextConfiguration.class, baseSearchClass);
+			throw new IllegalArgumentException(msg);
 		}
 
 		return attributesList;
@@ -280,23 +301,26 @@ abstract class ContextLoaderUtils {
 	 * Build the {@link MergedContextConfiguration merged context configuration}
 	 * for the supplied {@link Class testClass} and
 	 * <code>defaultContextLoaderClassName</code>.
+	 * @param annotationType annotation class to process. either {@link ContextConfiguration} or {@link ParentContextConfiguration}
 	 * @param testClass the test class for which the {@code MergedContextConfiguration}
 	 * should be built (must not be <code>null</code>)
 	 * @param defaultContextLoaderClassName the name of the default
 	 * {@code ContextLoader} class to use (may be <code>null</code>)
 	 * @return the merged context configuration
-	 * @see #resolveContextLoader()
-	 * @see #resolveContextConfigurationAttributes()
-	 * @see SmartContextLoader#processContextConfiguration()
-	 * @see ContextLoader#processLocations()
-	 * @see #resolveActiveProfiles()
+	 * @see #resolveContextLoader(Class, Class, String)
+	 * @see #resolveContextConfigurationAttributes(Class, Class) 
+	 * @see SmartContextLoader#processContextConfiguration(ContextConfigurationAttributes) 
+	 * @see ContextLoader#processLocations(Class, String...)
+	 * @see #resolveActiveProfiles(Class)
 	 * @see MergedContextConfiguration
 	 */
-	static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
+	static MergedContextConfiguration buildMergedContextConfiguration(Class<? extends Annotation> annotationType, Class<?> testClass,
 			String defaultContextLoaderClassName) {
 
-		final ContextLoader contextLoader = resolveContextLoader(testClass, defaultContextLoaderClassName);
-		final List<ContextConfigurationAttributes> configAttributesList = resolveContextConfigurationAttributes(testClass);
+		final ContextLoader contextLoader =
+				resolveContextLoader(annotationType, testClass, defaultContextLoaderClassName);
+		final List<ContextConfigurationAttributes> configAttributesList =
+				resolveContextConfigurationAttributes(annotationType, testClass);
 		final List<String> locationsList = new ArrayList<String>();
 		final List<Class<?>> classesList = new ArrayList<Class<?>>();
 

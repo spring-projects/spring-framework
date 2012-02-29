@@ -45,13 +45,13 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	/**
 	 * Marks the {@link ApplicationContext application context} of the supplied
 	 * {@link TestContext test context} as
-	 * {@link TestContext#markApplicationContextDirty() dirty}, and sets the
+	 * {@link TestContext#markApplicationContextDirty(boolean) dirty}, and sets the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to <code>true</code>
 	 * .
 	 */
-	protected void dirtyContext(TestContext testContext) {
-		testContext.markApplicationContextDirty();
+	protected void dirtyContext(TestContext testContext, boolean dirtyParent) {
+		testContext.markApplicationContextDirty(dirtyParent);
 		testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);
 	}
 
@@ -63,7 +63,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * mode} is set to {@link ClassMode#AFTER_EACH_TEST_METHOD
 	 * AFTER_EACH_TEST_METHOD}, the {@link ApplicationContext application
 	 * context} of the test context will be
-	 * {@link TestContext#markApplicationContextDirty() marked as dirty} and the
+	 * {@link TestContext#markApplicationContextDirty(boolean) marked as dirty} and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
 	 * <code>true</code>.
@@ -88,16 +88,22 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 					+ methodDirtiesContext + "].");
 		}
 
-		if (methodDirtiesContext || (classDirtiesContext && classMode == ClassMode.AFTER_EACH_TEST_METHOD)) {
-			dirtyContext(testContext);
+		if (methodDirtiesContext) {
+			boolean dirtiesParent = testMethod.getAnnotation(DirtiesContext.class).parent();
+			dirtyContext(testContext, dirtiesParent);
 		}
+		else if (classMode == ClassMode.AFTER_EACH_TEST_METHOD) {
+			boolean dirtiesParent = classDirtiesContextAnnotation.parent();
+			dirtyContext(testContext, dirtiesParent);
+		}
+
 	}
 
 	/**
 	 * If the test class of the supplied {@link TestContext test context} is
 	 * annotated with {@link DirtiesContext &#064;DirtiesContext}, the
 	 * {@link ApplicationContext application context} of the test context will
-	 * be {@link TestContext#markApplicationContextDirty() marked as dirty} ,
+	 * be {@link TestContext#markApplicationContextDirty(boolean) marked as dirty} ,
 	 * and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
@@ -113,7 +119,8 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 			logger.debug("After test class: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
 		}
 		if (dirtiesContext) {
-			dirtyContext(testContext);
+			boolean dirtiesParent = testClass.getAnnotation(DirtiesContext.class).parent();
+			dirtyContext(testContext, dirtiesParent);
 		}
 	}
 

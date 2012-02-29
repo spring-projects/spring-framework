@@ -208,12 +208,13 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 	 * {@code AnnotationConfigContextLoader} will load the {@code ApplicationContext}.</li>
 	 * </ul>
 	 * 
+	 * @param parentApplicationContext the parent application context. null if no parent is specified.
 	 * @param mergedConfig the merged context configuration to use to load the application context
 	 * @throws IllegalArgumentException if the supplied merged configuration is <code>null</code>
 	 * @throws IllegalStateException if neither candidate loader is capable of loading an
 	 * {@code ApplicationContext} from the supplied merged context configuration
 	 */
-	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
+	public ApplicationContext loadContext(ApplicationContext parentApplicationContext, MergedContextConfiguration mergedConfig) throws Exception {
 		Assert.notNull(mergedConfig, "mergedConfig must not be null");
 
 		List<SmartContextLoader> candidates = Arrays.asList(xmlLoader, annotationConfigLoader);
@@ -225,7 +226,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format("Delegating to %s to load context from %s.", name(loader), mergedConfig));
 				}
-				return loader.loadContext(mergedConfig);
+				return loader.loadContext(parentApplicationContext, mergedConfig);
 			}
 		}
 
@@ -249,11 +250,11 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 
 	/**
 	 * {@code DelegatingSmartContextLoader} does not support the
-	 * {@link ContextLoader#loadContext(String...) } method. Call
-	 * {@link #loadContext(MergedContextConfiguration)} instead.
+	 * {@link ContextLoader#loadContext(ApplicationContext, String...) } method. Call
+	 * {@link #loadContext(ApplicationContext, MergedContextConfiguration)} instead.
 	 * @throws UnsupportedOperationException
 	 */
-	public ApplicationContext loadContext(String... locations) throws Exception {
+	public ApplicationContext loadContext(ApplicationContext parentApplicationContext, String... locations) throws Exception {
 		throw new UnsupportedOperationException("DelegatingSmartContextLoader does not support the ContextLoader SPI. "
 				+ "Call loadContext(MergedContextConfiguration) instead.");
 	}
