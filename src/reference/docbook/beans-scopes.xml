@@ -385,9 +385,7 @@
         <para>You <emphasis>do not</emphasis> need to use the
           <literal>&lt;aop:scoped-proxy/&gt;</literal> in conjunction with beans
           that are scoped as <literal>singletons</literal> or
-          <literal>prototypes</literal>. If you try to create a scoped proxy for
-          a singleton bean, the
-          <exceptionname>BeanCreationException</exceptionname> is raised.</para>
+          <literal>prototypes</literal>.</para>
       </note>
 
       <para>The configuration in the following example is only one line, but it
