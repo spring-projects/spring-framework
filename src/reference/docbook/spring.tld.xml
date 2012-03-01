@@ -845,7 +845,7 @@
                </row>
                <row>
                   <entry>
-                     <para>javascriptEncoding</para>
+                     <para>javaScriptEscape</para>
                   </entry>
                   <entry>
                      <para>false</para>
@@ -945,7 +945,7 @@
                </row>
                <row>
                   <entry>
-                     <para>javascriptEncoding</para>
+                     <para>javaScriptEscape</para>
                   </entry>
                   <entry>
                      <para>false</para>

@@ -370,7 +370,7 @@ ApplicationContext context =
 PetStoreServiceImpl service = context.getBean("petStore", PetStoreServiceImpl.class);
 
 // use configured instance
-List userList service.getUsernameList();
+List userList = service.getUsernameList();
 </programlisting>
 
       <para>You use <methodname>getBean()</methodname> to retrieve instances of
