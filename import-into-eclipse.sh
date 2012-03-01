@@ -114,7 +114,7 @@ STEP 5: Enable Git support for all projects
 - Check "Use or create repository in parent folder of project"
 - Click Finish
 
-When complete, you'll hvae have Git support enabled for all projects.
+When complete, you'll have Git support enabled for all projects.
 
 You're ready to code! Goodbye!
 EOM
