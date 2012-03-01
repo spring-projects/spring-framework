@@ -161,7 +161,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * @return the value for the HTML '<code>name</code>' attribute
 	 */
 	protected String getName() throws JspException {
-		return getPropertyPath();
+		return getDisplayString(getPropertyPath());
 	}
 
 	/**
