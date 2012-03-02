@@ -24,10 +24,10 @@ import javax.servlet.http.HttpServletRequest;
  * Implementations are typically usable both within an application context
  * and standalone.
  *
- * <p>There is only one concrete implementation included in Spring,
- * as of Spring 2.5:
+ * <p>There are two concrete implementations included in Spring, as of Spring 3.1:
  * <ul>
  * <li>{@link org.springframework.web.multipart.commons.CommonsMultipartResolver} for Jakarta Commons FileUpload
+ * <li>{@link org.springframework.web.multipart.support.StandardServletMultipartResolver} for Servlet 3.0 Part API
  * </ul>
  *
  * <p>There is no default resolver implementation used for Spring
