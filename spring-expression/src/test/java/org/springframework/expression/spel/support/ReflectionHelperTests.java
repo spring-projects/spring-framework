@@ -318,7 +318,17 @@ public class ReflectionHelperTests extends ExpressionTestCase {
 //		Assert.assertEquals(0,rpr.read(ctx,t,"field3").getValue());
 		Assert.assertEquals(false,rpr.read(ctx,t,"property4").getValue());
 		Assert.assertTrue(rpr.canRead(ctx,t,"property4"));
-		
+
+		// repro SPR-9123, ReflectivePropertyAccessor JavaBean property names compliance tests
+		Assert.assertEquals("iD",rpr.read(ctx,t,"iD").getValue());
+		Assert.assertTrue(rpr.canRead(ctx,t,"iD"));
+		Assert.assertEquals("id",rpr.read(ctx,t,"id").getValue());
+		Assert.assertTrue(rpr.canRead(ctx,t,"id"));
+		Assert.assertEquals("ID",rpr.read(ctx,t,"ID").getValue());
+		Assert.assertTrue(rpr.canRead(ctx,t,"ID"));
+		// note: "Id" is not a valid JavaBean name, nevertheless it is treated as "id"
+		Assert.assertEquals("id",rpr.read(ctx,t,"Id").getValue());
+		Assert.assertTrue(rpr.canRead(ctx,t,"Id"));
 	}
 	
 	@Test
@@ -406,6 +416,9 @@ public class ReflectionHelperTests extends ExpressionTestCase {
 		String property2;
 		String property3 = "doodoo";
 		boolean property4 = false;
+		String iD = "iD";
+		String id = "id";
+		String ID = "ID";
 
 		public String getProperty() { return property; }
 		public void setProperty(String value) { property = value; }
@@ -415,6 +428,12 @@ public class ReflectionHelperTests extends ExpressionTestCase {
 		public String getProperty3() { return property3; }
 		
 		public boolean isProperty4() { return property4; }
+
+		public String getiD() { return iD; }
+
+		public String getId() { return id; }
+
+		public String getID() { return ID; }
 	}
 	
 	static class Super {
