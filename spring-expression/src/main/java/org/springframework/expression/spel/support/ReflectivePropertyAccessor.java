@@ -282,13 +282,18 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
-	 * Find a getter method for the specified property. A getter is defined as a method whose name start with the prefix
-	 * 'get' and the rest of the name is the same as the property name (with the first character uppercased).
+	 * Find a getter method for the specified property.
 	 */
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		Method[] ms = clazz.getMethods();
+		String propertyWriteMethodSuffix;
+		if (propertyName.length() > 1 && Character.isUpperCase(propertyName.charAt(1))) {
+			propertyWriteMethodSuffix = propertyName;
+		} else {
+			propertyWriteMethodSuffix = StringUtils.capitalize(propertyName);
+		}
 		// Try "get*" method...
-		String getterName = "get" + StringUtils.capitalize(propertyName);
+		String getterName = "get" + propertyWriteMethodSuffix;
 		for (Method method : ms) {
 			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
@@ -296,7 +301,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 		}
 		// Try "is*" method...
-		getterName = "is" + StringUtils.capitalize(propertyName);
+		getterName = "is" + propertyWriteMethodSuffix;
 		for (Method method : ms) {
 			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					boolean.class.equals(method.getReturnType()) &&
