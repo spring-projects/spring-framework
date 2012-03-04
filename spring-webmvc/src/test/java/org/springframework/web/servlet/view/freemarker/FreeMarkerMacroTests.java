@@ -260,6 +260,11 @@ public class FreeMarkerMacroTests {
 		assertTrue("Wrong output: " + output, output.contains("<input type=\"checkbox\" id=\"jedi\" name=\"jedi\" checked=\"checked\" />"));
 	}
 
+	@Test
+	public void testForm17() throws Exception {
+		assertEquals("<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\"     >", getMacroOutput("FORM17"));
+	}
+
 	private String getMacroOutput(String name) throws Exception {
 
 		String macro = fetchMacro(name);
