@@ -95,6 +95,16 @@ public final class BeanWrapperTests {
 		
 		private List list;
 		
+		private Bar bar;
+		
+		public Bar getBar() {
+			return bar;
+		}
+
+		public void setBar(Bar bar) {
+			this.bar = bar;
+		}
+
 		private List<Map> listOfMaps;
 
 		public List getList() {
@@ -113,6 +123,19 @@ public final class BeanWrapperTests {
 			this.listOfMaps = listOfMaps;
 		}
 
+	}
+	
+	static class Bar{
+		private String baz;
+
+		public String getBaz() {
+			return baz;
+		}
+
+		public void setBaz(String baz) {
+			this.baz = baz;
+		}
+		
 	}
 	
 	@Test
@@ -1873,5 +1896,15 @@ public final class BeanWrapperTests {
 
 		TEST_VALUE
 	}
-
+	
+	@Test
+	
+	public void testNoAutoGrowOnSetPropValNull(){
+		Foo foo = new Foo();
+		assertTrue(foo.getBar()== null) ;
+		BeanWrapper bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		bw.setPropertyValue("bar.baz", null);
+		assertTrue(foo.getBar()== null) ;
+	}
 }

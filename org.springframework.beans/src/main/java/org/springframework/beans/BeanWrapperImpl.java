@@ -894,7 +894,20 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	public void setPropertyValue(String propertyName, Object value) throws BeansException {
 		BeanWrapperImpl nestedBw;
 		try {
-			nestedBw = getBeanWrapperForPropertyPath(propertyName);
+			if (value == null)
+			{
+				boolean userAutoGrow = this.autoGrowNestedPaths;
+				this.autoGrowNestedPaths = false;
+				try{
+					nestedBw = getBeanWrapperForPropertyPath(propertyName);
+				}
+				catch (NullValueInNestedPathException e){
+					return;
+				}
+				this.autoGrowNestedPaths = userAutoGrow;
+			}
+			else	
+				nestedBw = getBeanWrapperForPropertyPath(propertyName);
 		}
 		catch (NotReadablePropertyException ex) {
 			throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,
