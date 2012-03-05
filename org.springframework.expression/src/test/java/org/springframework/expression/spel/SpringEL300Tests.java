@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1191,6 +1191,37 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		public Map<String, String> getThirdContext() {return thirdContext;}
 		public Map<String, String> getFourthContext() {return fourthContext;}
 	}
+
+	
+	@Test
+	public void testArray() {
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		Expression expression = null;
+		Object result = null;
+
+		expression = parser.parseExpression("new java.lang.Long[0].class");
+		result = expression.getValue(context, "");
+		assertEquals("Equal assertion failed: ", "class [Ljava.lang.Long;", result.toString());
+		
+		expression = parser.parseExpression("T(java.lang.Long[])");
+		result = expression.getValue(context, "");
+		assertEquals("Equal assertion failed: ", "class [Ljava.lang.Long;", result.toString());
+		
+		expression = parser.parseExpression("T(java.lang.String[][][])");
+		result = expression.getValue(context, "");
+		assertEquals("Equal assertion failed: ", "class [[[Ljava.lang.String;", result.toString());
+		assertEquals("T(java.lang.String[][][])",((SpelExpression)expression).toStringAST());
+		
+		expression = parser.parseExpression("new int[0].class");
+		result = expression.getValue(context, "");
+		assertEquals("Equal assertion failed: ", "class [I", result.toString());
+
+		expression = parser.parseExpression("T(int[][])");
+		result = expression.getValue(context, "");
+		assertEquals("Equal assertion failed: ", "class [[I", result.toString());
+	}
+	
 
 }
 
