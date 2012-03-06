@@ -1946,6 +1946,8 @@ public final class BeanWrapperTests {
 		bw.setAutoGrowNestedPaths(true);
 		bw.setPropertyValue("bars[0].baz", null);
 		assertTrue(foo.getBars()== null) ;
+		bw.setPropertyValue("bars[1].baz", null);
+		assertTrue(foo.getBars()== null) ;
 	}
 	
 	@Test

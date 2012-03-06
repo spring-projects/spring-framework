@@ -841,6 +841,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			return value;
 		}
 		catch (IndexOutOfBoundsException ex) {
+			if(this.propertyObjectIsNull)
+				throw ex;
+			else
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Index of out of bounds in property path '" + propertyName + "'", ex);
 		}
@@ -925,6 +928,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					else
 						throw e;
 				}
+				catch (IndexOutOfBoundsException e){
+					if (this.propertyObjectIsNull)
+						return;
+					else
+						throw e;
+				}
 		}
 		catch (NotReadablePropertyException ex) {
 			throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,
@@ -949,6 +958,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					}
 					catch (NullValueInNestedPathException e){
 						if(this.propertyObjectIsNull)
+							return;
+						else
+							throw e;
+					}
+					catch (IndexOutOfBoundsException e){
+						if (this.propertyObjectIsNull)
 							return;
 						else
 							throw e;
