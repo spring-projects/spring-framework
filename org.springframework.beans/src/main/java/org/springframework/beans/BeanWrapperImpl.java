@@ -99,6 +99,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private String nestedPath = "";
 
 	private Object rootObject;
+	
+	private boolean propertyObjectIsNull;
 
 	private TypeConverterDelegate typeConverterDelegate;
 
@@ -550,7 +552,16 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		if (pos > -1) {
 			String nestedProperty = propertyPath.substring(0, pos);
 			String nestedPath = propertyPath.substring(pos + 1);
-			BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
+			BeanWrapperImpl nestedBw ;
+			if(this.propertyObjectIsNull)
+			{					
+				boolean userAutoGrow = this.autoGrowNestedPaths;
+				this.autoGrowNestedPaths = false;
+				nestedBw = getNestedBeanWrapper(nestedProperty);
+				this.autoGrowNestedPaths = userAutoGrow;				
+			}
+			else
+				nestedBw = getNestedBeanWrapper(nestedProperty);
 			return nestedBw.getBeanWrapperForPropertyPath(nestedPath);
 		}
 		else {
@@ -845,6 +856,14 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Getter for property '" + actualName + "' threw exception", ex);
 		}
+		catch(NullValueInNestedPathException ex)
+		{
+			if(this.propertyObjectIsNull)
+				throw ex;
+			else
+				throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+						"Illegal attempt to get property '" + actualName + "' threw exception", ex);
+		}
 		catch (Exception ex) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Illegal attempt to get property '" + actualName + "' threw exception", ex);
@@ -893,21 +912,17 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	@Override
 	public void setPropertyValue(String propertyName, Object value) throws BeansException {
 		BeanWrapperImpl nestedBw;
+		this.propertyObjectIsNull = value== null;
 		try {
-			if (value == null)
-			{
-				boolean userAutoGrow = this.autoGrowNestedPaths;
-				this.autoGrowNestedPaths = false;
 				try{
 					nestedBw = getBeanWrapperForPropertyPath(propertyName);
 				}
 				catch (NullValueInNestedPathException e){
-					return;
+					if (this.propertyObjectIsNull)
+						return;
+					else
+						throw e;
 				}
-				this.autoGrowNestedPaths = userAutoGrow;
-			}
-			else	
-				nestedBw = getBeanWrapperForPropertyPath(propertyName);
 		}
 		catch (NotReadablePropertyException ex) {
 			throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,
@@ -919,24 +934,21 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	@Override
 	public void setPropertyValue(PropertyValue pv) throws BeansException {
+		this.propertyObjectIsNull = pv.getValue()== null;
 		PropertyTokenHolder tokens = (PropertyTokenHolder) pv.resolvedTokens;
 		if (tokens == null) {
 			String propertyName = pv.getName();
 			BeanWrapperImpl nestedBw;
-			boolean userAutoGrow = this.autoGrowNestedPaths;
-			this.autoGrowNestedPaths = false;
 			try {
-				if(pv.getValue()== null){
 					try{
 						nestedBw = getBeanWrapperForPropertyPath(propertyName);
 					}
 					catch (NullValueInNestedPathException e){
-						return;
+						if(this.propertyObjectIsNull)
+							return;
+						else
+							throw e;
 					}
-					this.autoGrowNestedPaths = userAutoGrow;
-				}
-				else
-				nestedBw = getBeanWrapperForPropertyPath(propertyName);
 			}
 			catch (NotReadablePropertyException ex) {
 				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,

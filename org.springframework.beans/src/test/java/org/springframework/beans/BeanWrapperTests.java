@@ -104,6 +104,17 @@ public final class BeanWrapperTests {
 		public void setBar(Bar bar) {
 			this.bar = bar;
 		}
+		
+		private List<Bar> bars;
+		
+		
+		public List<Bar> getBars() {
+			return bars;
+		}
+
+		public void setBars(List<Bar> bars) {
+			this.bars = bars;
+		}
 
 		private List<Map> listOfMaps;
 
@@ -1899,9 +1910,7 @@ public final class BeanWrapperTests {
 	
 	@Test	
 	public void testNoAutoGrowOnSetPropValNull(){
-		Foo foo = new Foo();
-		ITestBean rod = new TestBean("rod", 31);
-		
+		Foo foo = new Foo();		
 		assertTrue(foo.getBar()== null) ;
 		BeanWrapper bw = new BeanWrapperImpl(foo);
 		bw.setAutoGrowNestedPaths(true);
@@ -1928,5 +1937,24 @@ public final class BeanWrapperTests {
 		assertEquals(kerry, bw.getPropertyValue("spouse"));
 		assertEquals(null, bw.getPropertyValue("spouse.spouse"));
 	}
-
+	
+	@Test
+	public void testNoAutoGrowOnSetPropValListObjectNull(){
+		Foo foo = new Foo();
+		assertTrue(foo.getBars()== null);
+		BeanWrapper bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		bw.setPropertyValue("bars[0].baz", null);
+		assertTrue(foo.getBars()== null) ;
+	}
+	
+	@Test
+	public void testNoAutoGrowOnSetPropValListObjectNotNull(){
+		Foo foo = new Foo();
+		assertTrue(foo.getBars()== null);
+		BeanWrapper bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		bw.setPropertyValue("bars[0].baz", "abc");
+		assertTrue(foo.getBars()!= null) ;
+	}
 }
