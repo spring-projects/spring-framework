@@ -912,7 +912,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	@Override
 	public void setPropertyValue(String propertyName, Object value) throws BeansException {
 		BeanWrapperImpl nestedBw;
-		this.propertyObjectIsNull = value== null;
+		if(value== null || value.equals("")){
+			this.propertyObjectIsNull = true;
+		}
 		try {
 				try{
 					nestedBw = getBeanWrapperForPropertyPath(propertyName);
@@ -934,7 +936,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	@Override
 	public void setPropertyValue(PropertyValue pv) throws BeansException {
-		this.propertyObjectIsNull = pv.getValue()== null;
+		if(pv.getValue()== null ||pv.getValue().equals("")){
+			this.propertyObjectIsNull = true;
+		}
 		PropertyTokenHolder tokens = (PropertyTokenHolder) pv.resolvedTokens;
 		if (tokens == null) {
 			String propertyName = pv.getName();
