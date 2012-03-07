@@ -16,10 +16,13 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.NumberUtils;
 
 /**
  * Implements the multiply operator. Conversions and promotions:
@@ -59,7 +62,11 @@ public class OpMultiply extends Operator {
 		if (operandOne instanceof Number && operandTwo instanceof Number) {
 			Number leftNumber = (Number) operandOne;
 			Number rightNumber = (Number) operandTwo;
-			if (leftNumber instanceof Double || rightNumber instanceof Double) {
+            if ( leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal ) {
+                BigDecimal bdLeft = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
+				BigDecimal bdRight = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
+				return new TypedValue(bdLeft.multiply(bdRight));
+            } else if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue());
 			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
 				return new TypedValue(leftNumber.longValue() * rightNumber.longValue());

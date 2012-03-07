@@ -16,9 +16,14 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
+import org.springframework.util.NumberUtils;
 
 /**
  * Implements equality operator.
@@ -39,7 +44,15 @@ public class OpEQ extends Operator {
 		if (left instanceof Number && right instanceof Number) {
 			Number op1 = (Number) left;
 			Number op2 = (Number) right;
-			if (op1 instanceof Double || op2 instanceof Double) {
+			if ( op1 instanceof BigDecimal || op2 instanceof BigDecimal )
+            {
+                BigDecimal bd1 = NumberUtils.convertNumberToTargetClass(op1, BigDecimal.class);
+                BigDecimal bd2 = NumberUtils.convertNumberToTargetClass(op2, BigDecimal.class);
+                if ( bd1 == null || bd2 == null ) {
+                    throw new SpelEvaluationException(SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
+                }
+                return BooleanTypedValue.forValue(bd1.compareTo(bd2) == 0);
+            } else if (op1 instanceof Double || op2 instanceof Double) {
 				return BooleanTypedValue.forValue(op1.doubleValue() == op2.doubleValue());
 			} else if (op1 instanceof Long || op2 instanceof Long) {
 				return BooleanTypedValue.forValue(op1.longValue() == op2.longValue());

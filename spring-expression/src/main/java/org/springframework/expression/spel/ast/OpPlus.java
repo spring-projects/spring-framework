@@ -16,10 +16,13 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.NumberUtils;
 
 /**
  * The plus operator will:
@@ -48,6 +51,9 @@ public class OpPlus extends Operator {
 		if (rightOp == null) { // If only one operand, then this is unary plus
 			Object operandOne = leftOp.getValueInternal(state).getValue();
 			if (operandOne instanceof Number) {
+                if ( operandOne instanceof BigDecimal ) {
+                    return new TypedValue((BigDecimal) operandOne);
+                }
 				if (operandOne instanceof Double) {
 					return new TypedValue(((Double) operandOne).doubleValue());
 				} else if (operandOne instanceof Long) {
@@ -64,7 +70,11 @@ public class OpPlus extends Operator {
 			if (operandOne instanceof Number && operandTwo instanceof Number) {
 				Number op1 = (Number) operandOne;
 				Number op2 = (Number) operandTwo;
-				if (op1 instanceof Double || op2 instanceof Double) {
+				if ( op1 instanceof BigDecimal || op2 instanceof BigDecimal ) {
+                    BigDecimal bd1 = NumberUtils.convertNumberToTargetClass(op1, BigDecimal.class);
+                    BigDecimal bd2 = NumberUtils.convertNumberToTargetClass(op2, BigDecimal.class);
+					return new TypedValue(bd1.add(bd2));
+                } else if (op1 instanceof Double || op2 instanceof Double) {
 					return new TypedValue(op1.doubleValue() + op2.doubleValue());
 				} else if (op1 instanceof Long || op2 instanceof Long) {
 					return new TypedValue(op1.longValue() + op2.longValue());

@@ -16,10 +16,13 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.NumberUtils;
 
 /**
  * The power operator.
@@ -43,7 +46,12 @@ public class OperatorPower extends Operator {
 		if (operandOne instanceof Number && operandTwo instanceof Number) {
 			Number op1 = (Number) operandOne;
 			Number op2 = (Number) operandTwo;
-			if (op1 instanceof Double || op2 instanceof Double) {
+            if ( op1 instanceof BigDecimal ) {
+            	// BigDecimal.pow has a limit in the range.
+            	// is it correct to use the power function this way?
+                BigDecimal bd1 = NumberUtils.convertNumberToTargetClass(op1, BigDecimal.class);
+				return new TypedValue(bd1.pow(op2.intValue()));
+            } else if (op1 instanceof Double || op2 instanceof Double) {
 				return new TypedValue(Math.pow(op1.doubleValue(),op2.doubleValue()));
 			} else if (op1 instanceof Long || op2 instanceof Long) {
 				double d= Math.pow(op1.longValue(), op2.longValue());
