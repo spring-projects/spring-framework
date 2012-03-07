@@ -137,17 +137,62 @@ public final class BeanWrapperTests {
 	}
 	
 	static class Bar{
-		private String baz;
+		private Baz baz;
+		
+		private List<Baz> bazs;
+		
+		private String barString;
+		
+		
+		public String getBarString() {
+			return barString;
+		}
 
-		public String getBaz() {
+		public void setBarString(String barString) {
+			this.barString = barString;
+		}
+
+		public List<Baz> getBazs() {
+			return bazs;
+		}
+
+		public void setBazs(List<Baz> bazs) {
+			this.bazs = bazs;
+		}
+
+		public Baz getBaz() {
 			return baz;
 		}
 
-		public void setBaz(String baz) {
+		public void setBaz(Baz baz) {
 			this.baz = baz;
 		}
 		
 	}
+	
+	static class Baz{
+		
+		private String qux;
+		
+		private String yub;
+		
+		public String getYub() {
+			return yub;
+		}
+
+		public void setYub(String yub) {
+			this.yub = yub;
+		}
+
+		public String getQux(){
+			return qux;
+		}
+		
+		public void setQux(String qux){
+			this.qux = qux;
+		}
+	}
+	
 	
 	@Test
 	public void testIsReadablePropertyNotReadable() {
@@ -1956,7 +2001,35 @@ public final class BeanWrapperTests {
 		assertTrue(foo.getBars()== null);
 		BeanWrapper bw = new BeanWrapperImpl(foo);
 		bw.setAutoGrowNestedPaths(true);
-		bw.setPropertyValue("bars[0].baz", "abc");
-		assertTrue(foo.getBars()!= null) ;
+		bw.setPropertyValue("bars[0].baz.qux", "abc");
+		assertTrue(foo.getBars().get(0).getBaz().getQux().endsWith("abc"));
+		bw.setPropertyValue("bars[0].baz.yub", null);
+		assertTrue(foo.getBars().get(0).getBaz().getYub()== null) ;
+	}
+	
+	@Test	
+	public void testNoAutoGrowOnSetPropNestedValNull(){
+		Foo foo = new Foo();		
+		assertTrue(foo.getBar()== null) ;
+		BeanWrapper bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		bw.setPropertyValue("bar.baz.qux", null);
+		assertTrue(foo.getBar()== null) ;
+		bw.setPropertyValue("bar.baz.yub", "abc");
+		assertTrue(foo.getBar().getBaz().getYub().equals("abc") );
+	}
+	
+	@Test	
+	public void testNoAutoGrowOnSetPropNestedListObjectNull(){
+		Foo foo = new Foo();		
+		assertTrue(foo.getBar()== null) ;
+		BeanWrapper bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		bw.setPropertyValue("bars[0].barString", "xyz");
+		assertTrue(foo.getBars().get(0).barString.equals("xyz"));
+		bw.setPropertyValue("bars[0].bazs[0].qux", null);
+		assertTrue(foo.getBars().get(0).getBazs().get(0).qux== null) ;
+		bw.setPropertyValue("bars[0].bazs[0].yub", "abc");
+		assertTrue(foo.getBars().get(0).getBazs().get(0).getYub().equals("abc") );
 	}
 }

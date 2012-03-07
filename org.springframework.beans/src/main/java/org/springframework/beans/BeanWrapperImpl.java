@@ -545,6 +545,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Recursively navigate to return a BeanWrapper for the nested property path.
 	 * @param propertyPath property property path, which may be nested
 	 * @return a BeanWrapper for the target bean
+	 * @throws Exception 
 	 */
 	protected BeanWrapperImpl getBeanWrapperForPropertyPath(String propertyPath) {
 		int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(propertyPath);
@@ -557,8 +558,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			{					
 				boolean userAutoGrow = this.autoGrowNestedPaths;
 				this.autoGrowNestedPaths = false;
+				try{
 				nestedBw = getNestedBeanWrapper(nestedProperty);
-				this.autoGrowNestedPaths = userAutoGrow;				
+				}
+				finally{
+					this.autoGrowNestedPaths = userAutoGrow;
+				}			
 			}
 			else
 				nestedBw = getNestedBeanWrapper(nestedProperty);
@@ -918,6 +923,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		if(value== null || value.equals("")){
 			this.propertyObjectIsNull = true;
 		}
+		
 		try {
 				try{
 					nestedBw = getBeanWrapperForPropertyPath(propertyName);
@@ -934,6 +940,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					else
 						throw e;
 				}
+				finally{
+						this.propertyObjectIsNull = false;
+				}
 		}
 		catch (NotReadablePropertyException ex) {
 			throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,
@@ -948,6 +957,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		if(pv.getValue()== null ||pv.getValue().equals("")){
 			this.propertyObjectIsNull = true;
 		}
+		
 		PropertyTokenHolder tokens = (PropertyTokenHolder) pv.resolvedTokens;
 		if (tokens == null) {
 			String propertyName = pv.getName();
@@ -967,6 +977,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 							return;
 						else
 							throw e;
+					}
+					finally{
+						this.propertyObjectIsNull = false;
 					}
 			}
 			catch (NotReadablePropertyException ex) {
