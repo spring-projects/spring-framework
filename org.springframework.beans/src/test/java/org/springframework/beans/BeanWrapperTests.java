@@ -19,6 +19,7 @@ package org.springframework.beans;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -2031,5 +2032,45 @@ public final class BeanWrapperTests {
 		assertTrue(foo.getBars().get(0).getBazs().get(0).qux== null) ;
 		bw.setPropertyValue("bars[0].bazs[0].yub", "abc");
 		assertTrue(foo.getBars().get(0).getBazs().get(0).getYub().equals("abc") );
+	}
+	
+	@Test
+	public void testBindingCaseChildSupport()
+	{
+		Foo foo = new Foo();
+		Baz bazFather = new Baz();
+		bazFather.setQux("test");
+		Baz bazChild = new Baz();
+		bazChild.setYub("test");
+		Bar bar = new Bar();
+		bar.setBaz(bazFather);
+		foo.setBar(bar);
+		foo.getBar().setBazs(new ArrayList<Baz>());
+		foo.getBar().getBazs().add(bazChild);
+		BeanWrapperImpl bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		assertNull(bw.getPropertyValue("bar.bazs[0].qux"));
+		assertNotNull(bw.getPropertyValue("bar.bazs[0].yub"));
+		
+		bw.setPropertyValue("bar.bazs[0].qux", "bob");
+		bw.setPropertyValue("bar.bazs[1].yub", "");
+		bw.setPropertyValue("bar.bazs[1].qux", "bob");
+		assertEquals("bob", foo.getBar().getBazs().get(1).getQux());
+		assertEquals("bob", foo.getBar().getBazs().get(0).getQux());
+		assertEquals("bob", bw.getPropertyValue("bar.bazs[0].qux"));
+		assertEquals("test", foo.getBar().getBazs().get(0).getYub());
+		assertEquals("test", bw.getPropertyValue("bar.bazs[0].yub"));
+	}
+	
+	@Test
+	public void testBindingCaseNewChildSupport()
+	{
+		Foo foo = new Foo();
+		BeanWrapperImpl bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		assertNull(bw.getPropertyValue("bar.bazs[0].qux"));	
+		bw.setPropertyValue("bar.bazs[0].qux", "bob");
+		assertEquals("bob", foo.getBar().getBazs().get(0).getQux());
+		assertEquals("bob", bw.getPropertyValue("bar.bazs[0].qux"));
 	}
 }
