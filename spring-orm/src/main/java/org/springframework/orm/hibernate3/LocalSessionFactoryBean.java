@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
@@ -33,7 +34,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.cache.CacheProvider;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.NamingStrategy;
@@ -43,7 +43,6 @@ import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.event.EventListeners;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.hibernate.transaction.JTATransactionFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.core.io.ClassPathResource;
@@ -115,8 +114,9 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	private static final ThreadLocal<Object> configTimeRegionFactoryHolder =
 			new ThreadLocal<Object>();
 
-	private static final ThreadLocal<CacheProvider> configTimeCacheProviderHolder =
-			new ThreadLocal<CacheProvider>();
+	@SuppressWarnings("deprecation")
+	private static final ThreadLocal<org.hibernate.cache.CacheProvider> configTimeCacheProviderHolder =
+			new ThreadLocal<org.hibernate.cache.CacheProvider>();
 
 	private static final ThreadLocal<LobHandler> configTimeLobHandlerHolder =
 			new ThreadLocal<LobHandler>();
@@ -167,7 +167,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * during configuration.
 	 * @see #setCacheProvider
 	 */
-	public static CacheProvider getConfigTimeCacheProvider() {
+	@SuppressWarnings("deprecation")
+	public static org.hibernate.cache.CacheProvider getConfigTimeCacheProvider() {
 		return configTimeCacheProviderHolder.get();
 	}
 
@@ -207,7 +208,8 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 	private Object cacheRegionFactory;
 
-	private CacheProvider cacheProvider;
+	@SuppressWarnings("deprecation")
+	private org.hibernate.cache.CacheProvider cacheProvider;
 
 	private LobHandler lobHandler;
 
@@ -401,7 +403,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * @see #setCacheRegionFactory
 	 */
 	@Deprecated
-	public void setCacheProvider(CacheProvider cacheProvider) {
+	public void setCacheProvider(org.hibernate.cache.CacheProvider cacheProvider) {
 		this.cacheProvider = cacheProvider;
 	}
 
@@ -650,7 +652,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			}
 
 			if (dataSource != null) {
-				Class providerClass = LocalDataSourceConnectionProvider.class;
+				Class<?> providerClass = LocalDataSourceConnectionProvider.class;
 				if (isUseTransactionAwareDataSource() || dataSource instanceof TransactionAwareDataSourceProxy) {
 					providerClass = TransactionAwareDataSourceConnectionProvider.class;
 				}
@@ -719,7 +721,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 			if (this.entityCacheStrategies != null) {
 				// Register cache strategies for mapped entities.
-				for (Enumeration classNames = this.entityCacheStrategies.propertyNames(); classNames.hasMoreElements();) {
+				for (Enumeration<?> classNames = this.entityCacheStrategies.propertyNames(); classNames.hasMoreElements();) {
 					String className = (String) classNames.nextElement();
 					String[] strategyAndRegion =
 							StringUtils.commaDelimitedListToStringArray(this.entityCacheStrategies.getProperty(className));
@@ -739,7 +741,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 
 			if (this.collectionCacheStrategies != null) {
 				// Register cache strategies for mapped collections.
-				for (Enumeration collRoles = this.collectionCacheStrategies.propertyNames(); collRoles.hasMoreElements();) {
+				for (Enumeration<?> collRoles = this.collectionCacheStrategies.propertyNames(); collRoles.hasMoreElements();) {
 					String collRole = (String) collRoles.nextElement();
 					String[] strategyAndRegion =
 							StringUtils.commaDelimitedListToStringArray(this.collectionCacheStrategies.getProperty(collRole));
@@ -938,6 +940,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
+						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
 						String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
@@ -982,6 +985,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
+						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect, false);
 						getConfiguration().validateSchema(dialect, metadata);
@@ -1018,6 +1022,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		hibernateTemplate.execute(
 			new HibernateCallback<Object>() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
+					@SuppressWarnings("deprecation")
 					Connection con = session.connection();
 					String[] sql = getConfiguration().generateDropSchemaScript(dialect);
 					executeSchemaScript(con, sql);
@@ -1054,6 +1059,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
+						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
 						executeSchemaScript(con, sql);
