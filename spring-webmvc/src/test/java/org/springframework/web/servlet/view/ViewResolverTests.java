@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockRequestDispatcher;
@@ -154,6 +155,12 @@ public class ViewResolverTests {
 		view = vr.resolveViewName("redirect:myUrl", Locale.getDefault());
 		assertEquals("Correct view class", RedirectView.class, view.getClass());
 		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
+		assertSame("View not initialized as bean", wac, ((RedirectView) view).getApplicationContext());
+		
+		view = vr.resolveViewName("permanentRedirect:myUrl", Locale.getDefault());
+		assertEquals("Correct view class", RedirectView.class, view.getClass());
+		assertEquals("Correct URL", "myUrl", ((RedirectView) view).getUrl());
+		assertEquals("Correct Status Code", HttpStatus.MOVED_PERMANENTLY, ((RedirectView) view).getHttp11StatusCode(request, response, null));
 		assertSame("View not initialized as bean", wac, ((RedirectView) view).getApplicationContext());
 
 		view = vr.resolveViewName("forward:myUrl", Locale.getDefault());
