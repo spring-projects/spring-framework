@@ -39,6 +39,7 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.cfg.NamingStrategy;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.FilterDefinition;
+import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.event.EventListeners;
 import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.hibernate.transaction.JTATransactionFactory;
@@ -930,13 +931,14 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			configTimeDataSourceHolder.set(dataSource);
 		}
 		try {
-			HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
+			SessionFactory sessionFactory = getSessionFactory();
+			final Dialect dialect = ((SessionFactoryImplementor) sessionFactory).getDialect();
+			HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
 			hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
 						Connection con = session.connection();
-						Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
 						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
 						String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
 						executeSchemaScript(con, sql);
@@ -973,13 +975,14 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			configTimeDataSourceHolder.set(dataSource);
 		}
 		try {
-			HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
+			SessionFactory sessionFactory = getSessionFactory();
+			final Dialect dialect = ((SessionFactoryImplementor) sessionFactory).getDialect();
+			HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
 			hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
 						Connection con = session.connection();
-						Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
 						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect, false);
 						getConfiguration().validateSchema(dialect, metadata);
 						return null;
@@ -1009,12 +1012,13 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 */
 	public void dropDatabaseSchema() throws DataAccessException {
 		logger.info("Dropping database schema for Hibernate SessionFactory");
-		HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
+		SessionFactory sessionFactory = getSessionFactory();
+		final Dialect dialect = ((SessionFactoryImplementor) sessionFactory).getDialect();
+		HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
 		hibernateTemplate.execute(
 			new HibernateCallback<Object>() {
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
 					Connection con = session.connection();
-					Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
 					String[] sql = getConfiguration().generateDropSchemaScript(dialect);
 					executeSchemaScript(con, sql);
 					return null;
@@ -1044,12 +1048,13 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			configTimeDataSourceHolder.set(dataSource);
 		}
 		try {
-			HibernateTemplate hibernateTemplate = new HibernateTemplate(getSessionFactory());
+			SessionFactory sessionFactory = getSessionFactory();
+			final Dialect dialect = ((SessionFactoryImplementor) sessionFactory).getDialect();
+			HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
 						Connection con = session.connection();
-						Dialect dialect = Dialect.getDialect(getConfiguration().getProperties());
 						String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
 						executeSchemaScript(con, sql);
 						return null;
