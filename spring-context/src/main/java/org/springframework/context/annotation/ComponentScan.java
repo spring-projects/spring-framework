@@ -132,7 +132,7 @@ public @interface ComponentScan {
 
 	/**
 	 * Declares the type filter to be used as an {@linkplain ComponentScan#includeFilters()
-	 * include filter} or {@linkplain ComponentScan#includeFilters() exclude filter}.
+	 * include filter} or {@linkplain ComponentScan#excludeFilters() exclude filter}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({})
