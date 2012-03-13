@@ -264,7 +264,7 @@ public class Constants {
 	 * @throws ConstantException if the value wasn't found
 	 */
 	public String toCode(Object value, String namePrefix) throws ConstantException {
-		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : null);
+		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
 		for (Map.Entry<String, Object> entry : this.fieldCache.entrySet()) {
 			if (entry.getKey().startsWith(prefixToUse) && entry.getValue().equals(value)) {
 				return entry.getKey();

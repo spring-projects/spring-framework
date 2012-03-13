@@ -148,15 +148,24 @@ public class ConstantsTests extends TestCase {
 		assertEquals(c.toCode(new Integer(0), "D"), "DOG");
 		assertEquals(c.toCode(new Integer(0), "DO"), "DOG");
 		assertEquals(c.toCode(new Integer(0), "DoG"), "DOG");
+		assertEquals(c.toCode(new Integer(0), null), "DOG");
 		assertEquals(c.toCode(new Integer(66), ""), "CAT");
 		assertEquals(c.toCode(new Integer(66), "C"), "CAT");
 		assertEquals(c.toCode(new Integer(66), "ca"), "CAT");
 		assertEquals(c.toCode(new Integer(66), "cAt"), "CAT");
+		assertEquals(c.toCode(new Integer(66), null), "CAT");
 		assertEquals(c.toCode("", ""), "S1");
 		assertEquals(c.toCode("", "s"), "S1");
 		assertEquals(c.toCode("", "s1"), "S1");
+		assertEquals(c.toCode("", null), "S1");
 		try {
 			c.toCode("bogus", "bogus");
+			fail("Should have thrown ConstantException");
+		}
+		catch (ConstantException expected) {
+		}
+		try {
+			c.toCode("bogus", null);
 			fail("Should have thrown ConstantException");
 		}
 		catch (ConstantException expected) {
