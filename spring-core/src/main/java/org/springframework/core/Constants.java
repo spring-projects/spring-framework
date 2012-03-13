@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,7 +264,7 @@ public class Constants {
 	 * @throws ConstantException if the value wasn't found
 	 */
 	public String toCode(Object value, String namePrefix) throws ConstantException {
-		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : null);
+		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
 		for (Map.Entry<String, Object> entry : this.fieldCache.entrySet()) {
 			if (entry.getKey().startsWith(prefixToUse) && entry.getValue().equals(value)) {
 				return entry.getKey();
@@ -295,7 +295,7 @@ public class Constants {
 	 * @throws ConstantException if the value wasn't found
 	 */
 	public String toCodeForSuffix(Object value, String nameSuffix) throws ConstantException {
-		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : null);
+		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
 		for (Map.Entry<String, Object> entry : this.fieldCache.entrySet()) {
 			if (entry.getKey().endsWith(suffixToUse) && entry.getValue().equals(value)) {
 				return entry.getKey();
