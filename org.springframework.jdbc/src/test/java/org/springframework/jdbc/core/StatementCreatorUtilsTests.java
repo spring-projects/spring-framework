@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jdbc.core;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -65,11 +66,27 @@ public class StatementCreatorUtilsTests extends TestCase {
 		StatementCreatorUtils.setParameterValue(ps, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
 	}
 
+	public void testSetParameterValueWithNullAndUnknownTypeAndJdbc30Driver() throws SQLException {
+		MockControl pmdControl = MockControl.createControl(ParameterMetaData.class);
+		ParameterMetaData pmd = (ParameterMetaData) pmdControl.getMock();
+		ps.getParameterMetaData();
+		psControl.setReturnValue(pmd, 1);
+		pmd.getParameterType(1);
+		pmdControl.setReturnValue(Types.INTEGER, 1);
+		ps.setNull(1, Types.INTEGER);
+		psControl.setVoidCallable(1);
+		psControl.replay();
+		pmdControl.replay();
+		StatementCreatorUtils.setParameterValue(ps, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
+	}
+
 	public void testSetParameterValueWithNullAndUnknownTypeOnInformix() throws SQLException {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 		MockControl metaDataControl = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData metaData = (DatabaseMetaData) metaDataControl.getMock();
+		ps.getParameterMetaData();
+		psControl.setReturnValue(null, 1);
 		ps.getConnection();
 		psControl.setReturnValue(con, 1);
 		con.getMetaData();
@@ -93,6 +110,8 @@ public class StatementCreatorUtilsTests extends TestCase {
 		Connection con = (Connection) conControl.getMock();
 		MockControl metaDataControl = MockControl.createControl(DatabaseMetaData.class);
 		DatabaseMetaData metaData = (DatabaseMetaData) metaDataControl.getMock();
+		ps.getParameterMetaData();
+		psControl.setReturnValue(null, 1);
 		ps.getConnection();
 		psControl.setReturnValue(con, 1);
 		con.getMetaData();
