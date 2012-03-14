@@ -133,9 +133,4 @@ public interface Resource extends InputStreamSource {
 	 */
 	String getDescription();
 
-	/**
-	 * {@inheritDoc}
-	 * @return the input stream for the underlying resource (must not be {@code null}).
-	 */
-	public InputStream getInputStream() throws IOException;
 }

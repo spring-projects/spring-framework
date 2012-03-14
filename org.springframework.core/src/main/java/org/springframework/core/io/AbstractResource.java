@@ -25,7 +25,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.springframework.core.NestedIOException;
-import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -113,16 +112,14 @@ public abstract class AbstractResource implements Resource {
 	 * content length. Subclasses will almost always be able to provide
 	 * a more optimal version of this, e.g. checking a File length.
 	 * @see #getInputStream()
-	 * @throws IllegalStateException if {@link #getInputStream()} returns null.
 	 */
 	public long contentLength() throws IOException {
-		InputStream is = this.getInputStream();
-		Assert.state(is != null, "resource input stream must not be null");
+		InputStream is = getInputStream();
 		try {
 			long size = 0;
 			byte[] buf = new byte[255];
 			int read;
-			while((read = is.read(buf)) != -1) {
+			while ((read = is.read(buf)) != -1) {
 				size += read;
 			}
 			return size;
