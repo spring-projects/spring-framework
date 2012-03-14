@@ -37,6 +37,7 @@ import java.lang.annotation.Target;
  *
  * @author Mark Fisher
  * @author Dave Syer
+ * @author Chris Beams
  * @since 3.0
  * @see EnableScheduling
  * @see ScheduledAnnotationBeanPostProcessor
@@ -68,5 +69,13 @@ public @interface Scheduled {
 	 * @return the period in milliseconds
 	 */
 	long fixedRate() default -1;
+
+	/**
+	 * Number of milliseconds to delay before the first execution of a
+	 * {@link #fixedRate()} or {@link #fixedDelay()} task.
+	 * @return the initial delay in milliseconds
+	 * @since 3.2
+	 */
+	long initialDelay() default 0;
 
 }

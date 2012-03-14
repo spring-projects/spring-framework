@@ -339,6 +339,10 @@ public class CronSequenceGenerator {
 		return result;
 	}
 
+	String getExpression() {
+		return this.expression;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof CronSequenceGenerator)) {

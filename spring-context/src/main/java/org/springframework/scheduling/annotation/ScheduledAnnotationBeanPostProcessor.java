@@ -34,6 +34,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.config.CronTask;
+import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
@@ -75,13 +77,7 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	private ApplicationContext applicationContext;
 
-	private ScheduledTaskRegistrar registrar;
-
-	private final Map<Runnable, String> cronTasks = new HashMap<Runnable, String>();
-
-	private final Map<Runnable, Long> fixedDelayTasks = new HashMap<Runnable, Long>();
-
-	private final Map<Runnable, Long> fixedRateTasks = new HashMap<Runnable, Long>();
+	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
 
 
 	/**
@@ -146,19 +142,20 @@ public class ScheduledAnnotationBeanPostProcessor
 						if (embeddedValueResolver != null) {
 							cron = embeddedValueResolver.resolveStringValue(cron);
 						}
-						cronTasks.put(runnable, cron);
+						registrar.addCronTask(new CronTask(runnable, cron));
 					}
+					long initialDelay = annotation.initialDelay();
 					long fixedDelay = annotation.fixedDelay();
 					if (fixedDelay >= 0) {
 						Assert.isTrue(!processedSchedule, errorMessage);
 						processedSchedule = true;
-						fixedDelayTasks.put(runnable, fixedDelay);
+						registrar.addFixedDelayTask(new IntervalTask(runnable, fixedDelay, initialDelay));
 					}
 					long fixedRate = annotation.fixedRate();
 					if (fixedRate >= 0) {
 						Assert.isTrue(!processedSchedule, errorMessage);
 						processedSchedule = true;
-						fixedRateTasks.put(runnable, fixedRate);
+						registrar.addFixedRateTask(new IntervalTask(runnable, fixedRate, initialDelay));
 					}
 					Assert.isTrue(processedSchedule, errorMessage);
 				}
@@ -175,16 +172,6 @@ public class ScheduledAnnotationBeanPostProcessor
 		Map<String, SchedulingConfigurer> configurers =
 				this.applicationContext.getBeansOfType(SchedulingConfigurer.class);
 
-		if (this.cronTasks.isEmpty() && this.fixedDelayTasks.isEmpty() &&
-				this.fixedRateTasks.isEmpty() && configurers.isEmpty()) {
-			return;
-		}
-
-		this.registrar = new ScheduledTaskRegistrar();
-		this.registrar.setCronTasks(this.cronTasks);
-		this.registrar.setFixedDelayTasks(this.fixedDelayTasks);
-		this.registrar.setFixedRateTasks(this.fixedRateTasks);
-
 		if (this.scheduler != null) {
 			this.registrar.setScheduler(this.scheduler);
 		}
@@ -193,7 +180,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			configurer.configureTasks(this.registrar);
 		}
 
-		if (this.registrar.getScheduler() == null) {
+		if (this.registrar.hasTasks() && this.registrar.getScheduler() == null) {
 			Map<String, ? super Object> schedulers = new HashMap<String, Object>();
 			schedulers.putAll(applicationContext.getBeansOfType(TaskScheduler.class));
 			schedulers.putAll(applicationContext.getBeansOfType(ScheduledExecutorService.class));

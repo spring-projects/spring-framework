@@ -483,11 +483,14 @@ public class TaskExecutorExample {
       trigger with a fixed delay indicating the number of milliseconds to wait
       after each task execution has completed. Another option is 'fixed-rate',
       indicating how often the method should be executed regardless of how long
-      any previous execution takes. For more control, a "cron" attribute may be
-      provided instead. Here is an example demonstrating these other options.
-      </para>
+      any previous execution takes. Additionally, for both fixed-delay and
+      fixed-rate tasks an 'initial-delay' parameter may be specified indicating
+      the number of milliseconds to wait before the first execution of the
+      method. For more control, a "cron" attribute may be provided instead.
+      Here is an example demonstrating these other options.</para>
 
       <programlisting language="xml">&lt;task:scheduled-tasks scheduler="myScheduler"&gt;
+    &lt;task:scheduled ref="beanA" method="methodA" fixed-delay="5000" initial-delay="1000"/&gt;
     &lt;task:scheduled ref="beanB" method="methodB" fixed-rate="5000"/&gt;
     &lt;task:scheduled ref="beanC" method="methodC" cron="*/5 * * * * MON-FRI"/&gt;
 &lt;/task:scheduled-tasks&gt;
@@ -522,6 +525,16 @@ public void doSomething() {
       invocation.</para>
 
       <programlisting language="java">@Scheduled(fixedRate=5000)
+public void doSomething() {
+    // something that should execute periodically
+}</programlisting>
+
+      <para>For fixed-delay and fixed-rate tasks, an initial delay may be
+      specified indicating the number of milliseconds to wait before the first
+      execution of the method.
+      </para>
+
+      <programlisting language="java">@Scheduled(initialDelay=1000, fixedRate=5000)
 public void doSomething() {
     // something that should execute periodically
 }</programlisting>

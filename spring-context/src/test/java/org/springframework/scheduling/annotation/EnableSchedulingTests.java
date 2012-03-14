@@ -28,6 +28,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import static org.hamcrest.Matchers.*;
@@ -384,6 +385,45 @@ public class EnableSchedulingTests {
 
 
 	@Test
+	public void withTaskAddedVia_configureTasks() throws InterruptedException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(SchedulingEnabled_withTaskAddedVia_configureTasks.class);
+		ctx.refresh();
+		Thread.sleep(20);
+		ThreadAwareWorker worker = ctx.getBean(ThreadAwareWorker.class);
+		ctx.close();
+		assertThat(worker.executedByThread, startsWith("taskScheduler-"));
+	}
+
+
+	@Configuration
+	@EnableScheduling
+	static class SchedulingEnabled_withTaskAddedVia_configureTasks implements SchedulingConfigurer {
+
+		@Bean
+		public ThreadAwareWorker worker() {
+			return new ThreadAwareWorker();
+		}
+
+		@Bean
+		public TaskScheduler taskScheduler() {
+			return new ThreadPoolTaskScheduler();
+		}
+
+		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+			taskRegistrar.setScheduler(taskScheduler());
+			taskRegistrar.addFixedRateTask(new IntervalTask(
+					new Runnable() {
+						public void run() {
+							worker().executedByThread = Thread.currentThread().getName();
+						}
+					},
+					10, 0));
+		}
+	}
+
+
+	@Test
 	public void withTriggerTask() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(TriggerTaskConfig.class);
@@ -421,4 +461,34 @@ public class EnableSchedulingTests {
 			return scheduler;
 		}
 	}
+
+	@Test
+	public void withInitiallyDelayedFixedRateTask() throws InterruptedException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(FixedRateTaskConfig_withInitialDelay.class);
+		ctx.refresh();
+
+		Thread.sleep(1950);
+		AtomicInteger counter = ctx.getBean(AtomicInteger.class);
+		ctx.close();
+
+		assertThat(counter.get(), greaterThan(0)); // the @Scheduled method was called
+		assertThat(counter.get(), lessThanOrEqualTo(10)); // but not more than times the delay allows
+	}
+
+
+	@EnableScheduling @Configuration
+	static class FixedRateTaskConfig_withInitialDelay {
+
+		@Bean
+		public AtomicInteger counter() {
+			return new AtomicInteger();
+		}
+
+		@Scheduled(initialDelay=1000, fixedRate=100)
+		public void task() {
+			counter().incrementAndGet();
+		}
+	}
+
 }
