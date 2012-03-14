@@ -3,6 +3,7 @@ Bundle-Name: Spring Context
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Package: 
+ javax.inject;version="[1.0.0, 2.0.0)";resolution:=optional,
  javax.persistence;version="[1.0.0, 3.0.0)";resolution:=optional,
  org.springframework.orm.jpa.support;version="${spring.osgi.range.nq}";resolution:=optional,
  com.ibm.websphere.management;version="0";resolution:=optional
@@ -13,7 +14,6 @@ Import-Template:
  groovy.*;version="[1.5.0, 2.0.0)";resolution:=optional,
  javax.annotation.*;version="0";resolution:=optional,
  javax.ejb.*;version="[2.1.0, 4.0.0)";resolution:=optional,
- javax.inject.*;version="[1.0.0, 2.0.0)";resolution:=optional,
  javax.interceptor.*;version="[3.0.0, 4.0.0)";resolution:=optional,
  javax.jms.*;version="[1.1.0, 2.0.0)";resolution:=optional,
  javax.management.*;version="0";resolution:=optional,
