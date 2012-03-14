@@ -232,17 +232,4 @@ public class ResourceTests {
 		assertThat(resource.contentLength(), is(3L));
 	}
 
-	@Test(expected=IllegalStateException.class)
-	public void testContentLength_withNullInputStream() throws IOException {
-		AbstractResource resource = new AbstractResource() {
-			public InputStream getInputStream() throws IOException {
-				return null;
-			}
-			public String getDescription() {
-				return null;
-			}
-		};
-		resource.contentLength();
-	}
-
 }
