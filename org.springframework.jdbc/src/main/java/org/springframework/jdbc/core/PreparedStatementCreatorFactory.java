@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,10 +235,10 @@ public class PreparedStatementCreatorFactory {
 						ps = con.prepareStatement(this.actualSql, PreparedStatement.RETURN_GENERATED_KEYS);
 					}
 				}
-				catch (AbstractMethodError ex) {
+				catch (AbstractMethodError err) {
 					throw new InvalidDataAccessResourceUsageException(
-							"The JDBC driver is not compliant to JDBC 3.0 and thus " +
-							"does not support retrieval of auto-generated keys", ex);
+							"Your JDBC driver is not compliant with JDBC 3.0 - " +
+							"it does not support retrieval of auto-generated keys", err);
 				}
 			}
 			else if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
