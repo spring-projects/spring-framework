@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.1.2 (2012-03-29)
+-------------------------------------
+
+* fixed OSGi metadata for optional "javax.inject" package import
+* fixed AbstractResource's InputStream-based "contentLength()" implementation
+* fixed MutablePropertySources "get" implementation to correctly return null if not found
+* fixed @PropertySource placeholder resolution to apply to all specified values
+* JDBC parameter binding uses JDBC 3.0 ParameterMetaData (if available) for type determination
+
+
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------
 
