@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 the original author or authors.
+ * Copyright 2006-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,23 @@ package org.springframework.oxm.jibx;
 
 public class FlightType {
 
-    protected long number;
+	protected String airline;
 
-    public long getNumber() {
-        return this.number;
-    }
+	protected long number;
 
-    public void setNumber(long number) {
-        this.number = number;
-    }
+	public String getAirline() {
+		return this.airline;
+	}
+
+	public void setAirline(String airline) {
+		this.airline = airline;
+	}
+
+	public long getNumber() {
+		return this.number;
+	}
+
+	public void setNumber(long number) {
+		this.number = number;
+	}
 }
