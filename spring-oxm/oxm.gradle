@@ -9,7 +9,7 @@ dependencies {
     castor "velocity:velocity:1.5"
     xjc "com.sun.xml:com.springsource.com.sun.tools.xjc:2.1.7"
     xmlbeans "org.apache.xmlbeans:com.springsource.org.apache.xmlbeans:2.4.0"
-    jibx "org.jibx:jibx-bind:1.1.5"
+    jibx "org.jibx:jibx-bind:1.2.3"
     jibx "bcel:bcel:5.1"
 }
 
