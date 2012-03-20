@@ -37,7 +37,7 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests {
 
 	protected static final String INPUT_STRING_WITH_SPECIAL_CHARACTERS =
 			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
-					"<tns:flight><tns:airline>Air Liberté</tns:airline><tns:number>42</tns:number></tns:flight></tns:flights>";
+					"<tns:flight><tns:airline>Air Libert\u00e9</tns:airline><tns:number>42</tns:number></tns:flight></tns:flights>";
 
 	@Override
 	protected Unmarshaller createUnmarshaller() throws Exception {
@@ -78,7 +78,7 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests {
 		testFlights(flights);
 
 		FlightType flight = ((Flights)flights).getFlight(0);
-		assertEquals("Airline is invalid", "Air Liberté", flight.getAirline());
+		assertEquals("Airline is invalid", "Air Libert\u00e9", flight.getAirline());
 	}
 
 }
