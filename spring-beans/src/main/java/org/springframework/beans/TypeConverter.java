@@ -22,7 +22,7 @@ import org.springframework.core.MethodParameter;
  * Interface that defines type conversion methods. Typically (but not necessarily)
  * implemented in conjunction with the PropertyEditorRegistry interface.
  * <p>
- * TypeConverters are usually not thread-safe.
+ * <strong>TypeConverters are usually not thread-safe.</strong>
  *
  * @author Juergen Hoeller
  * @since 2.0
