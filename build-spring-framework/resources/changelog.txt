@@ -15,6 +15,7 @@ Changes in version 3.1.2 (2012-06-??)
 * EhCacheFactoryBean applies listeners and enabled/disabled flags to existing cache regions as well
 * ServletContextResource's getFile implementation falls back to getRealPath for non-existent files
 * fixed StandardServletMultipartResolver compatibility with Resin (only deleting actual file parts)
+* fix issue with parsing invalid Content-Type or Accept headers
 
 
 Changes in version 3.1.1 (2012-02-16)
