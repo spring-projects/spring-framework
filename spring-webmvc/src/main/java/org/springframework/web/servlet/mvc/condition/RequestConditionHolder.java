@@ -25,12 +25,12 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * A holder for a {@link RequestCondition} useful when the type of the held
  * request condition is not known ahead of time - e.g. custom condition.
- * 
- * <p>An implementation of {@code RequestCondition} itself, a 
- * {@code RequestConditionHolder} decorates the held request condition allowing 
- * it to be combined and compared with other custom request conditions while 
+ *
+ * <p>An implementation of {@code RequestCondition} itself, a
+ * {@code RequestConditionHolder} decorates the held request condition allowing
+ * it to be combined and compared with other custom request conditions while
  * ensuring type and null safety.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -38,9 +38,9 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 
 	@SuppressWarnings("rawtypes")
 	private final RequestCondition condition;
-	
+
 	/**
-	 * Create a new holder to wrap the given request condition. 
+	 * Create a new holder to wrap the given request condition.
 	 * @param requestCondition the condition to hold, may be {@code null}
 	 */
 	public RequestConditionHolder(RequestCondition<?> requestCondition) {
@@ -65,7 +65,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	}
 
 	/**
-	 * Combine the request conditions held by the two RequestConditionHolder 
+	 * Combine the request conditions held by the two RequestConditionHolder
 	 * instances after making sure the conditions are of the same type.
 	 * Or if one holder is empty, the other holder is returned.
 	 */
@@ -97,9 +97,9 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 			throw new ClassCastException("Incompatible request conditions: " + clazz + " and " + otherClazz);
 		}
 	}
-	
+
 	/**
-	 * Get the matching condition for the held request condition wrap it in a 
+	 * Get the matching condition for the held request condition wrap it in a
 	 * new RequestConditionHolder instance. Or otherwise if this is an empty
 	 * holder, return the same holder instance.
 	 */
@@ -108,11 +108,11 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 			return this;
 		}
 		RequestCondition<?> match = (RequestCondition<?>) condition.getMatchingCondition(request);
-		return new RequestConditionHolder(match);
+		return (match != null) ? new RequestConditionHolder(match) : null;
 	}
 
 	/**
-	 * Compare the request conditions held by the two RequestConditionHolder 
+	 * Compare the request conditions held by the two RequestConditionHolder
 	 * instances after making sure the conditions are of the same type.
 	 * Or if one holder is empty, the other holder is preferred.
 	 */
@@ -132,5 +132,5 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 			return condition.compareTo(other.condition, request);
 		}
 	}
-	
+
 }
