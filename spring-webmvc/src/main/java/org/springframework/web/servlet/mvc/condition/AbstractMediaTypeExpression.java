@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,22 @@ package org.springframework.web.servlet.mvc.condition;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Supports media type expressions as described in:
  * {@link RequestMapping#consumes()} and {@link RequestMapping#produces()}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTypeExpression>, MediaTypeExpression {
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final MediaType mediaType;
 
@@ -60,8 +64,16 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 	}
 
 	public final boolean match(HttpServletRequest request) {
-		boolean match = matchMediaType(request);
-		return !isNegated ? match : !match;
+		try {
+			boolean match = matchMediaType(request);
+			return !isNegated ? match : !match;
+		}
+		catch (IllegalArgumentException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not parse media type header: " + ex.getMessage());
+			}
+			return false;
+		}
 	}
 
 	protected abstract boolean matchMediaType(HttpServletRequest request);
