@@ -348,13 +348,13 @@ public class AntPathMatcherTests {
 		assertEquals("com.example", result.get("symbolicName"));
 		assertEquals("1.0.0", result.get("version"));
 	}
-	
+
 	// SPR-7787
-	
+
 	@Test
 	public void extractUriTemplateVarsRegexQualifiers() {
 		Map<String, String> result = pathMatcher.extractUriTemplateVariables(
-				"{symbolicName:[\\p{L}\\.]+}-sources-{version:[\\p{N}\\.]+}.jar", 
+				"{symbolicName:[\\p{L}\\.]+}-sources-{version:[\\p{N}\\.]+}.jar",
 				"com.example-sources-1.0.0.jar");
 		assertEquals("com.example", result.get("symbolicName"));
 		assertEquals("1.0.0", result.get("version"));
@@ -376,18 +376,18 @@ public class AntPathMatcherTests {
 	}
 
 	// SPR-8455
-	
+
 	@Test
 	public void extractUriTemplateVarsRegexCapturingGroups() {
 		try {
 			pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar");
 			fail("Expected exception");
 		} catch (IllegalArgumentException e) {
-			assertTrue("Expected helpful message on the use of capturing groups", 
+			assertTrue("Expected helpful message on the use of capturing groups",
 					e.getMessage().contains("The number of capturing groups in the pattern"));
 		}
 	}
-	
+
 	@Test
 	public void combine() {
 		assertEquals("", pathMatcher.combine(null, null));
@@ -410,7 +410,8 @@ public class AntPathMatcherTests {
 		assertEquals("/*.html", pathMatcher.combine("/**", "/*.html"));
 		assertEquals("/*.html", pathMatcher.combine("/*", "/*.html"));
 		assertEquals("/*.html", pathMatcher.combine("/*.*", "/*.html"));
-		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar"));
+		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar"));	// SPR-8858
+		assertEquals("/user/user", pathMatcher.combine("/user", "/user"));	// SPR-7970
 	}
 
 	@Test
