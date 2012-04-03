@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,9 @@ import javax.servlet.ServletException;
  *
  * }</pre>
  *
+ * As an alternative to the above, you can also extend from {@link
+ * org.springframework.web.servlet.support.AbstractDispatcherServletInitializer}.
+ *
  * As you can see, thanks to Servlet 3.0's new {@link ServletContext#addServlet} method
  * we're actually registering an <em>instance</em> of the {@code DispatcherServlet}, and
  * this means that the {@code DispatcherServlet} can now be treated like any other object
@@ -82,7 +85,7 @@ import javax.servlet.ServletException;
  * are free to create and work with your Spring application contexts as necessary before
  * injecting them into the {@code DispatcherServlet}.
  *
- * <p>Most major Spring Web componentry has been updated to support this style of
+ * <p>Most major Spring Web components have been updated to support this style of
  * registration.  You'll find that {@code DispatcherServlet}, {@code FrameworkServlet},
  * {@code ContextLoaderListener} and {@code DelegatingFilterProxy} all now support
  * constructor arguments. Even if a component (e.g. non-Spring, other third party) has not
@@ -131,6 +134,9 @@ import javax.servlet.ServletException;
  *
  * }</pre>
  *
+ * As an alternative to the above, you can also extend from {@link
+ * org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer}.
+ *
  * Remember that {@code WebApplicationInitializer} implementations are <em>detected
  * automatically</em> -- so you are free to package them within your application as you
  * see fit.
@@ -165,6 +171,9 @@ import javax.servlet.ServletException;
  * @author Chris Beams
  * @since 3.1
  * @see SpringServletContainerInitializer
+ * @see org.springframework.web.context.AbstractContextLoaderInitializer
+ * @see org.springframework.web.servlet.support.AbstractDispatcherServletInitializer
+ * @see org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer
  */
 public interface WebApplicationInitializer {
 
