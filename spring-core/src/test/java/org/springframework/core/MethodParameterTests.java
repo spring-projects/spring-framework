@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 package org.springframework.core;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
 import org.junit.Before;
@@ -25,6 +30,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Nikita Tovstoles
  */
 public class MethodParameterTests {
 
@@ -43,7 +49,6 @@ public class MethodParameterTests {
 	}
 
 
-	
 	@Test
 	public void testEquals() throws NoSuchMethodException {
 		assertEquals(stringParameter, stringParameter);
@@ -77,9 +82,30 @@ public class MethodParameterTests {
 		assertTrue(longParameter.hashCode() != methodParameter.hashCode());
 	}
 
+	@Test
+	public void testGetMethodParamaterAnnotations() {
+		Method method = stringParameter.getMethod();
+		Annotation[][] expectedAnnotations = method.getParameterAnnotations();
+		assertEquals(2, expectedAnnotations.length);
+		assertEquals(DummyAnnotation.class, expectedAnnotations[0][0].annotationType());
 
-	public int method(String p1, long p2) {
+		//start with empty cache
+		MethodParameter.methodParamAnnotationsCache.clear();
+
+		//check correctness
+		assertArrayEquals(expectedAnnotations, MethodParameter.getMethodParameterAnnotations(method));
+		//check that return value's been cached
+		assertArrayEquals(expectedAnnotations, MethodParameter.methodParamAnnotationsCache.get(method));
+	}
+
+
+	public int method(@DummyAnnotation String p1, long p2) {
 		return 42;
 	}
 
+	@Target(ElementType.PARAMETER)
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface DummyAnnotation {
+
+	}
 }
