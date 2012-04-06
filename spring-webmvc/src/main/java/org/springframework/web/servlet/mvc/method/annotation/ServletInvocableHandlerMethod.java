@@ -107,7 +107,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		mavContainer.setRequestHandled(false);
 
 		try {
-			returnValueHandlers.handleReturnValue(returnValue, getReturnType(), mavContainer, request);
+			returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), mavContainer, request);
 		} catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(getReturnValueHandlingErrorMessage("Error handling return value", returnValue), ex);
