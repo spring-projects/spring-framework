@@ -56,7 +56,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionRes
  * {@link #setCustomArgumentResolvers} and {@link #setCustomReturnValueHandlers}.
  * Or alternatively to re-configure all argument and return value types use
  * {@link #setArgumentResolvers} and {@link #setReturnValueHandlers(List)}.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -73,17 +73,17 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>();
 
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
-	
+
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 	/**
 	 * Default constructor.
 	 */
 	public ExceptionHandlerExceptionResolver() {
-		
+
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316
-		
+
 		this.messageConverters = new ArrayList<HttpMessageConverter<?>>();
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(stringHttpMessageConverter);
@@ -93,13 +93,13 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	/**
 	 * Provide resolvers for custom argument types. Custom resolvers are ordered
-	 * after built-in ones. To override the built-in support for argument 
+	 * after built-in ones. To override the built-in support for argument
 	 * resolution use {@link #setArgumentResolvers} instead.
 	 */
 	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		this.customArgumentResolvers= argumentResolvers;
 	}
-	
+
 	/**
 	 * Return the custom argument resolvers, or {@code null}.
 	 */
@@ -120,9 +120,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			this.argumentResolvers.addResolvers(argumentResolvers);
 		}
 	}
-	
+
 	/**
-	 * Return the configured argument resolvers, or possibly {@code null} if 
+	 * Return the configured argument resolvers, or possibly {@code null} if
 	 * not initialized yet via {@link #afterPropertiesSet()}.
 	 */
 	public HandlerMethodArgumentResolverComposite getArgumentResolvers() {
@@ -146,7 +146,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	}
 
 	/**
-	 * Configure the complete list of supported return value types thus 
+	 * Configure the complete list of supported return value types thus
 	 * overriding handlers that would otherwise be configured by default.
 	 */
 	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
@@ -158,15 +158,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			this.returnValueHandlers.addHandlers(returnValueHandlers);
 		}
 	}
-	
+
 	/**
-	 * Return the configured handlers, or possibly {@code null} if not 
+	 * Return the configured handlers, or possibly {@code null} if not
 	 * initialized yet via {@link #afterPropertiesSet()}.
 	 */
 	public HandlerMethodReturnValueHandlerComposite getReturnValueHandlers() {
 		return this.returnValueHandlers;
 	}
-	
+
 	/**
 	 * Set the message body converters to use.
 	 * <p>These converters are used to convert from and to HTTP requests and responses.
@@ -174,7 +174,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = messageConverters;
 	}
-	
+
 	/**
 	 * Return the configured message body converters.
 	 */
@@ -199,11 +199,11 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 */
 	protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
-		
+
 		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
 		resolvers.add(new ServletResponseMethodArgumentResolver());
-		
+
 		// Custom arguments
 		if (getCustomArgumentResolvers() != null) {
 			resolvers.addAll(getCustomArgumentResolvers());
@@ -213,12 +213,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	}
 
 	/**
-	 * Return the list of return value handlers to use including built-in and 
+	 * Return the list of return value handlers to use including built-in and
 	 * custom handlers provided via {@link #setReturnValueHandlers}.
 	 */
 	protected List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
-		
+
 		// Single-purpose return value types
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
@@ -240,23 +240,18 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 		// Catch-all
 		handlers.add(new ModelAttributeMethodProcessor(true));
-		
+
 		return handlers;
 	}
 
 	/**
-	 * Find an @{@link ExceptionHandler} method and invoke it to handle the 
+	 * Find an @{@link ExceptionHandler} method and invoke it to handle the
 	 * raised exception.
 	 */
 	@Override
-	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request, 
-														   HttpServletResponse response,
-														   HandlerMethod handlerMethod, 
-														   Exception exception) {
-		if (handlerMethod == null) {
-			return null;
-		}
-		
+	protected ModelAndView doResolveHandlerMethodException(HttpServletRequest request,
+			HttpServletResponse response, HandlerMethod handlerMethod, Exception exception) {
+
 		ServletInvocableHandlerMethod exceptionHandlerMethod = getExceptionHandlerMethod(handlerMethod, exception);
 		if (exceptionHandlerMethod == null) {
 			return null;
@@ -278,7 +273,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			logger.error("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
 			return null;
 		}
-		
+
 		if (mavContainer.isRequestHandled()) {
 			return new ModelAndView();
 		}
@@ -288,19 +283,22 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			if (!mavContainer.isViewReference()) {
 				mav.setView((View) mavContainer.getView());
 			}
-			return mav;				
+			return mav;
 		}
 	}
 
 	/**
 	 * Find the @{@link ExceptionHandler} method for the given exception.
-	 * The default implementation searches @{@link ExceptionHandler} methods 
+	 * The default implementation searches @{@link ExceptionHandler} methods
 	 * in the class hierarchy of the method that raised the exception.
-	 * @param handlerMethod the method where the exception was raised
+	 * @param handlerMethod the method where the exception was raised, possibly {@code null}
 	 * @param exception the raised exception
 	 * @return a method to handle the exception, or {@code null}
 	 */
 	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
+		if (handlerMethod == null) {
+			return null;
+		}
 		Class<?> handlerType = handlerMethod.getBeanType();
 		Method method = getExceptionHandlerMethodResolver(handlerType).resolveMethod(exception);
 		return (method != null ? new ServletInvocableHandlerMethod(handlerMethod.getBean(), method) : null);
