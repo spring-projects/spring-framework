@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -405,6 +405,12 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	protected boolean determineRequiredStatus(Annotation annotation) {
 		try {
 			Method method = ReflectionUtils.findMethod(annotation.annotationType(), this.requiredParameterName);
+			if (method == null) {
+				// some annotations like @Inject @Value @Resource don't have a
+				// method named "required" in this case the default to required
+				// see also SPR-9316
+				return true;
+			}
 			return (this.requiredParameterValue == (Boolean) ReflectionUtils.invokeMethod(method, annotation));
 		}
 		catch (Exception ex) {
