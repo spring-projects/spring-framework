@@ -16,16 +16,23 @@
 
 package org.springframework.web.filter;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.notNull;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.same;
+import static org.easymock.EasyMock.verify;
+
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.context.request.async.AsyncExecutionChain;
 
 /**
  * @author Rick Evans
@@ -39,28 +46,22 @@ public class CharacterEncodingFilterTests extends TestCase {
 
 
 	public void testForceAlwaysSetsEncoding() throws Exception {
-		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
+		HttpServletRequest request = createMock(HttpServletRequest.class);
+		expect(request.getAttribute(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE)).andReturn(null);
+		request.setAttribute(same(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE), notNull());
 		request.setCharacterEncoding(ENCODING);
-		mockRequest.setVoidCallable();
-		request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-		mockRequest.setReturnValue(null);
+		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
-		mockRequest.setVoidCallable();
 		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-		mockRequest.setVoidCallable();
-		mockRequest.replay();
+		replay(request);
 
-		MockControl mockResponse = MockControl.createControl(HttpServletResponse.class);
-		HttpServletResponse response = (HttpServletResponse) mockResponse.getMock();
+		HttpServletResponse response = createMock(HttpServletResponse.class);
 		response.setCharacterEncoding(ENCODING);
-		mockResponse.setVoidCallable();
-		mockResponse.replay();
+		replay(response);
 
-		MockControl mockFilter = MockControl.createControl(FilterChain.class);
-		FilterChain filterChain = (FilterChain) mockFilter.getMock();
+		FilterChain filterChain = createMock(FilterChain.class);
 		filterChain.doFilter(request, response);
-		mockFilter.replay();
+		replay(filterChain);
 
 		CharacterEncodingFilter filter = new CharacterEncodingFilter();
 		filter.setForceEncoding(true);
@@ -68,32 +69,27 @@ public class CharacterEncodingFilterTests extends TestCase {
 		filter.init(new MockFilterConfig(FILTER_NAME));
 		filter.doFilter(request, response, filterChain);
 
-		mockRequest.verify();
-		mockResponse.verify();
-		mockFilter.verify();
+		verify(request);
+		verify(response);
+		verify(filterChain);
 	}
 
 	public void testEncodingIfEmptyAndNotForced() throws Exception {
-		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
-		request.getCharacterEncoding();
-		mockRequest.setReturnValue(null);
+		HttpServletRequest request = createMock(HttpServletRequest.class);
+		expect(request.getAttribute(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE)).andReturn(null);
+		request.setAttribute(same(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE), notNull());
+		expect(request.getCharacterEncoding()).andReturn(null);
 		request.setCharacterEncoding(ENCODING);
-		mockRequest.setVoidCallable();
-		request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-		mockRequest.setReturnValue(null);
+		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
-		mockRequest.setVoidCallable();
 		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-		mockRequest.setVoidCallable();
-		mockRequest.replay();
+		replay(request);
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		MockControl mockFilter = MockControl.createControl(FilterChain.class);
-		FilterChain filterChain = (FilterChain) mockFilter.getMock();
+		FilterChain filterChain = createMock(FilterChain.class);
 		filterChain.doFilter(request, response);
-		mockFilter.replay();
+		replay(filterChain);
 
 		CharacterEncodingFilter filter = new CharacterEncodingFilter();
 		filter.setForceEncoding(false);
@@ -101,60 +97,51 @@ public class CharacterEncodingFilterTests extends TestCase {
 		filter.init(new MockFilterConfig(FILTER_NAME));
 		filter.doFilter(request, response, filterChain);
 
-		mockRequest.verify();
-		mockFilter.verify();
+		verify(request);
+		verify(filterChain);
 	}
 
 	public void testDoesNowtIfEncodingIsNotEmptyAndNotForced() throws Exception {
-		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
-		request.getCharacterEncoding();
-		mockRequest.setReturnValue(ENCODING);
-		request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-		mockRequest.setReturnValue(null);
+		HttpServletRequest request = createMock(HttpServletRequest.class);
+		expect(request.getAttribute(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE)).andReturn(null);
+		request.setAttribute(same(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE), notNull());
+		expect(request.getCharacterEncoding()).andReturn(ENCODING);
+		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
-		mockRequest.setVoidCallable();
 		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-		mockRequest.setVoidCallable();
-		mockRequest.replay();
+		replay(request);
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		MockControl mockFilter = MockControl.createControl(FilterChain.class);
-		FilterChain filterChain = (FilterChain) mockFilter.getMock();
+		FilterChain filterChain = createMock(FilterChain.class);
 		filterChain.doFilter(request, response);
-		mockFilter.replay();
+		replay(filterChain);
 
 		CharacterEncodingFilter filter = new CharacterEncodingFilter();
 		filter.setEncoding(ENCODING);
 		filter.init(new MockFilterConfig(FILTER_NAME));
 		filter.doFilter(request, response, filterChain);
 
-		mockRequest.verify();
-		mockFilter.verify();
+		verify(request);
+		verify(filterChain);
 	}
 
 	public void testWithBeanInitialization() throws Exception {
-		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
-		request.getCharacterEncoding();
-		mockRequest.setReturnValue(null);
+		HttpServletRequest request = createMock(HttpServletRequest.class);
+		expect(request.getAttribute(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE)).andReturn(null);
+		request.setAttribute(same(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE), notNull());
+		expect(request.getCharacterEncoding()).andReturn(null);
 		request.setCharacterEncoding(ENCODING);
-		mockRequest.setVoidCallable();
-		request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-		mockRequest.setReturnValue(null);
+		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
-		mockRequest.setVoidCallable();
 		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-		mockRequest.setVoidCallable();
-		mockRequest.replay();
+		replay(request);
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		MockControl mockFilter = MockControl.createControl(FilterChain.class);
-		FilterChain filterChain = (FilterChain) mockFilter.getMock();
+		FilterChain filterChain = createMock(FilterChain.class);
 		filterChain.doFilter(request, response);
-		mockFilter.replay();
+		replay(filterChain);
 
 		CharacterEncodingFilter filter = new CharacterEncodingFilter();
 		filter.setEncoding(ENCODING);
@@ -162,38 +149,33 @@ public class CharacterEncodingFilterTests extends TestCase {
 		filter.setServletContext(new MockServletContext());
 		filter.doFilter(request, response, filterChain);
 
-		mockRequest.verify();
-		mockFilter.verify();
+		verify(request);
+		verify(filterChain);
 	}
 
 	public void testWithIncompleteInitialization() throws Exception {
-		MockControl mockRequest = MockControl.createControl(HttpServletRequest.class);
-		HttpServletRequest request = (HttpServletRequest) mockRequest.getMock();
-		request.getCharacterEncoding();
-		mockRequest.setReturnValue(null);
+		HttpServletRequest request = createMock(HttpServletRequest.class);
+		expect(request.getAttribute(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE)).andReturn(null);
+		request.setAttribute(same(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE), notNull());
+		expect(request.getCharacterEncoding()).andReturn(null);
 		request.setCharacterEncoding(ENCODING);
-		mockRequest.setVoidCallable();
-		request.getAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-		mockRequest.setReturnValue(null);
+		expect(request.getAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
-		mockRequest.setVoidCallable();
 		request.removeAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
-		mockRequest.setVoidCallable();
-		mockRequest.replay();
+		replay(request);
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		MockControl mockFilter = MockControl.createControl(FilterChain.class);
-		FilterChain filterChain = (FilterChain) mockFilter.getMock();
+		FilterChain filterChain = createMock(FilterChain.class);
 		filterChain.doFilter(request, response);
-		mockFilter.replay();
+		replay(filterChain);
 
 		CharacterEncodingFilter filter = new CharacterEncodingFilter();
 		filter.setEncoding(ENCODING);
 		filter.doFilter(request, response, filterChain);
 
-		mockRequest.verify();
-		mockFilter.verify();
+		verify(request);
+		verify(filterChain);
 	}
 
 }

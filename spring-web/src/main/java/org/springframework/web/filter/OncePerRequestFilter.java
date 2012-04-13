@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.context.request.async.AbstractDelegatingCallable;
+import org.springframework.web.context.request.async.AsyncExecutionChain;
+
 /**
  * Filter base class that guarantees to be just executed once per request,
  * on any servlet container. It provides a {@link #doFilterInternal}
@@ -35,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
  * is based on the configured name of the concrete filter instance.
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 06.12.2003
  */
 public abstract class OncePerRequestFilter extends GenericFilterBean {
@@ -70,12 +74,18 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 			filterChain.doFilter(request, response);
 		}
 		else {
+			AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
+			chain.addDelegatingCallable(getAsyncCallable(request, alreadyFilteredAttributeName));
+
 			// Do invoke this filter...
 			request.setAttribute(alreadyFilteredAttributeName, Boolean.TRUE);
 			try {
 				doFilterInternal(httpRequest, httpResponse, filterChain);
 			}
 			finally {
+				if (chain.isAsyncStarted()) {
+					return;
+				}
 				// Remove the "already filtered" request attribute for this request.
 				request.removeAttribute(alreadyFilteredAttributeName);
 			}
@@ -111,6 +121,20 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		return false;
 	}
 
+	/**
+	 * Create a Callable to use to complete processing in an async execution chain.
+	 */
+	private AbstractDelegatingCallable getAsyncCallable(final ServletRequest request,
+			final String alreadyFilteredAttributeName) {
+
+		return new AbstractDelegatingCallable() {
+			public Object call() throws Exception {
+				getNextCallable().call();
+				request.removeAttribute(alreadyFilteredAttributeName);
+				return null;
+			}
+		};
+	}
 
 	/**
 	 * Same contract as for <code>doFilter</code>, but guaranteed to be

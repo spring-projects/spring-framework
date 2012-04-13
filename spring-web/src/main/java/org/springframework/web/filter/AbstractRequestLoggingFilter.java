@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -31,6 +32,8 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.async.AbstractDelegatingCallable;
+import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -51,6 +54,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @see #beforeRequest
  * @see #afterRequest
  * @since 1.2.5
@@ -185,14 +189,22 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+
 		if (isIncludePayload()) {
 			request = new RequestCachingRequestWrapper(request);
 		}
 		beforeRequest(request, getBeforeMessage(request));
+
+		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
+		chain.addDelegatingCallable(getAsyncCallable(request));
+
 		try {
 			filterChain.doFilter(request, response);
 		}
 		finally {
+			if (chain.isAsyncStarted()) {
+				return;
+			}
 			afterRequest(request, getAfterMessage(request));
 		}
 	}
@@ -277,6 +289,20 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * @param message the message to log
 	 */
 	protected abstract void afterRequest(HttpServletRequest request, String message);
+
+	/**
+	 * Create a Callable to use to complete processing in an async execution chain.
+	 */
+	private AbstractDelegatingCallable getAsyncCallable(final HttpServletRequest request) {
+		return new AbstractDelegatingCallable() {
+			public Object call() throws Exception {
+				getNextCallable().call();
+				afterRequest(request, getAfterMessage(request));
+				return null;
+			}
+		};
+	}
+
 
 	private static class RequestCachingRequestWrapper extends HttpServletRequestWrapper {
 

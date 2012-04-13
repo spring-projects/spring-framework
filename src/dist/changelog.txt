@@ -11,6 +11,7 @@ Changes in version 3.2 M1
 * fix issue with combining identical controller and method level request mapping paths
 * fix concurrency issue in AnnotationMethodHandlerExceptionResolver
 * fix case-sensitivity issue with some containers on access to 'Content-Disposition' header
+* add Servlet 3.0 based async support
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------
