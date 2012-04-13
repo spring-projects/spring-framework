@@ -44,7 +44,7 @@
 		<ivy:retrieve resolveId="additional.classpath" conf="additional" type="jar" transitive="false"
 				pattern="${main.output.dir}/[artifact]-[revision].[ext]" log="download-only"/>
 		<antcall target="bundlor"/>
-		<jar destfile="${jar.output.file}" basedir="${main.output.dir}" index="true" filesetmanifest="merge">
+		<jar destfile="${jar.output.file}" basedir="${main.output.dir}" index="false" filesetmanifest="merge">
 			<manifest>
 				<attribute name="Bundle-ManifestVersion" value="2"/>
 				<attribute name="Bundle-Version" value="${bundle.version}"/>
@@ -53,7 +53,7 @@
 				<attribute name="Implementation-Version" value="${implementation.version}"/>
 			</manifest>
 		</jar>
-		<jar destfile="${source-jar.output.file}" basedir="${main.java.dir}" index="true"/>
+		<jar destfile="${source-jar.output.file}" basedir="${main.java.dir}" index="false"/>
 		<ivy:publish resolver="integration" pubdate="${timestamp}" status="${release.type}">
 			<artifacts pattern="${ivy.output.dir}/[artifact].[ext]"/>
 			<artifacts pattern="${jar.output.dir}/[artifact].[ext]"/>

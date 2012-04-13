@@ -3,9 +3,10 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1.2 (2012-03-29)
+Changes in version 3.1.2 (2012-??-??)
 -------------------------------------
 
+* removed INDEX.LIST entries from Spring jar META-INF dirs
 * fixed OSGi metadata for optional "javax.inject" package import
 * fixed AbstractResource's InputStream-based "contentLength()" implementation
 * fixed MutablePropertySources "get" implementation to correctly return null if not found
