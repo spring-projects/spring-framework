@@ -17,6 +17,7 @@
 package org.springframework.core.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -122,7 +123,11 @@ public class UrlResource extends AbstractFileResolvingResource {
 		URLConnection con = this.url.openConnection();
 		ResourceUtils.useCachesIfNecessary(con);
 		try {
-			return con.getInputStream();
+			InputStream is=con.getInputStream();
+			if (is == null) {
+				throw new FileNotFoundException("Could not open " + getDescription());
+			}
+			return is;
 		}
 		catch (IOException ex) {
 			// Close the HTTP connection (if applicable).
