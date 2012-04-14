@@ -5,6 +5,7 @@ http://www.springsource.org
 Changes in version 3.2 M1
 -------------------------------------
 
+* upgraded to AspectJ 1.6.12
 * better handling on failure to parse invalid 'Content-Type' or 'Accept' headers
 * handle a controller method's return value based on the actual returned value (vs declared type)
 * fix issue with combining identical controller and method level request mapping paths

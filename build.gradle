@@ -18,6 +18,7 @@ configure(allprojects) {
     targetCompatibility=1.5
 
     ext.slf4jLog4jVersion = '1.5.10'
+    ext.aspectjVersion = '1.6.12'
 
     [compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
 
@@ -133,7 +134,7 @@ project('spring-core') {
             builtBy project(":spring-asm").jar
         }
         compile "commons-logging:commons-logging:1.1.1"
-        compile("org.aspectj:aspectjweaver:1.6.8", optional)
+        compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
         compile("net.sf.jopt-simple:jopt-simple:3.0") { dep ->
             optional dep
             exclude group: 'org.apache.ant', module: 'ant'
@@ -219,6 +220,10 @@ project('spring-context') {
         testCompile "commons-dbcp:commons-dbcp:1.2.2"
         testCompile("javax.xml:jaxrpc-api:1.1")
         testCompile("javax.inject:com.springsource.org.atinject.tck:1.0.0")
+    }
+
+    test {
+        jvmArgs = ['-disableassertions:org.aspectj.weaver.UnresolvedType'] // SPR-7989
     }
 }
 
@@ -439,8 +444,8 @@ project('spring-aspects') {
     dependencies {
         compile project(":spring-orm")
         aspects project(":spring-orm")
-        ajc "org.aspectj:aspectjtools:1.6.8"
-        compile "org.aspectj:aspectjrt:1.6.8"
+        ajc "org.aspectj:aspectjtools:${aspectjVersion}"
+        compile "org.aspectj:aspectjrt:${aspectjVersion}"
         testCompile project(":spring-test")
     }
     eclipse.project {
