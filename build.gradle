@@ -17,7 +17,7 @@ configure(allprojects) {
     sourceCompatibility=1.5
     targetCompatibility=1.5
 
-    slf4jLog4jVersion = '1.5.10'
+    ext.slf4jLog4jVersion = '1.5.10'
 
     [compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
 
@@ -85,7 +85,7 @@ configure(subprojects) { subproject ->
 
 project("spring-asm") {
     description = 'Spring ASM'
-    asmVersion = '2.2.3'
+    ext.asmVersion = '2.2.3'
 
     configurations {
         asm
@@ -542,7 +542,7 @@ configure(rootProject) {
         description = "Builds -${classifier} archive, containing all jars and docs, " +
                       "suitable for community download page."
 
-        baseDir = "${project.name}-${project.version}";
+        def baseDir = "${project.name}-${project.version}";
 
         from('src/dist') {
             include 'readme.txt'
@@ -581,7 +581,7 @@ configure(rootProject) {
 
     task wrapper(type: Wrapper) {
         description = 'Generates gradlew[.bat] scripts'
-        gradleVersion = '1.0-milestone-8a'
+        gradleVersion = '1.0-rc-1'
     }
 }
 
