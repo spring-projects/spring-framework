@@ -86,7 +86,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       ><classname>FileSystemXmlApplicationContext</classname></ulink>.
       <!-- MLP: Beverly to review --> While XML has been the traditional format
       for defining configuration metadata you can instruct the container to use
-      Java annotations or code as the metadata format by providng a small amount
+      Java annotations or code as the metadata format by providing a small amount
       of XML configuration to declaratively enable support for these additional
       metadata formats.</para>
 
