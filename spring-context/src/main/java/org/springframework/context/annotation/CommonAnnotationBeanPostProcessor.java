@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -512,6 +513,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		@SuppressWarnings("unused")
 		protected boolean shareable = true;
 
+		private volatile boolean cached = false;
+
+		private volatile Object cachedFieldValue;
+
 		public ResourceElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);
 		}
@@ -546,7 +551,20 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		@Override
 		protected Object getResourceToInject(Object target, String requestingBeanName) {
-			return getResource(this, requestingBeanName);
+			Object value = null;
+			if (this.cached && this.shareable) {
+				value = this.cachedFieldValue;
+			}
+			synchronized (this) {
+				if (!this.cached) {
+					value = getResource(this, requestingBeanName);
+					if (value != null && this.shareable) {
+						this.cachedFieldValue = value;
+						this.cached = true;
+					}
+				}
+			}
+			return value;
 		}
 	}
 
