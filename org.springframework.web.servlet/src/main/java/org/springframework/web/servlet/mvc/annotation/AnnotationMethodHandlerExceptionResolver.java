@@ -84,10 +84,10 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	// dummy method placeholder
-	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis", null);
+	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis", (Class<?>[]) null);
 	
-	private final Map<Class<?>, Map<Class<? extends Throwable>, Method>> exceptionHandlerCache = 
-			new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>(); 
+	private final Map<Class<?>, Map<Class<? extends Throwable>, Method>> exceptionHandlerCache =
+			new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>();
 
 	private WebArgumentResolver[] customArgumentResolvers;
 
@@ -228,19 +228,19 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	}
 
 	/**
-	 * Returns the best matching method. Uses the {@link DepthComparator}.
+	 * Uses the {@link DepthComparator} to find the best matching method
+ 	 * @return the best matching method or {@code null}.
 	 */
 	private Method getBestMatchingMethod(
 			Map<Class<? extends Throwable>, Method> resolverMethods, Exception thrownException) {
 
-		if (!resolverMethods.isEmpty()) {
-			Class<? extends Throwable> closestMatch =
-					ExceptionDepthComparator.findClosestMatch(resolverMethods.keySet(), thrownException);
-			return resolverMethods.get(closestMatch);
-		}
-		else {
+		if (resolverMethods.isEmpty()) {
 			return null;
 		}
+		Class<? extends Throwable> closestMatch =
+				ExceptionDepthComparator.findClosestMatch(resolverMethods.keySet(), thrownException);
+		Method method = resolverMethods.get(closestMatch);
+		return ((method == null) || (NO_METHOD_FOUND == method)) ? null : method;
 	}
 
 	/**
@@ -249,13 +249,13 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	private Object[] resolveHandlerArguments(Method handlerMethod, Object handler,
 			NativeWebRequest webRequest, Exception thrownException) throws Exception {
 
-		Class[] paramTypes = handlerMethod.getParameterTypes();
+		Class<?>[] paramTypes = handlerMethod.getParameterTypes();
 		Object[] args = new Object[paramTypes.length];
 		Class<?> handlerType = handler.getClass();
 		for (int i = 0; i < args.length; i++) {
 			MethodParameter methodParam = new MethodParameter(handlerMethod, i);
 			GenericTypeResolver.resolveParameterType(methodParam, handlerType);
-			Class paramType = methodParam.getParameterType();
+			Class<?> paramType = methodParam.getParameterType();
 			Object argValue = resolveCommonArgument(methodParam, webRequest, thrownException);
 			if (argValue != WebArgumentResolver.UNRESOLVED) {
 				args[i] = argValue;
@@ -290,7 +290,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		}
 
 		// Resolution of standard parameter types...
-		Class paramType = methodParameter.getParameterType();
+		Class<?> paramType = methodParameter.getParameterType();
 		Object value = resolveStandardArgument(paramType, webRequest, thrownException);
 		if (value != WebArgumentResolver.UNRESOLVED && !ClassUtils.isAssignableValue(paramType, value)) {
 			throw new IllegalStateException(
@@ -311,7 +311,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	 * @param thrownException the exception thrown
 	 * @return the argument value, or {@link WebArgumentResolver#UNRESOLVED}
 	 */
-	protected Object resolveStandardArgument(Class parameterType, NativeWebRequest webRequest,
+	protected Object resolveStandardArgument(Class<?> parameterType, NativeWebRequest webRequest,
 			Exception thrownException) throws Exception {
 
 		if (parameterType.isInstance(thrownException)) {
@@ -395,7 +395,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			return new ModelAndView().addAllObjects(((Model) returnValue).asMap());
 		}
 		else if (returnValue instanceof Map) {
-			return new ModelAndView().addAllObjects((Map) returnValue);
+			return new ModelAndView().addAllObjects((Map<String, Object>) returnValue);
 		}
 		else if (returnValue instanceof View) {
 			return new ModelAndView((View) returnValue);
