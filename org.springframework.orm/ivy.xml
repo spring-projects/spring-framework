@@ -62,7 +62,7 @@
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="${junit.version}" conf="test->runtime"/>
-		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.5.3" conf="test->runtime"/>
+		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.6.1" conf="test->runtime"/>
 	</dependencies>
 
 </ivy-module>
