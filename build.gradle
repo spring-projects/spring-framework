@@ -213,9 +213,13 @@ project('spring-context') {
         compile("org.beanshell:bsh:2.0b4", optional)
         compile("org.codehaus.groovy:groovy-all:1.6.3", optional)
         compile("org.jruby:jruby:1.4.0", optional)
-        compile("org.hibernate:hibernate-validator:4.2.0.Final", optional)
+        compile("org.hibernate:hibernate-validator:4.2.0.Final") { dep ->
+            optional dep
+            exclude group: 'org.slf4j', module: 'slf4j-api'
+        }
         compile("joda-time:joda-time:1.6", optional)
         compile("net.sf.ehcache:ehcache-core:2.0.0", optional)
+        compile("org.slf4j:slf4j-api:${slf4jLog4jVersion}", optional)
         compile("org.codehaus.jsr166-mirror:jsr166:1.7.0", provided)
         testCompile "commons-dbcp:commons-dbcp:1.2.2"
         testCompile("javax.xml:jaxrpc-api:1.1")
