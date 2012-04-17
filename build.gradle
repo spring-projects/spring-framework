@@ -17,7 +17,6 @@ configure(allprojects) {
     sourceCompatibility=1.5
     targetCompatibility=1.5
 
-    ext.slf4jLog4jVersion = '1.5.10'
     ext.aspectjVersion = '1.6.12'
 
     [compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
@@ -219,7 +218,7 @@ project('spring-context') {
         }
         compile("joda-time:joda-time:1.6", optional)
         compile("net.sf.ehcache:ehcache-core:2.0.0", optional)
-        compile("org.slf4j:slf4j-api:${slf4jLog4jVersion}", optional)
+        compile("org.slf4j:slf4j-api:1.6.1", optional)
         compile("org.codehaus.jsr166-mirror:jsr166:1.7.0", provided)
         testCompile "commons-dbcp:commons-dbcp:1.2.2"
         testCompile("javax.xml:jaxrpc-api:1.1")
@@ -389,7 +388,7 @@ project('spring-webmvc') {
         }
         compile("javax.servlet:jstl:1.1.2", provided)
         compile("org.apache.tomcat:tomcat-servlet-api:7.0.8", provided) // servlet-api 3.0
-        testCompile("org.slf4j:slf4j-log4j12:${slf4jLog4jVersion}") {
+        testCompile("org.slf4j:slf4j-log4j12:1.6.1") {
             exclude group: 'log4j', module: 'log4j'
         }
         testCompile "rhino:js:1.7R1"
