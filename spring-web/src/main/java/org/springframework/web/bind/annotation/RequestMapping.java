@@ -21,6 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.Callable;
 
 /**
  * Annotation for mapping web requests onto specific handler classes and/or
@@ -180,12 +181,18 @@ import java.lang.annotation.Target;
  * be converted to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
- * <li>A {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
+ * <li>An {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
  * {@link org.springframework.http.ResponseEntity ResponseEntity&lt;?&gt;} object
  * (Servlet-only) to access to the Servlet response HTTP headers and contents.
  * The entity body will be converted to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
+ * <li>A {@link Callable} which is used by Spring MVC to obtain the return
+ * value asynchronously in a separate thread transparently managed by Spring MVC
+ * on behalf of the application.
+ * <li>A {@code org.springframework.web.context.request.async.DeferredResult}
+ * which the application uses to produce a return value in a separate
+ * thread of its own choosing, as an alternative to returning a Callable.
  * <li><code>void</code> if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}

@@ -20,6 +20,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -32,12 +37,15 @@ import org.springframework.util.CollectionUtils;
  */
 public class HandlerExecutionChain {
 
+	private static final Log logger = LogFactory.getLog(HandlerExecutionChain.class);
+
 	private final Object handler;
 
 	private HandlerInterceptor[] interceptors;
 
 	private List<HandlerInterceptor> interceptorList;
 
+	private int interceptorIndex = -1;
 
 	/**
 	 * Create a new HandlerExecutionChain.
@@ -66,7 +74,6 @@ public class HandlerExecutionChain {
 			this.interceptors = interceptors;
 		}
 	}
-
 
 	/**
 	 * Return the handler object to execute.
@@ -107,6 +114,65 @@ public class HandlerExecutionChain {
 			this.interceptors = this.interceptorList.toArray(new HandlerInterceptor[this.interceptorList.size()]);
 		}
 		return this.interceptors;
+	}
+
+	/**
+	 * Apply preHandle methods of registered interceptors.
+	 * @return <code>true</code> if the execution chain should proceed with the
+	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
+	 * that this interceptor has already dealt with the response itself.
+	 */
+	boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		if (getInterceptors() != null) {
+			for (int i = 0; i < getInterceptors().length; i++) {
+				HandlerInterceptor interceptor = getInterceptors()[i];
+				if (!interceptor.preHandle(request, response, this.handler)) {
+					triggerAfterCompletion(request, response, null);
+					return false;
+				}
+				this.interceptorIndex = i;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Apply preHandle methods of registered interceptors.
+	 */
+	void applyPostHandle(HttpServletRequest request, HttpServletResponse response, ModelAndView mv)
+			throws Exception {
+
+		if (getInterceptors() == null) {
+			return;
+		}
+		for (int i = getInterceptors().length - 1; i >= 0; i--) {
+			HandlerInterceptor interceptor = getInterceptors()[i];
+			interceptor.postHandle(request, response, this.handler, mv);
+		}
+	}
+
+	/**
+	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
+	 * Will just invoke afterCompletion for all interceptors whose preHandle invocation
+	 * has successfully completed and returned true.
+	 */
+	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, Exception ex)
+			throws Exception {
+
+		if (getInterceptors() == null) {
+			return;
+		}
+		for (int i = this.interceptorIndex; i >= 0; i--) {
+			HandlerInterceptor interceptor = getInterceptors()[i];
+			try {
+				interceptor.afterCompletion(request, response, this.handler, ex);
+			}
+			catch (Throwable ex2) {
+				logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
+			}
+		}
 	}
 
 
