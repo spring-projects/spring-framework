@@ -140,38 +140,38 @@ public class AsyncExecutionChainTests {
 	}
 
 	@Test
-	public void startDeferredValueProcessing() throws Exception {
+	public void startDeferredResultProcessing() throws Exception {
 		this.chain.addDelegatingCallable(new IntegerIncrementingCallable());
 		this.chain.addDelegatingCallable(new IntegerIncrementingCallable());
 
-		DeferredResult deferredValue = new DeferredResult();
-		this.chain.startDeferredResultProcessing(deferredValue);
+		DeferredResult deferredResult = new DeferredResult();
+		this.chain.startDeferredResultProcessing(deferredResult);
 
 		assertTrue(this.asyncWebRequest.isAsyncStarted());
 
-		deferredValue.set(1);
+		deferredResult.set(1);
 
 		assertEquals(3, this.resultSavingCallable.result);
 	}
 
 	@Test(expected=StaleAsyncWebRequestException.class)
-	public void startDeferredValueProcessing_staleRequest() throws Exception {
+	public void startDeferredResultProcessing_staleRequest() throws Exception {
 		this.asyncWebRequest.startAsync();
 		this.asyncWebRequest.complete();
 
-		DeferredResult deferredValue = new DeferredResult();
-		this.chain.startDeferredResultProcessing(deferredValue);
-		deferredValue.set(1);
+		DeferredResult deferredResult = new DeferredResult();
+		this.chain.startDeferredResultProcessing(deferredResult);
+		deferredResult.set(1);
 	}
 
 	@Test
-	public void startDeferredValueProcessing_requiredDeferredValue() {
+	public void startDeferredResultProcessing_requiredDeferredResult() {
 		try {
 			this.chain.startDeferredResultProcessing(null);
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("A DeferredValue is required"));
+			assertThat(ex.getMessage(), containsString("A DeferredResult is required"));
 		}
 	}
 
