@@ -371,15 +371,15 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		messageConverters.add(new XmlAwareFormHttpMessageConverter());
 
 		ClassLoader classLoader = getClass().getClassLoader();
+		if (ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", classLoader)) {
+			messageConverters.add(new AtomFeedHttpMessageConverter());
+			messageConverters.add(new RssChannelHttpMessageConverter());
+		}
 		if (ClassUtils.isPresent("javax.xml.bind.Binder", classLoader)) {
 			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
 		if (ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", classLoader)) {
 			messageConverters.add(new MappingJacksonHttpMessageConverter());
-		}
-		if (ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", classLoader)) {
-			messageConverters.add(new AtomFeedHttpMessageConverter());
-			messageConverters.add(new RssChannelHttpMessageConverter());
 		}
 	}
 	
