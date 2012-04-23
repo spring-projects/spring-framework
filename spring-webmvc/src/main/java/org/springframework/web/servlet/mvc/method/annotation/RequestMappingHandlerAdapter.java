@@ -398,10 +398,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * Set the timeout for asynchronous request processing. When the timeout
-	 * begins depends on the underlying async technology. With the Servlet 3
-	 * async support the timeout begins after the main processing thread has
-	 * exited and has been returned to the container pool.
+	 * Set the timeout for asynchronous request processing in milliseconds.
+	 * When the timeout begins depends on the underlying async technology.
+	 * With the Servlet 3 async support the timeout begins after the main
+	 * processing thread has exited and has been returned to the container pool.
 	 * <p>If a value is not provided, the default timeout of the underlying
 	 * async technology is used (10 seconds on Tomcat with Servlet 3 async).
 	 */

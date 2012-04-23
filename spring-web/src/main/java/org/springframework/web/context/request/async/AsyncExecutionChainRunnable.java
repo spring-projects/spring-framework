@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  */
 public class AsyncExecutionChainRunnable implements Runnable {
 
-	private static final Log logger = LogFactory.getLog(AsyncWebRequest.class);
+	private static final Log logger = LogFactory.getLog(AsyncExecutionChainRunnable.class);
 
 	private final AsyncWebRequest asyncWebRequest;
 
@@ -62,8 +62,7 @@ public class AsyncExecutionChainRunnable implements Runnable {
 	 */
 	public void run() {
 		try {
-			logger.debug("Starting async execution chain");
-			callable.call();
+			this.callable.call();
 		}
 		catch (StaleAsyncWebRequestException ex) {
 			logger.trace("Could not complete async request", ex);
@@ -73,8 +72,8 @@ public class AsyncExecutionChainRunnable implements Runnable {
 			this.asyncWebRequest.sendError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
 		}
 		finally {
-			logger.debug("Exiting async execution chain");
-			asyncWebRequest.complete();
+			logger.debug("Completing async request processing");
+			this.asyncWebRequest.complete();
 		}
 	}
 

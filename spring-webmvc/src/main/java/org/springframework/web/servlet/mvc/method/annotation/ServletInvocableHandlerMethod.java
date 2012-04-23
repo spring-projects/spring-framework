@@ -126,6 +126,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		return new AbstractDelegatingCallable() {
 			public Object call() throws Exception {
+				mavContainer.setRequestHandled(false);
 				new CallableHandlerMethod(getNextCallable()).invokeAndHandle(webRequest, mavContainer, providedArgs);
 				return null;
 			}

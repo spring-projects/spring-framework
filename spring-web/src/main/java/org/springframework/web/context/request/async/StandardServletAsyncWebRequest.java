@@ -32,10 +32,10 @@ import org.springframework.web.context.request.ServletWebRequest;
 /**
  * A Servlet 3.0 implementation of {@link AsyncWebRequest}.
  *
- * <p>The servlet processing an async request as well as all filters involved
- * must async support enabled. This can be done in Java using the Servlet API
- * or by adding an {@code <async-support>true</async-support>} element to
- * servlet and filter declarations in web.xml
+ * <p>The servlet and all filters involved in an async request must have async
+ * support enabled using the Servlet API or by adding an
+ * {@code <async-support>true</async-support>} element to servlet and filter
+ * declarations in web.xml
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -57,7 +57,6 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	}
 
 	public boolean isAsyncStarted() {
-		assertNotStale();
 		return ((this.asyncContext != null) && getRequest().isAsyncStarted());
 	}
 
@@ -81,10 +80,15 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	}
 
 	public void complete() {
-		assertNotStale();
 		if (!isAsyncCompleted()) {
 			this.asyncContext.complete();
+			completeInternal();
 		}
+	}
+
+	private void completeInternal() {
+		this.asyncContext = null;
+		this.asyncCompleted.set(true);
 	}
 
 	public void sendError(HttpStatus status, String message) {
@@ -107,18 +111,19 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	// ---------------------------------------------------------------------
 
 	public void onTimeout(AsyncEvent event) throws IOException {
-		this.asyncCompleted.set(true);
+		completeInternal();
+		getResponse().sendError(HttpStatus.SERVICE_UNAVAILABLE.value());
 	}
 
 	public void onError(AsyncEvent event) throws IOException {
-		this.asyncCompleted.set(true);
+		completeInternal();
 	}
 
 	public void onStartAsync(AsyncEvent event) throws IOException {
 	}
 
 	public void onComplete(AsyncEvent event) throws IOException {
-		this.asyncCompleted.set(true);
+		completeInternal();
 	}
 
 }

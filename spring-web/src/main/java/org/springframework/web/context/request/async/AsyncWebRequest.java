@@ -21,9 +21,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 
 /**
- * Extends {@link NativeWebRequest} with methods for starting, completing, and
- * configuring async request processing. Abstract underlying mechanisms such as
- * the Servlet 3.0 AsyncContext.
+ * Extend {@link NativeWebRequest} with methods for async request processing.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -31,44 +29,44 @@ import org.springframework.web.context.request.NativeWebRequest;
 public interface AsyncWebRequest extends NativeWebRequest {
 
 	/**
-	 * Set the timeout for asynchronous request processing. When the timeout
-	 * begins depends on the underlying technology. With the Servlet 3 async
-	 * support the timeout begins after the main processing thread has exited
-	 * and has been returned to the container pool.
+	 * Set the timeout for asynchronous request processing in milliseconds.
+	 * In Servlet 3 async request processing, the timeout begins when the
+	 * main processing thread has exited.
 	 */
 	void setTimeout(Long timeout);
 
 	/**
-	 * Marks the start of async request processing for example. Ensures the
-	 * request remains open to be completed in a separate thread.
+	 * Mark the start of async request processing for example ensuring the
+	 * request remains open in order to be completed in a separate thread.
+	 * @throws IllegalStateException if async processing has started, if it is
+	 * 	not supported, or if it has completed.
 	 */
 	void startAsync();
 
 	/**
-	 * Return {@code true} if async processing has started following a call to
-	 * {@link #startAsync()} and before it has completed.
+	 * Whether async processing is in progress and has not yet completed.
 	 */
 	boolean isAsyncStarted();
 
 	/**
-	 * Complete async request processing finalizing the underlying request.
+	 * Complete async request processing making a best effort but without any
+	 * effect if async request processing has already completed for any reason
+	 * including a timeout.
 	 */
 	void complete();
 
 	/**
-	 * Send an error to the client.
-	 */
-	void sendError(HttpStatus status, String message);
-
-	/**
-	 * Return {@code true} if async processing completed either normally or for
-	 * any other reason such as a timeout or an error. Note that a timeout or a
-	 * (client) error may occur in a separate thread while async processing is
-	 * still in progress in its own thread. Hence the underlying async request
-	 * may become stale and this method may return {@code true} even if
-	 * {@link #complete()} was never actually called.
-	 * @see StaleAsyncWebRequestException
+	 * Whether async processing has completed either normally via calls to
+	 * {@link #complete()} or for other reasons such as a timeout likely
+	 * detected in a separate thread during async request processing.
 	 */
 	boolean isAsyncCompleted();
+
+	/**
+	 * Send an error to the client making a best effort to do so but without any
+	 * effect if async request processing has already completed, for example due
+	 * to a timeout.
+	 */
+	void sendError(HttpStatus status, String message);
 
 }

@@ -16,11 +16,15 @@
 
 package org.springframework.web.context.request.async;
 
+
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -57,7 +61,9 @@ public class StandardServletAsyncWebRequestTests {
 
 	@Test
 	public void isAsyncStarted() throws Exception {
-		assertEquals(false, this.asyncRequest.isAsyncStarted());
+		replay(this.request);
+		assertEquals("Should be \"false\" before startAsync()", false, this.asyncRequest.isAsyncStarted());
+		verify(this.request);
 
 		startAsync();
 
@@ -65,25 +71,19 @@ public class StandardServletAsyncWebRequestTests {
 		expect(this.request.isAsyncStarted()).andReturn(true);
 		replay(this.request);
 
-		assertTrue(this.asyncRequest.isAsyncStarted());
-	}
+		assertTrue("Should be \"true\" true startAsync()", this.asyncRequest.isAsyncStarted());
+		verify(this.request);
 
-	@Test
-	public void isAsyncStarted_stale() throws Exception {
 		this.asyncRequest.onComplete(new AsyncEvent(null));
-		try {
-			this.asyncRequest.isAsyncStarted();
-			fail("expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertStaleRequestMessage(ex);
-		}
+
+		assertFalse("Should be \"false\" after complete()", this.asyncRequest.isAsyncStarted());
 	}
 
 	@Test
 	public void startAsync() throws Exception {
 		AsyncContext asyncContext = EasyMock.createMock(AsyncContext.class);
 
+		reset(this.request);
 		expect(this.request.isAsyncSupported()).andReturn(true);
 		expect(this.request.startAsync(this.request, this.response)).andStubReturn(asyncContext);
 		replay(this.request);
@@ -95,6 +95,19 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.startAsync();
 
 		verify(this.request);
+	}
+
+	@Test
+	public void startAsync_notSupported() throws Exception {
+		expect(this.request.isAsyncSupported()).andReturn(false);
+		replay(this.request);
+		try {
+			this.asyncRequest.startAsync();
+			fail("expected exception");
+		}
+		catch (IllegalStateException ex) {
+			assertThat(ex.getMessage(), containsString("Async support must be enabled"));
+		}
 	}
 
 	@Test
@@ -128,20 +141,17 @@ public class StandardServletAsyncWebRequestTests {
 			fail("expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertStaleRequestMessage(ex);
+			assertEquals("Cannot use async request after completion", ex.getMessage());
 		}
 	}
 
 	@Test
 	public void complete_stale() throws Exception {
 		this.asyncRequest.onComplete(new AsyncEvent(null));
-		try {
-			this.asyncRequest.complete();
-			fail("expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertStaleRequestMessage(ex);
-		}
+		this.asyncRequest.complete();
+
+		assertFalse(this.asyncRequest.isAsyncStarted());
+		assertTrue(this.asyncRequest.isAsyncCompleted());
 	}
 
 	@Test
@@ -151,15 +161,10 @@ public class StandardServletAsyncWebRequestTests {
 	}
 
 	@Test
-	public void sendError_requestAlreadyCompleted() throws Exception {
+	public void sendError_stale() throws Exception {
 		this.asyncRequest.onComplete(new AsyncEvent(null));
 		this.asyncRequest.sendError(HttpStatus.INTERNAL_SERVER_ERROR, "error");
 		assertEquals(200, this.response.getStatus());
-	}
-
-
-	private void assertStaleRequestMessage(IllegalStateException ex) {
-		assertEquals("Cannot use async request after completion", ex.getMessage());
 	}
 
 }

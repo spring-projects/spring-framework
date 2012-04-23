@@ -42,7 +42,7 @@ public class StaleAsyncRequestCheckingCallable extends AbstractDelegatingCallabl
 		Object result = getNextCallable().call();
 		if (this.asyncWebRequest.isAsyncCompleted()) {
 			throw new StaleAsyncWebRequestException(
-					"Async request no longer available due to a timed out or a (client) error");
+					"Async request no longer available due to a timeout or a (client) error");
 		}
 		return result;
 	}
