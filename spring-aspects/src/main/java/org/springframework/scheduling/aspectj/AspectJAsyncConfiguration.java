@@ -31,7 +31,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
  * @author Chris Beams
  * @since 3.1
  * @see EnableAsync
- * @see AsyncConfigurationSelector
+ * @see org.springframework.scheduling.annotation.AsyncConfigurationSelector
  */
 @Configuration
 public class AspectJAsyncConfiguration extends AbstractAsyncConfiguration {

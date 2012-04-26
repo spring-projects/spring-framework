@@ -53,7 +53,7 @@ public abstract class JBossWorkManagerUtils {
 	/**
 	 * Obtain the default JBoss JCA WorkManager through a JMX lookup
 	 * for the JBossWorkManagerMBean.
-	 * @param workManagerObjectName the JMX object name to use
+	 * @param mbeanName the JMX object name to use
 	 * @see org.jboss.resource.work.JBossWorkManagerMBean
 	 */
 	public static WorkManager getWorkManager(String mbeanName) {

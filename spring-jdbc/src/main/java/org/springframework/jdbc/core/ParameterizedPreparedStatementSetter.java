@@ -34,7 +34,7 @@ import java.sql.SQLException;
  * @author Nicolas Fabre
  * @author Thomas Risberg
  * @since 3.1
- * @see JdbcTemplate#batchUpdate(String sql, Collection<T> objs, int batchSize, ParameterizedPreparedStatementSetter<T> pss)
+ * @see JdbcTemplate#batchUpdate(String, java.util.Collection, int, ParameterizedPreparedStatementSetter)
  */
 public interface ParameterizedPreparedStatementSetter<T> {
 

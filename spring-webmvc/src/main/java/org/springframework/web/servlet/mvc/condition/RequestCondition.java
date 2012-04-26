@@ -43,7 +43,7 @@ public interface RequestCondition<T> {
 	 * {@link RequestMapping} conditions. 
 	 * 
 	 * @param other the condition to combine with.
-	 * @returns a request condition instance that is the result of combining 
+	 * @return a request condition instance that is the result of combining 
 	 * 	the two condition instances.
 	 */
 	T combine(T other);

@@ -77,7 +77,7 @@ public interface SpelNode {
 
 	/**
 	 * Determine the class of the object passed in, unless it is already a class object.
-	 * @param o the object that the caller wants the class of
+	 * @param obj the object that the caller wants the class of
 	 * @return the class of the object if it is not already a class object, or null if the object is null
 	 */
 	Class<?> getObjectClass(Object obj);

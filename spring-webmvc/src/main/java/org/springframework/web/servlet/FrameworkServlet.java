@@ -330,7 +330,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Specify the set of fully-qualified {@link ApplicationContextInitializer} class
 	 * names, per the optional "contextInitializerClasses" servlet init-param.
 	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
-	 * @see #applyInitializers(ConfigurableWebApplicationContext)
+	 * @see #applyInitializers(ConfigurableApplicationContext)
 	 */
 	public void setContextInitializerClasses(String contextInitializerClasses) {
 		this.contextInitializerClasses = contextInitializerClasses;
@@ -340,7 +340,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Specify which {@link ApplicationContextInitializer} instances should be used
 	 * to initialize the application context used by this {@code FrameworkServlet}.
 	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
-	 * @see #applyInitializers(ConfigurableWebApplicationContext)
+	 * @see #applyInitializers(ConfigurableApplicationContext)
 	 */
 	public void setContextInitializers(ApplicationContextInitializer<ConfigurableApplicationContext>... contextInitializers) {
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : contextInitializers) {
@@ -691,12 +691,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * <p>The default implementation is empty. <code>refresh()</code> will
 	 * be called automatically after this method returns.
 	 * <p>Note that this method is designed to allow subclasses to modify the application
-	 * context, while {@link #initializeWebApplicationContext} is designed to allow
+	 * context, while {@link #initWebApplicationContext} is designed to allow
 	 * end-users to modify the context through the use of
 	 * {@link ApplicationContextInitializer}s.
 	 * @param wac the configured WebApplicationContext (not refreshed yet)
 	 * @see #createWebApplicationContext
-	 * @see #initializeWebApplicationContext
+	 * @see #initWebApplicationContext
 	 * @see ConfigurableWebApplicationContext#refresh()
 	 */
 	protected void postProcessWebApplicationContext(ConfigurableWebApplicationContext wac) {

@@ -62,7 +62,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * request parameter if the name matches to the model attribute name and
 	 * if there is an appropriate type conversion strategy. If none of these
 	 * are true delegate back to the base class.
-	 * @see #createAttributeFromUriValue
+	 * @see #createAttributeFromRequestValue(String, String, MethodParameter, WebDataBinderFactory, NativeWebRequest)
 	 */
 	@Override
 	protected final Object createAttribute(String attributeName, 

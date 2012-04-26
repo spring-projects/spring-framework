@@ -22,7 +22,7 @@ import org.springframework.http.HttpRequest;
 
 /**
  * Intercepts client-side HTTP requests. Implementations of this interface can be {@linkplain
- * org.springframework.web.client.RestTemplate#setInterceptors(ClientHttpRequestInterceptor[]) registered} with the
+ * org.springframework.web.client.RestTemplate#setInterceptors(java.util.List) registered} with the
  * {@link org.springframework.web.client.RestTemplate RestTemplate}, as to modify the outgoing {@link ClientHttpRequest}
  * and/or the incoming {@link ClientHttpResponse}.
  *

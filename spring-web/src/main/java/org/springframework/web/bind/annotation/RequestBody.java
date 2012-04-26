@@ -35,7 +35,8 @@ import org.springframework.http.converter.HttpMessageConverter;
  * @author Arjen Poutsma
  * @see RequestHeader
  * @see ResponseBody
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
+ * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  * @since 3.0
  */
 @Target(ElementType.PARAMETER)

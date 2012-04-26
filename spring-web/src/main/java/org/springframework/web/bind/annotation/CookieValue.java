@@ -35,7 +35,8 @@ import java.lang.annotation.Target;
  * @see RequestParam
  * @see RequestHeader
  * @see org.springframework.web.bind.annotation.RequestMapping
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
+ * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
 @Target(ElementType.PARAMETER)
