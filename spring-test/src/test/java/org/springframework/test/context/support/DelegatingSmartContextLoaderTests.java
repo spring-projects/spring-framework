@@ -109,19 +109,19 @@ public class DelegatingSmartContextLoaderTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void loadContextWithNullConfig() throws Exception {
 		MergedContextConfiguration mergedConfig = null;
-		loader.loadContext(mergedConfig);
+		loader.loadContext(null, mergedConfig);
 	}
 
 	@Test(expected = IllegalStateException.class)
 	public void loadContextWithoutLocationsAndConfigurationClasses() throws Exception {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
 			EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, loader);
-		loader.loadContext(mergedConfig);
+		loader.loadContext(null, mergedConfig);
 	}
 
 	private void assertApplicationContextLoadsAndContainsFooString(MergedContextConfiguration mergedConfig)
 			throws Exception {
-		ApplicationContext applicationContext = loader.loadContext(mergedConfig);
+		ApplicationContext applicationContext = loader.loadContext(null, mergedConfig);
 		assertNotNull(applicationContext);
 		assertEquals("foo", applicationContext.getBean(String.class));
 		assertTrue(applicationContext instanceof ConfigurableApplicationContext);
@@ -153,7 +153,7 @@ public class DelegatingSmartContextLoaderTests {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void loadContextFromLocations() throws Exception {
-		loader.loadContext(EMPTY_STRING_ARRAY);
+		loader.loadContext(null, EMPTY_STRING_ARRAY);
 	}
 
 

@@ -87,12 +87,12 @@ public class ContextLoaderUtilsTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void resolveContextConfigurationAttributesWithConflictingLocations() {
-		ContextLoaderUtils.resolveContextConfigurationAttributes(ConflictingLocations.class);
+		ContextLoaderUtils.resolveContextConfigurationAttributes(ContextConfiguration.class, ConflictingLocations.class);
 	}
 
 	@Test
 	public void resolveContextConfigurationAttributesWithBareAnnotations() {
-		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(BareAnnotations.class);
+		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(ContextConfiguration.class, BareAnnotations.class);
 		assertNotNull(attributesList);
 		assertEquals(1, attributesList.size());
 		assertAttributes(attributesList.get(0), BareAnnotations.class, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY,
@@ -101,7 +101,7 @@ public class ContextLoaderUtilsTests {
 
 	@Test
 	public void resolveContextConfigurationAttributesWithLocalAnnotationAndLocations() {
-		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(LocationsFoo.class);
+		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(ContextConfiguration.class, LocationsFoo.class);
 		assertNotNull(attributesList);
 		assertEquals(1, attributesList.size());
 		assertLocationsFooAttributes(attributesList.get(0));
@@ -109,7 +109,7 @@ public class ContextLoaderUtilsTests {
 
 	@Test
 	public void resolveContextConfigurationAttributesWithLocalAnnotationAndClasses() {
-		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(ClassesFoo.class);
+		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(ContextConfiguration.class, ClassesFoo.class);
 		assertNotNull(attributesList);
 		assertEquals(1, attributesList.size());
 		assertClassesFooAttributes(attributesList.get(0));
@@ -117,7 +117,7 @@ public class ContextLoaderUtilsTests {
 
 	@Test
 	public void resolveContextConfigurationAttributesWithLocalAndInheritedAnnotationsAndLocations() {
-		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(LocationsBar.class);
+		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(ContextConfiguration.class, LocationsBar.class);
 		assertNotNull(attributesList);
 		assertEquals(2, attributesList.size());
 		assertLocationsFooAttributes(attributesList.get(0));
@@ -126,7 +126,7 @@ public class ContextLoaderUtilsTests {
 
 	@Test
 	public void resolveContextConfigurationAttributesWithLocalAndInheritedAnnotationsAndClasses() {
-		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(ClassesBar.class);
+		List<ContextConfigurationAttributes> attributesList = ContextLoaderUtils.resolveContextConfigurationAttributes(ContextConfiguration.class, ClassesBar.class);
 		assertNotNull(attributesList);
 		assertEquals(2, attributesList.size());
 		assertClassesFooAttributes(attributesList.get(0));
@@ -135,13 +135,13 @@ public class ContextLoaderUtilsTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void buildMergedContextConfigurationWithoutAnnotation() {
-		ContextLoaderUtils.buildMergedContextConfiguration(Enigma.class, null);
+		ContextLoaderUtils.buildMergedContextConfiguration(ContextConfiguration.class, Enigma.class, null);
 	}
 
 	@Test
 	public void buildMergedContextConfigurationWithBareAnnotations() {
 		Class<BareAnnotations> testClass = BareAnnotations.class;
-		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass, null);
+		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(ContextConfiguration.class, testClass, null);
 
 		assertMergedContextConfiguration(
 			mergedConfig,
@@ -153,7 +153,7 @@ public class ContextLoaderUtilsTests {
 	@Test
 	public void buildMergedContextConfigurationWithLocalAnnotationAndLocations() {
 		Class<?> testClass = LocationsFoo.class;
-		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass, null);
+		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(ContextConfiguration.class, testClass, null);
 
 		assertMergedContextConfiguration(mergedConfig, testClass, new String[] { "classpath:/foo.xml" },
 			EMPTY_CLASS_ARRAY, DelegatingSmartContextLoader.class);
@@ -162,7 +162,7 @@ public class ContextLoaderUtilsTests {
 	@Test
 	public void buildMergedContextConfigurationWithLocalAnnotationAndClasses() {
 		Class<?> testClass = ClassesFoo.class;
-		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass, null);
+		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(ContextConfiguration.class, testClass, null);
 
 		assertMergedContextConfiguration(mergedConfig, testClass, EMPTY_STRING_ARRAY,
 			new Class<?>[] { FooConfig.class }, DelegatingSmartContextLoader.class);
@@ -172,7 +172,7 @@ public class ContextLoaderUtilsTests {
 	public void buildMergedContextConfigurationWithLocalAnnotationAndOverriddenContextLoaderAndLocations() {
 		Class<?> testClass = LocationsFoo.class;
 		Class<? extends ContextLoader> expectedContextLoaderClass = GenericPropertiesContextLoader.class;
-		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
+		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(ContextConfiguration.class, testClass,
 			expectedContextLoaderClass.getName());
 
 		assertMergedContextConfiguration(mergedConfig, testClass, new String[] { "classpath:/foo.xml" },
@@ -183,7 +183,7 @@ public class ContextLoaderUtilsTests {
 	public void buildMergedContextConfigurationWithLocalAnnotationAndOverriddenContextLoaderAndClasses() {
 		Class<?> testClass = ClassesFoo.class;
 		Class<? extends ContextLoader> expectedContextLoaderClass = GenericPropertiesContextLoader.class;
-		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
+		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(ContextConfiguration.class, testClass,
 			expectedContextLoaderClass.getName());
 
 		assertMergedContextConfiguration(mergedConfig, testClass, EMPTY_STRING_ARRAY,
@@ -195,7 +195,7 @@ public class ContextLoaderUtilsTests {
 		Class<?> testClass = LocationsBar.class;
 		String[] expectedLocations = new String[] { "/foo.xml", "/bar.xml" };
 
-		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass, null);
+		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(ContextConfiguration.class, testClass, null);
 		assertMergedContextConfiguration(mergedConfig, testClass, expectedLocations, EMPTY_CLASS_ARRAY,
 			AnnotationConfigContextLoader.class);
 	}
@@ -205,7 +205,7 @@ public class ContextLoaderUtilsTests {
 		Class<?> testClass = ClassesBar.class;
 		Class<?>[] expectedClasses = new Class<?>[] { FooConfig.class, BarConfig.class };
 
-		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(testClass, null);
+		MergedContextConfiguration mergedConfig = ContextLoaderUtils.buildMergedContextConfiguration(ContextConfiguration.class, testClass, null);
 		assertMergedContextConfiguration(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses,
 			AnnotationConfigContextLoader.class);
 	}

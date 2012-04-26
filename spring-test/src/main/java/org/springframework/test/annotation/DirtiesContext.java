@@ -90,4 +90,11 @@ public @interface DirtiesContext {
 	 */
 	ClassMode classMode() default ClassMode.AFTER_CLASS;
 
+	/**
+	 * Close parent {@link org.springframework.context.ApplicationContext} as well as child contexts
+	 * which have same parent context.
+	 *
+	 * @since 3.2
+	 */
+	boolean parent() default false;
 }

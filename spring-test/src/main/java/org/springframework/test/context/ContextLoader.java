@@ -28,10 +28,10 @@ import org.springframework.context.ApplicationContext;
  *
  * <p>Clients of a ContextLoader should call
  * {@link #processLocations(Class,String...) processLocations()} prior to
- * calling {@link #loadContext(String...) loadContext()} in case the
+ * calling {@link #loadContext(ApplicationContext, String...) loadContext()} in case the
  * ContextLoader provides custom support for modifying or generating locations.
  * The results of {@link #processLocations(Class,String...) processLocations()}
- * should then be supplied to {@link #loadContext(String...) loadContext()}.
+ * should then be supplied to {@link #loadContext(ApplicationContext, String...) loadContext()}.
  *
  * <p>Concrete implementations must provide a <code>public</code> no-args
  * constructor.
@@ -80,10 +80,11 @@ public interface ContextLoader {
 	 * early, all context instances will be automatically closed on JVM
 	 * shutdown. This allows for freeing external resources held by beans within
 	 * the context, e.g. temporary files.
+	 * @param parentContext parent context. null if it doesn't have a parent.
 	 * @param locations the resource locations to use to load the application context
 	 * @return a new application context
 	 * @throws Exception if context loading failed
 	 */
-	ApplicationContext loadContext(String... locations) throws Exception;
+	ApplicationContext loadContext(ApplicationContext parentContext, String... locations) throws Exception;
 
 }

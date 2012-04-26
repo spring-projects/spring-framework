@@ -27,19 +27,19 @@ import org.springframework.context.ApplicationContext;
  * either resource locations or configuration classes. Furthermore, a
  * {@code SmartContextLoader} can set active bean definition profiles in the
  * context that it loads (see {@link MergedContextConfiguration#getActiveProfiles()}
- * and {@link #loadContext(MergedContextConfiguration)}).
+ * and {@link #loadContext(ApplicationContext, MergedContextConfiguration)}).
  *
  * <p>Clients of a {@code SmartContextLoader} should call
  * {@link #processContextConfiguration(ContextConfigurationAttributes)
  * processContextConfiguration()} prior to calling
- * {@link #loadContext(MergedContextConfiguration) loadContext()}. This gives a
+ * {@link #loadContext(ApplicationContext, MergedContextConfiguration) loadContext()}. This gives a
  * {@code SmartContextLoader} the opportunity to provide custom support for
  * modifying resource locations or detecting default resource locations or 
  * default configuration classes. The results of
  * {@link #processContextConfiguration(ContextConfigurationAttributes)
  * processContextConfiguration()} should be merged for all classes in the
  * hierarchy of the root test class and then supplied to
- * {@link #loadContext(MergedContextConfiguration) loadContext()}.
+ * {@link #loadContext(ApplicationContext, MergedContextConfiguration) loadContext()}.
  * 
  * <p>Even though {@code SmartContextLoader} extends {@code ContextLoader},
  * clients should favor {@code SmartContextLoader}-specific methods over those
@@ -97,7 +97,7 @@ public interface SmartContextLoader extends ContextLoader {
 	 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
 	 * {@link javax.annotation.Resource @Resource}, and
 	 * {@link javax.inject.Inject @Inject}. In addition, concrete implementations
-	 * should set the active bean definition profiles in the context's 
+	 * should set the active bean definition profiles in the context's
 	 * {@link org.springframework.core.env.Environment Environment}.
 	 * <p>Any <code>ApplicationContext</code> loaded by a
 	 * {@code SmartContextLoader} <strong>must</strong> register a JVM
@@ -105,6 +105,7 @@ public interface SmartContextLoader extends ContextLoader {
 	 * instances will be automatically closed on JVM shutdown. This allows for
 	 * freeing of external resources held by beans within the context (e.g.,
 	 * temporary files).
+	 * @param parentApplicationContext parent application context. null if it doesn't have a parent.
 	 * @param mergedConfig the merged context configuration to use to load the
 	 * application context
 	 * @return a new application context
@@ -114,6 +115,6 @@ public interface SmartContextLoader extends ContextLoader {
 	 * @see org.springframework.test.context.MergedContextConfiguration#getActiveProfiles()
 	 * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment()
 	 */
-	ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception;
+	ApplicationContext loadContext(ApplicationContext parentApplicationContext, MergedContextConfiguration mergedConfig) throws Exception;
 
 }

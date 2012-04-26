@@ -17,6 +17,7 @@
 package org.springframework.test.context;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +25,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
+
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
 
 /**
  * <code>TestContext</code> encapsulates the context in which a test is executed,
@@ -42,6 +45,8 @@ public class TestContext extends AttributeAccessorSupport {
 	private final ContextCache contextCache;
 
 	private final MergedContextConfiguration mergedContextConfiguration;
+
+	private final MergedContextConfiguration parentMergedContextConfiguration;
 
 	private final Class<?> testClass;
 
@@ -84,6 +89,7 @@ public class TestContext extends AttributeAccessorSupport {
 		Assert.notNull(contextCache, "ContextCache must not be null");
 
 		MergedContextConfiguration mergedContextConfiguration;
+		MergedContextConfiguration parentMergedContextConfiguration = null;
 		ContextConfiguration contextConfiguration = testClass.getAnnotation(ContextConfiguration.class);
 
 		if (contextConfiguration == null) {
@@ -97,12 +103,21 @@ public class TestContext extends AttributeAccessorSupport {
 				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for class [%s]", contextConfiguration,
 					testClass));
 			}
-			mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
+			mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(ContextConfiguration.class, testClass,
 				defaultContextLoaderClassName);
+		}
+
+		// create merged-config for parent if @ParentContextConfiguration exists in hierarchy
+		Class<?> parentDeclaringClass = findAnnotationDeclaringClass(ParentContextConfiguration.class, testClass);
+		if (parentDeclaringClass != null) {
+			parentMergedContextConfiguration = ContextLoaderUtils
+					.buildMergedContextConfiguration(ParentContextConfiguration.class, testClass,
+							defaultContextLoaderClassName);
 		}
 
 		this.contextCache = contextCache;
 		this.mergedContextConfiguration = mergedContextConfiguration;
+		this.parentMergedContextConfiguration = parentMergedContextConfiguration;
 		this.testClass = testClass;
 	}
 
@@ -112,7 +127,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * both the {@link SmartContextLoader} and {@link ContextLoader} SPIs.
 	 * @throws Exception if an error occurs while loading the application context
 	 */
-	private ApplicationContext loadApplicationContext() throws Exception {
+	private ApplicationContext loadApplicationContext(MergedContextConfiguration mergedContextConfiguration, ApplicationContext parentApplicationContext) throws Exception {
 		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
 		Assert.notNull(contextLoader, "Can not load an ApplicationContext with a NULL 'contextLoader'. "
 				+ "Consider annotating your test class with @ContextConfiguration.");
@@ -121,13 +136,13 @@ public class TestContext extends AttributeAccessorSupport {
 
 		if (contextLoader instanceof SmartContextLoader) {
 			SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
-			applicationContext = smartContextLoader.loadContext(mergedContextConfiguration);
+			applicationContext = smartContextLoader.loadContext(parentApplicationContext, mergedContextConfiguration);
 		}
 		else {
 			String[] locations = mergedContextConfiguration.getLocations();
 			Assert.notNull(locations, "Can not load an ApplicationContext with a NULL 'locations' array. "
 					+ "Consider annotating your test class with @ContextConfiguration.");
-			applicationContext = contextLoader.loadContext(locations);
+			applicationContext = contextLoader.loadContext(parentApplicationContext, locations);
 		}
 
 		return applicationContext;
@@ -141,17 +156,32 @@ public class TestContext extends AttributeAccessorSupport {
 	 * application context
 	 */
 	public ApplicationContext getApplicationContext() {
+		return getOrCreateApplicationContextFromCache(mergedContextConfiguration, parentMergedContextConfiguration);
+	}
+
+	private ApplicationContext getOrCreateApplicationContextFromCache(MergedContextConfiguration mergedContextConfiguration,
+			MergedContextConfiguration parentMergedContextConfiguration) {
+
+		Assert.notNull(mergedContextConfiguration, "merged context configuration cannot be null");
+		ContextCacheKey cacheKey = new ContextCacheKey(mergedContextConfiguration, parentMergedContextConfiguration);
 		synchronized (contextCache) {
-			ApplicationContext context = contextCache.get(mergedContextConfiguration);
+			ApplicationContext context = contextCache.get(cacheKey);
 			if (context == null) {
+
+				ApplicationContext parentApplicationContext = null;
+				if (parentMergedContextConfiguration != null) {
+					// recursive call to get parent applicationContext
+					parentApplicationContext = getOrCreateApplicationContextFromCache(parentMergedContextConfiguration, null);
+				}
+
 				try {
-					context = loadApplicationContext();
+					context = loadApplicationContext(mergedContextConfiguration, parentApplicationContext);
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format(
-							"Storing ApplicationContext for test class [%s] in cache under key [%s].", testClass,
-							mergedContextConfiguration));
+								"Storing ApplicationContext for test class [%s] in cache under child key [%s], parent key [%s].",
+								testClass, mergedContextConfiguration, parentMergedContextConfiguration));
 					}
-					contextCache.put(mergedContextConfiguration, context);
+					contextCache.put(cacheKey, context);
 				}
 				catch (Exception ex) {
 					throw new IllegalStateException("Failed to load ApplicationContext", ex);
@@ -160,8 +190,8 @@ public class TestContext extends AttributeAccessorSupport {
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug(String.format(
-						"Retrieved ApplicationContext for test class [%s] from cache with key [%s].", testClass,
-						mergedContextConfiguration));
+							"Retrieved ApplicationContext for test class [%s] from cache with child key [%s], parent key[%s].",
+							testClass, mergedContextConfiguration, parentMergedContextConfiguration));
 				}
 			}
 			return context;
@@ -214,10 +244,27 @@ public class TestContext extends AttributeAccessorSupport {
 	 * be reloaded. Do this if a test has modified the context (for example, by
 	 * replacing a bean definition).
 	 */
-	public void markApplicationContextDirty() {
+	public void markApplicationContextDirty(boolean dirtyParent) {
+
 		synchronized (contextCache) {
-			contextCache.setDirty(mergedContextConfiguration);
+
+			if (dirtyParent) {
+				// parent context has a cache key with "parentMergedContextConfiguration, null".
+				ContextCacheKey parentKey = new ContextCacheKey(parentMergedContextConfiguration, null);
+				List<ContextCacheKey> childKeys = contextCache.getChildKeys(parentKey);
+
+				for (ContextCacheKey childKey : childKeys) {
+					contextCache.setDirty(childKey);
+				}
+				contextCache.setDirty(parentKey);
+			}
+			else {
+				ContextCacheKey key = new ContextCacheKey(mergedContextConfiguration, parentMergedContextConfiguration);
+				contextCache.setDirty(key);
+			}
+
 		}
+
 	}
 
 	/**

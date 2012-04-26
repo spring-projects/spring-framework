@@ -25,7 +25,7 @@ import org.springframework.util.ObjectUtils;
 /**
  * <code>ContextConfigurationAttributes</code> encapsulates the context 
  * configuration attributes declared on a test class via
- * {@link ContextConfiguration @ContextConfiguration}.
+ * {@link ContextConfiguration @ContextConfiguration} and {@link ParentContextConfiguration @ParentContextConfiguration}.
  * 
  * @author Sam Brannen
  * @since 3.1
@@ -55,11 +55,8 @@ public class ContextConfigurationAttributes {
 	 * 
 	 * @throws IllegalStateException if both the locations and value attributes have been declared
 	 */
-	private static String[] resolveLocations(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
+	private static String[] resolveLocations(Class<?> declaringClass, String[] locations, String[] valueLocations) {
 		Assert.notNull(declaringClass, "declaringClass must not be null");
-
-		String[] locations = contextConfiguration.locations();
-		String[] valueLocations = contextConfiguration.value();
 
 		if (!ObjectUtils.isEmpty(valueLocations) && !ObjectUtils.isEmpty(locations)) {
 			String msg = String.format("Test class [%s] has been configured with @ContextConfiguration's 'value' %s "
@@ -84,8 +81,20 @@ public class ContextConfigurationAttributes {
 	 * @param contextConfiguration the annotation from which to retrieve the attributes 
 	 */
 	public ContextConfigurationAttributes(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
-		this(declaringClass, resolveLocations(declaringClass, contextConfiguration), contextConfiguration.classes(),
-			contextConfiguration.inheritLocations(), contextConfiguration.loader());
+		this(declaringClass, resolveLocations(declaringClass, contextConfiguration.locations(), contextConfiguration.value())
+				, contextConfiguration.classes(), contextConfiguration.inheritLocations(), contextConfiguration.loader());
+	}
+
+	/**
+	 * Construct a new {@link ContextConfigurationAttributes} instance for the
+	 * supplied {@link ParentContextConfiguration @ParentContextConfiguration} annotation and
+	 * the {@link Class test class} that declared it.
+	 * @param declaringClass the test class that declared {@code @ParentContextConfiguration}
+	 * @param parentContextConfiguration the annotation from which to retrieve the attributes
+	 */
+	public ContextConfigurationAttributes(Class<?> declaringClass, ParentContextConfiguration parentContextConfiguration) {
+		this(declaringClass, resolveLocations(declaringClass, parentContextConfiguration.locations(), parentContextConfiguration.value())
+				, parentContextConfiguration.classes(), parentContextConfiguration.inheritLocations(), parentContextConfiguration.loader());
 	}
 
 	/**
