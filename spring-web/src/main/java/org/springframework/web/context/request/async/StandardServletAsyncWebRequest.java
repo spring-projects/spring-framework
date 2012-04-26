@@ -48,6 +48,8 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	private AtomicBoolean asyncCompleted = new AtomicBoolean(false);
 
+	private Runnable timeoutHandler;
+
 	public StandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
 		super(request, response);
 	}
@@ -62,6 +64,10 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	public boolean isAsyncCompleted() {
 		return this.asyncCompleted.get();
+	}
+
+	public void setTimeoutHandler(Runnable timeoutHandler) {
+		this.timeoutHandler = timeoutHandler;
 	}
 
 	public void startAsync() {
@@ -111,8 +117,13 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	// ---------------------------------------------------------------------
 
 	public void onTimeout(AsyncEvent event) throws IOException {
+		if (this.timeoutHandler == null) {
+			getResponse().sendError(HttpStatus.SERVICE_UNAVAILABLE.value());
+		}
+		else {
+			this.timeoutHandler.run();
+		}
 		completeInternal();
-		getResponse().sendError(HttpStatus.SERVICE_UNAVAILABLE.value());
 	}
 
 	public void onError(AsyncEvent event) throws IOException {

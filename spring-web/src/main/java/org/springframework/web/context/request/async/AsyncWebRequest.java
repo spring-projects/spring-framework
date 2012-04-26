@@ -36,6 +36,12 @@ public interface AsyncWebRequest extends NativeWebRequest {
 	void setTimeout(Long timeout);
 
 	/**
+	 * Invoked on a timeout to complete the response instead of the default
+	 * behavior that sets the status to 503 (SERVICE_UNAVAILABLE).
+	 */
+	void setTimeoutHandler(Runnable runnable);
+
+	/**
 	 * Mark the start of async request processing for example ensuring the
 	 * request remains open in order to be completed in a separate thread.
 	 * @throws IllegalStateException if async processing has started, if it is

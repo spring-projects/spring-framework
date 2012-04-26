@@ -123,7 +123,7 @@ public class AsyncExecutionChainTests {
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), containsString("The callable field is required"));
+			assertThat(ex.getMessage(), containsString("last callable is required"));
 		}
 	}
 
@@ -171,7 +171,7 @@ public class AsyncExecutionChainTests {
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("A DeferredResult is required"));
+			assertThat(ex.getMessage(), containsString("DeferredResult is required"));
 		}
 	}
 
@@ -186,6 +186,10 @@ public class AsyncExecutionChainTests {
 			super(request, response);
 		}
 
+		public void setTimeout(Long timeout) { }
+
+		public void setTimeoutHandler(Runnable runnable) { }
+
 		public void startAsync() {
 			this.asyncStarted = true;
 		}
@@ -193,8 +197,6 @@ public class AsyncExecutionChainTests {
 		public boolean isAsyncStarted() {
 			return this.asyncStarted;
 		}
-
-		public void setTimeout(Long timeout) { }
 
 		public void complete() {
 			this.asyncStarted = false;

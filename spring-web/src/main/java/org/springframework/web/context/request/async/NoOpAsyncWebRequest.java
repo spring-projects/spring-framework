@@ -39,6 +39,9 @@ public class NoOpAsyncWebRequest extends ServletWebRequest implements AsyncWebRe
 	public void setTimeout(Long timeout) {
 	}
 
+	public void setTimeoutHandler(Runnable runnable) {
+	}
+
 	public boolean isAsyncStarted() {
 		return false;
 	}

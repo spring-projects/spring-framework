@@ -143,7 +143,7 @@ public final class AsyncExecutionChain {
 	}
 
 	private Callable<Object> buildChain() {
-		Assert.state(this.callable != null, "The callable field is required to complete the chain");
+		Assert.state(this.callable != null, "The last callable is required to build the async chain");
 		this.delegatingCallables.add(new StaleAsyncRequestCheckingCallable(asyncWebRequest));
 		Callable<Object> result = this.callable;
 		for (int i = this.delegatingCallables.size() - 1; i >= 0; i--) {
@@ -165,25 +165,39 @@ public final class AsyncExecutionChain {
 	 * the threading model, i.e. whether a TaskExecutor is used.
 	 * @see DeferredResult
 	 */
-	public void startDeferredResultProcessing(DeferredResult deferredResult) {
-		Assert.notNull(deferredResult, "A DeferredResult is required");
+	public void startDeferredResultProcessing(final DeferredResult deferredResult) {
+		Assert.notNull(deferredResult, "DeferredResult is required");
 		startAsync();
-		deferredResult.setValueProcessor(new DeferredResultHandler() {
-			public void handle(Object value) {
+		deferredResult.init(new DeferredResultHandler() {
+			public void handle(Object result) {
 				if (asyncWebRequest.isAsyncCompleted()) {
 					throw new StaleAsyncWebRequestException("Async request processing already completed");
 				}
-				setCallable(getSimpleCallable(value));
+				setCallable(new PassThroughCallable(result));
 				new AsyncExecutionChainRunnable(asyncWebRequest, buildChain()).run();
 			}
 		});
+		if (deferredResult.canHandleTimeout()) {
+			this.asyncWebRequest.setTimeoutHandler(new Runnable() {
+				public void run() {
+					deferredResult.handleTimeout();
+				}
+			});
+		}
 	}
 
-	private Callable<Object> getSimpleCallable(final Object value) {
-		return new Callable<Object>() {
-			public Object call() throws Exception {
-				return value;
-			}
-		};
+
+	private static class PassThroughCallable implements Callable<Object> {
+
+		private final Object value;
+
+		public PassThroughCallable(Object value) {
+			this.value = value;
+		}
+
+		public Object call() throws Exception {
+			return this.value;
+		}
 	}
+
 }

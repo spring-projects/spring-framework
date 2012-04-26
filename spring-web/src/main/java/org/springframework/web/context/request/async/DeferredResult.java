@@ -16,72 +16,135 @@
 
 package org.springframework.web.context.request.async;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.util.Assert;
 
 /**
- * DeferredResult provides an alternative to using a Callable to complete async
- * request processing. Whereas with a Callable the framework manages a thread on
- * behalf of the application through an {@link AsyncTaskExecutor}, with a
- * DeferredResult the application can produce a value using a thread of its choice.
+ * DeferredResult provides an alternative to using a Callable for async request
+ * processing. With a Callable the framework manages a thread on behalf of the
+ * application through an {@link AsyncTaskExecutor}. With a DeferredResult the
+ * application sets the result in a thread of its choice.
  *
- * <p>The following sequence describes typical use of a DeferredResult:
+ * <p>The following sequence describes the intended use scenario:
  * <ol>
- * <li>Application method (e.g. controller method) returns a DeferredResult instance
- * <li>The framework completes initialization of the returned DeferredResult in the same thread
- * <li>The application calls {@link DeferredResult#set(Object)} from another thread
- * <li>The framework completes request processing in the thread in which it is invoked
+ * <li>thread-1: framework calls application method
+ * <li>thread-1: application method returns a DeferredResult
+ * <li>thread-1: framework initializes DeferredResult
+ * <li>thread-2: application calls {@link #set(Object)}
+ * <li>thread-2: framework completes async processing with given result
  * </ol>
  *
- * <p><strong>Note:</strong> {@link DeferredResult#set(Object)} will block if
- * called before the DeferredResult is fully initialized (by the framework).
- * Application code should never create a DeferredResult and set it immediately:
- *
- * <pre>
- * DeferredResult value = new DeferredResult();
- * value.set(1);  // blocks
- * </pre>
+ * <p>If the application calls {@link #set(Object)} in thread-2 before the
+ * DeferredResult is initialized by the framework in thread-1, then thread-2
+ * will block and wait for the initialization to complete. Therefore an
+ * application should never create and set the DeferredResult in the same
+ * thread because the initialization will never complete.</p>
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
 public final class DeferredResult {
 
-	private final AtomicReference<Object> value = new AtomicReference<Object>();
+	private final static Object TIMEOUT_RESULT_NONE = new Object();
 
-	private final BlockingQueue<DeferredResultHandler> handlers = new ArrayBlockingQueue<DeferredResultHandler>(1);
+	private Object result;
+
+	private final Object timeoutResult;
+
+	private DeferredResultHandler resultHandler;
+
+	private final CountDownLatch readySignal = new CountDownLatch(1);
+
+	private final ReentrantLock timeoutLock = new ReentrantLock();
 
 	/**
-	 * Provide a value to use to complete async request processing.
-	 * This method should be invoked only once and usually from a separate
-	 * thread to allow the framework to fully initialize the created
-	 * DeferrredValue. See the class level documentation for more details.
+	 * Create a new instance.
+	 */
+	public DeferredResult() {
+		this(TIMEOUT_RESULT_NONE);
+	}
+
+	/**
+	 * Create a new instance and also provide a default result to use if a
+	 * timeout occurs before {@link #set(Object)} is called.
+	 */
+	public DeferredResult(Object timeoutResult) {
+		this.timeoutResult = timeoutResult;
+	}
+
+	boolean canHandleTimeout() {
+		return this.timeoutResult != TIMEOUT_RESULT_NONE;
+	}
+
+	/**
+	 * Complete async processing with the given result. If the DeferredResult is
+	 * not yet fully initialized, this method will block and wait for that to
+	 * occur before proceeding. See the class level javadoc for more details.
 	 *
 	 * @throws StaleAsyncWebRequestException if the underlying async request
-	 * ended due to a timeout or an error before the value was set.
+	 * has already timed out or ended due to a network error.
 	 */
-	public void set(Object value) throws StaleAsyncWebRequestException {
-		Assert.isNull(this.value.get(), "Value already set");
-		this.value.set(value);
-		try {
-			this.handlers.take().handle(value);
+	public void set(Object result) throws StaleAsyncWebRequestException {
+		if (this.timeoutLock.tryLock() && (this.result != this.timeoutResult)) {
+			try {
+				handle(result);
+			}
+			finally {
+				this.timeoutLock.unlock();
+			}
 		}
-		catch (InterruptedException e) {
-			throw new IllegalStateException("Failed to process deferred return value: " + value, e);
+		else {
+			// A timeout is in progress
+			throw new StaleAsyncWebRequestException("Async request already timed out");
 		}
 	}
 
-	void setValueProcessor(DeferredResultHandler handler) {
-		this.handlers.add(handler);
+	/**
+	 * Invoked to complete async processing when a timeout occurs before
+	 * {@link #set(Object)} is called. Or if {@link #set(Object)} is already in
+	 * progress, this method blocks, waits for it to complete, and then returns.
+	 */
+	void handleTimeout() {
+		Assert.state(canHandleTimeout(), "Can't handle timeout");
+		this.timeoutLock.lock();
+		try {
+			if (this.result == null) {
+				handle(this.timeoutResult);
+			}
+		}
+		finally {
+			this.timeoutLock.unlock();
+		}
+	}
+
+	private void handle(Object result) throws StaleAsyncWebRequestException {
+		Assert.isNull(this.result, "A deferred result can be set once only");
+		this.result = result;
+		try {
+			this.readySignal.await(10, TimeUnit.SECONDS);
+		}
+		catch (InterruptedException e) {
+			throw new IllegalStateException(
+					"Gave up on waiting for DeferredResult to be initialized. " +
+					"Are you perhaps creating and setting a DeferredResult in the same thread? " +
+					"The DeferredResult must be fully initialized before you can set it. " +
+					"See the class javadoc for more details");
+		}
+		this.resultHandler.handle(result);
+	}
+
+	void init(DeferredResultHandler handler) {
+		this.resultHandler = handler;
+		this.readySignal.countDown();
 	}
 
 
 	/**
-	 * Puts the set value through processing wiht the async execution chain.
+	 * Completes processing when {@link DeferredResult#set(Object)} is called.
 	 */
 	interface DeferredResultHandler {
 

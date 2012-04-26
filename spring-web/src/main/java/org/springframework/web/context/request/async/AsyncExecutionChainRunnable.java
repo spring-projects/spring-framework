@@ -49,7 +49,6 @@ public class AsyncExecutionChainRunnable implements Runnable {
 	public AsyncExecutionChainRunnable(AsyncWebRequest asyncWebRequest, Callable<?> callable) {
 		Assert.notNull(asyncWebRequest, "An AsyncWebRequest is required");
 		Assert.notNull(callable, "A Callable is required");
-		Assert.state(asyncWebRequest.isAsyncStarted(), "Not an async request");
 		this.asyncWebRequest = asyncWebRequest;
 		this.callable = callable;
 	}
