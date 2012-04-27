@@ -25,6 +25,8 @@ import javax.servlet.ServletRequest;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
 
 /**
@@ -73,6 +75,20 @@ public final class AsyncExecutionChain {
 		if (chain == null) {
 			chain = new AsyncExecutionChain();
 			request.setAttribute(CALLABLE_CHAIN_ATTRIBUTE, chain);
+		}
+		return chain;
+	}
+
+	/**
+	 * Obtain the AsyncExecutionChain for the current request.
+	 * Or if not found, create an instance and associate it with the request.
+	 */
+	public static AsyncExecutionChain getForCurrentRequest(WebRequest request) {
+		int scope = RequestAttributes.SCOPE_REQUEST;
+		AsyncExecutionChain chain = (AsyncExecutionChain) request.getAttribute(CALLABLE_CHAIN_ATTRIBUTE, scope);
+		if (chain == null) {
+			chain = new AsyncExecutionChain();
+			request.setAttribute(CALLABLE_CHAIN_ATTRIBUTE, chain, scope);
 		}
 		return chain;
 	}

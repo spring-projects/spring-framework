@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.request.async.AsyncExecutionChain;
 
 /**
  * Handler execution chain, consisting of handler object and any handler interceptors.
@@ -139,7 +140,7 @@ public class HandlerExecutionChain {
 	}
 
 	/**
-	 * Apply preHandle methods of registered interceptors.
+	 * Apply postHandle methods of registered interceptors.
 	 */
 	void applyPostHandle(HttpServletRequest request, HttpServletResponse response, ModelAndView mv)
 			throws Exception {
@@ -150,6 +151,53 @@ public class HandlerExecutionChain {
 		for (int i = getInterceptors().length - 1; i >= 0; i--) {
 			HandlerInterceptor interceptor = getInterceptors()[i];
 			interceptor.postHandle(request, response, this.handler, mv);
+		}
+	}
+
+	/**
+	 * Add delegating, async Callable instances to the {@link AsyncExecutionChain}
+	 * for use in case of asynchronous request processing.
+	 */
+	void addDelegatingCallables(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		if (getInterceptors() == null) {
+			return;
+		}
+		for (int i = getInterceptors().length - 1; i >= 0; i--) {
+			HandlerInterceptor interceptor = getInterceptors()[i];
+			if (interceptor instanceof AsyncHandlerInterceptor) {
+				try {
+					AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) interceptor;
+					AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
+					chain.addDelegatingCallable(asyncInterceptor.getAsyncCallable(request, response, this.handler));
+				}
+				catch (Throwable ex) {
+					logger.error("HandlerInterceptor.addAsyncCallables threw exception", ex);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Trigger postHandleAsyncStarted callbacks on the mapped HandlerInterceptors.
+	 */
+	void applyPostHandleAsyncStarted(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+
+		if (getInterceptors() == null) {
+			return;
+		}
+		for (int i = getInterceptors().length - 1; i >= 0; i--) {
+			HandlerInterceptor interceptor = getInterceptors()[i];
+			if (interceptor instanceof AsyncHandlerInterceptor) {
+				try {
+					((AsyncHandlerInterceptor) interceptor).postHandleAsyncStarted(request, response, this.handler);
+				}
+				catch (Throwable ex) {
+					logger.error("HandlerInterceptor.postHandleAsyncStarted threw exception", ex);
+				}
+			}
 		}
 	}
 
