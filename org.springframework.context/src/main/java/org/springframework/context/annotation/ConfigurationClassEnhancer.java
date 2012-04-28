@@ -140,7 +140,7 @@ class ConfigurationClassEnhancer {
 		enhancer.setUseCache(false);
 		enhancer.setSuperclass(superclass);
 		enhancer.setInterfaces(new Class[] {EnhancedConfiguration.class});
-		enhancer.setUseFactory(false);
+		enhancer.setUseFactory(true);
 		enhancer.setCallbackFilter(this.callbackFilter);
 		enhancer.setCallbackTypes(this.callbackTypes.toArray(new Class[this.callbackTypes.size()]));
 		return enhancer;
