@@ -50,16 +50,16 @@ import org.springframework.web.util.WebUtils;
 /**
  * Context holder for request-specific state, like current web application context, current locale, current theme, and
  * potential binding errors. Provides easy access to localized messages and Errors instances.
- * 
+ *
  * <p>Suitable for exposition to views, and usage within JSP's "useBean" tag, JSP scriptlets, JSTL EL, Velocity
  * templates, etc. Necessary for views that do not have access to the servlet request, like Velocity templates.
- * 
+ *
  * <p>Can be instantiated manually, or automatically exposed to views as model attribute via AbstractView's
  * "requestContextAttribute" property.
- * 
+ *
  * <p>Will also work outside of DispatcherServlet requests, accessing the root WebApplicationContext and using an
  * appropriate fallback for the locale (the HttpServletRequest's primary locale).
- * 
+ *
  * @author Juergen Hoeller
  * @since 03.03.2003
  * @see org.springframework.web.servlet.DispatcherServlet
@@ -83,8 +83,8 @@ public class RequestContext {
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = RequestContext.class.getName() + ".CONTEXT";
 
 	/**
-	 * The name of the bean to use to look up in an implementation of 
-	 * {@link RequestDataValueProcessor} has been configured. 
+	 * The name of the bean to use to look up in an implementation of
+	 * {@link RequestDataValueProcessor} has been configured.
 	 */
 	private static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
 
@@ -148,7 +148,7 @@ public class RequestContext {
 	 * @param model the model attributes for the current view (can be <code>null</code>, using the request attributes
 	 * for Errors retrieval)
 	 * @see org.springframework.web.servlet.DispatcherServlet
-	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.ServletContext, Map)
+	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext, Map)
 	 */
 	public RequestContext(HttpServletRequest request, Map<String, Object> model) {
 		initContext(request, null, null, model);
@@ -226,7 +226,7 @@ public class RequestContext {
 		try {
 			this.requestDataValueProcessor = this.webApplicationContext.getBean(
 					REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME, RequestDataValueProcessor.class);
-		} 
+		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// Ignored
 		}
@@ -366,7 +366,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return the RequestDataValueProcessor instance to use obtained from the 
+	 * Return the RequestDataValueProcessor instance to use obtained from the
 	 * WebApplicationContext under the name {@code "requestDataValueProcessor"}.
 	 * Or {@code null} if no matching bean was found.
 	 */
@@ -402,9 +402,9 @@ public class RequestContext {
 	 * Return a context-aware URl for the given relative URL with placeholders (named keys with braces <code>{}</code>).
 	 * For example, send in a relative URL <code>foo/{bar}?spam={spam}</code> and a parameter map
 	 * <code>{bar=baz,spam=nuts}</code> and the result will be <code>[contextpath]/foo/baz?spam=nuts</code>.
-	 * 
+	 *
 	 * @param relativeUrl the relative URL part
-	 * @param a map of parameters to insert as placeholders in the url
+	 * @param params a map of parameters to insert as placeholders in the url
 	 * @return a URL that points back to the server with an absolute path (also URL-encoded accordingly)
 	 */
 	public String getContextUrl(String relativeUrl, Map<String, ?> params) {
@@ -418,9 +418,9 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return the path to URL mappings within the current servlet including the 
+	 * Return the path to URL mappings within the current servlet including the
 	 * context path and the servlet path of the original request. This is useful
-	 * for building links to other resources within the application where a 
+	 * for building links to other resources within the application where a
 	 * servlet mapping of the style {@code "/main/*"} is used.
 	 * <p>Delegates to the UrlPathHelper for decoding the context path.
 	 * @see javax.servlet.http.HttpServletRequest#getContextPath

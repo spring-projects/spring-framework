@@ -45,7 +45,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 3.0
- * @see PersistenceExceptionTranslationAdvisor
+ * @see org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisor
  * @see org.springframework.stereotype.Repository
  * @see org.springframework.dao.DataAccessException
  * @see org.springframework.dao.support.PersistenceExceptionTranslator
@@ -126,8 +126,8 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 	}
 
 	/**
-	 * Calculate a pointcut for the given target class, if any.
-	 * @param targetClass the class to introspect
+	 * Calculate a pointcut for the given async annotation types, if any.
+	 * @param asyncAnnotationTypes the async annotation types to introspect
 	 * @return the applicable Pointcut object, or <code>null</code> if none
 	 */
 	protected Pointcut buildPointcut(Set<Class<? extends Annotation>> asyncAnnotationTypes) {

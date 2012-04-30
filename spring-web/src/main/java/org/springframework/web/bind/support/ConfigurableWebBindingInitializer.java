@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	 * when accessing an out-of-bounds index.
 	 * <p>Default is "true" on a standard DataBinder. Note that this feature is only supported
 	 * for bean property access (DataBinder's default mode), not for field access.
-	 * @see #initBeanPropertyAccess()
+	 * @see org.springframework.validation.DataBinder#initBeanPropertyAccess()
 	 * @see org.springframework.validation.DataBinder#setAutoGrowNestedPaths
 	 */
 	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {

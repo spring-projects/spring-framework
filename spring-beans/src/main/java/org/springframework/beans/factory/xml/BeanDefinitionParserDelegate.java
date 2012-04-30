@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -353,7 +353,7 @@ public class BeanDefinitionParserDelegate {
 	 * <literal>parentDefaults</literal> in case the defaults are not explicitly set
 	 * locally.
 	 * @param defaults the defaults to populate
-	 * @param defaults the parent BeanDefinitionParserDelegate (if any) defaults to fall back to
+	 * @param parentDefaults the parent BeanDefinitionParserDelegate (if any) defaults to fall back to
 	 * @param root the root element of the current bean definition document (or nested beans element)
 	 */
 	protected void populateDefaults(DocumentDefaultsDefinition defaults, DocumentDefaultsDefinition parentDefaults, Element root) {

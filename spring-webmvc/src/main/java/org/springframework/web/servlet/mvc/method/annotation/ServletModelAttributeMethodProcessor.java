@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * A Servlet-specific {@link org.springframework.web.method.annotation.ModelAttributeMethodProcessor} that applies data
- * binding through a WebDataBinder of type {@link ServletRequestDataBinder}. 
- * 
+ * binding through a WebDataBinder of type {@link ServletRequestDataBinder}.
+ *
  * <p>Also adds a fall-back strategy to instantiate the model attribute from a
  * URI template variable or from a request parameter if the name matches the
  * model attribute name and there is an appropriate type conversion strategy.
@@ -50,7 +50,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 
 	/**
 	 * @param annotationNotRequired if "true", non-simple method arguments and
-	 * return values are considered model attributes with or without a 
+	 * return values are considered model attributes with or without a
 	 * {@code @ModelAttribute} annotation.
 	 */
 	public ServletModelAttributeMethodProcessor(boolean annotationNotRequired) {
@@ -62,12 +62,12 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * request parameter if the name matches to the model attribute name and
 	 * if there is an appropriate type conversion strategy. If none of these
 	 * are true delegate back to the base class.
-	 * @see #createAttributeFromUriValue
+	 * @see #createAttributeFromRequestValue(String, String, MethodParameter, WebDataBinderFactory, NativeWebRequest)
 	 */
 	@Override
-	protected final Object createAttribute(String attributeName, 
-										   MethodParameter parameter, 
-										   WebDataBinderFactory binderFactory, 
+	protected final Object createAttribute(String attributeName,
+										   MethodParameter parameter,
+										   WebDataBinderFactory binderFactory,
 										   NativeWebRequest request) throws Exception {
 
 		String value = getRequestValueForAttribute(attributeName, request);
@@ -83,7 +83,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	
 	/**
 	 * Obtain a value from the request that may be used to instantiate the
-	 * model attribute through type conversion from String to the target type. 
+	 * model attribute through type conversion from String to the target type.
 	 * <p>The default implementation looks for the attribute name to match
 	 * a URI variable first and then a request parameter.
 	 * @param attributeName the model attribute name
@@ -105,7 +105,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 
 	@SuppressWarnings("unchecked")
 	protected final Map<String, String> getUriTemplateVariables(NativeWebRequest request) {
-		Map<String, String> variables = 
+		Map<String, String> variables =
 			(Map<String, String>) request.getAttribute(
 					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 		return (variables != null) ? variables : Collections.<String, String>emptyMap();
@@ -114,7 +114,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	/**
 	 * Create a model attribute from a String request value (e.g. URI template
 	 * variable, request parameter) using type conversion.
-	 * <p>The default implementation converts only if there a registered 
+	 * <p>The default implementation converts only if there a registered
 	 * {@link Converter} that can perform the conversion.
 	 * @param sourceValue the source value to create the model attribute from
 	 * @param attributeName the name of the attribute, never {@code null}
@@ -125,9 +125,9 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * @throws Exception
 	 */
 	protected Object createAttributeFromRequestValue(String sourceValue,
-												 String attributeName, 
-												 MethodParameter parameter, 
-												 WebDataBinderFactory binderFactory, 
+												 String attributeName,
+												 MethodParameter parameter,
+												 WebDataBinderFactory binderFactory,
 												 NativeWebRequest request) throws Exception {
 		DataBinder binder = binderFactory.createBinder(request, null, attributeName);
 		ConversionService conversionService = binder.getConversionService();

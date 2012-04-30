@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * Check if the given RequestMappingInfo matches the current request and 
-	 * return a (potentially new) instance with conditions that match the 
+	 * Check if the given RequestMappingInfo matches the current request and
+	 * return a (potentially new) instance with conditions that match the
 	 * current request -- for example with a subset of URL patterns.
-	 * @returns an info in case of a match; or {@code null} otherwise. 
+	 * @return an info in case of a match; or {@code null} otherwise.
 	 */
 	@Override
 	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo info, HttpServletRequest request) {
@@ -101,17 +101,17 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	/**
 	 * Iterate all RequestMappingInfos once again, look if any match by URL at
 	 * least and raise exceptions accordingly.
-	 * 
-	 * @throws HttpRequestMethodNotSupportedException 
+	 *
+	 * @throws HttpRequestMethodNotSupportedException
 	 * 		if there are matches by URL but not by HTTP method
-	 * @throws HttpMediaTypeNotAcceptableException 
+	 * @throws HttpMediaTypeNotAcceptableException
 	 * 		if there are matches by URL but not by consumable media types
-	 * @throws HttpMediaTypeNotAcceptableException 
+	 * @throws HttpMediaTypeNotAcceptableException
 	 * 		if there are matches by URL but not by producible media types
 	 */
 	@Override
-	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos, 
-										  String lookupPath, 
+	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos,
+										  String lookupPath,
 										  HttpServletRequest request) throws ServletException {
 		Set<String> allowedMethods = new HashSet<String>(6);
 		Set<MediaType> consumableMediaTypes = new HashSet<MediaType>();

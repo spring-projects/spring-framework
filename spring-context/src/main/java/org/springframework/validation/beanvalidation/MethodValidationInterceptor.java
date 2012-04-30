@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 	/**
 	 * Create a new MethodValidationInterceptor using the given JSR-303 Validator.
-	 * @param validatorFactory the JSR-303 Validator to use
+	 * @param validator the JSR-303 Validator to use
 	 */
 	public MethodValidationInterceptor(Validator validator) {
 		this.validator = validator.unwrap(MethodValidator.class);

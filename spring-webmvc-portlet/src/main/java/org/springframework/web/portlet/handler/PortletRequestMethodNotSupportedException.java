@@ -55,7 +55,6 @@ public class PortletRequestMethodNotSupportedException extends PortletException 
 
 	/**
 	 * Create a new PortletRequestMethodNotSupportedException.
-	 * @param method the unsupported HTTP request method
 	 * @param supportedMethods the actually supported HTTP methods
 	 */
 	public PortletRequestMethodNotSupportedException(String[] supportedMethods) {

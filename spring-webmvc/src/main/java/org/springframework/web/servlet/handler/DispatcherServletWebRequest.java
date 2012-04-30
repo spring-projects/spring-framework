@@ -47,7 +47,7 @@ public class DispatcherServletWebRequest extends ServletWebRequest {
 	/**
 	 * Create a new DispatcherServletWebRequest instance for the given request and response.
 	 * @param request current HTTP request
-	 * @param request current HTTP response
+	 * @param response current HTTP response
 	 */
 	public DispatcherServletWebRequest(HttpServletRequest request, HttpServletResponse response) {
 		super(request, response);

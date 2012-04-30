@@ -88,7 +88,7 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	 * and the plain bean class else.
 	 * @param managedBean the bean instance (might be an AOP proxy)
 	 * @return the bean class to expose
-	 * @see org.springframework.aop.framework.AopProxyUtils#getTargetClass
+	 * @see org.springframework.aop.support.AopUtils#getTargetClass(Object)
 	 */
 	protected Class getTargetClass(Object managedBean) {
 		return AopUtils.getTargetClass(managedBean);
@@ -100,7 +100,7 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	 * (for example, checked for annotations).
 	 * @param managedBean the bean instance (might be an AOP proxy)
 	 * @return the bean class to expose
-	 * @see JmxUtils#getClassToExpose(Object) 
+	 * @see JmxUtils#getClassToExpose(Object)
 	 */
 	protected Class<?> getClassToExpose(Object managedBean) {
 		return JmxUtils.getClassToExpose(managedBean);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 	 * <p>It is only recommended to switch this flag to "true" when no JDBC access
 	 * code is involved in any of the transactions, and when it is acceptable to
 	 * perform read operations outside of the transactional JDBC Connection.
-	 * @see oracle.toplink.sessions.UnitOfWork#beginEarlyTransaction()
+	 * @see org.eclipse.persistence.sessions.UnitOfWork#beginEarlyTransaction()
 	 */
 	public void setLazyDatabaseTransaction(boolean lazyDatabaseTransaction) {
 		this.lazyDatabaseTransaction = lazyDatabaseTransaction;

@@ -43,7 +43,7 @@ public interface SpelNode {
 
 	/**
 	 * Determine if this expression node will support a setValue() call.
-	 * 
+	 *
 	 * @param expressionState the current expression state (includes the context)
 	 * @return true if the expression node will allow setValue()
 	 * @throws EvaluationException if something went wrong trying to determine if the node supports writing
@@ -77,7 +77,7 @@ public interface SpelNode {
 
 	/**
 	 * Determine the class of the object passed in, unless it is already a class object.
-	 * @param o the object that the caller wants the class of
+	 * @param obj the object that the caller wants the class of
 	 * @return the class of the object if it is not already a class object, or null if the object is null
 	 */
 	Class<?> getObjectClass(Object obj);
