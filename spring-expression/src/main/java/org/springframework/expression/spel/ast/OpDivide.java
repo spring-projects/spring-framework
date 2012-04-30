@@ -16,10 +16,13 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.NumberUtils;
 
 /**
  * Implements division operator.
@@ -40,7 +43,15 @@ public class OpDivide extends Operator {
 		if (operandOne instanceof Number && operandTwo instanceof Number) {
 			Number op1 = (Number) operandOne;
 			Number op2 = (Number) operandTwo;
-			if (op1 instanceof Double || op2 instanceof Double) {
+			
+			 if ( op1 instanceof BigDecimal || op2 instanceof BigDecimal ) {
+	                BigDecimal op1BD = NumberUtils.convertNumberToTargetClass(op1, BigDecimal.class);
+	                BigDecimal op2BD = NumberUtils.convertNumberToTargetClass(op2, BigDecimal.class);
+	                int scale = Math.max(op1BD.scale(), op2BD.scale());
+	                scale = scale > 2 ? scale : 3;
+	                // set scale of the max of the two operands in case zero set default 2
+	                return new TypedValue(op1BD.divide(op2BD, scale, BigDecimal.ROUND_HALF_UP));
+	        } else if (op1 instanceof Double || op2 instanceof Double) {
 				return new TypedValue(op1.doubleValue() / op2.doubleValue());
 			} else if (op1 instanceof Long || op2 instanceof Long) {
 				return new TypedValue(op1.longValue() / op2.longValue());

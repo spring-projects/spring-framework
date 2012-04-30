@@ -16,9 +16,14 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
+import org.springframework.util.NumberUtils;
 
 /**
  * Implements greater-than operator.
@@ -39,7 +44,14 @@ public class OpGT extends Operator {
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
-			if (leftNumber instanceof Double || rightNumber instanceof Double) {
+			if ( leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal ) {
+                BigDecimal bdLeft = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
+                BigDecimal bdRight = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
+                if ( bdLeft == null || bdRight == null ) {
+                    throw new SpelEvaluationException(SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
+                }
+                return BooleanTypedValue.forValue(bdLeft.compareTo(bdRight) > 0);
+            } else if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return BooleanTypedValue.forValue(leftNumber.doubleValue() > rightNumber.doubleValue());
 			} else if (leftNumber instanceof Long || rightNumber instanceof Long) {
 				return BooleanTypedValue.forValue(leftNumber.longValue() > rightNumber.longValue());
