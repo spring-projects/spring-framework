@@ -21,11 +21,21 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Map;
 
 /**
  * Annotation which indicates that a method parameter should be bound to a web
  * request parameter. Supported for annotated handler methods in Servlet and
  * Portlet environments.
+ *
+ * <p>If the method parameter type is {@link Map} and a request parameter name
+ * is specified, then the request parameter value is converted to a {@link Map}
+ * assuming an appropriate conversion strategy is available.
+ *
+ * <p>If the method parameter is {@link java.util.Map Map&lt;String, String&gt;} or
+ * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}
+ * and a parameter name is not specified, then the map parameter is populated
+ * with all request parameter names and values.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
