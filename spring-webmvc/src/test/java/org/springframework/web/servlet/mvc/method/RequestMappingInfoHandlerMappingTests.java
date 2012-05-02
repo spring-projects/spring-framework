@@ -16,17 +16,13 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,6 +52,9 @@ import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.util.UrlPathHelper;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link RequestMappingInfoHandlerMapping}.
@@ -256,6 +255,33 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertNotNull(chain);
 		assertNotNull(chain.getInterceptors());
 		assertSame(interceptor, chain.getInterceptors()[0]);
+
+		chain = hm.getHandler(new MockHttpServletRequest("GET", "/invalid"));
+		assertNull(chain);
+	}
+
+	@Test
+	public void interceptorsByPath() throws Exception {
+		String path = "/foo";
+		HandlerInterceptor interceptorA = new HandlerInterceptorAdapter() {};
+		HandlerInterceptor interceptorB = new HandlerInterceptorAdapter() {};
+		List<HandlerInterceptor> interceptors = new ArrayList<HandlerInterceptor>();
+		interceptors.add(interceptorA);
+		interceptors.add(interceptorB);
+		Map<String, List<HandlerInterceptor>> interceptorsByPath = new HashMap<String, List<HandlerInterceptor>>();
+		interceptorsByPath.put(path, interceptors);
+
+		TestRequestMappingInfoHandlerMapping hm = new TestRequestMappingInfoHandlerMapping();
+		hm.registerHandler(this.handler);
+		hm.setInterceptorsByPath(interceptorsByPath);
+		hm.setApplicationContext(new StaticWebApplicationContext());
+
+		HandlerExecutionChain chain = hm.getHandler(new MockHttpServletRequest("GET", path));
+		assertNotNull(chain);
+		assertNotNull(chain.getInterceptors());
+		assertThat(chain.getInterceptors(), hasItemInArray(interceptorA));
+		assertThat(chain.getInterceptors(), hasItemInArray(interceptorB));
+		assertThat(chain.getInterceptors().length, is(2));
 
 		chain = hm.getHandler(new MockHttpServletRequest("GET", "/invalid"));
 		assertNull(chain);
