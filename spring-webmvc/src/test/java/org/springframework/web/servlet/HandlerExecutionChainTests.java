@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet;
 
-import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.context.request.async.AbstractDelegatingCallable;
 
 /**
  * A test fixture with HandlerExecutionChain and mock handler interceptors.
@@ -42,11 +43,11 @@ public class HandlerExecutionChainTests {
 
 	private MockHttpServletResponse response;
 
-	private HandlerInterceptor interceptor1;
+	private AsyncHandlerInterceptor interceptor1;
 
-	private HandlerInterceptor interceptor2;
+	private AsyncHandlerInterceptor interceptor2;
 
-	private HandlerInterceptor interceptor3;
+	private AsyncHandlerInterceptor interceptor3;
 
 	@Before
 	public void setup() {
@@ -56,9 +57,9 @@ public class HandlerExecutionChainTests {
 		this.handler = new Object();
 		this.chain = new HandlerExecutionChain(this.handler);
 
-		this.interceptor1 = createMock(HandlerInterceptor.class);
-		this.interceptor2 = createMock(HandlerInterceptor.class);
-		this.interceptor3 = createMock(HandlerInterceptor.class);
+		this.interceptor1 = createStrictMock(AsyncHandlerInterceptor.class);
+		this.interceptor2 = createStrictMock(AsyncHandlerInterceptor.class);
+		this.interceptor3 = createStrictMock(AsyncHandlerInterceptor.class);
 
 		this.chain.addInterceptor(this.interceptor1);
 		this.chain.addInterceptor(this.interceptor2);
@@ -91,7 +92,42 @@ public class HandlerExecutionChainTests {
 	}
 
 	@Test
-	public void earlyExit() throws Exception {
+	public void successAsyncScenario() throws Exception {
+		ModelAndView mav = new ModelAndView();
+
+		expect(this.interceptor1.preHandle(this.request, this.response, this.handler)).andReturn(true);
+		expect(this.interceptor2.preHandle(this.request, this.response, this.handler)).andReturn(true);
+		expect(this.interceptor3.preHandle(this.request, this.response, this.handler)).andReturn(true);
+
+		expect(this.interceptor1.getAsyncCallable(request, response, this.handler)).andReturn(new TestAsyncCallable());
+		expect(this.interceptor2.getAsyncCallable(request, response, this.handler)).andReturn(new TestAsyncCallable());
+		expect(this.interceptor3.getAsyncCallable(request, response, this.handler)).andReturn(new TestAsyncCallable());
+
+		this.interceptor1.postHandleAsyncStarted(request, response, this.handler);
+		this.interceptor2.postHandleAsyncStarted(request, response, this.handler);
+		this.interceptor3.postHandleAsyncStarted(request, response, this.handler);
+
+		this.interceptor1.postHandle(this.request, this.response, this.handler, mav);
+		this.interceptor2.postHandle(this.request, this.response, this.handler, mav);
+		this.interceptor3.postHandle(this.request, this.response, this.handler, mav);
+
+		this.interceptor3.afterCompletion(this.request, this.response, this.handler, null);
+		this.interceptor2.afterCompletion(this.request, this.response, this.handler, null);
+		this.interceptor1.afterCompletion(this.request, this.response, this.handler, null);
+
+		replay(this.interceptor1, this.interceptor2, this.interceptor3);
+
+		this.chain.applyPreHandle(request, response);
+		this.chain.addDelegatingCallables(request, response);
+		this.chain.applyPostHandleAsyncStarted(request, response);
+		this.chain.applyPostHandle(request, response, mav);
+		this.chain.triggerAfterCompletion(this.request, this.response, null);
+
+		verify(this.interceptor1, this.interceptor2, this.interceptor3);
+	}
+
+	@Test
+	public void earlyExitInPreHandle() throws Exception {
 		expect(this.interceptor1.preHandle(this.request, this.response, this.handler)).andReturn(true);
 		expect(this.interceptor2.preHandle(this.request, this.response, this.handler)).andReturn(false);
 
@@ -153,6 +189,14 @@ public class HandlerExecutionChainTests {
 		this.chain.triggerAfterCompletion(this.request, this.response, ex);
 
 		verify(this.interceptor1, this.interceptor2, this.interceptor3);
+	}
+
+
+	private static class TestAsyncCallable extends AbstractDelegatingCallable {
+
+		public Object call() throws Exception {
+			return null;
+		}
 	}
 
 }
