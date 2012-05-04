@@ -941,6 +941,8 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
+				mappedHandler.addDelegatingCallables(processedRequest, response);
+
 				asyncChain.addDelegatingCallable(
 						getDispatchAsyncCallable(mappedHandler, request, response, processedRequest));
 
@@ -948,6 +950,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncChain.isAsyncStarted()) {
+					mappedHandler.applyPostHandleAsyncStarted(processedRequest, response);
 					logger.debug("Exiting request thread and leaving the response open");
 					return;
 				}

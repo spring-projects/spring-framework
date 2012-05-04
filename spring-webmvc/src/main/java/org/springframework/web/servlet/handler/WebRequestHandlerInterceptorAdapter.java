@@ -21,7 +21,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.WebRequestInterceptor;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.context.request.async.AbstractDelegatingCallable;
+import org.springframework.web.context.request.async.AsyncWebRequestInterceptor;
+import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -33,7 +35,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @see org.springframework.web.context.request.WebRequestInterceptor
  * @see org.springframework.web.servlet.HandlerInterceptor
  */
-public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
+public class WebRequestHandlerInterceptorAdapter implements AsyncHandlerInterceptor {
 
 	private final WebRequestInterceptor requestInterceptor;
 
@@ -53,6 +55,25 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 
 		this.requestInterceptor.preHandle(new DispatcherServletWebRequest(request, response));
 		return true;
+	}
+
+	public AbstractDelegatingCallable getAsyncCallable(HttpServletRequest request,
+			HttpServletResponse response, Object handler) {
+
+		if (this.requestInterceptor instanceof AsyncWebRequestInterceptor) {
+			AsyncWebRequestInterceptor asyncInterceptor = (AsyncWebRequestInterceptor) this.requestInterceptor;
+			DispatcherServletWebRequest webRequest = new DispatcherServletWebRequest(request, response);
+			return asyncInterceptor.getAsyncCallable(webRequest);
+		}
+		return null;
+	}
+
+	public void postHandleAsyncStarted(HttpServletRequest request, HttpServletResponse response, Object handler) {
+		if (this.requestInterceptor instanceof AsyncWebRequestInterceptor) {
+			AsyncWebRequestInterceptor asyncInterceptor = (AsyncWebRequestInterceptor) this.requestInterceptor;
+			DispatcherServletWebRequest webRequest = new DispatcherServletWebRequest(request, response);
+			asyncInterceptor.postHandleAsyncStarted(webRequest);
+		}
 	}
 
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)

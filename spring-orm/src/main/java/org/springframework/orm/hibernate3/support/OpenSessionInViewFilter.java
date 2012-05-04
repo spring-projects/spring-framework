@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.hibernate3.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.async.AbstractDelegatingCallable;
+import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -168,6 +170,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
+		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
+
 		SessionFactory sessionFactory = lookupSessionFactory(request);
 		boolean participate = false;
 
@@ -180,7 +184,10 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			else {
 				logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
 				Session session = getSession(sessionFactory);
-				TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(session));
+				SessionHolder sessionHolder = new SessionHolder(session);
+				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+
+				chain.addDelegatingCallable(getAsyncCallable(request, sessionFactory, sessionHolder));
 			}
 		}
 		else {
@@ -204,6 +211,9 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 					// single session mode
 					SessionHolder sessionHolder =
 							(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
+					if (chain.isAsyncStarted()) {
+						return;
+					}
 					logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
 					closeSession(sessionHolder.getSession(), sessionFactory);
 				}
@@ -277,6 +287,30 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 */
 	protected void closeSession(Session session, SessionFactory sessionFactory) {
 		SessionFactoryUtils.closeSession(session);
+	}
+
+	/**
+	 * Create a Callable to extend the use of the open Hibernate Session to the
+	 * async thread completing the request.
+	 */
+	private AbstractDelegatingCallable getAsyncCallable(final HttpServletRequest request,
+			final SessionFactory sessionFactory, final SessionHolder sessionHolder) {
+
+		return new AbstractDelegatingCallable() {
+			public Object call() throws Exception {
+				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+				try {
+					getNextCallable().call();
+				}
+				finally {
+					SessionHolder sessionHolder =
+							(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
+					logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
+					SessionFactoryUtils.closeSession(sessionHolder.getSession());
+				}
+				return null;
+			}
+		};
 	}
 
 }
