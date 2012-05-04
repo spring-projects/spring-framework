@@ -193,8 +193,13 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 	 */
 	public void postHandleAsyncStarted(WebRequest request) {
 		String attributeName = getParticipateAttributeName();
-		if ((request.getAttribute(attributeName, WebRequest.SCOPE_REQUEST) == null) && isSingleSession()) {
-			TransactionSynchronizationManager.unbindResource(getSessionFactory());
+		if (request.getAttribute(attributeName, WebRequest.SCOPE_REQUEST) == null) {
+			if (isSingleSession()) {
+				TransactionSynchronizationManager.unbindResource(getSessionFactory());
+			}
+			else {
+				throw new IllegalStateException("Deferred close is not supported with async requests.");
+			}
 		}
 	}
 
