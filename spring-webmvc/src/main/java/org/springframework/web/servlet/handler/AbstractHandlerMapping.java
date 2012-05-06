@@ -18,7 +18,9 @@ package org.springframework.web.servlet.handler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -174,6 +176,13 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		this.interceptors.addAll(Arrays.asList(interceptors));
 	}
 
+	/**
+	 * Set the handler interceptors by url-path.
+	 * @param interceptorsByPath list of handler interceptors per url-path
+	 */
+	public void setInterceptorsByPath(Map<String, List<HandlerInterceptor>> interceptorsByPath) {
+		this.interceptors.addAll(getConvertedMappedInterceptors(interceptorsByPath));
+	}
 
 	/**
 	 * Initializes the interceptors.
@@ -235,7 +244,49 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			}
 		}
 	}
-	
+
+	/**
+	 * Create a list of MappedInterceptors based on the url-path to handler interceptors mappings.
+	 * @param interceptorsByPath a map that contains url-path to handler-interceptors
+	 * @return a list of MappedInterceptors
+	 */
+	protected List<MappedInterceptor> getConvertedMappedInterceptors(Map<String, List<HandlerInterceptor>> interceptorsByPath) {
+
+		// convert (path -> interceptors) to (interceptor -> paths)
+		final Map<HandlerInterceptor, List<String>> map = new LinkedHashMap<HandlerInterceptor, List<String>>();
+		for (Map.Entry<String, List<HandlerInterceptor>> entry : interceptorsByPath.entrySet()) {
+			final String path = entry.getKey();
+			final List<HandlerInterceptor> interceptors = entry.getValue();
+
+			for (HandlerInterceptor interceptor : interceptors) {
+
+				List<String> paths = map.get(interceptor);
+				if (paths == null) {
+					paths = new ArrayList<String>();
+					map.put(interceptor, paths);
+				}
+
+				paths.add(path);
+			}
+		}
+
+		final List<MappedInterceptor> result = new ArrayList<MappedInterceptor>();
+
+		// create mapped interceptors
+		for (Map.Entry<HandlerInterceptor, List<String>> entry : map.entrySet()) {
+			final HandlerInterceptor interceptor = entry.getKey();
+			final List<String> paths = entry.getValue();
+
+			final MappedInterceptor mappedInterceptor =
+					new MappedInterceptor(paths.toArray(new String[paths.size()]), interceptor);
+
+			result.add(mappedInterceptor);
+		}
+
+		return result;
+
+	}
+
 	/**
 	 * Adapt the given interceptor object to the HandlerInterceptor interface.
 	 * <p>Supported interceptor types are HandlerInterceptor and WebRequestInterceptor.
