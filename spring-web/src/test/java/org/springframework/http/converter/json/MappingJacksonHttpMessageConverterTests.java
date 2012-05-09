@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,29 +23,47 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 /**
+ * Jackson conversion tests parameterized with Jackson and Jackson 2 converters.
+ *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
+@RunWith(Parameterized.class)
 public class MappingJacksonHttpMessageConverterTests {
 
-	private MappingJacksonHttpMessageConverter converter;
+	private HttpMessageConverter<Object> converter;
 
-	@Before
-	public void setUp() {
-		converter = new MappingJacksonHttpMessageConverter();
+	@Parameters
+	public static Collection<Object[]> handlerTypes() {
+		Object[][] array = new Object[2][1];
+
+		array[0] = new Object[] { new MappingJackson2HttpMessageConverter()};
+		array[1] = new Object[] { new MappingJacksonHttpMessageConverter()};
+
+		return Arrays.asList(array);
+	}
+
+	public MappingJacksonHttpMessageConverterTests(HttpMessageConverter<Object> converter) {
+		this.converter = converter;
 	}
 
 	@Test

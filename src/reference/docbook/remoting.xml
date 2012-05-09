@@ -1363,7 +1363,7 @@ if (HttpStatus.SC_CREATED == post.getStatusCode()) {
       these defaults using the <methodname>messageConverters()</methodname> bean
       property as would be required if using the
       <classname>MarshallingHttpMessageConverter</classname> or 
-      <classname>MappingJacksonHttpMessageConverter</classname>.</para>
+      <classname>MappingJackson2HttpMessageConverter</classname>.</para>
 
       <para>Each method takes URI template arguments in two forms, either as a
       <literal>String</literal> variable length argument or a
@@ -1608,7 +1608,7 @@ String body = response.getBody();</programlisting>
       </section>
       
       <section id="rest-mapping-json-converter">
-        <title>MappingJacksonHttpMessageConverter</title>
+        <title>MappingJackson2HttpMessageConverter (or MappingJacksonHttpMessageConverter with Jackson 1.x)</title>
         
         <para>An <interfacename>HttpMessageConverter</interfacename> 
         implementation that can read and write JSON using Jackson's 
