@@ -24,6 +24,7 @@ Import-Template:
  org.apache.velocity.*;version="[1.5.0, 2.0.0)";resolution:=optional,
  org.apache.velocity.tools.*;version="[1.4.0, 3.0.0)";resolution:=optional,
  org.codehaus.jackson.*;version="[1.3.0, 2.0.0)";resolution:=optional,
+ com.fasterxml.jackson.*;version="[2.0.0, 3.0.0)";resolution:=optional,
  org.springframework.beans.*;version=${spring.osgi.range},
  org.springframework.context.*;version=${spring.osgi.range},
  org.springframework.core.*;version=${spring.osgi.range},

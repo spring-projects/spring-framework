@@ -64,9 +64,11 @@
                     conf="optional, httpclient->compile"/>
 		<dependency org="org.apache.log4j" name="com.springsource.org.apache.log4j" rev="1.2.15"
                     conf="optional, log4j->compile"/>
-        <dependency org="org.codehaus.jackson" name="com.springsource.org.codehaus.jackson.mapper" rev="1.4.2"
+		<dependency org="org.codehaus.jackson" name="com.springsource.org.codehaus.jackson.mapper" rev="1.4.2"
                     conf="optional, jackson->compile"/>
-        <dependency org="org.jdom" name="com.springsource.org.jdom" rev="1.1.0"
+		<dependency org="com.fasterxml.jackson.core" name="com.springsource.com.fasterxml.jackson.core.jackson-databind" rev="2.0.2" 
+                    conf="optional, jackson->compile"/>
+		<dependency org="org.jdom" name="com.springsource.org.jdom" rev="1.1.0"
                     conf="optional, feed->compile"/>
 		<dependency org="org.springframework" name="org.springframework.aop" rev="latest.integration"
                     conf="compile->compile"/>

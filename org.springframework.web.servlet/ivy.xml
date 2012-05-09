@@ -69,6 +69,8 @@
                     conf="optional, velocity->compile"/>
 		<dependency org="org.codehaus.jackson" name="com.springsource.org.codehaus.jackson.mapper" rev="1.4.2"
                     conf="optional, jackson->compile"/>
+		<dependency org="com.fasterxml.jackson.core" name="com.springsource.com.fasterxml.jackson.core.jackson-databind" rev="2.0.2" 
+                    conf="optional, jackson->compile"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration"
                     conf="compile->compile"/>
 		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration"

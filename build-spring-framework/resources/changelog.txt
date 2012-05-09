@@ -16,7 +16,7 @@ Changes in version 3.1.2 (2012-06-??)
 * ServletContextResource's getFile implementation falls back to getRealPath for non-existent files
 * fixed StandardServletMultipartResolver compatibility with Resin (only deleting actual file parts)
 * fix issue with parsing invalid Content-Type or Accept headers
-
+* add Jackson 2 HttpMessageConverter and View types
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------
