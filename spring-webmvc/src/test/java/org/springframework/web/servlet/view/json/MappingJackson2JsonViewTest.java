@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.JsonSerializer;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.SerializerFactory;
-import org.codehaus.jackson.map.SerializerProvider;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.ser.BeanSerializerFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
@@ -48,13 +39,28 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.validation.BindingResult;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
+import com.fasterxml.jackson.databind.ser.BasicSerializerFactory;
+import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
+import com.fasterxml.jackson.databind.ser.SerializerFactory;
+import com.fasterxml.jackson.databind.ser.Serializers;
+
 /**
  * @author Jeremy Grelle
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
-public class MappingJacksonJsonViewTest {
+public class MappingJackson2JsonViewTest {
 
-	private MappingJacksonJsonView view;
+	private MappingJackson2JsonView view;
 
 	private MockHttpServletRequest request;
 
@@ -72,7 +78,7 @@ public class MappingJacksonJsonViewTest {
 		jsContext = ContextFactory.getGlobal().enterContext();
 		jsScope = jsContext.initStandardObjects();
 
-		view = new MappingJacksonJsonView();
+		view = new MappingJackson2JsonView();
 	}
 
 	@Test
@@ -162,7 +168,7 @@ public class MappingJacksonJsonViewTest {
 	@Test
 	public void renderWithCustomSerializerLocatedByFactory() throws Exception {
 
-		SerializerFactory factory = new DelegatingSerializerFactory();
+		SerializerFactory factory = new DelegatingSerializerFactory(null);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializerFactory(factory);
 		view.setObjectMapper(mapper);
@@ -304,33 +310,43 @@ public class MappingJacksonJsonViewTest {
 		}
 	}
 
-	public static class TestBeanSimpleSerializer extends JsonSerializer<TestBeanSimple> {
+	public static class TestBeanSimpleSerializer extends JsonSerializer<Object> {
 
 		@Override
-		public void serialize(TestBeanSimple value, JsonGenerator jgen, SerializerProvider provider)
-				throws IOException {
-
+		public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
 			jgen.writeStartObject();
 			jgen.writeFieldName("testBeanSimple");
 			jgen.writeString("custom");
 			jgen.writeEndObject();
-
 		}
 	}
 
-	public static class DelegatingSerializerFactory extends SerializerFactory {
+	public static class DelegatingSerializerFactory extends BasicSerializerFactory {
 
-		private SerializerFactory delegate = BeanSerializerFactory.instance;
+		private SerializerFactory beanSerializer = BeanSerializerFactory.instance;
+
+		protected DelegatingSerializerFactory(SerializerFactoryConfig config) {
+			super(config);
+		}
 
 		@Override
-		@SuppressWarnings("unchecked")
-		public <T> JsonSerializer<T> createSerializer(Class<T> type, SerializationConfig config) {
-			if (type == TestBeanSimple.class) {
-				return (JsonSerializer<T>) new TestBeanSimpleSerializer();
+	    public JsonSerializer<Object> createSerializer(SerializerProvider prov, JavaType type, BeanProperty property) throws JsonMappingException {
+			if (type.getRawClass() == TestBeanSimple.class) {
+				return new TestBeanSimpleSerializer();
 			}
 			else {
-				return delegate.createSerializer(type, config);
+				return beanSerializer.createSerializer(prov, type, property);
 			}
+		}
+
+		@Override
+		public SerializerFactory withConfig(SerializerFactoryConfig config) {
+			return null;
+		}
+
+		@Override
+		protected Iterable<Serializers> customSerializers() {
+			return null;
 		}
 	}
 }

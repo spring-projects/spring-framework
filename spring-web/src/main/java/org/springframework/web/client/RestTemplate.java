@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
@@ -118,6 +119,10 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder", RestTemplate.class.getClassLoader());
 
+	private static final boolean jackson2Present =
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", RestTemplate.class.getClassLoader()) &&
+					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", RestTemplate.class.getClassLoader());
+
 	private static final boolean jacksonPresent =
 			ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", RestTemplate.class.getClassLoader()) &&
 					ClassUtils.isPresent("org.codehaus.jackson.JsonGenerator", RestTemplate.class.getClassLoader());
@@ -143,7 +148,10 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		if (jaxb2Present) {
 			this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
-		if (jacksonPresent) {
+		if (jackson2Present) {
+			this.messageConverters.add(new MappingJackson2HttpMessageConverter());
+		}
+		else if (jacksonPresent) {
 			this.messageConverters.add(new MappingJacksonHttpMessageConverter());
 		}
 		if (romePresent) {
@@ -384,7 +392,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
 	}
 
-	public <T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity, 
+	public <T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
 			Class<T> responseType) throws RestClientException {
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
 		ResponseEntityResponseExtractor<T> responseExtractor = new ResponseEntityResponseExtractor<T>(responseType);
@@ -577,7 +585,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 						}
 						if (logger.isDebugEnabled()) {
 							if (requestContentType != null) {
-								logger.debug("Writing [" + requestBody + "] as \"" + requestContentType + 
+								logger.debug("Writing [" + requestBody + "] as \"" + requestContentType +
 										"\" using [" + messageConverter + "]");
 							}
 							else {

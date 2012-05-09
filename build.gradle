@@ -327,6 +327,7 @@ project('spring-web') {
         compile("commons-httpclient:commons-httpclient:3.1", optional)
         compile("org.apache.httpcomponents:httpclient:4.1.1", optional)
         compile("org.codehaus.jackson:jackson-mapper-asl:1.4.2", optional)
+        compile("com.fasterxml.jackson.core:jackson-databind:2.0.1", optional)
         compile("taglibs:standard:1.1.2", optional)
         compile("org.mortbay.jetty:jetty:6.1.9") { dep ->
             optional dep
