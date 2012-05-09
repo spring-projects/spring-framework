@@ -25,33 +25,35 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.map.type.TypeFactory;
-import org.codehaus.jackson.type.JavaType;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
- * Jackson 1.x converter tests.
+ * Jackson 2.x converter tests.
  *
  * @author Rossen Stoyanchev
  */
-public class MappingJacksonHttpMessageConverterTests extends AbstractMappingJacksonHttpMessageConverterTests<MappingJacksonHttpMessageConverter> {
+public class MappingJackson2HttpMessageConverterTests extends AbstractMappingJacksonHttpMessageConverterTests<MappingJackson2HttpMessageConverter> {
 
 	@Override
-	protected MappingJacksonHttpMessageConverter createConverter() {
-		return new MappingJacksonHttpMessageConverter();
+	protected MappingJackson2HttpMessageConverter createConverter() {
+		return new MappingJackson2HttpMessageConverter();
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readGenerics() throws IOException {
-		MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter() {
+		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter() {
+
 			@Override
 			protected JavaType getJavaType(Class<?> clazz) {
 				if (List.class.isAssignableFrom(clazz)) {
-					return TypeFactory.collectionType(ArrayList.class, MyBean.class);
+					return new ObjectMapper().getTypeFactory().constructCollectionType(ArrayList.class, MyBean.class);
 				}
 				else {
 					return super.getJavaType(clazz);

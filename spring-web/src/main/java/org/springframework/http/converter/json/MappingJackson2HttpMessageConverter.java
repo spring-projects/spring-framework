@@ -31,8 +31,10 @@ import org.springframework.util.Assert;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
@@ -57,6 +59,8 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 
 	private boolean prefixJson = false;
 
+	private Boolean prettyPrint;
+
 
 	/**
 	 * Construct a new {@code BindingJacksonHttpMessageConverter}.
@@ -77,6 +81,13 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 		this.objectMapper = objectMapper;
+		configurePrettyPrint();
+	}
+
+	private void configurePrettyPrint() {
+		if (this.prettyPrint != null) {
+			this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, this.prettyPrint);
+		}
 	}
 
 	/**
@@ -95,6 +106,20 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	 */
 	public void setPrefixJson(boolean prefixJson) {
 		this.prefixJson = prefixJson;
+	}
+
+	/**
+	 * Whether to use the {@link DefaultPrettyPrinter} when writing JSON.
+	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
+	 * <pre>
+	 * ObjectMapper mapper = new ObjectMapper();
+	 * mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+	 * converter.setObjectMapper(mapper);
+	 * </pre>
+	 */
+	public void setPrettyPrint(boolean prettyPrint) {
+		this.prettyPrint = prettyPrint;
+		configurePrettyPrint();
 	}
 
 
@@ -135,6 +160,13 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		JsonEncoding encoding = getJsonEncoding(outputMessage.getHeaders().getContentType());
 		JsonGenerator jsonGenerator =
 				this.objectMapper.getJsonFactory().createJsonGenerator(outputMessage.getBody(), encoding);
+
+		// A workaround for JsonGenerators not applying serialization features
+		// https://github.com/FasterXML/jackson-databind/issues/12
+		if (this.objectMapper.isEnabled(SerializationFeature.INDENT_OUTPUT)) {
+			jsonGenerator.useDefaultPrettyPrinter();
+		}
+
 		try {
 			if (this.prefixJson) {
 				jsonGenerator.writeRaw("{} && ");

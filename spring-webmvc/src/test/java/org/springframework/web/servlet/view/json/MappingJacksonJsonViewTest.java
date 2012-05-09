@@ -38,7 +38,6 @@ import org.codehaus.jackson.map.SerializerFactory;
 import org.codehaus.jackson.map.SerializerProvider;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.ser.BeanSerializerFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mozilla.javascript.Context;
@@ -46,6 +45,7 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 
 /**
@@ -133,6 +133,20 @@ public class MappingJacksonJsonViewTest {
 		view.render(model, request, response);
 
 		assertTrue(response.getContentAsString().length() > 0);
+
+		validateResult();
+	}
+
+	@Test
+	public void renderWithPrettyPrint() throws Exception {
+
+		ModelMap model = new ModelMap("foo", new TestBeanSimple());
+
+		view.setPrettyPrint(true);
+		view.render(model, request, response);
+
+		String result = response.getContentAsString();
+		assertTrue("Pretty printing not applied:\n" + result, result.startsWith("{\n  \"foo\" : {\n    "));
 
 		validateResult();
 	}
