@@ -17,6 +17,7 @@ Changes in version 3.2 M1
 * add pretty print option to Jackson HttpMessageConverter and View types
 * fix issue with resolving Errors controller method argument
 * detect controller methods via InitializingBean in RequestMappingHandlerMapping
+* translate IOException from Jackson to HttpMessageNotReadableException
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------

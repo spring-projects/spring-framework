@@ -148,7 +148,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		try {
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
-		catch (JsonProcessingException ex) {
+		catch (IOException ex) {
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
 		}
 	}
