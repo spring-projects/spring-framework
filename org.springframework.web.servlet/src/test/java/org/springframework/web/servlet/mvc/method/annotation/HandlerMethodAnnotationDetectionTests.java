@@ -51,37 +51,37 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Test various scenarios for detecting method-level and method parameter annotations depending 
- * on where they are located -- on interfaces, parent classes, in parameterized methods, or in 
+ * Test various scenarios for detecting method-level and method parameter annotations depending
+ * on where they are located -- on interfaces, parent classes, in parameterized methods, or in
  * combination with proxies.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
 public class HandlerMethodAnnotationDetectionTests {
-	
+
 	@Parameters
 	public static Collection<Object[]> handlerTypes() {
 		Object[][] array = new Object[12][2];
 
 		array[0] = new Object[] { SimpleController.class, true};  // CGLib proxy
 		array[1] = new Object[] { SimpleController.class, false};
-		
+
 		array[2] = new Object[] { AbstractClassController.class, true };	// CGLib proxy
 		array[3] = new Object[] { AbstractClassController.class, false };
-		
-		array[4] = new Object[] { ParameterizedAbstractClassController.class, false}; // CGLib proxy	
-		array[5] = new Object[] { ParameterizedAbstractClassController.class, false};	
-		
+
+		array[4] = new Object[] { ParameterizedAbstractClassController.class, false}; // CGLib proxy
+		array[5] = new Object[] { ParameterizedAbstractClassController.class, false};
+
 		array[6] = new Object[] { InterfaceController.class, true };	// JDK dynamic proxy
-		array[7] = new Object[] { InterfaceController.class, false };	
-		
-		array[8] = new Object[] { ParameterizedInterfaceController.class, false}; // no AOP	
-		array[9] = new Object[] { ParameterizedInterfaceController.class, false};	
-		
+		array[7] = new Object[] { InterfaceController.class, false };
+
+		array[8] = new Object[] { ParameterizedInterfaceController.class, false}; // no AOP
+		array[9] = new Object[] { ParameterizedInterfaceController.class, false};
+
 		array[10] = new Object[] { SupportClassController.class, true};  // CGLib proxy
 		array[11] = new Object[] { SupportClassController.class, false};
-		
+
 		return Arrays.asList(array);
 	}
 
@@ -101,7 +101,7 @@ public class HandlerMethodAnnotationDetectionTests {
 			context.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
 		}
 		context.refresh();
-		
+
 		handlerMapping.setApplicationContext(context);
 		handlerAdapter.afterPropertiesSet();
 		exceptionResolver.afterPropertiesSet();
@@ -113,12 +113,12 @@ public class HandlerMethodAnnotationDetectionTests {
 		SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
 		String dateA = "11:01:2011";
 		String dateB = "11:02:2011";
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/path1/path2");
 		request.setParameter("datePattern", datePattern);
 		request.addHeader("header1", dateA);
 		request.addHeader("header2", dateB);
-		
+
 		HandlerExecutionChain chain = handlerMapping.getHandler(request);
 		assertNotNull(chain);
 
@@ -133,7 +133,7 @@ public class HandlerMethodAnnotationDetectionTests {
 		assertEquals("failure", response.getContentAsString());
 	}
 
-	
+
 	/**
 	 * SIMPLE CASE
 	 */
@@ -156,15 +156,15 @@ public class HandlerMethodAnnotationDetectionTests {
 		public Date handle(@RequestHeader("header2") Date date) throws Exception {
 			return date;
 		}
-		
+
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
 		public String handleException(Exception exception) {
 			return exception.getMessage();
 		}
-	}	
+	}
 
-	
+
 	@Controller
 	static abstract class MappingAbstractClass {
 
@@ -177,15 +177,15 @@ public class HandlerMethodAnnotationDetectionTests {
 		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
 		@ModelAttribute("attr2")
 		public abstract Date handle(Date date, Model model) throws Exception;
-		
+
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
 		public abstract String handleException(Exception exception);
-	}	
+	}
 
 	/**
 	 * CONTROLLER WITH ABSTRACT CLASS
-	 * 
+	 *
 	 * <p>All annotations can be on methods in the abstract class except parameter annotations.
 	 */
 	static class AbstractClassController extends MappingAbstractClass {
@@ -202,14 +202,15 @@ public class HandlerMethodAnnotationDetectionTests {
 		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
 			return date;
 		}
-		
+
 		public String handleException(Exception exception) {
 			return exception.getMessage();
 		}
 	}
-	
-	
-	@Controller
+
+	// SPR-9374
+
+	@RequestMapping
 	static interface MappingInterface {
 
 		@InitBinder
@@ -221,15 +222,15 @@ public class HandlerMethodAnnotationDetectionTests {
 		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
 		@ModelAttribute("attr2")
 		Date handle(@RequestHeader("header2") Date date, Model model) throws Exception;
-		
+
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
 		String handleException(Exception exception);
-	}	
+	}
 
 	/**
 	 * CONTROLLER WITH INTERFACE
-	 * 
+	 *
 	 * No AOP:
 	 * All annotations can be on interface methods except parameter annotations.
 	 *
@@ -250,7 +251,7 @@ public class HandlerMethodAnnotationDetectionTests {
 		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
 			return date;
 		}
-		
+
 		public String handleException(Exception exception) {
 			return exception.getMessage();
 		}
@@ -269,15 +270,15 @@ public class HandlerMethodAnnotationDetectionTests {
 		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
 		@ModelAttribute("attr2")
 		public abstract Date handle(C date, Model model) throws Exception;
-		
+
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
 		public abstract String handleException(Exception exception);
-	}	
+	}
 
 	/**
 	 * CONTROLLER WITH PARAMETERIZED BASE CLASS
-	 * 
+	 *
 	 * <p>All annotations can be on methods in the abstract class except parameter annotations.
 	 */
 	static class ParameterizedAbstractClassController extends MappingParameterizedAbstractClass<String, Date, Date> {
@@ -294,14 +295,13 @@ public class HandlerMethodAnnotationDetectionTests {
 		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
 			return date;
 		}
-		
+
 		public String handleException(Exception exception) {
 			return exception.getMessage();
 		}
 	}
 
-	
-	@Controller
+	@RequestMapping
 	static interface MappingParameterizedInterface<A, B, C> {
 
 		@InitBinder
@@ -313,17 +313,17 @@ public class HandlerMethodAnnotationDetectionTests {
 		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
 		@ModelAttribute("attr2")
 		Date handle(C date, Model model) throws Exception;
-		
+
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
 		String handleException(Exception exception);
-	}	
+	}
 
 	/**
 	 * CONTROLLER WITH PARAMETERIZED INTERFACE
-	 * 
+	 *
 	 * <p>All annotations can be on interface except parameter annotations.
-	 * 
+	 *
 	 * <p>Cannot be used as JDK dynamic proxy since parameterized interface does not contain type information.
 	 */
 	static class ParameterizedInterfaceController implements MappingParameterizedInterface<String, Date, Date> {
@@ -344,18 +344,18 @@ public class HandlerMethodAnnotationDetectionTests {
 		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
 			return date;
 		}
-		
+
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
 		public String handleException(Exception exception) {
 			return exception.getMessage();
 		}
-	}	
-	
-	
+	}
+
+
 	/**
 	 * SPR-8248
-	 * 
+	 *
 	 * <p>Support class contains all annotations. Subclass has type-level @{@link RequestMapping}.
 	 */
 	@Controller
@@ -377,17 +377,17 @@ public class HandlerMethodAnnotationDetectionTests {
 		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
 			return date;
 		}
-		
+
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
 		public String handleException(Exception exception) {
 			return exception.getMessage();
 		}
-	}	
+	}
 
 	@Controller
 	@RequestMapping("/path1")
 	static class SupportClassController extends MappingSupportClass {
-	}	
+	}
 
 }
