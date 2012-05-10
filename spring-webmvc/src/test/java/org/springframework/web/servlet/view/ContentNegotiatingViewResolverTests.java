@@ -100,7 +100,7 @@ public class ContentNegotiatingViewResolverTests {
 	}
 
 	// SPR-8678
-	
+
 	@Test
 	public void getMediaTypeFilenameWithContextPath() {
 		request.setContextPath("/project-1.0.0.M3");
@@ -108,6 +108,15 @@ public class ContentNegotiatingViewResolverTests {
 		assertTrue("Context path should be excluded", viewResolver.getMediaTypes(request).isEmpty());
 		request.setRequestURI("/project-1.0.0.M3");
 		assertTrue("Context path should be excluded", viewResolver.getMediaTypes(request).isEmpty());
+	}
+
+	// SPR-9390
+
+	@Test
+	public void getMediaTypeFilenameWithEncodedURI() {
+		request.setRequestURI("/quo%20vadis%3f.html");
+		List<MediaType> result = viewResolver.getMediaTypes(request);
+		assertEquals("Invalid content type", Collections.singletonList(new MediaType("text", "html")), result);
 	}
 
 	@Test
@@ -426,7 +435,7 @@ public class ContentNegotiatingViewResolverTests {
 		StaticWebApplicationContext webAppContext = new StaticWebApplicationContext();
 		webAppContext.setServletContext(new MockServletContext());
 		webAppContext.refresh();
-		
+
 		UrlBasedViewResolver urlViewResolver = new InternalResourceViewResolver();
 		urlViewResolver.setApplicationContext(webAppContext);
 		ViewResolver xmlViewResolver = createMock(ViewResolver.class);
@@ -435,7 +444,7 @@ public class ContentNegotiatingViewResolverTests {
 		View xmlView = createMock("application_xml", View.class);
 		View jsonView = createMock("application_json", View.class);
 		viewResolver.setDefaultViews(Arrays.asList(jsonView));
-		
+
 		String viewName = "redirect:anotherTest";
 		Locale locale = Locale.ENGLISH;
 
@@ -449,7 +458,7 @@ public class ContentNegotiatingViewResolverTests {
 
 		verify(xmlViewResolver, xmlView, jsonView);
 	}
-	
+
 	@Test
 	public void resolveViewNoMatch() throws Exception {
 		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9");
@@ -505,7 +514,7 @@ public class ContentNegotiatingViewResolverTests {
 		StaticWebApplicationContext webAppContext = new StaticWebApplicationContext();
 		webAppContext.setServletContext(new MockServletContext());
 		webAppContext.refresh();
-		
+
 		InternalResourceViewResolver nestedResolver = new InternalResourceViewResolver();
 		nestedResolver.setApplicationContext(webAppContext);
 		nestedResolver.setViewClass(InternalResourceView.class);

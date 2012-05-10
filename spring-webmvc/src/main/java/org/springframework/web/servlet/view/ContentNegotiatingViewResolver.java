@@ -117,6 +117,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
+	static {
+		urlPathHelper.setUrlDecode(false);
+	}
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
 
@@ -270,7 +273,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 				String name = viewResolvers.get(i).getClass().getName() + i;
 				getApplicationContext().getAutowireCapableBeanFactory().initializeBean(viewResolvers.get(i), name);
 			}
-			
+
 		}
 		if (this.viewResolvers.isEmpty()) {
 			logger.warn("Did not find any ViewResolvers to delegate to; please configure them using the " +
