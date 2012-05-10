@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -42,18 +43,18 @@ import org.springframework.web.servlet.HandlerMapping;
 /**
  * Abstract base class for {@link HandlerMapping} implementations that define a
  * mapping between a request and a {@link HandlerMethod}.
- * 
- * <p>For each registered handler method, a unique mapping is maintained with 
- * subclasses defining the details of the mapping type {@code <T>}.  
- * 
+ *
+ * <p>For each registered handler method, a unique mapping is maintained with
+ * subclasses defining the details of the mapping type {@code <T>}.
+ *
  * @param <T> The mapping for a {@link HandlerMethod} containing the conditions
- * needed to match the handler method to incoming request. 
- * 
+ * needed to match the handler method to incoming request.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping {
+public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
 
 	private boolean detectHandlerMethodsInAncestorContexts = false;
 
@@ -72,7 +73,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	public void setDetectHandlerMethodsInAncestorContexts(boolean detectHandlerMethodsInAncestorContexts) {
 		this.detectHandlerMethodsInAncestorContexts = detectHandlerMethodsInAncestorContexts;
 	}
-	
+
 	/**
 	 * Return a map with all handler methods and their mappings.
 	 */
@@ -81,11 +82,17 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
-	 * ApplicationContext initialization and handler method detection.
+	 * ApplicationContext initialization.
 	 */
 	@Override
 	public void initApplicationContext() throws ApplicationContextException {
 		super.initApplicationContext();
+	}
+
+	/**
+	 * Detects handler methods at initialization.
+	 */
+	public void afterPropertiesSet() {
 		initHandlerMethods();
 	}
 
@@ -99,7 +106,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for request mappings in application context: " + getApplicationContext());
 		}
-		
+
 		String[] beanNames = (this.detectHandlerMethodsInAncestorContexts ?
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(getApplicationContext(), Object.class) :
 				getApplicationContext().getBeanNamesForType(Object.class));
@@ -131,17 +138,17 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param handler the bean name of a handler or a handler instance
 	 */
 	protected void detectHandlerMethods(final Object handler) {
-		Class<?> handlerType = (handler instanceof String) ? 
+		Class<?> handlerType = (handler instanceof String) ?
 				getApplicationContext().getType((String) handler) : handler.getClass();
 
 		final Class<?> userType = ClassUtils.getUserClass(handlerType);
-				
+
 		Set<Method> methods = HandlerMethodSelector.selectMethods(userType, new MethodFilter() {
 			public boolean matches(Method method) {
 				return getMappingForMethod(method, userType) != null;
 			}
 		});
-		
+
 		for (Method method : methods) {
 			T mapping = getMappingForMethod(method, userType);
 			registerHandlerMethod(handler, method, mapping);
@@ -149,7 +156,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
-	 * Provide the mapping for a handler method. A method for which no 
+	 * Provide the mapping for a handler method. A method for which no
 	 * mapping can be provided is not a handler method.
 	 *
 	 * @param method the method to provide a mapping for
@@ -161,11 +168,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	/**
 	 * Register a handler method and its unique mapping.
-	 * 
+	 *
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
 	 * @param mapping the mapping conditions associated with the handler method
-	 * @throws IllegalStateException if another method was already registered 
+	 * @throws IllegalStateException if another method was already registered
 	 * under the same mapping
 	 */
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
@@ -177,19 +184,19 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		else {
 			handlerMethod = new HandlerMethod(handler, method);
 		}
-		
+
 		HandlerMethod oldHandlerMethod = handlerMethods.get(mapping);
 		if (oldHandlerMethod != null && !oldHandlerMethod.equals(handlerMethod)) {
 			throw new IllegalStateException("Ambiguous mapping found. Cannot map '" + handlerMethod.getBean()
 					+ "' bean method \n" + handlerMethod + "\nto " + mapping + ": There is already '"
 					+ oldHandlerMethod.getBean() + "' bean method\n" + oldHandlerMethod + " mapped.");
 		}
-		
+
 		handlerMethods.put(mapping, handlerMethod);
 		if (logger.isInfoEnabled()) {
 			logger.info("Mapped \"" + mapping + "\" onto " + handlerMethod);
 		}
-		
+
 		Set<String> patterns = getMappingPathPatterns(mapping);
 		for (String pattern : patterns) {
 			if (!getPathMatcher().isPattern(pattern)) {
@@ -199,7 +206,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
-	 * Extract and return the URL paths contained in a mapping. 
+	 * Extract and return the URL paths contained in a mapping.
 	 */
 	protected abstract Set<String> getMappingPathPatterns(T mapping);
 
@@ -230,11 +237,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Look up the best-matching handler method for the current request.
 	 * If multiple matches are found, the best match is selected.
-	 * 
+	 *
 	 * @param lookupPath mapping lookup path within the current servlet mapping
 	 * @param request the current request
 	 * @return the best-matching handler method, or {@code null} if no match
-	 * 
+	 *
 	 * @see #handleMatch(Object, String, HttpServletRequest)
 	 * @see #handleNoMatch(Set, String, HttpServletRequest)
 	 */
@@ -289,7 +296,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
-	 * Check if a mapping matches the current request and return a (potentially 
+	 * Check if a mapping matches the current request and return a (potentially
 	 * new) mapping with conditions relevant to the current request.
 	 *
 	 * @param mapping the mapping to get a match for
@@ -308,7 +315,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	/**
 	 * Invoked when a matching mapping is found.
-	 * @param mapping the matching mapping 
+	 * @param mapping the matching mapping
 	 * @param lookupPath mapping lookup path within the current servlet mapping
 	 * @param request the current request
 	 */
@@ -360,5 +367,5 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			return comparator.compare(match1.mapping, match2.mapping);
 		}
 	}
-	
+
 }

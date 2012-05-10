@@ -83,6 +83,7 @@ public class WebMvcConfigurationSupportTests {
 		assertEquals(0, handlerMapping.getOrder());
 
 		handlerMapping.setApplicationContext(cxt);
+		handlerMapping.afterPropertiesSet();
 		HandlerExecutionChain chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertNotNull(chain.getInterceptors());
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[0].getClass());
@@ -204,6 +205,7 @@ public class WebMvcConfigurationSupportTests {
 
 		RequestMappingHandlerMapping rmHandlerMapping = webConfig.requestMappingHandlerMapping();
 		rmHandlerMapping.setApplicationContext(appCxt);
+		rmHandlerMapping.afterPropertiesSet();
 		HandlerExecutionChain chain = rmHandlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertNotNull(chain.getInterceptors());
 		assertEquals(2, chain.getInterceptors().length);
