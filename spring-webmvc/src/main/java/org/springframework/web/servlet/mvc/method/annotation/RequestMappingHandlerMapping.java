@@ -45,7 +45,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private boolean useSuffixPatternMatch = true;
 
 	private boolean useTrailingSlashMatch = true;
-	
+
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
@@ -54,7 +54,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	public void setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 	}
-	
+
 	/**
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a method mapped to "/users" also matches to "/users/".
@@ -83,7 +83,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
-		return AnnotationUtils.findAnnotation(beanType, Controller.class) != null;
+		return ((AnnotationUtils.findAnnotation(beanType, Controller.class) != null) ||
+				(AnnotationUtils.findAnnotation(beanType, RequestMapping.class) != null));
 	}
 
 	/**
@@ -123,7 +124,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	protected RequestCondition<?> getCustomMethodCondition(Method method) {
 		return null;
 	}
-	
+
 	/**
 	 * Provide a custom type-level request condition.
 	 * The custom {@link RequestCondition} can be of any type so long as the
