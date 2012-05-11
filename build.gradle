@@ -31,7 +31,7 @@ configure(allprojects) {
     }
 
     dependencies {
-        testCompile "junit:junit:4.9"
+        testCompile "junit:junit:4.10"
         testCompile "org.easymock:easymock:2.5.1"
         testCompile "org.hamcrest:hamcrest-all:1.1"
     }
@@ -425,7 +425,7 @@ project('spring-test') {
         compile project(":spring-webmvc-portlet")
         compile("javax.activation:activation:1.0", provided)
         compile("org.testng:testng:5.10:jdk15", optional)
-        compile("junit:junit:4.9", optional)
+        compile("junit:junit:4.10", optional)
         compile("javax.servlet:servlet-api:2.5", provided)
         testCompile "org.slf4j:slf4j-jcl:1.5.3"
     }
