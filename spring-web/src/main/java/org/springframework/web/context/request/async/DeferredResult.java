@@ -104,6 +104,22 @@ public final class DeferredResult {
 	}
 
 	/**
+	 * A variant of {@link #set(Object)} that absorbs a potential, resulting
+	 * {@link StaleAsyncWebRequestException}.
+	 * @return {@code false} if the outcome was a {@code StaleAsyncWebRequestException}
+	 */
+	public boolean trySet(Object result) throws StaleAsyncWebRequestException {
+		try {
+			set(result);
+			return true;
+		}
+		catch (StaleAsyncWebRequestException ex) {
+			// absorb
+		}
+		return false;
+	}
+
+	/**
 	 * Invoked to complete async processing when a timeout occurs before
 	 * {@link #set(Object)} is called. Or if {@link #set(Object)} is already in
 	 * progress, this method blocks, waits for it to complete, and then returns.

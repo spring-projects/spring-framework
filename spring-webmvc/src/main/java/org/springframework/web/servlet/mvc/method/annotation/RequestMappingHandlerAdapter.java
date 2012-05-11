@@ -388,10 +388,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * Set an AsyncTaskExecutor to use when a controller method returns a Callable.
-	 * <p>The default is a {@link SimpleAsyncTaskExecutor}
-	 *
-	 * TODO... need a better default
+	 * Set the AsyncTaskExecutor to use when a controller method returns a
+	 * {@code Callable}.
+	 * <p>The default instance type is a {@link SimpleAsyncTaskExecutor}.
+	 * It's recommended to change that default in production as the simple
+	 * executor does not re-use threads.
 	 */
 	public void setAsyncTaskExecutor(AsyncTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
