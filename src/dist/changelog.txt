@@ -14,12 +14,13 @@ Changes in version 3.2 M1
 * fix case-sensitivity issue with some containers on access to 'Content-Disposition' header
 * add Servlet 3.0 based async support
 * fix issue with encoded params in UriComponentsBuilder
-* add Jackson 2 HttpMessageConverter and View types
+* add HttpMessageConverter and View types compatible with Jackson 2.0
 * add pretty print option to Jackson HttpMessageConverter and View types
 * fix issue with resolving Errors controller method argument
 * detect controller methods via InitializingBean in RequestMappingHandlerMapping
 * translate IOException from Jackson to HttpMessageNotReadableException
 * fix content negotiation issue when sorting selected media types by quality value
+* Prevent further writing to the response when @ResponseStatus contains a reason
 
 
 Changes in version 3.1.1 (2012-02-16)

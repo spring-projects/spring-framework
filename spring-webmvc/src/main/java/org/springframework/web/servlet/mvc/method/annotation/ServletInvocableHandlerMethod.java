@@ -104,6 +104,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 				return;
 			}
 		}
+		else if (StringUtils.hasText(this.responseReason)) {
+			mavContainer.setRequestHandled(true);
+			return;
+		}
 
 		mavContainer.setRequestHandled(false);
 

@@ -72,19 +72,17 @@ public class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void nullReturnValueResponseStatus() throws Exception {
+	public void invokeAndHandle_VoidWithResponseStatus() throws Exception {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("responseStatus");
 		handlerMethod.invokeAndHandle(webRequest, mavContainer);
 
 		assertTrue("Null return value + @ResponseStatus should result in 'request handled'",
 				mavContainer.isRequestHandled());
-
 		assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-		assertEquals("400 Bad Request", response.getErrorMessage());
 	}
 
 	@Test
-	public void nullReturnValueHttpServletResponseArg() throws Exception {
+	public void invokeAndHandle_VoidWithHttpServletResponseArgument() throws Exception {
 		argumentResolvers.addResolver(new ServletResponseMethodArgumentResolver());
 
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("httpServletResponse", HttpServletResponse.class);
@@ -95,7 +93,7 @@ public class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void nullReturnValueRequestNotModified() throws Exception {
+	public void invokeAndHandle_VoidRequestNotModified() throws Exception {
 		webRequest.getNativeRequest(MockHttpServletRequest.class).addHeader("If-Modified-Since", 10 * 1000 * 1000);
 		int lastModifiedTimestamp = 1000 * 1000;
 		webRequest.checkNotModified(lastModifiedTimestamp);
@@ -107,8 +105,20 @@ public class ServletInvocableHandlerMethodTests {
 				mavContainer.isRequestHandled());
 	}
 
+	// SPR-9159
+
+	@Test
+	public void invokeAndHandle_NotVoidWithResponseStatusAndReason() throws Exception {
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("responseStatusWithReason");
+		handlerMethod.invokeAndHandle(webRequest, mavContainer);
+
+		assertTrue("When a phrase is used, the response should not be used any more", mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+		assertEquals("400 Bad Request", response.getErrorMessage());
+	}
+
 	@Test(expected=HttpMessageNotWritableException.class)
-	public void exceptionWhileHandlingReturnValue() throws Exception {
+	public void invokeAndHandle_Exception() throws Exception {
 		returnValueHandlers.addHandler(new ExceptionRaisingReturnValueHandler());
 
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod("handle");
@@ -117,7 +127,7 @@ public class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test
-	public void dynamicReturnValue() throws Exception {
+	public void invokeAndHandle_DynamicReturnValue() throws Exception {
 		argumentResolvers.addResolver(new RequestParamMethodArgumentResolver(null, false));
 		returnValueHandlers.addHandler(new ViewMethodReturnValueHandler());
 		returnValueHandlers.addHandler(new ViewNameMethodReturnValueHandler());
@@ -153,8 +163,13 @@ public class ServletInvocableHandlerMethodTests {
 			return "view";
 		}
 
-		@ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "400 Bad Request")
+		@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 		public void responseStatus() {
+		}
+
+		@ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "400 Bad Request")
+		public String responseStatusWithReason() {
+			return "foo";
 		}
 
 		public void httpServletResponse(HttpServletResponse response) {
