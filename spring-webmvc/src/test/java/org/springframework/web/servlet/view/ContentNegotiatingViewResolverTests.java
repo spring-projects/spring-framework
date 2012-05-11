@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,16 @@
 
 package org.springframework.web.servlet.view;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +38,6 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -39,9 +48,6 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
-
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -148,7 +154,6 @@ public class ContentNegotiatingViewResolverTests {
 		request.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, producibleTypes);
 		request.addHeader("Accept", "text/html,application/xml;q=0.9,application/xhtml+xml,*/*;q=0.8");
 		List<MediaType> result = viewResolver.getMediaTypes(request);
-		assertEquals("Invalid amount of media types", 1, result.size());
 		assertEquals("Invalid content type", new MediaType("application", "xhtml+xml"), result.get(0));
 	}
 
@@ -301,6 +306,35 @@ public class ContentNegotiatingViewResolverTests {
 		assertSame("Invalid view", viewMock2, result);
 
 		verify(viewResolverMock1, viewResolverMock2, viewMock1, viewMock2);
+	}
+
+	// SPR-9160
+
+	@Test
+	public void resolveViewNameAcceptHeaderSortByQuality() throws Exception {
+		request.addHeader("Accept", "text/plain;q=0.5, application/json");
+
+		ViewResolver htmlViewResolver = createMock(ViewResolver.class);
+		ViewResolver jsonViewResolver = createMock(ViewResolver.class);
+		viewResolver.setViewResolvers(Arrays.asList(htmlViewResolver, jsonViewResolver));
+
+		View htmlView = createMock("text_html", View.class);
+		View jsonViewMock = createMock("application_json", View.class);
+
+		String viewName = "view";
+		Locale locale = Locale.ENGLISH;
+
+		expect(htmlViewResolver.resolveViewName(viewName, locale)).andReturn(htmlView);
+		expect(jsonViewResolver.resolveViewName(viewName, locale)).andReturn(jsonViewMock);
+		expect(htmlView.getContentType()).andReturn("text/html").anyTimes();
+		expect(jsonViewMock.getContentType()).andReturn("application/json").anyTimes();
+		replay(htmlViewResolver, jsonViewResolver, htmlView, jsonViewMock);
+
+		viewResolver.setFavorPathExtension(false);
+		View result = viewResolver.resolveViewName(viewName, locale);
+		assertSame("Invalid view", jsonViewMock, result);
+
+		verify(htmlViewResolver, jsonViewResolver, htmlView, jsonViewMock);
 	}
 
 	@Test

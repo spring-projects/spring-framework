@@ -18,6 +18,7 @@ Changes in version 3.2 M1
 * fix issue with resolving Errors controller method argument
 * detect controller methods via InitializingBean in RequestMappingHandlerMapping
 * translate IOException from Jackson to HttpMessageNotReadableException
+* fix content negotiation issue when sorting selected media types by quality value
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------
