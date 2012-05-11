@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -117,7 +116,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 
 		List<MediaType> mediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
-		MediaType.sortBySpecificity(mediaTypes);
+		MediaType.sortBySpecificityAndQuality(mediaTypes);
 
 		MediaType selectedMediaType = null;
 		for (MediaType mediaType : mediaTypes) {
@@ -130,6 +129,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				break;
 			}
 		}
+
+		selectedMediaType = selectedMediaType.removeQualityValue();
 
 		if (selectedMediaType != null) {
 			for (HttpMessageConverter<?> messageConverter : messageConverters) {
@@ -188,14 +189,12 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	/**
-	 * Returns the more specific media type using the q-value of the first media type for both.
+	 * Return the more specific of the acceptable and the producible media types
+	 * with the q-value of the former.
 	 */
-	private MediaType getMostSpecificMediaType(MediaType type1, MediaType type2) {
-		double quality = type1.getQualityValue();
-		Map<String, String> params = Collections.singletonMap("q", String.valueOf(quality));
-		MediaType t1 = new MediaType(type1, params);
-		MediaType t2 = new MediaType(type2, params);
-		return MediaType.SPECIFICITY_COMPARATOR.compare(t1, t2) <= 0 ? type1 : type2;
+	private MediaType getMostSpecificMediaType(MediaType acceptType, MediaType produceType) {
+		produceType = produceType.copyQualityValue(acceptType);
+		return MediaType.SPECIFICITY_COMPARATOR.compare(acceptType, produceType) < 0 ? acceptType : produceType;
 	}
 
 }

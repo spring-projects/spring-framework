@@ -18,6 +18,8 @@ Changes in version 3.1.2 (2012-06-??)
 * fix issue with parsing invalid Content-Type or Accept headers
 * add Jackson 2 HttpMessageConverter and View types
 * translate IOException from Jackson to HttpMessageNotReadableException
+* fix content negotiation issue when sorting selected media types by quality value
+
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------
