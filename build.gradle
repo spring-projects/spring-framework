@@ -424,7 +424,7 @@ project('spring-test') {
     dependencies {
         compile project(":spring-webmvc-portlet")
         compile("javax.activation:activation:1.0", provided)
-        compile("org.testng:testng:5.10:jdk15", optional)
+        compile("org.testng:testng:6.5.2", optional)
         compile("junit:junit:4.10", optional)
         compile("javax.servlet:servlet-api:2.5", provided)
         testCompile "org.slf4j:slf4j-jcl:1.5.3"
