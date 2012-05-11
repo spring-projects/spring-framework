@@ -1,11 +1,12 @@
 SPRING FRAMEWORK CHANGELOG
-==========================
+===========================
 http://www.springsource.org
+
 
 Changes in version 3.2 M1
 -------------------------------------
 
-* upgraded to AspectJ 1.6.12
+* upgraded to AspectJ 1.6.12, JUnit 4.10, TestNG 6.5.2
 * better handling on failure to parse invalid 'Content-Type' or 'Accept' headers
 * handle a controller method's return value based on the actual returned value (vs declared type)
 * fix issue with combining identical controller and method level request mapping paths
@@ -19,6 +20,7 @@ Changes in version 3.2 M1
 * detect controller methods via InitializingBean in RequestMappingHandlerMapping
 * translate IOException from Jackson to HttpMessageNotReadableException
 * fix content negotiation issue when sorting selected media types by quality value
+
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------
