@@ -269,7 +269,7 @@
 
 &lt;/web-app&gt;</programlisting>
 
-    <para>In the preceding example, all requests startig with
+    <para>In the preceding example, all requests starting with
     <literal>/example</literal> will be handled by the
     <classname>DispatcherServlet</classname> instance named
     <literal>example</literal>. This is only the first step in setting up
@@ -1073,7 +1073,7 @@ public void addPet(@RequestBody Pet pet, Model model) {
           <para>The <emphasis>consumes</emphasis> condition is supported on
           the type and on the method level. Unlike most other conditions, when
           used at the type level, method-level consumable types override
-          rather than extend type-level consumeable types.</para>
+          rather than extend type-level consumable types.</para>
         </tip>
       </section>
 
@@ -1116,7 +1116,7 @@ public Pet getPet(@PathVariable String petId, Model model) {
         <para>You can narrow request matching through request parameter
         conditions such as <code>"myParam"</code>, <code>"!myParam"</code>, or
         <code>"myParam=myValue"</code>. The first two test for request
-        parameter presense/absence and the third for a specific parameter
+        parameter presence/absence and the third for a specific parameter
         value. Here is an example with a request parameter value
         condition:</para>
 
@@ -4581,7 +4581,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       <code>DefaultServletHttpRequestHandler</code> will attempt to
       auto-detect the default Servlet for the container at startup time, using
       a list of known names for most of the major Servlet containers
-      (including Tomcat, Jetty, Glassfish, JBoss, Resin, WebLogic, and
+      (including Tomcat, Jetty, GlassFish, JBoss, Resin, WebLogic, and
       WebSphere). If the default Servlet has been custom configured with a
       different name, or if a different Servlet container is being used where
       the default Servlet name is unknown, then the default Servlet's name

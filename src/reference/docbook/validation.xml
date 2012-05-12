@@ -1085,7 +1085,7 @@ public interface ConversionService {
       </programlisting>
 
       <para> A default ConversionService can convert between strings, numbers,
-        enums, collections, maps, and other common types. To suppliment or
+        enums, collections, maps, and other common types. To supplement or
         override the default converters with your own custom converter(s), set
         the <code>converters</code> property. Property values may implement
         either of the Converter, ConverterFactory, or GenericConverter
@@ -1112,9 +1112,9 @@ public interface ConversionService {
     </section>
 
     <section id="core-convert-programmatic-usage">
-      <title>Using a ConversionService programatically</title>
+      <title>Using a ConversionService programmatically</title>
 
-      <para> To work with a ConversionService instance programatically, simply
+      <para> To work with a ConversionService instance programmatically, simply
         inject a reference to it like you would for any other bean: </para>
 
       <programlisting language="java"><![CDATA[@Service
@@ -1353,10 +1353,10 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
       <para> The FormatterRegistry is an SPI for registering formatters and 
       	converters. <classname>FormattingConversionService</classname> is 
       	an implementation of FormatterRegistry suitable for most environments. 
-      	This implementation may be configured programatically or declaratively 
+      	This implementation may be configured programmatically or declaratively 
       	as a Spring bean using 
       	<classname>FormattingConversionServiceFactoryBean</classname>.
-      	Because this implemementation also implements
+      	Because this implementation also implements
         <classname>ConversionService</classname>, it can be directly 
         configured for use with Spring's DataBinder and the Spring Expression 
         Language (SpEL).
@@ -1419,7 +1419,7 @@ public interface FormatterRegistrar {
       <title>Configuring Formatting in Spring MVC</title>
 
       <para> In a Spring MVC application, you may configure a custom
-        ConversionService instance explicity as an attribute of the
+        ConversionService instance explicitly as an attribute of the
         <literal>annotation-driven</literal> element of the MVC namespace. This
         ConversionService will then be used anytime a type conversion is
         required during Controller model binding. If not configured explicitly,
@@ -1443,7 +1443,7 @@ public interface FormatterRegistrar {
 
 </beans>]]></programlisting>
 
-      <para> With this one-line of configuation, default formatters for Numbers
+      <para> With this one-line of configuration, default formatters for Numbers
         and Date types will be installed, including support for the
         @NumberFormat and @DateTimeFormat annotations. Full support for the Joda
         Time formatting library is also installed if Joda Time is present on the
@@ -1503,7 +1503,7 @@ public interface FormatterRegistrar {
 
     <para> Spring 3 introduces several enhancements to its validation support.
       First, the JSR-303 Bean Validation API is now fully supported. Second,
-      when used programatically, Spring's DataBinder can now validate objects as
+      when used programmatically, Spring's DataBinder can now validate objects as
       well as bind to them. Third, Spring MVC now has support for declaratively
       validating @Controller inputs. </para>
 
@@ -1671,7 +1671,7 @@ public class MyConstraintValidator implements ConstraintValidator {
         <code>binder.validate()</code>. Any validation Errors are automatically
         added to the binder's BindingResult. </para>
 
-      <para> When working with the DataBinder programatically, this can be used
+      <para> When working with the DataBinder programmatically, this can be used
         to invoke validation logic after binding to a target object: </para>
 
       <programlisting language="java">Foo target = new Foo();

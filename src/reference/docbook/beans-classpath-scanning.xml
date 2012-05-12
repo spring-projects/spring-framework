@@ -144,7 +144,7 @@ public class JpaMovieFinder implements MovieFinder {
     <note>
       <para>In Spring 3.0 RC1 you can use JSR 330's
       <interfacename>@Named</interfacename> annotation in place of
-      stereotpye annotations and they will be automatically detected during
+      stereotype annotations and they will be automatically detected during
       component-scanning. The value of the
       <interfacename>@Named</interfacename> property will be used as the
       Bean Name. At this time Spring defaults for bean scope will be applied
