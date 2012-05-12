@@ -225,7 +225,7 @@ public class SimpleDateFormatBeanDefinitionParser extends AbstractSingleBeanDefi
 		properties files. These properties files are both placed in a
 		<filename class="directory">'META-INF'</filename> directory in your application, and can, for
 		example, be distributed alongside your binary classes in a JAR file. The Spring XML parsing
-		infrastructurewill automatically pick up your new extension by consuming these special
+		infrastructure will automatically pick up your new extension by consuming these special
 		properties files, the formats of which are detailed below.</para>
 		<section id="extensible-xml-registration-spring-handlers">
 			<title><filename>'META-INF/spring.handlers'</filename></title>

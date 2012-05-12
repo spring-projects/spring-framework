@@ -592,7 +592,7 @@ Future&lt;String&gt; returnSomething(int i) {
 
       <para><interfacename>@Async</interfacename> can not be used in
       conjunction with lifecycle callbacks such as
-      <interfacename>@PostConstruct</interfacename>. To asynchonously
+      <interfacename>@PostConstruct</interfacename>. To asynchronously
       initialize Spring beans you currently have to use a separate
       initializing Spring bean that invokes the
       <interfacename>@Async</interfacename> annotated method on the target

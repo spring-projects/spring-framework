@@ -224,7 +224,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
         <para>After you learn about Spring's IoC container, you may want to know
           more about Spring's <interfacename>Resource</interfacename>
           abstraction, as described in <xref linkend="resources"/>, which
-          provides a convenient mechanism for reading an InputSream from
+          provides a convenient mechanism for reading an InputStream from
           locations defined in a URI syntax. In particular,
           <classname>Resource</classname> paths are used to construct
           applications contexts as described in <xref
