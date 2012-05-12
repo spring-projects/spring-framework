@@ -98,7 +98,7 @@ public Book findBook(ISBN isbn) {...}]]></programlisting>
 			In fact, depending on the JVM implementation or running conditions, the same hashCode can be reused for different objects, in the same VM instance.</para>
 
 			<para>To provide a different <emphasis>default</emphasis> key generator, one needs to implement the <interfacename>org.springframework.cache.KeyGenerator</interfacename> interface.
-			Once configured, the generator will be used for each declaration that doesn not specify its own key generation strategy (see below).
+			Once configured, the generator will be used for each declaration that does not specify its own key generation strategy (see below).
 			</para>
 		</section>
 
@@ -223,11 +223,11 @@ public Book findBook(String name)]]></programlisting>
 	<section id="cache-annotations-put">
 		<title><literal>@CachePut</literal> annotation</title>
 
-		<para>For cases where the cache needs to be updated without interferring with the method execution, one can use the <literal>@CachePut</literal> annotation. That is, the method will always
+		<para>For cases where the cache needs to be updated without interfering with the method execution, one can use the <literal>@CachePut</literal> annotation. That is, the method will always
 		be executed and its result placed into the cache (according to the <literal>@CachePut</literal> options). It supports the same options as <literal>@Cacheable</literal> and should be used
 		for cache population rather then method flow optimization.</para>
 
-		<para>Note that using <literal>@CachePut</literal> and <literal>@Cacheable</literal> annotations on the same method is generaly discouraged because they have different behaviours. While the latter
+		<para>Note that using <literal>@CachePut</literal> and <literal>@Cacheable</literal> annotations on the same method is generally discouraged because they have different behaviours. While the latter
 		causes the method execution to be skipped by using the cache, the former forces the execution in order to execute a cache update. This leads to unexpected behaviour and with the exception of specific
 		corner-cases (such as annotations having conditions that exclude them from each other), such declarations should be avoided.</para>
 	</section>
@@ -447,7 +447,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]></programlisting>
 
 		<para>Even though <literal>@SlowService</literal> is not a Spring annotation, the container automatically picks up its declaration at runtime and understands its meaning. Note that as
-		mentined <link linkend="cache-annotation-enable">above</link>, the annotation-driven behaviour needs to be enabled.</para>
+		mentioned <link linkend="cache-annotation-enable">above</link>, the annotation-driven behaviour needs to be enabled.</para>
 	</section>
 	</section>
 
@@ -488,7 +488,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 		<para>The declarative XML caching supports all of the annotation-based model so moving between the two should be fairly easy - further more both can be used inside the same application.
 		The XML based approach does not touch the target code however it is inherently more verbose; when dealing with classes with overloaded methods that are targeted for caching, identifying the
 		proper methods does take an extra effort since the <literal>method</literal> argument is not a good discriminator - in these cases, the AspectJ pointcut can be used to cherry pick the target
-		methods and apply the appropriate caching functionality. Howeve through XML, it is easier to apply a package/group/interface-wide caching (again due to the AspectJ poincut) and to create
+		methods and apply the appropriate caching functionality. However through XML, it is easier to apply a package/group/interface-wide caching (again due to the AspectJ pointcut) and to create
 		template-like definitions (as we did in the example above by defining the target cache through the <literal>cache:definitions </literal><literal>cache</literal> attribute).
 		</para>
 	</section>
@@ -554,7 +554,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 	<property name="addNoOpCache" value="true"/>
 </bean>]]></programlisting>
 
-		<para>The <literal>CompositeCacheManager</literal> above chains multiple <literal>CacheManager</literal>s and aditionally, through the <literal>addNoOpManager</literal> flag, adds a
+		<para>The <literal>CompositeCacheManager</literal> above chains multiple <literal>CacheManager</literal>s and additionally, through the <literal>addNoOpManager</literal> flag, adds a
 		<emphasis>no op</emphasis> cache that for all the definitions not handled by the configured cache managers. That is, every cache definition not found in either <literal>jdkCache</literal>
 		or <literal>gemfireCache</literal> (configured above) will be handled by the no op cache, which will not store any information causing the target method to be executed every time.
 		</para>

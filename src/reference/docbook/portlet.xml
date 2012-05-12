@@ -518,7 +518,7 @@
       included here for completeness.</para>
 
       <para>When using the <classname>AbstractController</classname> as a
-      baseclass for your controllers (which is not recommended since there
+      base class for your controllers (which is not recommended since there
       are a lot of other controllers that might already do the job for
       you) you only have to override either the
       <methodname>handleActionRequestInternal(ActionRequest,

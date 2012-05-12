@@ -427,7 +427,7 @@ TR: OK. Added to diagram.--></para>
             development snapshots and milestone releases (a copy of the final
             releases is also held here). The jar file names are in the same
             form as Maven Central, so this is a useful place to get
-            development versions of Spring to use with other libraries depoyed
+            development versions of Spring to use with other libraries deployed
             in Maven Central.</para>
           </listitem>
         </itemizedlist></para>
@@ -615,7 +615,7 @@ TR: OK. Added to diagram.--></para>
         <para>We used the Maven Central naming conventions in the example
         above, so that works with Maven Central or the SpringSource S3 Maven
         repository. To use the S3 Maven repository (e.g. for milestones or
-        developer snaphots), you need to specify the repository location in
+        developer snapshots), you need to specify the repository location in
         your Maven configuration. For full releases:</para>
 
         <programlisting>&lt;repositories&gt;
@@ -670,7 +670,7 @@ TR: OK. Added to diagram.--></para>
 &lt;/repositories&gt;</programlisting>
 
         <para>If you are managing your dependencies by hand, the URL in the
-        repository declaration above is not browseable, but there is a user
+        repository declaration above is not browsable, but there is a user
         interface at <ulink
         url="http://www.springsource.com/repository">http://www.springsource.com/repository</ulink>
         that can be used to search for and download dependencies. It also has
@@ -879,8 +879,8 @@ TR: OK. Added to diagram.--></para>
       and generates fewer dependencies, is to bind directly to <ulink type=""
       url="http://logback.qos.ch">Logback</ulink>. This removes the extra
       binding step because Logback implements SLF4J directly, so you only need
-      to depend on two libaries not four (<code>jcl-over-slf4j</code> and
-      <code>logback</code>). If you do that you might also need to exlude the
+      to depend on two libraries not four (<code>jcl-over-slf4j</code> and
+      <code>logback</code>). If you do that you might also need to exclude the
       slf4j-api dependency from other external dependencies (not Spring),
       because you only want one version of that API on the classpath.</para>
 

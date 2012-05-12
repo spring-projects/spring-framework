@@ -1473,7 +1473,7 @@ URI location = template.postForLocation(uri, booking, "1");
             
 URI uri = uriComponents.toUri();</programlisting>
 
-        <para>Or specify each URI component indiviudally:</para>
+        <para>Or specify each URI component individually:</para>
         
         <programlisting language="java">UriComponents uriComponents = 
         UriComponentsBuilder.newInstance()

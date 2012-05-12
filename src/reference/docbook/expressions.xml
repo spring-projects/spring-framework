@@ -688,7 +688,7 @@ boolean trueValue = parser.parseExpression(expression).getValue(societyContext, 
 boolean trueValue = parser.parseExpression("true or false").getValue(Boolean.class);
 
 // evaluates to true
-String expression =  "isMember('Nikola Tesla') or isMember('Albert Einstien')";
+String expression =  "isMember('Nikola Tesla') or isMember('Albert Einstein')";
 boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 
 // -- NOT --
