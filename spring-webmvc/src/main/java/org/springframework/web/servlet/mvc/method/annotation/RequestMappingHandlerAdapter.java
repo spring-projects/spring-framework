@@ -454,6 +454,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
 		resolvers.add(new PathVariableMethodArgumentResolver());
+		resolvers.add(new PathVariableMapMethodArgumentResolver());
 		resolvers.add(new ServletModelAttributeMethodProcessor(false));
 		resolvers.add(new RequestResponseBodyMethodProcessor(getMessageConverters()));
 		resolvers.add(new RequestPartMethodArgumentResolver(getMessageConverters()));

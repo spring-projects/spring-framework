@@ -992,6 +992,11 @@ public String findPet(<emphasis role="bold">@PathVariable</emphasis> String owne
   return "displayPet"; 
 }</programlisting>
 
+        <para>When a <interfacename>@PathVariable</interfacename> annotation is
+        used on a <classname>Map&lt;String, String&gt;</classname> argument, the
+        map is populated with all URI template variables.
+        </para>
+
         <para>A URI template can be assembled from type and path level
         <emphasis>@RequestMapping</emphasis> annotations. As a result the
         <methodname>findPet()</methodname> method can be invoked with a URL

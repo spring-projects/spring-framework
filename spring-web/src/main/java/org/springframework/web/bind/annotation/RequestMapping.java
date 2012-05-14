@@ -79,6 +79,9 @@ import java.util.concurrent.Callable;
  * will match against the regular expression {@code [^\.]*} (i.e. any character
  * other than period), but this can be changed by specifying another regular
  * expression, like so: /hotels/{hotel:\d+}.
+ * Additionally, {@code @PathVariable} can be used on a
+ * {@link java.util.Map Map&lt;String, String&gt;} to gain access to all
+ * URI template variables.
  * <li>{@link RequestParam @RequestParam} annotated parameters for access to
  * specific Servlet/Portlet request parameters. Parameter values will be
  * converted to the declared method argument type. Additionally,
