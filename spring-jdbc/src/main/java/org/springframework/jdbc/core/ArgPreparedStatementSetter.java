@@ -18,6 +18,7 @@ package org.springframework.jdbc.core;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 /**
  * Simple adapter for PreparedStatementSetter that applies
@@ -25,7 +26,8 @@ import java.sql.SQLException;
  *
  * @author Juergen Hoeller
  */
-class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
+class ArgPreparedStatementSetter implements PreparedStatementSetter,
+		PreparedStatementValueProvider, ParameterDisposer {
 
 	private final Object[] args;
 
@@ -38,6 +40,11 @@ class ArgPreparedStatementSetter implements PreparedStatementSetter, ParameterDi
 		this.args = args;
 	}
 
+
+	@Override
+	public String getValuesString() {
+		return Arrays.toString(args);
+	}
 
 	public void setValues(PreparedStatement ps) throws SQLException {
 		if (this.args != null) {

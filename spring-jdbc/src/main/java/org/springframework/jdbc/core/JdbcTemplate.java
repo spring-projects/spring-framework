@@ -585,6 +585,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				psToUse = this.nativeJdbcExtractor.getNativePreparedStatement(ps);
 			}
 			T result = action.doInPreparedStatement(psToUse);
+			new PreparedStatementResultLogger<T>().log(result);
 			handleWarnings(ps);
 			return result;
 		}
@@ -639,7 +640,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				ResultSet rs = null;
 				try {
 					if (pss != null) {
-						pss.setValues(ps);
+						new PreparedStatementValueLogger(pss).setValues(ps);
 					}
 					rs = ps.executeQuery();
 					ResultSet rsToUse = rs;
@@ -813,7 +814,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			public Integer doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				try {
 					if (pss != null) {
-						pss.setValues(ps);
+						new PreparedStatementValueLogger(pss).setValues(ps);
 					}
 					int rows = ps.executeUpdate();
 					if (logger.isDebugEnabled()) {
