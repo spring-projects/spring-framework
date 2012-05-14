@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 22.11.2003
  * @see org.springframework.web.servlet.DispatcherServlet
  */
@@ -45,6 +46,8 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	public static final String DEFAULT_EXCEPTION_ATTRIBUTE = "exception";
 
 	private Properties exceptionMappings;
+
+	private Class<?>[] excludedExceptions;
 
 	private String defaultErrorView;
 
@@ -74,6 +77,16 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	}
 
 	/**
+	 * Set one or more exceptions to be excluded from the exception mappings.
+	 * Excluded exceptions are checked first and if one of them equals the actual
+	 * exception, the exception will remain unresolved.
+	 * @param excludedExceptions one or more excluded exception types
+	 */
+	public void setExcludedExceptions(Class<?>... excludedExceptions) {
+		this.excludedExceptions = excludedExceptions;
+	}
+
+	/**
 	 * Set the name of the default error view. This view will be returned if no specific mapping was found. <p>Default is
 	 * none.
 	 */
@@ -98,13 +111,13 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	}
 
 	/**
-	 * An alternative to {@link #setStatusCodes(Properties)} for use with 
+	 * An alternative to {@link #setStatusCodes(Properties)} for use with
 	 * Java-based configuration.
 	 */
 	public void addStatusCode(String viewName, int statusCode) {
 		this.statusCodes.put(viewName, statusCode);
 	}
-	
+
 	/**
 	 * Returns the HTTP status codes provided via {@link #setStatusCodes(Properties)}.
 	 * Keys are view names; values are status codes.
@@ -172,14 +185,23 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	}
 
 	/**
-	 * Determine the view name for the given exception, searching the {@link #setExceptionMappings "exceptionMappings"},
-	 * using the {@link #setDefaultErrorView "defaultErrorView"} as fallback.
+	 * Determine the view name for the given exception, first checking against the
+	 * {@link #setExcludedExceptions(Class[]) "excludedExecptions"}, then searching the
+	 * {@link #setExceptionMappings "exceptionMappings"}, and finally using the
+	 * {@link #setDefaultErrorView "defaultErrorView"} as a fallback.
 	 * @param ex the exception that got thrown during handler execution
 	 * @param request current HTTP request (useful for obtaining metadata)
-	 * @return the resolved view name, or <code>null</code> if none found
+	 * @return the resolved view name, or <code>null</code> if excluded or none found
 	 */
 	protected String determineViewName(Exception ex, HttpServletRequest request) {
 		String viewName = null;
+		if (this.excludedExceptions != null) {
+			for (Class<?> excludedEx : this.excludedExceptions) {
+				if (excludedEx.equals(ex.getClass())) {
+					return null;
+				}
+			}
+		}
 		// Check for specific exception mappings.
 		if (this.exceptionMappings != null) {
 			viewName = findMatchingViewName(this.exceptionMappings, ex);

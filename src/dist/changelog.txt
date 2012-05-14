@@ -23,6 +23,7 @@ Changes in version 3.2 M1
 * Prevent further writing to the response when @ResponseStatus contains a reason
 * Deprecate HttpStatus codes 419, 420, 421
 * support access to all URI vars via @PathVariable Map<String, String>
+* add "excludedExceptions" property to SimpleUrlHandlerMapping
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------
