@@ -44,8 +44,7 @@ public class OpEQ extends Operator {
 		if (left instanceof Number && right instanceof Number) {
 			Number op1 = (Number) left;
 			Number op2 = (Number) right;
-			if ( op1 instanceof BigDecimal || op2 instanceof BigDecimal )
-            {
+			if ( op1 instanceof BigDecimal || op2 instanceof BigDecimal ) {
                 BigDecimal bd1 = NumberUtils.convertNumberToTargetClass(op1, BigDecimal.class);
                 BigDecimal bd2 = NumberUtils.convertNumberToTargetClass(op2, BigDecimal.class);
                 if ( bd1 == null || bd2 == null ) {
