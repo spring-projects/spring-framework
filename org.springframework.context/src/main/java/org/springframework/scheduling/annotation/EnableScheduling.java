@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,11 +105,15 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *         taskRegistrar.setScheduler(taskExecutor());
  *     }
  *
- *     &#064;Bean
+ *     &#064;Bean(destroyMethod="shutdown")
  *     public Executor taskExecutor() {
  *         return Executors.newScheduledThreadPool(100);
  *     }
  * }</pre>
+ *
+ * Note in the example above the use of {@code @Bean(destroyMethod="shutdown")}. This
+ * ensures that the task executor is properly shut down when the Spring application
+ * context itself is closed.
  *
  * Implementing {@code SchedulingConfigurer} also allows for fine-grained
  * control over task registration via the {@code ScheduledTaskRegistrar}.
@@ -133,7 +137,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *         );
  *     }
  *
- *     &#064;Bean
+ *     &#064;Bean(destroyMethod="shutdown")
  *     public Executor taskScheduler() {
  *         return Executors.newScheduledThreadPool(42);
  *     }
