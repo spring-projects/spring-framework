@@ -96,7 +96,7 @@ public enum HttpStatus {
 	MULTI_STATUS(207, "Multi-Status"),
 	/**
 	 * {@code 208 Already Reported}.
-	 * @see <a href="http://tools.ietf.org/html/draft-ietf-webdav-bind-27#section-7.1">WebDAV Binding Extensions</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc5842#section-7.1">WebDAV Binding Extensions</a>
 	 */
 	ALREADY_REPORTED(208, "Already Reported"),
 	/**
@@ -224,7 +224,7 @@ public enum HttpStatus {
 	/**
 	 * {@code 413 Request Entity Too Large}.
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-10.4.14">HTTP/1.1</a>
-	 */	
+	 */
 	REQUEST_ENTITY_TOO_LARGE(413, "Request Entity Too Large"),
 	/**
 	 * {@code 414 Request-URI Too Long}.
@@ -252,18 +252,15 @@ public enum HttpStatus {
 	 */
 	I_AM_A_TEAPOT(418, "I'm a teapot"),
 	/**
-	 * {@code 419 Insufficient Space on Resource}.
-	 * @see <a href="http://tools.ietf.org/html/draft-ietf-webdav-protocol-05#section-10.4">WebDAV Draft</a>
+	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
 	 */
 	INSUFFICIENT_SPACE_ON_RESOURCE(419, "Insufficient Space On Resource"),
 	/**
-	 * {@code 420 Method Failure}.
-	 * @see <a href="http://tools.ietf.org/html/draft-ietf-webdav-protocol-05#section-10.5">WebDAV Draft</a>
+	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
 	 */
 	METHOD_FAILURE(420, "Method Failure"),
 	/**
-	 * {@code 421 Destination Locked}.
-	 * @see <a href="http://tools.ietf.org/html/draft-ietf-webdav-protocol-05#section-10.6">WebDAV Draft</a>
+	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
 	 */
 	DESTINATION_LOCKED(421, "Destination Locked"),
 	/**
@@ -288,20 +285,17 @@ public enum HttpStatus {
 	UPGRADE_REQUIRED(426, "Upgrade Required"),
 	/**
 	 * {@code 428 Precondition Required}.
-	 * @see <a href="http://tools.ietf.org/html/draft-nottingham-http-new-status-02#section-3">Additional HTTP Status
-	 * Codes</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc6585#section-3">Additional HTTP Status Codes</a>
 	 */
 	PRECONDITION_REQUIRED(428, "Precondition Required"),
 	/**
 	 * {@code 429 Too Many Requests}.
-	 * @see <a href="http://tools.ietf.org/html/draft-nottingham-http-new-status-02#section-4">Additional HTTP Status
-	 * Codes</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc6585#section-4">Additional HTTP Status Codes</a>
 	 */
 	TOO_MANY_REQUESTS(429, "Too Many Requests"),
 	/**
 	 * {@code 431 Request Header Fields Too Large}.
-	 * @see <a href="http://tools.ietf.org/html/draft-nottingham-http-new-status-02#section-5">Additional HTTP Status
-	 * Codes</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc6585#section-5">Additional HTTP Status Codes</a>
 	 */
 	REQUEST_HEADER_FIELDS_TOO_LARGE(431, "Request Header Fields Too Large"),
 
@@ -349,7 +343,7 @@ public enum HttpStatus {
 	INSUFFICIENT_STORAGE(507, "Insufficient Storage"),
 	/**
 	 * {@code 508 Loop Detected}
-	 * @see <a href="http://tools.ietf.org/html/draft-ietf-webdav-bind-27#section-7.2">WebDAV Binding Extensions</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc5842#section-7.2">WebDAV Binding Extensions</a>
  	 */
 	LOOP_DETECTED(508, "Loop Detected"),
 	/**
@@ -363,8 +357,7 @@ public enum HttpStatus {
 	NOT_EXTENDED(510, "Not Extended"),
 	/**
 	 * {@code 511 Network Authentication Required}.
-	 * @see <a href="http://tools.ietf.org/html/draft-nottingham-http-new-status-02#section-6">Additional HTTP Status
-	 * Codes</a>
+	 * @see <a href="http://tools.ietf.org/html/rfc6585#section-6">Additional HTTP Status Codes</a>
 	 */
 	NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required");
 
