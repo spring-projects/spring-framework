@@ -55,7 +55,7 @@
             <emphasis>unmarshaller</emphasis> deserializes XML stream to an object. In this section, we will describe
             the two Spring interfaces used for this purpose.
         </para>
-        <section>
+        <section id="oxm-marshaller">
             <title>Marshaller</title>
             <para>
                 Spring abstracts all marshalling operations behind the 
@@ -113,7 +113,7 @@ public interface Marshaller {
                 </note>
             </para>
         </section>
-        <section>
+        <section id="oxm-unmarshaller">
             <title>Unmarshaller</title>
             <para>
                 Similar to the <interfacename>Marshaller</interfacename>, there is the 
@@ -170,7 +170,7 @@ public interface Unmarshaller {
             one class. This means that you can wire up one marshaller class and refer to it both as a marshaller and an 
             unmarshaller in your <filename>applicationContext.xml</filename>.
         </para>
-        <section>
+        <section id="oxm-xmlmappingexception">
             <title>XmlMappingException</title>
             <para>
                 Spring converts exceptions from the underlying O/X mapping tool to its own exception hierarchy with the
@@ -306,7 +306,7 @@ public class Application {
 ]]></programlisting>
         </para>
     </section>
-	<section>
+	<section id="oxm-schema-based-config">
        	<title>XML Schema-based Configuration</title>
        	<para>
        		Marshallers could be configured more concisely using tags from the OXM namespace.
@@ -441,7 +441,7 @@ public class Application {
             <citetitle>Castor web site</citetitle></ulink>. The Spring integration classes reside in the
             <package>org.springframework.oxm.castor</package> package.
         </para>
-        <section>
+        <section id="oxm-castor-marshaller">
             <title>CastorMarshaller</title>
             <para>
                 As with JAXB, the <classname>CastorMarshaller</classname> implements both the 
@@ -456,7 +456,7 @@ public class Application {
 
 </beans>]]></programlisting>
         </section>
-        <section>
+        <section id="oxm-castor-mapping">
             <title>Mapping</title>
             <para>
                 Although it is possible to rely on Castor's default marshalling behavior, it might be necessary to have
@@ -490,7 +490,7 @@ public class Application {
 			   <citetitle>XMLBeans web site </citetitle></ulink>. The Spring-WS integration classes reside
             in the <package>org.springframework.oxm.xmlbeans</package> package.
         </para>
-        <section>
+        <section id="oxm-xmlbeans-marshaller">
             <title>XmlBeansMarshaller</title>
             <para>
                 The <classname>XmlBeansMarshaller</classname>
@@ -568,7 +568,7 @@ public class Application {
             <citetitle>JiBX web site</citetitle></ulink>. The Spring integration classes reside in the
             <package>org.springframework.oxm.jibx</package> package.
         </para>
-        <section>
+        <section id="oxm-jibx-marshaller">
             <title>JibxMarshaller</title>
             <para>
                 The <classname>JibxMarshaller</classname> class implements both the 
@@ -647,7 +647,7 @@ public class Application {
 			<citetitle>XStream web site</citetitle></ulink>. The Spring integration classes reside in the
             <package>org.springframework.oxm.xstream</package> package.
         </para>
-        <section>
+        <section id="oxm-xstream-marshaller">
             <title>XStreamMarshaller</title>
             <para>
                 The <classname>XStreamMarshaller</classname> does not require any configuration, and can be configured

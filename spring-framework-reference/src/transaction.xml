@@ -95,7 +95,7 @@
 
     <!--Gave global, local, and spring models their own sections. These need to be called out at a higher level, esp. Spring advantage! TR: OK-->
 
-    <section>
+    <section id="transaction-global">
       <title>Global transactions</title>
 
       <para>Global transactions enable you to work with multiple transactional
@@ -125,7 +125,7 @@
       compelling alternatives for declarative transaction management.</para>
     </section>
 
-    <section>
+    <section id="transaction-local">
       <title>Local transactions</title>
 
       <para>Local transactions are resource-specific, such as a transaction
@@ -140,7 +140,7 @@
       transactions are invasive to the programming model.</para>
     </section>
 
-    <section>
+    <section id="transaction-programming-model">
       <title>Spring Framework's consistent programming model</title>
 
       <para>Spring resolves the disadvantages of global and local

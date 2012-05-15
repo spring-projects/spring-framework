@@ -610,7 +610,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       does.</para>
   </section>
 
-  <section>
+  <section id="context-deploy-rar">
     <title>Deploying a Spring ApplicationContext as a J2EE RAR file</title>
 
     <para>In Spring 2.5 and later, it is possible to deploy a Spring

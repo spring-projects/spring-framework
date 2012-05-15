@@ -353,7 +353,7 @@
     <para>...</para>
   </section>
 
-  <section>
+  <section id="classic-spring-jms">
     <title>JMS Usage</title>
 
     <para>One of the benefits of Spring's JMS support is to shield the user
@@ -391,7 +391,7 @@
       </note>
     </sidebar>
 
-    <section>
+    <section id="classic-spring-jms-template">
       <title>JmsTemplate</title>
 
       <para>Located in the package
@@ -406,7 +406,7 @@
       that the point-to-point domain, Queues, will be used.</para>
     </section>
 
-    <section>
+    <section id="classic-spring-aysnc-messages">
       <title>Asynchronous Message Reception </title>
 
       <para><link
@@ -422,7 +422,7 @@
       rely only on the JMS 1.0.2 API. </para>
     </section>
 
-    <section>
+    <section id="classic-spring-jms-connections">
       <title>Connections</title>
 
       <para>The <classname>ConnectionFactory</classname> interface is part of
@@ -440,7 +440,7 @@
       <classname>javax.jmsTopicConnection</classname>.</para>
     </section>
 
-    <section>
+    <section id="classic-spring-jms-tx-management">
       <title>Transaction Management</title>
 
       <para>In a JMS 1.0.2 environment the class

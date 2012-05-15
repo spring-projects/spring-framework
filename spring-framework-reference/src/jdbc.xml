@@ -2941,7 +2941,7 @@ public class DataAccessUnitTestTemplate {
     </section>
   </section>
 
-  <section>
+  <section id="jdbc-intializing-datasource">
     <title>Initializing a DataSource</title>
 
     <para>The <literal>org.springframework.jdbc.datasource.init</literal>
@@ -2951,7 +2951,7 @@ public class DataAccessUnitTestTemplate {
     <classname>DataSource</classname> for an application, but sometimes you
     need to initialize an instance running on a server somewhere.</para>
 
-    <section>
+    <section id="jdbc-initializing-datasource-xml">
       <title>Initializing a database instance using Spring XML</title>
 
       <para>If you want to initialize a database and you can provide a
@@ -3015,7 +3015,7 @@ public class DataAccessUnitTestTemplate {
       can simply use the <classname>DataSourceInitializer</classname>
       directly, and define it as a component in your application.</para>
 
-      <section>
+      <section id="jdbc-client-component-initialization">
         <title>Initialization of Other Components that Depend on the
         Database</title>
 

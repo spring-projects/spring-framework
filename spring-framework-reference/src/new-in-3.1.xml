@@ -15,7 +15,7 @@
     yet have dedicated reference documentation but do have Javadoc. In such
     cases, fully-qualified class names are given.</para>
 
-    <section>
+    <section id="new-in-3.1-cache-abstraction">
       <title>Cache Abstraction</title>
 
       <itemizedlist>
@@ -31,7 +31,7 @@
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="new-in-3.1-bean-definition-profiles">
       <title>Bean Definition Profiles</title>
 
       <itemizedlist>
@@ -59,7 +59,7 @@
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="new-in-3.1-environment-abstraction">
       <title>Environment Abstraction</title>
 
       <itemizedlist>
@@ -75,7 +75,7 @@
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="new-in-3.1-property-source-abstraction">
       <title>PropertySource Abstraction</title>
 
       <itemizedlist>
@@ -100,7 +100,7 @@
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="new-in-3.1-code-equivalent-xml-namespaces">
       <title>Code equivalents for Spring's XML namespaces</title>
 
       <para>Code-based equivalents to popular Spring XML namespace elements
@@ -168,7 +168,7 @@
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="new-in-3.1-hibernate-4-support">
       <title>Support for Hibernate 4.x</title>
 
       <itemizedlist>
@@ -179,7 +179,7 @@
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="new-in-3.1-test-context-profiles">
       <title>TestContext framework support for @Configuration classes and bean
       definition profiles</title>
 
@@ -237,7 +237,7 @@
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="new-in-3.1-c-namespace">
       <title>c: namespace for more concise constructor injection</title>
 
       <itemizedlist>
@@ -247,7 +247,7 @@
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="new-in-3.1-injection-non-javabeans-setters">
       <title>Support for injection against non-standard JavaBeans
       setters</title>
 
@@ -259,7 +259,7 @@
       setter methods return a reference to 'this'.</para>
     </section>
 
-    <section>
+    <section id="new-in-3.1-servlet-3-code-config">
       <title>Support for Servlet 3 code-based configuration of Servlet
       Container</title>
 
@@ -283,7 +283,7 @@
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="new-in-3.1-servlet-3-multipart-resolver">
       <title>Support for Servlet 3 MultipartResolver</title>
 
       <itemizedlist>
@@ -295,7 +295,7 @@
       </itemizedlist>
     </section>
 
-    <section>
+    <section id="new-in-3.1-jpa-without-xml">
       <title>JPA EntityManagerFactory bootstrapping without
       persistence.xml</title>
 
@@ -319,7 +319,7 @@
       initializer.</para>
     </section>
 
-    <section>
+    <section id="new-in-3.1-handler-method-controller-processing">
       <title>New HandlerMethod-based Support Classes For Annotated Controller
       Processing</title>
 
@@ -396,7 +396,7 @@
 
     </section>
 
-    <section>
+    <section id="new-in-3.1-request-mapping-consumes-produces">
       <title>"consumes" and "produces" conditions in
       <interface>@RequestMapping</interface></title>
 
@@ -407,7 +407,7 @@
       linkend="mvc-ann-requestmapping-produces" /></para>
     </section>
 
-    <section>
+    <section id="new-in-3.1-flash-redirect-attributes">
       <title>Flash Attributes and
       <interfacename>RedirectAttributes</interfacename></title>
 
@@ -425,7 +425,7 @@
       for more details.</para>
     </section>
 
-    <section>
+    <section id="new-in-3.1-uri-template-var-enhancements">
       <title>URI Template Variable Enhancements</title>
 
       <para>URI template variables from the current request are used in more
@@ -460,7 +460,7 @@
         </itemizedlist></para>
     </section>
 
-    <section>
+    <section id="new-in-3.1-mvc-valid-requestbody">
       <title><interfacename>@Valid</interfacename> On
       <interface>@RequestBody</interface> Controller Method Arguments</title>
 
@@ -473,7 +473,7 @@
       <literal>400</literal> response code.</para>
     </section>
 
-    <section>
+    <section id="new-in-3.1-mvc-requestpart">
       <title><interfacename>@RequestPart</interfacename> Annotation On
       Controller Method Arguments</title>
 
@@ -483,7 +483,7 @@
       linkend="mvc-multipart" />.</para>
     </section>
 
-    <section>
+    <section id="new-in-3.1-mvc-uricomponentsbuilder">
       <title><classname>UriComponentsBuilder</classname> and <classname>UriComponents</classname></title>
 
       <para>A new <classname>UriComponents</classname> class has been added,
