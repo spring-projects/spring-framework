@@ -603,7 +603,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
       <para>Note that you can also use the standard
         <interfacename>BeanInfo</interfacename> JavaBeans mechanism here as well
         (described <ulink
-        url="http://java.sun.com/docs/books/tutorial/javabeans/customization/index.html"
+        url="http://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html"
         >in not-amazing-detail here</ulink>). Find below an example of using the
         <interfacename>BeanInfo</interfacename> mechanism for explicitly
         registering one or more <interfacename>PropertyEditor</interfacename>
