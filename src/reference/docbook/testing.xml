@@ -2111,7 +2111,7 @@ public void updateWithSessionFlush() {
 
           <para>The <emphasis>Spring TestContext Framework</emphasis> offers
           full integration with JUnit 4.5+ through a custom runner (tested on
-          JUnit 4.5 – 4.9). By annotating test classes with
+          JUnit 4.5 – 4.10). By annotating test classes with
           <literal>@RunWith(SpringJUnit4ClassRunner.class)</literal>,
           developers can implement standard JUnit-based unit and integration
           tests and simultaneously reap the benefits of the TestContext
@@ -2416,7 +2416,7 @@ public class HibernateClinicTests extends AbstractClinicTests { }
       </listitem>
 
       <listitem>
-        <para><ulink url="http://grinder.sourceforge.net/">Grinder</ulink>:
+        <para><ulink url="http://grinder.sourceforge.net/">The Grinder</ulink>:
         Java load testing framework.</para>
       </listitem>
     </itemizedlist>
