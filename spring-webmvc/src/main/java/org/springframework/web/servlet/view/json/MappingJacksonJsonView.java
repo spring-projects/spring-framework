@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.view.json;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +75,7 @@ public class MappingJacksonJsonView extends AbstractView {
 
 	private boolean disableCaching = true;
 
+	private boolean updateContentLength = false;
 
 	/**
 	 * Construct a new {@code JacksonJsonView}, setting the content type to {@code application/json}.
@@ -201,6 +204,16 @@ public class MappingJacksonJsonView extends AbstractView {
 		this.disableCaching = disableCaching;
 	}
 
+	/**
+	 * Whether to update the 'Content-Length' header of the response. When set to
+	 * {@code true}, the response is buffered in order to determine the content
+	 * length and set the 'Content-Length' header of the response.
+	 * <p>The default setting is {@code false}.
+	 */
+	public void setUpdateContentLength(boolean updateContentLength) {
+		this.updateContentLength = updateContentLength;
+	}
+
 
 	@Override
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
@@ -217,9 +230,10 @@ public class MappingJacksonJsonView extends AbstractView {
 	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
 
+		OutputStream stream = this.updateContentLength ? createTemporaryOutputStream() : response.getOutputStream();
+
 		Object value = filterModel(model);
-		JsonGenerator generator =
-				this.objectMapper.getJsonFactory().createJsonGenerator(response.getOutputStream(), this.encoding);
+		JsonGenerator generator = this.objectMapper.getJsonFactory().createJsonGenerator(stream, this.encoding);
 
 		// A workaround for JsonGenerators not applying serialization features
 		// https://github.com/FasterXML/jackson-databind/issues/12
@@ -231,6 +245,10 @@ public class MappingJacksonJsonView extends AbstractView {
 			generator.writeRaw("{} && ");
 		}
 		this.objectMapper.writeValue(generator, value);
+
+		if (this.updateContentLength) {
+			writeToResponse(response, (ByteArrayOutputStream) stream);
+		}
 	}
 
 	/**

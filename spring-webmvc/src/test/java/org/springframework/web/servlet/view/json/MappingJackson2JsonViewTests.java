@@ -59,7 +59,7 @@ import com.fasterxml.jackson.databind.ser.Serializers;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class MappingJackson2JsonViewTest {
+public class MappingJackson2JsonViewTests {
 
 	private MappingJackson2JsonView view;
 
@@ -94,6 +94,7 @@ public class MappingJackson2JsonViewTest {
 		model.put("bindingResult", createMock("binding_result", BindingResult.class));
 		model.put("foo", "bar");
 
+		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
 		assertEquals("no-cache", response.getHeader("Pragma"));
@@ -104,6 +105,7 @@ public class MappingJackson2JsonViewTest {
 
 		String jsonResult = response.getContentAsString();
 		assertTrue(jsonResult.length() > 0);
+		assertEquals(jsonResult.length(), response.getContentLength());
 
 		validateResult();
 	}
@@ -137,9 +139,11 @@ public class MappingJackson2JsonViewTest {
 		model.put("bindingResult", createMock("binding_result", BindingResult.class));
 		model.put("foo", bean);
 
+		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
 		assertTrue(response.getContentAsString().length() > 0);
+		assertEquals(response.getContentAsString().length(), response.getContentLength());
 
 		validateResult();
 	}

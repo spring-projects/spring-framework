@@ -25,7 +25,8 @@ Changes in version 3.2 M1
 * support access to all URI vars via @PathVariable Map<String, String>
 * add "excludedExceptions" property to SimpleUrlHandlerMapping
 * add CompositeRequestCondition for use with multiple custom request mapping conditions
-* add option to configure custom MessageCodesResolver through WebMvcConfigurer
+* add ability to configure custom MessageCodesResolver through the MVC Java config
+* add option in MappingJacksonJsonView for setting the Content-Length header
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------

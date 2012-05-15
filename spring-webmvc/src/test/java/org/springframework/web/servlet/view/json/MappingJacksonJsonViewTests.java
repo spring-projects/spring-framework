@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import org.springframework.validation.BindingResult;
  * @author Jeremy Grelle
  * @author Arjen Poutsma
  */
-public class MappingJacksonJsonViewTest {
+public class MappingJacksonJsonViewTests {
 
 	private MappingJacksonJsonView view;
 
@@ -87,6 +87,7 @@ public class MappingJacksonJsonViewTest {
 		model.put("bindingResult", createMock("binding_result", BindingResult.class));
 		model.put("foo", "bar");
 
+		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
 		assertEquals("no-cache", response.getHeader("Pragma"));
@@ -97,6 +98,7 @@ public class MappingJacksonJsonViewTest {
 
 		String jsonResult = response.getContentAsString();
 		assertTrue(jsonResult.length() > 0);
+		assertEquals(jsonResult.length(), response.getContentLength());
 
 		validateResult();
 	}
@@ -130,9 +132,11 @@ public class MappingJacksonJsonViewTest {
 		model.put("bindingResult", createMock("binding_result", BindingResult.class));
 		model.put("foo", bean);
 
+		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
 		assertTrue(response.getContentAsString().length() > 0);
+		assertEquals(response.getContentAsString().length(), response.getContentLength());
 
 		validateResult();
 	}
