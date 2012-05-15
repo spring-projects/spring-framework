@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -362,7 +362,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	/**
 	 * Sets whether this unmarshaller should re-use objects. This will be only used when unmarshalling to existing
-	 * object. </p> The default is {@link false}, which means that the objects won't be re-used.
+	 * object. </p> The default is {@code false}, which means that the objects won't be re-used.
 	 *
 	 * @see org.exolab.castor.xml.Unmarshaller#setReuseObjects(boolean)
 	 */
@@ -371,7 +371,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	}
 
 	/**
-	 * Sets whether this unmarshaller should clear collections upon the first use. </p> The default is {@link false},
+	 * Sets whether this unmarshaller should clear collections upon the first use. </p> The default is {@code false},
 	 * which means that marshaller won't clear collections.
 	 *
 	 * @see org.exolab.castor.xml.Unmarshaller#setClearCollections(boolean)

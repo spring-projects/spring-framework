@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class MediaTypeTests {
 		assertTrue(applicationWildcardXml.includes(applicationSoapXml));
 		assertFalse(applicationSoapXml.includes(applicationWildcardXml));
 	}
-	
+
 	@Test
 	public void isCompatible() throws Exception {
 		MediaType textPlain = MediaType.TEXT_PLAIN;
@@ -102,7 +102,7 @@ public class MediaTypeTests {
 	public void slashInSubtype() {
 		new MediaType("text", "/");
 	}
-	
+
 	@Test
 	public void getDefaultQualityValue() {
 		MediaType mediaType = new MediaType("text", "plain");
@@ -477,7 +477,7 @@ public class MediaTypeTests {
 			}
 		}
 	}
-	
+
 	@Test
 	public void sortByQualityUnrelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
@@ -504,7 +504,7 @@ public class MediaTypeTests {
 		MediaType mediaType = MediaType.parseMediaType("application/xml");
 		assertEquals(mediaType, conversionService.convert("application/xml", MediaType.class));
 	}
-	
+
 	@Test
 	public void isConcrete() {
 		assertTrue("text/plain not concrete", MediaType.TEXT_PLAIN.isConcrete());

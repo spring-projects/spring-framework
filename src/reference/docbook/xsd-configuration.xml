@@ -125,7 +125,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 implementation, the <classname>FieldRetrievingFactoryBean</classname>, to
                 set the value of the <literal>'isolation'</literal> property on a bean
                 to the value of the <literal>'java.sql.Connection.TRANSACTION_SERIALIZABLE'</literal>
-                constant. This is all well and good, but it is a tad verbose and (unneccessarily)
+                constant. This is all well and good, but it is a tad verbose and (unnecessarily)
                 exposes Spring's internal plumbing to the end user.
                 </para>
                 <para>The following XML Schema-based version is more concise
@@ -771,7 +771,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 <interfacename>@Resource</interfacename> (if available), and JPA's
                 <interfacename>@PersistenceContext</interfacename> and <interfacename>@PersistenceUnit</interfacename>
                 (if available). Alternatively, you can choose to activate the individual
-                <interfacename>BeanPostProcessors</interfacename> for those annotations explictly.</para>
+                <interfacename>BeanPostProcessors</interfacename> for those annotations explicitly.</para>
                 <note>
                     <para>This element does <emphasis>not</emphasis> activate processing of Spring's
                     <link linkend="transaction-declarative-annotations"><interfacename>@Transactional</interfacename></link>

@@ -76,6 +76,17 @@ public class UriComponentsBuilderTests {
 		assertEquals("Invalid result URI", uri, result.toUri());
 	}
 
+	// SPR-9317
+
+    @Test
+    public void fromUriEncodedQuery() throws URISyntaxException {
+        URI uri = new URI("http://www.example.org/?param=aGVsbG9Xb3JsZA%3D%3D");
+        String fromUri = UriComponentsBuilder.fromUri(uri).build().getQueryParams().get("param").get(0);
+        String fromUriString = UriComponentsBuilder.fromUriString(uri.toString()).build().getQueryParams().get("param").get(0);
+
+        assertEquals(fromUri, fromUriString);
+    }
+
 	@Test
 	public void fromUriString() {
 		UriComponents result = UriComponentsBuilder.fromUriString("http://www.ietf.org/rfc/rfc3986.txt").build();

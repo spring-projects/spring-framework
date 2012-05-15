@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.ObjectUtils;
  * Concrete implementation of {@link AbstractGenericContextLoader} that loads
  * bean definitions from
  * {@link org.springframework.context.annotation.Configuration configuration classes}.
- * 
+ *
  * <p>Note: <code>AnnotationConfigContextLoader</code> supports
  * {@link org.springframework.context.annotation.Configuration configuration classes}
  * rather than the String-based resource locations defined by the legacy
@@ -46,13 +46,13 @@ import org.springframework.util.ObjectUtils;
  * <code>AbstractContextLoader</code> or <code>AbstractGenericContextLoader</code>.
  * Consequently, <code>AnnotationConfigContextLoader</code> should chiefly be
  * considered a {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
- * rather than a {@link org.springframework.test.context.ContextLoader ContextLoader}. 
- * 
+ * rather than a {@link org.springframework.test.context.ContextLoader ContextLoader}.
+ *
  * @author Sam Brannen
  * @since 3.1
- * @see #processContextConfiguration()
- * @see #detectDefaultConfigurationClasses()
- * @see #loadBeanDefinitions()
+ * @see #processContextConfiguration(ContextConfigurationAttributes)
+ * @see #detectDefaultConfigurationClasses(Class)
+ * @see #loadBeanDefinitions(GenericApplicationContext, MergedContextConfiguration)
  */
 public class AnnotationConfigContextLoader extends AbstractGenericContextLoader {
 
@@ -72,9 +72,9 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * supplied configuration attributes. Otherwise, properties in the supplied
 	 * configuration attributes will not be modified.
 	 * @param configAttributes the context configuration attributes to process
-	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration()
+	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration(ContextConfigurationAttributes)
 	 * @see #isGenerateDefaultLocations()
-	 * @see #detectDefaultConfigurationClasses()
+	 * @see #detectDefaultConfigurationClasses(Class)
 	 */
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && isGenerateDefaultLocations()) {
@@ -117,7 +117,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * {@link Configuration @Configuration}.
 	 * <p>The implementation of this method adheres to the contract defined in the
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
-	 * SPI. Specifically, this method uses introspection to detect default 
+	 * SPI. Specifically, this method uses introspection to detect default
 	 * configuration classes that comply with the constraints required of
 	 * {@code @Configuration} class implementations. If a potential candidate
 	 * configuration class does meet these requirements, this method will log a
@@ -187,7 +187,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * <code>AnnotationConfigContextLoader</code> should be used as a 
+	 * <code>AnnotationConfigContextLoader</code> should be used as a
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
@@ -226,7 +226,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	}
 
 	/**
-	 * <code>AnnotationConfigContextLoader</code> should be used as a 
+	 * <code>AnnotationConfigContextLoader</code> should be used as a
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.

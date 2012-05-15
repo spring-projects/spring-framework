@@ -269,7 +269,7 @@
 
 &lt;/web-app&gt;</programlisting>
 
-    <para>In the preceding example, all requests startig with
+    <para>In the preceding example, all requests starting with
     <literal>/example</literal> will be handled by the
     <classname>DispatcherServlet</classname> instance named
     <literal>example</literal>. This is only the first step in setting up
@@ -1073,7 +1073,7 @@ public void addPet(@RequestBody Pet pet, Model model) {
           <para>The <emphasis>consumes</emphasis> condition is supported on
           the type and on the method level. Unlike most other conditions, when
           used at the type level, method-level consumable types override
-          rather than extend type-level consumeable types.</para>
+          rather than extend type-level consumable types.</para>
         </tip>
       </section>
 
@@ -1116,7 +1116,7 @@ public Pet getPet(@PathVariable String petId, Model model) {
         <para>You can narrow request matching through request parameter
         conditions such as <code>"myParam"</code>, <code>"!myParam"</code>, or
         <code>"myParam=myValue"</code>. The first two test for request
-        parameter presense/absence and the third for a specific parameter
+        parameter presence/absence and the third for a specific parameter
         value. Here is an example with a request parameter value
         condition:</para>
 
@@ -2892,7 +2892,7 @@ public String upload(...) {
   &lt;/property&gt;
   &lt;property name="defaultViews"&gt;
     &lt;list&gt;
-      &lt;bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" /&gt;
+      &lt;bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" /&gt;
     &lt;/list&gt;
   &lt;/property&gt;
 &lt;/bean&gt;
@@ -2924,7 +2924,7 @@ public String upload(...) {
       the <classname>SampleContentAtomView</classname> if the view name
       returned is <classname>content</classname>. If the request is made with
       the file extension <literal>.json</literal>, the
-      <classname>MappingJacksonJsonView</classname> instance from the
+      <classname>MappingJackson2JsonView</classname>instance from the
       <literal>DefaultViews</literal> list will be selected regardless of the
       view name. Alternatively, client requests can be made without a file
       extension but with the <literal>Accept</literal> header set to the
@@ -3588,7 +3588,7 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
       However, the <literal>@RequestPart("meta-data") MetaData</literal>
       method argument in this case is read as JSON content based on its
       <literal>'Content-Type'</literal> header and converted with the help of
-      the <classname>MappingJacksonHttpMessageConverter</classname>.</para>
+      the <classname>MappingJackson2HttpMessageConverter</classname>.</para>
     </section>
   </section>
 
@@ -4256,9 +4256,10 @@ public class WebConfig {
                 </listitem>
 
                 <listitem>
-                  <para><classname>MappingJacksonHttpMessageConverter</classname>
-                  converts to/from JSON — added if Jackson is present on the
-                  classpath.</para>
+                  <para><classname>MappingJackson2HttpMessageConverter</classname>
+                  (or <classname>MappingJacksonHttpMessageConverter</classname>)
+                  converts to/from JSON — added if Jackson 2 (or Jackson) is present
+                  on the classpath.</para>
                 </listitem>
 
                 <listitem>
@@ -4580,7 +4581,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       <code>DefaultServletHttpRequestHandler</code> will attempt to
       auto-detect the default Servlet for the container at startup time, using
       a list of known names for most of the major Servlet containers
-      (including Tomcat, Jetty, Glassfish, JBoss, Resin, WebLogic, and
+      (including Tomcat, Jetty, GlassFish, JBoss, Resin, WebLogic, and
       WebSphere). If the default Servlet has been custom configured with a
       different name, or if a different Servlet container is being used where
       the default Servlet name is unknown, then the default Servlet's name

@@ -27,12 +27,13 @@ import org.springframework.util.NumberUtils;
 /**
  * The minus operator supports:
  * <ul>
+ * <li>subtraction of BigDecimals
  * <li>subtraction of doubles (floats are represented as doubles)
  * <li>subtraction of longs
  * <li>subtraction of integers
  * <li>subtraction of an int from a string of one character (effectively decreasing that character), so 'd'-3='a'
  * </ul>
- * It can be used as a unary operator for numbers (double/long/int).  The standard promotions are performed
+ * It can be used as a unary operator for numbers (BigDecimal/double/long/int).  The standard promotions are performed
  * when the operand types vary (double-int=double).
  * For other options it defers to the registered overloader.
  *

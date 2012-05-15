@@ -45,6 +45,7 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 
 /**
@@ -137,6 +138,20 @@ public class MappingJacksonJsonViewTest {
 	}
 
 	@Test
+	public void renderWithPrettyPrint() throws Exception {
+
+		ModelMap model = new ModelMap("foo", new TestBeanSimple());
+
+		view.setPrettyPrint(true);
+		view.render(model, request, response);
+
+		String result = response.getContentAsString();
+		assertTrue("Pretty printing not applied:\n" + result, result.startsWith("{\n  \"foo\" : {\n    "));
+
+		validateResult();
+	}
+
+	@Test
 	public void renderSimpleBeanPrefixed() throws Exception {
 
 		view.setPrefixJson(true);
@@ -213,10 +228,10 @@ public class MappingJacksonJsonViewTest {
 		model.put("foo", bean);
 
 		Object actual = view.filterModel(model);
-		
+
 		assertSame(bean, actual);
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void filterTwoKeyModel() throws Exception {

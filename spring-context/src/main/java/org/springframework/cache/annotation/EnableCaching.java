@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,7 +163,7 @@ public @interface EnableCaching {
 
 	/**
 	 * Indicate how caching advice should be applied. The default is
-	 * {@link AdviceMode.PROXY}.
+	 * {@link AdviceMode#PROXY}.
 	 * @see AdviceMode
 	 */
 	AdviceMode mode() default AdviceMode.PROXY;

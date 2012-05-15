@@ -47,7 +47,7 @@ public class OperatorPower extends Operator {
 			Number op1 = (Number) operandOne;
 			Number op2 = (Number) operandTwo;
             if ( op1 instanceof BigDecimal ) {
-            	// BigDecimal.pow has a limit in the range.
+            	// TODO BigDecimal.pow has a limit in the range.
             	// is it correct to use the power function this way?
                 BigDecimal bd1 = NumberUtils.convertNumberToTargetClass(op1, BigDecimal.class);
 				return new TypedValue(bd1.pow(op2.intValue()));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.stereotype.Controller;
@@ -73,16 +73,17 @@ public class WebMvcConfigurationSupportTests {
 	public void setUp() {
 		mvcConfiguration = new TestWebMvcConfiguration();
 	}
-	
+
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {
 		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
 		cxt.registerSingleton("controller", TestController.class);
-		
+
 		RequestMappingHandlerMapping handlerMapping = mvcConfiguration.requestMappingHandlerMapping();
 		assertEquals(0, handlerMapping.getOrder());
 
 		handlerMapping.setApplicationContext(cxt);
+		handlerMapping.afterPropertiesSet();
 		HandlerExecutionChain chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertNotNull(chain.getInterceptors());
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[0].getClass());
@@ -95,7 +96,7 @@ public class WebMvcConfigurationSupportTests {
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
 		assertTrue(handlerMapping.getClass().getName().endsWith("EmptyHandlerMapping"));
 	}
-	
+
 	@Test
 	public void beanNameHandlerMapping() throws Exception {
 		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
@@ -112,7 +113,7 @@ public class WebMvcConfigurationSupportTests {
 		assertEquals(2, chain.getInterceptors().length);
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[1].getClass());
 	}
-	
+
 	@Test
 	public void emptyResourceHandlerMapping() {
 		mvcConfiguration.setApplicationContext(new StaticWebApplicationContext());
@@ -121,7 +122,7 @@ public class WebMvcConfigurationSupportTests {
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
 		assertTrue(handlerMapping.getClass().getName().endsWith("EmptyHandlerMapping"));
 	}
-	
+
 	@Test
 	public void emptyDefaultServletHandlerMapping() {
 		mvcConfiguration.setServletContext(new MockServletContext());
@@ -130,7 +131,7 @@ public class WebMvcConfigurationSupportTests {
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
 		assertTrue(handlerMapping.getClass().getName().endsWith("EmptyHandlerMapping"));
 	}
-	
+
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
 		RequestMappingHandlerAdapter adapter = mvcConfiguration.requestMappingHandlerAdapter();
@@ -145,29 +146,29 @@ public class WebMvcConfigurationSupportTests {
 		ConversionService conversionService = initializer.getConversionService();
 		assertNotNull(conversionService);
 		assertTrue(conversionService instanceof FormattingConversionService);
-		
+
 		Validator validator = initializer.getValidator();
 		assertNotNull(validator);
 		assertTrue(validator instanceof LocalValidatorFactoryBean);
-		
+
 		assertEquals(false, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
 	}
-	
+
 	@Test
 	public void handlerExceptionResolver() throws Exception {
-		HandlerExceptionResolverComposite compositeResolver = 
+		HandlerExceptionResolverComposite compositeResolver =
 			(HandlerExceptionResolverComposite) mvcConfiguration.handlerExceptionResolver();
-		
+
 		assertEquals(0, compositeResolver.getOrder());
 
 		List<HandlerExceptionResolver> expectedResolvers = new ArrayList<HandlerExceptionResolver>();
 		mvcConfiguration.addDefaultHandlerExceptionResolvers(expectedResolvers);
 		assertEquals(expectedResolvers.size(), compositeResolver.getExceptionResolvers().size());
 	}
-	
-	@Test 
+
+	@Test
 	public void webMvcConfigurerExtensionHooks() throws Exception {
-		
+
 		StaticWebApplicationContext appCxt = new StaticWebApplicationContext();
 		appCxt.setServletContext(new MockServletContext(new FileSystemResourceLoader()));
 		appCxt.registerSingleton("controller", TestController.class);
@@ -175,35 +176,36 @@ public class WebMvcConfigurationSupportTests {
 		WebConfig webConfig = new WebConfig();
 		webConfig.setApplicationContext(appCxt);
 		webConfig.setServletContext(appCxt.getServletContext());
-		
+
 		String actual = webConfig.mvcConversionService().convert(new TestBean(), String.class);
 		assertEquals("converted", actual);
 
 		RequestMappingHandlerAdapter adapter = webConfig.requestMappingHandlerAdapter();
 		assertEquals(1, adapter.getMessageConverters().size());
-		
+
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
 		assertNotNull(initializer);
-		
+
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(null, "");
 		initializer.getValidator().validate(null, bindingResult);
 		assertEquals("invalid", bindingResult.getAllErrors().get(0).getCode());
 
 		@SuppressWarnings("unchecked")
-		List<HandlerMethodArgumentResolver> argResolvers= (List<HandlerMethodArgumentResolver>) 
+		List<HandlerMethodArgumentResolver> argResolvers= (List<HandlerMethodArgumentResolver>)
 			new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
 		assertEquals(1, argResolvers.size());
 
 		@SuppressWarnings("unchecked")
-		List<HandlerMethodReturnValueHandler> handlers = (List<HandlerMethodReturnValueHandler>) 
+		List<HandlerMethodReturnValueHandler> handlers = (List<HandlerMethodReturnValueHandler>)
 			new DirectFieldAccessor(adapter).getPropertyValue("customReturnValueHandlers");
 		assertEquals(1, handlers.size());
-		
+
 		HandlerExceptionResolverComposite composite = (HandlerExceptionResolverComposite) webConfig.handlerExceptionResolver();
 		assertEquals(1, composite.getExceptionResolvers().size());
-		
+
 		RequestMappingHandlerMapping rmHandlerMapping = webConfig.requestMappingHandlerMapping();
 		rmHandlerMapping.setApplicationContext(appCxt);
+		rmHandlerMapping.afterPropertiesSet();
 		HandlerExecutionChain chain = rmHandlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
 		assertNotNull(chain.getInterceptors());
 		assertEquals(2, chain.getInterceptors().length);
@@ -234,7 +236,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@Controller
 	private static class TestController {
-		
+
 		@SuppressWarnings("unused")
 		@RequestMapping("/")
 		public void handle() {
@@ -242,15 +244,15 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	private static class TestWebMvcConfiguration extends WebMvcConfigurationSupport {
-		
+
 	}
-	
+
 	/**
-	 * The purpose of this class is to test that an implementation of a {@link WebMvcConfigurer} 
+	 * The purpose of this class is to test that an implementation of a {@link WebMvcConfigurer}
 	 * can also apply customizations by extension from {@link WebMvcConfigurationSupport}.
 	 */
 	private class WebConfig extends WebMvcConfigurationSupport implements WebMvcConfigurer {
-		
+
 		@Override
 		public void addFormatters(FormatterRegistry registry) {
 			registry.addConverter(new Converter<TestBean, String>() {
@@ -262,7 +264,7 @@ public class WebMvcConfigurationSupportTests {
 
 		@Override
 		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-			converters.add(new MappingJacksonHttpMessageConverter());
+			converters.add(new MappingJackson2HttpMessageConverter());
 		}
 
 		@Override
@@ -312,5 +314,5 @@ public class WebMvcConfigurationSupportTests {
 			configurer.enable("default");
 		}
 	}
-	
+
 }

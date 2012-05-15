@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition.Pr
  * @author Rossen Stoyanchev
  */
 public class ProducesRequestConditionTests {
-	
+
 	@Test
 	public void producesMatch() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
@@ -44,7 +44,7 @@ public class ProducesRequestConditionTests {
 
 		assertNotNull(condition.getMatchingCondition(request));
 	}
-	
+
 	@Test
 	public void negatedProducesMatch() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!text/plain");
@@ -60,7 +60,7 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!application/xml");
 		assertEquals(Collections.emptySet(), condition.getProducibleMediaTypes());
 	}
-	
+
 	@Test
 	public void producesWildcardMatch() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/*");
@@ -87,6 +87,26 @@ public class ProducesRequestConditionTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Accept", "application/xml");
+
+		assertNull(condition.getMatchingCondition(request));
+	}
+
+	@Test
+	public void producesParseError() {
+		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Accept", "bogus");
+
+		assertNull(condition.getMatchingCondition(request));
+	}
+
+	@Test
+	public void producesParseErrorWithNegation() {
+		ProducesRequestCondition condition = new ProducesRequestCondition("!text/plain");
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader("Accept", "bogus");
 
 		assertNull(condition.getMatchingCondition(request));
 	}
@@ -126,12 +146,12 @@ public class ProducesRequestConditionTests {
 		assertTrue(html.compareTo(xml, request) > 0);
 		assertTrue(xml.compareTo(html, request) < 0);
 	}
-	
+
 	@Test
 	public void compareToWithSingleExpression() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Accept", "text/plain");
-		
+
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/plain");
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("text/*");
 
@@ -188,7 +208,7 @@ public class ProducesRequestConditionTests {
 	@Test
 	public void compareToMediaTypeAll() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		
+
 		ProducesRequestCondition condition1 = new ProducesRequestCondition();
 		ProducesRequestCondition condition2 = new ProducesRequestCondition("application/json");
 
@@ -202,7 +222,7 @@ public class ProducesRequestConditionTests {
 
 		assertTrue(condition1.compareTo(condition2, request) < 0);
 		assertTrue(condition2.compareTo(condition1, request) > 0);
-	
+
 		request.addHeader("Accept", "*/*");
 
 		condition1 = new ProducesRequestCondition();
@@ -255,7 +275,7 @@ public class ProducesRequestConditionTests {
 		ProducesRequestCondition result = condition1.combine(condition2);
 		assertEquals(condition2, result);
 	}
-	
+
 	@Test
 	public void combineWithDefault() {
 		ProducesRequestCondition condition1 = new ProducesRequestCondition("text/plain");

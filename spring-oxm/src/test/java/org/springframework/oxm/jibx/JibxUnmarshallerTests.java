@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,16 @@
 
 package org.springframework.oxm.jibx;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import org.junit.Ignore;
+import java.io.ByteArrayInputStream;
 
+import javax.xml.transform.stream.StreamSource;
+
+import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.Unmarshaller;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -30,6 +34,10 @@ import org.springframework.oxm.Unmarshaller;
  * not occur by default. The Gradle build should succeed, however.
  */
 public class JibxUnmarshallerTests extends AbstractUnmarshallerTests {
+
+	protected static final String INPUT_STRING_WITH_SPECIAL_CHARACTERS =
+			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
+					"<tns:flight><tns:airline>Air Libert\u00e9</tns:airline><tns:number>42</tns:number></tns:flight></tns:flights>";
 
 	@Override
 	protected Unmarshaller createUnmarshaller() throws Exception {
@@ -58,6 +66,19 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests {
 	@Ignore
 	public void unmarshalPartialStaxSourceXmlStreamReader() throws Exception {
 		// JiBX does not support reading XML fragments, hence the override here
+	}
+
+	@Test
+	public void unmarshalStreamSourceInputStreamUsingNonDefaultEncoding() throws Exception {
+		String encoding = "ISO-8859-1";
+		((JibxMarshaller)unmarshaller).setEncoding(encoding);
+
+		StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING_WITH_SPECIAL_CHARACTERS.getBytes(encoding)));
+		Object flights = unmarshaller.unmarshal(source);
+		testFlights(flights);
+
+		FlightType flight = ((Flights)flights).getFlight(0);
+		assertEquals("Airline is invalid", "Air Libert\u00e9", flight.getAirline());
 	}
 
 }

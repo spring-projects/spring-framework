@@ -91,7 +91,7 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 	 * {@inheritDoc}
 	 * <p>The parent {@linkplain #getEnvironment() environment} is
 	 * delegated to this (child) context if the parent is a
-	 * {@link ConfigurableApplicationContext} implementation.
+	 * {@link org.springframework.context.ConfigurableApplicationContext} implementation.
 	 * <p>The parent {@linkplain #getServletContext() servlet context} is
 	 * delegated to this (child) context if the parent is a {@link WebApplicationContext}
 	 * implementation.

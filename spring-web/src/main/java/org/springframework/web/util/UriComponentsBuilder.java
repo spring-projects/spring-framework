@@ -260,8 +260,8 @@ public class UriComponentsBuilder {
 
 		this.scheme = uri.getScheme();
 
-		if (uri.getUserInfo() != null) {
-			this.userInfo = uri.getUserInfo();
+		if (uri.getRawUserInfo() != null) {
+			this.userInfo = uri.getRawUserInfo();
 		}
 		if (uri.getHost() != null) {
 			this.host = uri.getHost();
@@ -269,15 +269,15 @@ public class UriComponentsBuilder {
 		if (uri.getPort() != -1) {
 			this.port = uri.getPort();
 		}
-		if (StringUtils.hasLength(uri.getPath())) {
-			this.pathBuilder = new FullPathComponentBuilder(uri.getPath());
+		if (StringUtils.hasLength(uri.getRawPath())) {
+			this.pathBuilder = new FullPathComponentBuilder(uri.getRawPath());
 		}
-		if (StringUtils.hasLength(uri.getQuery())) {
+		if (StringUtils.hasLength(uri.getRawQuery())) {
 			this.queryParams.clear();
-			query(uri.getQuery());
+			query(uri.getRawQuery());
 		}
-		if (uri.getFragment() != null) {
-			this.fragment = uri.getFragment();
+		if (uri.getRawFragment() != null) {
+			this.fragment = uri.getRawFragment();
 		}
 		return this;
 	}

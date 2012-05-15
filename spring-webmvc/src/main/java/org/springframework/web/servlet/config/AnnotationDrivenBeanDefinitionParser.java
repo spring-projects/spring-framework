@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
@@ -65,52 +66,52 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 import org.w3c.dom.Element;
 
 /**
- * A {@link BeanDefinitionParser} that provides the configuration for the 
+ * A {@link BeanDefinitionParser} that provides the configuration for the
  * {@code <annotation-driven/>} MVC namespace  element.
  *
  * <p>This class registers the following {@link HandlerMapping}s:</p>
  * <ul>
- * 	<li>{@link RequestMappingHandlerMapping} 
+ * 	<li>{@link RequestMappingHandlerMapping}
  * 	ordered at 0 for mapping requests to annotated controller methods.
- * 	<li>{@link BeanNameUrlHandlerMapping} 
+ * 	<li>{@link BeanNameUrlHandlerMapping}
  * 	ordered at 2 to map URL paths to controller bean names.
  * </ul>
  *
- * <p><strong>Note:</strong> Additional HandlerMappings may be registered 
- * as a result of using the {@code <view-controller>} or the 
+ * <p><strong>Note:</strong> Additional HandlerMappings may be registered
+ * as a result of using the {@code <view-controller>} or the
  * {@code <resources>} MVC namespace elements.
- * 
+ *
  * <p>This class registers the following {@link HandlerAdapter}s:
  * <ul>
- * 	<li>{@link RequestMappingHandlerAdapter} 
+ * 	<li>{@link RequestMappingHandlerAdapter}
  * 	for processing requests with annotated controller methods.
- * 	<li>{@link HttpRequestHandlerAdapter} 
+ * 	<li>{@link HttpRequestHandlerAdapter}
  * 	for processing requests with {@link HttpRequestHandler}s.
- * 	<li>{@link SimpleControllerHandlerAdapter} 
+ * 	<li>{@link SimpleControllerHandlerAdapter}
  * 	for processing requests with interface-based {@link Controller}s.
  * </ul>
- * 
+ *
  * <p>This class registers the following {@link HandlerExceptionResolver}s:
  * <ul>
- * 	<li>{@link ExceptionHandlerExceptionResolver} for handling exceptions 
+ * 	<li>{@link ExceptionHandlerExceptionResolver} for handling exceptions
  * 	through @{@link ExceptionHandler} methods.
- * 	<li>{@link ResponseStatusExceptionResolver} for exceptions annotated 
+ * 	<li>{@link ResponseStatusExceptionResolver} for exceptions annotated
  * 	with @{@link ResponseStatus}.
- * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring 
+ * 	<li>{@link DefaultHandlerExceptionResolver} for resolving known Spring
  * 	exception types
  * </ul>
- * 
- * <p>Both the {@link RequestMappingHandlerAdapter} and the 
- * {@link ExceptionHandlerExceptionResolver} are configured with default 
+ *
+ * <p>Both the {@link RequestMappingHandlerAdapter} and the
+ * {@link ExceptionHandlerExceptionResolver} are configured with default
  * instances of the following kind, unless custom instances are provided:
  * <ul>
  * 	<li>A {@link DefaultFormattingConversionService}
- * 	<li>A {@link LocalValidatorFactoryBean} if a JSR-303 implementation is 
+ * 	<li>A {@link LocalValidatorFactoryBean} if a JSR-303 implementation is
  * 	available on the classpath
- * 	<li>A range of {@link HttpMessageConverter}s depending on what 3rd party 
+ * 	<li>A range of {@link HttpMessageConverter}s depending on what 3rd party
  * 	libraries are available on the classpath.
  * </ul>
- * 
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Arjen Poutsma
@@ -124,6 +125,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
+
+	private static final boolean jackson2Present =
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", AnnotationDrivenBeanDefinitionParser.class.getClassLoader()) &&
+					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
 	private static final boolean jacksonPresent =
 			ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", AnnotationDrivenBeanDefinitionParser.class.getClassLoader()) &&
@@ -158,7 +163,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedList<?> messageConverters = getMessageConverters(element, source, parserContext);
 		ManagedList<?> argumentResolvers = getArgumentResolvers(element, source, parserContext);
 		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, source, parserContext);
-		
+
 		RootBeanDefinition methodAdapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 		methodAdapterDef.setSource(source);
 		methodAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -215,7 +220,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		parserContext.registerComponent(new BeanComponentDefinition(defaultExceptionResolver, defaultExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(mappedCsInterceptorDef, mappedInterceptorName));
 
-		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off" 
+		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off"
 		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
 
 		parserContext.popAndRegisterContainingComponent();
@@ -309,7 +314,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				messageConverters
 						.add(createConverterBeanDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
 			}
-			if (jacksonPresent) {
+			if (jackson2Present) {
+				messageConverters.add(createConverterBeanDefinition(MappingJackson2HttpMessageConverter.class, source));
+			}
+			else if (jacksonPresent) {
 				messageConverters.add(createConverterBeanDefinition(MappingJacksonHttpMessageConverter.class, source));
 			}
 			if (romePresent) {

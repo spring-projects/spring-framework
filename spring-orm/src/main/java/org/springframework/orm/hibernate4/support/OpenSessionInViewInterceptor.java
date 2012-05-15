@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate4.SessionFactoryUtils;
@@ -30,7 +29,9 @@ import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.WebRequestInterceptor;
+import org.springframework.web.context.request.async.AbstractDelegatingCallable;
+import org.springframework.web.context.request.async.AsyncExecutionChain;
+import org.springframework.web.context.request.async.AsyncWebRequestInterceptor;
 
 /**
  * Spring web request interceptor that binds a Hibernate <code>Session</code> to the
@@ -72,7 +73,7 @@ import org.springframework.web.context.request.WebRequestInterceptor;
  * @see org.springframework.orm.hibernate4.HibernateTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
-public class OpenSessionInViewInterceptor implements WebRequestInterceptor {
+public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor {
 
 	/**
 	 * Suffix that gets appended to the <code>SessionFactory</code>
@@ -112,11 +113,45 @@ public class OpenSessionInViewInterceptor implements WebRequestInterceptor {
 		else {
 			logger.debug("Opening Hibernate Session in OpenSessionInViewInterceptor");
 			Session session = openSession();
-			TransactionSynchronizationManager.bindResource(getSessionFactory(), new SessionHolder(session));
+			SessionHolder sessionHolder = new SessionHolder(session);
+			TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
 		}
 	}
 
 	public void postHandle(WebRequest request, ModelMap model) {
+	}
+
+	/**
+	 * Create a <code>Callable</code> to bind the <code>Hibernate</code> session
+	 * to the async request thread.
+	 */
+	public AbstractDelegatingCallable getAsyncCallable(WebRequest request) {
+		String attributeName = getParticipateAttributeName();
+		if (request.getAttribute(attributeName, WebRequest.SCOPE_REQUEST) != null) {
+			return null;
+		}
+
+		final SessionHolder sessionHolder =
+				(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
+
+		return new AbstractDelegatingCallable() {
+			public Object call() throws Exception {
+				TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
+				getNextCallable().call();
+				return null;
+			}
+		};
+	}
+
+	/**
+	 * Unbind the Hibernate <code>Session</code> from the main thread leaving
+	 * it open for further use from an async thread.
+	 */
+	public void postHandleAsyncStarted(WebRequest request) {
+		String attributeName = getParticipateAttributeName();
+		if (request.getAttribute(attributeName, WebRequest.SCOPE_REQUEST) == null) {
+			TransactionSynchronizationManager.unbindResource(getSessionFactory());
+		}
 	}
 
 	/**

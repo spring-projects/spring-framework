@@ -86,7 +86,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       ><classname>FileSystemXmlApplicationContext</classname></ulink>.
       <!-- MLP: Beverly to review --> While XML has been the traditional format
       for defining configuration metadata you can instruct the container to use
-      Java annotations or code as the metadata format by providng a small amount
+      Java annotations or code as the metadata format by providing a small amount
       of XML configuration to declaratively enable support for these additional
       metadata formats.</para>
 
@@ -224,7 +224,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
         <para>After you learn about Spring's IoC container, you may want to know
           more about Spring's <interfacename>Resource</interfacename>
           abstraction, as described in <xref linkend="resources"/>, which
-          provides a convenient mechanism for reading an InputSream from
+          provides a convenient mechanism for reading an InputStream from
           locations defined in a URI syntax. In particular,
           <classname>Resource</classname> paths are used to construct
           applications contexts as described in <xref
@@ -356,7 +356,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
       <para>The <interfacename>ApplicationContext</interfacename> is the
         interface for an advanced factory capable of maintaining a registry of
         different beans and their dependencies. Using the method <methodname>T
-        getBean(Stringname, Class&lt;T&gt; requiredType)</methodname> you can
+        getBean(String name, Class&lt;T&gt; requiredType)</methodname> you can
         retrieve instances of your beans.</para>
 
       <para>The <interfacename>ApplicationContext</interfacename> enables you to

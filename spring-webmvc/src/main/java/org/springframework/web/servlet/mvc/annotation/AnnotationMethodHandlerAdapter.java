@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -443,7 +443,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	/**
 	 * This method always returns -1 since an annotated controller can have many methods,
 	 * each requiring separate lastModified calculations. Instead, an
-	 * @{@link RequestMapping}-annotated method can calculate the lastModified value, call
+	 * {@link RequestMapping}-annotated method can calculate the lastModified value, call
 	 * {@link org.springframework.web.context.request.WebRequest#checkNotModified(long)}
 	 * to check it, and return {@code null} if that returns {@code true}.
 	 * @see org.springframework.web.context.request.WebRequest#checkNotModified(long)
@@ -483,7 +483,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * @return the ServletRequestDataBinder instance to use
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ServletRequestDataBinder#bind(javax.servlet.ServletRequest)
-	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, org.springframework.core.MethodParameter) 
+	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, org.springframework.core.MethodParameter)
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object target, String objectName) throws Exception {
 		return new ServletRequestDataBinder(target, objectName);

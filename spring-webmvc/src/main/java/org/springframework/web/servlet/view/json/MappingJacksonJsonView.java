@@ -20,19 +20,22 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.SerializerFactory;
-
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.AbstractView;
+
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
@@ -62,12 +65,14 @@ public class MappingJacksonJsonView extends AbstractView {
 
 	private boolean prefixJson = false;
 
+	private Boolean prettyPrint;
+
 	private Set<String> modelKeys;
 
 	private boolean extractValueFromSingleKeyModel = false;
 
 	private boolean disableCaching = true;
-	
+
 
 	/**
 	 * Construct a new {@code JacksonJsonView}, setting the content type to {@code application/json}.
@@ -90,6 +95,13 @@ public class MappingJacksonJsonView extends AbstractView {
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "'objectMapper' must not be null");
 		this.objectMapper = objectMapper;
+		configurePrettyPrint();
+	}
+
+	private void configurePrettyPrint() {
+		if (this.prettyPrint != null) {
+			this.objectMapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, this.prettyPrint);
+		}
 	}
 
 	/**
@@ -114,13 +126,28 @@ public class MappingJacksonJsonView extends AbstractView {
 	}
 
 	/**
+	 * Whether to use the {@link DefaultPrettyPrinter} when writing JSON.
+	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
+	 * <pre>
+	 * ObjectMapper mapper = new ObjectMapper();
+	 * mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+	 * converter.setObjectMapper(mapper);
+	 * </pre>
+	 * <p>The default value is {@code false}.
+	 */
+	public void setPrettyPrint(boolean prettyPrint) {
+		this.prettyPrint = prettyPrint;
+		configurePrettyPrint();
+	}
+
+	/**
 	 * Set the attribute in the model that should be rendered by this view.
 	 * When set, all other model attributes will be ignored.
 	 */
 	public void setModelKey(String modelKey) {
 		this.modelKeys = Collections.singleton(modelKey);
 	}
-	
+
 	/**
 	 * Set the attributes in the model that should be rendered by this view.
 	 * When set, all other model attributes will be ignored.
@@ -193,6 +220,13 @@ public class MappingJacksonJsonView extends AbstractView {
 		Object value = filterModel(model);
 		JsonGenerator generator =
 				this.objectMapper.getJsonFactory().createJsonGenerator(response.getOutputStream(), this.encoding);
+
+		// A workaround for JsonGenerators not applying serialization features
+		// https://github.com/FasterXML/jackson-databind/issues/12
+		if (this.objectMapper.getSerializationConfig().isEnabled(SerializationConfig.Feature.INDENT_OUTPUT)) {
+			generator.useDefaultPrettyPrinter();
+		}
+
 		if (this.prefixJson) {
 			generator.writeRaw("{} && ");
 		}

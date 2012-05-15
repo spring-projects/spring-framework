@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Encapsulates information about a bean method consisting of a {@linkplain #getMethod() method} and a 
- * {@linkplain #getBean() bean}. Provides convenient access to method parameters, the method return value, 
+ * Encapsulates information about a bean method consisting of a {@linkplain #getMethod() method} and a
+ * {@linkplain #getBean() bean}. Provides convenient access to method parameters, the method return value,
  * method annotations.
  *
  * <p>The class may be created with a bean instance or with a bean name (e.g. lazy bean, prototype bean).
  * Use {@link #createWithResolvedBean()} to obtain an {@link HandlerMethod} instance with a bean instance
- * initialized through the bean factory.  
+ * initialized through the bean factory.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -49,7 +49,7 @@ public class HandlerMethod {
 	private final Object bean;
 
 	private final Method method;
-	
+
 	private final BeanFactory beanFactory;
 
 	private MethodParameter[] parameters;
@@ -87,7 +87,7 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * Constructs a new handler method with the given bean name and method. The bean name will be lazily 
+	 * Constructs a new handler method with the given bean name and method. The bean name will be lazily
 	 * initialized when {@link #createWithResolvedBean()} is called.
 	 * @param beanName the bean name
 	 * @param beanFactory the bean factory to use for bean initialization
@@ -120,7 +120,7 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * Returns the type of the handler for this handler method. 
+	 * Returns the type of the handler for this handler method.
 	 * Note that if the bean type is a CGLIB-generated class, the original, user-defined class is returned.
 	 */
 	public Class<?> getBeanType() {
@@ -132,7 +132,7 @@ public class HandlerMethod {
 			return ClassUtils.getUserClass(bean.getClass());
 		}
 	}
-	
+
 	/**
 	 * If the bean method is a bridge method, this method returns the bridged (user-defined) method.
 	 * Otherwise it returns the same method as {@link #getMethod()}.
@@ -149,7 +149,7 @@ public class HandlerMethod {
 			int parameterCount = this.bridgedMethod.getParameterTypes().length;
 			MethodParameter[] p = new MethodParameter[parameterCount];
 			for (int i = 0; i < parameterCount; i++) {
-				p[i] = new HandlerMethodParameter(this.bridgedMethod, i);
+				p[i] = new HandlerMethodParameter(i);
 			}
 			this.parameters = p;
 		}
@@ -157,10 +157,17 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * Returns the method return type, as {@code MethodParameter}.
+	 * Return the HandlerMethod return type.
 	 */
 	public MethodParameter getReturnType() {
-		return new HandlerMethodParameter(this.bridgedMethod, -1);
+		return new HandlerMethodParameter(-1);
+	}
+
+	/**
+	 * Return the actual return value type.
+	 */
+	public MethodParameter getReturnValueType(Object returnValue) {
+		return new ReturnValueMethodParameter(returnValue);
 	}
 
 	/**
@@ -171,8 +178,8 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * Returns a single annotation on the underlying method traversing its super methods if no 
-	 * annotation can be found on the given method itself. 
+	 * Returns a single annotation on the underlying method traversing its super methods if no
+	 * annotation can be found on the given method itself.
 	 * @param annotationType the type of annotation to introspect the method for.
 	 * @return the annotation, or {@code null} if none found
 	 */
@@ -181,7 +188,7 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * If the provided instance contains a bean name rather than an object instance, the bean name is resolved 
+	 * If the provided instance contains a bean name rather than an object instance, the bean name is resolved
 	 * before a {@link HandlerMethod} is created and returned.
 	 */
 	public HandlerMethod createWithResolvedBean() {
@@ -192,7 +199,7 @@ public class HandlerMethod {
 		}
 		return new HandlerMethod(handler, method);
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -216,32 +223,40 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * A {@link MethodParameter} that resolves method annotations even when the actual annotations
-	 * are on a bridge method rather than on the current method. Annotations on super types are
-	 * also returned via {@link AnnotationUtils#findAnnotation(Method, Class)}. 
+	 * A MethodParameter with HandlerMethod-specific behavior.
 	 */
 	private class HandlerMethodParameter extends MethodParameter {
-		
-		public HandlerMethodParameter(Method method, int parameterIndex) {
-			super(method, parameterIndex);
+
+		protected HandlerMethodParameter(int index) {
+			super(HandlerMethod.this.bridgedMethod, index);
 		}
 
-		/**
-		 * Return {@link HandlerMethod#getBeanType()} rather than the method's class, which could be
-		 * important for the proper discovery of generic types.
-		 */
 		@Override
 		public Class<?> getDeclaringClass() {
 			return HandlerMethod.this.getBeanType();
 		}
 
-		/**
-		 * Return the method annotation via {@link HandlerMethod#getMethodAnnotation(Class)}, which will find
-		 * the annotation by traversing super-types and handling annotations on bridge methods correctly.
-		 */
 		@Override
 		public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
 			return HandlerMethod.this.getMethodAnnotation(annotationType);
+		}
+	}
+
+	/**
+	 * A MethodParameter for a HandlerMethod return type based on an actual return value.
+	 */
+	private class ReturnValueMethodParameter extends HandlerMethodParameter {
+
+		private final Object returnValue;
+
+		public ReturnValueMethodParameter(Object returnValue) {
+			super(-1);
+			this.returnValue = returnValue;
+		}
+
+		@Override
+		public Class<?> getParameterType() {
+			return (this.returnValue != null) ? this.returnValue.getClass() : super.getParameterType();
 		}
 	}
 

@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
 public class ResourceHttpRequestHandlerTests {
 
 	private ResourceHttpRequestHandler handler;
-	
+
 	@Before
 	public void setUp() {
 		List<Resource> resourcePaths = new ArrayList<Resource>();
@@ -52,7 +52,7 @@ public class ResourceHttpRequestHandlerTests {
 		handler.setCacheSeconds(3600);
 		handler.setServletContext(new TestServletContext());
 	}
-	
+
 	@Test
 	public void getResource() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -65,11 +65,11 @@ public class ResourceHttpRequestHandlerTests {
 		assertTrue(Long.valueOf(response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
 		assertEquals("max-age=3600, must-revalidate", response.getHeader("Cache-Control"));
 		assertTrue(response.containsHeader("Last-Modified"));
-		assertEquals(Long.valueOf(response.getHeader("Last-Modified")).longValue(), 
+		assertEquals(Long.valueOf(response.getHeader("Last-Modified")).longValue(),
 				new ClassPathResource("test/foo.css", getClass()).getFile().lastModified());
 		assertEquals("h1 { color:red; }", response.getContentAsString());
 	}
-	
+
 	@Test
 	public void getResourceWithHtmlMediaType() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -81,10 +81,10 @@ public class ResourceHttpRequestHandlerTests {
 		assertTrue(Long.valueOf(response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
 		assertEquals("max-age=3600, must-revalidate", response.getHeader("Cache-Control"));
 		assertTrue(response.containsHeader("Last-Modified"));
-		assertEquals(Long.valueOf(response.getHeader("Last-Modified")).longValue(), 
+		assertEquals(Long.valueOf(response.getHeader("Last-Modified")).longValue(),
 				new ClassPathResource("test/foo.html", getClass()).getFile().lastModified());
 	}
-	
+
 	@Test
 	public void getResourceFromAlternatePath() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -97,11 +97,11 @@ public class ResourceHttpRequestHandlerTests {
 		assertTrue(Long.valueOf(response.getHeader("Expires")) >= System.currentTimeMillis() - 1000 + (3600 * 1000));
 		assertEquals("max-age=3600, must-revalidate", response.getHeader("Cache-Control"));
 		assertTrue(response.containsHeader("Last-Modified"));
-		assertEquals(Long.valueOf(response.getHeader("Last-Modified")).longValue(), 
+		assertEquals(Long.valueOf(response.getHeader("Last-Modified")).longValue(),
 				new ClassPathResource("testalternatepath/baz.css", getClass()).getFile().lastModified());
 		assertEquals("h1 { color:red; }", response.getContentAsString());
 	}
-	
+
 	@Test
 	public void getResourceFromSubDirectory() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -112,7 +112,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("text/javascript", response.getContentType());
 		assertEquals("function foo() { console.log(\"hello world\"); }", response.getContentAsString());
 	}
-	
+
 	@Test
 	public void getResourceFromSubDirectoryOfAlternatePath() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -138,7 +138,7 @@ public class ResourceHttpRequestHandlerTests {
 		response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
 		assertEquals(404, response.getStatus());
-		
+
 		handler.setLocations(Arrays.<Resource>asList(new ClassPathResource("testsecret/", getClass())));
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "secret.txt");
 		response = new MockHttpServletResponse();
@@ -158,7 +158,7 @@ public class ResourceHttpRequestHandlerTests {
 		handler.handleRequest(request, response);
 		assertEquals(HttpServletResponse.SC_NOT_MODIFIED, response.getStatus());
 	}
-	
+
 	@Test
 	public void modified() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -169,9 +169,9 @@ public class ResourceHttpRequestHandlerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
 		assertEquals(HttpServletResponse.SC_OK, response.getStatus());
-		assertEquals("h1 { color:red; }", response.getContentAsString());		
+		assertEquals("h1 { color:red; }", response.getContentAsString());
 	}
-	
+
 	@Test
 	public void directory() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -191,7 +191,7 @@ public class ResourceHttpRequestHandlerTests {
 		handler.handleRequest(request, response);
 		assertEquals(404, response.getStatus());
 	}
-	
+
 	@Test(expected=IllegalStateException.class)
 	public void noPathWithinHandlerMappingAttribute() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -199,7 +199,7 @@ public class ResourceHttpRequestHandlerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
 	}
-	
+
 	@Test(expected=HttpRequestMethodNotSupportedException.class)
 	public void unsupportedHttpMethod() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -208,7 +208,7 @@ public class ResourceHttpRequestHandlerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
 	}
-	
+
 	@Test
 	public void resourceNotFound() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -217,6 +217,11 @@ public class ResourceHttpRequestHandlerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		handler.handleRequest(request, response);
 		assertEquals(404, response.getStatus());
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void locationsNotSet() throws Exception {
+		new ResourceHttpRequestHandler().afterPropertiesSet();
 	}
 
 

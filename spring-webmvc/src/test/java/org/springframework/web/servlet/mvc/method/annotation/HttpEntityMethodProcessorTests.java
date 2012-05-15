@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import org.springframework.web.servlet.mvc.method.annotation.HttpEntityMethodPro
 
 /**
  * Test fixture with {@link HttpEntityMethodProcessor} and mock {@link HttpMessageConverter}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -106,7 +106,7 @@ public class HttpEntityMethodProcessorTests {
 		returnTypeResponseEntityProduces = new MethodParameter(getClass().getMethod("handle4"), -1);
 
 		mavContainer = new ModelAndViewContainer();
-		
+
 		servletRequest = new MockHttpServletRequest();
 		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
@@ -219,7 +219,7 @@ public class HttpEntityMethodProcessorTests {
 
 		fail("Expected exception");
 	}
-	
+
 	@Test(expected = HttpMediaTypeNotAcceptableException.class)
 	public void handleReturnValueNotAcceptableProduces() throws Exception {
 		String body = "Foo";
@@ -235,6 +235,17 @@ public class HttpEntityMethodProcessorTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntityProduces, mavContainer, webRequest);
 
+		fail("Expected exception");
+	}
+
+	// SPR-9142
+
+	@Test(expected=HttpMediaTypeNotAcceptableException.class)
+	public void handleReturnValueNotAcceptableParseError() throws Exception {
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("Body", HttpStatus.ACCEPTED);
+		servletRequest.addHeader("Accept", "01");
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 		fail("Expected exception");
 	}
 
@@ -269,7 +280,7 @@ public class HttpEntityMethodProcessorTests {
 		assertEquals("headerValue", outputMessage.getValue().getHeaders().get("header").get(0));
 		verify(messageConverter);
 	}
-	
+
 	public ResponseEntity<String> handle1(HttpEntity<String> httpEntity, ResponseEntity<String> responseEntity, int i) {
 		return responseEntity;
 	}

@@ -25,6 +25,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -38,7 +39,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
- * {@link HttpRequestHandler} that serves static resources optimized for superior browser performance 
+ * {@link HttpRequestHandler} that serves static resources optimized for superior browser performance
  * (according to the guidelines of Page Speed, YSlow, etc.) by allowing for flexible cache settings
  * ({@linkplain #setCacheSeconds "cacheSeconds" property}, last-modified support).
  *
@@ -50,7 +51,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * (if present) so that a {@code 304} status code will be returned as appropriate, avoiding unnecessary
  * overhead for resources that are already cached by the client. The use of {@code Resource} locations
  * allows resource requests to easily be mapped to locations other than the web application root. For
- * example, resources could be served from a classpath location such as "classpath:/META-INF/public-web-resources/", 
+ * example, resources could be served from a classpath location such as "classpath:/META-INF/public-web-resources/",
  * allowing convenient packaging and serving of resources such as a JavaScript library from within jar files.
  *
  * <p>To ensure that users with a primed browser cache get the latest changes to application-specific
@@ -66,7 +67,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @author Juergen Hoeller
  * @since 3.0.4
  */
-public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler {
+public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler, InitializingBean {
 
 	private static final boolean jafPresent =
 			ClassUtils.isPresent("javax.activation.FileTypeMap", ResourceHttpRequestHandler.class.getClassLoader());
@@ -87,6 +88,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		this.locations = locations;
 	}
 
+	public void afterPropertiesSet() throws Exception {
+		Assert.notEmpty(locations, "Locations list must not be empty");
+	}
 
 	/**
 	 * Processes a resource request.

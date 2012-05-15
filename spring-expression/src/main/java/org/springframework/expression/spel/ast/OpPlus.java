@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,30 +18,36 @@ package org.springframework.expression.spel.ast;
 
 import java.math.BigDecimal;
 
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
+import org.springframework.expression.TypeConverter;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 
 /**
  * The plus operator will:
  * <ul>
+ * <li>add BigDecimals
  * <li>add doubles (floats are represented as doubles)
  * <li>add longs
  * <li>add integers
  * <li>concatenate strings
  * </ul>
- * It can be used as a unary operator for numbers (double/long/int).  The standard promotions are performed
+ * It can be used as a unary operator for numbers (BigDecimal/double/long/int).  The standard promotions are performed
  * when the operand types vary (double+int=double). For other options it defers to the registered overloader.
- * 
+ *
  * @author Andy Clement
+ * @author Ivo Smid
  * @since 3.0
  */
 public class OpPlus extends Operator {
 
 	public OpPlus(int pos, SpelNodeImpl... operands) {
 		super("+", pos, operands);
+		Assert.notEmpty(operands);
 	}
 
 	@Override
@@ -51,22 +57,21 @@ public class OpPlus extends Operator {
 		if (rightOp == null) { // If only one operand, then this is unary plus
 			Object operandOne = leftOp.getValueInternal(state).getValue();
 			if (operandOne instanceof Number) {
-                if ( operandOne instanceof BigDecimal ) {
-                    return new TypedValue((BigDecimal) operandOne);
-                }
-				if (operandOne instanceof Double) {
-					return new TypedValue(((Double) operandOne).doubleValue());
-				} else if (operandOne instanceof Long) {
-					return new TypedValue(((Long) operandOne).longValue());
+				if (operandOne instanceof Double || operandOne instanceof Long || operandOne instanceof BigDecimal) {
+					return new TypedValue(operandOne); 
 				} else {
-					return new TypedValue(((Integer) operandOne).intValue());
+					return new TypedValue(((Number) operandOne).intValue());
 				}
 			}
 			return state.operate(Operation.ADD, operandOne, null);
 		}
 		else {
-			Object operandOne = leftOp.getValueInternal(state).getValue();
-			Object operandTwo = rightOp.getValueInternal(state).getValue();
+			final TypedValue operandOneValue = leftOp.getValueInternal(state);
+			final Object operandOne = operandOneValue.getValue();
+
+			final TypedValue operandTwoValue = rightOp.getValueInternal(state);
+			final Object operandTwo = operandTwoValue.getValue();
+
 			if (operandOne instanceof Number && operandTwo instanceof Number) {
 				Number op1 = (Number) operandOne;
 				Number op2 = (Number) operandTwo;
@@ -84,13 +89,14 @@ public class OpPlus extends Operator {
 			} else if (operandOne instanceof String && operandTwo instanceof String) {
 				return new TypedValue(new StringBuilder((String) operandOne).append((String) operandTwo).toString());
 			} else if (operandOne instanceof String) {
-				StringBuilder result = new StringBuilder((String)operandOne);
-				result.append((operandTwo==null?"null":operandTwo.toString()));
-				return new TypedValue(result.toString());				
+				StringBuilder result = new StringBuilder((String) operandOne);
+				result.append((operandTwo == null ? "null" : convertTypedValueToString(operandTwoValue, state)));
+				return new TypedValue(result.toString());
 			} else if (operandTwo instanceof String) {
-				StringBuilder result = new StringBuilder((operandOne==null?"null":operandOne.toString()));
-				result.append((String)operandTwo);
-				return new TypedValue(result.toString());								
+				StringBuilder result = new StringBuilder((operandOne == null ? "null" : convertTypedValueToString(
+						operandOneValue, state)));
+				result.append((String) operandTwo);
+				return new TypedValue(result.toString());
 			}
 			return state.operate(Operation.ADD, operandOne, operandTwo);
 		}
@@ -104,10 +110,32 @@ public class OpPlus extends Operator {
 		return super.toStringAST();
 	}
 
+	@Override
 	public SpelNodeImpl getRightOperand() {
-		if (children.length<2) {return null;}
+		if (children.length < 2) {
+			return null;
+		}
 		return children[1];
 	}
 
+	/**
+	 * Convert operand value to string using registered converter or using
+	 * {@code toString} method.
+	 *
+	 * @param value typed value to be converted
+	 * @param state expression state
+	 * @return {@code TypedValue} instance converted to {@code String}
+	 */
+	private static String convertTypedValueToString(TypedValue value, ExpressionState state) {
+		final TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
+		final TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(String.class);
+
+		if (typeConverter.canConvert(value.getTypeDescriptor(), typeDescriptor)) {
+			final Object obj = typeConverter.convertValue(value.getValue(), value.getTypeDescriptor(), typeDescriptor);
+			return String.valueOf(obj);
+		} else {
+			return String.valueOf(value.getValue());
+		}
+	}
 
 }

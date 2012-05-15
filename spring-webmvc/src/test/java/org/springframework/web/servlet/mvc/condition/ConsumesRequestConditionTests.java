@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class ConsumesRequestConditionTests {
 
 		assertNotNull(condition.getMatchingCondition(request));
 	}
-	
+
 	@Test
 	public void negatedConsumesMatch() {
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("!text/plain");
@@ -60,7 +60,7 @@ public class ConsumesRequestConditionTests {
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("!application/xml");
 		assertEquals(Collections.emptySet(), condition.getConsumableMediaTypes());
 	}
-	
+
 	@Test
 	public void consumesWildcardMatch() {
 		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/*");
@@ -87,6 +87,26 @@ public class ConsumesRequestConditionTests {
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setContentType("application/xml");
+
+		assertNull(condition.getMatchingCondition(request));
+	}
+
+	@Test
+	public void consumesParseError() {
+		ConsumesRequestCondition condition = new ConsumesRequestCondition("text/plain");
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType("01");
+
+		assertNull(condition.getMatchingCondition(request));
+	}
+
+	@Test
+	public void consumesParseErrorWithNegation() {
+		ConsumesRequestCondition condition = new ConsumesRequestCondition("!text/plain");
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContentType("01");
 
 		assertNull(condition.getMatchingCondition(request));
 	}
@@ -128,7 +148,7 @@ public class ConsumesRequestConditionTests {
 		ConsumesRequestCondition result = condition1.combine(condition2);
 		assertEquals(condition2, result);
 	}
-	
+
 	@Test
 	public void combineWithDefault() {
 		ConsumesRequestCondition condition1 = new ConsumesRequestCondition("text/plain");

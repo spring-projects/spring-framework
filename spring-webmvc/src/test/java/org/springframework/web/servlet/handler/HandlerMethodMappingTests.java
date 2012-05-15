@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class HandlerMethodMappingTests {
 		HandlerMethod result = mapping.getHandlerInternal(new MockHttpServletRequest("GET", "/foo"));
 		assertEquals(method1, result.getMethod());
 	}
-	
+
 	@Test(expected = IllegalStateException.class)
 	public void ambiguousMatch() throws Exception {
 		mapping.registerHandlerMethod(handler, method1, "/f?o");
@@ -95,24 +95,26 @@ public class HandlerMethodMappingTests {
 	public void testDetectHandlerMethodsInAncestorContexts() {
 		StaticApplicationContext cxt = new StaticApplicationContext();
 		cxt.registerSingleton("myHandler", MyHandler.class);
-		
+
 		AbstractHandlerMethodMapping<String> mapping1 = new MyHandlerMethodMapping();
 		mapping1.setApplicationContext(new StaticApplicationContext(cxt));
+		mapping1.afterPropertiesSet();
 
 		assertEquals(0, mapping1.getHandlerMethods().size());
 
 		AbstractHandlerMethodMapping<String> mapping2 = new MyHandlerMethodMapping();
 		mapping2.setDetectHandlerMethodsInAncestorContexts(true);
 		mapping2.setApplicationContext(new StaticApplicationContext(cxt));
+		mapping2.afterPropertiesSet();
 
 		assertEquals(2, mapping2.getHandlerMethods().size());
 	}
 
-	
+
 	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<String> {
 
 		private UrlPathHelper pathHelper = new UrlPathHelper();
-		
+
 		private PathMatcher pathMatcher = new AntPathMatcher();
 
 		@Override

@@ -32,7 +32,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * AOP Alliance <code>MethodInterceptor</code> that processes method invocations
  * asynchronously, using a given {@link org.springframework.core.task.AsyncTaskExecutor}.
- * Typically used with the {@link org.springframework.context.task.Async} annotation.
+ * Typically used with the {@link org.springframework.scheduling.annotation.Async} annotation.
  *
  * <p>In terms of target method signatures, any parameter types are supported.
  * However, the return type is constrained to either <code>void</code> or
