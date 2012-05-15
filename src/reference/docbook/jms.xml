@@ -140,7 +140,7 @@
       should ensure that it references the managed implementation of the
       <classname>ConnectionFactory</classname>.</para>
 
-      <section>
+      <section id="jms-caching-resources">
         <title>Caching Messaging Resources</title>
 
         <para>The standard API involves creating many intermediate objects. To
@@ -154,7 +154,7 @@
         IConnectionFactory are provided.</para>
       </section>
 
-      <section>
+      <section id="jms-connection-factory">
         <title>SingleConnectionFactory</title>
 
         <para>Spring provides an implementation of the
@@ -171,7 +171,7 @@
         from JNDI.</para>
       </section>
 
-      <section>
+      <section id="jdbc-connection-factory-caching">
         <title>CachingConnectionFactory</title>
 
         <para>The <classname>CachingConnectionFactory</classname> extends the

@@ -3600,7 +3600,7 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
   <section id="mvc-exceptionhandlers">
     <title>Handling exceptions</title>
 
-    <section>
+    <section id="mvc-exceptionhandlers-resolver">
       <title
       id="mvc-HandlerExceptionResolver"><interfacename>HandlerExceptionResolver</interfacename></title>
 
