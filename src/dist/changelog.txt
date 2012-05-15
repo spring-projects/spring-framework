@@ -25,6 +25,7 @@ Changes in version 3.2 M1
 * support access to all URI vars via @PathVariable Map<String, String>
 * add "excludedExceptions" property to SimpleUrlHandlerMapping
 * add CompositeRequestCondition for use with multiple custom request mapping conditions
+* add option to configure custom MessageCodesResolver through WebMvcConfigurer
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------

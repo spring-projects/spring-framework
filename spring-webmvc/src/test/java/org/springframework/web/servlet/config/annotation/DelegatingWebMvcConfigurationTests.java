@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -72,6 +73,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 		configurer.configureMessageConverters(capture(converters));
 		expect(configurer.getValidator()).andReturn(null);
+		expect(configurer.getMessageCodesResolver()).andReturn(null);
 		configurer.addFormatters(capture(conversionService));
 		configurer.addArgumentResolvers(capture(resolvers));
 		configurer.addReturnValueHandlers(capture(handlers));
@@ -91,7 +93,7 @@ public class DelegatingWebMvcConfigurationTests {
 		verify(configurer);
 	}
 
-	@Test 
+	@Test
 	public void configureMessageConverters() {
 		List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
 		configurers.add(new WebMvcConfigurerAdapter() {
@@ -102,11 +104,11 @@ public class DelegatingWebMvcConfigurationTests {
 		});
 		mvcConfiguration = new DelegatingWebMvcConfiguration();
 		mvcConfiguration.setConfigurers(configurers);
-		
+
 		RequestMappingHandlerAdapter adapter = mvcConfiguration.requestMappingHandlerAdapter();
 		assertEquals("Only one custom converter should be registered", 1, adapter.getMessageConverters().size());
 	}
-	
+
 	@Test
 	public void getCustomValidator() {
 		expect(configurer.getValidator()).andReturn(new LocalValidatorFactoryBean());
@@ -114,6 +116,17 @@ public class DelegatingWebMvcConfigurationTests {
 
 		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
 		mvcConfiguration.mvcValidator();
+
+		verify(configurer);
+	}
+
+	@Test
+	public void getCustomMessageCodesResolver() {
+		expect(configurer.getMessageCodesResolver()).andReturn(new DefaultMessageCodesResolver());
+		replay(configurer);
+
+		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
+		mvcConfiguration.getMessageCodesResolver();
 
 		verify(configurer);
 	}
@@ -139,7 +152,7 @@ public class DelegatingWebMvcConfigurationTests {
 		verify(configurer);
 	}
 
-	@Test 
+	@Test
 	public void configureExceptionResolvers() throws Exception {
 		List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
 		configurers.add(new WebMvcConfigurerAdapter() {
@@ -149,10 +162,10 @@ public class DelegatingWebMvcConfigurationTests {
 			}
 		});
 		mvcConfiguration.setConfigurers(configurers);
-		
-		HandlerExceptionResolverComposite composite = 
+
+		HandlerExceptionResolverComposite composite =
 			(HandlerExceptionResolverComposite) mvcConfiguration.handlerExceptionResolver();
 		assertEquals("Only one custom converter is expected", 1, composite.getExceptionResolvers().size());
 	}
-	
+
 }

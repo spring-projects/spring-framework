@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
+import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
@@ -280,6 +281,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		ConfigurableWebBindingInitializer webBindingInitializer = new ConfigurableWebBindingInitializer();
 		webBindingInitializer.setConversionService(mvcConversionService());
 		webBindingInitializer.setValidator(mvcValidator());
+		webBindingInitializer.setMessageCodesResolver(getMessageCodesResolver());
 
 		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
 		addArgumentResolvers(argumentResolvers);
@@ -293,6 +295,69 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomArgumentResolvers(argumentResolvers);
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 		return adapter;
+	}
+
+	/**
+	 * Returns a {@link FormattingConversionService} for use with annotated
+	 * controller methods and the {@code spring:eval} JSP tag.
+	 * Also see {@link #addFormatters} as an alternative to overriding this method.
+	 */
+	@Bean
+	public FormattingConversionService mvcConversionService() {
+		FormattingConversionService conversionService = new DefaultFormattingConversionService();
+		addFormatters(conversionService);
+		return conversionService;
+	}
+
+	/**
+	 * Returns a global {@link Validator} instance for example for validating
+	 * {@code @ModelAttribute} and {@code @RequestBody} method arguments.
+	 * Delegates to {@link #getValidator()} first and if that returns {@code null}
+	 * checks the classpath for the presence of a JSR-303 implementations
+	 * before creating a {@code LocalValidatorFactoryBean}.If a JSR-303
+	 * implementation is not available, a no-op {@link Validator} is returned.
+	 */
+	@Bean
+	public Validator mvcValidator() {
+		Validator validator = getValidator();
+		if (validator == null) {
+			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+				Class<?> clazz;
+				try {
+					String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
+					clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
+				} catch (ClassNotFoundException e) {
+					throw new BeanInitializationException("Could not find default validator", e);
+				} catch (LinkageError e) {
+					throw new BeanInitializationException("Could not find default validator", e);
+				}
+				validator = (Validator) BeanUtils.instantiate(clazz);
+			}
+			else {
+				validator = new Validator() {
+					public boolean supports(Class<?> clazz) {
+						return false;
+					}
+					public void validate(Object target, Errors errors) {
+					}
+				};
+			}
+		}
+		return validator;
+	}
+
+	/**
+	 * Override this method to provide a custom {@link Validator}.
+	 */
+	protected Validator getValidator() {
+		return null;
+	}
+
+	/**
+	 * Override this method to provide a custom {@link MessageCodesResolver}.
+	 */
+	protected MessageCodesResolver getMessageCodesResolver() {
+		return null;
 	}
 
 	/**
@@ -388,65 +453,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Returns a {@link FormattingConversionService} for use with annotated
-	 * controller methods and the {@code spring:eval} JSP tag.
-	 * Also see {@link #addFormatters} as an alternative to overriding this method.
-	 */
-	@Bean
-	public FormattingConversionService mvcConversionService() {
-		FormattingConversionService conversionService = new DefaultFormattingConversionService();
-		addFormatters(conversionService);
-		return conversionService;
-	}
-
-	/**
 	 * Override this method to add custom {@link Converter}s and {@link Formatter}s.
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
-	}
-
-	/**
-	 * Returns a global {@link Validator} instance for example for validating
-	 * {@code @ModelAttribute} and {@code @RequestBody} method arguments.
-	 * Delegates to {@link #getValidator()} first and if that returns {@code null}
-	 * checks the classpath for the presence of a JSR-303 implementations
-	 * before creating a {@code LocalValidatorFactoryBean}.If a JSR-303
-	 * implementation is not available, a no-op {@link Validator} is returned.
-	 */
-	@Bean
-	public Validator mvcValidator() {
-		Validator validator = getValidator();
-		if (validator == null) {
-			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
-				Class<?> clazz;
-				try {
-					String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
-					clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
-				} catch (ClassNotFoundException e) {
-					throw new BeanInitializationException("Could not find default validator", e);
-				} catch (LinkageError e) {
-					throw new BeanInitializationException("Could not find default validator", e);
-				}
-				validator = (Validator) BeanUtils.instantiate(clazz);
-			}
-			else {
-				validator = new Validator() {
-					public boolean supports(Class<?> clazz) {
-						return false;
-					}
-					public void validate(Object target, Errors errors) {
-					}
-				};
-			}
-		}
-		return validator;
-	}
-
-	/**
-	 * Override this method to provide a custom {@link Validator}.
-	 */
-	protected Validator getValidator() {
-		return null;
 	}
 
 	/**

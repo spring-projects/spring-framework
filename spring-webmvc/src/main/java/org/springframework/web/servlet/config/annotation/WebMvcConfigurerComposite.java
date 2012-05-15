@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -45,77 +44,92 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	public void addFormatters(FormatterRegistry registry) {
-		for (WebMvcConfigurer delegate : delegates) {
+		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addFormatters(registry);
 		}
 	}
 
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-		for (WebMvcConfigurer delegate : delegates) {
+		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureMessageConverters(converters);
 		}
 	}
 
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		for (WebMvcConfigurer delegate : delegates) {
+		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addArgumentResolvers(argumentResolvers);
 		}
 	}
 
 	public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-		for (WebMvcConfigurer delegate : delegates) {
+		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addReturnValueHandlers(returnValueHandlers);
 		}
 	}
 
 	public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-		for (WebMvcConfigurer delegate : delegates) {
+		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureHandlerExceptionResolvers(exceptionResolvers);
 		}
 	}
 
 	public void addInterceptors(InterceptorRegistry registry) {
-		for (WebMvcConfigurer delegate : delegates) {
+		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addInterceptors(registry);
 		}
 	}
 
 	public void addViewControllers(ViewControllerRegistry registry) {
-		for (WebMvcConfigurer delegate : delegates) {
+		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addViewControllers(registry);
 		}
 	}
 
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		for (WebMvcConfigurer delegate : delegates) {
+		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addResourceHandlers(registry);
 		}
 	}
 
 	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
-		for (WebMvcConfigurer delegate : delegates) {
+		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureDefaultServletHandling(configurer);
 		}
 	}
 
 	public Validator getValidator() {
-		Map<WebMvcConfigurer, Validator> validators = new HashMap<WebMvcConfigurer, Validator>();
-		for (WebMvcConfigurer delegate : delegates) {
-			Validator validator = delegate.getValidator();
+		List<Validator> candidates = new ArrayList<Validator>();
+		for (WebMvcConfigurer configurer : this.delegates) {
+			Validator validator = configurer.getValidator();
 			if (validator != null) {
-				validators.put(delegate, validator);
+				candidates.add(validator);
 			}
 		}
-		if (validators.size() == 0) {
-			return null;
+		return selectSingleInstance(candidates, Validator.class);
+	}
+
+	private <T> T selectSingleInstance(List<T> instances, Class<T> instanceType) {
+		if (instances.size() > 1) {
+			throw new IllegalStateException(
+					"Only one [" + instanceType + "] was expected but multiple instances were provided: " + instances);
 		}
-		else if (validators.size() == 1) {
-			return validators.values().iterator().next();
+		else if (instances.size() == 1) {
+			return instances.get(0);
 		}
 		else {
-			throw new IllegalStateException(
-					"Multiple custom validators provided from [" + validators.keySet() + "]");
+			return null;
 		}
+	}
+
+	public MessageCodesResolver getMessageCodesResolver() {
+		List<MessageCodesResolver> candidates = new ArrayList<MessageCodesResolver>();
+		for (WebMvcConfigurer configurer : this.delegates) {
+			MessageCodesResolver messageCodesResolver = configurer.getMessageCodesResolver();
+			if (messageCodesResolver != null) {
+				candidates.add(messageCodesResolver);
+			}
+		}
+		return selectSingleInstance(candidates, MessageCodesResolver.class);
 	}
 
 }

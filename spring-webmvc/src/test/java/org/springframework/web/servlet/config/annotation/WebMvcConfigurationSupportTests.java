@@ -40,7 +40,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.Errors;
+import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -190,6 +192,9 @@ public class WebMvcConfigurationSupportTests {
 		initializer.getValidator().validate(null, bindingResult);
 		assertEquals("invalid", bindingResult.getAllErrors().get(0).getCode());
 
+		String[] codes = initializer.getMessageCodesResolver().resolveMessageCodes("invalid", null);
+		assertEquals("custom.invalid", codes[0]);
+
 		@SuppressWarnings("unchecked")
 		List<HandlerMethodArgumentResolver> argResolvers= (List<HandlerMethodArgumentResolver>)
 			new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
@@ -248,8 +253,11 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	/**
-	 * The purpose of this class is to test that an implementation of a {@link WebMvcConfigurer}
-	 * can also apply customizations by extension from {@link WebMvcConfigurationSupport}.
+	 * Since WebMvcConfigurationSupport does not implement WebMvcConfigurer, the purpose
+	 * of this test class is also to ensure the two are in sync with each other. Effectively
+	 * that ensures that application config classes that use the combo {@code @EnableWebMvc}
+	 * plus WebMvcConfigurer can switch to extending WebMvcConfigurationSupport directly for
+	 * more advanced configuration needs.
 	 */
 	private class WebConfig extends WebMvcConfigurationSupport implements WebMvcConfigurer {
 
@@ -299,6 +307,17 @@ public class WebMvcConfigurationSupportTests {
 			registry.addInterceptor(new LocaleChangeInterceptor());
 		}
 
+		@SuppressWarnings("serial")
+		@Override
+		public MessageCodesResolver getMessageCodesResolver() {
+			return new DefaultMessageCodesResolver() {
+				@Override
+				public String[] resolveMessageCodes(String errorCode, String objectName) {
+					return new String[] { "custom." + errorCode };
+				}
+			};
+		}
+
 		@Override
 		public void addViewControllers(ViewControllerRegistry registry) {
 			registry.addViewController("/path");
@@ -313,6 +332,7 @@ public class WebMvcConfigurationSupportTests {
 		public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 			configurer.enable("default");
 		}
+
 	}
 
 }
