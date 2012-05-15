@@ -787,7 +787,7 @@ boolean trueValue =
 </programlisting>
     </section>
 
-    <section id="expressions-constrcutors">
+    <section id="expressions-constructors">
       <title>Constructors</title>
 
       <para>Constructors can be invoked using the new operator. The fully
