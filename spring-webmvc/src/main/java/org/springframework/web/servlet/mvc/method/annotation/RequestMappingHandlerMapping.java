@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
+import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
@@ -114,26 +116,36 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Provide a custom method-level request condition.
-	 * The custom {@link RequestCondition} can be of any type so long as the
-	 * same condition type is returned from all calls to this method in order
-	 * to ensure custom request conditions can be combined and compared.
-	 * @param method the handler method for which to create the condition
-	 * @return the condition, or {@code null}
-	 */
-	protected RequestCondition<?> getCustomMethodCondition(Method method) {
-		return null;
-	}
-
-	/**
 	 * Provide a custom type-level request condition.
 	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
 	 * to ensure custom request conditions can be combined and compared.
+	 *
+	 * <p>Consider extending {@link AbstractRequestCondition} for custom
+	 * condition types and using {@link CompositeRequestCondition} to provide
+	 * multiple custom conditions.
+	 *
 	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
 	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
+		return null;
+	}
+
+	/**
+	 * Provide a custom method-level request condition.
+	 * The custom {@link RequestCondition} can be of any type so long as the
+	 * same condition type is returned from all calls to this method in order
+	 * to ensure custom request conditions can be combined and compared.
+	 *
+	 * <p>Consider extending {@link AbstractRequestCondition} for custom
+	 * condition types and using {@link CompositeRequestCondition} to provide
+	 * multiple custom conditions.
+	 *
+	 * @param method the handler method for which to create the condition
+	 * @return the condition, or {@code null}
+	 */
+	protected RequestCondition<?> getCustomMethodCondition(Method method) {
 		return null;
 	}
 

@@ -6,24 +6,25 @@ http://www.springsource.org
 Changes in version 3.2 M1
 -------------------------------------
 
+* add Servlet 3.0 based async support
 * upgraded to AspectJ 1.6.12, JUnit 4.10, TestNG 6.5.2
+* add HttpMessageConverter and View types compatible with Jackson 2.0
 * better handling on failure to parse invalid 'Content-Type' or 'Accept' headers
 * handle a controller method's return value based on the actual returned value (vs declared type)
 * fix issue with combining identical controller and method level request mapping paths
 * fix concurrency issue in AnnotationMethodHandlerExceptionResolver
 * fix case-sensitivity issue with some containers on access to 'Content-Disposition' header
-* add Servlet 3.0 based async support
 * fix issue with encoded params in UriComponentsBuilder
-* add HttpMessageConverter and View types compatible with Jackson 2.0
 * add pretty print option to Jackson HttpMessageConverter and View types
-* fix issue with resolving Errors controller method argument
-* detect controller methods via InitializingBean in RequestMappingHandlerMapping
 * translate IOException from Jackson to HttpMessageNotReadableException
+* fix issue with resolving Errors controller method argument
+* implement InitializingBean in RequestMappingHandlerMapping to detect controller methods
 * fix content negotiation issue when sorting selected media types by quality value
-* Prevent further writing to the response when @ResponseStatus contains a reason
-* Deprecate HttpStatus codes 419, 420, 421
+* prevent further writing to the response when @ResponseStatus contains a reason
+* deprecate HttpStatus codes 419, 420, 421
 * support access to all URI vars via @PathVariable Map<String, String>
 * add "excludedExceptions" property to SimpleUrlHandlerMapping
+* add CompositeRequestCondition for use with multiple custom request mapping conditions
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------

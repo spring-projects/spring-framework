@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,22 +27,11 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * A test fixture for
- * {code org.springframework.web.servlet.mvc.method.RequestConditionHolder} tests.
+ * A test fixture for {@link RequestConditionHolder} tests.
  *
  * @author Rossen Stoyanchev
  */
 public class RequestConditionHolderTests {
-
-	@Test
-	public void combineEmpty() {
-		RequestConditionHolder empty = new RequestConditionHolder(null);
-		RequestConditionHolder notEmpty = new RequestConditionHolder(new ParamsRequestCondition("name"));
-
-		assertSame(empty, empty.combine(new RequestConditionHolder(null)));
-		assertSame(notEmpty, notEmpty.combine(empty));
-		assertSame(notEmpty, empty.combine(notEmpty));
-	}
 
 	@Test
 	public void combine() {
@@ -51,6 +40,16 @@ public class RequestConditionHolderTests {
 		RequestConditionHolder expected = new RequestConditionHolder(new ParamsRequestCondition("name1", "name2"));
 
 		assertEquals(expected, params1.combine(params2));
+	}
+
+	@Test
+	public void combineEmpty() {
+		RequestConditionHolder empty = new RequestConditionHolder(null);
+		RequestConditionHolder notEmpty = new RequestConditionHolder(new ParamsRequestCondition("name"));
+
+		assertSame(empty, empty.combine(empty));
+		assertSame(notEmpty, notEmpty.combine(empty));
+		assertSame(notEmpty, empty.combine(notEmpty));
 	}
 
 	@Test(expected=ClassCastException.class)

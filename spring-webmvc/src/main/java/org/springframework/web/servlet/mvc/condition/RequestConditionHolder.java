@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,40 +23,42 @@ import javax.servlet.http.HttpServletRequest;
 
 
 /**
- * A holder for a {@link RequestCondition} useful when the type of the held
- * request condition is not known ahead of time - e.g. custom condition.
+ * A holder for a {@link RequestCondition} useful when the type of the request
+ * condition is not known ahead of time, e.g. custom condition. Since this
+ * class is also an implementation of {@code RequestCondition}, effectively it
+ * decorates the held request condition and allows it to be combined and compared
+ * with other request conditions in a type and null safe way.
  *
- * <p>An implementation of {@code RequestCondition} itself, a
- * {@code RequestConditionHolder} decorates the held request condition allowing
- * it to be combined and compared with other custom request conditions while
- * ensuring type and null safety.
+ * <p>When two {@code RequestConditionHolder} instances are combined or compared
+ * with each other, it is expected the conditions they hold are of the same type.
+ * If they are not, a {@link ClassCastException} is raised.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public final class RequestConditionHolder extends AbstractRequestCondition<RequestConditionHolder> {
 
-	@SuppressWarnings("rawtypes")
-	private final RequestCondition condition;
+	private final RequestCondition<Object> condition;
 
 	/**
 	 * Create a new holder to wrap the given request condition.
 	 * @param requestCondition the condition to hold, may be {@code null}
 	 */
+	@SuppressWarnings("unchecked")
 	public RequestConditionHolder(RequestCondition<?> requestCondition) {
-		this.condition = requestCondition;
+		this.condition = (RequestCondition<Object>) requestCondition;
 	}
 
 	/**
 	 * Return the held request condition, or {@code null} if not holding one.
 	 */
 	public RequestCondition<?> getCondition() {
-		return condition;
+		return this.condition;
 	}
 
 	@Override
 	protected Collection<?> getContent() {
-		return condition != null ? Collections.singleton(condition) : Collections.emptyList();
+		return this.condition != null ? Collections.singleton(this.condition) : Collections.emptyList();
 	}
 
 	@Override
@@ -69,20 +71,19 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * instances after making sure the conditions are of the same type.
 	 * Or if one holder is empty, the other holder is returned.
 	 */
-	@SuppressWarnings("unchecked")
 	public RequestConditionHolder combine(RequestConditionHolder other) {
-		if (condition == null && other.condition == null) {
+		if (this.condition == null && other.condition == null) {
 			return this;
 		}
-		else if (condition == null) {
+		else if (this.condition == null) {
 			return other;
 		}
 		else if (other.condition == null) {
 			return this;
 		}
 		else {
-			assertIsCompatible(other);
-			RequestCondition<?> combined = (RequestCondition<?>) condition.combine(other.condition);
+			assertEqualConditionTypes(other);
+			RequestCondition<?> combined = (RequestCondition<?>) this.condition.combine(other.condition);
 			return new RequestConditionHolder(combined);
 		}
 	}
@@ -90,8 +91,8 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	/**
 	 * Ensure the held request conditions are of the same type.
 	 */
-	private void assertIsCompatible(RequestConditionHolder other) {
-		Class<?> clazz = condition.getClass();
+	private void assertEqualConditionTypes(RequestConditionHolder other) {
+		Class<?> clazz = this.condition.getClass();
 		Class<?> otherClazz = other.condition.getClass();
 		if (!clazz.equals(otherClazz)) {
 			throw new ClassCastException("Incompatible request conditions: " + clazz + " and " + otherClazz);
@@ -104,10 +105,10 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * holder, return the same holder instance.
 	 */
 	public RequestConditionHolder getMatchingCondition(HttpServletRequest request) {
-		if (condition == null) {
+		if (this.condition == null) {
 			return this;
 		}
-		RequestCondition<?> match = (RequestCondition<?>) condition.getMatchingCondition(request);
+		RequestCondition<?> match = (RequestCondition<?>) this.condition.getMatchingCondition(request);
 		return (match != null) ? new RequestConditionHolder(match) : null;
 	}
 
@@ -116,20 +117,19 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * instances after making sure the conditions are of the same type.
 	 * Or if one holder is empty, the other holder is preferred.
 	 */
-	@SuppressWarnings("unchecked")
 	public int compareTo(RequestConditionHolder other, HttpServletRequest request) {
-		if (condition == null && other.condition == null) {
+		if (this.condition == null && other.condition == null) {
 			return 0;
 		}
-		else if (condition == null) {
+		else if (this.condition == null) {
 			return 1;
 		}
 		else if (other.condition == null) {
 			return -1;
 		}
 		else {
-			assertIsCompatible(other);
-			return condition.compareTo(other.condition, request);
+			assertEqualConditionTypes(other);
+			return this.condition.compareTo(other.condition, request);
 		}
 	}
 
