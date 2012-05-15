@@ -404,7 +404,7 @@ public class AppConfig {
         <literal>AnnotationConfigApplicationContext</literal>.</para>
       </section>
 
-      <section>
+      <section id="new-bean-metadata-in-components">
         <title>Defining bean metadata within components</title>
 
         <para><literal>@Bean</literal> annotated methods are also supported
@@ -448,7 +448,7 @@ public class AppConfig {
       building RESTful web services and web applications. There are also some
       new annotations that can be used in any web application.</para>
 
-      <section>
+      <section id="new-feature-rest-support">
         <title>Comprehensive REST support</title>
 
         <para>Server-side support for building RESTful applications has been
@@ -471,7 +471,7 @@ public class AppConfig {
         information.</para>
       </section>
 
-      <section>
+      <section id="new-feature-at-mvc">
         <title>@MVC additions</title>
 
         <para>A <literal>mvc</literal> namespace has been introduced that greatly simplifies Spring MVC configuration.</para>

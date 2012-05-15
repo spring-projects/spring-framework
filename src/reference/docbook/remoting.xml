@@ -1435,7 +1435,7 @@ URI location = template.postForLocation(uri, booking, "1");
       information on using the execute method and the meaning of its other
       method arguments.</para>
 
-      <section>
+      <section id="rest-resttemplate-uri">
         <title>Working with the URI</title>
 
         <para>For each of the main HTTP methods, the <classname>RestTemplate</classname>
@@ -1485,7 +1485,7 @@ URI uri = uriComponents.toUri();</programlisting>
         
       </section>
 
-      <section>
+      <section id="rest-template-headers">
         <title>Dealing with request and response headers</title>
 
         <para>Besides the methods described above, the <classname>RestTemplate</classname>
