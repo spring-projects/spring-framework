@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,12 +83,12 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *     // ...
  * }</pre>
  *
- * <p>{@code @Bean} methods may also be declared wihtin any {@code @Component} class, in
- * which case they will get processed in a configuration class 'lite' mode in which
+ * <p>{@code @Bean} methods may also be declared within any {@code @Component} class, in
+ * which case they will get processed in a configuration class <em>'lite'</em> mode in which
  * they will simply be called as plain factory methods from the container (similar to
  * {@code factory-method} declarations in XML). The containing component classes remain
- * unmodified in this case, and there are no unusual constraints for factory methods,
- * however, scoping semantics are not respected as described above for inter-bean method
+ * unmodified in this case, and there are no unusual constraints for factory methods;
+ * however, scoping semantics are <b>not</b> respected as described above for inter-bean method
  * invocations in this mode. For example:
  * <pre class="code">
  * &#064;Component
@@ -130,6 +130,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * @author Costin Leau
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see Configuration
  * @see Scope
