@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNotSame;
 import javax.sql.DataSource;
 
 import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.Ignore;
 import org.springframework.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +30,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -46,7 +45,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see Bean
  * @see TransactionalAnnotatedConfigClassWithAtConfigurationTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@Ignore("Disabled until working within the build")
 @ContextConfiguration(classes = TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests.AnnotatedFactoryBeans.class)
 public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests extends
 		AbstractTransactionalAnnotatedConfigClassTests {
