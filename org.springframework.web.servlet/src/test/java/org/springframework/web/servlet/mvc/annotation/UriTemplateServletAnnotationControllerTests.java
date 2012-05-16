@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -351,6 +351,31 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("foo-foo", response.getContentAsString());
 	}
 
+	// SPR-9333
+	@Test
+	@SuppressWarnings("serial")
+	public void suppressDefaultSuffixPattern() throws Exception {
+		servlet = new DispatcherServlet() {
+			@Override
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
+					throws BeansException {
+				GenericWebApplicationContext wac = new GenericWebApplicationContext();
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(VariableNamesController.class));
+				RootBeanDefinition mappingDef = new RootBeanDefinition(DefaultAnnotationHandlerMapping.class);
+				mappingDef.getPropertyValues().add("useDefaultSuffixPattern", false);
+				wac.registerBeanDefinition("handlerMapping", mappingDef);
+				wac.refresh();
+				return wac;
+			}
+		};
+		servlet.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/jsmith@mail.com");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals("foo-jsmith@mail.com", response.getContentAsString());
+	}
+
 	// SPR-6906
 	@Test
 	public void controllerClassName() throws Exception {
@@ -389,7 +414,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	@Test
 	public void doIt() throws Exception {
 		initServlet(Spr6978Controller.class);
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/100");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
