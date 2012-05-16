@@ -28,6 +28,8 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 /**
  * Indicates that a method produces a bean to be managed by the Spring container.
  *
+ * <h3>Overview</h3>
+ *
  * <p>The names and semantics of the attributes to this annotation are intentionally
  * similar to those of the {@code <bean/>} element in the Spring XML schema. For
  * example:
@@ -55,12 +57,12 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *         return obj;
  *     }</pre>
  *
- * <h3>Scope, Primary, and Lazy</h3>
+ * <h3>Scope, DependsOn, Primary, and Lazy</h3>
  *
  * <p>Note that the {@code @Bean} annotation does not provide attributes for scope,
- * primary, or lazy. Rather, it should be used in conjunction with {@link Scope @Scope},
- * {@link Primary @Primary}, and {@link Lazy @Lazy} annotations to achieve those
- * semantics. For example:
+ * depends-on, primary, or lazy. Rather, it should be used in conjunction with
+ * {@link Scope @Scope}, {@link DependsOn @DependsOn}, {@link Primary @Primary},
+ * and {@link Lazy @Lazy} annotations to achieve those semantics. For example:
  *
  * <pre class="code">
  *     &#064;Bean
@@ -96,15 +98,21 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *     // ...
  * }</pre>
  *
- * <h3>Configuration Class <i>Lite</i> Mode</h3>
+ * <h3>{@code @Bean} <em>Lite</em> Mode</h3>
  *
- * <p>{@code @Bean} methods may also be declared within any {@code @Component} class, in
- * which case they will get processed in a configuration class <em>'lite'</em> mode in which
- * they will simply be called as plain factory methods from the container (similar to
- * {@code factory-method} declarations in XML) but with <b><i>prototype</i></b> semantics.
- * The containing component classes remain unmodified in this case, and there are no
- * unusual constraints for factory methods; however, scoping semantics are <b>not</b>
- * respected as described above for inter-bean method invocations in this mode. For example:
+ * <p>{@code @Bean} methods may also be declared within classes that are <em>not</em>
+ * annotated with {@code @Configuration}. For example, bean methods may be declared
+ * in a {@code @Component} class or even in a <em>plain old class</em>. In such cases,
+ * a {@code @Bean} method will get processed in a configuration class <em>'lite'</em>
+ * mode.
+ *
+ * <p>In contrast to bean methods in {@code @Configuration} classes as described
+ * above, bean methods in <em>lite</em> mode will be called as plain <em>factory
+ * methods</em> from the container (similar to {@code factory-method} declarations
+ * in XML) but with <b><em>prototype</em></b> semantics. The containing class remains
+ * unmodified in this case, and there are no unusual constraints for factory methods;
+ * however, scoping semantics are <b>not</b> respected as described above for
+ * 'inter-bean method invocations in this mode. For example:
  *
  * <pre class="code">
  * &#064;Component
