@@ -99,6 +99,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private String nestedPath = "";
 
 	private Object rootObject;
+	
+	private boolean propertyObjectIsNull;
 
 	private TypeConverterDelegate typeConverterDelegate;
 
@@ -543,6 +545,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Recursively navigate to return a BeanWrapper for the nested property path.
 	 * @param propertyPath property property path, which may be nested
 	 * @return a BeanWrapper for the target bean
+	 * @throws Exception 
 	 */
 	protected BeanWrapperImpl getBeanWrapperForPropertyPath(String propertyPath) {
 		int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(propertyPath);
@@ -550,7 +553,20 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		if (pos > -1) {
 			String nestedProperty = propertyPath.substring(0, pos);
 			String nestedPath = propertyPath.substring(pos + 1);
-			BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
+			BeanWrapperImpl nestedBw ;
+			if(this.propertyObjectIsNull)
+			{					
+				boolean userAutoGrow = this.autoGrowNestedPaths;
+				this.autoGrowNestedPaths = false;
+				try{
+				nestedBw = getNestedBeanWrapper(nestedProperty);
+				}
+				finally{
+					this.autoGrowNestedPaths = userAutoGrow;
+				}			
+			}
+			else
+				nestedBw = getNestedBeanWrapper(nestedProperty);
 			return nestedBw.getBeanWrapperForPropertyPath(nestedPath);
 		}
 		else {
@@ -830,6 +846,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			return value;
 		}
 		catch (IndexOutOfBoundsException ex) {
+			if(this.propertyObjectIsNull)
+				throw ex;
+			else
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Index of out of bounds in property path '" + propertyName + "'", ex);
 		}
@@ -844,6 +863,14 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		catch (InvocationTargetException ex) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 					"Getter for property '" + actualName + "' threw exception", ex);
+		}
+		catch(NullValueInNestedPathException ex)
+		{
+			if(this.propertyObjectIsNull)
+				throw ex;
+			else
+				throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+						"Illegal attempt to get property '" + actualName + "' threw exception", ex);
 		}
 		catch (Exception ex) {
 			throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
@@ -893,8 +920,29 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	@Override
 	public void setPropertyValue(String propertyName, Object value) throws BeansException {
 		BeanWrapperImpl nestedBw;
+		if(value== null || value.equals("")){
+			this.propertyObjectIsNull = true;
+		}
+		
 		try {
-			nestedBw = getBeanWrapperForPropertyPath(propertyName);
+				try{
+					nestedBw = getBeanWrapperForPropertyPath(propertyName);
+				}
+				catch (NullValueInNestedPathException e){
+					if (this.propertyObjectIsNull)
+						return;
+					else
+						throw e;
+				}
+				catch (IndexOutOfBoundsException e){
+					if (this.propertyObjectIsNull)
+						return;
+					else
+						throw e;
+				}
+				finally{
+						this.propertyObjectIsNull = false;
+				}
 		}
 		catch (NotReadablePropertyException ex) {
 			throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,
@@ -906,12 +954,33 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	@Override
 	public void setPropertyValue(PropertyValue pv) throws BeansException {
+		if(pv.getValue()== null ||pv.getValue().equals("")){
+			this.propertyObjectIsNull = true;
+		}
+		
 		PropertyTokenHolder tokens = (PropertyTokenHolder) pv.resolvedTokens;
 		if (tokens == null) {
 			String propertyName = pv.getName();
 			BeanWrapperImpl nestedBw;
 			try {
-				nestedBw = getBeanWrapperForPropertyPath(propertyName);
+					try{
+						nestedBw = getBeanWrapperForPropertyPath(propertyName);
+					}
+					catch (NullValueInNestedPathException e){
+						if(this.propertyObjectIsNull)
+							return;
+						else
+							throw e;
+					}
+					catch (IndexOutOfBoundsException e){
+						if (this.propertyObjectIsNull)
+							return;
+						else
+							throw e;
+					}
+					finally{
+						this.propertyObjectIsNull = false;
+					}
 			}
 			catch (NotReadablePropertyException ex) {
 				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,

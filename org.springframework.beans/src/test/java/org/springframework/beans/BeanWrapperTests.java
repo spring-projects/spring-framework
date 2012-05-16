@@ -19,6 +19,7 @@ package org.springframework.beans;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -95,6 +96,27 @@ public final class BeanWrapperTests {
 		
 		private List list;
 		
+		private Bar bar;
+		
+		public Bar getBar() {
+			return bar;
+		}
+
+		public void setBar(Bar bar) {
+			this.bar = bar;
+		}
+		
+		private List<Bar> bars;
+		
+		
+		public List<Bar> getBars() {
+			return bars;
+		}
+
+		public void setBars(List<Bar> bars) {
+			this.bars = bars;
+		}
+
 		private List<Map> listOfMaps;
 
 		public List getList() {
@@ -114,6 +136,64 @@ public final class BeanWrapperTests {
 		}
 
 	}
+	
+	static class Bar{
+		private Baz baz;
+		
+		private List<Baz> bazs;
+		
+		private String barString;
+		
+		
+		public String getBarString() {
+			return barString;
+		}
+
+		public void setBarString(String barString) {
+			this.barString = barString;
+		}
+
+		public List<Baz> getBazs() {
+			return bazs;
+		}
+
+		public void setBazs(List<Baz> bazs) {
+			this.bazs = bazs;
+		}
+
+		public Baz getBaz() {
+			return baz;
+		}
+
+		public void setBaz(Baz baz) {
+			this.baz = baz;
+		}
+		
+	}
+	
+	static class Baz{
+		
+		private String qux;
+		
+		private String yub;
+		
+		public String getYub() {
+			return yub;
+		}
+
+		public void setYub(String yub) {
+			this.yub = yub;
+		}
+
+		public String getQux(){
+			return qux;
+		}
+		
+		public void setQux(String qux){
+			this.qux = qux;
+		}
+	}
+	
 	
 	@Test
 	public void testIsReadablePropertyNotReadable() {
@@ -1873,5 +1953,124 @@ public final class BeanWrapperTests {
 
 		TEST_VALUE
 	}
+	
+	@Test	
+	public void testNoAutoGrowOnSetPropValNull(){
+		Foo foo = new Foo();		
+		assertTrue(foo.getBar()== null) ;
+		BeanWrapper bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		bw.setPropertyValue("bar.baz", null);
+		assertTrue(foo.getBar()== null) ;
+	}
+	
+	@Test
+	public void testNoAutoGrowOnSetPropValObjectNull(){
+		ITestBean rod = new TestBean("rod", 31);
+		ITestBean kerry = new TestBean("kerry", 0);
 
+		BeanWrapper bw = new BeanWrapperImpl(rod);
+		bw.setPropertyValue("spouse", kerry);
+
+		assertTrue("nested set worked", rod.getSpouse() == kerry);
+		assertTrue("no back relation", kerry.getSpouse() == null);
+		bw.setPropertyValue(new PropertyValue("spouse.spouse", null));
+		assertTrue("nested set worked", kerry.getSpouse() == null);
+		assertTrue("kerry age not set", kerry.getAge() == 0);
+		bw.setPropertyValue(new PropertyValue("spouse.age", new Integer(35)));
+		assertTrue("Set primitive on spouse", kerry.getAge() == 35);
+
+		assertEquals(kerry, bw.getPropertyValue("spouse"));
+		assertEquals(null, bw.getPropertyValue("spouse.spouse"));
+	}
+	
+	@Test
+	public void testNoAutoGrowOnSetPropValListObjectNull(){
+		Foo foo = new Foo();
+		assertTrue(foo.getBars()== null);
+		BeanWrapper bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		bw.setPropertyValue("bars[0].baz", null);
+		assertTrue(foo.getBars()== null) ;
+		bw.setPropertyValue("bars[1].baz", null);
+		assertTrue(foo.getBars()== null) ;
+	}
+	
+	@Test
+	public void testNoAutoGrowOnSetPropValListObjectNotNull(){
+		Foo foo = new Foo();
+		assertTrue(foo.getBars()== null);
+		BeanWrapper bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		bw.setPropertyValue("bars[0].baz.qux", "abc");
+		assertTrue(foo.getBars().get(0).getBaz().getQux().endsWith("abc"));
+		bw.setPropertyValue("bars[0].baz.yub", null);
+		assertTrue(foo.getBars().get(0).getBaz().getYub()== null) ;
+	}
+	
+	@Test	
+	public void testNoAutoGrowOnSetPropNestedValNull(){
+		Foo foo = new Foo();		
+		assertTrue(foo.getBar()== null) ;
+		BeanWrapper bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		bw.setPropertyValue("bar.baz.qux", null);
+		assertTrue(foo.getBar()== null) ;
+		bw.setPropertyValue("bar.baz.yub", "abc");
+		assertTrue(foo.getBar().getBaz().getYub().equals("abc") );
+	}
+	
+	@Test	
+	public void testNoAutoGrowOnSetPropNestedListObjectNull(){
+		Foo foo = new Foo();		
+		assertTrue(foo.getBar()== null) ;
+		BeanWrapper bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		bw.setPropertyValue("bars[0].barString", "xyz");
+		assertTrue(foo.getBars().get(0).barString.equals("xyz"));
+		bw.setPropertyValue("bars[0].bazs[0].qux", null);
+		assertTrue(foo.getBars().get(0).getBazs().get(0).qux== null) ;
+		bw.setPropertyValue("bars[0].bazs[0].yub", "abc");
+		assertTrue(foo.getBars().get(0).getBazs().get(0).getYub().equals("abc") );
+	}
+	
+	@Test
+	public void testBindingCaseChildSupport()
+	{
+		Foo foo = new Foo();
+		Baz bazFather = new Baz();
+		bazFather.setQux("test");
+		Baz bazChild = new Baz();
+		bazChild.setYub("test");
+		Bar bar = new Bar();
+		bar.setBaz(bazFather);
+		foo.setBar(bar);
+		foo.getBar().setBazs(new ArrayList<Baz>());
+		foo.getBar().getBazs().add(bazChild);
+		BeanWrapperImpl bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		assertNull(bw.getPropertyValue("bar.bazs[0].qux"));
+		assertNotNull(bw.getPropertyValue("bar.bazs[0].yub"));
+		
+		bw.setPropertyValue("bar.bazs[0].qux", "bob");
+		bw.setPropertyValue("bar.bazs[1].yub", "");
+		bw.setPropertyValue("bar.bazs[1].qux", "bob");
+		assertEquals("bob", foo.getBar().getBazs().get(1).getQux());
+		assertEquals("bob", foo.getBar().getBazs().get(0).getQux());
+		assertEquals("bob", bw.getPropertyValue("bar.bazs[0].qux"));
+		assertEquals("test", foo.getBar().getBazs().get(0).getYub());
+		assertEquals("test", bw.getPropertyValue("bar.bazs[0].yub"));
+	}
+	
+	@Test
+	public void testBindingCaseNewChildSupport()
+	{
+		Foo foo = new Foo();
+		BeanWrapperImpl bw = new BeanWrapperImpl(foo);
+		bw.setAutoGrowNestedPaths(true);
+		assertNull(bw.getPropertyValue("bar.bazs[0].qux"));	
+		bw.setPropertyValue("bar.bazs[0].qux", "bob");
+		assertEquals("bob", foo.getBar().getBazs().get(0).getQux());
+		assertEquals("bob", bw.getPropertyValue("bar.bazs[0].qux"));
+	}
 }
