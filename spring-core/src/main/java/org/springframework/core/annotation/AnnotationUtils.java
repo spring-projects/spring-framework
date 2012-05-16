@@ -132,12 +132,12 @@ public abstract class AnnotationUtils {
 			try {
 				Method equivalentMethod = cl.getDeclaredMethod(method.getName(), method.getParameterTypes());
 				annotation = getAnnotation(equivalentMethod, annotationType);
-				if (annotation == null) {
-					annotation = searchOnInterfaces(method, annotationType, cl.getInterfaces());
-				}
 			}
 			catch (NoSuchMethodException ex) {
-				// We're done...
+				// No equivalent method found
+			}
+			if (annotation == null) {
+				annotation = searchOnInterfaces(method, annotationType, cl.getInterfaces());
 			}
 		}
 		return annotation;
