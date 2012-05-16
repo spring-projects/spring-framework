@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.context.ApplicationContext;
@@ -81,9 +82,11 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  */
 public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandlerMapping {
 
+	static final String USE_DEFAULT_SUFFIX_PATTERN = DefaultAnnotationHandlerMapping.class.getName() + ".useDefaultSuffixPattern";
+
 	private boolean useDefaultSuffixPattern = true;
 
-	private final Map<Class, RequestMapping> cachedMappings = new HashMap<Class, RequestMapping>();
+	private final Map<Class<?>, RequestMapping> cachedMappings = new HashMap<Class<?>, RequestMapping>();
 
 
 	/**
@@ -229,6 +232,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 		if (mapping != null) {
 			validateMapping(mapping, request);
 		}
+		request.setAttribute(USE_DEFAULT_SUFFIX_PATTERN, this.useDefaultSuffixPattern);
 	}
 
 	/**
