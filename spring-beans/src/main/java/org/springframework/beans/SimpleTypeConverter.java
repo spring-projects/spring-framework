@@ -24,6 +24,8 @@ import org.springframework.core.convert.ConverterNotFoundException;
  * Simple implementation of the TypeConverter interface that does not operate
  * on any specific target object. This is an alternative to using a full-blown
  * BeanWrapperImpl instance for arbitrary type conversion needs.
+ * <p>
+ * <strong>TypeConverters are usually not thread-safe.</strong>
  *
  * @author Juergen Hoeller
  * @since 2.0
