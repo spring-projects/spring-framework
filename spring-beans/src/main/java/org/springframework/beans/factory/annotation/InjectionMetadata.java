@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,12 +54,17 @@ public class InjectionMetadata {
 
 
 	public InjectionMetadata(Class targetClass, Collection<InjectedElement> elements) {
-		this.injectedElements = Collections.synchronizedSet(new LinkedHashSet<InjectedElement>());
-		for (InjectedElement element : elements) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Found injected element on class [" + targetClass.getName() + "]: " + element);
+		if (!elements.isEmpty()) {
+			this.injectedElements = Collections.synchronizedSet(new LinkedHashSet<InjectedElement>(elements.size()));
+			for (InjectedElement element : elements) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found injected element on class [" + targetClass.getName() + "]: " + element);
+				}
+				this.injectedElements.add(element);
 			}
-			this.injectedElements.add(element);
+		}
+		else {
+			this.injectedElements = Collections.emptySet();
 		}
 	}
 
