@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public static final String SCOPE_DEFAULT = "";
 
-
 	/**
 	 * Constant that indicates no autowiring at all.
 	 * @see #setAutowireMode
@@ -96,7 +95,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Deprecated
 	public static final int AUTOWIRE_AUTODETECT = AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT;
 
-
 	/**
 	 * Constant that indicates no dependency check at all.
 	 * @see #setDependencyCheck
@@ -128,7 +126,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * #setDestroyMethodName destroy method name} for a bean as opposed to explicit
 	 * specification of a method name. The value {@value} is specifically designed to
 	 * include characters otherwise illegal in a method name, ensuring no possibility of
-	 * collisions with a legitimately named methods having the same name.
+	 * collisions with legitimately named methods having the same name.
 	 */
 	public static final String INFER_METHOD = "(inferred)";
 
@@ -206,7 +204,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Create a new AbstractBeanDefinition as deep copy of the given
+	 * Create a new AbstractBeanDefinition as a deep copy of the given
 	 * bean definition.
 	 * @param original the original bean definition to copy from
 	 * @deprecated since Spring 2.5, in favor of {@link #AbstractBeanDefinition(BeanDefinition)}
@@ -217,7 +215,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Create a new AbstractBeanDefinition as deep copy of the given
+	 * Create a new AbstractBeanDefinition as a deep copy of the given
 	 * bean definition.
 	 * @param original the original bean definition to copy from
 	 */
@@ -263,9 +261,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 
 	/**
-	 * Override settings in this bean definition (assumably a copied parent
+	 * Override settings in this bean definition (presumably a copied parent
 	 * from a parent-child inheritance relationship) from the given bean
-	 * definition (assumably the child).
+	 * definition (presumably the child).
 	 * @deprecated since Spring 2.5, in favor of {@link #overrideFrom(BeanDefinition)}
 	 */
 	@Deprecated
@@ -274,9 +272,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Override settings in this bean definition (assumably a copied parent
+	 * Override settings in this bean definition (presumably a copied parent
 	 * from a parent-child inheritance relationship) from the given bean
-	 * definition (assumably the child).
+	 * definition (presumably the child).
 	 * <ul>
 	 * <li>Will override beanClass if specified in the given bean definition.
 	 * <li>Will always take <code>abstract</code>, <code>scope</code>,
