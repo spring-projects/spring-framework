@@ -26,6 +26,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.util.Assert;
 
@@ -66,7 +68,10 @@ public class MethodParameter {
 	Map<TypeVariable, Type> typeVariableMap;
 
 	private int hash = 0;
-
+	
+	private static ConcurrentMap<Method, Annotation[][]> methodParamAnnotationsCache = new ConcurrentHashMap<Method, Annotation[][]>();
+	final private static Annotation[][] EMPTY_ANNOTATION_MATRIX = new Annotation[0][0];
+	final private static Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
 	/**
 	 * Create a new MethodParameter for the given method, with nesting level 1.
@@ -280,7 +285,7 @@ public class MethodParameter {
 	public Annotation[] getParameterAnnotations() {
 		if (this.parameterAnnotations == null) {
 			Annotation[][] annotationArray = (this.method != null ?
-					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations());
+					getMethodParameterAnnotations(this.method) : this.constructor.getParameterAnnotations());
 			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
 				this.parameterAnnotations = annotationArray[this.parameterIndex];
 			}
@@ -289,6 +294,42 @@ public class MethodParameter {
 			}
 		}
 		return this.parameterAnnotations;
+	}
+	
+	/**
+	 * 
+	 * @param m
+	 * @return parameter annotations for given m. returns
+	 */
+	static Annotation[][] getMethodParameterAnnotations(Method m) {
+		assert m != null;
+		
+		Annotation[][] result = getMethodParamAnnotationsCache().get(m);
+		if (result == null) {
+			//no point in synchronizing call to below since it's an idempotent read 
+			result = m.getParameterAnnotations(); //always returns a new copy
+			
+			//minimize cache size: do not store copies of empty arrays
+			if(result.length == 0)
+			{
+				result = EMPTY_ANNOTATION_MATRIX;
+			} else {
+				for (int i = 0; i < result.length; i++) {
+					if (result[i].length == 0) {
+						result[i] = EMPTY_ANNOTATION_ARRAY;
+					}
+				}
+			}
+			getMethodParamAnnotationsCache().put(m, result);
+		}
+		
+		//always return deep copy to prevent caller from modifying cache state
+		Annotation[][] resultCopy = new Annotation[result.length][0];
+		for(int i = 0; i < result.length; i++)
+		{
+			resultCopy[i] = result[i].clone();
+		}
+		return resultCopy;
 	}
 
 	/**
@@ -470,6 +511,10 @@ public class MethodParameter {
 			this.hash = result;
 		}
 		return result;
+	}
+
+	static ConcurrentMap<Method, Annotation[][]> getMethodParamAnnotationsCache() {
+		return methodParamAnnotationsCache;
 	}
 
 }
