@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNotSame;
 import javax.sql.DataSource;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.springframework.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,7 +44,6 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @see Bean
  * @see TransactionalAnnotatedConfigClassWithAtConfigurationTests
  */
-@Ignore("Disabled until working within the build")
 @ContextConfiguration(classes = TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests.AnnotatedFactoryBeans.class)
 public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests extends
 		AbstractTransactionalAnnotatedConfigClassTests {
@@ -95,6 +93,8 @@ public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests exte
 		public DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()//
 			.addScript("classpath:/org/springframework/test/context/junit4/spr9051/schema.sql")//
+			// Ensure that this in-memory database is only used by this class:
+			.setName(getClass().getName())//
 			.build();
 		}
 

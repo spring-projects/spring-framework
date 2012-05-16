@@ -21,7 +21,6 @@ import static org.junit.Assert.assertSame;
 import javax.sql.DataSource;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.springframework.beans.Employee;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +37,6 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @since 3.2
  * @see TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests
  */
-@Ignore("Disabled until working within the build")
 @ContextConfiguration
 public class TransactionalAnnotatedConfigClassWithAtConfigurationTests extends
 		AbstractTransactionalAnnotatedConfigClassTests {
@@ -70,6 +68,8 @@ public class TransactionalAnnotatedConfigClassWithAtConfigurationTests extends
 		public DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()//
 			.addScript("classpath:/org/springframework/test/context/junit4/spr9051/schema.sql")//
+			// Ensure that this in-memory database is only used by this class:
+			.setName(getClass().getName())//
 			.build();
 		}
 
@@ -78,7 +78,7 @@ public class TransactionalAnnotatedConfigClassWithAtConfigurationTests extends
 
 	@Before
 	public void compareDataSources() throws Exception {
-		// NOTE: the two DataSource instances are the same!
+		// NOTE: the two DataSource instances ARE the same!
 		assertSame(dataSourceFromTxManager, dataSourceViaInjection);
 	}
 

@@ -24,22 +24,22 @@ import static org.springframework.test.transaction.TransactionTestUtils.inTransa
 import javax.sql.DataSource;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.Employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * This set of tests investigates the claims made in
+ * This set of tests (i.e., all concrete subclasses) investigates the claims made in
  * <a href="https://jira.springsource.org/browse/SPR-9051" target="_blank">SPR-9051</a>
  * with regard to transactional tests.
  * 
@@ -48,19 +48,12 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.testng.AnnotationConfigTransactionalTestNGSpringContextTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public abstract class AbstractTransactionalAnnotatedConfigClassTests {
 
 	protected static final String JANE = "jane";
 	protected static final String SUE = "sue";
 	protected static final String YODA = "yoda";
-
-	protected static final int NUM_TESTS = 2;
-	protected static final int NUM_TX_TESTS = 1;
-
-	private static int numSetUpCalls = 0;
-	private static int numSetUpCallsInTransaction = 0;
-	private static int numTearDownCalls = 0;
-	private static int numTearDownCallsInTransaction = 0;
 
 	protected DataSource dataSourceFromTxManager;
 	protected DataSource dataSourceViaInjection;
@@ -82,11 +75,11 @@ public abstract class AbstractTransactionalAnnotatedConfigClassTests {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	protected int countRowsInTable(String tableName) {
+	private int countRowsInTable(String tableName) {
 		return jdbcTemplate.queryForInt("SELECT COUNT(0) FROM " + tableName);
 	}
 
-	protected int createPerson(String name) {
+	private int createPerson(String name) {
 		return jdbcTemplate.update("INSERT INTO person VALUES(?)", name);
 	}
 
@@ -103,22 +96,6 @@ public abstract class AbstractTransactionalAnnotatedConfigClassTests {
 		assertEquals("Adding '" + name + "'", 1, createPerson(name));
 	}
 
-	@BeforeClass
-	public static void beforeClass() {
-		numSetUpCalls = 0;
-		numSetUpCallsInTransaction = 0;
-		numTearDownCalls = 0;
-		numTearDownCallsInTransaction = 0;
-	}
-
-	@AfterClass
-	public static void afterClass() {
-		assertEquals("number of calls to setUp().", NUM_TESTS, numSetUpCalls);
-		assertEquals("number of calls to setUp() within a transaction.", NUM_TX_TESTS, numSetUpCallsInTransaction);
-		assertEquals("number of calls to tearDown().", NUM_TESTS, numTearDownCalls);
-		assertEquals("number of calls to tearDown() within a transaction.", NUM_TX_TESTS, numTearDownCallsInTransaction);
-	}
-
 	@Test
 	public void autowiringFromConfigClass() {
 		assertNotNull("The employee should have been autowired.", employee);
@@ -133,10 +110,6 @@ public abstract class AbstractTransactionalAnnotatedConfigClassTests {
 
 	@Before
 	public void setUp() throws Exception {
-		numSetUpCalls++;
-		if (inTransaction()) {
-			numSetUpCallsInTransaction++;
-		}
 		assertNumRowsInPersonTable((inTransaction() ? 1 : 0), "before a test method");
 	}
 
@@ -151,10 +124,6 @@ public abstract class AbstractTransactionalAnnotatedConfigClassTests {
 
 	@After
 	public void tearDown() throws Exception {
-		numTearDownCalls++;
-		if (inTransaction()) {
-			numTearDownCallsInTransaction++;
-		}
 		assertNumRowsInPersonTable((inTransaction() ? 3 : 0), "after a test method");
 	}
 
