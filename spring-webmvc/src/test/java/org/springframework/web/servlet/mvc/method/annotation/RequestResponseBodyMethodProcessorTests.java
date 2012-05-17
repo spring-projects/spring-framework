@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -47,6 +48,7 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -79,6 +81,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	private MethodParameter paramRequestBodyString;
 	private MethodParameter paramInt;
 	private MethodParameter paramValidBean;
+	private MethodParameter paramStringNotRequired;
 	private MethodParameter returnTypeString;
 	private MethodParameter returnTypeInt;
 	private MethodParameter returnTypeStringProduces;
@@ -108,6 +111,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle2"), -1);
 		returnTypeStringProduces = new MethodParameter(getClass().getMethod("handle3"), -1);
 		paramValidBean = new MethodParameter(getClass().getMethod("handle4", SimpleBean.class), 0);
+		paramStringNotRequired = new MethodParameter(getClass().getMethod("handle5", String.class), 0);
 
 		mavContainer = new ModelAndViewContainer();
 
@@ -134,6 +138,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
 		String body = "Foo";
+		servletRequest.setContent(body.getBytes());
+
 		expect(messageConverter.canRead(String.class, contentType)).andReturn(true);
 		expect(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).andReturn(body);
 		replay(messageConverter);
@@ -165,6 +171,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	private void testResolveArgumentWithValidation(SimpleBean simpleBean) throws IOException, Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Content-Type", contentType.toString());
+		servletRequest.setContent(new byte[] {});
 
 		@SuppressWarnings("unchecked")
 		HttpMessageConverter<SimpleBean> beanConverter = createMock(HttpMessageConverter.class);
@@ -183,6 +190,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	public void resolveArgumentNotReadable() throws Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Content-Type", contentType.toString());
+		servletRequest.setContent(new byte[] {});
 
 		expect(messageConverter.canRead(String.class, contentType)).andReturn(false);
 		replay(messageConverter);
@@ -194,8 +202,20 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNoContentType() throws Exception {
+		servletRequest.setContent(new byte[] {});
 		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 		fail("Expected exception");
+	}
+
+	@Test(expected = HttpMessageNotReadableException.class)
+	public void resolveArgumentRequiredNoContent() throws Exception {
+		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
+		fail("Expected exception");
+	}
+
+	@Test
+	public void resolveArgumentNotRequiredNoContent() throws Exception {
+		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, null));
 	}
 
 	@Test
@@ -308,6 +328,9 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	public void handle4(@Valid @RequestBody SimpleBean b) {
+	}
+
+	public void handle5(@RequestBody(required=false) String s) {
 	}
 
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
