@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.servlet.View;
@@ -49,9 +50,11 @@ import org.springframework.web.servlet.View;
  * "/WEB-INF/jsp/test.jsp"
  *
  * <p>As a special feature, redirect URLs can be specified via the "redirect:"
- * prefix. E.g.: "redirect:myAction.do" will trigger a redirect to the given
- * URL, rather than resolution as standard view name. This is typically used
- * for redirecting to a controller URL after finishing a form workflow.
+ * of "permanentRedirect:" prefixes. E.g.: "redirect:myAction.do" will trigger 
+ * a redirect to the given URL, rather than resolution as standard view name. 
+ * This is typically used for redirecting to a controller URL after finishing 
+ * a form workflow or permanently redirecting to another controller for URls
+ * that no longer exists for SEO reasons.
  *
  * <p>Furthermore, forward URLs can be specified via the "forward:" prefix. E.g.:
  * "forward:myAction.do" will trigger a forward to the given URL, rather than
@@ -76,6 +79,8 @@ import org.springframework.web.servlet.View;
  * @see #setSuffix
  * @see #setRequestContextAttribute
  * @see #REDIRECT_URL_PREFIX
+ * @see #PERMANENT_REDIRECT_URL_PREFIX
+ * @see #FORWARD_URL_PREFIX
  * @see AbstractUrlBasedView
  * @see InternalResourceView
  * @see org.springframework.web.servlet.view.velocity.VelocityView
@@ -90,6 +95,15 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * way but rather be treated as special shortcut.
 	 */
 	public static final String REDIRECT_URL_PREFIX = "redirect:";
+	
+	/**
+	 * Prefix for special view names that specify a permanent redirect URL
+	 * (usually from a controller that for which a page no longer exists and 
+	 * needs to be redirected).
+	 * Such view names will not be resolved in the configured default
+	 * way but rather be treated as special shortcut.
+	 */
+	public static final String PERMANENT_REDIRECT_URL_PREFIX = "permanentRedirect:";
 
 	/**
 	 * Prefix for special view names that specify a forward URL (usually
@@ -386,10 +400,13 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		if (!canHandle(viewName, locale)) {
 			return null;
 		}
-		// Check for special "redirect:" prefix.
-		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
-			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
+		// Check for special "redirect:" or "permanentRedirect:" prefixes.
+		if (viewName.startsWith(REDIRECT_URL_PREFIX) || viewName.startsWith(PERMANENT_REDIRECT_URL_PREFIX)) {
+			String redirectUrl = viewName.startsWith(REDIRECT_URL_PREFIX) ? viewName.substring(REDIRECT_URL_PREFIX.length()) : viewName.substring(PERMANENT_REDIRECT_URL_PREFIX.length());
 			RedirectView view = new RedirectView(redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+			if (viewName.startsWith(PERMANENT_REDIRECT_URL_PREFIX)) {
+				view.setStatusCode(HttpStatus.MOVED_PERMANENTLY);
+			}
 			return applyLifecycleMethods(viewName, view);
 		}
 		// Check for special "forward:" prefix.

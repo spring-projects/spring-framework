@@ -74,7 +74,7 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 	 * reference; "false" otherwise.
 	 */
 	protected boolean isRedirectViewName(String viewName) {
-		return viewName.startsWith("redirect:");
+		return viewName.startsWith("redirect:") || viewName.startsWith("permanentRedirect:");
 	}
 
 }

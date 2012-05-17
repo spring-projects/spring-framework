@@ -494,6 +494,38 @@ public class ContentNegotiatingViewResolverTests {
 	}
 
 	@Test
+	public void resolveViewNamePermanentRedirectView() throws Exception {
+		request.addHeader("Accept", "application/json");
+		request.setRequestURI("/test");
+
+		StaticWebApplicationContext webAppContext = new StaticWebApplicationContext();
+		webAppContext.setServletContext(new MockServletContext());
+		webAppContext.refresh();
+		
+		UrlBasedViewResolver urlViewResolver = new InternalResourceViewResolver();
+		urlViewResolver.setApplicationContext(webAppContext);
+		ViewResolver xmlViewResolver = createMock(ViewResolver.class);
+		viewResolver.setViewResolvers(Arrays.<ViewResolver>asList(xmlViewResolver, urlViewResolver));
+
+		View xmlView = createMock("application_xml", View.class);
+		View jsonView = createMock("application_json", View.class);
+		viewResolver.setDefaultViews(Arrays.asList(jsonView));
+		
+		String viewName = "permanentRedirect:anotherTest";
+		Locale locale = Locale.ENGLISH;
+
+		expect(xmlViewResolver.resolveViewName(viewName, locale)).andReturn(xmlView);
+		expect(jsonView.getContentType()).andReturn("application/json").anyTimes();
+
+		replay(xmlViewResolver, xmlView, jsonView);
+
+		View actualView = viewResolver.resolveViewName(viewName, locale);
+		assertEquals("Invalid view", RedirectView.class, actualView.getClass());
+
+		verify(xmlViewResolver, xmlView, jsonView);
+	}
+	
+	@Test
 	public void resolveViewNoMatch() throws Exception {
 		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9");
 
