@@ -47,8 +47,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * {@link TestContext test context} as
 	 * {@link TestContext#markApplicationContextDirty() dirty}, and sets the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
-	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to <code>true</code>
-	 * .
+	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to <code>true</code>.
 	 */
 	protected void dirtyContext(TestContext testContext) {
 		testContext.markApplicationContextDirty();

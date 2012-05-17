@@ -24,11 +24,15 @@ import org.springframework.context.ApplicationContext;
  *
  * <p>The {@code SmartContextLoader} SPI supersedes the {@link ContextLoader} SPI
  * introduced in Spring 2.5: a {@code SmartContextLoader} can choose to process
- * either resource locations or configuration classes. Furthermore, a
+ * either resource locations or annotated classes. Furthermore, a
  * {@code SmartContextLoader} can set active bean definition profiles in the
  * context that it loads (see {@link MergedContextConfiguration#getActiveProfiles()}
  * and {@link #loadContext(MergedContextConfiguration)}).
  *
+ * <p>See the Javadoc for
+ * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
+ * for a definition of <em>annotated class</em>.
+ * 
  * <p>Clients of a {@code SmartContextLoader} should call
  * {@link #processContextConfiguration(ContextConfigurationAttributes)
  * processContextConfiguration()} prior to calling

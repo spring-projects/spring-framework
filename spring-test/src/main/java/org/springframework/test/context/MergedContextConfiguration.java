@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import org.springframework.util.StringUtils;
  * context configuration declared on a test class and all of its superclasses
  * via {@link ContextConfiguration @ContextConfiguration} and
  * {@link ActiveProfiles @ActiveProfiles}.
- * 
- * <p>Merged resource locations, configuration classes, and active profiles
+ *
+ * <p>Merged resource locations, annotated classes, and active profiles
  * represent all declared values in the test class hierarchy taking into
  * consideration the semantics of the
  * {@link ContextConfiguration#inheritLocations inheritLocations} and
@@ -98,15 +98,17 @@ public class MergedContextConfiguration implements Serializable {
 
 	/**
 	 * Create a new {@code MergedContextConfiguration} instance for the
-	 * supplied {@link Class test class}, resource locations, configuration
-	 * classes, active profiles, and {@link ContextLoader}.
+	 * supplied test class, resource locations, annotated classes, active
+	 * profiles, and {@code ContextLoader}.
+	 *
 	 * <p>If a <code>null</code> value is supplied for <code>locations</code>,
 	 * <code>classes</code>, or <code>activeProfiles</code> an empty array will
 	 * be stored instead. Furthermore, active profiles will be sorted, and duplicate
-	 * profiles will be removed. 
+	 * profiles will be removed.
+	 * 
 	 * @param testClass the test class for which the configuration was merged
 	 * @param locations the merged resource locations
-	 * @param classes the merged configuration classes
+	 * @param classes the merged annotated classes
 	 * @param activeProfiles the merged active bean definition profiles
 	 * @param contextLoader the resolved <code>ContextLoader</code>
 	 */
@@ -120,40 +122,35 @@ public class MergedContextConfiguration implements Serializable {
 	}
 
 	/**
-	 * Get the {@link Class test class} associated with this
-	 * {@code MergedContextConfiguration}.
+	 * Get the {@link Class test class} associated with this {@code MergedContextConfiguration}.
 	 */
 	public Class<?> getTestClass() {
 		return testClass;
 	}
 
 	/**
-	 * Get the merged resource locations for the
-	 * {@link #getTestClass() test class}.
+	 * Get the merged resource locations for the {@link #getTestClass() test class}.
 	 */
 	public String[] getLocations() {
 		return locations;
 	}
 
 	/**
-	 * Get the merged configuration classes for the
-	 * {@link #getTestClass() test class}.
+	 * Get the merged annotated classes for the {@link #getTestClass() test class}.
 	 */
 	public Class<?>[] getClasses() {
 		return classes;
 	}
 
 	/**
-	 * Get the merged active bean definition profiles for the
-	 * {@link #getTestClass() test class}.
+	 * Get the merged active bean definition profiles for the {@link #getTestClass() test class}.
 	 */
 	public String[] getActiveProfiles() {
 		return activeProfiles;
 	}
 
 	/**
-	 * Get the resolved {@link ContextLoader} for the
-	 * {@link #getTestClass() test class}.
+	 * Get the resolved {@link ContextLoader} for the {@link #getTestClass() test class}.
 	 */
 	public ContextLoader getContextLoader() {
 		return contextLoader;
@@ -178,7 +175,7 @@ public class MergedContextConfiguration implements Serializable {
 	/**
 	 * Determine if the supplied object is equal to this {@code MergedContextConfiguration}
 	 * instance by comparing both object's {@link #getLocations() locations},
-	 * {@link #getClasses() configuration classes}, {@link #getActiveProfiles()
+	 * {@link #getClasses() annotated classes}, {@link #getActiveProfiles()
 	 * active profiles}, and the fully qualified names of their
 	 * {@link #getContextLoader() ContextLoaders}.
 	 */
@@ -212,7 +209,7 @@ public class MergedContextConfiguration implements Serializable {
 
 	/**
 	 * Provide a String representation of the {@link #getTestClass() test class},
-	 * {@link #getLocations() locations}, {@link #getClasses() configuration classes},
+	 * {@link #getLocations() locations}, {@link #getClasses() annotated classes},
 	 * {@link #getActiveProfiles() active profiles}, and the name of the
 	 * {@link #getContextLoader() ContextLoader}.
 	 */

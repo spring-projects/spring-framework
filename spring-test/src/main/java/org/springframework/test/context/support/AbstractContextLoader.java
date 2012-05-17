@@ -68,8 +68,10 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * processed locations are then
 	 * {@link ContextConfigurationAttributes#setLocations(String[]) set} in
 	 * the supplied configuration attributes.
+	 *
 	 * <p>Can be overridden in subclasses &mdash; for example, to process
-	 * configuration classes instead of resource locations.
+	 * annotated classes instead of resource locations.
+	 *
 	 * @since 3.1
 	 * @see #processLocations(Class, String...)
 	 */
@@ -90,6 +92,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * {@link #getResourceSuffix() resource suffix}; otherwise, the supplied
 	 * <code>locations</code> will be {@link #modifyLocations modified} if
 	 * necessary and returned.
+	 *
 	 * @param clazz the class with which the locations are associated: to be
 	 * used when generating default locations
 	 * @param locations the unmodified locations to use for loading the
@@ -110,18 +113,22 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	/**
 	 * Generate the default classpath resource locations array based on the
 	 * supplied class.
+	 *
 	 * <p>For example, if the supplied class is <code>com.example.MyTest</code>,
 	 * the generated locations will contain a single string with a value of
 	 * &quot;classpath:/com/example/MyTest<code>&lt;suffix&gt;</code>&quot;,
 	 * where <code>&lt;suffix&gt;</code> is the value of the
 	 * {@link #getResourceSuffix() resource suffix} string.
+	 *
 	 * <p>As of Spring 3.1, the implementation of this method adheres to the
 	 * contract defined in the {@link SmartContextLoader} SPI. Specifically,
 	 * this method will <em>preemptively</em> verify that the generated default
 	 * location actually exists. If it does not exist, this method will log a
 	 * warning and return an empty array.
+	 *
 	 * <p>Subclasses can override this method to implement a different
 	 * <em>default location generation</em> strategy.
+	 *
 	 * @param clazz the class for which the default locations are to be generated
 	 * @return an array of default application context resource locations
 	 * @since 2.5
@@ -153,6 +160,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 
 	/**
 	 * Generate a modified version of the supplied locations array and return it.
+	 *
 	 * <p>A plain path &mdash; for example, &quot;context.xml&quot; &mdash; will
 	 * be treated as a classpath resource that is relative to the package in which
 	 * the specified class is defined. A path starting with a slash is treated
@@ -162,8 +170,10 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link ResourceUtils#FILE_URL_PREFIX file:}, <code>http:</code>,
 	 * etc.) will be added to the results unchanged.
+	 *
 	 * <p>Subclasses can override this method to implement a different
 	 * <em>location modification</em> strategy.
+	 *
 	 * @param clazz the class with which the locations are associated
 	 * @param locations the resource locations to be modified
 	 * @return an array of modified application context resource locations
@@ -191,6 +201,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * Determine whether or not <em>default</em> resource locations should be
 	 * generated if the <code>locations</code> provided to
 	 * {@link #processLocations(Class, String...)} are <code>null</code> or empty.
+	 *
 	 * <p>As of Spring 3.1, the semantics of this method have been overloaded
 	 * to include detection of either default resource locations or default
 	 * configuration classes. Consequently, this method can also be used to
@@ -199,7 +210,9 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * {@link ContextConfigurationAttributes configuration attributes} supplied
 	 * to {@link #processContextConfiguration(ContextConfigurationAttributes)}
 	 * are <code>null</code> or empty.
+	 *
 	 * <p>Can be overridden by subclasses to change the default behavior.
+	 *
 	 * @return always <code>true</code> by default
 	 * @since 2.5
 	 */
@@ -208,9 +221,11 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	}
 
 	/**
-	 * Get the suffix to append to {@link ApplicationContext} resource
-	 * locations when generating default locations.
+	 * Get the suffix to append to {@link ApplicationContext} resource locations
+	 * when generating default locations.
+	 *
 	 * <p>Must be implemented by subclasses.
+	 *
 	 * @return the resource suffix; should not be <code>null</code> or empty
 	 * @since 2.5
 	 * @see #generateDefaultLocations(Class)

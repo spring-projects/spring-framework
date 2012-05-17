@@ -96,7 +96,7 @@ public class ContextConfigurationAttributes {
 	 *
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
 	 * @param locations the resource locations declared via {@code @ContextConfiguration}
-	 * @param classes the configuration classes declared via {@code @ContextConfiguration}
+	 * @param classes the annotated classes declared via {@code @ContextConfiguration}
 	 * @param inheritLocations the <code>inheritLocations</code> flag declared via {@code @ContextConfiguration}
 	 * @param contextLoaderClass the {@code ContextLoader} class declared via {@code @ContextConfiguration}
 	 * @throws IllegalArgumentException if the {@code declaringClass} or {@code contextLoaderClass} is
@@ -128,6 +128,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the {@link Class class} that declared the
 	 * {@link ContextConfiguration @ContextConfiguration} annotation.
+	 *
 	 * @return the declaring class; never <code>null</code>
 	 */
 	public Class<?> getDeclaringClass() {
@@ -137,9 +138,11 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the resource locations that were declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * <p>Note: this is a mutable property. The returned value may therefore
 	 * represent a <em>processed</em> value that does not match the original value
 	 * declared via {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * @return the resource locations; potentially <code>null</code> or <em>empty</em>
 	 * @see ContextConfiguration#value
 	 * @see ContextConfiguration#locations
@@ -152,6 +155,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Set the <em>processed</em> resource locations, effectively overriding the
 	 * original value declared via {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * @see #getLocations()
 	 */
 	public void setLocations(String[] locations) {
@@ -159,12 +163,14 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
-	 * Get the configuration classes that were declared via
+	 * Get the annotated classes that were declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * <p>Note: this is a mutable property. The returned value may therefore
 	 * represent a <em>processed</em> value that does not match the original value
 	 * declared via {@link ContextConfiguration @ContextConfiguration}.
-	 * @return the configuration classes; potentially <code>null</code> or <em>empty</em>
+	 *
+	 * @return the annotated classes; potentially <code>null</code> or <em>empty</em>
 	 * @see ContextConfiguration#classes
 	 * @see #setClasses(Class[])
 	 */
@@ -173,8 +179,9 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
-	 * Set the <em>processed</em> configuration classes, effectively overriding the
+	 * Set the <em>processed</em> annotated classes, effectively overriding the
 	 * original value declared via {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * @see #getClasses()
 	 */
 	public void setClasses(Class<?>[] classes) {
@@ -184,6 +191,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Determine if this {@code ContextConfigurationAttributes} instance has
 	 * path-based resource locations.
+	 *
 	 * @return <code>true</code> if the {@link #getLocations() locations} array is not empty
 	 * @see #hasResources()
 	 * @see #hasClasses()
@@ -195,6 +203,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Determine if this {@code ContextConfigurationAttributes} instance has
 	 * class-based resources.
+	 *
 	 * @return <code>true</code> if the {@link #getClasses() classes} array is not empty
 	 * @see #hasResources()
 	 * @see #hasLocations()
@@ -206,6 +215,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Determine if this {@code ContextConfigurationAttributes} instance has
 	 * either path-based resource locations or class-based resources.
+	 *
 	 * @return <code>true</code> if either the {@link #getLocations() locations}
 	 * or the {@link #getClasses() classes} array is not empty
 	 * @see #hasLocations()
@@ -218,6 +228,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the <code>inheritLocations</code> flag that was declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * @return the <code>inheritLocations</code> flag
 	 * @see ContextConfiguration#inheritLocations
 	 */
@@ -228,6 +239,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the <code>ContextLoader</code> class that was declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * @return the <code>ContextLoader</code> class
 	 * @see ContextConfiguration#loader
 	 */

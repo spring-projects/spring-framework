@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.util.ObjectUtils;
  * {@link SmartContextLoader} is not explicitly declared via
  * {@code @ContextConfiguration}, {@code DelegatingSmartContextLoader} will be used as
  * the default loader, thus providing automatic support for either XML configuration
- * files or configuration classes, but not both simultaneously.
+ * files or annotated classes, but not both simultaneously.
  * 
  * @author Sam Brannen
  * @since 3.1
@@ -96,7 +96,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 	 * Specifically, the delegation algorithm is as follows:
 	 * 
 	 * <ul>
-	 * <li>If the resource locations or configuration classes in the supplied
+	 * <li>If the resource locations or annotated classes in the supplied
 	 * {@code ContextConfigurationAttributes} are not empty, the appropriate 
 	 * candidate loader will be allowed to process the configuration <em>as is</em>,
 	 * without any checks for detection of defaults.</li>
@@ -113,7 +113,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 	 * @param configAttributes the context configuration attributes to process
 	 * @throws IllegalArgumentException if the supplied configuration attributes are
 	 * <code>null</code>, or if the supplied configuration attributes include both
-	 * resource locations and configuration classes
+	 * resource locations and annotated classes
 	 * @throws IllegalStateException if {@code GenericXmlContextLoader} detects default
 	 * configuration classes; if {@code AnnotationConfigContextLoader} detects default
 	 * resource locations; if neither candidate loader detects defaults for the supplied
@@ -124,7 +124,7 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 
 		Assert.notNull(configAttributes, "configAttributes must not be null");
 		Assert.isTrue(!(configAttributes.hasLocations() && configAttributes.hasClasses()), String.format(
-			"Cannot process locations AND configuration classes for context "
+			"Cannot process locations AND classes for context "
 					+ "configuration %s; configure one or the other, but not both.", configAttributes));
 
 		// If the original locations or classes were not empty, there's no
@@ -201,9 +201,9 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 	 * 
 	 * <ul>
 	 * <li>If the resource locations in the supplied {@code MergedContextConfiguration}
-	 * are not empty and the configuration classes are empty,
+	 * are not empty and the annotated classes are empty,
 	 * {@code GenericXmlContextLoader} will load the {@code ApplicationContext}.</li>
-	 * <li>If the configuration classes in the supplied {@code MergedContextConfiguration}
+	 * <li>If the annotated classes in the supplied {@code MergedContextConfiguration}
 	 * are not empty and the resource locations are empty,
 	 * {@code AnnotationConfigContextLoader} will load the {@code ApplicationContext}.</li>
 	 * </ul>
