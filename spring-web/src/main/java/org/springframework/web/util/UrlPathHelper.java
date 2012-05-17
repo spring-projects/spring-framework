@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@ package org.springframework.web.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.StringUtils;
 
 /**
@@ -37,6 +40,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Rossen Stoyanchev
  * @since 14.01.2004
  */
 public class UrlPathHelper {
@@ -301,7 +305,7 @@ public class UrlPathHelper {
 	 * @return the query string
 	 */
 	public String getOriginatingQueryString(HttpServletRequest request) {
-		if ((request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE) != null) || 
+		if ((request.getAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE) != null) ||
 			(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE) != null)) {
 			return (String) request.getAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE);
 		}
@@ -333,19 +337,23 @@ public class UrlPathHelper {
 	 */
 	public String decodeRequestString(HttpServletRequest request, String source) {
 		if (this.urlDecode) {
-			String enc = determineEncoding(request);
-			try {
-				return UriUtils.decode(source, enc);
-			}
-			catch (UnsupportedEncodingException ex) {
-				if (logger.isWarnEnabled()) {
-					logger.warn("Could not decode request string [" + source + "] with encoding '" + enc +
-							"': falling back to platform default encoding; exception message: " + ex.getMessage());
-				}
-				return URLDecoder.decode(source);
-			}
+			return decodeInternal(request, source);
 		}
 		return source;
+	}
+
+	private String decodeInternal(HttpServletRequest request, String source) {
+		String enc = determineEncoding(request);
+		try {
+			return UriUtils.decode(source, enc);
+		}
+		catch (UnsupportedEncodingException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Could not decode request string [" + source + "] with encoding '" + enc +
+						"': falling back to platform default encoding; exception message: " + ex.getMessage());
+			}
+			return URLDecoder.decode(source);
+		}
 	}
 
 	/**
@@ -366,6 +374,27 @@ public class UrlPathHelper {
 		return enc;
 	}
 
+	/**
+	 * Decode the given URI path variables via {@link #decodeRequestString(HttpServletRequest, String)}
+	 * unless {@link #setUrlDecode(boolean)} is set to {@code true} in which case
+	 * it is assumed the URL path from which the variables were extracted is
+	 * already decoded through a call to {@link #getLookupPathForRequest(HttpServletRequest)}.
+	 * @param request current HTTP request
+	 * @param vars URI variables extracted from the URL path
+	 * @return the same Map or a new Map instance
+	 */
+	public Map<String, String> decodePathVariables(HttpServletRequest request, Map<String, String> vars) {
+		if (this.urlDecode) {
+			return vars;
+		}
+		else {
+			Map<String, String> decodedVars = new LinkedHashMap<String, String>(vars.size());
+			for (Entry<String, String> entry : vars.entrySet()) {
+				decodedVars.put(entry.getKey(), decodeInternal(request, entry.getValue()));
+			}
+			return decodedVars;
+		}
+	}
 
 	private boolean shouldRemoveTrailingServletPathSlash(HttpServletRequest request) {
 		if (request.getAttribute(WEBSPHERE_URI_ATTRIBUTE) == null) {

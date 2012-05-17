@@ -88,9 +88,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		Set<String> patterns = info.getPatternsCondition().getPatterns();
 		String bestPattern = patterns.isEmpty() ? lookupPath : patterns.iterator().next();
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
-		
-		Map<String, String> uriTemplateVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
+
+		Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
+		Map<String, String> decodedVars = getUrlPathHelper().decodePathVariables(request, vars);
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedVars);
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
 			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();

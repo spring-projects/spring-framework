@@ -27,6 +27,7 @@ Changes in version 3.2 M1
 * add CompositeRequestCondition for use with multiple custom request mapping conditions
 * add ability to configure custom MessageCodesResolver through the MVC Java config
 * add option in MappingJacksonJsonView for setting the Content-Length header
+* decode path variables when url decoding is turned off in AbstractHandlerMapping
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		HandlerMethod hm = (HandlerMethod) this.mapping.getHandler(request).getHandler();
 		assertEquals(this.fooParamMethod.getMethod(), hm.getMethod());
 	}
-	
+
 	@Test
 	public void requestMethodNotAllowed() throws Exception {
 		try {
@@ -143,7 +143,7 @@ public class RequestMappingInfoHandlerMappingTests {
 			assertArrayEquals("Invalid supported methods", new String[]{"GET", "HEAD"}, ex.getSupportedMethods());
 		}
 	}
-	
+
 	@Test
 	public void mediaTypeNotSupported() throws Exception {
 		testMediaTypeNotSupported("/person/1");
@@ -159,11 +159,11 @@ public class RequestMappingInfoHandlerMappingTests {
 			fail("HttpMediaTypeNotSupportedException expected");
 		}
 		catch (HttpMediaTypeNotSupportedException ex) {
-			assertEquals("Invalid supported consumable media types", 
+			assertEquals("Invalid supported consumable media types",
 					Arrays.asList(new MediaType("application", "xml")), ex.getSupportedMediaTypes());
 		}
 	}
-	
+
 	@Test
 	public void mediaTypeNotAccepted() throws Exception {
 		testMediaTypeNotAccepted("/persons");
@@ -179,7 +179,7 @@ public class RequestMappingInfoHandlerMappingTests {
 			fail("HttpMediaTypeNotAcceptableException expected");
 		}
 		catch (HttpMediaTypeNotAcceptableException ex) {
-			assertEquals("Invalid supported producible media types", 
+			assertEquals("Invalid supported producible media types",
 					Arrays.asList(new MediaType("application", "xml")), ex.getSupportedMediaTypes());
 		}
 	}
@@ -191,15 +191,39 @@ public class RequestMappingInfoHandlerMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 		this.mapping.handleMatch(key, lookupPath, request);
-		
+
 		@SuppressWarnings("unchecked")
-		Map<String, String> uriVariables = 
+		Map<String, String> uriVariables =
 			(Map<String, String>) request.getAttribute(
 					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-		
+
 		assertNotNull(uriVariables);
 		assertEquals("1", uriVariables.get("path1"));
 		assertEquals("2", uriVariables.get("path2"));
+	}
+
+	// SPR-9098
+
+	@Test
+	public void uriTemplateVariablesDecode() {
+		PatternsRequestCondition patterns = new PatternsRequestCondition("/{group}/{identifier}");
+		RequestMappingInfo key = new RequestMappingInfo(patterns, null, null, null, null, null, null);
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/group/a%2Fb");
+
+		UrlPathHelper pathHelper = new UrlPathHelper();
+		pathHelper.setUrlDecode(false);
+		String lookupPath = pathHelper.getLookupPathForRequest(request);
+
+		this.mapping.setUrlPathHelper(pathHelper);
+		this.mapping.handleMatch(key, lookupPath, request);
+
+		@SuppressWarnings("unchecked")
+		Map<String, String> uriVariables =
+			(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+
+		assertNotNull(uriVariables);
+		assertEquals("group", uriVariables.get("group"));
+		assertEquals("a/b", uriVariables.get("identifier"));
 	}
 
 	@Test
@@ -209,7 +233,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 
 		this.mapping.handleMatch(key, "/1/2", request);
-		
+
 		assertEquals("/{path1}/2", request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
 
@@ -220,7 +244,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 
 		this.mapping.handleMatch(key, "/1/2", request);
-		
+
 		assertEquals("/1/2", request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
 
@@ -237,10 +261,10 @@ public class RequestMappingInfoHandlerMappingTests {
 		request.addHeader("Accept", "application/json");
 		this.mapping.getHandler(request);
 
-		assertNull("Negated expression should not be listed as a producible type", 
+		assertNull("Negated expression should not be listed as a producible type",
 				request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE));
 	}
-	
+
 	@Test
 	public void mappedInterceptors() throws Exception {
 		String path = "/foo";
@@ -268,7 +292,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		@RequestMapping(value = "/foo", method = RequestMethod.GET)
 		public void foo() {
 		}
-		
+
 		@RequestMapping(value = "/foo", method = RequestMethod.GET, params="p")
 		public void fooParam() {
 		}
@@ -306,7 +330,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void registerHandler(Object handler) {
 			super.detectHandlerMethods(handler);
 		}
-		
+
 		@Override
 		protected boolean isHandler(Class<?> beanType) {
 			return AnnotationUtils.findAnnotation(beanType, RequestMapping.class) != null;
@@ -329,5 +353,5 @@ public class RequestMappingInfoHandlerMappingTests {
 			}
 		}
 	}
-	
+
 }
