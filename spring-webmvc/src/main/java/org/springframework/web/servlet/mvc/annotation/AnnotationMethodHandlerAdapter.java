@@ -750,7 +750,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			int patternVariableCount = StringUtils.countOccurrencesOf(mappedPattern, "{");
 			if ((variables == null || patternVariableCount != variables.size()) && pathMatcher.match(mappedPattern, lookupPath)) {
 				variables = pathMatcher.extractUriTemplateVariables(mappedPattern, lookupPath);
-				request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, variables);
+				Map<String, String> decodedVariables = urlPathHelper.decodePathVariables(request, variables);
+				request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedVariables);
 			}
 		}
 	}
