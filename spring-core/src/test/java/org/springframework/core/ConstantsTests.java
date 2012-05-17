@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class ConstantsTests extends TestCase {
 	public void testGetNames() {
 		Constants c = new Constants(A.class);
 
-		Set names = c.getNames("");
+		Set<?> names = c.getNames("");
 		assertEquals(c.getSize(), names.size());
 		assertTrue(names.contains("DOG"));
 		assertTrue(names.contains("CAT"));
@@ -75,7 +75,7 @@ public class ConstantsTests extends TestCase {
 	public void testGetValues() {
 		Constants c = new Constants(A.class);
 
-		Set values = c.getValues("");
+		Set<?> values = c.getValues("");
 		assertEquals(7, values.size());
 		assertTrue(values.contains(new Integer(0)));
 		assertTrue(values.contains(new Integer(66)));
@@ -102,7 +102,7 @@ public class ConstantsTests extends TestCase {
 		try {
 			Constants c = new Constants(A.class);
 
-			Set values = c.getValues("");
+			Set<?> values = c.getValues("");
 			assertEquals(7, values.size());
 			assertTrue(values.contains(new Integer(0)));
 			assertTrue(values.contains(new Integer(66)));
@@ -130,12 +130,12 @@ public class ConstantsTests extends TestCase {
 	public void testSuffixAccess() {
 		Constants c = new Constants(A.class);
 
-		Set names = c.getNamesForSuffix("_PROPERTY");
+		Set<?> names = c.getNamesForSuffix("_PROPERTY");
 		assertEquals(2, names.size());
 		assertTrue(names.contains("NO_PROPERTY"));
 		assertTrue(names.contains("YES_PROPERTY"));
 
-		Set values = c.getValuesForSuffix("_PROPERTY");
+		Set<?> values = c.getValuesForSuffix("_PROPERTY");
 		assertEquals(2, values.size());
 		assertTrue(values.contains(new Integer(3)));
 		assertTrue(values.contains(new Integer(4)));
@@ -148,15 +148,24 @@ public class ConstantsTests extends TestCase {
 		assertEquals(c.toCode(new Integer(0), "D"), "DOG");
 		assertEquals(c.toCode(new Integer(0), "DO"), "DOG");
 		assertEquals(c.toCode(new Integer(0), "DoG"), "DOG");
+		assertEquals(c.toCode(new Integer(0), null), "DOG");
 		assertEquals(c.toCode(new Integer(66), ""), "CAT");
 		assertEquals(c.toCode(new Integer(66), "C"), "CAT");
 		assertEquals(c.toCode(new Integer(66), "ca"), "CAT");
 		assertEquals(c.toCode(new Integer(66), "cAt"), "CAT");
+		assertEquals(c.toCode(new Integer(66), null), "CAT");
 		assertEquals(c.toCode("", ""), "S1");
 		assertEquals(c.toCode("", "s"), "S1");
 		assertEquals(c.toCode("", "s1"), "S1");
+		assertEquals(c.toCode("", null), "S1");
 		try {
 			c.toCode("bogus", "bogus");
+			fail("Should have thrown ConstantException");
+		}
+		catch (ConstantException expected) {
+		}
+		try {
+			c.toCode("bogus", null);
 			fail("Should have thrown ConstantException");
 		}
 		catch (ConstantException expected) {
@@ -175,15 +184,24 @@ public class ConstantsTests extends TestCase {
 		assertEquals(c.toCodeForSuffix(new Integer(0), "G"), "DOG");
 		assertEquals(c.toCodeForSuffix(new Integer(0), "OG"), "DOG");
 		assertEquals(c.toCodeForSuffix(new Integer(0), "DoG"), "DOG");
+		assertEquals(c.toCodeForSuffix(new Integer(0), null), "DOG");
 		assertEquals(c.toCodeForSuffix(new Integer(66), ""), "CAT");
 		assertEquals(c.toCodeForSuffix(new Integer(66), "T"), "CAT");
 		assertEquals(c.toCodeForSuffix(new Integer(66), "at"), "CAT");
 		assertEquals(c.toCodeForSuffix(new Integer(66), "cAt"), "CAT");
+		assertEquals(c.toCodeForSuffix(new Integer(66), null), "CAT");
 		assertEquals(c.toCodeForSuffix("", ""), "S1");
 		assertEquals(c.toCodeForSuffix("", "1"), "S1");
 		assertEquals(c.toCodeForSuffix("", "s1"), "S1");
+		assertEquals(c.toCodeForSuffix("", null), "S1");
 		try {
 			c.toCodeForSuffix("bogus", "bogus");
+			fail("Should have thrown ConstantException");
+		}
+		catch (ConstantException expected) {
+		}
+		try {
+			c.toCodeForSuffix("bogus", null);
 			fail("Should have thrown ConstantException");
 		}
 		catch (ConstantException expected) {
@@ -192,26 +210,26 @@ public class ConstantsTests extends TestCase {
 
 	public void testGetValuesWithNullPrefix() throws Exception {
 		Constants c = new Constants(A.class);
-		Set values = c.getValues(null);
+		Set<?> values = c.getValues(null);
 		assertEquals("Must have returned *all* public static final values", 7, values.size());
 	}
 
 	public void testGetValuesWithEmptyStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
-		Set values = c.getValues("");
+		Set<Object> values = c.getValues("");
 		assertEquals("Must have returned *all* public static final values", 7, values.size());
 	}
 
 	public void testGetValuesWithWhitespacedStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
-		Set values = c.getValues(" ");
+		Set<?> values = c.getValues(" ");
 		assertEquals("Must have returned *all* public static final values", 7, values.size());
 	}
 
 	public void testWithClassThatExposesNoConstants() throws Exception {
 		Constants c = new Constants(NoConstants.class);
 		assertEquals(0, c.getSize());
-		final Set values = c.getValues("");
+		final Set<?> values = c.getValues("");
 		assertNotNull(values);
 		assertEquals(0, values.size());
 	}
@@ -227,10 +245,11 @@ public class ConstantsTests extends TestCase {
 
 	private static final class NoConstants {
 	}
-	
 
+
+	@SuppressWarnings("unused")
 	private static final class A {
-		
+
 		public static final int DOG = 0;
 		public static final int CAT = 66;
 		public static final String S1 = "";
