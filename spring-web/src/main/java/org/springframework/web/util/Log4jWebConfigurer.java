@@ -122,11 +122,14 @@ public abstract class Log4jWebConfigurer {
 		if (location != null) {
 			// Perform actual log4j initialization; else rely on log4j's default initialization.
 			try {
-				// Return a URL (e.g. "classpath:" or "file:") as-is;
-				// consider a plain file path as relative to the web application root directory.
+				// Resolve system property placeholders before potentially
+				// resolving a real path.
 				location = SystemPropertyUtils.resolvePlaceholders(location);
+
+				// Leave a URL (e.g. "classpath:" or "file:") as-is.
 				if (!ResourceUtils.isUrl(location)) {
-					// Resolve system property placeholders before resolving real path.
+					// Consider a plain file path as relative to the web
+					// application root directory.
 					location = WebUtils.getRealPath(servletContext, location);
 				}
 
