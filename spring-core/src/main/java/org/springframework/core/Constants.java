@@ -58,7 +58,7 @@ public class Constants {
 	 * @param clazz the class to analyze
 	 * @throws IllegalArgumentException if the supplied <code>clazz</code> is <code>null</code>
 	 */
-	public Constants(Class clazz) {
+	public Constants(Class<?> clazz) {
 		Assert.notNull(clazz);
 		this.className = clazz.getName();
 		Field[] fields = clazz.getFields();
@@ -189,7 +189,7 @@ public class Constants {
 	 * @param nameSuffix suffix of the constant names to search (may be <code>null</code>)
 	 * @return the set of constant names
 	 */
-	public Set getNamesForSuffix(String nameSuffix) {
+	public Set<String> getNamesForSuffix(String nameSuffix) {
 		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
 		Set<String> names = new HashSet<String>();
 		for (String code : this.fieldCache.keySet()) {
