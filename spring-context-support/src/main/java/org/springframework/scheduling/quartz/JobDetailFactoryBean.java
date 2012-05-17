@@ -168,7 +168,6 @@ public class JobDetailFactoryBean
 	}
 
 
-	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
 		if (this.name == null) {
 			this.name = this.beanName;
@@ -196,7 +195,7 @@ public class JobDetailFactoryBean
 		this.jobDetail = jdi;
 		*/
 
-		Class jobDetailClass;
+		Class<?> jobDetailClass;
 		try {
 			jobDetailClass = getClass().getClassLoader().loadClass("org.quartz.impl.JobDetailImpl");
 		}

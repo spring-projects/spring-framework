@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,6 @@ public class SourceFilteringListener implements SmartApplicationListener {
 	 * <p>The default implementation invokes the specified delegate, if any.
 	 * @param event the event to process (matching the specified source)
 	 */
-	@SuppressWarnings("unchecked")
 	protected void onApplicationEventInternal(ApplicationEvent event) {
 		if (this.delegate == null) {
 			throw new IllegalStateException(
