@@ -73,21 +73,23 @@ public class TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests exte
 
 		/**
 		 * Since this method does not reside in a true {@code @Configuration class},
-		 * it acts as a factory method instead of a singleton bean. The result is
-		 * that this method will be called at least twice:
+		 * it acts as a factory method when invoked directly (e.g., from
+		 * {@link #transactionManager()}) and as a singleton bean when retrieved 
+		 * through the application context (e.g., when injected into the test
+		 * instance). The result is that this method will be called twice:
 		 * 
-		 * <ul>
+		 * <ol>
 		 * <li>once <em>indirectly</em> by the {@link TransactionalTestExecutionListener}
 		 * when it retrieves the {@link PlatformTransactionManager} from the
 		 * application context</li>
 		 * <li>and again when the {@link DataSource} is injected into the test
 		 * instance in {@link AbstractTransactionalAnnotatedConfigClassTests#setDataSource(DataSource)}.</li>
-		 *</ul>
+		 *</ol>
 		 *
 		 * Consequently, the {@link JdbcTemplate} used by this test instance and
 		 * the {@link PlatformTransactionManager} used by the Spring TestContext
 		 * Framework will operate on two different {@code DataSource} instances,
-		 * which is most certainly not the desired or intended behavior.
+		 * which is almost certainly not the desired or intended behavior.
 		 */
 		@Bean
 		public DataSource dataSource() {
