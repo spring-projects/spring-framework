@@ -453,11 +453,7 @@
             located in the classpath; whereas, annotated classes are typically
             <interfacename>@Configuration</interfacename> classes. However,
             resource locations could also refer to files in the file system,
-            and annotated classes could be component classes, etc. See <link
-            linkend="testcontext-ctx-management-xml">Context configuration
-            with XML resources</link> and the Javadoc for
-            <interfacename>@ContextConfiguration</interfacename> for further
-            details.</para>
+            and annotated classes could be component classes, etc.</para>
 
             <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>("/test-config.xml")
 public class XmlApplicationContextTests {
@@ -493,7 +489,8 @@ public class CustomLoaderXmlApplicationContextTests {
             </note>
 
             <para>See <link linkend="testcontext-ctx-management">Context
-            management and caching</link> and Javadoc for examples and further
+            management and caching</link> and the Javadoc for
+            <interfacename>@ContextConfiguration</interfacename> for further
             details.</para>
           </listitem>
 
