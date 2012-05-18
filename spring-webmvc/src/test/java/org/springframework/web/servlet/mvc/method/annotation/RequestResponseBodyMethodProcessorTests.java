@@ -196,21 +196,17 @@ public class RequestResponseBodyMethodProcessorTests {
 		replay(messageConverter);
 
 		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
-
-		fail("Expected exception");
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNoContentType() throws Exception {
 		servletRequest.setContent(new byte[] {});
 		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
-		fail("Expected exception");
 	}
 
 	@Test(expected = HttpMessageNotReadableException.class)
 	public void resolveArgumentRequiredNoContent() throws Exception {
 		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
-		fail("Expected exception");
 	}
 
 	@Test
@@ -265,8 +261,6 @@ public class RequestResponseBodyMethodProcessorTests {
 		replay(messageConverter);
 
 		processor.handleReturnValue("Foo", returnTypeString, mavContainer, webRequest);
-
-		fail("Expected exception");
 	}
 
 	@Test(expected = HttpMediaTypeNotAcceptableException.class)
@@ -280,8 +274,6 @@ public class RequestResponseBodyMethodProcessorTests {
 		replay(messageConverter);
 
 		processor.handleReturnValue("Foo", returnTypeStringProduces, mavContainer, webRequest);
-
-		fail("Expected exception");
 	}
 
 	// SPR-9160
