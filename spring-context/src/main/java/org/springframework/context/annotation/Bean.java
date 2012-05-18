@@ -77,7 +77,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * <p>Typically, {@code @Bean} methods are declared within {@code @Configuration}
  * classes. In this case, bean methods may reference other {@code @Bean} methods
  * in the same class by calling them <i>directly</i>. This ensures that references between
- * beans are strongly typed and navigable. Such so-called 'inter-bean references' are
+ * beans are strongly typed and navigable. Such so-called <em>'inter-bean references'</em> are
  * guaranteed to respect scoping and AOP semantics, just like <code>getBean()</code> lookups
  * would. These are the semantics known from the original 'Spring JavaConfig' project
  * which require CGLIB subclassing of each such configuration class at runtime. As a
@@ -105,13 +105,21 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * in a {@code @Component} class or even in a <em>plain old class</em>. In such cases,
  * a {@code @Bean} method will get processed in a so-called <em>'lite'</em> mode.
  *
- * <p>In contrast to the semantics for bean methods in {@code @Configuration} classes
- * as described above, bean methods in <em>lite</em> mode will be called as plain
- * <em>factory methods</em> from the container (similar to {@code factory-method}
- * declarations in XML) but with <b><em>prototype</em></b> semantics. The containing
+ * <p>Bean methods in <em>lite</em> mode will be treated as plain <em>factory
+ * methods</em> by the container (similar to {@code factory-method} declarations
+ * in XML), with scoping and lifecycle callbacks properly applied. The containing
  * class remains unmodified in this case, and there are no unusual constraints for
- * factory methods; however, scoping semantics are <b>not</b> respected as described
- * above for 'inter-bean method' invocations in this mode. For example:
+ * the containing class or the factory methods.
+ *
+ * <p>In contrast to the semantics for bean methods in {@code @Configuration} classes,
+ * <em>'inter-bean references'</em> are not supported in <em>lite</em> mode. Instead,
+ * when one {@code @Bean}-method invokes another {@code @Bean}-method in <em>lite</em>
+ * mode, the invocation is a standard Java method invocation; Spring does not intercept
+ * the invocation via a CGLIB proxy. This is analogous to inter-{@code @Transactional}
+ * method calls where in proxy mode, Spring does not intercept the invocation &mdash;
+ * Spring does so only in AspectJ mode.
+ * 
+ * <p>For example:
  *
  * <pre class="code">
  * &#064;Component
