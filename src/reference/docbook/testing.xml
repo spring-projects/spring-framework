@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="testing">
+<chapter version="5.0" xml:id="testing" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:ns5="http://www.w3.org/1999/xhtml"
+         xmlns:ns4="http://www.w3.org/2000/svg"
+         xmlns:ns3="http://www.w3.org/1998/Math/MathML"
+         xmlns:ns="http://docbook.org/ns/docbook">
   <title>Testing</title>
 
   <section id="testing-introduction">
@@ -128,8 +131,9 @@
           <classname>ModelAndViewAssert</classname> combined with
           <literal>MockHttpServletRequest</literal>,
           <literal>MockHttpSession</literal>, and so on from the <link
-          linkend="mock-objects-servlet"><literal>org.springframework.mock.web</literal></link>
-          package.</para>
+              linkend="mock-objects-servlet">
+              <literal>org.springframework.mock.web</literal>
+            </link> package.</para>
         </tip>
       </section>
     </section>
@@ -254,11 +258,11 @@
         every test fixture leads to slower overall test runs that could reduce
         productivity.</para>
 
-        <para>Test classes can provide either an array containing the resource
-        locations of XML configuration metadata — typically in the classpath —
-        or an array containing <interfacename>@Configuration</interfacename>
-        classes that is used to configure the application. These locations or
-        classes are the same as or similar to those specified in
+        <para>Test classes can provide either an array of <emphasis>resource
+        locations</emphasis> for XML configuration metadata — typically in the
+        classpath — or an array of <emphasis>annotated classes</emphasis> that
+        is used to configure the application. These locations or classes are
+        the same as or similar to those specified in
         <literal>web.xml</literal> or other deployment configuration
         files.</para>
 
@@ -267,8 +271,8 @@
         test. Thus the setup cost is incurred only once (per test suite), and
         subsequent test execution is much faster. In this context, the term
         <emphasis>test suite</emphasis> means all tests run in the same JVM —
-        for example, all tests run from an Ant or Maven build for a given
-        project or module. In the unlikely case that a test corrupts the
+        for example, all tests run from an Ant, Maven, or Gradle build for a
+        given project or module. In the unlikely case that a test corrupts the
         application context and requires reloading — for example, by modifying
         a bean definition or the state of an application object — the
         TestContext framework can be configured to reload the configuration
@@ -350,10 +354,11 @@
         useful when you want a particular test to populate or modify the
         database — the TestContext framework can be instructed to cause the
         transaction to commit instead of roll back via the <link
-        linkend="integration-testing-annotations"><interfacename>@TransactionConfiguration</interfacename></link>
-        and <link
-        linkend="integration-testing-annotations"><interfacename>@Rollback</interfacename></link>
-        annotations.</para>
+            linkend="integration-testing-annotations">
+            <interfacename>@TransactionConfiguration</interfacename>
+          </link> and <link linkend="integration-testing-annotations">
+            <interfacename>@Rollback</interfacename>
+          </link> annotations.</para>
 
         <para>See transaction management with the <link
         linkend="testcontext-tx">TestContext framework</link>.</para>
@@ -405,10 +410,11 @@
       contains <classname>SimpleJdbcTestUtils</classname>, which is a
       collection of JDBC related utility functions intended to simplify
       standard database testing scenarios. <emphasis>Note that <link
-      linkend="testcontext-support-classes-junit4"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>
-      and <link
-      linkend="testcontext-support-classes-testng"><classname>AbstractTransactionalTestNGSpringContextTests</classname></link>
-      provide convenience methods which delegate to
+          linkend="testcontext-support-classes-junit4">
+          <classname>AbstractTransactionalJUnit4SpringContextTests</classname>
+        </link> and <link linkend="testcontext-support-classes-testng">
+          <classname>AbstractTransactionalTestNGSpringContextTests</classname>
+        </link> provide convenience methods which delegate to
       <classname>SimpleJdbcTestUtils</classname> internally.</emphasis></para>
     </section>
 
@@ -427,8 +433,11 @@
 
         <itemizedlist>
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@ContextConfiguration</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@ContextConfiguration</interfacename>
+              </emphasis>
+            </para>
 
             <para>Defines class-level metadata that is used to determine how
             to load and configure an
@@ -436,25 +445,43 @@
             classes. Specifically,
             <interfacename>@ContextConfiguration</interfacename> declares
             <emphasis>either</emphasis> the application context resource
-            <literal>locations</literal> <emphasis>or</emphasis> the
-            <interfacename>@Configuration</interfacename>
-            <varname>classes</varname> (but not both) to load as well as the
-            <interfacename>ContextLoader</interfacename> strategy to use for
-            loading the context. Note, however, that you typically do not need
-            to explicitly configure the loader since the default loader
-            supports either resource <varname>locations</varname> or
-            configuration <varname>classes</varname>.</para>
+            <varname>locations</varname> <emphasis>or</emphasis> the annotated
+            <varname>classes</varname> that will be used to load the
+            context.</para>
 
-            <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>(<emphasis
-                role="bold">locations</emphasis>="example/test-context.xml", <emphasis
-                role="bold">loader</emphasis>=CustomContextLoader.class)
+            <para>Resource locations are typically XML configuration files
+            located in the classpath; whereas, annotated classes are typically
+            <interfacename>@Configuration</interfacename> classes. However,
+            resource locations could also refer to files in the file system,
+            and annotated classes could be component classes, etc. See <link
+            linkend="testcontext-ctx-management-xml">Context configuration
+            with XML resources</link> and the Javadoc for
+            <interfacename>@ContextConfiguration</interfacename> for further
+            details.</para>
+
+            <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>("/test-config.xml")
 public class XmlApplicationContextTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
             <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>(<emphasis
-                role="bold">classes</emphasis>=MyConfig.class)
+                role="bold">classes</emphasis>=TestConfig.class)
 public class ConfigClassApplicationContextTests {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+            <para><interfacename>@ContextConfiguration</interfacename> may
+            optionally be used to declare the
+            <interfacename>ContextLoader</interfacename> strategy as well.
+            Note, however, that you typically do not need to explicitly
+            configure the loader since the default loader supports either
+            resource <varname>locations</varname> or annotated
+            <varname>classes</varname>.</para>
+
+            <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>(<emphasis
+                role="bold">locations</emphasis>="/test-context.xml", <emphasis
+                role="bold">loader</emphasis>=CustomContextLoader.class)
+public class CustomLoaderXmlApplicationContextTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
@@ -471,8 +498,11 @@ public class ConfigClassApplicationContextTests {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@ActiveProfiles</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@ActiveProfiles</interfacename>
+              </emphasis>
+            </para>
 
             <para>A class-level annotation that is used to declare which
             <emphasis>bean definition profiles</emphasis> should be active
@@ -494,8 +524,7 @@ public class DeveloperIntegrationTests {
             <note>
               <para><interfacename>@ActiveProfiles</interfacename> provides
               support for <emphasis>inheriting</emphasis> active bean
-              definition profiles declared by superclasses classes by
-              default.</para>
+              definition profiles declared by superclasses by default.</para>
             </note>
 
             <para>See <link
@@ -506,8 +535,11 @@ public class DeveloperIntegrationTests {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@DirtiesContext</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@DirtiesContext</interfacename>
+              </emphasis>
+            </para>
 
             <para>Indicates that the underlying Spring
             <interfacename>ApplicationContext</interfacename> has been
@@ -575,8 +607,11 @@ public void testProcessWhichDirtiesAppCtx() {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@TestExecutionListeners</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@TestExecutionListeners</interfacename>
+              </emphasis>
+            </para>
 
             <para>Defines class-level metadata for configuring which
             <interfacename>TestExecutionListener</interfacename>s should be
@@ -597,8 +632,11 @@ public class CustomTestExecutionListenerTests {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@TransactionConfiguration</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@TransactionConfiguration</interfacename>
+              </emphasis>
+            </para>
 
             <para>Defines class-level metadata for configuring transactional
             tests. Specifically, the bean name of the
@@ -634,8 +672,11 @@ public class CustomConfiguredTransactionalTests {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Rollback</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@Rollback</interfacename>
+              </emphasis>
+            </para>
 
             <para>Indicates whether the transaction for the annotated test
             method should be <emphasis>rolled back</emphasis> after the test
@@ -652,8 +693,11 @@ public void testProcessWithoutRollback() {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@BeforeTransaction</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@BeforeTransaction</interfacename>
+              </emphasis>
+            </para>
 
             <para>Indicates that the annotated <literal>public void</literal>
             method should be executed <emphasis>before</emphasis> a
@@ -668,8 +712,11 @@ public void testProcessWithoutRollback() {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@AfterTransaction</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@AfterTransaction</interfacename>
+              </emphasis>
+            </para>
 
             <para>Indicates that the annotated <literal>public void</literal>
             method should be executed <emphasis>after</emphasis> a transaction
@@ -684,8 +731,11 @@ public void testProcessWithoutRollback() {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@NotTransactional</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@NotTransactional</interfacename>
+              </emphasis>
+            </para>
 
             <para>The presence of this annotation indicates that the annotated
             test method must <emphasis>not</emphasis> execute in a
@@ -728,54 +778,70 @@ public void testProcessWithoutTransaction() {
 
         <itemizedlist>
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Autowired</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@Autowired</interfacename>
+              </emphasis>
+            </para>
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Qualifier</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@Qualifier</interfacename>
+              </emphasis>
+            </para>
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Resource</interfacename></emphasis>
-            (javax.annotation) <emphasis>if JSR-250 is
+            <para><emphasis role="bold">
+                <interfacename>@Resource</interfacename>
+              </emphasis> (javax.annotation) <emphasis>if JSR-250 is
             present</emphasis></para>
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Inject</interfacename></emphasis>
-            (javax.inject) <emphasis>if JSR-330 is present</emphasis></para>
+            <para><emphasis role="bold">
+                <interfacename>@Inject</interfacename>
+              </emphasis> (javax.inject) <emphasis>if JSR-330 is
+            present</emphasis></para>
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Named</interfacename></emphasis>
-            (javax.inject) <emphasis>if JSR-330 is present</emphasis></para>
+            <para><emphasis role="bold">
+                <interfacename>@Named</interfacename>
+              </emphasis> (javax.inject) <emphasis>if JSR-330 is
+            present</emphasis></para>
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@PersistenceContext</interfacename></emphasis>
-            (javax.persistence) <emphasis>if JPA is present</emphasis></para>
+            <para><emphasis role="bold">
+                <interfacename>@PersistenceContext</interfacename>
+              </emphasis> (javax.persistence) <emphasis>if JPA is
+            present</emphasis></para>
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@PersistenceUnit</interfacename></emphasis>
-            (javax.persistence) <emphasis>if JPA is present</emphasis></para>
+            <para><emphasis role="bold">
+                <interfacename>@PersistenceUnit</interfacename>
+              </emphasis> (javax.persistence) <emphasis>if JPA is
+            present</emphasis></para>
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Required</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@Required</interfacename>
+              </emphasis>
+            </para>
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Transactional</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@Transactional</interfacename>
+              </emphasis>
+            </para>
           </listitem>
         </itemizedlist>
       </section>
@@ -791,8 +857,11 @@ public void testProcessWithoutTransaction() {
 
         <itemizedlist>
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@IfProfileValue</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@IfProfileValue</interfacename>
+              </emphasis>
+            </para>
 
             <para>Indicates that the annotated test is enabled for a specific
             testing environment. If the configured
@@ -827,8 +896,11 @@ public void testProcessWhichRunsForUnitOrIntegrationTestGroups() {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@ProfileValueSourceConfiguration</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@ProfileValueSourceConfiguration</interfacename>
+              </emphasis>
+            </para>
 
             <para>Class-level annotation that specifies what type of
             <literal>ProfileValueSource</literal> to use when retrieving
@@ -846,8 +918,11 @@ public class CustomProfileValueSourceTests {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Timed</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@Timed</interfacename>
+              </emphasis>
+            </para>
 
             <para>Indicates that the annotated test method must finish
             execution in a specified time period (in milliseconds). If the
@@ -881,8 +956,11 @@ public void testProcessWithOneSecondTimeout() {
           </listitem>
 
           <listitem>
-            <para><emphasis
-            role="bold"><interfacename>@Repeat</interfacename></emphasis></para>
+            <para>
+              <emphasis role="bold">
+                <interfacename>@Repeat</interfacename>
+              </emphasis>
+            </para>
 
             <para>Indicates that the annotated test method must be executed
             repeatedly. The number of times that the test method is to be
@@ -909,17 +987,16 @@ public void testProcessRepeatedly() {
       Framework</emphasis> (located in the
       <literal>org.springframework.test.context</literal> package) provides
       generic, annotation-driven unit and integration testing support that is
-      agnostic of the testing framework in use, whether JUnit or TestNG. The
-      TestContext framework also places a great deal of importance on
-      <emphasis>convention over configuration</emphasis> with reasonable
-      defaults that can be overridden through annotation-based
-      configuration.</para>
+      agnostic of the testing framework in use. The TestContext framework also
+      places a great deal of importance on <emphasis>convention over
+      configuration</emphasis> with reasonable defaults that can be overridden
+      through annotation-based configuration.</para>
 
       <para>In addition to generic testing infrastructure, the TestContext
       framework provides explicit support for JUnit and TestNG in the form of
       <literal>abstract</literal> support classes. For JUnit, Spring also
       provides a custom JUnit <interfacename>Runner</interfacename> that
-      allows one to write so called <emphasis>POJO test classes</emphasis>.
+      allows one to write so-called <emphasis>POJO test classes</emphasis>.
       POJO test classes are not required to extend a particular class
       hierarchy.</para>
 
@@ -1037,8 +1114,8 @@ public void testProcessRepeatedly() {
 
             <para>As of Spring 3.1, implement
             <interfacename>SmartContextLoader</interfacename> instead of this
-            interface in order to provide support for configuration classes
-            and active bean definition profiles.</para>
+            interface in order to provide support for annotated classes and
+            active bean definition profiles.</para>
           </listitem>
 
           <listitem>
@@ -1050,8 +1127,8 @@ public void testProcessRepeatedly() {
             supersedes the <interfacename>ContextLoader</interfacename> SPI
             that was introduced in Spring 2.5. Specifically, a
             <interfacename>SmartContextLoader</interfacename> can choose to
-            process either resource <varname>locations</varname> or
-            configuration <varname>classes</varname>. Furthermore, a
+            process either resource <varname>locations</varname> or annotated
+            <varname>classes</varname>. Furthermore, a
             <interfacename>SmartContextLoader</interfacename> can set active
             bean definition profiles in the context that it loads.</para>
 
@@ -1071,13 +1148,14 @@ public void testProcessRepeatedly() {
 
               <listitem>
                 <para><classname>AnnotationConfigContextLoader</classname>:
-                loads an application context from
-                <interfacename>@Configuration</interfacename> classes.</para>
+                loads an application context from <emphasis>annotated
+                classes</emphasis>.</para>
               </listitem>
 
               <listitem>
                 <para><classname>GenericXmlContextLoader</classname>: loads an
-                application context from XML resource locations.</para>
+                application context from XML <emphasis>resource
+                locations</emphasis>.</para>
               </listitem>
 
               <listitem>
@@ -1144,16 +1222,16 @@ public class MyTest {
         achieved simply by declaring the
         <interfacename>@ContextConfiguration</interfacename> annotation at the
         class level. If your test class does not explicitly declare
-        application context resource <literal>locations</literal> or
-        configuration <varname>classes</varname>, the configured
+        application context resource <literal>locations</literal> or annotated
+        <varname>classes</varname>, the configured
         <interfacename>ContextLoader</interfacename> determines how to load a
         context from a default location or default configuration
         classes.</para>
 
         <para>The following sections explain how to configure an
         <interfacename>ApplicationContext</interfacename> via XML
-        configuration files or <interfacename>@Configuration</interfacename>
-        classes using Spring's
+        configuration files or annotated classes (typically
+        <interfacename>@Configuration</interfacename> classes) using Spring's
         <interfacename>@ContextConfiguration</interfacename>
         annotation.</para>
 
@@ -1224,15 +1302,15 @@ public class MyTest {
         </section>
 
         <section id="testcontext-ctx-management-javaconfig">
-          <title>Context configuration with @Configuration classes</title>
+          <title>Context configuration with annotated classes</title>
 
           <para>To load an <interfacename>ApplicationContext</interfacename>
-          for your tests using <interfacename>@Configuration</interfacename>
-          classes (see <xref linkend="beans-java" />), annotate your test
-          class with <interfacename>@ContextConfiguration</interfacename> and
-          configure the <literal>classes</literal> attribute with an array
-          that contains references to configuration classes. Alternatively,
-          you can implement and configure your own custom
+          for your tests using <emphasis>annotated classes</emphasis> (see
+          <xref linkend="beans-java" />), annotate your test class with
+          <interfacename>@ContextConfiguration</interfacename> and configure
+          the <literal>classes</literal> attribute with an array that contains
+          references to annotated classes. Alternatively, you can implement
+          and configure your own custom
           <interfacename>ContextLoader</interfacename> or
           <interfacename>SmartContextLoader</interfacename> for advanced use
           cases.</para>
@@ -1249,11 +1327,11 @@ public class MyTest {
           TestContext framework will attempt to detect the presence of default
           configuration classes. Specifically,
           <classname>AnnotationConfigContextLoader</classname> will detect all
-          static inner classes of the annotated test class that meet the
-          requirements for configuration class implementations as specified in
-          the Javadoc for <interfacename>@Configuration</interfacename>. In
-          the following example, the <classname>OrderServiceTest</classname>
-          class declares a static inner configuration class named
+          static inner classes of the test class that meet the requirements
+          for configuration class implementations as specified in the Javadoc
+          for <interfacename>@Configuration</interfacename>. In the following
+          example, the <classname>OrderServiceTest</classname> class declares
+          a static inner configuration class named
           <classname>Config</classname> that will be automatically used to
           load the <interfacename>ApplicationContext</interfacename> for the
           test class. Note that the name of the configuration class is
@@ -1291,10 +1369,11 @@ public class OrderServiceTest {
         </section>
 
         <section id="testcontext-ctx-management-mixed-config">
-          <title>Mixing XML resources and @Configuration classes</title>
+          <title>Mixing XML resources and annotated classes</title>
 
           <para>It may sometimes be desirable to mix XML resources and
-          <interfacename>@Configuration</interfacename> classes to configure
+          annotated classes (i.e., typically
+          <interfacename>@Configuration</interfacename> classes) to configure
           an <interfacename>ApplicationContext</interfacename> for your tests.
           For example, if you use XML configuration in production, you may
           decide that you want to use
@@ -1330,22 +1409,21 @@ public class OrderServiceTest {
 
           <para><interfacename>@ContextConfiguration</interfacename> supports
           a boolean <literal>inheritLocations</literal> attribute that denotes
-          whether resource locations or configuration classes declared by
+          whether resource locations or annotated classes declared by
           superclasses should be <emphasis>inherited</emphasis>. The default
-          value is <literal>true</literal>. This means that an annotated class
-          inherits the resource locations or configuration classes declared by
-          any annotated superclasses. Specifically, the resource locations or
-          configuration classes for an annotated test class are appended to
-          the list of resource locations or configuration classes declared by
-          annotated superclasses. Thus, subclasses have the option of
-          <emphasis>extending</emphasis> the list of resource locations or
-          configuration classes.</para>
+          value is <literal>true</literal>. This means that a test class
+          inherits the resource locations or annotated classes declared by any
+          superclasses. Specifically, the resource locations or annotated
+          classes for a test class are appended to the list of resource
+          locations or annotated classes declared by superclasses. Thus,
+          subclasses have the option of <emphasis>extending</emphasis> the
+          list of resource locations or annotated classes.</para>
 
           <para>If <interfacename>@ContextConfiguration</interfacename>'s
           <literal>inheritLocations</literal> attribute is set to
-          <literal>false</literal>, the resource locations or configuration
-          classes for the annotated class <emphasis>shadow</emphasis> and
-          effectively replace any resource locations or configuration classes
+          <literal>false</literal>, the resource locations or annotated
+          classes for the test class <emphasis>shadow</emphasis> and
+          effectively replace any resource locations or annotated classes
           defined by superclasses.</para>
 
           <para>In the following example that uses XML resource locations, the
@@ -1372,12 +1450,12 @@ public class ExtendedTest extends BaseTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
-          <para>Similarly, in the following example that uses configuration
+          <para>Similarly, in the following example that uses annotated
           classes, the <interfacename>ApplicationContext</interfacename> for
           <classname>ExtendedTest</classname> will be loaded from the
           <classname>BaseConfig</classname> <emphasis
           role="bold">and</emphasis> <classname>ExtendedConfig</classname>
-          configuration classes, in that order. Beans defined in
+          classes, in that order. Beans defined in
           <classname>ExtendedConfig</classname> may therefore override (i.e.,
           replace) those defined in <classname>BaseConfig</classname>.</para>
 
@@ -1403,7 +1481,7 @@ public class ExtendedTest extends BaseTest {
           definition profiles</emphasis>), and integration tests can now be
           configured to activate particular bean definition profiles for
           various testing scenarios. This is achieved by annotating a test
-          class with the new <interfacename>@ActiveProfiles</interfacename>
+          class with the <interfacename>@ActiveProfiles</interfacename>
           annotation and supplying a list of profiles that should be activated
           when loading the <interfacename>ApplicationContext</interfacename>
           for the test.</para>
@@ -1626,23 +1704,35 @@ public class TransferServiceTest {
 
           <itemizedlist>
             <listitem>
-              <para><varname>locations</varname> <emphasis>(from
-              @ContextConfiguration)</emphasis></para>
+              <para>
+                <varname>locations</varname>
+
+                <emphasis>(from @ContextConfiguration)</emphasis>
+              </para>
             </listitem>
 
             <listitem>
-              <para><varname>classes</varname> <emphasis>(from
-              @ContextConfiguration)</emphasis></para>
+              <para>
+                <varname>classes</varname>
+
+                <emphasis>(from @ContextConfiguration)</emphasis>
+              </para>
             </listitem>
 
             <listitem>
-              <para><varname>contextLoader</varname> <emphasis>(from
-              @ContextConfiguration)</emphasis></para>
+              <para>
+                <varname>contextLoader</varname>
+
+                <emphasis>(from @ContextConfiguration)</emphasis>
+              </para>
             </listitem>
 
             <listitem>
-              <para><varname>activeProfiles</varname> <emphasis>(from
-              @ActiveProfiles)</emphasis></para>
+              <para>
+                <varname>activeProfiles</varname>
+
+                <emphasis>(from @ActiveProfiles)</emphasis>
+              </para>
             </listitem>
           </itemizedlist>
 
@@ -1677,9 +1767,9 @@ public class TransferServiceTest {
             <para>To benefit from the caching mechanism, all tests must run
             within the same process or test suite. This can be achieved by
             executing all tests as a group within an IDE. Similarly, when
-            executing tests with a build framework such as Ant or Maven it is
-            important to make sure that the build framework does not
-            <emphasis>fork</emphasis> between tests. For example, if the
+            executing tests with a build framework such as Ant, Maven, or
+            Gradle it is important to make sure that the build framework does
+            not <emphasis>fork</emphasis> between tests. For example, if the
             <ulink
             url="http://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode">forkMode</ulink>
             for the Maven Surefire plug-in is set to <literal>always</literal>
@@ -1729,13 +1819,13 @@ public class TransferServiceTest {
         </tip>
 
         <para>Because <interfacename>@Autowired</interfacename> is used to
-        perform <link linkend="beans-factory-autowire"><emphasis>autowiring by
-        type</emphasis></link>, if you have multiple bean definitions of the
-        same type, you cannot rely on this approach for those particular
-        beans. In that case, you can use
-        <interfacename>@Autowired</interfacename> in conjunction with
-        <interfacename>@Qualifier</interfacename>. As of Spring 3.0 you may
-        also choose to use <interfacename>@Inject</interfacename> in
+        perform <link linkend="beans-factory-autowire">
+            <emphasis>autowiring by type</emphasis>
+          </link>, if you have multiple bean definitions of the same type, you
+        cannot rely on this approach for those particular beans. In that case,
+        you can use <interfacename>@Autowired</interfacename> in conjunction
+        with <interfacename>@Qualifier</interfacename>. As of Spring 3.0 you
+        may also choose to use <interfacename>@Inject</interfacename> in
         conjunction with <interfacename>@Named</interfacename>. Alternatively,
         if your test class has access to its
         <classname>ApplicationContext</classname>, you can perform an explicit
@@ -1904,12 +1994,14 @@ public class HibernateTitleRepositoryTests {
         the <interfacename>@Rollback</interfacename> annotation to override
         the class-level default rollback setting.</para>
 
-        <para><emphasis><link
-        linkend="testcontext-support-classes-junit4"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>
-        and <link
-        linkend="testcontext-support-classes-testng"><classname>AbstractTransactionalTestNGSpringContextTests</classname></link>
-        are preconfigured for transactional support at the class level.
-        </emphasis></para>
+        <para>
+          <emphasis><link linkend="testcontext-support-classes-junit4">
+              <classname>AbstractTransactionalJUnit4SpringContextTests</classname>
+            </link> and <link linkend="testcontext-support-classes-testng">
+              <classname>AbstractTransactionalTestNGSpringContextTests</classname>
+            </link> are preconfigured for transactional support at the class
+          level.</emphasis>
+        </para>
 
         <para>Occasionally you need to execute certain code before or after a
         transactional test method but outside the transactional context, for
@@ -2363,10 +2455,10 @@ public class HibernateClinicTests extends AbstractClinicTests { }
 
     <itemizedlist>
       <listitem>
-        <para><ulink url="http://www.junit.org/">JUnit</ulink>:
-        <quote><emphasis>A programmer-oriented testing framework for
-        Java</emphasis></quote>. Used by the Spring Framework in its test
-        suite.</para>
+        <para><ulink url="http://www.junit.org/">JUnit</ulink>: <quote>
+            <emphasis>A programmer-oriented testing framework for
+            Java</emphasis>
+          </quote>. Used by the Spring Framework in its test suite.</para>
       </listitem>
 
       <listitem>
@@ -2389,10 +2481,11 @@ public class HibernateClinicTests extends AbstractClinicTests { }
 
       <listitem>
         <para><ulink url="http://www.easymock.org/">EasyMock</ulink>: Java
-        library <quote><emphasis>that provides Mock Objects for interfaces
-        (and objects through the class extension) by generating them on the
-        fly using Java's proxy mechanism.</emphasis></quote> Used by the
-        Spring Framework in its test suite.</para>
+        library <quote>
+            <emphasis>that provides Mock Objects for interfaces (and objects
+            through the class extension) by generating them on the fly using
+            Java's proxy mechanism.</emphasis>
+          </quote> Used by the Spring Framework in its test suite.</para>
       </listitem>
 
       <listitem>
@@ -2416,8 +2509,8 @@ public class HibernateClinicTests extends AbstractClinicTests { }
       </listitem>
 
       <listitem>
-        <para><ulink url="http://grinder.sourceforge.net/">The Grinder</ulink>:
-        Java load testing framework.</para>
+        <para><ulink url="http://grinder.sourceforge.net/">The
+        Grinder</ulink>: Java load testing framework.</para>
       </listitem>
     </itemizedlist>
   </section>
