@@ -29,6 +29,7 @@ Changes in version 3.2 M1
 * add option in MappingJacksonJsonView for setting the Content-Length header
 * decode path variables when url decoding is turned off in AbstractHandlerMapping
 * add required flag to @RequestBody annotation
+* support executor qualification with @Async#value (SPR-6847)
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------

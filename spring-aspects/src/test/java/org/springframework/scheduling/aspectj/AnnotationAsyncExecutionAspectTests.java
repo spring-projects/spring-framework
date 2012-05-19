@@ -22,9 +22,16 @@ import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.startsWith;
 
 import static org.junit.Assert.*;
 
@@ -104,6 +111,22 @@ public class AnnotationAsyncExecutionAspectTests {
 		assertEquals(0, executor.submitCompleteCounter);
 	}
 
+	@Test
+	public void qualifiedAsyncMethodsAreRoutedToCorrectExecutor() throws InterruptedException, ExecutionException {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("e1", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
+		AnnotationAsyncExecutionAspect.aspectOf().setBeanFactory(beanFactory);
+
+		ClassWithQualifiedAsyncMethods obj = new ClassWithQualifiedAsyncMethods();
+
+		Future<Thread> defaultThread = obj.defaultWork();
+		assertThat(defaultThread.get(), not(Thread.currentThread()));
+		assertThat(defaultThread.get().getName(), not(startsWith("e1-")));
+
+		Future<Thread> e1Thread = obj.e1Work();
+		assertThat(e1Thread.get().getName(), startsWith("e1-"));
+	}
+
 
 	@SuppressWarnings("serial")
 	private static class CountingExecutor extends SimpleAsyncTaskExecutor {
@@ -180,4 +203,16 @@ public class AnnotationAsyncExecutionAspectTests {
 		}
 	}
 
+
+	static class ClassWithQualifiedAsyncMethods {
+		@Async
+		public Future<Thread> defaultWork() {
+			return new AsyncResult<Thread>(Thread.currentThread());
+		}
+
+		@Async("e1")
+		public Future<Thread> e1Work() {
+			return new AsyncResult<Thread>(Thread.currentThread());
+		}
+	}
 }

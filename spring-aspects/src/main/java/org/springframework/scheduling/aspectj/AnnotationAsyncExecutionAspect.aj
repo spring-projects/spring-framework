@@ -16,7 +16,11 @@
 
 package org.springframework.scheduling.aspectj;
 
+import java.lang.reflect.Method;
+
 import java.util.concurrent.Future;
+
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.scheduling.annotation.Async;
 
 /**
@@ -31,6 +35,7 @@ import org.springframework.scheduling.annotation.Async;
  * constraint, it produces only a warning.
  *
  * @author Ramnivas Laddad
+ * @author Chris Beams
  * @since 3.0.5
  */
 public aspect AnnotationAsyncExecutionAspect extends AbstractAsyncExecutionAspect {
@@ -42,6 +47,28 @@ public aspect AnnotationAsyncExecutionAspect extends AbstractAsyncExecutionAspec
 		: execution((void || Future+) (@Async *).*(..));
 
 	public pointcut asyncMethod() : asyncMarkedMethod() || asyncTypeMarkedMethod();
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation inspects the given method and its declaring class for the
+	 * {@code @Async} annotation, returning the qualifier value expressed by
+	 * {@link Async#value()}. If {@code @Async} is specified at both the method and class level, the
+	 * method's {@code #value} takes precedence (even if empty string, indicating that
+	 * the default executor should be used preferentially).
+	 * @return the qualifier if specified, otherwise empty string indicating that the
+	 * {@linkplain #setExecutor(Executor) default executor} should be used
+	 * @see #determineAsyncExecutor(Method)
+	 */
+	@Override
+	protected String getExecutorQualifier(Method method) {
+		// maintainer's note: changes made here should also be made in
+		// AnnotationAsyncExecutionInterceptor#getExecutorQualifier
+		Async async = AnnotationUtils.findAnnotation(method, Async.class);
+		if (async == null) {
+			async = AnnotationUtils.findAnnotation(method.getDeclaringClass(), Async.class);
+		}
+		return async == null ? null : async.value();
+	}
 
 	declare error:
 		execution(@Async !(void||Future) *(..)):

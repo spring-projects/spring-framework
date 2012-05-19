@@ -37,13 +37,28 @@ import java.lang.annotation.Target;
  * Spring's {@link AsyncResult} or EJB 3.1's {@link javax.ejb.AsyncResult}.
  *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0
- * @see org.springframework.aop.interceptor.AsyncExecutionInterceptor
+ * @see AnnotationAsyncExecutionInterceptor
  * @see AsyncAnnotationAdvisor
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Async {
+
+	/**
+	 * A qualifier value for the specified asynchronous operation(s).
+	 * <p>May be used to determine the target executor to be used when executing this
+	 * method, matching the qualifier value (or the bean name) of a specific
+	 * {@link java.util.concurrent.Executor Executor} or
+	 * {@link org.springframework.core.task.TaskExecutor TaskExecutor}
+	 * bean definition.
+	 * <p>When specified on a class level {@code @Async} annotation, indicates that the
+	 * given executor should be used for all methods within the class. Method level use
+	 * of {@link Async#value} always overrides any value set at the class level.
+	 * @since 3.2
+	 */
+	String value() default "";
 
 }
