@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.context.transaction;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -29,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.Rollback;
@@ -40,7 +42,6 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.DelegatingTransactionAttribute;
-import org.springframework.transaction.interceptor.TransactionAspectUtils;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.util.Assert;
@@ -154,7 +155,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				// qualifier matching (only exposed on the internal BeanFactory,
 				// not on the ApplicationContext).
 				BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
-				tm = TransactionAspectUtils.getTransactionManager(bf, qualifier);
+				tm = BeanFactoryUtils.qualifiedBeanOfType(bf, PlatformTransactionManager.class, qualifier);
 			}
 			else {
 				tm = getTransactionManager(testContext);
