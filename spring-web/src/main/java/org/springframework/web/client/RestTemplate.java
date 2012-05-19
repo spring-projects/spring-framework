@@ -458,7 +458,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			}
 		}
 		catch (IOException ex) {
-			throw new ResourceAccessException("I/O error: " + ex.getMessage(), ex);
+			throw new ResourceAccessException("I/O error on method " + method.toString() 
+				+ " for \"" + url  + "\":" + ex.getMessage(), ex);
 		}
 		finally {
 			if (response != null) {
