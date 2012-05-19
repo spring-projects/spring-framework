@@ -35,7 +35,7 @@
 					<xsd:documentation><![CDATA[
 	Specifies the java.util.Executor instance to use when invoking asynchronous methods.
 	If not provided, an instance of org.springframework.core.task.SimpleAsyncTaskExecutor
-	will be used by default
+	will be used by default.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

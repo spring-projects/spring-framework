@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,10 +49,17 @@ public abstract aspect AbstractAsyncExecutionAspect {
 		}
 	}
 
+	/**
+	 * Apply around advice to methods matching the {@link #asyncMethod()} pointcut,
+	 * submit the actual calling of the method to the correct task executor and return
+	 * immediately to the caller.
+	 * @return {@link Future} if the original method returns {@code Future}; {@code null}
+	 * otherwise.
+	 */
 	Object around() : asyncMethod() {
-                if (this.asyncExecutor == null) {
+		if (this.asyncExecutor == null) {
 			return proceed();
-                }
+		}
 		Callable<Object> callable = new Callable<Object>() {
 			public Object call() throws Exception {
 				Object result = proceed();
@@ -70,6 +77,9 @@ public abstract aspect AbstractAsyncExecutionAspect {
 		}
 	}
 
+	/**
+	 * Return the set of joinpoints at which async advice should be applied.
+	 */
 	public abstract pointcut asyncMethod();
 
 }
