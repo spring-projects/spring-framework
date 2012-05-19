@@ -841,6 +841,32 @@ public void testProcessWithoutTransaction() {
             </para>
           </listitem>
         </itemizedlist>
+
+        <note>
+          <title>JSR-250 Lifecycle Annotations</title>
+
+          <para>In the Spring TestContext Framework
+          <interfacename>@PostConstruct</interfacename> and
+          <interfacename>@PreDestroy</interfacename> may be used with standard
+          semantics on any application components configured in the
+          <interfacename>ApplicationContext</interfacename>; however, these
+          lifecycle annotations have limited usage within an actual test
+          class.</para>
+
+          <para>If a method within a test class is annotated with
+          <interfacename>@PostConstruct</interfacename>, that method will be
+          executed before any <emphasis>before</emphasis> methods of the
+          underlying test framework (e.g., methods annotated with JUnit's
+          <interfacename>@Before</interfacename>), and that will apply for
+          every test method in the test class. On the other hand, if a method
+          within a test class is annotated with
+          <interfacename>@PreDestroy</interfacename>, that method will
+          <emphasis role="bold">never</emphasis> be executed. Within a test
+          class it is therefore recommended to use test lifecycle callbacks
+          from the underlying test framework instead of
+          <interfacename>@PostConstruct</interfacename> and
+          <interfacename>@PreDestroy</interfacename>.</para>
+        </note>
       </section>
 
       <section id="integration-testing-annotations-junit">
