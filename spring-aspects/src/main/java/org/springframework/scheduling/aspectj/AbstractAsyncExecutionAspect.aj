@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 import org.aspectj.lang.reflect.MethodSignature;
+
+import org.springframework.aop.interceptor.AsyncExecutionAspectSupport;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.support.TaskExecutorAdapter;
 
 /**
  * Abstract aspect that routes selected methods asynchronously.
@@ -34,25 +34,33 @@ import org.springframework.core.task.support.TaskExecutorAdapter;
  *
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0.5
  */
-public abstract aspect AbstractAsyncExecutionAspect {
+public abstract aspect AbstractAsyncExecutionAspect extends AsyncExecutionAspectSupport {
 
-	private AsyncTaskExecutor asyncExecutor;
-
-	public void setExecutor(Executor executor) {
-		if (executor instanceof AsyncTaskExecutor) {
-			this.asyncExecutor = (AsyncTaskExecutor) executor;
-		}
-		else {
-			this.asyncExecutor = new TaskExecutorAdapter(executor);
-		}
+	/**
+	 * Create an {@code AnnotationAsyncExecutionAspect} with a {@code null} default
+	 * executor, which should instead be set via {@code #aspectOf} and
+	 * {@link #setExecutor(Executor)}.
+	 */
+	public AbstractAsyncExecutionAspect() {
+		super(null);
 	}
 
+	/**
+	 * Apply around advice to methods matching the {@link #asyncMethod()} pointcut,
+	 * submit the actual calling of the method to the correct task executor and return
+	 * immediately to the caller.
+	 * @return {@link Future} if the original method returns {@code Future}; {@code null}
+	 * otherwise.
+	 */
 	Object around() : asyncMethod() {
-                if (this.asyncExecutor == null) {
+		MethodSignature methodSignature = (MethodSignature) thisJoinPointStaticPart.getSignature();
+		AsyncTaskExecutor executor = determineAsyncExecutor(methodSignature.getMethod());
+		if (executor == null) {
 			return proceed();
-                }
+		}
 		Callable<Object> callable = new Callable<Object>() {
 			public Object call() throws Exception {
 				Object result = proceed();
@@ -61,8 +69,8 @@ public abstract aspect AbstractAsyncExecutionAspect {
 				}
 				return null;
 			}};
-		Future<?> result = this.asyncExecutor.submit(callable);
-		if (Future.class.isAssignableFrom(((MethodSignature) thisJoinPointStaticPart.getSignature()).getReturnType())) {
+		Future<?> result = executor.submit(callable);
+		if (Future.class.isAssignableFrom(methodSignature.getReturnType())) {
 			return result;
 		}
 		else {
@@ -70,6 +78,9 @@ public abstract aspect AbstractAsyncExecutionAspect {
 		}
 	}
 
+	/**
+	 * Return the set of joinpoints at which async advice should be applied.
+	 */
 	public abstract pointcut asyncMethod();
 
 }

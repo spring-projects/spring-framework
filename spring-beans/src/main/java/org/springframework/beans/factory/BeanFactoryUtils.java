@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.beans.factory;
 
+import java.lang.reflect.Method;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -23,7 +25,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AutowireCandidateQualifier;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -37,6 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 04.07.2003
  */
 public abstract class BeanFactoryUtils {
@@ -429,6 +439,104 @@ public abstract class BeanFactoryUtils {
 		else {
 			throw new NoSuchBeanDefinitionException(type, "expected single bean but found " + beansOfType.size());
 		}
+	}
+
+	/**
+	 * Obtain a bean of type {@code T} from the given {@code BeanFactory} declaring a
+	 * qualifier (e.g. via {@code <qualifier>} or {@code @Qualifier}) matching the given
+	 * qualifier, or having a bean name matching the given qualifier.
+	 * @param bf the BeanFactory to get the target bean from
+	 * @param beanType the type of bean to retrieve
+	 * @param qualifier the qualifier for selecting between multiple bean matches
+	 * @return the matching bean of type {@code T} (never {@code null})
+	 * @throws IllegalStateException if no matching bean of type {@code T} found
+	 * @since 3.2
+	 */
+	public static <T> T qualifiedBeanOfType(BeanFactory beanFactory, Class<T> beanType, String qualifier) {
+		if (beanFactory instanceof ConfigurableListableBeanFactory) {
+			// Full qualifier matching supported.
+			return qualifiedBeanOfType((ConfigurableListableBeanFactory) beanFactory, beanType, qualifier);
+		}
+		else if (beanFactory.containsBean(qualifier)) {
+			// Fallback: target bean at least found by bean name.
+			return beanFactory.getBean(qualifier, beanType);
+		}
+		else {
+			throw new IllegalStateException("No matching " + beanType.getSimpleName() +
+					" bean found for bean name '" + qualifier +
+					"'! (Note: Qualifier matching not supported because given " +
+					"BeanFactory does not implement ConfigurableListableBeanFactory.)");
+		}
+	}
+
+	/**
+	 * Obtain a bean of type {@code T} from the given {@code BeanFactory} declaring a
+	 * qualifier (e.g. {@code <qualifier>} or {@code @Qualifier}) matching the given
+	 * qualifier
+	 * @param bf the BeanFactory to get the target bean from
+	 * @param beanType the type of bean to retrieve
+	 * @param qualifier the qualifier for selecting between multiple bean matches
+	 * @return the matching bean of type {@code T} (never {@code null})
+	 * @throws IllegalStateException if no matching bean of type {@code T} found
+	 */
+	private static <T> T qualifiedBeanOfType(ConfigurableListableBeanFactory bf, Class<T> beanType, String qualifier) {
+		Map<String, T> candidateBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, beanType);
+		T matchingBean = null;
+		for (String beanName : candidateBeans.keySet()) {
+			if (isQualifierMatch(qualifier, beanName, bf)) {
+				if (matchingBean != null) {
+					throw new IllegalStateException("No unique " + beanType.getSimpleName() +
+							" bean found for qualifier '" + qualifier + "'");
+				}
+				matchingBean = candidateBeans.get(beanName);
+			}
+		}
+		if (matchingBean != null) {
+			return matchingBean;
+		}
+		else {
+			throw new IllegalStateException("No matching " + beanType.getSimpleName() +
+					" bean found for qualifier '" + qualifier + "' - neither qualifier " +
+					"match nor bean name match!");
+		}
+	}
+
+	/**
+	 * Check whether the named bean declares a qualifier of the given name.
+	 * @param qualifier the qualifier to match
+	 * @param beanName the name of the candidate bean
+	 * @param bf the {@code BeanFactory} from which to retrieve the named bean
+	 * @return {@code true} if either the bean definition (in the XML case)
+	 * or the bean's factory method (in the {@code @Bean} case) defines a matching
+	 * qualifier value (through {@code <qualifier>} or {@code @Qualifier})
+	 */
+	private static boolean isQualifierMatch(String qualifier, String beanName, ConfigurableListableBeanFactory bf) {
+		if (bf.containsBean(beanName)) {
+			try {
+				BeanDefinition bd = bf.getMergedBeanDefinition(beanName);
+				if (bd instanceof AbstractBeanDefinition) {
+					AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
+					AutowireCandidateQualifier candidate = abd.getQualifier(Qualifier.class.getName());
+					if ((candidate != null && qualifier.equals(candidate.getAttribute(AutowireCandidateQualifier.VALUE_KEY))) ||
+							qualifier.equals(beanName) || ObjectUtils.containsElement(bf.getAliases(beanName), qualifier)) {
+						return true;
+					}
+				}
+				if (bd instanceof RootBeanDefinition) {
+					Method factoryMethod = ((RootBeanDefinition) bd).getResolvedFactoryMethod();
+					if (factoryMethod != null) {
+						Qualifier targetAnnotation = factoryMethod.getAnnotation(Qualifier.class);
+						if (targetAnnotation != null && qualifier.equals(targetAnnotation.value())) {
+							return true;
+						}
+					}
+				}
+			}
+			catch (NoSuchBeanDefinitionException ex) {
+				// ignore - can't compare qualifiers for a manually registered singleton object
+			}
+		}
+		return false;
 	}
 
 }

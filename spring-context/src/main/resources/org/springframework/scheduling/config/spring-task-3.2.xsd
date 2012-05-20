@@ -35,7 +35,10 @@
 					<xsd:documentation><![CDATA[
 	Specifies the java.util.Executor instance to use when invoking asynchronous methods.
 	If not provided, an instance of org.springframework.core.task.SimpleAsyncTaskExecutor
-	will be used by default
+	will be used by default.
+	Note that as of Spring 3.2, individual @Async methods may qualify which executor to
+	use, meaning that the executor specified here acts as a default for all non-qualified
+	@Async methods.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -98,6 +101,9 @@
 	required even when defining the executor as an inner bean: The executor
 	won't be directly accessible then but will nevertheless use the specified
 	id as the thread name prefix of the threads that it manages.
+	In the case of multiple task:executors, as of Spring 3.2 this value may be used to
+	qualify which executor should handle a given @Async method, e.g. @Async("executorId").
+	See the Javadoc for the #value attribute of Spring's @Async annotation for details.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

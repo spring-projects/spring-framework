@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,10 @@ import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
@@ -53,7 +56,8 @@ import org.springframework.util.ClassUtils;
  */
 @SuppressWarnings("serial")
 public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
-		implements BeanPostProcessor, BeanClassLoaderAware, InitializingBean, Ordered {
+		implements BeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware,
+		InitializingBean, Ordered {
 
 	private Class<? extends Annotation> asyncAnnotationType;
 
@@ -68,6 +72,8 @@ public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
 	 * an advisor to existing proxies rather than double-proxy.
 	 */
 	private int order = Ordered.LOWEST_PRECEDENCE;
+
+	private BeanFactory beanFactory;
 
 
 	/**
@@ -95,12 +101,17 @@ public class AsyncAnnotationBeanPostProcessor extends ProxyConfig
 		this.beanClassLoader = classLoader;
 	}
 
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
+	}
+
 	public void afterPropertiesSet() {
 		this.asyncAnnotationAdvisor = (this.executor != null ?
 				new AsyncAnnotationAdvisor(this.executor) : new AsyncAnnotationAdvisor());
 		if (this.asyncAnnotationType != null) {
 			this.asyncAnnotationAdvisor.setAsyncAnnotationType(this.asyncAnnotationType);
 		}
+		this.asyncAnnotationAdvisor.setBeanFactory(this.beanFactory);
 	}
 
 	public int getOrder() {

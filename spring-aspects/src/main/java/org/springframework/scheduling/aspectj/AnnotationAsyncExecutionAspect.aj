@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package org.springframework.scheduling.aspectj;
 
+import java.lang.reflect.Method;
+
 import java.util.concurrent.Future;
+
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.scheduling.annotation.Async;
 
 /**
@@ -24,31 +28,55 @@ import org.springframework.scheduling.annotation.Async;
  *
  * <p>This aspect routes methods marked with the {@link Async} annotation
  * as well as methods in classes marked with the same. Any method expected
- * to be routed asynchronously must return either void, {@link Future}, 
- * or a subtype of {@link Future}. This aspect, therefore, will produce 
- * a compile-time error for methods that violate this constraint on the return type. 
- * If, however, a class marked with <code>&#64;Async</code> contains a method that 
- * violates this constraint, it produces only a warning.
- * 
+ * to be routed asynchronously must return either {@code void}, {@link Future},
+ * or a subtype of {@link Future}. This aspect, therefore, will produce
+ * a compile-time error for methods that violate this constraint on the return type.
+ * If, however, a class marked with {@code @Async} contains a method that violates this
+ * constraint, it produces only a warning.
+ *
  * @author Ramnivas Laddad
+ * @author Chris Beams
  * @since 3.0.5
  */
 public aspect AnnotationAsyncExecutionAspect extends AbstractAsyncExecutionAspect {
 
-	private pointcut asyncMarkedMethod() 
+	private pointcut asyncMarkedMethod()
 		: execution(@Async (void || Future+) *(..));
 
-	private pointcut asyncTypeMarkedMethod() 
+	private pointcut asyncTypeMarkedMethod()
 		: execution((void || Future+) (@Async *).*(..));
-	
+
 	public pointcut asyncMethod() : asyncMarkedMethod() || asyncTypeMarkedMethod();
-	
-	declare error: 
-		execution(@Async !(void||Future) *(..)): 
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation inspects the given method and its declaring class for the
+	 * {@code @Async} annotation, returning the qualifier value expressed by
+	 * {@link Async#value()}. If {@code @Async} is specified at both the method and class level, the
+	 * method's {@code #value} takes precedence (even if empty string, indicating that
+	 * the default executor should be used preferentially).
+	 * @return the qualifier if specified, otherwise empty string indicating that the
+	 * {@linkplain #setExecutor(Executor) default executor} should be used
+	 * @see #determineAsyncExecutor(Method)
+	 */
+	@Override
+	protected String getExecutorQualifier(Method method) {
+		// maintainer's note: changes made here should also be made in
+		// AnnotationAsyncExecutionInterceptor#getExecutorQualifier
+		Async async = AnnotationUtils.findAnnotation(method, Async.class);
+		if (async == null) {
+			async = AnnotationUtils.findAnnotation(method.getDeclaringClass(), Async.class);
+		}
+		return async == null ? null : async.value();
+	}
+
+	declare error:
+		execution(@Async !(void||Future) *(..)):
 		"Only methods that return void or Future may have an @Async annotation";
 
-	declare warning: 
-		execution(!(void||Future) (@Async *).*(..)): 
-		"Methods in a class marked with @Async that do not return void or Future will be routed synchronously";
+	declare warning:
+		execution(!(void||Future) (@Async *).*(..)):
+		"Methods in a class marked with @Async that do not return void or Future will " +
+		"be routed synchronously";
 
 }
