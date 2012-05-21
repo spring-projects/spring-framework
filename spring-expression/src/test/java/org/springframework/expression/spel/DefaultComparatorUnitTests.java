@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package org.springframework.expression.spel;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.math.BigDecimal;
 
 import org.junit.Test;
 import org.springframework.expression.EvaluationException;
@@ -57,6 +59,35 @@ public class DefaultComparatorUnitTests {
 		assertTrue(comparator.compare(1L, 2L) < 0);
 		assertTrue(comparator.compare(1L, 1L) == 0);
 		assertTrue(comparator.compare(2L, 1L) > 0);
+	}
+	
+	@Test
+	public void testNonPrimitiveNumbers() throws EvaluationException {
+		TypeComparator comparator = new StandardTypeComparator();
+
+		BigDecimal bdOne = new BigDecimal("1");
+		BigDecimal bdTwo = new BigDecimal("2");
+		
+		assertTrue(comparator.compare(bdOne, bdTwo) < 0);
+		assertTrue(comparator.compare(bdOne, new BigDecimal("1")) == 0);
+		assertTrue(comparator.compare(bdTwo, bdOne) > 0);
+
+		assertTrue(comparator.compare(1, bdTwo) < 0);
+		assertTrue(comparator.compare(1, bdOne) == 0);
+		assertTrue(comparator.compare(2, bdOne) > 0);
+
+		assertTrue(comparator.compare(1.0d, bdTwo) < 0);
+		assertTrue(comparator.compare(1.0d, bdOne) == 0);
+		assertTrue(comparator.compare(2.0d, bdOne) > 0);
+
+		assertTrue(comparator.compare(1.0f, bdTwo) < 0);
+		assertTrue(comparator.compare(1.0f, bdOne) == 0);
+		assertTrue(comparator.compare(2.0f, bdOne) > 0);
+
+		assertTrue(comparator.compare(1L, bdTwo) < 0);
+		assertTrue(comparator.compare(1L, bdOne) == 0);
+		assertTrue(comparator.compare(2L, bdOne) > 0);
+
 	}
 
 	@Test

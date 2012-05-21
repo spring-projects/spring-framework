@@ -16,9 +16,14 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.support.BooleanTypedValue;
+import org.springframework.util.NumberUtils;
 
 /**
  * Implements the not-equal operator.
@@ -42,7 +47,12 @@ public class OpNE extends Operator {
 		if (left instanceof Number && right instanceof Number) {
 			Number op1 = (Number) left;
 			Number op2 = (Number) right;
-
+			if (op1 instanceof BigDecimal || op2 instanceof BigDecimal) {
+				BigDecimal bd1 = NumberUtils.convertNumberToTargetClass(op1, BigDecimal.class);
+				BigDecimal bd2 = NumberUtils.convertNumberToTargetClass(op2, BigDecimal.class);
+				return BooleanTypedValue.forValue(bd1.compareTo(bd2) != 0);
+			}
+			
 			if (op1 instanceof Double || op2 instanceof Double) {
 				return BooleanTypedValue.forValue(op1.doubleValue() != op2.doubleValue());
 			}

@@ -16,9 +16,12 @@
 
 package org.springframework.expression.spel.support;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.TypeComparator;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
+import org.springframework.util.NumberUtils;
 
 /**
  * A simple basic TypeComparator implementation. It supports comparison of numbers and
@@ -45,6 +48,13 @@ public class StandardTypeComparator implements TypeComparator {
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
+			
+			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
+				BigDecimal bd1 = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
+				BigDecimal bd2 = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
+				return bd1.compareTo(bd2);
+			}
+			
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				double d1 = leftNumber.doubleValue();
 				double d2 = rightNumber.doubleValue();
