@@ -16,7 +16,11 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.NumberUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Common supertype for operators that operate on either one or two operands. In the case
@@ -24,6 +28,7 @@ import org.springframework.expression.spel.ExpressionState;
  * is only one.
  *
  * @author Andy Clement
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public abstract class Operator extends SpelNodeImpl {
@@ -67,29 +72,35 @@ public abstract class Operator extends SpelNodeImpl {
 
 	protected boolean equalityCheck(ExpressionState state, Object left, Object right) {
 		if (left instanceof Number && right instanceof Number) {
-			Number op1 = (Number) left;
-			Number op2 = (Number) right;
+			Number leftNumber = (Number) left;
+			Number rightNumber = (Number) right;
 
-			if (op1 instanceof Double || op2 instanceof Double) {
-				return (op1.doubleValue() == op2.doubleValue());
+			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
+				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
+				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
+				return (leftBigDecimal == null ? rightBigDecimal == null : leftBigDecimal.compareTo(rightBigDecimal) == 0);
 			}
 
-			if (op1 instanceof Float || op2 instanceof Float) {
-				return (op1.floatValue() == op2.floatValue());
+			if (leftNumber instanceof Double || rightNumber instanceof Double) {
+				return (leftNumber.doubleValue() == rightNumber.doubleValue());
 			}
 
-			if (op1 instanceof Long || op2 instanceof Long) {
-				return (op1.longValue() == op2.longValue());
+			if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				return (leftNumber.floatValue() == rightNumber.floatValue());
 			}
 
-			return (op1.intValue() == op2.intValue());
+			if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				return (leftNumber.longValue() == rightNumber.longValue());
+			}
+
+			return (leftNumber.intValue() == rightNumber.intValue());
 		}
 
 		if (left != null && (left instanceof Comparable)) {
 			return (state.getTypeComparator().compare(left, right) == 0);
 		}
 
-		return (left == null ? right == null : left.equals(right));
+		return ObjectUtils.nullSafeEquals(left, right);
 	}
 
 }

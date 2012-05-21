@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
@@ -29,6 +31,7 @@ import org.springframework.util.Assert;
  * appropriate exceptions if the operand in question does not support increment.
  *
  * @author Andy Clement
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.2
  */
 public class OpInc extends Operator {
@@ -47,34 +50,38 @@ public class OpInc extends Operator {
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl operand = getLeftOperand();
 
-		ValueRef lvalue = operand.getValueRef(state);
+		ValueRef valueRef = operand.getValueRef(state);
 
-		final TypedValue operandTypedValue = lvalue.getValue();
-		final Object operandValue = operandTypedValue.getValue();
-		TypedValue returnValue = operandTypedValue;
+		final TypedValue typedValue = valueRef.getValue();
+		final Object value = typedValue.getValue();
+		TypedValue returnValue = typedValue;
 		TypedValue newValue = null;
 
-		if (operandValue instanceof Number) {
-			Number op1 = (Number) operandValue;
-			if (op1 instanceof Double) {
+		if (value instanceof Number) {
+			Number op1 = (Number) value;
+			if (op1 instanceof BigDecimal) {
+				newValue = new TypedValue(((BigDecimal) op1).add(BigDecimal.ONE),
+						typedValue.getTypeDescriptor());
+			}
+			else if (op1 instanceof Double) {
 				newValue = new TypedValue(op1.doubleValue() + 1.0d,
-						operandTypedValue.getTypeDescriptor());
+						typedValue.getTypeDescriptor());
 			}
 			else if (op1 instanceof Float) {
 				newValue = new TypedValue(op1.floatValue() + 1.0f,
-						operandTypedValue.getTypeDescriptor());
+						typedValue.getTypeDescriptor());
 			}
 			else if (op1 instanceof Long) {
 				newValue = new TypedValue(op1.longValue() + 1L,
-						operandTypedValue.getTypeDescriptor());
+						typedValue.getTypeDescriptor());
 			}
 			else if (op1 instanceof Short) {
 				newValue = new TypedValue(op1.shortValue() + (short) 1,
-						operandTypedValue.getTypeDescriptor());
+						typedValue.getTypeDescriptor());
 			}
 			else {
 				newValue = new TypedValue(op1.intValue() + 1,
-						operandTypedValue.getTypeDescriptor());
+						typedValue.getTypeDescriptor());
 			}
 		}
 		if (newValue == null) {
@@ -93,7 +100,7 @@ public class OpInc extends Operator {
 
 		// set the name value
 		try {
-			lvalue.setValue(newValue.getValue());
+			valueRef.setValue(newValue.getValue());
 		}
 		catch (SpelEvaluationException see) {
 			// if unable to set the value the operand is not writable (e.g. 1++ )

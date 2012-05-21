@@ -16,18 +16,23 @@
 
 package org.springframework.expression.spel.ast;
 
+import java.math.BigDecimal;
+
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Operation;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
+import org.springframework.util.NumberUtils;
 
 /**
  * Implements the modulus operator.
  *
  * @author Andy Clement
+ * @author Giovanni Dall'Oglio Risso
  * @since 3.0
  */
 public class OpModulus extends Operator {
+
 
 	public OpModulus(int pos, SpelNodeImpl... operands) {
 		super("%", pos, operands);
@@ -36,25 +41,34 @@ public class OpModulus extends Operator {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		Object operandOne = getLeftOperand().getValueInternal(state).getValue();
-		Object operandTwo = getRightOperand().getValueInternal(state).getValue();
-		if (operandOne instanceof Number && operandTwo instanceof Number) {
-			Number op1 = (Number) operandOne;
-			Number op2 = (Number) operandTwo;
-			if (op1 instanceof Double || op2 instanceof Double) {
-				return new TypedValue(op1.doubleValue() % op2.doubleValue());
+		Object leftOperand = getLeftOperand().getValueInternal(state).getValue();
+		Object rightOperand = getRightOperand().getValueInternal(state).getValue();
+		if (leftOperand instanceof Number && rightOperand instanceof Number) {
+			Number leftNumber = (Number) leftOperand;
+			Number rightNumber = (Number) rightOperand;
+
+			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
+				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
+				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
+				return new TypedValue(leftBigDecimal.remainder(rightBigDecimal));
 			}
-			else if (op1 instanceof Float || op2 instanceof Float) {
-				return new TypedValue(op1.floatValue() % op2.floatValue());
+
+			if (leftNumber instanceof Double || rightNumber instanceof Double) {
+				return new TypedValue(leftNumber.doubleValue() % rightNumber.doubleValue());
 			}
-			else if (op1 instanceof Long || op2 instanceof Long) {
-				return new TypedValue(op1.longValue() % op2.longValue());
+
+			if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				return new TypedValue(leftNumber.floatValue() % rightNumber.floatValue());
 			}
-			else {
-				return new TypedValue(op1.intValue() % op2.intValue());
+
+			if (leftNumber instanceof Long || rightNumber instanceof Long) {
+				return new TypedValue(leftNumber.longValue() % rightNumber.longValue());
 			}
+
+			return new TypedValue(leftNumber.intValue() % rightNumber.intValue());
 		}
-		return state.operate(Operation.MODULUS, operandOne, operandTwo);
+
+		return state.operate(Operation.MODULUS, leftOperand, rightOperand);
 	}
 
 }
