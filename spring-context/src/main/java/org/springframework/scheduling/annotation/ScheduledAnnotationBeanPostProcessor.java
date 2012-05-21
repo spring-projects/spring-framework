@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -104,7 +105,6 @@ public class ScheduledAnnotationBeanPostProcessor
 		return LOWEST_PRECEDENCE;
 	}
 
-
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
@@ -124,9 +124,11 @@ public class ScheduledAnnotationBeanPostProcessor
 							// found a @Scheduled method on the target class for this JDK proxy -> is it
 							// also present on the proxy itself?
 							method = bean.getClass().getMethod(method.getName(), method.getParameterTypes());
-						} catch (SecurityException ex) {
+						}
+						catch (SecurityException ex) {
 							ReflectionUtils.handleReflectionException(ex);
-						} catch (NoSuchMethodException ex) {
+						}
+						catch (NoSuchMethodException ex) {
 							throw new IllegalStateException(String.format(
 									"@Scheduled method '%s' found on bean target class '%s', " +
 									"but not found in any interface(s) for bean JDK proxy. Either " +
@@ -137,7 +139,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					}
 					Runnable runnable = new ScheduledMethodRunnable(bean, method);
 					boolean processedSchedule = false;
-					String errorMessage = "Exactly one of 'cron', 'fixedDelay', or 'fixedRate' is required.";
+					String errorMessage = "Exactly one of the 'cron', 'fixedDelay', or 'fixedRate' attributes is required.";
 					String cron = annotation.cron();
 					if (!"".equals(cron)) {
 						processedSchedule = true;
@@ -170,7 +172,8 @@ public class ScheduledAnnotationBeanPostProcessor
 			return;
 		}
 
-		Map<String, SchedulingConfigurer> configurers = applicationContext.getBeansOfType(SchedulingConfigurer.class);
+		Map<String, SchedulingConfigurer> configurers =
+				this.applicationContext.getBeansOfType(SchedulingConfigurer.class);
 
 		if (this.cronTasks.isEmpty() && this.fixedDelayTasks.isEmpty() &&
 				this.fixedRateTasks.isEmpty() && configurers.isEmpty()) {
@@ -190,19 +193,23 @@ public class ScheduledAnnotationBeanPostProcessor
 			configurer.configureTasks(this.registrar);
 		}
 
-		if (registrar.getScheduler() == null) {
+		if (this.registrar.getScheduler() == null) {
 			Map<String, ? super Object> schedulers = new HashMap<String, Object>();
 			schedulers.putAll(applicationContext.getBeansOfType(TaskScheduler.class));
 			schedulers.putAll(applicationContext.getBeansOfType(ScheduledExecutorService.class));
 			if (schedulers.size() == 0) {
 				// do nothing -> fall back to default scheduler
-			} else if (schedulers.size() == 1) {
+			}
+			else if (schedulers.size() == 1) {
 				this.registrar.setScheduler(schedulers.values().iterator().next());
-			} else if (schedulers.size() >= 2){
-				throw new IllegalStateException("More than one TaskScheduler and/or ScheduledExecutorService  " +
-						"exist within the context. Remove all but one of the beans; or implement the " +
-						"SchedulingConfigurer interface and call ScheduledTaskRegistrar#setScheduler " +
-						"explicitly within the configureTasks() callback. Found the following beans: " + schedulers.keySet());
+			}
+			else if (schedulers.size() >= 2){
+				throw new IllegalStateException(
+						"More than one TaskScheduler and/or ScheduledExecutorService  " +
+						"exist within the context. Remove all but one of the beans; or " +
+						"implement the SchedulingConfigurer interface and call " +
+						"ScheduledTaskRegistrar#setScheduler explicitly within the " +
+						"configureTasks() callback. Found the following beans: " + schedulers.keySet());
 			}
 		}
 

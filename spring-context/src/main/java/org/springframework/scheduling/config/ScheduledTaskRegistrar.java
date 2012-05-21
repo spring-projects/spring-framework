@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 
 
 	/**
-	 * Set the TaskScheduler to register scheduled tasks with.
+	 * Set the {@link TaskScheduler} to register scheduled tasks with.
 	 */
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
@@ -73,9 +73,9 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Set the {@link org.springframework.scheduling.TaskScheduler} to register scheduled
-	 * tasks with, or a {@link java.util.concurrent.ScheduledExecutorService} to be
-	 * wrapped as a TaskScheduler.
+	 * Set the {@link TaskScheduler} to register scheduled tasks with, or a
+	 * {@link java.util.concurrent.ScheduledExecutorService} to be wrapped as a
+	 * {@code TaskScheduler}.
 	 */
 	public void setScheduler(Object scheduler) {
 		Assert.notNull(scheduler, "Scheduler object must not be null");
@@ -91,7 +91,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Return the scheduler instance for this registrar (may be null)
+	 * Return the {@link TaskScheduler} instance for this registrar (may be {@code null}).
 	 */
 	public TaskScheduler getScheduler() {
 		return this.taskScheduler;
@@ -122,6 +122,14 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
+	 * Specify triggered tasks as a Map of Runnables (the tasks) and fixed-delay values.
+	 * @see TaskScheduler#scheduleWithFixedDelay(Runnable, long)
+	 */
+	public void setFixedDelayTasks(Map<Runnable, Long> fixedDelayTasks) {
+		this.fixedDelayTasks = fixedDelayTasks;
+	}
+
+	/**
 	 * Add a Runnable task to be triggered per the given {@link Trigger}.
 	 * @see TaskScheduler#scheduleAtFixedRate(Runnable, long)
 	 */
@@ -143,17 +151,6 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Add a Runnable task to be triggered with the given fixed delay.
-	 * @see TaskScheduler#scheduleWithFixedDelay(Runnable, long)
-	 */
-	public void addFixedDelayTask(Runnable task, long delay) {
-		if (this.fixedDelayTasks == null) {
-			this.fixedDelayTasks = new HashMap<Runnable, Long>();
-		}
-		this.fixedDelayTasks.put(task, delay);
-	}
-
-	/**
 	 * Add a Runnable task to be triggered at the given fixed-rate period.
 	 * @see TaskScheduler#scheduleAtFixedRate(Runnable, long)
 	 */
@@ -165,14 +162,20 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	}
 
 	/**
-	 * Specify triggered tasks as a Map of Runnables (the tasks) and fixed-delay values.
+	 * Add a Runnable task to be triggered with the given fixed delay.
 	 * @see TaskScheduler#scheduleWithFixedDelay(Runnable, long)
 	 */
-	public void setFixedDelayTasks(Map<Runnable, Long> fixedDelayTasks) {
-		this.fixedDelayTasks = fixedDelayTasks;
+	public void addFixedDelayTask(Runnable task, long delay) {
+		if (this.fixedDelayTasks == null) {
+			this.fixedDelayTasks = new HashMap<Runnable, Long>();
+		}
+		this.fixedDelayTasks.put(task, delay);
 	}
 
-
+	/**
+	 * Schedule all registered tasks against the underlying {@linkplain
+	 * #setTaskScheduler(TaskScheduler) task scheduler.
+	 */
 	public void afterPropertiesSet() {
 		if (this.taskScheduler == null) {
 			this.localExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -199,7 +202,6 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 			}
 		}
 	}
-
 
 	public void destroy() {
 		for (ScheduledFuture<?> future : this.scheduledFutures) {

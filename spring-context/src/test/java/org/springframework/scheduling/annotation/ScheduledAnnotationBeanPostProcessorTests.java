@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -36,6 +35,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher
@@ -269,7 +270,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class FixedDelayTestBean {
+	static class FixedDelayTestBean {
 
 		@Scheduled(fixedDelay=5000)
 		public void fixedDelay() {
@@ -277,7 +278,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class FixedRateTestBean {
+	static class FixedRateTestBean {
 
 		@Scheduled(fixedRate=3000)
 		public void fixedRate() {
@@ -285,7 +286,15 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	public static class CronTestBean {
+	static class FixedRateWithInitialDelayTestBean {
+
+		@Scheduled(initialDelay=1000, fixedRate=3000)
+		public void fixedRate() {
+		}
+	}
+
+
+	static class CronTestBean {
 
 		@Scheduled(cron="*/7 * * * * ?")
 		public void cron() throws IOException {
@@ -295,7 +304,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	private static class EmptyAnnotationTestBean {
+	static class EmptyAnnotationTestBean {
 
 		@Scheduled
 		public void invalid() {
@@ -304,7 +313,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	private static class InvalidCronTestBean {
+	static class InvalidCronTestBean {
 
 		@Scheduled(cron="abc")
 		public void invalid() {
@@ -313,7 +322,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	private static class NonVoidReturnTypeTestBean {
+	static class NonVoidReturnTypeTestBean {
 
 		@Scheduled(fixedRate=3000)
 		public String invalid() {
@@ -323,7 +332,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	private static class NonEmptyParamListTestBean {
+	static class NonEmptyParamListTestBean {
 
 		@Scheduled(fixedRate=3000)
 		public void invalid(String oops) {
@@ -344,7 +353,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	private static @interface Hourly {}
 
 
-	private static class MetaAnnotationFixedRateTestBean {
+	static class MetaAnnotationFixedRateTestBean {
 
 		@EveryFiveSeconds
 		public void checkForUpdates() {
@@ -352,7 +361,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	private static class MetaAnnotationCronTestBean {
+	static class MetaAnnotationCronTestBean {
 
 		@Hourly
 		public void generateReport() {
@@ -360,7 +369,7 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	}
 
 
-	private static class PropertyPlaceholderTestBean {
+	static class PropertyPlaceholderTestBean {
 
 		@Scheduled(cron = "${schedules.businessHours}")
 		public void x() {
@@ -370,11 +379,11 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Scheduled(cron = "${schedules.businessHours}")
 	@Target(ElementType.METHOD)
-	@Retention(RetentionPolicy.RUNTIME)	
+	@Retention(RetentionPolicy.RUNTIME)
 	private static @interface BusinessHours {}
 
 
-	private static class PropertyPlaceholderMetaAnnotationTestBean {
+	static class PropertyPlaceholderMetaAnnotationTestBean {
 
 		@BusinessHours
 		public void y() {

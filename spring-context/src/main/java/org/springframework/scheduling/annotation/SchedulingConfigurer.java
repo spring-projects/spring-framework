@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,15 @@ package org.springframework.scheduling.annotation;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 /**
- * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration}
- * classes annotated with @{@link EnableScheduling} that wish to register scheduled tasks
- * in a <em>programmatic</em> fashion as opposed to the <em>declarative</em> approach of
- * using the @{@link Scheduled} annotation. For example, this may be necessary when
- * implementing {@link org.springframework.scheduling.Trigger Trigger}-based tasks, which
- * are not supported by the {@code @Scheduled} annotation.
+ * Optional interface to be implemented by @{@link
+ * org.springframework.context.annotation.Configuration Configuration} classes annotated
+ * with @{@link EnableScheduling}. Typically used for setting a specific
+ * {@link org.springframework.scheduling.TaskScheduler TaskScheduler} bean to be used when
+ * executing scheduled tasks or for registering scheduled tasks in a <em>programmatic</em>
+ * fashion as opposed to the <em>declarative</em> approach of using the @{@link Scheduled}
+ * annotation. For example, this may be necessary when implementing {@link
+ * org.springframework.scheduling.Trigger Trigger}-based tasks, which are not supported by
+ * the {@code @Scheduled} annotation.
  *
  * <p>See @{@link EnableScheduling} for detailed usage examples.
  *

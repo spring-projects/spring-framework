@@ -472,7 +472,7 @@ public class TaskExecutorExample {
       example.</para>
 
       <programlisting language="xml">&lt;task:scheduled-tasks scheduler="myScheduler"&gt;
-    &lt;task:scheduled ref="someObject" method="someMethod" fixed-delay="5000"/&gt;
+    &lt;task:scheduled ref="beanA" method="methodA" fixed-delay="5000"/&gt;
 &lt;/task:scheduled-tasks&gt;
 
 &lt;task:scheduler id="myScheduler" pool-size="10"/&gt;</programlisting>
@@ -480,13 +480,16 @@ public class TaskExecutorExample {
       <para>As you can see, the scheduler is referenced by the outer element,
       and each individual task includes the configuration of its trigger
       metadata. In the preceding example, that metadata defines a periodic
-      trigger with a fixed delay. It could also be configured with a
-      "fixed-rate", or for more control, a "cron" attribute could be provided
-      instead. Here's an example featuring these other options.</para>
+      trigger with a fixed delay indicating the number of milliseconds to wait
+      after each task execution has completed. Another option is 'fixed-rate',
+      indicating how often the method should be executed regardless of how long
+      any previous execution takes. For more control, a "cron" attribute may be
+      provided instead. Here is an example demonstrating these other options.
+      </para>
 
       <programlisting language="xml">&lt;task:scheduled-tasks scheduler="myScheduler"&gt;
-    &lt;task:scheduled ref="someObject" method="someMethod" fixed-rate="5000"/&gt;
-    &lt;task:scheduled ref="anotherObject" method="anotherMethod" cron="*/5 * * * * MON-FRI"/&gt;
+    &lt;task:scheduled ref="beanB" method="methodB" fixed-rate="5000"/&gt;
+    &lt;task:scheduled ref="beanC" method="methodC" cron="*/5 * * * * MON-FRI"/&gt;
 &lt;/task:scheduled-tasks&gt;
 
 &lt;task:scheduler id="myScheduler" pool-size="10"/&gt;</programlisting>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation that marks a method to be scheduled. Exactly one of the
- * <code>cron</code>, <code>fixedDelay</code>, or <code>fixedRate</code>
- * attributes must be provided.
+ * {@link #cron()}, {@link #fixedDelay()}, or {@link #fixedRate()}
+ * attributes must be specified.
  *
  * <p>The annotated method must expect no arguments and have a
- * <code>void</code> return type.
+ * {@code void} return type.
  *
  * <p>Processing of {@code @Scheduled} annotations is performed by
  * registering a {@link ScheduledAnnotationBeanPostProcessor}. This can be
@@ -49,9 +49,10 @@ public @interface Scheduled {
 	/**
 	 * A cron-like expression, extending the usual UN*X definition to include
 	 * triggers on the second as well as minute, hour, day of month, month
-	 * and day of week.  e.g. <code>"0 * * * * MON-FRI"</code> means once 
-	 * per minute on weekdays (at the top of the minute - the 0th second).
+	 * and day of week.  e.g. {@code "0 * * * * MON-FRI"} means once per minute on
+	 * weekdays (at the top of the minute - the 0th second).
 	 * @return an expression that can be parsed to a cron schedule
+	 * @see org.springframework.scheduling.support.CronSequenceGenerator
 	 */
 	String cron() default "";
 
