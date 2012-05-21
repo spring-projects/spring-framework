@@ -190,7 +190,8 @@ public class PreparedStatementCreatorFactory {
 	 * PreparedStatementCreator implementation returned by this class.
 	 */
 	private class PreparedStatementCreatorImpl
-			implements PreparedStatementCreator, PreparedStatementSetter, SqlProvider, ParameterDisposer {
+			implements PreparedStatementCreator, PreparedStatementSetter,
+			PreparedStatementValueProvider, SqlProvider, ParameterDisposer {
 
 		private final String actualSql;
 
@@ -248,8 +249,13 @@ public class PreparedStatementCreatorFactory {
 				ps = con.prepareStatement(this.actualSql, resultSetType,
 					updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
 			}
-			setValues(ps);
+			new PreparedStatementValueLogger(this).setValues(ps);
 			return ps;
+		}
+
+		@Override
+		public String getValuesString() {
+			return parameters.toString();
 		}
 
 		public void setValues(PreparedStatement ps) throws SQLException {

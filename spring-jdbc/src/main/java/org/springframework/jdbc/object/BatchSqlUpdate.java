@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.PreparedStatementValueLogger;
 
 /**
  * SqlUpdate subclass that performs batch update operations. Encapsulates
@@ -189,7 +190,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 					}
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
 						Object[] params = parameterQueue.removeFirst();
-						newPreparedStatementSetter(params).setValues(ps);
+						new PreparedStatementValueLogger(newPreparedStatementSetter(params)).setValues(ps);
 					}
 				});
 

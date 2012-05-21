@@ -19,6 +19,7 @@ package org.springframework.jdbc.core;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -30,7 +31,8 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  *
  * @author Juergen Hoeller
  */
-class ArgTypePreparedStatementSetter implements PreparedStatementSetter, ParameterDisposer {
+class ArgTypePreparedStatementSetter implements PreparedStatementSetter,
+		PreparedStatementValueProvider, ParameterDisposer {
 
 	private final Object[] args;
 
@@ -51,6 +53,12 @@ class ArgTypePreparedStatementSetter implements PreparedStatementSetter, Paramet
 		this.argTypes = argTypes;
 	}
 
+
+
+	@Override
+	public String getValuesString() {
+		return Arrays.toString(args);
+	}
 
 	public void setValues(PreparedStatement ps) throws SQLException {
 		int parameterPosition = 1;
