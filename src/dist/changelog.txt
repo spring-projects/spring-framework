@@ -31,6 +31,7 @@ Changes in version 3.2 M1
 * add required flag to @RequestBody annotation
 * support executor qualification with @Async#value (SPR-6847)
 * add convenient WebAppInitializer base classes (SPR-9300)
+* support initial delay attribute for scheduled tasks (SPR-7022)
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------

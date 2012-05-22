@@ -72,6 +72,9 @@ public class CronTrigger implements Trigger {
 		return this.sequenceGenerator.next(date);
 	}
 
+	public String getExpression() {
+		return this.sequenceGenerator.getExpression();
+	}
 
 	@Override
 	public boolean equals(Object obj) {
