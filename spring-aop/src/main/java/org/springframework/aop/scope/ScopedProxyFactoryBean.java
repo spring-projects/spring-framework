@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,14 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Convenient proxy factory bean for scoped objects.
- * 
+ *
  * <p>Proxies created using this factory bean are thread-safe singletons
  * and may be injected into shared objects, with transparent scoping behavior.
  *
  * <p>Proxies returned by this class implement the {@link ScopedObject} interface.
  * This presently allows for removing the corresponding object from the scope,
  * seamlessly creating a new instance in the scope on next access.
- * 
+ *
  * <p>Please note that the proxies created by this factory are
  * <i>class-based</i> proxies by default. This can be customized
  * through switching the "proxyTargetClass" property to "false".
@@ -89,7 +89,7 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 		pf.copyFrom(this);
 		pf.setTargetSource(this.scopedTargetSource);
 
-		Class beanType = beanFactory.getType(this.targetBeanName);
+		Class<?> beanType = beanFactory.getType(this.targetBeanName);
 		if (beanType == null) {
 			throw new IllegalStateException("Cannot create scoped proxy for bean '" + this.targetBeanName +
 					"': Target type could not be determined at the time of proxy creation.");

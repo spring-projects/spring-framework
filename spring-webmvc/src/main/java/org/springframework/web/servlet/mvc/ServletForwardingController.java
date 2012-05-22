@@ -90,7 +90,7 @@ public class ServletForwardingController extends AbstractController implements B
 	private String servletName;
 
 	private String beanName;
-	
+
 
 	/**
 	 * Set the name of the servlet to forward to,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.transaction.Status;
 import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
@@ -31,14 +30,10 @@ import org.hibernate.HibernateException;
 import org.hibernate.usertype.UserType;
 import org.hibernate.util.EqualsHelper;
 
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.support.lob.JtaLobCreatorSynchronization;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.jdbc.support.lob.SpringLobCreatorSynchronization;
 import org.springframework.jdbc.support.lob.LobCreatorUtils;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Abstract base class for Hibernate UserType implementations that map to LOBs.

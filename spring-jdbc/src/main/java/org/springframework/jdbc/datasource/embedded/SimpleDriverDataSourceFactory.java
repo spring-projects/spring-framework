@@ -32,21 +32,21 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 final class SimpleDriverDataSourceFactory implements DataSourceFactory {
 
 	private final SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
-	
+
 	public ConnectionProperties getConnectionProperties() {
 		return new ConnectionProperties() {
 			public void setDriverClass(Class<? extends Driver> driverClass) {
 				dataSource.setDriverClass(driverClass);
 			}
-			
+
 			public void setUrl(String url) {
 				dataSource.setUrl(url);
 			}
-			
+
 			public void setUsername(String username) {
 				dataSource.setUsername(username);
 			}
-			
+
 			public void setPassword(String password) {
 				dataSource.setPassword(password);
 			}
@@ -56,5 +56,5 @@ final class SimpleDriverDataSourceFactory implements DataSourceFactory {
 	public DataSource getDataSource() {
 		return this.dataSource;
 	}
-	
+
 }

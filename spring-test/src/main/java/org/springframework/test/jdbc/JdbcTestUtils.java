@@ -34,10 +34,8 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.util.StringUtils;
 
 /**
- * {@code JdbcTestUtils} is a collection of JDBC related utility functions
- * intended to simplify standard database testing scenarios.
- *
- * <p>As of Spring 3.1.3, {@code JdbcTestUtils} supersedes {@link SimpleJdbcTestUtils}.
+ * JdbcTestUtils is a collection of JDBC related utility methods for use in unit
+ * and integration testing scenarios.
  *
  * @author Thomas Risberg
  * @author Sam Brannen
@@ -161,85 +159,13 @@ public class JdbcTestUtils {
 	}
 
 	/**
-	 * Execute the given SQL script.
-	 * <p>The script will typically be loaded from the classpath. There should
-	 * be one statement per line. Any semicolons and line comments will be removed.
-	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
-	 * @param jdbcTemplate the JdbcTemplate with which to perform JDBC operations
-	 * @param resource the resource (potentially associated with a specific encoding)
-	 * to load the SQL script from
-	 * @param continueOnError whether or not to continue without throwing an
-	 * exception in the event of an error
-	 * @throws DataAccessException if there is an error executing a statement
-	 * and {@code continueOnError} is {@code false}
-	 * @see ResourceDatabasePopulator
-	 */
-	public static void executeSqlScript(JdbcTemplate jdbcTemplate, EncodedResource resource, boolean continueOnError)
-			throws DataAccessException {
-
-		if (logger.isInfoEnabled()) {
-			logger.info("Executing SQL script from " + resource);
-		}
-		long startTime = System.currentTimeMillis();
-		List<String> statements = new LinkedList<String>();
-		LineNumberReader reader = null;
-		try {
-			reader = new LineNumberReader(resource.getReader());
-			String script = readScript(reader);
-			char delimiter = DEFAULT_STATEMENT_SEPARATOR;
-			if (!containsSqlScriptDelimiters(script, delimiter)) {
-				delimiter = '\n';
-			}
-			splitSqlScript(script, delimiter, statements);
-			int lineNumber = 0;
-			for (String statement : statements) {
-				lineNumber++;
-				try {
-					int rowsAffected = jdbcTemplate.update(statement);
-					if (logger.isDebugEnabled()) {
-						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
-					}
-				}
-				catch (DataAccessException ex) {
-					if (continueOnError) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("Failed to execute SQL script statement at line " + lineNumber
-									+ " of resource " + resource + ": " + statement, ex);
-						}
-					}
-					else {
-						throw ex;
-					}
-				}
-			}
-			long elapsedTime = System.currentTimeMillis() - startTime;
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format("Executed SQL script from %s in %s ms.", resource, elapsedTime));
-			}
-		}
-		catch (IOException ex) {
-			throw new DataAccessResourceFailureException("Failed to open SQL script from " + resource, ex);
-		}
-		finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-			}
-			catch (IOException ex) {
-				// ignore
-			}
-		}
-	}
-
-	/**
-	 * Read a script from the provided {@code LineNumberReader}, using 
-	 * "{@code --}" as the comment prefix, and build a {@code String} containing
-	 * the lines.
-	 * @param lineNumberReader the {@code LineNumberReader} containing the script
-	 * to be processed
-	 * @return a {@code String} containing the script lines
-	 * @see #readScript(LineNumberReader, String)
+	 * Read a script from the LineNumberReader and build a String containing the
+	 * lines.
+	 *
+	 * @param lineNumberReader the <code>LineNumberReader</code> containing the
+	 * script to be processed
+	 * @return <code>String</code> containing the script lines
+	 * @throws IOException
 	 */
 	public static String readScript(LineNumberReader lineNumberReader) throws IOException {
 		return readScript(lineNumberReader, DEFAULT_COMMENT_PREFIX);
@@ -273,7 +199,8 @@ public class JdbcTestUtils {
 	}
 
 	/**
-	 * Determine if the provided SQL script contains the specified delimiter.
+	 * Does the provided SQL script contain the specified delimiter?
+	 *
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement &mdash; typically a ';' character
 	 * @return {@code true} if the script contains the delimiter; {@code false} otherwise
@@ -296,10 +223,7 @@ public class JdbcTestUtils {
 	 * Split an SQL script into separate statements delimited by the provided
 	 * delimiter character. Each individual statement will be added to the
 	 * provided <code>List</code>.
-	 * <p>Within a statement, "{@code --}" will be used as the comment prefix;
-	 * any text beginning with the comment prefix and extending to the end of
-	 * the line will be omitted from the statement. In addition, multiple adjacent
-	 * whitespace characters will be collapsed into a single space.
+	 *
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement &mdash; typically a ';' character
 	 * @param statements the list that will contain the individual statements

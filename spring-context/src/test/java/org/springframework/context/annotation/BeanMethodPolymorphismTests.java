@@ -21,8 +21,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
  *
  * Bean-annotated methods should be able to be overloaded, though supporting this
  * is more subtle. Essentially, it must be unambiguous to the container which bean
- * method to call.  A simple way to think about this is that no one Configuration
- * class may declare two bean methods with the same name.  In the case of inheritance,
+ * method to call. A simple way to think about this is that no one Configuration
+ * class may declare two bean methods with the same name. In the case of inheritance,
  * the most specific subclass bean method will always be the one that is invoked.
  *
  * @author Chris Beams
@@ -31,7 +31,7 @@ public class BeanMethodPolymorphismTests {
 
 	@Test
 	public void beanMethodOverloadingWithoutInheritance() {
-		@SuppressWarnings("unused")
+		@SuppressWarnings({ "unused", "hiding" })
 		@Configuration class Config {
 			@Bean String aString() { return "na"; }
 			@Bean String aString(Integer dependency) { return "na"; }

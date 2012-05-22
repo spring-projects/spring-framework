@@ -47,6 +47,7 @@ public class GenericBean<T> {
 
 	private List<Map<Integer, Long>> listOfMaps;
 
+	@SuppressWarnings("rawtypes")
 	private Map plainMap;
 
 	private Map<Short, Integer> shortMap;
@@ -91,6 +92,7 @@ public class GenericBean<T> {
 		this.resourceList = Collections.singletonList(resource);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public GenericBean(Map plainMap, Map<Short, Integer> shortMap) {
 		this.plainMap = plainMap;
 		this.shortMap = shortMap;
@@ -161,6 +163,7 @@ public class GenericBean<T> {
 		this.listOfMaps = listOfMaps;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Map getPlainMap() {
 		return plainMap;
 	}
@@ -237,12 +240,12 @@ public class GenericBean<T> {
 		this.customEnumArray = customEnum;
 	}
 
-	public Set<CustomEnum> getCustomEnumSet() {
-		return customEnumSet;
-	}
-
 	public void setCustomEnumSet(Set<CustomEnum> customEnumSet) {
 		this.customEnumSet = customEnumSet;
+	}
+
+	public Set<CustomEnum> getCustomEnumSet() {
+		return customEnumSet;
 	}
 
 	public Set<CustomEnum> getCustomEnumSetMismatch() {
@@ -251,37 +254,44 @@ public class GenericBean<T> {
 
 	public void setCustomEnumSetMismatch(Set<String> customEnumSet) {
 		this.customEnumSet = new HashSet<CustomEnum>(customEnumSet.size());
-		for (Iterator<String> iterator = customEnumSet.iterator(); iterator.hasNext(); ) {
+		for (Iterator<String> iterator = customEnumSet.iterator(); iterator.hasNext();) {
 			this.customEnumSet.add(CustomEnum.valueOf(iterator.next()));
 		}
 	}
 
-	public static GenericBean createInstance(Set<Integer> integerSet) {
-		return new GenericBean(integerSet);
+	public static GenericBean<Set<Integer>> createInstance(Set<Integer> integerSet) {
+		return new GenericBean<Set<Integer>>(integerSet);
 	}
 
-	public static GenericBean createInstance(Set<Integer> integerSet, List<Resource> resourceList) {
-		return new GenericBean(integerSet, resourceList);
+	public static GenericBean<Set<Integer>> createInstance(Set<Integer> integerSet,
+		List<Resource> resourceList) {
+		return new GenericBean<Set<Integer>>(integerSet, resourceList);
 	}
 
-	public static GenericBean createInstance(HashSet<Integer> integerSet, Map<Short, Integer> shortMap) {
-		return new GenericBean(integerSet, shortMap);
+	public static GenericBean<Set<Integer>> createInstance(HashSet<Integer> integerSet,
+		Map<Short, Integer> shortMap) {
+		return new GenericBean<Set<Integer>>(integerSet, shortMap);
 	}
 
-	public static GenericBean createInstance(Map<Short, Integer> shortMap, Resource resource) {
-		return new GenericBean(shortMap, resource);
+	public static GenericBean<Set<Integer>> createInstance(Map<Short, Integer> shortMap,
+		Resource resource) {
+		return new GenericBean<Set<Integer>>(shortMap, resource);
 	}
 
-	public static GenericBean createInstance(Map map, Map<Short, Integer> shortMap) {
-		return new GenericBean(map, shortMap);
+	@SuppressWarnings("rawtypes")
+	public static GenericBean<Map<Short, Integer>> createInstance(Map plainMap,
+		Map<Short, Integer> shortMap) {
+		return new GenericBean<Map<Short, Integer>>(plainMap, shortMap);
 	}
 
-	public static GenericBean createInstance(HashMap<Long, ?> longMap) {
-		return new GenericBean(longMap);
+	public static GenericBean<HashMap<Long, ?>> createInstance(HashMap<Long, ?> longMap) {
+		return new GenericBean<HashMap<Long, ?>>(longMap);
 	}
 
-	public static GenericBean createInstance(boolean someFlag, Map<Number, Collection<? extends Object>> collectionMap) {
-		return new GenericBean(someFlag, collectionMap);
+	public static GenericBean<Map<Number, Collection<? extends Object>>> createInstance(
+		boolean someFlag, Map<Number, Collection<? extends Object>> collectionMap) {
+		return new GenericBean<Map<Number, Collection<? extends Object>>>(someFlag,
+			collectionMap);
 	}
 
 }

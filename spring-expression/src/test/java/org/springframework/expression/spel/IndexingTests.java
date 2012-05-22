@@ -38,7 +38,7 @@ public class IndexingTests {
 		expression = parser.parseExpression("property['foo']");
 		assertEquals("bar", expression.getValue(this));
 	}
-	
+
 	@FieldAnnotation
 	public Object property;
 
@@ -59,15 +59,15 @@ public class IndexingTests {
 		expression = parser.parseExpression("property['foo']");
 		assertEquals("bar", expression.getValue(context));
 	}
-	
+
 	public static class MapAccessor implements PropertyAccessor {
 
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-			return (((Map) target).containsKey(name));
+			return (((Map<?, ?>) target).containsKey(name));
 		}
 
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-			return new TypedValue(((Map) target).get(name));
+			return new TypedValue(((Map<?, ?>) target).get(name));
 		}
 
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
@@ -77,15 +77,15 @@ public class IndexingTests {
 		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
-			((Map) target).put(name, newValue);
+			((Map<String, Object>) target).put(name, newValue);
 		}
 
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] { Map.class };
 		}
-		
+
 	}
-	
+
 	@Test
 	public void setGenericPropertyContainingMap() {
 		Map<String, String> property = new HashMap<String, String>();
@@ -97,7 +97,7 @@ public class IndexingTests {
 		assertEquals(property, expression.getValue(this));
 		expression = parser.parseExpression("property['foo']");
 		assertEquals("bar", expression.getValue(this));
-		expression.setValue(this, "baz");		
+		expression.setValue(this, "baz");
 		assertEquals("baz", expression.getValue(this));
 	}
 
@@ -112,7 +112,7 @@ public class IndexingTests {
 		assertEquals(property, expression.getValue(this));
 		expression = parser.parseExpression("parameterizedMap['9']");
 		assertEquals(3, expression.getValue(this));
-		expression.setValue(this, "37");		
+		expression.setValue(this, "37");
 		assertEquals(37, expression.getValue(this));
 	}
 
@@ -126,10 +126,10 @@ public class IndexingTests {
 		assertEquals(property, expression.getValue(this));
 		expression = parser.parseExpression("parameterizedMap['9']");
 		assertEquals(null, expression.getValue(this));
-		expression.setValue(this, "37");		
+		expression.setValue(this, "37");
 		assertEquals(37, expression.getValue(this));
 	}
-	
+
 	@Test
 	public void indexIntoGenericPropertyContainingList() {
 		List<String> property = new ArrayList<String>();
@@ -142,7 +142,7 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		assertEquals("bar", expression.getValue(this));
 	}
-	
+
 	@Test
 	public void setGenericPropertyContainingList() {
 		List<Integer> property = new ArrayList<Integer>();
@@ -170,10 +170,10 @@ public class IndexingTests {
 		try {
 			expression.setValue(this, "4");
 		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1053E"));			
+			assertTrue(e.getMessage().startsWith("EL1053E"));
 		}
 	}
-	
+
 	@Test
 	public void indexIntoPropertyContainingList() {
 		List<Integer> property = new ArrayList<Integer>();
@@ -186,7 +186,7 @@ public class IndexingTests {
 		expression = parser.parseExpression("parameterizedList[0]");
 		assertEquals(3, expression.getValue(this));
 	}
-	
+
 	public List<Integer> parameterizedList;
 
 	@Test
@@ -201,9 +201,9 @@ public class IndexingTests {
 		expression = parser.parseExpression("parameterizedListOfList[0][0]");
 		assertEquals(3, expression.getValue(this));
 	}
-	
+
 	public List<List<Integer>> parameterizedListOfList;
-	
+
 	@Test
 	public void setPropertyContainingList() {
 		List<Integer> property = new ArrayList<Integer>();
@@ -218,7 +218,7 @@ public class IndexingTests {
 		expression.setValue(this, "4");
 		assertEquals(4, expression.getValue(this));
 	}
-	
+
 	@Test
 	public void indexIntoGenericPropertyContainingNullList() {
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
@@ -230,7 +230,7 @@ public class IndexingTests {
 		try {
 			assertEquals("bar", expression.getValue(this));
 		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1027E"));			
+			assertTrue(e.getMessage().startsWith("EL1027E"));
 		}
 	}
 
@@ -267,7 +267,8 @@ public class IndexingTests {
 			assertTrue(e.getMessage().startsWith("EL1053E"));
 		}
 	}
-	
+
+	@SuppressWarnings("rawtypes")
 	public List property2;
 
 	@Test
@@ -281,7 +282,8 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		assertEquals("bar", expression.getValue(this));
 	}
-	
+
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void emptyList() {
 		listOfScalarNotGeneric = new ArrayList();
@@ -291,6 +293,7 @@ public class IndexingTests {
 		assertEquals("", expression.getValue(this, String.class));
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void resolveCollectionElementType() {
 		listNotGeneric = new ArrayList();
@@ -309,15 +312,17 @@ public class IndexingTests {
 		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.List<?>", expression.getValueTypeDescriptor(this).toString());
 	}
 
+	@SuppressWarnings("rawtypes")
 	@FieldAnnotation
 	public List listNotGeneric;
 
 	@Target({ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface FieldAnnotation {
-		
+
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void resolveMapKeyValueTypes() {
 		mapNotGeneric = new HashMap();
@@ -327,10 +332,12 @@ public class IndexingTests {
 		Expression expression = parser.parseExpression("mapNotGeneric");
 		assertEquals("@org.springframework.expression.spel.IndexingTests$FieldAnnotation java.util.HashMap<?, ?>", expression.getValueTypeDescriptor(this).toString());
 	}
-	
+
+	@SuppressWarnings("rawtypes")
 	@FieldAnnotation
 	public Map mapNotGeneric;
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void testListOfScalar() {
 		listOfScalarNotGeneric = new ArrayList();
@@ -339,10 +346,12 @@ public class IndexingTests {
 		Expression expression = parser.parseExpression("listOfScalarNotGeneric[0]");
 		assertEquals(new Integer(5), expression.getValue(this, Integer.class));
 	}
-	
+
+	@SuppressWarnings("rawtypes")
 	public List listOfScalarNotGeneric;
 
-	
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void testListsOfMap() {
 		listOfMapsNotGeneric = new ArrayList();
@@ -353,7 +362,8 @@ public class IndexingTests {
 		Expression expression = parser.parseExpression("listOfMapsNotGeneric[0]['fruit']");
 		assertEquals("apple", expression.getValue(this, String.class));
 	}
-	
+
+	@SuppressWarnings("rawtypes")
 	public List listOfMapsNotGeneric;
-	
+
 }

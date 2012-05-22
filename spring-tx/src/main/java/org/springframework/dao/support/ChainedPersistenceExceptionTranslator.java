@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class ChainedPersistenceExceptionTranslator implements PersistenceExceptionTranslator {
-	
+
 	/** List of PersistenceExceptionTranslators */
 	private final List<PersistenceExceptionTranslator> delegates = new ArrayList<PersistenceExceptionTranslator>(4);
 

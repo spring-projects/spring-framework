@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,9 @@ public class ContextCleanupListener implements ServletContextListener {
 	 * @param sc the ServletContext to check
 	 */
 	static void cleanupAttributes(ServletContext sc) {
-		Enumeration attrNames = sc.getAttributeNames();
+		Enumeration<String> attrNames = sc.getAttributeNames();
 		while (attrNames.hasMoreElements()) {
-			String attrName = (String) attrNames.nextElement();
+			String attrName = attrNames.nextElement();
 			if (attrName.startsWith("org.springframework.")) {
 				Object attrValue = sc.getAttribute(attrName);
 				if (attrValue instanceof DisposableBean) {

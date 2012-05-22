@@ -29,7 +29,7 @@ import org.springframework.test.annotation.IfProfileValue;
 
 /**
  * Hibernate-specific JPA tests.
- * 
+ *
  * @author Juergen Hoeller
  * @author Rod Johnson
  */

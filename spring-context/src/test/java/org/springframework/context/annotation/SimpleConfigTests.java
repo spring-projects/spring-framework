@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Juergen Hoeller
  */
 public class SimpleConfigTests {
-	
+
 	@Test
 	public void testFooService() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigLocations(), getClass());
@@ -42,7 +42,7 @@ public class SimpleConfigTests {
 		String value = fooService.foo(1);
 		assertEquals("bar", value);
 
-		Future future = fooService.asyncFoo(1);
+		Future<String> future = fooService.asyncFoo(1);
 		assertTrue(future instanceof FutureTask);
 		assertEquals("bar", future.get());
 

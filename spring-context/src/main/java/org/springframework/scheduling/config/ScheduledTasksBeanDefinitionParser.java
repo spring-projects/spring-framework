@@ -30,7 +30,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Parser for the 'scheduled-tasks' element of the scheduling namespace.
- * 
+ *
  * @author Mark Fisher
  * @author Chris Beams
  * @since 3.0
@@ -73,6 +73,9 @@ public class ScheduledTasksBeanDefinitionParser extends AbstractSingleBeanDefini
 				// Continue with the possible next task element
 				continue;
 			}
+
+			RuntimeBeanReference runnableBeanRef = new RuntimeBeanReference(
+					createRunnableBean(ref, method, taskElement, parserContext));
 
 			String cronAttribute = taskElement.getAttribute("cron");
 			String fixedDelayAttribute = taskElement.getAttribute("fixed-delay");

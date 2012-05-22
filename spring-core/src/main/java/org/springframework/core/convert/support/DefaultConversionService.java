@@ -75,7 +75,7 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverterFactory(new CharacterToNumberFactory());
 
 		converterRegistry.addConverterFactory(new StringToEnumConverterFactory());
-		converterRegistry.addConverter(Enum.class, String.class, new EnumToStringConverter(conversionService));
+		converterRegistry.addConverter(Enum.class, String.class, new EnumToStringConverter());
 
 		converterRegistry.addConverter(new StringToLocaleConverter());
 		converterRegistry.addConverter(Locale.class, String.class, new ObjectToStringConverter());

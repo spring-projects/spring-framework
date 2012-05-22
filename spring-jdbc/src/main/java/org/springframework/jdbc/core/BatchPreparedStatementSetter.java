@@ -38,7 +38,7 @@ import java.sql.SQLException;
  */
 public interface BatchPreparedStatementSetter {
 
-	/** 
+	/**
 	 * Set parameter values on the given PreparedStatement.
 	 * @param ps the PreparedStatement to invoke setter methods on
 	 * @param i index of the statement we're issuing in the batch, starting from 0
@@ -47,7 +47,7 @@ public interface BatchPreparedStatementSetter {
 	 */
 	void setValues(PreparedStatement ps, int i) throws SQLException;
 
-	/** 
+	/**
 	 * Return the size of the batch.
 	 * @return the number of statements in the batch
 	 */

@@ -16,10 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.net.URI;
-
-import org.junit.Test;
-import org.springframework.http.HttpMethod;
 
 public class CommonsHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 

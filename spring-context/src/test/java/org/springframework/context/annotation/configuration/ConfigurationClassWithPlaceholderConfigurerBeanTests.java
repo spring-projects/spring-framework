@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import test.beans.TestBean;
 
 /**
  * A configuration class that registers a placeholder configurer @Bean method
- * cannot also have @Value fields.  Logically, the config class must be instantiated
+ * cannot also have @Value fields. Logically, the config class must be instantiated
  * in order to invoke the placeholder configurer bean method, and it is a
  * chicken-and-egg problem to process the @Value field.
  *
@@ -48,7 +48,7 @@ public class ConfigurationClassWithPlaceholderConfigurerBeanTests {
 	/**
 	 * Intentionally ignored test proving that a property placeholder bean
 	 * cannot be declared in the same configuration class that has a @Value
-	 * field in need of placeholder replacement.  It's an obvious chicken-and-egg issue.
+	 * field in need of placeholder replacement. It's an obvious chicken-and-egg issue.
 	 * The solution is to do as {@link #valueFieldsAreProcessedWhenPlaceholderConfigurerIsSegregated()}
 	 * does and segragate the two bean definitions across configuration classes.
 	 */

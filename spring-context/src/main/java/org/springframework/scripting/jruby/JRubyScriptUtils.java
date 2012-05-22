@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public abstract class JRubyScriptUtils {
 	 * @throws JumpException in case of JRuby parsing failure
 	 * @see ClassUtils#getDefaultClassLoader()
 	 */
-	public static Object createJRubyObject(String scriptSource, Class[] interfaces) throws JumpException {
+	public static Object createJRubyObject(String scriptSource, Class<?>[] interfaces) throws JumpException {
 		return createJRubyObject(scriptSource, interfaces, ClassUtils.getDefaultClassLoader());
 	}
 
@@ -75,12 +75,13 @@ public abstract class JRubyScriptUtils {
 	 * @return the scripted Java object
 	 * @throws JumpException in case of JRuby parsing failure
 	 */
-	public static Object createJRubyObject(String scriptSource, Class[] interfaces, ClassLoader classLoader) {
+	public static Object createJRubyObject(String scriptSource, Class<?>[] interfaces, ClassLoader classLoader) {
 		Ruby ruby = initializeRuntime();
 
 		Node scriptRootNode = ruby.parseEval(scriptSource, "", null, 0);
 		// keep using the deprecated runNormally variant for JRuby 1.1/1.2 compatibility...
-		IRubyObject rubyObject = ruby.runNormally(scriptRootNode, false);
+		@SuppressWarnings("deprecation")
+        IRubyObject rubyObject = ruby.runNormally(scriptRootNode, false);
 
 		if (rubyObject instanceof RubyNil) {
 			String className = findClassName(scriptRootNode);
@@ -206,7 +207,7 @@ public abstract class JRubyScriptUtils {
 			return rubyArgs;
 		}
 
-		private Object convertFromRuby(IRubyObject rubyResult, Class returnType) {
+		private Object convertFromRuby(IRubyObject rubyResult, Class<?> returnType) {
 			Object result = JavaEmbedUtils.rubyToJava(this.ruby, rubyResult, returnType);
 			if (result instanceof RubyArray && returnType.isArray()) {
 				result = convertFromRubyArray(((RubyArray) result).toJavaArray(), returnType);
@@ -214,8 +215,8 @@ public abstract class JRubyScriptUtils {
 			return result;
 		}
 
-		private Object convertFromRubyArray(IRubyObject[] rubyArray, Class returnType) {
-			Class targetType = returnType.getComponentType();
+		private Object convertFromRubyArray(IRubyObject[] rubyArray, Class<?> returnType) {
+			Class<?> targetType = returnType.getComponentType();
 			Object javaArray = Array.newInstance(targetType, rubyArray.length);
 			for (int i = 0; i < rubyArray.length; i++) {
 				IRubyObject rubyObject = rubyArray[i];

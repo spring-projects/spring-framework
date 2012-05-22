@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ public class GenericBean<T> {
 
 	private List<Map<Integer, Long>> listOfMaps;
 
+	@SuppressWarnings("rawtypes")
 	private Map plainMap;
 
 	private Map<Short, Integer> shortMap;
@@ -83,6 +84,7 @@ public class GenericBean<T> {
 		this.resourceList = Collections.singletonList(resource);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public GenericBean(Map plainMap, Map<Short, Integer> shortMap) {
 		this.plainMap = plainMap;
 		this.shortMap = shortMap;
@@ -137,6 +139,7 @@ public class GenericBean<T> {
 		this.listOfMaps = listOfMaps;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Map getPlainMap() {
 		return plainMap;
 	}
@@ -206,32 +209,33 @@ public class GenericBean<T> {
 	}
 
 
-	public static GenericBean createInstance(Set<Integer> integerSet) {
-		return new GenericBean(integerSet);
+	public static GenericBean<Set<Integer>> createInstance(Set<Integer> integerSet) {
+		return new GenericBean<Set<Integer>>(integerSet);
 	}
 
-	public static GenericBean createInstance(Set<Integer> integerSet, List<Resource> resourceList) {
-		return new GenericBean(integerSet, resourceList);
+	public static GenericBean<Set<Integer>> createInstance(Set<Integer> integerSet, List<Resource> resourceList) {
+		return new GenericBean<Set<Integer>>(integerSet, resourceList);
 	}
 
-	public static GenericBean createInstance(HashSet<Integer> integerSet, Map<Short, Integer> shortMap) {
-		return new GenericBean(integerSet, shortMap);
+	public static GenericBean<HashSet<Integer>> createInstance(HashSet<Integer> integerSet, Map<Short, Integer> shortMap) {
+		return new GenericBean<HashSet<Integer>>(integerSet, shortMap);
 	}
 
-	public static GenericBean createInstance(Map<Short, Integer> shortMap, Resource resource) {
-		return new GenericBean(shortMap, resource);
+	public static GenericBean<Map<String, Integer>> createInstance(Map<Short, Integer> shortMap, Resource resource) {
+		return new GenericBean<Map<String, Integer>>(shortMap, resource);
 	}
 
-	public static GenericBean createInstance(Map map, Map<Short, Integer> shortMap) {
-		return new GenericBean(map, shortMap);
+	@SuppressWarnings("rawtypes")
+	public static GenericBean<Map> createInstance(Map map, Map<Short, Integer> shortMap) {
+		return new GenericBean<Map>(map, shortMap);
 	}
 
-	public static GenericBean createInstance(HashMap<Long, ?> longMap) {
-		return new GenericBean(longMap);
+	public static GenericBean<Set<Integer>> createInstance(HashMap<Long, ?> longMap) {
+		return new GenericBean<Set<Integer>>(longMap);
 	}
 
-	public static GenericBean createInstance(boolean someFlag, Map<Number, Collection<? extends Object>> collectionMap) {
-		return new GenericBean(someFlag, collectionMap);
+	public static GenericBean<Set<Integer>> createInstance(boolean someFlag, Map<Number, Collection<? extends Object>> collectionMap) {
+		return new GenericBean<Set<Integer>>(someFlag, collectionMap);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public abstract class TagUtils {
 	 * 'page' or 'application', the method will return {@link PageContext#PAGE_SCOPE}.
 	 * @param scope the <code>String</code> to inspect
 	 * @return the scope found, or {@link PageContext#PAGE_SCOPE} if no scope matched
-	 * @throws IllegalArgumentException if the supplied <code>scope</code> is <code>null</code> 
+	 * @throws IllegalArgumentException if the supplied <code>scope</code> is <code>null</code>
 	 */
 	public static int getScope(String scope) {
 		Assert.notNull(scope, "Scope to search for cannot be null");
@@ -90,9 +90,9 @@ public abstract class TagUtils {
 	 * of the supplied type
 	 * @throws IllegalArgumentException if either of the supplied arguments is <code>null</code>;
 	 * or if the supplied <code>ancestorTagClass</code> is not type-assignable to
-	 * the {@link Tag} class 
+	 * the {@link Tag} class
 	 */
-	public static boolean hasAncestorOfType(Tag tag, Class ancestorTagClass) {
+	public static boolean hasAncestorOfType(Tag tag, Class<?> ancestorTagClass) {
 		Assert.notNull(tag, "Tag cannot be null");
 		Assert.notNull(ancestorTagClass, "Ancestor tag class cannot be null");
 		if (!Tag.class.isAssignableFrom(ancestorTagClass)) {
@@ -122,10 +122,10 @@ public abstract class TagUtils {
 	 * @throws IllegalArgumentException if any of the supplied arguments is <code>null</code>,
 	 * or in the case of the {@link String}-typed arguments, is composed wholly
 	 * of whitespace; or if the supplied <code>ancestorTagClass</code> is not
-	 * type-assignable to the {@link Tag} class 
+	 * type-assignable to the {@link Tag} class
 	 * @see #hasAncestorOfType(javax.servlet.jsp.tagext.Tag, Class)
 	 */
-	public static void assertHasAncestorOfType(Tag tag, Class ancestorTagClass, String tagName, String ancestorTagName) {
+	public static void assertHasAncestorOfType(Tag tag, Class<?> ancestorTagClass, String tagName, String ancestorTagName) {
 		Assert.hasText(tagName, "'tagName' must not be empty");
 		Assert.hasText(ancestorTagName, "'ancestorTagName' must not be empty");
 		if (!TagUtils.hasAncestorOfType(tag, ancestorTagClass)) {

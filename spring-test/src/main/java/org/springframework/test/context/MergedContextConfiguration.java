@@ -41,15 +41,15 @@ import org.springframework.util.StringUtils;
  * {@link ContextConfiguration#inheritLocations inheritLocations} and
  * {@link ActiveProfiles#inheritProfiles inheritProfiles} flags in
  * {@code @ContextConfiguration} and {@code @ActiveProfiles}, respectively.
- * 
+ *
  * <p>A {@link SmartContextLoader} uses {@code MergedContextConfiguration}
  * to load an {@link org.springframework.context.ApplicationContext ApplicationContext}.
- * 
+ *
  * <p>{@code MergedContextConfiguration} is also used by the {@link TestContext}
  * as the context cache key for caching an
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * that was loaded using properties of this {@code MergedContextConfiguration}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  * @see ContextConfiguration
@@ -118,7 +118,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * <code>classes</code>, or <code>activeProfiles</code> an empty array will
 	 * be stored instead. Furthermore, active profiles will be sorted, and duplicate
 	 * profiles will be removed.
-	 * 
+	 *
 	 * @param testClass the test class for which the configuration was merged
 	 * @param locations the merged resource locations
 	 * @param classes the merged annotated classes

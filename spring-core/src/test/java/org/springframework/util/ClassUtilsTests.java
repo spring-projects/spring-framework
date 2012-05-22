@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.beans.TestBean;
  * @author Rob Harrop
  * @author Rick Evans
  */
+@SuppressWarnings("deprecation")
 public class ClassUtilsTests extends TestCase {
 
 	public void setUp() {
@@ -171,14 +172,14 @@ public class ClassUtilsTests extends TestCase {
 	}
 
 	public void testHasMethod() throws Exception {
-		assertTrue(ClassUtils.hasMethod(Collection.class, "size", null));
+		assertTrue(ClassUtils.hasMethod(Collection.class, "size"));
 		assertTrue(ClassUtils.hasMethod(Collection.class, "remove", new Class[] {Object.class}));
-		assertFalse(ClassUtils.hasMethod(Collection.class, "remove", null));
-		assertFalse(ClassUtils.hasMethod(Collection.class, "someOtherMethod", null));
+		assertFalse(ClassUtils.hasMethod(Collection.class, "remove"));
+		assertFalse(ClassUtils.hasMethod(Collection.class, "someOtherMethod"));
 	}
 
 	public void testGetMethodIfAvailable() throws Exception {
-		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size", null);
+		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size");
 		assertNotNull(method);
 		assertEquals("size", method.getName());
 
@@ -186,8 +187,8 @@ public class ClassUtilsTests extends TestCase {
 		assertNotNull(method);
 		assertEquals("remove", method.getName());
 
-		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "remove", null));
-		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "someOtherMethod", null));
+		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "remove"));
+		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "someOtherMethod"));
 	}
 
 	public void testGetMethodCountForName() {
@@ -258,7 +259,7 @@ public class ClassUtilsTests extends TestCase {
 
 	public void testGetAllInterfaces() {
 		DerivedTestBean testBean = new DerivedTestBean();
-		List ifcs = Arrays.asList(ClassUtils.getAllInterfaces(testBean));
+		List<Class<?>> ifcs = Arrays.asList(ClassUtils.getAllInterfaces(testBean));
 		assertEquals("Correct number of interfaces", 4, ifcs.size());
 		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
 		assertTrue("Contains ITestBean", ifcs.contains(ITestBean.class));
@@ -266,13 +267,13 @@ public class ClassUtilsTests extends TestCase {
 	}
 
 	public void testClassNamesToString() {
-		List ifcs = new LinkedList();
+		List<Class<?>> ifcs = new LinkedList<Class<?>>();
 		ifcs.add(Serializable.class);
 		ifcs.add(Runnable.class);
 		assertEquals("[interface java.io.Serializable, interface java.lang.Runnable]", ifcs.toString());
 		assertEquals("[java.io.Serializable, java.lang.Runnable]", ClassUtils.classNamesToString(ifcs));
 
-		List classes = new LinkedList();
+		List<Class<?>> classes = new LinkedList<Class<?>>();
 		classes.add(LinkedList.class);
 		classes.add(Integer.class);
 		assertEquals("[class java.util.LinkedList, class java.lang.Integer]", classes.toString());
@@ -282,7 +283,7 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals("[java.util.List]", ClassUtils.classNamesToString(List.class));
 
 		assertEquals("[]", Collections.EMPTY_LIST.toString());
-		assertEquals("[]", ClassUtils.classNamesToString(Collections.EMPTY_LIST));
+		assertEquals("[]", ClassUtils.classNamesToString(Collections.<Class<?>>emptyList()));
 	}
 
 
@@ -305,7 +306,7 @@ public class ClassUtilsTests extends TestCase {
 		}
 	}
 
-	private static class OverloadedMethodsClass {
+	public static class OverloadedMethodsClass {
 		public void print(String messages) {
 			/* no-op */
 		}
@@ -314,7 +315,7 @@ public class ClassUtilsTests extends TestCase {
 		}
 	}
 
-	private static class SubOverloadedMethodsClass extends OverloadedMethodsClass{
+	public static class SubOverloadedMethodsClass extends OverloadedMethodsClass{
 		public void print(String header, String[] messages) {
 			/* no-op */
 		}

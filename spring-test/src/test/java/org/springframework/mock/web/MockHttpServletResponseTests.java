@@ -61,8 +61,7 @@ public class MockHttpServletResponseTests {
 		assertEquals(contentType, response.getHeader("Content-Type"));
 	}
 
-	@Test
-	public void contentTypeHeader() {
+	public void testContentTypeHeader() {
 		String contentType = "test/plain";
 		response.addHeader("Content-Type", contentType);
 		assertEquals(contentType, response.getContentType());
@@ -116,12 +115,15 @@ public class MockHttpServletResponseTests {
 		assertEquals("66", response.getHeader("Content-Length"));
 	}
 
-	@Test
-	public void contentLengthHeader() {
+	public void testContentLengthHeader() {
+		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader("Content-Length", "66");
 		assertEquals(66, response.getContentLength());
 		assertEquals("66", response.getHeader("Content-Length"));
 	}
+
+	public void testHttpHeaderNameCasingIsPreserved() throws Exception {
+		final String headerName = "Header1";
 
 	@Test
 	public void httpHeaderNameCasingIsPreserved() throws Exception {

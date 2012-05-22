@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.mail.javamail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -59,7 +60,7 @@ public class JavaMailSenderTests extends TestCase {
 		simpleMessage.setTo("you@mail.org");
 		simpleMessage.setCc(new String[] {"he@mail.org", "she@mail.org"});
 		simpleMessage.setBcc(new String[] {"us@mail.org", "them@mail.org"});
-		Date sentDate = new Date(2004, 1, 1);
+		Date sentDate = newDate(2004, 1, 1);
 		simpleMessage.setSentDate(sentDate);
 		simpleMessage.setSubject("my subject");
 		simpleMessage.setText("my text");
@@ -73,19 +74,19 @@ public class JavaMailSenderTests extends TestCase {
 
 		assertEquals(1, sender.transport.getSentMessages().size());
 		MimeMessage sentMessage = sender.transport.getSentMessage(0);
-		List froms = Arrays.asList(sentMessage.getFrom());
+		List<Address> froms = Arrays.asList(sentMessage.getFrom());
 		assertEquals(1, froms.size());
 		assertEquals("me@mail.org", ((InternetAddress) froms.get(0)).getAddress());
-		List replyTos = Arrays.asList(sentMessage.getReplyTo());
+		List<Address> replyTos = Arrays.asList(sentMessage.getReplyTo());
 		assertEquals("reply@mail.org", ((InternetAddress) replyTos.get(0)).getAddress());
-		List tos = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.TO));
+		List<Address> tos = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.TO));
 		assertEquals(1, tos.size());
 		assertEquals("you@mail.org", ((InternetAddress) tos.get(0)).getAddress());
-		List ccs = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.CC));
+		List<Address> ccs = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.CC));
 		assertEquals(2, ccs.size());
 		assertEquals("he@mail.org", ((InternetAddress) ccs.get(0)).getAddress());
 		assertEquals("she@mail.org", ((InternetAddress) ccs.get(1)).getAddress());
-		List bccs = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.BCC));
+		List<Address> bccs = Arrays.asList(sentMessage.getRecipients(Message.RecipientType.BCC));
 		assertEquals(2, bccs.size());
 		assertEquals("us@mail.org", ((InternetAddress) bccs.get(0)).getAddress());
 		assertEquals("them@mail.org", ((InternetAddress) bccs.get(1)).getAddress());
@@ -113,11 +114,11 @@ public class JavaMailSenderTests extends TestCase {
 
 		assertEquals(2, sender.transport.getSentMessages().size());
 		MimeMessage sentMessage1 = sender.transport.getSentMessage(0);
-		List tos1 = Arrays.asList(sentMessage1.getRecipients(Message.RecipientType.TO));
+		List<Address> tos1 = Arrays.asList(sentMessage1.getRecipients(Message.RecipientType.TO));
 		assertEquals(1, tos1.size());
 		assertEquals("he@mail.org", ((InternetAddress) tos1.get(0)).getAddress());
 		MimeMessage sentMessage2 = sender.transport.getSentMessage(1);
-		List tos2 = Arrays.asList(sentMessage2.getRecipients(Message.RecipientType.TO));
+		List<Address> tos2 = Arrays.asList(sentMessage2.getRecipients(Message.RecipientType.TO));
 		assertEquals(1, tos2.size());
 		assertEquals("she@mail.org", ((InternetAddress) tos2.get(0)).getAddress());
 	}
@@ -330,7 +331,8 @@ public class JavaMailSenderTests extends TestCase {
 		MimeMessage mimeMessage = sender.createMimeMessage();
 		mimeMessage.setSubject("custom");
 		mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("you@mail.org"));
-		mimeMessage.setSentDate(new Date(2005, 3, 1));
+		Date sentDate = newDate(2005, 3, 1);
+		mimeMessage.setSentDate(sentDate);
 		sender.send(mimeMessage);
 
 		assertEquals("host", sender.transport.getConnectedHost());
@@ -468,6 +470,12 @@ public class JavaMailSenderTests extends TestCase {
 		}
 	}
 
+	private static Date newDate(int year, int month, int day) {
+		Calendar c = Calendar.getInstance();
+		c.set(year, month, day, 0, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		return c.getTime();
+	}
 
 	private static class MockJavaMailSender extends JavaMailSenderImpl {
 
@@ -514,7 +522,7 @@ public class JavaMailSenderTests extends TestCase {
 			return closeCalled;
 		}
 
-		public List getSentMessages() {
+		public List<Message> getSentMessages() {
 			return sentMessages;
 		}
 
@@ -546,8 +554,8 @@ public class JavaMailSenderTests extends TestCase {
 			if ("fail".equals(message.getSubject())) {
 				throw new MessagingException("failed");
 			}
-			List addr1 = Arrays.asList(message.getAllRecipients());
-			List addr2 = Arrays.asList(addresses);
+			List<Address> addr1 = Arrays.asList(message.getAllRecipients());
+			List<Address> addr2 = Arrays.asList(addresses);
 			if (!addr1.equals(addr2)) {
 				throw new MessagingException("addresses not correct");
 			}
@@ -555,7 +563,8 @@ public class JavaMailSenderTests extends TestCase {
 				throw new MessagingException("No sentDate specified");
 			}
 			if (message.getSubject() != null && message.getSubject().contains("custom")) {
-				assertEquals(new Date(2005, 3, 1), message.getSentDate());
+				Date sentDate = newDate(2005, 3, 1);
+				assertEquals(sentDate, message.getSentDate());
 			}
 			this.sentMessages.add(message);
 		}

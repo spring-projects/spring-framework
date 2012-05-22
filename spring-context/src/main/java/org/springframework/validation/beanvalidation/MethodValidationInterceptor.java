@@ -84,7 +84,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		Class[] groups = determineValidationGroups(invocation);
+		Class<?>[] groups = determineValidationGroups(invocation);
 		Set<MethodConstraintViolation<Object>> result = this.validator.validateAllParameters(
 				invocation.getThis(), invocation.getMethod(), invocation.getArguments(), groups);
 		if (!result.isEmpty()) {
@@ -106,7 +106,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param invocation the current MethodInvocation
 	 * @return the applicable validation groups as a Class array
 	 */
-	protected Class[] determineValidationGroups(MethodInvocation invocation) {
+	protected Class<?>[] determineValidationGroups(MethodInvocation invocation) {
 		Validated valid = AnnotationUtils.findAnnotation(invocation.getThis().getClass(), Validated.class);
 		return (valid != null ? valid.value() : new Class[0]);
 	}

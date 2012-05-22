@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 
 	private WebApplicationContext webApplicationContext;
-	
+
 
 	@Override
 	public void init(ActionServlet actionServlet, ModuleConfig moduleConfig) throws ServletException {
@@ -126,7 +126,7 @@ public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 		if (!getWebApplicationContext().containsBean(beanName)) {
 			return null;
 		}
-		return (Action) getWebApplicationContext().getBean(beanName, Action.class);
+		return getWebApplicationContext().getBean(beanName, Action.class);
 	}
 
 	/**

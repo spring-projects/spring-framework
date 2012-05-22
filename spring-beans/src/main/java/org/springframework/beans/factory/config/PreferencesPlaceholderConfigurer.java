@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,9 +76,9 @@ public class PreferencesPlaceholderConfigurer extends PropertyPlaceholderConfigu
 	 */
 	public void afterPropertiesSet() {
 		this.systemPrefs = (this.systemTreePath != null) ?
-		    Preferences.systemRoot().node(this.systemTreePath) : Preferences.systemRoot();
+			Preferences.systemRoot().node(this.systemTreePath) : Preferences.systemRoot();
 		this.userPrefs = (this.userTreePath != null) ?
-		    Preferences.userRoot().node(this.userTreePath) : Preferences.userRoot();
+			Preferences.userRoot().node(this.userTreePath) : Preferences.userRoot();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
-* Copyright 2002-2009 the original author or authors.
+* Copyright 2002-2012 the original author or authors.
   *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.oxm.config;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -49,11 +48,10 @@ class Jaxb2MarshallerBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 		if (StringUtils.hasText(contextPath)) {
 			beanDefinitionBuilder.addPropertyValue("contextPath", contextPath);
 		}
-		List classes = DomUtils.getChildElementsByTagName(element, "class-to-be-bound");
+		List<Element> classes = DomUtils.getChildElementsByTagName(element, "class-to-be-bound");
 		if (!classes.isEmpty()) {
-			ManagedList classesToBeBound = new ManagedList(classes.size());
-			for (Iterator iterator = classes.iterator(); iterator.hasNext();) {
-				Element classToBeBound = (Element) iterator.next();
+			ManagedList<String> classesToBeBound = new ManagedList<String>(classes.size());
+			for (Element classToBeBound : classes) {
 				String className = classToBeBound.getAttribute("name");
 				classesToBeBound.add(className);
 			}

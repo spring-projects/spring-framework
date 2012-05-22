@@ -134,8 +134,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/**
 	 * If this variable is set to true then all results from a stored procedure call
 	 * that don't have a corresponding SqlOutParameter declaration will be bypassed.
-	 * All other results processing will be take place unless the variable
-	 * <code>skipResultsProcessing</code> is set to <code>true</code>.
+	 * All other results processng will be take place unless the variable
+	 * <code>skipResultsProcessing</code> is set to <code>true</code>
 	 */
 	private boolean skipUndeclaredResults = false;
 
@@ -934,7 +934,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.jdbc.core.JdbcOperations#batchUpdate(java.lang.String, java.util.Collection, int, org.springframework.jdbc.core.ParameterizedPreparedStatementSetter)
-	 * 
+	 *
 	 * Contribution by Nicolas Fabre
 	 */
 	public <T> int[][] batchUpdate(String sql, final Collection<T> batchArgs, final int batchSize, final ParameterizedPreparedStatementSetter<T> pss) {
@@ -1045,16 +1045,16 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	public Map<String, Object> call(CallableStatementCreator csc, List<SqlParameter> declaredParameters)
 			throws DataAccessException {
 
-		final List<SqlParameter> updateCountParameters = new ArrayList<SqlParameter>();
-		final List<SqlParameter> resultSetParameters = new ArrayList<SqlParameter>();
+		final List<SqlReturnUpdateCount> updateCountParameters = new ArrayList<SqlReturnUpdateCount>();
+		final List<SqlReturnResultSet> resultSetParameters = new ArrayList<SqlReturnResultSet>();
 		final List<SqlParameter> callParameters = new ArrayList<SqlParameter>();
 		for (SqlParameter parameter : declaredParameters) {
 			if (parameter.isResultsParameter()) {
 				if (parameter instanceof SqlReturnResultSet) {
-					resultSetParameters.add(parameter);
+					resultSetParameters.add((SqlReturnResultSet) parameter);
 				}
 				else {
-					updateCountParameters.add(parameter);					
+					updateCountParameters.add((SqlReturnUpdateCount) parameter);
 				}
 			}
 			else {
@@ -1086,10 +1086,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param resultSetParameters Parameter list of declared resultSet parameters for the stored procedure
 	 * @return Map that contains returned results
 	 */
-	@SuppressWarnings("rawtypes")
-	protected Map<String, Object> extractReturnedResults(
-			CallableStatement cs, List updateCountParameters, List resultSetParameters, int updateCount)
-			throws SQLException {
+	protected Map<String, Object> extractReturnedResults(CallableStatement cs,
+		List<? extends SqlReturnUpdateCount> updateCountParameters,
+		List<? extends SqlReturnResultSet> resultSetParameters, int updateCount)
+		throws SQLException {
 
 		Map<String, Object> returnedResults = new HashMap<String, Object>();
 		int rsIndex = 0;
@@ -1099,7 +1099,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			do {
 				if (updateCount == -1) {
 					if (resultSetParameters != null && resultSetParameters.size() > rsIndex) {
-						SqlReturnResultSet declaredRsParam = (SqlReturnResultSet)resultSetParameters.get(rsIndex);
+						SqlReturnResultSet declaredRsParam = resultSetParameters.get(rsIndex);
 						returnedResults.putAll(processResultSet(cs.getResultSet(), declaredRsParam));
 						rsIndex++;
 					}
@@ -1115,7 +1115,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				else {
 					if (updateCountParameters != null && updateCountParameters.size() > updateIndex) {
-						SqlReturnUpdateCount ucParam = (SqlReturnUpdateCount)updateCountParameters.get(updateIndex);
+						SqlReturnUpdateCount ucParam = updateCountParameters.get(updateIndex);
 						String declaredUcName = ucParam.getName();
 						returnedResults.put(declaredUcName, updateCount);
 						updateIndex++;
@@ -1190,7 +1190,6 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @param param the corresponding stored procedure parameter
 	 * @return Map that contains returned results
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Map<String, Object> processResultSet(ResultSet rs, ResultSetSupportingSqlParameter param) throws SQLException {
 		if (rs == null) {
 			return Collections.emptyMap();
@@ -1202,8 +1201,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				rsToUse = this.nativeJdbcExtractor.getNativeResultSet(rs);
 			}
 			if (param.getRowMapper() != null) {
-				RowMapper rowMapper = param.getRowMapper();
-				Object result = (new RowMapperResultSetExtractor(rowMapper)).extractData(rsToUse);
+				RowMapper<?> rowMapper = param.getRowMapper();
+				Object result = (new RowMapperResultSetExtractor<Object>(rowMapper)).extractData(rsToUse);
 				returnedResults.put(param.getName(), result);
 			}
 			else if (param.getRowCallbackHandler() != null) {
@@ -1382,12 +1381,12 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return System.identityHashCode(proxy);
 			}
 			else if (method.getName().equals("unwrap")) {
-				if (((Class) args[0]).isInstance(proxy)) {
+				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return proxy;
 				}
 			}
 			else if (method.getName().equals("isWrapperFor")) {
-				if (((Class) args[0]).isInstance(proxy)) {
+				if (((Class<?>) args[0]).isInstance(proxy)) {
 					return true;
 				}
 			}

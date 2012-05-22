@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.expression.spel.standard.SpelExpression;
 
 /**
  * Test providing operator support
- * 
+ *
  * @author Andy Clement
  */
 public class OperatorOverloaderTests extends ExpressionTestCase {
@@ -48,11 +48,11 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 				return true;
 			}
 			return false;
-			
+
 		}
-		
+
 	}
-	
+
 	@Test
 	public void testSimpleOperations() throws Exception {
 		// no built in support for this:
@@ -66,7 +66,7 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 
 		expr = (SpelExpression)parser.parseExpression("'abc'-true");
 		Assert.assertEquals("abc",expr.getValue(eContext));
-		
+
 		expr = (SpelExpression)parser.parseExpression("'abc'+null");
 		Assert.assertEquals("abcnull",expr.getValue(eContext));
 	}

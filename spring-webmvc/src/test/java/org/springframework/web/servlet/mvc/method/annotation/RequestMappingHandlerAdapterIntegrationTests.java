@@ -277,18 +277,6 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	@Test
-	public void handleAndValidateRequestPart() throws Exception {
-		MockMultipartHttpServletRequest multipartRequest = new MockMultipartHttpServletRequest();
-		multipartRequest.addFile(new MockMultipartFile("requestPart", "", "text/plain", "content".getBytes("UTF-8")));
-
-		HandlerMethod handlerMethod = handlerMethod("handleAndValidateRequestPart", String.class, Errors.class, Model.class);
-		ModelAndView mav = handlerAdapter.handle(multipartRequest, response, handlerMethod);
-
-		assertNotNull(mav);
-		assertEquals(1, mav.getModelMap().get("error count"));
-	}
-
-	@Test
 	public void handleAndCompleteSession() throws Exception {
 		HandlerMethod handlerMethod = handlerMethod("handleAndCompleteSession", SessionStatus.class);
 		handlerAdapter.handle(request, response, handlerMethod);
@@ -380,12 +368,6 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 		public void handleRequestPart(@RequestPart String requestPart, Model model) {
 			model.addAttribute("requestPart", requestPart);
-		}
-
-		public void handleAndValidateRequestPart(@RequestPart @Valid String requestPart,
-				Errors errors, Model model) throws Exception {
-
-			model.addAttribute("error count", errors.getErrorCount());
 		}
 
 		public void handleAndCompleteSession(SessionStatus sessionStatus) {

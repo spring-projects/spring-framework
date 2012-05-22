@@ -3,7 +3,7 @@
  *
  * Contains classes defining the application context subinterface
  * for UI applications. The theme feature is added here.
- * 
+ *
  * <ul>
  *   <li>If no <code>UiApplicationContextUtils.THEME_SOURCE_BEAN_NAME</code>
  * bean is available in the context or parent context, a default <code>ResourceBundleThemeSource</code>
@@ -24,7 +24,7 @@
  *   <li>If messages in the resource bundles are in fact paths to resources(css, images, ...), make sure these resources
  *   are directly available for the user and not, for example, under the WEB-INF directory.</li>
  *  </ul>
- * 
+ *
  * <br>Web packages add the resolution and the setting of the user current theme.
  *
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class RowMapperTests extends TestCase {
 	private MockControl rsControl;
 	private ResultSet rs;
 	private JdbcTemplate jdbcTemplate;
-	private List result;
+	private List<TestBean> result;
 
 	protected void setUp() throws SQLException {
 		conControl = MockControl.createControl(Connection.class);
@@ -229,8 +229,8 @@ public class RowMapperTests extends TestCase {
 
 		assertTrue(result != null);
 		assertEquals(2, result.size());
-		TestBean tb1 = (TestBean) result.get(0);
-		TestBean tb2 = (TestBean) result.get(1);
+		TestBean tb1 = result.get(0);
+		TestBean tb2 = result.get(1);
 		assertEquals("tb1", tb1.getName());
 		assertEquals(1, tb1.getAge());
 		assertEquals("tb2", tb2.getName());
@@ -238,9 +238,9 @@ public class RowMapperTests extends TestCase {
 	}
 
 
-	private static class TestRowMapper implements RowMapper {
+	private static class TestRowMapper implements RowMapper<TestBean> {
 
-		public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+		public TestBean mapRow(ResultSet rs, int rowNum) throws SQLException {
 			return new TestBean(rs.getString(1), rs.getInt(2));
 		}
 	}

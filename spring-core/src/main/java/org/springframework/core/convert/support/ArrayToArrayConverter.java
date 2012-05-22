@@ -27,8 +27,8 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Converts an Array to another Array. First adapts the source array to a List, then
- * delegates to {@link CollectionToArrayConverter} to perform the target array conversion.
+ * Converts an Array to another Array.
+ * First adapts the source array to a List, then delegates to {@link CollectionToArrayConverter} to perform the target array conversion.
  *
  * @author Keith Donald
  * @author Phillip Webb
@@ -53,16 +53,8 @@ final class ArrayToArrayConverter implements ConditionalGenericConverter {
 		return this.helperConverter.matches(sourceType, targetType);
 	}
 
-	public Object convert(Object source, TypeDescriptor sourceType,
-			TypeDescriptor targetType) {
-		if ((conversionService instanceof GenericConversionService)
-				&& ((GenericConversionService) conversionService).canBypassConvert(
-						sourceType.getElementTypeDescriptor(),
-						targetType.getElementTypeDescriptor())) {
-			return source;
-		}
-		List<Object> sourceList = Arrays.asList(ObjectUtils.toObjectArray(source));
-		return this.helperConverter.convert(sourceList, sourceType, targetType);
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		return this.helperConverter.convert(Arrays.asList(ObjectUtils.toObjectArray(source)), sourceType, targetType);
 	}
 
 }

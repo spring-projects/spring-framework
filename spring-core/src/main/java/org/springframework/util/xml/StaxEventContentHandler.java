@@ -90,17 +90,15 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 	@Override
 	protected void startElementInternal(QName name, Attributes atts, SimpleNamespaceContext namespaceContext)
 			throws XMLStreamException {
-
-		List attributes = getAttributes(atts);
-		List namespaces = createNamespaces(namespaceContext);
-		consumeEvent(this.eventFactory.createStartElement(name, attributes.iterator(),
-				(namespaces != null ? namespaces.iterator() : null)));
+		List<Attribute> attributes = getAttributes(atts);
+		List<Namespace> namespaces = createNamespaces(namespaceContext);
+		consumeEvent(eventFactory.createStartElement(name, attributes.iterator(), namespaces != null ? namespaces.iterator() : null));
 	}
 
 	@Override
 	protected void endElementInternal(QName name, SimpleNamespaceContext namespaceContext) throws XMLStreamException {
-		List namespaces = createNamespaces(namespaceContext);
-		consumeEvent(this.eventFactory.createEndElement(name, namespaces != null ? namespaces.iterator() : null));
+		List<Namespace> namespaces = createNamespaces(namespaceContext);
+		consumeEvent(eventFactory.createEndElement(name, namespaces != null ? namespaces.iterator() : null));
 	}
 
 	@Override
@@ -135,8 +133,8 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 		if (StringUtils.hasLength(defaultNamespaceUri)) {
 			namespaces.add(this.eventFactory.createNamespace(defaultNamespaceUri));
 		}
-		for (Iterator iterator = namespaceContext.getBoundPrefixes(); iterator.hasNext();) {
-			String prefix = (String) iterator.next();
+		for (Iterator<String> iterator = namespaceContext.getBoundPrefixes(); iterator.hasNext();) {
+			String prefix = iterator.next();
 			String namespaceUri = namespaceContext.getNamespaceURI(prefix);
 			namespaces.add(this.eventFactory.createNamespace(prefix, namespaceUri));
 		}

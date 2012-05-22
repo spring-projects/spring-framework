@@ -35,7 +35,7 @@ import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link org.springframework.web.servlet.mvc.method.annotation.ServletRequestMethodArgumentResolver}.
- * 
+ *
  * @author Arjen Poutsma
  */
 public class ServletResponseMethodArgumentResolverTests {

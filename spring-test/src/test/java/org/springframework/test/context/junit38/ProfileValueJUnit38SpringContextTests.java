@@ -32,7 +32,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * Verifies proper handling of {@link IfProfileValue &#064;IfProfileValue} and
  * {@link ProfileValueSourceConfiguration &#064;ProfileValueSourceConfiguration}
  * in conjunction with {@link AbstractJUnit38SpringContextTests}.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */

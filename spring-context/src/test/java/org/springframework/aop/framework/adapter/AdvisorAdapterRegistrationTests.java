@@ -135,4 +135,5 @@ final class SimpleBeforeAdviceInterceptor implements MethodInterceptor {
 		advice.before();
 		return mi.proceed();
 	}
+
 }

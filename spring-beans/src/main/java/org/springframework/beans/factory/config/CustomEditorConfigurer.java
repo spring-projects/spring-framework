@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.ClassUtils;
 /**
  * {@link BeanFactoryPostProcessor} implementation that allows for convenient
  * registration of custom {@link PropertyEditor property editors}.
- * 
+ *
  * <p>
  * In case you want to register {@link PropertyEditor} instances, the
  * recommended usage as of Spring 2.0 is to use custom
@@ -43,7 +43,7 @@ import org.springframework.util.ClassUtils;
  * desired editor instances on a given
  * {@link org.springframework.beans.PropertyEditorRegistry registry}. Each
  * PropertyEditorRegistrar can register any number of custom editors.
- * 
+ *
  * <pre class="code">
  * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="propertyEditorRegistrars"&gt;
@@ -54,12 +54,12 @@ import org.springframework.util.ClassUtils;
  *   &lt;/property&gt;
  * &lt;/bean&gt;
  * </pre>
- * 
+ *
  * <p>
  * It's perfectly fine to register {@link PropertyEditor} <em>classes</em> via
  * the {@code customEditors} property. Spring will create fresh instances of
  * them for each editing attempt then:
- * 
+ *
  * <pre class="code">
  * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="customEditors"&gt;
@@ -70,7 +70,7 @@ import org.springframework.util.ClassUtils;
  *   &lt;/property&gt;
  * &lt;/bean&gt;
  * </pre>
- * 
+ *
  * <p>
  * Note, that you shouldn't register {@link PropertyEditor} bean instances via
  * the {@code customEditors} property as {@link PropertyEditor}s are stateful
@@ -78,7 +78,7 @@ import org.springframework.util.ClassUtils;
  * attempt. In case you need control over the instantiation process of
  * {@link PropertyEditor}s, use a {@link PropertyEditorRegistrar} to register
  * them.
- * 
+ *
  * <p>
  * Also supports "java.lang.String[]"-style array class names and primitive
  * class names (e.g. "boolean"). Delegates to {@link ClassUtils} for actual
@@ -116,11 +116,11 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 
 
 	public void setOrder(int order) {
-	  this.order = order;
+		this.order = order;
 	}
 
 	public int getOrder() {
-	  return this.order;
+		return this.order;
 	}
 
 	/**
@@ -178,7 +178,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 			for (Map.Entry<String, ?> entry : this.customEditors.entrySet()) {
 				String key = entry.getKey();
 				Object value = entry.getValue();
-				Class requiredType = null;
+				Class<?> requiredType = null;
 
 				try {
 					requiredType = ClassUtils.forName(key, this.beanClassLoader);
@@ -192,10 +192,10 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 								new SharedPropertyEditorRegistrar(requiredType, (PropertyEditor) value));
 					}
 					else if (value instanceof Class) {
-						beanFactory.registerCustomEditor(requiredType, (Class) value);
+						beanFactory.registerCustomEditor(requiredType, (Class<? extends PropertyEditor>) value);
 					}
 					else if (value instanceof String) {
-						Class editorClass = ClassUtils.forName((String) value, this.beanClassLoader);
+						Class<?> editorClass = ClassUtils.forName((String) value, this.beanClassLoader);
 						Assert.isAssignable(PropertyEditor.class, editorClass);
 						beanFactory.registerCustomEditor(requiredType, (Class<? extends PropertyEditor>) editorClass);
 					}
@@ -225,16 +225,17 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	 */
 	private static class SharedPropertyEditorRegistrar implements PropertyEditorRegistrar {
 
-		private final Class requiredType;
+		private final Class<?> requiredType;
 
 		private final PropertyEditor sharedEditor;
 
-		public SharedPropertyEditorRegistrar(Class requiredType, PropertyEditor sharedEditor) {
+		public SharedPropertyEditorRegistrar(Class<?> requiredType, PropertyEditor sharedEditor) {
 			this.requiredType = requiredType;
 			this.sharedEditor = sharedEditor;
 		}
 
-		public void registerCustomEditors(PropertyEditorRegistry registry) {
+		@SuppressWarnings("deprecation")
+        public void registerCustomEditors(PropertyEditorRegistry registry) {
 			if (!(registry instanceof PropertyEditorRegistrySupport)) {
 				throw new IllegalArgumentException("Cannot registered shared editor " +
 						"on non-PropertyEditorRegistrySupport registry: " + registry);

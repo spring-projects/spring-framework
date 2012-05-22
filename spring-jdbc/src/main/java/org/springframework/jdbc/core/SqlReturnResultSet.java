@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param extractor ResultSetExtractor to use for parsing the {@link java.sql.ResultSet}
 	 */
-	public SqlReturnResultSet(String name, ResultSetExtractor extractor) {
+	public SqlReturnResultSet(String name, ResultSetExtractor<?> extractor) {
 		super(name, 0, extractor);
 	}
 
@@ -53,7 +53,7 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param mapper RowMapper to use for parsing the {@link java.sql.ResultSet}
 	 */
-	public SqlReturnResultSet(String name, RowMapper mapper) {
+	public SqlReturnResultSet(String name, RowMapper<?> mapper) {
 		super(name, 0, mapper);
 	}
 

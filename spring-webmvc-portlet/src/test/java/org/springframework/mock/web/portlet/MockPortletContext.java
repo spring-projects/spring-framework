@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class MockPortletContext implements PortletContext {
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final String resourceBasePath;
-	
+
 	private final ResourceLoader resourceLoader;
 
 	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
@@ -68,7 +68,7 @@ public class MockPortletContext implements PortletContext {
 
 
 	/**
-	 * Create a new MockPortletContext with no base path and a 
+	 * Create a new MockPortletContext with no base path and a
 	 * DefaultResourceLoader (i.e. the classpath root as WAR root).
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
@@ -123,7 +123,7 @@ public class MockPortletContext implements PortletContext {
 		return this.resourceBasePath + path;
 	}
 
-	
+
 	public String getServerInfo() {
 		return "MockPortal/1.0";
 	}
@@ -158,7 +158,7 @@ public class MockPortletContext implements PortletContext {
 	public int getMinorVersion() {
 		return 0;
 	}
-	
+
 	public String getMimeType(String filePath) {
 		return null;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2010-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 		return counter.getAndIncrement();
 	}
 
-	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#a0"),  @CacheEvict(value = "primary", key = "#p0 + 'A'") })
+	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value = "secondary", key = "#a0"), @CacheEvict(value = "primary", key = "#p0 + 'A'") })
 	public Object multiEvict(Object arg1) {
 		return counter.getAndIncrement();
 	}

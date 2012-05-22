@@ -49,7 +49,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 	private ServletRequestAttributes oldRequestAttributes;
 
-	private ServletRequestAttributes newRequestAttributes; 
+	private ServletRequestAttributes newRequestAttributes;
 
 	private ServletRequestAttributes oldRequestAttributesWithSession;
 
@@ -234,7 +234,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		assertTrue(bean instanceof AnotherScopeTestInterface);
 
 		assertEquals(DEFAULT_NAME, bean.getName());
-		bean.setName(MODIFIED_NAME);	
+		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributesWithSession);
 		// this is a proxy so it should be reset to default
@@ -262,7 +262,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		assertTrue(bean instanceof SessionScopedTestBean);
 
 		assertEquals(DEFAULT_NAME, bean.getName());
-		bean.setName(MODIFIED_NAME);	
+		bean.setName(MODIFIED_NAME);
 
 		RequestContextHolder.setRequestAttributes(newRequestAttributesWithSession);
 		// this is a proxy so it should be reset to default

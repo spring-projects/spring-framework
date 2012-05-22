@@ -159,8 +159,8 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * @param locale the locale for which the view object should be removed
 	 */
 	public void removeFromCache(String viewName, Locale locale) {
-		if (!isCache()) {
-			logger.warn("View caching is SWITCHED OFF -- removal not necessary");			
+		if (!this.cache) {
+			logger.warn("View caching is SWITCHED OFF -- removal not necessary");
 		}
 		else {
 			Object cacheKey = getCacheKey(viewName, locale);
@@ -173,7 +173,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 				if (logger.isDebugEnabled()) {
 					logger.debug("No cached instance for view '" + cacheKey + "' was found");
 				}
-			} 
+			}
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Cache for view " + cacheKey + " has been cleared");

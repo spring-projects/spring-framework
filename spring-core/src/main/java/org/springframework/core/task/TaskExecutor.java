@@ -21,7 +21,7 @@ import java.util.concurrent.Executor;
 /**
  * Simple task executor interface that abstracts the execution
  * of a {@link Runnable}.
- * 
+ *
  * <p>Implementations can use all sorts of different execution strategies,
  * such as: synchronous, asynchronous, using a thread pool, and more.
  *

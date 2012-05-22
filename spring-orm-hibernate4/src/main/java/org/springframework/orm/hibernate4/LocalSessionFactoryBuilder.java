@@ -228,7 +228,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * Build the {@code SessionFactory}.
 	 */
 	@Override
-	@SuppressWarnings("deprecation")
 	public SessionFactory buildSessionFactory() throws HibernateException {
 		ClassLoader appClassLoader = (ClassLoader) getProperties().get(AvailableSettings.APP_CLASSLOADER);
 		Thread currentThread = Thread.currentThread();

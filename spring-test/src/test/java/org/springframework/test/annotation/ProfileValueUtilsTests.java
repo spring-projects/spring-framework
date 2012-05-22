@@ -26,7 +26,7 @@ import org.junit.Test;
 
 /**
  * Unit tests for {@link ProfileValueUtils}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

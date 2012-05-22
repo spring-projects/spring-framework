@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.orm.ibatis;
 import java.util.List;
 import java.util.Map;
 
-import com.ibatis.common.util.PaginatedList;
 import com.ibatis.sqlmap.client.event.RowHandler;
 
 import org.springframework.dao.DataAccessException;
@@ -69,27 +68,27 @@ public interface SqlMapClientOperations {
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForList(String)
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
-	List queryForList(String statementName) throws DataAccessException;
+	List<Object> queryForList(String statementName) throws DataAccessException;
 
 	/**
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForList(String, Object)
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
-	List queryForList(String statementName, Object parameterObject)
+	List<Object> queryForList(String statementName, Object parameterObject)
 			throws DataAccessException;
 
 	/**
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForList(String, int, int)
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
-	List queryForList(String statementName, int skipResults, int maxResults)
+	List<Object> queryForList(String statementName, int skipResults, int maxResults)
 			throws DataAccessException;
 
 	/**
 	 * @see com.ibatis.sqlmap.client.SqlMapExecutor#queryForList(String, Object, int, int)
 	 * @throws org.springframework.dao.DataAccessException in case of errors
 	 */
-	List queryForList(String statementName, Object parameterObject, int skipResults, int maxResults)
+	List<Object> queryForList(String statementName, Object parameterObject, int skipResults, int maxResults)
 			throws DataAccessException;
 
 	/**

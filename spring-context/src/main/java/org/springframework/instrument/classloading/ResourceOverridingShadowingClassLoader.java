@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader {
-	
+
 	private static final Enumeration<URL> EMPTY_URL_ENUMERATION = new Enumeration<URL>() {
 		public boolean hasMoreElements() {
 			return false;
@@ -43,7 +43,7 @@ public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader
 			throw new UnsupportedOperationException("Should not be called. I am empty.");
 		}
 	};
-	
+
 
 	/**
 	 * Key is asked for value: value is actual value
@@ -59,7 +59,7 @@ public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader
 	public ResourceOverridingShadowingClassLoader(ClassLoader enclosingClassLoader) {
 		super(enclosingClassLoader);
 	}
-	
+
 
 	/**
 	 * Return the resource (if any) at the new path
@@ -70,7 +70,7 @@ public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader
 	public void override(String oldPath, String newPath) {
 		this.overrides.put(oldPath, newPath);
 	}
-	
+
 	/**
 	 * Ensure that a resource with the given path is not found.
 	 * @param oldPath the path of the resource to hide even if
@@ -111,7 +111,7 @@ public class ResourceOverridingShadowingClassLoader extends ShadowingClassLoader
 			return super.getResourceAsStream(requestedPath);
 		}
 	}
-	
+
 	@Override
 	public Enumeration<URL> getResources(String requestedPath) throws IOException {
 		if (this.overrides.containsKey(requestedPath)) {

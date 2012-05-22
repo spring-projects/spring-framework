@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  * Default implementation of the {@link Errors} and {@link BindingResult}
  * interfaces, for the registration and evaluation of binding errors on
  * JavaBean objects.
- * 
+ *
  * <p>Performs standard JavaBean property access, also supporting nested
  * properties. Normally, application code will work with the
  * <code>Errors</code> interface or the <code>BindingResult</code> interface.

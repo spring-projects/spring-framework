@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,7 +223,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #setFormView
 	 */
-	protected ModelAndView showForm(RenderRequest request, RenderResponse response, BindException errors, Map controlModel)
+	protected ModelAndView showForm(RenderRequest request, RenderResponse response, BindException errors, Map<String, ?> controlModel)
 			throws Exception {
 
 		return showForm(request, errors, getFormView(), controlModel);
@@ -242,7 +242,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see ModelAndView
 	 */
 	@Override
-	protected Map referenceData(PortletRequest request, Object command, Errors errors) throws Exception {
+	protected Map<String, ?> referenceData(PortletRequest request, Object command, Errors errors) throws Exception {
 		return referenceData(request);
 	}
 
@@ -257,7 +257,7 @@ public class SimpleFormController extends AbstractFormController {
 	 * @see #referenceData(PortletRequest, Object, Errors)
 	 * @see ModelAndView
 	 */
-	protected Map referenceData(PortletRequest request) throws Exception {
+	protected Map<String, ?> referenceData(PortletRequest request) throws Exception {
 		return null;
 	}
 

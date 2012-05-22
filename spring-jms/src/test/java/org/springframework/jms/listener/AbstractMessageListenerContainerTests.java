@@ -28,7 +28,7 @@ public abstract class AbstractMessageListenerContainerTests {
 
 	protected abstract AbstractMessageListenerContainer getContainer();
 
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void testSettingMessageListenerToANullType() throws Exception {
 		getContainer().setMessageListener(null);

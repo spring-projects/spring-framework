@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,14 @@ public class PortletRequestParameterPropertyValuesTests extends TestCase {
 		PortletRequestParameterPropertyValues pvs = new PortletRequestParameterPropertyValues(request);
 		assertTrue("Should not have any property values", pvs.getPropertyValues().length == 0);
 	}
-	
+
 	public void testWithNoPrefix() {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param", "value");
 		PortletRequestParameterPropertyValues pvs = new PortletRequestParameterPropertyValues(request);
 		assertEquals("value", pvs.getPropertyValue("param").getValue());
 	}
-	
+
 	public void testWithPrefix() {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("test_param", "value");
@@ -60,5 +60,5 @@ public class PortletRequestParameterPropertyValuesTests extends TestCase {
 		assertFalse(pvs.contains("other"));
 		assertTrue(pvs.contains("param"));
 		assertEquals("value", pvs.getPropertyValue("param").getValue());
-	}	
+	}
 }

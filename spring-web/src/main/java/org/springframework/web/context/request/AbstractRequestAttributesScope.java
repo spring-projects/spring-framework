@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.config.Scope;
  *
  * <p>Subclasses may wish to override the {@link #get} and {@link #remove}
  * methods to add synchronization around the call back into this super class.
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -36,7 +36,7 @@ import org.springframework.beans.factory.config.Scope;
  */
 public abstract class AbstractRequestAttributesScope implements Scope {
 
-	public Object get(String name, ObjectFactory objectFactory) {
+	public Object get(String name, ObjectFactory<?> objectFactory) {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		Object scopedObject = attributes.getAttribute(name, getScope());
 		if (scopedObject == null) {

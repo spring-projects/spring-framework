@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -477,12 +477,12 @@ public abstract class AbstractJdbcInsert {
 				Long key = jdbcTemplate.queryForLong(
 						getInsertString() + " " + keyQuery,
 						values.toArray(new Object[values.size()]));
-				HashMap keys = new HashMap(1);
+				HashMap<String, Object> keys = new HashMap<String, Object>(1);
 				keys.put(getGeneratedKeyNames()[0], key);
 				keyHolder.getKeyList().add(keys);
 			}
 			else {
-				jdbcTemplate.execute(new ConnectionCallback() {
+				jdbcTemplate.execute(new ConnectionCallback<Object>() {
 					public Object doInConnection(Connection con) throws SQLException, DataAccessException {
 						// Do the insert
 						PreparedStatement ps = null;
@@ -496,7 +496,7 @@ public abstract class AbstractJdbcInsert {
 						//Get the key
 						Statement keyStmt = null;
 						ResultSet rs = null;
-						HashMap keys = new HashMap(1);
+						HashMap<String, Object> keys = new HashMap<String, Object>(1);
 						try {
 							keyStmt = con.createStatement();
 							rs = keyStmt.executeQuery(keyQuery);
@@ -554,7 +554,7 @@ public abstract class AbstractJdbcInsert {
 	 */
 	protected int[] doExecuteBatch(Map<String, Object>[] batch) {
 		checkCompiled();
-		List[] batchValues = new ArrayList[batch.length];
+		List<Object>[] batchValues = createBatchValuesArray(batch.length);
 		int i = 0;
 		for (Map<String, Object> args : batch) {
 			List<Object> values = matchInParameterValuesWithInsertColumns(args);
@@ -571,13 +571,18 @@ public abstract class AbstractJdbcInsert {
 	 */
 	protected int[] doExecuteBatch(SqlParameterSource[] batch) {
 		checkCompiled();
-		List[] batchValues = new ArrayList[batch.length];
+		List<Object>[] batchValues = createBatchValuesArray(batch.length);
 		int i = 0;
 		for (SqlParameterSource parameterSource : batch) {
 			List<Object> values = matchInParameterValuesWithInsertColumns(parameterSource);
 			batchValues[i++] = values;
 		}
 		return executeBatchInternal(batchValues);
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<Object>[] createBatchValuesArray(int length) {
+		return new List[length];
 	}
 
 	/**
@@ -622,7 +627,7 @@ public abstract class AbstractJdbcInsert {
 			}
 		}
 	}
-	
+
 	/**
 	 * Match the provided in parameter values with regitered parameters and parameters defined via metedata
 	 * processing.

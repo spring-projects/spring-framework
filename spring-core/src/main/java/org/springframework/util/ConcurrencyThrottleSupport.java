@@ -54,7 +54,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	 * Switch concurrency 'off': that is, don't allow any concurrent invocations.
 	 */
 	public static final int NO_CONCURRENCY = 0;
-	
+
 
 	/** Transient to optimize serialization */
 	protected transient Log logger = LogFactory.getLog(getClass());
@@ -99,7 +99,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	/**
 	 * To be invoked before the main execution logic of concrete subclasses.
 	 * <p>This implementation applies the concurrency throttle.
-	 * @see #afterAccess() 
+	 * @see #afterAccess()
 	 */
 	protected void beforeAccess() {
 		if (this.concurrencyLimit == NO_CONCURRENCY) {

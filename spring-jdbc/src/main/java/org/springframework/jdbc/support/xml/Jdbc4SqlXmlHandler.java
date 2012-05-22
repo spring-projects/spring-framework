@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+
+import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
@@ -75,13 +77,13 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Source getXmlAsSource(ResultSet rs, String columnName, Class sourceClass) throws SQLException {
-		return rs.getSQLXML(columnName).getSource(sourceClass != null ? sourceClass : DOMSource.class);
+	public Source getXmlAsSource(ResultSet rs, String columnName, Class<?> sourceClass) throws SQLException {
+		return rs.getSQLXML(columnName).getSource((Class<Source>) (sourceClass != null ? sourceClass : DOMSource.class));
 	}
 
 	@SuppressWarnings("unchecked")
-	public Source getXmlAsSource(ResultSet rs, int columnIndex, Class sourceClass) throws SQLException {
-		return rs.getSQLXML(columnIndex).getSource(sourceClass != null ? sourceClass : DOMSource.class);
+	public Source getXmlAsSource(ResultSet rs, int columnIndex, Class<?> sourceClass) throws SQLException {
+		return rs.getSQLXML(columnIndex).getSource((Class<Source>) (sourceClass != null ? sourceClass : DOMSource.class));
 	}
 
 
@@ -116,12 +118,12 @@ public class Jdbc4SqlXmlHandler implements SqlXmlHandler {
 		};
 	}
 
-	public SqlXmlValue newSqlXmlValue(final Class resultClass, final XmlResultProvider provider) {
+	public SqlXmlValue newSqlXmlValue(final Class<?> resultClass, final XmlResultProvider provider) {
 		return new AbstractJdbc4SqlXmlValue() {
 			@Override
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked" })
 			protected void provideXml(SQLXML xmlObject) throws SQLException, IOException {
-				provider.provideXml(xmlObject.setResult(resultClass));
+				provider.provideXml(xmlObject.setResult((Class<Result>)resultClass));
 			}
 		};
 	}

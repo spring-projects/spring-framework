@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 	}
 
 	public int getNamespaceCount() {
-		Iterator namespaces;
+		Iterator<?> namespaces;
 		if (event.isStartElement()) {
 			namespaces = event.asStartElement().getNamespaces();
 		}
@@ -156,7 +156,7 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 		if (!event.isStartElement()) {
 			throw new IllegalStateException();
 		}
-		Iterator attributes = event.asStartElement().getAttributes();
+		Iterator<?> attributes = event.asStartElement().getAttributes();
 		return countIterator(attributes);
 	}
 
@@ -206,7 +206,7 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 		}
 	}
 
-	private int countIterator(Iterator iterator) {
+	private int countIterator(Iterator<?> iterator) {
 		int count = 0;
 		while (iterator.hasNext()) {
 			iterator.next();
@@ -220,7 +220,7 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 			throw new IllegalStateException();
 		}
 		int count = 0;
-		Iterator attributes = event.asStartElement().getAttributes();
+		Iterator<?> attributes = event.asStartElement().getAttributes();
 		while (attributes.hasNext()) {
 			Attribute attribute = (Attribute) attributes.next();
 			if (count == index) {
@@ -234,7 +234,7 @@ class XMLEventStreamReader extends AbstractXMLStreamReader {
 	}
 
 	private Namespace getNamespace(int index) {
-		Iterator namespaces;
+		Iterator<?> namespaces;
 		if (event.isStartElement()) {
 			namespaces = event.asStartElement().getNamespaces();
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.util.ClassUtils;
  */
 public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 
-	protected final Set<Class> publishedInterfaces = new HashSet<Class>();
+	protected final Set<Class<?>> publishedInterfaces = new HashSet<Class<?>>();
 
 	private transient Map<Method, Boolean> rememberedMethods = new ConcurrentHashMap<Method, Boolean>(32);
 
@@ -54,11 +54,11 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	 * <p>Does nothing if the interface is not implemented by the delegate.
 	 * @param intf the interface to suppress
 	 */
-	public void suppressInterface(Class intf) {
+	public void suppressInterface(Class<?> intf) {
 		this.publishedInterfaces.remove(intf);
 	}
 
-	public Class[] getInterfaces() {
+	public Class<?>[] getInterfaces() {
 		return this.publishedInterfaces.toArray(new Class[this.publishedInterfaces.size()]);
 	}
 
@@ -67,8 +67,8 @@ public class IntroductionInfoSupport implements IntroductionInfo, Serializable {
 	 * @param ifc the interface to check
 	 * @return whether the interface is part of this introduction
 	 */
-	public boolean implementsInterface(Class ifc) {
-		for (Class pubIfc : this.publishedInterfaces) {
+	public boolean implementsInterface(Class<?> ifc) {
+		for (Class<?> pubIfc : this.publishedInterfaces) {
 			if (ifc.isInterface() && ifc.isAssignableFrom(pubIfc)) {
 				return true;
 			}

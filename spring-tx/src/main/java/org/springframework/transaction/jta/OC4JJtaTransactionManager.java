@@ -97,7 +97,7 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 	@Override
 	protected UserTransaction retrieveUserTransaction() throws TransactionSystemException {
 		try {
-			Class transactionUtilityClass = getClass().getClassLoader().loadClass(TRANSACTION_UTILITY_CLASS_NAME);
+			Class<?> transactionUtilityClass = getClass().getClassLoader().loadClass(TRANSACTION_UTILITY_CLASS_NAME);
 			Method getInstanceMethod = transactionUtilityClass.getMethod("getInstance");
 			Object transactionUtility = getInstanceMethod.invoke(null);
 			logger.debug("Retrieving JTA UserTransaction from OC4J TransactionUtility");
@@ -123,8 +123,8 @@ public class OC4JJtaTransactionManager extends JtaTransactionManager {
 
 	private void loadOC4JTransactionClasses() throws TransactionSystemException {
 		// Find available OC4J API (in "oracle.j2ee.transaction" or "com.evermind.server")
-		Class transactionManagerClass = null;
-		Class transactionClass = null;
+		Class<?> transactionManagerClass = null;
+		Class<?> transactionClass = null;
 		try {
 			transactionManagerClass = getClass().getClassLoader().loadClass(TRANSACTION_MANAGER_CLASS_NAME);
 			transactionClass = getClass().getClassLoader().loadClass(TRANSACTION_CLASS_NAME);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,11 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport.Tran
  * @since 16.03.2003
  */
 public abstract class AbstractTransactionAspectTests extends TestCase {
-	
+
 	protected Method exceptionalMethod;
-	
+
 	protected Method getNameMethod;
-	
+
 	protected Method setNameMethod;
 
 
@@ -246,7 +246,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		ptm.commit(status);
 		ptmControl.setVoidCallable(1);
 		ptmControl.replay();
-		
+
 		final String spouseName = "innerName";
 
 		TestBean outer = new TestBean() {
@@ -264,7 +264,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 				return spouseName;
 			}
 		};
-		
+
 		ITestBean outerProxy = (ITestBean) advised(outer, ptm, tas);
 		ITestBean innerProxy = (ITestBean) advised(inner, ptm, tas);
 		outer.setSpouse(innerProxy);
@@ -272,13 +272,13 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		checkTransactionStatus(false);
 
 		// Will invoke inner.getName, which is non-transactional
-		outerProxy.exceptional(null);		
-		
+		outerProxy.exceptional(null);
+
 		checkTransactionStatus(false);
 
 		ptmControl.verify();
 	}
-	
+
 	public void testEnclosingTransactionWithNestedTransactionOnAdvisedInside() throws Throwable {
 		final TransactionAttribute outerTxatt = new DefaultTransactionAttribute();
 		final TransactionAttribute innerTxatt = new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_NESTED);
@@ -291,23 +291,23 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 
 		TransactionStatus outerStatus = transactionStatusForNewTransaction();
 		TransactionStatus innerStatus = transactionStatusForNewTransaction();
-		
+
 		MockControl ptmControl = MockControl.createControl(PlatformTransactionManager.class);
 		PlatformTransactionManager ptm = (PlatformTransactionManager) ptmControl.getMock();
 		// Expect a transaction
 		ptm.getTransaction(outerTxatt);
 		ptmControl.setReturnValue(outerStatus, 1);
-		
+
 		ptm.getTransaction(innerTxatt);
 		ptmControl.setReturnValue(innerStatus, 1);
-		
+
 		ptm.commit(innerStatus);
 		ptmControl.setVoidCallable(1);
-		
+
 		ptm.commit(outerStatus);
 		ptmControl.setVoidCallable(1);
 		ptmControl.replay();
-		
+
 		final String spouseName = "innerName";
 
 		TestBean outer = new TestBean() {
@@ -328,7 +328,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 				return spouseName;
 			}
 		};
-		
+
 		ITestBean outerProxy = (ITestBean) advised(outer, ptm, tas);
 		ITestBean innerProxy = (ITestBean) advised(inner, ptm, tas);
 		outer.setSpouse(innerProxy);
@@ -336,13 +336,13 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		checkTransactionStatus(false);
 
 		// Will invoke inner.getName, which is non-transactional
-		outerProxy.exceptional(null);		
-		
+		outerProxy.exceptional(null);
+
 		checkTransactionStatus(false);
 
 		ptmControl.verify();
 	}
-	
+
 	public void testRollbackOnCheckedException() throws Throwable {
 		doTestRollbackOnException(new Exception(), true, false);
 	}
@@ -419,7 +419,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		}
 		ptmControl.replay();
 
-		TestBean tb = new TestBean();		
+		TestBean tb = new TestBean();
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
 
 		try {
@@ -437,7 +437,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 
 		ptmControl.verify();
 	}
-	
+
 	/**
 	 * Test that TransactionStatus.setRollbackOnly works.
 	 */
@@ -466,7 +466,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 				return name;
 			}
 		};
-		
+
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
 
 		// verification!?
@@ -474,7 +474,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 
 		ptmControl.verify();
 	}
-	
+
 	/**
 	 * @return a TransactionStatus object configured for a new transaction
 	 */
@@ -507,7 +507,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 				throw new UnsupportedOperationException(
 						"Shouldn't have invoked target method when couldn't create transaction for transactional method");
 			}
-		};		
+		};
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
 
 		try {
@@ -545,7 +545,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		ptmControl.setThrowable(ex);
 		ptmControl.replay();
 
-		TestBean tb = new TestBean();		
+		TestBean tb = new TestBean();
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
 
 		String name = "new name";

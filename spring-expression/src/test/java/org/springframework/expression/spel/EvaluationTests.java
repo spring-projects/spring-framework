@@ -75,8 +75,8 @@ public class EvaluationTests extends ExpressionTestCase {
 		assertEquals(4, testClass.getFoo().size());
 	}
 
-	@Test(expected = SpelEvaluationException.class)
-	public void testCreateMapsOnAttemptToIndexNull01() throws Exception {
+	@Test
+	public void testCreateMapsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
 		TestClass testClass = new TestClass();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
@@ -84,10 +84,15 @@ public class EvaluationTests extends ExpressionTestCase {
 		o = parser.parseExpression("map['a']").getValue(ctx);
 		assertNull(o);
 		o = parser.parseExpression("map").getValue(ctx);
-		assertNotNull(o);
+		Assert.assertNotNull(o);
 
-		o = parser.parseExpression("map2['a']").getValue(ctx);
-		// map2 should be null, there is no setter
+		try {
+			o = parser.parseExpression("map2['a']").getValue(ctx);
+			// fail!
+			Assert.fail("map2 should be null, there is no setter");
+		} catch (Exception e) {
+			// success!
+		}
 	}
 
 	// wibble2 should be null (cannot be initialized dynamically), there is no setter
@@ -100,14 +105,20 @@ public class EvaluationTests extends ExpressionTestCase {
 		o = parser.parseExpression("wibble.bar").getValue(ctx);
 		assertEquals("hello", o);
 		o = parser.parseExpression("wibble").getValue(ctx);
-		assertNotNull(o);
+		Assert.assertNotNull(o);
 
-		o = parser.parseExpression("wibble2.bar").getValue(ctx);
+		try {
+			o = parser.parseExpression("wibble2.bar").getValue(ctx);
+			// fail!
+			Assert.fail("wibble2 should be null (cannot be initialized dynamically), there is no setter");
+		} catch (Exception e) {
+			// success!
+		}
 	}
-
 
 	@SuppressWarnings("rawtypes")
 	static class TestClass {
+
 		public Foo wibble;
 		private Foo wibble2;
 		public Map map;
@@ -115,7 +126,6 @@ public class EvaluationTests extends ExpressionTestCase {
 		public List<String> list;
 		public List list2;
 		private Map map2;
-		private List<String> foo;
 
 		public Map getMap2() { return this.map2; }
 		public Foo getWibble2() { return this.wibble2; }
@@ -127,7 +137,6 @@ public class EvaluationTests extends ExpressionTestCase {
 		public Foo() {}
 		public String bar = "hello";
 	}
-
 
 	@Test
 	public void testElvis01() {
@@ -237,12 +246,13 @@ public class EvaluationTests extends ExpressionTestCase {
 			new SpelExpressionParser().parseExpression("placeOfBirth.foo.");
 			fail("Should have failed to parse");
 		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
-			assertEquals(SpelMessage.OOD, spe.getMessageCode());
-			assertEquals(16, spe.getPosition());
+			Assert.assertTrue(e instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException)e;
+			Assert.assertEquals(SpelMessage.OOD,spe.getMessageCode());
+			Assert.assertEquals(16,spe.getPosition());
 		}
 	}
+
 
 	// nested properties
 	@Test
@@ -295,10 +305,10 @@ public class EvaluationTests extends ExpressionTestCase {
 		String newString = expr.getValue(String.class);
 		assertEquals("wibble", newString);
 		newString = expr.getValue(String.class);
-		assertEquals("wibble", newString);
+		Assert.assertEquals("wibble",newString);
 
 		// not writable
-		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
 
 		// ast
 		assertEquals("new String('wibble')", expr.toStringAST());
@@ -417,6 +427,7 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluate("'christian'[8]", "n", String.class);
 	}
 
+
 	@Test
 	public void testIndexerError() {
 		evaluateAndCheckError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",
@@ -492,6 +503,7 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluateAndAskForReturnType("3*4+5", "17", String.class);
 	}
 
+
 	@Test
 	public void testAdvancedNumerics() throws Exception {
 		int twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Integer.class);
@@ -530,7 +542,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	@Test
 	public void testResolvingString() throws Exception {
 		Class<?> stringClass = parser.parseExpression("T(String)").getValue(Class.class);
-		assertEquals(String.class, stringClass);
+		Assert.assertEquals(String.class,stringClass);
 	}
 
 	/**
@@ -549,11 +561,11 @@ public class EvaluationTests extends ExpressionTestCase {
 
 		expression = parser.parseExpression("address.street");
 		expression.setValue(context, "123 High St");
-		assertEquals("123 High St", person.getAddress().getStreet());
+		Assert.assertEquals("123 High St",person.getAddress().getStreet());
 
 		expression = parser.parseExpression("address.crossStreets[0]");
 		expression.setValue(context, "Blah");
-		assertEquals("Blah", person.getAddress().getCrossStreets().get(0));
+		Assert.assertEquals("Blah",person.getAddress().getCrossStreets().get(0));
 
 		expression = parser.parseExpression("address.crossStreets[3]");
 		expression.setValue(context, "Wibble");
@@ -919,469 +931,5 @@ public class EvaluationTests extends ExpressionTestCase {
 		assertEquals(15,return_sss);
 		assertEquals(14,helper.sss);
 	}
-
-	@Test
-	public void decrement02prefix() {
-		Spr9751 helper = new Spr9751();
-		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
-
-		// double
-		e = parser.parseExpression("--ddd");
-		assertEquals(2.0d,helper.ddd,0d);
-		double return_ddd = e.getValue(ctx,Double.TYPE);
-		assertEquals(1.0d,return_ddd,0d);
-		assertEquals(1.0d,helper.ddd,0d);
-
-		// float
-		e = parser.parseExpression("--fff");
-		assertEquals(3.0f,helper.fff,0d);
-		float return_fff = e.getValue(ctx,Float.TYPE);
-		assertEquals(2.0f,return_fff,0d);
-		assertEquals(2.0f,helper.fff,0d);
-
-		// long
-		e = parser.parseExpression("--lll");
-		assertEquals(66666L,helper.lll);
-		long return_lll = e.getValue(ctx,Long.TYPE);
-		assertEquals(66665L,return_lll);
-		assertEquals(66665L,helper.lll);
-
-		// int
-		e = parser.parseExpression("--iii");
-		assertEquals(42,helper.iii);
-		int return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(41,return_iii);
-		assertEquals(41,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(40,return_iii);
-		assertEquals(40,helper.iii);
-
-		// short
-		e = parser.parseExpression("--sss");
-		assertEquals(15,helper.sss);
-		int return_sss = (Integer)e.getValue(ctx);
-		assertEquals(14,return_sss);
-		assertEquals(14,helper.sss);
-	}
-
-	@Test
-	public void decrement03() {
-		Spr9751 helper = new Spr9751();
-		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
-
-		e = parser.parseExpression("m()--");
-		try {
-			e.getValue(ctx,Double.TYPE);
-			fail();
-		} catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.OPERAND_NOT_DECREMENTABLE,see.getMessageCode());
-		}
-
-		e = parser.parseExpression("--m()");
-		try {
-			e.getValue(ctx,Double.TYPE);
-			fail();
-		} catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.OPERAND_NOT_DECREMENTABLE,see.getMessageCode());
-		}
-	}
-
-
-	@Test
-	public void decrement04() {
-		Integer i = 42;
-		StandardEvaluationContext ctx = new StandardEvaluationContext(i);
-		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		try {
-			Expression e =  parser.parseExpression("--1");
-			e.getValue(ctx,Integer.class);
-			fail();
-		} catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.NOT_ASSIGNABLE,see.getMessageCode());
-		}
-		try {
-			Expression e =  parser.parseExpression("1--");
-			e.getValue(ctx,Integer.class);
-			fail();
-		} catch (SpelEvaluationException see) {
-			assertEquals(SpelMessage.NOT_ASSIGNABLE,see.getMessageCode());
-		}
-	}
-
-	@Test
-	public void incdecTogether() {
-		Spr9751 helper = new Spr9751();
-		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
-
-		// index1 is 2 at the start - the 'intArray[#root.index1++]' should not be evaluated twice!
-		// intArray[2] is 3
-		e = parser.parseExpression("intArray[#root.index1++]++");
-		e.getValue(ctx,Integer.class);
-		assertEquals(3,helper.index1);
-		assertEquals(4,helper.intArray[2]);
-
-		// index1 is 3 intArray[3] is 4
-		e =  parser.parseExpression("intArray[#root.index1++]--");
-		assertEquals(4,e.getValue(ctx,Integer.class).intValue());
-		assertEquals(4,helper.index1);
-		assertEquals(3,helper.intArray[3]);
-
-		// index1 is 4, intArray[3] is 3
-		e =  parser.parseExpression("intArray[--#root.index1]++");
-		assertEquals(3,e.getValue(ctx,Integer.class).intValue());
-		assertEquals(3,helper.index1);
-		assertEquals(4,helper.intArray[3]);
-	}
-
-
-
-
-	private void expectFail(ExpressionParser parser, EvaluationContext eContext, String expressionString, SpelMessage messageCode) {
-		try {
-			Expression e = parser.parseExpression(expressionString);
-			 SpelUtilities.printAbstractSyntaxTree(System.out, e);
-			e.getValue(eContext);
-			fail();
-		} catch (SpelEvaluationException see) {
-			see.printStackTrace();
-			assertEquals(messageCode,see.getMessageCode());
-		}
-	}
-
-	private void expectFailNotAssignable(ExpressionParser parser, EvaluationContext eContext, String expressionString) {
-		expectFail(parser,eContext,expressionString,SpelMessage.NOT_ASSIGNABLE);
-	}
-
-	private void expectFailSetValueNotSupported(ExpressionParser parser, EvaluationContext eContext, String expressionString) {
-		expectFail(parser,eContext,expressionString,SpelMessage.SETVALUE_NOT_SUPPORTED);
-	}
-
-	private void expectFailNotIncrementable(ExpressionParser parser, EvaluationContext eContext, String expressionString) {
-		expectFail(parser,eContext,expressionString,SpelMessage.OPERAND_NOT_INCREMENTABLE);
-	}
-
-	private void expectFailNotDecrementable(ExpressionParser parser, EvaluationContext eContext, String expressionString) {
-		expectFail(parser,eContext,expressionString,SpelMessage.OPERAND_NOT_DECREMENTABLE);
-	}
-
-	// Verify how all the nodes behave with assignment (++, --, =)
-	@Test
-	public void incrementAllNodeTypes() throws SecurityException, NoSuchMethodException {
-		Spr9751 helper = new Spr9751();
-		StandardEvaluationContext ctx = new StandardEvaluationContext(helper);
-		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e = null;
-
-		// BooleanLiteral
-		expectFailNotAssignable(parser, ctx, "true++");
-		expectFailNotAssignable(parser, ctx, "--false");
-		expectFailSetValueNotSupported(parser, ctx, "true=false");
-
-		// IntLiteral
-		expectFailNotAssignable(parser, ctx, "12++");
-		expectFailNotAssignable(parser, ctx, "--1222");
-		expectFailSetValueNotSupported(parser, ctx, "12=16");
-
-		// LongLiteral
-		expectFailNotAssignable(parser, ctx, "1.0d++");
-		expectFailNotAssignable(parser, ctx, "--3.4d");
-		expectFailSetValueNotSupported(parser, ctx, "1.0d=3.2d");
-
-		// NullLiteral
-		expectFailNotAssignable(parser, ctx, "null++");
-		expectFailNotAssignable(parser, ctx, "--null");
-		expectFailSetValueNotSupported(parser, ctx, "null=null");
-		expectFailSetValueNotSupported(parser, ctx, "null=123");
-
-		// OpAnd
-		expectFailNotAssignable(parser, ctx, "(true && false)++");
-		expectFailNotAssignable(parser, ctx, "--(false AND true)");
-		expectFailSetValueNotSupported(parser, ctx, "(true && false)=(false && true)");
-
-		// OpDivide
-		expectFailNotAssignable(parser, ctx, "(3/4)++");
-		expectFailNotAssignable(parser, ctx, "--(2/5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1/2)=(3/4)");
-
-		// OpEq
-		expectFailNotAssignable(parser, ctx, "(3==4)++");
-		expectFailNotAssignable(parser, ctx, "--(2==5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1==2)=(3==4)");
-
-		// OpGE
-		expectFailNotAssignable(parser, ctx, "(3>=4)++");
-		expectFailNotAssignable(parser, ctx, "--(2>=5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1>=2)=(3>=4)");
-
-		// OpGT
-		expectFailNotAssignable(parser, ctx, "(3>4)++");
-		expectFailNotAssignable(parser, ctx, "--(2>5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1>2)=(3>4)");
-
-		// OpLE
-		expectFailNotAssignable(parser, ctx, "(3<=4)++");
-		expectFailNotAssignable(parser, ctx, "--(2<=5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1<=2)=(3<=4)");
-
-		// OpLT
-		expectFailNotAssignable(parser, ctx, "(3<4)++");
-		expectFailNotAssignable(parser, ctx, "--(2<5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1<2)=(3<4)");
-
-		// OpMinus
-		expectFailNotAssignable(parser, ctx, "(3-4)++");
-		expectFailNotAssignable(parser, ctx, "--(2-5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1-2)=(3-4)");
-
-		// OpModulus
-		expectFailNotAssignable(parser, ctx, "(3%4)++");
-		expectFailNotAssignable(parser, ctx, "--(2%5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1%2)=(3%4)");
-
-		// OpMultiply
-		expectFailNotAssignable(parser, ctx, "(3*4)++");
-		expectFailNotAssignable(parser, ctx, "--(2*5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1*2)=(3*4)");
-
-		// OpNE
-		expectFailNotAssignable(parser, ctx, "(3!=4)++");
-		expectFailNotAssignable(parser, ctx, "--(2!=5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1!=2)=(3!=4)");
-
-		// OpOr
-		expectFailNotAssignable(parser, ctx, "(true || false)++");
-		expectFailNotAssignable(parser, ctx, "--(false OR true)");
-		expectFailSetValueNotSupported(parser, ctx, "(true || false)=(false OR true)");
-
-		// OpPlus
-		expectFailNotAssignable(parser, ctx, "(3+4)++");
-		expectFailNotAssignable(parser, ctx, "--(2+5)");
-		expectFailSetValueNotSupported(parser, ctx, "(1+2)=(3+4)");
-
-		// RealLiteral
-		expectFailNotAssignable(parser, ctx, "1.0d++");
-		expectFailNotAssignable(parser, ctx, "--2.0d");
-		expectFailSetValueNotSupported(parser, ctx, "(1.0d)=(3.0d)");
-		expectFailNotAssignable(parser, ctx, "1.0f++");
-		expectFailNotAssignable(parser, ctx, "--2.0f");
-		expectFailSetValueNotSupported(parser, ctx, "(1.0f)=(3.0f)");
-
-		// StringLiteral
-		expectFailNotAssignable(parser, ctx, "'abc'++");
-		expectFailNotAssignable(parser, ctx, "--'def'");
-		expectFailSetValueNotSupported(parser, ctx, "'abc'='def'");
-
-		// Ternary
-		expectFailNotAssignable(parser, ctx, "(true?true:false)++");
-		expectFailNotAssignable(parser, ctx, "--(true?true:false)");
-		expectFailSetValueNotSupported(parser, ctx, "(true?true:false)=(true?true:false)");
-
-		// TypeReference
-		expectFailNotAssignable(parser, ctx, "T(String)++");
-		expectFailNotAssignable(parser, ctx, "--T(Integer)");
-		expectFailSetValueNotSupported(parser, ctx, "T(String)=T(Integer)");
-
-		// OperatorBetween
-		expectFailNotAssignable(parser, ctx, "(3 between {1,5})++");
-		expectFailNotAssignable(parser, ctx, "--(3 between {1,5})");
-		expectFailSetValueNotSupported(parser, ctx, "(3 between {1,5})=(3 between {1,5})");
-
-		// OperatorInstanceOf
-		expectFailNotAssignable(parser, ctx, "(type instanceof T(String))++");
-		expectFailNotAssignable(parser, ctx, "--(type instanceof T(String))");
-		expectFailSetValueNotSupported(parser, ctx, "(type instanceof T(String))=(type instanceof T(String))");
-
-		// Elvis
-		expectFailNotAssignable(parser, ctx, "(true?:false)++");
-		expectFailNotAssignable(parser, ctx, "--(true?:false)");
-		expectFailSetValueNotSupported(parser, ctx, "(true?:false)=(true?:false)");
-
-		// OpInc
-		expectFailNotAssignable(parser, ctx, "(iii++)++");
-		expectFailNotAssignable(parser, ctx, "--(++iii)");
-		expectFailSetValueNotSupported(parser, ctx, "(iii++)=(++iii)");
-
-		// OpDec
-		expectFailNotAssignable(parser, ctx, "(iii--)++");
-		expectFailNotAssignable(parser, ctx, "--(--iii)");
-		expectFailSetValueNotSupported(parser, ctx, "(iii--)=(--iii)");
-
-		// OperatorNot
-		expectFailNotAssignable(parser, ctx, "(!true)++");
-		expectFailNotAssignable(parser, ctx, "--(!false)");
-		expectFailSetValueNotSupported(parser, ctx, "(!true)=(!false)");
-
-		// OperatorPower
-		expectFailNotAssignable(parser, ctx, "(iii^2)++");
-		expectFailNotAssignable(parser, ctx, "--(iii^2)");
-		expectFailSetValueNotSupported(parser, ctx, "(iii^2)=(iii^3)");
-
-		// Assign
-		// iii=42
-		e = parser.parseExpression("iii=iii++");
-		assertEquals(42,helper.iii);
-		int return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,helper.iii);
-		assertEquals(42,return_iii);
-
-		// Identifier
-		e = parser.parseExpression("iii++");
-		assertEquals(42,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,return_iii);
-		assertEquals(43,helper.iii);
-
-		e = parser.parseExpression("--iii");
-		assertEquals(43,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,return_iii);
-		assertEquals(42,helper.iii);
-
-		e = parser.parseExpression("iii=99");
-		assertEquals(42,helper.iii);
-		return_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(99,return_iii);
-		assertEquals(99,helper.iii);
-
-		// CompoundExpression
-		// foo.iii == 99
-		e = parser.parseExpression("foo.iii++");
-		assertEquals(99,helper.foo.iii);
-		int return_foo_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(99,return_foo_iii);
-		assertEquals(100,helper.foo.iii);
-
-		e = parser.parseExpression("--foo.iii");
-		assertEquals(100,helper.foo.iii);
-		return_foo_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(99,return_foo_iii);
-		assertEquals(99,helper.foo.iii);
-
-		e = parser.parseExpression("foo.iii=999");
-		assertEquals(99,helper.foo.iii);
-		return_foo_iii = e.getValue(ctx,Integer.TYPE);
-		assertEquals(999,return_foo_iii);
-		assertEquals(999,helper.foo.iii);
-
-		// ConstructorReference
-		expectFailNotAssignable(parser, ctx, "(new String('abc'))++");
-		expectFailNotAssignable(parser, ctx, "--(new String('abc'))");
-		expectFailSetValueNotSupported(parser, ctx, "(new String('abc'))=(new String('abc'))");
-
-		// MethodReference
-		expectFailNotIncrementable(parser, ctx, "m()++");
-		expectFailNotDecrementable(parser, ctx, "--m()");
-		expectFailSetValueNotSupported(parser, ctx, "m()=m()");
-
-		// OperatorMatches
-		expectFailNotAssignable(parser, ctx, "('abc' matches '^a..')++");
-		expectFailNotAssignable(parser, ctx, "--('abc' matches '^a..')");
-		expectFailSetValueNotSupported(parser, ctx, "('abc' matches '^a..')=('abc' matches '^a..')");
-
-		// Selection
-		ctx.registerFunction("isEven", Spr9751.class.getDeclaredMethod("isEven", Integer.TYPE));
-
-		expectFailNotIncrementable(parser, ctx, "({1,2,3}.?[#isEven(#this)])++");
-		expectFailNotDecrementable(parser, ctx, "--({1,2,3}.?[#isEven(#this)])");
-		expectFailNotAssignable(parser, ctx, "({1,2,3}.?[#isEven(#this)])=({1,2,3}.?[#isEven(#this)])");
-
-		// slightly diff here because return value isn't a list, it is a single entity
-		expectFailNotAssignable(parser, ctx, "({1,2,3}.^[#isEven(#this)])++");
-		expectFailNotAssignable(parser, ctx, "--({1,2,3}.^[#isEven(#this)])");
-		expectFailNotAssignable(parser, ctx, "({1,2,3}.^[#isEven(#this)])=({1,2,3}.^[#isEven(#this)])");
-
-		expectFailNotAssignable(parser, ctx, "({1,2,3}.$[#isEven(#this)])++");
-		expectFailNotAssignable(parser, ctx, "--({1,2,3}.$[#isEven(#this)])");
-		expectFailNotAssignable(parser, ctx, "({1,2,3}.$[#isEven(#this)])=({1,2,3}.$[#isEven(#this)])");
-
-		// FunctionReference
-		expectFailNotAssignable(parser, ctx, "#isEven(3)++");
-		expectFailNotAssignable(parser, ctx, "--#isEven(4)");
-		expectFailSetValueNotSupported(parser, ctx, "#isEven(3)=#isEven(5)");
-
-		// VariableReference
-		ctx.setVariable("wibble", "hello world");
-		expectFailNotIncrementable(parser, ctx, "#wibble++");
-		expectFailNotDecrementable(parser, ctx, "--#wibble");
-		e = parser.parseExpression("#wibble=#wibble+#wibble");
-		String s = e.getValue(ctx,String.class);
-		assertEquals("hello worldhello world",s);
-		assertEquals("hello worldhello world",(String)ctx.lookupVariable("wibble"));
-
-		ctx.setVariable("wobble", 3);
-		e = parser.parseExpression("#wobble++");
-		assertEquals(3,((Integer)ctx.lookupVariable("wobble")).intValue());
-		int r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(3,r);
-		assertEquals(4,((Integer)ctx.lookupVariable("wobble")).intValue());
-
-		e = parser.parseExpression("--#wobble");
-		assertEquals(4,((Integer)ctx.lookupVariable("wobble")).intValue());
-		r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(3,r);
-		assertEquals(3,((Integer)ctx.lookupVariable("wobble")).intValue());
-
-		e = parser.parseExpression("#wobble=34");
-		assertEquals(3,((Integer)ctx.lookupVariable("wobble")).intValue());
-		r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(34,r);
-		assertEquals(34,((Integer)ctx.lookupVariable("wobble")).intValue());
-
-		// Projection
-		expectFailNotIncrementable(parser, ctx, "({1,2,3}.![#isEven(#this)])++"); // projection would be {false,true,false}
-		expectFailNotDecrementable(parser, ctx, "--({1,2,3}.![#isEven(#this)])"); // projection would be {false,true,false}
-		expectFailNotAssignable(parser, ctx, "({1,2,3}.![#isEven(#this)])=({1,2,3}.![#isEven(#this)])");
-
-		// InlineList
-		expectFailNotAssignable(parser, ctx, "({1,2,3})++");
-		expectFailNotAssignable(parser, ctx, "--({1,2,3})");
-		expectFailSetValueNotSupported(parser, ctx, "({1,2,3})=({1,2,3})");
-
-		// BeanReference
-		ctx.setBeanResolver(new MyBeanResolver());
-		expectFailNotAssignable(parser, ctx, "@foo++");
-		expectFailNotAssignable(parser, ctx, "--@foo");
-		expectFailSetValueNotSupported(parser, ctx, "@foo=@bar");
-
-		// PropertyOrFieldReference
-		helper.iii = 42;
-		e = parser.parseExpression("iii++");
-		assertEquals(42,helper.iii);
-		r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,r);
-		assertEquals(43,helper.iii);
-
-		e = parser.parseExpression("--iii");
-		assertEquals(43,helper.iii);
-		r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(42,r);
-		assertEquals(42,helper.iii);
-
-		e = parser.parseExpression("iii=100");
-		assertEquals(42,helper.iii);
-		r = e.getValue(ctx,Integer.TYPE);
-		assertEquals(100,r);
-		assertEquals(100,helper.iii);
-
-	}
-
-	static class MyBeanResolver implements BeanResolver {
-
-		public Object resolve(EvaluationContext context, String beanName)
-				throws AccessException {
-			if (beanName.equals("foo") || beanName.equals("bar")) {
-				return new Spr9751_2();
-			}
-			throw new AccessException("not heard of "+beanName);
-		}
-
-	}
-
 
 }

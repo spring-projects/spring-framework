@@ -40,7 +40,7 @@ public class GenericPortletBeanTests extends TestCase {
 		assertNotNull(portletBean.getTestParam());
 		assertEquals(testValue, portletBean.getTestParam());
 	}
-	
+
 	public void testInitParameterNotSet() throws Exception {
 		PortletContext portletContext = new MockPortletContext();
 		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
@@ -112,7 +112,7 @@ public class GenericPortletBeanTests extends TestCase {
 			// expected
 		}
 	}
-	
+
 	public void testRequiredInitParameterNotSetOtherParameterNotSet() throws Exception {
 		PortletContext portletContext = new MockPortletContext();
 		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
@@ -153,22 +153,22 @@ public class GenericPortletBeanTests extends TestCase {
 
 
 	private static class TestPortletBean extends GenericPortletBean {
-		
-		private String testParam; 
+
+		private String testParam;
 		private String anotherParam;
-		
+
 		public void setTestParam(String value) {
 			this.testParam = value;
 		}
-		
+
 		public String getTestParam() {
 			return this.testParam;
 		}
-		
+
 		public void setAnotherParam(String value) {
 			this.anotherParam = value;
 		}
-		
+
 		public String getAnotherParam() {
 			return this.anotherParam;
 		}

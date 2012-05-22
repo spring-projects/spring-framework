@@ -19,7 +19,7 @@ package org.springframework.jdbc.support.incrementer;
 import javax.sql.DataSource;
 
 /**
- * {@link org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer} that increments 
+ * {@link org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer} that increments
  * the maximum value of a given Sybase SQL Anywhere table
  * with the equivalent of an auto-increment column. Note: If you use this class, your table key
  * column should <i>NOT</i> be defined as an IDENTITY column, as the sequence table does the job.

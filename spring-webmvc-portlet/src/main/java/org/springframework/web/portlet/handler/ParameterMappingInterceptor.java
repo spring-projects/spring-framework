@@ -26,7 +26,7 @@ import javax.portlet.ActionResponse;
  * <p>This can be useful when using {@link ParameterHandlerMapping ParameterHandlerMapping}
  * or {@link PortletModeParameterHandlerMapping PortletModeParameterHandlerMapping}.
  * It will ensure that the parameter that was used to map the <code>ActionRequest</code>
- * to a handler will be forwarded to the <code>RenderRequest</code> so that it will also be 
+ * to a handler will be forwarded to the <code>RenderRequest</code> so that it will also be
  * mapped the same way.
  *
  * <p>When using this Interceptor, you can still change the value of the mapping parameter

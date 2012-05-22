@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,11 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	private final String scriptSourceLocator;
 
-	private final Class[] scriptInterfaces;
+	private final Class<?>[] scriptInterfaces;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
-	private Class scriptClass;
+	private Class<?> scriptClass;
 
 	private final Object scriptClassMonitor = new Object();
 
@@ -78,7 +78,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * @param scriptInterfaces the Java interfaces that the scripted object
 	 * is supposed to implement (may be <code>null</code>)
 	 */
-	public BshScriptFactory(String scriptSourceLocator, Class[] scriptInterfaces) {
+	public BshScriptFactory(String scriptSourceLocator, Class<?>[] scriptInterfaces) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
 		this.scriptSourceLocator = scriptSourceLocator;
 		this.scriptInterfaces = scriptInterfaces;
@@ -93,7 +93,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		return this.scriptSourceLocator;
 	}
 
-	public Class[] getScriptInterfaces() {
+	public Class<?>[] getScriptInterfaces() {
 		return this.scriptInterfaces;
 	}
 
@@ -108,11 +108,11 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * Load and parse the BeanShell script via {@link BshScriptUtils}.
 	 * @see BshScriptUtils#createBshObject(String, Class[], ClassLoader)
 	 */
-	public Object getScriptedObject(ScriptSource scriptSource, Class[] actualInterfaces)
+	public Object getScriptedObject(ScriptSource scriptSource, Class<?>[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
 		try {
-			Class clazz = null;
+			Class<?> clazz = null;
 
 			synchronized (this.scriptClassMonitor) {
 				boolean requiresScriptEvaluation = (this.wasModifiedForTypeCheck && this.scriptClass == null);
@@ -125,7 +125,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 					if (result instanceof Class) {
 						// A Class: We'll cache the Class here and create an instance
 						// outside of the synchronized block.
-						this.scriptClass = (Class) result;
+						this.scriptClass = (Class<?>) result;
 					}
 					else {
 						// Not a Class: OK, we'll simply create BeanShell objects
@@ -159,7 +159,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		}
 	}
 
-	public Class getScriptedObjectType(ScriptSource scriptSource)
+	public Class<?> getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 
 		try {

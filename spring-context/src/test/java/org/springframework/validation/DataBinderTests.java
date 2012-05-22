@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue("changed name correctly", rod.getName().equals("Rod"));
 		assertTrue("changed age correctly", rod.getAge() == 32);
 
-		Map map = binder.getBindingResult().getModel();
+		Map<String, Object> map = binder.getBindingResult().getModel();
 		assertTrue("There is one element in map", map.size() == 2);
 		TestBean tb = (TestBean) map.get("person");
 		assertTrue("Same object", tb.equals(rod));
@@ -190,7 +190,7 @@ public class DataBinderTests extends TestCase {
 			assertTrue("changed name correctly", rod.getName().equals("Rod"));
 			//assertTrue("changed age correctly", rod.getAge() == 32);
 
-			Map map = binder.getBindingResult().getModel();
+			Map<String, Object> map = binder.getBindingResult().getModel();
 			//assertTrue("There are 3 element in map", m.size() == 1);
 			TestBean tb = (TestBean) map.get("person");
 			assertTrue("Same object", tb.equals(rod));
@@ -284,7 +284,7 @@ public class DataBinderTests extends TestCase {
 			assertTrue("changed name correctly", rod.getName().equals("Rod"));
 			//assertTrue("changed age correctly", rod.getAge() == 32);
 
-			Map model = binder.getBindingResult().getModel();
+			Map<String, Object> model = binder.getBindingResult().getModel();
 			//assertTrue("There are 3 element in map", m.size() == 1);
 			TestBean tb = (TestBean) model.get("person");
 			assertTrue("Same object", tb.equals(rod));
@@ -1444,7 +1444,6 @@ public class DataBinderTests extends TestCase {
 		assertEquals("badName", nameError.getCode());
 	}
 
-	@SuppressWarnings("unchecked")
 	public void testBindingWithResortedList() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1590,14 +1589,14 @@ public class DataBinderTests extends TestCase {
 		mpv.add("f[list][1]", "secondValue");
 		binder.bind(mpv);
 		assertFalse(binder.getBindingResult().hasErrors());
+		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) form.getF().get("list");
 		assertEquals("firstValue", list.get(0));
 		assertEquals("secondValue", list.get(1));
 		assertEquals(2, list.size());
-	  }
+	}
 
-
-	private static class BeanWithIntegerList {
+	public static class BeanWithIntegerList {
 
 		private List<Integer> integerList;
 
@@ -1611,7 +1610,7 @@ public class DataBinderTests extends TestCase {
 	}
 
 
-	private static class Book {
+	public static class Book {
 
 		private String Title;
 
@@ -1645,9 +1644,9 @@ public class DataBinderTests extends TestCase {
 	}
 
 
-	private static class TestBeanValidator implements Validator {
+	public static class TestBeanValidator implements Validator {
 
-		public boolean supports(Class clazz) {
+		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
@@ -1672,9 +1671,9 @@ public class DataBinderTests extends TestCase {
 	}
 
 
-	private static class SpouseValidator implements Validator {
+	public static class SpouseValidator implements Validator {
 
-		public boolean supports(Class clazz) {
+		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
@@ -1691,7 +1690,7 @@ public class DataBinderTests extends TestCase {
 	}
 
 
-	private static class GrowingList<E> extends AbstractList<E> {
+	public static class GrowingList<E> extends AbstractList<E> {
 
 		private List<E> list;
 
@@ -1766,7 +1765,7 @@ public class DataBinderTests extends TestCase {
 	}
 
 
-	private static class Form {
+	public static class Form {
 
 		private final Map<String, Object> f;
 

@@ -26,7 +26,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Unit tests for {@link SingletonBeanFactoryLocator}.
- * 
+ *
  * @author Colin Sampaleanu
  * @author Chris Beams
  */
@@ -38,7 +38,7 @@ public final class SingletonBeanFactoryLocatorTests {
 	public void testBasicFunctionality() {
 		SingletonBeanFactoryLocator facLoc = new SingletonBeanFactoryLocator(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(CLASS, REF1_XML));
-		
+
 		basicFunctionalityTest(facLoc);
 	}
 
@@ -81,7 +81,7 @@ public final class SingletonBeanFactoryLocatorTests {
 		BeanFactoryLocator facLoc = SingletonBeanFactoryLocator.getInstance(
 				ClassUtils.addResourcePathToPackagePath(CLASS, REF1_XML));
 		getInstanceTest1(facLoc);
-		
+
 		facLoc = SingletonBeanFactoryLocator.getInstance(
 				"classpath*:/" + ClassUtils.addResourcePathToPackagePath(CLASS, REF1_XML));
 		getInstanceTest2(facLoc);
@@ -90,7 +90,7 @@ public final class SingletonBeanFactoryLocatorTests {
 		facLoc = SingletonBeanFactoryLocator.getInstance(
 				"classpath:" + ClassUtils.addResourcePathToPackagePath(CLASS, REF1_XML));
 		getInstanceTest3(facLoc);
-		
+
 	}
 
 	/**
@@ -109,12 +109,12 @@ public final class SingletonBeanFactoryLocatorTests {
 		fac = bfr3.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-		
+
 		BeanFactoryReference bfr4 = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
 		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-		
+
 		bfr.release();
 		bfr3.release();
 		bfr2.release();
@@ -152,7 +152,7 @@ public final class SingletonBeanFactoryLocatorTests {
 		bfr4.release();
 		bfr3.release();
 	}
-	
+
 	/**
 	 * Worker method so subclass can use it too
 	 */

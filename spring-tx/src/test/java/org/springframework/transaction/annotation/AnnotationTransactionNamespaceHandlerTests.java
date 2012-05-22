@@ -82,14 +82,14 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
 		}
 	}
-	
+
 	public void testNonPublicMethodsNotAdvised() {
 		TransactionalTestBean testBean = getTestBean();
 		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
 		assertEquals("Should not have any started transactions", 0, ptm.begun);
 		testBean.annotationsOnProtectedAreIgnored();
-		assertEquals("Should not have any started transactions", 0, ptm.begun);		
+		assertEquals("Should not have any started transactions", 0, ptm.begun);
 	}
 
 	public void testMBeanExportAlsoWorks() throws Exception {
@@ -125,7 +125,7 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 		public String doSomething() {
 			return "done";
 		}
-		
+
 		@Transactional
 		protected void annotationsOnProtectedAreIgnored() {
 		}

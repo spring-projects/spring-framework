@@ -231,7 +231,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		this.simpleTrigger = sti;
 		*/
 
-		Class simpleTriggerClass;
+		Class<?> simpleTriggerClass;
 		Method jobKeyMethod;
 		try {
 			simpleTriggerClass = getClass().getClassLoader().loadClass("org.quartz.impl.triggers.SimpleTriggerImpl");

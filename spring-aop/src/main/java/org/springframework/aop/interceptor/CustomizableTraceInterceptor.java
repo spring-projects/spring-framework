@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	/**
 	 * The <code>Set</code> of allowed placeholders.
 	 */
-	private static final Set ALLOWED_PLACEHOLDERS =
+	private static final Set<Object> ALLOWED_PLACEHOLDERS =
 			new Constants(CustomizableTraceInterceptor.class).getValues("PLACEHOLDER_");
 
 
@@ -393,7 +393,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * @param output the <code>StringBuffer</code> containing the output
 	 */
 	private void appendArgumentTypes(MethodInvocation methodInvocation, Matcher matcher, StringBuffer output) {
-		Class[] argumentTypes = methodInvocation.getMethod().getParameterTypes();
+		Class<?>[] argumentTypes = methodInvocation.getMethod().getParameterTypes();
 		String[] argumentTypeShortNames = new String[argumentTypes.length];
 		for (int i = 0; i < argumentTypeShortNames.length; i++) {
 			argumentTypeShortNames[i] = ClassUtils.getShortName(argumentTypes[i]);

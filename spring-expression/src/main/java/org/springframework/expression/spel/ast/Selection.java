@@ -54,7 +54,7 @@ public class Selection extends SpelNodeImpl {
 	private final boolean nullSafe;
 
 	public Selection(boolean nullSafe, int variant,int pos,SpelNodeImpl expression) {
-		super(pos,expression); 
+		super(pos,expression);
 		this.nullSafe = nullSafe;
 		this.variant = variant;
 	}
@@ -73,9 +73,9 @@ public class Selection extends SpelNodeImpl {
 		if (operand instanceof Map) {
 			Map<?, ?> mapdata = (Map<?, ?>) operand;
 			// TODO don't lose generic info for the new map
-			Map<Object,Object> result = new HashMap<Object,Object>();
+			Map<Object, Object> result = new HashMap<Object, Object>();
 			Object lastKey = null;
-			for (Map.Entry<?,?> entry : mapdata.entrySet()) {
+			for (Map.Entry<?, ?> entry : mapdata.entrySet()) {
 				try {
 					TypedValue kvpair = new TypedValue(entry);
 					state.pushActiveContextObject(kvpair);
@@ -101,7 +101,7 @@ public class Selection extends SpelNodeImpl {
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(null),this);
 			}
 			if (variant == LAST) {
-				Map<Object,Object> resultMap = new HashMap<Object,Object>();
+				Map<Object, Object> resultMap = new HashMap<Object, Object>();
 				Object lastValue = result.get(lastKey);
 				resultMap.put(lastKey,lastValue);
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultMap),this);
@@ -153,8 +153,8 @@ public class Selection extends SpelNodeImpl {
 			}
 		} else {
 			if (operand==null) {
-				if (nullSafe) { 
-					return ValueRef.NullValueRef.instance;
+				if (nullSafe) {
+					return TypedValue.NULL;
 				} else {
 					throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
 							"null");
@@ -162,7 +162,7 @@ public class Selection extends SpelNodeImpl {
 			} else {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
 						operand.getClass().getName());
-			}				
+			}
 		}
 	}
 

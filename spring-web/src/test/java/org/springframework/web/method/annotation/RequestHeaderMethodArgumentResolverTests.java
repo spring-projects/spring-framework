@@ -41,7 +41,7 @@ import org.springframework.web.method.annotation.RequestHeaderMethodArgumentReso
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.RequestHeaderMethodArgumentResolver}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -78,7 +78,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		// Expose request to the current thread (for SpEL expressions)
 		RequestContextHolder.setRequestAttributes(webRequest);
 	}
-	
+
 	@After
 	public void teardown() {
 		RequestContextHolder.resetRequestAttributes();

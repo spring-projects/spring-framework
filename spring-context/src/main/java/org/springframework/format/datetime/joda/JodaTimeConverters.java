@@ -149,6 +149,17 @@ final class JodaTimeConverters {
 	}
 
 	/**
+	 * Used when printing a java.util.Date field with a MillisecondInstantPrinter.
+	 * @see MillisecondInstantPrinter
+	 * @see JodaDateTimeFormatAnnotationFormatterFactory
+	 */
+	private static class DateToLongConverter implements Converter<Date, Long> {
+		public Long convert(Date source) {
+			return source.getTime();
+		}
+	}
+
+	/**
 	 * Used when printing a java.util.Calendar field with a ReadableInstantPrinter.
 	 * @see MillisecondInstantPrinter
 	 * @see JodaDateTimeFormatAnnotationFormatterFactory

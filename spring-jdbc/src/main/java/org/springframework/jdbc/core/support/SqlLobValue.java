@@ -53,7 +53,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  *     },
  *     new int[] {Types.VARCHAR, Types.BLOB, Types.CLOB});
  * </pre>
- *   
+ *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 1.1

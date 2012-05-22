@@ -32,7 +32,7 @@ public class BooleanTypedValue extends TypedValue {
 	private BooleanTypedValue(boolean b) {
 		super(b);
 	}
-	
+
 
 	public static BooleanTypedValue forValue(boolean b) {
 		if (b) {

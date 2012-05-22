@@ -204,7 +204,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 		if (WindowState.MINIMIZED.equals(request.getWindowState()) && !this.renderWhenMinimized) {
 			return null;
 		}
-	    
+
 		// Delegate to PortletContentGenerator for checking and preparing.
 		checkAndPrepare(request, response);
 

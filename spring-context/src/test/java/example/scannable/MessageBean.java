@@ -23,7 +23,7 @@ package example.scannable;
 public class MessageBean {
 
 	private String message;
-	
+
 	public MessageBean() {
 		this.message = "DEFAULT MESSAGE";
 	}
@@ -31,7 +31,7 @@ public class MessageBean {
 	public MessageBean(String message) {
 		this.message = message;
 	}
-	
+
 	public String getMessage() {
 		return this.message;
 	}

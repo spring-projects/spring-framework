@@ -28,6 +28,8 @@ import org.springframework.cache.Cache;
 import static org.junit.Assert.*;
 
 /**
+ * Test for native cache implementations.
+ *
  * @author Costin Leau
  */
 public class EhCacheCacheTests {
@@ -92,20 +94,4 @@ public class EhCacheCacheTests {
 		assertNull(cache.get("vlaicu"));
 		assertNull(cache.get("enescu"));
 	}
-
-	@Test
-	public void testExpiredElements() throws Exception {
-		String key = "brancusi";
-		String value = "constantin";
-		Element brancusi = new Element(key, value);
-		// ttl = 10s
-		brancusi.setTimeToLive(3);
-		nativeCache.put(brancusi);
-
-		assertEquals(value, cache.get(key).get());
-		// wait for the entry to expire
-		Thread.sleep(5 * 1000);
-		assertNull(cache.get(key));
-	}
-
 }

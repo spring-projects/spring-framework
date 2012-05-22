@@ -178,7 +178,7 @@ final class ConfigurationClass {
 			int newCount = currentCount != null ? currentCount + 1 : 1;
 			methodNameCounts.put(fqMethodName, newCount);
 		}
-		
+
 		for (String methodName : methodNameCounts.keySet()) {
 			int count = methodNameCounts.get(methodName);
 			if (count > 1) {
@@ -186,7 +186,7 @@ final class ConfigurationClass {
 				problemReporter.error(new BeanMethodOverloadingProblem(shortMethodName, count));
 			}
 		}
-		
+
 		// A configuration class may not be final (CGLIB limitation)
 		if (getMetadata().isAnnotated(Configuration.class.getName())) {
 			if (getMetadata().isFinal()) {

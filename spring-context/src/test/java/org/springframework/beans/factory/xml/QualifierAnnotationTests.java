@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public final class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByAliasTestBean testBean = (QualifiedByAliasTestBean) context.getBean("testBean");
 		Person person = testBean.getStooge();
-		assertEquals("LarryBean", person.getName());		
+		assertEquals("LarryBean", person.getName());
 	}
 
 	@Test
@@ -199,7 +199,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class NonQualifiedTestBean {
+	public static class NonQualifiedTestBean {
 
 		@Autowired
 		private Person anonymous;
@@ -210,7 +210,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class QualifiedByValueTestBean {
+	public static class QualifiedByValueTestBean {
 
 		@Autowired @Qualifier("larry")
 		private Person larry;
@@ -221,7 +221,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class QualifiedByBeanNameTestBean {
+	public static class QualifiedByBeanNameTestBean {
 
 		@Autowired @Qualifier("larryBean")
 		private Person larry;
@@ -235,7 +235,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class QualifiedByFieldNameTestBean {
+	public static class QualifiedByFieldNameTestBean {
 
 		@Autowired
 		private Person larryBean;
@@ -246,7 +246,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class QualifiedByParameterNameTestBean {
+	public static class QualifiedByParameterNameTestBean {
 
 		private Person larryBean;
 
@@ -261,7 +261,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class QualifiedByAliasTestBean {
+	public static class QualifiedByAliasTestBean {
 
 		@Autowired @Qualifier("stooge")
 		private Person stooge;
@@ -272,7 +272,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class QualifiedByAnnotationTestBean {
+	public static class QualifiedByAnnotationTestBean {
 
 		@Autowired @Qualifier("special")
 		private Person larry;
@@ -283,7 +283,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class QualifiedByCustomValueTestBean {
+	public static class QualifiedByCustomValueTestBean {
 
 		@Autowired @SimpleValueQualifier("curly")
 		private Person curly;
@@ -294,7 +294,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class QualifiedByAnnotationValueTestBean {
+	public static class QualifiedByAnnotationValueTestBean {
 
 		@Autowired @SimpleValueQualifier("special")
 		private Person larry;
@@ -305,7 +305,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class QualifiedByAttributesTestBean {
+	public static class QualifiedByAttributesTestBean {
 
 		@Autowired @MultipleAttributeQualifier(name="moe", age=42)
 		private Person moeSenior;
@@ -323,7 +323,7 @@ public final class QualifierAnnotationTests {
 	}
 
 
-	private static class Person {
+	public static class Person {
 
 		private String name;
 
@@ -339,7 +339,7 @@ public final class QualifierAnnotationTests {
 
 	@Qualifier("special")
 	@SimpleValueQualifier("special")
-	private static class SpecialPerson extends Person {
+	public static class SpecialPerson extends Person {
 	}
 
 

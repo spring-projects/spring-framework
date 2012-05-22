@@ -106,7 +106,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	@SuppressWarnings("unchecked")
 	public <T> Class<? extends T> getClass(String attributeName) {
-		return (Class<T>)doGet(attributeName, Class.class);
+		return doGet(attributeName, Class.class);
 	}
 
 	public Class<?>[] getClassArray(String attributeName) {
@@ -130,29 +130,5 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 				format("Attribute '%s' is of type [%s], but [%s] was expected. Cause: ",
 						attributeName, value.getClass().getSimpleName(), expectedType.getSimpleName()));
 		return (T) value;
-	}
-
-	public String toString() {
-		Iterator<Map.Entry<String, Object>> entries = entrySet().iterator();
-		StringBuilder sb = new StringBuilder("{");
-		while (entries.hasNext()) {
-			Map.Entry<String, Object> entry = entries.next();
-			sb.append(entry.getKey());
-			sb.append('=');
-			sb.append(valueToString(entry.getValue()));
-			sb.append(entries.hasNext() ? ", " : "");
-		}
-		sb.append("}");
-		return sb.toString();
-	}
-
-	private String valueToString(Object value) {
-		if (value == this) {
-			return "(this Map)";
-		}
-		if (value instanceof Object[]) {
-			return "[" + StringUtils.arrayToCommaDelimitedString((Object[]) value) + "]";
-		}
-		return String.valueOf(value);
 	}
 }

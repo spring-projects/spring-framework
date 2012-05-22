@@ -45,7 +45,7 @@ public @interface ActiveProfiles {
 
 	/**
 	 * Alias for {@link #profiles}.
-	 * 
+	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction
 	 * with {@link #profiles}, but it may be used <em>instead</em> of
 	 * {@link #profiles}.
@@ -54,7 +54,7 @@ public @interface ActiveProfiles {
 
 	/**
 	 * The bean definition profiles to activate.
-	 * 
+	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction
 	 * with {@link #value}, but it may be used <em>instead</em> of
 	 * {@link #value}.
@@ -88,7 +88,7 @@ public @interface ActiveProfiles {
 	 * public class BaseTest {
 	 *     // ...
 	 * }
-	 * 
+	 *
 	 * &#064;ActiveProfiles(&quot;extended&quot;)
 	 * &#064;ContextConfiguration
 	 * public class ExtendedTest extends BaseTest {
@@ -96,7 +96,7 @@ public @interface ActiveProfiles {
 	 * }
 	 * </pre>
 	 *
-	 * <p>Note: {@code @ActiveProfiles} can be used when loading an 
+	 * <p>Note: {@code @ActiveProfiles} can be used when loading an
 	 * {@code ApplicationContext} from path-based resource locations or
 	 * annotated classes.
 	 *

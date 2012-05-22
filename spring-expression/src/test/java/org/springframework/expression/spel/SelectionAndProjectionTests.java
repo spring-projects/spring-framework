@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class SelectionAndProjectionTests {
 		EvaluationContext context = new StandardEvaluationContext(new ListTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof List);
-		List list = (List) value;
+		List<?> list = (List<?>) value;
 		assertEquals(5, list.size());
 		assertEquals(0, list.get(0));
 		assertEquals(1, list.get(1));
@@ -79,7 +79,7 @@ public class SelectionAndProjectionTests {
 		EvaluationContext context = new StandardEvaluationContext(new SetTestBean());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof List);
-		List list = (List) value;
+		List<?> list = (List<?>) value;
 		assertEquals(5, list.size());
 		assertEquals(0, list.get(0));
 		assertEquals(1, list.get(1));
@@ -221,7 +221,7 @@ public class SelectionAndProjectionTests {
 		context.setVariable("testList", IntegerTestBean.createList());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof List);
-		List list = (List) value;
+		List<?> list = (List<?>) value;
 		assertEquals(3, list.size());
 		assertEquals(5, list.get(0));
 		assertEquals(6, list.get(1));
@@ -235,7 +235,7 @@ public class SelectionAndProjectionTests {
 		context.setVariable("testList", IntegerTestBean.createSet());
 		Object value = expression.getValue(context);
 		assertTrue(value instanceof List);
-		List list = (List) value;
+		List<?> list = (List<?>) value;
 		assertEquals(3, list.size());
 		assertEquals(5, list.get(0));
 		assertEquals(6, list.get(1));

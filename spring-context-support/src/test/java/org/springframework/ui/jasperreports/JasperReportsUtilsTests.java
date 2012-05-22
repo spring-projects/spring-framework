@@ -72,7 +72,7 @@ public class JasperReportsUtilsTests extends TestCase {
 
 	public void testRenderAsCsvWithExporterParameters() throws Exception {
 		StringWriter writer = new StringWriter();
-		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
+		Map<Object, String> exporterParameters = new HashMap<Object, String>();
 		exporterParameters.put(JRCsvExporterParameter.FIELD_DELIMITER, "~");
 		JasperReportsUtils.renderAsCsv(getReport(), getParameters(), getData(), writer, exporterParameters);
 		String output = writer.getBuffer().toString();
@@ -96,7 +96,7 @@ public class JasperReportsUtilsTests extends TestCase {
 
 	public void testRenderAsHtmlWithExporterParameters() throws Exception {
 		StringWriter writer = new StringWriter();
-		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
+		Map<Object, String> exporterParameters = new HashMap<Object, String>();
 		String uri = "/my/uri";
 		exporterParameters.put(JRHtmlExporterParameter.IMAGES_URI, uri);
 		JasperReportsUtils.renderAsHtml(getReport(), getParameters(), getData(), writer, exporterParameters);
@@ -121,7 +121,7 @@ public class JasperReportsUtilsTests extends TestCase {
 
 	public void testRenderAsPdfWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
+		Map<Object, String> exporterParameters = new HashMap<Object, String>();
 		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6.toString());
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os, exporterParameters);
 		byte[] output = os.toByteArray();
@@ -145,7 +145,7 @@ public class JasperReportsUtilsTests extends TestCase {
 
 	public void testRenderAsXlsWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
+		Map<Object, Object> exporterParameters = new HashMap<Object, Object>();
 
 		SimpleProgressMonitor monitor = new SimpleProgressMonitor();
 		exporterParameters.put(JRXlsExporterParameter.PROGRESS_MONITOR, monitor);
@@ -206,8 +206,8 @@ public class JasperReportsUtilsTests extends TestCase {
 		return (JasperReport) JRLoader.loadObject(resource.getInputStream());
 	}
 
-	private Map<String, Object> getParameters() {
-		Map<String, Object> model = new HashMap<String, Object>();
+	private Map<Object, Object> getParameters() {
+		HashMap<Object, Object> model = new HashMap<Object, Object>();
 		model.put("ReportTitle", "Dear Lord!");
 		model.put(JRParameter.REPORT_LOCALE, Locale.GERMAN);
 		model.put(JRParameter.REPORT_RESOURCE_BUNDLE,
@@ -220,7 +220,7 @@ public class JasperReportsUtilsTests extends TestCase {
 	}
 
 	private List<PersonBean> getData() {
-		List<PersonBean> list = new ArrayList<PersonBean>();
+		ArrayList<PersonBean> list = new ArrayList<PersonBean>();
 		for (int x = 0; x < 10; x++) {
 			PersonBean bean = new PersonBean();
 			bean.setId(x);

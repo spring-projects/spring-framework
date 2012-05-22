@@ -71,8 +71,7 @@ public class VelocityToolboxViewTests {
 
 		vv.setUrl(templateName);
 		vv.setApplicationContext(wac);
-		@SuppressWarnings("unchecked")
-		Map<String, Class> toolAttributes = new HashMap<String, Class>();
+		Map<String, Class<?>> toolAttributes = new HashMap<String, Class<?>>();
 		toolAttributes.put("math", MathTool.class);
 		toolAttributes.put("link2", LinkTool.class);
 		vv.setToolAttributes(toolAttributes);

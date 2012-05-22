@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import org.springframework.util.FileCopyUtils;
 import static org.custommonkey.xmlunit.XMLAssert.*;
 
 /** @author Arjen Poutsma */
-@SuppressWarnings("unchecked")
 public class SourceHttpMessageConverterTests {
 
 	private SourceHttpMessageConverter<Source> converter;
@@ -120,7 +119,7 @@ public class SourceHttpMessageConverterTests {
 		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
 				outputMessage.getHeaders().getContentLength());
 	}
-	
+
 	@Test
 	public void writeSAXSource() throws Exception {
 		String xml = "<root>Hello World</root>";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 package org.springframework.core.style;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -52,7 +53,7 @@ public class ToStringCreatorTests extends TestCase {
 	}
 
 	public void testDefaultStyleMap() {
-		final Map map = getMap();
+		final Map<String, String> map = getMap();
 		Object stringy = new Object() {
 			public String toString() {
 				return new ToStringCreator(this).append("familyFavoriteSport", map).toString();
@@ -63,8 +64,8 @@ public class ToStringCreatorTests extends TestCase {
 				stringy.toString());
 	}
 
-	private Map getMap() {
-		Map map = CollectionFactory.createLinkedMapIfPossible(3);
+	private Map<String, String> getMap() {
+		Map<String, String> map = new LinkedHashMap<String, String>(3);
 		map.put("Keri", "Softball");
 		map.put("Scot", "Fishing");
 		map.put("Keith", "Flag Football");
@@ -85,7 +86,7 @@ public class ToStringCreatorTests extends TestCase {
 	}
 
 	public void testList() {
-		List list = new ArrayList();
+		List<SomeObject> list = new ArrayList<SomeObject>();
 		list.add(s1);
 		list.add(s2);
 		list.add(s3);
@@ -95,7 +96,7 @@ public class ToStringCreatorTests extends TestCase {
 	}
 
 	public void testSet() {
-		Set set = CollectionFactory.createLinkedSetIfPossible(3);
+		Set<SomeObject> set = new LinkedHashSet<SomeObject>();
 		set.add(s1);
 		set.add(s2);
 		set.add(s3);
@@ -111,7 +112,7 @@ public class ToStringCreatorTests extends TestCase {
 	}
 
 	public void testMethod() throws Exception {
-		String str = new ToStringCreator(this).append("myMethod", this.getClass().getMethod("testMethod", null))
+		String str = new ToStringCreator(this).append("myMethod", this.getClass().getMethod("testMethod"))
 				.toString();
 		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this)
 				+ " myMethod = testMethod@ToStringCreatorTests]", str);

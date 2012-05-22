@@ -52,11 +52,11 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the FactoryBean's object type,
 	 * or <code>null</code> if the type cannot be determined yet
 	 */
-	protected Class getTypeForFactoryBean(final FactoryBean factoryBean) {
+	protected Class<?> getTypeForFactoryBean(final FactoryBean<?> factoryBean) {
 		try {
 			if (System.getSecurityManager() != null) {
-				return AccessController.doPrivileged(new PrivilegedAction<Class>() {
-					public Class run() {
+				return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
+					public Class<?> run() {
 						return factoryBean.getObjectType();
 					}
 				}, getAccessControlContext());
@@ -94,7 +94,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @throws BeanCreationException if FactoryBean object creation failed
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	protected Object getObjectFromFactoryBean(FactoryBean factory, String beanName, boolean shouldPostProcess) {
+	protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName, boolean shouldPostProcess) {
 		if (factory.isSingleton() && containsSingleton(beanName)) {
 			synchronized (getSingletonMutex()) {
 				Object object = this.factoryBeanObjectCache.get(beanName);
@@ -120,7 +120,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
 	private Object doGetObjectFromFactoryBean(
-			final FactoryBean factory, final String beanName, final boolean shouldPostProcess)
+			final FactoryBean<?> factory, final String beanName, final boolean shouldPostProcess)
 			throws BeanCreationException {
 
 		Object object;
@@ -149,7 +149,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 		}
 
-		
+
 		// Do not accept a null value for a FactoryBean that's not fully
 		// initialized yet: Many FactoryBeans just return null then.
 		if (object == null && isSingletonCurrentlyInCreation(beanName)) {
@@ -190,12 +190,12 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @return the bean instance as FactoryBean
 	 * @throws BeansException if the given bean cannot be exposed as a FactoryBean
 	 */
-	protected FactoryBean getFactoryBean(String beanName, Object beanInstance) throws BeansException {
+	protected FactoryBean<?> getFactoryBean(String beanName, Object beanInstance) throws BeansException {
 		if (!(beanInstance instanceof FactoryBean)) {
 			throw new BeanCreationException(beanName,
 					"Bean instance of type [" + beanInstance.getClass() + "] is not a FactoryBean");
 		}
-		return (FactoryBean) beanInstance;
+		return (FactoryBean<?>) beanInstance;
 	}
 
 	/**
@@ -206,7 +206,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 		super.removeSingleton(beanName);
 		this.factoryBeanObjectCache.remove(beanName);
 	}
-	
+
 	/**
 	 * Returns the security context for this bean factory. If a security manager
 	 * is set, interaction with the user code will be executed using the privileged

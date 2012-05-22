@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.datasource.TestDataSourceWrapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -58,15 +58,16 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 	private PreparedStatement mockPreparedStatement;
 	private ResultSet mockResultSet;
 
-	private BeanFactory bf;
+	private DefaultListableBeanFactory bf;
 
-	
+
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
 		mockPreparedStatement =	createMock(PreparedStatement.class);
 		mockResultSet = createMock(ResultSet.class);
-		this.bf = new XmlBeanFactory(
+		this.bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.bf).loadBeanDefinitions(
 				new ClassPathResource("org/springframework/jdbc/object/GenericSqlQueryTests-context.xml"));
 		TestDataSourceWrapper testDataSource = (TestDataSourceWrapper) bf.getBean("dataSource");
 		testDataSource.setTarget(mockDataSource);
@@ -88,18 +89,20 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testPlaceHoldersCustomerQuery() throws SQLException {
-		SqlQuery query = (SqlQuery) bf.getBean("queryWithPlaceHolders");
+		SqlQuery<Customer> query = (SqlQuery<Customer>) bf.getBean("queryWithPlaceHolders");
 		testCustomerQuery(query, false);
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testNamedParameterCustomerQuery() throws SQLException {
-		SqlQuery query = (SqlQuery) bf.getBean("queryWithNamedParameters");
+		SqlQuery<Customer> query = (SqlQuery<Customer>) bf.getBean("queryWithNamedParameters");
 		testCustomerQuery(query, true);
 	}
 
-	private void testCustomerQuery(SqlQuery query, boolean namedParameters) throws SQLException {
+	private void testCustomerQuery(SqlQuery<Customer> query, boolean namedParameters) throws SQLException {
 		expect(mockResultSet.next()).andReturn(true);
 		expect(mockResultSet.getInt("id")).andReturn(1);
 		expect(mockResultSet.getString("forename")).andReturn("rod");
@@ -123,7 +126,7 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 
 		replay();
 
-		List l;
+		List<Customer> l;
 		if (namedParameters) {
 			Map<String, Object> params = new HashMap<String, Object>(2);
 			params.put("id", new Integer(1));
@@ -135,7 +138,7 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 			l = query.execute(params);
 		}
 		assertTrue("Customer was returned correctly", l.size() == 1);
-		Customer cust = (Customer) l.get(0);
+		Customer cust = l.get(0);
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
 	}

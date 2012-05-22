@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 
 	private Set<String> excludedPackages = Collections.singleton("org.springframework.web.servlet.mvc");
 
-	private Set<Class> excludedClasses = Collections.emptySet();
+	private Set<Class<?>> excludedClasses = Collections.emptySet();
 
 
 	/**
@@ -69,9 +69,9 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 * Specify controller classes that should be excluded from this mapping.
 	 * Any such classes will simply be ignored by this HandlerMapping.
 	 */
-	public void setExcludedClasses(Class[] excludedClasses) {
+	public void setExcludedClasses(Class<?>[] excludedClasses) {
 		this.excludedClasses = (excludedClasses != null) ?
-				new HashSet<Class>(Arrays.asList(excludedClasses)) : new HashSet<Class>();
+				new HashSet<Class<?>>(Arrays.asList(excludedClasses)) : new HashSet<Class<?>>();
 	}
 
 
@@ -81,7 +81,7 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 */
 	@Override
 	protected String[] determineUrlsForHandler(String beanName) {
-		Class beanClass = getApplicationContext().getType(beanName);
+		Class<?> beanClass = getApplicationContext().getType(beanName);
 		if (isEligibleForMapping(beanName, beanClass)) {
 			return buildUrlsForHandler(beanName, beanClass);
 		}
@@ -98,7 +98,7 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 * @see #setExcludedPackages
 	 * @see #setExcludedClasses
 	 */
-	protected boolean isEligibleForMapping(String beanName, Class beanClass) {
+	protected boolean isEligibleForMapping(String beanName, Class<?> beanClass) {
 		if (beanClass == null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Excluding controller bean '" + beanName + "' from class name mapping " +
@@ -131,7 +131,7 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 * that is supported by this mapping strategy.
 	 * @param beanClass the class to introspect
 	 */
-	protected boolean isControllerType(Class beanClass) {
+	protected boolean isControllerType(Class<?> beanClass) {
 		return this.predicate.isControllerType(beanClass);
 	}
 
@@ -140,7 +140,7 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 * that dispatches to multiple action methods.
 	 * @param beanClass the class to introspect
 	 */
-	protected boolean isMultiActionControllerType(Class beanClass) {
+	protected boolean isMultiActionControllerType(Class<?> beanClass) {
 		return this.predicate.isMultiActionControllerType(beanClass);
 	}
 
@@ -151,6 +151,6 @@ public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetect
 	 * @param beanClass the type of the bean
 	 * @return the URLs determined for the bean
 	 */
-	protected abstract String[] buildUrlsForHandler(String beanName, Class beanClass);
+	protected abstract String[] buildUrlsForHandler(String beanName, Class<?> beanClass);
 
 }

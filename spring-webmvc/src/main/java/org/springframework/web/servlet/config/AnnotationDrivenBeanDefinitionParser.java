@@ -433,9 +433,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		return messageConverters;
 	}
 
-	private RootBeanDefinition createConverterBeanDefinition(
-			Class<? extends HttpMessageConverter> converterClass, Object source) {
-
+	private RootBeanDefinition createConverterBeanDefinition(@SuppressWarnings("rawtypes") Class<? extends HttpMessageConverter> converterClass,
+			Object source) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(converterClass);
 		beanDefinition.setSource(source);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

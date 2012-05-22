@@ -312,7 +312,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 						"'reportDataKey' for main report is required when specifying a value for 'subReportDataKeys'");
 			}
 			this.subReports = new HashMap<String, JasperReport>(this.subReportUrls.size());
-			for (Enumeration urls = this.subReportUrls.propertyNames(); urls.hasMoreElements();) {
+			for (Enumeration<?> urls = this.subReportUrls.propertyNames(); urls.hasMoreElements();) {
 				String key = (String) urls.nextElement();
 				String path = this.subReportUrls.getProperty(key);
 				Resource resource = getApplicationContext().getResource(path);
@@ -432,7 +432,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 		String fieldName = fqFieldName.substring(index + 1);
 
 		try {
-			Class cls = ClassUtils.forName(className, getApplicationContext().getClassLoader());
+			Class<?> cls = ClassUtils.forName(className, getApplicationContext().getClassLoader());
 			Field field = cls.getField(fieldName);
 
 			if (JRExporterParameter.class.isAssignableFrom(field.getType())) {
@@ -637,7 +637,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			}
 		}
 		else {
-			Collection values = model.values();
+			Collection<?> values = model.values();
 			jrDataSource = CollectionUtils.findValueOfType(values, JRDataSource.class);
 			if (jrDataSource == null) {
 				JRDataSourceProvider provider = CollectionUtils.findValueOfType(values, JRDataSourceProvider.class);
@@ -705,7 +705,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	private void populateHeaders(HttpServletResponse response) {
 		// Apply the headers to the response.
-		for (Enumeration en = this.headers.propertyNames(); en.hasMoreElements();) {
+		for (Enumeration<?> en = this.headers.propertyNames(); en.hasMoreElements();) {
 			String key = (String) en.nextElement();
 			response.addHeader(key, this.headers.getProperty(key));
 		}
@@ -795,7 +795,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * <p>Default value types are: <code>java.util.Collection</code> and <code>Object</code> array.
 	 * @return the value types in prioritized order
 	 */
-	protected Class[] getReportDataTypes() {
+	protected Class<?>[] getReportDataTypes() {
 		return new Class[] {Collection.class, Object[].class};
 	}
 

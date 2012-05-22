@@ -57,7 +57,7 @@ public class ClassPathFactoryBeanDefinitionScannerTests extends TestCase {
 		TestBean tb2 = (TestBean)context.getBean("publicInstance"); //2
 		assertEquals("publicInstance", tb2.getName());
 		assertSame(tb2, tb);
-		
+
 		tb = (TestBean)context.getBean("protectedInstance"); //3
 		assertEquals("protectedInstance", tb.getName());
 		assertSame(tb, context.getBean("protectedInstance"));
@@ -72,7 +72,7 @@ public class ClassPathFactoryBeanDefinitionScannerTests extends TestCase {
 		tb2 = context.getBean("privateInstance", TestBean.class); //4
 		assertEquals(2, tb2.getAge());
 		assertNotSame(tb2, tb);
-		
+
 		Object bean = context.getBean("requestScopedInstance"); //5
 		assertTrue(AopUtils.isCglibProxy(bean));
 		assertTrue(bean instanceof ScopedObject);

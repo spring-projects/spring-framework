@@ -223,7 +223,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		return invoker.invoke();
 	}
-	
+
 	private void inspectBeforeCacheEvicts(Collection<CacheOperationContext> evictions) {
 		inspectCacheEvicts(evictions, true);
 	}
@@ -326,7 +326,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					}
 				}
 			}
-			
+
 			// return a status only if at least on cacheable matched
 			if (atLeastOnePassed) {
 				return new CacheStatus(cUpdates, updateRequire, retVal);

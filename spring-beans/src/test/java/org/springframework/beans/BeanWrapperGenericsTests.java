@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,8 +157,7 @@ public class BeanWrapperGenericsTests {
 		GenericBean<?> gb = new GenericBean<Object>();
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
-		@SuppressWarnings("unchecked")
-		Map<String, Collection> input = new HashMap<String, Collection>();
+		Map<String, Collection<?>> input = new HashMap<String, Collection<?>>();
 		HashSet<Integer> value1 = new HashSet<Integer>();
 		value1.add(new Integer(1));
 		input.put("1", value1);
@@ -487,7 +486,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 
-	private static abstract class BaseGenericCollectionBean {
+	public static abstract class BaseGenericCollectionBean {
 
 		public abstract Object getMapOfInteger();
 
@@ -497,7 +496,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 
-	private static class NestedGenericCollectionBean extends BaseGenericCollectionBean {
+	public static class NestedGenericCollectionBean extends BaseGenericCollectionBean {
 
 		private Map<String, Integer> mapOfInteger;
 
@@ -541,7 +540,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 
-	private static class ComplexMapHolder {
+	public static class ComplexMapHolder {
 
 		private Map<List<Integer>, List<Long>> genericMap;
 
@@ -603,23 +602,22 @@ public class BeanWrapperGenericsTests {
 
 	public interface ObjectWithId<T extends Comparable<T>> {
 
-	  T getId();
+		T getId();
 
-	  void setId(T aId);
+		void setId(T aId);
 	}
-
 
 	public class Promotion implements ObjectWithId<Long> {
 
-	  private Long id;
+		private Long id;
 
-	  public Long getId() {
-		  return id;
-	  }
+		public Long getId() {
+			return id;
+		}
 
-	  public void setId(Long aId) {
-		  this.id = aId;
-	  }
+		public void setId(Long aId) {
+			this.id = aId;
+		}
 	}
 
 }

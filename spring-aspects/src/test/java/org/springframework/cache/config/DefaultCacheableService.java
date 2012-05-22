@@ -25,7 +25,7 @@ import org.springframework.cache.annotation.Caching;
 
 /**
  * Simple cacheable service
- * 
+ *
  * @author Costin Leau
  */
 public class DefaultCacheableService implements CacheableService<Long> {

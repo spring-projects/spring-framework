@@ -90,7 +90,7 @@ public class AnnotationCacheOperationSourceTests {
 		assertTrue(next.getCacheNames().contains("bar"));
 	}
 
-	private static class AnnotatedClass {
+	public static class AnnotatedClass {
 		@Cacheable("test")
 		public void singular() {
 		}

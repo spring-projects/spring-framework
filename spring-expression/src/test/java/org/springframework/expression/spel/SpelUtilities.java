@@ -23,7 +23,7 @@ import org.springframework.expression.spel.standard.SpelExpression;
 
 /**
  * Utilities for working with Spring Expressions.
- * 
+ *
  * @author Andy Clement
  */
 public class SpelUtilities {

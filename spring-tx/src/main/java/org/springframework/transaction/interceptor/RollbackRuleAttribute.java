@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class RollbackRuleAttribute implements Serializable{
 	 * @throws IllegalArgumentException if the supplied <code>clazz</code> is
 	 * not a <code>Throwable</code> type or is <code>null</code>
 	 */
-	public RollbackRuleAttribute(Class clazz) {
+	public RollbackRuleAttribute(Class<?> clazz) {
 		Assert.notNull(clazz, "'clazz' cannot be null.");
 		if (!Throwable.class.isAssignableFrom(clazz)) {
 			throw new IllegalArgumentException(
@@ -109,7 +109,7 @@ public class RollbackRuleAttribute implements Serializable{
 	}
 
 
-	private int getDepth(Class exceptionClass, int depth) {
+	private int getDepth(Class<?> exceptionClass, int depth) {
 		if (exceptionClass.getName().indexOf(this.exceptionName) != -1) {
 			// Found it!
 			return depth;
@@ -133,7 +133,7 @@ public class RollbackRuleAttribute implements Serializable{
 		RollbackRuleAttribute rhs = (RollbackRuleAttribute) other;
 		return this.exceptionName.equals(rhs.exceptionName);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return this.exceptionName.hashCode();

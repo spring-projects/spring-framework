@@ -72,7 +72,7 @@ public class RequestAndSessionScopedBeanTests {
 			// expected
 		}
 	}
-	
+
 	@Test
 	public void testPutBeanInSession() throws Exception {
 		String targetBeanName = "target";

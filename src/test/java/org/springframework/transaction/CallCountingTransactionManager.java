@@ -51,7 +51,7 @@ public class CallCountingTransactionManager extends AbstractPlatformTransactionM
 		++rollbacks;
 		--inflight;
 	}
-	
+
 	public void clear() {
 		begun = commits = rollbacks = inflight = 0;
 	}

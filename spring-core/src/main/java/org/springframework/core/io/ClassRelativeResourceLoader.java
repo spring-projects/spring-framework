@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,14 @@ import org.springframework.util.StringUtils;
  */
 public class ClassRelativeResourceLoader extends DefaultResourceLoader {
 
-	private final Class clazz;
+	private final Class<?> clazz;
 
 
 	/**
 	 * Create a new ClassRelativeResourceLoader for the given class.
 	 * @param clazz the class to load resources through
 	 */
-	public ClassRelativeResourceLoader(Class clazz) {
+	public ClassRelativeResourceLoader(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		this.clazz = clazz;
 		setClassLoader(clazz.getClassLoader());
@@ -54,9 +54,9 @@ public class ClassRelativeResourceLoader extends DefaultResourceLoader {
 	 */
 	private static class ClassRelativeContextResource extends ClassPathResource implements ContextResource {
 
-		private final Class clazz;
+		private final Class<?> clazz;
 
-		public ClassRelativeContextResource(String path, Class clazz) {
+		public ClassRelativeContextResource(String path, Class<?> clazz) {
 			super(path, clazz);
 			this.clazz = clazz;
 		}

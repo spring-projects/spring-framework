@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-20011 the original author or authors.
+ * Copyright 2002-20121 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,6 @@ public final class PortletUtilsTests {
 	@Test
 	public void testClearAllRenderParametersDoesNotPropagateExceptionIfRedirectAlreadySentAtTimeOfCall() throws Exception {
 		MockActionResponse response = new MockActionResponse() {
-			@SuppressWarnings("unchecked")
 			public void setRenderParameters(Map parameters) {
 				throw new IllegalStateException();
 			}
@@ -300,7 +299,6 @@ public final class PortletUtilsTests {
 		PortletUtils.exposeRequestAttributes(new MockPortletRequest(), null);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testExposeRequestAttributesSunnyDay() throws Exception {
 		MockPortletRequest request = new MockPortletRequest();
@@ -312,7 +310,6 @@ public final class PortletUtilsTests {
 		assertEquals("Roy Fokker", request.getAttribute("mentor"));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testExposeRequestAttributesWithEmptyAttributesMapIsAnIdempotentOperation() throws Exception {
 		MockPortletRequest request = new MockPortletRequest();

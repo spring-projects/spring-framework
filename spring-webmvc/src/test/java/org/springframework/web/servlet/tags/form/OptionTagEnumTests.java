@@ -29,7 +29,7 @@ import org.springframework.web.servlet.support.BindStatus;
 public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 
 	private OptionTag tag;
-	
+
 	private SelectTag parentTag;
 
 	protected void onSetUp() {
@@ -40,7 +40,7 @@ public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 		};
 		this.parentTag = new SelectTag() {
 			public String getName() {
-				// Should not be used other than to delegate to 
+				// Should not be used other than to delegate to
 				// RequestDataValueDataProcessor
 				return "testName";
 			}

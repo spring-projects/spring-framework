@@ -50,7 +50,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.RequestParamMethodArgumentResolver}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -81,7 +81,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 		Method method = getClass().getMethod("params", String.class, String[].class, Map.class, MultipartFile.class,
 				Map.class, String.class, MultipartFile.class, List.class, Part.class, MultipartFile.class);
-		
+
 		paramNamedDefaultValueString = new MethodParameter(method, 0);
 		paramNamedStringArray = new MethodParameter(method, 1);
 		paramNamedMap = new MethodParameter(method, 2);
@@ -112,7 +112,7 @@ public class RequestParamMethodArgumentResolverTests {
 		assertTrue("Simple type params supported w/o annotations", resolver.supportsParameter(paramStringNotAnnot));
 		assertTrue("MultipartFile parameter not supported", resolver.supportsParameter(paramMultipartFileNotAnnot));
 		assertTrue("Part parameter not supported", resolver.supportsParameter(paramServlet30Part));
-		
+
 		resolver = new RequestParamMethodArgumentResolver(null, false);
 		assertFalse(resolver.supportsParameter(paramStringNotAnnot));
 		assertFalse(resolver.supportsParameter(paramRequestPartAnnot));
@@ -229,7 +229,7 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveDefaultValue() throws Exception {
 		Object result = resolver.resolveArgument(paramNamedDefaultValueString, null, webRequest, null);
-		
+
 		assertTrue(result instanceof String);
 		assertEquals("Invalid result", "bar", result);
 	}
@@ -250,7 +250,7 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	// SPR-8561
-	
+
 	@Test
 	public void resolveSimpleTypeParamToNull() throws Exception {
 		Object result = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, null);

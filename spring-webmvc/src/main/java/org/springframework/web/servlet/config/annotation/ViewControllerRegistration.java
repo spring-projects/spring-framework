@@ -22,7 +22,7 @@ import org.springframework.web.servlet.mvc.ParameterizableViewController;
 
 /**
  * Encapsulates information required to create a view controller.
- * 
+ *
  * @author Rossen Stoyanchev
  * @author Keith Donald
  * @since 3.1
@@ -30,7 +30,7 @@ import org.springframework.web.servlet.mvc.ParameterizableViewController;
 public class ViewControllerRegistration {
 
 	private final String urlPath;
-	
+
 	private String viewName;
 
 	/**
@@ -41,11 +41,11 @@ public class ViewControllerRegistration {
 		Assert.notNull(urlPath, "A URL path is required to create a view controller.");
 		this.urlPath = urlPath;
 	}
-	
+
 	/**
-	 * Sets the view name to use for this view controller. This field is optional. If not specified the 
+	 * Sets the view name to use for this view controller. This field is optional. If not specified the
 	 * view controller will return a {@code null} view name, which will be resolved through the configured
-	 * {@link RequestToViewNameTranslator}. By default that means "/foo/bar" would resolve to "foo/bar". 
+	 * {@link RequestToViewNameTranslator}. By default that means "/foo/bar" would resolve to "foo/bar".
 	 */
 	public void setViewName(String viewName) {
 		this.viewName = viewName;
@@ -66,5 +66,5 @@ public class ViewControllerRegistration {
 		controller.setViewName(viewName);
 		return controller;
 	}
-	
+
 }

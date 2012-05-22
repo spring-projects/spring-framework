@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class Jsr330ScopeMetadataResolver implements ScopeMetadataResolver {
 	 * @param annotationType the JSR-330 annotation type as a Class
 	 * @param scopeName the Spring scope name
 	 */
-	public final void registerScope(Class annotationType, String scopeName) {
+	public final void registerScope(Class<?> annotationType, String scopeName) {
 		this.scopeMap.put(annotationType.getName(), scopeName);
 	}
 

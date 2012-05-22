@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,8 +152,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 				else if (getServiceInterface() != null) {
 					boolean isImpl = getServiceInterface().isInstance(remoteObj);
 					logger.debug("Using service interface [" + getServiceInterface().getName() +
-					    "] for RMI stub [" + getServiceUrl() + "] - " +
-					    (!isImpl ? "not " : "") + "directly implemented");
+						"] for RMI stub [" + getServiceUrl() + "] - " +
+						(!isImpl ? "not " : "") + "directly implemented");
 				}
 			}
 			if (this.cacheStub) {
@@ -345,7 +345,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 			}
 			catch (RemoteException ex) {
 				throw RmiClientInterceptorUtils.convertRmiAccessException(
-				    invocation.getMethod(), ex, isConnectFailure(ex), getServiceUrl());
+					invocation.getMethod(), ex, isConnectFailure(ex), getServiceUrl());
 			}
 			catch (InvocationTargetException ex) {
 				Throwable exToThrow = ex.getTargetException();
@@ -389,7 +389,7 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @see org.springframework.remoting.support.RemoteInvocation
 	 */
 	protected Object doInvoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
-	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
 			return "RMI invoker proxy for service URL [" + getServiceUrl() + "]";

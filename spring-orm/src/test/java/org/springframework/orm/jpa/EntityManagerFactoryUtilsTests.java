@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 			// no tx active
 			assertSame(manager, EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory, null));
 			assertSame(manager, ((EntityManagerHolder)TransactionSynchronizationManager.unbindResource(factory)).getEntityManager());
-			
+
 			mockControl.verify();
 		}
 		finally {
@@ -91,21 +91,21 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 	}
-	
+
 	public void testTranslatesIllegalStateException() {
 		IllegalStateException ise = new IllegalStateException();
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ise);
 		assertSame(ise, dex.getCause());
 		assertTrue(dex instanceof InvalidDataAccessApiUsageException);
 	}
-	
+
 	public void testTranslatesIllegalArgumentException() {
 		IllegalArgumentException iae = new IllegalArgumentException();
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(iae);
 		assertSame(iae, dex.getCause());
 		assertTrue(dex instanceof InvalidDataAccessApiUsageException);
 	}
-	
+
 	/**
 	 * We do not convert unknown exceptions. They may result from user code.
 	 */

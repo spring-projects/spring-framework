@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.context.support.StaticApplicationContext;
  * @author Rick Evans
  */
 public class EventPublicationInterceptorTests {
-	
+
 	private ApplicationEventPublisher publisher;
 
 
@@ -48,7 +48,7 @@ public class EventPublicationInterceptorTests {
 		publisher = createMock(ApplicationEventPublisher.class);
 		replay(publisher);
 	}
-	
+
 	@After
 	public void tearDown() {
 		verify(publisher);
@@ -92,7 +92,7 @@ public class EventPublicationInterceptorTests {
 
 		class TestContext extends StaticApplicationContext {
 			protected void onRefresh() throws BeansException {
-				addListener(listener);
+				addApplicationListener(listener);
 			}
 		}
 
@@ -137,13 +137,13 @@ public class EventPublicationInterceptorTests {
 	}
 
 
-	public static class FactoryBeanTestListener extends TestListener implements FactoryBean {
+	public static class FactoryBeanTestListener extends TestListener implements FactoryBean<String> {
 
-		public Object getObject() throws Exception {
+		public String getObject() throws Exception {
 			return "test";
 		}
 
-		public Class getObjectType() {
+		public Class<?> getObjectType() {
 			return String.class;
 		}
 

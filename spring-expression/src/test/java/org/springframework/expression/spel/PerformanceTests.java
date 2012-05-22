@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * Tests the evaluation of real expressions in a real context.
- * 
+ *
  * @author Andy Clement
  */
 public class PerformanceTests {
@@ -40,7 +40,7 @@ public class PerformanceTests {
 	private static EvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	private static final boolean DEBUG = false;
-	
+
 	@Test
 	public void testPerformanceOfPropertyAccess() throws Exception {
 		long starttime = 0;
@@ -54,7 +54,7 @@ public class PerformanceTests {
 			}
 			expr.getValue(eContext);
 		}
-		
+
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
@@ -92,7 +92,7 @@ public class PerformanceTests {
 	public void testPerformanceOfMethodAccess() throws Exception {
 		long starttime = 0;
 		long endtime = 0;
-		
+
 		// warmup
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");

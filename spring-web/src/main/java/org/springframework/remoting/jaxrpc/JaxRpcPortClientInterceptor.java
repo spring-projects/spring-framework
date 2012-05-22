@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,9 +96,9 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/** Map of custom properties, keyed by property name (String) */
 	private final Map<String, Object> customPropertyMap = new HashMap<String, Object>();
 
-	private Class serviceInterface;
+	private Class<?> serviceInterface;
 
-	private Class portInterface;
+	private Class<?> portInterface;
 
 	private boolean lookupServiceOnStartup = true;
 
@@ -273,7 +273,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see javax.xml.rpc.Service#createCall
 	 * @see #setPortInterface
 	 */
-	public void setServiceInterface(Class serviceInterface) {
+	public void setServiceInterface(Class<?> serviceInterface) {
 		if (serviceInterface != null && !serviceInterface.isInterface()) {
 			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
@@ -283,7 +283,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Return the interface of the service that this factory should create a proxy for.
 	 */
-	public Class getServiceInterface() {
+	public Class<?> getServiceInterface() {
 		return this.serviceInterface;
 	}
 
@@ -301,7 +301,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see java.rmi.Remote
 	 * @see #setServiceInterface
 	 */
-	public void setPortInterface(Class portInterface) {
+	public void setPortInterface(Class<?> portInterface) {
 		if (portInterface != null &&
 				(!portInterface.isInterface() || !Remote.class.isAssignableFrom(portInterface))) {
 			throw new IllegalArgumentException(
@@ -313,7 +313,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	/**
 	 * Return the JAX-RPC port interface to use.
 	 */
-	public Class getPortInterface() {
+	public Class<?> getPortInterface() {
 		return this.portInterface;
 	}
 
@@ -380,7 +380,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 					postProcessJaxRpcService(service);
 				}
 
-				Class portInterface = getPortInterface();
+				Class<?> portInterface = getPortInterface();
 				if (portInterface != null && !alwaysUseJaxRpcCall()) {
 					// JAX-RPC-compliant port interface -> using JAX-RPC stub for port.
 
@@ -391,7 +391,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 					Remote remoteObj = service.getPort(this.portQName, portInterface);
 
 					if (logger.isDebugEnabled()) {
-						Class serviceInterface = getServiceInterface();
+						Class<?> serviceInterface = getServiceInterface();
 						if (serviceInterface != null) {
 							boolean isImpl = serviceInterface.isInstance(remoteObj);
 							logger.debug("Using service interface [" + serviceInterface.getName() + "] for JAX-RPC port [" +

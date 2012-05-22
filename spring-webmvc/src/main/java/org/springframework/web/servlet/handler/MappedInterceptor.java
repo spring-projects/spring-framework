@@ -30,9 +30,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  */
 public final class MappedInterceptor {
 
-	private final String[] includePatterns;
-
-	private final String[] excludePatterns;
+	private final String[] pathPatterns;
 
 	private final HandlerInterceptor interceptor;
 

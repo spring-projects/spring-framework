@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,11 +61,11 @@ public class SimpleNamespaceContext implements NamespaceContext {
 	}
 
 	public String getPrefix(String namespaceUri) {
-		List prefixes = getPrefixesInternal(namespaceUri);
+		List<String> prefixes = getPrefixesInternal(namespaceUri);
 		return prefixes.isEmpty() ? null : (String) prefixes.get(0);
 	}
 
-	public Iterator getPrefixes(String namespaceUri) {
+	public Iterator<String> getPrefixes(String namespaceUri) {
 		return getPrefixesInternal(namespaceUri).iterator();
 	}
 
@@ -152,7 +152,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		}
 		else {
 			String namespaceUri = prefixToNamespaceUri.remove(prefix);
-			List prefixes = getPrefixesInternal(namespaceUri);
+			List<String> prefixes = getPrefixesInternal(namespaceUri);
 			prefixes.remove(prefix);
 		}
 	}

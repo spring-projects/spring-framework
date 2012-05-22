@@ -67,7 +67,7 @@ public abstract class DigestUtils {
 	}
 
 	/**
-	 * Creates a new {@link MessageDigest} with the given algorithm. Necessary 
+	 * Creates a new {@link MessageDigest} with the given algorithm. Necessary
 	 * because {@code MessageDigest} is not thread-safe.
 	 */
 	private static MessageDigest getDigest(String algorithm) {

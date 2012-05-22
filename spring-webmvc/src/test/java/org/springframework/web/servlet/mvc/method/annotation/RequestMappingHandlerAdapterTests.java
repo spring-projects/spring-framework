@@ -190,6 +190,8 @@ public class RequestMappingHandlerAdapterTests {
 		return new InvocableHandlerMethod(handler, method);
 	}
 
+
+
 	private void assertMethodProcessorCount(int resolverCount, int initBinderResolverCount, int handlerCount) {
 		assertEquals(resolverCount, this.handlerAdapter.getArgumentResolvers().getResolvers().size());
 		assertEquals(initBinderResolverCount, this.handlerAdapter.getInitBinderArgumentResolvers().getResolvers().size());
@@ -219,15 +221,6 @@ public class RequestMappingHandlerAdapterTests {
 		public String handle(Model model) {
 			model.addAttribute("someAttr", "someAttrValue");
 			return "redirect:/path";
-		}
-	}
-
-	@ControllerAdvice
-	private static class ModelAttributeAdvice {
-
-		@ModelAttribute
-		public void addAttributes(Model model) {
-			model.addAttribute("globalAttr", "globalAttrValue");
 		}
 	}
 

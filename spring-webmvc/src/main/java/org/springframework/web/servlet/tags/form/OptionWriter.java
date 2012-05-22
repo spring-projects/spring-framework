@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,12 @@ import java.beans.PropertyEditor;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
-
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.support.BindStatus;
-import org.springframework.web.servlet.support.RequestDataValueProcessor;
-import org.springframework.web.servlet.support.RequestContext;
 
 /**
  * Provides supporting functionality to render a list of '<code>option</code>'
@@ -47,7 +41,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * the <code>labelProperty</code>). These properties are then used when
  * rendering each element of the array/{@link Collection} as an '<code>option</code>'.
  * If either property name is omitted, the value of {@link Object#toString()} of
- * the corresponding array/{@link Collection} element is used instead.  However, 
+ * the corresponding array/{@link Collection} element is used instead.  However,
  * if the item is an enum, {@link Enum#name()} is used as the default value.
  * </p>
  * <h3>Using a {@link Map}:</h3>
@@ -141,7 +135,7 @@ class OptionWriter {
 		else if (this.optionSource instanceof Map) {
 			renderFromMap(tagWriter);
 		}
-		else if (this.optionSource instanceof Class && ((Class) this.optionSource).isEnum()) {
+		else if (this.optionSource instanceof Class && ((Class<?>) this.optionSource).isEnum()) {
 			renderFromEnum(tagWriter);
 		}
 		else {
@@ -164,8 +158,8 @@ class OptionWriter {
 	 * @see #renderOption(TagWriter, Object, Object, Object)
 	 */
 	private void renderFromMap(TagWriter tagWriter) throws JspException {
-		Map<?, ?> optionMap = (Map) this.optionSource;
-		for (Map.Entry entry : optionMap.entrySet()) {
+		Map<?, ?> optionMap = (Map<?, ?>) this.optionSource;
+		for (Map.Entry<?, ?> entry : optionMap.entrySet()) {
 			Object mapKey = entry.getKey();
 			Object mapValue = entry.getValue();
 			Object renderValue = (this.valueProperty != null ?
@@ -183,7 +177,7 @@ class OptionWriter {
 	 * @see #doRenderFromCollection(java.util.Collection, TagWriter)
 	 */
 	private void renderFromCollection(TagWriter tagWriter) throws JspException {
-		doRenderFromCollection((Collection) this.optionSource, tagWriter);
+		doRenderFromCollection((Collection<?>) this.optionSource, tagWriter);
 	}
 
 	/**
@@ -191,7 +185,7 @@ class OptionWriter {
 	 * @see #doRenderFromCollection(java.util.Collection, TagWriter)
 	 */
 	private void renderFromEnum(TagWriter tagWriter) throws JspException {
-		doRenderFromCollection(CollectionUtils.arrayToList(((Class) this.optionSource).getEnumConstants()), tagWriter);
+		doRenderFromCollection(CollectionUtils.arrayToList(((Class<?>) this.optionSource).getEnumConstants()), tagWriter);
 	}
 
 	/**
@@ -200,7 +194,7 @@ class OptionWriter {
 	 * when rendering the '<code>value</code>' of the '<code>option</code>' and the value of the
 	 * {@link #labelProperty} property is used when rendering the label.
 	 */
-	private void doRenderFromCollection(Collection optionCollection, TagWriter tagWriter) throws JspException {
+	private void doRenderFromCollection(Collection<?> optionCollection, TagWriter tagWriter) throws JspException {
 		for (Object item : optionCollection) {
 			BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(item);
 			Object value;
@@ -228,7 +222,7 @@ class OptionWriter {
 
 		String valueDisplayString = getDisplayString(value);
 		String labelDisplayString = getDisplayString(label);
-		
+
 		valueDisplayString = processOptionValue(valueDisplayString);
 
 		// allows render values to handle some strange browser compat issues.
@@ -254,13 +248,13 @@ class OptionWriter {
 	}
 
 	/**
-	 * Process the option value before it is written. 
-	 * The default implementation simply returns the same value unchanged. 
+	 * Process the option value before it is written.
+	 * The default implementation simply returns the same value unchanged.
 	 */
 	protected String processOptionValue(String resolvedValue) {
 		return resolvedValue;
 	}
-	
+
 	/**
 	 * Determine whether the supplied values matched the selected value.
 	 * Delegates to {@link SelectedValueComparator#isSelected}.

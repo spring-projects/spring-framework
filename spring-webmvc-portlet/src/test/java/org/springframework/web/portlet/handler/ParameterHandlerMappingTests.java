@@ -30,9 +30,9 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
 public class ParameterHandlerMappingTests extends TestCase {
 
 	public static final String CONF = "/org/springframework/web/portlet/handler/parameterMapping.xml";
-	
-	private ConfigurablePortletApplicationContext pac; 
-	
+
+	private ConfigurablePortletApplicationContext pac;
+
 	public void setUp() throws Exception {
 		MockPortletContext portletContext = new MockPortletContext();
 		pac = new XmlPortletApplicationContext();
@@ -40,55 +40,55 @@ public class ParameterHandlerMappingTests extends TestCase {
 		pac.setConfigLocations(new String[] {CONF});
 		pac.refresh();
 	}
-	
+
 	public void testParameterMapping() throws Exception {
 		HandlerMapping hm = (HandlerMapping)pac.getBean("handlerMapping");
-		
+
 		MockPortletRequest addRequest = new MockPortletRequest();
 		addRequest.addParameter("action", "add");
 
 		MockPortletRequest removeRequest = new MockPortletRequest();
 		removeRequest.addParameter("action", "remove");
-		
+
 		Object addHandler = hm.getHandler(addRequest).getHandler();
 		Object removeHandler = hm.getHandler(removeRequest).getHandler();
-		
+
 		assertEquals(pac.getBean("addItemHandler"), addHandler);
 		assertEquals(pac.getBean("removeItemHandler"), removeHandler);
 	}
-	
+
 	public void testUnregisteredHandlerWithNoDefault() throws Exception {
 		HandlerMapping hm = (HandlerMapping)pac.getBean("handlerMapping");
-		
+
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("action", "modify");
 
-		assertNull(hm.getHandler(request));		
+		assertNull(hm.getHandler(request));
 	}
 
 	public void testUnregisteredHandlerWithDefault() throws Exception {
 		ParameterHandlerMapping hm = (ParameterHandlerMapping)pac.getBean("handlerMapping");
 		Object defaultHandler = new Object();
 		hm.setDefaultHandler(defaultHandler);
-		
+
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("action", "modify");
 
 		assertNotNull(hm.getHandler(request));
 		assertEquals(defaultHandler, hm.getHandler(request).getHandler());
 	}
-	
+
 	public void testConfiguredParameterName() throws Exception {
 		ParameterHandlerMapping hm = (ParameterHandlerMapping)pac.getBean("handlerMapping");
 		hm.setParameterName("someParam");
-	
+
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("someParam", "add");
-		
+
 		Object handler = hm.getHandler(request).getHandler();
 		assertEquals(pac.getBean("addItemHandler"), handler);
 	}
-	
+
 	public void testDuplicateMappingAttempt() {
 		ParameterHandlerMapping hm = (ParameterHandlerMapping)pac.getBean("handlerMapping");
 		try {

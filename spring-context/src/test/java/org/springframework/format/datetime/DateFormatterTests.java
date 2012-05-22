@@ -43,10 +43,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  */
 public class DateFormatterTests {
 
-	@Rule
-	public ExpectedException thown = ExpectedException.none();
-
-	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+	private DateFormatter formatter = new DateFormatter("yyyy-MM-dd");
 
 	@Test
 	public void shouldPrintAndParseDefault() throws Exception {

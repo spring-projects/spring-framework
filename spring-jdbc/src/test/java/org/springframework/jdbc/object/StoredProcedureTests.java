@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,13 +213,13 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 	}
 
-		
+
 	/**
 	 * Confirm no connection was used to get metadata.
 	 * Does not use superclass replay mechanism.
 	 * @throws Exception
 	 */
-	public void testStoredProcedureConfiguredViaJdbcTemplateWithCustomExceptionTranslator() throws Exception {					
+	public void testStoredProcedureConfiguredViaJdbcTemplateWithCustomExceptionTranslator() throws Exception {
 		mockCallable.setObject(1, new Integer(11), Types.INTEGER);
 		ctrlCallable.setVoidCallable(1);
 		mockCallable.registerOutParameter(2, Types.INTEGER);
@@ -246,7 +246,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		mockConnection.close();
 		ctrlConnection.setVoidCallable(1);
 		ctrlConnection.replay();
-		
+
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource localDs = (DataSource) dsControl.getMock();
 		localDs.getConnection();
@@ -255,7 +255,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 
 		class TestJdbcTemplate extends JdbcTemplate {
 			int calls;
-			public Map call(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
+			public Map<String, Object> call(CallableStatementCreator csc, List<SqlParameter> declaredParameters) throws DataAccessException {
 				calls++;
 				return super.call(csc, declaredParameters);
 			}
@@ -267,15 +267,15 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		// DataSource here if we need to to create an ExceptionTranslator
 		t.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
-		
+
 		assertEquals(sp.execute(11), 5);
 		assertEquals(1, t.calls);
-		
+
 		dsControl.verify();
 		ctrlCallable.verify();
 		ctrlConnection.verify();
 	}
-	
+
 	/**
 	 * Confirm our JdbcTemplate is used
 	 * @throws Exception
@@ -301,11 +301,11 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		mockConnection.prepareCall("{call " + StoredProcedureConfiguredViaJdbcTemplate.SQL + "(?, ?)}");
 		ctrlConnection.setReturnValue(mockCallable);
 
-		replay();	
+		replay();
 		JdbcTemplate t = new JdbcTemplate();
 		t.setDataSource(mockDataSource);
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
-	
+
 		assertEquals(sp.execute(1106), 4);
 	}
 
@@ -341,8 +341,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 	public void testUnnamedParameter() throws Exception {
 		replay();
 		try {
-			UnnamedParameterStoredProcedure unp =
-				new UnnamedParameterStoredProcedure(mockDataSource);
+			new UnnamedParameterStoredProcedure(mockDataSource);
 			fail("Shouldn't succeed in creating stored procedure with unnamed parameter");
 		} catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK
@@ -429,7 +428,8 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlResultSet.verify();
 		assertEquals(2, sproc.getCount());
 	}
-	
+
+	@SuppressWarnings("unchecked")
 	public void testStoredProcedureWithResultSetMapped() throws Exception {
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
@@ -470,17 +470,18 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlResultSet.replay();
 
 		StoredProcedureWithResultSetMapped sproc = new StoredProcedureWithResultSetMapped(mockDataSource);
-		Map res = sproc.execute();
+		Map<String, Object> res = sproc.execute();
 
 		ctrlResultSet.verify();
-		
-		List rs = (List) res.get("rs");
+
+		List<String> rs = (List<String>) res.get("rs");
 		assertEquals(2, rs.size());
 		assertEquals("Foo", rs.get(0));
-		assertEquals("Bar", rs.get(1));		
+		assertEquals("Bar", rs.get(1));
 
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testStoredProcedureWithUndeclaredResults() throws Exception {
 		MockControl ctrlResultSet1 = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet1 = (ResultSet) ctrlResultSet1.getMock();
@@ -557,23 +558,23 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlResultSet2.replay();
 
 		StoredProcedureWithResultSetMapped sproc = new StoredProcedureWithResultSetMapped(mockDataSource);
-		Map res = sproc.execute();
+		Map<String, Object> res = sproc.execute();
 
 		ctrlResultSet1.verify();
 		ctrlResultSet2.verify();
 
 		assertEquals("incorrect number of returns", 3, res.size());
 
-		List rs1 = (List) res.get("rs");
+		List<String> rs1 = (List<String>) res.get("rs");
 		assertEquals(2, rs1.size());
 		assertEquals("Foo", rs1.get(0));
 		assertEquals("Bar", rs1.get(1));
 
-		List rs2 = (List) res.get("#result-set-2");
+		List<Object> rs2 = (List<Object>) res.get("#result-set-2");
 		assertEquals(1, rs2.size());
 		Object o2 = rs2.get(0);
 		assertTrue("wron type returned for result set 2", o2 instanceof Map);
-		Map m2 = (Map) o2;
+		Map<String, String> m2 = (Map<String, String>) o2;
 		assertEquals("Spam", m2.get("spam"));
 		assertEquals("Eggs", m2.get("eggs"));
 
@@ -601,11 +602,12 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(mockDataSource);
 		jdbcTemplate.setSkipResultsProcessing(true);
 		StoredProcedureWithResultSetMapped sproc = new StoredProcedureWithResultSetMapped(jdbcTemplate);
-		Map res = sproc.execute();
+		Map<String, Object> res = sproc.execute();
 
 		assertEquals("incorrect number of returns", 0, res.size());
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testStoredProcedureSkippingUndeclaredResults() throws Exception {
 		MockControl ctrlResultSet1 = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet1 = (ResultSet) ctrlResultSet1.getMock();
@@ -652,13 +654,13 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(mockDataSource);
 		jdbcTemplate.setSkipUndeclaredResults(true);
 		StoredProcedureWithResultSetMapped sproc = new StoredProcedureWithResultSetMapped(jdbcTemplate);
-		Map res = sproc.execute();
+		Map<String, Object> res = sproc.execute();
 
 		ctrlResultSet1.verify();
 
 		assertEquals("incorrect number of returns", 1, res.size());
 
-		List rs1 = (List) res.get("rs");
+		List<String> rs1 = (List<String>) res.get("rs");
 		assertEquals(2, rs1.size());
 		assertEquals("Foo", rs1.get(0));
 		assertEquals("Bar", rs1.get(1));
@@ -688,7 +690,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 
 		replay();
 		ParameterMapperStoredProcedure pmsp = new ParameterMapperStoredProcedure(mockDataSource);
-		Map out = pmsp.executeTest();
+		Map<String, Object> out = pmsp.executeTest();
 		assertEquals("OK", out.get("out"));
 	}
 
@@ -719,7 +721,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 
 		replay();
 		SqlTypeValueStoredProcedure stvsp = new SqlTypeValueStoredProcedure(mockDataSource);
-		Map out = stvsp.executeTest(testVal);
+		Map<String, Object> out = stvsp.executeTest(testVal);
 		assertEquals("OK", out.get("out"));
 	}
 
@@ -747,12 +749,12 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 
 		replay();
 		NumericWithScaleStoredProcedure nwssp = new NumericWithScaleStoredProcedure(mockDataSource);
-		Map out = nwssp.executeTest();
+		Map<String, Object> out = nwssp.executeTest();
 		assertEquals(new BigDecimal("12345.6789"), out.get("out"));
 	}
 
 
-	private static class StoredProcedureConfiguredViaJdbcTemplate extends StoredProcedure {
+	public static class StoredProcedureConfiguredViaJdbcTemplate extends StoredProcedure {
 
 		public static final String SQL = "configured_via_jt";
 
@@ -765,16 +767,16 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		public int execute(int intIn) {
-			Map in = new HashMap();
+			HashMap<String, Integer> in = new HashMap<String, Integer>();
 			in.put("intIn", new Integer(intIn));
-			Map out = execute(in);
+			Map<String, Object> out = execute(in);
 			Number intOut = (Number) out.get("intOut");
 			return intOut.intValue();
 		}
 	}
 
 
-	private static class AddInvoice extends StoredProcedure {
+	public static class AddInvoice extends StoredProcedure {
 
 		public static final String SQL = "add_invoice";
 
@@ -788,16 +790,16 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		public int execute(int amount, int custid) {
-			Map in = new HashMap();
+			Map<String, Integer> in = new HashMap<String, Integer>();
 			in.put("amount", new Integer(amount));
 			in.put("custid", new Integer(custid));
-			Map out = execute(in);
+			Map<String, Object> out = execute(in);
 			Number id = (Number) out.get("newid");
 			return id.intValue();
 		}
 	}
 
-	private static class AddInvoiceUsingObjectArray extends StoredProcedure {
+	public static class AddInvoiceUsingObjectArray extends StoredProcedure {
 
 		public static final String SQL = "add_invoice";
 
@@ -811,7 +813,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		public int execute(int amount, int custid) {
-			Map out = execute(new Object[] {amount, custid});
+			Map<String, Object> out = execute(new Object[] {amount, custid});
 			System.out.println("####### " + out);
 			Number id = (Number) out.get("newid");
 			return id.intValue();
@@ -819,7 +821,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 	}
 
 
-	private static class NullArg extends StoredProcedure {
+	public static class NullArg extends StoredProcedure {
 
 		public static final String SQL = "takes_null";
 
@@ -831,14 +833,14 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		public void execute(String s) {
-			Map in = new HashMap();
+			Map<String, String> in = new HashMap<String, String>();
 			in.put("ptest", s);
-			Map out = execute(in);
+			execute(in);
 		}
 	}
 
 
-	private static class NoSuchStoredProcedure extends StoredProcedure {
+	public static class NoSuchStoredProcedure extends StoredProcedure {
 
 		public static final String SQL = "no_sproc_with_this_name";
 
@@ -849,12 +851,12 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		public void execute() {
-			execute(new HashMap());
+			execute(new HashMap<String, Object>());
 		}
 	}
 
 
-	private static class UnnamedParameterStoredProcedure extends StoredProcedure {
+	public static class UnnamedParameterStoredProcedure extends StoredProcedure {
 
 		public UnnamedParameterStoredProcedure(DataSource ds) {
 			super(ds, "unnamed_parameter_sp");
@@ -863,14 +865,14 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		public void execute(int id) {
-			Map in = new HashMap();
+			Map<String, Integer> in = new HashMap<String, Integer>();
 			in.put("id", new Integer(id));
-			Map out = execute(in);
+			execute(in);
 		}
 	}
 
 
-	private static class MissingParameterStoredProcedure extends StoredProcedure {
+	public static class MissingParameterStoredProcedure extends StoredProcedure {
 
 		public MissingParameterStoredProcedure(DataSource ds) {
 			setDataSource(ds);
@@ -880,12 +882,12 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		public void execute() {
-			execute(new HashMap());
+			execute(new HashMap<String, Object>());
 		}
 	}
 
 
-	private static class StoredProcedureWithResultSet extends StoredProcedure {
+	public static class StoredProcedureWithResultSet extends StoredProcedure {
 
 		public static final String SQL = "sproc_with_result_set";
 
@@ -899,7 +901,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		public void execute() {
-			execute(new HashMap());
+			execute(new HashMap<String, Object>());
 		}
 
 		public int getCount() {
@@ -908,7 +910,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 	}
 
 
-	private static class StoredProcedureWithResultSetMapped extends StoredProcedure {
+	public static class StoredProcedureWithResultSetMapped extends StoredProcedure {
 
 		public static final String SQL = "sproc_with_result_set";
 
@@ -928,20 +930,20 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			compile();
 		}
 
-		public Map execute() {
-			Map out = execute(new HashMap());
+		public Map<String, Object> execute() {
+			Map<String, Object> out = execute(new HashMap<String, Object>());
 			return out;
 		}
 
-		private static class RowMapperImpl implements RowMapper {
-			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+		private static class RowMapperImpl implements RowMapper<String> {
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return rs.getString(2);
 			}
 		}
 	}
 
 
-	private static class ParameterMapperStoredProcedure extends StoredProcedure {
+	public static class ParameterMapperStoredProcedure extends StoredProcedure {
 
 		public static final String SQL = "parameter_mapper_sp";
 
@@ -953,19 +955,19 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			compile();
 		}
 
-		public Map executeTest() {
-			Map out = null;
+		public Map<String, Object> executeTest() {
+			Map<String, Object> out = null;
 			out = execute(new TestParameterMapper());
 			return out;
 		}
-		
+
 		private static class TestParameterMapper implements ParameterMapper {
-			
+
 			private TestParameterMapper() {
 			}
-			
-			public Map createMap(Connection conn) throws SQLException {
-				Map inParms = new HashMap();
+
+			public Map<String, String> createMap(Connection conn) throws SQLException {
+				Map<String, String> inParms = new HashMap<String, String>();
 				String testValue = conn.toString();
 				inParms.put("in", testValue);
 				return inParms;
@@ -974,7 +976,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 	}
 
 
-	private static class SqlTypeValueStoredProcedure extends StoredProcedure {
+	public static class SqlTypeValueStoredProcedure extends StoredProcedure {
 
 		public static final String SQL = "sql_type_value_sp";
 
@@ -986,8 +988,8 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			compile();
 		}
 
-		public Map executeTest(final int[] inValue) {
-			Map in = new HashMap(1);
+		public Map<String, Object> executeTest(final int[] inValue) {
+			Map<String, AbstractSqlTypeValue> in = new HashMap<String, AbstractSqlTypeValue>(1);
 			in.put("in", new AbstractSqlTypeValue() {
 				public Object createTypeValue(Connection con, int type, String typeName) {
 					//assertEquals(Connection.class, con.getClass());
@@ -996,13 +998,13 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 					return inValue;
 				}
 			});
-			Map out = null;
+			Map<String, Object> out = null;
 			out = execute(in);
 			return out;
 		}
 	}
 
-	private static class NumericWithScaleStoredProcedure extends StoredProcedure {
+	public static class NumericWithScaleStoredProcedure extends StoredProcedure {
 
 		public static final String SQL = "numeric_with_scale_sp";
 
@@ -1013,16 +1015,16 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			compile();
 		}
 
-		public Map executeTest() {
-			Map in = new HashMap(1);
-			Map out = null;
+		public Map<String, Object> executeTest() {
+			Map<String, Object> in = new HashMap<String, Object>(1);
+			Map<String, Object> out = null;
 			out = execute(in);
 			return out;
 		}
 	}
 
 
-	private static class StoredProcedureExceptionTranslator extends StoredProcedure {
+	public static class StoredProcedureExceptionTranslator extends StoredProcedure {
 
 		public static final String SQL = "no_sproc_with_this_name";
 
@@ -1042,12 +1044,12 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		public void execute() {
-			execute(new HashMap());
+			execute(new HashMap<String, Object>());
 		}
 	}
 
 
-	private static class CustomDataException extends DataAccessException {
+	public static class CustomDataException extends DataAccessException {
 
 		public CustomDataException(String s) {
 			super(s);

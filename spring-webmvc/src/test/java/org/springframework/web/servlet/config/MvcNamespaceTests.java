@@ -121,11 +121,6 @@ public class MvcNamespaceTests {
 		assertEquals(0, mapping.getOrder());
 		mapping.setDefaultHandler(handlerMethod);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
-		NativeWebRequest webRequest = new ServletWebRequest(request);
-		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
-		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
-
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 		assertEquals(false, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
@@ -460,39 +455,6 @@ public class MvcNamespaceTests {
 		assertNotNull(beanNameMapping);
 		assertEquals(2, beanNameMapping.getOrder());
 	}
-
-	@Test
-	public void testContentNegotiationManager() throws Exception {
-		loadBeanDefinitions("mvc-config-content-negotiation-manager.xml", 12);
-
-		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
-		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
-
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.xml");
-		NativeWebRequest webRequest = new ServletWebRequest(request);
-		assertEquals(Arrays.asList(MediaType.valueOf("application/rss+xml")), manager.resolveMediaTypes(webRequest));
-	}
-
-	@Test
-	public void testAsyncSupportOptions() throws Exception {
-		loadBeanDefinitions("mvc-config-async-support.xml", 13);
-
-		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
-		assertNotNull(adapter);
-
-		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
-		assertEquals(ConcurrentTaskExecutor.class, fieldAccessor.getPropertyValue("taskExecutor").getClass());
-		assertEquals(2500L, fieldAccessor.getPropertyValue("asyncRequestTimeout"));
-
-		CallableProcessingInterceptor[] callableInterceptors =
-				(CallableProcessingInterceptor[]) fieldAccessor.getPropertyValue("callableInterceptors");
-		assertEquals(1, callableInterceptors.length);
-
-		DeferredResultProcessingInterceptor[] deferredResultInterceptors =
-				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
-		assertEquals(1, deferredResultInterceptors.length);
-	}
-
 
 	private void loadBeanDefinitions(String fileName, int expectedBeanCount) {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);

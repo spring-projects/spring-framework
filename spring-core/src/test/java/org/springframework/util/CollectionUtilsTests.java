@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,16 +40,16 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testIsEmpty() {
-		assertTrue(CollectionUtils.isEmpty((Set) null));
-		assertTrue(CollectionUtils.isEmpty((Map) null));
-		assertTrue(CollectionUtils.isEmpty(new HashMap()));
-		assertTrue(CollectionUtils.isEmpty(new HashSet()));
+		assertTrue(CollectionUtils.isEmpty((Set<?>) null));
+		assertTrue(CollectionUtils.isEmpty((Map<?, ?>) null));
+		assertTrue(CollectionUtils.isEmpty(new HashMap<Object, Object>()));
+		assertTrue(CollectionUtils.isEmpty(new HashSet<Object>()));
 
-		List list = new LinkedList();
+		List<Object> list = new LinkedList<Object>();
 		list.add(new Object());
 		assertFalse(CollectionUtils.isEmpty(list));
 
-		Map map = new HashMap();
+		HashMap<Object, Object> map = new HashMap<Object, Object>();
 		map.put("foo", "bar");
 		assertFalse(CollectionUtils.isEmpty(map));
 	}
@@ -57,7 +57,7 @@ public class CollectionUtilsTests {
 	@Test
 	public void testMergeArrayIntoCollection() {
 		Object[] arr = new Object[] {"value1", "value2"};
-		List list = new LinkedList();
+		List<Object> list = new LinkedList<Object>();
 		list.add("value3");
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
@@ -69,7 +69,7 @@ public class CollectionUtilsTests {
 	@Test
 	public void testMergePrimitiveArrayIntoCollection() {
 		int[] arr = new int[] {1, 2};
-		List list = new LinkedList();
+		List<Object> list = new LinkedList<Object>();
 		list.add(new Integer(3));
 
 		CollectionUtils.mergeArrayIntoCollection(arr, list);
@@ -86,7 +86,7 @@ public class CollectionUtilsTests {
 		props.setProperty("prop2", "value2");
 		props.put("prop3", new Integer(3));
 
-		Map map = new HashMap();
+		Map<Object, Object> map = new HashMap<Object, Object>();
 		map.put("prop4", "value4");
 
 		CollectionUtils.mergePropertiesIntoMap(props, map);
@@ -98,28 +98,28 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testContains() {
-		assertFalse(CollectionUtils.contains((Iterator) null, "myElement"));
-		assertFalse(CollectionUtils.contains((Enumeration) null, "myElement"));
-		assertFalse(CollectionUtils.contains(new LinkedList().iterator(), "myElement"));
-		assertFalse(CollectionUtils.contains(new Hashtable().keys(), "myElement"));
+		assertFalse(CollectionUtils.contains((Iterator<?>) null, "myElement"));
+		assertFalse(CollectionUtils.contains((Enumeration<?>) null, "myElement"));
+		assertFalse(CollectionUtils.contains(new LinkedList<Object>().iterator(), "myElement"));
+		assertFalse(CollectionUtils.contains(new Hashtable<Object, Object>().keys(), "myElement"));
 
-		List list = new LinkedList();
+		List<Object> list = new LinkedList<Object>();
 		list.add("myElement");
 		assertTrue(CollectionUtils.contains(list.iterator(), "myElement"));
 
-		Hashtable ht = new Hashtable();
+		Hashtable<Object, Object> ht = new Hashtable<Object, Object>();
 		ht.put("myElement", "myValue");
 		assertTrue(CollectionUtils.contains(ht.keys(), "myElement"));
 	}
 
 	@Test
 	public void testContainsAny() throws Exception {
-		List source = new ArrayList();
+		ArrayList<Object> source = new ArrayList<Object>();
 		source.add("abc");
 		source.add("def");
 		source.add("ghi");
 
-		List candidates = new ArrayList();
+		ArrayList<Object> candidates = new ArrayList<Object>();
 		candidates.add("xyz");
 		candidates.add("def");
 		candidates.add("abc");
@@ -139,7 +139,7 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testContainsInstanceWithInstancesThatAreEqualButDistinct() throws Exception {
-		List list = new ArrayList();
+		List<Object> list = new ArrayList<Object>();
 		list.add(new Instance("fiona"));
 		assertFalse("Must return false if instance is not in the supplied Collection argument",
 				CollectionUtils.containsInstance(list, new Instance("fiona")));
@@ -147,7 +147,7 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testContainsInstanceWithSameInstance() throws Exception {
-		List list = new ArrayList();
+		List<Object> list = new ArrayList<Object>();
 		list.add(new Instance("apple"));
 		Instance instance = new Instance("fiona");
 		list.add(instance);
@@ -157,7 +157,7 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testContainsInstanceWithNullInstance() throws Exception {
-		List list = new ArrayList();
+		List<Object> list = new ArrayList<Object>();
 		list.add(new Instance("apple"));
 		list.add(new Instance("fiona"));
 		assertFalse("Must return false if null instance is supplied",
@@ -166,12 +166,12 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testFindFirstMatch() throws Exception {
-		List source = new ArrayList();
+		List<Object> source = new ArrayList<Object>();
 		source.add("abc");
 		source.add("def");
 		source.add("ghi");
 
-		List candidates = new ArrayList();
+		List<Object> candidates = new ArrayList<Object>();
 		candidates.add("xyz");
 		candidates.add("def");
 		candidates.add("abc");
@@ -181,35 +181,35 @@ public class CollectionUtilsTests {
 
 	@Test
 	public void testHasUniqueObject() {
-		List list = new LinkedList();
+		List<Object> list = new LinkedList<Object>();
 		list.add("myElement");
 		list.add("myOtherElement");
 		assertFalse(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList();
+		list = new LinkedList<Object>();
 		list.add("myElement");
 		assertTrue(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList();
+		list = new LinkedList<Object>();
 		list.add("myElement");
 		list.add(null);
 		assertFalse(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList();
+		list = new LinkedList<Object>();
 		list.add(null);
 		list.add("myElement");
 		assertFalse(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList();
+		list = new LinkedList<Object>();
 		list.add(null);
 		list.add(null);
 		assertTrue(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList();
+		list = new LinkedList<Object>();
 		list.add(null);
 		assertTrue(CollectionUtils.hasUniqueObject(list));
 
-		list = new LinkedList();
+		list = new LinkedList<Object>();
 		assertFalse(CollectionUtils.hasUniqueObject(list));
 	}
 

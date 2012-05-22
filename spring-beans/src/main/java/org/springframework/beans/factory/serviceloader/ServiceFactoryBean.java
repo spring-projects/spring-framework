@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
  * @since 2.5
  * @see java.util.ServiceLoader
  */
-public class ServiceFactoryBean extends AbstractServiceLoaderBasedFactoryBean implements BeanClassLoaderAware {
+public class ServiceFactoryBean<T> extends AbstractServiceLoaderBasedFactoryBean<T, T> implements BeanClassLoaderAware {
 
 	@Override
-	protected Object getObjectToExpose(ServiceLoader serviceLoader) {
-		Iterator it = serviceLoader.iterator();
+	protected T getObjectToExpose(ServiceLoader<T> serviceLoader) {
+		Iterator<T> it = serviceLoader.iterator();
 		if (!it.hasNext()) {
 			throw new IllegalStateException(
 					"ServiceLoader could not find service for type [" + getServiceType() + "]");
@@ -43,7 +43,7 @@ public class ServiceFactoryBean extends AbstractServiceLoaderBasedFactoryBean im
 	}
 
 	@Override
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return getServiceType();
 	}
 

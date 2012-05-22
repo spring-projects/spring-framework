@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class PortletWrappingController extends AbstractController
 
 	private PortletConfig portletConfig;
 
-	private Class portletClass;
+	private Class<?> portletClass;
 
 	private String portletName;
 
@@ -126,7 +126,7 @@ public class PortletWrappingController extends AbstractController
 	 * Needs to implement <code>javax.portlet.Portlet</code>.
 	 * @see javax.portlet.Portlet
 	 */
-	public void setPortletClass(Class portletClass) {
+	public void setPortletClass(Class<?> portletClass) {
 		this.portletClass = portletClass;
 	}
 

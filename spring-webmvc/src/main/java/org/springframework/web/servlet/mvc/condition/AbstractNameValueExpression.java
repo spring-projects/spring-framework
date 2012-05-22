@@ -19,8 +19,8 @@ package org.springframework.web.servlet.mvc.condition;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Supports "name=value" style expressions as described in: 
- * {@link org.springframework.web.bind.annotation.RequestMapping#params()} and 
+ * Supports "name=value" style expressions as described in:
+ * {@link org.springframework.web.bind.annotation.RequestMapping#params()} and
  * {@link org.springframework.web.bind.annotation.RequestMapping#headers()}.
  *
  * @author Rossen Stoyanchev
@@ -48,7 +48,7 @@ abstract class AbstractNameValueExpression<T> implements NameValueExpression<T> 
 			this.value = parseValue(expression.substring(separator + 1));
 		}
 	}
-	
+
 	public String getName() {
 		return this.name;
 	}

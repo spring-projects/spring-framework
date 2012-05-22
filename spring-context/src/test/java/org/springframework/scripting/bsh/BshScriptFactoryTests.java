@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,7 +241,7 @@ public class BshScriptFactoryTests extends TestCase {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		TestBean testBean = (TestBean) ctx.getBean("testBean");
 
-		Collection beanNames = Arrays.asList(ctx.getBeanNamesForType(Messenger.class));
+		Collection<String> beanNames = Arrays.asList(ctx.getBeanNamesForType(Messenger.class));
 		assertTrue(beanNames.contains("messenger"));
 		assertTrue(beanNames.contains("messengerImpl"));
 		assertTrue(beanNames.contains("messengerInstance"));
@@ -262,7 +262,7 @@ public class BshScriptFactoryTests extends TestCase {
 		TestBeanAwareMessenger messengerByName = (TestBeanAwareMessenger) ctx.getBean("messengerByName");
 		assertEquals(testBean, messengerByName.getTestBean());
 
-		Collection beans = ctx.getBeansOfType(Messenger.class).values();
+		Collection<Messenger> beans = ctx.getBeansOfType(Messenger.class).values();
 		assertTrue(beans.contains(messenger));
 		assertTrue(beans.contains(messengerImpl));
 		assertTrue(beans.contains(messengerInstance));

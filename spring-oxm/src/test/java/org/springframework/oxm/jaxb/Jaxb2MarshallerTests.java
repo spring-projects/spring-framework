@@ -52,7 +52,6 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertFalse;
 import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.custommonkey.xmlunit.XMLAssert.fail;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
 
@@ -163,7 +162,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.afterPropertiesSet();
 		testSupports();
 	}
-	
+
 	@Test
 	public void supportsPackagesToScan() throws Exception {
 		marshaller = new Jaxb2Marshaller();
@@ -261,7 +260,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		assertFalse("Jaxb2Marshaller supports DummyType class", marshaller.supports(DummyType.class));
 		assertFalse("Jaxb2Marshaller supports DummyType type", marshaller.supports((Type)DummyType.class));
 	}
-	
+
 
 	@Test
 	public void marshalAttachments() throws Exception {
@@ -307,5 +306,5 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	private JAXBElement<DummyType> createDummyType() {
 		return null;
 	}
-	
+
 }

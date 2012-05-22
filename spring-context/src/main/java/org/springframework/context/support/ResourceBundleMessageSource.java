@@ -135,7 +135,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @see #setBasename
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
-	public void setBasenames(String... basenames)  {
+	public void setBasenames(String... basenames) {
 		if (basenames != null) {
 			this.basenames = new String[basenames.length];
 			for (int i = 0; i < basenames.length; i++) {

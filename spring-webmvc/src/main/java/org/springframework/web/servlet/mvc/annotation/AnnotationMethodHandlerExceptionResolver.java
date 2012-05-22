@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.transform.Source;
 
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.GenericTypeResolver;
@@ -96,7 +97,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 
 	private HttpMessageConverter<?>[] messageConverters =
 			new HttpMessageConverter[] {new ByteArrayHttpMessageConverter(), new StringHttpMessageConverter(),
-					new SourceHttpMessageConverter(), new XmlAwareFormHttpMessageConverter()};
+					new SourceHttpMessageConverter<Source>(), new XmlAwareFormHttpMessageConverter()};
 
 
 	/**
@@ -413,7 +414,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private ModelAndView handleResponseBody(Object returnValue, ServletWebRequest webRequest)
 			throws ServletException, IOException {
 
@@ -427,9 +428,9 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		Class<?> returnValueType = returnValue.getClass();
 		if (this.messageConverters != null) {
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {
-				for (HttpMessageConverter messageConverter : this.messageConverters) {
+				for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 					if (messageConverter.canWrite(returnValueType, acceptedMediaType)) {
-						messageConverter.write(returnValue, acceptedMediaType, outputMessage);
+						((HttpMessageConverter)messageConverter).write(returnValue, acceptedMediaType, outputMessage);
 						return new ModelAndView();
 					}
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.jdbc.core.test.Person;
 /**
  * @author Thomas Risberg
  */
+@SuppressWarnings("deprecation")
 public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTests {
 
 	private SimpleJdbcTemplate simpleJdbcTemplate;
@@ -36,6 +37,7 @@ public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTe
 		simpleJdbcTemplate = new SimpleJdbcTemplate(jdbcTemplate);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testOverridingClassDefinedForMapping() {
 		ParameterizedBeanPropertyRowMapper<Person> mapper =
 				ParameterizedBeanPropertyRowMapper.newInstance(Person.class);
@@ -56,7 +58,7 @@ public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTe
 
 	public void testStaticQueryWithRowMapper() throws SQLException {
 		List<Person> result = simpleJdbcTemplate.query("select name, age, birth_date, balance from people",
-				ParameterizedBeanPropertyRowMapper.newInstance(Person.class));
+				ParameterizedBeanPropertyRowMapper.<Person>newInstance(Person.class));
 		assertEquals(1, result.size());
 		Person bean = result.get(0);
 		verifyPerson(bean);

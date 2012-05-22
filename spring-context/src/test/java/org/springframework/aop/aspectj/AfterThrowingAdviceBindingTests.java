@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,14 +43,14 @@ public final class AfterThrowingAdviceBindingTests {
 	public void setUp() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-		
+
 		testBean = (ITestBean) ctx.getBean("testBean");
 		afterThrowingAdviceAspect = (AfterThrowingAdviceBindingTestAspect) ctx.getBean("testAspect");
-		
+
 		mockCollaborator = createNiceMock(AfterThrowingAdviceBindingCollaborator.class);
 		afterThrowingAdviceAspect.setCollaborator(mockCollaborator);
 	}
-	
+
 	@After
 	public void tearDown() {
 		verify(mockCollaborator);
@@ -62,7 +62,7 @@ public final class AfterThrowingAdviceBindingTests {
 		replay(mockCollaborator);
 		this.testBean.exceptional(new Throwable());
 	}
-	
+
 	@Test(expected=Throwable.class)
 	public void testAfterThrowingWithBinding() throws Throwable {
 		Throwable t = new Throwable();
@@ -70,14 +70,14 @@ public final class AfterThrowingAdviceBindingTests {
 		replay(mockCollaborator);
 		this.testBean.exceptional(t);
 	}
-	
+
 	@Test(expected=Throwable.class)
 	public void testAfterThrowingWithNamedTypeRestriction() throws Throwable {
 		Throwable t = new Throwable();
 		// need a strict mock for this test...
 		mockCollaborator = createMock(AfterThrowingAdviceBindingCollaborator.class);
 		afterThrowingAdviceAspect.setCollaborator(mockCollaborator);
-		
+
 		mockCollaborator.noArgs();
 		mockCollaborator.oneThrowable(t);
 		mockCollaborator.noArgsOnThrowableMatch();
@@ -113,7 +113,7 @@ public final class AfterThrowingAdviceBindingTests {
 
 final class AfterThrowingAdviceBindingTestAspect {
 
-	// collaborator interface that makes it easy to test this aspect is 
+	// collaborator interface that makes it easy to test this aspect is
 	// working as expected through mocking.
 	public interface AfterThrowingAdviceBindingCollaborator {
 		void noArgs();
@@ -122,29 +122,29 @@ final class AfterThrowingAdviceBindingTestAspect {
 		void noArgsOnThrowableMatch();
 		void noArgsOnRuntimeExceptionMatch();
 	}
-	
+
 	protected AfterThrowingAdviceBindingCollaborator collaborator = null;
-	
+
 	public void setCollaborator(AfterThrowingAdviceBindingCollaborator aCollaborator) {
 		this.collaborator = aCollaborator;
 	}
-	
+
 	public void noArgs() {
 		this.collaborator.noArgs();
 	}
-	
+
 	public void oneThrowable(Throwable t) {
 		this.collaborator.oneThrowable(t);
 	}
-	
+
 	public void oneRuntimeException(RuntimeException ex) {
 		this.collaborator.oneRuntimeException(ex);
 	}
-	
+
 	public void noArgsOnThrowableMatch() {
 		this.collaborator.noArgsOnThrowableMatch();
 	}
-	
+
 	public void noArgsOnRuntimeExceptionMatch() {
 		this.collaborator.noArgsOnRuntimeExceptionMatch();
 	}

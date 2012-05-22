@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class ConversionNotSupportedException extends TypeMismatchException {
 	 * @param requiredType the required target type (or <code>null</code> if not known)
 	 * @param cause the root cause (may be <code>null</code>)
 	 */
-	public ConversionNotSupportedException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable cause) {
+	public ConversionNotSupportedException(PropertyChangeEvent propertyChangeEvent, Class<?> requiredType, Throwable cause) {
 		super(propertyChangeEvent, requiredType, cause);
 	}
 
@@ -43,7 +43,7 @@ public class ConversionNotSupportedException extends TypeMismatchException {
 	 * @param requiredType the required target type (or <code>null</code> if not known)
 	 * @param cause the root cause (may be <code>null</code>)
 	 */
-	public ConversionNotSupportedException(Object value, Class requiredType, Throwable cause) {
+	public ConversionNotSupportedException(Object value, Class<?> requiredType, Throwable cause) {
 		super(value, requiredType, cause);
 	}
 

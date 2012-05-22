@@ -614,6 +614,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 			super.setTestBean2(testBean2);
 		}
 
+		@SuppressWarnings("unused")
 		@Inject
 		private void inject(ITestBean testBean4, T nestedTestBean) {
 			this.testBean4 = testBean4;
@@ -667,6 +668,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 			super.setTestBean2(testBean2);
 		}
 
+		@SuppressWarnings("unused")
 		@Inject
 		private void inject(ITestBean testBean4, NestedTestBean[] nestedTestBeans, IndexedTestBean indexedTestBean) {
 			this.testBean4 = testBean4;
@@ -713,6 +715,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 			super.setTestBean2(testBean2);
 		}
 
+		@SuppressWarnings("unused")
 		@Inject
 		private void inject(ITestBean testBean4, List<NestedTestBean> nestedTestBeans, IndexedTestBean indexedTestBean) {
 			this.testBean4 = testBean4;

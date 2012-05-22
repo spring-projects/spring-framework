@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ import org.springframework.web.servlet.ModelAndView;
  *      gets applied to populate the new form object with initial request parameters and the
  *      {@link #onBindOnNewForm(HttpServletRequest, Object, BindException)} callback method is
  *      called. <em>Note:</em> any defined Validators are not applied at this point, to allow
- *      partial binding. However be aware that any Binder customizations applied via 
+ *      partial binding. However be aware that any Binder customizations applied via
  *      initBinder() (such as
  *      {@link org.springframework.validation.DataBinder#setRequiredFields(String[])} will
  *      still apply. As such, if using bindOnNewForm=true and initBinder() customizations are
@@ -556,7 +556,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final ModelAndView showForm(
-			HttpServletRequest request, BindException errors, String viewName, Map controlModel)
+			HttpServletRequest request, BindException errors, String viewName, Map<String, ?> controlModel)
 			throws Exception {
 
 		// In session form mode, re-expose form object as HTTP session attribute.
@@ -572,10 +572,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 		// Fetch errors model as starting point, containing form object under
 		// "commandName", and corresponding Errors instance under internal key.
-		Map model = errors.getModel();
+		Map<String, Object> model = errors.getModel();
 
 		// Merge reference data into model, if any.
-		Map referenceData = referenceData(request, errors.getTarget(), errors);
+		Map<String, ?> referenceData = referenceData(request, errors.getTarget(), errors);
 		if (referenceData != null) {
 			model.putAll(referenceData);
 		}
@@ -601,7 +601,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
-	protected Map referenceData(HttpServletRequest request, Object command, Errors errors) throws Exception {
+	protected Map<String, ?> referenceData(HttpServletRequest request, Object command, Errors errors) throws Exception {
 		return null;
 	}
 

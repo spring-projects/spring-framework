@@ -162,7 +162,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	/**
 	 * Gets the value of the '<code>readonly</code>' attribute.
 	 * May be a runtime expression.
-	 * @see #isReadonly() 
+	 * @see #isReadonly()
 	 */
 	protected String getReadonly() {
 		return this.readonly;

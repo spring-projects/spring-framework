@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,9 +69,9 @@ public class SpringTilesApplicationContextFactory extends AbstractTilesApplicati
 		public SpringWildcardServletTilesApplicationContext(ServletContext servletContext, Map<String, String> params) {
 			super(servletContext);
 			this.mergedInitParams = new LinkedHashMap<String, String>();
-			Enumeration initParamNames = servletContext.getInitParameterNames();
+			Enumeration<String> initParamNames = servletContext.getInitParameterNames();
 			while (initParamNames.hasMoreElements()) {
-				String initParamName = (String) initParamNames.nextElement();
+				String initParamName = initParamNames.nextElement();
 				this.mergedInitParams.put(initParamName, servletContext.getInitParameter(initParamName));
 			}
 			if (params != null) {

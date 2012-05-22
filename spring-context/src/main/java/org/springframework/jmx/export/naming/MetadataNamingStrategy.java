@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 	 * with the managed resource's <code>Class</code>.
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
-		Class managedClass = AopUtils.getTargetClass(managedBean);
+		Class<?> managedClass = AopUtils.getTargetClass(managedBean);
 		ManagedResource mr = this.attributeSource.getManagedResource(managedClass);
 
 		// Check that an object name has been specified.

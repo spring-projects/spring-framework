@@ -42,7 +42,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * @since 3.0
  */
 public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> implements ResourceLoaderAware {
-	
+
 	private final List<String> locations;
 
 	private ResourcePatternResolver resourcePatternResolver;

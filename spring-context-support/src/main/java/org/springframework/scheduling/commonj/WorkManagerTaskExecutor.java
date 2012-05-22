@@ -182,12 +182,14 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 		return this.workManager.schedule(work, workListener);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public boolean waitForAll(Collection workItems, long timeout)
 			throws InterruptedException, IllegalArgumentException {
 
 		return this.workManager.waitForAll(workItems, timeout);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Collection waitForAny(Collection workItems, long timeout)
 			throws InterruptedException, IllegalArgumentException {
 

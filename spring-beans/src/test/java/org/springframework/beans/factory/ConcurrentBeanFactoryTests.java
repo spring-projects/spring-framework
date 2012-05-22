@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.beans.factory;
 
 import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static test.util.TestResourceUtils.beanFactoryFromQualifiedResource;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -34,9 +34,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.core.io.Resource;
 
 /**
  * @author Guillaume Poirier
@@ -47,8 +46,7 @@ import org.springframework.core.io.Resource;
 public final class ConcurrentBeanFactoryTests {
 
 	private static final Log logger = LogFactory.getLog(ConcurrentBeanFactoryTests.class);
-	private static final Resource CONTEXT = qualifiedResource(ConcurrentBeanFactoryTests.class, "context.xml");
-	
+
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
 	private static final Date DATE_1, DATE_2;
 
@@ -70,7 +68,7 @@ public final class ConcurrentBeanFactoryTests {
 
 	@Before
 	public void setUp() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(CONTEXT);
+		DefaultListableBeanFactory factory = beanFactoryFromQualifiedResource(getClass(), "context.xml");
 		factory.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				registry.registerCustomEditor(Date.class, new CustomDateEditor((DateFormat) DATE_FORMAT.clone(), false));

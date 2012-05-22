@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * <code>ApplicationContext</code> associated with a test as <em>dirty</em> for
  * both test classes and test methods configured with the {@link DirtiesContext
  * &#064;DirtiesContext} annotation.
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5

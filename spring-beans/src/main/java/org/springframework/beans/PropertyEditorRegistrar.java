@@ -31,7 +31,7 @@ package org.springframework.beans;
  * @see java.beans.PropertyEditor
  */
 public interface PropertyEditorRegistrar {
-	
+
 	/**
 	 * Register custom {@link java.beans.PropertyEditor PropertyEditors} with
 	 * the given <code>PropertyEditorRegistry</code>.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class ControllerClassNameHandlerMapping extends AbstractControllerUrlHand
 
 
 	@Override
-	protected String[] buildUrlsForHandler(String beanName, Class beanClass) {
+	protected String[] buildUrlsForHandler(String beanName, Class<?> beanClass) {
 		return generatePathMappings(beanClass);
 	}
 
@@ -133,7 +133,7 @@ public class ControllerClassNameHandlerMapping extends AbstractControllerUrlHand
 	 * @param beanClass the controller bean class to generate a mapping for
 	 * @return the URL path mappings for the given controller
 	 */
-	protected String[] generatePathMappings(Class beanClass) {
+	protected String[] generatePathMappings(Class<?> beanClass) {
 		StringBuilder pathMapping = buildPathPrefix(beanClass);
 		String className = ClassUtils.getShortName(beanClass);
 		String path = (className.endsWith(CONTROLLER_SUFFIX) ?
@@ -159,7 +159,7 @@ public class ControllerClassNameHandlerMapping extends AbstractControllerUrlHand
 	 * @param beanClass the controller bean class to generate a mapping for
 	 * @return the path prefix, potentially including subpackage names as path elements
 	 */
-	private StringBuilder buildPathPrefix(Class beanClass) {
+	private StringBuilder buildPathPrefix(Class<?> beanClass) {
 		StringBuilder pathMapping = new StringBuilder();
 		if (this.pathPrefix != null) {
 			pathMapping.append(this.pathPrefix);

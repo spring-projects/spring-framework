@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
 /**
  * Default implementation of the {@link TypeConverter} interface,
  * delegating to a core Spring {@link ConversionService}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Andy Clement
  * @since 3.0
@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
 public class StandardTypeConverter implements TypeConverter {
 
 	private static ConversionService defaultConversionService;
-	
+
 	private final ConversionService conversionService;
 
 

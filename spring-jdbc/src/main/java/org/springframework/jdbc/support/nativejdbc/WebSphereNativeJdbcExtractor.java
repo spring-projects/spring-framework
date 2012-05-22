@@ -45,7 +45,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	private static final String JDBC_ADAPTER_UTIL_NAME_5 = "com.ibm.ws.rsadapter.jdbc.WSJdbcUtil";
 
 
-	private Class webSphere5ConnectionClass;
+	private Class<?> webSphere5ConnectionClass;
 
 	private Method webSphere5NativeConnectionMethod;
 
@@ -57,7 +57,7 @@ public class WebSphereNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	public WebSphereNativeJdbcExtractor() {
 		try {
 			this.webSphere5ConnectionClass = getClass().getClassLoader().loadClass(JDBC_ADAPTER_CONNECTION_NAME_5);
-			Class jdbcAdapterUtilClass = getClass().getClassLoader().loadClass(JDBC_ADAPTER_UTIL_NAME_5);
+			Class<?> jdbcAdapterUtilClass = getClass().getClassLoader().loadClass(JDBC_ADAPTER_UTIL_NAME_5);
 			this.webSphere5NativeConnectionMethod =
 					jdbcAdapterUtilClass.getMethod("getNativeConnection", new Class[] {this.webSphere5ConnectionClass});
 		}

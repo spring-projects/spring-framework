@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,14 @@ import org.springframework.web.servlet.support.BindStatus;
  * inequality, logical (String-representation-based) equality and {@link PropertyEditor}-based comparison.
  *
  * <p>Full support is provided for comparing arrays, {@link Collection Collections} and {@link Map Maps}.
- * 
+ *
  * <p><h1><a name="equality-contract">Equality Contract</a></h1>
  * For single-valued objects equality is first tested using standard {@link Object#equals Java equality}. As
  * such, user code should endeavour to implement {@link Object#equals} to speed up the comparison process. If
  * {@link Object#equals} returns <code>false</code> then an attempt is made at an
  * {@link #exhaustiveCompare exhaustive comparison} with the aim being to <strong>prove</strong> equality rather
  * than disprove it.
- * 
+ *
  * <p>Special support is given for instances of {@link LabeledEnum} with a <code>String</code>-based
  * comparison of the candidate value against the code of the {@link LabeledEnum}. This can be useful when a
  * {@link LabeledEnum} is used to define a list of '<code>&lt;option&gt;</code>' elements in HTML.
@@ -47,7 +47,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * <p>Next, an attempt is made to compare the <code>String</code> representations of both the candidate and bound
  * values. This may result in <code>true</code> in a number of cases due to the fact both values will be represented
  * as <code>Strings</code> when shown to the user.
- * 
+ *
  * <p>Next, if the candidate value is a <code>String</code>, an attempt is made to compare the bound value to
  * result of applying the corresponding {@link PropertyEditor} to the candidate. This comparison may be
  * executed twice, once against the direct <code>String</code> instances, and then against the <code>String</code>
@@ -94,10 +94,10 @@ abstract class SelectedValueComparator {
 			selected = collectionCompare(CollectionUtils.arrayToList(boundValue), candidateValue, bindStatus);
 		}
 		else if (boundValue instanceof Collection) {
-			selected = collectionCompare((Collection) boundValue, candidateValue, bindStatus);
+			selected = collectionCompare((Collection<?>) boundValue, candidateValue, bindStatus);
 		}
 		else if (boundValue instanceof Map) {
-			selected = mapCompare((Map) boundValue, candidateValue, bindStatus);
+			selected = mapCompare((Map<?, ?>) boundValue, candidateValue, bindStatus);
 		}
 		if (!selected) {
 			selected = exhaustiveCompare(boundValue, candidateValue, bindStatus.getEditor(), null);
@@ -105,7 +105,7 @@ abstract class SelectedValueComparator {
 		return selected;
 	}
 
-	private static boolean collectionCompare(Collection boundCollection, Object candidateValue, BindStatus bindStatus) {
+	private static boolean collectionCompare(Collection<?> boundCollection, Object candidateValue, BindStatus bindStatus) {
 		try {
 			if (boundCollection.contains(candidateValue)) {
 				return true;
@@ -117,7 +117,7 @@ abstract class SelectedValueComparator {
 		return exhaustiveCollectionCompare(boundCollection, candidateValue, bindStatus);
 	}
 
-	private static boolean mapCompare(Map boundMap, Object candidateValue, BindStatus bindStatus) {
+	private static boolean mapCompare(Map<?, ?> boundMap, Object candidateValue, BindStatus bindStatus) {
 		try {
 			if (boundMap.containsKey(candidateValue)) {
 				return true;
@@ -130,7 +130,7 @@ abstract class SelectedValueComparator {
 	}
 
 	private static boolean exhaustiveCollectionCompare(
-			Collection collection, Object candidateValue, BindStatus bindStatus) {
+			Collection<?> collection, Object candidateValue, BindStatus bindStatus) {
 
 		Map<PropertyEditor, Object> convertedValueCache = new HashMap<PropertyEditor, Object>(1);
 		PropertyEditor editor = null;
@@ -165,7 +165,7 @@ abstract class SelectedValueComparator {
 			}
 		}
 		else if (boundValue.getClass().isEnum()) {
-			Enum boundEnum = (Enum) boundValue;
+			Enum<?> boundEnum = (Enum<?>) boundValue;
 			String enumCodeAsString = ObjectUtils.getDisplayString(boundEnum.name());
 			if (enumCodeAsString.equals(candidateDisplayString)) {
 				return true;

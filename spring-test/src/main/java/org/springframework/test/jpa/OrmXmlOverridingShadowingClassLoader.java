@@ -31,7 +31,7 @@ import org.springframework.instrument.classloading.ResourceOverridingShadowingCl
  * @since 2.0
  */
 class OrmXmlOverridingShadowingClassLoader extends ResourceOverridingShadowingClassLoader {
-	
+
 	/**
 	 * Default location of the <code>orm.xml</code> file in the class path:
 	 * "META-INF/orm.xml"

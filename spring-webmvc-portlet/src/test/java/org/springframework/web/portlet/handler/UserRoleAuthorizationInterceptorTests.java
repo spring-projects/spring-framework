@@ -91,7 +91,7 @@ public class UserRoleAuthorizationInterceptorTests extends TestCase {
 			// expected
 		}
 	}
-	
+
 	public void testInterceptorWithNoAuthorizedRoles() throws Exception {
 		UserRoleAuthorizationInterceptor interceptor = new UserRoleAuthorizationInterceptor();
 		MockRenderRequest request = new MockRenderRequest();

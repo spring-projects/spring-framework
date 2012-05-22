@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -339,13 +339,14 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		return doExecute(action, false, false);
 	}
 
-	public List executeFind(HibernateCallback<?> action) throws DataAccessException {
+	@SuppressWarnings("unchecked")
+	public List<Object> executeFind(HibernateCallback<?> action) throws DataAccessException {
 		Object result = doExecute(action, false, false);
 		if (result != null && !(result instanceof List)) {
 			throw new InvalidDataAccessApiUsageException(
 					"Result object returned from HibernateCallback isn't a List: [" + result + "]");
 		}
-		return (List) result;
+		return (List<Object>) result;
 	}
 
 	/**
@@ -480,8 +481,8 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	 * @see #prepareCriteria
 	 */
 	protected Session createSessionProxy(Session session) {
-		Class[] sessionIfcs = null;
-		Class mainIfc = (session instanceof org.hibernate.classic.Session ?
+		Class<?>[] sessionIfcs = null;
+		Class<?> mainIfc = (session instanceof org.hibernate.classic.Session ?
 				org.hibernate.classic.Session.class : Session.class);
 		if (session instanceof EventSource) {
 			sessionIfcs = new Class[] {mainIfc, EventSource.class};
@@ -753,7 +754,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-	public void saveOrUpdateAll(final Collection entities) throws DataAccessException {
+	public void saveOrUpdateAll(final Collection<?> entities) throws DataAccessException {
 		executeWithNativeSession(new HibernateCallback<Object>() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
@@ -865,7 +866,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-	public void deleteAll(final Collection entities) throws DataAccessException {
+	public void deleteAll(final Collection<?> entities) throws DataAccessException {
 		executeWithNativeSession(new HibernateCallback<Object>() {
 			public Object doInHibernate(Session session) throws HibernateException {
 				checkWriteOperationAllowed(session);
@@ -900,17 +901,18 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	// Convenience finder methods for HQL strings
 	//-------------------------------------------------------------------------
 
-	public List find(String queryString) throws DataAccessException {
+	public List<Object> find(String queryString) throws DataAccessException {
 		return find(queryString, (Object[]) null);
 	}
 
-	public List find(String queryString, Object value) throws DataAccessException {
+	public List<Object> find(String queryString, Object value) throws DataAccessException {
 		return find(queryString, new Object[] {value});
 	}
 
-	public List find(final String queryString, final Object... values) throws DataAccessException {
-		return executeWithNativeSession(new HibernateCallback<List>() {
-			public List doInHibernate(Session session) throws HibernateException {
+	public List<Object> find(final String queryString, final Object... values) throws DataAccessException {
+		return executeWithNativeSession(new HibernateCallback<List<Object>>() {
+			@SuppressWarnings("unchecked")
+			public List<Object> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
 				if (values != null) {
@@ -923,20 +925,21 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-	public List findByNamedParam(String queryString, String paramName, Object value)
+	public List<Object> findByNamedParam(String queryString, String paramName, Object value)
 			throws DataAccessException {
 
 		return findByNamedParam(queryString, new String[] {paramName}, new Object[] {value});
 	}
 
-	public List findByNamedParam(final String queryString, final String[] paramNames, final Object[] values)
+	public List<Object> findByNamedParam(final String queryString, final String[] paramNames, final Object[] values)
 			throws DataAccessException {
 
 		if (paramNames.length != values.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
-		return executeWithNativeSession(new HibernateCallback<List>() {
-			public List doInHibernate(Session session) throws HibernateException {
+		return executeWithNativeSession(new HibernateCallback<List<Object>>() {
+			@SuppressWarnings("unchecked")
+			public List<Object> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
 				if (values != null) {
@@ -949,11 +952,12 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-	public List findByValueBean(final String queryString, final Object valueBean)
+	public List<Object> findByValueBean(final String queryString, final Object valueBean)
 			throws DataAccessException {
 
-		return executeWithNativeSession(new HibernateCallback<List>() {
-			public List doInHibernate(Session session) throws HibernateException {
+		return executeWithNativeSession(new HibernateCallback<List<Object>>() {
+			@SuppressWarnings("unchecked")
+			public List<Object> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
 				queryObject.setProperties(valueBean);
@@ -967,17 +971,18 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	// Convenience finder methods for named queries
 	//-------------------------------------------------------------------------
 
-	public List findByNamedQuery(String queryName) throws DataAccessException {
+	public List<Object> findByNamedQuery(String queryName) throws DataAccessException {
 		return findByNamedQuery(queryName, (Object[]) null);
 	}
 
-	public List findByNamedQuery(String queryName, Object value) throws DataAccessException {
+	public List<Object> findByNamedQuery(String queryName, Object value) throws DataAccessException {
 		return findByNamedQuery(queryName, new Object[] {value});
 	}
 
-	public List findByNamedQuery(final String queryName, final Object... values) throws DataAccessException {
-		return executeWithNativeSession(new HibernateCallback<List>() {
-			public List doInHibernate(Session session) throws HibernateException {
+	public List<Object> findByNamedQuery(final String queryName, final Object... values) throws DataAccessException {
+		return executeWithNativeSession(new HibernateCallback<List<Object>>() {
+			@SuppressWarnings("unchecked")
+			public List<Object> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
 				prepareQuery(queryObject);
 				if (values != null) {
@@ -990,21 +995,22 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-	public List findByNamedQueryAndNamedParam(String queryName, String paramName, Object value)
+	public List<Object> findByNamedQueryAndNamedParam(String queryName, String paramName, Object value)
 			throws DataAccessException {
 
 		return findByNamedQueryAndNamedParam(queryName, new String[] {paramName}, new Object[] {value});
 	}
 
-	public List findByNamedQueryAndNamedParam(
+	public List<Object> findByNamedQueryAndNamedParam(
 			final String queryName, final String[] paramNames, final Object[] values)
 			throws DataAccessException {
 
 		if (paramNames != null && values != null && paramNames.length != values.length) {
 			throw new IllegalArgumentException("Length of paramNames array must match length of values array");
 		}
-		return executeWithNativeSession(new HibernateCallback<List>() {
-			public List doInHibernate(Session session) throws HibernateException {
+		return executeWithNativeSession(new HibernateCallback<List<Object>>() {
+			@SuppressWarnings("unchecked")
+			public List<Object> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
 				prepareQuery(queryObject);
 				if (values != null) {
@@ -1017,11 +1023,12 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-	public List findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
+	public List<Object> findByNamedQueryAndValueBean(final String queryName, final Object valueBean)
 			throws DataAccessException {
 
-		return executeWithNativeSession(new HibernateCallback<List>() {
-			public List doInHibernate(Session session) throws HibernateException {
+		return executeWithNativeSession(new HibernateCallback<List<Object>>() {
+			@SuppressWarnings("unchecked")
+			public List<Object> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
 				prepareQuery(queryObject);
 				queryObject.setProperties(valueBean);
@@ -1035,16 +1042,17 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	// Convenience finder methods for detached criteria
 	//-------------------------------------------------------------------------
 
-	public List findByCriteria(DetachedCriteria criteria) throws DataAccessException {
+	public List<Object> findByCriteria(DetachedCriteria criteria) throws DataAccessException {
 		return findByCriteria(criteria, -1, -1);
 	}
 
-	public List findByCriteria(final DetachedCriteria criteria, final int firstResult, final int maxResults)
+	public List<Object> findByCriteria(final DetachedCriteria criteria, final int firstResult, final int maxResults)
 			throws DataAccessException {
 
 		Assert.notNull(criteria, "DetachedCriteria must not be null");
-		return executeWithNativeSession(new HibernateCallback<List>() {
-			public List doInHibernate(Session session) throws HibernateException {
+		return executeWithNativeSession(new HibernateCallback<List<Object>>() {
+			@SuppressWarnings("unchecked")
+			public List<Object> doInHibernate(Session session) throws HibernateException {
 				Criteria executableCriteria = criteria.getExecutableCriteria(session);
 				prepareCriteria(executableCriteria);
 				if (firstResult >= 0) {
@@ -1058,25 +1066,26 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-	public List findByExample(Object exampleEntity) throws DataAccessException {
+	public List<Object> findByExample(Object exampleEntity) throws DataAccessException {
 		return findByExample(null, exampleEntity, -1, -1);
 	}
 
-	public List findByExample(String entityName, Object exampleEntity) throws DataAccessException {
+	public List<Object> findByExample(String entityName, Object exampleEntity) throws DataAccessException {
 		return findByExample(entityName, exampleEntity, -1, -1);
 	}
 
-	public List findByExample(Object exampleEntity, int firstResult, int maxResults) throws DataAccessException {
+	public List<Object> findByExample(Object exampleEntity, int firstResult, int maxResults) throws DataAccessException {
 		return findByExample(null, exampleEntity, firstResult, maxResults);
 	}
 
-	public List findByExample(
+	public List<Object> findByExample(
 			final String entityName, final Object exampleEntity, final int firstResult, final int maxResults)
 			throws DataAccessException {
 
 		Assert.notNull(exampleEntity, "Example entity must not be null");
-		return executeWithNativeSession(new HibernateCallback<List>() {
-			public List doInHibernate(Session session) throws HibernateException {
+		return executeWithNativeSession(new HibernateCallback<List<Object>>() {
+			@SuppressWarnings("unchecked")
+			public List<Object> doInHibernate(Session session) throws HibernateException {
 				Criteria executableCriteria = (entityName != null ?
 						session.createCriteria(entityName) : session.createCriteria(exampleEntity.getClass()));
 				executableCriteria.add(Example.create(exampleEntity));
@@ -1097,17 +1106,18 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 	// Convenience query methods for iteration and bulk updates/deletes
 	//-------------------------------------------------------------------------
 
-	public Iterator iterate(String queryString) throws DataAccessException {
+	public Iterator<Object> iterate(String queryString) throws DataAccessException {
 		return iterate(queryString, (Object[]) null);
 	}
 
-	public Iterator iterate(String queryString, Object value) throws DataAccessException {
+	public Iterator<Object> iterate(String queryString, Object value) throws DataAccessException {
 		return iterate(queryString, new Object[] {value});
 	}
 
-	public Iterator iterate(final String queryString, final Object... values) throws DataAccessException {
-		return executeWithNativeSession(new HibernateCallback<Iterator>() {
-			public Iterator doInHibernate(Session session) throws HibernateException {
+	public Iterator<Object> iterate(final String queryString, final Object... values) throws DataAccessException {
+		return executeWithNativeSession(new HibernateCallback<Iterator<Object>>() {
+			@SuppressWarnings("unchecked")
+			public Iterator<Object> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
 				if (values != null) {
@@ -1120,7 +1130,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 		});
 	}
 
-	public void closeIterator(Iterator it) throws DataAccessException {
+	public void closeIterator(Iterator<?> it) throws DataAccessException {
 		try {
 			Hibernate.close(it);
 		}
@@ -1237,7 +1247,7 @@ public class HibernateTemplate extends HibernateAccessor implements HibernateOpe
 			throws HibernateException {
 
 		if (value instanceof Collection) {
-			queryObject.setParameterList(paramName, (Collection) value);
+			queryObject.setParameterList(paramName, (Collection<?>) value);
 		}
 		else if (value instanceof Object[]) {
 			queryObject.setParameterList(paramName, (Object[]) value);

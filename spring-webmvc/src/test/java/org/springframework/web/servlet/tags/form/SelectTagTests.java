@@ -83,7 +83,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.setItemLabel("name");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
-		
+
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
 
@@ -241,7 +241,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 				if (value==null) {
 					return null;
 				}
-				return ((Country) value).getName();
+				return value.getName();
 			}
 		});
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
@@ -294,7 +294,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 				if (value==null) {
 					return "";
 				}
-				return ((Country) value).getName();
+				return value.getName();
 			}
 		});
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
@@ -846,7 +846,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	private TestBean getTestBean() {
 		return (TestBean) getPageContext().getRequest().getAttribute(COMMAND_NAME);
 	}
-	
+
 	public static class TestBeanWrapper {
 		private TestBean bean;
 
@@ -857,7 +857,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		public void setBean(TestBean bean) {
 			this.bean = bean;
 		}
-		
+
 	}
 
 }

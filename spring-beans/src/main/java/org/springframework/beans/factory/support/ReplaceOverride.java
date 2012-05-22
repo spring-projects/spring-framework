@@ -76,12 +76,12 @@ public class ReplaceOverride extends MethodOverride {
 			// It can't match.
 			return false;
 		}
-		
+
 		if (!isOverloaded()) {
 			// No overloaded: don't worry about arg type matching.
 			return true;
 		}
-		
+
 		// If we get to here, we need to insist on precise argument matching.
 		if (this.typeIdentifiers.size() != method.getParameterTypes().length) {
 			return false;
@@ -93,7 +93,7 @@ public class ReplaceOverride extends MethodOverride {
 				return false;
 			}
 		}
-		return true;			
+		return true;
 	}
 
 

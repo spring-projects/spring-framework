@@ -20,7 +20,7 @@ import org.springframework.test.context.junit4.orm.domain.Person;
 
 /**
  * Person Repository API.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

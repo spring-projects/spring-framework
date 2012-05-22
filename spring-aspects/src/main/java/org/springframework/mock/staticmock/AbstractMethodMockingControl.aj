@@ -114,7 +114,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 			if (responseType == CallResponse.return_) {
 				return call.returnValue(lastSig, args);
 			} else if(responseType == CallResponse.throw_) {
-				return (RuntimeException)call.throwException(lastSig, args);
+				return call.throwException(lastSig, args);
 			} else if(responseType == CallResponse.nothing) {
 				// do nothing
 			}

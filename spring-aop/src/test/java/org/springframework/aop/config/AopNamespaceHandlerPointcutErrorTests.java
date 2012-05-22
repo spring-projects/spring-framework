@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,24 @@
 package org.springframework.aop.config;
 
 import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static test.util.TestResourceUtils.beanFactoryFromQualifiedResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
 
 /**
  * @author Mark Fisher
  * @author Chris Beams
  */
 public final class AopNamespaceHandlerPointcutErrorTests {
-	
+
 	@Test
 	public void testDuplicatePointcutConfig() {
 		try {
-			new XmlBeanFactory(qualifiedResource(getClass(), "pointcutDuplication.xml"));
+			beanFactoryFromQualifiedResource(getClass(), "pointcutDuplication.xml");
 			fail("parsing should have caused a BeanDefinitionStoreException");
-		}
-		catch (BeanDefinitionStoreException ex) {
+		} catch (BeanDefinitionStoreException ex) {
 			assertTrue(ex.contains(BeanDefinitionParsingException.class));
 		}
 	}
@@ -44,7 +42,7 @@ public final class AopNamespaceHandlerPointcutErrorTests {
 	@Test
 	public void testMissingPointcutConfig() {
 		try {
-			new XmlBeanFactory(qualifiedResource(getClass(), "pointcutMissing.xml"));
+			beanFactoryFromQualifiedResource(getClass(), "pointcutMissing.xml");
 			fail("parsing should have caused a BeanDefinitionStoreException");
 		}
 		catch (BeanDefinitionStoreException ex) {

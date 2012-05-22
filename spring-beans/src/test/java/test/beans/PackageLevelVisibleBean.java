@@ -25,5 +25,5 @@ package test.beans;
 class PackageLevelVisibleBean {
 
 	public static final String CONSTANT = "Wuby";
-	
+
 }

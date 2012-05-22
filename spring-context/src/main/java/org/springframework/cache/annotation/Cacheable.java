@@ -52,7 +52,7 @@ public @interface Cacheable {
 	String key() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching. 
+	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching.
 	 * <p>Default is "", meaning the method is always cached.
 	 */
 	String condition() default "";

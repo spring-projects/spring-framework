@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public class StandardClasses {
 		Duration duration = factory.newDuration(42000);
 		return new JAXBElement<Duration>(NAME, Duration.class, duration);
 	}
-	
+
 	public JAXBElement<Image> standardClassImage() throws IOException {
 		Image image = ImageIO.read(getClass().getResourceAsStream("spring-ws.png"));
 		return new JAXBElement<Image>(NAME, Image.class, image);

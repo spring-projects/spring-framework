@@ -27,7 +27,7 @@ import java.sql.SQLException;
  * @see ResourceDatabasePopulator
  */
 public interface DatabasePopulator {
-	
+
 	/**
 	 * Populate the database using the JDBC connection provided.
 	 * @param connection the JDBC connection to use to populate the db; already configured and ready to use

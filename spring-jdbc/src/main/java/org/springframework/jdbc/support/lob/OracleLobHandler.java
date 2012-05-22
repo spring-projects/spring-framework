@@ -95,15 +95,15 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	private Boolean releaseResourcesAfterRead = Boolean.FALSE;
 
-	private Class blobClass;
+	private Class<?> blobClass;
 
-	private Class clobClass;
+	private Class<?> clobClass;
 
-	private final Map<Class, Integer> durationSessionConstants = new HashMap<Class, Integer>(2);
+	private final Map<Class<?>, Integer> durationSessionConstants = new HashMap<Class<?>, Integer>(2);
 
-	private final Map<Class, Integer> modeReadWriteConstants = new HashMap<Class, Integer>(2);
+	private final Map<Class<?>, Integer> modeReadWriteConstants = new HashMap<Class<?>, Integer>(2);
 
-	private final Map<Class, Integer> modeReadOnlyConstants = new HashMap<Class, Integer>(2);
+	private final Map<Class<?>, Integer> modeReadOnlyConstants = new HashMap<Class<?>, Integer>(2);
 
 
 	/**
@@ -366,7 +366,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 	 */
 	protected class OracleLobCreator implements LobCreator {
 
-		private final List createdLobs = new LinkedList();
+		private final List<Object> createdLobs = new LinkedList<Object>();
 
 		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, final byte[] content)
 				throws SQLException {
@@ -537,7 +537,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		/**
 		 * Create and open an oracle.sql.BLOB/CLOB instance via reflection.
 		 */
-		protected Object prepareLob(Connection con, Class lobClass) throws Exception {
+		protected Object prepareLob(Connection con, Class<?> lobClass) throws Exception {
 			/*
 			BLOB blob = BLOB.createTemporary(con, false, BLOB.DURATION_SESSION);
 			blob.open(BLOB.MODE_READWRITE);
@@ -556,7 +556,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		 */
 		public void close() {
 			try {
-				for (Iterator it = this.createdLobs.iterator(); it.hasNext();) {
+				for (Iterator<Object> it = this.createdLobs.iterator(); it.hasNext();) {
 					/*
 					BLOB blob = (BLOB) it.next();
 					blob.freeTemporary();

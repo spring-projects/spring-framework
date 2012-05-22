@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	public static final String FORWARD_URL_PREFIX = "forward:";
 
 
-	private Class viewClass;
+	private Class<?> viewClass;
 
 	private String prefix = "";
 
@@ -129,7 +129,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * (by default, AbstractUrlBasedView)
 	 * @see AbstractUrlBasedView
 	 */
-	public void setViewClass(Class viewClass) {
+	public void setViewClass(Class<?> viewClass) {
 		if (viewClass == null || !requiredViewClass().isAssignableFrom(viewClass)) {
 			throw new IllegalArgumentException(
 					"Given view class [" + (viewClass != null ? viewClass.getName() : null) +
@@ -141,7 +141,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Return the view class to be used to create views.
 	 */
-	protected Class getViewClass() {
+	protected Class<?> getViewClass() {
 		return this.viewClass;
 	}
 
@@ -150,7 +150,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 * This implementation returns AbstractUrlBasedView.
 	 * @see AbstractUrlBasedView
 	 */
-	protected Class requiredViewClass() {
+	protected Class<?> requiredViewClass() {
 		return AbstractUrlBasedView.class;
 	}
 
@@ -341,13 +341,13 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Whether views resolved by this resolver should add path variables the model or not.
 	 * The default setting is to allow each View decide (see {@link AbstractView#setExposePathVariables(boolean)}.
-	 * However, you can use this property to override that. 
+	 * However, you can use this property to override that.
 	 * @param exposePathVariables
 	 * 	<ul>
 	 * 		<li>{@code true} - all Views resolved by this resolver will expose path variables
 	 * 		<li>{@code false} - no Views resolved by this resolver will expose path variables
-	 * 		<li>{@code null} - individual Views can decide for themselves (this is used by the default) 
-	 * 	<ul> 
+	 * 		<li>{@code null} - individual Views can decide for themselves (this is used by the default)
+	 * 	<ul>
 	 * 	@see AbstractView#setExposePathVariables(boolean)
 	 */
 	public void setExposePathVariables(Boolean exposePathVariables) {

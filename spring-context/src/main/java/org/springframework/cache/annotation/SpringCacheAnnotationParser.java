@@ -154,15 +154,4 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 
 		return (anns.isEmpty() ? null : anns);
 	}
-
-	@Override
-	public boolean equals(Object other) {
-		return (this == other || other instanceof SpringCacheAnnotationParser);
-	}
-
-	@Override
-	public int hashCode() {
-		return SpringCacheAnnotationParser.class.hashCode();
-	}
-
 }

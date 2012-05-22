@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.web.util.NestedServletException;
 
 /**
  * Convenient superclass for views rendered using an XSLT stylesheet.
- * 
+ *
  * <p>Subclasses typically must provide the {@link Source} to transform
  * by overriding {@link #createXsltSource}. Subclasses do not need to
  * concern themselves with XSLT other than providing a valid stylesheet location.
@@ -67,7 +67,7 @@ import org.springframework.web.util.NestedServletException;
  * the {@link ErrorListener} implementation instance for custom handling of warnings and errors during TransformerFactory operations
  * <li>{@link #setIndent(boolean) indent} (optional): whether additional whitespace
  * may be added when outputting the result; defaults to <code>true</code>
- * <li>{@link #setCache(boolean) cache} (optional): are templates to be cached; debug setting only; defaults to <code>true</code> 
+ * <li>{@link #setCache(boolean) cache} (optional): are templates to be cached; debug setting only; defaults to <code>true</code>
  * </ul>
  *
  * <p>Note that setting {@link #setCache(boolean) "cache"} to <code>false</code>
@@ -93,7 +93,7 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	private boolean customContentTypeSet = false;
 
-	private Class transformerFactoryClass;
+	private Class<?> transformerFactoryClass;
 
 	private Resource stylesheetLocation;
 
@@ -139,7 +139,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * <p>The default constructor of the specified class will be called
 	 * to build the TransformerFactory for this view.
 	 */
-	public void setTransformerFactoryClass(Class transformerFactoryClass) {
+	public void setTransformerFactoryClass(Class<?> transformerFactoryClass) {
 		Assert.isAssignable(TransformerFactory.class, transformerFactoryClass);
 		this.transformerFactoryClass = transformerFactoryClass;
 	}
@@ -293,7 +293,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @see #setTransformerFactoryClass
 	 * @see #getTransformerFactory()
 	 */
-	protected TransformerFactory newTransformerFactory(Class transformerFactoryClass) {
+	protected TransformerFactory newTransformerFactory(Class<?> transformerFactoryClass) {
 		if (transformerFactoryClass != null) {
 			try {
 				return (TransformerFactory) transformerFactoryClass.newInstance();
@@ -394,7 +394,7 @@ public abstract class AbstractXsltView extends AbstractView {
 			Map<String, Object> model, Source source, HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
-		Map<String, Object> parameters = getParameters(model, request);
+		Map<String, ?> parameters = getParameters(model, request);
 		Result result = (useWriter() ?
 				new StreamResult(response.getWriter()) :
 				new StreamResult(new BufferedOutputStream(response.getOutputStream())));
@@ -413,7 +413,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @return a Map of parameters to apply to the transformation process
 	 * @see javax.xml.transform.Transformer#setParameter
 	 */
-	protected Map getParameters(Map<String, Object> model, HttpServletRequest request) {
+	protected Map<String, ?> getParameters(Map<String, Object> model, HttpServletRequest request) {
 		return getParameters(request);
 	}
 
@@ -427,7 +427,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @see #getParameters(Map, HttpServletRequest)
 	 * @see javax.xml.transform.Transformer#setParameter
 	 */
-	protected Map getParameters(HttpServletRequest request) {
+	protected Map<String, ?> getParameters(HttpServletRequest request) {
 		return null;
 	}
 
@@ -456,7 +456,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @param encoding the preferred character encoding that the underlying Transformer should use
 	 * @throws Exception if an error occurs
 	 */
-	protected void doTransform(Source source, Map<String, Object> parameters, Result result, String encoding)
+	protected void doTransform(Source source, Map<String, ?> parameters, Result result, String encoding)
 			throws Exception {
 
 		try {
@@ -475,7 +475,7 @@ public abstract class AbstractXsltView extends AbstractView {
 
 			// Apply any arbitrary output properties, if specified.
 			if (this.outputProperties != null) {
-				Enumeration propsEnum = this.outputProperties.propertyNames();
+				Enumeration<?> propsEnum = this.outputProperties.propertyNames();
 				while (propsEnum.hasMoreElements()) {
 					String propName = (String) propsEnum.nextElement();
 					trans.setOutputProperty(propName, this.outputProperties.getProperty(propName));
@@ -504,7 +504,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * @throws TransformerConfigurationException if the Transformer object
 	 * could not be built
 	 */
-	protected Transformer buildTransformer(Map<String, Object> parameters) throws TransformerConfigurationException {
+	protected Transformer buildTransformer(Map<String, ?> parameters) throws TransformerConfigurationException {
 		Templates templates = getTemplates();
 		Transformer transformer =
 				(templates != null ? templates.newTransformer() : getTransformerFactory().newTransformer());
@@ -547,9 +547,9 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * (as determined by {@link #getParameters(Map, HttpServletRequest)})
 	 * @param transformer the Transformer to aply the parameters
 	 */
-	protected void applyTransformerParameters(Map<String, Object> parameters, Transformer transformer) {
+	protected void applyTransformerParameters(Map<String, ?> parameters, Transformer transformer) {
 		if (parameters != null) {
-			for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+			for (Map.Entry<String, ?> entry : parameters.entrySet()) {
 				transformer.setParameter(entry.getKey(), entry.getValue());
 			}
 		}

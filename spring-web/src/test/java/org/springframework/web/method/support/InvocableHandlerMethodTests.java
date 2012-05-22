@@ -60,9 +60,9 @@ public class InvocableHandlerMethodTests {
 		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 		composite.addResolver(intResolver);
 		composite.addResolver(stringResolver);
-		handlerMethod.setHandlerMethodArgumentResolvers(composite);
+		handleMethod.setHandlerMethodArgumentResolvers(composite);
 
-		Object returnValue = handlerMethod.invokeForRequest(webRequest, null);
+		Object returnValue = handleMethod.invokeForRequest(webRequest, null);
 
 		assertEquals(1, intResolver.getResolvedParameters().size());
 		assertEquals(1, stringResolver.getResolvedParameters().size());
@@ -80,9 +80,9 @@ public class InvocableHandlerMethodTests {
 		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 		composite.addResolver(intResolver);
 		composite.addResolver(stringResolver);
-		handlerMethod.setHandlerMethodArgumentResolvers(composite);
+		handleMethod.setHandlerMethodArgumentResolvers(composite);
 
-		Object returnValue = handlerMethod.invokeForRequest(webRequest, null);
+		Object returnValue = handleMethod.invokeForRequest(webRequest, null);
 
 		assertEquals(1, intResolver.getResolvedParameters().size());
 		assertEquals(1, stringResolver.getResolvedParameters().size());
@@ -126,7 +126,7 @@ public class InvocableHandlerMethodTests {
 	public void exceptionInResolvingArg() throws Exception {
 		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 		composite.addResolver(new ExceptionRaisingArgumentResolver());
-		handlerMethod.setHandlerMethodArgumentResolvers(composite);
+		handleMethod.setHandlerMethodArgumentResolvers(composite);
 
 		try {
 			handlerMethod.invokeForRequest(webRequest, null);

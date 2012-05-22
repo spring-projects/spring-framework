@@ -16,6 +16,9 @@
 
 package org.springframework.beans.factory;
 
+import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.beanFactoryFromQualifiedResource;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +27,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.cglib.proxy.NoOp;
-import org.springframework.core.io.Resource;
 import org.springframework.util.ObjectUtils;
 
 import test.beans.DummyFactory;
@@ -45,12 +46,6 @@ import static test.util.TestResourceUtils.qualifiedResource;
  * @since 04.07.2003
  */
 public final class BeanFactoryUtilsTests {
-	
-	private static final Class<?> CLASS = BeanFactoryUtilsTests.class;
-	private static final Resource ROOT_CONTEXT = qualifiedResource(CLASS, "root.xml"); 
-	private static final Resource MIDDLE_CONTEXT = qualifiedResource(CLASS, "middle.xml"); 
-	private static final Resource LEAF_CONTEXT = qualifiedResource(CLASS, "leaf.xml"); 
-	private static final Resource DEPENDENT_BEANS_CONTEXT = qualifiedResource(CLASS, "dependentBeans.xml"); 
 
 	private ConfigurableListableBeanFactory listableBeanFactory;
 
@@ -59,11 +54,10 @@ public final class BeanFactoryUtilsTests {
 	@Before
 	public void setUp() {
 		// Interesting hierarchical factory to test counts.
-		// Slow to read so we cache it.
-		XmlBeanFactory grandParent = new XmlBeanFactory(ROOT_CONTEXT);
-		XmlBeanFactory parent = new XmlBeanFactory(MIDDLE_CONTEXT, grandParent);
-		XmlBeanFactory child = new XmlBeanFactory(LEAF_CONTEXT, parent);
-		this.dependentBeansBF = new XmlBeanFactory(DEPENDENT_BEANS_CONTEXT);
+		DefaultListableBeanFactory grandParent = beanFactoryFromQualifiedResource(getClass(), "root.xml");
+		DefaultListableBeanFactory parent = beanFactoryFromQualifiedResource(getClass(), "middle.xml", grandParent);
+		DefaultListableBeanFactory child = beanFactoryFromQualifiedResource(getClass(), "leaf.xml", parent);
+		this.dependentBeansBF = beanFactoryFromQualifiedResource(getClass(), "dependentBeans.xml");
 		dependentBeansBF.preInstantiateSingletons();
 		this.listableBeanFactory = child;
 	}

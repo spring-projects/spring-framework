@@ -407,7 +407,7 @@ public interface JdbcOperations {
 	 * @see PreparedStatementCreatorFactory
 	 */
 	void query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException;
-	
+
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a
 	 * PreparedStatementSetter implementation that knows how to bind values
@@ -423,7 +423,7 @@ public interface JdbcOperations {
 	 */
 	void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch)
 	    throws DataAccessException;
-	
+
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
 	 * arguments to bind to the query, reading the ResultSet on a per-row basis
@@ -947,7 +947,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
 	int update(String sql, PreparedStatementSetter pss) throws DataAccessException;
-	
+
 	/**
 	 * Issue a single SQL update operation (such as an insert, update or delete statement)
 	 * via a prepared statement, binding the given arguments.

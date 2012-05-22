@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.TreeSet;
  * @author Juergen Hoeller
  * @since 11.11.2003
  */
+@SuppressWarnings("rawtypes")
 public class IndexedTestBean {
 
 	private TestBean[] array;
@@ -57,6 +58,7 @@ public class IndexedTestBean {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void populate() {
 		TestBean tb0 = new TestBean("name0", 0);
 		TestBean tb1 = new TestBean("name1", 0);

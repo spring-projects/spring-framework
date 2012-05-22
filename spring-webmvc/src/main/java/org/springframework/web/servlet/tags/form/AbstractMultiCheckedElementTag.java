@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,7 +199,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		if (itemsObject == null && boundType != null && boundType.isEnum()) {
 			itemsObject = boundType.getEnumConstants();
 		}
-		
+
 		if (itemsObject == null) {
 			throw new IllegalArgumentException("Attribute 'items' is required and must be a Collection, an Array or a Map");
 		}
@@ -212,18 +212,19 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 			}
 		}
 		else if (itemsObject instanceof Collection) {
-			final Collection optionCollection = (Collection) itemsObject;
+			final Collection<?> optionCollection = (Collection<?>) itemsObject;
 			int itemIndex = 0;
-			for (Iterator it = optionCollection.iterator(); it.hasNext(); itemIndex++) {
+			for (Iterator<?> it = optionCollection.iterator(); it.hasNext(); itemIndex++) {
 				Object item = it.next();
 				writeObjectEntry(tagWriter, valueProperty, labelProperty, item, itemIndex);
 			}
 		}
 		else if (itemsObject instanceof Map) {
-			final Map optionMap = (Map) itemsObject;
+			final Map<?, ?> optionMap = (Map<?, ?>) itemsObject;
 			int itemIndex = 0;
-			for (Iterator it = optionMap.entrySet().iterator(); it.hasNext(); itemIndex++) {
-				Map.Entry entry = (Map.Entry) it.next();
+			for (@SuppressWarnings("rawtypes")
+			Iterator it = optionMap.entrySet().iterator(); it.hasNext(); itemIndex++) {
+				Map.Entry<?, ?> entry = (Map.Entry<?, ?>) it.next();
 				writeMapEntry(tagWriter, valueProperty, labelProperty, entry, itemIndex);
 			}
 		}
@@ -241,10 +242,10 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		Object renderValue;
 		if (valueProperty != null) {
 			renderValue = wrapper.getPropertyValue(valueProperty);
-		} 
+		}
 		else if (item instanceof Enum) {
 			renderValue = ((Enum<?>) item).name();
-		} 
+		}
 		else {
 			renderValue = item;
 		}
@@ -253,7 +254,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 	}
 
 	private void writeMapEntry(TagWriter tagWriter, String valueProperty,
-			String labelProperty, Map.Entry entry, int itemIndex) throws JspException {
+			String labelProperty, Map.Entry<?, ?> entry, int itemIndex) throws JspException {
 
 		Object mapKey = entry.getKey();
 		Object mapValue = entry.getValue();

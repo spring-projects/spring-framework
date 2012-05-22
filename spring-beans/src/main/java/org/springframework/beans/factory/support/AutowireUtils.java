@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ abstract class AutowireUtils {
 	 * decreasing number of arguments.
 	 * @param constructors the constructor array to sort
 	 */
-	public static void sortConstructors(Constructor[] constructors) {
-		Arrays.sort(constructors, new Comparator<Constructor>() {
-			public int compare(Constructor c1, Constructor c2) {
+	public static void sortConstructors(Constructor<?>[] constructors) {
+		Arrays.sort(constructors, new Comparator<Constructor<?>>() {
+			public int compare(Constructor<?> c1, Constructor<?> c2) {
 				boolean p1 = Modifier.isPublic(c1.getModifiers());
 				boolean p2 = Modifier.isPublic(c2.getModifiers());
 				if (p1 != p2) {
@@ -103,7 +103,7 @@ abstract class AutowireUtils {
 		}
 		// It was declared by CGLIB, but we might still want to autowire it
 		// if it was actually declared by the superclass.
-		Class superclass = wm.getDeclaringClass().getSuperclass();
+		Class<?> superclass = wm.getDeclaringClass().getSuperclass();
 		return !ClassUtils.hasMethod(superclass, wm.getName(), wm.getParameterTypes());
 	}
 
@@ -114,11 +114,11 @@ abstract class AutowireUtils {
 	 * @param interfaces the Set of interfaces (Class objects)
 	 * @return whether the setter method is defined by an interface
 	 */
-	public static boolean isSetterDefinedInInterface(PropertyDescriptor pd, Set<Class> interfaces) {
+	public static boolean isSetterDefinedInInterface(PropertyDescriptor pd, Set<Class<?>> interfaces) {
 		Method setter = pd.getWriteMethod();
 		if (setter != null) {
-			Class targetClass = setter.getDeclaringClass();
-			for (Class ifc : interfaces) {
+			Class<?> targetClass = setter.getDeclaringClass();
+			for (Class<?> ifc : interfaces) {
 				if (ifc.isAssignableFrom(targetClass) &&
 						ClassUtils.hasMethod(ifc, setter.getName(), setter.getParameterTypes())) {
 					return true;
@@ -135,9 +135,9 @@ abstract class AutowireUtils {
 	 * @param requiredType the type to assign the result to
 	 * @return the resolved value
 	 */
-	public static Object resolveAutowiringValue(Object autowiringValue, Class requiredType) {
+	public static Object resolveAutowiringValue(Object autowiringValue, Class<?> requiredType) {
 		if (autowiringValue instanceof ObjectFactory && !requiredType.isInstance(autowiringValue)) {
-			ObjectFactory factory = (ObjectFactory) autowiringValue;
+			ObjectFactory<?> factory = (ObjectFactory<?>) autowiringValue;
 			if (autowiringValue instanceof Serializable && requiredType.isInterface()) {
 				autowiringValue = Proxy.newProxyInstance(requiredType.getClassLoader(),
 						new Class[] {requiredType}, new ObjectFactoryDelegatingInvocationHandler(factory));
@@ -155,9 +155,9 @@ abstract class AutowireUtils {
 	 */
 	private static class ObjectFactoryDelegatingInvocationHandler implements InvocationHandler, Serializable {
 
-		private final ObjectFactory objectFactory;
+		private final ObjectFactory<?> objectFactory;
 
-		public ObjectFactoryDelegatingInvocationHandler(ObjectFactory objectFactory) {
+		public ObjectFactoryDelegatingInvocationHandler(ObjectFactory<?> objectFactory) {
 			this.objectFactory = objectFactory;
 		}
 

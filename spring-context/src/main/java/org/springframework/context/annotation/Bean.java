@@ -118,7 +118,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * the invocation via a CGLIB proxy. This is analogous to inter-{@code @Transactional}
  * method calls where in proxy mode, Spring does not intercept the invocation &mdash;
  * Spring does so only in AspectJ mode.
- * 
+ *
  * <p>For example:
  *
  * <pre class="code">

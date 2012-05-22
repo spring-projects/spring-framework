@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 	private static TypeDescriptor typeDescriptorForListOfString = null;
 	private static List<Integer> listOfInteger = new ArrayList<Integer>();
 	private static TypeDescriptor typeDescriptorForListOfInteger = null;
-	
+
 	static {
 		listOfString.add("1");
 		listOfString.add("2");
@@ -58,35 +58,35 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		listOfInteger.add(5);
 		listOfInteger.add(6);
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 		ExpressionTestsUsingCoreConversionService.typeDescriptorForListOfString = new TypeDescriptor(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfString"));
 		ExpressionTestsUsingCoreConversionService.typeDescriptorForListOfInteger = new TypeDescriptor(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfInteger"));
 	}
-		
-	
+
+
 	/**
 	 * Test the service can convert what we are about to use in the expression evaluation tests.
 	 */
 	@Test
 	public void testConversionsAvailable() throws Exception {
 		TypeConvertorUsingConversionService tcs = new TypeConvertorUsingConversionService();
-		
+
 		// ArrayList containing List<Integer> to List<String>
 		Class<?> clazz = typeDescriptorForListOfString.getElementTypeDescriptor().getType();
 		assertEquals(String.class,clazz);
-		List l = (List) tcs.convertValue(listOfInteger, TypeDescriptor.forObject(listOfInteger), typeDescriptorForListOfString);
+		List<?> l = (List<?>) tcs.convertValue(listOfInteger, TypeDescriptor.forObject(listOfInteger), typeDescriptorForListOfString);
 		assertNotNull(l);
 
 		// ArrayList containing List<String> to List<Integer>
 		clazz = typeDescriptorForListOfInteger.getElementTypeDescriptor().getType();
 		assertEquals(Integer.class,clazz);
-		
-		l = (List) tcs.convertValue(listOfString, TypeDescriptor.forObject(listOfString), typeDescriptorForListOfString);
+
+		l = (List<?>) tcs.convertValue(listOfString, TypeDescriptor.forObject(listOfString), typeDescriptorForListOfString);
 		assertNotNull(l);
 	}
-	
+
 	@Test
 	public void testSetParameterizedList() throws Exception {
 		StandardEvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
@@ -96,7 +96,7 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		// Assign a List<String> to the List<Integer> field - the component elements should be converted
 		parser.parseExpression("listOfInteger").setValue(context,listOfString);
 		assertEquals(3,e.getValue(context,Integer.class).intValue()); // size now 3
-		Class clazz = parser.parseExpression("listOfInteger[1].getClass()").getValue(context,Class.class); // element type correctly Integer
+		Class<?> clazz = parser.parseExpression("listOfInteger[1].getClass()").getValue(context,Class.class); // element type correctly Integer
 		assertEquals(Integer.class,clazz);
 	}
 

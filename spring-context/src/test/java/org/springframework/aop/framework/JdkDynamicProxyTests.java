@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,16 +48,16 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		assertTrue("Should be a JDK proxy: " + proxy.getClass(), AopUtils.isJdkDynamicProxy(proxy));
 		return proxy;
 	}
-	
+
 	protected AopProxy createAopProxy(AdvisedSupport as) {
 		return new JdkDynamicAopProxy(as);
 	}
-	
+
 	public void testNullConfig() {
 		try {
 			new JdkDynamicAopProxy(null);
 			fail("Shouldn't allow null interceptors");
-		} 
+		}
 		catch (IllegalArgumentException ex) {
 			// Ok
 		}
@@ -91,16 +91,16 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		assertTrue("correct return value", tb.getAge() == age);
 		verify(mi);
 	}
-	
+
 	public void testTargetCanGetInvocationWithPrivateClass() throws Throwable {
 		final ExposedInvocationTestBean expectedTarget = new ExposedInvocationTestBean() {
 			protected void assertions(MethodInvocation invocation) {
 				assertTrue(invocation.getThis() == this);
-				assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
+				assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(),
 					invocation.getMethod().getDeclaringClass() == ITestBean.class);
 			}
 		};
-	
+
 		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class, IOther.class });
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
@@ -118,7 +118,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		tb.getName();
 		// Not safe to trap invocation
 		//assertTrue(tii.invocation == target.invocation);
-	
+
 		//assertTrue(target.invocation.getProxy() == tb);
 
 		//	((IOther) tb).absquatulate();

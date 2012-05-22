@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,7 @@ import org.springframework.beans.factory.SmartFactoryBean;
  * @deprecated as of Spring 3.2, in favor of using regular bean name aliases
  * (which support placeholder parsing since Spring 2.5)
  */
-@Deprecated
-public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAware {
+public class BeanReferenceFactoryBean<T> implements SmartFactoryBean<T>, BeanFactoryAware {
 
 	private String targetBeanName;
 
@@ -76,14 +75,15 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 	}
 
 
-	public Object getObject() throws BeansException {
+	@SuppressWarnings("unchecked")
+    public T getObject() throws BeansException {
 		if (this.beanFactory == null) {
 			throw new FactoryBeanNotInitializedException();
 		}
-		return this.beanFactory.getBean(this.targetBeanName);
+		return (T) this.beanFactory.getBean(this.targetBeanName);
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		if (this.beanFactory == null) {
 			return null;
 		}

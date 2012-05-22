@@ -52,7 +52,7 @@ public class SpelParserTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		EvaluationContext ctx = new StandardEvaluationContext();
 		Class<?> c = parser.parseRaw("2").getValueType();
-		assertEquals(Integer.class, c);
+		Assert.assertEquals(Integer.class,c);
 		c = parser.parseRaw("12").getValueType(ctx);
 		assertEquals(Integer.class, c);
 		c = parser.parseRaw("null").getValueType();
@@ -67,7 +67,7 @@ public class SpelParserTests {
 	public void whitespace() throws EvaluationException, ParseException {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expr = parser.parseRaw("2      +    3");
-		assertEquals(5, expr.getValue());
+		Assert.assertEquals(5,expr.getValue());
 		expr = parser.parseRaw("2	+	3");
 		assertEquals(5, expr.getValue());
 		expr = parser.parseRaw("2\n+\t3");
@@ -250,34 +250,15 @@ public class SpelParserTests {
 	@Test
 	public void stringLiterals() throws EvaluationException, ParseException {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("'howdy'");
-		assertEquals("howdy", expr.getValue());
+		Assert.assertEquals("howdy",expr.getValue());
 		expr = new SpelExpressionParser().parseRaw("'hello '' world'");
-		assertEquals("hello ' world", expr.getValue());
+		Assert.assertEquals("hello ' world",expr.getValue());
 	}
 
 	@Test
 	public void stringLiterals2() throws EvaluationException, ParseException {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("'howdy'.substring(0,2)");
-		assertEquals("ho", expr.getValue());
-	}
-
-	@Test
-	public void testStringLiterals_DoubleQuotes_spr9620() throws Exception {
-		SpelExpression expr = new SpelExpressionParser().parseRaw("\"double quote: \"\".\"");
-		assertEquals("double quote: \".", expr.getValue());
-		expr = new SpelExpressionParser().parseRaw("\"hello \"\" world\"");
-		assertEquals("hello \" world", expr.getValue());
-	}
-
-	@Test
-	public void testStringLiterals_DoubleQuotes_spr9620_2() throws Exception {
-		try {
-			new SpelExpressionParser().parseRaw("\"double quote: \\\"\\\".\"");
-			fail("Should have failed");
-		} catch (SpelParseException spe) {
-			assertEquals(17, spe.getPosition());
-			assertEquals(SpelMessage.UNEXPECTED_ESCAPE_CHAR, spe.getMessageCode());
-		}
+		Assert.assertEquals("ho",expr.getValue());
 	}
 
 	@Test
@@ -289,8 +270,8 @@ public class SpelParserTests {
 		SpelNode rightOrOperand = operatorOr.getRightOperand();
 
 		// check position for final 'false'
-		assertEquals(17, rightOrOperand.getStartPosition());
-		assertEquals(22, rightOrOperand.getEndPosition());
+		Assert.assertEquals(17, rightOrOperand.getStartPosition());
+		Assert.assertEquals(22, rightOrOperand.getEndPosition());
 
 		// check position for first 'true'
 		assertEquals(0, operatorAnd.getLeftOperand().getStartPosition());
@@ -301,8 +282,8 @@ public class SpelParserTests {
 		assertEquals(13, operatorAnd.getRightOperand().getEndPosition());
 
 		// check position for OperatorAnd
-		assertEquals(5, operatorAnd.getStartPosition());
-		assertEquals(8, operatorAnd.getEndPosition());
+		Assert.assertEquals(5, operatorAnd.getStartPosition());
+		Assert.assertEquals(8, operatorAnd.getEndPosition());
 
 		// check position for OperatorOr
 		assertEquals(14, operatorOr.getStartPosition());
@@ -316,12 +297,12 @@ public class SpelParserTests {
 		assertEquals("NOT(!)", tk.toString());
 
 		tk = TokenKind.MINUS;
-		assertFalse(tk.hasPayload());
-		assertEquals("MINUS(-)", tk.toString());
+		Assert.assertFalse(tk.hasPayload());
+		Assert.assertEquals("MINUS(-)",tk.toString());
 
 		tk = TokenKind.LITERAL_STRING;
-		assertEquals("LITERAL_STRING", tk.toString());
-		assertTrue(tk.hasPayload());
+		Assert.assertEquals("LITERAL_STRING",tk.toString());
+		Assert.assertTrue(tk.hasPayload());
 	}
 
 	@Test
@@ -355,34 +336,29 @@ public class SpelParserTests {
 	}
 
 	@Test
-	public void parseMethodsOnNumbers() {
-		checkNumber("3.14.toString()", "3.14", String.class);
-		checkNumber("3.toString()", "3", String.class);
-	}
+	public void testNumerics() {
+		checkNumber("2",2,Integer.class);
+		checkNumber("22",22,Integer.class);
+		checkNumber("+22",22,Integer.class);
+		checkNumber("-22",-22,Integer.class);
 
-	@Test
-	public void numerics() {
-		checkNumber("2", 2, Integer.class);
-		checkNumber("22", 22, Integer.class);
-		checkNumber("+22", 22, Integer.class);
-		checkNumber("-22", -22, Integer.class);
+		checkNumber("2L",2L,Long.class);
+		checkNumber("22l",22L,Long.class);
 
-		checkNumber("2L", 2L, Long.class);
-		checkNumber("22l", 22L, Long.class);
+		checkNumber("0x1",1,Integer.class);
+		checkNumber("0x1L",1L,Long.class);
+		checkNumber("0xa",10,Integer.class);
+		checkNumber("0xAL",10L,Long.class);
 
-		checkNumber("0x1", 1, Integer.class);
-		checkNumber("0x1L", 1L, Long.class);
-		checkNumber("0xa", 10, Integer.class);
-		checkNumber("0xAL", 10L, Long.class);
+		checkNumberError("0x",SpelMessage.NOT_AN_INTEGER);
+		checkNumberError("0xL",SpelMessage.NOT_A_LONG);
 
-		checkNumberError("0x", SpelMessage.NOT_AN_INTEGER);
-		checkNumberError("0xL", SpelMessage.NOT_A_LONG);
+		checkNumberError(".324",SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
 
-		checkNumberError(".324", SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
+		checkNumberError("3.4L",SpelMessage.REAL_CANNOT_BE_LONG);
 
-		checkNumberError("3.4L", SpelMessage.REAL_CANNOT_BE_LONG);
-
-		checkNumber("3.5f", 3.5f, Float.class);
+		// Number is parsed as a float, but immediately promoted to a double
+		checkNumber("3.5f",3.5d,Double.class);
 
 		checkNumber("1.2e3", 1.2e3d, Double.class);
 		checkNumber("1.2e+3", 1.2e3d, Double.class);

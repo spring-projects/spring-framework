@@ -48,8 +48,7 @@ class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 			mappedInterceptorDef.setSource(parserContext.extractSource(interceptor));
 			mappedInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
-			ManagedList<String> includePatterns = null;
-			ManagedList<String> excludePatterns = null;
+			String[] pathPatterns;
 			Object interceptorBean;
 			if ("interceptor".equals(interceptor.getLocalName())) {
 				includePatterns = getIncludePatterns(interceptor, "mapping");

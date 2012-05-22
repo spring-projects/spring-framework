@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public class ConstructorArgumentValues {
 	 * untyped values only)
 	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
-	public ValueHolder getIndexedArgumentValue(int index, Class requiredType) {
+	public ValueHolder getIndexedArgumentValue(int index, Class<?> requiredType) {
 		return getIndexedArgumentValue(index, requiredType, null);
 	}
 
@@ -159,7 +159,7 @@ public class ConstructorArgumentValues {
 	 * unnamed values only)
 	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
-	public ValueHolder getIndexedArgumentValue(int index, Class requiredType, String requiredName) {
+	public ValueHolder getIndexedArgumentValue(int index, Class<?> requiredType, String requiredName) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
 		ValueHolder valueHolder = this.indexedArgumentValues.get(index);
 		if (valueHolder != null &&
@@ -247,7 +247,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredType the type to match
 	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
-	public ValueHolder getGenericArgumentValue(Class requiredType) {
+	public ValueHolder getGenericArgumentValue(Class<?> requiredType) {
 		return getGenericArgumentValue(requiredType, null, null);
 	}
 
@@ -257,7 +257,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredName the name to match
 	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
-	public ValueHolder getGenericArgumentValue(Class requiredType, String requiredName) {
+	public ValueHolder getGenericArgumentValue(Class<?> requiredType, String requiredName) {
 		return getGenericArgumentValue(requiredType, requiredName, null);
 	}
 
@@ -273,7 +273,7 @@ public class ConstructorArgumentValues {
 	 * in the current resolution process and should therefore not be returned again
 	 * @return the ValueHolder for the argument, or <code>null</code> if none found
 	 */
-	public ValueHolder getGenericArgumentValue(Class requiredType, String requiredName, Set<ValueHolder> usedValueHolders) {
+	public ValueHolder getGenericArgumentValue(Class<?> requiredType, String requiredName, Set<ValueHolder> usedValueHolders) {
 		for (ValueHolder valueHolder : this.genericArgumentValues) {
 			if (usedValueHolders != null && usedValueHolders.contains(valueHolder)) {
 				continue;
@@ -312,7 +312,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredType the type to match
 	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
-	public ValueHolder getArgumentValue(int index, Class requiredType) {
+	public ValueHolder getArgumentValue(int index, Class<?> requiredType) {
 		return getArgumentValue(index, requiredType, null, null);
 	}
 
@@ -324,7 +324,7 @@ public class ConstructorArgumentValues {
 	 * @param requiredName the name to match
 	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
-	public ValueHolder getArgumentValue(int index, Class requiredType, String requiredName) {
+	public ValueHolder getArgumentValue(int index, Class<?> requiredType, String requiredName) {
 		return getArgumentValue(index, requiredType, requiredName, null);
 	}
 
@@ -340,7 +340,7 @@ public class ConstructorArgumentValues {
 	 * in case of multiple generic argument values of the same type)
 	 * @return the ValueHolder for the argument, or <code>null</code> if none set
 	 */
-	public ValueHolder getArgumentValue(int index, Class requiredType, String requiredName, Set<ValueHolder> usedValueHolders) {
+	public ValueHolder getArgumentValue(int index, Class<?> requiredType, String requiredName, Set<ValueHolder> usedValueHolders) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
 		ValueHolder valueHolder = getIndexedArgumentValue(index, requiredType, requiredName);
 		if (valueHolder == null) {

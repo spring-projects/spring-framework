@@ -49,7 +49,7 @@ public class PortletContextAwareProcessor implements BeanPostProcessor {
 	public PortletContextAwareProcessor(PortletContext portletContext) {
 		this(portletContext, null);
 	}
-	
+
 	/**
 	 * Create a new PortletContextAwareProcessor for the given config.
 	 */

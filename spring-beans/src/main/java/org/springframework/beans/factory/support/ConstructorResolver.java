@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,12 +103,12 @@ class ConstructorResolver {
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper autowireConstructor(
-			final String beanName, final RootBeanDefinition mbd, Constructor[] chosenCtors, final Object[] explicitArgs) {
+			final String beanName, final RootBeanDefinition mbd, Constructor<?>[] chosenCtors, final Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
 
-		Constructor constructorToUse = null;
+		Constructor<?> constructorToUse = null;
 		ArgumentsHolder argsHolderToUse = null;
 		Object[] argsToUse = null;
 
@@ -118,7 +118,7 @@ class ConstructorResolver {
 		else {
 			Object[] argsToResolve = null;
 			synchronized (mbd.constructorArgumentLock) {
-				constructorToUse = (Constructor) mbd.resolvedConstructorOrFactoryMethod;
+				constructorToUse = (Constructor<?>) mbd.resolvedConstructorOrFactoryMethod;
 				if (constructorToUse != null && mbd.constructorArgumentsResolved) {
 					// Found a cached constructor...
 					argsToUse = mbd.resolvedConstructorArguments;
@@ -149,9 +149,9 @@ class ConstructorResolver {
 			}
 
 			// Take specified constructors, if any.
-			Constructor[] candidates = chosenCtors;
+			Constructor<?>[] candidates = chosenCtors;
 			if (candidates == null) {
-				Class beanClass = mbd.getBeanClass();
+				Class<?> beanClass = mbd.getBeanClass();
 				try {
 					candidates = (mbd.isNonPublicAccessAllowed() ?
 							beanClass.getDeclaredConstructors() : beanClass.getConstructors());
@@ -164,12 +164,12 @@ class ConstructorResolver {
 			}
 			AutowireUtils.sortConstructors(candidates);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
-			Set<Constructor> ambiguousConstructors = null;
+			Set<Constructor<?>> ambiguousConstructors = null;
 			List<Exception> causes = null;
 
 			for (int i = 0; i < candidates.length; i++) {
 				Constructor<?> candidate = candidates[i];
-				Class[] paramTypes = candidate.getParameterTypes();
+				Class<?>[] paramTypes = candidate.getParameterTypes();
 
 				if (constructorToUse != null && argsToUse.length > paramTypes.length) {
 					// Already found greedy constructor that can be satisfied ->
@@ -239,7 +239,7 @@ class ConstructorResolver {
 				}
 				else if (constructorToUse != null && typeDiffWeight == minTypeDiffWeight) {
 					if (ambiguousConstructors == null) {
-						ambiguousConstructors = new LinkedHashSet<Constructor>();
+						ambiguousConstructors = new LinkedHashSet<Constructor<?>>();
 						ambiguousConstructors.add(constructorToUse);
 					}
 					ambiguousConstructors.add(candidate);
@@ -267,7 +267,7 @@ class ConstructorResolver {
 			Object beanInstance;
 
 			if (System.getSecurityManager() != null) {
-				final Constructor ctorToUse = constructorToUse;
+				final Constructor<?> ctorToUse = constructorToUse;
 				final Object[] argumentsToUse = argsToUse;
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
 					public Object run() {
@@ -280,7 +280,7 @@ class ConstructorResolver {
 				beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
 						mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 			}
-			
+
 			bw.setWrappedInstance(beanInstance);
 			return bw;
 		}
@@ -295,7 +295,7 @@ class ConstructorResolver {
 	 * @param mbd the bean definition to check
 	 */
 	public void resolveFactoryMethodIfPossible(RootBeanDefinition mbd) {
-		Class factoryClass;
+		Class<?> factoryClass;
 		if (mbd.getFactoryBeanName() != null) {
 			factoryClass = this.beanFactory.getType(mbd.getFactoryBeanName());
 		}
@@ -341,7 +341,7 @@ class ConstructorResolver {
 		this.beanFactory.initBeanWrapper(bw);
 
 		Object factoryBean;
-		Class factoryClass;
+		Class<?> factoryClass;
 		boolean isStatic;
 
 		String factoryBeanName = mbd.getFactoryBeanName();
@@ -399,7 +399,7 @@ class ConstructorResolver {
 			factoryClass = ClassUtils.getUserClass(factoryClass);
 			Method[] rawCandidates;
 
-			final Class factoryClazz = factoryClass;
+			final Class<?> factoryClazz = factoryClass;
 			if (System.getSecurityManager() != null) {
 				rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
 					public Method[] run() {
@@ -412,7 +412,7 @@ class ConstructorResolver {
 				rawCandidates = (mbd.isNonPublicAccessAllowed() ?
 						ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
 			}
-			
+
 			List<Method> candidateSet = new ArrayList<Method>();
 			for (Method candidate : rawCandidates) {
 				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
@@ -445,7 +445,7 @@ class ConstructorResolver {
 
 			for (int i = 0; i < candidates.length; i++) {
 				Method candidate = candidates[i];
-				Class[] paramTypes = candidate.getParameterTypes();
+				Class<?>[] paramTypes = candidate.getParameterTypes();
 
 				if (paramTypes.length >= minNrOfArgs) {
 					ArgumentsHolder argsHolder;
@@ -570,7 +570,7 @@ class ConstructorResolver {
 				beanInstance = beanFactory.getInstantiationStrategy().instantiate(
 						mbd, beanName, beanFactory, factoryBean, factoryMethodToUse, argsToUse);
 			}
-			
+
 			if (beanInstance == null) {
 				return null;
 			}
@@ -644,7 +644,7 @@ class ConstructorResolver {
 	 */
 	private ArgumentsHolder createArgumentArray(
 			String beanName, RootBeanDefinition mbd, ConstructorArgumentValues resolvedValues,
-			BeanWrapper bw, Class[] paramTypes, String[] paramNames, Object methodOrCtor,
+			BeanWrapper bw, Class<?>[] paramTypes, String[] paramNames, Object methodOrCtor,
 			boolean autowiring) throws UnsatisfiedDependencyException {
 
 		String methodType = (methodOrCtor instanceof Constructor ? "constructor" : "factory method");
@@ -750,8 +750,8 @@ class ConstructorResolver {
 	private Object[] resolvePreparedArguments(
 			String beanName, RootBeanDefinition mbd, BeanWrapper bw, Member methodOrCtor, Object[] argsToResolve) {
 
-		Class[] paramTypes = (methodOrCtor instanceof Method ?
-				((Method) methodOrCtor).getParameterTypes() : ((Constructor) methodOrCtor).getParameterTypes());
+		Class<?>[] paramTypes = (methodOrCtor instanceof Method ?
+				((Method) methodOrCtor).getParameterTypes() : ((Constructor<?>) methodOrCtor).getParameterTypes());
 		TypeConverter converter = (this.beanFactory.getCustomTypeConverter() != null ?
 				this.beanFactory.getCustomTypeConverter() : bw);
 		BeanDefinitionValueResolver valueResolver =
@@ -822,7 +822,7 @@ class ConstructorResolver {
 			this.preparedArguments = args;
 		}
 
-		public int getTypeDifferenceWeight(Class[] paramTypes) {
+		public int getTypeDifferenceWeight(Class<?>[] paramTypes) {
 			// If valid arguments found, determine type difference weight.
 			// Try type difference weight on both the converted arguments and
 			// the raw arguments. If the raw weight is better, use it.
@@ -832,7 +832,7 @@ class ConstructorResolver {
 			return (rawTypeDiffWeight < typeDiffWeight ? rawTypeDiffWeight : typeDiffWeight);
 		}
 
-		public int getAssignabilityWeight(Class[] paramTypes) {
+		public int getAssignabilityWeight(Class<?>[] paramTypes) {
 			for (int i = 0; i < paramTypes.length; i++) {
 				if (!ClassUtils.isAssignableValue(paramTypes[i], this.arguments[i])) {
 					return Integer.MAX_VALUE;

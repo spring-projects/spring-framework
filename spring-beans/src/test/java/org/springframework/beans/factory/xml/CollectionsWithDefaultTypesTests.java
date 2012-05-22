@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import test.beans.TestBean;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -31,10 +32,12 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class CollectionsWithDefaultTypesTests {
 
-	private final XmlBeanFactory beanFactory;
+	private final DefaultListableBeanFactory beanFactory;
 
 	public CollectionsWithDefaultTypesTests() {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource("collectionsWithDefaultTypes.xml", getClass()));
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(new ClassPathResource(
+			"collectionsWithDefaultTypes.xml", getClass()));
 	}
 
 	@Test
@@ -66,7 +69,7 @@ public class CollectionsWithDefaultTypesTests {
 	}
 
 	private void assertMap(Map<?,?> map) {
-		for (Map.Entry entry : map.entrySet()) {
+		for (Map.Entry<?,?> entry : map.entrySet()) {
 			assertEquals("Key type is incorrect", Integer.class, entry.getKey().getClass());
 			assertEquals("Value type is incorrect", Boolean.class, entry.getValue().getClass());
 		}
@@ -74,10 +77,11 @@ public class CollectionsWithDefaultTypesTests {
 
 	@Test
 	public void testBuildCollectionFromMixtureOfReferencesAndValues() throws Exception {
-		MixedCollectionBean jumble = (MixedCollectionBean) this.beanFactory.getBean("jumble");
+		@SuppressWarnings("unchecked")
+		MixedCollectionBean<Object> jumble = (MixedCollectionBean<Object>) this.beanFactory.getBean("jumble");
 		assertTrue("Expected 3 elements, not " + jumble.getJumble().size(),
 				jumble.getJumble().size() == 3);
-		List l = (List) jumble.getJumble();
+		List<Object> l = (List<Object>) jumble.getJumble();
 		assertTrue(l.get(0).equals("literal"));
 		Integer[] array1 = (Integer[]) l.get(1);
 		assertTrue(array1[0].equals(new Integer(2)));

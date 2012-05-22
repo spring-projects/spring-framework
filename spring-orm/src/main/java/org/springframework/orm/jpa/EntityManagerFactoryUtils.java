@@ -140,7 +140,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
-	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, Map properties)
+	public static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, Map<?, ?> properties)
 			throws DataAccessResourceFailureException {
 		try {
 			return doGetTransactionalEntityManager(emf, properties);
@@ -164,7 +164,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * @see JpaTransactionManager
 	 */
 	public static EntityManager doGetTransactionalEntityManager(
-			EntityManagerFactory emf, Map properties) throws PersistenceException {
+			EntityManagerFactory emf, Map<?, ?> properties) throws PersistenceException {
 
 		Assert.notNull(emf, "No EntityManagerFactory specified");
 
@@ -317,11 +317,11 @@ public abstract class EntityManagerFactoryUtils {
 		if (ex instanceof PersistenceException) {
 			return new JpaSystemException((PersistenceException) ex);
 		}
-		
+
 		// If we get here, we have an exception that resulted from user code,
 		// rather than the persistence provider, so we return null to indicate
 		// that translation should not occur.
-		return null;				
+		return null;
 	}
 
 	/**

@@ -24,8 +24,8 @@ import javax.portlet.RenderResponse;
 import org.springframework.web.portlet.ModelAndView;
 
 /**
- * Base portlet Controller interface, representing a component that receives 
- * RenderRequest/RenderResponse and ActionRequest/ActionResponse like a 
+ * Base portlet Controller interface, representing a component that receives
+ * RenderRequest/RenderResponse and ActionRequest/ActionResponse like a
  * <code>Portlet</code> but is able to participate in an MVC workflow.
  *
  * <p>Any implementation of the portlet Controller interface should be a
@@ -46,7 +46,7 @@ import org.springframework.web.portlet.ModelAndView;
  * So actually, these method are the main entrypoint for the
  * {@link org.springframework.web.portlet.DispatcherPortlet DispatcherPortlet}
  * which delegates requests to controllers.</p>
- * 
+ *
  * <p>So basically any <i>direct</i> implementation of the Controller interface
  * just handles RenderRequests/ActionRequests and should return a ModelAndView, to be
  * further used by the DispatcherPortlet. Any additional functionality such as

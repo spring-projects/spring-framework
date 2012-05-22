@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 /**
  * <code>TestContext</code> encapsulates the context in which a test is executed,
  * agnostic of the actual testing framework in use.
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5

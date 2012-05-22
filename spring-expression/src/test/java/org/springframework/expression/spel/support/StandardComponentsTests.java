@@ -43,19 +43,19 @@ public class StandardComponentsTests {
 		context.setTypeLocator(tl);
 		Assert.assertEquals(tl,context.getTypeLocator());
 	}
-	
+
 	@Test
 	public void testStandardOperatorOverloader() throws EvaluationException {
 		OperatorOverloader oo = new StandardOperatorOverloader();
 		Assert.assertFalse(oo.overridesOperation(Operation.ADD, null, null));
-		try {	
+		try {
 			oo.operate(Operation.ADD, 2, 3);
 			Assert.fail("should have failed");
 		} catch (EvaluationException e) {
 			// success
 		}
 	}
-	
+
 	@Test
 	public void testStandardTypeLocator() {
 		StandardTypeLocator tl = new StandardTypeLocator();
@@ -68,7 +68,7 @@ public class StandardComponentsTests {
 		prefixes = tl.getImportPrefixes();
 		Assert.assertEquals(1,prefixes.size());
 	}
-	
+
 	@Test
 	public void testStandardTypeConverter() throws EvaluationException {
 		TypeConverter tc = new StandardTypeConverter();

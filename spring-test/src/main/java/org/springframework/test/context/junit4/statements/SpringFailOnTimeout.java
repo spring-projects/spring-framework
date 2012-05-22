@@ -26,7 +26,7 @@ import org.springframework.test.annotation.Timed;
  * which adds support for Spring's {@link Timed @Timed} annotation by throwing
  * an exception if the next statement in the execution chain takes more than the
  * specified number of milliseconds.
- * 
+ *
  * @see #evaluate()
  * @author Sam Brannen
  * @since 3.0
@@ -40,7 +40,7 @@ public class SpringFailOnTimeout extends Statement {
 
 	/**
 	 * Constructs a new <code>SpringFailOnTimeout</code> statement.
-	 * 
+	 *
 	 * @param next the next <code>Statement</code> in the execution chain
 	 * @param timeout the configured <code>timeout</code> for the current test
 	 * @see Timed#millis()

@@ -23,7 +23,7 @@ import java.io.Serializable;
 
 /**
  * Serializer that writes an object to an output stream using Java Serialization.
- * 
+ *
  * @author Gary Russell
  * @author Mark Fisher
  * @since 3.0.5

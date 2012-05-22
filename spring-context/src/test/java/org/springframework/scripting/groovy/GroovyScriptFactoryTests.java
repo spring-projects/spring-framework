@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -384,7 +384,7 @@ public class GroovyScriptFactoryTests {
 		assertEquals("Hello World!", messenger.getMessage());
 
 		assertTrue(ctx.getBeansOfType(ConcreteMessenger.class).values().contains(messenger));
-		
+
 		// Check that AnnotationUtils works with concrete proxied script classes
 		assertNotNull(AnnotationUtils.findAnnotation(messenger.getClass(), Component.class));
 	}
@@ -402,7 +402,7 @@ public class GroovyScriptFactoryTests {
 	@Test
 	public void testAnonymousScriptDetected() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
-		Map beans = ctx.getBeansOfType(Messenger.class);
+		Map<String, Messenger> beans = ctx.getBeansOfType(Messenger.class);
 		assertEquals(4, beans.size());
 	}
 

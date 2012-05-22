@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, JoinPoint.StaticPart {
-	
+
 	private final ProxyMethodInvocation methodInvocation;
 
 	private Object[] defensiveCopyOfArgs;
@@ -169,7 +169,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			return methodInvocation.getMethod().getModifiers();
 		}
 
-		public Class getDeclaringType() {
+		public Class<?> getDeclaringType() {
 			return methodInvocation.getMethod().getDeclaringClass();
 		}
 
@@ -177,7 +177,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			return methodInvocation.getMethod().getDeclaringClass().getName();
 		}
 
-		public Class getReturnType() {
+		public Class<?> getReturnType() {
 			return methodInvocation.getMethod().getReturnType();
 		}
 
@@ -185,7 +185,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			return methodInvocation.getMethod();
 		}
 
-		public Class[] getParameterTypes() {
+		public Class<?>[] getParameterTypes() {
 			return methodInvocation.getMethod().getParameterTypes();
 		}
 
@@ -196,7 +196,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			return this.parameterNames;
 		}
 
-		public Class[] getExceptionTypes() {
+		public Class<?>[] getExceptionTypes() {
 			return methodInvocation.getMethod().getExceptionTypes();
 		}
 
@@ -227,7 +227,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			sb.append(".");
 			sb.append(getMethod().getName());
 			sb.append("(");
-			Class[] parametersTypes = getParameterTypes();
+			Class<?>[] parametersTypes = getParameterTypes();
 			appendTypes(sb, parametersTypes, includeReturnTypeAndArgs, useLongReturnAndArgumentTypeName);
 			sb.append(")");
 			return sb.toString();
@@ -267,7 +267,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	 */
 	private class SourceLocationImpl implements SourceLocation {
 
-		public Class getWithinType() {
+		public Class<?> getWithinType() {
 			if (methodInvocation.getThis() == null) {
 				throw new UnsupportedOperationException("No source location joinpoint available: target is null");
 			}

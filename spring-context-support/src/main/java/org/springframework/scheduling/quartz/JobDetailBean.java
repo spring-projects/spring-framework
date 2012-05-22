@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.context.ApplicationContextAware;
 public class JobDetailBean extends JobDetail
 		implements BeanNameAware, ApplicationContextAware, InitializingBean {
 
-	private Class actualJobClass;
+	private Class<?> actualJobClass;
 
 	private String beanName;
 
@@ -65,6 +65,7 @@ public class JobDetailBean extends JobDetail
 	 * to adapt the given job class to the Quartz Job interface.
 	 * @see SchedulerFactoryBean#setJobFactory
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void setJobClass(Class jobClass) {
 		if (jobClass != null && !Job.class.isAssignableFrom(jobClass)) {
@@ -81,7 +82,7 @@ public class JobDetailBean extends JobDetail
 	 * to adapt the given job class to the Quartz Job interface.
 	 */
 	@Override
-	public Class getJobClass() {
+	public Class<?> getJobClass() {
 		return (this.actualJobClass != null ? this.actualJobClass : super.getJobClass());
 	}
 
@@ -96,6 +97,7 @@ public class JobDetailBean extends JobDetail
 	 * (for example Spring-managed beans)
 	 * @see SchedulerFactoryBean#setSchedulerContextAsMap
 	 */
+	@SuppressWarnings("rawtypes")
 	public void setJobDataAsMap(Map jobDataAsMap) {
 		getJobDataMap().putAll(jobDataAsMap);
 	}

@@ -33,10 +33,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.HandlerMethodSelector;
 
 /**
- * Discovers {@linkplain ExceptionHandler @ExceptionHandler} methods in a given class
- * type, including all super types, and helps to resolve an Exception to the method
- * its mapped to. Exception mappings are defined through {@code @ExceptionHandler}
- * annotation or by looking at the signature of an {@code @ExceptionHandler} method.
+ * Given a set of @{@link ExceptionHandler} methods at initialization, finds
+ * the best matching method mapped to an exception at runtime.
+ *
+ * <p>Exception mappings are extracted from the method @{@link ExceptionHandler}
+ * annotation or by looking for {@link Throwable} method arguments.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -46,14 +47,18 @@ public class ExceptionHandlerMethodResolver {
 	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
 
 	private final Map<Class<? extends Throwable>, Method> mappedMethods =
-			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+		new ConcurrentHashMap<Class<? extends Throwable>, Method>();
 
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache =
 			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
 
 	/**
-	 * A constructor that finds {@link ExceptionHandler} methods in the given type.
-	 * @param handlerType the type to introspect
+	 * A constructor that finds {@link ExceptionHandler} methods in a handler.
+	 * @param handlerType the handler to inspect for exception handler methods.
+	 * @throws IllegalStateException
+	 * 		If an exception type is mapped to two methods.
+	 * @throws IllegalArgumentException
+	 * 		If an @{@link ExceptionHandler} method is not mapped to any exceptions.
 	 */
 	public ExceptionHandlerMethodResolver(Class<?> handlerType) {
 		for (Method method : HandlerMethodSelector.selectMethods(handlerType, EXCEPTION_HANDLER_METHODS)) {

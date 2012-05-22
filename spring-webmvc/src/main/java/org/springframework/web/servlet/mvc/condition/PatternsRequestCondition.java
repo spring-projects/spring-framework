@@ -52,11 +52,9 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 	private final boolean useTrailingSlashMatch;
 
-	private final List<String> fileExtensions = new ArrayList<String>();
-
 	/**
 	 * Creates a new instance with the given URL patterns.
-	 * Each pattern that is not empty and does not start with "/" is prepended with "/".
+	 * Each pattern that is not empty and does not start with "/" is pre-pended with "/".
 	 * @param patterns 0 or more URL patterns; if 0 the condition will match to every request.
 	 */
 	public PatternsRequestCondition(String... patterns) {
@@ -89,21 +87,23 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @param useTrailingSlashMatch whether to match irrespective of a trailing slash
 	 * @param fileExtensions a list of file extensions to consider for path matching
 	 */
-	public PatternsRequestCondition(String[] patterns, UrlPathHelper urlPathHelper,
-			PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
-			List<String> fileExtensions) {
-
-		this(asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch, useTrailingSlashMatch, fileExtensions);
+	public PatternsRequestCondition(String[] patterns,
+									UrlPathHelper urlPathHelper,
+									PathMatcher pathMatcher,
+									boolean useSuffixPatternMatch,
+									boolean useTrailingSlashMatch) {
+		this(asList(patterns), urlPathHelper, pathMatcher, useSuffixPatternMatch, useTrailingSlashMatch);
 	}
 
 	/**
 	 * Private constructor accepting a collection of patterns.
 	 * @param fileExtensionResolver
 	 */
-	private PatternsRequestCondition(Collection<String> patterns, UrlPathHelper urlPathHelper,
-			PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
-			List<String> fileExtensions) {
-
+	private PatternsRequestCondition(Collection<String> patterns,
+									 UrlPathHelper urlPathHelper,
+									 PathMatcher pathMatcher,
+									 boolean useSuffixPatternMatch,
+									 boolean useTrailingSlashMatch) {
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
 		this.urlPathHelper = urlPathHelper != null ? urlPathHelper : new UrlPathHelper();
 		this.pathMatcher = pathMatcher != null ? pathMatcher : new AntPathMatcher();
@@ -249,14 +249,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Whether to match by known file extensions. Return "true" if file extensions
-	 * are configured, and the lookup path has a suffix.
-	 */
-	private boolean useSmartSuffixPatternMatch(String pattern, String lookupPath) {
-		return (!this.fileExtensions.isEmpty() && lookupPath.indexOf('.') != -1) ;
 	}
 
 	/**

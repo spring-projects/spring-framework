@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Standard implementation of the {@link PersonService} API.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

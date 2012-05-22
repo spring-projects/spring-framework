@@ -47,9 +47,12 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 	private static final CachedRowSetFactory cachedRowSetFactory;
 
 	static {
-		if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_17) {
-			// using JDBC 4.1 RowSetProvider
-			cachedRowSetFactory = new StandardCachedRowSetFactory();
+		ClassLoader cl = SqlRowSetResultSetExtractor.class.getClassLoader();
+		try {
+			Class<?> rowSetProviderClass = cl.loadClass("javax.sql.rowset.RowSetProvider");
+			Method newFactory = rowSetProviderClass.getMethod("newFactory");
+			rowSetFactory = ReflectionUtils.invokeMethod(newFactory, null);
+			createCachedRowSet = rowSetFactory.getClass().getMethod("createCachedRowSet");
 		}
 		else {
 			// JDBC 4.1 API not available - fall back to Sun CachedRowSetImpl

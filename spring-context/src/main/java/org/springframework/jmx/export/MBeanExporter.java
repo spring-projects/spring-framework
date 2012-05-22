@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -603,7 +603,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 					"Unable to register MBean [" + mapValue + "] with key '" + beanKey + "'", ex);
 		}
 	}
-	
+
 	/**
 	 * Replaces any bean names used as keys in the <code>NotificationListener</code>
 	 * mappings with their corresponding <code>ObjectName</code> values.
@@ -739,7 +739,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @return whether the class qualifies as an MBean
 	 * @see org.springframework.jmx.support.JmxUtils#isMBean(Class)
 	 */
-	protected boolean isMBean(Class beanClass) {
+	protected boolean isMBean(Class<?> beanClass) {
 		return JmxUtils.isMBean(beanClass);
 	}
 
@@ -751,7 +751,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @param bean the original bean instance
 	 * @return the adapted MBean, or <code>null</code> if not possible
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected DynamicMBean adaptMBeanIfPossible(Object bean) throws JMException {
 		Class targetClass = AopUtils.getTargetClass(bean);
 		if (targetClass != bean.getClass()) {
@@ -782,8 +782,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * interface for the supplied managed resource.
 	 * @param managedResource the resource that is to be exported as an MBean
 	 * @param beanKey the key associated with the managed bean
-	 * @see #createModelMBean() 
-	 * @see #getMBeanInfo(Object, String) 
+	 * @see #createModelMBean()
+	 * @see #getMBeanInfo(Object, String)
 	 */
 	protected ModelMBean createAndConfigureMBean(Object managedResource, String beanKey)
 			throws MBeanExportException {
@@ -840,7 +840,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private void autodetectBeans(final AutodetectCapableMBeanInfoAssembler assembler) {
 		autodetect(new AutodetectCallback() {
-			public boolean include(Class beanClass, String beanName) {
+			public boolean include(Class<?> beanClass, String beanName) {
 				return assembler.includeBean(beanClass, beanName);
 			}
 		});
@@ -852,7 +852,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private void autodetectMBeans() {
 		autodetect(new AutodetectCallback() {
-			public boolean include(Class beanClass, String beanName) {
+			public boolean include(Class<?> beanClass, String beanName) {
 				return isMBean(beanClass);
 			}
 		});
@@ -874,7 +874,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		for (String beanName : beanNames) {
 			if (!isExcluded(beanName) && !isBeanDefinitionAbstract(this.beanFactory, beanName)) {
 				try {
-					Class beanClass = this.beanFactory.getType(beanName);
+					Class<?> beanClass = this.beanFactory.getType(beanName);
 					if (beanClass != null && callback.include(beanClass, beanName)) {
 						boolean lazyInit = isBeanDefinitionLazyInit(this.beanFactory, beanName);
 						Object beanInstance = (!lazyInit ? this.beanFactory.getBean(beanName) : null);
@@ -1060,7 +1060,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		 * @param beanClass the class of the bean
 		 * @param beanName the name of the bean
 		 */
-		boolean include(Class beanClass, String beanName);
+		boolean include(Class<?> beanClass, String beanName);
 	}
 
 
@@ -1072,7 +1072,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private class NotificationPublisherAwareLazyTargetSource extends LazyInitTargetSource {
 
 		private ModelMBean modelMBean;
-		
+
 		private ObjectName objectName;
 
 		public void setModelMBean(ModelMBean modelMBean) {

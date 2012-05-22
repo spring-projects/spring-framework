@@ -82,6 +82,7 @@ import org.xml.sax.InputSource;
  * @author Rick Evans
  * @author Chris Beams
  */
+@SuppressWarnings("deprecation")
 public final class XmlBeanFactoryTests {
 
 	private static final Class<?> CLASS = XmlBeanFactoryTests.class;
@@ -116,7 +117,6 @@ public final class XmlBeanFactoryTests {
 	private static final ClassPathResource NO_SUCH_FACTORY_METHOD_CONTEXT = classPathResource("-noSuchFactoryMethod.xml");
 	private static final ClassPathResource RECURSIVE_IMPORT_CONTEXT = classPathResource("-recursiveImport.xml");
 	private static final ClassPathResource RESOURCE_CONTEXT = classPathResource("-resource.xml");
-	private static final ClassPathResource RESOURCE_IMPORT_CONTEXT = classPathResource("-resourceImport.xml");
 	private static final ClassPathResource SATISFIED_ALL_DEP_CONTEXT = classPathResource("-satisfiedAllDepCheck.xml");
 	private static final ClassPathResource SATISFIED_OBJECT_DEP_CONTEXT = classPathResource("-satisfiedObjectDepCheck.xml");
 	private static final ClassPathResource SATISFIED_SIMPLE_DEP_CONTEXT = classPathResource("-satisfiedSimpleDepCheck.xml");
@@ -134,7 +134,8 @@ public final class XmlBeanFactoryTests {
 	}
 
 	/* SPR-2368 */
-	public @Test void testCollectionsReferredToAsRefLocals() throws Exception {
+	@Test
+	public void testCollectionsReferredToAsRefLocals() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(COLLECTIONS_XSD_CONTEXT);
 		factory.preInstantiateSingletons();
 	}
@@ -1742,7 +1743,7 @@ public final class XmlBeanFactoryTests {
 			this.tb = tb;
 		}
 
-		public LenientDependencyTestBean(Map[] m) {
+		public LenientDependencyTestBean(Map<Object, Object>[] m) {
 			throw new IllegalStateException("Don't pick this constructor");
 		}
 

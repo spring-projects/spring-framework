@@ -36,7 +36,7 @@ public class DeprecatedBeanWarnerTests {
 
 	private DeprecatedBeanWarner warner;
 
-
+	@SuppressWarnings("deprecation")
 	@Test
 	public void postProcess() {
 		beanFactory = new DefaultListableBeanFactory();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,7 +224,7 @@ public class CallMetaDataContext {
 	 * @param rowMapper a RowMapper implementation used to map the data returned in the result set
 	 * @return the appropriate SqlParameter
 	 */
-	public SqlParameter createReturnResultSetParameter(String parameterName, RowMapper rowMapper) {
+	public SqlParameter createReturnResultSetParameter(String parameterName, RowMapper<?> rowMapper) {
 		if (this.metaDataProvider.isReturnResultSetSupported()) {
 			return new SqlReturnResultSet(parameterName, rowMapper);
 		}
@@ -434,7 +434,7 @@ public class CallMetaDataContext {
 	public Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
 		// For parameter source lookups we need to provide case-insensitive lookup support
 		// since the database metadata is not necessarily providing case sensitive parameter names.
-		Map caseInsensitiveParameterNames =
+		Map<String, String> caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 
 		Map<String, String> callParameterNames = new HashMap<String, String>(this.callParameters.size());
@@ -467,7 +467,7 @@ public class CallMetaDataContext {
 								}
 								else {
 									if (caseInsensitiveParameterNames.containsKey(lowerCaseName)) {
-										String sourceName = (String) caseInsensitiveParameterNames.get(lowerCaseName);
+										String sourceName = caseInsensitiveParameterNames.get(lowerCaseName);
 										matchedParameters.put(parameterName, SqlParameterSourceUtils.getTypedValue(parameterSource, sourceName));
 									}
 									else {

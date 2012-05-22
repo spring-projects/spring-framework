@@ -1,7 +1,5 @@
 package org.springframework.context;
 
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
 
 /**
  * Listener that maintains a global count of events.

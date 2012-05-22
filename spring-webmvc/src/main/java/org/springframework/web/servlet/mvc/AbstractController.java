@@ -27,7 +27,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * <p>Convenient superclass for controller implementations, using the Template
  * Method design pattern.</p>
- * 
+ *
  * <p>As stated in the {@link org.springframework.web.servlet.mvc.Controller Controller}
  * interface, a lot of functionality is already provided by certain abstract
  * base controllers. The AbstractController is one of the most important
@@ -149,7 +149,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 				}
 			}
 		}
-		
+
 		return handleRequestInternal(request, response);
 	}
 

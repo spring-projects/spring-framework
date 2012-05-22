@@ -87,7 +87,7 @@ public class ConcurrentMapCache implements Cache {
 		return this.name;
 	}
 
-	public ConcurrentMap getNativeCache() {
+	public ConcurrentMap<Object, Object> getNativeCache() {
 		return this.store;
 	}
 

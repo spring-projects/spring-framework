@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 15 April 2001
  */
-public class TestBean implements ITestBean, IOther, Comparable {
+public class TestBean implements ITestBean, IOther, Comparable<Object> {
 
 	private String beanName;
 
@@ -65,13 +65,13 @@ public class TestBean implements ITestBean, IOther, Comparable {
 
 	private Float myFloat = new Float(0.0);
 
-	private Collection friends = new LinkedList();
+	private Collection<Object> friends = new LinkedList<Object>();
 
-	private Set someSet = new HashSet();
+	private Set<Object> someSet = new HashSet<Object>();
 
-	private Map someMap = new HashMap();
+	private Map<Object, Object> someMap = new HashMap<Object, Object>();
 
-	private List someList = new ArrayList();
+	private List<Object> someList = new ArrayList<Object>();
 
 	private Properties someProperties = new Properties();
 
@@ -89,10 +89,9 @@ public class TestBean implements ITestBean, IOther, Comparable {
 
 	private Boolean someBoolean;
 
-	private List otherColours;
+	private List<Object> otherColours;
 
-	private List pets;
-
+	private List<Object> pets;
 
 	public TestBean() {
 	}
@@ -115,15 +114,15 @@ public class TestBean implements ITestBean, IOther, Comparable {
 		this.someProperties = someProperties;
 	}
 
-	public TestBean(List someList) {
+	public TestBean(List<Object> someList) {
 		this.someList = someList;
 	}
 
-	public TestBean(Set someSet) {
+	public TestBean(Set<Object> someSet) {
 		this.someSet = someSet;
 	}
 
-	public TestBean(Map someMap) {
+	public TestBean(Map<Object, Object> someMap) {
 		this.someMap = someMap;
 	}
 
@@ -249,35 +248,35 @@ public class TestBean implements ITestBean, IOther, Comparable {
 		this.myFloat = myFloat;
 	}
 
-	public Collection getFriends() {
+	public Collection<Object> getFriends() {
 		return friends;
 	}
 
-	public void setFriends(Collection friends) {
+	public void setFriends(Collection<Object> friends) {
 		this.friends = friends;
 	}
 
-	public Set getSomeSet() {
+	public Set<Object> getSomeSet() {
 		return someSet;
 	}
 
-	public void setSomeSet(Set someSet) {
+	public void setSomeSet(Set<Object> someSet) {
 		this.someSet = someSet;
 	}
 
-	public Map getSomeMap() {
+	public Map<Object, Object> getSomeMap() {
 		return someMap;
 	}
 
-	public void setSomeMap(Map someMap) {
+	public void setSomeMap(Map<Object, Object> someMap) {
 		this.someMap = someMap;
 	}
 
-	public List getSomeList() {
+	public List<Object> getSomeList() {
 		return someList;
 	}
 
-	public void setSomeList(List someList) {
+	public void setSomeList(List<Object> someList) {
 		this.someList = someList;
 	}
 
@@ -337,19 +336,19 @@ public class TestBean implements ITestBean, IOther, Comparable {
 		this.nestedIndexedBean = nestedIndexedBean;
 	}
 
-	public List getOtherColours() {
+	public List<Object> getOtherColours() {
 		return otherColours;
 	}
 
-	public void setOtherColours(List otherColours) {
+	public void setOtherColours(List<Object> otherColours) {
 		this.otherColours = otherColours;
 	}
 
-	public List getPets() {
+	public List<Object> getPets() {
 		return pets;
 	}
 
-	public void setPets(List pets) {
+	public void setPets(List<Object> pets) {
 		this.pets = pets;
 	}
 

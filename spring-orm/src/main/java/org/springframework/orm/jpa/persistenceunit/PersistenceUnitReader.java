@@ -293,8 +293,7 @@ class PersistenceUnitReader {
 	/**
 	 * Parse the <code>property</code> XML elements.
 	 */
-	@SuppressWarnings("unchecked")
-	protected void parseProperties(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
+	protected void parseProperty(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		Element propRoot = DomUtils.getChildElementByTagName(persistenceUnit, PROPERTIES);
 		if (propRoot == null) {
 			return;
@@ -310,8 +309,7 @@ class PersistenceUnitReader {
 	/**
 	 * Parse the <code>class</code> XML elements.
 	 */
-	@SuppressWarnings("unchecked")
-	protected void parseManagedClasses(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
+	protected void parseClass(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		List<Element> classes = DomUtils.getChildElementsByTagName(persistenceUnit, MANAGED_CLASS_NAME);
 		for (Element element : classes) {
 			String value = DomUtils.getTextValue(element).trim();
@@ -323,10 +321,9 @@ class PersistenceUnitReader {
 	/**
 	 * Parse the <code>mapping-file</code> XML elements.
 	 */
-	@SuppressWarnings("unchecked")
-	protected void parseMappingFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
-		List<Element> files = DomUtils.getChildElementsByTagName(persistenceUnit, MAPPING_FILE_NAME);
-		for (Element element : files) {
+	protected void parseJarFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) throws IOException {
+		List<Element> jars = DomUtils.getChildElementsByTagName(persistenceUnit, JAR_FILE_URL);
+		for (Element element : jars) {
 			String value = DomUtils.getTextValue(element).trim();
 			if (StringUtils.hasText(value)) {
 				unitInfo.addMappingFileName(value);
@@ -337,10 +334,9 @@ class PersistenceUnitReader {
 	/**
 	 * Parse the <code>jar-file</code> XML elements.
 	 */
-	@SuppressWarnings("unchecked")
-	protected void parseJarFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) throws IOException {
-		List<Element> jars = DomUtils.getChildElementsByTagName(persistenceUnit, JAR_FILE_URL);
-		for (Element element : jars) {
+	protected void parseMappingFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
+		List<Element> files = DomUtils.getChildElementsByTagName(persistenceUnit, MAPPING_FILE_NAME);
+		for (Element element : files) {
 			String value = DomUtils.getTextValue(element).trim();
 			if (StringUtils.hasText(value)) {
 				Resource[] resources = this.resourcePatternResolver.getResources(value);

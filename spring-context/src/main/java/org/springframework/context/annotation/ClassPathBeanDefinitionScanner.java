@@ -256,7 +256,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 					beanDefinitions.add(definitionHolder);
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
-			}						
+			}
 		}
 		return beanDefinitions;
 	}

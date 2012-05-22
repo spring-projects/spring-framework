@@ -32,15 +32,15 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 /**
- * Stores registrations of resource handlers for serving static resources such as images, css files and others 
- * through Spring MVC including setting cache headers optimized for efficient loading in a web browser. 
+ * Stores registrations of resource handlers for serving static resources such as images, css files and others
+ * through Spring MVC including setting cache headers optimized for efficient loading in a web browser.
  * Resources can be served out of locations under web application root, from the classpath, and others.
  *
- * <p>To create a resource handler, use {@link #addResourceHandler(String...)} providing the URL path patterns 
+ * <p>To create a resource handler, use {@link #addResourceHandler(String...)} providing the URL path patterns
  * for which the handler should be invoked to serve static resources (e.g. {@code "/resources/**"}).
  *
- * <p>Then use additional methods on the returned {@link ResourceHandlerRegistration} to add one or more 
- * locations from which to serve static content from (e.g. {{@code "/"}, 
+ * <p>Then use additional methods on the returned {@link ResourceHandlerRegistration} to add one or more
+ * locations from which to serve static content from (e.g. {{@code "/"},
  * {@code "classpath:/META-INF/public-web-resources/"}}) or to specify a cache period for served resources.
  *
  * @author Rossen Stoyanchev
@@ -57,7 +57,7 @@ public class ResourceHandlerRegistry {
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<ResourceHandlerRegistration>();
 
 	private int order = Integer.MAX_VALUE -1;
-	
+
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext) {
 		Assert.notNull(applicationContext, "ApplicationContext is required");
 		this.applicationContext = applicationContext;

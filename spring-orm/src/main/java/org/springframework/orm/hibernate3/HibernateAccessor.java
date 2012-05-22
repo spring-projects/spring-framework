@@ -208,7 +208,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
 			}
-			return (Interceptor) this.beanFactory.getBean((String) this.entityInterceptor, Interceptor.class);
+			return this.beanFactory.getBean((String) this.entityInterceptor, Interceptor.class);
 		}
 		return (Interceptor) this.entityInterceptor;
 	}

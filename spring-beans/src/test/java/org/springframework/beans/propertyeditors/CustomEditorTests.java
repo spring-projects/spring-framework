@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import test.beans.TestBean;
  * @author Rob Harrop
  * @author Arjen Poutsma
  * @author Chris Beams
- * 
+ *
  * @since 10.06.2003
  */
 public class CustomEditorTests {
@@ -511,7 +511,7 @@ public class CustomEditorTests {
 
 		bw.setPropertyValue("myChar", "\\u0022");
 		assertEquals('"', cb.getMyChar());
-		
+
 		CharacterEditor editor = new CharacterEditor(false);
 		editor.setAsText("M");
 		assertEquals("M", editor.getAsText());
@@ -672,7 +672,7 @@ public class CustomEditorTests {
 
 		patternEditor = new PatternEditor();
 		assertEquals("", patternEditor.getAsText());
-		
+
 		patternEditor = new PatternEditor();
 		patternEditor.setAsText(null);
 		assertEquals("", patternEditor.getAsText());
@@ -1460,7 +1460,7 @@ public class CustomEditorTests {
 	}
 
 
-	private static class PrimitiveArrayBean {
+	public static class PrimitiveArrayBean {
 
 		private byte[] byteArray;
 
@@ -1484,7 +1484,7 @@ public class CustomEditorTests {
 	}
 
 
-	private static class CharBean {
+	public static class CharBean {
 
 		private char myChar;
 
@@ -1508,7 +1508,7 @@ public class CustomEditorTests {
 	}
 
 
-	private static class OldCollectionsBean {
+	public static class OldCollectionsBean {
 
 		private Vector<?> vector;
 

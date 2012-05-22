@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.util.ReflectionUtils;
  * this class will create the object that it creates exactly once
  * on initialization and subsequently return said singleton instance
  * on all calls to the {@link #getObject()} method.
- * 
+ *
  * <p>Else, this class will create a new instance every time the
  * {@link #getObject()} method is invoked. Subclasses are responsible
  * for implementing the abstract {@link #createInstance()} template
@@ -153,7 +153,7 @@ public abstract class AbstractFactoryBean<T>
 	 */
 	@SuppressWarnings("unchecked")
 	private T getEarlySingletonInstance() throws Exception {
-		Class[] ifcs = getEarlySingletonInterfaces();
+		Class<?>[] ifcs = getEarlySingletonInterfaces();
 		if (ifcs == null) {
 			throw new FactoryBeanNotInitializedException(
 					getClass().getName() + " does not support circular references");
@@ -218,8 +218,8 @@ public abstract class AbstractFactoryBean<T>
 	 * or <code>null</code> to indicate a FactoryBeanNotInitializedException
 	 * @see org.springframework.beans.factory.FactoryBeanNotInitializedException
 	 */
-	protected Class[] getEarlySingletonInterfaces() {
-		Class type = getObjectType();
+	protected Class<?>[] getEarlySingletonInterfaces() {
+		Class<?> type = getObjectType();
 		return (type != null && type.isInterface() ? new Class[] {type} : null);
 	}
 

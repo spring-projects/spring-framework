@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -319,7 +319,7 @@ public abstract class WebUtils {
 	 * @return the value of the session attribute, newly created if not found
 	 * @throws IllegalArgumentException if the session attribute could not be instantiated
 	 */
-	public static Object getOrCreateSessionAttribute(HttpSession session, String name, Class clazz)
+	public static Object getOrCreateSessionAttribute(HttpSession session, String name, Class<?> clazz)
 			throws IllegalArgumentException {
 
 		Assert.notNull(session, "Session must not be null");
@@ -573,7 +573,6 @@ public abstract class WebUtils {
 	 * @return the value of the parameter, or <code>null</code>
 	 * if the parameter does not exist in given request
 	 */
-	@SuppressWarnings("unchecked")
 	public static String findParameterValue(ServletRequest request, String name) {
 		return findParameterValue(request.getParameterMap(), name);
 	}
@@ -644,13 +643,13 @@ public abstract class WebUtils {
 	 */
 	public static Map<String, Object> getParametersStartingWith(ServletRequest request, String prefix) {
 		Assert.notNull(request, "Request must not be null");
-		Enumeration paramNames = request.getParameterNames();
+		Enumeration<String> paramNames = request.getParameterNames();
 		Map<String, Object> params = new TreeMap<String, Object>();
 		if (prefix == null) {
 			prefix = "";
 		}
 		while (paramNames != null && paramNames.hasMoreElements()) {
-			String paramName = (String) paramNames.nextElement();
+			String paramName = paramNames.nextElement();
 			if ("".equals(prefix) || paramName.startsWith(prefix)) {
 				String unprefixed = paramName.substring(prefix.length());
 				String[] values = request.getParameterValues(paramName);
@@ -678,9 +677,9 @@ public abstract class WebUtils {
 	 * @return the page specified in the request, or current page if not found
 	 */
 	public static int getTargetPage(ServletRequest request, String paramPrefix, int currentPage) {
-		Enumeration paramNames = request.getParameterNames();
+		Enumeration<String> paramNames = request.getParameterNames();
 		while (paramNames.hasMoreElements()) {
-			String paramName = (String) paramNames.nextElement();
+			String paramName = paramNames.nextElement();
 			if (paramName.startsWith(paramPrefix)) {
 				for (int i = 0; i < WebUtils.SUBMIT_IMAGE_SUFFIXES.length; i++) {
 					String suffix = WebUtils.SUBMIT_IMAGE_SUFFIXES[i];

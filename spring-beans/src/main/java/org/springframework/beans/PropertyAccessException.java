@@ -30,7 +30,7 @@ import org.springframework.core.ErrorCoded;
 public abstract class PropertyAccessException extends BeansException implements ErrorCoded {
 
 	private transient PropertyChangeEvent propertyChangeEvent;
-	
+
 
 	/**
 	 * Create a new PropertyAccessException.

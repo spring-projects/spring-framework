@@ -52,7 +52,7 @@ public class Primitives {
 	public JAXBElement<Double> primitiveDouble() {
 		return new JAXBElement<Double>(NAME, Double.class, 42D);
 	}
-	
+
 	public JAXBElement<byte[]> primitiveByteArray() {
 		return new JAXBElement<byte[]>(NAME, byte[].class, new byte[]{42});
 	}

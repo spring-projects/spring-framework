@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Map;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.DynamicAttributes;
 
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -29,13 +28,13 @@ import org.springframework.util.StringUtils;
 /**
  * Base class for databinding-aware JSP tags that render HTML element. Provides
  * a set of properties corresponding to the set of HTML attributes that are common
- * across elements.  
- * 
- * <p>Additionally, this base class allows for rendering non-standard attributes 
- * as part of the tag's output.  These attributes are accessible to subclasses if 
- * needed via the {@link AbstractHtmlElementTag#getDynamicAttributes() dynamicAttributes} 
+ * across elements.
+ *
+ * <p>Additionally, this base class allows for rendering non-standard attributes
+ * as part of the tag's output.  These attributes are accessible to subclasses if
+ * needed via the {@link AbstractHtmlElementTag#getDynamicAttributes() dynamicAttributes}
  * map.
- * 
+ *
  * @author Rob Harrop
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
@@ -109,7 +108,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	private String onkeyup;
 
 	private String onkeydown;
-	
+
 	private Map<String, Object> dynamicAttributes;
 
 
@@ -383,14 +382,14 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 	protected String getOnkeydown() {
 		return this.onkeydown;
 	}
-	
+
 	/**
-	 * Get the map of dynamic attributes. 
+	 * Get the map of dynamic attributes.
 	 */
 	protected Map<String, Object> getDynamicAttributes() {
 		return this.dynamicAttributes;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -404,7 +403,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 		}
 		dynamicAttributes.put(localName, value);
 	}
-	
+
 	/**
 	 * Whether the given name-value pair is a valid dynamic attribute.
 	 */
@@ -445,7 +444,7 @@ public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElemen
 		writeOptionalAttribute(tagWriter, ONKEYPRESS_ATTRIBUTE, getOnkeypress());
 		writeOptionalAttribute(tagWriter, ONKEYUP_ATTRIBUTE, getOnkeyup());
 		writeOptionalAttribute(tagWriter, ONKEYDOWN_ATTRIBUTE, getOnkeydown());
-		
+
 		if (!CollectionUtils.isEmpty(this.dynamicAttributes)) {
 			for (String attr : this.dynamicAttributes.keySet()) {
 				tagWriter.writeOptionalAttributeValue(attr, getDisplayString(this.dynamicAttributes.get(attr)));

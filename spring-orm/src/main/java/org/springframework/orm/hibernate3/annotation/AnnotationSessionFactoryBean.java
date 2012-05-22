@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	private static final String RESOURCE_PATTERN = "/**/*.class";
 
 
-	private Class[] annotatedClasses;
+	private Class<?>[] annotatedClasses;
 
 	private String[] annotatedPackages;
 
@@ -114,7 +114,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	 * class-level JDK 1.5+ annotation metadata.
 	 * @see org.hibernate.cfg.AnnotationConfiguration#addAnnotatedClass(Class)
 	 */
-	public void setAnnotatedClasses(Class[] annotatedClasses) {
+	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
 	}
 
@@ -163,7 +163,7 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	protected void postProcessMappings(Configuration config) throws HibernateException {
 		AnnotationConfiguration annConfig = (AnnotationConfiguration) config;
 		if (this.annotatedClasses != null) {
-			for (Class annotatedClass : this.annotatedClasses) {
+			for (Class<?> annotatedClass : this.annotatedClasses) {
 				annConfig.addAnnotatedClass(annotatedClass);
 			}
 		}

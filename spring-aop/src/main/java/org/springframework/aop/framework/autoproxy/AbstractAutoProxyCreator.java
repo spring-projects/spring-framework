@@ -151,11 +151,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @param order ordering value
 	 */
 	public final void setOrder(int order) {
-	  this.order = order;
+		this.order = order;
 	}
 
 	public final int getOrder() {
-	  return this.order;
+		return this.order;
 	}
 
 	/**

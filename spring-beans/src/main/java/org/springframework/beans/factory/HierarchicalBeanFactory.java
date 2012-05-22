@@ -30,7 +30,7 @@ package org.springframework.beans.factory;
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setParentBeanFactory
  */
 public interface HierarchicalBeanFactory extends BeanFactory {
-	
+
 	/**
 	 * Return the parent bean factory, or <code>null</code> if there is none.
 	 */

@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.core.ParameterizedTypeReference;
+import javax.xml.transform.Source;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -151,12 +152,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new ResourceHttpMessageConverter());
-		this.messageConverters.add(new SourceHttpMessageConverter());
-		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
-		if (romePresent) {
-			this.messageConverters.add(new AtomFeedHttpMessageConverter());
-			this.messageConverters.add(new RssChannelHttpMessageConverter());
-		}
+		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
+		this.messageConverters.add(new XmlAwareFormHttpMessageConverter());
 		if (jaxb2Present) {
 			this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
@@ -545,7 +542,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.responseType = responseType;
 		}
 
-		@SuppressWarnings("unchecked")
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
 			if (responseType != null) {
 				Class<?> responseClass = null;
@@ -600,20 +596,19 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	private class HttpEntityRequestCallback extends AcceptHeaderRequestCallback {
 
-		private final HttpEntity requestEntity;
+		private final HttpEntity<?> requestEntity;
 
 		private HttpEntityRequestCallback(Object requestBody) {
 			this(requestBody, null);
 		}
 
-		@SuppressWarnings("unchecked")
-		private HttpEntityRequestCallback(Object requestBody, Type responseType) {
+		private HttpEntityRequestCallback(Object requestBody, Class<?> responseType) {
 			super(responseType);
 			if (requestBody instanceof HttpEntity) {
-				this.requestEntity = (HttpEntity) requestBody;
+				this.requestEntity = (HttpEntity<?>) requestBody;
 			}
 			else if (requestBody != null) {
-				this.requestEntity = new HttpEntity(requestBody);
+				this.requestEntity = new HttpEntity<Object>(requestBody);
 			}
 			else {
 				this.requestEntity = HttpEntity.EMPTY;
@@ -621,7 +616,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void doWithRequest(ClientHttpRequest httpRequest) throws IOException {
 			super.doWithRequest(httpRequest);
 			if (!requestEntity.hasBody()) {
@@ -639,7 +634,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				Class<?> requestType = requestBody.getClass();
 				HttpHeaders requestHeaders = requestEntity.getHeaders();
 				MediaType requestContentType = requestHeaders.getContentType();
-				for (HttpMessageConverter messageConverter : getMessageConverters()) {
+				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
 					if (messageConverter.canWrite(requestType, requestContentType)) {
 						if (!requestHeaders.isEmpty()) {
 							httpRequest.getHeaders().putAll(requestHeaders);
@@ -654,7 +649,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 							}
 
 						}
-						messageConverter.write(requestBody, requestContentType, httpRequest);
+						((HttpMessageConverter)messageConverter).write(requestBody, requestContentType, httpRequest);
 						return;
 					}
 				}

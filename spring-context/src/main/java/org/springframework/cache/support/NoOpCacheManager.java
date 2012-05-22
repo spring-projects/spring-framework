@@ -100,4 +100,30 @@ public class NoOpCacheManager implements CacheManager {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * This implementation always returns a {@link Cache} implementation that will not
+	 * store items. Additionally, the request cache will be remembered by the manager for consistency.
+	 */
+	public Cache getCache(String name) {
+		Cache cache = caches.get(name);
+		if (cache == null) {
+			caches.putIfAbsent(name, new NoOpCache(name));
+			synchronized (names) {
+				names.add(name);
+			}
+		}
+
+		return caches.get(name);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * This implementation returns the name of the caches previously requested.
+	 */
+	public Collection<String> getCacheNames() {
+		return Collections.unmodifiableSet(names);
+	}
 }

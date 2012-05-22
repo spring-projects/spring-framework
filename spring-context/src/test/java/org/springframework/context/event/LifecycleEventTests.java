@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class LifecycleEventTests extends TestCase {
 		assertFalse(lifecycleBean.isRunning());
 		context.start();
 		assertTrue(lifecycleBean.isRunning());
-		assertEquals(0, listener.getStoppedCount());		
+		assertEquals(0, listener.getStoppedCount());
 		context.stop();
 		assertFalse(lifecycleBean.isRunning());
 		assertEquals(1, listener.getStoppedCount());
@@ -63,7 +63,7 @@ public class LifecycleEventTests extends TestCase {
 	}
 
 
-	private static class LifecycleListener implements ApplicationListener {
+	private static class LifecycleListener implements ApplicationListener<ApplicationEvent> {
 
 		private ApplicationContext context;
 

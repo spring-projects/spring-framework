@@ -28,18 +28,18 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
 /**
- * Defines the algorithm for searching handler methods exhaustively including interfaces and parent 
+ * Defines the algorithm for searching handler methods exhaustively including interfaces and parent
  * classes while also dealing with parameterized methods as well as interface and class-based proxies.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public abstract class HandlerMethodSelector {
-	
+
 	/**
 	 * Selects handler methods for the given handler type. Callers of this method define handler methods
 	 * of interest through the {@link MethodFilter} parameter.
-	 * 
+	 *
 	 * @param handlerType the handler type to search handler methods on
 	 * @param handlerMethodFilter a {@link MethodFilter} to help recognize handler methods of interest
 	 * @return the selected methods, or an empty set

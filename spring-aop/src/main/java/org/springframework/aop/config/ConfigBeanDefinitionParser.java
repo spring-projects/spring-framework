@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
 
 	private ParseState parseState = new ParseState();
-	
+
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compositeDef =
@@ -281,10 +281,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class);
 		builder.addConstructorArgValue(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE));
 		builder.addConstructorArgValue(declareParentsElement.getAttribute(TYPE_PATTERN));
-		
+
 		String defaultImpl = declareParentsElement.getAttribute(DEFAULT_IMPL);
 		String delegateRef = declareParentsElement.getAttribute(DELEGATE_REF);
-		
+
 		if (StringUtils.hasText(defaultImpl) && !StringUtils.hasText(delegateRef)) {
 			builder.addConstructorArgValue(defaultImpl);
 		}
@@ -404,7 +404,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	/**
 	 * Gets the advice implementation class corresponding to the supplied {@link Element}.
 	 */
-	private Class getAdviceClass(Element adviceElement, ParserContext parserContext) {
+	private Class<?> getAdviceClass(Element adviceElement, ParserContext parserContext) {
 		String elementName = parserContext.getDelegate().getLocalName(adviceElement);
 		if (BEFORE.equals(elementName)) {
 			return AspectJMethodBeforeAdvice.class;
@@ -435,7 +435,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		String expression = pointcutElement.getAttribute(EXPRESSION);
 
 		AbstractBeanDefinition pointcutDefinition = null;
-		
+
 		try {
 			this.parseState.push(new PointcutEntry(id));
 			pointcutDefinition = createPointcutDefinition(expression);
@@ -462,7 +462,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	/**
 	 * Parses the <code>pointcut</code> or <code>pointcut-ref</code> attributes of the supplied
 	 * {@link Element} and add a <code>pointcut</code> property as appropriate. Generates a
-	 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if  necessary
+	 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if necessary
 	 * and returns its bean name, otherwise returns the bean name of the referred pointcut.
 	 */
 	private Object parsePointcutProperty(Element element, ParserContext parserContext) {

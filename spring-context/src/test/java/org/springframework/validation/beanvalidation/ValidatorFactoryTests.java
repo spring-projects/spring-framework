@@ -95,7 +95,7 @@ public class ValidatorFactoryTests {
 		Set<ConstraintViolation<ValidPerson>> result = validator.validate(person);
 		assertEquals(1, result.size());
 		Iterator<ConstraintViolation<ValidPerson>> iterator = result.iterator();
-		ConstraintViolation cv = iterator.next();
+		ConstraintViolation<ValidPerson> cv = iterator.next();
 		assertEquals("", cv.getPropertyPath().toString());
 		assertTrue(cv.getConstraintDescriptor().getAnnotation() instanceof NameAddressValid);
 	}

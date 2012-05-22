@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class FreeMarkerConfigurerTests extends TestCase {
 		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setTemplateLoaderPath("file:/mydir");
 		fcfb.afterPropertiesSet();
-		Configuration cfg = (Configuration) fcfb.getObject();
+		Configuration cfg = fcfb.getObject();
 		assertTrue(cfg.getTemplateLoader() instanceof SpringTemplateLoader);
 	}
 
@@ -97,7 +97,7 @@ public class FreeMarkerConfigurerTests extends TestCase {
 		});
 		fcfb.afterPropertiesSet();
 		assertTrue(fcfb.getObject() instanceof Configuration);
-		Configuration fc = (Configuration) fcfb.getObject();
+		Configuration fc = fcfb.getObject();
 		Template ft = fc.getTemplate("test");
 		assertEquals("test", FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap()));
 	}

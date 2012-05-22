@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class DataBinderFieldAccessTests extends TestCase {
 		assertTrue("changed name correctly", rod.getName().equals("Rod"));
 		assertTrue("changed age correctly", rod.getAge() == 32);
 
-		Map m = binder.getBindingResult().getModel();
+		Map<String, Object> m = binder.getBindingResult().getModel();
 		assertTrue("There is one element in map", m.size() == 2);
 		FieldAccessBean tb = (FieldAccessBean) m.get("person");
 		assertTrue("Same object", tb.equals(rod));
@@ -92,7 +92,7 @@ public class DataBinderFieldAccessTests extends TestCase {
 			assertTrue("changed name correctly", rod.getName().equals("Rod"));
 			//assertTrue("changed age correctly", rod.getAge() == 32);
 
-			Map map = binder.getBindingResult().getModel();
+			Map<String, Object> map = binder.getBindingResult().getModel();
 			//assertTrue("There are 3 element in map", m.size() == 1);
 			FieldAccessBean tb = (FieldAccessBean) map.get("person");
 			assertTrue("Same object", tb.equals(rod));

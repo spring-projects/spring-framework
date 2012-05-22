@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,30 +41,30 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		implements InstantiationModelAwarePointcutAdvisor, AspectJPrecedenceInformation {
 
 	private final AspectJExpressionPointcut declaredPointcut;
-	
+
 	private Pointcut pointcut;
-	
+
 	private final MetadataAwareAspectInstanceFactory aspectInstanceFactory;
-	
+
 	private final Method method;
-	
+
 	private final boolean lazy;
-	
+
 	private final AspectJAdvisorFactory atAspectJAdvisorFactory;
-	
+
 	private Advice instantiatedAdvice;
 
 	private int declarationOrder;
-	
+
 	private String aspectName;
-	
+
 	private Boolean isBeforeAdvice;
 
 	private Boolean isAfterAdvice;
 
 
-	public InstantiationModelAwarePointcutAdvisorImpl(AspectJAdvisorFactory af,  AspectJExpressionPointcut ajexp,
-			MetadataAwareAspectInstanceFactory aif,  Method method, int declarationOrderInAspect, String aspectName) {
+	public InstantiationModelAwarePointcutAdvisorImpl(AspectJAdvisorFactory af, AspectJExpressionPointcut ajexp,
+			MetadataAwareAspectInstanceFactory aif, Method method, int declarationOrderInAspect, String aspectName) {
 
 		this.declaredPointcut = ajexp;
 		this.method = method;
@@ -72,12 +72,12 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		this.aspectInstanceFactory = aif;
 		this.declarationOrder = declarationOrderInAspect;
 		this.aspectName = aspectName;
-		
+
 		if (aif.getAspectMetadata().isLazilyInstantiated()) {
 			// Static part of the pointcut is a lazy type.
 			Pointcut preInstantiationPointcut =
 					Pointcuts.union(aif.getAspectMetadata().getPerClausePointcut(), this.declaredPointcut);
-			
+
 			// Make it dynamic: must mutate from pre-instantiation to post-instantiation state.
 			// If it's not a dynamic pointcut, it may be optimized out
 			// by the Spring AOP infrastructure after the first evaluation.
@@ -109,7 +109,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 	public boolean isPerInstance() {
 		return (getAspectMetadata().getAjType().getPerClause().getKind() != PerClauseKind.SINGLETON);
 	}
-	
+
 	/**
 	 * Return the AspectJ AspectMetadata for this advisor.
 	 */
@@ -126,7 +126,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		}
 		return this.instantiatedAdvice;
 	}
-	
+
 	public boolean isLazy() {
 		return this.lazy;
 	}
@@ -140,7 +140,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		return this.atAspectJAdvisorFactory.getAdvice(
 				this.method, pcut, this.aspectInstanceFactory, this.declarationOrder, this.aspectName);
 	}
-	
+
 	public MetadataAwareAspectInstanceFactory getAspectInstanceFactory() {
 		return this.aspectInstanceFactory;
 	}
@@ -239,13 +239,13 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		}
 
 		@Override
-		public boolean matches(Method method, Class targetClass) {
+		public boolean matches(Method method, Class<?> targetClass) {
 			// We're either instantiated and matching on declared pointcut, or uninstantiated matching on either pointcut
 			return (isAspectMaterialized() && this.declaredPointcut.matches(method, targetClass)) ||
 					this.preInstantiationPointcut.getMethodMatcher().matches(method, targetClass);
 		}
 
-		public boolean matches(Method method, Class targetClass, Object[] args) {
+		public boolean matches(Method method, Class<?> targetClass, Object[] args) {
 			// This can match only on declared pointcut.
 			return (isAspectMaterialized() && this.declaredPointcut.matches(method, targetClass));
 		}

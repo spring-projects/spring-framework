@@ -42,7 +42,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Mock implementation of the {@link javax.portlet.PortletRequest} interface.
- * 
+ *
  * @author John A. Lewis
  * @author Juergen Hoeller
  * @since 2.0
@@ -103,7 +103,7 @@ public class MockPortletRequest implements PortletRequest {
 	/**
 	 * Create a new MockPortletRequest with a default {@link MockPortalContext}
 	 * and a default {@link MockPortletContext}.
-	 * 
+	 *
 	 * @see MockPortalContext
 	 * @see MockPortletContext
 	 */
@@ -113,7 +113,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Create a new MockPortletRequest with a default {@link MockPortalContext}.
-	 * 
+	 *
 	 * @param portletContext the PortletContext that the request runs in
 	 * @see MockPortalContext
 	 */
@@ -123,7 +123,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Create a new MockPortletRequest.
-	 * 
+	 *
 	 * @param portalContext the PortalContext that the request runs in
 	 * @param portletContext the PortletContext that the request runs in
 	 */

@@ -70,10 +70,10 @@ import org.springframework.util.ReflectionUtils;
  * if available, as a direct alternative to Spring's own <code>@Autowired</code>.
  *
  * <p>Only one constructor (at max) of any given bean class may carry this
- * annotation with the 'required' parameter set to <code>true</code>, 
- * indicating <i>the</i> constructor to autowire when used as a Spring bean. 
- * If multiple <i>non-required</i> constructors carry the annotation, they 
- * will be considered as candidates for autowiring. The constructor with 
+ * annotation with the 'required' parameter set to <code>true</code>,
+ * indicating <i>the</i> constructor to autowire when used as a Spring bean.
+ * If multiple <i>non-required</i> constructors carry the annotation, they
+ * will be considered as candidates for autowiring. The constructor with
  * the greatest number of dependencies that can be satisfied by matching
  * beans in the Spring container will be chosen. If none of the candidates
  * can be satisfied, then a default constructor (if present) will be used.
@@ -109,9 +109,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes =
 			new LinkedHashSet<Class<? extends Annotation>>();
-	
+
 	private String requiredParameterName = "required";
-	
+
 	private boolean requiredParameterValue = true;
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 2;
@@ -185,9 +185,9 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	/**
-	 * Set the boolean value that marks a dependency as required 
-	 * <p>For example if using 'required=true' (the default), 
-	 * this value should be <code>true</code>; but if using 
+	 * Set the boolean value that marks a dependency as required
+	 * <p>For example if using 'required=true' (the default),
+	 * this value should be <code>true</code>; but if using
 	 * 'optional=false', this value should be <code>false</code>.
 	 * @see #setRequiredParameterName(String)
 	 */
@@ -196,11 +196,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	public void setOrder(int order) {
-	  this.order = order;
+		this.order = order;
 	}
 
 	public int getOrder() {
-	  return this.order;
+		return this.order;
 	}
 
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {

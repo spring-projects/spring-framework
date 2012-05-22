@@ -115,7 +115,7 @@ public abstract class BeanFactoryUtils {
 	public static int countBeansIncludingAncestors(ListableBeanFactory lbf) {
 		return beanNamesIncludingAncestors(lbf).length;
 	}
-	
+
 	/**
 	 * Return all bean names in the factory, including ancestor factories.
 	 * @param lbf the bean factory
@@ -139,7 +139,7 @@ public abstract class BeanFactoryUtils {
 	 * @param type the type that beans must match
 	 * @return the array of matching bean names, or an empty array if none
 	 */
-	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, Class type) {
+	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, Class<?> type) {
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		String[] result = lbf.getBeanNamesForType(type);
 		if (lbf instanceof HierarchicalBeanFactory) {
@@ -181,7 +181,7 @@ public abstract class BeanFactoryUtils {
 	 * @return the array of matching bean names, or an empty array if none
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(
-			ListableBeanFactory lbf, Class type, boolean includeNonSingletons, boolean allowEagerInit) {
+			ListableBeanFactory lbf, Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
 		String[] result = lbf.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);

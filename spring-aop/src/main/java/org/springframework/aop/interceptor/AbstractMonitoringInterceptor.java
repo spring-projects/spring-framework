@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * <p>Subclasses should call the <code>createInvocationTraceName(MethodInvocation)</code>
  * method to create a name for the given trace that includes information about the
  * method invocation under trace along with the prefix and suffix added as appropriate.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2.7
@@ -97,7 +97,7 @@ public abstract class AbstractMonitoringInterceptor extends AbstractTraceInterce
 	protected String createInvocationTraceName(MethodInvocation invocation) {
 		StringBuilder sb = new StringBuilder(getPrefix());
 		Method method = invocation.getMethod();
-		Class clazz = method.getDeclaringClass();
+		Class<?> clazz = method.getDeclaringClass();
 		if (this.logTargetClassInvocation && clazz.isInstance(invocation.getThis())) {
 			clazz = invocation.getThis().getClass();
 		}

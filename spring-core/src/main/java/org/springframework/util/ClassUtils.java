@@ -763,7 +763,7 @@ public abstract class ClassUtils {
 	 * @param method the method to check
 	 * @param targetClass the target class to check against
 	 */
-	private static boolean isOverridable(Method method, Class targetClass) {
+	private static boolean isOverridable(Method method, Class<?> targetClass) {
 		if (Modifier.isPrivate(method.getModifiers())) {
 			return false;
 		}
@@ -866,13 +866,13 @@ public abstract class ClassUtils {
 			return true;
 		}
 		if (lhsType.isPrimitive()) {
-			Class resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
+			Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
 			if (resolvedPrimitive != null && lhsType.equals(resolvedPrimitive)) {
 				return true;
 			}
 		}
 		else {
-			Class resolvedWrapper = primitiveTypeToWrapperMap.get(rhsType);
+			Class<?> resolvedWrapper = primitiveTypeToWrapperMap.get(rhsType);
 			if (resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper)) {
 				return true;
 			}
@@ -974,7 +974,7 @@ public abstract class ClassUtils {
 	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
 	 * @see java.util.AbstractCollection#toString()
 	 */
-	public static String classNamesToString(Class... classes) {
+	public static String classNamesToString(Class<?>... classes) {
 		return classNamesToString(Arrays.asList(classes));
 	}
 
@@ -987,13 +987,13 @@ public abstract class ClassUtils {
 	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
 	 * @see java.util.AbstractCollection#toString()
 	 */
-	public static String classNamesToString(Collection<Class> classes) {
+	public static String classNamesToString(Collection<Class<?>> classes) {
 		if (CollectionUtils.isEmpty(classes)) {
 			return "[]";
 		}
 		StringBuilder sb = new StringBuilder("[");
-		for (Iterator<Class> it = classes.iterator(); it.hasNext(); ) {
-			Class clazz = it.next();
+		for (Iterator<Class<?>> it = classes.iterator(); it.hasNext(); ) {
+			Class<?> clazz = it.next();
 			sb.append(clazz.getName());
 			if (it.hasNext()) {
 				sb.append(", ");
@@ -1023,7 +1023,7 @@ public abstract class ClassUtils {
 	 * @param instance the instance to analyze for interfaces
 	 * @return all interfaces that the given instance implements as array
 	 */
-	public static Class[] getAllInterfaces(Object instance) {
+	public static Class<?>[] getAllInterfaces(Object instance) {
 		Assert.notNull(instance, "Instance must not be null");
 		return getAllInterfacesForClass(instance.getClass());
 	}
@@ -1049,7 +1049,7 @@ public abstract class ClassUtils {
 	 * @return all interfaces that the given object implements as array
 	 */
 	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, ClassLoader classLoader) {
-		Set<Class> ifcs = getAllInterfacesForClassAsSet(clazz, classLoader);
+		Set<Class<?>> ifcs = getAllInterfacesForClassAsSet(clazz, classLoader);
 		return ifcs.toArray(new Class[ifcs.size()]);
 	}
 
@@ -1059,7 +1059,7 @@ public abstract class ClassUtils {
 	 * @param instance the instance to analyze for interfaces
 	 * @return all interfaces that the given instance implements as Set
 	 */
-	public static Set<Class> getAllInterfacesAsSet(Object instance) {
+	public static Set<Class<?>> getAllInterfacesAsSet(Object instance) {
 		Assert.notNull(instance, "Instance must not be null");
 		return getAllInterfacesForClassAsSet(instance.getClass());
 	}
@@ -1071,7 +1071,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to analyze for interfaces
 	 * @return all interfaces that the given object implements as Set
 	 */
-	public static Set<Class> getAllInterfacesForClassAsSet(Class clazz) {
+	public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz) {
 		return getAllInterfacesForClassAsSet(clazz, null);
 	}
 
@@ -1084,12 +1084,12 @@ public abstract class ClassUtils {
 	 * (may be <code>null</code> when accepting all declared interfaces)
 	 * @return all interfaces that the given object implements as Set
 	 */
-	public static Set<Class> getAllInterfacesForClassAsSet(Class clazz, ClassLoader classLoader) {
+	public static Set<Class<?>> getAllInterfacesForClassAsSet(Class<?> clazz, ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface() && isVisible(clazz, classLoader)) {
-			return Collections.singleton(clazz);
+			return Collections.<Class<?>>singleton(clazz);
 		}
-		Set<Class> interfaces = new LinkedHashSet<Class>();
+		Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
 		while (clazz != null) {
 			Class<?>[] ifcs = clazz.getInterfaces();
 			for (Class<?> ifc : ifcs) {

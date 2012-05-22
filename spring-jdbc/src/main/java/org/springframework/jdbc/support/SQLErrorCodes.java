@@ -174,7 +174,7 @@ public class SQLErrorCodes {
 	public void setCannotSerializeTransactionCodes(String[] cannotSerializeTransactionCodes) {
 		this.cannotSerializeTransactionCodes = StringUtils.sortStringArray(cannotSerializeTransactionCodes);
 	}
-	
+
 	public String[] getCannotSerializeTransactionCodes() {
 		return this.cannotSerializeTransactionCodes;
 	}

@@ -23,7 +23,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * objects backed by dynamic languages such as Groovy, JRuby and
  * BeanShell. The following is an example (from the reference
  * documentation) that details the wiring of a Groovy backed bean:
- * 
+ *
  * <pre class="code">
  * &lt;lang:groovy id="messenger"
  *     refresh-check-delay="5000"
@@ -31,7 +31,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
  * &lt;lang:property name="message" value="I Can Do The Frug"/&gt;
  * &lt;/lang:groovy&gt;
  * </pre>
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Mark Fisher

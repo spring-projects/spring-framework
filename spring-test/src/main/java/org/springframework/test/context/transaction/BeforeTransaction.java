@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  * The <code>&#064;BeforeTransaction</code> methods of superclasses will be
  * executed before those of the current class.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.transaction.annotation.Transactional

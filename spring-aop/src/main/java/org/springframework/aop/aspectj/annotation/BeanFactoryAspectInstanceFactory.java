@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.ClassUtils;
  * backed by a Spring {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>Note that this may instantiate multiple times if using a prototype,
- * which probably won't give the semantics you expect. 
+ * which probably won't give the semantics you expect.
  * Use a {@link LazySingletonAspectInstanceFactoryDecorator}
  * to wrap this to ensure only one new aspect comes back.
  *
@@ -56,7 +56,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name) {
 		this(beanFactory, name, beanFactory.getType(name));
 	}
-	
+
 	/**
 	 * Create a BeanFactoryAspectInstanceFactory, providing a type that AspectJ should
 	 * introspect to create AJType metadata. Use if the BeanFactory may consider the type
@@ -65,7 +65,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * @param name the name of the bean
 	 * @param type the type that should be introspected by AspectJ
 	 */
-	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, Class type) {
+	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, Class<?> type) {
 		this.beanFactory = beanFactory;
 		this.name = name;
 		this.aspectMetadata = new AspectMetadata(type, name);

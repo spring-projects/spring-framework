@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.config;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,20 +29,20 @@ import org.springframework.beans.factory.ObjectFactory;
  */
 public class SimpleMapScope implements Scope, Serializable {
 
-	private final Map map = new HashMap();
+	private final Map<Object, Object> map = new HashMap<Object, Object>();
 
-	private final List callbacks = new LinkedList();
+	private final List<Runnable> callbacks = new LinkedList<Runnable>();
 
 
 	public SimpleMapScope() {
 	}
 
-	public final Map getMap() {
+	public final Map<Object, Object> getMap() {
 		return this.map;
 	}
 
 
-	public Object get(String name, ObjectFactory objectFactory) {
+	public Object get(String name, ObjectFactory<?> objectFactory) {
 		synchronized (this.map) {
 			Object scopedObject = this.map.get(name);
 			if (scopedObject == null) {
@@ -69,8 +68,7 @@ public class SimpleMapScope implements Scope, Serializable {
 	}
 
 	public void close() {
-		for (Iterator it = this.callbacks.iterator(); it.hasNext();) {
-			Runnable runnable = (Runnable) it.next();
+	    for (Runnable runnable : this.callbacks) {
 			runnable.run();
 		}
 	}

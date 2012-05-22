@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2012 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,13 +66,13 @@ public class BeanFactoryTransactionTests extends TestCase {
 		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
 		doTestGetsAreNotTransactional(testBean);
 	}
-	
+
 	public void testGetsAreNotTransactionalWithProxyFactory2Cglib() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Cglib");
 		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(testBean));
 		doTestGetsAreNotTransactional(testBean);
 	}
-	
+
 	public void testProxyFactory2Lazy() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Lazy");
 		assertFalse(factory.containsSingleton("target"));
@@ -84,14 +84,14 @@ public class BeanFactoryTransactionTests extends TestCase {
 		ImplementsNoInterfaces ini = (ImplementsNoInterfaces) factory.getBean("cglibNoInterfaces");
 		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(ini));
 		String newName = "Gordon";
-		
+
 		// Install facade
 		CallCountingTransactionManager ptm = new CallCountingTransactionManager();
 		PlatformTransactionManagerFacade.delegate = ptm;
-		
+
 		ini.setName(newName);
 		assertEquals(newName, ini.getName());
-		assertEquals(2, ptm.commits);		
+		assertEquals(2, ptm.commits);
 	}
 
 	public void testGetsAreNotTransactionalWithProxyFactory3() throws NoSuchMethodException {
@@ -171,7 +171,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 			// Ok
 		}
 	}
-	
+
 	/**
 	 * Test that we can set the target to a dynamic TargetSource.
 	 */
@@ -179,13 +179,13 @@ public class BeanFactoryTransactionTests extends TestCase {
 		// Install facade
 		CallCountingTransactionManager txMan = new CallCountingTransactionManager();
 		PlatformTransactionManagerFacade.delegate = txMan;
-		
+
 		TestBean tb = (TestBean) factory.getBean("hotSwapped");
 		assertEquals(666, tb.getAge());
 		int newAge = 557;
 		tb.setAge(newAge);
 		assertEquals(newAge, tb.getAge());
-		
+
 		TestBean target2 = new TestBean();
 		target2.setAge(65);
 		HotSwappableTargetSource ts = (HotSwappableTargetSource) factory.getBean("swapper");
@@ -193,7 +193,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		assertEquals(target2.getAge(), tb.getAge());
 		tb.setAge(newAge);
 		assertEquals(newAge, target2.getAge());
-		
+
 		assertEquals(0, txMan.inflight);
 		assertEquals(2, txMan.commits);
 		assertEquals(0, txMan.rollbacks);

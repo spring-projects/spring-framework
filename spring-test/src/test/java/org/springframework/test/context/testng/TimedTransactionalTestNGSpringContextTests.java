@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
  * {@link AbstractTransactionalTestNGSpringContextTests}; used to verify claim
  * raised in <a href="http://jira.springframework.org/browse/SPR-6124"
  * target="_blank">SPR-6124</a>.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public class NullValueInNestedPathException extends InvalidPropertyException {
 	 * @param beanClass the offending bean class
 	 * @param propertyName the offending property
 	 */
-	public NullValueInNestedPathException(Class beanClass, String propertyName) {
+	public NullValueInNestedPathException(Class<?> beanClass, String propertyName) {
 		super(beanClass, propertyName, "Value of nested property '" + propertyName + "' is null");
 	}
 
@@ -42,7 +42,7 @@ public class NullValueInNestedPathException extends InvalidPropertyException {
 	 * @param propertyName the offending property
 	 * @param msg the detail message
 	 */
-	public NullValueInNestedPathException(Class beanClass, String propertyName, String msg) {
+	public NullValueInNestedPathException(Class<?> beanClass, String propertyName, String msg) {
 		super(beanClass, propertyName, msg);
 	}
 

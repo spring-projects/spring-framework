@@ -55,7 +55,8 @@ public final class AutoProxyCreatorTests {
 		proxyCreator.getPropertyValues().add("beanNames", "singletonToBeProxied,innerBean,singletonFactoryToBeProxied");
 		sac.getDefaultListableBeanFactory().registerBeanDefinition("beanNameAutoProxyCreator", proxyCreator);
 
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		RootBeanDefinition innerBean = new RootBeanDefinition(TestBean.class);
 		bd.getPropertyValues().add("spouse", new BeanDefinitionHolder(innerBean, "innerBean"));
 		sac.getDefaultListableBeanFactory().registerBeanDefinition("singletonToBeProxied", bd);

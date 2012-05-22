@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,19 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
  * @since 2.5
  * @see java.util.ServiceLoader
  */
-public class ServiceListFactoryBean extends AbstractServiceLoaderBasedFactoryBean implements BeanClassLoaderAware {
+public class ServiceListFactoryBean<T> extends AbstractServiceLoaderBasedFactoryBean<List<T>, T> implements BeanClassLoaderAware {
 
 	@Override
-	protected Object getObjectToExpose(ServiceLoader serviceLoader) {
-		List<Object> result = new LinkedList<Object>();
-		for (Object loaderObject : serviceLoader) {
+	protected List<T> getObjectToExpose(ServiceLoader<T> serviceLoader) {
+		List<T> result = new LinkedList<T>();
+		for (T loaderObject : serviceLoader) {
 			result.add(loaderObject);
 		}
 		return result;
 	}
 
 	@Override
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return List.class;
 	}
 

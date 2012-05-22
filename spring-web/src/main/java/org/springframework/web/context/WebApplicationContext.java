@@ -20,7 +20,7 @@ import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
 
-/** 
+/**
  * Interface to provide configuration for a web application. This is read-only while
  * the application is running, but may be reloaded if the implementation supports this.
  *
@@ -107,5 +107,5 @@ public interface WebApplicationContext extends ApplicationContext {
 	 * <p>Also available for a Portlet application, in addition to the PortletContext.
 	 */
 	ServletContext getServletContext();
-	
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ package org.springframework.expression;
  * to determine if it can read or write them. Property resolvers are considered to be ordered and each will be called in
  * turn. The only rule that affects the call order is that any naming the target class directly in
  * getSpecifiedTargetClasses() will be called first, before the general resolvers.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -36,7 +36,7 @@ public interface PropertyAccessor {
 	 * resolver that can be called in an attempt to resolve a property on any type.
 	 * @return an array of classes that this resolver is suitable for (or null if a general resolver)
 	 */
-	Class[] getSpecificTargetClasses();
+	Class<?>[] getSpecificTargetClasses();
 
 	/**
 	 * Called to determine if a resolver instance is able to access a specified property on a specified target object.

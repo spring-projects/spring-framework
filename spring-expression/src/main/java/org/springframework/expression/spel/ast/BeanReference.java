@@ -26,13 +26,13 @@ import org.springframework.expression.spel.SpelMessage;
 
 /**
  * Represents a bean reference to a type, for example "@foo" or "@'foo.bar'"
- * 
+ *
  * @author Andy Clement
  */
 public class BeanReference extends SpelNodeImpl {
 
 	private String beanname;
-	
+
 	public BeanReference(int pos,String beanname) {
 		super(pos);
 		this.beanname = beanname;
@@ -64,5 +64,5 @@ public class BeanReference extends SpelNodeImpl {
 		}
 		return sb.toString();
 	}
-	
+
 }

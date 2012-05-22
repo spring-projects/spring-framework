@@ -79,7 +79,7 @@ import org.springframework.util.ReflectionUtils;
  * <b>NOTE:</b> As of Spring 3.0, <code>SpringJUnit4ClassRunner</code> requires
  * JUnit 4.5+.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5

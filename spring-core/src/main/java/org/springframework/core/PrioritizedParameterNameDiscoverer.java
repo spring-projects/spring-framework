@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.core;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,7 +34,7 @@ import java.util.List;
  * @since 2.0
  */
 public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscoverer {
-	
+
 	private final List<ParameterNameDiscoverer> parameterNameDiscoverers =
 			new LinkedList<ParameterNameDiscoverer>();
 
@@ -59,7 +58,7 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 		return null;
 	}
 
-	public String[] getParameterNames(Constructor ctor) {
+	public String[] getParameterNames(Constructor<?> ctor) {
 		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
 			String[] result = pnd.getParameterNames(ctor);
 			if (result != null) {

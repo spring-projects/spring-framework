@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,6 @@ import org.springframework.util.CollectionUtils;
  * @author Juergen Hoeller
  * @see org.springframework.aop.framework.AopProxy
  */
-@SuppressWarnings("unchecked")
 public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/** use serialVersionUID from Spring 2.0 for interoperability */
@@ -88,7 +87,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Interfaces to be implemented by the proxy. Held in List to keep the order
 	 * of registration, to create JDK proxy with specified order of interfaces.
 	 */
-	private List<Class> interfaces = new ArrayList<Class>();
+	private List<Class<?>> interfaces = new ArrayList<Class<?>>();
 
 	/**
 	 * List of Advisors. If an Advice is added, it will be wrapped
@@ -114,7 +113,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Create a AdvisedSupport instance with the given parameters.
 	 * @param interfaces the proxied interfaces
 	 */
-	public AdvisedSupport(Class[] interfaces) {
+	public AdvisedSupport(Class<?>[] interfaces) {
 		this();
 		setInterfaces(interfaces);
 	}
@@ -158,7 +157,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @see #setTargetSource
 	 * @see #setTarget
 	 */
-	public void setTargetClass(Class targetClass) {
+	public void setTargetClass(Class<?> targetClass) {
 		this.targetSource = EmptyTargetSource.forClass(targetClass);
 	}
 
@@ -194,10 +193,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	/**
 	 * Set the interfaces to be proxied.
 	 */
-	public void setInterfaces(Class[] interfaces) {
+	public void setInterfaces(Class<?>[] interfaces) {
 		Assert.notNull(interfaces, "Interfaces must not be null");
 		this.interfaces.clear();
-		for (Class ifc : interfaces) {
+		for (Class<?> ifc : interfaces) {
 			addInterface(ifc);
 		}
 	}
@@ -206,7 +205,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Add a new proxied interface.
 	 * @param intf the additional interface to proxy
 	 */
-	public void addInterface(Class intf) {
+	public void addInterface(Class<?> intf) {
 		Assert.notNull(intf, "Interface must not be null");
 		if (!intf.isInterface()) {
 			throw new IllegalArgumentException("[" + intf.getName() + "] is not an interface");
@@ -224,16 +223,16 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @return <code>true</code> if the interface was removed; <code>false</code>
 	 * if the interface was not found and hence could not be removed
 	 */
-	public boolean removeInterface(Class intf) {
+	public boolean removeInterface(Class<?> intf) {
 		return this.interfaces.remove(intf);
 	}
 
-	public Class[] getProxiedInterfaces() {
+	public Class<?>[] getProxiedInterfaces() {
 		return this.interfaces.toArray(new Class[this.interfaces.size()]);
 	}
 
-	public boolean isInterfaceProxied(Class intf) {
-		for (Class proxyIntf : this.interfaces) {
+	public boolean isInterfaceProxied(Class<?> intf) {
+		for (Class<?> proxyIntf : this.interfaces) {
 			if (intf.isAssignableFrom(proxyIntf)) {
 				return true;
 			}
@@ -351,8 +350,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private void validateIntroductionAdvisor(IntroductionAdvisor advisor) {
 		advisor.validateInterfaces();
 		// If the advisor passed validation, we can make the change.
-		Class[] ifcs = advisor.getInterfaces();
-		for (Class ifc : ifcs) {
+		Class<?>[] ifcs = advisor.getInterfaces();
+		for (Class<?> ifc : ifcs) {
 			addInterface(ifc);
 		}
 	}
@@ -455,7 +454,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param adviceClass the advice class to check
 	 * @return the count of the interceptors of this class or subclasses
 	 */
-	public int countAdvicesOfType(Class adviceClass) {
+	public int countAdvicesOfType(Class<?> adviceClass) {
 		int count = 0;
 		if (adviceClass != null) {
 			for (Advisor advisor : this.advisors) {
@@ -475,7 +474,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param targetClass the target class
 	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
-	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, Class targetClass) {
+	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, Class<?> targetClass) {
 		MethodCacheKey cacheKey = new MethodCacheKey(method);
 		List<Object> cached = this.methodCache.get(cacheKey);
 		if (cached == null) {
@@ -513,7 +512,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		copyFrom(other);
 		this.targetSource = targetSource;
 		this.advisorChainFactory = other.advisorChainFactory;
-		this.interfaces = new ArrayList<Class>(other.interfaces);
+		this.interfaces = new ArrayList<Class<?>>(other.interfaces);
 		for (Advisor advisor : advisors) {
 			if (advisor instanceof IntroductionAdvisor) {
 				validateIntroductionAdvisor((IntroductionAdvisor) advisor);

@@ -26,7 +26,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 
 /**
- * Assists with the creation of a {@link MappedInterceptor}.
+ * Encapsulates a {@link HandlerInterceptor} and an optional list of URL patterns.
+ * Results in the creation of a {@link MappedInterceptor} if URL patterns are provided.
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald
@@ -36,9 +37,7 @@ public class InterceptorRegistration {
 
 	private final HandlerInterceptor interceptor;
 
-	private final List<String> includePatterns = new ArrayList<String>();
-
-	private final List<String> excludePatterns = new ArrayList<String>();
+	private final List<String> pathPatterns = new ArrayList<String>();
 
 	/**
 	 * Creates an {@link InterceptorRegistration} instance.
@@ -53,14 +52,6 @@ public class InterceptorRegistration {
 	 */
 	public InterceptorRegistration addPathPatterns(String... patterns) {
 		this.includePatterns.addAll(Arrays.asList(patterns));
-		return this;
-	}
-
-	/**
-	 * Add URL patterns to which the registered interceptor should not apply to.
-	 */
-	public InterceptorRegistration excludePathPatterns(String... patterns) {
-		this.excludePatterns.addAll(Arrays.asList(patterns));
 		return this;
 	}
 

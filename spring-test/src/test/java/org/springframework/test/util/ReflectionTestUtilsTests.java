@@ -29,7 +29,7 @@ import org.springframework.test.util.subpackage.Person;
 
 /**
  * Unit tests for {@link ReflectionTestUtils}.
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  */

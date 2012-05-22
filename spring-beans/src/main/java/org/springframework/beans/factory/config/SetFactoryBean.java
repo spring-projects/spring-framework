@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,17 +32,17 @@ import org.springframework.core.GenericCollectionTypeResolver;
  * @see ListFactoryBean
  * @see MapFactoryBean
  */
-public class SetFactoryBean extends AbstractFactoryBean<Set> {
+public class SetFactoryBean extends AbstractFactoryBean<Set<?>> {
 
-	private Set sourceSet;
+	private Set<?> sourceSet;
 
-	private Class targetSetClass;
+	private Class<? extends Set<?>> targetSetClass;
 
 
 	/**
 	 * Set the source Set, typically populated via XML "set" elements.
 	 */
-	public void setSourceSet(Set sourceSet) {
+	public void setSourceSet(Set<?> sourceSet) {
 		this.sourceSet = sourceSet;
 	}
 
@@ -52,36 +52,38 @@ public class SetFactoryBean extends AbstractFactoryBean<Set> {
 	 * <p>Default is a linked HashSet, keeping the registration order.
 	 * @see java.util.LinkedHashSet
 	 */
-	public void setTargetSetClass(Class targetSetClass) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void setTargetSetClass(Class<? extends Set> targetSetClass) {
 		if (targetSetClass == null) {
 			throw new IllegalArgumentException("'targetSetClass' must not be null");
 		}
 		if (!Set.class.isAssignableFrom(targetSetClass)) {
 			throw new IllegalArgumentException("'targetSetClass' must implement [java.util.Set]");
 		}
-		this.targetSetClass = targetSetClass;
+		this.targetSetClass = (Class<? extends Set<?>>) targetSetClass;
 	}
 
 
 	@Override
-	public Class<Set> getObjectType() {
+	public Class<?> getObjectType() {
 		return Set.class;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	protected Set createInstance() {
+	@SuppressWarnings({ "unchecked", "cast" })
+	protected Set<?> createInstance() {
 		if (this.sourceSet == null) {
 			throw new IllegalArgumentException("'sourceSet' is required");
 		}
+		@SuppressWarnings("rawtypes")
 		Set result = null;
 		if (this.targetSetClass != null) {
-			result = (Set) BeanUtils.instantiateClass(this.targetSetClass);
+			result = (Set<?>) BeanUtils.instantiateClass(this.targetSetClass);
 		}
 		else {
-			result = new LinkedHashSet(this.sourceSet.size());
+			result = new LinkedHashSet<Object>(this.sourceSet.size());
 		}
-		Class valueType = null;
+		Class<?> valueType = null;
 		if (this.targetSetClass != null) {
 			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetSetClass);
 		}

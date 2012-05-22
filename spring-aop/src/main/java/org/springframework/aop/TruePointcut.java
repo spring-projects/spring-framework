@@ -24,9 +24,9 @@ import java.io.Serializable;
  * @author Rod Johnson
  */
 class TruePointcut implements Pointcut, Serializable {
-	
+
 	public static final TruePointcut INSTANCE = new TruePointcut();
-	
+
 	/**
 	 * Enforce Singleton pattern.
 	 */
@@ -40,7 +40,7 @@ class TruePointcut implements Pointcut, Serializable {
 	public MethodMatcher getMethodMatcher() {
 		return MethodMatcher.TRUE;
 	}
-	
+
 	/**
 	 * Required to support serialization. Replaces with canonical
 	 * instance on deserialization, protecting Singleton pattern.

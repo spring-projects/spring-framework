@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
  * @since 2.0
  */
 public abstract class AspectJProxyUtils {
-	
+
 	/**
 	 * Add special advisors if necessary to work with a proxy chain that contains AspectJ advisors.
 	 * This will expose the current Spring AOP invocation (necessary for some AspectJ pointcut matching)
@@ -64,8 +64,8 @@ public abstract class AspectJProxyUtils {
 	 */
 	private static boolean isAspectJAdvice(Advisor advisor) {
 		return (advisor instanceof InstantiationModelAwarePointcutAdvisor ||
-			   advisor.getAdvice() instanceof AbstractAspectJAdvice ||
-			   (advisor instanceof PointcutAdvisor &&
+				advisor.getAdvice() instanceof AbstractAspectJAdvice ||
+				(advisor instanceof PointcutAdvisor &&
 						 ((PointcutAdvisor) advisor).getPointcut() instanceof AspectJExpressionPointcut));
 	}
 

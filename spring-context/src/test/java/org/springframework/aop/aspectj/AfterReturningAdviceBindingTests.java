@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public final class AfterReturningAdviceBindingTests {
 	private TestBean testBeanTarget;
 
 	private AfterReturningAdviceBindingCollaborator mockCollaborator;
-	
+
 
 	public void setAfterReturningAdviceAspect(AfterReturningAdviceBindingTestAspect anAspect) {
 		this.afterAdviceAspect = anAspect;
@@ -55,15 +55,15 @@ public final class AfterReturningAdviceBindingTests {
 	public void setUp() throws Exception {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-		
+
 		afterAdviceAspect = (AfterReturningAdviceBindingTestAspect) ctx.getBean("testAspect");
-		
+
 		mockCollaborator = createNiceMock(AfterReturningAdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
-		
+
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(testBeanProxy));
-		
+
 		// we need the real target too, not just the proxy...
 		this.testBeanTarget = (TestBean) ((Advised)testBeanProxy).getTargetSource().getTarget();
 	}
@@ -76,7 +76,7 @@ public final class AfterReturningAdviceBindingTests {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testOneObjectArg() {
 		mockCollaborator.oneObjectArg(this.testBeanProxy);
@@ -84,7 +84,7 @@ public final class AfterReturningAdviceBindingTests {
 		testBeanProxy.getAge();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testOneIntAndOneObjectArgs() {
 		mockCollaborator.oneIntAndOneObject(5,this.testBeanProxy);
@@ -92,7 +92,7 @@ public final class AfterReturningAdviceBindingTests {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testNeedsJoinPoint() {
 		mockCollaborator.needsJoinPoint("getAge");
@@ -100,7 +100,7 @@ public final class AfterReturningAdviceBindingTests {
 		testBeanProxy.getAge();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testNeedsJoinPointStaticPart() {
 		mockCollaborator.needsJoinPointStaticPart("getAge");
@@ -117,7 +117,7 @@ public final class AfterReturningAdviceBindingTests {
 		testBeanProxy.getName();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testReturningObject() {
 		mockCollaborator.oneObjectArg(this.testBeanTarget);
@@ -125,7 +125,7 @@ public final class AfterReturningAdviceBindingTests {
 		testBeanProxy.returnsThis();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testReturningBean() {
 		mockCollaborator.oneTestBeanArg(this.testBeanTarget);
@@ -133,11 +133,11 @@ public final class AfterReturningAdviceBindingTests {
 		testBeanProxy.returnsThis();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testReturningBeanArray() {
 		this.testBeanTarget.setSpouse(new TestBean());
-		ITestBean[] spouses = (ITestBean[]) this.testBeanTarget.getSpouses();
+		ITestBean[] spouses = this.testBeanTarget.getSpouses();
 		mockCollaborator.testBeanArrayArg(spouses);
 		replay(mockCollaborator);
 		testBeanProxy.getSpouses();
@@ -149,13 +149,13 @@ public final class AfterReturningAdviceBindingTests {
 		// we need a strict mock for this...
 		mockCollaborator = createMock(AfterReturningAdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
-		
+
 		replay(mockCollaborator);
 		testBeanProxy.setSpouse(this.testBeanProxy);
 		testBeanProxy.getSpouse();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testReturningByType() {
 		mockCollaborator.objectMatchNoArgs();
@@ -163,7 +163,7 @@ public final class AfterReturningAdviceBindingTests {
 		testBeanProxy.returnsThis();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testReturningPrimitive() {
 		mockCollaborator.oneInt(20);
@@ -181,15 +181,15 @@ final class AfterReturningAdviceBindingTestAspect extends AdviceBindingTestAspec
 	private AfterReturningAdviceBindingCollaborator getCollaborator() {
 		return (AfterReturningAdviceBindingCollaborator) this.collaborator;
 	}
-	
+
 	public void oneString(String name) {
 		getCollaborator().oneString(name);
 	}
-	
+
 	public void oneTestBeanArg(TestBean bean) {
 		getCollaborator().oneTestBeanArg(bean);
 	}
-	
+
 	public void testBeanArrayArg(ITestBean[] beans) {
 		getCollaborator().testBeanArrayArg(beans);
 	}
@@ -197,11 +197,11 @@ final class AfterReturningAdviceBindingTestAspect extends AdviceBindingTestAspec
 	public void objectMatchNoArgs() {
 		getCollaborator().objectMatchNoArgs();
 	}
-	
+
 	public void stringMatchNoArgs() {
 		getCollaborator().stringMatchNoArgs();
 	}
-	
+
 	public void oneInt(int result) {
 		getCollaborator().oneInt(result);
 	}

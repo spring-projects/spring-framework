@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,28 +33,27 @@ import org.springframework.util.Assert;
  */
 public class GenericApplicationListenerAdapter implements SmartApplicationListener {
 
-	private final ApplicationListener delegate;
+	private final ApplicationListener<?> delegate;
 
 
 	/**
 	 * Create a new GenericApplicationListener for the given delegate.
 	 * @param delegate the delegate listener to be invoked
 	 */
-	public GenericApplicationListenerAdapter(ApplicationListener delegate) {
+	public GenericApplicationListenerAdapter(ApplicationListener<?> delegate) {
 		Assert.notNull(delegate, "Delegate listener must not be null");
 		this.delegate = delegate;
 	}
 
 
-	@SuppressWarnings("unchecked")
 	public void onApplicationEvent(ApplicationEvent event) {
-		this.delegate.onApplicationEvent(event);
+		((ApplicationListener)this.delegate).onApplicationEvent(event);
 	}
 
 	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
-		Class typeArg = GenericTypeResolver.resolveTypeArgument(this.delegate.getClass(), ApplicationListener.class);
+		Class<?> typeArg = GenericTypeResolver.resolveTypeArgument(this.delegate.getClass(), ApplicationListener.class);
 		if (typeArg == null || typeArg.equals(ApplicationEvent.class)) {
-			Class targetClass = AopUtils.getTargetClass(this.delegate);
+			Class<?> targetClass = AopUtils.getTargetClass(this.delegate);
 			if (targetClass != this.delegate.getClass()) {
 				typeArg = GenericTypeResolver.resolveTypeArgument(targetClass, ApplicationListener.class);
 			}

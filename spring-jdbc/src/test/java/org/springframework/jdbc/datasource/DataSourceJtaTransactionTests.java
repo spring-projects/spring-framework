@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -653,7 +653,7 @@ public class DataSourceJtaTransactionTests extends TestCase {
 
 		JtaTransactionManager ptm = new JtaTransactionManager(ut) {
 			protected void doRegisterAfterCompletionWithJtaTransaction(
-					JtaTransactionObject txObject, final List synchronizations) {
+					JtaTransactionObject txObject, final List<TransactionSynchronization> synchronizations) {
 				Thread async = new Thread() {
 					public void run() {
 						invokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_COMMITTED);
@@ -843,7 +843,7 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		ds2Control.replay();
 
 		final IsolationLevelDataSourceRouter dsToUse = new IsolationLevelDataSourceRouter();
-		Map targetDataSources = new HashMap();
+		Map<Object, Object> targetDataSources = new HashMap<Object, Object>();
 		if (dataSourceLookup) {
 			targetDataSources.put("ISOLATION_REPEATABLE_READ", "ds2");
 			dsToUse.setDefaultTargetDataSource("ds1");

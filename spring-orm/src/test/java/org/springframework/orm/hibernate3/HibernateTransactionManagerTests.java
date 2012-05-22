@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1024,7 +1024,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		beanFactory.getBean("entityInterceptor", Interceptor.class);
 		beanFactoryControl.setReturnValue(entityInterceptor2, 1);
 		beanFactoryControl.replay();
-		
+
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		tm.setEntityInterceptorBeanName("entityInterceptor");
 		tm.setBeanFactory(beanFactory);

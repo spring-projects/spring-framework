@@ -42,7 +42,7 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		assertNotNull(response.getRenderParameter(param));
 		assertEquals(value, response.getRenderParameter(param));
 	}
-	
+
 	public void testNonDefaultParameterNotMapped() throws Exception {
 		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
 		Object handler = new Object();
@@ -57,7 +57,7 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		assertNull(response.getRenderParameter(param));
 		assertNull(response.getRenderParameter(ParameterHandlerMapping.DEFAULT_PARAMETER_NAME));
 	}
-	
+
 	public void testNonDefaultParameterMappedWhenHandlerMappingProvided() throws Exception {
 		String param = "myParam";
 		String value = "someValue";
@@ -88,7 +88,7 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		boolean shouldProceed = interceptor.preHandle(request, response, handler);
 		assertTrue(shouldProceed);
 	}
-	
+
 	public void testNoParameterValueSetWithDefaultParameterName() throws Exception {
 		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
 		Object handler = new Object();
@@ -100,7 +100,7 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		assertTrue(shouldProceed);
 		assertNull(response.getRenderParameter(param));
 	}
-	
+
 	public void testNoParameterValueSetWithNonDefaultParameterName() throws Exception {
 		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
 		Object handler = new Object();
@@ -127,5 +127,5 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		assertTrue(shouldProceed);
 		assertNull(response.getRenderParameter(param));
 	}
-	
+
 }

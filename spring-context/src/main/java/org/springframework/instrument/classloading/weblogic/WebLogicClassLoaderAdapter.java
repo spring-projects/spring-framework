@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2007 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * Reflective wrapper around a WebLogic 10 class loader. Used to
  * encapsulate the classloader-specific methods (discovered and
  * called through reflection) from the load-time weaver.
- * 
+ *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.5
@@ -43,7 +43,7 @@ class WebLogicClassLoaderAdapter {
 
 	private final ClassLoader classLoader;
 
-	private final Class wlPreProcessorClass;
+	private final Class<?> wlPreProcessorClass;
 
 	private final Method addPreProcessorMethod;
 
@@ -51,11 +51,11 @@ class WebLogicClassLoaderAdapter {
 
 	private final Method getParentMethod;
 
-	private final Constructor wlGenericClassLoaderConstructor;
+	private final Constructor<?> wlGenericClassLoaderConstructor;
 
 
 	public WebLogicClassLoaderAdapter(ClassLoader classLoader) {
-		Class wlGenericClassLoaderClass = null;
+		Class<?> wlGenericClassLoaderClass = null;
 		try {
 			wlGenericClassLoaderClass = classLoader.loadClass(GENERIC_CLASS_LOADER_NAME);
 			this.wlPreProcessorClass = classLoader.loadClass(CLASS_PRE_PROCESSOR_NAME);

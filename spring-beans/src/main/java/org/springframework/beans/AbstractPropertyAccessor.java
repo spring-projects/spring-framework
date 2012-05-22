@@ -105,7 +105,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 
     // Redefined with public visibility.
 	@Override
-	public Class getPropertyType(String propertyPath) {
+	public Class<?> getPropertyType(String propertyPath) {
 		return null;
 	}
 

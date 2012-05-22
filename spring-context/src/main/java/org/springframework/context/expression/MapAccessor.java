@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,11 @@ import org.springframework.expression.TypedValue;
 public class MapAccessor implements PropertyAccessor {
 
 	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-		Map map = (Map) target;
-		return map.containsKey(name);
+		return asMap(target).containsKey(name);
 	}
 
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-		Map map = (Map) target;
+		Map<String, Object> map = asMap(target);
 		Object value = map.get(name);
 		if (value == null && !map.containsKey(name)) {
 			throw new MapAccessException(name);
@@ -51,16 +50,19 @@ public class MapAccessor implements PropertyAccessor {
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
-		Map map = (Map) target;
+		Map<String, Object> map = asMap(target);
 		map.put(name, newValue);
 	}
 
-	public Class[] getSpecificTargetClasses() {
+	public Class<?>[] getSpecificTargetClasses() {
 		return new Class[] {Map.class};
 	}
 
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> asMap(Object target) {
+		return (Map<String, Object>) target;
+	}
 
 	/**
 	 * Exception thrown from <code>read</code> in order to reset a cached

@@ -25,7 +25,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link FactoryBean} for RMI proxies from JNDI.
- * 
+ *
  * <p>Typically used for RMI-IIOP (CORBA), but can also be used for EJB home objects
  * (for example, a Stateful Session Bean home). In contrast to a plain JNDI lookup,
  * this accessor also performs narrowing through {@link javax.rmi.PortableRemoteObject}.

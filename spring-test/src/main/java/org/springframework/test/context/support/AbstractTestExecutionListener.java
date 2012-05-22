@@ -23,7 +23,7 @@ import org.springframework.test.context.TestExecutionListener;
  * Abstract implementation of the {@link TestExecutionListener} interface which
  * provides empty method stubs. Subclasses can extend this class and override
  * only those methods suitable for the task at hand.
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5

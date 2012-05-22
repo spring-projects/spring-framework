@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * @see javax.persistence.spi.PersistenceUnitInfo#addTransformer(javax.persistence.spi.ClassTransformer)
  */
 class ClassFileTransformerAdapter implements ClassFileTransformer {
-	
+
 	private static final Log logger = LogFactory.getLog(ClassFileTransformerAdapter.class);
 
 	private final ClassTransformer classTransformer;
@@ -51,7 +51,7 @@ class ClassFileTransformerAdapter implements ClassFileTransformer {
 	public byte[] transform(
 			ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-		
+
 		try {
 			byte[] transformed = this.classTransformer.transform(
 					loader, className, classBeingRedefined, protectionDomain, classfileBuffer);

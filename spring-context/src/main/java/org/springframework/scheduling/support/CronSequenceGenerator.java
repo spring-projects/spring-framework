@@ -104,7 +104,7 @@ public class CronSequenceGenerator {
 		4 If hour matches move on, otherwise find the next match
 		4.1 If next match is in the next day then roll forwards,
 		4.2 Reset the minutes and seconds and go to 2
-		
+
 		...
 		*/
 

@@ -26,19 +26,19 @@ import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 
 /**
  * Convenience methods for use in MVC namespace BeanDefinitionParsers.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 abstract class MvcNamespaceUtils {
 
-	private static final String BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME = 
+	private static final String BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME =
 			BeanNameUrlHandlerMapping.class.getName();
 
-	private static final String SIMPLE_CONTROLLER_HANDLER_ADAPTER_BEAN_NAME = 
+	private static final String SIMPLE_CONTROLLER_HANDLER_ADAPTER_BEAN_NAME =
 			SimpleControllerHandlerAdapter.class.getName();
 
-	private static final String HTTP_REQUEST_HANDLER_ADAPTER_BEAN_NAME = 
+	private static final String HTTP_REQUEST_HANDLER_ADAPTER_BEAN_NAME =
 			HttpRequestHandlerAdapter.class.getName();
 
 	public static void registerDefaultComponents(ParserContext parserContext, Object source) {
@@ -48,7 +48,7 @@ abstract class MvcNamespaceUtils {
 	}
 
 	/**
-	 * Registers  an {@link HttpRequestHandlerAdapter} under a well-known 
+	 * Registers  an {@link HttpRequestHandlerAdapter} under a well-known
 	 * name unless already registered.
 	 */
 	private static void registerBeanNameUrlHandlerMapping(ParserContext parserContext, Object source) {
@@ -63,7 +63,7 @@ abstract class MvcNamespaceUtils {
 	}
 
 	/**
-	 * Registers  an {@link HttpRequestHandlerAdapter} under a well-known 
+	 * Registers  an {@link HttpRequestHandlerAdapter} under a well-known
 	 * name unless already registered.
 	 */
 	private static void registerHttpRequestHandlerAdapter(ParserContext parserContext, Object source) {
@@ -75,9 +75,9 @@ abstract class MvcNamespaceUtils {
 			parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef, HTTP_REQUEST_HANDLER_ADAPTER_BEAN_NAME));
 		}
 	}
-	
+
 	/**
-	 * Registers a {@link SimpleControllerHandlerAdapter} under a well-known 
+	 * Registers a {@link SimpleControllerHandlerAdapter} under a well-known
 	 * name unless already registered.
 	 */
 	private static void registerSimpleControllerHandlerAdapter(ParserContext parserContext, Object source) {

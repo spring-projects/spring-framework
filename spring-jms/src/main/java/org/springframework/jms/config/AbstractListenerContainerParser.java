@@ -103,7 +103,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 				}
 			}
 		}
-		
+
 		parserContext.popAndRegisterContainingComponent();
 		return null;
 	}
@@ -111,7 +111,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 	private void parseListener(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition listenerDef = new RootBeanDefinition();
 		listenerDef.setSource(parserContext.extractSource(listenerEle));
-		
+
 		String ref = listenerEle.getAttribute(REF_ATTRIBUTE);
 		if (!StringUtils.hasText(ref)) {
 			parserContext.getReaderContext().error(
@@ -164,11 +164,11 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		containerDef.getPropertyValues().add("messageListener", listenerDef);
 
 		String containerBeanName = listenerEle.getAttribute(ID_ATTRIBUTE);
-		// If no bean id is given auto generate one using the ReaderContext's BeanNameGenerator 
+		// If no bean id is given auto generate one using the ReaderContext's BeanNameGenerator
 		if (!StringUtils.hasText(containerBeanName)) {
 			containerBeanName = parserContext.getReaderContext().generateBeanName(containerDef);
 		}
-		
+
 		// Register the listener and fire event
 		parserContext.registerBeanComponent(new BeanComponentDefinition(containerDef, containerBeanName));
 	}

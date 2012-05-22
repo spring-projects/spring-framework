@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public class DeclareParentsDelegateRefTests {
 	protected NoMethodsBean noMethodsBean;
 
 	protected Counter counter;
-	
+
 
 	@Before
 	public void setUp() {
@@ -46,7 +46,7 @@ public class DeclareParentsDelegateRefTests {
 	public void testIntroductionWasMade() {
 		assertTrue("Introduction must have been made", noMethodsBean instanceof ICounter);
 	}
-	
+
 	@Test
 	public void testIntroductionDelegation() {
 		((ICounter)noMethodsBean).increment();
@@ -62,4 +62,4 @@ interface NoMethodsBean {
 
 class NoMethodsBeanImpl implements NoMethodsBean {
 }
-	
+

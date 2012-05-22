@@ -33,9 +33,9 @@ import org.springframework.web.servlet.ModelAndView;
 public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	/**
-	 * Checks if the handler is a {@link HandlerMethod} and then delegates to the
-	 * base class implementation of {@link #shouldApplyTo(HttpServletRequest, Object)}
-	 * passing the bean of the {@code HandlerMethod}. Otherwise returns {@code false}.
+	 * Checks if the handler is a {@link HandlerMethod} instance and performs the check against the bean
+	 * instance it contains. If the provided handler is not an instance of {@link HandlerMethod},
+	 * {@code false} is returned instead.
 	 */
 	@Override
 	protected boolean shouldApplyTo(HttpServletRequest request, Object handler) {

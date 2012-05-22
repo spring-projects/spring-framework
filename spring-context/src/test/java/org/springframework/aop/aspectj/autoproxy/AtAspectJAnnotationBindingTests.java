@@ -76,8 +76,8 @@ class AtAspectJAnnotationBindingTestAspect {
 		Object result = pjp.proceed();
 		return (result instanceof String ? annValue + " " + result : result);
 	}
-	
-} 
+
+}
 
 
 class ResourceArrayFactoryBean implements FactoryBean<Object> {

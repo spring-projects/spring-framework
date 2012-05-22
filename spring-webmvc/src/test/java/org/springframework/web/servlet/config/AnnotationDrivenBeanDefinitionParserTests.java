@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,7 +143,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertTrue(converters.get(0) instanceof StringHttpMessageConverter);
 		assertTrue(converters.get(1) instanceof ResourceHttpMessageConverter);
 	}
-	
+
 }
 
 class TestWebArgumentResolver implements WebArgumentResolver {
@@ -176,7 +176,7 @@ class TestHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHan
 			MethodParameter returnType, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest) throws Exception {
 	}
-	
+
 }
 
 class TestMessageCodesResolver implements MessageCodesResolver {

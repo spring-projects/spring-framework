@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,10 @@ import org.springframework.scheduling.TestMethodInvokingTask;
  * @author Juergen Hoeller
  * @since 20.02.2004
  */
+@SuppressWarnings("deprecation")
 public class TimerSupportTests extends TestCase {
 
+	@SuppressWarnings("cast")
 	public void testTimerFactoryBean() throws Exception {
 		final TestTimerTask timerTask0 = new TestTimerTask();
 
@@ -39,7 +41,7 @@ public class TimerSupportTests extends TestCase {
 		mittfb.setTargetObject(task1);
 		mittfb.setTargetMethod("doSomething");
 		mittfb.afterPropertiesSet();
-		final TimerTask timerTask1 = (TimerTask) mittfb.getObject();
+		final TimerTask timerTask1 = mittfb.getObject();
 
 		final TestRunnable timerTask2 = new TestRunnable();
 
@@ -48,7 +50,7 @@ public class TimerSupportTests extends TestCase {
 		tasks[1] = new ScheduledTimerTask(timerTask1, 10, 20, true);
 		tasks[2] = new ScheduledTimerTask(timerTask2, 20);
 
-		final List success = new ArrayList(3);
+		final List<Boolean> success = new ArrayList<Boolean>(3);
 		final Timer timer = new Timer(true) {
 			public void schedule(TimerTask task, long delay, long period) {
 				if (task == timerTask0 && delay == 0 && period == 10) {

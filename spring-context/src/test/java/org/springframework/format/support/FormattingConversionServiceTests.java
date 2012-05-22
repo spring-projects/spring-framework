@@ -219,7 +219,7 @@ public class FormattingConversionServiceTests {
 			assertEquals(new LocalDate(2009, 10, 2), new LocalDate(dates.get(2)));
 		}
 	}
-	
+
 	@Test
 	public void testPrintNull() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
@@ -324,7 +324,7 @@ public class FormattingConversionServiceTests {
 
 		@org.springframework.format.annotation.DateTimeFormat(style="S-")
 		public Date date;
-		
+
 		@org.springframework.format.annotation.DateTimeFormat(pattern="M-d-yy")
 		public List<Date> dates;
 
@@ -355,13 +355,6 @@ public class FormattingConversionServiceTests {
 		}
 	}
 
-
-	@org.springframework.format.annotation.DateTimeFormat(pattern="${datePattern}")
-	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface MyDatePattern {
-	}
-
-
 	public static class NullReturningFormatter implements Formatter<Integer> {
 
 		public String print(Integer object, Locale locale) {
@@ -371,7 +364,7 @@ public class FormattingConversionServiceTests {
 		public Integer parse(String text, Locale locale) throws ParseException {
 			return null;
 		}
-		
+
 	}
 
 

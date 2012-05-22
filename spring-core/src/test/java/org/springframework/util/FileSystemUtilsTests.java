@@ -24,51 +24,51 @@ import junit.framework.TestCase;
  * @author Rob Harrop
  */
 public class FileSystemUtilsTests extends TestCase {
-	
+
 	public void testDeleteRecursively() throws Exception {
 		File root = new File("./tmp/root");
 		File child = new File(root, "child");
 		File grandchild = new File(child, "grandchild");
-		
+
 		grandchild.mkdirs();
-		
+
 		File bar = new File(child, "bar.txt");
 		bar.createNewFile();
-		
+
 		assertTrue(root.exists());
 		assertTrue(child.exists());
 		assertTrue(grandchild.exists());
 		assertTrue(bar.exists());
-		
+
 		FileSystemUtils.deleteRecursively(root);
-		
+
 		assertFalse(root.exists());
 		assertFalse(child.exists());
 		assertFalse(grandchild.exists());
 		assertFalse(bar.exists());
 	}
-	
+
 	public void testCopyRecursively() throws Exception {
 		File src = new File("./tmp/src");
 		File child = new File(src, "child");
 		File grandchild = new File(child, "grandchild");
-		
+
 		grandchild.mkdirs();
-		
+
 		File bar = new File(child, "bar.txt");
 		bar.createNewFile();
-		
+
 		assertTrue(src.exists());
 		assertTrue(child.exists());
 		assertTrue(grandchild.exists());
 		assertTrue(bar.exists());
-		
+
 		File dest = new File("./dest");
 		FileSystemUtils.copyRecursively(src, dest);
-		
+
 		assertTrue(dest.exists());
 		assertTrue(new File(dest, child.getName()).exists());
-		
+
 		FileSystemUtils.deleteRecursively(src);
 		assertTrue(!src.exists());
 	}

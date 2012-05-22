@@ -84,7 +84,7 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * or an empty array if none defined
 	 */
 	String[] getBeanDefinitionNames();
-	
+
 	/**
 	 * Return the names of beans matching the given type (including subclasses),
 	 * judging from either bean definitions or the value of <code>getObjectType</code>

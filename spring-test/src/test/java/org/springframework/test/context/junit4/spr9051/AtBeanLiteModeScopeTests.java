@@ -35,7 +35,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 /**
  * Integration tests that verify proper scoping of beans created in
  * <em>{@code @Bean} Lite Mode</em>.
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  */

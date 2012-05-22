@@ -9,13 +9,13 @@ import junit.framework.TestCase;
 
 /**
  * Test case for {@link CompositeIterator}.
- * 
+ *
  * @author Erwin Vervaet
  */
 public class CompositeIteratorTests extends TestCase {
 
 	public void testNoIterators() {
-		CompositeIterator it = new CompositeIterator();
+		CompositeIterator<String> it = new CompositeIterator<String>();
 		assertFalse(it.hasNext());
 		try {
 			it.next();
@@ -26,7 +26,7 @@ public class CompositeIteratorTests extends TestCase {
 	}
 
 	public void testSingleIterator() {
-		CompositeIterator it = new CompositeIterator();
+		CompositeIterator<String> it = new CompositeIterator<String>();
 		it.add(Arrays.asList(new String[] { "0", "1" }).iterator());
 		for (int i = 0; i < 2; i++) {
 			assertTrue(it.hasNext());
@@ -42,7 +42,7 @@ public class CompositeIteratorTests extends TestCase {
 	}
 
 	public void testMultipleIterators() {
-		CompositeIterator it = new CompositeIterator();
+		CompositeIterator<String> it = new CompositeIterator<String>();
 		it.add(Arrays.asList(new String[] { "0", "1" }).iterator());
 		it.add(Arrays.asList(new String[] { "2" }).iterator());
 		it.add(Arrays.asList(new String[] { "3", "4" }).iterator());
@@ -60,8 +60,8 @@ public class CompositeIteratorTests extends TestCase {
 	}
 
 	public void testInUse() {
-		List list = Arrays.asList(new String[] { "0", "1" });
-		CompositeIterator it = new CompositeIterator();
+		List<String> list = Arrays.asList(new String[] { "0", "1" });
+		CompositeIterator<String> it = new CompositeIterator<String>();
 		it.add(list.iterator());
 		it.hasNext();
 		try {
@@ -70,7 +70,7 @@ public class CompositeIteratorTests extends TestCase {
 		} catch (IllegalStateException e) {
 			// expected
 		}
-		it = new CompositeIterator();
+		it = new CompositeIterator<String>();
 		it.add(list.iterator());
 		it.next();
 		try {
@@ -82,9 +82,9 @@ public class CompositeIteratorTests extends TestCase {
 	}
 
 	public void testDuplicateIterators() {
-		List list = Arrays.asList(new String[] { "0", "1" });
-		Iterator iterator = list.iterator();
-		CompositeIterator it = new CompositeIterator();
+		List<String> list = Arrays.asList(new String[] { "0", "1" });
+		Iterator<String> iterator = list.iterator();
+		CompositeIterator<String> it = new CompositeIterator<String>();
 		it.add(iterator);
 		it.add(list.iterator());
 		try {

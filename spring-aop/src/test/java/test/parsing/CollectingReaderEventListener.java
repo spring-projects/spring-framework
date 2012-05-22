@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 
 	private final Map<String, Object> componentDefinitions = new LinkedHashMap<String, Object>(8);
 
-	private final Map<String, Object> aliasMap = new LinkedHashMap<String, Object>(8);
+	private final Map<String, List<Object>> aliasMap = new LinkedHashMap<String, List<Object>>(8);
 
 	private final List<ImportDefinition> imports = new LinkedList<ImportDefinition>();
 
@@ -67,18 +67,17 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		return collection.toArray(new ComponentDefinition[collection.size()]);
 	}
 
-	@SuppressWarnings("unchecked")
 	public void aliasRegistered(AliasDefinition aliasDefinition) {
-		List aliases = (List) this.aliasMap.get(aliasDefinition.getBeanName());
+		List<Object> aliases = this.aliasMap.get(aliasDefinition.getBeanName());
 		if(aliases == null) {
-			aliases = new ArrayList();
+			aliases = new ArrayList<Object>();
 			this.aliasMap.put(aliasDefinition.getBeanName(), aliases);
 		}
 		aliases.add(aliasDefinition);
 	}
 
 	public List<?> getAliases(String beanName) {
-		List<?> aliases = (List<?>) this.aliasMap.get(beanName);
+		List<?> aliases = this.aliasMap.get(beanName);
 		return aliases == null ? null : Collections.unmodifiableList(aliases);
 	}
 

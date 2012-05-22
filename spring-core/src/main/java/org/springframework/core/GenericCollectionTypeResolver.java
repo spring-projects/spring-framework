@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param collectionClass the collection class to introspect
 	 * @return the generic type, or <code>null</code> if none
 	 */
-	public static Class<?> getCollectionType(Class<? extends Collection> collectionClass) {
+	public static Class<?> getCollectionType(@SuppressWarnings("rawtypes") Class<? extends Collection> collectionClass) {
 		return extractTypeFromClass(collectionClass, Collection.class, 0);
 	}
 
@@ -55,7 +55,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param mapClass the map class to introspect
 	 * @return the generic type, or <code>null</code> if none
 	 */
-	public static Class<?> getMapKeyType(Class<? extends Map> mapClass) {
+	public static Class<?> getMapKeyType(@SuppressWarnings("rawtypes") Class<? extends Map> mapClass) {
 		return extractTypeFromClass(mapClass, Map.class, 0);
 	}
 
@@ -65,7 +65,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param mapClass the map class to introspect
 	 * @return the generic type, or <code>null</code> if none
 	 */
-	public static Class<?> getMapValueType(Class<? extends Map> mapClass) {
+	public static Class<?> getMapValueType(@SuppressWarnings("rawtypes") Class<? extends Map> mapClass) {
 		return extractTypeFromClass(mapClass, Map.class, 1);
 	}
 
@@ -317,12 +317,12 @@ public abstract class GenericCollectionTypeResolver {
 	 * @return the generic type as Class, or <code>null</code> if none
 	 */
 	private static Class<?> extractType(Type type, Class<?> source, int typeIndex,
-			Map<TypeVariable, Type> typeVariableMap, Map<Integer, Integer> typeIndexesPerLevel,
+			Map<TypeVariable<?>, Type> typeVariableMap, Map<Integer, Integer> typeIndexesPerLevel,
 			int nestingLevel, int currentLevel) {
 
 		Type resolvedType = type;
 		if (type instanceof TypeVariable && typeVariableMap != null) {
-			Type mappedType = typeVariableMap.get((TypeVariable) type);
+			Type mappedType = typeVariableMap.get(type);
 			if (mappedType != null) {
 				resolvedType = mappedType;
 			}
@@ -332,7 +332,7 @@ public abstract class GenericCollectionTypeResolver {
 					nestingLevel, currentLevel);
 		}
 		else if (resolvedType instanceof Class) {
-			return extractTypeFromClass((Class) resolvedType, source, typeIndex, typeVariableMap, typeIndexesPerLevel,
+			return extractTypeFromClass((Class<?>) resolvedType, source, typeIndex, typeVariableMap, typeIndexesPerLevel,
 					nestingLevel, currentLevel);
 		}
 		else if (resolvedType instanceof GenericArrayType) {
@@ -354,13 +354,13 @@ public abstract class GenericCollectionTypeResolver {
 	 * @return the generic type as Class, or <code>null</code> if none
 	 */
 	private static Class<?> extractTypeFromParameterizedType(ParameterizedType ptype, Class<?> source, int typeIndex,
-			Map<TypeVariable, Type> typeVariableMap, Map<Integer, Integer> typeIndexesPerLevel,
+			Map<TypeVariable<?>, Type> typeVariableMap, Map<Integer, Integer> typeIndexesPerLevel,
 			int nestingLevel, int currentLevel) {
 
 		if (!(ptype.getRawType() instanceof Class)) {
 			return null;
 		}
-		Class rawType = (Class) ptype.getRawType();
+		Class<?> rawType = (Class<?>) ptype.getRawType();
 		Type[] paramTypes = ptype.getActualTypeArguments();
 		if (nestingLevel - currentLevel > 0) {
 			int nextLevel = currentLevel + 1;
@@ -373,7 +373,7 @@ public abstract class GenericCollectionTypeResolver {
 		if (source != null && !source.isAssignableFrom(rawType)) {
 			return null;
 		}
-		Class fromSuperclassOrInterface = extractTypeFromClass(rawType, source, typeIndex, typeVariableMap, typeIndexesPerLevel,
+		Class<?> fromSuperclassOrInterface = extractTypeFromClass(rawType, source, typeIndex, typeVariableMap, typeIndexesPerLevel,
 				nestingLevel, currentLevel);
 		if (fromSuperclassOrInterface != null) {
 			return fromSuperclassOrInterface;
@@ -383,7 +383,7 @@ public abstract class GenericCollectionTypeResolver {
 		}
 		Type paramType = paramTypes[typeIndex];
 		if (paramType instanceof TypeVariable && typeVariableMap != null) {
-			Type mappedType = typeVariableMap.get((TypeVariable) paramType);
+			Type mappedType = typeVariableMap.get(paramType);
 			if (mappedType != null) {
 				paramType = mappedType;
 			}
@@ -408,12 +408,12 @@ public abstract class GenericCollectionTypeResolver {
 			// A generic array type... Let's turn it into a straight array type if possible.
 			Type compType = ((GenericArrayType) paramType).getGenericComponentType();
 			if (compType instanceof Class) {
-				return Array.newInstance((Class) compType, 0).getClass();
+				return Array.newInstance((Class<?>) compType, 0).getClass();
 			}
 		}
 		else if (paramType instanceof Class) {
 			// We finally got a straight Class...
-			return (Class) paramType;
+			return (Class<?>) paramType;
 		}
 		return null;
 	}
@@ -439,7 +439,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @return the generic type as Class, or <code>null</code> if none
 	 */
 	private static Class<?> extractTypeFromClass(Class<?> clazz, Class<?> source, int typeIndex,
-			Map<TypeVariable, Type> typeVariableMap, Map<Integer, Integer> typeIndexesPerLevel,
+			Map<TypeVariable<?>, Type> typeVariableMap, Map<Integer, Integer> typeIndexesPerLevel,
 			int nestingLevel, int currentLevel) {
 
 		if (clazz.getName().startsWith("java.util.")) {
@@ -456,7 +456,7 @@ public abstract class GenericCollectionTypeResolver {
 				if (ifc instanceof ParameterizedType) {
 					rawType = ((ParameterizedType) ifc).getRawType();
 				}
-				if (rawType instanceof Class && isIntrospectionCandidate((Class) rawType)) {
+				if (rawType instanceof Class && isIntrospectionCandidate((Class<?>) rawType)) {
 					return extractType(ifc, source, typeIndex, typeVariableMap, typeIndexesPerLevel, nestingLevel, currentLevel);
 				}
 			}
@@ -470,7 +470,7 @@ public abstract class GenericCollectionTypeResolver {
 	 * @param clazz the class to check
 	 * @return whether the given class is assignable to Collection or Map
 	 */
-	private static boolean isIntrospectionCandidate(Class clazz) {
+	private static boolean isIntrospectionCandidate(Class<?> clazz) {
 		return (Collection.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz));
 	}
 

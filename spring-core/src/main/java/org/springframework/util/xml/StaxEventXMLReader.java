@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,11 +203,11 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 		if (getContentHandler() != null) {
 			QName qName = startElement.getName();
 			if (hasNamespacesFeature()) {
-				for (Iterator i = startElement.getNamespaces(); i.hasNext();) {
+				for (Iterator<?> i = startElement.getNamespaces(); i.hasNext();) {
 					Namespace namespace = (Namespace) i.next();
 					startPrefixMapping(namespace.getPrefix(), namespace.getNamespaceURI());
 				}
-				for (Iterator i = startElement.getAttributes(); i.hasNext();){
+				for (Iterator<?> i = startElement.getAttributes(); i.hasNext();){
 					Attribute attribute = (Attribute) i.next();
 					QName attributeName = attribute.getName();
 					startPrefixMapping(attributeName.getPrefix(), attributeName.getNamespaceURI());
@@ -244,7 +244,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 			QName qName = endElement.getName();
 			if (hasNamespacesFeature()) {
 				getContentHandler().endElement(qName.getNamespaceURI(), qName.getLocalPart(), toQualifiedName(qName));
-				for (Iterator i = endElement.getNamespaces(); i.hasNext();) {
+				for (Iterator<?> i = endElement.getNamespaces(); i.hasNext();) {
 					Namespace namespace = (Namespace) i.next();
 					endPrefixMapping(namespace.getPrefix());
 				}
@@ -312,7 +312,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 	private Attributes getAttributes(StartElement event) {
 		AttributesImpl attributes = new AttributesImpl();
 
-		for (Iterator i = event.getAttributes(); i.hasNext();) {
+		for (Iterator<?> i = event.getAttributes(); i.hasNext();) {
 			Attribute attribute = (Attribute) i.next();
 			QName qName = attribute.getName();
 			String namespace = qName.getNamespaceURI();
@@ -327,7 +327,7 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 					.addAttribute(namespace, qName.getLocalPart(), toQualifiedName(qName), type, attribute.getValue());
 		}
 		if (hasNamespacePrefixesFeature()) {
-			for (Iterator i = event.getNamespaces(); i.hasNext();) {
+			for (Iterator<?> i = event.getNamespaces(); i.hasNext();) {
 				Namespace namespace = (Namespace) i.next();
 				String prefix = namespace.getPrefix();
 				String namespaceUri = namespace.getNamespaceURI();

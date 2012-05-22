@@ -8,13 +8,13 @@ import org.springframework.context.ApplicationListener;
  * @author Juergen Hoeller
  * @since 06.10.2004
  */
-public class FactoryBeanAndApplicationListener implements FactoryBean, ApplicationListener {
+public class FactoryBeanAndApplicationListener implements FactoryBean<String>, ApplicationListener<ApplicationEvent> {
 
-	public Object getObject() throws Exception {
+	public String getObject() throws Exception {
 		return "";
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return String.class;
 	}
 

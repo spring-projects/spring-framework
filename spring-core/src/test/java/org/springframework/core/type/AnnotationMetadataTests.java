@@ -147,7 +147,7 @@ public class AnnotationMetadataTests {
 			assertThat(specialAttrs.getString("clazz"), is(String.class.getName()));
 
 			AnnotationAttributes nestedAnno = specialAttrs.getAnnotation("nestedAnno");
-			assertArrayEquals(new String[]{String.class.getName()}, (String[])nestedAnno.getStringArray("classArray"));
+			assertArrayEquals(new String[]{String.class.getName()}, nestedAnno.getStringArray("classArray"));
 			assertArrayEquals(new String[]{String.class.getName()}, nestedAnno.getStringArray("classArray"));
 
 			AnnotationAttributes[] nestedAnnoArray = specialAttrs.getAnnotationArray("nestedAnnoArray");
@@ -214,9 +214,9 @@ public class AnnotationMetadataTests {
 			})
 	@SuppressWarnings({"serial", "unused"})
 	private static class AnnotatedComponent implements Serializable {
-		
-		@TestAutowired
-		public void doWork(@TestQualifier("myColor") java.awt.Color color) {
+
+		@Autowired
+		public void doWork(@Qualifier("myColor") java.awt.Color color) {
 		}
 
 		public void doSleep()  {

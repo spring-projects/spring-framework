@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,16 +17,8 @@
 package org.springframework.beans.support;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import junit.framework.TestCase;
-
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 
 import test.beans.TestBean;
 
@@ -47,12 +39,12 @@ public class PagedListHolderTests extends TestCase {
 		TestBean tb3 = new TestBean();
 		tb3.setName("Rod");
 		tb3.setAge(32);
-		List tbs = new ArrayList();
+		List<Object> tbs = new ArrayList<Object>();
 		tbs.add(tb1);
 		tbs.add(tb2);
 		tbs.add(tb3);
 
-		PagedListHolder holder = new PagedListHolder(tbs);
+		PagedListHolder<Object> holder = new PagedListHolder<Object>(tbs);
 		assertTrue("Correct source", holder.getSource() == tbs);
 		assertTrue("Correct number of elements", holder.getNrOfElements() == 3);
 		assertTrue("Correct number of pages", holder.getPageCount() == 1);

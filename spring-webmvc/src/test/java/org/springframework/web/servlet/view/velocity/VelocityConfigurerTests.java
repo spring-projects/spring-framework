@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class VelocityConfigurerTests extends TestCase {
 		vefb.setVelocityPropertiesMap(map);
 		vefb.afterPropertiesSet();
 		assertTrue(vefb.getObject() instanceof VelocityEngine);
-		VelocityEngine ve = (VelocityEngine) vefb.getObject();
+		VelocityEngine ve = vefb.getObject();
 		assertEquals("/mydir", ve.getProperty("myprop"));
 		assertEquals(value, ve.getProperty("myentry"));
 	}
@@ -79,7 +79,7 @@ public class VelocityConfigurerTests extends TestCase {
 		vefb.setResourceLoaderPath("file:/mydir");
 		vefb.afterPropertiesSet();
 		assertTrue(vefb.getObject() instanceof VelocityEngine);
-		VelocityEngine ve = (VelocityEngine) vefb.getObject();
+		VelocityEngine ve = vefb.getObject();
 		assertEquals(new File("/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
 	}
 
@@ -104,7 +104,7 @@ public class VelocityConfigurerTests extends TestCase {
 		});
 		vefb.afterPropertiesSet();
 		assertTrue(vefb.getObject() instanceof VelocityEngine);
-		VelocityEngine ve = (VelocityEngine) vefb.getObject();
+		VelocityEngine ve = vefb.getObject();
 		assertEquals("test", VelocityEngineUtils.mergeTemplateIntoString(ve, "test", new HashMap()));
 	}
 

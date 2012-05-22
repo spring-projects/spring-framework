@@ -24,11 +24,11 @@ import javax.portlet.PortletConfig;
 public class PortletConfigAwareBean implements PortletConfigAware {
 
 	private PortletConfig portletConfig;
-	
+
 	public void setPortletConfig(PortletConfig portletConfig) {
 		this.portletConfig = portletConfig;
 	}
-	
+
 	public PortletConfig getPortletConfig() {
 		return portletConfig;
 	}

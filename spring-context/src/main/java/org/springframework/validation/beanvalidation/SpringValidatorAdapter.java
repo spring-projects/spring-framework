@@ -91,11 +91,11 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 
 	@SuppressWarnings("rawtypes")
 	public void validate(Object target, Errors errors, Object... validationHints) {
-		Set<Class> groups = new LinkedHashSet<Class>();
+		Set<Class<?>> groups = new LinkedHashSet<Class<?>>();
 		if (validationHints != null) {
 			for (Object hint : validationHints) {
 				if (hint instanceof Class) {
-					groups.add((Class) hint);
+					groups.add((Class<?>) hint);
 				}
 			}
 		}

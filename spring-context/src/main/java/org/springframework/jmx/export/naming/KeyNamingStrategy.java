@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.CollectionUtils;
  * <code>ObjectNamingStrategy</code> implementation that builds
  * <code>ObjectName</code> instances from the key used in the
  * "beans" map passed to <code>MBeanExporter</code>.
- * 
+ *
  * <p>Can also check object name mappings, given as <code>Properties</code>
  * or as <code>mappingLocations</code> of properties files. The key used
  * to look up is the key used in <code>MBeanExporter</code>'s "beans" map.
@@ -123,7 +123,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 			}
 		}
 	}
-	
+
 
 	/**
 	 * Attempts to retrieve the <code>ObjectName</code> via the given key, trying to

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import test.beans.ITestBean;
 import test.beans.TestBean;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -33,8 +34,7 @@ public class SimplePropertyNamespaceHandlerTests {
 
 	@Test
 	public void simpleBeanConfigured() throws Exception {
-		XmlBeanFactory beanFactory =
-				new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
+		DefaultListableBeanFactory beanFactory = createFactory("simplePropertyNamespaceHandlerTests.xml");
 		ITestBean rob = (TestBean) beanFactory.getBean("rob");
 		ITestBean sally = (TestBean) beanFactory.getBean("sally");
 		assertEquals("Rob Harrop", rob.getName());
@@ -44,8 +44,7 @@ public class SimplePropertyNamespaceHandlerTests {
 
 	@Test
 	public void innerBeanConfigured() throws Exception {
-		XmlBeanFactory beanFactory =
-				new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
+		DefaultListableBeanFactory beanFactory = createFactory("simplePropertyNamespaceHandlerTests.xml");
 		TestBean sally = (TestBean) beanFactory.getBean("sally2");
 		ITestBean rob = sally.getSpouse();
 		assertEquals("Rob Harrop", rob.getName());
@@ -55,15 +54,20 @@ public class SimplePropertyNamespaceHandlerTests {
 
 	@Test(expected = BeanDefinitionStoreException.class)
 	public void withPropertyDefinedTwice() throws Exception {
-		new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTestsWithErrors.xml", getClass()));
+		createFactory("simplePropertyNamespaceHandlerTestsWithErrors.xml");
 	}
 
 	@Test
 	public void propertyWithNameEndingInRef() throws Exception {
-		XmlBeanFactory beanFactory =
-				new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
+		DefaultListableBeanFactory beanFactory = createFactory("simplePropertyNamespaceHandlerTests.xml");
 		ITestBean sally = (TestBean) beanFactory.getBean("derivedSally");
 		assertEquals("r", sally.getSpouse().getName());
 	}
 
+	private DefaultListableBeanFactory createFactory(String resourceName) {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(new ClassPathResource(
+			resourceName, getClass()));
+		return beanFactory;
+	}
 }

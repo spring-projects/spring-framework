@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,14 @@ import org.springframework.util.Assert;
  */
 public class StandardClassMetadata implements ClassMetadata {
 
-	private final Class introspectedClass;
+	private final Class<?> introspectedClass;
 
 
 	/**
 	 * Create a new StandardClassMetadata wrapper for the given Class.
 	 * @param introspectedClass the Class to introspect
 	 */
-	public StandardClassMetadata(Class introspectedClass) {
+	public StandardClassMetadata(Class<?> introspectedClass) {
 		Assert.notNull(introspectedClass, "Class must not be null");
 		this.introspectedClass = introspectedClass;
 	}
@@ -45,7 +45,7 @@ public class StandardClassMetadata implements ClassMetadata {
 	/**
 	 * Return the underlying Class.
 	 */
-	public final Class getIntrospectedClass() {
+	public final Class<?> getIntrospectedClass() {
 		return this.introspectedClass;
 	}
 
@@ -81,7 +81,7 @@ public class StandardClassMetadata implements ClassMetadata {
 	}
 
 	public String getEnclosingClassName() {
-		Class enclosingClass = this.introspectedClass.getEnclosingClass();
+		Class<?> enclosingClass = this.introspectedClass.getEnclosingClass();
 		return (enclosingClass != null ? enclosingClass.getName() : null);
 	}
 
@@ -90,12 +90,12 @@ public class StandardClassMetadata implements ClassMetadata {
 	}
 
 	public String getSuperClassName() {
-		Class superClass = this.introspectedClass.getSuperclass();
+		Class<?> superClass = this.introspectedClass.getSuperclass();
 		return (superClass != null ? superClass.getName() : null);
 	}
 
 	public String[] getInterfaceNames() {
-		Class[] ifcs = this.introspectedClass.getInterfaces();
+		Class<?>[] ifcs = this.introspectedClass.getInterfaces();
 		String[] ifcNames = new String[ifcs.length];
 		for (int i = 0; i < ifcs.length; i++) {
 			ifcNames[i] = ifcs[i].getName();

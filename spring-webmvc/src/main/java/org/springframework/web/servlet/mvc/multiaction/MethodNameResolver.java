@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletRequest;
  * @see MultiActionController#setMethodNameResolver
  */
 public interface MethodNameResolver {
-	
+
 	/**
 	 * Return a method name that can handle this request. Such
 	 * mappings are typically, but not necessarily, based on URL.

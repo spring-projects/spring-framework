@@ -48,6 +48,6 @@ public abstract class AbstractGenericLabeledEnum extends AbstractLabeledEnum {
 		else {
 			return getCode().toString();
 		}
-	}	
+	}
 
 }

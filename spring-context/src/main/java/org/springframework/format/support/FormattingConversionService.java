@@ -191,11 +191,12 @@ public class FormattingConversionService extends GenericConversionService
 	}
 
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private class AnnotationPrinterConverter implements ConditionalGenericConverter {
 
 		private Class<? extends Annotation> annotationType;
 
-		private AnnotationFormatterFactory annotationFormatterFactory;
+        private AnnotationFormatterFactory annotationFormatterFactory;
 
 		private Class<?> fieldType;
 
@@ -214,7 +215,6 @@ public class FormattingConversionService extends GenericConversionService
 			return sourceType.hasAnnotation(annotationType);
 		}
 
-		@SuppressWarnings("unchecked")
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			AnnotationConverterKey converterKey =
 					new AnnotationConverterKey(sourceType.getAnnotation(annotationType), sourceType.getObjectType());
@@ -235,6 +235,7 @@ public class FormattingConversionService extends GenericConversionService
 	}
 
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private class AnnotationParserConverter implements ConditionalGenericConverter {
 
 		private Class<? extends Annotation> annotationType;
@@ -258,7 +259,6 @@ public class FormattingConversionService extends GenericConversionService
 			return targetType.hasAnnotation(annotationType);
 		}
 
-		@SuppressWarnings("unchecked")
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			AnnotationConverterKey converterKey =
 					new AnnotationConverterKey(targetType.getAnnotation(annotationType), targetType.getObjectType());
@@ -273,8 +273,7 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		public String toString() {
-			return String.class.getName() + " -> @" + annotationType.getName() + " " +
-					fieldType.getName() + ": " + annotationFormatterFactory;
+			return String.class.getName() + " -> @" + annotationType.getName() + " " + fieldType.getName() + ": " + annotationFormatterFactory;
 		}
 	}
 

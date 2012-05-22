@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,8 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * @author Rod Johnson
  * @since 10.03.2003
  */
-public class DummyFactory
-		implements FactoryBean, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
-	
+public class DummyFactory implements FactoryBean<TestBean>, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
+
 	public static final String SINGLETON_NAME = "Factory singleton";
 
 	private static boolean prototypeCreated;
@@ -125,7 +124,7 @@ public class DummyFactory
 		}
 		this.initialized = true;
 	}
-	
+
 	/**
 	 * Was this initialized by invocation of the
 	 * afterPropertiesSet() method from the InitializingBean interface?
@@ -144,7 +143,7 @@ public class DummyFactory
 	 * and prototype mode.
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
-	public Object getObject() throws BeansException {
+	public TestBean getObject() throws BeansException {
 		if (isSingleton()) {
 			return this.testBean;
 		}
@@ -158,7 +157,7 @@ public class DummyFactory
 		}
 	}
 
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return TestBean.class;
 	}
 

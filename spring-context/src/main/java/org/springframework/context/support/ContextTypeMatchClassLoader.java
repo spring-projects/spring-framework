@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,11 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 	}
 
 	@Override
-	public Class loadClass(String name) throws ClassNotFoundException {
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		return new ContextOverridingClassLoader(getParent()).loadClass(name);
 	}
 
-	public boolean isClassReloadable(Class clazz) {
+	public boolean isClassReloadable(Class<?> clazz) {
 		return (clazz.getClassLoader() instanceof ContextOverridingClassLoader);
 	}
 
@@ -95,7 +95,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 		}
 
 		@Override
-		protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
+		protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
 			byte[] bytes = bytesCache.get(name);
 			if (bytes == null) {
 				bytes = loadBytesForClass(name);

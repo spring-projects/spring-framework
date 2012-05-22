@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link FactoryBean} which retrieves a static or non-static field value.
- * 
+ *
  * <p>Typically used for retrieving public static final constants. Usage example:
  *
  * <pre class="code">// standard definition for exposing a static field, specifying the "staticField" property
@@ -42,10 +42,10 @@ import org.springframework.util.StringUtils;
  * &lt;bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
  *       class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/&gt;</pre>
  * </pre>
- * 
+ *
  * <p>If you are using Spring 2.0, you can also use the following style of configuration for
  * public static fields.
- * 
+ *
  * <pre class="code">&lt;util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/&gt;</pre>
  *
  * @author Juergen Hoeller
@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
 public class FieldRetrievingFactoryBean
 		implements FactoryBean<Object>, BeanNameAware, BeanClassLoaderAware, InitializingBean {
 
-	private Class targetClass;
+	private Class<?> targetClass;
 
 	private Object targetObject;
 
@@ -78,14 +78,14 @@ public class FieldRetrievingFactoryBean
 	 * @see #setTargetObject
 	 * @see #setTargetField
 	 */
-	public void setTargetClass(Class targetClass) {
+	public void setTargetClass(Class<?> targetClass) {
 		this.targetClass = targetClass;
 	}
 
 	/**
 	 * Return the target class on which the field is defined.
 	 */
-	public Class getTargetClass() {
+	public Class<?> getTargetClass() {
 		return targetClass;
 	}
 
@@ -186,10 +186,9 @@ public class FieldRetrievingFactoryBean
 		}
 
 		// Try to get the exact method first.
-		Class targetClass = (this.targetObject != null) ? this.targetObject.getClass() : this.targetClass;
+		Class<?> targetClass = (this.targetObject != null) ? this.targetObject.getClass() : this.targetClass;
 		this.fieldObject = targetClass.getField(this.targetField);
 	}
-
 
 	public Object getObject() throws IllegalAccessException {
 		if (this.fieldObject == null) {

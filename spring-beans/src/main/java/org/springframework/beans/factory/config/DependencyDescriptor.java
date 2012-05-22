@@ -43,11 +43,11 @@ public class DependencyDescriptor implements Serializable {
 
 	private transient Field field;
 
-	private Class declaringClass;
+	private Class<?> declaringClass;
 
 	private String methodName;
 
-	private Class[] parameterTypes;
+	private Class<?>[] parameterTypes;
 
 	private int parameterIndex;
 
@@ -216,12 +216,12 @@ public class DependencyDescriptor implements Serializable {
 				if (type instanceof ParameterizedType) {
 					Type arg = ((ParameterizedType) type).getActualTypeArguments()[0];
 					if (arg instanceof Class) {
-						return (Class) arg;
+						return (Class<?>) arg;
 					}
 					else if (arg instanceof ParameterizedType) {
 						arg = ((ParameterizedType) arg).getRawType();
 						if (arg instanceof Class) {
-							return (Class) arg;
+							return (Class<?>) arg;
 						}
 					}
 				}

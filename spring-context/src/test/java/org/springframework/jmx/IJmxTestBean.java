@@ -36,5 +36,5 @@ public interface IJmxTestBean {
 
 	// used to test invalid methods that exist in the proxy interface
 	public void dontExposeMe();
-	
+
 }

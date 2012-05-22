@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class ControllerBeanNameHandlerMapping extends AbstractControllerUrlHandl
 
 
 	@Override
-	protected String[] buildUrlsForHandler(String beanName, Class beanClass) {
+	protected String[] buildUrlsForHandler(String beanName, Class<?> beanClass) {
 		List<String> urls = new ArrayList<String>();
 		urls.add(generatePathMapping(beanName));
 		String[] aliases = getApplicationContext().getAliases(beanName);

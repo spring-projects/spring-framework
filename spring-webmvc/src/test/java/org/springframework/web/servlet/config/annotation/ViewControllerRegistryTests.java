@@ -63,7 +63,7 @@ public class ViewControllerRegistryTests {
 		assertNotNull(controller);
 		assertEquals("viewName", controller.getViewName());
 	}
-	
+
 	@Test
 	public void order() {
 		registry.addViewController("/path");

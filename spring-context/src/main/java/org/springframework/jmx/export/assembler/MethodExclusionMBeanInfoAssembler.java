@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 /**
  * <code>AbstractReflectiveMBeanInfoAssembler</code> subclass that allows
  * method names to be explicitly excluded as MBean operations and attributes.
- * 
+ *
  * <p>Any method not explicitly excluded from the management interface will be exposed to
  * JMX. JavaBean getters and setters will automatically be exposed as JMX attributes.
  *
@@ -81,7 +81,7 @@ public class MethodExclusionMBeanInfoAssembler extends AbstractConfigurableMBean
 	 */
 	public void setIgnoredMethodMappings(Properties mappings) {
 		this.ignoredMethodMappings = new HashMap<String, Set<String>>();
-		for (Enumeration en = mappings.keys(); en.hasMoreElements();) {
+		for (Enumeration<?> en = mappings.keys(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] methodNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
 			this.ignoredMethodMappings.put(beanKey, new HashSet<String>(Arrays.asList(methodNames)));

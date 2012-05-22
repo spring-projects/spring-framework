@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2012 the original author or authors.
- * 
+ * Copyright 2002-2005 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -78,7 +78,7 @@ public class CommandControllerTests extends TestCase {
 		assertTrue("command name bound ok", person.getName().equals(name));
 		assertTrue("command age bound ok", person.getAge() == age);
 	}
-	
+
 	public void test2Args1Mismatch() throws Exception {
 		TestController mc = new TestController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/ok.html");
@@ -492,11 +492,11 @@ public class CommandControllerTests extends TestCase {
 
 
 	private static class TestController extends AbstractCommandController {
-		
+
 		private TestController() {
 			super(TestBean.class, "person");
 		}
-		
+
 		protected ModelAndView handle(HttpServletRequest request,	HttpServletResponse response,	Object command,	BindException errors) {
 			Map m = new HashMap();
 			assertTrue("Command not null", command != null);

@@ -584,17 +584,19 @@ public class DefaultPersistenceUnitManager
 
 		private final SpringPersistenceUnitInfo target;
 
+		@SuppressWarnings("rawtypes")
 		private final Class<? extends Enum> sharedCacheModeEnum;
 
+		@SuppressWarnings("rawtypes")
 		private final Class<? extends Enum> validationModeEnum;
 
 		@SuppressWarnings("unchecked")
 		public Jpa2PersistenceUnitInfoDecorator(SpringPersistenceUnitInfo target) {
 			this.target = target;
 			try {
-				this.sharedCacheModeEnum = (Class<? extends Enum>)
+				this.sharedCacheModeEnum = (Class<? extends Enum<?>>)
 						ClassUtils.forName("javax.persistence.SharedCacheMode", PersistenceUnitInfo.class.getClassLoader());
-				this.validationModeEnum = (Class<? extends Enum>)
+				this.validationModeEnum = (Class<? extends Enum<?>>)
 						ClassUtils.forName("javax.persistence.ValidationMode", PersistenceUnitInfo.class.getClassLoader());
 			}
 			catch (Exception ex) {
@@ -606,6 +608,7 @@ public class DefaultPersistenceUnitManager
 			return this.target;
 		}
 
+		@SuppressWarnings("unchecked")
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (method.getName().equals("getSharedCacheMode")) {
 				return Enum.valueOf(this.sharedCacheModeEnum, this.target.getSharedCacheModeName());

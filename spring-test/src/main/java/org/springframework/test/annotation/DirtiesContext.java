@@ -49,7 +49,7 @@ import java.lang.annotation.Target;
  * AFTER_EACH_TEST_METHOD}, the context will be marked dirty after each test
  * method in the class.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @author Rod Johnson
  * @since 2.0

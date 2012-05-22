@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,72 +91,80 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertEquals("Rob Harrop", bean.getName());
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testSimpleMap() throws Exception {
-		Map map = (Map) this.beanFactory.getBean("simpleMap");
+		Map<String, String> map = (Map<String, String>) this.beanFactory.getBean("simpleMap");
 		assertEquals("bar", map.get("foo"));
-		Map map2 = (Map) this.beanFactory.getBean("simpleMap");
+		Map<String, String> map2 = (Map<String, String>) this.beanFactory.getBean("simpleMap");
 		assertTrue(map == map2);
 	}
 
-	public void testScopedMap() throws Exception {
-		Map map = (Map) this.beanFactory.getBean("scopedMap");
+	@SuppressWarnings("unchecked")
+  	public void testScopedMap() throws Exception {
+		Map<String, String> map = (Map<String, String>) this.beanFactory.getBean("scopedMap");
 		assertEquals("bar", map.get("foo"));
-		Map map2 = (Map) this.beanFactory.getBean("scopedMap");
+		Map<String, String> map2 = (Map<String, String>) this.beanFactory.getBean("scopedMap");
 		assertEquals("bar", map2.get("foo"));
 		assertTrue(map != map2);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testSimpleList() throws Exception {
-		List list = (List) this.beanFactory.getBean("simpleList");
+		List<String> list = (List<String>) this.beanFactory.getBean("simpleList");
 		assertEquals("Rob Harrop", list.get(0));
-		List list2 = (List) this.beanFactory.getBean("simpleList");
+		List<String> list2 = (List<String>) this.beanFactory.getBean("simpleList");
 		assertTrue(list == list2);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testScopedList() throws Exception {
-		List list = (List) this.beanFactory.getBean("scopedList");
+		List<String> list = (List<String>) this.beanFactory.getBean("scopedList");
 		assertEquals("Rob Harrop", list.get(0));
-		List list2 = (List) this.beanFactory.getBean("scopedList");
+		List<String> list2 = (List<String>) this.beanFactory.getBean("scopedList");
 		assertEquals("Rob Harrop", list2.get(0));
 		assertTrue(list != list2);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testSimpleSet() throws Exception {
-		Set set = (Set) this.beanFactory.getBean("simpleSet");
+		Set<String> set = (Set<String>) this.beanFactory.getBean("simpleSet");
 		assertTrue(set.contains("Rob Harrop"));
-		Set set2 = (Set) this.beanFactory.getBean("simpleSet");
+		Set<String> set2 = (Set<String>) this.beanFactory.getBean("simpleSet");
 		assertTrue(set == set2);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testScopedSet() throws Exception {
-		Set set = (Set) this.beanFactory.getBean("scopedSet");
+		Set<String> set = (Set<String>) this.beanFactory.getBean("scopedSet");
 		assertTrue(set.contains("Rob Harrop"));
-		Set set2 = (Set) this.beanFactory.getBean("scopedSet");
+		Set<String> set2 = (Set<String>) this.beanFactory.getBean("scopedSet");
 		assertTrue(set2.contains("Rob Harrop"));
 		assertTrue(set != set2);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testMapWithRef() throws Exception {
-		Map map = (Map) this.beanFactory.getBean("mapWithRef");
+		Map<String, String> map = (Map<String, String>) this.beanFactory.getBean("mapWithRef");
 		assertTrue(map instanceof TreeMap);
 		assertEquals(this.beanFactory.getBean("testBean"), map.get("bean"));
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testNestedCollections() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCollectionsBean");
 
-		List list = bean.getSomeList();
+		List<Object> list = bean.getSomeList();
 		assertEquals(1, list.size());
 		assertEquals("foo", list.get(0));
 
-		Set set = bean.getSomeSet();
+		Set<Object> set = bean.getSomeSet();
 		assertEquals(1, set.size());
 		assertTrue(set.contains("bar"));
 
-		Map map = bean.getSomeMap();
+		Map<Object, Object> map = bean.getSomeMap();
 		assertEquals(1, map.size());
 		assertTrue(map.get("foo") instanceof Set);
-		Set innerSet = (Set) map.get("foo");
+		Set<String> innerSet = (Set<String>) map.get("foo");
 		assertEquals(1, innerSet.size());
 		assertTrue(innerSet.contains("bar"));
 
@@ -175,11 +183,11 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		assertEquals(1, bean.getStringArray().length);
 		assertEquals("fooStr", bean.getStringArray()[0]);
 
-		List list = bean.getSomeList();
+		List<Object> list = bean.getSomeList();
 		assertEquals(1, list.size());
 		assertEquals("foo", list.get(0));
 
-		Set set = bean.getSomeSet();
+		Set<Object> set = bean.getSomeSet();
 		assertEquals(1, set.size());
 		assertTrue(set.contains("bar"));
 
@@ -195,16 +203,16 @@ public class UtilNamespaceHandlerTests extends TestCase {
 	public void testNestedInCollections() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("nestedCustomTagBean");
 
-		List list = bean.getSomeList();
+		List<Object> list = bean.getSomeList();
 		assertEquals(1, list.size());
 		assertEquals(Integer.MIN_VALUE, list.get(0));
 
-		Set set = bean.getSomeSet();
+		Set<Object> set = bean.getSomeSet();
 		assertEquals(2, set.size());
 		assertTrue(set.contains(Thread.State.NEW));
 		assertTrue(set.contains(Thread.State.RUNNABLE));
 
-		Map map = bean.getSomeMap();
+		Map<Object, Object> map = bean.getSomeMap();
 		assertEquals(1, map.size());
 		assertEquals(CustomEnum.VALUE_1, map.get("min"));
 
@@ -220,15 +228,15 @@ public class UtilNamespaceHandlerTests extends TestCase {
 	public void testCircularCollections() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionsBean");
 
-		List list = bean.getSomeList();
+		List<Object> list = bean.getSomeList();
 		assertEquals(1, list.size());
 		assertEquals(bean, list.get(0));
 
-		Set set = bean.getSomeSet();
+		Set<Object> set = bean.getSomeSet();
 		assertEquals(1, set.size());
 		assertTrue(set.contains(bean));
 
-		Map map = bean.getSomeMap();
+		Map<Object, Object> map = bean.getSomeMap();
 		assertEquals(1, map.size());
 		assertEquals(bean, map.get("foo"));
 	}
@@ -237,17 +245,17 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		this.beanFactory.getBean("circularList");
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
-		List list = bean.getSomeList();
+		List<Object> list = bean.getSomeList();
 		assertTrue(Proxy.isProxyClass(list.getClass()));
 		assertEquals(1, list.size());
 		assertEquals(bean, list.get(0));
 
-		Set set = bean.getSomeSet();
+		Set<Object> set = bean.getSomeSet();
 		assertFalse(Proxy.isProxyClass(set.getClass()));
 		assertEquals(1, set.size());
 		assertTrue(set.contains(bean));
 
-		Map map = bean.getSomeMap();
+		Map<Object, Object> map = bean.getSomeMap();
 		assertFalse(Proxy.isProxyClass(map.getClass()));
 		assertEquals(1, map.size());
 		assertEquals(bean, map.get("foo"));
@@ -257,17 +265,17 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		this.beanFactory.getBean("circularSet");
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
-		List list = bean.getSomeList();
+		List<Object> list = bean.getSomeList();
 		assertFalse(Proxy.isProxyClass(list.getClass()));
 		assertEquals(1, list.size());
 		assertEquals(bean, list.get(0));
 
-		Set set = bean.getSomeSet();
+		Set<Object> set = bean.getSomeSet();
 		assertTrue(Proxy.isProxyClass(set.getClass()));
 		assertEquals(1, set.size());
 		assertTrue(set.contains(bean));
 
-		Map map = bean.getSomeMap();
+		Map<Object, Object> map = bean.getSomeMap();
 		assertFalse(Proxy.isProxyClass(map.getClass()));
 		assertEquals(1, map.size());
 		assertEquals(bean, map.get("foo"));
@@ -277,17 +285,17 @@ public class UtilNamespaceHandlerTests extends TestCase {
 		this.beanFactory.getBean("circularMap");
 		TestBean bean = (TestBean) this.beanFactory.getBean("circularCollectionBeansBean");
 
-		List list = bean.getSomeList();
+		List<Object> list = bean.getSomeList();
 		assertFalse(Proxy.isProxyClass(list.getClass()));
 		assertEquals(1, list.size());
 		assertEquals(bean, list.get(0));
 
-		Set set = bean.getSomeSet();
+		Set<Object> set = bean.getSomeSet();
 		assertFalse(Proxy.isProxyClass(set.getClass()));
 		assertEquals(1, set.size());
 		assertTrue(set.contains(bean));
 
-		Map map = bean.getSomeMap();
+		Map<Object, Object> map = bean.getSomeMap();
 		assertTrue(Proxy.isProxyClass(map.getClass()));
 		assertEquals(1, map.size());
 		assertEquals(bean, map.get("foo"));

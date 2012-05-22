@@ -25,7 +25,7 @@ import org.springframework.test.context.TestContextManager;
  * be plugged into the JUnit execution chain by calling
  * {@link TestContextManager#beforeTestClass() beforeTestClass()} on the
  * supplied {@link TestContextManager}.
- * 
+ *
  * @see #evaluate()
  * @see RunAfterTestMethodCallbacks
  * @author Sam Brannen
@@ -40,7 +40,7 @@ public class RunBeforeTestClassCallbacks extends Statement {
 
 	/**
 	 * Constructs a new <code>RunBeforeTestClassCallbacks</code> statement.
-	 * 
+	 *
 	 * @param next the next <code>Statement</code> in the execution chain
 	 * @param testContextManager the TestContextManager upon which to call
 	 * <code>beforeTestClass()</code>

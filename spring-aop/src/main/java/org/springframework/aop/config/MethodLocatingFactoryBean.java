@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class MethodLocatingFactoryBean implements FactoryBean<Method>, BeanFacto
 			throw new IllegalArgumentException("Property 'methodName' is required");
 		}
 
-		Class beanClass = beanFactory.getType(this.targetBeanName);
+		Class<?> beanClass = beanFactory.getType(this.targetBeanName);
 		if (beanClass == null) {
 			throw new IllegalArgumentException("Can't determine type of bean with name '" + this.targetBeanName + "'");
 		}

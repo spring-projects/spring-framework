@@ -19,8 +19,6 @@ package org.springframework.web.servlet.handler;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
-import junit.framework.TestCase;
-
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.mock.web.test.MockHttpServletRequest;

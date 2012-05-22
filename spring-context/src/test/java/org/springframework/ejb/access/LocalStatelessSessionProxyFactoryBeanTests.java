@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,16 +41,16 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 	public void testInvokesMethod() throws Exception {
 		final int value = 11;
 		final String jndiName = "foo";
-		
+
 		MyEjb myEjb = createMock(MyEjb.class);
 		expect(myEjb.getValue()).andReturn(value);
 		myEjb.remove();
 		replay(myEjb);
-		
+
 		final MyHome home = createMock(MyHome.class);
 		expect(home.create()).andReturn(myEjb);
 		replay(home);
-		
+
 		JndiTemplate jt = new JndiTemplate() {
 			public Object lookup(String name) throws NamingException {
 				// parameterize
@@ -58,13 +58,13 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 				return home;
 			}
 		};
-		
+
 		LocalStatelessSessionProxyFactoryBean fb = new LocalStatelessSessionProxyFactoryBean();
 		fb.setJndiName(jndiName);
 		fb.setResourceRef(true);
 		fb.setBusinessInterface(MyBusinessMethods.class);
 		fb.setJndiTemplate(jt);
-		
+
 		// Need lifecycle methods
 		fb.afterPropertiesSet();
 
@@ -72,9 +72,9 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
 		assertTrue(mbm.getValue() == value);
 		verify(myEjb);
-		verify(home);	
+		verify(home);
 	}
-	
+
 	@Test
 	public void testInvokesMethodOnEjb3StyleBean() throws Exception {
 		final int value = 11;
@@ -110,12 +110,12 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 	@Test
 	public void testCreateException() throws Exception {
 		final String jndiName = "foo";
-	
+
 		final CreateException cex = new CreateException();
 		final MyHome home = createMock(MyHome.class);
 		expect(home.create()).andThrow(cex);
 		replay(home);
-	
+
 		JndiTemplate jt = new JndiTemplate() {
 			public Object lookup(String name) throws NamingException {
 				// parameterize
@@ -123,20 +123,20 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 				return home;
 			}
 		};
-	
+
 		LocalStatelessSessionProxyFactoryBean fb = new LocalStatelessSessionProxyFactoryBean();
 		fb.setJndiName(jndiName);
 		fb.setResourceRef(false);	// no java:comp/env prefix
 		fb.setBusinessInterface(MyBusinessMethods.class);
 		assertEquals(fb.getBusinessInterface(), MyBusinessMethods.class);
 		fb.setJndiTemplate(jt);
-	
+
 		// Need lifecycle methods
 		fb.afterPropertiesSet();
 
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
-		
+
 		try {
 			mbm.getValue();
 			fail("Should have failed to create EJB");
@@ -144,10 +144,10 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		catch (EjbAccessException ex) {
 			assertSame(cex, ex.getCause());
 		}
-		
-		verify(home);	
+
+		verify(home);
 	}
-	
+
 	@Test
 	public void testNoBusinessInterfaceSpecified() throws Exception {
 		// Will do JNDI lookup to get home but won't call create
@@ -162,7 +162,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
 				return home;
-			} 
+			}
 		};
 
 		LocalStatelessSessionProxyFactoryBean fb = new LocalStatelessSessionProxyFactoryBean();
@@ -184,10 +184,10 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		}
 
 		// Expect no methods on home
-		verify(home);	
+		verify(home);
 	}
-	
-	
+
+
 	public static interface MyHome extends EJBLocalHome {
 
 		MyBusinessMethods create() throws CreateException;

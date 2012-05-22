@@ -128,7 +128,7 @@ class BeanDefinitionValueResolver {
 		else if (value instanceof ManagedArray) {
 			// May need to resolve contained runtime references.
 			ManagedArray array = (ManagedArray) value;
-			Class elementType = array.resolvedElementType;
+			Class<?> elementType = array.resolvedElementType;
 			if (elementType == null) {
 				String elementTypeName = array.getElementTypeName();
 				if (StringUtils.hasText(elementTypeName)) {
@@ -164,7 +164,7 @@ class BeanDefinitionValueResolver {
 		else if (value instanceof ManagedProperties) {
 			Properties original = (Properties) value;
 			Properties copy = new Properties();
-			for (Map.Entry propEntry : original.entrySet()) {
+			for (Map.Entry<?, ?> propEntry : original.entrySet()) {
 				Object propKey = propEntry.getKey();
 				Object propValue = propEntry.getValue();
 				if (propKey instanceof TypedStringValue) {
@@ -272,7 +272,7 @@ class BeanDefinitionValueResolver {
 			this.beanFactory.registerContainedBean(actualInnerBeanName, this.beanName);
 			if (innerBean instanceof FactoryBean) {
 				boolean synthetic = (mbd != null && mbd.isSynthetic());
-				return this.beanFactory.getObjectFromFactoryBean((FactoryBean) innerBean, actualInnerBeanName, !synthetic);
+				return this.beanFactory.getObjectFromFactoryBean((FactoryBean<?>) innerBean, actualInnerBeanName, !synthetic);
 			}
 			else {
 				return innerBean;
@@ -335,11 +335,11 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the managed array, resolve reference if necessary.
 	 */
-	private Object resolveManagedArray(Object argName, List<?> ml, Class elementType) {
+	private Object resolveManagedArray(Object argName, List<?> ml, Class<?> elementType) {
 		Object resolved = Array.newInstance(elementType, ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			Array.set(resolved, i,
-			    resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
+				resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
 		}
 		return resolved;
 	}
@@ -347,11 +347,11 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the managed list, resolve reference if necessary.
 	 */
-	private List resolveManagedList(Object argName, List<?> ml) {
+	private List<?> resolveManagedList(Object argName, List<?> ml) {
 		List<Object> resolved = new ArrayList<Object>(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(
-			    resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
+				resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
 		}
 		return resolved;
 	}
@@ -359,7 +359,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the managed set, resolve reference if necessary.
 	 */
-	private Set resolveManagedSet(Object argName, Set<?> ms) {
+	private Set<?> resolveManagedSet(Object argName, Set<?> ms) {
 		Set<Object> resolved = new LinkedHashSet<Object>(ms.size());
 		int i = 0;
 		for (Object m : ms) {
@@ -372,9 +372,9 @@ class BeanDefinitionValueResolver {
 	/**
 	 * For each element in the managed map, resolve reference if necessary.
 	 */
-	private Map resolveManagedMap(Object argName, Map<?, ?> mm) {
+	private Map<?, ?> resolveManagedMap(Object argName, Map<?, ?> mm) {
 		Map<Object, Object> resolved = new LinkedHashMap<Object, Object>(mm.size());
-		for (Map.Entry entry : mm.entrySet()) {
+		for (Map.Entry<?, ?> entry : mm.entrySet()) {
 			Object resolvedKey = resolveValueIfNecessary(argName, entry.getKey());
 			Object resolvedValue = resolveValueIfNecessary(
 					new KeyedArgName(argName, entry.getKey()), entry.getValue());

@@ -22,13 +22,13 @@ import javax.portlet.PortletContext;
  * @author Mark Fisher
  */
 public class PortletContextAwareBean implements PortletContextAware {
-	
+
 	private PortletContext portletContext;
-	
+
 	public void setPortletContext(PortletContext portletContext) {
 		this.portletContext = portletContext;
 	}
-	
+
 	public PortletContext getPortletContext() {
 		return portletContext;
 	}

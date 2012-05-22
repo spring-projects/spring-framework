@@ -90,7 +90,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	 * @throws Exception to avoid placing constraints on pooling APIs
 	 */
 	protected abstract void createPool() throws Exception;
-	
+
 	/**
 	 * Acquire an object from the pool.
 	 * @return an object from the pool
@@ -98,7 +98,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	 * APIs, so we're forgiving with our exception signature
 	 */
 	public abstract Object getTarget() throws Exception;
-	
+
 	/**
 	 * Return the given object to the pool.
 	 * @param target object that must have been acquired from the pool

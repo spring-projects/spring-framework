@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,7 +214,7 @@ public class BindStatus {
 	 * '<code>getValue().getClass()</code>' since '<code>getValue()</code>' may
 	 * return '<code>null</code>'.
 	 */
-	public Class getValueType() {
+	public Class<?> getValueType() {
 		return this.valueType;
 	}
 
@@ -318,7 +318,7 @@ public class BindStatus {
 	 * @param valueClass the value class that an editor is needed for
 	 * @return the associated PropertyEditor, or <code>null</code> if none
 	 */
-	public PropertyEditor findEditor(Class valueClass) {
+	public PropertyEditor findEditor(Class<?> valueClass) {
 		return (this.bindingResult != null ? this.bindingResult.findEditor(this.expression, valueClass) : null);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public interface PropertyAccessor {
 	 * @throws PropertyAccessException if the property was valid but the
 	 * accessor method failed
 	 */
-	Class getPropertyType(String propertyName) throws BeansException;
+	Class<?> getPropertyType(String propertyName) throws BeansException;
 
 	/**
 	 * Return a type descriptor for the specified property:
@@ -190,8 +190,7 @@ public interface PropertyAccessor {
 	 * successfully updated.
 	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
 	 */
-	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
-	    throws BeansException;
+	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown) throws BeansException;
 
 	/**
 	 * Perform a batch update with full control over behavior.
@@ -213,6 +212,6 @@ public interface PropertyAccessor {
 	 * successfully updated.
 	 */
 	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
-	    throws BeansException;
+		throws BeansException;
 
 }
