@@ -37,19 +37,19 @@ import org.springframework.web.servlet.HandlerMapping;
 public class ExtendedServletRequestDataBinderTests {
 
 	private MockHttpServletRequest request;
-	
+
 	@Before
 	public void setup() {
 		this.request = new MockHttpServletRequest();
 	}
-	
+
 	@Test
 	public void createBinder() throws Exception {
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
 		uriTemplateVars.put("name", "nameValue");
 		uriTemplateVars.put("age", "25");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
-		
+
 		TestBean target = new TestBean();
 		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
 		((ServletRequestDataBinder) binder).bind(request);
@@ -61,18 +61,18 @@ public class ExtendedServletRequestDataBinderTests {
 	@Test
 	public void uriTemplateVarAndRequestParam() throws Exception {
 		request.addParameter("age", "35");
-		
+
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
 		uriTemplateVars.put("name", "nameValue");
 		uriTemplateVars.put("age", "25");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
-		
+
 		TestBean target = new TestBean();
 		WebDataBinder binder = new ExtendedServletRequestDataBinder(target, "");
 		((ServletRequestDataBinder) binder).bind(request);
 
 		assertEquals("nameValue", target.getName());
-		assertEquals(25, target.getAge());
+		assertEquals(35, target.getAge());
 	}
 
 	@Test
