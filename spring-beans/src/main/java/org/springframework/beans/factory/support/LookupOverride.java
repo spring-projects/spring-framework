@@ -61,7 +61,7 @@ public class LookupOverride extends MethodOverride {
 	 */
 	@Override
 	public boolean matches(Method method) {
-		return (method.getName().equals(getMethodName()) && method.getParameterTypes().length == 0);
+		return (method.getName().equals(getMethodName()));
 	}
 
 

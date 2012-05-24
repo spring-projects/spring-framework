@@ -157,7 +157,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
 				// Cast is safe, as CallbackFilter filters are used selectively.
 				LookupOverride lo = (LookupOverride) beanDefinition.getMethodOverrides().getOverride(method);
-				return owner.getBean(lo.getBeanName());
+				return owner.getBean(lo.getBeanName(), args);
 			}			
 		}
 

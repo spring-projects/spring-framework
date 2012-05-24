@@ -170,7 +170,7 @@ public interface BeanFactory {
 	 * overriding the specified default arguments (if any) in the bean definition.
 	 * @param name the name of the bean to retrieve
 	 * @param args arguments to use if creating a prototype using explicit arguments to a
-	 * static factory method. It is invalid to use a non-null args value in any other case.
+	 * static factory method.
 	 * @return an instance of the bean
 	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
 	 * @throws BeanDefinitionStoreException if arguments have been given but
