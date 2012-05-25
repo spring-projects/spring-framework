@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans.factory.aspectj;
+package org.springframework.context.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -25,14 +25,16 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
 /**
- * Signals the current application context to apply dependency injection to non-managed
- * classes that are instantiated outside of the Spring bean factory (typically classes
- * annotated with the @{@link org.springframework.beans.factory.annotation.Configurable
+ * Signals the current application context to apply dependency injection to
+ * non-managed classes that are instantiated outside of the Spring bean factory
+ * (typically classes annotated with the @
+ * {@link org.springframework.beans.factory.annotation.Configurable
  * Configurable} annotation).
  *
- * <p>Similar to functionality found in Spring's {@code <context:spring-configured>} XML
- * element. Often used in conjunction with {@link
- * org.springframework.context.annotation.EnableLoadTimeWeaving @EnableLoadTimeWeaving}.
+ * <p>Similar to functionality found in Spring's
+ * {@code <context:spring-configured>} XML element. Often used in conjunction
+ * with {@link org.springframework.context.annotation.EnableLoadTimeWeaving
+ * @EnableLoadTimeWeaving}.
  *
  * @author Chris Beams
  * @since 3.1
