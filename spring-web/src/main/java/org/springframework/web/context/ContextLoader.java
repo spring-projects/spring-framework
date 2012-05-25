@@ -44,7 +44,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
  * Performs the actual initialization work for the root application context.
@@ -485,15 +484,9 @@ public class ContextLoader {
 			initializerInstances.add(BeanUtils.instantiateClass(initializerClass));
 		}
 
+		applicationContext.getEnvironment().initPropertySources(servletContext, null);
+
 		Collections.sort(initializerInstances, new AnnotationAwareOrderComparator());
-
-		// eagerly attempt to initialize servlet property sources in case initializers
-		// below depend on accessing context-params via the Environment API. Note that
-		// depending on application context implementation, this initialization will be
-		// attempted again during context refresh.
-		WebApplicationContextUtils.initServletPropertySources(
-				applicationContext.getEnvironment().getPropertySources(), servletContext);
-
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
 			initializer.initialize(applicationContext);
 		}

@@ -99,6 +99,7 @@ public class EnvironmentIntegrationTests {
 
 	private ConfigurableEnvironment prodEnv;
 	private ConfigurableEnvironment devEnv;
+	private ConfigurableEnvironment prodWebEnv;
 
 	/**
 	 * Constants used both locally and in scan* sub-packages
@@ -125,6 +126,9 @@ public class EnvironmentIntegrationTests {
 
 		devEnv = new StandardEnvironment();
 		devEnv.setActiveProfiles(DEV_ENV_NAME);
+
+		prodWebEnv = new StandardServletEnvironment();
+		prodWebEnv.setActiveProfiles(PROD_ENV_NAME);
 	}
 
 	@Test
@@ -348,24 +352,24 @@ public class EnvironmentIntegrationTests {
 
 		assertHasStandardServletEnvironment(ctx);
 
-		ctx.setEnvironment(prodEnv);
+		ctx.setEnvironment(prodWebEnv);
 		ctx.refresh();
 
-		assertHasEnvironment(ctx, prodEnv);
+		assertHasEnvironment(ctx, prodWebEnv);
 		assertEnvironmentBeanRegistered(ctx);
-		assertEnvironmentAwareInvoked(ctx, prodEnv);
+		assertEnvironmentAwareInvoked(ctx, prodWebEnv);
 	}
 
 	@Test
 	public void xmlWebApplicationContext() {
 		AbstractRefreshableWebApplicationContext ctx = new XmlWebApplicationContext();
 		ctx.setConfigLocation("classpath:" + XML_PATH);
-		ctx.setEnvironment(prodEnv);
+		ctx.setEnvironment(prodWebEnv);
 		ctx.refresh();
 
-		assertHasEnvironment(ctx, prodEnv);
+		assertHasEnvironment(ctx, prodWebEnv);
 		assertEnvironmentBeanRegistered(ctx);
-		assertEnvironmentAwareInvoked(ctx, prodEnv);
+		assertEnvironmentAwareInvoked(ctx, prodWebEnv);
 		assertThat(ctx.containsBean(DEV_BEAN_NAME), is(false));
 		assertThat(ctx.containsBean(PROD_BEAN_NAME), is(true));
 	}
@@ -394,24 +398,24 @@ public class EnvironmentIntegrationTests {
 
 		registerEnvironmentBeanDefinition(ctx);
 
-		ctx.setEnvironment(prodEnv);
+		ctx.setEnvironment(prodWebEnv);
 		ctx.refresh();
 
-		assertHasEnvironment(ctx, prodEnv);
+		assertHasEnvironment(ctx, prodWebEnv);
 		assertEnvironmentBeanRegistered(ctx);
-		assertEnvironmentAwareInvoked(ctx, prodEnv);
+		assertEnvironmentAwareInvoked(ctx, prodWebEnv);
 	}
 
 	@Test
 	public void annotationConfigWebApplicationContext() {
 		AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
-		ctx.setEnvironment(prodEnv);
+		ctx.setEnvironment(prodWebEnv);
 		ctx.setConfigLocation(EnvironmentAwareBean.class.getName());
 		ctx.refresh();
 
-		assertHasEnvironment(ctx, prodEnv);
+		assertHasEnvironment(ctx, prodWebEnv);
 		assertEnvironmentBeanRegistered(ctx);
-		assertEnvironmentAwareInvoked(ctx, prodEnv);
+		assertEnvironmentAwareInvoked(ctx, prodWebEnv);
 	}
 
 	@Test
