@@ -30,7 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.annotation.Rollback;
@@ -155,7 +155,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				// qualifier matching (only exposed on the internal BeanFactory,
 				// not on the ApplicationContext).
 				BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
-				tm = BeanFactoryUtils.qualifiedBeanOfType(bf, PlatformTransactionManager.class, qualifier);
+				tm = BeanFactoryAnnotationUtils.qualifiedBeanOfType(bf, PlatformTransactionManager.class, qualifier);
 			}
 			else {
 				tm = getTransactionManager(testContext);

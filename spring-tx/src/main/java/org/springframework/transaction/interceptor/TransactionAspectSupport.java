@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -242,7 +243,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		}
 		String qualifier = txAttr.getQualifier();
 		if (StringUtils.hasLength(qualifier)) {
-			return BeanFactoryUtils.qualifiedBeanOfType(this.beanFactory, PlatformTransactionManager.class, qualifier);
+			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, PlatformTransactionManager.class, qualifier);
 		}
 		else if (this.transactionManagerBeanName != null) {
 			return this.beanFactory.getBean(this.transactionManagerBeanName, PlatformTransactionManager.class);
