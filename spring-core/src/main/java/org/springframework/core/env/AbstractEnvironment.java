@@ -387,6 +387,20 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return systemProperties;
 	}
 
+	public void merge(ConfigurableEnvironment parent) {
+		for (PropertySource<?> ps : parent.getPropertySources()) {
+			if (!this.propertySources.contains(ps.getName())) {
+				this.propertySources.addLast(ps);
+			}
+		}
+		for (String profile : parent.getActiveProfiles()) {
+			this.activeProfiles.add(profile);
+		}
+		for (String profile : parent.getDefaultProfiles()) {
+			this.defaultProfiles.add(profile);
+		}
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of ConfigurablePropertyResolver interface

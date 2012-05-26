@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,11 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.UiApplicationContextUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
+import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -130,6 +132,15 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		return new StandardServletEnvironment();
 	}
 
+	@Override
+	public ConfigurableWebEnvironment getEnvironment() {
+		ConfigurableEnvironment env = super.getEnvironment();
+		Assert.isInstanceOf(ConfigurableWebEnvironment.class, env,
+				"ConfigurableWebApplicationContext environment must be of type " +
+				"ConfigurableWebEnvironment");
+		return (ConfigurableWebEnvironment) env;
+	}
+
 	/**
 	 * Register ServletContextAwareProcessor.
 	 * @see ServletContextAwareProcessor
@@ -176,8 +187,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	@Override
 	protected void initPropertySources() {
 		super.initPropertySources();
-		WebApplicationContextUtils.initServletPropertySources(
-				this.getEnvironment().getPropertySources(), this.servletContext);
+		this.getEnvironment().initPropertySources(this.servletContext, null);
 	}
 
 	public Theme getTheme(String themeName) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,13 +55,14 @@ import java.util.Map;
  *   propertySources.replace(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, mockEnvVars);
  * </pre>
  *
- * When an {@link Environment} is being used by an ApplicationContext, it is important
- * that any such PropertySource manipulations be performed <em>before</em> the context's
- * {@link org.springframework.context.support.AbstractApplicationContext#refresh()
- * refresh()} method is called. This ensures that all property sources are available
- * during the container bootstrap process, including use by
- * {@linkplain org.springframework.context.support.PropertySourcesPlaceholderConfigurer
- * property placeholder configurers}.
+ * When an {@link Environment} is being used by an {@code ApplicationContext}, it is
+ * important that any such {@code PropertySource} manipulations be performed
+ * <em>before</em> the context's {@link
+ * org.springframework.context.support.AbstractApplicationContext#refresh() refresh()}
+ * method is called. This ensures that all property sources are available during the
+ * container bootstrap process, including use by {@linkplain
+ * org.springframework.context.support.PropertySourcesPlaceholderConfigurer property
+ * placeholder configurers}.
  *
  *
  * @author Chris Beams
@@ -78,7 +79,6 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * <p>Any existing active profiles will be replaced with the given arguments; call
 	 * with zero arguments to clear the current set of active profiles. Use
 	 * {@link #addActiveProfile} to add a profile while preserving the existing set.
-	 *
 	 * @see #addActiveProfile
 	 * @see #setDefaultProfiles
 	 * @see org.springframework.context.annotation.Profile
@@ -123,12 +123,10 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * Return the value of {@link System#getenv()} if allowed by the current
 	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
 	 * to access individual keys using calls to {@link System#getenv(String)}.
-	 *
 	 * <p>Note that most {@link Environment} implementations will include this system
 	 * environment map as a default {@link PropertySource} to be searched. Therefore, it
 	 * is recommended that this method not be used directly unless bypassing other
 	 * property sources is expressly intended.
-	 *
 	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
 	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
 	 * to a property, {@code null} will be returned and an INFO-level log message will be
@@ -140,17 +138,35 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * Return the value of {@link System#getProperties()} if allowed by the current
 	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
 	 * to access individual keys using calls to {@link System#getProperty(String)}.
-	 *
 	 * <p>Note that most {@code Environment} implementations will include this system
 	 * properties map as a default {@link PropertySource} to be searched. Therefore, it is
 	 * recommended that this method not be used directly unless bypassing other property
 	 * sources is expressly intended.
-	 *
 	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
 	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
 	 * to a property, {@code null} will be returned and an INFO-level log message will be
 	 * issued noting the exception.
 	 */
 	Map<String, Object> getSystemProperties();
+
+	/**
+	 * Append the given parent environment's active profiles, default profiles and
+	 * property sources to this (child) environment's respective collections of each.
+	 * <p>For any identically-named {@code PropertySource} instance existing in both
+	 * parent and child, the child instance is to be preserved and the parent instance
+	 * discarded. This has the effect of allowing overriding of property sources by the
+	 * child as well as avoiding redundant searches through common property source types,
+	 * e.g. system environment and system properties.
+	 * <p>Active and default profile names are also filtered for duplicates, to avoid
+	 * confusion and redundant storage.
+	 * <p>The parent environment remains unmodified in any case. Note that any changes to
+	 * the parent environment occurring after the call to {@code merge} will not be
+	 * reflected in the child. Therefore, care should be taken to configure parent
+	 * property sources and profile information prior to calling {@code merge}.
+	 * @param parent the environment to merge with
+	 * @since 3.2
+	 * @see org.springframework.context.support.AbstractApplicationContext#setParent
+	 */
+	void merge(ConfigurableEnvironment parent);
 
 }
