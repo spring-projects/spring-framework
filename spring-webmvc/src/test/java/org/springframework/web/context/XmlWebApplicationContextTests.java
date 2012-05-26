@@ -48,6 +48,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		InitAndIB.constructed = false;
 		root = new XmlWebApplicationContext();
+		root.getEnvironment().addActiveProfile("rootProfile1");
 		MockServletContext sc = new MockServletContext("");
 		root.setServletContext(sc);
 		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
@@ -69,6 +70,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		});
 		root.refresh();
 		XmlWebApplicationContext wac = new XmlWebApplicationContext();
+		wac.getEnvironment().addActiveProfile("wacProfile1");
 		wac.setParent(root);
 		wac.setServletContext(sc);
 		wac.setNamespace("test-servlet");
@@ -77,8 +79,11 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		return wac;
 	}
 
-	public void testEnvironmentInheritance() {
-		assertThat(this.applicationContext.getEnvironment(), sameInstance(this.root.getEnvironment()));
+	public void testEnvironmentMerge() {
+		assertThat(this.root.getEnvironment().acceptsProfiles("rootProfile1"), is(true));
+		assertThat(this.root.getEnvironment().acceptsProfiles("wacProfile1"), is(false));
+		assertThat(this.applicationContext.getEnvironment().acceptsProfiles("rootProfile1"), is(true));
+		assertThat(this.applicationContext.getEnvironment().acceptsProfiles("wacProfile1"), is(true));
 	}
 
 	/**

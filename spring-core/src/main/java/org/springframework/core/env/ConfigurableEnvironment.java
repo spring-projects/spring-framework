@@ -149,4 +149,24 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 */
 	Map<String, Object> getSystemProperties();
 
+	/**
+	 * Append the given parent environment's active profiles, default profiles and
+	 * property sources to this (child) environment's respective collections of each.
+	 * <p>For any identically-named {@code PropertySource} instance existing in both
+	 * parent and child, the child instance is to be preserved and the parent instance
+	 * discarded. This has the effect of allowing overriding of property sources by the
+	 * child as well as avoiding redundant searches through common property source types,
+	 * e.g. system environment and system properties.
+	 * <p>Active and default profile names are also filtered for duplicates, to avoid
+	 * confusion and redundant storage.
+	 * <p>The parent environment remains unmodified in any case. Note that any changes to
+	 * the parent environment occurring after the call to {@code merge} will not be
+	 * reflected in the child. Therefore, care should be taken to configure parent
+	 * property sources and profile information prior to calling {@code merge}.
+	 * @param parent the environment to merge with
+	 * @since 3.2
+	 * @see org.springframework.context.support.AbstractApplicationContext#setParent
+	 */
+	void merge(ConfigurableEnvironment parent);
+
 }
