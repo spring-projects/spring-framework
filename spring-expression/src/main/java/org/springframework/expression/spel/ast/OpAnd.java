@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -39,27 +38,25 @@ public class OpAnd extends Operator {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		boolean leftValue;
-		boolean rightValue;
+		Boolean leftValue;
+		Boolean rightValue;
 
 		try {
-			TypedValue typedValue = getLeftOperand().getValueInternal(state);
-			this.assertTypedValueNotNull(typedValue);
-			leftValue = (Boolean)state.convertValue(typedValue, TypeDescriptor.valueOf(Boolean.class));
+			leftValue = getLeftOperand().getValue(state, Boolean.class);
+			this.assertValueNotNull(leftValue);
 		}
 		catch (SpelEvaluationException ee) {
 			ee.setPosition(getLeftOperand().getStartPosition());
 			throw ee;
 		}
 
-		if (leftValue == false) {
+		if (!leftValue) {
 			return BooleanTypedValue.forValue(false); // no need to evaluate right operand
 		}
 
 		try {
-			TypedValue typedValue = getRightOperand().getValueInternal(state);
-			this.assertTypedValueNotNull(typedValue);
-			rightValue = (Boolean)state.convertValue(typedValue, TypeDescriptor.valueOf(Boolean.class));
+			rightValue = getRightOperand().getValue(state, Boolean.class);
+			this.assertValueNotNull(rightValue);
 		}
 		catch (SpelEvaluationException ee) {
 			ee.setPosition(getRightOperand().getStartPosition());
@@ -69,8 +66,8 @@ public class OpAnd extends Operator {
 		return /* leftValue && */BooleanTypedValue.forValue(rightValue);
 	}
 
-	private void assertTypedValueNotNull(TypedValue typedValue) {
-		if (TypedValue.NULL.equals(typedValue)) {
+	private void assertValueNotNull(Boolean value) {
+		if (value == null) {
 			throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
 		}
 	}
