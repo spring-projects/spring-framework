@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,13 +55,14 @@ import java.util.Map;
  *   propertySources.replace(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, mockEnvVars);
  * </pre>
  *
- * When an {@link Environment} is being used by an ApplicationContext, it is important
- * that any such PropertySource manipulations be performed <em>before</em> the context's
- * {@link org.springframework.context.support.AbstractApplicationContext#refresh()
- * refresh()} method is called. This ensures that all property sources are available
- * during the container bootstrap process, including use by
- * {@linkplain org.springframework.context.support.PropertySourcesPlaceholderConfigurer
- * property placeholder configurers}.
+ * When an {@link Environment} is being used by an {@code ApplicationContext}, it is
+ * important that any such {@code PropertySource} manipulations be performed
+ * <em>before</em> the context's {@link
+ * org.springframework.context.support.AbstractApplicationContext#refresh() refresh()}
+ * method is called. This ensures that all property sources are available during the
+ * container bootstrap process, including use by {@linkplain
+ * org.springframework.context.support.PropertySourcesPlaceholderConfigurer property
+ * placeholder configurers}.
  *
  *
  * @author Chris Beams
@@ -78,7 +79,6 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * <p>Any existing active profiles will be replaced with the given arguments; call
 	 * with zero arguments to clear the current set of active profiles. Use
 	 * {@link #addActiveProfile} to add a profile while preserving the existing set.
-	 *
 	 * @see #addActiveProfile
 	 * @see #setDefaultProfiles
 	 * @see org.springframework.context.annotation.Profile
@@ -123,12 +123,10 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * Return the value of {@link System#getenv()} if allowed by the current
 	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
 	 * to access individual keys using calls to {@link System#getenv(String)}.
-	 *
 	 * <p>Note that most {@link Environment} implementations will include this system
 	 * environment map as a default {@link PropertySource} to be searched. Therefore, it
 	 * is recommended that this method not be used directly unless bypassing other
 	 * property sources is expressly intended.
-	 *
 	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
 	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
 	 * to a property, {@code null} will be returned and an INFO-level log message will be
@@ -140,12 +138,10 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * Return the value of {@link System#getProperties()} if allowed by the current
 	 * {@link SecurityManager}, otherwise return a map implementation that will attempt
 	 * to access individual keys using calls to {@link System#getProperty(String)}.
-	 *
 	 * <p>Note that most {@code Environment} implementations will include this system
 	 * properties map as a default {@link PropertySource} to be searched. Therefore, it is
 	 * recommended that this method not be used directly unless bypassing other property
 	 * sources is expressly intended.
-	 *
 	 * <p>Calls to {@link Map#get(Object)} on the Map returned will never throw
 	 * {@link IllegalAccessException}; in cases where the SecurityManager forbids access
 	 * to a property, {@code null} will be returned and an INFO-level log message will be

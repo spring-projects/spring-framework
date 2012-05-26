@@ -16,9 +16,6 @@
 
 package org.springframework.web.context;
 
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
-
 import java.util.Locale;
 
 import javax.servlet.ServletException;
@@ -35,6 +32,10 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
+
+import static org.hamcrest.CoreMatchers.*;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -53,6 +54,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		root.addBeanFactoryPostProcessor(new BeanFactoryPostProcessor() {
 			public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 				beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
+					@SuppressWarnings("unchecked")
 					public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 						if (bean instanceof TestBean) {
 							((TestBean) bean).getFriends().add("myFriend");

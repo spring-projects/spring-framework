@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,6 @@
 
 package org.springframework.core.env;
 
-import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.hasItem;
-import static org.junit.matchers.JUnitMatchers.hasItems;
-import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
-import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME;
-import static org.springframework.core.env.AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME;
-
 import java.lang.reflect.Field;
 import java.security.AccessControlException;
 import java.security.Permission;
@@ -40,7 +24,17 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.mock.env.MockPropertySource;
+
+import static java.lang.String.*;
+
+import static org.hamcrest.CoreMatchers.*;
+
+import static org.junit.Assert.*;
+import static org.junit.matchers.JUnitMatchers.*;
+
+import static org.springframework.core.env.AbstractEnvironment.*;
 
 /**
  * Unit tests for {@link StandardEnvironment}.
