@@ -31,7 +31,6 @@ import net.sf.ehcache.constructs.blocking.UpdatingCacheEntryFactory;
 import net.sf.ehcache.constructs.blocking.UpdatingSelfPopulatingCache;
 import net.sf.ehcache.event.CacheEventListener;
 import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -333,6 +332,21 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 			this.cacheManager.addCache(rawCache);
 		}
 
+		if (this.cacheEventListeners != null) {
+			for (CacheEventListener listener : this.cacheEventListeners) {
+				rawCache.getCacheEventNotificationService().registerListener(listener);
+			}
+		}
+		if (this.statisticsEnabled) {
+			rawCache.setStatisticsEnabled(true);
+		}
+		if (this.sampledStatisticsEnabled) {
+			rawCache.setSampledStatisticsEnabled(true);
+		}
+		if (this.disabled) {
+			rawCache.setDisabled(true);
+		}
+
 		// Decorate cache if necessary.
 		Ehcache decoratedCache = decorateCache(rawCache);
 		if (decoratedCache != rawCache) {
@@ -346,7 +360,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 	 */
 	protected Cache createCache() {
 		// Only call EHCache 1.6 constructor if actually necessary (for compatibility with EHCache 1.3+)
-		Cache cache = (!this.clearOnFlush) ?
+		return (!this.clearOnFlush) ?
 				new Cache(this.cacheName, this.maxElementsInMemory, this.memoryStoreEvictionPolicy,
 						this.overflowToDisk, null, this.eternal, this.timeToLive, this.timeToIdle,
 						this.diskPersistent, this.diskExpiryThreadIntervalSeconds, null,
@@ -356,22 +370,6 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 						this.overflowToDisk, null, this.eternal, this.timeToLive, this.timeToIdle,
 						this.diskPersistent, this.diskExpiryThreadIntervalSeconds, null,
 						this.bootstrapCacheLoader, this.maxElementsOnDisk, this.diskSpoolBufferSize);
-
-		if (this.cacheEventListeners != null) {
-			for (CacheEventListener listener : this.cacheEventListeners) {
-				cache.getCacheEventNotificationService().registerListener(listener);
-			}
-		}
-		if (this.statisticsEnabled) {
-			cache.setStatisticsEnabled(true);
-		}
-		if (this.sampledStatisticsEnabled) {
-			cache.setSampledStatisticsEnabled(true);
-		}
-		if (this.disabled) {
-			cache.setDisabled(true);
-		}
-		return cache;
 	}
 
 	/**
