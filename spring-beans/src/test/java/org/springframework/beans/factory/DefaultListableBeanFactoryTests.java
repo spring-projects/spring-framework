@@ -2164,6 +2164,34 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 
+	static class A { }
+	static class B { }
+
+	/**
+	 * Test that by-type bean lookup caching is working effectively by searching for a
+	 * bean of type B 10K times within a container having 1K additional beans of type A.
+	 * Prior to by-type caching, each bean lookup would traverse the entire container
+	 * (all 1001 beans), performing expensive assignability checks, etc. Now these
+	 * operations are necessary only once, providing a dramatic performance improvement.
+	 * On load-free modern hardware (e.g. an 8-core MPB), this method should complete well
+	 * under the 1000 ms timeout, usually ~= 300ms. With caching removed and on the same
+	 * hardware the method will take ~13000 ms. See SPR-6870.
+	 */
+	@Test(timeout=1000)
+	public void testByTypeLookupIsFastEnough() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		for (int i=0; i<1000; i++) {
+			bf.registerBeanDefinition("a"+i, new RootBeanDefinition(A.class));
+		}
+		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
+
+		for (int i=0; i<10000; i++) {
+			bf.getBean(B.class);
+		}
+	}
+
+
 	public static class NoDependencies {
 
 		private NoDependencies() {
