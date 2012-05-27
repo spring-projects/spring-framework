@@ -166,8 +166,8 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	 */
 	@Override
 	public File getFile() throws IOException {
-		URL url = getURL();
-		if (ResourceUtils.isFileURL(url)) {
+		URL url = this.servletContext.getResource(this.path);
+		if (url != null && ResourceUtils.isFileURL(url)) {
 			// Proceed with file system resolution...
 			return super.getFile();
 		}
