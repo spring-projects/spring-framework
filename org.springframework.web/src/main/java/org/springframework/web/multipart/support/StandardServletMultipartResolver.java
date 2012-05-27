@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,10 +59,13 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 	}
 
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
-		// To be on the safe side: explicitly delete all parts.
+		// To be on the safe side: explicitly delete the parts,
+		// but only actual file parts (for Resin compatibility)
 		try {
 			for (Part part : request.getParts()) {
-				part.delete();
+                if (request.getFile(part.getName()) != null) {
+				    part.delete();
+                }
 			}
 		}
 		catch (Exception ex) {
