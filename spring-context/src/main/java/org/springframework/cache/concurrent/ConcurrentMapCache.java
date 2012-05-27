@@ -16,12 +16,12 @@
 
 package org.springframework.cache.concurrent;
 
+import org.springframework.cache.Cache;
+import org.springframework.cache.support.SimpleValueWrapper;
+
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import org.springframework.cache.Cache;
-import org.springframework.cache.support.SimpleValueWrapper;
 
 /**
  * Simple {@link Cache} implementation based on the core JDK
@@ -62,6 +62,7 @@ public class ConcurrentMapCache implements Cache {
 	/**
 	 * Create a new ConcurrentMapCache with the specified name.
 	 * @param name the name of the cache
+	 * @param allowNullValues whether to accept and convert null values for this cache
 	 */
 	public ConcurrentMapCache(String name, boolean allowNullValues) {
 		this(name, new ConcurrentHashMap<Object, Object>(), allowNullValues);
