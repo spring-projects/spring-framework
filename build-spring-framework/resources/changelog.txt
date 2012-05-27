@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1.2 (2012-??-??)
+Changes in version 3.1.2 (2012-06-??)
 -------------------------------------
 
 * removed INDEX.LIST entries from Spring jar META-INF dirs
@@ -12,6 +12,9 @@ Changes in version 3.1.2 (2012-??-??)
 * fixed MutablePropertySources "get" implementation to correctly return null if not found
 * fixed @PropertySource placeholder resolution to apply to all specified values
 * JDBC parameter binding uses JDBC 3.0 ParameterMetaData (if available) for type determination
+* EhCacheFactoryBean applies listeners and enabled/disabled flags to existing cache regions as well
+* ServletContextResource's getFile implementation falls back to getRealPath for non-existent files
+* fixed StandardServletMultipartResolver compatibility with Resin (only deleting actual file parts)
 
 
 Changes in version 3.1.1 (2012-02-16)
