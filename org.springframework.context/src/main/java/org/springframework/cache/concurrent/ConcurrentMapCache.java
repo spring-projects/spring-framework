@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ public class ConcurrentMapCache implements Cache {
 	/**
 	 * Create a new ConcurrentMapCache with the specified name.
 	 * @param name the name of the cache
+	 * @param allowNullValues whether to accept and convert null values for this cache
 	 */
 	public ConcurrentMapCache(String name, boolean allowNullValues) {
 		this(name, new ConcurrentHashMap<Object, Object>(), allowNullValues);
@@ -115,7 +116,7 @@ public class ConcurrentMapCache implements Cache {
 	/**
 	 * Convert the given value from the internal store to a user value
 	 * returned from the get method (adapting <code>null</code>).
-	 * @param userValue the store value
+	 * @param storeValue the store value
 	 * @return the value to return to the user
 	 */
 	protected Object fromStoreValue(Object storeValue) {

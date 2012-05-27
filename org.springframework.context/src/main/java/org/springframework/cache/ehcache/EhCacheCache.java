@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,6 @@ public class EhCacheCache implements Cache {
 		return this.cache;
 	}
 
-	public void clear() {
-		this.cache.removeAll();
-	}
-
 	public ValueWrapper get(Object key) {
 		Element element = this.cache.get(key);
 		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);
@@ -72,6 +68,10 @@ public class EhCacheCache implements Cache {
 
 	public void evict(Object key) {
 		this.cache.remove(key);
+	}
+
+	public void clear() {
+		this.cache.removeAll();
 	}
 
 }
