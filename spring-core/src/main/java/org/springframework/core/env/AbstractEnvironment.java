@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import static java.lang.String.*;
+
 import static org.springframework.util.StringUtils.*;
 
 /**
@@ -300,31 +301,43 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	public boolean acceptsProfiles(String... profiles) {
 		Assert.notEmpty(profiles, "Must specify at least one profile");
-		boolean activeProfileFound = false;
-		Set<String> activeProfiles = this.doGetActiveProfiles();
-		Set<String> defaultProfiles = this.doGetDefaultProfiles();
 		for (String profile : profiles) {
-			this.validateProfile(profile);
-			if (activeProfiles.contains(profile)
-					|| (activeProfiles.isEmpty() && defaultProfiles.contains(profile))) {
-				activeProfileFound = true;
-				break;
+			if (profile != null && profile.length() > 0 && profile.charAt(0) == '!') {
+				return !this.isProfileActive(profile.substring(1));
+			}
+			if (this.isProfileActive(profile)) {
+				return true;
 			}
 		}
-		return activeProfileFound;
+		return false;
+	}
+
+	/**
+	 * Return whether the given profile is active, or if active profiles are empty
+	 * whether the profile should be active by default.
+	 * @throws IllegalArgumentException per {@link #validateProfile(String)}
+	 * @since 3.2
+	 */
+	protected boolean isProfileActive(String profile) {
+		this.validateProfile(profile);
+		return this.doGetActiveProfiles().contains(profile)
+				|| (this.doGetActiveProfiles().isEmpty() && this.doGetDefaultProfiles().contains(profile));
 	}
 
 	/**
 	 * Validate the given profile, called internally prior to adding to the set of
 	 * active or default profiles.
 	 * <p>Subclasses may override to impose further restrictions on profile syntax.
-	 * @throws IllegalArgumentException if the profile is null, empty or whitespace-only
+	 * @throws IllegalArgumentException if the profile is null, empty, whitespace-only or
+	 * begins with the profile NOT operator (!).
 	 * @see #acceptsProfiles
 	 * @see #addActiveProfile
 	 * @see #setDefaultProfiles
 	 */
 	protected void validateProfile(String profile) {
 		Assert.hasText(profile, "Invalid profile [" + profile + "]: must contain text");
+		Assert.isTrue(profile.charAt(0) != '!',
+				"Invalid profile [" + profile + "]: must not begin with the ! operator");
 	}
 
 	public MutablePropertySources getPropertySources() {

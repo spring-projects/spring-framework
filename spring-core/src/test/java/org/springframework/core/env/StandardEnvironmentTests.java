@@ -17,8 +17,10 @@
 package org.springframework.core.env;
 
 import java.lang.reflect.Field;
+
 import java.security.AccessControlException;
 import java.security.Permission;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -148,6 +150,11 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
+	public void setActiveProfiles_withNotOperator() {
+		environment.setActiveProfiles("p1", "!p2");
+	}
+
+	@Test(expected=IllegalArgumentException.class)
 	public void setDefaultProfiles_withNullProfileArray() {
 		environment.setDefaultProfiles((String[])null);
 	}
@@ -160,6 +167,11 @@ public class StandardEnvironmentTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void setDefaultProfiles_withEmptyProfile() {
 		environment.setDefaultProfiles("");
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void setDefaultProfiles_withNotOperator() {
+		environment.setDefaultProfiles("d1", "!d2");
 	}
 
 	@Test
@@ -282,6 +294,20 @@ public class StandardEnvironmentTests {
 		environment.setActiveProfiles("p1");
 		assertThat(environment.acceptsProfiles("pd"), is(false));
 		assertThat(environment.acceptsProfiles("p1"), is(true));
+	}
+
+	@Test
+	public void acceptsProfiles_withNotOperator() {
+		assertThat(environment.acceptsProfiles("p1"), is(false));
+		assertThat(environment.acceptsProfiles("!p1"), is(true));
+		environment.addActiveProfile("p1");
+		assertThat(environment.acceptsProfiles("p1"), is(true));
+		assertThat(environment.acceptsProfiles("!p1"), is(false));
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void acceptsProfiles_withInvalidNotOperator() {
+		environment.acceptsProfiles("p1", "!");
 	}
 
 	@Test
