@@ -33,8 +33,8 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.TestAutowired;
+import org.springframework.beans.factory.annotation.TestQualifier;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -167,10 +167,10 @@ public class AnnotationMetadataTests {
 	}
 
 	private void doTestMethodAnnotationInfo(AnnotationMetadata classMetadata) {
-		Set<MethodMetadata> methods = classMetadata.getAnnotatedMethods(Autowired.class.getName());
+		Set<MethodMetadata> methods = classMetadata.getAnnotatedMethods(TestAutowired.class.getName());
 		assertThat(methods.size(), is(1));
 		for (MethodMetadata methodMetadata : methods) {
-			assertThat(methodMetadata.isAnnotated(Autowired.class.getName()), is(true));
+			assertThat(methodMetadata.isAnnotated(TestAutowired.class.getName()), is(true));
 		}
 	}
 
@@ -215,8 +215,8 @@ public class AnnotationMetadataTests {
 	@SuppressWarnings({"serial", "unused"})
 	private static class AnnotatedComponent implements Serializable {
 		
-		@Autowired
-		public void doWork(@Qualifier("myColor") java.awt.Color color) {
+		@TestAutowired
+		public void doWork(@TestQualifier("myColor") java.awt.Color color) {
 		}
 
 		public void doSleep()  {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,19 @@
 
 package org.springframework.beans.factory.annotation;
 
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * This annotation may be used on a field or parameter as a qualifier for
- * candidate beans when autowiring. It may also be used to annotate other
- * custom annotations that can then in turn be used as qualifiers.
- *
- * @author Mark Fisher
- * @author Juergen Hoeller
- * @since 2.5
- */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
-@Inherited
-@Documented
-public @interface Qualifier {
+@Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD})
+public @interface TestAutowired {
 
-	String value() default "";
+	/**
+	 * Declares whether the annotated dependency is required.
+	 * <p>Defaults to <code>true</code>.
+	 */
+	boolean required() default true;
 
 }
