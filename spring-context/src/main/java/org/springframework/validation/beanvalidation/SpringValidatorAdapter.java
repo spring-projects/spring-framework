@@ -89,6 +89,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		processConstraintViolations(this.targetValidator.validate(target), errors);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public void validate(Object target, Errors errors, Object... validationHints) {
 		Set<Class> groups = new LinkedHashSet<Class>();
 		if (validationHints != null) {

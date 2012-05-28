@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,21 @@ package org.springframework.validation;
  * validation 'hints'.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  */
 public interface SmartValidator extends Validator {
 
 	/**
-	 * Validate the supplied {@code target} object, which must be of a {@link Class} for
-	 * which the {@link #supports(Class)} method typically has (or would) return {@code true}.
+	 * Validate the supplied {@code target} object, which must be of a type of {@link Class}
+	 * for which the {@link #supports(Class)} method typically returns {@code true}.
 	 * <p>The supplied {@link Errors errors} instance can be used to report any
 	 * resulting validation errors.
-	 * <p><b>This variant of {@code validate} supports validation hints, such as
-	 * validation groups against a JSR-303 provider</b> (in this case, the provided hint
+	 * <p><b>This variant of {@code validate()} supports validation hints, such as
+	 * validation groups against a JSR-303 provider</b> (in which case, the provided hint
 	 * objects need to be annotation arguments of type {@code Class}).
 	 * <p>Note: Validation hints may get ignored by the actual target {@code Validator},
-	 * in which case this method is supposed to be behave just like its regular
+	 * in which case this method should behave just like its regular
 	 * {@link #validate(Object, Errors)} sibling.
 	 * @param target the object that is to be validated (can be {@code null})
 	 * @param errors contextual state about the validation process (never {@code null})
