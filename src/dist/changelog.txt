@@ -32,6 +32,15 @@ Changes in version 3.2 M1
 * support executor qualification with @Async#value (SPR-6847)
 * add convenient WebAppInitializer base classes (SPR-9300)
 * support initial delay attribute for scheduled tasks (SPR-7022)
+* cache by-type lookups in DefaultListableBeanFactory (SPR-6870)
+* merge rather than add URI vars to data binding values (SPR-9349)
+* support not (!) operator for profile selection (SPR-8728)
+* fix regression in ClassPathResource descriptions (SPR-9413)
+* improve documentation of @Bean 'lite' mode (SPR-9401)
+* improve documentation of annotated class support in the TestContext framework (SPR-9401)
+* document support for JSR-250 lifecycle annotations in the TestContext framework (SPR-4868)
+* improve dependency management for spring-test (SPR-8861)
+
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------

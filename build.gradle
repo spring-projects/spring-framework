@@ -423,11 +423,15 @@ project('spring-webmvc-portlet') {
 project('spring-test') {
     description = 'Spring TestContext Framework'
     dependencies {
-        compile project(":spring-webmvc-portlet")
-        compile("javax.activation:activation:1.0", provided)
-        compile("org.testng:testng:6.5.2", optional)
+        compile project(":spring-core")
+        compile(project(":spring-webmvc"), optional)
+        compile(project(":spring-webmvc-portlet"), optional)
         compile("junit:junit:4.10", optional)
-        compile("javax.servlet:servlet-api:2.5", provided)
+        compile("org.testng:testng:6.5.2", optional)
+        compile("javax.servlet:servlet-api:2.5", optional)
+        compile("javax.servlet.jsp:jsp-api:2.1", optional)
+        compile("javax.portlet:portlet-api:2.0", optional)
+        compile("javax.activation:activation:1.0", provided)
         testCompile "org.slf4j:slf4j-jcl:1.5.3"
     }
 }
