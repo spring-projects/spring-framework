@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
@@ -69,14 +70,15 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 */
 	public void handleError(ClientHttpResponse response) throws IOException {
 		HttpStatus statusCode = response.getStatusCode();
-		MediaType contentType = response.getHeaders().getContentType();
+		HttpHeaders headers = response.getHeaders();
+		MediaType contentType = headers.getContentType();
 		Charset charset = contentType != null ? contentType.getCharSet() : null;
 		byte[] body = getResponseBody(response);
 		switch (statusCode.series()) {
 			case CLIENT_ERROR:
-				throw new HttpClientErrorException(statusCode, response.getStatusText(), body, charset);
+				throw new HttpClientErrorException(statusCode, response.getStatusText(), headers, body, charset);
 			case SERVER_ERROR:
-				throw new HttpServerErrorException(statusCode, response.getStatusText(), body, charset);
+				throw new HttpServerErrorException(statusCode, response.getStatusText(), headers, body, charset);
 			default:
 				throw new RestClientException("Unknown status code [" + statusCode + "]");
 		}

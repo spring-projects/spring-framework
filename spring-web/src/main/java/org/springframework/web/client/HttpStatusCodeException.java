@@ -19,6 +19,7 @@ package org.springframework.web.client;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -30,7 +31,7 @@ import org.springframework.http.HttpStatus;
  */
 public abstract class HttpStatusCodeException extends RestClientException {
 
-	private static final long serialVersionUID = 1549626836533638803L;
+	private static final long serialVersionUID = -5807494703720513267L;
 
 	private static final String DEFAULT_CHARSET = "ISO-8859-1";
 
@@ -39,6 +40,8 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	private final String statusText;
 
 	private final byte[] responseBody;
+
+	private final HttpHeaders responseHeaders;
 
 	private final String responseCharset;
 
@@ -49,7 +52,7 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	 * @param statusCode the status code
 	 */
 	protected HttpStatusCodeException(HttpStatus statusCode) {
-		this(statusCode, statusCode.name(), null, null);
+		this(statusCode, statusCode.name(), null, null, null);
 	}
 
 	/**
@@ -59,7 +62,7 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	 * @param statusText the status text
 	 */
 	protected HttpStatusCodeException(HttpStatus statusCode, String statusText) {
-		this(statusCode, statusText, null, null);
+		this(statusCode, statusText, null, null, null);
 	}
 
 	/**
@@ -75,9 +78,25 @@ public abstract class HttpStatusCodeException extends RestClientException {
 			String statusText,
 			byte[] responseBody,
 			Charset responseCharset) {
+		this(statusCode, statusText, null, responseBody, responseCharset);
+	}
+
+	/**
+	 * Construct a new instance of {@code HttpStatusCodeException} based on an
+	 * {@link HttpStatus}, status text, and response body content.
+	 * @param statusCode the status code
+	 * @param statusText the status text
+	 * @param responseHeaders the response headers, may be {@code null}
+	 * @param responseBody the response body content, may be {@code null}
+	 * @param responseCharset the response body charset, may be {@code null}
+	 * @since 3.2
+	 */
+	protected HttpStatusCodeException(HttpStatus statusCode, String statusText,
+			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
 		super(statusCode.value() + " " + statusText);
 		this.statusCode = statusCode;
 		this.statusText = statusText;
+		this.responseHeaders = responseHeaders;
 		this.responseBody = responseBody != null ? responseBody : new byte[0];
 		this.responseCharset = responseCharset != null ? responseCharset.name() : DEFAULT_CHARSET;
 	}
@@ -98,7 +117,16 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	}
 
 	/**
+	 * Return the HTTP response headers.
+	 * @since 3.2
+	 */
+	public HttpHeaders getResponseHeaders() {
+		return this.responseHeaders;
+	}
+
+	/**
 	 * Return the response body as a byte array.
+	 *
 	 * @since 3.0.5
 	 */
 	public byte[] getResponseBodyAsByteArray() {

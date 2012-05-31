@@ -16,6 +16,8 @@
 
 package org.springframework.http;
 
+import java.io.Serializable;
+
 import java.net.URI;
 
 import java.nio.charset.Charset;
@@ -57,7 +59,9 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class HttpHeaders implements MultiValueMap<String, String> {
+public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
+
+	private static final long serialVersionUID = -8578554704772377436L;
 
 	private static final String ACCEPT = "Accept";
 

@@ -68,7 +68,7 @@ public class DefaultResponseErrorHandlerTests {
 		verify(response);
 	}
 
-	@Test(expected = HttpClientErrorException.class)
+	@Test
 	public void handleError() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
@@ -80,7 +80,13 @@ public class DefaultResponseErrorHandlerTests {
 
 		replay(response);
 
-		handler.handleError(response);
+		try {
+			handler.handleError(response);
+			fail("expected HttpClientErrorException");
+		}
+		catch (HttpClientErrorException e) {
+			assertSame(headers, e.getResponseHeaders());
+		}
 
 		verify(response);
 	}
