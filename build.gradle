@@ -504,12 +504,17 @@ project('spring-aspects') {
     description = 'Spring Aspects'
     apply from: 'aspects.gradle'
     dependencies {
-        compile project(":spring-core")
-        compile project(":spring-tx")
-        compile project(":spring-orm")
+        compile(project(":spring-beans"), optional) // for @Configurable support
+        compile(project(":spring-aop"), optional) // for @Async support
+        compile(project(":spring-context"), optional) // for @Enable* support
+        compile(project(":spring-context-support"), optional) // for JavaMail support
+        compile(project(":spring-tx"), optional) // for JPA, @Transactional support
+        compile(project(":spring-orm"), optional) // for JPA exception translation support
         aspects project(":spring-orm")
         ajc "org.aspectj:aspectjtools:${aspectjVersion}"
         compile "org.aspectj:aspectjrt:${aspectjVersion}"
+        testCompile project(":spring-core") // for CodeStyleAspect
+        compile project(":spring-beans") // for 'p' namespace visibility
         testCompile project(":spring-test")
     }
     eclipse.project {
