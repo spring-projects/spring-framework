@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -54,7 +55,9 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class HttpHeaders implements MultiValueMap<String, String> {
+public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
+
+	private static final long serialVersionUID = -8578554704772377436L;
 
 	private static final String ACCEPT = "Accept";
 
