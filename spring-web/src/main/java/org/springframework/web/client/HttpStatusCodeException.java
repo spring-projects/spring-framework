@@ -42,9 +42,10 @@ public abstract class HttpStatusCodeException extends RestClientException {
 
 	private final String responseCharset;
 
+
 	/**
-	 * Construct a new instance of {@code HttpStatusCodeException} based on a {@link HttpStatus}.
-	 *
+	 * Construct a new instance of {@code HttpStatusCodeException} based on an
+	 * {@link HttpStatus}.
 	 * @param statusCode the status code
 	 */
 	protected HttpStatusCodeException(HttpStatus statusCode) {
@@ -52,8 +53,8 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	}
 
 	/**
-	 * Construct a new instance of {@code HttpStatusCodeException} based on a {@link HttpStatus} and status text.
-	 *
+	 * Construct a new instance of {@code HttpStatusCodeException} based on an
+	 * {@link HttpStatus} and status text.
 	 * @param statusCode the status code
 	 * @param statusText the status text
 	 */
@@ -62,12 +63,11 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	}
 
 	/**
-	 * Construct a new instance of {@code HttpStatusCodeException} based on a {@link HttpStatus}, status text, and
-	 * response body content.
-	 *
-	 * @param statusCode	  the status code
-	 * @param statusText	  the status text
-	 * @param responseBody	the response body content, may be {@code null}
+	 * Construct a new instance of {@code HttpStatusCodeException} based on an
+	 * {@link HttpStatus}, status text, and response body content.
+	 * @param statusCode the status code
+	 * @param statusText the status text
+	 * @param responseBody the response body content, may be {@code null}
 	 * @param responseCharset the response body charset, may be {@code null}
 	 * @since 3.0.5
 	 */
@@ -82,23 +82,23 @@ public abstract class HttpStatusCodeException extends RestClientException {
 		this.responseCharset = responseCharset != null ? responseCharset.name() : DEFAULT_CHARSET;
 	}
 
+
 	/**
-	 * Returns the HTTP status code.
+	 * Return the HTTP status code.
 	 */
 	public HttpStatus getStatusCode() {
 		return this.statusCode;
 	}
 
 	/**
-	 * Returns the HTTP status text.
+	 * Return the HTTP status text.
 	 */
 	public String getStatusText() {
 		return this.statusText;
 	}
 
 	/**
-	 * Returns the response body as a byte array.
-	 *
+	 * Return the response body as a byte array.
 	 * @since 3.0.5
 	 */
 	public byte[] getResponseBodyAsByteArray() {
@@ -106,8 +106,7 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	}
 
 	/**
-	 * Returns the response body as a string.
-	 *
+	 * Return the response body as a string.
 	 * @since 3.0.5
 	 */
 	public String getResponseBodyAsString() {
@@ -119,4 +118,5 @@ public abstract class HttpStatusCodeException extends RestClientException {
 			throw new InternalError(ex.getMessage());
 		}
 	}
+
 }

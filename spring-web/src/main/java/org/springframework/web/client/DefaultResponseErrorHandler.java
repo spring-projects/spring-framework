@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,11 @@ import org.springframework.util.FileCopyUtils;
 /**
  * Default implementation of the {@link ResponseErrorHandler} interface.
  *
- * <p>This error handler checks for the status code on the {@link ClientHttpResponse}: any code with series
- * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
- * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR} is considered to be an error.
- * This behavior can be changed by overriding the {@link #hasError(HttpStatus)} method.
+ * <p>This error handler checks for the status code on the {@link ClientHttpResponse}: any
+ * code with series {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
+ * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR} is considered to be an
+ * error. This behavior can be changed by overriding the {@link #hasError(HttpStatus)}
+ * method.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -83,15 +84,15 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	private byte[] getResponseBody(ClientHttpResponse response) {
 		try {
-            InputStream responseBody = response.getBody();
-            if (responseBody != null) {
-                return FileCopyUtils.copyToByteArray(responseBody);
-            }
+			InputStream responseBody = response.getBody();
+			if (responseBody != null) {
+				return FileCopyUtils.copyToByteArray(responseBody);
+			}
 		}
 		catch (IOException ex) {
-            // ignore
+			// ignore
 		}
-        return new byte[0];
+		return new byte[0];
 	}
 
 }
