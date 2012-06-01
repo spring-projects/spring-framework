@@ -183,6 +183,10 @@ project('spring-instrument') {
     dependencies {
         compile project(":spring-core")
     }
+    jar {
+        manifest.attributes['Premain-Class'] =
+            'org.springframework.instrument.InstrumentationSavingAgent'
+    }
 }
 
 project('spring-instrument-tomcat') {
