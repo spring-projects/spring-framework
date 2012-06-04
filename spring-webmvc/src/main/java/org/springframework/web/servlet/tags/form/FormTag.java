@@ -27,6 +27,7 @@ import javax.servlet.jsp.PageContext;
 
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.core.Conventions;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
@@ -319,7 +320,6 @@ public class FormTag extends AbstractHtmlElementTag {
 		return ("get".equalsIgnoreCase(method) || "post".equalsIgnoreCase(method));
 	}
 
-
 	/**
 	 * Writes the opening part of the block	'<code>form</code>' tag and exposes
 	 * the form object name in the {@link javax.servlet.jsp.PageContext}.
@@ -345,6 +345,7 @@ public class FormTag extends AbstractHtmlElementTag {
 		tagWriter.forceBlock();
 
 		if (!isMethodBrowserSupported(getMethod())) {
+			assertHttpMethod(getMethod());
 			String inputName = getMethodParameter();
 			String inputType = "hidden";
 			tagWriter.startTag(INPUT_TAG);
@@ -367,6 +368,15 @@ public class FormTag extends AbstractHtmlElementTag {
 				modelAttribute + PropertyAccessor.NESTED_PROPERTY_SEPARATOR, PageContext.REQUEST_SCOPE);
 
 		return EVAL_BODY_INCLUDE;
+	}
+
+	private void assertHttpMethod(String method) {
+		for (HttpMethod httpMethod : HttpMethod.values()) {
+			if (httpMethod.name().equalsIgnoreCase(method)) {
+				return;
+			}
+		}
+		throw new IllegalArgumentException("Invalid HTTP method: " + method);
 	}
 
 	/**

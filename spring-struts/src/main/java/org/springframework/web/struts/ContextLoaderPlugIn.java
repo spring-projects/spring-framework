@@ -97,7 +97,6 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * @see DelegatingRequestProcessor
  * @see DelegatingTilesRequestProcessor
  * @see org.springframework.web.context.ContextLoaderListener
- * @see org.springframework.web.context.ContextLoaderServlet
  * @see org.springframework.web.servlet.FrameworkServlet
  * @deprecated as of Spring 3.0
  */

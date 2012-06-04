@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -45,6 +46,8 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.async.AbstractDelegatingCallable;
+import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -112,6 +115,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Rossen Stoyanchev
  * @see #doService
  * @see #setContextClass
  * @see #setContextConfigLocation
@@ -189,7 +193,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/** Actual ApplicationContextInitializer instances to apply to the context */
 	private ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
 			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
-
 
 	/**
 	 * Create a new {@code FrameworkServlet} that will create its own internal web
@@ -327,7 +330,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Specify the set of fully-qualified {@link ApplicationContextInitializer} class
 	 * names, per the optional "contextInitializerClasses" servlet init-param.
 	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
-	 * @see #applyInitializers(ConfigurableWebApplicationContext)
+	 * @see #applyInitializers(ConfigurableApplicationContext)
 	 */
 	public void setContextInitializerClasses(String contextInitializerClasses) {
 		this.contextInitializerClasses = contextInitializerClasses;
@@ -337,7 +340,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Specify which {@link ApplicationContextInitializer} instances should be used
 	 * to initialize the application context used by this {@code FrameworkServlet}.
 	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
-	 * @see #applyInitializers(ConfigurableWebApplicationContext)
+	 * @see #applyInitializers(ConfigurableApplicationContext)
 	 */
 	public void setContextInitializers(ApplicationContextInitializer<ConfigurableApplicationContext>... contextInitializers) {
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : contextInitializers) {
@@ -688,12 +691,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * <p>The default implementation is empty. <code>refresh()</code> will
 	 * be called automatically after this method returns.
 	 * <p>Note that this method is designed to allow subclasses to modify the application
-	 * context, while {@link #initializeWebApplicationContext} is designed to allow
+	 * context, while {@link #initWebApplicationContext} is designed to allow
 	 * end-users to modify the context through the use of
 	 * {@link ApplicationContextInitializer}s.
 	 * @param wac the configured WebApplicationContext (not refreshed yet)
 	 * @see #createWebApplicationContext
-	 * @see #initializeWebApplicationContext
+	 * @see #initWebApplicationContext
 	 * @see ConfigurableWebApplicationContext#refresh()
 	 */
 	protected void postProcessWebApplicationContext(ConfigurableWebApplicationContext wac) {
@@ -850,7 +853,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		super.doTrace(request, response);
 	}
 
-
 	/**
 	 * Process this request, publishing an event regardless of the outcome.
 	 * <p>The actual event handling is performed by the abstract
@@ -862,49 +864,96 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		long startTime = System.currentTimeMillis();
 		Throwable failureCause = null;
 
-		// Expose current LocaleResolver and request as LocaleContext.
 		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
-		LocaleContextHolder.setLocaleContext(buildLocaleContext(request), this.threadContextInheritable);
+		LocaleContext localeContext = buildLocaleContext(request);
 
-		// Expose current RequestAttributes to current thread.
-		RequestAttributes previousRequestAttributes = RequestContextHolder.getRequestAttributes();
+		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
 		ServletRequestAttributes requestAttributes = null;
-		if (previousRequestAttributes == null || previousRequestAttributes.getClass().equals(ServletRequestAttributes.class)) {
+		if (previousAttributes == null || previousAttributes.getClass().equals(ServletRequestAttributes.class)) {
 			requestAttributes = new ServletRequestAttributes(request);
-			RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
 		}
 
-		if (logger.isTraceEnabled()) {
-			logger.trace("Bound request context to thread: " + request);
-		}
+		initContextHolders(request, localeContext, requestAttributes);
+
+		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
+		chain.addDelegatingCallable(getAsyncCallable(startTime, request, response,
+				previousLocaleContext, previousAttributes, localeContext, requestAttributes));
 
 		try {
 			doService(request, response);
 		}
-		catch (ServletException ex) {
-			failureCause = ex;
-			throw ex;
+		catch (Throwable t) {
+			failureCause = t;
 		}
-		catch (IOException ex) {
-			failureCause = ex;
-			throw ex;
-		}
-		catch (Throwable ex) {
-			failureCause = ex;
-			throw new NestedServletException("Request processing failed", ex);
-		}
-
 		finally {
-			// Clear request attributes and reset thread-bound context.
-			LocaleContextHolder.setLocaleContext(previousLocaleContext, this.threadContextInheritable);
+			resetContextHolders(request, previousLocaleContext, previousAttributes);
+			if (chain.isAsyncStarted()) {
+				return;
+			}
+			finalizeProcessing(startTime, request, response, requestAttributes, failureCause);
+		}
+	}
+
+	/**
+	 * Build a LocaleContext for the given request, exposing the request's
+	 * primary locale as current locale.
+	 * @param request current HTTP request
+	 * @return the corresponding LocaleContext
+	 */
+	protected LocaleContext buildLocaleContext(HttpServletRequest request) {
+		return new SimpleLocaleContext(request.getLocale());
+	}
+
+	private void initContextHolders(HttpServletRequest request,
+			LocaleContext localeContext, RequestAttributes attributes) {
+
+		LocaleContextHolder.setLocaleContext(localeContext, this.threadContextInheritable);
+		if (attributes != null) {
+			RequestContextHolder.setRequestAttributes(attributes, this.threadContextInheritable);
+		}
+		if (logger.isTraceEnabled()) {
+			logger.trace("Bound request context to thread: " + request);
+		}
+	}
+
+	private void resetContextHolders(HttpServletRequest request,
+			LocaleContext prevLocaleContext, RequestAttributes previousAttributes) {
+
+		LocaleContextHolder.setLocaleContext(prevLocaleContext, this.threadContextInheritable);
+		RequestContextHolder.setRequestAttributes(previousAttributes, this.threadContextInheritable);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Cleared thread-bound request context: " + request);
+		}
+	}
+
+	/**
+	 * Log and re-throw unhandled exceptions, publish a ServletRequestHandledEvent, etc.
+	 */
+	private void finalizeProcessing(long startTime, HttpServletRequest request, HttpServletResponse response,
+			ServletRequestAttributes requestAttributes, Throwable t) throws ServletException, IOException {
+
+		Throwable failureCause = null;
+		try {
+			if (t != null) {
+				if (t instanceof ServletException) {
+					failureCause = t;
+					throw (ServletException) t;
+				}
+				else if (t instanceof IOException) {
+					failureCause = t;
+					throw (IOException) t;
+				}
+				else {
+					NestedServletException ex = new NestedServletException("Request processing failed", t);
+					failureCause = ex;
+					throw ex;
+				}
+			}
+		}
+		finally {
 			if (requestAttributes != null) {
-				RequestContextHolder.setRequestAttributes(previousRequestAttributes, this.threadContextInheritable);
 				requestAttributes.requestCompleted();
 			}
-			if (logger.isTraceEnabled()) {
-				logger.trace("Cleared thread-bound request context: " + request);
-			}
-
 			if (logger.isDebugEnabled()) {
 				if (failureCause != null) {
 					this.logger.debug("Could not complete request", failureCause);
@@ -927,13 +976,30 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Build a LocaleContext for the given request, exposing the request's
-	 * primary locale as current locale.
-	 * @param request current HTTP request
-	 * @return the corresponding LocaleContext
+	 * Create a Callable to use to complete processing in an async execution chain.
 	 */
-	protected LocaleContext buildLocaleContext(HttpServletRequest request) {
-		return new SimpleLocaleContext(request.getLocale());
+	private AbstractDelegatingCallable getAsyncCallable(final long startTime,
+			final HttpServletRequest request, final HttpServletResponse response,
+			final LocaleContext previousLocaleContext, final RequestAttributes previousAttributes,
+			final LocaleContext localeContext, final ServletRequestAttributes requestAttributes) {
+
+		return new AbstractDelegatingCallable() {
+			public Object call() throws Exception {
+				initContextHolders(request, localeContext, requestAttributes);
+				Throwable unhandledFailure = null;
+				try {
+					getNextCallable().call();
+				}
+				catch (Throwable t) {
+					unhandledFailure = t;
+				}
+				finally {
+					resetContextHolders(request, previousLocaleContext, previousAttributes);
+					finalizeProcessing(startTime, request, response, requestAttributes, unhandledFailure);
+				}
+				return null;
+			}
+		};
 	}
 
 	/**
@@ -965,7 +1031,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected abstract void doService(HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
 
-
 	/**
 	 * Close the WebApplicationContext of this servlet.
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
@@ -977,7 +1042,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			((ConfigurableApplicationContext) this.webApplicationContext).close();
 		}
 	}
-
 
 	/**
 	 * ApplicationListener endpoint that receives events from this servlet's WebApplicationContext

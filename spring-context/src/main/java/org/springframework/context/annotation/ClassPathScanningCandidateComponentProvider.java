@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,10 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -302,10 +303,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(metadataReader, this.metadataReaderFactory)) {
 				AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-				if (!ProfileHelper.isProfileAnnotationPresent(metadata)) {
+				if (!metadata.isAnnotated(Profile.class.getName())) {
 					return true;
 				}
-				return this.environment.acceptsProfiles(ProfileHelper.getCandidateProfiles(metadata));
+				AnnotationAttributes profile = MetadataUtils.attributesFor(metadata, Profile.class);
+				return this.environment.acceptsProfiles(profile.getStringArray("value"));
 			}
 		}
 		return false;

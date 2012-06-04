@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2010-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  * Proxy factory bean for simplified declarative caching handling.
  * This is a convenient alternative to a standard AOP
  * {@link org.springframework.aop.framework.ProxyFactoryBean}
- * with a separate {@link CachingInterceptor} definition.
+ * with a separate {@link CacheInterceptor} definition.
  *
  * <p>This class is designed to facilitate declarative cache demarcation: namely, wrapping
  * a singleton target object with a caching proxy, proxying all the interfaces that the
@@ -36,7 +36,7 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  *
  * @author Costin Leau
  * @see org.springframework.aop.framework.ProxyFactoryBean
- * @see CachingInterceptor
+ * @see CacheInterceptor
  */
 @SuppressWarnings("serial")
 public class CacheProxyFactoryBean extends AbstractSingletonProxyFactoryBean {

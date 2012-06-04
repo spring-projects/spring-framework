@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,24 @@ package org.springframework.jdbc.datasource.init;
 import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
-import javax.sql.DataSource;
+import org.easymock.EasyMock;
 
 import org.junit.After;
 import org.junit.Test;
+
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * @author Dave Syer
  * @author Sam Brannen
+ * @author Oliver Gierke
  */
 public class DatabasePopulatorTests {
 
@@ -49,13 +54,19 @@ public class DatabasePopulatorTests {
 		assertEquals(name, jdbcTemplate.queryForObject("select NAME from T_TEST", String.class));
 	}
 
-	private void assertUsersDatabaseCreated(DataSource db) {
+	private void assertUsersDatabaseCreated() {
 		assertEquals("Sam", jdbcTemplate.queryForObject("select first_name from users where last_name = 'Brannen'",
 				String.class));
 	}
 
 	@After
 	public void shutDown() {
+
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.clear();
+			TransactionSynchronizationManager.unbindResource(db);
+		}
+
 		db.shutdown();
 	}
 
@@ -191,7 +202,40 @@ public class DatabasePopulatorTests {
 			connection.close();
 		}
 
-		assertUsersDatabaseCreated(db);
+		assertUsersDatabaseCreated();
 	}
 
+	@Test
+	public void testBuildWithSelectStatements() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-select.sql"));
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
+
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Keith'"));
+		assertEquals(1, jdbcTemplate.queryForInt("select COUNT(NAME) from T_TEST where NAME='Dave'"));
+	}
+
+	/**
+	 * @see SPR-9457
+	 */
+	@Test
+	public void usesBoundConnectionIfAvailable() throws SQLException {
+
+		TransactionSynchronizationManager.initSynchronization();
+		Connection connection = DataSourceUtils.getConnection(db);
+
+		DatabasePopulator populator = EasyMock.createMock(DatabasePopulator.class);
+		populator.populate(connection);
+		EasyMock.expectLastCall();
+		EasyMock.replay(populator);
+
+		DatabasePopulatorUtils.execute(populator, db);
+
+		EasyMock.verify(populator);
+	}
 }

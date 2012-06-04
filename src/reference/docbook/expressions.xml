@@ -277,7 +277,7 @@ String name = (String) exp.getValue(tesla);
     <programlisting language="java">Expression exp = parser.parseExpression("name == 'Nikola Tesla'");
 boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</programlisting>
 
-    <section>
+    <section id="expressions-evaluation-context">
       <title>The EvaluationContext interface</title>
 
       <para>The interface <interfacename>EvaluationContext</interfacename> is
@@ -306,7 +306,7 @@ boolean result = exp.getValue(context, Boolean.class);  // evaluates to true</pr
       expressions. Please refer to the JavaDoc of these classes for more
       details.</para>
 
-      <section>
+      <section id="expressions-type-conversion">
         <title>Type Conversion</title>
 
         <para>By default SpEL uses the conversion service available in Spring
@@ -514,7 +514,7 @@ Object nullValue = parser.parseExpression("null").getValue();
       Double.parseDouble().</para>
     </section>
 
-    <section>
+    <section id="expressions-properties-arrays">
       <title>Properties, Arrays, Lists, Maps, Indexers</title>
 
       <para>Navigating with property references is easy, just use a period to
@@ -576,7 +576,7 @@ parser.parseExpression("Officers['advisors'][0].PlaceOfBirth.Country").setValue(
 
 </programlisting>
     </section>
-    <section>
+    <section id="expressions-inline-lists">
       <title>Inline lists</title>
 
       <para>Lists can be expressed directly in an expression using {} notation.
@@ -593,7 +593,7 @@ List listOfLists = (List) parser.parseExpression("{{'a','b'},{'x','y'}}").getVal
       to represent the expression, rather than building a new list on each evaluation.</para>
 	</section>
 	
-	<section>
+	<section id="expressions-array-construction">
       <title>Array construction</title>
 
       <para>Arrays can be built using the familiar Java syntax, optionally
@@ -612,7 +612,7 @@ int[][] numbers3 = (int[][]) parser.parseExpression("new int[4][5]").getValue(co
       a multi-dimensional array.</para>
 	</section>
 	
-    <section>
+    <section id="expressions-methods">
       <title>Methods</title>
 
       <para>Methods are invoked using typical Java programming syntax. You may
@@ -626,10 +626,10 @@ boolean isMember = parser.parseExpression("isMember('Mihajlo Pupin')").getValue(
                                                                                 Boolean.class);</programlisting>
     </section>
 
-    <section>
+    <section id="expressions-operators">
       <title>Operators</title>
 
-      <section>
+      <section id="expressions-operators-relational">
         <title>Relational operators</title>
 
         <para>The relational operators; equal, not equal, less than, less than
@@ -667,7 +667,7 @@ boolean falseValue =
       These are case insensitive.</para>
       </section>
 
-      <section>
+      <section id="expressions-operators-logical">
         <title>Logical operators</title>
 
         <para>The logical operators that are supported are and, or, and not.
@@ -688,7 +688,7 @@ boolean trueValue = parser.parseExpression(expression).getValue(societyContext, 
 boolean trueValue = parser.parseExpression("true or false").getValue(Boolean.class);
 
 // evaluates to true
-String expression =  "isMember('Nikola Tesla') or isMember('Albert Einstien')";
+String expression =  "isMember('Nikola Tesla') or isMember('Albert Einstein')";
 boolean trueValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);
 
 // -- NOT --
@@ -702,7 +702,7 @@ String expression =  "isMember('Nikola Tesla') and !isMember('Mihajlo Pupin')";
 boolean falseValue = parser.parseExpression(expression).getValue(societyContext, Boolean.class);</programlisting></para>
       </section>
 
-      <section>
+      <section id="expressions-operators-mathematical">
         <title>Mathematical operators</title>
 
         <para>The addition operator can be used on numbers, strings and dates.
@@ -743,7 +743,7 @@ int minusTwentyOne = parser.parseExpression("1+2-3*8").getValue(Integer.class); 
       </section>
     </section>
 
-    <section>
+    <section id="expressions-assignment">
       <title>Assignment</title>
 
       <para>Setting of a property is done by using the assignment operator.
@@ -765,7 +765,7 @@ String aleks = parser.parseExpression("Name = 'Alexandar Seovic'").getValue(inve
       <para></para>
     </section>
 
-    <section>
+    <section id="expressions-types">
       <title>Types</title>
 
       <para>The special 'T' operator can be used to specify an instance of
@@ -787,7 +787,7 @@ boolean trueValue =
 </programlisting>
     </section>
 
-    <section>
+    <section id="expressions-constructors">
       <title>Constructors</title>
 
       <para>Constructors can be invoked using the new operator. The fully
@@ -821,7 +821,7 @@ parser.parseExpression("Name = #newName").getValue(context);
 
 System.out.println(tesla.getName()) // "Mike Tesla"</programlisting>
 
-      <section>
+      <section id="expressions-this-root">
         <title>The #this and #root variables</title>
 
         <para>The variable #this is always defined and refers to the current
@@ -848,7 +848,7 @@ List&lt;Integer&gt; primesGreaterThanTen =
       </section>
 
       <!--
-        <section>
+        <section id="expressions-root">
         <title>The #root variable</title>
 
         <para>The variable #root is always defined and refers to the
@@ -906,7 +906,7 @@ String helloWorldReversed =
           parser.parseExpression("#reverseString('hello')").getValue(context, String.class);</programlisting>
     </section>
 
-    <section>
+    <section id="expressions-bean-references">
     	<title>Bean references</title>
     	<para>If the evaluation context has been configured with a bean resolver it is possible to
     	lookup beans from an expression using the (@) symbol.
@@ -919,7 +919,7 @@ context.setBeanResolver(new MyBeanResolver());
 Object bean = parser.parseExpression("@foo").getValue(context);</programlisting>
     </section>
     
-    <section>
+    <section id="expressions-operator-ternary">
       <title>Ternary Operator (If-Then-Else)</title>
 
       <para>You can use the ternary operator for performing if-then-else
@@ -945,7 +945,7 @@ String queryResultString =
       shorter syntax for the ternary operator.</para>
     </section>
 
-    <section>
+    <section id="expressions-operator-elvis">
       <title>The Elvis Operator</title>
 
       <para>The Elvis operator is a shortening of the ternary operator syntax
@@ -986,7 +986,7 @@ name = parser.parseExpression("Name?:'Elvis Presley'").getValue(context, String.
 System.out.println(name); // Elvis Presley</programlisting>
     </section>
 
-    <section>
+    <section id="expressions-operator-safe-navigation">
       <title>Safe Navigation operator</title>
 
       <para>The Safe Navigation operator is used to avoid a
@@ -1023,7 +1023,7 @@ System.out.println(city); // null - does not throw NullPointerException!!!</prog
       </note>
     </section>
 
-    <section>
+    <section id="expressions-collection-selection">
       <title>Collection Selection</title>
 
       <para>Selection is a powerful expression language feature that allows you
@@ -1058,7 +1058,7 @@ System.out.println(city); // null - does not throw NullPointerException!!!</prog
       <literal>$[...]</literal>.</para>
     </section>
 
-    <section>
+    <section id="expressions-collection-projection">
       <title>Collection Projection</title>
 
       <para>Projection allows a collection to drive the evaluation of a
@@ -1079,7 +1079,7 @@ List placesOfBirth = (List)parser.parseExpression("Members.![placeOfBirth.city]"
       projection expression against each map entry.</para>
     </section>
 
-    <section>
+    <section id="expressions-templating">
       <title>Expression templating</title>
 
       <para>Expression templates allow a mixing of literal text with one or

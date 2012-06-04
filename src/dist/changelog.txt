@@ -1,18 +1,71 @@
 SPRING FRAMEWORK CHANGELOG
-==========================
+===========================
 http://www.springsource.org
 
 
-Changes in version 3.1.1 (2012-02-06)
+Changes in version 3.2 M1 (2012-05-28)
+--------------------------------------
+
+* add Servlet 3.0-based async support
+* upgrade to AspectJ 1.6.12, JUnit 4.10, TestNG 6.5.2
+* add HttpMessageConverter and View types compatible with Jackson 2.0
+* better handling on failure to parse invalid 'Content-Type' or 'Accept' headers
+* handle a controller method's return value based on the actual returned value (vs declared type)
+* fix issue with combining identical controller and method level request mapping paths
+* fix concurrency issue in AnnotationMethodHandlerExceptionResolver
+* fix case-sensitivity issue with some containers on access to 'Content-Disposition' header
+* fix issue with encoded params in UriComponentsBuilder
+* add pretty print option to Jackson HttpMessageConverter and View types
+* translate IOException from Jackson to HttpMessageNotReadableException
+* fix issue with resolving Errors controller method argument
+* implement InitializingBean in RequestMappingHandlerMapping to detect controller methods
+* fix content negotiation issue when sorting selected media types by quality value
+* prevent further writing to the response when @ResponseStatus contains a reason
+* deprecate HttpStatus codes 419, 420, 421
+* support access to all URI vars via @PathVariable Map<String, String>
+* add "excludedExceptions" property to SimpleUrlHandlerMapping
+* add CompositeRequestCondition for use with multiple custom request mapping conditions
+* add ability to configure custom MessageCodesResolver through the MVC Java config
+* add option in MappingJacksonJsonView for setting the Content-Length header
+* decode path variables when url decoding is turned off in AbstractHandlerMapping
+* add required flag to @RequestBody annotation
+* support executor qualification with @Async#value (SPR-6847)
+* add convenient WebAppInitializer base classes (SPR-9300)
+* support initial delay attribute for scheduled tasks (SPR-7022)
+* cache by-type lookups in DefaultListableBeanFactory (SPR-6870)
+* merge rather than add URI vars to data binding values (SPR-9349)
+* support not (!) operator for profile selection (SPR-8728)
+* fix regression in ClassPathResource descriptions (SPR-9413)
+* improve documentation of @Bean 'lite' mode (SPR-9401)
+* improve documentation of annotated class support in the TestContext framework (SPR-9401)
+* document support for JSR-250 lifecycle annotations in the TestContext framework (SPR-4868)
+* improve dependency management for spring-test (SPR-8861)
+* fix MultipartResolver Resin compatibility (SPR-9299)
+* handle non-existent files in ServletContextResource (SPR-8461)
+* apply cache settings consistently in EhCacheFactoryBean (SPR-9392)
+* add initial support for JCache (JSR-107) compliant cache providers (SPR-8774)
+
+
+Changes in version 3.1.1 (2012-02-16)
 -------------------------------------
 
-* official support for Hibernate 4.0 GA (as released in the meantime)
+* official support for Hibernate 4.0.0/4.0.1 as well as Hibernate 4.1
 * JBossNativeJdbcExtractor is compatible with JBoss AS 7 as well
+* restored JBossLoadTimeWeaver compatibility with JBoss AS 5.1
+* Provider injection works with generically typed collections of beans as well
+* @ActiveProfiles mechanism in test context framework works with @ImportResource as well
 * context:property-placeholder's "file-encoding" attribute value is being applied correctly
+* clarified Resource's "getFilename" method to return null if resource type does not have a filename
+* Resource "contentLength()" implementations work with OSGi bundle resources and JBoss VFS resources
+* PathMatchingResourcePatternResolver preserves caching for JNLP (Java Web Start) jar connections
+* optimized converter lookup in GenericConversionService to avoid contention in JDK proxy check
 * DataBinder correctly handles ParseException from Formatter for String->String case
 * CacheNamespaceHandler actually parses cache:annotation-driven's "key-generator" attribute
+* introduced CustomSQLExceptionTranslatorRegistry/Registrar for JDBC error code translation
 * officially deprecated TopLinkJpaDialect in favor of EclipseLink and Spring's EclipseLinkJpaDialect
 * fixed LocalContainerEntityManagerFactoryBean's "packagesToScan" to avoid additional provider scan
+* LocalContainerEntityManagerFactoryBean's "persistenceUnitName" applies to "packagesToScan" as well
+* DefaultPersistenceUnitManager uses containing jar as persistence unit root URL for default unit
 * added protected "isPersistenceUnitOverrideAllowed()" method to DefaultPersistenceUnitManager
 * Hibernate synchronization properly unbinds Session even in case of afterCompletion exception
 * Hibernate exception translation covers NonUniqueObjectException to DuplicateKeyException case
@@ -20,16 +73,26 @@ Changes in version 3.1.1 (2012-02-06)
 * Hibernate 4 LocalSessionFactoryBean does not insist on a "dataSource" reference being set
 * added "entityInterceptor" property to Hibernate 4 LocalSessionFactoryBean
 * added "getConfiguration" accessor to Hibernate 4 LocalSessionFactoryBean
-* corrected fix for QuartzJobBean to work with Quartz 2.0/2.1
+* added "durability" and "description" properties to JobDetailFactoryBean
+* fixed QuartzJobBean and MethodInvokingJobDetailFactoryBean for compatibility with Quartz 2.0/2.1
 * JMS CachingConnectionFactory never caches consumers for temporary queues and topics
 * JMS SimpleMessageListenerContainer silently falls back to lazy registration of consumers
-* fix regresion in UriUtils
-* allow adding flash attributes in methods with a ModelAndView return value
+* added "receive-timeout" attribute to jms:listener-container element in JMS namespace
+* ServletServerHttpRequest/Response fall back on the Content-Type and encoding of the request
 * preserve quotes in MediaType parameters
-* make flash attributes available in the model of ParameterizableViewController and UrlFilenameViewController
-* add property to RedirectView to disable expanding URI variables in redirect URL
-* fix request mapping bug involving direct vs pattern path matches with HTTP methods
-* revise the FlashMapManager contract and implemenation to address a flaw in its design
+* added "normalize()" method to UriComponents
+* remove empty path segments from input to UriComponentsBuilder
+* added "fromRequestUri(request)" and "fromCurrentRequestUri()" methods to ServletUriComponentsBuilder
+* Servlet/PortletContextResource's "isReadable()" implementation returns false for directories
+* allow adding flash attributes in methods with a ModelAndView return value
+* make flash attributes available in the model of Parameterizable/UrlFilenameViewController
+* revised the FlashMapManager contract and implementation to address a flaw in its design
+* removed check for HTTP POST when resolving multipart request controller method arguments
+* fixed request mapping bug involving direct vs pattern path matches with HTTP methods
+* updated @RequestMapping and reference docs wrt differences between @MVC 3.1 and @MVC 2.5-3.0
+* improved @SessionAttributes handling to provide better support for clustered sessions
+* added property to RedirectView to disable expanding URI variables in redirect URL
+
 
 Changes in version 3.1 GA (2011-12-12)
 --------------------------------------

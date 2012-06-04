@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,15 @@ public class UriTemplateTests {
         URI result = template.expand(uriVariables);
         assertEquals("Invalid expanded template", new URI("http://example.com/hotel%20list/Z%C3%BCrich"), result);
     }
+
+	@Test(expected = IllegalArgumentException.class)
+	public void expandMapUnboundVariables() throws Exception {
+		Map<String, String> uriVariables = new HashMap<String, String>(2);
+		uriVariables.put("booking", "42");
+		uriVariables.put("bar", "1");
+		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
+		template.expand(uriVariables);
+	}
 
 	@Test
 	public void expandEncoded() throws Exception {

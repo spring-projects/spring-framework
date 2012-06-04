@@ -16,7 +16,7 @@
 
 package org.springframework.oxm.jaxb;
 
-import java.awt.*;
+import java.awt.Image;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,6 +76,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.JdkVersion;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -456,6 +457,7 @@ public class Jaxb2Marshaller
 		if (logger.isDebugEnabled()) {
 			logger.debug("Found JAXB2 classes: [" + StringUtils.arrayToCommaDelimitedString(jaxb2Classes) + "]");
 		}
+		this.classesToBeBound = jaxb2Classes;
 		if (this.jaxbContextProperties != null) {
 			return JAXBContext.newInstance(jaxb2Classes, this.jaxbContextProperties);
 		}
@@ -502,10 +504,17 @@ public class Jaxb2Marshaller
 				Type typeArgument = parameterizedType.getActualTypeArguments()[0];
 				if (typeArgument instanceof Class) {
 					Class<?> classArgument = (Class<?>) typeArgument;
-					return (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) ||
-							supportsInternal(classArgument, false));
+					if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_17 && classArgument.isArray()) {
+						return classArgument.getComponentType().equals(Byte.TYPE);
+					}
+					else {
+						return (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) ||
+								supportsInternal(classArgument, false));
+					}
 				}
-				else if (typeArgument instanceof GenericArrayType) {
+				else if (JdkVersion.getMajorJavaVersion() <= JdkVersion.JAVA_16 &&
+						typeArgument instanceof GenericArrayType) {
+					// see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5041784
 					GenericArrayType arrayType = (GenericArrayType) typeArgument;
 					return arrayType.getGenericComponentType().equals(Byte.TYPE);
 				}
@@ -867,13 +876,13 @@ public class Jaxb2Marshaller
 	 */
 	private static class ByteArrayDataSource implements DataSource {
 
-		private byte[] data;
+		private final byte[] data;
 
-		private String contentType;
+		private final String contentType;
 
-		private int offset;
+		private final int offset;
 
-		private int length;
+		private final int length;
 
 		private ByteArrayDataSource(String contentType, byte[] data, int offset, int length) {
 			this.contentType = contentType;

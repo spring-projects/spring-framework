@@ -36,6 +36,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -71,7 +72,7 @@ public class SQLExceptionSubclassTranslator extends AbstractFallbackSQLException
 				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof SQLTimeoutException) {
-				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
+				return new QueryTimeoutException(buildMessage(task, sql, ex), ex);
 			}
 		}
 		else if (ex instanceof SQLNonTransientException) {

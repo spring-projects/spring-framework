@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.asm.MethodAdapter;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.Type;
 import org.springframework.asm.commons.EmptyVisitor;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.MultiValueMap;
 
@@ -35,6 +36,7 @@ import org.springframework.util.MultiValueMap;
  * @author Juergen Hoeller
  * @author Mark Pollack
  * @author Costin Leau
+ * @author Chris Beams
  * @since 3.0
  */
 final class MethodMetadataReadingVisitor extends MethodAdapter implements MethodMetadata {
@@ -49,7 +51,7 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 
 	private final MultiValueMap<String, MethodMetadata> methodMetadataMap;
 
-	private final Map<String, Map<String, Object>> attributeMap = new LinkedHashMap<String, Map<String, Object>>(2);
+	private final Map<String, AnnotationAttributes> attributeMap = new LinkedHashMap<String, AnnotationAttributes>(2);
 
 	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
 			MultiValueMap<String, MethodMetadata> methodMetadataMap) {
@@ -88,7 +90,7 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 		return this.attributeMap.containsKey(annotationType);
 	}
 
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
+	public AnnotationAttributes getAnnotationAttributes(String annotationType) {
 		return this.attributeMap.get(annotationType);
 	}
 

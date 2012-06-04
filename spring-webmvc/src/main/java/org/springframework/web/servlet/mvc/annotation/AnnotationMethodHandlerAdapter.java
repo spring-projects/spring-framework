@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -443,7 +443,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	/**
 	 * This method always returns -1 since an annotated controller can have many methods,
 	 * each requiring separate lastModified calculations. Instead, an
-	 * @{@link RequestMapping}-annotated method can calculate the lastModified value, call
+	 * {@link RequestMapping}-annotated method can calculate the lastModified value, call
 	 * {@link org.springframework.web.context.request.WebRequest#checkNotModified(long)}
 	 * to check it, and return {@code null} if that returns {@code true}.
 	 * @see org.springframework.web.context.request.WebRequest#checkNotModified(long)
@@ -483,7 +483,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * @return the ServletRequestDataBinder instance to use
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ServletRequestDataBinder#bind(javax.servlet.ServletRequest)
-	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, org.springframework.core.MethodParameter) 
+	 * @see ServletRequestDataBinder#convertIfNecessary(Object, Class, org.springframework.core.MethodParameter)
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object target, String objectName) throws Exception {
 		return new ServletRequestDataBinder(target, objectName);
@@ -588,7 +588,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 						if (!typeLevelPattern.startsWith("/")) {
 							typeLevelPattern = "/" + typeLevelPattern;
 						}
-						if (getMatchingPattern(typeLevelPattern, lookupPath) != null) {
+						boolean useSuffixPattern = useSuffixPattern(request);
+						if (getMatchingPattern(typeLevelPattern, lookupPath, useSuffixPattern) != null) {
 							if (mappingInfo.matches(request)) {
 								match = true;
 								mappingInfo.addMatchedPattern(typeLevelPattern);
@@ -675,6 +676,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			return (Boolean) request.getAttribute(HandlerMapping.INTROSPECT_TYPE_LEVEL_MAPPING);
 		}
 
+		private boolean useSuffixPattern(HttpServletRequest request) {
+			Object value = request.getAttribute(DefaultAnnotationHandlerMapping.USE_DEFAULT_SUFFIX_PATTERN);
+			return (value != null) ? (Boolean) value : Boolean.TRUE;
+		}
+
 		/**
 		 * Determines the combined pattern for the given methodLevelPattern and path.
 		 * <p>Uses the following algorithm:
@@ -687,6 +693,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		 * </ol>
 		 */
 		private String getCombinedPattern(String methodLevelPattern, String lookupPath, HttpServletRequest request) {
+			boolean useSuffixPattern = useSuffixPattern(request);
 			if (useTypeLevelMapping(request)) {
 				String[] typeLevelPatterns = getTypeLevelMapping().value();
 				for (String typeLevelPattern : typeLevelPatterns) {
@@ -694,7 +701,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 						typeLevelPattern = "/" + typeLevelPattern;
 					}
 					String combinedPattern = pathMatcher.combine(typeLevelPattern, methodLevelPattern);
-					String matchingPattern = getMatchingPattern(combinedPattern, lookupPath);
+					String matchingPattern = getMatchingPattern(combinedPattern, lookupPath, useSuffixPattern);
 					if (matchingPattern != null) {
 						return matchingPattern;
 					}
@@ -704,20 +711,20 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			String bestMatchingPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
 			if (StringUtils.hasText(bestMatchingPattern) && bestMatchingPattern.endsWith("*")) {
 				String combinedPattern = pathMatcher.combine(bestMatchingPattern, methodLevelPattern);
-				String matchingPattern = getMatchingPattern(combinedPattern, lookupPath);
+				String matchingPattern = getMatchingPattern(combinedPattern, lookupPath, useSuffixPattern);
 				if (matchingPattern != null && !matchingPattern.equals(bestMatchingPattern)) {
 					return matchingPattern;
 				}
 			}
-			return getMatchingPattern(methodLevelPattern, lookupPath);
+			return getMatchingPattern(methodLevelPattern, lookupPath, useSuffixPattern);
 		}
 
-		private String getMatchingPattern(String pattern, String lookupPath) {
+		private String getMatchingPattern(String pattern, String lookupPath, boolean useSuffixPattern) {
 			if (pattern.equals(lookupPath)) {
 				return pattern;
 			}
 			boolean hasSuffix = pattern.indexOf('.') != -1;
-			if (!hasSuffix) {
+			if (useSuffixPattern && !hasSuffix) {
 				String patternWithSuffix = pattern + ".*";
 				if (pathMatcher.match(patternWithSuffix, lookupPath)) {
 					return patternWithSuffix;
@@ -727,7 +734,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				return pattern;
 			}
 			boolean endsWithSlash = pattern.endsWith("/");
-			if (!endsWithSlash) {
+			if (useSuffixPattern && !endsWithSlash) {
 				String patternWithSlash = pattern + "/";
 				if (pathMatcher.match(patternWithSlash, lookupPath)) {
 					return patternWithSlash;
@@ -743,7 +750,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			int patternVariableCount = StringUtils.countOccurrencesOf(mappedPattern, "{");
 			if ((variables == null || patternVariableCount != variables.size()) && pathMatcher.match(mappedPattern, lookupPath)) {
 				variables = pathMatcher.extractUriTemplateVariables(mappedPattern, lookupPath);
-				request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, variables);
+				Map<String, String> decodedVariables = urlPathHelper.decodePathVariables(request, variables);
+				request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedVariables);
 			}
 		}
 	}
@@ -1236,7 +1244,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		private int compareAcceptHeaders(RequestMappingInfo info1, RequestMappingInfo info2) {
 			List<MediaType> requestAccepts = request.getHeaders().getAccept();
 			MediaType.sortByQualityValue(requestAccepts);
-			
+
 			List<MediaType> info1Accepts = getAcceptHeaderValue(info1);
 			List<MediaType> info2Accepts = getAcceptHeaderValue(info2);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,30 @@ import org.springframework.context.ApplicationContext;
 /**
  * Strategy interface for loading an {@link ApplicationContext application context}
  * for an integration test managed by the Spring TestContext Framework.
- * 
+ *
  * <p>The {@code SmartContextLoader} SPI supersedes the {@link ContextLoader} SPI
  * introduced in Spring 2.5: a {@code SmartContextLoader} can choose to process
- * either resource locations or configuration classes. Furthermore, a
+ * either resource locations or annotated classes. Furthermore, a
  * {@code SmartContextLoader} can set active bean definition profiles in the
  * context that it loads (see {@link MergedContextConfiguration#getActiveProfiles()}
  * and {@link #loadContext(MergedContextConfiguration)}).
  *
+ * <p>See the Javadoc for
+ * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
+ * for a definition of <em>annotated class</em>.
+ * 
  * <p>Clients of a {@code SmartContextLoader} should call
  * {@link #processContextConfiguration(ContextConfigurationAttributes)
  * processContextConfiguration()} prior to calling
  * {@link #loadContext(MergedContextConfiguration) loadContext()}. This gives a
  * {@code SmartContextLoader} the opportunity to provide custom support for
- * modifying resource locations or detecting default resource locations or 
+ * modifying resource locations or detecting default resource locations or
  * default configuration classes. The results of
  * {@link #processContextConfiguration(ContextConfigurationAttributes)
  * processContextConfiguration()} should be merged for all classes in the
  * hierarchy of the root test class and then supplied to
  * {@link #loadContext(MergedContextConfiguration) loadContext()}.
- * 
+ *
  * <p>Even though {@code SmartContextLoader} extends {@code ContextLoader},
  * clients should favor {@code SmartContextLoader}-specific methods over those
  * defined in {@code ContextLoader}, particularly because a
@@ -97,7 +101,7 @@ public interface SmartContextLoader extends ContextLoader {
 	 * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
 	 * {@link javax.annotation.Resource @Resource}, and
 	 * {@link javax.inject.Inject @Inject}. In addition, concrete implementations
-	 * should set the active bean definition profiles in the context's 
+	 * should set the active bean definition profiles in the context's
 	 * {@link org.springframework.core.env.Environment Environment}.
 	 * <p>Any <code>ApplicationContext</code> loaded by a
 	 * {@code SmartContextLoader} <strong>must</strong> register a JVM
@@ -110,7 +114,8 @@ public interface SmartContextLoader extends ContextLoader {
 	 * @return a new application context
 	 * @throws Exception if context loading failed
 	 * @see #processContextConfiguration(ContextConfigurationAttributes)
-	 * @see org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors()
+	 * @see org.springframework.context.annotation.AnnotationConfigUtils
+	 * #registerAnnotationConfigProcessors(org.springframework.beans.factory.support.BeanDefinitionRegistry)
 	 * @see org.springframework.test.context.MergedContextConfiguration#getActiveProfiles()
 	 * @see org.springframework.context.ConfigurableApplicationContext#getEnvironment()
 	 */

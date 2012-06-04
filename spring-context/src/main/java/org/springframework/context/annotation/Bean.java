@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,14 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 
 /**
- * Indicates that a method produces a bean to be managed by the Spring container. The
- * names and semantics of the attributes to this annotation are intentionally similar
- * to those of the {@code <bean/>} element in the Spring XML schema. For example:
+ * Indicates that a method produces a bean to be managed by the Spring container.
+ *
+ * <h3>Overview</h3>
+ *
+ * <p>The names and semantics of the attributes to this annotation are intentionally
+ * similar to those of the {@code <bean/>} element in the Spring XML schema. For
+ * example:
+ *
  * <pre class="code">
  *     &#064;Bean
  *     public MyBean myBean() {
@@ -36,11 +41,15 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *         return obj;
  *     }</pre>
  *
- * <p>While a {@link #name()} attribute is available, the default strategy for determining
- * the name of a bean is to use the name of the Bean method. This is convenient and
- * intuitive, but if explicit naming is desired, the {@code name()} attribute may be used.
- * Also note that {@code name()} accepts an array of Strings. This is in order to allow
- * for specifying multiple names (i.e., aliases) for a single bean.
+ * <h3>Bean Names</h3>
+ *
+ * <p>While a {@link #name() name} attribute is available, the default strategy for
+ * determining the name of a bean is to use the name of the {@code @Bean} method.
+ * This is convenient and intuitive, but if explicit naming is desired, the
+ * {@code name} attribute may be used. Also note that {@code name} accepts an array
+ * of Strings. This is in order to allow for specifying multiple names (i.e., aliases)
+ * for a single bean.
+ *
  * <pre class="code">
  *     &#064;Bean(name={"b1","b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
  *     public MyBean myBean() {
@@ -48,10 +57,13 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *         return obj;
  *     }</pre>
  *
+ * <h3>Scope, DependsOn, Primary, and Lazy</h3>
+ *
  * <p>Note that the {@code @Bean} annotation does not provide attributes for scope,
- * primary or lazy. Rather, it should be used in conjunction with {@link Scope @Scope},
- * {@link Primary @Primary}, and {@link Lazy @Lazy} annotations to achieve
- * those semantics. For example:
+ * depends-on, primary, or lazy. Rather, it should be used in conjunction with
+ * {@link Scope @Scope}, {@link DependsOn @DependsOn}, {@link Primary @Primary},
+ * and {@link Lazy @Lazy} annotations to achieve those semantics. For example:
+ *
  * <pre class="code">
  *     &#064;Bean
  *     &#064;Scope("prototype")
@@ -60,15 +72,18 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *         return obj;
  *     }</pre>
  *
+ * <h3>{@code @Bean} Methods in {@code @Configuration} Classes</h3>
+ *
  * <p>Typically, {@code @Bean} methods are declared within {@code @Configuration}
- * classes. In this case, bean methods may reference other <code>@Bean</code> methods
- * on the same class by calling them <i>directly</i>. This ensures that references between
- * beans are strongly typed and navigable. Such so-called 'inter-bean references' are
- * guaranteed to respect scoping and AOP semantics, just like <code>getBean</code> lookups
+ * classes. In this case, bean methods may reference other {@code @Bean} methods
+ * in the same class by calling them <i>directly</i>. This ensures that references between
+ * beans are strongly typed and navigable. Such so-called <em>'inter-bean references'</em> are
+ * guaranteed to respect scoping and AOP semantics, just like <code>getBean()</code> lookups
  * would. These are the semantics known from the original 'Spring JavaConfig' project
  * which require CGLIB subclassing of each such configuration class at runtime. As a
  * consequence, {@code @Configuration} classes and their factory methods must not be
  * marked as final or private in this mode. For example:
+ *
  * <pre class="code">
  * &#064;Configuration
  * public class AppConfig {
@@ -83,13 +98,29 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *     // ...
  * }</pre>
  *
- * <p>{@code @Bean} methods may also be declared wihtin any {@code @Component} class, in
- * which case they will get processed in a configuration class 'lite' mode in which
- * they will simply be called as plain factory methods from the container (similar to
- * {@code factory-method} declarations in XML). The containing component classes remain
- * unmodified in this case, and there are no unusual constraints for factory methods,
- * however, scoping semantics are not respected as described above for inter-bean method
- * invocations in this mode. For example:
+ * <h3>{@code @Bean} <em>Lite</em> Mode</h3>
+ *
+ * <p>{@code @Bean} methods may also be declared within classes that are <em>not</em>
+ * annotated with {@code @Configuration}. For example, bean methods may be declared
+ * in a {@code @Component} class or even in a <em>plain old class</em>. In such cases,
+ * a {@code @Bean} method will get processed in a so-called <em>'lite'</em> mode.
+ *
+ * <p>Bean methods in <em>lite</em> mode will be treated as plain <em>factory
+ * methods</em> by the container (similar to {@code factory-method} declarations
+ * in XML), with scoping and lifecycle callbacks properly applied. The containing
+ * class remains unmodified in this case, and there are no unusual constraints for
+ * the containing class or the factory methods.
+ *
+ * <p>In contrast to the semantics for bean methods in {@code @Configuration} classes,
+ * <em>'inter-bean references'</em> are not supported in <em>lite</em> mode. Instead,
+ * when one {@code @Bean}-method invokes another {@code @Bean}-method in <em>lite</em>
+ * mode, the invocation is a standard Java method invocation; Spring does not intercept
+ * the invocation via a CGLIB proxy. This is analogous to inter-{@code @Transactional}
+ * method calls where in proxy mode, Spring does not intercept the invocation &mdash;
+ * Spring does so only in AspectJ mode.
+ * 
+ * <p>For example:
+ *
  * <pre class="code">
  * &#064;Component
  * public class Calculator {
@@ -103,21 +134,26 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *     }
  * }</pre>
  *
+ * <h3>Bootstrapping</h3>
+ *
  * <p>See @{@link Configuration} Javadoc for further details including how to bootstrap
  * the container using {@link AnnotationConfigApplicationContext} and friends.
  *
- * <h3>A note on {@code BeanFactoryPostProcessor}-returning {@code @Bean} methods</h3>
+ * <h3>{@code BeanFactoryPostProcessor}-returning {@code @Bean} methods</h3>
+ *
  * <p>Special consideration must be taken for {@code @Bean} methods that return Spring
  * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessor}
  * ({@code BFPP}) types. Because {@code BFPP} objects must be instantiated very early in the
  * container lifecycle, they can interfere with processing of annotations such as {@code @Autowired},
  * {@code @Value}, and {@code @PostConstruct} within {@code @Configuration} classes. To avoid these
  * lifecycle issues, mark {@code BFPP}-returning {@code @Bean} methods as {@code static}. For example:
+ *
  * <pre class="code">
  *     &#064;Bean
  *     public static PropertyPlaceholderConfigurer ppc() {
  *         // instantiate, configure and return ppc ...
  *     }</pre>
+ *
  * By marking this method as {@code static}, it can be invoked without causing instantiation of its
  * declaring {@code @Configuration} class, thus avoiding the above-mentioned lifecycle conflicts.
  * Note however that {@code static} {@code @Bean} methods will not be enhanced for scoping and AOP
@@ -130,6 +166,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * @author Costin Leau
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see Configuration
  * @see Scope
@@ -140,7 +177,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * @see org.springframework.beans.factory.annotation.Autowired
  * @see org.springframework.beans.factory.annotation.Value
  */
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@Target({ ElementType.METHOD, ElementType.ANNOTATION_TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Bean {
@@ -170,20 +207,24 @@ public @interface Bean {
 	 * application context, for example a {@code close()} method on a JDBC {@code
 	 * DataSource} implementation, or a Hibernate {@code SessionFactory} object.
 	 * The method must have no arguments but may throw any exception.
+	 *
 	 * <p>As a convenience to the user, the container will attempt to infer a destroy
-	 * method against object returned from the {@code @Bean} method. For example, given a
+	 * method against an object returned from the {@code @Bean} method. For example, given a
 	 * {@code @Bean} method returning an Apache Commons DBCP {@code BasicDataSource}, the
 	 * container will notice the {@code close()} method available on that object and
 	 * automatically register it as the {@code destroyMethod}. This 'destroy method
 	 * inference' is currently limited to detecting only public, no-arg methods named
-	 * 'close'. The method may be declared at any level of the inheritance hierarchy, and
-	 * will be detected regardless of the return type of the {@code @Bean} method, i.e.
-	 * detection occurs reflectively against the bean instance itself at creation time.
+	 * 'close'. The method may be declared at any level of the inheritance hierarchy and
+	 * will be detected regardless of the return type of the {@code @Bean} method (i.e.,
+	 * detection occurs reflectively against the bean instance itself at creation time).
+	 *
 	 * <p>To disable destroy method inference for a particular {@code @Bean}, specify an
 	 * empty string as the value, e.g. {@code @Bean(destroyMethod="")}.
+	 *
 	 * <p>Note: Only invoked on beans whose lifecycle is under the full control of the
-	 * factory, which is always the case for singletons but not guaranteed 
-	 * for any other scope.
+	 * factory, which is always the case for singletons but not guaranteed for any
+	 * other scope.
+	 *
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
 	String destroyMethod() default AbstractBeanDefinition.INFER_METHOD;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -485,38 +485,38 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 */
 	protected final JasperReport loadReport(Resource resource) {
 		try {
-			String fileName = resource.getFilename();
-			if (fileName.endsWith(".jasper")) {
-				// Load pre-compiled report.
-				if (logger.isInfoEnabled()) {
-					logger.info("Loading pre-compiled Jasper Report from " + resource);
+			String filename = resource.getFilename();
+			if (filename != null) {
+				if (filename.endsWith(".jasper")) {
+					// Load pre-compiled report.
+					if (logger.isInfoEnabled()) {
+						logger.info("Loading pre-compiled Jasper Report from " + resource);
+					}
+					InputStream is = resource.getInputStream();
+					try {
+						return (JasperReport) JRLoader.loadObject(is);
+					}
+					finally {
+						is.close();
+					}
 				}
-				InputStream is = resource.getInputStream();
-				try {
-					return (JasperReport) JRLoader.loadObject(is);
-				}
-				finally {
-					is.close();
+				else if (filename.endsWith(".jrxml")) {
+					// Compile report on-the-fly.
+					if (logger.isInfoEnabled()) {
+						logger.info("Compiling Jasper Report loaded from " + resource);
+					}
+					InputStream is = resource.getInputStream();
+					try {
+						JasperDesign design = JRXmlLoader.load(is);
+						return JasperCompileManager.compileReport(design);
+					}
+					finally {
+						is.close();
+					}
 				}
 			}
-			else if (fileName.endsWith(".jrxml")) {
-				// Compile report on-the-fly.
-				if (logger.isInfoEnabled()) {
-					logger.info("Compiling Jasper Report loaded from " + resource);
-				}
-				InputStream is = resource.getInputStream();
-				try {
-					JasperDesign design = JRXmlLoader.load(is);
-					return JasperCompileManager.compileReport(design);
-				}
-				finally {
-					is.close();
-				}
-			}
-			else {
-				throw new IllegalArgumentException(
-						"Report filename [" + fileName + "] must end in either .jasper or .jrxml");
-			}
+			throw new IllegalArgumentException(
+					"Report filename [" + filename + "] must end in either .jasper or .jrxml");
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException(

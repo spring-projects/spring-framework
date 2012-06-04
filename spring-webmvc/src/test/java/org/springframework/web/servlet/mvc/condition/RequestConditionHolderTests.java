@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.condition;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,36 +25,31 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
-import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
-import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
-import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 
 /**
- * A test fixture for 
- * {code org.springframework.web.servlet.mvc.method.RequestConditionHolder} tests.
- * 
+ * A test fixture for {@link RequestConditionHolder} tests.
+ *
  * @author Rossen Stoyanchev
  */
 public class RequestConditionHolderTests {
-
-	@Test
-	public void combineEmpty() {
-		RequestConditionHolder empty = new RequestConditionHolder(null);
-		RequestConditionHolder notEmpty = new RequestConditionHolder(new ParamsRequestCondition("name"));
-		
-		assertSame(empty, empty.combine(new RequestConditionHolder(null)));
-		assertSame(notEmpty, notEmpty.combine(empty));
-		assertSame(notEmpty, empty.combine(notEmpty));
-	}
 
 	@Test
 	public void combine() {
 		RequestConditionHolder params1 = new RequestConditionHolder(new ParamsRequestCondition("name1"));
 		RequestConditionHolder params2 = new RequestConditionHolder(new ParamsRequestCondition("name2"));
 		RequestConditionHolder expected = new RequestConditionHolder(new ParamsRequestCondition("name1", "name2"));
-		
+
 		assertEquals(expected, params1.combine(params2));
+	}
+
+	@Test
+	public void combineEmpty() {
+		RequestConditionHolder empty = new RequestConditionHolder(null);
+		RequestConditionHolder notEmpty = new RequestConditionHolder(new ParamsRequestCondition("name"));
+
+		assertSame(empty, empty.combine(empty));
+		assertSame(notEmpty, notEmpty.combine(empty));
+		assertSame(notEmpty, empty.combine(notEmpty));
 	}
 
 	@Test(expected=ClassCastException.class)
@@ -67,14 +63,24 @@ public class RequestConditionHolderTests {
 	public void match() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 		request.setParameter("name1", "value1");
-		
+
 		RequestMethodsRequestCondition rm = new RequestMethodsRequestCondition(RequestMethod.GET, RequestMethod.POST);
 		RequestConditionHolder custom = new RequestConditionHolder(rm);
 		RequestMethodsRequestCondition expected = new RequestMethodsRequestCondition(RequestMethod.GET);
-		
+
 		assertEquals(expected, custom.getMatchingCondition(request).getCondition());
 	}
-	
+
+	@Test
+	public void noMatch() {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+
+		RequestMethodsRequestCondition rm = new RequestMethodsRequestCondition(RequestMethod.POST);
+		RequestConditionHolder custom = new RequestConditionHolder(rm);
+
+		assertNull(custom.getMatchingCondition(request));
+	}
+
 	@Test
 	public void matchEmpty() {
 		RequestConditionHolder empty = new RequestConditionHolder(null);
@@ -91,7 +97,7 @@ public class RequestConditionHolderTests {
 		assertEquals(1, params11.compareTo(params12, request));
 		assertEquals(-1, params12.compareTo(params11, request));
 	}
-	
+
 	@Test
 	public void compareEmpty() {
 		HttpServletRequest request = new MockHttpServletRequest();

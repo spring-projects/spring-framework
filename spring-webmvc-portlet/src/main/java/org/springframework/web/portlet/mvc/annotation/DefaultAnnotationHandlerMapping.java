@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -411,8 +411,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 			}
 			else if (other instanceof RenderMappingPredicate) {
 				RenderMappingPredicate otherRender = (RenderMappingPredicate) other;
-				boolean hasWindowState = "".equals(this.windowState);
-				boolean otherHasWindowState = "".equals(otherRender.windowState);
+				boolean hasWindowState = (this.windowState != null);
+				boolean otherHasWindowState = (otherRender.windowState != null);
 				if (hasWindowState != otherHasWindowState) {
 					return (hasWindowState ? -1 : 1);
 				}

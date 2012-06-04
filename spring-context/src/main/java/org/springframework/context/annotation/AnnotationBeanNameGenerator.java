@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -85,7 +86,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		Set<String> types = amd.getAnnotationTypes();
 		String beanName = null;
 		for (String type : types) {
-			Map<String, Object> attributes = amd.getAnnotationAttributes(type);
+			AnnotationAttributes attributes = MetadataUtils.attributesFor(amd, type);
 			if (isStereotypeWithNameValue(type, amd.getMetaAnnotationTypes(type), attributes)) {
 				String value = (String) attributes.get("value");
 				if (StringUtils.hasLength(value)) {

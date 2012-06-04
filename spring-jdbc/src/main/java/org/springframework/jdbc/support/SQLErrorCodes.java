@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jdbc.support;
 
 import org.springframework.util.StringUtils;
-import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
  * JavaBean for holding JDBC error codes for a particular database.
@@ -37,8 +36,6 @@ public class SQLErrorCodes {
 	private String[] databaseProductNames;
 
 	private boolean useSqlStateForTranslation = false;
-
-	private SQLExceptionTranslator customSqlExceptionTranslator = null;
 
 	private String[] badSqlGrammarCodes = new String[0];
 
@@ -61,6 +58,8 @@ public class SQLErrorCodes {
 	private String[] cannotSerializeTransactionCodes = new String[0];
 
 	private CustomSQLErrorCodesTranslation[] customTranslations;
+
+	private SQLExceptionTranslator customSqlExceptionTranslator;
 
 
 	/**
@@ -98,27 +97,6 @@ public class SQLErrorCodes {
 
 	public boolean isUseSqlStateForTranslation() {
 		return this.useSqlStateForTranslation;
-	}
-
-	public SQLExceptionTranslator getCustomSqlExceptionTranslator() {
-		return customSqlExceptionTranslator;
-	}
-
-	public void setCustomSqlExceptionTranslatorClass(Class customSqlExceptionTranslatorClass) {
-		if (customSqlExceptionTranslatorClass != null) {
-			try {
-				this.customSqlExceptionTranslator =
-						(SQLExceptionTranslator) customSqlExceptionTranslatorClass.newInstance();
-			}
-			catch (InstantiationException e) {
-				throw new InvalidDataAccessResourceUsageException(
-						"Unable to instantiate " + customSqlExceptionTranslatorClass.getName(), e);
-			}
-			catch (IllegalAccessException e) {
-				throw new InvalidDataAccessResourceUsageException(
-						"Unable to instantiate " + customSqlExceptionTranslatorClass.getName(), e);
-			}
-		}
 	}
 
 	public void setBadSqlGrammarCodes(String[] badSqlGrammarCodes) {
@@ -207,6 +185,28 @@ public class SQLErrorCodes {
 
 	public CustomSQLErrorCodesTranslation[] getCustomTranslations() {
 		return this.customTranslations;
+	}
+
+	public void setCustomSqlExceptionTranslatorClass(Class<? extends SQLExceptionTranslator> customTranslatorClass) {
+		if (customTranslatorClass != null) {
+			try {
+				this.customSqlExceptionTranslator = customTranslatorClass.newInstance();
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException("Unable to instantiate custom translator", ex);
+			}
+		}
+		else {
+			this.customSqlExceptionTranslator = null;
+		}
+	}
+
+	public void setCustomSqlExceptionTranslator(SQLExceptionTranslator customSqlExceptionTranslator) {
+		this.customSqlExceptionTranslator = customSqlExceptionTranslator;
+	}
+
+	public SQLExceptionTranslator getCustomSqlExceptionTranslator() {
+		return this.customSqlExceptionTranslator;
 	}
 
 }

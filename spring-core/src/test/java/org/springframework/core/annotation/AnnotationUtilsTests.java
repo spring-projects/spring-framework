@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,19 @@
 
 package org.springframework.core.annotation;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
-import static org.springframework.core.annotation.AnnotationUtils.getAnnotation;
-import static org.springframework.core.annotation.AnnotationUtils.isAnnotationDeclaredLocally;
-import static org.springframework.core.annotation.AnnotationUtils.isAnnotationInherited;
-
-import java.io.IOException;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.core.Ordered;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.stereotype.Component;
+
+import static org.junit.Assert.*;
+
+import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
  * @author Rod Johnson
@@ -219,6 +207,14 @@ public class AnnotationUtilsTests {
 		assertNotNull(order);
 	}
 
+	@Test
+	public void testFindAnnotationFromInterfaceWhenSuperDoesNotImplementMethod() throws Exception {
+
+		Method method = SubOfAbstractImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
+		Order order = findAnnotation(method, Order.class);
+		assertNotNull(order);
+	}
+
 
 	@Component(value="meta1")
 	@Retention(RetentionPolicy.RUNTIME)
@@ -348,6 +344,15 @@ public class AnnotationUtilsTests {
 	}
 
 	public static class SubOfImplementsInterfaceWithAnnotatedMethod extends ImplementsInterfaceWithAnnotatedMethod {
+
+		public void foo() {
+		}
+	}
+
+	public abstract static class AbstractDoesNotImplementInterfaceWithAnnotatedMethod implements InterfaceWithAnnotatedMethod {
+	}
+
+	public static class SubOfAbstractImplementsInterfaceWithAnnotatedMethod extends AbstractDoesNotImplementInterfaceWithAnnotatedMethod {
 
 		public void foo() {
 		}

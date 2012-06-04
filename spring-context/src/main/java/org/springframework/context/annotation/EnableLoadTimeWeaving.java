@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,13 +64,13 @@ import org.springframework.instrument.classloading.LoadTimeWeaver;
  * TomcatInstrumentableClassLoader}).
  *
  * <p>To customize the weaver used, the {@code @Configuration} class annotated with
- * {@code @EnableLoadTimeWeaving} may also implement the {@link LoadTimeWeaverConfigurer}
+ * {@code @EnableLoadTimeWeaving} may also implement the {@link LoadTimeWeavingConfigurer}
  * interface and return a custom {@code LoadTimeWeaver} instance through the
  * {@code #getLoadTimeWeaver} method:
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableLoadTimeWeaving
- * public class AppConfig implements LoadTimeWeaverConfigurer {
+ * public class AppConfig implements LoadTimeWeavingConfigurer {
  *     &#064;Override
  *     public LoadTimeWeaver getLoadTimeWeaver() {
  *         MyLoadTimeWeaver ltw = new MyLoadTimeWeaver();

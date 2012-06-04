@@ -11,6 +11,13 @@
 		</layout>
 	</appender>
 
+	<appender name="file" class="org.apache.log4j.FileAppender">
+		<param name="File" value="build/spring-test.log" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p: %c - %m%n" />
+		</layout>
+	</appender>
+
 	<logger name="org.springframework.beans">
 		<level value="warn" />
 	</logger>
@@ -21,7 +28,11 @@
 	<logger name="org.springframework.test.context.ContextLoaderUtils">
 		<level value="warn" />
 	</logger>
-<!--
+
+<!-- 
+	<logger name="org.springframework.test.context.support.DelegatingSmartContextLoader">
+		<level value="info" />
+	</logger>
 	<logger name="org.springframework.test.context.support.AbstractGenericContextLoader">
 		<level value="info" />
 	</logger>
@@ -29,14 +40,16 @@
 		<level value="info" />
 	</logger>
 -->
-	<logger name="org.springframework.test.context.support">
-		<level value="fatal" />
+
+	<logger name="org.springframework.test.context">
+		<level value="warn" />
 	</logger>
 
 	<!-- Root Logger -->
 	<root>
 		<priority value="warn" />
 		<appender-ref ref="console" />
+		<appender-ref ref="file" />
 	</root>
 
 </log4j:configuration>

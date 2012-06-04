@@ -17,10 +17,10 @@
 package org.springframework.web.method.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.bind.support.WebRequestDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -99,10 +98,10 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			throws Exception {
 
 		String name = ModelFactory.getNameForParameter(parameter);
-		Object target = (mavContainer.containsAttribute(name)) ?
+		Object attribute = (mavContainer.containsAttribute(name)) ?
 				mavContainer.getModel().get(name) : createAttribute(name, parameter, binderFactory, request);
 
-		WebDataBinder binder = binderFactory.createBinder(request, target, name);
+		WebDataBinder binder = binderFactory.createBinder(request, attribute, name);
 		if (binder.getTarget() != null) {
 			bindRequestParameters(binder, request);
 			validateIfApplicable(binder, parameter);
@@ -113,7 +112,12 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			}
 		}
 
-		mavContainer.addAllAttributes(binder.getBindingResult().getModel());
+		// Add resolved attribute and BindingResult at the end of the model
+
+		Map<String, Object> bindingResultModel = binder.getBindingResult().getModel();
+		mavContainer.removeAttributes(bindingResultModel);
+		mavContainer.addAllAttributes(bindingResultModel);
+
 		return binder.getTarget();
 	}
 

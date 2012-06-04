@@ -265,7 +265,7 @@ public class ExampleBean {
       </sidebar>
     </section>
 
-    <section>
+    <section id="beans-dependency-resolution">
       <title>Dependency resolution process</title>
 
       <para>The container performs bean dependency resolution as follows:</para>
@@ -859,7 +859,7 @@ support=support@example.co.uk</programlisting>
           the container uses internally.</para>
       </section>
 
-      <section>
+      <section id="beans-collection-merge-limitations">
         <title>Limitations of collection merging</title>
 
         <para>You cannot merge different collection types (such as a
@@ -1438,7 +1438,7 @@ package fiona.apple;
 
 <lineannotation>// Spring-API imports</lineannotation>
 import org.springframework.beans.BeansException;
-import org.springframework.context.Applicationcontext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 public class CommandManager implements ApplicationContextAware {

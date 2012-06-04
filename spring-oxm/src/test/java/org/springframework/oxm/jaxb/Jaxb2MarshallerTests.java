@@ -163,6 +163,14 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.afterPropertiesSet();
 		testSupports();
 	}
+	
+	@Test
+	public void supportsPackagesToScan() throws Exception {
+		marshaller = new Jaxb2Marshaller();
+		marshaller.setPackagesToScan(new String[] {CONTEXT_PATH});
+		marshaller.afterPropertiesSet();
+		testSupports();
+	}
 
 	private void testSupports() throws Exception {
 		assertTrue("Jaxb2Marshaller does not support Flights class", marshaller.supports(Flights.class));
@@ -277,13 +285,6 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.marshal(object, new StreamResult(writer), mimeContainer);
 		verify(mimeContainer);
 		assertTrue("No XML written", writer.toString().length() > 0);
-	}
-
-	@Test
-	public void supportsPackagesToScan() throws Exception {
-		marshaller = new Jaxb2Marshaller();
-		marshaller.setPackagesToScan(new String[] {CONTEXT_PATH});
-		marshaller.afterPropertiesSet();
 	}
 
 	@XmlRootElement

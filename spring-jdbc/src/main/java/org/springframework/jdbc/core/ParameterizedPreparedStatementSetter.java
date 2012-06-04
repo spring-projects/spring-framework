@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ import java.sql.SQLException;
  * @author Nicolas Fabre
  * @author Thomas Risberg
  * @since 3.1
- * @see JdbcTemplate#batchUpdate(String sql, Collection<T> objs, int batchSize, ParameterizedPreparedStatementSetter<T> pss)
+ * @see JdbcTemplate#batchUpdate(String, java.util.Collection, int, ParameterizedPreparedStatementSetter)
  */
 public interface ParameterizedPreparedStatementSetter<T> {
 
-	/** 
+	/**
 	 * Set parameter values on the given PreparedStatement.
-	 * 
+	 *
 	 * @param ps the PreparedStatement to invoke setter methods on
 	 * @param argument the object containing the values to be set
 	 * @throws SQLException if a SQLException is encountered (i.e. there is no need to catch SQLException)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,16 @@
 
 package org.springframework.web.servlet.handler;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.util.Collections;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletResponse;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
@@ -193,6 +195,16 @@ public class SimpleMappingExceptionResolverTests {
 		exceptionResolver.setMappedHandlerClasses(new Class[] {String.class});
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler2, genericException);
+		assertNull(mav);
+	}
+
+	@Test
+	public void simpleExceptionMappingWithExclusion() {
+		Properties props = new Properties();
+		props.setProperty("Exception", "error");
+		exceptionResolver.setExceptionMappings(props);
+		exceptionResolver.setExcludedExceptions(IllegalArgumentException.class);
+		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, new IllegalArgumentException());
 		assertNull(mav);
 	}
 

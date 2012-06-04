@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * <code>ContextConfigurationAttributes</code> encapsulates the context 
+ * <code>ContextConfigurationAttributes</code> encapsulates the context
  * configuration attributes declared on a test class via
  * {@link ContextConfiguration @ContextConfiguration}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  * @see ContextConfiguration
@@ -52,7 +52,7 @@ public class ContextConfigurationAttributes {
 	 * Resolve resource locations from the {@link ContextConfiguration#locations() locations}
 	 * and {@link ContextConfiguration#value() value} attributes of the supplied
 	 * {@link ContextConfiguration} annotation.
-	 * 
+	 *
 	 * @throws IllegalStateException if both the locations and value attributes have been declared
 	 */
 	private static String[] resolveLocations(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
@@ -81,7 +81,7 @@ public class ContextConfigurationAttributes {
 	 * supplied {@link ContextConfiguration @ContextConfiguration} annotation and
 	 * the {@link Class test class} that declared it.
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
-	 * @param contextConfiguration the annotation from which to retrieve the attributes 
+	 * @param contextConfiguration the annotation from which to retrieve the attributes
 	 */
 	public ContextConfigurationAttributes(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
 		this(declaringClass, resolveLocations(declaringClass, contextConfiguration), contextConfiguration.classes(),
@@ -93,14 +93,14 @@ public class ContextConfigurationAttributes {
 	 * {@link Class test class} that declared the
 	 * {@link ContextConfiguration @ContextConfiguration} annotation and its
 	 * corresponding attributes.
-	 * 
+	 *
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
 	 * @param locations the resource locations declared via {@code @ContextConfiguration}
-	 * @param classes the configuration classes declared via {@code @ContextConfiguration}
+	 * @param classes the annotated classes declared via {@code @ContextConfiguration}
 	 * @param inheritLocations the <code>inheritLocations</code> flag declared via {@code @ContextConfiguration}
 	 * @param contextLoaderClass the {@code ContextLoader} class declared via {@code @ContextConfiguration}
 	 * @throws IllegalArgumentException if the {@code declaringClass} or {@code contextLoaderClass} is
-	 * <code>null</code>, or if the {@code locations} and {@code classes} are both non-empty 
+	 * <code>null</code>, or if the {@code locations} and {@code classes} are both non-empty
 	 */
 	public ContextConfigurationAttributes(Class<?> declaringClass, String[] locations, Class<?>[] classes,
 			boolean inheritLocations, Class<? extends ContextLoader> contextLoaderClass) {
@@ -128,6 +128,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the {@link Class class} that declared the
 	 * {@link ContextConfiguration @ContextConfiguration} annotation.
+	 *
 	 * @return the declaring class; never <code>null</code>
 	 */
 	public Class<?> getDeclaringClass() {
@@ -137,13 +138,15 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the resource locations that were declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * <p>Note: this is a mutable property. The returned value may therefore
-	 * represent a <em>processed</em> value that does not match the original value 
+	 * represent a <em>processed</em> value that does not match the original value
 	 * declared via {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * @return the resource locations; potentially <code>null</code> or <em>empty</em>
 	 * @see ContextConfiguration#value
 	 * @see ContextConfiguration#locations
-	 * @see #setLocations()
+	 * @see #setLocations(String[])
 	 */
 	public String[] getLocations() {
 		return locations;
@@ -152,6 +155,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Set the <em>processed</em> resource locations, effectively overriding the
 	 * original value declared via {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * @see #getLocations()
 	 */
 	public void setLocations(String[] locations) {
@@ -159,22 +163,25 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
-	 * Get the configuration classes that were declared via
+	 * Get the annotated classes that were declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * <p>Note: this is a mutable property. The returned value may therefore
-	 * represent a <em>processed</em> value that does not match the original value 
+	 * represent a <em>processed</em> value that does not match the original value
 	 * declared via {@link ContextConfiguration @ContextConfiguration}.
-	 * @return the configuration classes; potentially <code>null</code> or <em>empty</em>
+	 *
+	 * @return the annotated classes; potentially <code>null</code> or <em>empty</em>
 	 * @see ContextConfiguration#classes
-	 * @see #setClasses()
+	 * @see #setClasses(Class[])
 	 */
 	public Class<?>[] getClasses() {
 		return classes;
 	}
 
 	/**
-	 * Set the <em>processed</em> configuration classes, effectively overriding the
+	 * Set the <em>processed</em> annotated classes, effectively overriding the
 	 * original value declared via {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * @see #getClasses()
 	 */
 	public void setClasses(Class<?>[] classes) {
@@ -182,8 +189,9 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
-	 * Determine if this {@code ContextConfigurationAttributes} instance has 
+	 * Determine if this {@code ContextConfigurationAttributes} instance has
 	 * path-based resource locations.
+	 *
 	 * @return <code>true</code> if the {@link #getLocations() locations} array is not empty
 	 * @see #hasResources()
 	 * @see #hasClasses()
@@ -193,8 +201,9 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
-	 * Determine if this {@code ContextConfigurationAttributes} instance has 
+	 * Determine if this {@code ContextConfigurationAttributes} instance has
 	 * class-based resources.
+	 *
 	 * @return <code>true</code> if the {@link #getClasses() classes} array is not empty
 	 * @see #hasResources()
 	 * @see #hasLocations()
@@ -204,8 +213,9 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
-	 * Determine if this {@code ContextConfigurationAttributes} instance has 
+	 * Determine if this {@code ContextConfigurationAttributes} instance has
 	 * either path-based resource locations or class-based resources.
+	 *
 	 * @return <code>true</code> if either the {@link #getLocations() locations}
 	 * or the {@link #getClasses() classes} array is not empty
 	 * @see #hasLocations()
@@ -218,6 +228,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the <code>inheritLocations</code> flag that was declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * @return the <code>inheritLocations</code> flag
 	 * @see ContextConfiguration#inheritLocations
 	 */
@@ -228,6 +239,7 @@ public class ContextConfigurationAttributes {
 	/**
 	 * Get the <code>ContextLoader</code> class that was declared via
 	 * {@link ContextConfiguration @ContextConfiguration}.
+	 *
 	 * @return the <code>ContextLoader</code> class
 	 * @see ContextConfiguration#loader
 	 */

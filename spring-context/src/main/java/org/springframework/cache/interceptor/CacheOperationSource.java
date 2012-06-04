@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 /**
- * Interface used by CacheInterceptor. Implementations know
- * how to source cache operation attributes, whether from configuration,
- * metadata attributes at source level, or anywhere else.
+ * Interface used by {@link CacheInterceptor}. Implementations know how to source
+ * cache operation attributes, whether from configuration, metadata attributes at
+ * source level, or elsewhere.
  *
  * @author Costin Leau
  * @since 3.1
@@ -30,13 +30,12 @@ import java.util.Collection;
 public interface CacheOperationSource {
 
 	/**
-	 * Return the collection of cache operations for this method,
-	 * or {@code null} if the method contains no "cacheable" annotations.
+	 * Return the collection of cache operations for this method, or {@code null}
+	 * if the method contains no <em>cacheable</em> annotations.
 	 * @param method the method to introspect
-	 * @param targetClass the target class (may be {@code null},
-	 * in which case the declaring class of the method must be used)
-	 * @return all cache operations for this method, or {@code null} if
-	 * none found
+	 * @param targetClass the target class (may be {@code null}, in which case
+	 * the declaring class of the method must be used)
+	 * @return all cache operations for this method, or {@code null} if none found
 	 */
 	Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass);
 

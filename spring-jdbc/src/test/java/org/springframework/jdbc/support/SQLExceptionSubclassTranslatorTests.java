@@ -26,6 +26,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -83,7 +84,7 @@ public class SQLExceptionSubclassTranslatorTests extends TestCase {
 		assertEquals(transientConnEx, tdarex.getCause());
 
 		SQLException transientConnEx2 = SQLExceptionSubclassFactory.newSQLTimeoutException("", "", 0);
-		TransientDataAccessResourceException tdarex2 = (TransientDataAccessResourceException) sext.translate("task", "SQL", transientConnEx2);
+		QueryTimeoutException tdarex2 = (QueryTimeoutException) sext.translate("task", "SQL", transientConnEx2);
 		assertEquals(transientConnEx2, tdarex2.getCause());
 
 		SQLException recoverableEx = SQLExceptionSubclassFactory.newSQLRecoverableException("", "", 0);

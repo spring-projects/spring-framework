@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,8 +185,9 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 			Map<String, String> uriTemplateVariables = new LinkedHashMap<String, String>();
 			for (String matchingPattern : matchingPatterns) {
 				if (patternComparator.compare(bestPatternMatch, matchingPattern) == 0) {
-					uriTemplateVariables
-							.putAll(getPathMatcher().extractUriTemplateVariables(matchingPattern, urlPath));
+					Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(matchingPattern, urlPath);
+					Map<String, String> decodedVars = getUrlPathHelper().decodePathVariables(request, vars);
+					uriTemplateVariables.putAll(decodedVars);
 				}
 			}
 			if (logger.isDebugEnabled()) {
@@ -208,7 +209,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	protected void validateHandler(Object handler, HttpServletRequest request) throws Exception {
 	}
-	
+
 	/**
 	 * Build a handler object for the given raw handler, exposing the actual
 	 * handler, the {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}, as well as

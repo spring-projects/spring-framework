@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,28 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 
 	/**
 	 * This implementation delegates to <code>ServletContext.getResourceAsStream</code>,
+	 * which returns <code>null</code> in case of a non-readable resource (e.g. a directory).
+	 * @see javax.servlet.ServletContext#getResourceAsStream(String)
+	 */
+	@Override
+	public boolean isReadable() {
+		InputStream is = this.servletContext.getResourceAsStream(this.path);
+		if (is != null) {
+			try {
+				is.close();
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	/**
+	 * This implementation delegates to <code>ServletContext.getResourceAsStream</code>,
 	 * but throws a FileNotFoundException if no resource found.
 	 * @see javax.servlet.ServletContext#getResourceAsStream(String)
 	 */
@@ -144,8 +166,8 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	 */
 	@Override
 	public File getFile() throws IOException {
-		URL url = getURL();
-		if (ResourceUtils.isFileURL(url)) {
+		URL url = this.servletContext.getResource(this.path);
+		if (url != null && ResourceUtils.isFileURL(url)) {
 			// Proceed with file system resolution...
 			return super.getFile();
 		}

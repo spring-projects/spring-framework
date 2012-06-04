@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,27 @@
 
 package org.springframework.core.env;
 
-import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.junit.matchers.JUnitMatchers.hasItem;
-import static org.junit.matchers.JUnitMatchers.hasItems;
-import static org.springframework.core.env.AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME;
-import static org.springframework.core.env.AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME;
-import static org.springframework.core.env.AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME;
-
 import java.lang.reflect.Field;
+
 import java.security.AccessControlException;
 import java.security.Permission;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.mock.env.MockPropertySource;
+
+import static java.lang.String.*;
+
+import static org.hamcrest.CoreMatchers.*;
+
+import static org.junit.Assert.*;
+import static org.junit.matchers.JUnitMatchers.*;
+
+import static org.springframework.core.env.AbstractEnvironment.*;
 
 /**
  * Unit tests for {@link StandardEnvironment}.
@@ -61,6 +57,47 @@ public class StandardEnvironmentTests {
 	private static final Object NON_STRING_PROPERTY_VALUE = new Object();
 
 	private ConfigurableEnvironment environment = new StandardEnvironment();
+
+	@Test
+	public void merge() {
+		ConfigurableEnvironment child = new StandardEnvironment();
+		child.setActiveProfiles("c1", "c2");
+		child.getPropertySources().addLast(
+				new MockPropertySource("childMock")
+					.withProperty("childKey", "childVal")
+					.withProperty("bothKey", "childBothVal"));
+
+		ConfigurableEnvironment parent = new StandardEnvironment();
+		parent.setActiveProfiles("p1", "p2");
+		parent.getPropertySources().addLast(
+				new MockPropertySource("parentMock")
+					.withProperty("parentKey", "parentVal")
+					.withProperty("bothKey", "parentBothVal"));
+
+		assertThat(child.getProperty("childKey"), is("childVal"));
+		assertThat(child.getProperty("parentKey"), nullValue());
+		assertThat(child.getProperty("bothKey"), is("childBothVal"));
+
+		assertThat(parent.getProperty("childKey"), nullValue());
+		assertThat(parent.getProperty("parentKey"), is("parentVal"));
+		assertThat(parent.getProperty("bothKey"), is("parentBothVal"));
+
+		assertThat(child.getActiveProfiles(), equalTo(new String[]{"c1","c2"}));
+		assertThat(parent.getActiveProfiles(), equalTo(new String[]{"p1","p2"}));
+
+		child.merge(parent);
+
+		assertThat(child.getProperty("childKey"), is("childVal"));
+		assertThat(child.getProperty("parentKey"), is("parentVal"));
+		assertThat(child.getProperty("bothKey"), is("childBothVal"));
+
+		assertThat(parent.getProperty("childKey"), nullValue());
+		assertThat(parent.getProperty("parentKey"), is("parentVal"));
+		assertThat(parent.getProperty("bothKey"), is("parentBothVal"));
+
+		assertThat(child.getActiveProfiles(), equalTo(new String[]{"c1","c2","p1","p2"}));
+		assertThat(parent.getActiveProfiles(), equalTo(new String[]{"p1","p2"}));
+	}
 
 	@Test
 	public void propertySourceOrder() {
@@ -113,6 +150,11 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
+	public void setActiveProfiles_withNotOperator() {
+		environment.setActiveProfiles("p1", "!p2");
+	}
+
+	@Test(expected=IllegalArgumentException.class)
 	public void setDefaultProfiles_withNullProfileArray() {
 		environment.setDefaultProfiles((String[])null);
 	}
@@ -125,6 +167,11 @@ public class StandardEnvironmentTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void setDefaultProfiles_withEmptyProfile() {
 		environment.setDefaultProfiles("");
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void setDefaultProfiles_withNotOperator() {
+		environment.setDefaultProfiles("d1", "!d2");
 	}
 
 	@Test
@@ -247,6 +294,20 @@ public class StandardEnvironmentTests {
 		environment.setActiveProfiles("p1");
 		assertThat(environment.acceptsProfiles("pd"), is(false));
 		assertThat(environment.acceptsProfiles("p1"), is(true));
+	}
+
+	@Test
+	public void acceptsProfiles_withNotOperator() {
+		assertThat(environment.acceptsProfiles("p1"), is(false));
+		assertThat(environment.acceptsProfiles("!p1"), is(true));
+		environment.addActiveProfile("p1");
+		assertThat(environment.acceptsProfiles("p1"), is(true));
+		assertThat(environment.acceptsProfiles("!p1"), is(false));
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void acceptsProfiles_withInvalidNotOperator() {
+		environment.acceptsProfiles("p1", "!");
 	}
 
 	@Test

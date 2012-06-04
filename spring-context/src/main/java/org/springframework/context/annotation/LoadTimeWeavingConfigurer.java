@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package org.springframework.context.annotation;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 
 /**
- * Interface to be implemented by @{@link org.springframework.context.annotation.Configuration
- * Configuration} classes annotated with @{@link EnableLoadTimeWeaving} that wish to
+ * Interface to be implemented by
+ * {@link org.springframework.context.annotation.Configuration @Configuration}
+ * classes annotated with {@link EnableLoadTimeWeaving @EnableLoadTimeWeaving} that wish to
  * customize the {@link LoadTimeWeaver} instance to be used.
  *
- * <p>See @{@link EnableAsync} for usage examples and information on how a default
- * {@code LoadTimeWeaver} is selected when this interface is not used.
+ * <p>See {@link org.springframework.scheduling.annotation.EnableAsync @EnableAsync}
+ * for usage examples and information on how a default {@code LoadTimeWeaver}
+ * is selected when this interface is not used.
  *
  * @author Chris Beams
  * @since 3.1

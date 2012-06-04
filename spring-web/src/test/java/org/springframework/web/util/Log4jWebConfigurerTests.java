@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,9 @@ import org.springframework.mock.web.MockServletContext;
 public class Log4jWebConfigurerTests {
 
 	private static final String TESTLOG4J_PROPERTIES = "testlog4j.properties";
-	private static final String CLASSPATH_RESOURCE = "classpath:org/springframework/web/util/testlog4j.properties";
-	private static final String RELATIVE_PATH = "src/test/resources/org/springframework/web/util/testlog4j.properties";
+	private static final String PROPERTIES_LOCATION = "org/springframework/web/util/testlog4j.properties";
+	private static final String CLASSPATH_RESOURCE = "classpath:" + PROPERTIES_LOCATION;
+	private static final String RELATIVE_PATH = "src/test/resources/" + PROPERTIES_LOCATION;
 
 	@Test
 	public void initLoggingWithClasspathResource() {
@@ -59,7 +60,12 @@ public class Log4jWebConfigurerTests {
 	public void initLoggingWithRelativeFilePathAndRefreshInterval() {
 		initLogging(RELATIVE_PATH, true);
 	}
-	
+
+	@Test // See SPR-9417
+	public void initLoggingWithPlaceholderResolvingToValidUrl() {
+		initLogging("${some.prop.name:classpath:}" + PROPERTIES_LOCATION, true);
+	}
+
 	@Test
 	public void initLoggingWithUrl() {
 		URL url = Log4jWebConfigurerTests.class.getResource(TESTLOG4J_PROPERTIES);

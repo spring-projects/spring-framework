@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 import test.beans.ITestBean;
 import test.beans.IndexedTestBean;
@@ -39,6 +38,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.SerializationTestUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor}
@@ -206,8 +207,8 @@ public class InjectAnnotationBeanPostProcessorTests {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(
-				ConstructorsCollectionResourceInjectionBean.class));
+		bf.registerBeanDefinition("annotatedBean",
+				new RootBeanDefinition(ConstructorsCollectionResourceInjectionBean.class));
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 		NestedTestBean ntb1 = new NestedTestBean();
@@ -411,6 +412,74 @@ public class InjectAnnotationBeanPostProcessorTests {
 		ObjectFactoryInjectionBean bean = (ObjectFactoryInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("testBean"), bean.getTestBean());
 		bean = (ObjectFactoryInjectionBean) SerializationTestUtils.serializeAndDeserialize(bean);
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testObjectFactoryWithTypedListField() throws Exception {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryListFieldInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+		bf.setSerializationId("test");
+
+		ObjectFactoryListFieldInjectionBean bean = (ObjectFactoryListFieldInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bean = (ObjectFactoryListFieldInjectionBean) SerializationTestUtils.serializeAndDeserialize(bean);
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testObjectFactoryWithTypedListMethod() throws Exception {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryListMethodInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+		bf.setSerializationId("test");
+
+		ObjectFactoryListMethodInjectionBean bean = (ObjectFactoryListMethodInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bean = (ObjectFactoryListMethodInjectionBean) SerializationTestUtils.serializeAndDeserialize(bean);
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testObjectFactoryWithTypedMapField() throws Exception {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryMapFieldInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+		bf.setSerializationId("test");
+
+		ObjectFactoryMapFieldInjectionBean bean = (ObjectFactoryMapFieldInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bean = (ObjectFactoryMapFieldInjectionBean) SerializationTestUtils.serializeAndDeserialize(bean);
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testObjectFactoryWithTypedMapMethod() throws Exception {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryMapMethodInjectionBean.class));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+		bf.setSerializationId("test");
+
+		ObjectFactoryMapMethodInjectionBean bean = (ObjectFactoryMapMethodInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		bean = (ObjectFactoryMapMethodInjectionBean) SerializationTestUtils.serializeAndDeserialize(bean);
 		assertSame(bf.getBean("testBean"), bean.getTestBean());
 		bf.destroySingletons();
 	}
@@ -831,6 +900,66 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		public TestBean getTestBean() {
 			return (TestBean) this.testBeanFactory.get();
+		}
+	}
+
+
+	public static class ObjectFactoryListFieldInjectionBean implements Serializable {
+
+		@Inject
+		private Provider<List<TestBean>> testBeanFactory;
+
+		public void setTestBeanFactory(Provider<List<TestBean>> testBeanFactory) {
+			this.testBeanFactory = testBeanFactory;
+		}
+
+		public TestBean getTestBean() {
+			return this.testBeanFactory.get().get(0);
+		}
+	}
+
+
+	public static class ObjectFactoryListMethodInjectionBean implements Serializable {
+
+		private Provider<List<TestBean>> testBeanFactory;
+
+		@Inject
+		public void setTestBeanFactory(Provider<List<TestBean>> testBeanFactory) {
+			this.testBeanFactory = testBeanFactory;
+		}
+
+		public TestBean getTestBean() {
+			return this.testBeanFactory.get().get(0);
+		}
+	}
+
+
+	public static class ObjectFactoryMapFieldInjectionBean implements Serializable {
+
+		@Inject
+		private Provider<Map<String, TestBean>> testBeanFactory;
+
+		public void setTestBeanFactory(Provider<Map<String, TestBean>> testBeanFactory) {
+			this.testBeanFactory = testBeanFactory;
+		}
+
+		public TestBean getTestBean() {
+			return this.testBeanFactory.get().values().iterator().next();
+		}
+	}
+
+
+	public static class ObjectFactoryMapMethodInjectionBean implements Serializable {
+
+		private Provider<Map<String, TestBean>> testBeanFactory;
+
+		@Inject
+		public void setTestBeanFactory(Provider<Map<String, TestBean>> testBeanFactory) {
+			this.testBeanFactory = testBeanFactory;
+		}
+
+		public TestBean getTestBean() {
+			return this.testBeanFactory.get().values().iterator().next();
 		}
 	}
 

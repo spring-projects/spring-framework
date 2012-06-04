@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 	private static final String ERROR_HANDLER_ATTRIBUTE = "error-handler";
 
 	private static final String CACHE_ATTRIBUTE = "cache";
+
+	private static final String RECEIVE_TIMEOUT_ATTRIBUTE = "receive-timeout";
 
 
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
@@ -156,6 +158,13 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 			}
 		}
 
+		String receiveTimeout = containerEle.getAttribute(RECEIVE_TIMEOUT_ATTRIBUTE);
+		if (StringUtils.hasText(receiveTimeout)) {
+			if (containerType.startsWith("default")) {
+				containerDef.getPropertyValues().add("receiveTimeout", new Integer(receiveTimeout));
+			}
+		}
+
 		String phase = containerEle.getAttribute(PHASE_ATTRIBUTE);
 		if (StringUtils.hasText(phase)) {
 			containerDef.getPropertyValues().add("phase", phase);
@@ -164,10 +173,12 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 		return containerDef;
 	}
 
+	@Override
 	protected boolean indicatesPubSub(BeanDefinition containerDef) {
 		return indicatesPubSubConfig(containerDef);
 	}
 
+	@Override
 	protected boolean indicatesJms102(BeanDefinition containerDef) {
 		return containerDef.getBeanClassName().endsWith("102");
 	}

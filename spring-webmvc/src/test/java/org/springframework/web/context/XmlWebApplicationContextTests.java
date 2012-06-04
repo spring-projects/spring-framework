@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.web.context;
-
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
 
 import java.util.Locale;
 
@@ -36,6 +33,10 @@ import org.springframework.context.TestListener;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
+import static org.hamcrest.CoreMatchers.*;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -47,12 +48,14 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		InitAndIB.constructed = false;
 		root = new XmlWebApplicationContext();
+		root.getEnvironment().addActiveProfile("rootProfile1");
 		MockServletContext sc = new MockServletContext("");
 		root.setServletContext(sc);
 		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
 		root.addBeanFactoryPostProcessor(new BeanFactoryPostProcessor() {
 			public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 				beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
+					@SuppressWarnings("unchecked")
 					public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 						if (bean instanceof TestBean) {
 							((TestBean) bean).getFriends().add("myFriend");
@@ -67,6 +70,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		});
 		root.refresh();
 		XmlWebApplicationContext wac = new XmlWebApplicationContext();
+		wac.getEnvironment().addActiveProfile("wacProfile1");
 		wac.setParent(root);
 		wac.setServletContext(sc);
 		wac.setNamespace("test-servlet");
@@ -75,8 +79,11 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		return wac;
 	}
 
-	public void testEnvironmentInheritance() {
-		assertThat(this.applicationContext.getEnvironment(), sameInstance(this.root.getEnvironment()));
+	public void testEnvironmentMerge() {
+		assertThat(this.root.getEnvironment().acceptsProfiles("rootProfile1"), is(true));
+		assertThat(this.root.getEnvironment().acceptsProfiles("wacProfile1"), is(false));
+		assertThat(this.applicationContext.getEnvironment().acceptsProfiles("rootProfile1"), is(true));
+		assertThat(this.applicationContext.getEnvironment().acceptsProfiles("wacProfile1"), is(true));
 	}
 
 	/**

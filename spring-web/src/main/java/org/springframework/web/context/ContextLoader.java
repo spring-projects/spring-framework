@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
@@ -201,7 +201,7 @@ public class ContextLoader {
 	 * ContextLoaderListener} subclass as a {@code <listener>} within {@code web.xml}, as
 	 * a no-arg constructor is required.
 	 * <p>The created application context will be registered into the ServletContext under
-	 * the attribute name {@link WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE}
+	 * the attribute name {@link WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE}
 	 * and subclasses are free to call the {@link #closeWebApplicationContext} method on
 	 * container shutdown to close the application context.
 	 * @see #ContextLoader(WebApplicationContext)
@@ -237,7 +237,7 @@ public class ContextLoader {
 	 * <p>See {@link org.springframework.web.WebApplicationInitializer} for usage examples.
 	 * <p>In any case, the given application context will be registered into the
 	 * ServletContext under the attribute name {@link
-	 * WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE} and subclasses are
+	 * WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE} and subclasses are
 	 * free to call the {@link #closeWebApplicationContext} method on container shutdown
 	 * to close the application context.
 	 * @param context the application context to manage
@@ -324,7 +324,6 @@ public class ContextLoader {
 	 * <p>In addition, {@link #customizeContext} gets called prior to refreshing the
 	 * context, allowing subclasses to perform custom modifications to the context.
 	 * @param sc current servlet context
-	 * @param parent the parent ApplicationContext to use, or <code>null</code> if none
 	 * @return the root WebApplicationContext
 	 * @see ConfigurableWebApplicationContext
 	 */
@@ -342,7 +341,7 @@ public class ContextLoader {
 	/**
 	 * @deprecated as of Spring 3.1 in favor of
 	 * {@link #createWebApplicationContext(ServletContext)} and
-	 * {@link #configureAndRefreshWebApplicationContext(WebApplicationContext, ServletContext)}
+	 * {@link #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext, ServletContext)}
 	 */
 	@Deprecated
 	protected WebApplicationContext createWebApplicationContext(ServletContext sc, ApplicationContext parent) {
@@ -463,11 +462,18 @@ public class ContextLoader {
 	 * @see ApplicationContextInitializer#initialize(ConfigurableApplicationContext)
 	 */
 	protected void customizeContext(ServletContext servletContext, ConfigurableWebApplicationContext applicationContext) {
+		List<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>> initializerClasses =
+				determineContextInitializerClasses(servletContext);
+
+		if (initializerClasses.size() == 0) {
+			// no ApplicationContextInitializers have been declared -> nothing to do
+			return;
+		}
+
 		ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances =
 			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
-		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass :
-				determineContextInitializerClasses(servletContext)) {
+		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : initializerClasses) {
 			Class<?> contextClass = applicationContext.getClass();
 			Class<?> initializerContextClass =
 				GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
@@ -478,8 +484,9 @@ public class ContextLoader {
 			initializerInstances.add(BeanUtils.instantiateClass(initializerClass));
 		}
 
-		Collections.sort(initializerInstances, new AnnotationAwareOrderComparator());
+		applicationContext.getEnvironment().initPropertySources(servletContext, null);
 
+		Collections.sort(initializerInstances, new AnnotationAwareOrderComparator());
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
 			initializer.initialize(applicationContext);
 		}

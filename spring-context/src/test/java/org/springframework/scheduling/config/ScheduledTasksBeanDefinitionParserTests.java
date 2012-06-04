@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@
 package org.springframework.scheduling.config;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,8 +30,13 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 
+import static org.hamcrest.CoreMatchers.*;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Mark Fisher
+ * @author Chris Beams
  */
 @SuppressWarnings("unchecked")
 public class ScheduledTasksBeanDefinitionParserTests {
@@ -63,9 +66,9 @@ public class ScheduledTasksBeanDefinitionParserTests {
 
 	@Test
 	public void checkTarget() {
-		Map<Runnable, Long> tasks = (Map<Runnable, Long>) new DirectFieldAccessor(
+		List<IntervalTask> tasks = (List<IntervalTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedRateTasks");
-		Runnable runnable = tasks.keySet().iterator().next();
+		Runnable runnable = tasks.get(0).getRunnable();
 		assertEquals(ScheduledMethodRunnable.class, runnable.getClass());
 		Object targetObject = ((ScheduledMethodRunnable) runnable).getTarget();
 		Method targetMethod = ((ScheduledMethodRunnable) runnable).getMethod();
@@ -75,39 +78,39 @@ public class ScheduledTasksBeanDefinitionParserTests {
 
 	@Test
 	public void fixedRateTasks() {
-		Map<Runnable, Long> tasks = (Map<Runnable, Long>) new DirectFieldAccessor(
+		List<IntervalTask> tasks = (List<IntervalTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedRateTasks");
-		assertEquals(2, tasks.size());
-		Collection<Long> values = tasks.values();
-		assertTrue(values.contains(new Long(1000)));
-		assertTrue(values.contains(new Long(2000)));
+		assertEquals(3, tasks.size());
+		assertEquals(1000L, tasks.get(0).getInterval());
+		assertEquals(2000L, tasks.get(1).getInterval());
+		assertEquals(4000L, tasks.get(2).getInterval());
+		assertEquals(500, tasks.get(2).getInitialDelay());
 	}
 
 	@Test
 	public void fixedDelayTasks() {
-		Map<Runnable, Long> tasks = (Map<Runnable, Long>) new DirectFieldAccessor(
+		List<IntervalTask> tasks = (List<IntervalTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("fixedDelayTasks");
-		assertEquals(1, tasks.size());
-		Long value = tasks.values().iterator().next();
-		assertEquals(new Long(3000), value);
+		assertEquals(2, tasks.size());
+		assertEquals(3000L, tasks.get(0).getInterval());
+		assertEquals(3500L, tasks.get(1).getInterval());
+		assertEquals(250, tasks.get(1).getInitialDelay());
 	}
 
 	@Test
 	public void cronTasks() {
-		Map<Runnable, String> tasks = (Map<Runnable, String>) new DirectFieldAccessor(
+		List<CronTask> tasks = (List<CronTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("cronTasks");
 		assertEquals(1, tasks.size());
-		String expression = tasks.values().iterator().next();
-		assertEquals("*/4 * 9-17 * * MON-FRI", expression);		
+		assertEquals("*/4 * 9-17 * * MON-FRI", tasks.get(0).getExpression());
 	}
 
 	@Test
 	public void triggerTasks() {
-		Map<Runnable, Trigger> tasks = (Map<Runnable, Trigger>) new DirectFieldAccessor(
+		List<TriggerTask> tasks = (List<TriggerTask>) new DirectFieldAccessor(
 				this.registrar).getPropertyValue("triggerTasks");
 		assertEquals(1, tasks.size());
-		Trigger trigger = tasks.values().iterator().next();
-		assertEquals(TestTrigger.class, trigger.getClass());		
+		assertThat(tasks.get(0).getTrigger(), instanceOf(TestTrigger.class));
 	}
 
 

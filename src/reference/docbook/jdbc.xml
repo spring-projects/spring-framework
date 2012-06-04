@@ -736,7 +736,7 @@ public Actor findActor(String specialty, int age) {
     };
 
     
-    <lineannotation>// notice the wrapping up of the argumenta in an array</lineannotation>
+    <lineannotation>// notice the wrapping up of the arguments in an array</lineannotation>
     return (Actor) jdbcTemplate.queryForObject(sql, new Object[] {specialty, age}, mapper);
 }</programlisting>
 
@@ -813,7 +813,7 @@ public Actor findActor(String specialty, int age) {
       class="libraryfile">sql-error-codes.xml</filename>. This file is
       populated with vendor codes and based on the
       <code>DatabaseProductName</code> taken from the
-      <interfacename>DatabaseMetaData</interfacename>. The codes for the acual
+      <interfacename>DatabaseMetaData</interfacename>. The codes for the actual
       database you are using are used.<!--what do you mean by *the current* database? --><!--TR: Revised, please review.--></para>
 
       <para>The <classname>SQLErrorCodeSQLExceptionTranslator</classname>
@@ -888,7 +888,7 @@ public Actor findActor(String specialty, int age) {
       processing where this translator is needed. Here is an example of how
       this custom translator can be used:</para>
 
-      <programlisting language="java"><lineannotation>private JdbcTemplate jdbcTemoplate;
+      <programlisting language="java"><lineannotation>private JdbcTemplate jdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
     // create a <classname>JdbcTemplate</classname> and set data source</lineannotation> 
@@ -901,7 +901,7 @@ public void setDataSource(DataSource dataSource) {
 }
 
 <lineannotation>public void updateShippingCharge(long orderId, long pct) {
-    // use the <classname>prepared JdbcTemplate</classname> for this u<classname>pdate</classname></lineannotation>
+    // use the <classname>prepared JdbcTemplate</classname> for this <classname>update</classname></lineannotation>
     this.jdbcTemplate.update(
         "update orders" + 
             " set shipping_charge = shipping_charge * ? / 100" + 
@@ -1547,8 +1547,8 @@ dataSource.setPassword("");</programlisting>
       length indicates the number of updates in that batch. The number of
       updates in each batch should be the the batch size provided for all
       batches except for the last one that might be less, depending on the
-      total number of updat objects provided. The update count for each update
-      stament is the one reported by the JDBC driver. If the count is not
+      total number of update objects provided. The update count for each update
+      statement is the one reported by the JDBC driver. If the count is not
       available, the JDBC driver returns a -2 value.</para>
     </section>
   </section>
@@ -2501,7 +2501,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
           <para>Many update and query methods of the
           <classname>JdbcTemplate</classname> take an additional parameter in
           the form of an <code>int </code>array. This array is used to
-          indicate the SQL type of the coresponding parameter using constant
+          indicate the SQL type of the corresponding parameter using constant
           values from the <classname>java.sql.Types</classname> class. <!--Reword to say *what* is using constant values from the java.sql.Types class to do *what*. Phrases that being with *using* are --><!--often unclear as to what uses what to do what.-->Provide
           one entry for each parameter.</para>
         </listitem>
@@ -2925,7 +2925,7 @@ public class DataAccessUnitTestTemplate {
     </section>
   </section>
 
-  <section>
+  <section id="jdbc-intializing-datasource">
     <title>Initializing a DataSource</title>
 
     <para>The <literal>org.springframework.jdbc.datasource.init</literal>
@@ -2935,7 +2935,7 @@ public class DataAccessUnitTestTemplate {
     <classname>DataSource</classname> for an application, but sometimes you
     need to initialize an instance running on a server somewhere.</para>
 
-    <section>
+    <section id="jdbc-initializing-datasource-xml">
       <title>Initializing a database instance using Spring XML</title>
 
       <para>If you want to initialize a database and you can provide a
@@ -2983,7 +2983,7 @@ public class DataAccessUnitTestTemplate {
   &lt;jdbc:script location="..."/&gt;
 &lt;/jdbc:initialize-database&gt;</programlisting>In this example we are
       saying we expect that sometimes the scripts will be run against an empty
-      dtabase and there are some DROP statements in the scripts which would
+      database and there are some DROP statements in the scripts which would
       therefore fail. So failed SQL <code>DROP</code> statements will be
       ignored, but other failures will cause an exception. This is useful if
       your SQL dialect doesn't support <code>DROP ... IF EXISTS</code> (or
@@ -2999,7 +2999,7 @@ public class DataAccessUnitTestTemplate {
       can simply use the <classname>DataSourceInitializer</classname>
       directly, and define it as a component in your application.</para>
 
-      <section>
+      <section id="jdbc-client-component-initialization">
         <title>Initialization of Other Components that Depend on the
         Database</title>
 

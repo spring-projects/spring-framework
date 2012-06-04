@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,8 @@ public @interface ResponseStatus {
 
 	/**
 	 * The reason to be used for the response. <p>If this element is not set, it will default to the standard status
-	 * message for the status code.
+	 * message for the status code. Note that due to the use of {@code HttpServletResponse.sendError(int, String)},
+	 * the response will be considered complete and should not be written to any further.
 	 *
 	 * @see javax.servlet.http.HttpServletResponse#sendError(int, String)
 	 */

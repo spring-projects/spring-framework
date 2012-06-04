@@ -25,6 +25,7 @@ import test.beans.TestBean;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
@@ -51,13 +52,6 @@ public class ImportTests {
 	private void assertBeanDefinitionCount(int expectedCount, Class<?>... classes) {
 		DefaultListableBeanFactory beanFactory = processConfigurationClasses(classes);
 		assertThat(beanFactory.getBeanDefinitionCount(), equalTo(expectedCount));
-	}
-
-	@Test
-	public void testProcessImports() {
-		int configClasses = 2;
-		int beansInClasses = 2;
-		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigurationWithImportAnnotation.class);
 	}
 
 	@Test
@@ -315,4 +309,36 @@ public class ImportTests {
 	static class ConfigAnnotated { }
 
 	static class NonConfigAnnotated { }
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Test that values supplied to @Configuration(value="...") are propagated as the
+	 * bean name for the configuration class even in the case of inclusion via @Import
+	 * or in the case of automatic registration via nesting
+	 */
+	@Test
+	public void reproSpr9023() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(B.class);
+		ctx.refresh();
+		System.out.println(ctx.getBeanFactory());
+		assertThat(ctx.getBeanNamesForType(B.class)[0], is("config-b"));
+		assertThat(ctx.getBeanNamesForType(A.class)[0], is("config-a"));
+	}
+
+	@Configuration("config-a")
+	static class A { }
+
+	@Configuration("config-b")
+	@Import(A.class)
+	static class B { }
+
+	@Test
+	public void testProcessImports() {
+		int configClasses = 2;
+		int beansInClasses = 2;
+		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigurationWithImportAnnotation.class);
+	}
+
 }

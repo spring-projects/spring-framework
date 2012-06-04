@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,18 @@
 
 package org.springframework.beans.factory;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
-
 import java.lang.reflect.Field;
+
 import java.net.MalformedURLException;
+
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Principal;
 import java.security.PrivilegedAction;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -48,8 +40,10 @@ import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -91,6 +85,10 @@ import test.beans.ITestBean;
 import test.beans.LifecycleBean;
 import test.beans.NestedTestBean;
 import test.beans.TestBean;
+
+import static org.hamcrest.CoreMatchers.*;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests properties population and autowire behavior.
@@ -2159,10 +2157,38 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testContainsBeanReturnsTrueEvenForAbstractBeanDefinition() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("abs",
-				rootBeanDefinition(TestBean.class).setAbstract(true).getBeanDefinition());
+		bf.registerBeanDefinition("abs", BeanDefinitionBuilder
+				.rootBeanDefinition(TestBean.class).setAbstract(true).getBeanDefinition());
 		assertThat(bf.containsBean("abs"), is(true));
 		assertThat(bf.containsBean("bogus"), is(false));
+	}
+
+
+	static class A { }
+	static class B { }
+
+	/**
+	 * Test that by-type bean lookup caching is working effectively by searching for a
+	 * bean of type B 10K times within a container having 1K additional beans of type A.
+	 * Prior to by-type caching, each bean lookup would traverse the entire container
+	 * (all 1001 beans), performing expensive assignability checks, etc. Now these
+	 * operations are necessary only once, providing a dramatic performance improvement.
+	 * On load-free modern hardware (e.g. an 8-core MPB), this method should complete well
+	 * under the 1000 ms timeout, usually ~= 300ms. With caching removed and on the same
+	 * hardware the method will take ~13000 ms. See SPR-6870.
+	 */
+	@Test(timeout=1000)
+	public void testByTypeLookupIsFastEnough() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+
+		for (int i=0; i<1000; i++) {
+			bf.registerBeanDefinition("a"+i, new RootBeanDefinition(A.class));
+		}
+		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
+
+		for (int i=0; i<10000; i++) {
+			bf.getBean(B.class);
+		}
 	}
 
 

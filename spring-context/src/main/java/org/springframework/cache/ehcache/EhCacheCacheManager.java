@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,18 +39,17 @@ public class EhCacheCacheManager extends AbstractCacheManager {
 
 
 	/**
-	 * Returns the backing Ehcache {@link net.sf.ehcache.CacheManager}.
-	 * @return
-	 */
-	public net.sf.ehcache.CacheManager getCacheManager() {
-		return cacheManager;
-	}
-
-	/**
-	 * Sets the backing EhCache {@link net.sf.ehcache.CacheManager}.
+	 * Set the backing EhCache {@link net.sf.ehcache.CacheManager}.
 	 */
 	public void setCacheManager(net.sf.ehcache.CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
+	}
+
+	/**
+	 * Return the backing EhCache {@link net.sf.ehcache.CacheManager}.
+	 */
+	public net.sf.ehcache.CacheManager getCacheManager() {
+		return this.cacheManager;
 	}
 
 
@@ -83,4 +82,5 @@ public class EhCacheCacheManager extends AbstractCacheManager {
 		}
 		return cache;
 	}
+
 }

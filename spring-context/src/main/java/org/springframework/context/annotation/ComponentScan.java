@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,14 @@ public @interface ComponentScan {
 	/**
 	 * The {@link BeanNameGenerator} class to be used for naming detected components
 	 * within the Spring container.
+	 * <p>The default value of the {@link BeanNameGenerator} interface itself indicates
+	 * that the scanner used to process this {@code @ComponentScan} annotation should
+	 * use its inherited bean name generator, e.g. the default
+	 * {@link AnnotationBeanNameGenerator} or any custom instance supplied to the
+	 * application context at bootstrap time.
+	 * @see AnnotationConfigApplicationContext#setBeanNameGenerator(BeanNameGenerator)
 	 */
-	Class<? extends BeanNameGenerator> nameGenerator() default AnnotationBeanNameGenerator.class;
+	Class<? extends BeanNameGenerator> nameGenerator() default BeanNameGenerator.class;
 
 	/**
 	 * The {@link ScopeMetadataResolver} to be used for resolving the scope of detected components.
@@ -126,7 +132,7 @@ public @interface ComponentScan {
 
 	/**
 	 * Declares the type filter to be used as an {@linkplain ComponentScan#includeFilters()
-	 * include filter} or {@linkplain ComponentScan#includeFilters() exclude filter}.
+	 * include filter} or {@linkplain ComponentScan#excludeFilters() exclude filter}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({})

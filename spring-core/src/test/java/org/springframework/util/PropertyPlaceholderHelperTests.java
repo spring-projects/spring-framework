@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,15 @@ public class PropertyPlaceholderHelperTests {
 		props.setProperty("inner", "ar");
 
 		assertEquals("foo=bar", this.helper.replacePlaceholders(text, props));
+
+		text = "${top}";
+		props = new Properties();
+		props.setProperty("top", "${child}+${child}");
+		props.setProperty("child", "${${differentiator}.grandchild}");
+		props.setProperty("differentiator", "first");
+		props.setProperty("first.grandchild", "actualValue");
+
+		assertEquals("actualValue+actualValue", this.helper.replacePlaceholders(text, props));
 	}
 
 	@Test

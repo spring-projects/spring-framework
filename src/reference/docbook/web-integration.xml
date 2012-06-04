@@ -624,7 +624,7 @@
     
     <para>
         <quote>
-          <emphasis>A very succesful design pattern in Tapestry is to keep pages
+          <emphasis>A very successful design pattern in Tapestry is to keep pages
           and components very simple, and <emphasis
           role="bold">delegate</emphasis> as much logic as possible out to
           HiveMind [or Spring, or whatever] services. Listener methods should

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
+import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
@@ -32,8 +34,8 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 
 /**
- * Creates {@link RequestMappingInfo} instances from type and method-level 
- * {@link RequestMapping @RequestMapping} annotations in 
+ * Creates {@link RequestMappingInfo} instances from type and method-level
+ * {@link RequestMapping @RequestMapping} annotations in
  * {@link Controller @Controller} classes.
  *
  * @author Arjen Poutsma
@@ -45,16 +47,16 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private boolean useSuffixPatternMatch = true;
 
 	private boolean useTrailingSlashMatch = true;
-	
+
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
-	 * <p>The default value is {@code true}. 
+	 * <p>The default value is {@code true}.
 	 */
 	public void setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 	}
-	
+
 	/**
 	 * Whether to match to URLs irrespective of the presence of a trailing slash.
 	 * If enabled a method mapped to "/users" also matches to "/users/".
@@ -78,21 +80,22 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * {@inheritDoc} 
+	 * {@inheritDoc}
 	 * Expects a handler to have a type-level @{@link Controller} annotation.
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
-		return AnnotationUtils.findAnnotation(beanType, Controller.class) != null;
+		return ((AnnotationUtils.findAnnotation(beanType, Controller.class) != null) ||
+				(AnnotationUtils.findAnnotation(beanType, RequestMapping.class) != null));
 	}
 
 	/**
 	 * Uses method and type-level @{@link RequestMapping} annotations to create
 	 * the RequestMappingInfo.
-	 * 
+	 *
 	 * @return the created RequestMappingInfo, or {@code null} if the method
 	 * does not have a {@code @RequestMapping} annotation.
-	 * 
+	 *
 	 * @see #getCustomMethodCondition(Method)
 	 * @see #getCustomTypeCondition(Class)
 	 */
@@ -113,26 +116,36 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Provide a custom method-level request condition.
-	 * The custom {@link RequestCondition} can be of any type so long as the 
+	 * Provide a custom type-level request condition.
+	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
-	 * to ensure custom request conditions can be combined and compared. 
+	 * to ensure custom request conditions can be combined and compared.
+	 *
+	 * <p>Consider extending {@link AbstractRequestCondition} for custom
+	 * condition types and using {@link CompositeRequestCondition} to provide
+	 * multiple custom conditions.
+	 *
+	 * @param handlerType the handler type for which to create the condition
+	 * @return the condition, or {@code null}
+	 */
+	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
+		return null;
+	}
+
+	/**
+	 * Provide a custom method-level request condition.
+	 * The custom {@link RequestCondition} can be of any type so long as the
+	 * same condition type is returned from all calls to this method in order
+	 * to ensure custom request conditions can be combined and compared.
+	 *
+	 * <p>Consider extending {@link AbstractRequestCondition} for custom
+	 * condition types and using {@link CompositeRequestCondition} to provide
+	 * multiple custom conditions.
+	 *
 	 * @param method the handler method for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
 	protected RequestCondition<?> getCustomMethodCondition(Method method) {
-		return null;
-	}
-	
-	/**
-	 * Provide a custom type-level request condition.
-	 * The custom {@link RequestCondition} can be of any type so long as the 
-	 * same condition type is returned from all calls to this method in order
-	 * to ensure custom request conditions can be combined and compared. 
-	 * @param method the handler method for which to create the condition
-	 * @return the condition, or {@code null}
-	 */
-	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
 		return null;
 	}
 
@@ -141,13 +154,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	private RequestMappingInfo createRequestMappingInfo(RequestMapping annotation, RequestCondition<?> customCondition) {
 		return new RequestMappingInfo(
-				new PatternsRequestCondition(annotation.value(), 
+				new PatternsRequestCondition(annotation.value(),
 						getUrlPathHelper(), getPathMatcher(), this.useSuffixPatternMatch, this.useTrailingSlashMatch),
 				new RequestMethodsRequestCondition(annotation.method()),
 				new ParamsRequestCondition(annotation.params()),
 				new HeadersRequestCondition(annotation.headers()),
 				new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
-				new ProducesRequestCondition(annotation.produces(), annotation.headers()), 
+				new ProducesRequestCondition(annotation.produces(), annotation.headers()),
 				customCondition);
 	}
 

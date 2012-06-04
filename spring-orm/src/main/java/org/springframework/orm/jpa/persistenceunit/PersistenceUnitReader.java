@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.util.xml.DomUtils;
 import org.springframework.util.xml.SimpleSaxErrorHandler;
 
 /**
- * Internal helper class for reading <code>persistence.xml</code> files.
+ * Internal helper class for reading JPA-compliant <code>persistence.xml</code> files.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -227,7 +227,7 @@ class PersistenceUnitReader {
 	/**
 	 * Parse the unit info DOM element.
 	 */
-	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo(Element persistenceUnit, String version) throws IOException { // JC: Changed
+	protected SpringPersistenceUnitInfo parsePersistenceUnitInfo(Element persistenceUnit, String version) throws IOException {
 		SpringPersistenceUnitInfo unitInfo = new SpringPersistenceUnitInfo();
 
 		// set JPA version (1.0 or 2.0)

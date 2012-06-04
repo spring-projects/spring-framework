@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,11 @@ import org.springframework.util.StringUtils;
  * <p>A FlashMap can be set up with a request path and request parameters to 
  * help identify the target request. Without this information, a FlashMap is
  * made available to the next request, which may or may not be the intended 
- * recipient. On a redirect, the target URL is known and for example
- * {@code org.springframework.web.servlet.view.RedirectView} has the
- * opportunity to automatically update the current FlashMap with target
- * URL information.
+ * recipient. On a redirect, the target URL is known and a FlashMap can be
+ * updated with that information. This is done automatically when the
+ * {@code org.springframework.web.servlet.view.RedirectView} is used.
  * 
- * <p>Annotated controllers will usually not use this type directly.
+ * <p>Note: annotated controllers will usually not use FlashMap directly.
  * See {@code org.springframework.web.servlet.mvc.support.RedirectAttributes}
  * for an overview of using flash attributes in annotated controllers. 
  * 
@@ -58,25 +57,6 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	
 	private int timeToLive;
 
-	private final int createdBy;
-
-	/**
-	 * Create a new instance with an id uniquely identifying the creator of 
-	 * this FlashMap.
-	 * @param createdBy identifies the FlashMapManager instance that created
-	 * 	and will manage this FlashMap instance (e.g. via a hashCode)  
-	 */
-	public FlashMap(int createdBy) {
-		this.createdBy = createdBy;
-	}
-	
-	/**
-	 * Create a new instance.
-	 */
-	public FlashMap() {
-		this.createdBy = 0;
-	}
-
 	/**
 	 * Provide a URL path to help identify the target request for this FlashMap.
 	 * The path may be absolute (e.g. /application/resource) or relative to the
@@ -96,7 +76,6 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 
 	/**
 	 * Provide request parameters identifying the request for this FlashMap.
-	 * Null or empty keys and values are skipped.
 	 * @param params a Map with the names and values of expected parameters.
 	 */
 	public FlashMap addTargetRequestParams(MultiValueMap<String, String> params) {
@@ -112,8 +91,8 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 
 	/**
 	 * Provide a request parameter identifying the request for this FlashMap.
-	 * @param name the expected parameter name, skipped if {@code null}
-	 * @param value the expected parameter value, skipped if {@code null}
+	 * @param name the expected parameter name, skipped if empty or {@code null}
+	 * @param value the expected value, skipped if empty or {@code null}
 	 */
 	public FlashMap addTargetRequestParam(String name, String value) {
 		if (StringUtils.hasText(name) && StringUtils.hasText(value)) {
@@ -149,13 +128,6 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 		else {
 			return false;
 		}
-	}
-
-	/**
-	 * Whether the given id matches the id of the creator of this FlashMap.
-	 */
-	public boolean isCreatedBy(int createdBy) {
-		return this.createdBy == createdBy;
 	}
 
 	/**

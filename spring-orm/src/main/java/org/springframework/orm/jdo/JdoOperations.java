@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,7 +228,6 @@ public interface JdoOperations {
 	 * to rely on auto-flushing at transaction completion.
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#flush()
-	 * @see JdoDialect#flush(javax.jdo.PersistenceManager)
 	 */
 	void flush() throws DataAccessException;
 

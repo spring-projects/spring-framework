@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,13 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.util.Assert;
 
@@ -36,10 +39,20 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Andy Clement
+ * @author Nikita Tovstoles
+ * @author Chris Beams
  * @since 2.0
  * @see GenericCollectionTypeResolver
  */
 public class MethodParameter {
+
+
+	private static final Annotation[][] EMPTY_ANNOTATION_MATRIX = new Annotation[0][0];
+
+	private static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
+
+	static final ConcurrentMap<Method, Annotation[][]> methodParamAnnotationsCache =
+			new ConcurrentHashMap<Method, Annotation[][]>();
 
 	private final Method method;
 
@@ -233,6 +246,29 @@ public class MethodParameter {
 		return this.genericParameterType;
 	}
 
+	public Class<?> getNestedParameterType() {
+		if (this.nestingLevel > 1) {
+			Type type = getGenericParameterType();
+			if (type instanceof ParameterizedType) {
+				Integer index = getTypeIndexForCurrentLevel();
+				Type arg = ((ParameterizedType) type).getActualTypeArguments()[index != null ? index : 0];
+				if (arg instanceof Class) {
+					return (Class) arg;
+				}
+				else if (arg instanceof ParameterizedType) {
+					arg = ((ParameterizedType) arg).getRawType();
+					if (arg instanceof Class) {
+						return (Class) arg;
+					}
+				}
+			}
+			return Object.class;
+		}
+		else {
+			return getParameterType();
+		}
+	}
+
 	/**
 	 * Return the annotations associated with the target method/constructor itself.
 	 */
@@ -245,7 +281,6 @@ public class MethodParameter {
 	 * @param annotationType the annotation type to look for
 	 * @return the annotation object, or <code>null</code> if not found
 	 */
-	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
 		return getAnnotatedElement().getAnnotation(annotationType);
 	}
@@ -256,7 +291,7 @@ public class MethodParameter {
 	public Annotation[] getParameterAnnotations() {
 		if (this.parameterAnnotations == null) {
 			Annotation[][] annotationArray = (this.method != null ?
-					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations());
+					getMethodParameterAnnotations(this.method) : this.constructor.getParameterAnnotations());
 			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
 				this.parameterAnnotations = annotationArray[this.parameterIndex];
 			}
@@ -415,6 +450,41 @@ public class MethodParameter {
 		}
 	}
 
+	/**
+	 * Return the parameter annotations for the given method, retrieving cached values
+	 * if a lookup has already been performed for this method, otherwise perform a fresh
+	 * lookup and populate the cache with the result before returning. <strong>For
+	 * internal use only.</strong>
+	 * @param method the method to introspect for parameter annotations
+	 */
+	static Annotation[][] getMethodParameterAnnotations(Method method) {
+		Assert.notNull(method);
+
+		Annotation[][] result = methodParamAnnotationsCache.get(method);
+		if (result == null) {
+			result = method.getParameterAnnotations();
+
+			if(result.length == 0) {
+				result = EMPTY_ANNOTATION_MATRIX;
+			}
+			else {
+				for (int i = 0; i < result.length; i++) {
+					if (result[i].length == 0) {
+						result[i] = EMPTY_ANNOTATION_ARRAY;
+					}
+				}
+			}
+			methodParamAnnotationsCache.put(method, result);
+		}
+
+		//always return deep copy to prevent caller from modifying cache state
+		Annotation[][] resultCopy = new Annotation[result.length][0];
+		for(int i = 0; i < result.length; i++) {
+			resultCopy[i] = result[i].clone();
+		}
+		return resultCopy;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -435,7 +505,6 @@ public class MethodParameter {
 		}
 		return false;
 	}
-
 
 	@Override
 	public int hashCode() {

@@ -2626,7 +2626,9 @@ simpleReport.reportDataKey=myBeanData</programlisting>
   <section id="view-json-mapping">
   	<title>JSON Mapping View</title>
   	
-  	<para>The <classname>MappingJacksonJsonView</classname> uses the Jackson 
+        <para>The <classname>MappingJackson2JsonView</classname>
+        (or <classname>MappingJacksonJsonView</classname> depending on the
+        the Jackson version you have) uses the Jackson
   	library's <classname>ObjectMapper</classname> to render the response content 
   	as JSON. By default, the entire contents of the model map (with the exception 
   	of framework-specific classes) will be encoded as JSON. For cases where the 

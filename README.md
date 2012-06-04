@@ -35,7 +35,6 @@ you've found a bug? Please consider submitting a reproduction project via the
 [readme](https://github.com/SpringSource/spring-framework-issues#readme) provides simple
 step-by-step instructions.  <a name="building_from_source"/>
 
-
 ## Building from source
 The Spring Framework uses a [Gradle](http://gradle.org)-based build system. In the instructions
 below, [`./gradlew`](http://vimeo.com/34436402) is invoked from the root of the source tree and
@@ -58,12 +57,8 @@ Run `./import-into-eclipse.sh` or read `import-into-idea.md` as appropriate.
 [Gradle build and release FAQ](https://github.com/SpringSource/spring-framework/wiki/Gradle-build-and-release-FAQ).
 
 ## Contributing
-[Pull requests](http://help.github.com/send-pull-requests) are welcome; you'll be asked to sign our
-contributor license agreement ([CLA](https://support.springsource.com/spring_committer_signup)).
-Trivial changes like typo fixes are especially appreciated (just
-[fork and edit!](https://github.com/blog/844-forking-with-the-edit-button)). For larger changes,
-please search through JIRA for similiar issues, creating a new one if necessary, and discuss your
-ideas with the Spring team.
+[Pull requests](http://help.github.com/send-pull-requests) are welcome; see the
+[contributor guidelines](https://github.com/SpringSource/spring-framework/wiki/Contributor-guidelines).
 
 ## Staying in touch
 Follow [@springframework](http://twitter.com/springframework) and its

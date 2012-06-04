@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.context.request.async.AbstractDelegatingCallable;
+import org.springframework.web.context.request.async.AsyncExecutionChain;
 
 /**
  * Servlet 2.3 Filter that exposes the request to the current thread,
@@ -40,6 +43,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Rossen Stoyanchev
  * @since 2.0
  * @see org.springframework.context.i18n.LocaleContextHolder
  * @see org.springframework.web.context.request.RequestContextHolder
@@ -74,22 +78,61 @@ public class RequestContextFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		ServletRequestAttributes attributes = new ServletRequestAttributes(request);
-		LocaleContextHolder.setLocale(request.getLocale(), this.threadContextInheritable);
-		RequestContextHolder.setRequestAttributes(attributes, this.threadContextInheritable);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Bound request context to thread: " + request);
-		}
+		initContextHolders(request, attributes);
+
+		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
+		chain.addDelegatingCallable(getChainedCallable(request, attributes));
+
 		try {
 			filterChain.doFilter(request, response);
 		}
 		finally {
-			LocaleContextHolder.resetLocaleContext();
-			RequestContextHolder.resetRequestAttributes();
+			resetContextHolders();
+			if (chain.isAsyncStarted()) {
+				return;
+			}
 			attributes.requestCompleted();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cleared thread-bound request context: " + request);
 			}
 		}
+	}
+
+	private void initContextHolders(HttpServletRequest request, ServletRequestAttributes requestAttributes) {
+		LocaleContextHolder.setLocale(request.getLocale(), this.threadContextInheritable);
+		RequestContextHolder.setRequestAttributes(requestAttributes, this.threadContextInheritable);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Bound request context to thread: " + request);
+		}
+	}
+
+	private void resetContextHolders() {
+		LocaleContextHolder.resetLocaleContext();
+		RequestContextHolder.resetRequestAttributes();
+	}
+
+	/**
+	 * Create a Callable to use to complete processing in an async execution chain.
+	 */
+	private AbstractDelegatingCallable getChainedCallable(final HttpServletRequest request,
+			final ServletRequestAttributes requestAttributes) {
+
+		return new AbstractDelegatingCallable() {
+			public Object call() throws Exception {
+				initContextHolders(request, requestAttributes);
+				try {
+					getNextCallable().call();
+				}
+				finally {
+					resetContextHolders();
+					requestAttributes.requestCompleted();
+					if (logger.isDebugEnabled()) {
+						logger.debug("Cleared thread-bound request context: " + request);
+					}
+				}
+				return null;
+			}
+		};
 	}
 
 }

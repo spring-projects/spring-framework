@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
+import java.util.Map.Entry;
+
 import javax.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -54,13 +56,24 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	}
 
 	/**
-	 * Add URI template variables to the property values used for data binding.
+	 * Merge URI variables into the property values to use for data binding.
 	 */
-	@Override 
+	@Override
 	@SuppressWarnings("unchecked")
 	protected void addBindValues(MutablePropertyValues mpvs, ServletRequest request) {
 		String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		mpvs.addPropertyValues((Map<String, String>) request.getAttribute(attr));
-	}	
+		Map<String, String> uriVars = (Map<String, String>) request.getAttribute(attr);
+		if (uriVars != null) {
+			for (Entry<String, String> entry : uriVars.entrySet()) {
+				if (mpvs.contains(entry.getKey())) {
+					logger.warn("Skipping URI variable '" + entry.getKey()
+							+ "' since the request contains a bind value with the same name.");
+				}
+				else {
+					mpvs.addPropertyValue(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+	}
 
 }

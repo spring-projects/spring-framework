@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.util;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -80,7 +80,7 @@ public class UriComponentsBuilder {
 			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
 					PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
 
-	
+
 	private String scheme;
 
 	private String userInfo;
@@ -223,10 +223,10 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Builds a {@code UriComponents} instance and replaces URI template variables 
-	 * with the values from a map. This is a shortcut method, which combines 
-	 * calls to {@link #build()} and then {@link UriComponents#expand(Map)}. 
-	 * 
+	 * Builds a {@code UriComponents} instance and replaces URI template variables
+	 * with the values from a map. This is a shortcut method, which combines
+	 * calls to {@link #build()} and then {@link UriComponents#expand(Map)}.
+	 *
 	 * @param uriVariables the map of URI variables
 	 * @return the URI components with expanded values
 	 */
@@ -235,17 +235,17 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Builds a {@code UriComponents} instance and replaces URI template variables 
-	 * with the values from an array. This is a shortcut method, which combines 
-	 * calls to {@link #build()} and then {@link UriComponents#expand(Object...)}. 
-	 * 
+	 * Builds a {@code UriComponents} instance and replaces URI template variables
+	 * with the values from an array. This is a shortcut method, which combines
+	 * calls to {@link #build()} and then {@link UriComponents#expand(Object...)}.
+	 *
 	 * @param uriVariableValues URI variable values
 	 * @return the URI components with expanded values
 	 */
 	public UriComponents buildAndExpand(Object... uriVariableValues) {
 		return build(false).expand(uriVariableValues);
 	}
-	
+
     // URI components methods
 
 	/**
@@ -260,8 +260,8 @@ public class UriComponentsBuilder {
 
 		this.scheme = uri.getScheme();
 
-		if (uri.getUserInfo() != null) {
-			this.userInfo = uri.getUserInfo();
+		if (uri.getRawUserInfo() != null) {
+			this.userInfo = uri.getRawUserInfo();
 		}
 		if (uri.getHost() != null) {
 			this.host = uri.getHost();
@@ -269,15 +269,15 @@ public class UriComponentsBuilder {
 		if (uri.getPort() != -1) {
 			this.port = uri.getPort();
 		}
-		if (StringUtils.hasLength(uri.getPath())) {
-			this.pathBuilder = new FullPathComponentBuilder(uri.getPath());
+		if (StringUtils.hasLength(uri.getRawPath())) {
+			this.pathBuilder = new FullPathComponentBuilder(uri.getRawPath());
 		}
-		if (StringUtils.hasLength(uri.getQuery())) {
+		if (StringUtils.hasLength(uri.getRawQuery())) {
 			this.queryParams.clear();
-			query(uri.getQuery());
+			query(uri.getRawQuery());
 		}
-		if (uri.getFragment() != null) {
-			this.fragment = uri.getFragment();
+		if (uri.getRawFragment() != null) {
+			this.fragment = uri.getRawFragment();
 		}
 		return this;
 	}
@@ -347,8 +347,8 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the path of this builder overriding all existing path and path segment values. 
-	 * 
+	 * Sets the path of this builder overriding all existing path and path segment values.
+	 *
 	 * @param path the URI path; a {@code null} value results in an empty path.
 	 * @return this UriComponentsBuilder
 	 */
@@ -394,7 +394,7 @@ public class UriComponentsBuilder {
 
 	/**
 	 * Sets the query of this builder overriding all existing query parameters.
-	 * 
+	 *
 	 * @param query the query string; a {@code null} value removes all query parameters.
 	 * @return this UriComponentsBuilder
 	 */
@@ -430,7 +430,7 @@ public class UriComponentsBuilder {
 	/**
 	 * Sets the query parameter values overriding all existing query values for the same parameter.
 	 * If no values are given, the query parameter is removed.
-	 * 
+	 *
 	 * @param name   the query parameter name
 	 * @param values the query parameter values
 	 * @return this UriComponentsBuilder
@@ -443,7 +443,7 @@ public class UriComponentsBuilder {
 		}
 		return this;
 	}
-    
+
 	/**
 	 * Sets the URI fragment. The given fragment may contain URI template variables, and may also be {@code null} to clear
 	 * the fragment of this builder.
@@ -509,7 +509,17 @@ public class UriComponentsBuilder {
 		private final List<String> pathSegments = new ArrayList<String>();
 
 		private PathSegmentComponentBuilder(String... pathSegments) {
-			Collections.addAll(this.pathSegments, pathSegments);
+			this.pathSegments.addAll(removeEmptyPathSegments(pathSegments));
+		}
+
+		private Collection<String> removeEmptyPathSegments(String... pathSegments) {
+			List<String> result = new ArrayList<String>();
+			for (String segment : pathSegments) {
+				if (StringUtils.hasText(segment)) {
+					result.add(segment);
+				}
+			}
+			return result;
 		}
 
 		public UriComponents.PathComponent build() {
@@ -523,7 +533,7 @@ public class UriComponentsBuilder {
 		}
 
 		public PathComponentBuilder appendPathSegments(String... pathSegments) {
-			Collections.addAll(this.pathSegments, pathSegments);
+			this.pathSegments.addAll(removeEmptyPathSegments(pathSegments));
 			return this;
 		}
 	}

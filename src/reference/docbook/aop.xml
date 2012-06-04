@@ -2545,7 +2545,7 @@ public @interface Idempotent {
     <itemizedlist>
       <listitem>
         <para><literal>final</literal> methods cannot be advised, as they
-        cannot be overriden.</para>
+        cannot be overridden.</para>
       </listitem>
 
       <listitem>

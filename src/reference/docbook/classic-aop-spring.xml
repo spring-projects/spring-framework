@@ -1808,7 +1808,7 @@ Object oldTarget = swapper.swap(newTarget);</programlisting></para>
       <para>Note that the target object - "businessObjectTarget" in the
       example - <emphasis>must</emphasis> be a prototype. This allows the
       <literal>PoolingTargetSource</literal> implementation to create new
-      instances of the target to grow the pool as necessary. See the havadoc
+      instances of the target to grow the pool as necessary. See the Javadoc
       for <literal>AbstractPoolingTargetSource</literal> and the concrete
       subclass you wish to use for information about its properties: "maxSize"
       is the most basic, and always guaranteed to be present.</para>

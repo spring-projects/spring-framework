@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,15 +65,15 @@ public @interface ActiveProfiles {
 	 * Whether or not bean definition profiles from superclasses should be
 	 * <em>inherited</em>.
 	 *
-	 * <p>The default value is <code>true</code>, which means that an annotated
-	 * class will <em>inherit</em> bean definition profiles defined by an
-	 * annotated superclass. Specifically, the bean definition profiles for an
-	 * annotated class will be appended to the list of bean definition profiles
-	 * defined by an annotated superclass. Thus, subclasses have the option of
+	 * <p>The default value is <code>true</code>, which means that a test
+	 * class will <em>inherit</em> bean definition profiles defined by a
+	 * test superclass. Specifically, the bean definition profiles for a test
+	 * class will be appended to the list of bean definition profiles
+	 * defined by a test superclass. Thus, subclasses have the option of
 	 * <em>extending</em> the list of bean definition profiles.
 	 *
 	 * <p>If <code>inheritProfiles</code> is set to <code>false</code>, the bean
-	 * definition profiles for the annotated class will <em>shadow</em> and
+	 * definition profiles for the test class will <em>shadow</em> and
 	 * effectively replace any bean definition profiles defined by a superclass.
 	 *
 	 * <p>In the following example, the {@code ApplicationContext} for
@@ -98,7 +98,8 @@ public @interface ActiveProfiles {
 	 *
 	 * <p>Note: {@code @ActiveProfiles} can be used when loading an 
 	 * {@code ApplicationContext} from path-based resource locations or
-	 * configuration classes.
+	 * annotated classes.
+	 *
 	 * @see ContextConfiguration#locations
 	 * @see ContextConfiguration#classes
 	 * @see ContextConfiguration#inheritLocations

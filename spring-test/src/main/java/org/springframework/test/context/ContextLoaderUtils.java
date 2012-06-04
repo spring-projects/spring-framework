@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
 /**
  * Utility methods for working with {@link ContextLoader ContextLoaders} and
  * {@link SmartContextLoader SmartContextLoaders} and resolving resource locations,
- * configuration classes, and active bean definition profiles.
+ * annotated classes, and active bean definition profiles.
  * 
  * @author Sam Brannen
  * @since 3.1
@@ -61,11 +61,13 @@ abstract class ContextLoaderUtils {
 	 * Resolve the {@link ContextLoader} {@link Class class} to use for the
 	 * supplied {@link Class testClass} and then instantiate and return that
 	 * {@code ContextLoader}.
+	 *
 	 * <p>If the supplied <code>defaultContextLoaderClassName</code> is
 	 * <code>null</code> or <em>empty</em>, the <em>standard</em>
 	 * default context loader class name {@value #DEFAULT_CONTEXT_LOADER_CLASS_NAME}
 	 * will be used. For details on the class resolution process, see
 	 * {@link #resolveContextLoaderClass()}.
+	 *
 	 * @param testClass the test class for which the {@code ContextLoader}
 	 * should be resolved (must not be <code>null</code>)
 	 * @param defaultContextLoaderClassName the name of the default
@@ -90,6 +92,7 @@ abstract class ContextLoaderUtils {
 	/**
 	 * Resolve the {@link ContextLoader} {@link Class} to use for the supplied
 	 * {@link Class testClass}.
+	 *
 	 * <ol>
 	 * <li>If the {@link ContextConfiguration#loader() loader} attribute of
 	 * {@link ContextConfiguration &#064;ContextConfiguration} is configured
@@ -101,6 +104,7 @@ abstract class ContextLoaderUtils {
 	 * the class hierarchy, an attempt will be made to load and return the class
 	 * with the supplied <code>defaultContextLoaderClassName</code>.</li>
 	 * </ol>
+	 *
 	 * @param testClass the class for which to resolve the {@code ContextLoader}
 	 * class; must not be <code>null</code>
 	 * @param defaultContextLoaderClassName the name of the default
@@ -163,13 +167,15 @@ abstract class ContextLoaderUtils {
 	/**
 	 * Resolve the list of {@link ContextConfigurationAttributes configuration
 	 * attributes} for the supplied {@link Class class} and its superclasses.
+	 *
 	 * <p>Note that the {@link ContextConfiguration#inheritLocations
 	 * inheritLocations} flag of {@link ContextConfiguration
 	 * &#064;ContextConfiguration} will be taken into consideration.
 	 * Specifically, if the <code>inheritLocations</code> flag is set to
-	 * <code>true</code>, configuration attributes defined in the annotated
+	 * <code>true</code>, configuration attributes defined in the test
 	 * class will be appended to the configuration attributes defined in
 	 * superclasses.
+	 *
 	 * @param clazz the class for which to resolve the configuration attributes (must
 	 * not be <code>null</code>)
 	 * @return the list of configuration attributes for the specified class,
@@ -214,11 +220,13 @@ abstract class ContextLoaderUtils {
 
 	/**
 	 * Resolve <em>active bean definition profiles</em> for the supplied {@link Class}.
+	 *
 	 * <p>Note that the {@link ActiveProfiles#inheritProfiles inheritProfiles}
 	 * flag of {@link ActiveProfiles &#064;ActiveProfiles} will be taken into
 	 * consideration. Specifically, if the <code>inheritProfiles</code> flag is
-	 * set to <code>true</code>, profiles defined in the annotated class will be
+	 * set to <code>true</code>, profiles defined in the test class will be
 	 * merged with those defined in superclasses.
+	 *
 	 * @param clazz the class for which to resolve the active profiles (must
 	 * not be <code>null</code>)
 	 * @return the set of active profiles for the specified class, including
@@ -280,6 +288,7 @@ abstract class ContextLoaderUtils {
 	 * Build the {@link MergedContextConfiguration merged context configuration}
 	 * for the supplied {@link Class testClass} and
 	 * <code>defaultContextLoaderClassName</code>.
+	 *
 	 * @param testClass the test class for which the {@code MergedContextConfiguration}
 	 * should be built (must not be <code>null</code>)
 	 * @param defaultContextLoaderClassName the name of the default

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.NestedIOException;
 import org.springframework.util.ReflectionUtils;
 
@@ -58,14 +59,15 @@ public abstract class VfsUtils {
 	private static Method VFS_METHOD_GET_ROOT_URI = null;
 
 	private static Method VIRTUAL_FILE_METHOD_EXISTS = null;
+	private static Method VIRTUAL_FILE_METHOD_GET_INPUT_STREAM;
 	private static Method VIRTUAL_FILE_METHOD_GET_SIZE;
 	private static Method VIRTUAL_FILE_METHOD_GET_LAST_MODIFIED;
-	private static Method VIRTUAL_FILE_METHOD_GET_CHILD;
-	private static Method VIRTUAL_FILE_METHOD_GET_INPUT_STREAM;
 	private static Method VIRTUAL_FILE_METHOD_TO_URL;
 	private static Method VIRTUAL_FILE_METHOD_TO_URI;
 	private static Method VIRTUAL_FILE_METHOD_GET_NAME;
 	private static Method VIRTUAL_FILE_METHOD_GET_PATH_NAME;
+	private static Method VIRTUAL_FILE_METHOD_GET_CHILD;
+
 	protected static Class<?> VIRTUAL_FILE_VISITOR_INTERFACE;
 	protected static Method VIRTUAL_FILE_METHOD_VISIT;
 
@@ -101,9 +103,10 @@ public abstract class VfsUtils {
 
 				if (logger.isDebugEnabled())
 					logger.debug("JBoss VFS packages for JBoss AS 5 found");
-			} catch (ClassNotFoundException ex1) {
+			}
+			catch (ClassNotFoundException ex2) {
 				logger.error("JBoss VFS packages (for both JBoss AS 5 and 6) were not found - JBoss VFS support disabled");
-				throw new IllegalStateException("Cannot detect JBoss VFS packages", ex1);
+				throw new IllegalStateException("Cannot detect JBoss VFS packages", ex2);
 			}
 		}
 
@@ -117,8 +120,8 @@ public abstract class VfsUtils {
 			Class<?> virtualFile = loader.loadClass(pkg + "VirtualFile");
 
 			VIRTUAL_FILE_METHOD_EXISTS = ReflectionUtils.findMethod(virtualFile, "exists");
-			VIRTUAL_FILE_METHOD_GET_SIZE = ReflectionUtils.findMethod(virtualFile, "getSize");
 			VIRTUAL_FILE_METHOD_GET_INPUT_STREAM = ReflectionUtils.findMethod(virtualFile, "openStream");
+			VIRTUAL_FILE_METHOD_GET_SIZE = ReflectionUtils.findMethod(virtualFile, "getSize");
 			VIRTUAL_FILE_METHOD_GET_LAST_MODIFIED = ReflectionUtils.findMethod(virtualFile, "getLastModified");
 			VIRTUAL_FILE_METHOD_TO_URI = ReflectionUtils.findMethod(virtualFile, "toURI");
 			VIRTUAL_FILE_METHOD_TO_URL = ReflectionUtils.findMethod(virtualFile, "toURL");
@@ -181,6 +184,10 @@ public abstract class VfsUtils {
 		catch (IOException ex) {
 			return false;
 		}
+	}
+
+	static long getSize(Object vfsResource) throws IOException {
+		return (Long) invokeVfsMethod(VIRTUAL_FILE_METHOD_GET_SIZE, vfsResource);
 	}
 
 	static long getLastModified(Object vfsResource) throws IOException {

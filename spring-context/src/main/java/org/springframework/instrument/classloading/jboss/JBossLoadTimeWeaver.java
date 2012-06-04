@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.ClassUtils;
  * <p>Thanks to Ales Justin and Marius Bogoevici for the initial prototype.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class JBossLoadTimeWeaver implements LoadTimeWeaver {
@@ -55,23 +56,18 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * Create a new instance of the {@link JBossLoadTimeWeaver} class using
 	 * the supplied {@link ClassLoader}.
-	 * @param classLoader the <code>ClassLoader</code> to delegate to for
-	 * weaving (must not be <code>null</code>)
+	 * @param classLoader the <code>ClassLoader</code> to delegate to for weaving
+	 * (must not be <code>null</code>)
 	 */
 	public JBossLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
-		String loaderClassName = classLoader.getClass().getName();
-
-		if (loaderClassName.startsWith("org.jboss.classloader")) {
-			// JBoss AS 5 or JBoss AS 6
-			this.adapter = new JBossMCAdapter(classLoader);
-		}
-		else if (loaderClassName.startsWith("org.jboss.modules")) {
+		if (classLoader.getClass().getName().startsWith("org.jboss.modules")) {
 			// JBoss AS 7
 			this.adapter = new JBossModulesAdapter(classLoader);
 		}
 		else {
-			throw new IllegalArgumentException("Unexpected ClassLoader type: " + loaderClassName);
+			// JBoss AS 5 or JBoss AS 6
+			this.adapter = new JBossMCAdapter(classLoader);
 		}
 	}
 

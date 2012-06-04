@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,15 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
- * Cache for Spring {@link ApplicationContext ApplicationContexts}
- * in a test environment.
+ * Cache for Spring {@link ApplicationContext ApplicationContexts} in a test environment.
  *
  * <p>Maintains a cache of {@link ApplicationContext contexts} keyed by
  * {@link MergedContextConfiguration} instances. This has significant performance
  * benefits if initializing the context would take time. While initializing a
  * Spring context itself is very quick, some beans in a context, such as a
- * {@link org.springframework.orm.hibernate3.LocalSessionFactoryBean LocalSessionFactoryBean}
- * for working with Hibernate, may take some time to initialize. Hence it often
- * makes sense to perform that initialization once.
+ * {@code LocalSessionFactoryBean} for working with Hibernate, may take some time
+ * to initialize. Hence it often makes sense to perform that initialization only
+ * once per test suite.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -70,6 +69,7 @@ class ContextCache {
 
 	/**
 	 * Return whether there is a cached context for the given key.
+	 *
 	 * @param key the context key (never <code>null</code>)
 	 */
 	boolean contains(MergedContextConfiguration key) {
@@ -79,8 +79,10 @@ class ContextCache {
 
 	/**
 	 * Obtain a cached ApplicationContext for the given key.
+	 *
 	 * <p>The {@link #getHitCount() hit} and {@link #getMissCount() miss}
 	 * counts will be updated accordingly.
+	 *
 	 * @param key the context key (never <code>null</code>)
 	 * @return the corresponding ApplicationContext instance,
 	 * or <code>null</code> if not found in the cache.
@@ -133,6 +135,7 @@ class ContextCache {
 
 	/**
 	 * Explicitly add an ApplicationContext instance to the cache under the given key.
+	 *
 	 * @param key the context key (never <code>null</code>)
 	 * @param context the ApplicationContext instance (never <code>null</code>)
 	 */
@@ -144,9 +147,10 @@ class ContextCache {
 
 	/**
 	 * Remove the context with the given key.
+	 *
 	 * @param key the context key (never <code>null</code>)
-	 * @return the corresponding ApplicationContext instance,
-	 * or <code>null</code> if not found in the cache.
+	 * @return the corresponding ApplicationContext instance, or <code>null</code>
+	 * if not found in the cache.
 	 * @see #setDirty
 	 */
 	ApplicationContext remove(MergedContextConfiguration key) {
@@ -156,11 +160,13 @@ class ContextCache {
 	/**
 	 * Mark the context with the given key as dirty, effectively
 	 * {@link #remove removing} the context from the cache and explicitly
-	 * {@link ConfigurableApplicationContext#close() closing} it if
-	 * it is an instance of {@link ConfigurableApplicationContext}.
+	 * {@link ConfigurableApplicationContext#close() closing} it if it is an
+	 * instance of {@link ConfigurableApplicationContext}.
+	 *
 	 * <p>Generally speaking, you would only call this method if you change the
 	 * state of a singleton bean, potentially affecting future interaction with
 	 * the context.
+	 *
 	 * @param key the context key (never <code>null</code>)
 	 * @see #remove
 	 */

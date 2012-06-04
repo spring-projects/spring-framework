@@ -106,8 +106,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * a thrown exception instance. Provided argument values are checked before argument resolvers.
 	 *
 	 * @param request the current request
-	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
-	 * @param providedArgs argument values to try to use without view resolution
+	 * @param mavContainer the ModelAndViewContainer for this request
+	 * @param providedArgs "given" arguments matched by type, not resolved
 	 * @return the raw value returned by the invoked method
 	 * @exception Exception raised if no suitable argument resolver can be found, or the method raised an exception
 	 */
@@ -193,7 +193,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * Attempt to resolve a method parameter from the list of provided argument values.
 	 */
 	private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
-		if (providedArgs == null || parameter.hasParameterAnnotations()) {
+		if (providedArgs == null) {
 			return null;
 		}
 		for (Object providedArg : providedArgs) {

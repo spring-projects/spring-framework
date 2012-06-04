@@ -94,7 +94,7 @@
          </interfacename> registration is through <interfacename>ApplicationContext
          </interfacename> auto-detection (as described above), it is also
          possible to register them <emphasis>programmatically</emphasis>
-         against an <interfacename>ApplicationContext</interfacename> using the
+         against a <interfacename>ConfigurableBeanFactory</interfacename> using the
          <methodname>addBeanPostProcessor</methodname> method. This can be useful
          when needing to evaluate conditional logic before registration, or even
          for copying bean post processors across contexts in a hierarchy.  Note

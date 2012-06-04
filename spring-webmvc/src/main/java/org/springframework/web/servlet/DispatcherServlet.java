@@ -50,6 +50,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.async.AbstractDelegatingCallable;
+import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -130,6 +132,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Chris Beams
+ * @author Rossen Stoyanchev
  * @see org.springframework.web.HttpRequestHandler
  * @see org.springframework.web.servlet.mvc.Controller
  * @see org.springframework.web.context.ContextLoaderListener
@@ -297,10 +300,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/** FlashMapManager used by this servlet */
 	private FlashMapManager flashMapManager;
-	
+
 	/** List of ViewResolvers used by this servlet */
 	private List<ViewResolver> viewResolvers;
-
 
 	/**
 	 * Create a new {@code DispatcherServlet} that will create its own internal web
@@ -691,7 +693,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Initialize the {@link FlashMapManager} used by this servlet instance.
-	 * <p>If no implementation is configured then we default to 
+	 * <p>If no implementation is configured then we default to
 	 * {@code org.springframework.web.servlet.support.DefaultFlashMapManager}.
 	 */
 	private void initFlashMapManager(ApplicationContext context) {
@@ -814,6 +816,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		AsyncExecutionChain asyncChain = AsyncExecutionChain.getForCurrentRequest(request);
+
 		if (logger.isDebugEnabled()) {
 			String requestUri = urlPathHelper.getRequestUri(request);
 			logger.debug("DispatcherServlet with name '" + getServletName() + "' processing " + request.getMethod() +
@@ -840,23 +845,49 @@ public class DispatcherServlet extends FrameworkServlet {
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 		request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
+
+		FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);
+		if (inputFlashMap != null) {
+			request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, Collections.unmodifiableMap(inputFlashMap));
+		}
 		request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
 		request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE, this.flashMapManager);
 
-		Map<String, ?> flashMap = this.flashMapManager.getFlashMapForRequest(request);
-		if (flashMap != null) {
-			request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, flashMap);
-		}
+		asyncChain.addDelegatingCallable(getServiceAsyncCallable(request, attributesSnapshot));
 
 		try {
 			doDispatch(request, response);
 		}
 		finally {
+			if (asyncChain.isAsyncStarted()) {
+				return;
+			}
 			// Restore the original attribute snapshot, in case of an include.
 			if (attributesSnapshot != null) {
 				restoreAttributesAfterInclude(request, attributesSnapshot);
 			}
 		}
+	}
+
+	/**
+	 * Create a Callable to complete doService() processing asynchronously.
+	 */
+	private AbstractDelegatingCallable getServiceAsyncCallable(
+			final HttpServletRequest request, final Map<String, Object> attributesSnapshot) {
+
+		return new AbstractDelegatingCallable() {
+			public Object call() throws Exception {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Resuming asynchronous processing of " + request.getMethod() +
+							" request for [" + urlPathHelper.getRequestUri(request) + "]");
+				}
+				getNextCallable().call();
+				if (attributesSnapshot != null) {
+					restoreAttributesAfterInclude(request, attributesSnapshot);
+				}
+				return null;
+			}
+		};
 	}
 
 	/**
@@ -873,11 +904,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HttpServletRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
-		int interceptorIndex = -1;
+		AsyncExecutionChain asyncChain = AsyncExecutionChain.getForCurrentRequest(request);
 
 		try {
-			ModelAndView mv;
-			boolean errorView = false;
+			ModelAndView mv = null;
+			Exception dispatchException = null;
 
 			try {
 				processedRequest = checkMultipart(request);
@@ -892,7 +923,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				// Determine handler adapter for the current request.
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
-                // Process last-modified header, if supported by the handler.
+				// Process last-modified header, if supported by the handler.
 				String method = request.getMethod();
 				boolean isGet = "GET".equals(method);
 				if (isGet || "HEAD".equals(method)) {
@@ -906,81 +937,136 @@ public class DispatcherServlet extends FrameworkServlet {
 					}
 				}
 
-				// Apply preHandle methods of registered interceptors.
-				HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
-				if (interceptors != null) {
-					for (int i = 0; i < interceptors.length; i++) {
-						HandlerInterceptor interceptor = interceptors[i];
-						if (!interceptor.preHandle(processedRequest, response, mappedHandler.getHandler())) {
-							triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
-							return;
-						}
-						interceptorIndex = i;
-					}
+				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
+					return;
 				}
+
+				mappedHandler.addDelegatingCallables(processedRequest, response);
+
+				asyncChain.addDelegatingCallable(
+						getDispatchAsyncCallable(mappedHandler, request, response, processedRequest));
 
 				// Actually invoke the handler.
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
-				// Do we need view name translation?
-				if (mv != null && !mv.hasView()) {
-					mv.setViewName(getDefaultViewName(request));
+				if (asyncChain.isAsyncStarted()) {
+					mappedHandler.applyPostHandleAsyncStarted(processedRequest, response);
+					logger.debug("Exiting request thread and leaving the response open");
+					return;
 				}
 
-				// Apply postHandle methods of registered interceptors.
-				if (interceptors != null) {
-					for (int i = interceptors.length - 1; i >= 0; i--) {
-						HandlerInterceptor interceptor = interceptors[i];
-						interceptor.postHandle(processedRequest, response, mappedHandler.getHandler(), mv);
-					}
-				}
-			}
-			catch (ModelAndViewDefiningException ex) {
-				logger.debug("ModelAndViewDefiningException encountered", ex);
-				mv = ex.getModelAndView();
+				applyDefaultViewName(request, mv);
+
+				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
-				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
-				mv = processHandlerException(processedRequest, response, handler, ex);
-				errorView = (mv != null);
+				dispatchException = ex;
 			}
-
-			// Did the handler return a view to render?
-			if (mv != null && !mv.wasCleared()) {
-				render(mv, processedRequest, response);
-				if (errorView) {
-					WebUtils.clearErrorRequestAttributes(request);
-				}
-			}
-			else {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Null ModelAndView returned to DispatcherServlet with name '" + getServletName() +
-							"': assuming HandlerAdapter completed request handling");
-				}
-			}
-
-			// Trigger after-completion for successful outcome.
-			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, null);
+			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
-
 		catch (Exception ex) {
-			// Trigger after-completion for thrown exception.
-			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
-			throw ex;
+			triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
 		}
 		catch (Error err) {
-			ServletException ex = new NestedServletException("Handler processing failed", err);
-			// Trigger after-completion for thrown exception.
-			triggerAfterCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
-			throw ex;
+			triggerAfterCompletionWithError(processedRequest, response, mappedHandler, err);
 		}
-
 		finally {
+			if (asyncChain.isAsyncStarted()) {
+				return;
+			}
 			// Clean up any resources used by a multipart request.
 			if (processedRequest != request) {
 				cleanupMultipart(processedRequest);
 			}
 		}
+	}
+
+	/**
+	 * Do we need view name translation?
+	 */
+	private void applyDefaultViewName(HttpServletRequest request, ModelAndView mv) throws Exception {
+		if (mv != null && !mv.hasView()) {
+			mv.setViewName(getDefaultViewName(request));
+		}
+	}
+
+	/**
+	 * Handle the result of handler selection and handler invocation, which is
+	 * either a ModelAndView or an Exception to be resolved to a ModelAndView.
+	 */
+	private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,
+			HandlerExecutionChain mappedHandler, ModelAndView mv, Exception exception) throws Exception {
+
+		boolean errorView = false;
+
+		if (exception != null) {
+			if (exception instanceof ModelAndViewDefiningException) {
+				logger.debug("ModelAndViewDefiningException encountered", exception);
+				mv = ((ModelAndViewDefiningException) exception).getModelAndView();
+			}
+			else {
+				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
+				mv = processHandlerException(request, response, handler, exception);
+				errorView = (mv != null);
+			}
+		}
+
+		// Did the handler return a view to render?
+		if (mv != null && !mv.wasCleared()) {
+			render(mv, request, response);
+			if (errorView) {
+				WebUtils.clearErrorRequestAttributes(request);
+			}
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Null ModelAndView returned to DispatcherServlet with name '" + getServletName() +
+						"': assuming HandlerAdapter completed request handling");
+			}
+		}
+
+		if (mappedHandler != null) {
+			mappedHandler.triggerAfterCompletion(request, response, null);
+		}
+	}
+
+	/**
+	 * Create a Callable to complete doDispatch processing asynchronously.
+	 */
+	private AbstractDelegatingCallable getDispatchAsyncCallable(
+			final HandlerExecutionChain mappedHandler,
+			final HttpServletRequest request, final HttpServletResponse response,
+			final HttpServletRequest processedRequest) throws Exception {
+
+		return new AbstractDelegatingCallable() {
+			public Object call() throws Exception {
+				try {
+					ModelAndView mv = null;
+					Exception dispatchException = null;
+					try {
+						mv = (ModelAndView) getNextCallable().call();
+						applyDefaultViewName(processedRequest, mv);
+						mappedHandler.applyPostHandle(request, response, mv);
+					}
+					catch (Exception ex) {
+						dispatchException = ex;
+					}
+					processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
+				}
+				catch (Exception ex) {
+					triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
+				}
+				catch (Error err) {
+					triggerAfterCompletionWithError(processedRequest, response, mappedHandler, err);
+				}
+				finally {
+					if (processedRequest != request) {
+						cleanupMultipart(processedRequest);
+					}
+				}
+				return null;
+			}
+		};
 	}
 
 	/**
@@ -996,7 +1082,6 @@ public class DispatcherServlet extends FrameworkServlet {
 			public Locale getLocale() {
 				return localeResolver.resolveLocale(request);
 			}
-			@Override
 			public String toString() {
 				return getLocale().toString();
 			}
@@ -1216,36 +1301,23 @@ public class DispatcherServlet extends FrameworkServlet {
 		return null;
 	}
 
-	/**
-	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
-	 * Will just invoke afterCompletion for all interceptors whose preHandle invocation
-	 * has successfully completed and returned true.
-	 * @param mappedHandler the mapped HandlerExecutionChain
-	 * @param interceptorIndex index of last interceptor that successfully completed
-	 * @param ex Exception thrown on handler execution, or <code>null</code> if none
-	 * @see HandlerInterceptor#afterCompletion
-	 */
-	private void triggerAfterCompletion(HandlerExecutionChain mappedHandler,
-			int interceptorIndex,
-			HttpServletRequest request,
-			HttpServletResponse response,
-			Exception ex) throws Exception {
+	private void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response,
+			HandlerExecutionChain mappedHandler, Exception ex) throws Exception {
 
-		// Apply afterCompletion methods of registered interceptors.
 		if (mappedHandler != null) {
-			HandlerInterceptor[] interceptors = mappedHandler.getInterceptors();
-			if (interceptors != null) {
-				for (int i = interceptorIndex; i >= 0; i--) {
-					HandlerInterceptor interceptor = interceptors[i];
-					try {
-						interceptor.afterCompletion(request, response, mappedHandler.getHandler(), ex);
-					}
-					catch (Throwable ex2) {
-						logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
-					}
-				}
-			}
+			mappedHandler.triggerAfterCompletion(request, response, ex);
 		}
+		throw ex;
+	}
+
+	private void triggerAfterCompletionWithError(HttpServletRequest request, HttpServletResponse response,
+			HandlerExecutionChain mappedHandler, Error error) throws Exception, ServletException {
+
+		ServletException ex = new NestedServletException("Handler processing failed", error);
+		if (mappedHandler != null) {
+			mappedHandler.triggerAfterCompletion(request, response, ex);
+		}
+		throw ex;
 	}
 
 	/**

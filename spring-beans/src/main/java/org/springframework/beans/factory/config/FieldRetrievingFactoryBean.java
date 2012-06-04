@@ -171,7 +171,7 @@ public class FieldRetrievingFactoryBean
 			int lastDotIndex = this.staticField.lastIndexOf('.');
 			if (lastDotIndex == -1 || lastDotIndex == this.staticField.length()) {
 				throw new IllegalArgumentException(
-						"staticField must be a fully qualified class plus method name: " +
+						"staticField must be a fully qualified class plus static field name: " +
 						"e.g. 'example.MyExampleClass.MY_EXAMPLE_FIELD'");
 			}
 			String className = this.staticField.substring(0, lastDotIndex);

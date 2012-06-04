@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,22 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.Callable;
 
 /**
  * Annotation for mapping web requests onto specific handler classes and/or
- * handler methods. Provides consistent style between Servlet and Portlet
+ * handler methods. Provides a consistent style between Servlet and Portlet
  * environments, with the semantics adapting to the concrete environment.
  *
- * <p><b>NOTE:</b> Method-level mappings are only allowed to narrow the mapping
- * expressed at the class level (if any). In the Servlet case, an HTTP path needs to
- * uniquely map onto one specific handler bean (not spread across multiple handler beans);
- * the remaining mapping parameters and conditions are effectively assertions only.
- * In the Portlet case, a portlet mode in combination with specific parameter conditions
- * needs to uniquely map onto one specific handler bean, with all conditions evaluated
- * for mapping purposes. It is strongly recommended to co-locate related handler methods
- * into the same bean and therefore keep the mappings simple and intuitive.
+ * <p><b>NOTE:</b> The set of features supported for Servlets is a superset
+ * of the set of features supported for Portlets. The places where this applies
+ * are marked with the label "Servlet-only" in this source file. For Servlet
+ * environments there are some further distinctions depending on whether an
+ * application is configured with {@literal "@MVC 3.0"} or
+ * {@literal "@MVC 3.1"} support classes. The places where this applies are
+ * marked with {@literal "@MVC 3.1-only"} in this source file. For more
+ * details see the note on the new support classes added in Spring MVC 3.1
+ * further below.
  *
  * <p>Handler methods which are annotated with this annotation are allowed
  * to have very flexible signatures. They may have arguments of the following
@@ -55,7 +57,7 @@ import java.lang.annotation.Target;
  * As a consequence, such an argument will never be <code>null</code>.
  * <i>Note that session access may not be thread-safe, in particular in a
  * Servlet environment: Consider switching the
- * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter#setSynchronizeOnSession "synchronizeOnSession"}
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
  * flag to "true" if multiple requests are allowed to access a session concurrently.</i>
  * <li>{@link org.springframework.web.context.request.WebRequest} or
  * {@link org.springframework.web.context.request.NativeWebRequest}.
@@ -71,12 +73,15 @@ import java.lang.annotation.Target;
  * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
  * the response's content. This will be the raw OutputStream/Writer as
  * exposed by the Servlet/Portlet API.
- * <li>{@link PathVariable @PathVariable} annotated parameters for access to
- * URI template values (i.e. /hotels/{hotel}). Variable values will be
+ * <li>{@link PathVariable @PathVariable} annotated parameters (Servlet-only)
+ * for access to URI template values (i.e. /hotels/{hotel}). Variable values will be
  * converted to the declared method argument type. By default, the URI template
  * will match against the regular expression {@code [^\.]*} (i.e. any character
  * other than period), but this can be changed by specifying another regular
  * expression, like so: /hotels/{hotel:\d+}.
+ * Additionally, {@code @PathVariable} can be used on a
+ * {@link java.util.Map Map&lt;String, String&gt;} to gain access to all
+ * URI template variables.
  * <li>{@link RequestParam @RequestParam} annotated parameters for access to
  * specific Servlet/Portlet request parameters. Parameter values will be
  * converted to the declared method argument type. Additionally,
@@ -90,30 +95,43 @@ import java.lang.annotation.Target;
  * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}, or
  * {@link org.springframework.http.HttpHeaders HttpHeaders} method parameter to
  * gain access to all request headers.
- * <li>{@link RequestBody @RequestBody} annotated parameters for access to
- * the Servlet request HTTP contents. The request stream will be
- * converted to the declared method argument type using 
+ * <li>{@link RequestBody @RequestBody} annotated parameters (Servlet-only)
+ * for access to the Servlet request HTTP contents. The request stream will be
+ * converted to the declared method argument type using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
- * converters}. Such parameters may optionally be annotated with {@code @Valid}.
- * <li>{@link RequestPart @RequestPart} annotated parameters for access to the content
+ * converters}. Such parameters may optionally be annotated with {@code @Valid}
+ * but do not support access to validation results through a
+ * {@link org.springframework.validation.Errors} /
+ * {@link org.springframework.validation.BindingResult} argument.
+ * Instead a {@link org.springframework.web.servlet.mvc.method.annotation.MethodArgumentNotValidException}
+ * exception is raised.
+ * <li>{@link RequestPart @RequestPart} annotated parameters
+ * (Servlet-only, {@literal @MVC 3.1-only})
+ * for access to the content
  * of a part of "multipart/form-data" request. The request part stream will be
- * converted to the declared method argument type using 
+ * converted to the declared method argument type using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
- * converters}. Such parameters may optionally be annotated with {@code @Valid}.
+ * converters}. Such parameters may optionally be annotated with {@code @Valid}
+ * but do not support access to validation results through a
+ * {@link org.springframework.validation.Errors} /
+ * {@link org.springframework.validation.BindingResult} argument.
+ * Instead a {@link org.springframework.web.servlet.mvc.method.annotation.MethodArgumentNotValidException}
+ * exception is raised.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
- * for access to the Servlet request HTTP headers and contents. The request stream will be
- * converted to the entity body using
+ * (Servlet-only) for access to the Servlet request HTTP headers and contents.
+ * The request stream will be converted to the entity body using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
  * <li>{@link java.util.Map} / {@link org.springframework.ui.Model} /
  * {@link org.springframework.ui.ModelMap} for enriching the implicit model
  * that will be exposed to the web view.
- * <li>{@link org.springframework.web.servlet.mvc.support.RedirectAttributes} 
- * to specify the exact set of attributes to use in case of a redirect
- * and also to add flash attributes (attributes stored temporarily on the 
- * server-side to make them available to the request after the redirect).
- * {@code RedirectAttributes} is used instead of the implicit model if the 
- * method returns a "redirect:" prefixed view name or {@code RedirectView}.
+ * <li>{@link org.springframework.web.servlet.mvc.support.RedirectAttributes}
+ * (Servlet-only, {@literal @MVC 3.1-only}) to specify the exact set of attributes
+ * to use in case of a redirect and also to add flash attributes (attributes
+ * stored temporarily on the server-side to make them available to the request
+ * after the redirect). {@code RedirectAttributes} is used instead of the
+ * implicit model if the method returns a "redirect:" prefixed view name or
+ * {@code RedirectView}.
  * <li>Command/form objects to bind parameters to: as bean properties or fields,
  * with customizable type conversion, depending on {@link InitBinder} methods
  * and/or the HandlerAdapter configuration - see the "webBindingInitializer"
@@ -130,9 +148,10 @@ import java.lang.annotation.Target;
  * for marking form processing as complete (triggering the cleanup of session
  * attributes that have been indicated by the {@link SessionAttributes} annotation
  * at the handler type level).
- * <li>{@link org.springframework.web.util.UriComponentsBuilder} a builder for
- * preparing a URL relative to the current request's host, port, scheme, context 
- * path, and the literal part of the servlet mapping.
+ * <li>{@link org.springframework.web.util.UriComponentsBuilder}
+ * (Servlet-only, {@literal @MVC 3.1-only})
+ * for preparing a URL relative to the current request's host, port, scheme,
+ * context path, and the literal part of the servlet mapping.
  * </ul>
  *
  * <p>The following return types are supported for handler methods:
@@ -160,17 +179,23 @@ import java.lang.annotation.Target;
  * The handler method may also programmatically enrich the model by
  * declaring a {@link org.springframework.ui.ModelMap} argument
  * (see above).
- * <li>{@link ResponseBody @ResponseBody} annotated methods for access to
- * the Servlet response HTTP contents. The return value will be converted
- * to the response stream using
- * {@linkplain org.springframework.http.converter.HttpMessageConverter message
- * converters}.
- * <li>A {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
- * {@link org.springframework.http.ResponseEntity ResponseEntity&lt;?&gt;} object
- * to access to the Servlet response HTTP headers and contents. The entity body will
+ * <li>{@link ResponseBody @ResponseBody} annotated methods (Servlet-only)
+ * for access to the Servlet response HTTP contents. The return value will
  * be converted to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}.
+ * <li>An {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
+ * {@link org.springframework.http.ResponseEntity ResponseEntity&lt;?&gt;} object
+ * (Servlet-only) to access to the Servlet response HTTP headers and contents.
+ * The entity body will be converted to the response stream using
+ * {@linkplain org.springframework.http.converter.HttpMessageConverter message
+ * converters}.
+ * <li>A {@link Callable} which is used by Spring MVC to obtain the return
+ * value asynchronously in a separate thread transparently managed by Spring MVC
+ * on behalf of the application.
+ * <li>A {@code org.springframework.web.context.request.async.DeferredResult}
+ * which the application uses to produce a return value in a separate
+ * thread of its own choosing, as an alternative to returning a Callable.
  * <li><code>void</code> if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
@@ -187,16 +212,24 @@ import java.lang.annotation.Target;
  * {@link ModelAttribute} annotated reference data accessor methods.
  * </ul>
  *
- * <p><b>NOTE: <code>@RequestMapping</code> will only be processed if a
- * corresponding <code>HandlerMapping</code> (for type level annotations)
- * and/or <code>HandlerAdapter</code> (for method level annotations) is
- * present in the dispatcher.</b> This is the case by default in both
- * <code>DispatcherServlet</code> and <code>DispatcherPortlet</code>.
+ * <p><b>NOTE:</b> <code>@RequestMapping</code> will only be processed if an
+ * an appropriate <code>HandlerMapping</code>-<code>HandlerAdapter</code> pair
+ * is configured. This is the case by default in both the
+ * <code>DispatcherServlet</code> and the <code>DispatcherPortlet</code>.
  * However, if you are defining custom <code>HandlerMappings</code> or
- * <code>HandlerAdapters</code>, then you need to make sure that a
- * corresponding custom <code>RequestMappingHandlerMethodMapping</code>
- * and/or <code>RequestMappingHandlerMethodAdapter</code> is defined as well
- * - provided that you intend to use <code>@RequestMapping</code>.
+ * <code>HandlerAdapters</code>, then you need to add
+ * <code>DefaultAnnotationHandlerMapping</code> and
+ * <code>AnnotationMethodHandlerAdapter</code> to your configuration.</code>.
+ *
+ * <p><b>NOTE:</b> Spring 3.1 introduced a new set of support classes for
+ * <code>@RequestMapping</code> methods in Servlet environments called
+ * <code>RequestMappingHandlerMapping</code> and
+ * <code>RequestMappingHandlerAdapter</code>. They are recommended for use and
+ * even required to take advantage of new features in Spring MVC 3.1 (search
+ * {@literal "@MVC 3.1-only"} in this source file) and going forward.
+ * The new support classes are enabled by default from the MVC namespace and
+ * with use of the MVC Java config (<code>@EnableWebMvc</code>) but must be
+ * configured explicitly if using neither.
  *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations - such as
@@ -212,8 +245,7 @@ import java.lang.annotation.Target;
  * @see SessionAttributes
  * @see InitBinder
  * @see org.springframework.web.context.request.WebRequest
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodMapping
- * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMethodAdapter
+ * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
  * @see org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping
  * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
@@ -234,20 +266,6 @@ public @interface RequestMapping {
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
-	 * <p>In case of Servlet-based handler methods, the method names are
-	 * taken into account for narrowing if no path was specified explicitly,
-	 * according to the specified
-	 * {@link org.springframework.web.servlet.mvc.multiaction.MethodNameResolver}
-	 * (by default an
-	 * {@link org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver}).
-	 * Note that this only applies in case of ambiguous annotation mappings
-	 * that do not specify a path mapping explicitly. In other words,
-	 * the method name is only used for narrowing among a set of matching
-	 * methods; it does not constitute a primary path mapping itself.
-	 * <p>If you have a single default method (without explicit path mapping),
-	 * then all requests without a more specific mapped method found will
-	 * be dispatched to it. If you have multiple such default methods, then
-	 * the method name will be taken into account for choosing between them.
 	 */
 	String[] value() default {};
 
@@ -309,7 +327,7 @@ public @interface RequestMapping {
 	 * and against PortletRequest properties in a Portlet 2.0 environment.
 	 * @see org.springframework.http.MediaType
 	 */
-	String[] headers() default {}; 
+	String[] headers() default {};
 
 	/**
 	 * The consumable media types of the mapped request, narrowing the primary mapping.

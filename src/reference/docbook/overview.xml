@@ -108,7 +108,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
         <caption><para>Overview of the Spring Framework</para></caption>
       </mediaobject></para>
 
-    <section>
+    <section id="overview-core-container">
       <title>Core Container</title>
 
       <para>The <link linkend="beans-introduction"><emphasis>Core
@@ -150,7 +150,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
       aggregations.</para>
     </section>
 
-    <section>
+    <section id="overview-data-access">
       <title>Data Access/Integration</title>
 
       <para>The <emphasis>Data Access/Integration</emphasis> layer consists of
@@ -184,7 +184,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
       Java objects)</emphasis>.</para>
     </section>
 
-    <section>
+    <section id="overview-web">
       <title>Web</title>
 
       <para>The <emphasis>Web</emphasis> layer consists of the Web,
@@ -215,7 +215,7 @@ It sounds important.--><!--TR: REVISED, PLS REVIEW.--></para>
       functionality of Web-Servlet module.<!--mirrors it in what way?--><!--TR: REVISED, PLS REVIEW. The functionality is mirrored - one for Servlets and the other for Portlets--></para>
     </section>
 
-    <section>
+    <section id="overview-aop-instrumentation">
       <title>AOP and Instrumentation</title>
 
       <para>Spring's <link
@@ -237,7 +237,7 @@ TR: OK. Added to diagram.--></para>
       certain application servers.</para>
     </section>
 
-    <section>
+    <section id="overview-testing">
       <title>Test</title>
 
       <para>The <emphasis>Test</emphasis> module supports the testing of
@@ -427,7 +427,7 @@ TR: OK. Added to diagram.--></para>
             development snapshots and milestone releases (a copy of the final
             releases is also held here). The jar file names are in the same
             form as Maven Central, so this is a useful place to get
-            development versions of Spring to use with other libraries depoyed
+            development versions of Spring to use with other libraries deployed
             in Maven Central.</para>
           </listitem>
         </itemizedlist></para>
@@ -570,7 +570,7 @@ TR: OK. Added to diagram.--></para>
           </tgroup>
         </table></para>
 
-      <section>
+      <section id="overview-spring-dependencies">
         <title>Spring Dependencies and Depending on Spring</title>
 
         <para>Although Spring provides integration and support for a huge
@@ -590,7 +590,7 @@ TR: OK. Added to diagram.--></para>
         our samples mostly use Maven.</para>
       </section>
 
-      <section>
+      <section id="overview-maven-dependency-management">
         <title>Maven Dependency Management</title>
 
         <para>If you are using Maven for dependency management you don't even
@@ -615,7 +615,7 @@ TR: OK. Added to diagram.--></para>
         <para>We used the Maven Central naming conventions in the example
         above, so that works with Maven Central or the SpringSource S3 Maven
         repository. To use the S3 Maven repository (e.g. for milestones or
-        developer snaphots), you need to specify the repository location in
+        developer snapshots), you need to specify the repository location in
         your Maven configuration. For full releases:</para>
 
         <programlisting>&lt;repositories&gt;
@@ -670,7 +670,7 @@ TR: OK. Added to diagram.--></para>
 &lt;/repositories&gt;</programlisting>
 
         <para>If you are managing your dependencies by hand, the URL in the
-        repository declaration above is not browseable, but there is a user
+        repository declaration above is not browsable, but there is a user
         interface at <ulink
         url="http://www.springsource.com/repository">http://www.springsource.com/repository</ulink>
         that can be used to search for and download dependencies. It also has
@@ -678,7 +678,7 @@ TR: OK. Added to diagram.--></para>
         paste if you are using those tools.</para>
       </section>
 
-      <section>
+      <section id="overview-ivy-dependency-management">
         <title>Ivy Dependency Management</title>
 
         <para>If you prefer to use <ulink
@@ -726,7 +726,7 @@ TR: OK. Added to diagram.--></para>
       </section>
     </section>
 
-    <section>
+    <section id="overview-logging">
       <title>Logging</title>
 
       <para>Logging is a very important dependency for Spring because a) it is
@@ -763,7 +763,7 @@ TR: OK. Added to diagram.--></para>
       application works and logs happily to the console out of the box in most
       situations, and that's important.</para>
 
-      <section>
+      <section id="overview-not-using-commons-logging">
         <title>Not Using Commons Logging</title>
 
         <para>Unfortunately, the runtime discovery algorithm in
@@ -801,7 +801,7 @@ TR: OK. Added to diagram.--></para>
         alternative implementation of JCL using SLF4J as an example.</para>
       </section>
 
-      <section>
+      <section id="overview-logging-slf4j">
         <title>Using SLF4J</title>
       </section>
 
@@ -879,12 +879,12 @@ TR: OK. Added to diagram.--></para>
       and generates fewer dependencies, is to bind directly to <ulink type=""
       url="http://logback.qos.ch">Logback</ulink>. This removes the extra
       binding step because Logback implements SLF4J directly, so you only need
-      to depend on two libaries not four (<code>jcl-over-slf4j</code> and
-      <code>logback</code>). If you do that you might also need to exlude the
+      to depend on two libraries not four (<code>jcl-over-slf4j</code> and
+      <code>logback</code>). If you do that you might also need to exclude the
       slf4j-api dependency from other external dependencies (not Spring),
       because you only want one version of that API on the classpath.</para>
 
-      <section>
+      <section id="overview-logging-log4j">
         <title>Using Log4J</title>
 
         <para>Many people use <ulink
@@ -928,7 +928,7 @@ log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} %5p %t %c{2}:%L - %m
 
 log4j.category.org.springframework.beans.factory=DEBUG</programlisting>
 
-        <section>
+        <section id="overview-native-jcl">
           <title>Runtime Containers with Native JCL</title>
 
           <para>Many people run their Spring applications in a container that

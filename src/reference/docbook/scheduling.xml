@@ -472,7 +472,7 @@ public class TaskExecutorExample {
       example.</para>
 
       <programlisting language="xml">&lt;task:scheduled-tasks scheduler="myScheduler"&gt;
-    &lt;task:scheduled ref="someObject" method="someMethod" fixed-delay="5000"/&gt;
+    &lt;task:scheduled ref="beanA" method="methodA" fixed-delay="5000"/&gt;
 &lt;/task:scheduled-tasks&gt;
 
 &lt;task:scheduler id="myScheduler" pool-size="10"/&gt;</programlisting>
@@ -480,13 +480,19 @@ public class TaskExecutorExample {
       <para>As you can see, the scheduler is referenced by the outer element,
       and each individual task includes the configuration of its trigger
       metadata. In the preceding example, that metadata defines a periodic
-      trigger with a fixed delay. It could also be configured with a
-      "fixed-rate", or for more control, a "cron" attribute could be provided
-      instead. Here's an example featuring these other options.</para>
+      trigger with a fixed delay indicating the number of milliseconds to wait
+      after each task execution has completed. Another option is 'fixed-rate',
+      indicating how often the method should be executed regardless of how long
+      any previous execution takes. Additionally, for both fixed-delay and
+      fixed-rate tasks an 'initial-delay' parameter may be specified indicating
+      the number of milliseconds to wait before the first execution of the
+      method. For more control, a "cron" attribute may be provided instead.
+      Here is an example demonstrating these other options.</para>
 
       <programlisting language="xml">&lt;task:scheduled-tasks scheduler="myScheduler"&gt;
-    &lt;task:scheduled ref="someObject" method="someMethod" fixed-rate="5000"/&gt;
-    &lt;task:scheduled ref="anotherObject" method="anotherMethod" cron="*/5 * * * * MON-FRI"/&gt;
+    &lt;task:scheduled ref="beanA" method="methodA" fixed-delay="5000" initial-delay="1000"/&gt;
+    &lt;task:scheduled ref="beanB" method="methodB" fixed-rate="5000"/&gt;
+    &lt;task:scheduled ref="beanC" method="methodC" cron="*/5 * * * * MON-FRI"/&gt;
 &lt;/task:scheduled-tasks&gt;
 
 &lt;task:scheduler id="myScheduler" pool-size="10"/&gt;</programlisting>
@@ -519,6 +525,16 @@ public void doSomething() {
       invocation.</para>
 
       <programlisting language="java">@Scheduled(fixedRate=5000)
+public void doSomething() {
+    // something that should execute periodically
+}</programlisting>
+
+      <para>For fixed-delay and fixed-rate tasks, an initial delay may be
+      specified indicating the number of milliseconds to wait before the first
+      execution of the method.
+      </para>
+
+      <programlisting language="java">@Scheduled(initialDelay=1000, fixedRate=5000)
 public void doSomething() {
     // something that should execute periodically
 }</programlisting>
@@ -592,7 +608,7 @@ Future&lt;String&gt; returnSomething(int i) {
 
       <para><interfacename>@Async</interfacename> can not be used in
       conjunction with lifecycle callbacks such as
-      <interfacename>@PostConstruct</interfacename>. To asynchonously
+      <interfacename>@PostConstruct</interfacename>. To asynchronously
       initialize Spring beans you currently have to use a separate
       initializing Spring bean that invokes the
       <interfacename>@Async</interfacename> annotated method on the target
@@ -637,6 +653,29 @@ public class SampleBeanInititalizer {
       tasks that correspond to methods with the @Async annotation, and the
       scheduler reference is provided for managing those methods annotated
       with @Scheduled.</para>
+    </section>
+
+    <section id="scheduling-annotation-support-qualification">
+      <title>Executor qualification with @Async</title>
+
+      <para>By default when specifying <interfacename>@Async</interfacename> on
+      a method, the executor that will be used is the one supplied to the
+      'annotation-driven' element as described above. However, the
+      <literal>value</literal> attribute of the
+      <interfacename>@Async</interfacename> annotation can be used when needing
+      to indicate that an executor other than the default should be used when
+      executing a given method.</para>
+      <programlisting language="java">@Async("otherExecutor")
+void doSomething(String s) {
+    // this will be executed asynchronously by "otherExecutor"
+}</programlisting>
+
+      <para>In this case, "otherExecutor" may be the name of any
+      <interfacename>Executor</interfacename> bean in the Spring container, or
+      may be the name of a <emphasis>qualifier</emphasis> associated with any
+      <interfacename>Executor</interfacename>, e.g. as specified with the
+      <literal>&lt;qualifier&gt;</literal> element or Spring's
+      <interfacename>@Qualifier</interfacename> annotation.</para>
     </section>
   </section>
 

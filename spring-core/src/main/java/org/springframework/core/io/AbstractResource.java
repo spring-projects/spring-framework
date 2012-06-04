@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.springframework.core.NestedIOException;
+import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -108,12 +109,31 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation checks the length of the underlying File,
-	 * if available.
-	 * @see #getFile()
+	 * This implementation reads the entire InputStream to calculate the
+	 * content length. Subclasses will almost always be able to provide
+	 * a more optimal version of this, e.g. checking a File length.
+	 * @see #getInputStream()
+	 * @throws IllegalStateException if {@link #getInputStream()} returns null.
 	 */
 	public long contentLength() throws IOException {
-		return getFile().length();
+		InputStream is = this.getInputStream();
+		Assert.state(is != null, "resource input stream must not be null");
+		try {
+			long size = 0;
+			byte[] buf = new byte[255];
+			int read;
+			while((read = is.read(buf)) != -1) {
+				size += read;
+			}
+			return size;
+		}
+		finally {
+			try {
+				is.close();
+			}
+			catch (IOException ex) {
+			}
+		}
 	}
 
 	/**
@@ -150,11 +170,11 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation always throws IllegalStateException,
-	 * assuming that the resource does not have a filename.
+	 * This implementation always returns <code>null</code>,
+	 * assuming that this resource type does not have a filename.
 	 */
 	public String getFilename() throws IllegalStateException {
-		throw new IllegalStateException(getDescription() + " does not have a filename");
+		return null;
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.core.env.PropertySource.StubPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiPropertySource;
+import org.springframework.web.context.ConfigurableWebEnvironment;
 
 /**
  * {@link Environment} implementation to be used by {@code Servlet}-based web
@@ -40,7 +41,8 @@ import org.springframework.jndi.JndiPropertySource;
  * @since 3.1
  * @see StandardEnvironment
  */
-public class StandardServletEnvironment extends StandardEnvironment {
+public class StandardServletEnvironment extends StandardEnvironment
+		implements ConfigurableWebEnvironment {
 
 	/** Servlet context init parameters property source name: {@value} */
 	public static final String SERVLET_CONTEXT_PROPERTY_SOURCE_NAME = "servletContextInitParams";
@@ -68,15 +70,15 @@ public class StandardServletEnvironment extends StandardEnvironment {
 	 * environment variables contributed by the {@link StandardEnvironment} superclass.
 	 * <p>The {@code Servlet}-related property sources are added as {@link
 	 * StubPropertySource stubs} at this stage, and will be {@linkplain
-	 * WebApplicationContextUtils#initServletPropertySources fully initialized} once the
-	 * actual {@link ServletConfig} and {@link ServletContext} objects become available.
+	 * #initPropertySources(ServletContext) fully initialized} once the actual
+	 * {@link ServletContext} object becomes available.
 	 * @see StandardEnvironment#customizePropertySources
 	 * @see org.springframework.core.env.AbstractEnvironment#customizePropertySources
 	 * @see ServletConfigPropertySource
 	 * @see ServletContextPropertySource
 	 * @see org.springframework.jndi.JndiPropertySource
 	 * @see org.springframework.context.support.AbstractApplicationContext#initPropertySources
-	 * @see WebApplicationContextUtils#initServletPropertySources
+	 * @see #initPropertySources(ServletContext)
 	 */
 	@Override
 	protected void customizePropertySources(MutablePropertySources propertySources) {
@@ -86,6 +88,11 @@ public class StandardServletEnvironment extends StandardEnvironment {
 			propertySources.addLast(new JndiPropertySource(JNDI_PROPERTY_SOURCE_NAME));
 		}
 		super.customizePropertySources(propertySources);
+	}
+
+	public void initPropertySources(ServletContext servletContext, ServletConfig servletConfig) {
+		WebApplicationContextUtils.initServletPropertySources(
+				this.getPropertySources(), servletContext, servletConfig);
 	}
 
 }

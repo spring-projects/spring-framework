@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class Constants {
 	 * @param clazz the class to analyze
 	 * @throws IllegalArgumentException if the supplied <code>clazz</code> is <code>null</code>
 	 */
-	public Constants(Class clazz) {
+	public Constants(Class<?> clazz) {
 		Assert.notNull(clazz);
 		this.className = clazz.getName();
 		Field[] fields = clazz.getFields();
@@ -189,7 +189,7 @@ public class Constants {
 	 * @param nameSuffix suffix of the constant names to search (may be <code>null</code>)
 	 * @return the set of constant names
 	 */
-	public Set getNamesForSuffix(String nameSuffix) {
+	public Set<String> getNamesForSuffix(String nameSuffix) {
 		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
 		Set<String> names = new HashSet<String>();
 		for (String code : this.fieldCache.keySet()) {
@@ -264,7 +264,7 @@ public class Constants {
 	 * @throws ConstantException if the value wasn't found
 	 */
 	public String toCode(Object value, String namePrefix) throws ConstantException {
-		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : null);
+		String prefixToUse = (namePrefix != null ? namePrefix.trim().toUpperCase(Locale.ENGLISH) : "");
 		for (Map.Entry<String, Object> entry : this.fieldCache.entrySet()) {
 			if (entry.getKey().startsWith(prefixToUse) && entry.getValue().equals(value)) {
 				return entry.getKey();
@@ -295,7 +295,7 @@ public class Constants {
 	 * @throws ConstantException if the value wasn't found
 	 */
 	public String toCodeForSuffix(Object value, String nameSuffix) throws ConstantException {
-		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : null);
+		String suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : "");
 		for (Map.Entry<String, Object> entry : this.fieldCache.entrySet()) {
 			if (entry.getKey().endsWith(suffixToUse) && entry.getValue().equals(value)) {
 				return entry.getKey();

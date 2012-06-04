@@ -25,7 +25,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.web.servlet.FlashMap;
 
 /**
- * Stores {@link FlashMap} instances in the HTTP session.
+ * Store and retrieve {@link FlashMap} instances to and from the HTTP session.
  *
  * @author Rossen Stoyanchev
  * @since 3.1.1
@@ -35,9 +35,10 @@ public class SessionFlashMapManager extends AbstractFlashMapManager{
 	private static final String FLASH_MAPS_SESSION_ATTRIBUTE = SessionFlashMapManager.class.getName() + ".FLASH_MAPS";
 
 	/**
-	 * Retrieve saved FlashMap instances from the HTTP session.
-	 * @param request the current request
-	 * @return a List with FlashMap instances or {@code null}
+	 * Retrieve saved FlashMap instances from the HTTP Session.
+	 * <p>Does not cause an HTTP session to be created but may update it if a
+	 * FlashMap matching the current request is found or there are expired
+	 * FlashMap to be removed.
 	 */
 	@SuppressWarnings("unchecked")
 	protected List<FlashMap> retrieveFlashMaps(HttpServletRequest request) {
@@ -46,7 +47,7 @@ public class SessionFlashMapManager extends AbstractFlashMapManager{
 	}
 
 	/**
-	 * Save the given FlashMap instances in the HTTP session.
+	 * Save the given FlashMap instance, if not empty, in the HTTP session.
 	 */
 	protected void updateFlashMaps(List<FlashMap> flashMaps, HttpServletRequest request, HttpServletResponse response) {
 		request.getSession().setAttribute(FLASH_MAPS_SESSION_ATTRIBUTE, flashMaps);

@@ -9,19 +9,19 @@ dependencies {
     castor "velocity:velocity:1.5"
     xjc "com.sun.xml:com.springsource.com.sun.tools.xjc:2.1.7"
     xmlbeans "org.apache.xmlbeans:com.springsource.org.apache.xmlbeans:2.4.0"
-    jibx "org.jibx:jibx-bind:1.1.5"
+    jibx "org.jibx:jibx-bind:1.2.3"
     jibx "bcel:bcel:5.1"
 }
 
-genSourcesDir = "${buildDir}/generated-sources"
-flightSchema = "${projectDir}/src/test/resources/org/springframework/oxm/flight.xsd"
+ext.genSourcesDir = "${buildDir}/generated-sources"
+ext.flightSchema = "${projectDir}/src/test/resources/org/springframework/oxm/flight.xsd"
 
 task genCastor {
-    orderSchema = "${projectDir}/src/test/resources/org/springframework/oxm/order.xsd"
-    castorBuilderProperties = "${projectDir}/src/test/castor/castorbuilder.properties"
+    def orderSchema = "${projectDir}/src/test/resources/org/springframework/oxm/order.xsd"
+    def castorBuilderProperties = "${projectDir}/src/test/castor/castorbuilder.properties"
 
-    sourcesDir = "${genSourcesDir}/castor"
-    classesDir = "${buildDir}/classes/castor"
+    ext.sourcesDir = "${genSourcesDir}/castor"
+    ext.classesDir = "${buildDir}/classes/castor"
 
     inputs.files flightSchema, orderSchema, castorBuilderProperties
     outputs.dir classesDir
@@ -56,8 +56,8 @@ task genCastor {
 }
 
 task genJaxb {
-    sourcesDir = "${genSourcesDir}/jaxb"
-    classesDir = "${buildDir}/classes/jaxb"
+    ext.sourcesDir = "${genSourcesDir}/jaxb"
+    ext.classesDir = "${buildDir}/classes/jaxb"
 
     inputs.files flightSchema
     outputs.dir classesDir
@@ -92,7 +92,7 @@ task genJaxb {
 }
 
 task genXmlbeans {
-    classesDir = "${buildDir}/classes/xmlbeans"
+    ext.classesDir = "${buildDir}/classes/xmlbeans"
 
     inputs.files flightSchema
     outputs.dir classesDir
@@ -112,7 +112,7 @@ task genXmlbeans {
 
 // add jibx binding to the normal test compilation process
 compileTestJava {
-    bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
+    def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
 
     doLast() {
         project.ant {

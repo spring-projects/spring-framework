@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
+import org.springframework.util.comparator.CompoundComparator;
 
 /**
  * Represents an Internet Media Type, as defined in the HTTP specification.
@@ -43,6 +44,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.0
  * @see <a href="http://tools.ietf.org/html/rfc2616#section-3.7">HTTP 1.1, section 3.7</a>
  */
@@ -102,7 +104,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Public constant media type for {@code application/xhtml+xml}.
 	 *  */
 	public final static MediaType APPLICATION_XHTML_XML;
-	
+
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_XHTML_XML}.
 	 */
@@ -112,7 +114,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Public constant media type for {@code application/xml}.
 	 */
 	public final static MediaType APPLICATION_XML;
-	
+
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_XML}.
 	 */
@@ -122,7 +124,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Public constant media type for {@code image/gif}.
 	 */
 	public final static MediaType IMAGE_GIF;
-	
+
 	/**
 	 * A String equivalent of {@link MediaType#IMAGE_GIF}.
 	 */
@@ -132,7 +134,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Public constant media type for {@code image/jpeg}.
 	 */
 	public final static MediaType IMAGE_JPEG;
-	
+
 	/**
 	 * A String equivalent of {@link MediaType#IMAGE_JPEG}.
 	 */
@@ -142,7 +144,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Public constant media type for {@code image/png}.
 	 */
 	public final static MediaType IMAGE_PNG;
-	
+
 	/**
 	 * A String equivalent of {@link MediaType#IMAGE_PNG}.
 	 */
@@ -152,7 +154,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Public constant media type for {@code multipart/form-data}.
 	 *  */
 	public final static MediaType MULTIPART_FORM_DATA;
-	
+
 	/**
 	 * A String equivalent of {@link MediaType#MULTIPART_FORM_DATA}.
 	 */
@@ -162,7 +164,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Public constant media type for {@code text/html}.
 	 *  */
 	public final static MediaType TEXT_HTML;
-	
+
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_HTML}.
 	 */
@@ -172,7 +174,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Public constant media type for {@code text/plain}.
 	 *  */
 	public final static MediaType TEXT_PLAIN;
-	
+
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_PLAIN}.
 	 */
@@ -182,7 +184,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Public constant media type for {@code text/xml}.
 	 *  */
 	public final static MediaType TEXT_XML;
-	
+
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_XML}.
 	 */
@@ -451,6 +453,14 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
+	 * Return all generic parameter values.
+	 * @return a read-only map, possibly empty, never <code>null</code>
+	 */
+	public Map<String, String> getParameters() {
+	        return parameters;
+	}
+
+	/**
 	 * Indicate whether this {@code MediaType} includes the given media type.
 	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html}, and {@code application/*+xml}
 	 * includes {@code application/soap+xml}, etc. This method is <b>not</b> symmetric.
@@ -519,6 +529,32 @@ public class MediaType implements Comparable<MediaType> {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Return a replica of this instance with the quality value of the given MediaType.
+	 * @return the same instance if the given MediaType doesn't have a quality value, or a new one otherwise
+	 */
+	public MediaType copyQualityValue(MediaType mediaType) {
+		if (!mediaType.parameters.containsKey(PARAM_QUALITY_FACTOR)) {
+			return this;
+		}
+		Map<String, String> params = new LinkedHashMap<String, String>(this.parameters);
+		params.put(PARAM_QUALITY_FACTOR, mediaType.parameters.get(PARAM_QUALITY_FACTOR));
+		return new MediaType(this, params);
+	}
+
+	/**
+	 * Return a replica of this instance with its quality value removed.
+	 * @return the same instance if the media type doesn't contain a quality value, or a new one otherwise
+	 */
+	public MediaType removeQualityValue() {
+		if (!this.parameters.containsKey(PARAM_QUALITY_FACTOR)) {
+			return this;
+		}
+		Map<String, String> params = new LinkedHashMap<String, String>(this.parameters);
+		params.remove(PARAM_QUALITY_FACTOR);
+		return new MediaType(this, params);
 	}
 
 	/**
@@ -761,6 +797,22 @@ public class MediaType implements Comparable<MediaType> {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
 			Collections.sort(mediaTypes, QUALITY_VALUE_COMPARATOR);
+		}
+	}
+
+	/**
+	 * Sorts the given list of {@code MediaType} objects by specificity as the
+	 * primary criteria and quality value the secondary.
+	 * @see MediaType#sortBySpecificity(List)
+	 * @see MediaType#sortByQualityValue(List)
+	 */
+	public static void sortBySpecificityAndQuality(List<MediaType> mediaTypes) {
+		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
+		if (mediaTypes.size() > 1) {
+			Comparator<?>[] comparators = new Comparator[2];
+			comparators[0] = MediaType.SPECIFICITY_COMPARATOR;
+			comparators[1] = MediaType.QUALITY_VALUE_COMPARATOR;
+			Collections.sort(mediaTypes, new CompoundComparator<MediaType>(comparators));
 		}
 	}
 

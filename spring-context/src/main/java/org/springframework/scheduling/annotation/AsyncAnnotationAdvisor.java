@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,12 @@ import java.util.concurrent.Executor;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.interceptor.AsyncExecutionInterceptor;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
-import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.Assert;
 
@@ -45,27 +46,30 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 3.0
- * @see PersistenceExceptionTranslationAdvisor
+ * @see org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisor
  * @see org.springframework.stereotype.Repository
  * @see org.springframework.dao.DataAccessException
  * @see org.springframework.dao.support.PersistenceExceptionTranslator
  */
-public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
+@SuppressWarnings("serial")
+public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements BeanFactoryAware {
 
 	private Advice advice;
 
 	private Pointcut pointcut;
 
+	private BeanFactory beanFactory;
+
 
 	/**
-	 * Create a new ConcurrencyAnnotationBeanPostProcessor for bean-style configuration.
+	 * Create a new {@code AsyncAnnotationAdvisor} for bean-style configuration.
 	 */
 	public AsyncAnnotationAdvisor() {
 		this(new SimpleAsyncTaskExecutor());
 	}
 
 	/**
-	 * Create a new ConcurrencyAnnotationBeanPostProcessor for the given task executor.
+	 * Create a new {@code AsyncAnnotationAdvisor} for the given task executor.
 	 * @param executor the task executor to use for asynchronous methods
 	 */
 	@SuppressWarnings("unchecked")
@@ -74,13 +78,28 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 		asyncAnnotationTypes.add(Async.class);
 		ClassLoader cl = AsyncAnnotationAdvisor.class.getClassLoader();
 		try {
-			asyncAnnotationTypes.add((Class) cl.loadClass("javax.ejb.Asynchronous"));
+			asyncAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass("javax.ejb.Asynchronous"));
 		}
 		catch (ClassNotFoundException ex) {
 			// If EJB 3.1 API not present, simply ignore.
 		}
 		this.advice = buildAdvice(executor);
+		this.setTaskExecutor(executor);
 		this.pointcut = buildPointcut(asyncAnnotationTypes);
+	}
+
+	/**
+	 * Set the {@code BeanFactory} to be used when looking up executors by qualifier.
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
+		delegateBeanFactory(beanFactory);
+	}
+
+	public void delegateBeanFactory(BeanFactory beanFactory) {
+		if (this.advice instanceof AnnotationAsyncExecutionInterceptor) {
+			((AnnotationAsyncExecutionInterceptor)this.advice).setBeanFactory(beanFactory);
+		}
 	}
 
 	/**
@@ -88,6 +107,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 	 */
 	public void setTaskExecutor(Executor executor) {
 		this.advice = buildAdvice(executor);
+		delegateBeanFactory(this.beanFactory);
 	}
 
 	/**
@@ -117,17 +137,12 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 
 
 	protected Advice buildAdvice(Executor executor) {
-		if (executor instanceof AsyncTaskExecutor) {
-			return new AsyncExecutionInterceptor((AsyncTaskExecutor) executor);
-		}
-		else {
-			return new AsyncExecutionInterceptor(executor);
-		}
+		return new AnnotationAsyncExecutionInterceptor(executor);
 	}
 
 	/**
-	 * Calculate a pointcut for the given target class, if any.
-	 * @param targetClass the class to introspect
+	 * Calculate a pointcut for the given async annotation types, if any.
+	 * @param asyncAnnotationTypes the async annotation types to introspect
 	 * @return the applicable Pointcut object, or <code>null</code> if none
 	 */
 	protected Pointcut buildPointcut(Set<Class<? extends Annotation>> asyncAnnotationTypes) {

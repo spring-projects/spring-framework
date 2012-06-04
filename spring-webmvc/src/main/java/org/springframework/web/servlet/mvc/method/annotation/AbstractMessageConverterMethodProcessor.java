@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +40,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Extends {@link AbstractMessageConverterMethodArgumentResolver} with the ability to handle method return 
+ * Extends {@link AbstractMessageConverterMethodArgumentResolver} with the ability to handle method return
  * values by writing to the response with {@link HttpMessageConverter}s.
  *
  * @author Arjen Poutsma
@@ -103,7 +102,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		List<MediaType> acceptableMediaTypes = getAcceptableMediaTypes(inputMessage);
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(inputMessage.getServletRequest(), returnValueClass);
-		
+
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
 		for (MediaType a : acceptableMediaTypes) {
 			for (MediaType p : producibleMediaTypes) {
@@ -115,10 +114,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		if (compatibleMediaTypes.isEmpty()) {
 			throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
 		}
-		
+
 		List<MediaType> mediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
-		MediaType.sortBySpecificity(mediaTypes);
-		
+		MediaType.sortBySpecificityAndQuality(mediaTypes);
+
 		MediaType selectedMediaType = null;
 		for (MediaType mediaType : mediaTypes) {
 			if (mediaType.isConcrete()) {
@@ -130,7 +129,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				break;
 			}
 		}
-		
+
+		selectedMediaType = selectedMediaType.removeQualityValue();
+
 		if (selectedMediaType != null) {
 			for (HttpMessageConverter<?> messageConverter : messageConverters) {
 				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
@@ -166,7 +167,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
                 if (converter.canWrite(returnValueClass, null)) {
                 	result.addAll(converter.getSupportedMediaTypes());
                 }
-            }			
+            }
 			return result;
 		}
 		else {
@@ -175,19 +176,25 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	private List<MediaType> getAcceptableMediaTypes(HttpInputMessage inputMessage) {
-		List<MediaType> result = inputMessage.getHeaders().getAccept();
-		return result.isEmpty() ? Collections.singletonList(MediaType.ALL) : result;
+		try {
+			List<MediaType> result = inputMessage.getHeaders().getAccept();
+			return result.isEmpty() ? Collections.singletonList(MediaType.ALL) : result;
+		}
+		catch (IllegalArgumentException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not parse Accept header: " + ex.getMessage());
+			}
+			return Collections.emptyList();
+		}
 	}
 
 	/**
-	 * Returns the more specific media type using the q-value of the first media type for both.
+	 * Return the more specific of the acceptable and the producible media types
+	 * with the q-value of the former.
 	 */
-	private MediaType getMostSpecificMediaType(MediaType type1, MediaType type2) {
-		double quality = type1.getQualityValue();
-		Map<String, String> params = Collections.singletonMap("q", String.valueOf(quality));
-		MediaType t1 = new MediaType(type1, params);
-		MediaType t2 = new MediaType(type2, params);
-		return MediaType.SPECIFICITY_COMPARATOR.compare(t1, t2) <= 0 ? type1 : type2;
+	private MediaType getMostSpecificMediaType(MediaType acceptType, MediaType produceType) {
+		produceType = produceType.copyQualityValue(acceptType);
+		return MediaType.SPECIFICITY_COMPARATOR.compare(acceptType, produceType) < 0 ? acceptType : produceType;
 	}
 
 }

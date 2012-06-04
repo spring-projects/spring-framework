@@ -1,10 +1,10 @@
 apply plugin: 'maven'
 
-optionalDeps = []
-providedDeps = []
+ext.optionalDeps = []
+ext.providedDeps = []
 
-optional = { optionalDeps << it }
-provided = { providedDeps << it }
+ext.optional = { optionalDeps << it }
+ext.provided = { providedDeps << it }
 
 install {
     repositories.mavenInstaller {
