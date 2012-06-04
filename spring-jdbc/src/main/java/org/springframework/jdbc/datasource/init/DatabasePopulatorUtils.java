@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,18 @@
 package org.springframework.jdbc.datasource.init;
 
 import java.sql.Connection;
-import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.Assert;
 
 /**
  * Utility methods for executing a DatabasePopulator.
  *
  * @author Juergen Hoeller
+ * @author Oliver Gierke
  * @since 3.1
  */
 public abstract class DatabasePopulatorUtils {
@@ -40,20 +42,15 @@ public abstract class DatabasePopulatorUtils {
 		Assert.notNull(populator, "DatabasePopulator must be provided");
 		Assert.notNull(dataSource, "DataSource must be provided");
 		try {
-			Connection connection = dataSource.getConnection();
+			Connection connection = DataSourceUtils.getConnection(dataSource);
 			try {
 				populator.populate(connection);
-			}
-			finally {
-				try {
-					connection.close();
-				}
-				catch (SQLException ex) {
-					// ignore
+			} finally {
+				if (connection != null) {
+					DataSourceUtils.releaseConnection(connection, dataSource);
 				}
 			}
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			throw new DataAccessResourceFailureException("Failed to execute database script", ex);
 		}
 	}
