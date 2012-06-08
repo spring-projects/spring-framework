@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,9 +17,11 @@
 package org.springframework.http.converter.json;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
@@ -27,15 +29,15 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
+
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
-
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
@@ -50,7 +52,8 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
  * @since 3.0
  * @see org.springframework.web.servlet.view.json.MappingJacksonJsonView
  */
-public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
+public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
+	implements GenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
@@ -63,7 +66,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 
 
 	/**
-	 * Construct a new {@code BindingJacksonHttpMessageConverter}.
+	 * Construct a new {@code MappingJacksonHttpMessageConverter}.
 	 */
 	public MappingJacksonHttpMessageConverter() {
 		super(new MediaType("application", "json", DEFAULT_CHARSET));
@@ -125,7 +128,11 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		JavaType javaType = getJavaType(clazz);
+		return canRead((Type) clazz, mediaType);
+	}
+
+	public boolean canRead(Type type, MediaType mediaType) {
+		JavaType javaType = getJavaType(type);
 		return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
 	}
 
@@ -145,6 +152,17 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 			throws IOException, HttpMessageNotReadableException {
 
 		JavaType javaType = getJavaType(clazz);
+		return readJavaType(javaType, inputMessage);
+	}
+
+	public Object read(Type type, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		JavaType javaType = getJavaType(type);
+		return readJavaType(javaType, inputMessage);
+	}
+
+	private Object readJavaType(JavaType javaType, HttpInputMessage inputMessage) {
 		try {
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
@@ -180,24 +198,24 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 
 
 	/**
-	 * Return the Jackson {@link JavaType} for the specified class.
+	 * Return the Jackson {@link JavaType} for the specified type.
 	 * <p>The default implementation returns {@link TypeFactory#type(java.lang.reflect.Type)},
 	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
 	 * For instance:
 	 * <pre class="code">
-	 * protected JavaType getJavaType(Class&lt;?&gt; clazz) {
-	 *   if (List.class.isAssignableFrom(clazz)) {
+	 * protected JavaType getJavaType(Type type) {
+	 *   if (type instanceof Class && List.class.isAssignableFrom((Class)type)) {
 	 *     return TypeFactory.collectionType(ArrayList.class, MyBean.class);
 	 *   } else {
-	 *     return super.getJavaType(clazz);
+	 *     return super.getJavaType(type);
 	 *   }
 	 * }
 	 * </pre>
-	 * @param clazz the class to return the java type for
+	 * @param type the type to return the java type for
 	 * @return the java type
 	 */
-	protected JavaType getJavaType(Class<?> clazz) {
-		return TypeFactory.type(clazz);
+	protected JavaType getJavaType(Type type) {
+		return TypeFactory.type(type);
 	}
 
 	/**

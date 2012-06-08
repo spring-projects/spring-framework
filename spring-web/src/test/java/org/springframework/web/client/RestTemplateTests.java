@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,12 +21,16 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,10 +40,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 @SuppressWarnings("unchecked")
@@ -600,9 +602,8 @@ public class RestTemplateTests {
 
 	@Test
 	public void exchange() throws Exception {
-		MediaType textPlain = new MediaType("text", "plain");
 		expect(converter.canRead(Integer.class, null)).andReturn(true);
-		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(textPlain));
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(this.request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		expect(this.request.getHeaders()).andReturn(requestHeaders).times(2);
@@ -612,12 +613,12 @@ public class RestTemplateTests {
 		expect(this.request.execute()).andReturn(response);
 		expect(errorHandler.hasError(response)).andReturn(false);
 		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(textPlain);
+		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
 		responseHeaders.setContentLength(10);
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		expect(response.getHeaders()).andReturn(responseHeaders).times(3);
 		Integer expected = 42;
-		expect(converter.canRead(Integer.class, textPlain)).andReturn(true);
+		expect(converter.canRead(Integer.class, MediaType.TEXT_PLAIN)).andReturn(true);
 		expect(converter.read(Integer.class, response)).andReturn(expected);
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		response.close();
@@ -629,12 +630,54 @@ public class RestTemplateTests {
 		HttpEntity<String> requestEntity = new HttpEntity<String>(body, entityHeaders);
 		ResponseEntity<Integer> result = template.exchange("http://example.com", HttpMethod.POST, requestEntity, Integer.class);
 		assertEquals("Invalid POST result", expected, result.getBody());
-		assertEquals("Invalid Content-Type", textPlain, result.getHeaders().getContentType());
-		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
+		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
+		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
 		assertEquals("Invalid custom header", "MyValue", requestHeaders.getFirst("MyHeader"));
 		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
 
 		verifyMocks();
+	}
+
+	@Test
+	public void exchangeParameterizedType() throws Exception {
+		GenericHttpMessageConverter converter = createMock(GenericHttpMessageConverter.class);
+		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
+
+		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<List<Integer>>() {};
+		expect(converter.canRead(intList.getType(), null)).andReturn(true);
+		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(this.request);
+		HttpHeaders requestHeaders = new HttpHeaders();
+		expect(this.request.getHeaders()).andReturn(requestHeaders).times(2);
+		expect(converter.canWrite(String.class, null)).andReturn(true);
+		String requestBody = "Hello World";
+		converter.write(requestBody, null, this.request);
+		expect(this.request.execute()).andReturn(response);
+		expect(errorHandler.hasError(response)).andReturn(false);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setContentType(MediaType.TEXT_PLAIN);
+		responseHeaders.setContentLength(10);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		expect(response.getHeaders()).andReturn(responseHeaders).times(3);
+		List<Integer> expected = Collections.singletonList(42);
+		expect(converter.canRead(intList.getType(), MediaType.TEXT_PLAIN)).andReturn(true);
+		expect(converter.read(intList.getType(), response)).andReturn(expected);
+		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
+		response.close();
+
+		replay(requestFactory, request, response, errorHandler, converter);
+
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.set("MyHeader", "MyValue");
+		HttpEntity<String> requestEntity = new HttpEntity<String>(requestBody, entityHeaders);
+		ResponseEntity<List<Integer>> result = template.exchange("http://example.com", HttpMethod.POST, requestEntity, intList);
+		assertEquals("Invalid POST result", expected, result.getBody());
+		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
+		assertEquals("Invalid Accept header", MediaType.TEXT_PLAIN_VALUE, requestHeaders.getFirst("Accept"));
+		assertEquals("Invalid custom header", "MyValue", requestHeaders.getFirst("MyHeader"));
+		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
+
+		verify(requestFactory, request, response, errorHandler, converter);
 	}
 
 

@@ -17,6 +17,7 @@
 package org.springframework.web.client;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -25,12 +26,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
 
 /**
- * Response extractor that uses the given {@linkplain HttpMessageConverter entity converters} to convert the response
- * into a type <code>T</code>.
+ * Response extractor that uses the given {@linkplain HttpMessageConverter entity
+ * converters} to convert the response into a type <code>T</code>.
  *
  * @author Arjen Poutsma
  * @see RestTemplate
@@ -38,21 +40,31 @@ import org.springframework.util.Assert;
  */
 public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
-	private final Class<T> responseType;
+	private final Type responseType;
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
 	private final Log logger;
 
 	/**
-	 * Creates a new instance of the {@code HttpMessageConverterExtractor} with the given response type and message
-	 * converters. The given converters must support the response type.
+	 * Creates a new instance of the {@code HttpMessageConverterExtractor} with the given
+	 * response type and message converters. The given converters must support the response
+	 * type.
 	 */
 	public HttpMessageConverterExtractor(Class<T> responseType, List<HttpMessageConverter<?>> messageConverters) {
+		this((Type) responseType, messageConverters);
+	}
+
+	/**
+	 * Creates a new instance of the {@code HttpMessageConverterExtractor} with the given
+	 * response type and message converters. The given converters must support the response
+	 * type.
+	 */
+	public HttpMessageConverterExtractor(Type responseType, List<HttpMessageConverter<?>> messageConverters) {
 		this(responseType, messageConverters, LogFactory.getLog(HttpMessageConverterExtractor.class));
 	}
 
-	HttpMessageConverterExtractor(Class<T> responseType, List<HttpMessageConverter<?>> messageConverters, Log logger) {
+	HttpMessageConverterExtractor(Type responseType, List<HttpMessageConverter<?>> messageConverters, Log logger) {
 		Assert.notNull(responseType, "'responseType' must not be null");
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
 		this.responseType = responseType;
@@ -65,6 +77,39 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		if (!hasMessageBody(response)) {
 			return null;
 		}
+		MediaType contentType = getContentType(response);
+
+		Class<T> responseClass = null;
+		if (this.responseType instanceof Class) {
+			responseClass = (Class) this.responseType;
+		}
+		for (HttpMessageConverter messageConverter : this.messageConverters) {
+			if (responseClass != null) {
+				if (messageConverter.canRead(responseClass, contentType)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Reading [" + responseClass.getName() + "] as \"" +
+								contentType + "\" using [" + messageConverter + "]");
+					}
+					return (T) messageConverter.read(responseClass, response);
+				}
+			}
+			else if (messageConverter instanceof GenericHttpMessageConverter) {
+				GenericHttpMessageConverter genericMessageConverter = (GenericHttpMessageConverter) messageConverter;
+				if (genericMessageConverter.canRead(this.responseType, contentType)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Reading [" + this.responseType + "] as \"" +
+								contentType + "\" using [" + messageConverter + "]");
+					}
+					return (T) genericMessageConverter.read(this.responseType, response);
+				}
+			}
+		}
+		throw new RestClientException(
+				"Could not extract response: no suitable HttpMessageConverter found for response type [" +
+						this.responseType + "] and content type [" + contentType + "]");
+	}
+
+	private MediaType getContentType(ClientHttpResponse response) {
 		MediaType contentType = response.getHeaders().getContentType();
 		if (contentType == null) {
 			if (logger.isTraceEnabled()) {
@@ -72,24 +117,13 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 			}
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
-		for (HttpMessageConverter messageConverter : messageConverters) {
-			if (messageConverter.canRead(responseType, contentType)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Reading [" + responseType.getName() + "] as \"" + contentType
-							+"\" using [" + messageConverter + "]");
-				}
-				return (T) messageConverter.read(this.responseType, response);
-			}
-		}
-		throw new RestClientException(
-				"Could not extract response: no suitable HttpMessageConverter found for response type [" +
-						this.responseType.getName() + "] and content type [" + contentType + "]");
+		return contentType;
 	}
 
 	/**
-	 * Indicates whether the given response has a message body.
-	 * <p>Default implementation returns {@code false} for a response status of {@code 204} or {@code 304}, or a
-	 * {@code Content-Length} of {@code 0}.
+	 * Indicates whether the given response has a message body. <p>Default implementation
+	 * returns {@code false} for a response status of {@code 204} or {@code 304}, or a {@code
+	 * Content-Length} of {@code 0}.
 	 *
 	 * @param response the response to check for a message body
 	 * @return {@code true} if the response has a body, {@code false} otherwise
@@ -97,7 +131,8 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	 */
 	protected boolean hasMessageBody(ClientHttpResponse response) throws IOException {
 		HttpStatus responseStatus = response.getStatusCode();
-		if (responseStatus == HttpStatus.NO_CONTENT || responseStatus == HttpStatus.NOT_MODIFIED) {
+		if (responseStatus == HttpStatus.NO_CONTENT ||
+				responseStatus == HttpStatus.NOT_MODIFIED) {
 			return false;
 		}
 		long contentLength = response.getHeaders().getContentLength();

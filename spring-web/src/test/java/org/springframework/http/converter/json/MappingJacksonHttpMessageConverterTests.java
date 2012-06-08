@@ -16,18 +16,18 @@
 
 package org.springframework.http.converter.json;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
+import static org.junit.Assert.*;
 import org.junit.Test;
+
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
@@ -49,12 +49,12 @@ public class MappingJacksonHttpMessageConverterTests extends AbstractMappingJack
 	public void readGenerics() throws IOException {
 		MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter() {
 			@Override
-			protected JavaType getJavaType(Class<?> clazz) {
-				if (List.class.isAssignableFrom(clazz)) {
+			protected JavaType getJavaType(Type type) {
+				if (type instanceof Class && List.class.isAssignableFrom((Class)type)) {
 					return TypeFactory.collectionType(ArrayList.class, MyBean.class);
 				}
 				else {
-					return super.getJavaType(clazz);
+					return super.getJavaType(type);
 				}
 			}
 		};
@@ -64,6 +64,28 @@ public class MappingJacksonHttpMessageConverterTests extends AbstractMappingJack
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		List<MyBean> results = (List<MyBean>) converter.read(List.class, inputMessage);
+		assertEquals(1, results.size());
+		MyBean result = results.get(0);
+		assertEquals("Foo", result.getString());
+		assertEquals(42, result.getNumber());
+		assertEquals(42F, result.getFraction(), 0F);
+		assertArrayEquals(new String[]{"Foo", "Bar"}, result.getArray());
+		assertTrue(result.isBool());
+		assertArrayEquals(new byte[]{0x1, 0x2}, result.getBytes());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void readParameterizedType() throws IOException {
+		ParameterizedTypeReference<List<MyBean>> beansList = new ParameterizedTypeReference<List<MyBean>>() {};
+
+		String body =
+				"[{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
+
+		MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter();
+		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), inputMessage);
 		assertEquals(1, results.size());
 		MyBean result = results.get(0);
 		assertEquals("Foo", result.getString());

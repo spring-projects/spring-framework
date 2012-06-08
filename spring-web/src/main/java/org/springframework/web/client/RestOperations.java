@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -395,6 +396,69 @@ public interface RestOperations {
 	 */
 	<T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
 			Class<T> responseType) throws RestClientException;
+
+	/**
+	 * Execute the HTTP method to the given URI template, writing the given
+	 * request entity to the request, and returns the response as {@link ResponseEntity}.
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type information:
+	 *
+	 * <pre class="code">
+	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
+	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 * </pre>
+	 *
+	 * @param url the URL
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param requestEntity the entity (headers and/or body) to write to the
+	 * request, may be {@code null}
+	 * @param responseType the type of the return value
+	 * @param uriVariables the variables to expand in the template
+	 * @return the response as entity
+	 * @since 3.2.0
+	 */
+	<T> ResponseEntity<T> exchange(String url,HttpMethod method, HttpEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType, Object... uriVariables) throws RestClientException;
+
+	/**
+	 * Execute the HTTP method to the given URI template, writing the given
+	 * request entity to the request, and returns the response as {@link ResponseEntity}.
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type information:
+	 *
+	 * <pre class="code">
+	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
+	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 * </pre>
+	 *
+	 * @param url the URL
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}
+	 * @param responseType the type of the return value
+	 * @param uriVariables the variables to expand in the template
+	 * @return the response as entity
+	 * @since 3.2.0
+	 */
+	<T> ResponseEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
+
+	/**
+	 * Execute the HTTP method to the given URI template, writing the given
+	 * request entity to the request, and returns the response as {@link ResponseEntity}.
+	 * The given {@link ParameterizedTypeReference} is used to pass generic type information:
+	 *
+	 * <pre class="code">
+	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
+	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = template.exchange(&quot;http://example.com&quot;,HttpMethod.GET, null, myBean);
+	 * </pre>
+	 *
+	 * @param url the URL
+	 * @param method the HTTP method (GET, POST, etc)
+	 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}
+	 * @param responseType the type of the return value
+	 * @return the response as entity
+	 * @since 3.2.0
+	 */
+	<T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType) throws RestClientException;
 
 	// general execution
 
