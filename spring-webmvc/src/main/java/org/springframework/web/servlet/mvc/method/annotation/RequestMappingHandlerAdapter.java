@@ -47,6 +47,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -146,6 +147,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
 	private Long asyncRequestTimeout;
+
+	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
 	/**
 	 * Default constructor.
@@ -411,6 +414,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
+	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * If not set, the default constructor is used.
+	 */
+	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 * <p>A {@link ConfigurableBeanFactory} is expected for resolving
 	 * expressions in method argument default values.
@@ -525,12 +536,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
-		handlers.add(new HttpEntityMethodProcessor(getMessageConverters()));
+		handlers.add(new HttpEntityMethodProcessor(getMessageConverters(), this.contentNegotiationManager));
 		handlers.add(new AsyncMethodReturnValueHandler());
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
-		handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters()));
+		handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(), this.contentNegotiationManager));
 
 		// Multi-purpose return value types
 		handlers.add(new ViewNameMethodReturnValueHandler());

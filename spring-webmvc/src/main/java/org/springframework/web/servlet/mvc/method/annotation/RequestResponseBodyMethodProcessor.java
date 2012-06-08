@@ -29,6 +29,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,6 +59,12 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	public RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
 		super(messageConverters);
+	}
+
+	public RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
+			ContentNegotiationManager contentNegotiationManager) {
+
+		super(messageConverters, contentNegotiationManager);
 	}
 
 	public boolean supportsParameter(MethodParameter parameter) {

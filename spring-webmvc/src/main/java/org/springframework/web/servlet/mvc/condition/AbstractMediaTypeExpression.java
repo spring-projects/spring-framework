@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.MediaType;
+import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -68,15 +69,12 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 			boolean match = matchMediaType(request);
 			return !isNegated ? match : !match;
 		}
-		catch (IllegalArgumentException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Could not parse media type header: " + ex.getMessage());
-			}
+		catch (HttpMediaTypeException ex) {
 			return false;
 		}
 	}
 
-	protected abstract boolean matchMediaType(HttpServletRequest request);
+	protected abstract boolean matchMediaType(HttpServletRequest request) throws HttpMediaTypeException;
 
 	public int compareTo(AbstractMediaTypeExpression other) {
 		return MediaType.SPECIFICITY_COMPARATOR.compare(this.getMediaType(), other.getMediaType());

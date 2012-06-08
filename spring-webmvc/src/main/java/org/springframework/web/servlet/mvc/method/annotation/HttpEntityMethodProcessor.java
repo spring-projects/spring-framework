@@ -33,6 +33,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -54,6 +55,12 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
 		super(messageConverters);
+	}
+
+	public HttpEntityMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
+			ContentNegotiationManager contentNegotiationManager) {
+
+		super(messageConverters, contentNegotiationManager);
 	}
 
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -123,7 +130,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		if (!entityHeaders.isEmpty()) {
 			outputMessage.getHeaders().putAll(entityHeaders);
 		}
-		
+
 		Object body = responseEntity.getBody();
 		if (body != null) {
 			writeWithMessageConverters(body, returnType, inputMessage, outputMessage);

@@ -368,6 +368,7 @@ project('spring-web') {
             optional dep
             exclude group: 'org.mortbay.jetty', module: 'servlet-api-2.5'
         }
+        testCompile project(":spring-context-support")  // for JafMediaTypeFactory
         testCompile "xmlunit:xmlunit:1.2"
     }
 

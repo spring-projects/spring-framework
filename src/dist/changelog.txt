@@ -10,7 +10,7 @@ Changes in version 3.2 M2
 * raise RestClientException instead of IllegalArgumentException for unknown status codes
 * add JacksonObjectMapperFactoryBean for configuring a Jackson ObjectMapper in XML
 * infer return type of parameterized factory methods (SPR-9493)
-
+* add ContentNegotiationManager/ContentNegotiationStrategy to resolve requested media types
 
 Changes in version 3.2 M1 (2012-05-28)
 --------------------------------------

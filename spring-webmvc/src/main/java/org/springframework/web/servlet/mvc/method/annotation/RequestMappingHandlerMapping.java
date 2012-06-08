@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
 import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
@@ -48,6 +50,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private boolean useTrailingSlashMatch = true;
 
+	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
+
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
@@ -67,6 +71,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * If not set, the default constructor is used.
+	 */
+	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	/**
 	 * Whether to use suffix pattern matching.
 	 */
 	public boolean useSuffixPatternMatch() {
@@ -77,6 +89,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	public boolean useTrailingSlashMatch() {
 		return this.useTrailingSlashMatch;
+	}
+
+	/**
+	 * Return the configured {@link ContentNegotiationManager}.
+	 */
+	public ContentNegotiationManager getContentNegotiationManager() {
+		return contentNegotiationManager;
 	}
 
 	/**
@@ -160,7 +179,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				new ParamsRequestCondition(annotation.params()),
 				new HeadersRequestCondition(annotation.headers()),
 				new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
-				new ProducesRequestCondition(annotation.produces(), annotation.headers()),
+				new ProducesRequestCondition(annotation.produces(), annotation.headers(), getContentNegotiationManager()),
 				customCondition);
 	}
 

@@ -44,7 +44,7 @@ public class ParamsRequestConditionTests {
 				new ParamsRequestCondition("foo=bar").equals(new ParamsRequestCondition("FOO=bar")));
 	}
 
-		@Test
+	@Test
 	public void paramPresent() {
 		ParamsRequestCondition condition = new ParamsRequestCondition("foo");
 
@@ -96,7 +96,7 @@ public class ParamsRequestConditionTests {
 	@Test
 	public void compareTo() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		
+
 		ParamsRequestCondition condition1 = new ParamsRequestCondition("foo", "bar", "baz");
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo", "bar");
 
