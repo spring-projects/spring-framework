@@ -18,6 +18,7 @@ configure(allprojects) {
     targetCompatibility=1.5
 
     ext.aspectjVersion = '1.6.12'
+    ext.junitVersion = '4.10'
 
     [compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
 
@@ -31,9 +32,11 @@ configure(allprojects) {
     }
 
     dependencies {
-        testCompile "junit:junit:4.10"
-        testCompile "org.easymock:easymock:2.5.1"
+        testCompile ("junit:junit-dep:${junitVersion}") {
+            exclude group: 'org.hamcrest', module: 'hamcrest-core'
+        }
         testCompile "org.hamcrest:hamcrest-all:1.1"
+        testCompile "org.easymock:easymock:2.5.1"
     }
 
     // servlet-api (2.5) and tomcat-servlet-api (3.0) classpath entries should not be
@@ -475,8 +478,17 @@ project('spring-test') {
         compile(project(":spring-web"), optional)
         compile(project(":spring-webmvc"), optional)
         compile(project(":spring-webmvc-portlet"), optional)
-        compile("junit:junit:4.10", optional)
-        compile("org.testng:testng:6.5.2", optional)
+        compile("junit:junit-dep:${junitVersion}") { dep ->
+            optional dep
+            // We already have hamcrest-all as a global testCompile dependency.
+            exclude group: 'org.hamcrest', module: 'hamcrest-core'
+        }
+        compile("org.testng:testng:6.5.2") { dep ->
+            optional dep
+            exclude group: 'junit', module: 'junit'
+            // We already have hamcrest-all as a global testCompile dependency.
+            exclude group: 'org.hamcrest', module: 'hamcrest-core'
+        }
         compile("javax.servlet:servlet-api:2.5", optional)
         compile("javax.servlet.jsp:jsp-api:2.1", optional)
         compile("javax.portlet:portlet-api:2.0", optional)

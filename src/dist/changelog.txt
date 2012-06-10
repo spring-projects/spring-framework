@@ -3,6 +3,12 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.2 M2
+-------------------------
+
+* spring-test module now depends on junit:junit-dep
+
+
 Changes in version 3.2 M1 (2012-05-28)
 --------------------------------------
 
