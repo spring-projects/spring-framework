@@ -3620,18 +3620,91 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
       <interfacename>HandlerExceptionResolver</interfacename> interface, which
       is only a matter of implementing the
       <literal>resolveException(Exception, Handler)</literal> method and
-      returning a <classname>ModelAndView</classname>, you may also use the
+      returning a <classname>ModelAndView</classname>, you may also use the provided
       <classname>SimpleMappingExceptionResolver</classname>. This resolver
       enables you to take the class name of any exception that might be thrown
       and map it to a view name. This is functionally equivalent to the
       exception mapping feature from the Servlet API, but it is also possible
       to implement more finely grained mappings of exceptions from different
       handlers.</para>
+    </section>
+
+    <section id="mvc-ann-exceptionhandler">
+      <title><interfacename>@ExceptionHandler</interfacename></title>
+
+      <para>The <interfacename>HandlerExceptionResolver</interfacename> interface
+      and the <classname>SimpleMappingExceptionResolver</classname> implementations
+      allow you to map Exceptions to specific views along with some Java logic
+      before forwarding to those views. However, in some cases, especially when
+      working with programmatic clients (Ajax or non-browser) it is more
+      convenient to set the status and optionally write error information to the
+      response body.</para>
+
+      <para>For that you can use <interfacename>@ExceptionHandler</interfacename>
+      methods. When present within a controller such methods apply to exceptions
+      raised by that contoroller or any of its sub-classes.
+      Or you can also declare <interfacename>@ExceptionHandler</interfacename>
+      methods in a type annotated with <interfacename>@ExceptionResolver</interfacename>
+      in which case they apply globally.
+      The <interfacename>@ExceptionResolver</interfacename> annotation is
+      a component annotation that can also be used  with a component scan.
+      </para>
+
+      <para>Here is an example with a controller-level
+      <interfacename>@ExceptionHandler</interfacename> method:</para>
+
+      <programlisting language="java">@Controller
+public class SimpleController {
+
+  // other controller method omitted
+
+  @ExceptionHandler(IOException.class)
+  public ResponseEntity handleIOException(IOException ex) {
+    // prepare responseEntity
+    return responseEntity;
+  }
+}</programlisting>
+
+      <para>The <classname>@ExceptionHandler</classname> value can be set to
+      an array of Exception types. If an exception is thrown matches one of
+      the types in the list, then the method annotated with the matching
+      <classname>@ExceptionHandler</classname> will be invoked. If the
+      annotation value is not set then the exception types listed as method
+      arguments are used.</para>
+
+      <para>Much like standard controller methods annotated with a
+      <interfacename>@RequestMapping</interfacename> annotation, the method arguments
+      and return values of <interfacename>@ExceptionHandler</interfacename> methods
+      can be flexible. For example, the
+      <classname>HttpServletRequest</classname> can be accessed in Servlet
+      environments and the <classname>PortletRequest</classname> in Portlet
+      environments. The return type can be a <classname>String</classname>,
+      which is interpreted as a view name, a
+      <classname>ModelAndView</classname> object, a
+      <classname>ResponseEntity</classname>, or you can also add the
+      <interfacename>@ResponseBody</interfacename> to have the method return value
+      converted with message converters and written to the response stream.</para>
+
+      <note><para>To better understand how <interfacename>@ExceptionHandler</interfacename>
+      methods work, consider that in Spring MVC there is only one abstraction
+      for handling exception and that's the
+      <interfacename>HandlerExceptionResolver</interfacename>. There is a special
+      implementation of that interface,
+      the <classname>ExceptionHandlerExceptionResolver</classname>, which detects
+      and invokes <interfacename>@ExceptionHandler</interfacename> methods.</para></note>
+    </section>
+
+    <section id="mvc-ann-rest-handler-exception-resolvers">
+      <title><classname>DefaultHandlerExceptionResolver</classname>
+      and <classname>ResponseStatusExceptionResolver</classname></title>
 
       <para>By default, the <classname>DispatcherServlet</classname> registers
       the <classname>DefaultHandlerExceptionResolver</classname>. This
       resolver handles certain standard Spring MVC exceptions by setting a
-      specific response status code: <informaltable>
+      specific response status code. This is useful when responding to programmatic
+      clients (e.g. Ajax, non-browser) in which the client uses the response code
+      to interpret the result.
+      <informaltable>
           <tgroup cols="2">
             <thead>
               <row>
@@ -3697,51 +3770,21 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
               </row>
             </tbody>
           </tgroup>
-        </informaltable></para>
-    </section>
+        </informaltable>
+        </para>
 
-    <section id="mvc-ann-exceptionhandler">
-      <title><interfacename>@ExceptionHandler</interfacename></title>
+        <para>The <classname>DispatcherServlet</classname> also registers the
+        <classname>ResponseStatusExceptionResolver</classname>, which handles
+        exceptions annotated with <interfacename>@ResponseStatus</interfacename>
+        by setting the response status code to that indicated in the annotation.
+        Once again this is useful in scenarios with programmatic clients.</para>
 
-      <para>An alternative to the
-      <interfacename>HandlerExceptionResolver</interfacename> interface is the
-      <interfacename>@ExceptionHandler</interfacename> annotation. You use the
-      <classname>@ExceptionHandler</classname> method annotation within a
-      controller to specify which method is invoked when an exception of a
-      specific type is thrown during the execution of controller methods. For
-      example:</para>
-
-      <programlisting language="java">@Controller
-public class SimpleController {
-
-  // other controller method omitted
-
-  @ExceptionHandler(IOException.class)
-  public String handleIOException(IOException ex, HttpServletRequest request) {
-    return ClassUtils.getShortName(ex.getClass());
-  }
-}</programlisting>
-
-      <para>will invoke the 'handlerIOException' method when a
-      <classname>java.io.IOException</classname> is thrown.</para>
-
-      <para>The <classname>@ExceptionHandler</classname> value can be set to
-      an array of Exception types. If an exception is thrown matches one of
-      the types in the list, then the method annotated with the matching
-      <classname>@ExceptionHandler</classname> will be invoked. If the
-      annotation value is not set then the exception types listed as method
-      arguments are used.</para>
-
-      <para>Much like standard controller methods annotated with a
-      <classname>@RequestMapping</classname> annotation, the method arguments
-      and return values of <classname>@ExceptionHandler</classname> methods
-      are very flexible. For example, the
-      <classname>HttpServletRequest</classname> can be accessed in Servlet
-      environments and the <classname>PortletRequest</classname> in Portlet
-      environments. The return type can be a <classname>String</classname>,
-      which is interpreted as a view name or a
-      <classname>ModelAndView</classname> object. Refer to the API
-      documentation for more details.</para>
+        <para>Note however that if you explicitly register one or more
+        <interfacename>HandlerExceptionResolver</interfacename> instances in your configuration
+        then the defaults registered by the <classname>DispatcherServlet</classname> are
+        cancelled. This is standard behavior with regards to
+        <classname>DispatcherServlet</classname> defaults.
+        See <xref linkend="mvc-servlet-special-bean-types"/> for more details.</para>
     </section>
   </section>
 

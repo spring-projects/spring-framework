@@ -18,15 +18,23 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.Source;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -34,6 +42,7 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ExceptionResolver;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
@@ -49,6 +58,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+
 /**
  * An {@link AbstractHandlerMethodExceptionResolver} that resolves exceptions
  * through {@code @ExceptionHandler} methods.
@@ -62,7 +73,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionRes
  * @since 3.1
  */
 public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver implements
-		InitializingBean {
+		InitializingBean, ApplicationContextAware {
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
@@ -72,12 +83,17 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
-	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerMethodResolvers =
-		new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>();
+	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlersByType =
+			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>();
+
+	private final Map<Object, ExceptionHandlerMethodResolver> globalExceptionHandlers =
+			new LinkedHashMap<Object, ExceptionHandlerMethodResolver>();
 
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
+
+	private ApplicationContext applicationContext;
 
 	/**
 	 * Default constructor.
@@ -193,6 +209,22 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
+	/**
+	 * Provide instances of objects with {@link ExceptionHandler @ExceptionHandler}
+	 * methods to apply globally, i.e. regardless of the selected controller.
+	 * <p>{@code @ExceptionHandler} methods in the controller are always looked
+	 * up before {@code @ExceptionHandler} methods in global handlers.
+	 */
+	public void setGlobalExceptionHandlers(Object... handlers) {
+		for (Object handler : handlers) {
+			this.globalExceptionHandlers.put(handler, new ExceptionHandlerMethodResolver(handler.getClass()));
+		}
+	}
+
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
+
 	public void afterPropertiesSet() {
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
@@ -202,6 +234,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
 		}
+		initGlobalExceptionHandlers();
 	}
 
 	/**
@@ -253,6 +286,36 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		handlers.add(new ModelAttributeMethodProcessor(true));
 
 		return handlers;
+	}
+
+	private void initGlobalExceptionHandlers() {
+		if (this.applicationContext == null) {
+			logger.warn("Can't detect @ExceptionResolver components if the ApplicationContext property is not set");
+		}
+		else {
+			String[] beanNames = this.applicationContext.getBeanNamesForType(Object.class);
+			for (String name : beanNames) {
+				Class<?> type = this.applicationContext.getType(name);
+				if (AnnotationUtils.findAnnotation(type , ExceptionResolver.class) != null) {
+					Object bean = this.applicationContext.getBean(name);
+					this.globalExceptionHandlers.put(bean, new ExceptionHandlerMethodResolver(bean.getClass()));
+				}
+			}
+		}
+		if (this.globalExceptionHandlers.size() > 0) {
+			sortGlobalExceptionHandlers();
+		}
+	}
+
+	private void sortGlobalExceptionHandlers() {
+		Map<Object, ExceptionHandlerMethodResolver> handlersCopy =
+				new HashMap<Object, ExceptionHandlerMethodResolver>(this.globalExceptionHandlers);
+		List<Object> handlers = new ArrayList<Object>(handlersCopy.keySet());
+		Collections.sort(handlers, new AnnotationAwareOrderComparator());
+		this.globalExceptionHandlers.clear();
+		for (Object handler : handlers) {
+			this.globalExceptionHandlers.put(handler, handlersCopy.get(handler));
+		}
 	}
 
 	/**
@@ -307,24 +370,32 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * @return a method to handle the exception, or {@code null}
 	 */
 	protected ServletInvocableHandlerMethod getExceptionHandlerMethod(HandlerMethod handlerMethod, Exception exception) {
-		if (handlerMethod == null) {
-			return null;
+		if (handlerMethod != null) {
+			Class<?> handlerType = handlerMethod.getBeanType();
+			ExceptionHandlerMethodResolver resolver = this.exceptionHandlersByType.get(handlerType);
+			if (resolver == null) {
+				resolver = new ExceptionHandlerMethodResolver(handlerType);
+				this.exceptionHandlersByType.put(handlerType, resolver);
+			}
+			Method method = resolver.resolveMethod(exception);
+			if (method != null) {
+				return new ServletInvocableHandlerMethod(handlerMethod.getBean(), method);
+			}
 		}
-		Class<?> handlerType = handlerMethod.getBeanType();
-		Method method = getExceptionHandlerMethodResolver(handlerType).resolveMethod(exception);
-		return (method != null ? new ServletInvocableHandlerMethod(handlerMethod.getBean(), method) : null);
+		return getGlobalExceptionHandlerMethod(exception);
 	}
 
 	/**
-	 * Return a method resolver for the given handler type, never {@code null}.
+	 * Return a global {@code @ExceptionHandler} method for the given exception or {@code null}.
 	 */
-	private ExceptionHandlerMethodResolver getExceptionHandlerMethodResolver(Class<?> handlerType) {
-		ExceptionHandlerMethodResolver resolver = this.exceptionHandlerMethodResolvers.get(handlerType);
-		if (resolver == null) {
-			resolver = new ExceptionHandlerMethodResolver(handlerType);
-			this.exceptionHandlerMethodResolvers.put(handlerType, resolver);
+	private ServletInvocableHandlerMethod getGlobalExceptionHandlerMethod(Exception exception) {
+		for (Entry<Object, ExceptionHandlerMethodResolver> entry : this.globalExceptionHandlers.entrySet()) {
+			Method method = entry.getValue().resolveMethod(exception);
+			if (method != null) {
+				return new ServletInvocableHandlerMethod(entry.getKey(), method);
+			}
 		}
-		return resolver;
+		return null;
 	}
 
 }

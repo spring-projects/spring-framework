@@ -76,6 +76,15 @@ import java.lang.annotation.Target;
  * {@link org.springframework.web.servlet.RequestToViewNameTranslator}.
  * <li>A {@link org.springframework.web.servlet.View} object.
  * <li>A {@link java.lang.String} value which is interpreted as view name.
+ * <li>{@link ResponseBody @ResponseBody} annotated methods (Servlet-only)
+ * to set the response content. The return value will be converted to the
+ * response stream using
+ * {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}.
+ * <li>An {@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} or
+ * {@link org.springframework.http.ResponseEntity ResponseEntity&lt;?&gt;} object
+ * (Servlet-only) to set response headers and content. The ResponseEntity body
+ * will be converted and written to the response stream using
+ * {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}.
  * <li><code>void</code> if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
