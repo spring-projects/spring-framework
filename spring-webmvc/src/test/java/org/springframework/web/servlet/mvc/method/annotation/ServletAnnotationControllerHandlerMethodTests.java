@@ -293,7 +293,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 		assertEquals("Invalid response status", HttpServletResponse.SC_METHOD_NOT_ALLOWED, response.getStatus());
 		String allowHeader = (String) response.getHeader("Allow");
-		assertNotNull("No Allow header", allowHeader);
 		Set<String> allowedMethods = new HashSet<String>();
 		allowedMethods.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
 		assertEquals("Invalid amount of supported methods", 6, allowedMethods.size());
@@ -865,7 +864,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals(415, response.getStatus());
-		assertNotNull("No Accept response header set", response.getHeader("Accept"));
 	}
 
 	@Test
