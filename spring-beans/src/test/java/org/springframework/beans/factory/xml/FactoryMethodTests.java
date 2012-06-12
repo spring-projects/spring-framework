@@ -28,7 +28,6 @@ import test.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.io.ClassPathResource;
 
 /**

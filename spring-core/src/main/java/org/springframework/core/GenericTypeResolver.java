@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Helper class for resolving generic types against type variables.
@@ -40,10 +44,13 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Sam Brannen
  * @since 2.5.2
  * @see GenericCollectionTypeResolver
  */
 public abstract class GenericTypeResolver {
+
+	private static final Log logger = LogFactory.getLog(GenericTypeResolver.class);
 
 	/** Cache from Class to TypeVariable Map */
 	private static final Map<Class, Reference<Map<TypeVariable, Type>>> typeVariableCache =
@@ -93,13 +100,131 @@ public abstract class GenericTypeResolver {
 	 * @param clazz the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type
 	 */
-	public static Class<?> resolveReturnType(Method method, Class clazz) {
+	public static Class<?> resolveReturnType(Method method, Class<?> clazz) {
 		Assert.notNull(method, "Method must not be null");
 		Type genericType = method.getGenericReturnType();
 		Assert.notNull(clazz, "Class must not be null");
 		Map<TypeVariable, Type> typeVariableMap = getTypeVariableMap(clazz);
 		Type rawType = getRawType(genericType, typeVariableMap);
-		return (rawType instanceof Class ? (Class) rawType : method.getReturnType());
+		return (rawType instanceof Class ? (Class<?>) rawType : method.getReturnType());
+	}
+
+	/**
+	 * Determine the concrete type for the generic return type of the given
+	 * parameterized method.
+	 *
+	 * <p>For example, given a factory method with the following signature,
+	 * if {@code resolveParameterizedReturnType()} is invoked with the reflected
+	 * method for {@code creatProxy()} and an {@code Object[]} array containing
+	 * {@code MyService.class}, {@code resolveParameterizedReturnType()} will
+	 * infer that the concrete return type is {@code MyService}.
+	 *
+	 * <pre>{@code public static <T> T createProxy(Class<T> clazz)}</pre>
+	 *
+	 * <h4>Possible Return Values</h4>
+	 * <ul>
+	 * <li>Returns the concrete return type if it can be inferred.</li>
+	 * <li>Returns the {@link Method#getReturnType() standard return type}, if
+	 * the supplied {@code method} does not declare any {@link
+	 * Method#getTypeParameters() generic types}.</li>
+	 * <li>Returns the {@link Method#getReturnType() standard return type}, if
+	 * the concrete return type cannot be inferred (e.g., due to type erasure).</li>
+	 * <li>Returns <code>null</code>, if the length of the supplied arguments
+	 * array is shorter than the length of the {@link
+	 * Method#getGenericParameterTypes() formal argument list} for the supplied
+	 * method.</li>
+	 * </ul>
+	 *
+	 * @param method the method to introspect, never <code>null</code>
+	 * @param args the arguments that will be supplied to the method once it is
+	 * invoked, never <code>null</code>
+	 * @return the resolved concrete return type, the standard return type, or
+	 * <code>null</code>
+	 * @since 3.2
+	 */
+	public static Class<?> resolveParameterizedReturnType(Method method, Object[] args) {
+		Assert.notNull(method, "method must not be null");
+		Assert.notNull(args, "args must not be null");
+
+		final TypeVariable<Method>[] declaredGenericTypes = method.getTypeParameters();
+		final Type genericReturnType = method.getGenericReturnType();
+		final Type[] genericArgumentTypes = method.getGenericParameterTypes();
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format(
+				"Resolving parameterized return type for [%s] with concrete method arguments [%s].",
+				method.toGenericString(), ObjectUtils.nullSafeToString(args)));
+		}
+
+		// No declared generic types to inspect, so just return the standard return type.
+		if (declaredGenericTypes.length == 0) {
+			return method.getReturnType();
+		}
+
+		// The supplied argument list is too short for the method's signature, so
+		// return null, since such a method invocation would fail.
+		if (args.length < genericArgumentTypes.length) {
+			return null;
+		}
+
+		// Ensure that the generic type is declared directly on the method
+		// itself, not on the enclosing class or interface.
+		boolean locallyDeclaredGenericTypeMatchesReturnType = false;
+		for (TypeVariable<Method> currentType : declaredGenericTypes) {
+			if (currentType.equals(genericReturnType)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("Found declared generic type [%s] that matches return type [%s].",
+						currentType, genericReturnType));
+				}
+				locallyDeclaredGenericTypeMatchesReturnType = true;
+				break;
+			}
+		}
+
+		if (locallyDeclaredGenericTypeMatchesReturnType) {
+			for (int i = 0; i < genericArgumentTypes.length; i++) {
+				final Type currentArgumentType = genericArgumentTypes[i];
+
+				if (currentArgumentType.equals(genericReturnType)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format(
+							"Found generic method argument at index [%s] that matches the target return type.", i));
+					}
+					return args[i].getClass();
+				}
+
+				if (currentArgumentType instanceof ParameterizedType) {
+					ParameterizedType parameterizedType = (ParameterizedType) currentArgumentType;
+					Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+
+					for (int j = 0; j < actualTypeArguments.length; j++) {
+						final Type typeArg = actualTypeArguments[j];
+
+						if (typeArg.equals(genericReturnType)) {
+							logger.debug(String.format(
+								"Found method argument at index [%s] that is parameterized with a type that matches the target return type.",
+								i));
+
+							if (args[i] instanceof Class) {
+								return (Class<?>) args[i];
+							} else {
+								// TODO Determine the class of the J'th typeArg, if
+								// possible.
+								logger.info(String.format(
+									"Could not determine the concrete class for parameterized type [%s] for method [%s].",
+									typeArg, method.toGenericString()));
+
+								// For now, just fall back...
+								return method.getReturnType();
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Fall back...
+		return method.getReturnType();
 	}
 
 	/**
@@ -128,7 +253,7 @@ public abstract class GenericTypeResolver {
 				return null;
 			}
 		}
-		return GenericTypeResolver.resolveTypeArgument((Class<?>) returnType, genericIfc);
+		return resolveTypeArgument((Class<?>) returnType, genericIfc);
 	}
 
 	/**
@@ -186,7 +311,7 @@ public abstract class GenericTypeResolver {
 		}
 		return null;
 	}
-	
+
 	private static Class[] doResolveTypeArguments(Class ownerClass, Type ifc, Class genericIfc) {
 		if (ifc instanceof ParameterizedType) {
 			ParameterizedType paramIfc = (ParameterizedType) ifc;
@@ -235,7 +360,6 @@ public abstract class GenericTypeResolver {
 		}
 		return (arg instanceof Class ? (Class) arg : Object.class);
 	}
-
 
 	/**
 	 * Resolve the specified generic type against the given TypeVariable map.
