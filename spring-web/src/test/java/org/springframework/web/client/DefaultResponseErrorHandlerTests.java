@@ -124,4 +124,16 @@ public class DefaultResponseErrorHandlerTests {
 
 		verify(response);
 	}
+
+	// SPR-9406
+
+	@Test(expected=RestClientException.class)
+	public void unknownStatusCode() throws Exception {
+		expect(response.getStatusCode()).andThrow(new IllegalArgumentException("No matching constant for 999"));
+		expect(response.getRawStatusCode()).andReturn(999);
+
+		replay(response);
+
+		handler.handleError(response);
+	}
 }

@@ -7,7 +7,7 @@ Changes in version 3.2 M2
 -------------------------
 
 * spring-test module now depends on junit:junit-dep
-
+* raise RestClientException instead of IllegalArgumentException for unknown status codes
 
 Changes in version 3.2 M1 (2012-05-28)
 --------------------------------------
