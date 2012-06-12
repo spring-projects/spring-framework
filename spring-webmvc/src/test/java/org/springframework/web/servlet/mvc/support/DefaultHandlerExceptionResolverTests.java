@@ -87,7 +87,6 @@ public class DefaultHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 415, response.getStatus());
-		assertEquals("Invalid Accept header", "application/pdf", response.getHeader("Accept"));
 	}
 
 	@Test

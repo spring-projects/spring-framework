@@ -1250,7 +1250,6 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals(415, response.getStatus());
-		assertNotNull("No Accept response header set", response.getHeader("Accept"));
 	}
 
 	@Test

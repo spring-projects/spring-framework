@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.support;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,10 +26,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.Ordered;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -192,8 +189,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	/**
 	 * Handle the case where no {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}
 	 * were found for the PUT or POSTed content. <p>The default implementation sends an HTTP 415 error,
-	 * sets the "Accept" header, and returns an empty {@code ModelAndView}. Alternatively, a fallback
-	 * view could be chosen, or the HttpMediaTypeNotSupportedException could be rethrown as-is.
+	 * and returns an empty {@code ModelAndView}. Alternatively, a fallback view could be chosen, or the
+     * HttpMediaTypeNotSupportedException could be rethrown as-is.
 	 * @param ex the HttpMediaTypeNotSupportedException to be handled
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -205,10 +202,6 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
 		response.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
-		List<MediaType> mediaTypes = ex.getSupportedMediaTypes();
-		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			response.setHeader("Accept", MediaType.toString(mediaTypes));
-		}
 		return new ModelAndView();
 	}
 
