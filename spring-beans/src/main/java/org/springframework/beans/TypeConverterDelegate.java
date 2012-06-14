@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Dave Syer
  * @since 2.0
  * @see BeanWrapperImpl
  * @see SimpleTypeConverter
@@ -244,7 +245,7 @@ class TypeConverterDelegate {
 		}
 
 		if (firstAttemptEx != null) {
-			if (editor == null && convertedValue == newValue) {
+			if (editor == null && convertedValue == newValue && requiredType!=null && !ClassUtils.isAssignableValue(requiredType, convertedValue)) {
 				throw firstAttemptEx;
 			}
 			logger.debug("Original ConversionService attempt failed - ignored since " +
