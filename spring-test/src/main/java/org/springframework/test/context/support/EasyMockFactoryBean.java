@@ -37,11 +37,11 @@ import org.springframework.util.Assert;
  * usage:
  * 
  * <pre>
- * &lt;bean name="myService" class="org.springframework.test.context.support.EasyMockBeanFactory"
+ * &lt;bean name="myService" class="org.springframework.test.context.support.EasyMockFactoryBean"
  * 	p:mockInterface="org.company.api.MyService"
  * />
  * 
- * &lt;bean name="myDao" class="org.springframework.test.context.support.EasyMockBeanFactory"
+ * &lt;bean name="myDao" class="org.springframework.test.context.support.EasyMockFactoryBean"
  * 	p:mockInterface="org.company.api.Dao"
  * 	p:mocksControl-ref="mocksCtrl"
  * />
@@ -99,7 +99,7 @@ import org.springframework.util.Assert;
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @since 3.2
  */
-public class EasyMockBeanFactory<T> implements FactoryBean<T>,
+public class EasyMockFactoryBean<T> implements FactoryBean<T>,
 		InitializingBean, BeanFactoryAware {
 
 	private IMocksControl mocksControl;
