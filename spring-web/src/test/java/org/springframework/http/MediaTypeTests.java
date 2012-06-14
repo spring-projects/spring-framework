@@ -181,6 +181,12 @@ public class MediaTypeTests {
 		assertEquals("\"v>alue\"", mediaType.getParameter("attr"));
 	}
 
+	@Test
+	public void parseMediaTypeSingleQuotedParameterValue() {
+		MediaType mediaType = MediaType.parseMediaType("audio/*;attr='v>alue'");
+		assertEquals("'v>alue'", mediaType.getParameter("attr"));
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void parseMediaTypeIllegalQuotedParameterValue() {
 		MediaType.parseMediaType("audio/*;attr=\"");
