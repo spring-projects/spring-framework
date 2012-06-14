@@ -4,6 +4,7 @@
 .DS_Store
 .settings
 .springBeans
+target
 bin
 build.sh
 integration-repo
@@ -17,6 +18,7 @@ build
 .classpath
 .project
 argfile*
+pom.xml
 
 # IDEA metadata and output dirs
 *.iml
