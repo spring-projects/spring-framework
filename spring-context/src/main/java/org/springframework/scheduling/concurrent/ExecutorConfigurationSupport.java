@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +43,9 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public abstract class ExecutorConfigurationSupport extends CustomizableThreadFactory
 		implements BeanNameAware, InitializingBean, DisposableBean {
+	private static final long DEFAULT_MAX_SHUTDOWN_WAIT_IN_MILLIS = 3000L;
+	private static final String MSG_SHUTDOWN_TIMED_OUT = "Timed out while waiting for executor to terminate. Forcing shutdown";
+	private static final String MSG_SHUTDOWN_INTERRUPTED = "Interrupted while waiting for executor to terminate. Restoring interrupt status and exiting";
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -56,6 +60,8 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	private String beanName;
 
 	private ExecutorService executor;
+
+	private long maxShutdownWaitInMillis = DEFAULT_MAX_SHUTDOWN_WAIT_IN_MILLIS;
 
 
 	/**
@@ -98,6 +104,15 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 		this.beanName = name;
 	}
 
+	/**
+	 * Set the maximum amount of milliseconds to wait for tasks to complete before
+	 * forcing shutdown.
+	 * @param maxShutdownWaitInMillis Number of milliseconds to wait
+	 * @since 3.2.0
+	 */
+	public void setMaxShutdownWaitInMillis(final long maxShutdownWaitInMillis) {
+		this.maxShutdownWaitInMillis = maxShutdownWaitInMillis;
+	}
 
 	/**
 	 * Calls <code>initialize()</code> after the container applied all property values.
@@ -123,7 +138,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	/**
 	 * Create the target {@link java.util.concurrent.ExecutorService} instance.
 	 * Called by <code>afterPropertiesSet</code>.
-	 * @param threadFactory the ThreadFactory to use
+	 * @param threadFactory	the ThreadFactory to use
 	 * @param rejectedExecutionHandler the RejectedExecutionHandler to use
 	 * @return a new ExecutorService instance
 	 * @see #afterPropertiesSet()
@@ -147,14 +162,38 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	 */
 	public void shutdown() {
 		if (logger.isInfoEnabled()) {
-			logger.info("Shutting down ExecutorService" + (this.beanName != null ? " '" + this.beanName + "'" : ""));
+			logger.info(appendBeanNameToMessage("Shutting down ExecutorService", this.beanName));
 		}
 		if (this.waitForTasksToCompleteOnShutdown) {
 			this.executor.shutdown();
+			if (awaitTermination()) {
+				return;
+			}
 		}
-		else {
-			this.executor.shutdownNow();
-		}
+
+		this.executor.shutdownNow();
 	}
 
+	private static String appendBeanNameToMessage(final String message, final String beanName) {
+		return message + (beanName != null ? " '" + beanName + "'" : "");
+	}
+
+	private boolean awaitTermination() {
+		try {
+			final boolean shutdownSuccess = this.executor.awaitTermination(this.maxShutdownWaitInMillis, TimeUnit.MILLISECONDS);
+			if (shutdownSuccess) {
+				return true;
+			}
+			if (logger.isWarnEnabled()) {
+				logger.warn(appendBeanNameToMessage(MSG_SHUTDOWN_TIMED_OUT, this.beanName));
+			}
+		} catch (final InterruptedException e) {
+			if (logger.isWarnEnabled()) {
+				logger.warn(appendBeanNameToMessage(MSG_SHUTDOWN_INTERRUPTED, this.beanName));
+			}
+			Thread.currentThread().interrupt();
+		}
+
+		return false;
+	}
 }
