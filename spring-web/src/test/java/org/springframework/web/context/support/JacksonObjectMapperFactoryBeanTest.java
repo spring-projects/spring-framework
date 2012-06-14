@@ -36,23 +36,23 @@ import org.junit.Test;
 import org.springframework.beans.FatalBeanException;
 
 /**
- * Test cases for {@link JacksonObjectMapperBeanFactory} class.
+ * Test cases for {@link JacksonObjectMapperFactoryBean} class.
  * 
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  */
-public class JacksonObjectMapperBeanFactoryTest {
+public class JacksonObjectMapperFactoryBeanTest {
 
-	private JacksonObjectMapperBeanFactory beanFactory;
+	private JacksonObjectMapperFactoryBean factory;
 
 	@Before
 	public void setUp() {
-		beanFactory = new JacksonObjectMapperBeanFactory();
+		factory = new JacksonObjectMapperFactoryBean();
 	}
 
 	@Test
 	public void testChecks() {
 		try {
-			beanFactory.setFeaturesToEnable(null);
+			factory.setFeaturesToEnable(null);
 
 			fail("FatalBeanException should be thrown");
 		}
@@ -61,10 +61,10 @@ public class JacksonObjectMapperBeanFactoryTest {
 			assertNotNull(e);
 		}
 
-		beanFactory.setFeaturesToEnable(new Object[0]);
+		factory.setFeaturesToEnable(new Object[0]);
 
 		try {
-			beanFactory.setFeaturesToDisable(null);
+			factory.setFeaturesToDisable(null);
 
 			fail("FatalBeanException should be thrown");
 		}
@@ -73,13 +73,13 @@ public class JacksonObjectMapperBeanFactoryTest {
 			assertNotNull(e);
 		}
 
-		beanFactory.setFeaturesToDisable(new Object[0]);
+		factory.setFeaturesToDisable(new Object[0]);
 	}
 
 	@Test(expected = FatalBeanException.class)
 	public void testUnknownFeature() {
-		beanFactory.setFeaturesToEnable(new Object[] { Boolean.TRUE });
-		beanFactory.afterPropertiesSet();
+		factory.setFeaturesToEnable(new Object[] { Boolean.TRUE });
+		factory.afterPropertiesSet();
 
 		fail("FatalBeanException should be thrown");
 	}
@@ -87,14 +87,14 @@ public class JacksonObjectMapperBeanFactoryTest {
 	@Test
 	public void testBooleanSetters() {
 
-		beanFactory.setAutoDetectFields(false);
-		beanFactory.setAutoDetectGettersSetters(false);
-		beanFactory.setFailOnEmptyBeans(false);
-		beanFactory.setIndentOutput(true);
+		factory.setAutoDetectFields(false);
+		factory.setAutoDetectGettersSetters(false);
+		factory.setFailOnEmptyBeans(false);
+		factory.setIndentOutput(true);
 
-		beanFactory.afterPropertiesSet();
+		factory.afterPropertiesSet();
 
-		ObjectMapper objectMapper = beanFactory.getObject();
+		ObjectMapper objectMapper = factory.getObject();
 
 		assertFalse(objectMapper.getSerializationConfig().isEnabled(
 				SerializationConfig.Feature.AUTO_DETECT_FIELDS));
@@ -116,44 +116,42 @@ public class JacksonObjectMapperBeanFactoryTest {
 	@Test
 	public void testDateTimeFormatSetter() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat(
-				JacksonObjectMapperBeanFactory.DATE_FORMAT);
+				JacksonObjectMapperFactoryBean.DATE_FORMAT);
 
-		beanFactory.setDateTimeFormat(dateFormat);
-		beanFactory.afterPropertiesSet();
+		factory.setDateTimeFormat(dateFormat);
+		factory.afterPropertiesSet();
 
-		assertEquals(dateFormat, beanFactory.getObject()
-				.getSerializationConfig().getDateFormat());
+		assertEquals(dateFormat, factory.getObject().getSerializationConfig()
+				.getDateFormat());
 	}
 
 	@Test
 	public void testDateTimeFormatStringSetter() {
 		SimpleDateFormat dateFormat = new SimpleDateFormat(
-				JacksonObjectMapperBeanFactory.DATE_FORMAT);
+				JacksonObjectMapperFactoryBean.DATE_FORMAT);
 
-		beanFactory
-				.setDateTimeFormat(JacksonObjectMapperBeanFactory.DATE_FORMAT);
-		beanFactory.afterPropertiesSet();
+		factory.setDateTimeFormat(JacksonObjectMapperFactoryBean.DATE_FORMAT);
+		factory.afterPropertiesSet();
 
-		assertEquals(dateFormat, beanFactory.getObject()
-				.getSerializationConfig().getDateFormat());
+		assertEquals(dateFormat, factory.getObject().getSerializationConfig()
+				.getDateFormat());
 	}
 
 	@Test
 	public void testDateTimeFormatStringTimezoneSetter() {
-		beanFactory
-				.setUtcDateTimeFormat(JacksonObjectMapperBeanFactory.DATE_FORMAT);
-		beanFactory.afterPropertiesSet();
+		factory.setUtcDateTimeFormat(JacksonObjectMapperFactoryBean.DATE_FORMAT);
+		factory.afterPropertiesSet();
 
-		assertEquals(TimeZone.getTimeZone("GMT"), beanFactory.getObject()
+		assertEquals(TimeZone.getTimeZone("GMT"), factory.getObject()
 				.getSerializationConfig().getDateFormat().getTimeZone());
 	}
 
 	@Test
 	public void testSimpleFlow() {
-		beanFactory.afterPropertiesSet();
-		assertNotNull(beanFactory.getObject());
-		assertTrue(beanFactory.isSingleton());
-		assertEquals(ObjectMapper.class, beanFactory.getObjectType());
+		factory.afterPropertiesSet();
+		assertNotNull(factory.getObject());
+		assertTrue(factory.isSingleton());
+		assertEquals(ObjectMapper.class, factory.getObjectType());
 	}
 
 	@Test
@@ -161,25 +159,25 @@ public class JacksonObjectMapperBeanFactoryTest {
 		NopAnnotationIntrospector annotationIntrospector = new NopAnnotationIntrospector();
 		ObjectMapper objectMapper = new ObjectMapper();
 
-		assertTrue(beanFactory.isSingleton());
-		assertEquals(ObjectMapper.class, beanFactory.getObjectType());
+		assertTrue(factory.isSingleton());
+		assertEquals(ObjectMapper.class, factory.getObjectType());
 
-		beanFactory.setObjectMapper(objectMapper);
-		beanFactory.setAnnotationIntrospector(annotationIntrospector);
-		beanFactory.setFeaturesToEnable(new Object[] {
+		factory.setObjectMapper(objectMapper);
+		factory.setAnnotationIntrospector(annotationIntrospector);
+		factory.setFeaturesToEnable(new Object[] {
 				SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS,
 				DeserializationConfig.Feature.USE_ANNOTATIONS,
 				JsonParser.Feature.ALLOW_SINGLE_QUOTES,
 				JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS });
-		beanFactory.setFeaturesToDisable(new Object[] {
+		factory.setFeaturesToDisable(new Object[] {
 				SerializationConfig.Feature.AUTO_DETECT_GETTERS,
 				DeserializationConfig.Feature.AUTO_DETECT_FIELDS,
 				JsonParser.Feature.AUTO_CLOSE_SOURCE,
 				JsonGenerator.Feature.QUOTE_FIELD_NAMES });
 
-		beanFactory.afterPropertiesSet();
+		factory.afterPropertiesSet();
 
-		assertTrue(objectMapper == beanFactory.getObject());
+		assertTrue(objectMapper == factory.getObject());
 
 		assertTrue(annotationIntrospector == objectMapper
 				.getSerializationConfig().getAnnotationIntrospector());

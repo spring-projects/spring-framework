@@ -41,7 +41,7 @@ import org.springframework.beans.factory.InitializingBean;
  * 	&lt;mvc:message-converters>
  * 		&lt;bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
  * 			&lt;property name="objectMapper">
- * 				&lt;bean class="org.springframework.web.context.support.JacksonObjectMapperBeanFactory"
+ * 				&lt;bean class="org.springframework.web.context.support.JacksonObjectMapperFactoryBean"
  * 					p:autoDetectFields="false"
  * 					p:autoDetectGettersSetters="false"
  * 					p:annotationIntrospector-ref="jaxbAnnotationIntrospector" />
@@ -59,7 +59,7 @@ import org.springframework.beans.factory.InitializingBean;
  * <pre>
  * &lt;bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
  * 	&lt;property name="objectMapper">
- * 		&lt;bean class="org.springframework.web.context.support.JacksonObjectMapperBeanFactory">
+ * 		&lt;bean class="org.springframework.web.context.support.JacksonObjectMapperFactoryBean">
  * 			&lt;property name="featuresToEnable">
  * 				&lt;array>
  * 					&lt;util:constant static-field="org.codehaus.jackson.map.SerializationConfig$Feature.WRAP_ROOT_VALUE"/>
@@ -86,7 +86,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @since 3.2
  */
-public class JacksonObjectMapperBeanFactory implements
+public class JacksonObjectMapperFactoryBean implements
 		FactoryBean<ObjectMapper>, InitializingBean {
 
 	private ObjectMapper objectMapper;
