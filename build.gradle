@@ -574,6 +574,7 @@ configure(rootProject) {
         options.author = true
         options.header = rootProject.description
         options.overview = 'src/api/overview.html'
+        options.splitIndex = true
         options.links(
             'http://docs.jboss.org/jbossas/javadoc/4.0.5/connector'
         )
