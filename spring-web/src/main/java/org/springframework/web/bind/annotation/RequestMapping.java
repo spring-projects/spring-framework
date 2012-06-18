@@ -331,8 +331,13 @@ public @interface RequestMapping {
 
 	/**
 	 * The consumable media types of the mapped request, narrowing the primary mapping.
-	 * <p>The format is a sequence of media types ("text/plain", "application/*),
+	 * <p>The format is a single media type or a sequence of media types,
 	 * with a request only mapped if the {@code Content-Type} matches one of these media types.
+	 * Examples:
+	 * <pre>
+	 * consumes = "text/plain"
+	 * consumes = {"text/plain", "application/*"}
+	 * </pre>
 	 * Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
 	 * all requests with a {@code Content-Type} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
@@ -345,8 +350,13 @@ public @interface RequestMapping {
 
 	/**
 	 * The producible media types of the mapped request, narrowing the primary mapping.
-	 * <p>The format is a sequence of media types ("text/plain", "application/*),
+	 * <p>The format is a single media type or a sequence of media types,
 	 * with a request only mapped if the {@code Accept} matches one of these media types.
+	 * Examples:
+	 * <pre>
+	 * produces = "text/plain"
+	 * produces = {"text/plain", "application/*"}
+	 * </pre>
 	 * Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
