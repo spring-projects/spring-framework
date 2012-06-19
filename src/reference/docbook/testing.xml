@@ -416,6 +416,12 @@
           <classname>AbstractTransactionalTestNGSpringContextTests</classname>
         </link> provide convenience methods which delegate to
       <classname>SimpleJdbcTestUtils</classname> internally.</emphasis></para>
+
+      <para>The <literal>spring-jdbc</literal> module provides support for
+      configuring and launching an embedded database which can be used in
+      integration tests that interact with a database. For details, see <xref
+      linkend="jdbc-embedded-database-support" /> and <xref
+      linkend="jdbc-embedded-database-dao-testing" />.</para>
     </section>
 
     <section id="integration-testing-annotations">

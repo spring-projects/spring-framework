@@ -2902,11 +2902,13 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
 
       <programlisting language="java">
 public class DataAccessUnitTestTemplate {
+
     private EmbeddedDatabase db;
     
     @Before
     public void setUp() {
-        // creates a HSQL in-memory db populated from default scripts classpath:schema.sql and classpath:test-data.sql
+        // creates an HSQL in-memory database populated from default scripts
+        // classpath:schema.sql and classpath:data.sql
         db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();		
     }
 
@@ -2920,8 +2922,8 @@ public class DataAccessUnitTestTemplate {
     public void tearDown() {
         db.shutdown();
     }
-}
-</programlisting>
+
+}</programlisting>
     </section>
   </section>
 
