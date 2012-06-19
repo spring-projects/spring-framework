@@ -24,7 +24,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 /**
  * Specialization of {@link ConfigurableEnvironment} allowing initialization of
  * servlet-related {@link org.springframework.core.env.PropertySource} objects at the
- * earliest moment the {@link ServletContext} and (optionally) {@link ServletConfig}
+ * earliest moment that the {@link ServletContext} and (optionally) {@link ServletConfig}
  * become available.
  *
  * @author Chris Beams
@@ -39,7 +39,7 @@ public interface ConfigurableWebEnvironment extends ConfigurableEnvironment {
 	 * instances acting as placeholders with real servlet context/config property sources
 	 * using the given parameters.
 	 * @param servletContext the {@link ServletContext} (may not be {@code null})
-	 * @param servletConfig the {@link ServletContext} ({@code null} if not available)
+	 * @param servletConfig the {@link ServletConfig} ({@code null} if not available)
 	 */
 	void initPropertySources(ServletContext servletContext, ServletConfig servletConfig);
 
