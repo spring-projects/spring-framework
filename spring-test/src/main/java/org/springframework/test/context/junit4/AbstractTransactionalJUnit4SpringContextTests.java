@@ -32,33 +32,28 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * <p>
  * Abstract {@link Transactional transactional} extension of
  * {@link AbstractJUnit4SpringContextTests} which adds convenience functionality
  * for JDBC access. Expects a {@link DataSource} bean and a
  * {@link PlatformTransactionManager} bean to be defined in the Spring
  * {@link ApplicationContext application context}.
- * </p>
- * <p>
- * This class exposes a {@link SimpleJdbcTemplate} and provides an easy way to
- * {@link #countRowsInTable(String) count the number of rows in a table} ,
- * {@link #deleteFromTables(String...) delete from the database} , and
+ *
+ * <p>This class exposes a {@link SimpleJdbcTemplate} and provides an easy way
+ * to {@link #countRowsInTable(String) count the number of rows in a table},
+ * {@link #deleteFromTables(String...) delete from tables}, and
  * {@link #executeSqlScript(String, boolean) execute SQL scripts} within a
  * transaction.
- * </p>
- * <p>
- * Concrete subclasses must fulfill the same requirements outlined in
+ *
+ * <p>Concrete subclasses must fulfill the same requirements outlined in
  * {@link AbstractJUnit4SpringContextTests}.
- * </p>
- * <p>
- * Note: this class serves only as a convenience for extension. If you do not
+ *
+ * <p>Note: this class serves only as a convenience for extension. If you do not
  * wish for your test classes to be tied to a Spring-specific class hierarchy,
  * you may configure your own custom test classes by using
  * {@link SpringJUnit4ClassRunner}, {@link ContextConfiguration
  * &#064;ContextConfiguration}, {@link TestExecutionListeners
  * &#064;TestExecutionListeners}, {@link Transactional &#064;Transactional},
  * etc.
- * </p>
  * 
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -76,9 +71,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.jdbc.SimpleJdbcTestUtils
  * @see org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
  */
-@SuppressWarnings("deprecation")
 @TestExecutionListeners(TransactionalTestExecutionListener.class)
 @Transactional
+@SuppressWarnings("deprecation")
 public abstract class AbstractTransactionalJUnit4SpringContextTests extends AbstractJUnit4SpringContextTests {
 
 	/**

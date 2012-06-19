@@ -31,24 +31,20 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * <p>
  * Abstract {@link Transactional transactional} extension of
  * {@link AbstractTestNGSpringContextTests} which adds convenience functionality
  * for JDBC access. Expects a {@link DataSource} bean and a
  * {@link PlatformTransactionManager} bean to be defined in the Spring
  * {@link ApplicationContext application context}.
- * </p>
- * <p>
- * This class exposes a {@link SimpleJdbcTemplate} and provides an easy way to
- * {@link #countRowsInTable(String) count the number of rows in a table} ,
- * {@link #deleteFromTables(String...) delete from the database} , and
+ *
+ * <p>This class exposes a {@link SimpleJdbcTemplate} and provides an easy way
+ * to {@link #countRowsInTable(String) count the number of rows in a table},
+ * {@link #deleteFromTables(String...) delete from tables}, and
  * {@link #executeSqlScript(String, boolean) execute SQL scripts} within a
  * transaction.
- * </p>
- * <p>
- * Concrete subclasses must fulfill the same requirements outlined in
+ *
+ * <p>Concrete subclasses must fulfill the same requirements outlined in
  * {@link AbstractTestNGSpringContextTests}.
- * </p>
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -64,9 +60,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.jdbc.SimpleJdbcTestUtils
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  */
-@SuppressWarnings("deprecation")
 @TestExecutionListeners(TransactionalTestExecutionListener.class)
 @Transactional
+@SuppressWarnings("deprecation")
 public abstract class AbstractTransactionalTestNGSpringContextTests extends AbstractTestNGSpringContextTests {
 
 	/**
@@ -125,7 +121,6 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * and continueOnError was <code>false</code>
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
-
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
 		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, new EncodedResource(resource,
 			this.sqlScriptEncoding), continueOnError);

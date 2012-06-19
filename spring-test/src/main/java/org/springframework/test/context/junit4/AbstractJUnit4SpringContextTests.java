@@ -18,7 +18,9 @@ package org.springframework.test.context.junit4;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.runner.RunWith;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,30 +31,26 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 /**
- * <p>
  * Abstract base test class which integrates the <em>Spring TestContext
  * Framework</em> with explicit {@link ApplicationContext} testing support in a
  * <strong>JUnit 4.5+</strong> environment.
- * </p>
- * <p>
- * Concrete subclasses should typically declare a class-level
+ *
+ * <p>Concrete subclasses should typically declare a class-level
  * {@link ContextConfiguration &#064;ContextConfiguration} annotation to
- * configure the {@link ApplicationContext application context}
- * {@link ContextConfiguration#locations() resource locations}.
- * <em>If your test does not need to load an application context, you may choose
- * to omit the {@link ContextConfiguration &#064;ContextConfiguration} declaration
- * and to configure the appropriate
- * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners}
- * manually.</em>
- * </p>
- * <p>
- * Note: this class serves only as a convenience for extension. If you do not
+ * configure the {@link ApplicationContext application context} {@link
+ * ContextConfiguration#locations() resource locations} or {@link
+ * ContextConfiguration#classes() annotated classes}. <em>If your test does not
+ * need to load an application context, you may choose to omit the {@link
+ * ContextConfiguration &#064;ContextConfiguration} declaration and to configure
+ * the appropriate {@link org.springframework.test.context.TestExecutionListener
+ * TestExecutionListeners} manually.</em>
+ *
+ * <p>Note: this class serves only as a convenience for extension. If you do not
  * wish for your test classes to be tied to a Spring-specific class hierarchy,
  * you may configure your own custom test classes by using
  * {@link SpringJUnit4ClassRunner}, {@link ContextConfiguration
  * &#064;ContextConfiguration}, {@link TestExecutionListeners
  * &#064;TestExecutionListeners}, etc.
- * </p>
  * 
  * @author Sam Brannen
  * @since 2.5
