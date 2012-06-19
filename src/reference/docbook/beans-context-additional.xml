@@ -183,7 +183,7 @@ argument.required=The '{0}' argument is required.</programlisting>
 
   <lineannotation>&lt;!-- this <interfacename>MessageSource</interfacename> is being used in a web application --&gt;</lineannotation>
   &lt;bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"&gt;
-      &lt;property name="basename" value="test-messages"/&gt;
+      &lt;property name="basename" value="exceptions"/&gt;
   &lt;/bean&gt;
 
   <lineannotation>&lt;!-- lets inject the above <interfacename>MessageSource</interfacename> into this POJO --&gt;</lineannotation>
