@@ -15,9 +15,9 @@ The framework also serves as the foundation for
 [Python](https://github.com/SpringSource/spring-python) variants are available as well.
 
 ## Downloading artifacts
-Instructions on
-[downloading Spring artifacts](https://github.com/SpringSource/spring-framework/wiki/Downloading-Spring-artifacts)
-via Maven and other build systems are available via the project wiki.
+See [downloading Spring artifacts](https://github.com/SpringSource/spring-framework/wiki/Downloading-Spring-artifacts)
+for Maven repository information. Unable to use Maven or other transitive dependency management tools?
+See [building a distribution with dependencies](https://github.com/SpringSource/spring-framework/wiki/Building-a-distribution-with-dependencies).
 
 ## Documentation
 See the current [Javadoc](http://static.springsource.org/spring-framework/docs/current/api)

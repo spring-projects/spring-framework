@@ -640,7 +640,7 @@ configure(rootProject) {
         description = "Builds -${classifier} archive, containing all jars and docs, " +
                       "suitable for community download page."
 
-        def baseDir = "${project.name}-${project.version}";
+        ext.baseDir = "${project.name}-${project.version}";
 
         from('src/dist') {
             include 'readme.txt'
@@ -666,6 +666,36 @@ configure(rootProject) {
                 }
                 if (subproject.tasks.findByPath('javadocJar')) {
                     from subproject.javadocJar
+                }
+            }
+        }
+    }
+
+    // Create an distribution that contains all dependencies (required and optional).
+    // Not published by default; only for use when building from source.
+    task depsZip(type: Zip, dependsOn: distZip) { zipTask ->
+        group = 'Distribution'
+        classifier = 'dist-with-deps'
+        description = "Builds -${classifier} archive, containing everything " +
+            "in the -${distZip.classifier} archive plus all runtime dependencies."
+
+        from zipTree(distZip.archivePath)
+
+        gradle.taskGraph.whenReady { taskGraph ->
+            if (taskGraph.hasTask(":${zipTask.name}")) {
+                def projectNames = rootProject.subprojects*.name
+                def artifacts = new HashSet()
+                subprojects.each { subproject ->
+                    subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                        def dependency = artifact.moduleVersion.id
+                        if (!projectNames.contains(dependency.name)) {
+                            artifacts << artifact.file
+                        }
+                    }
+                }
+
+                zipTask.from(artifacts) {
+                    into "${distZip.baseDir}/deps"
                 }
             }
         }
