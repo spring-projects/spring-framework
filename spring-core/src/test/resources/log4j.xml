@@ -15,6 +15,10 @@
 		<level value="warn" />
 	</logger>
 
+	<logger name="org.springframework.core.GenericTypeResolver">
+		<level value="info" />
+	</logger>
+
 	<!-- Root Logger -->
 	<root>
 		<priority value="warn" />
