@@ -18,6 +18,7 @@ package org.springframework.core.type.classreading;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.BufferedInputStream;
 
 import org.springframework.asm.ClassReader;
 import org.springframework.core.io.Resource;
@@ -42,7 +43,7 @@ final class SimpleMetadataReader implements MetadataReader {
 	private final AnnotationMetadata annotationMetadata;
 
 	SimpleMetadataReader(Resource resource, ClassLoader classLoader) throws IOException {
-		InputStream is = resource.getInputStream();
+		InputStream is = new BufferedInputStream(resource.getInputStream());
 		ClassReader classReader = null;
 		try {
 			classReader = new ClassReader(is);
