@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.URI;
-
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.http.HttpMethod;
-import org.springframework.util.Assert;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
@@ -40,6 +37,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HttpContext;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that uses
@@ -155,8 +156,27 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				return new HttpPut(uri);
 			case TRACE:
 				return new HttpTrace(uri);
+			case PATCH:
+				return createHttpPatch(uri);
 			default:
 				throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
+		}
+	}
+
+	private HttpUriRequest createHttpPatch(URI uri) {
+		String className = "org.apache.http.client.methods.HttpPatch";
+		ClassLoader classloader = this.getClass().getClassLoader();
+		if (!ClassUtils.isPresent(className, classloader)) {
+			throw new IllegalArgumentException(
+					"HTTP method PATCH not available before Apache HttpComponents HttpClient 4.2");
+		}
+		try {
+			Class<?> clazz = classloader.loadClass(className);
+			Constructor<?> constructor = clazz.getConstructor(URI.class);
+			return (HttpUriRequest) constructor.newInstance(uri);
+		}
+		catch (Throwable ex) {
+			throw new IllegalStateException("Unable to instantiate " + className, ex);
 		}
 	}
 

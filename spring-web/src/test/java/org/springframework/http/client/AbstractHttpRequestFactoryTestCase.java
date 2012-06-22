@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("OPTIONS")), "/methods/options");
 		jettyContext.addServlet(new ServletHolder(new PostServlet()), "/methods/post");
 		jettyContext.addServlet(new ServletHolder(new MethodServlet("PUT")), "/methods/put");
+		jettyContext.addServlet(new ServletHolder(new MethodServlet("PATCH")), "/methods/patch");
 		jettyServer.start();
 	}
 
@@ -160,7 +161,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		assertHttpMethod("delete", HttpMethod.DELETE);
 	}
 
-	private void assertHttpMethod(String path, HttpMethod method) throws Exception {
+	protected void assertHttpMethod(String path, HttpMethod method) throws Exception {
 		ClientHttpResponse response = null;
 		try {
 			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/methods/" + path), method);

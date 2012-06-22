@@ -41,6 +41,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -768,6 +769,25 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 
 	/**
+	 * Override the parent class implementation in order to intercept PATCH
+	 * requests.
+	 *
+	 * @see #doPatch(HttpServletRequest, HttpServletResponse)
+	 */
+	@Override
+	protected void service(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		String method = request.getMethod();
+		if (method.equalsIgnoreCase(RequestMethod.PATCH.name())) {
+			doPatch(request, response);
+		}
+		else {
+			super.service(request, response);
+		}
+	}
+
+	/**
 	 * Delegate GET requests to processRequest/doService.
 	 * <p>Will also be invoked by HttpServlet's default implementation of <code>doHead</code>,
 	 * with a <code>NoBodyResponse</code> that just captures the content length.
@@ -798,6 +818,16 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	@Override
 	protected final void doPut(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		processRequest(request, response);
+	}
+
+	/**
+	 * Delegate PATCH requests to {@link #processRequest}.
+	 * @see #doService
+	 */
+	protected final void doPatch(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		processRequest(request, response);

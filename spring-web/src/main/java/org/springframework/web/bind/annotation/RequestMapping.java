@@ -271,7 +271,7 @@ public @interface RequestMapping {
 
 	/**
 	 * The HTTP request methods to map to, narrowing the primary mapping:
-	 * GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE.
+	 * GET, POST, HEAD, OPTIONS, PUT, PATCH, DELETE, TRACE.
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this HTTP method restriction (i.e. the type-level restriction

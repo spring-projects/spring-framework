@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,25 +29,26 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
  * Test fixture for {@link HttpPutFormContentFilter}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class HttpPutFormContentFilterTests {
 
 	private HttpPutFormContentFilter filter;
-	
+
 	private MockHttpServletRequest request;
-	
+
 	private MockHttpServletResponse response;
-	
+
 	private MockFilterChain filterChain;
-	
+
 	@Before
 	public void setup() {
 		filter = new HttpPutFormContentFilter();
@@ -59,14 +60,18 @@ public class HttpPutFormContentFilterTests {
 	}
 
 	@Test
-	public void wrapPutOnly() throws Exception {
+	public void wrapPutAndPatchOnly() throws Exception {
 		request.setContent("".getBytes("ISO-8859-1"));
-		String[] methods = new String[] {"GET", "POST", "DELETE", "HEAD", "OPTIONS", "TRACE"};
-		for (String method : methods) {
-			request.setMethod(method);
+		for (HttpMethod method : HttpMethod.values()) {
+			request.setMethod(method.name());
 			filterChain = new MockFilterChain();
 			filter.doFilter(request, response, filterChain);
-			assertSame("Should not wrap for HTTP method " + method, request, filterChain.getRequest());
+			if (method.equals(HttpMethod.PUT) || method.equals(HttpMethod.PATCH)) {
+				assertNotSame("Should wrap HTTP method " + method, request, filterChain.getRequest());
+			}
+			else {
+				assertSame("Should not wrap for HTTP method " + method, request, filterChain.getRequest());
+			}
 		}
 	}
 
@@ -81,31 +86,31 @@ public class HttpPutFormContentFilterTests {
 			assertSame("Should not wrap for content type " + contentType, request, filterChain.getRequest());
 		}
 	}
-	
+
 	@Test
 	public void getParameter() throws Exception {
 		request.setContent("name=value".getBytes("ISO-8859-1"));
 		filter.doFilter(request, response, filterChain);
-		
+
 		assertEquals("value", filterChain.getRequest().getParameter("name"));
 	}
-	
+
 	@Test
 	public void getParameterFromQueryString() throws Exception {
 		request.addParameter("name", "value1");
 		request.setContent("name=value2".getBytes("ISO-8859-1"));
 		filter.doFilter(request, response, filterChain);
-	
+
 		assertNotSame("Request not wrapped", request, filterChain.getRequest());
-		assertEquals("Query string parameters should be listed ahead of form parameters", 
+		assertEquals("Query string parameters should be listed ahead of form parameters",
 				"value1", filterChain.getRequest().getParameter("name"));
 	}
-	
+
 	@Test
 	public void getParameterNullValue() throws Exception {
 		request.setContent("name=value".getBytes("ISO-8859-1"));
 		filter.doFilter(request, response, filterChain);
-		
+
 		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertNull(filterChain.getRequest().getParameter("noSuchParam"));
 	}
@@ -115,27 +120,27 @@ public class HttpPutFormContentFilterTests {
 		request.addParameter("name1", "value1");
 		request.addParameter("name2", "value2");
 		request.setContent("name1=value1&name3=value3&name4=value4".getBytes("ISO-8859-1"));
-		
+
 		filter.doFilter(request, response, filterChain);
 		List<String> names = Collections.list(filterChain.getRequest().getParameterNames());
 
 		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertEquals(Arrays.asList("name1", "name2", "name3", "name4"), names);
 	}
-	
+
 	@Test
 	public void getParameterValues() throws Exception {
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("name=value3&name=value4".getBytes("ISO-8859-1"));
-		
+
 		filter.doFilter(request, response, filterChain);
 		String[] values = filterChain.getRequest().getParameterValues("name");
 
 		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertArrayEquals(new String[]{"value1", "value2", "value3", "value4"}, values);
 	}
-	
+
 	@Test
 	public void getParameterValuesFromQueryString() throws Exception {
 		request.addParameter("name", "value1");
@@ -148,33 +153,33 @@ public class HttpPutFormContentFilterTests {
 		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertArrayEquals(new String[]{"value1", "value2"}, values);
 	}
-	
+
 	@Test
 	public void getParameterValuesFromFormContent() throws Exception {
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("anotherName=anotherValue".getBytes("ISO-8859-1"));
-		
+
 		filter.doFilter(request, response, filterChain);
 		String[] values = filterChain.getRequest().getParameterValues("anotherName");
 
 		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertArrayEquals(new String[]{"anotherValue"}, values);
 	}
-	
+
 	@Test
 	public void getParameterValuesInvalidName() throws Exception {
 		request.addParameter("name", "value1");
 		request.addParameter("name", "value2");
 		request.setContent("anotherName=anotherValue".getBytes("ISO-8859-1"));
-		
+
 		filter.doFilter(request, response, filterChain);
 		String[] values = filterChain.getRequest().getParameterValues("noSuchParameter");
 
 		assertNotSame("Request not wrapped", request, filterChain.getRequest());
 		assertNull(values);
 	}
-	
+
 	@Test
 	public void getParameterMap() throws Exception {
 		request.addParameter("name", "value1");
@@ -189,5 +194,5 @@ public class HttpPutFormContentFilterTests {
 		assertArrayEquals(new String[] {"value1", "value2", "value3"}, parameters.get("name"));
 		assertArrayEquals(new String[] {"value4"}, parameters.get("name4"));
 	}
-	
+
 }

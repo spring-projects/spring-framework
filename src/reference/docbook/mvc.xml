@@ -1975,7 +1975,7 @@ public class EditPetForm {
         <literal>ServletRequest.getParameter*()</literal> family of methods to
         support form field access only for HTTP POST, not for HTTP PUT.</para>
 
-        <para>To support HTTP PUT requests, the <literal>spring-web</literal>
+        <para>To support HTTP PUT and PATCH requests, the <literal>spring-web</literal>
         module provides the filter
         <classname>HttpPutFormContentFilter</classname>, which can be
         configured in <filename>web.xml</filename>:</para>
@@ -1995,7 +1995,7 @@ public class EditPetForm {
   &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
 &lt;/servlet&gt;</programlisting>
 
-        <para>The above filter intercepts HTTP PUT requests with content type
+        <para>The above filter intercepts HTTP PUT and PATCH requests with content type
         <literal>application/x-www-form-urlencoded</literal>, reads the form
         data from the body of the request, and wraps the
         <classname>ServletRequest</classname> in order to make the form data
