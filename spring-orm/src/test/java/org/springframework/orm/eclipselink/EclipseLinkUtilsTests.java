@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,16 @@ import org.springframework.dao.DataAccessException;
 
 /**
  * @author Jan Stamer
- * @since 25.06.2012
+ * @since 3.2
  */
 public class EclipseLinkUtilsTests extends TestCase {
 
-   public void testWithNull() {
-      assertTrue(EclipseLinkUtils.convertEclipseLinkAccessException(null) instanceof DataAccessException);
-   }
-	
+	public void testWithNull() {
+		assertTrue(EclipseLinkUtils.convertEclipseLinkAccessException(null) instanceof DataAccessException);
+	}
+
 	public void testWithEclipseLinkException() {
-	   assertTrue(EclipseLinkUtils.convertEclipseLinkAccessException(DatabaseException.databaseAccessorNotConnected()) instanceof DataAccessException);
+		assertTrue(EclipseLinkUtils.convertEclipseLinkAccessException(DatabaseException.databaseAccessorNotConnected()) instanceof DataAccessException);
 	}
 
 }
