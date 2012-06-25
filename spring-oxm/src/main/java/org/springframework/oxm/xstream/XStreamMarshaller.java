@@ -473,17 +473,22 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected Object unmarshalDomNode(Node node) throws XmlMappingException {
-		HierarchicalStreamReader streamReader;
-		if (node instanceof Document) {
-			streamReader = new DomReader((Document) node);
-		}
-		else if (node instanceof Element) {
-			streamReader = new DomReader((Element) node);
-		}
-		else {
+		try {
+			HierarchicalStreamReader streamReader;
+			if (node instanceof Document) {
+				streamReader = new DomReader((Document) node);
+			}
+			else if (node instanceof Element) {
+				streamReader = new DomReader((Element) node);
+			}
+			else {
 			throw new IllegalArgumentException("DOMSource contains neither Document nor Element");
+			}
+			return getXStream().unmarshal(streamReader);
 		}
-		return unmarshal(streamReader);
+		catch (Exception ex) {
+			throw convertXStreamException(ex, false);
+		}
 	}
 
 	@Override
@@ -499,7 +504,14 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) throws XmlMappingException {
-		return unmarshal(new StaxReader(new QNameMap(), streamReader));
+		try {
+			HierarchicalStreamReader hierarchicalStreamReader =
+					new StaxReader(new QNameMap(),streamReader);
+			return getXStream().unmarshal(hierarchicalStreamReader);
+		}
+		catch (Exception ex) {
+			throw convertXStreamException(ex, false);
+		}
 	}
 
 	@Override
@@ -509,11 +521,18 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
-		if (streamDriver != null) {
-			return unmarshal(streamDriver.createReader(reader));
+		try {
+			HierarchicalStreamReader streamReader;
+			if (streamDriver != null) {
+				streamReader = streamDriver.createReader(reader);
+			}
+			else {
+				streamReader = new XppReader(reader);
+			}
+			return getXStream().unmarshal(streamReader);
 		}
-		else {
-			return unmarshal(new XppReader(reader));
+		catch (Exception ex) {
+			throw convertXStreamException(ex, false);
 		}
 	}
 
@@ -524,16 +543,6 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		throw new UnsupportedOperationException(
 				"XStreamMarshaller does not support unmarshalling using SAX XMLReaders");
 	}
-
-	private Object unmarshal(HierarchicalStreamReader streamReader) {
-		try {
-			return this.getXStream().unmarshal(streamReader);
-		}
-		catch (Exception ex) {
-			throw convertXStreamException(ex, false);
-		}
-	}
-
 
 	/**
 	 * Convert the given XStream exception to an appropriate exception from the
