@@ -17,7 +17,6 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.net.URI;
 
 import org.apache.http.client.HttpClient;
@@ -25,6 +24,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpOptions;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpTrace;
@@ -55,6 +55,9 @@ import org.springframework.util.ClassUtils;
  * @since 3.1
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
+
+	private static final boolean HTTP_PATCH_AVAILABLE = ClassUtils.isPresent(
+			"org.apache.http.client.methods.HttpPatch", HttpComponentsClientHttpRequestFactory.class.getClassLoader());
 
 	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 100;
 
@@ -164,19 +167,12 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	private HttpUriRequest createHttpPatch(URI uri) {
-		String className = "org.apache.http.client.methods.HttpPatch";
-		ClassLoader classloader = this.getClass().getClassLoader();
-		if (!ClassUtils.isPresent(className, classloader)) {
+		if (!HTTP_PATCH_AVAILABLE) {
 			throw new IllegalArgumentException(
 					"HTTP method PATCH not available before Apache HttpComponents HttpClient 4.2");
 		}
-		try {
-			Class<?> clazz = classloader.loadClass(className);
-			Constructor<?> constructor = clazz.getConstructor(URI.class);
-			return (HttpUriRequest) constructor.newInstance(uri);
-		}
-		catch (Throwable ex) {
-			throw new IllegalStateException("Unable to instantiate " + className, ex);
+		else {
+			return new HttpPatch(uri);
 		}
 	}
 

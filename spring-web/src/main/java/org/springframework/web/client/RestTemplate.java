@@ -69,6 +69,10 @@ import org.springframework.web.util.UriUtils;
  * <tr><td>any</td><td>{@link #exchange}</td></tr>
  * <tr><td></td><td>{@link #execute}</td></tr> </table>
  *
+ * <p>The {@code exchange} and {@code execute} methods are generalized versions of the more specific methods listed
+ * above them. They support additional, less frequently used combinations including support for requests using the
+ * HTTP PATCH method. However, note that the underlying HTTP library must also support the desired combination.</p>
+ *
  * <p>For each of these HTTP methods, there are three corresponding Java methods in the {@code RestTemplate}. Two
  * variant take a {@code String} URI as first argument (eg. {@link #getForObject(String, Class, Object[])}, {@link
  * #getForObject(String, Class, Map)}), and are capable of substituting any {@linkplain UriTemplate URI templates} in
