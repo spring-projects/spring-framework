@@ -54,7 +54,7 @@ Run `./import-into-eclipse.sh` or read `import-into-idea.md` as appropriate.
 build and release FAQ][].
 
 ## Contributing
-[Pull requests][] are welcome; see the [contributor guidelines][].
+[Pull requests][] are welcome; see the [contributor guidelines][] for details.
 
 ## Staying in touch
 Follow [@springframework][] and its [team members][] on Twitter. In-depth
