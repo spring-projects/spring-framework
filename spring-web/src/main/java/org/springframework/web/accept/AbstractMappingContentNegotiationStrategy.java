@@ -31,14 +31,14 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public abstract class AbstractMappingContentNegotiationStrategy extends MappingMediaTypeExtensionsResolver
-		implements ContentNegotiationStrategy, MediaTypeExtensionsResolver {
+public abstract class AbstractMappingContentNegotiationStrategy extends MappingMediaTypeFileExtensionResolver
+		implements ContentNegotiationStrategy, MediaTypeFileExtensionResolver {
 
 	/**
 	 * Create an instance with the given extension-to-MediaType lookup.
 	 * @throws IllegalArgumentException if a media type string cannot be parsed
 	 */
-	public AbstractMappingContentNegotiationStrategy(Map<String, String> mediaTypes) {
+	public AbstractMappingContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
 		super(mediaTypes);
 	}
 

@@ -102,7 +102,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	private boolean favorPathExtension = true;
 	private boolean favorParameter = false;
 	private boolean ignoreAcceptHeader = false;
-	private Map<String, String> mediaTypes = new HashMap<String, String>();
+	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
 	private Boolean useJaf;
 	private String parameterName;
 	private MediaType defaultContentType;
@@ -200,7 +200,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	public void setMediaTypes(Map<String, String> mediaTypes) {
-		this.mediaTypes = mediaTypes;
+		if (mediaTypes != null) {
+			for (Map.Entry<String, String> entry : mediaTypes.entrySet()) {
+				String extension = entry.getKey().toLowerCase(Locale.ENGLISH);
+				MediaType mediaType = MediaType.parseMediaType(entry.getValue());
+				this.mediaTypes.put(extension, mediaType);
+			}
+		}
 	}
 
 	/**
@@ -389,7 +395,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 				candidateViews.add(view);
 			}
 			for (MediaType requestedMediaType : requestedMediaTypes) {
-				List<String> extensions = this.contentNegotiationManager.resolveExtensions(requestedMediaType);
+				List<String> extensions = this.contentNegotiationManager.resolveFileExtensions(requestedMediaType);
 				for (String extension : extensions) {
 					String viewNameWithExtension = viewName + "." + extension;
 					view = viewResolver.resolveViewName(viewNameWithExtension, locale);

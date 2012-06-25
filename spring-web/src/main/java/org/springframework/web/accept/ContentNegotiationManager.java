@@ -33,28 +33,30 @@ import org.springframework.web.context.request.NativeWebRequest;
  * in a request by delegating to a list of {@link ContentNegotiationStrategy} instances.
  *
  * <p>It may also be used to determine the extensions associated with a MediaType by
- * delegating to a list of {@link MediaTypeExtensionsResolver} instances.
+ * delegating to a list of {@link MediaTypeFileExtensionResolver} instances.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class ContentNegotiationManager implements ContentNegotiationStrategy, MediaTypeExtensionsResolver {
+public class ContentNegotiationManager implements ContentNegotiationStrategy, MediaTypeFileExtensionResolver {
 
-	private final List<ContentNegotiationStrategy> contentNegotiationStrategies = new ArrayList<ContentNegotiationStrategy>();
+	private final List<ContentNegotiationStrategy> contentNegotiationStrategies =
+			new ArrayList<ContentNegotiationStrategy>();
 
-	private final Set<MediaTypeExtensionsResolver> extensionResolvers = new LinkedHashSet<MediaTypeExtensionsResolver>();
+	private final Set<MediaTypeFileExtensionResolver> fileExtensionResolvers =
+			new LinkedHashSet<MediaTypeFileExtensionResolver>();
 
 	/**
 	 * Create an instance with the given ContentNegotiationStrategy instances.
 	 * <p>Each instance is checked to see if it is also an implementation of
-	 * MediaTypeExtensionsResolver, and if so it is registered as such.
+	 * MediaTypeFileExtensionResolver, and if so it is registered as such.
 	 */
 	public ContentNegotiationManager(ContentNegotiationStrategy... strategies) {
 		Assert.notEmpty(strategies, "At least one ContentNegotiationStrategy is expected");
 		this.contentNegotiationStrategies.addAll(Arrays.asList(strategies));
 		for (ContentNegotiationStrategy strategy : this.contentNegotiationStrategies) {
-			if (strategy instanceof MediaTypeExtensionsResolver) {
-				this.extensionResolvers.add((MediaTypeExtensionsResolver) strategy);
+			if (strategy instanceof MediaTypeFileExtensionResolver) {
+				this.fileExtensionResolvers.add((MediaTypeFileExtensionResolver) strategy);
 			}
 		}
 	}
@@ -67,10 +69,10 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	}
 
 	/**
-	 * Add MediaTypeExtensionsResolver instances.
+	 * Add MediaTypeFileExtensionResolver instances.
 	 */
-	public void addExtensionsResolver(MediaTypeExtensionsResolver... resolvers) {
-		this.extensionResolvers.addAll(Arrays.asList(resolvers));
+	public void addFileExtensionResolvers(MediaTypeFileExtensionResolver... resolvers) {
+		this.fileExtensionResolvers.addAll(Arrays.asList(resolvers));
 	}
 
 	/**
@@ -91,13 +93,13 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	}
 
 	/**
-	 * Delegate to all configured MediaTypeExtensionsResolver instances and aggregate
-	 * the list of all extensions found.
+	 * Delegate to all configured MediaTypeFileExtensionResolver instances and aggregate
+	 * the list of all file extensions found.
 	 */
-	public List<String> resolveExtensions(MediaType mediaType) {
+	public List<String> resolveFileExtensions(MediaType mediaType) {
 		Set<String> extensions = new LinkedHashSet<String>();
-		for (MediaTypeExtensionsResolver resolver : this.extensionResolvers) {
-			extensions.addAll(resolver.resolveExtensions(mediaType));
+		for (MediaTypeFileExtensionResolver resolver : this.fileExtensionResolvers) {
+			extensions.addAll(resolver.resolveFileExtensions(mediaType));
 		}
 		return new ArrayList<String>(extensions);
 	}

@@ -16,6 +16,7 @@
 package org.springframework.web.accept;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,20 +26,29 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 
 /**
- * Test fixture for MappingMediaTypeExtensionsResolver.
+ * Test fixture for {@link MappingMediaTypeFileExtensionResolver}.
  *
  * @author Rossen Stoyanchev
  */
-public class MappingMediaTypeExtensionsResolverTests {
+public class MappingMediaTypeFileExtensionResolverTests {
 
 	@Test
 	public void resolveExtensions() {
-		Map<String, String> mapping = Collections.singletonMap("json", "application/json");
-		MappingMediaTypeExtensionsResolver resolver = new MappingMediaTypeExtensionsResolver(mapping);
-		List<String> extensions = resolver.resolveExtensions(MediaType.APPLICATION_JSON);
+		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
+		MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(mapping);
+		List<String> extensions = resolver.resolveFileExtensions(MediaType.APPLICATION_JSON);
 
 		assertEquals(1, extensions.size());
 		assertEquals("json", extensions.get(0));
+	}
+
+	@Test
+	public void resolveExtensionsNoMatch() {
+		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
+		MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(mapping);
+		List<String> extensions = resolver.resolveFileExtensions(MediaType.TEXT_HTML);
+
+		assertTrue(extensions.isEmpty());
 	}
 
 }

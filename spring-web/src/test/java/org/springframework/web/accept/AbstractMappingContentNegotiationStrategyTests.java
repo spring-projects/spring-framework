@@ -35,7 +35,7 @@ public class AbstractMappingContentNegotiationStrategyTests {
 
 	@Test
 	public void resolveMediaTypes() {
-		Map<String, String> mapping = Collections.singletonMap("json", "application/json");
+		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("json", mapping);
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
@@ -46,7 +46,7 @@ public class AbstractMappingContentNegotiationStrategyTests {
 
 	@Test
 	public void resolveMediaTypesNoMatch() {
-		Map<String, String> mapping = null;
+		Map<String, MediaType> mapping = null;
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("blah", mapping);
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
@@ -56,7 +56,7 @@ public class AbstractMappingContentNegotiationStrategyTests {
 
 	@Test
 	public void resolveMediaTypesNoKey() {
-		Map<String, String> mapping = Collections.singletonMap("json", "application/json");
+		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy(null, mapping);
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
@@ -66,7 +66,7 @@ public class AbstractMappingContentNegotiationStrategyTests {
 
 	@Test
 	public void resolveMediaTypesHandleNoMatch() {
-		Map<String, String> mapping = null;
+		Map<String, MediaType> mapping = null;
 		TestMappingContentNegotiationStrategy strategy = new TestMappingContentNegotiationStrategy("xml", mapping);
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
@@ -80,7 +80,7 @@ public class AbstractMappingContentNegotiationStrategyTests {
 
 		private final String extension;
 
-		public TestMappingContentNegotiationStrategy(String extension, Map<String, String> mapping) {
+		public TestMappingContentNegotiationStrategy(String extension, Map<String, MediaType> mapping) {
 			super(mapping);
 			this.extension = extension;
 		}

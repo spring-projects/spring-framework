@@ -27,7 +27,7 @@ import org.springframework.http.MediaType;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public interface MediaTypeExtensionsResolver {
+public interface MediaTypeFileExtensionResolver {
 
 	/**
 	 * Resolve the given media type to a list of path extensions.
@@ -35,6 +35,6 @@ public interface MediaTypeExtensionsResolver {
 	 * @param mediaType the media type to resolve
 	 * @return a list of extensions or an empty list, never {@code null}
 	 */
-	List<String> resolveExtensions(MediaType mediaType);
+	List<String> resolveFileExtensions(MediaType mediaType);
 
 }

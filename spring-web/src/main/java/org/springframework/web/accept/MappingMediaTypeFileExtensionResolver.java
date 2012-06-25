@@ -15,7 +15,7 @@
  */
 package org.springframework.web.accept;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -24,28 +24,32 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.http.MediaType;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
- * An implementation of {@link MediaTypeExtensionsResolver} that maintains a lookup
+ * An implementation of {@link MediaTypeFileExtensionResolver} that maintains a lookup
  * from extension to MediaType.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class MappingMediaTypeExtensionsResolver implements MediaTypeExtensionsResolver {
+public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExtensionResolver {
 
-	private ConcurrentMap<String, MediaType> mediaTypes = new ConcurrentHashMap<String, MediaType>();
+	private final ConcurrentMap<String, MediaType> mediaTypes = new ConcurrentHashMap<String, MediaType>();
+
+	private final MultiValueMap<MediaType, String> fileExtensions = new LinkedMultiValueMap<MediaType, String>();
 
 	/**
 	 * Create an instance with the given mappings between extensions and media types.
 	 * @throws IllegalArgumentException if a media type string cannot be parsed
 	 */
-	public MappingMediaTypeExtensionsResolver(Map<String, String> mediaTypes) {
+	public MappingMediaTypeFileExtensionResolver(Map<String, MediaType> mediaTypes) {
 		if (mediaTypes != null) {
-			for (Map.Entry<String, String> entry : mediaTypes.entrySet()) {
-				String extension = entry.getKey().toLowerCase(Locale.ENGLISH);
-				MediaType mediaType = MediaType.parseMediaType(entry.getValue());
-				this.mediaTypes.put(extension, mediaType);
+			for (Entry<String, MediaType> entries : mediaTypes.entrySet()) {
+				String extension = entries.getKey().toLowerCase(Locale.ENGLISH);
+				MediaType mediaType = entries.getValue();
+				addMapping(extension, mediaType);
 			}
 		}
 	}
@@ -54,14 +58,9 @@ public class MappingMediaTypeExtensionsResolver implements MediaTypeExtensionsRe
 	 * Find the extensions applicable to the given MediaType.
 	 * @return 0 or more extensions, never {@code null}
 	 */
-	public List<String> resolveExtensions(MediaType mediaType) {
-		List<String> result = new ArrayList<String>();
-		for (Entry<String, MediaType> entry : this.mediaTypes.entrySet()) {
-			if (mediaType.includes(entry.getValue())) {
-				result.add(entry.getKey());
-			}
-		}
-		return result;
+	public List<String> resolveFileExtensions(MediaType mediaType) {
+		List<String> fileExtensions = this.fileExtensions.get(mediaType);
+		return (fileExtensions != null) ? fileExtensions : Collections.<String>emptyList();
 	}
 
 	/**
@@ -76,7 +75,10 @@ public class MappingMediaTypeExtensionsResolver implements MediaTypeExtensionsRe
 	 * Map a MediaType to an extension or ignore if the extensions is already mapped.
 	 */
 	protected void addMapping(String extension, MediaType mediaType) {
-		this.mediaTypes.putIfAbsent(extension, mediaType);
+		MediaType previous = this.mediaTypes.putIfAbsent(extension, mediaType);
+		if (previous == null) {
+			this.fileExtensions.add(mediaType, extension);
+		}
 	}
 
 }

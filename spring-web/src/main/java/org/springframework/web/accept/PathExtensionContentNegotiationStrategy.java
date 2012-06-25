@@ -72,7 +72,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	 * Create an instance with the given extension-to-MediaType lookup.
 	 * @throws IllegalArgumentException if a media type string cannot be parsed
 	 */
-	public PathExtensionContentNegotiationStrategy(Map<String, String> mediaTypes) {
+	public PathExtensionContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
 		super(mediaTypes);
 	}
 

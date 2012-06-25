@@ -43,7 +43,7 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.FixedContentNegotiationStrategy;
 import org.springframework.web.accept.HeaderContentNegotiationStrategy;
-import org.springframework.web.accept.MappingMediaTypeExtensionsResolver;
+import org.springframework.web.accept.MappingMediaTypeFileExtensionResolver;
 import org.springframework.web.accept.ParameterContentNegotiationStrategy;
 import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -117,10 +117,10 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameWithAcceptHeader() throws Exception {
 		request.addHeader("Accept", "application/vnd.ms-excel");
 
-		Map<String, String> mapping = Collections.singletonMap("xls", "application/vnd.ms-excel");
-		MappingMediaTypeExtensionsResolver extensionsResolver = new MappingMediaTypeExtensionsResolver(mapping);
+		Map<String, MediaType> mapping = Collections.singletonMap("xls", MediaType.valueOf("application/vnd.ms-excel"));
+		MappingMediaTypeFileExtensionResolver extensionsResolver = new MappingMediaTypeFileExtensionResolver(mapping);
 		ContentNegotiationManager manager = new ContentNegotiationManager(new HeaderContentNegotiationStrategy());
-		manager.addExtensionsResolver(extensionsResolver);
+		manager.addFileExtensionResolvers(extensionsResolver);
 		viewResolver.setContentNegotiationManager(manager);
 
 		ViewResolver viewResolverMock = createMock(ViewResolver.class);
@@ -155,7 +155,7 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameWithRequestParameter() throws Exception {
 		request.addParameter("format", "xls");
 
-		Map<String, String> mapping = Collections.singletonMap("xls", "application/vnd.ms-excel");
+		Map<String, MediaType> mapping = Collections.singletonMap("xls", MediaType.valueOf("application/vnd.ms-excel"));
 		ParameterContentNegotiationStrategy paramStrategy = new ParameterContentNegotiationStrategy(mapping);
 		viewResolver.setContentNegotiationManager(new ContentNegotiationManager(paramStrategy));
 
@@ -343,8 +343,7 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameFilenameDefaultView() throws Exception {
 		request.setRequestURI("/test.json");
 
-
-		Map<String, String> mapping = Collections.singletonMap("json", "application/json");
+		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
 		PathExtensionContentNegotiationStrategy pathStrategy = new PathExtensionContentNegotiationStrategy(mapping);
 		viewResolver.setContentNegotiationManager(new ContentNegotiationManager(pathStrategy));
 

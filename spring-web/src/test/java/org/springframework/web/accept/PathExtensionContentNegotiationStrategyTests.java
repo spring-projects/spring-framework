@@ -56,7 +56,7 @@ public class PathExtensionContentNegotiationStrategyTests {
 
 		assertEquals(Arrays.asList(new MediaType("text", "html")), mediaTypes);
 
-		strategy = new PathExtensionContentNegotiationStrategy(Collections.singletonMap("HTML", "application/xhtml+xml"));
+		strategy = new PathExtensionContentNegotiationStrategy(Collections.singletonMap("HTML", MediaType.APPLICATION_XHTML_XML));
 		mediaTypes = strategy.resolveMediaTypes(this.webRequest);
 
 		assertEquals(Arrays.asList(new MediaType("application", "xhtml+xml")), mediaTypes);

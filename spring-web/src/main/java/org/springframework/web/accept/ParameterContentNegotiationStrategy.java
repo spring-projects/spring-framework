@@ -42,7 +42,7 @@ public class ParameterContentNegotiationStrategy extends AbstractMappingContentN
 	 * Create an instance with the given extension-to-MediaType lookup.
 	 * @throws IllegalArgumentException if a media type string cannot be parsed
 	 */
-	public ParameterContentNegotiationStrategy(Map<String, String> mediaTypes) {
+	public ParameterContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
 		super(mediaTypes);
 		Assert.notEmpty(mediaTypes, "Cannot look up media types without any mappings");
 	}
