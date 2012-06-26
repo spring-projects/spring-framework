@@ -37,4 +37,10 @@ public interface MediaTypeFileExtensionResolver {
 	 */
 	List<String> resolveFileExtensions(MediaType mediaType);
 
+	/**
+	 * Return all known file extensions.
+	 * @return a list of extensions or an empty list, never {@code null}
+	 */
+	List<String> getAllFileExtensions();
+
 }

@@ -17,11 +17,13 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.accept.ContentNegotiationManager;
-import org.springframework.web.accept.HeaderContentNegotiationStrategy;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
 import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
@@ -52,6 +54,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
+	private final List<String> contentNegotiationFileExtensions = new ArrayList<String>();
+
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
@@ -75,7 +79,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * If not set, the default constructor is used.
 	 */
 	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		Assert.notNull(contentNegotiationManager);
 		this.contentNegotiationManager = contentNegotiationManager;
+		this.contentNegotiationFileExtensions.addAll(contentNegotiationManager.getAllFileExtensions());
 	}
 
 	/**
@@ -95,7 +101,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Return the configured {@link ContentNegotiationManager}.
 	 */
 	public ContentNegotiationManager getContentNegotiationManager() {
-		return contentNegotiationManager;
+		return this.contentNegotiationManager;
+	}
+
+	/**
+	 * Return the known file extensions for content negotiation.
+	 */
+	public List<String> getContentNegotiationFileExtensions() {
+		return this.contentNegotiationFileExtensions;
 	}
 
 	/**
@@ -173,8 +186,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	private RequestMappingInfo createRequestMappingInfo(RequestMapping annotation, RequestCondition<?> customCondition) {
 		return new RequestMappingInfo(
-				new PatternsRequestCondition(annotation.value(),
-						getUrlPathHelper(), getPathMatcher(), this.useSuffixPatternMatch, this.useTrailingSlashMatch),
+				new PatternsRequestCondition(annotation.value(), getUrlPathHelper(), getPathMatcher(),
+						this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.contentNegotiationFileExtensions),
 				new RequestMethodsRequestCondition(annotation.method()),
 				new ParamsRequestCondition(annotation.params()),
 				new HeadersRequestCondition(annotation.headers()),

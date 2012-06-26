@@ -15,6 +15,7 @@
  */
 package org.springframework.web.accept;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +41,8 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 
 	private final MultiValueMap<MediaType, String> fileExtensions = new LinkedMultiValueMap<MediaType, String>();
 
+	private final List<String> allFileExtensions = new ArrayList<String>();
+
 	/**
 	 * Create an instance with the given mappings between extensions and media types.
 	 * @throws IllegalArgumentException if a media type string cannot be parsed
@@ -55,7 +58,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	}
 
 	/**
-	 * Find the extensions applicable to the given MediaType.
+	 * Find the file extensions mapped to the given MediaType.
 	 * @return 0 or more extensions, never {@code null}
 	 */
 	public List<String> resolveFileExtensions(MediaType mediaType) {
@@ -63,11 +66,15 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 		return (fileExtensions != null) ? fileExtensions : Collections.<String>emptyList();
 	}
 
+	public List<String> getAllFileExtensions() {
+		return Collections.unmodifiableList(this.allFileExtensions);
+	}
+
 	/**
 	 * Return the MediaType mapped to the given extension.
 	 * @return a MediaType for the key or {@code null}
 	 */
-	public MediaType lookupMediaType(String extension) {
+	protected MediaType lookupMediaType(String extension) {
 		return this.mediaTypes.get(extension);
 	}
 
@@ -78,6 +85,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 		MediaType previous = this.mediaTypes.putIfAbsent(extension, mediaType);
 		if (previous == null) {
 			this.fileExtensions.add(mediaType, extension);
+			this.allFileExtensions.add(extension);
 		}
 	}
 

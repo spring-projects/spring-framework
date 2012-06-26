@@ -97,11 +97,23 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * the list of all file extensions found.
 	 */
 	public List<String> resolveFileExtensions(MediaType mediaType) {
-		Set<String> extensions = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<String>();
 		for (MediaTypeFileExtensionResolver resolver : this.fileExtensionResolvers) {
-			extensions.addAll(resolver.resolveFileExtensions(mediaType));
+			result.addAll(resolver.resolveFileExtensions(mediaType));
 		}
-		return new ArrayList<String>(extensions);
+		return new ArrayList<String>(result);
+	}
+
+	/**
+	 * Delegate to all configured MediaTypeFileExtensionResolver instances and aggregate
+	 * the list of all known file extensions.
+	 */
+	public List<String> getAllFileExtensions() {
+		Set<String> result = new LinkedHashSet<String>();
+		for (MediaTypeFileExtensionResolver resolver : this.fileExtensionResolvers) {
+			result.addAll(resolver.getAllFileExtensions());
+		}
+		return new ArrayList<String>(result);
 	}
 
 }
