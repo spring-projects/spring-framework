@@ -22,11 +22,9 @@ import java.util.List;
 
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
-
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -123,7 +121,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		try {
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
-		catch (JsonProcessingException ex) {
+		catch (IOException ex) {
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
 		}
 	}
@@ -141,7 +139,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 			}
 			this.objectMapper.writeValue(jsonGenerator, object);
 		}
-		catch (JsonProcessingException ex) {
+		catch (IOException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
 	}

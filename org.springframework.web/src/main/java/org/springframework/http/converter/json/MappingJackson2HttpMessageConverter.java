@@ -30,7 +30,6 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -123,7 +122,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		try {
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
-		catch (JsonProcessingException ex) {
+		catch (IOException ex) {
 			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
 		}
 	}
@@ -141,7 +140,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 			}
 			this.objectMapper.writeValue(jsonGenerator, object);
 		}
-		catch (JsonProcessingException ex) {
+		catch (IOException ex) {
 			throw new HttpMessageNotWritableException("Could not write JSON: " + ex.getMessage(), ex);
 		}
 	}

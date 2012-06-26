@@ -17,6 +17,7 @@ Changes in version 3.1.2 (2012-06-??)
 * fixed StandardServletMultipartResolver compatibility with Resin (only deleting actual file parts)
 * fix issue with parsing invalid Content-Type or Accept headers
 * add Jackson 2 HttpMessageConverter and View types
+* translate IOException from Jackson to HttpMessageNotReadableException
 
 Changes in version 3.1.1 (2012-02-16)
 -------------------------------------
