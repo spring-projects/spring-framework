@@ -22,7 +22,6 @@ import java.util.Map;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -30,6 +29,8 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Resolves {@link Map} method arguments annotated with an @{@link PathVariable}
@@ -49,9 +50,7 @@ public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgum
 	}
 
 	/**
-	 * Return a Map with all URI template variables.
-	 * @throws ServletRequestBindingException if no URI vars are found in the
-	 * 	request attribute {@link HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE}
+	 * Return a Map with all URI template variables or an empty map.
 	 */
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
@@ -61,12 +60,12 @@ public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgum
 				(Map<String, String>) webRequest.getAttribute(
 						HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
-		if (CollectionUtils.isEmpty(uriTemplateVars)) {
-			throw new ServletRequestBindingException(
-					"No URI template variables for method parameter type [" + parameter.getParameterType() + "]");
+		if (!CollectionUtils.isEmpty(uriTemplateVars)) {
+			return new LinkedHashMap<String, String>(uriTemplateVars);
 		}
-
-		return new LinkedHashMap<String, String>(uriTemplateVars);
+		else {
+			return Collections.emptyMap();
+		}
 	}
 
 }
