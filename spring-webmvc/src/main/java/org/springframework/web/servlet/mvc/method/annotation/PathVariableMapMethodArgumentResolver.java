@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,8 +30,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Resolves {@link Map} method arguments annotated with an @{@link PathVariable}
