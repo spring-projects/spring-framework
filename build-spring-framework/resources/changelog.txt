@@ -15,11 +15,17 @@ Changes in version 3.1.2 (2012-06-??)
 * EhCacheFactoryBean applies listeners and enabled/disabled flags to existing cache regions as well
 * ServletContextResource's getFile implementation falls back to getRealPath for non-existent files
 * fixed StandardServletMultipartResolver compatibility with Resin (only deleting actual file parts)
+* fix RequestConditionHolder to return null when no match is found
+* fix concurrency issue in AnnotationMethodHandlerExceptionResolver
 * fix issue with parsing invalid Content-Type or Accept headers
 * add Jackson 2 HttpMessageConverter and View types
-* translate IOException from Jackson to HttpMessageNotReadableException
+* translate IOException on EOF from Jackson to HttpMessageNotReadableException
 * fix content negotiation issue when sorting selected media types by quality value
 * raise RestClientException instead of IllegalArgumentException for unknown status codes
+* discover controllers based on type-level @RequestMapping in new @MVC support classes
+* fix issue with suffix pattern in AnnotationMethodHandlerAdapter 
+* merge rather than add URI vars in ExtendedServletRequestDataBinder
+* raise RestClientException for unknown HTTP status codes
 
 
 Changes in version 3.1.1 (2012-02-16)
