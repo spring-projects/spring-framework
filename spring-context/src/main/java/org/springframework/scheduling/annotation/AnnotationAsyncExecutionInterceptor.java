@@ -26,11 +26,11 @@ import org.springframework.core.annotation.AnnotationUtils;
  * Specialization of {@link AsyncExecutionInterceptor} that delegates method execution to
  * an {@code Executor} based on the {@link Async} annotation. Specifically designed to
  * support use of {@link Async#value()} executor qualification mechanism introduced in
- * Spring 3.2. Supports detecting qualifier metadata via {@code @Async} at the method or
+ * Spring 3.1.2. Supports detecting qualifier metadata via {@code @Async} at the method or
  * declaring class level. See {@link #getExecutorQualifier(Method)} for details.
  *
  * @author Chris Beams
- * @since 3.2
+ * @since 3.1.2
  * @see org.springframework.scheduling.annotation.Async
  * @see org.springframework.scheduling.annotation.AsyncAnnotationAdvisor
  */

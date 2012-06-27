@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * bean to be used when executing it, e.g. through an annotation attribute.
  *
  * @author Chris Beams
- * @since 3.2
+ * @since 3.1.2
  */
 public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
