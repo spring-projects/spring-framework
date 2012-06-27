@@ -92,6 +92,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Costin Leau
+ * @author Chris Beams
  * @since 16 April 2001
  * @see StaticListableBeanFactory
  * @see PropertiesBeanDefinitionReader
@@ -134,6 +135,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/** Map of bean definition objects, keyed by bean name */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>();
+
+	/** Map of singleton bean names keyed by bean class */
+	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>();
+
+	/** Map of non-singleton bean names keyed by bean class */
+	private final Map<Class<?>, String[]> nonSingletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>();
 
 	/** List of bean definition names, in registration order */
 	private final List<String> beanDefinitionNames = new ArrayList<String>();
@@ -301,6 +308,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
+		if (type == null || !allowEagerInit) {
+			return this.doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+		}
+		Map<Class<?>, String[]> cache = includeNonSingletons ?
+				this.nonSingletonBeanNamesByType : this.singletonBeanNamesByType;
+		String[] resolvedBeanNames = cache.get(type);
+		if (resolvedBeanNames != null) {
+			return resolvedBeanNames;
+		}
+		resolvedBeanNames = this.doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+		cache.put(type, resolvedBeanNames);
+		return resolvedBeanNames;
+	}
+
+	private String[] doGetBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		List<String> result = new ArrayList<String>();
 
 		// Check all bean definitions.
@@ -670,6 +692,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		synchronized (getSingletonMutex()) {
 			destroySingleton(beanName);
 		}
+
+		// Remove any assumptions about by-type mappings
+		this.singletonBeanNamesByType.clear();
+		this.nonSingletonBeanNamesByType.clear();
 
 		// Reset all bean definitions that have the given bean as parent (recursively).
 		for (String bdName : this.beanDefinitionNames) {
