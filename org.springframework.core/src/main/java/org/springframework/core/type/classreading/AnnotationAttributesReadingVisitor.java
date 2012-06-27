@@ -80,17 +80,13 @@ abstract class AbstractRecursiveAnnotationVisitor implements AnnotationVisitor {
 				valueToUse = enumConstant.get(null);
 			}
 		}
-		catch (Exception ex) {
-			logNonFatalException(ex);
+		catch (ClassNotFoundException ex) {
+			this.logger.debug("Failed to classload enum type while reading annotation metadata", ex);
+		}
+		catch (IllegalAccessException ex) {
+			this.logger.warn("Could not access enum value while reading annotation metadata", ex);
 		}
 		this.attributes.put(attributeName, valueToUse);
-	}
-
-
-	protected void logNonFatalException(Exception ex) {
-		this.logger.warn("Failed to classload type while reading annotation metadata. " +
-				"This is a non-fatal error, but certain annotation metadata may be " +
-				"unavailable.", ex);
 	}
 }
 
@@ -168,7 +164,9 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 			this.doVisitEnd(annotationClass);
 		}
 		catch (ClassNotFoundException ex) {
-			logNonFatalException(ex);
+			this.logger.debug("Failed to classload type while reading annotation " +
+					"metadata. This is a non-fatal error, but certain annotation " +
+					"metadata may be unavailable.", ex);
 		}
 	}
 
