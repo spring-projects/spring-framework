@@ -164,7 +164,7 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
 	 * reflected in the child. Therefore, care should be taken to configure parent
 	 * property sources and profile information prior to calling {@code merge}.
 	 * @param parent the environment to merge with
-	 * @since 3.2
+	 * @since 3.1.2
 	 * @see org.springframework.context.support.AbstractApplicationContext#setParent
 	 */
 	void merge(ConfigurableEnvironment parent);

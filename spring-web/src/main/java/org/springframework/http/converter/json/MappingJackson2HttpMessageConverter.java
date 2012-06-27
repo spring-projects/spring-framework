@@ -47,7 +47,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  *
  * @author Arjen Poutsma
  * @author Keith Donald
- * @since 3.2
+ * @since 3.1.2
  * @see org.springframework.web.servlet.view.json.MappingJackson2JsonView
  */
 public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object> {
