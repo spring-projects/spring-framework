@@ -46,7 +46,7 @@ import org.springframework.validation.annotation.Validated;
  * of that class. By default, JSR-303 will validate against its default group only.
  *
  * <p>As of Spring 3.1, this functionality requires Hibernate Validator 4.2 or higher.
- * In Spring 3.2, this class will autodetect a Bean Validation 1.1 compliant provider
+ * In Spring 3.1.2, this class will autodetect a Bean Validation 1.1 compliant provider
  * and automatically use the standard method validation support there (once available).
  *
  * @author Juergen Hoeller

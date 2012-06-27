@@ -73,7 +73,7 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	 * @param responseHeaders the response headers, may be {@code null}
 	 * @param responseBody the response body content, may be {@code null}
 	 * @param responseCharset the response body charset, may be {@code null}
-	 * @since 3.2
+	 * @since 3.1.2
 	 */
 	public HttpClientErrorException(HttpStatus statusCode, String statusText,
 			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
