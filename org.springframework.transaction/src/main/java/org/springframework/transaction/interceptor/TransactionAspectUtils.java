@@ -18,6 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -40,10 +41,10 @@ public abstract class TransactionAspectUtils {
 	 * @return the chosen {@code PlatformTransactionManager} (never {@code null})
 	 * @throws IllegalStateException if no matching {@code PlatformTransactionManager} bean found
 	 * @deprecated as of Spring 3.2 in favor of
-	 * {@link BeanFactoryUtils#qualifiedBeanOfType(BeanFactory, Class, String)}
+	 * {@link BeanFactoryAnnotationUtils#qualifiedBeanOfType(BeanFactory, Class, String)}
 	 */
 	public static PlatformTransactionManager getTransactionManager(BeanFactory beanFactory, String qualifier) {
-		return BeanFactoryUtils.qualifiedBeanOfType(beanFactory, PlatformTransactionManager.class, qualifier);
+		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, PlatformTransactionManager.class, qualifier);
 	}
 
 	/**
@@ -53,10 +54,10 @@ public abstract class TransactionAspectUtils {
 	 * @return the chosen {@code PlatformTransactionManager} (never {@code null})
 	 * @throws IllegalStateException if no matching {@code PlatformTransactionManager} bean found
 	 * @deprecated as of Spring 3.2 in favor of
-	 * {@link BeanFactoryUtils#qualifiedBeanOfType(BeanFactory, Class, String)}
+	 * {@link BeanFactoryAnnotationUtils#qualifiedBeanOfType(BeanFactory, Class, String)}
 	 */
 	public static PlatformTransactionManager getTransactionManager(ConfigurableListableBeanFactory bf, String qualifier) {
-		return BeanFactoryUtils.qualifiedBeanOfType(bf, PlatformTransactionManager.class, qualifier);
+		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(bf, PlatformTransactionManager.class, qualifier);
 	}
 
 }

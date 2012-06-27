@@ -25,7 +25,7 @@ import java.util.concurrent.Executor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.util.Assert;
@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * bean to be used when executing it, e.g. through an annotation attribute.
  *
  * @author Chris Beams
- * @since 3.1.2
+ * @since 3.2
  */
 public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
@@ -110,7 +110,8 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 				Assert.notNull(this.beanFactory,
 						"BeanFactory must be set on " + this.getClass().getSimpleName() +
 						" to access qualified executor [" + qualifier + "]");
-				executor = BeanFactoryUtils.qualifiedBeanOfType(this.beanFactory, Executor.class, qualifier);
+				executor = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+						this.beanFactory, Executor.class, qualifier);
 			}
 
 			if (executor instanceof AsyncTaskExecutor) {
