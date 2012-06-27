@@ -21,9 +21,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 import org.aspectj.lang.reflect.MethodSignature;
+
+import org.springframework.aop.interceptor.AsyncExecutionAspectSupport;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.support.TaskExecutorAdapter;
 
 /**
  * Abstract aspect that routes selected methods asynchronously.
@@ -34,19 +34,18 @@ import org.springframework.core.task.support.TaskExecutorAdapter;
  *
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0.5
  */
-public abstract aspect AbstractAsyncExecutionAspect {
+public abstract aspect AbstractAsyncExecutionAspect extends AsyncExecutionAspectSupport {
 
-	private AsyncTaskExecutor asyncExecutor;
-
-	public void setExecutor(Executor executor) {
-		if (executor instanceof AsyncTaskExecutor) {
-			this.asyncExecutor = (AsyncTaskExecutor) executor;
-		}
-		else {
-			this.asyncExecutor = new TaskExecutorAdapter(executor);
-		}
+	/**
+	 * Create an {@code AnnotationAsyncExecutionAspect} with a {@code null} default
+	 * executor, which should instead be set via {@code #aspectOf} and
+	 * {@link #setExecutor(Executor)}.
+	 */
+	public AbstractAsyncExecutionAspect() {
+		super(null);
 	}
 
 	/**
@@ -57,7 +56,9 @@ public abstract aspect AbstractAsyncExecutionAspect {
 	 * otherwise.
 	 */
 	Object around() : asyncMethod() {
-		if (this.asyncExecutor == null) {
+		MethodSignature methodSignature = (MethodSignature) thisJoinPointStaticPart.getSignature();
+		AsyncTaskExecutor executor = determineAsyncExecutor(methodSignature.getMethod());
+		if (executor == null) {
 			return proceed();
 		}
 		Callable<Object> callable = new Callable<Object>() {
@@ -68,8 +69,8 @@ public abstract aspect AbstractAsyncExecutionAspect {
 				}
 				return null;
 			}};
-		Future<?> result = this.asyncExecutor.submit(callable);
-		if (Future.class.isAssignableFrom(((MethodSignature) thisJoinPointStaticPart.getSignature()).getReturnType())) {
+		Future<?> result = executor.submit(callable);
+		if (Future.class.isAssignableFrom(methodSignature.getReturnType())) {
 			return result;
 		}
 		else {

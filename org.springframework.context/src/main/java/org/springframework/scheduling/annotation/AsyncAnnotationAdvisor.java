@@ -25,11 +25,12 @@ import java.util.concurrent.Executor;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.interceptor.AsyncExecutionInterceptor;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.ComposablePointcut;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
-import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.Assert;
 
@@ -51,11 +52,13 @@ import org.springframework.util.Assert;
  * @see org.springframework.dao.support.PersistenceExceptionTranslator
  */
 @SuppressWarnings("serial")
-public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
+public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements BeanFactoryAware {
 
 	private Advice advice;
 
 	private Pointcut pointcut;
+
+	private BeanFactory beanFactory;
 
 
 	/**
@@ -81,7 +84,22 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 			// If EJB 3.1 API not present, simply ignore.
 		}
 		this.advice = buildAdvice(executor);
+		this.setTaskExecutor(executor);
 		this.pointcut = buildPointcut(asyncAnnotationTypes);
+	}
+
+	/**
+	 * Set the {@code BeanFactory} to be used when looking up executors by qualifier.
+	 */
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
+		delegateBeanFactory(beanFactory);
+	}
+
+	public void delegateBeanFactory(BeanFactory beanFactory) {
+		if (this.advice instanceof AnnotationAsyncExecutionInterceptor) {
+			((AnnotationAsyncExecutionInterceptor)this.advice).setBeanFactory(beanFactory);
+		}
 	}
 
 	/**
@@ -89,6 +107,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 	 */
 	public void setTaskExecutor(Executor executor) {
 		this.advice = buildAdvice(executor);
+		delegateBeanFactory(this.beanFactory);
 	}
 
 	/**
@@ -118,12 +137,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 
 
 	protected Advice buildAdvice(Executor executor) {
-		if (executor instanceof AsyncTaskExecutor) {
-			return new AsyncExecutionInterceptor((AsyncTaskExecutor) executor);
-		}
-		else {
-			return new AsyncExecutionInterceptor(executor);
-		}
+		return new AnnotationAsyncExecutionInterceptor(executor);
 	}
 
 	/**

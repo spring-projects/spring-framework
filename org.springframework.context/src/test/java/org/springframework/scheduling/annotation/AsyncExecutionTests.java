@@ -25,11 +25,13 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
 public class AsyncExecutionTests {
 
@@ -53,6 +55,26 @@ public class AsyncExecutionTests {
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
 		assertEquals("20", future.get());
+	}
+
+	@Test
+	public void asyncMethodsWithQualifier() throws Exception {
+		originalThreadName = Thread.currentThread().getName();
+		GenericApplicationContext context = new GenericApplicationContext();
+		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodWithQualifierBean.class));
+		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
+		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
+		context.registerBeanDefinition("e0", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
+		context.registerBeanDefinition("e1", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
+		context.registerBeanDefinition("e2", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
+		context.refresh();
+		AsyncMethodWithQualifierBean asyncTest = context.getBean("asyncTest", AsyncMethodWithQualifierBean.class);
+		asyncTest.doNothing(5);
+		asyncTest.doSomething(10);
+		Future<String> future = asyncTest.returnSomething(20);
+		assertEquals("20", future.get());
+		Future<String> future2 = asyncTest.returnSomething2(30);
+		assertEquals("30", future2.get());
 	}
 
 	@Test
@@ -160,6 +182,34 @@ public class AsyncExecutionTests {
 		@Async
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			return new AsyncResult<String>(Integer.toString(i));
+		}
+	}
+
+
+	@Async("e0")
+	public static class AsyncMethodWithQualifierBean {
+
+		public void doNothing(int i) {
+			assertTrue(Thread.currentThread().getName().equals(originalThreadName));
+		}
+
+		@Async("e1")
+		public void doSomething(int i) {
+			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			assertTrue(Thread.currentThread().getName().startsWith("e1-"));
+		}
+
+		@Async("e2")
+		public Future<String> returnSomething(int i) {
+			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			assertTrue(Thread.currentThread().getName().startsWith("e2-"));
+			return new AsyncResult<String>(Integer.toString(i));
+		}
+
+		public Future<String> returnSomething2(int i) {
+			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			assertTrue(Thread.currentThread().getName().startsWith("e0-"));
 			return new AsyncResult<String>(Integer.toString(i));
 		}
 	}

@@ -21,7 +21,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 
 import org.junit.Test;
 
@@ -29,6 +31,7 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -67,6 +70,48 @@ public class EnableAsyncTests {
 		@Bean
 		public AsyncBean asyncBean() {
 			return new AsyncBean();
+		}
+	}
+
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void withAsyncBeanWithExecutorQualifiedByName() throws ExecutionException, InterruptedException {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(AsyncWithExecutorQualifiedByNameConfig.class);
+		ctx.refresh();
+
+		AsyncBeanWithExecutorQualifiedByName asyncBean = ctx.getBean(AsyncBeanWithExecutorQualifiedByName.class);
+		Future<Thread> workerThread0 = asyncBean.work0();
+		assertThat(workerThread0.get().getName(), not(anyOf(startsWith("e1-"), startsWith("otherExecutor-"))));
+		Future<Thread> workerThread = asyncBean.work();
+		assertThat(workerThread.get().getName(), startsWith("e1-"));
+		Future<Thread> workerThread2 = asyncBean.work2();
+		assertThat(workerThread2.get().getName(), startsWith("otherExecutor-"));
+		Future<Thread> workerThread3 = asyncBean.work3();
+		assertThat(workerThread3.get().getName(), startsWith("otherExecutor-"));
+	}
+
+
+	static class AsyncBeanWithExecutorQualifiedByName {
+		@Async
+		public Future<Thread> work0() {
+			return new AsyncResult<Thread>(Thread.currentThread());
+		}
+
+		@Async("e1")
+		public Future<Thread> work() {
+			return new AsyncResult<Thread>(Thread.currentThread());
+		}
+
+		@Async("otherExecutor")
+		public Future<Thread> work2() {
+			return new AsyncResult<Thread>(Thread.currentThread());
+		}
+
+		@Async("e2")
+		public Future<Thread> work3() {
+			return new AsyncResult<Thread>(Thread.currentThread());
 		}
 	}
 
@@ -208,6 +253,28 @@ public class EnableAsyncTests {
 			executor.initialize();
 			return executor;
 		}
+	}
 
+
+	@Configuration
+	@EnableAsync
+	static class AsyncWithExecutorQualifiedByNameConfig {
+		@Bean
+		public AsyncBeanWithExecutorQualifiedByName asyncBean() {
+			return new AsyncBeanWithExecutorQualifiedByName();
+		}
+
+		@Bean
+		public Executor e1() {
+			ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+			return executor;
+		}
+
+		@Bean
+		@Qualifier("e2")
+		public Executor otherExecutor() {
+			ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+			return executor;
+		}
 	}
 }

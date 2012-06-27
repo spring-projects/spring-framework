@@ -591,7 +591,7 @@ Future&lt;String&gt; returnSomething(int i) {
 
       <para><interfacename>@Async</interfacename> can not be used in
       conjunction with lifecycle callbacks such as
-      <interfacename>@PostConstruct</interfacename>. To asynchonously
+      <interfacename>@PostConstruct</interfacename>. To asynchronously
       initialize Spring beans you currently have to use a separate
       initializing Spring bean that invokes the
       <interfacename>@Async</interfacename> annotated method on the target
@@ -636,6 +636,29 @@ public class SampleBeanInititalizer {
       tasks that correspond to methods with the @Async annotation, and the
       scheduler reference is provided for managing those methods annotated
       with @Scheduled.</para>
+    </section>
+
+    <section id="scheduling-annotation-support-qualification">
+      <title>Executor qualification with @Async</title>
+
+      <para>By default when specifying <interfacename>@Async</interfacename> on
+      a method, the executor that will be used is the one supplied to the
+      'annotation-driven' element as described above. However, the
+      <literal>value</literal> attribute of the
+      <interfacename>@Async</interfacename> annotation can be used when needing
+      to indicate that an executor other than the default should be used when
+      executing a given method.</para>
+      <programlisting language="java">@Async("otherExecutor")
+void doSomething(String s) {
+    // this will be executed asynchronously by "otherExecutor"
+}</programlisting>
+
+      <para>In this case, "otherExecutor" may be the name of any
+      <interfacename>Executor</interfacename> bean in the Spring container, or
+      may be the name of a <emphasis>qualifier</emphasis> associated with any
+      <interfacename>Executor</interfacename>, e.g. as specified with the
+      <literal>&lt;qualifier&gt;</literal> element or Spring's
+      <interfacename>@Qualifier</interfacename> annotation.</para>
     </section>
   </section>
 
@@ -820,7 +843,7 @@ public class ExampleJob extends QuartzJobBean {
       <classname>SchedulerFactoryBean</classname> for you to set, such as the
       calendars used by the job details, properties to customize Quartz with,
       etc. Have a look at the <ulink
-      url="http://static.springframework.org/spring/docs/3.0.x/javadoc-api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean
+      url="http://static.springframework.org/spring/docs/current/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean
       Javadoc</ulink> for more information.</para>
     </section>
   </section>

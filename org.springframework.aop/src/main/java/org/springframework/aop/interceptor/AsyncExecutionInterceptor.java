@@ -16,6 +16,8 @@
 
 package org.springframework.aop.interceptor;
 
+import java.lang.reflect.Method;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -25,8 +27,6 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.support.TaskExecutorAdapter;
-import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -44,39 +44,39 @@ import org.springframework.util.ReflectionUtils;
  * (like Spring's {@link org.springframework.scheduling.annotation.AsyncResult}
  * or EJB 3.1's <code>javax.ejb.AsyncResult</code>).
  *
+ * <p>As of Spring 3.1.2 the {@code AnnotationAsyncExecutionInterceptor} subclass is
+ * preferred for use due to its support for executor qualification in conjunction with
+ * Spring's {@code @Async} annotation.
+ *
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 3.0
  * @see org.springframework.scheduling.annotation.Async
  * @see org.springframework.scheduling.annotation.AsyncAnnotationAdvisor
+ * @see org.springframework.scheduling.annotation.AnnotationAsyncExecutionInterceptor
  */
-public class AsyncExecutionInterceptor implements MethodInterceptor, Ordered {
-
-	private final AsyncTaskExecutor asyncExecutor;
-
+public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
+		implements MethodInterceptor, Ordered {
 
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
 	 * @param executor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
 	 * or {@link java.util.concurrent.ExecutorService}) to delegate to.
 	 */
-	public AsyncExecutionInterceptor(AsyncTaskExecutor asyncExecutor) {
-		Assert.notNull(asyncExecutor, "TaskExecutor must not be null");
-		this.asyncExecutor = asyncExecutor;
+	public AsyncExecutionInterceptor(Executor executor) {
+		super(executor);
 	}
 
 
 	/**
-	 * Create a new AsyncExecutionInterceptor.
-	 * @param asyncExecutor the <code>java.util.concurrent</code> Executor
-	 * to delegate to (typically a {@link java.util.concurrent.ExecutorService}
+	 * Intercept the given method invocation, submit the actual calling of the method to
+	 * the correct task executor and return immediately to the caller.
+	 * @param invocation the method to intercept and make asynchronous
+	 * @return {@link Future} if the original method returns {@code Future}; {@code null}
+	 * otherwise.
 	 */
-	public AsyncExecutionInterceptor(Executor asyncExecutor) {
-		this.asyncExecutor = new TaskExecutorAdapter(asyncExecutor);
-	}
-
-
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
-		Future<?> result = this.asyncExecutor.submit(
+		Future<?> result = this.determineAsyncExecutor(invocation.getMethod()).submit(
 				new Callable<Object>() {
 					public Object call() throws Exception {
 						try {
@@ -97,6 +97,20 @@ public class AsyncExecutionInterceptor implements MethodInterceptor, Ordered {
 		else {
 			return null;
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation is a no-op for compatibility in Spring 3.1.2. Subclasses may
+	 * override to provide support for extracting qualifier information, e.g. via an
+	 * annotation on the given method.
+	 * @return always {@code null}
+	 * @see #determineAsyncExecutor(Method)
+	 * @since 3.1.2
+	 */
+	@Override
+	protected String getExecutorQualifier(Method method) {
+		return null;
 	}
 
 	public int getOrder() {

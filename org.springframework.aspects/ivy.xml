@@ -38,6 +38,7 @@
 		<dependency org="org.springframework" name="org.springframework.context.support" rev="latest.integration" conf="optional, cache->compile"/>
 		<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" conf="optional, orm->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="${junit.version}" conf="test->compile"/>
+		<dependency org="org.hamcrest" name="com.springsource.org.hamcrest" rev="1.1.0" conf="test->compile"/>
 		<dependency org="javax.mail" name="com.springsource.javax.mail" rev="1.4.0" conf="optional, test->compile"/>
 	</dependencies>
 
