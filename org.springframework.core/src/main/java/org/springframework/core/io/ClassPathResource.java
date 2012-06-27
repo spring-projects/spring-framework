@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * Always supports resolution as URL.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 28.12.2003
  * @see java.lang.ClassLoader#getResourceAsStream(String)
  * @see java.lang.Class#getResourceAsStream(String)
@@ -108,7 +109,6 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		this.clazz = clazz;
 	}
 
-
 	/**
 	 * Return the path for this resource (as resource path within the class path).
 	 */
@@ -122,7 +122,6 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	public final ClassLoader getClassLoader() {
 		return (this.classLoader != null ? this.classLoader : this.clazz.getClassLoader());
 	}
-
 
 	/**
 	 * This implementation checks for the resolution of a resource URL.
@@ -155,8 +154,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 			is = this.classLoader.getResourceAsStream(this.path);
 		}
 		if (is == null) {
-			throw new FileNotFoundException(
-					getDescription() + " cannot be opened because it does not exist");
+			throw new FileNotFoundException(getDescription() + " cannot be opened because it does not exist");
 		}
 		return is;
 	}
@@ -176,8 +174,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 			url = this.classLoader.getResource(this.path);
 		}
 		if (url == null) {
-			throw new FileNotFoundException(
-					getDescription() + " cannot be resolved to URL because it does not exist");
+			throw new FileNotFoundException(getDescription() + " cannot be resolved to URL because it does not exist");
 		}
 		return url;
 	}
@@ -209,16 +206,21 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	public String getDescription() {
 		StringBuilder builder = new StringBuilder("class path resource [");
 
-		if (this.clazz != null) {
+		String pathToUse = path;
+
+		if (this.clazz != null && !pathToUse.startsWith("/")) {
 			builder.append(ClassUtils.classPackageAsResourcePath(this.clazz));
 			builder.append('/');
 		}
 
-		builder.append(this.path);
+		if (pathToUse.startsWith("/")) {
+			pathToUse = pathToUse.substring(1);
+		}
+
+		builder.append(pathToUse);
 		builder.append(']');
 		return builder.toString();
 	}
-
 
 	/**
 	 * This implementation compares the underlying class path locations.
@@ -230,9 +232,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		}
 		if (obj instanceof ClassPathResource) {
 			ClassPathResource otherRes = (ClassPathResource) obj;
-			return (this.path.equals(otherRes.path) &&
-					ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
-					ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
+			return (this.path.equals(otherRes.path)
+					&& ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) && ObjectUtils.nullSafeEquals(
+				this.clazz, otherRes.clazz));
 		}
 		return false;
 	}
