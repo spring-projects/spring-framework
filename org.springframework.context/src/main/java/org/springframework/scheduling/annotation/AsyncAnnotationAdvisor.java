@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,12 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 3.0
- * @see PersistenceExceptionTranslationAdvisor
+ * @see org.springframework.dao.annotation.PersistenceExceptionTranslationAdvisor
  * @see org.springframework.stereotype.Repository
  * @see org.springframework.dao.DataAccessException
  * @see org.springframework.dao.support.PersistenceExceptionTranslator
  */
+@SuppressWarnings("serial")
 public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 
 	private Advice advice;
@@ -58,14 +59,14 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 
 
 	/**
-	 * Create a new ConcurrencyAnnotationBeanPostProcessor for bean-style configuration.
+	 * Create a new {@code AsyncAnnotationAdvisor} for bean-style configuration.
 	 */
 	public AsyncAnnotationAdvisor() {
 		this(new SimpleAsyncTaskExecutor());
 	}
 
 	/**
-	 * Create a new ConcurrencyAnnotationBeanPostProcessor for the given task executor.
+	 * Create a new {@code AsyncAnnotationAdvisor} for the given task executor.
 	 * @param executor the task executor to use for asynchronous methods
 	 */
 	@SuppressWarnings("unchecked")
@@ -74,7 +75,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 		asyncAnnotationTypes.add(Async.class);
 		ClassLoader cl = AsyncAnnotationAdvisor.class.getClassLoader();
 		try {
-			asyncAnnotationTypes.add((Class) cl.loadClass("javax.ejb.Asynchronous"));
+			asyncAnnotationTypes.add((Class<? extends Annotation>) cl.loadClass("javax.ejb.Asynchronous"));
 		}
 		catch (ClassNotFoundException ex) {
 			// If EJB 3.1 API not present, simply ignore.
@@ -126,8 +127,8 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor {
 	}
 
 	/**
-	 * Calculate a pointcut for the given target class, if any.
-	 * @param targetClass the class to introspect
+	 * Calculate a pointcut for the given async annotation types, if any.
+	 * @param asyncAnnotationTypes the async annotation types to introspect
 	 * @return the applicable Pointcut object, or <code>null</code> if none
 	 */
 	protected Pointcut buildPointcut(Set<Class<? extends Annotation>> asyncAnnotationTypes) {

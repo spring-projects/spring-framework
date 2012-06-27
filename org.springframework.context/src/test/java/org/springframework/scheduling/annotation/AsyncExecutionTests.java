@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.scheduling.annotation;
 
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
@@ -27,7 +25,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.scheduling.annotation.AsyncResult;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -155,7 +154,6 @@ public class AsyncExecutionTests {
 
 		@Async
 		public void doSomething(int i) {
-			System.out.println(Thread.currentThread().getName() + ": " + i);
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 		}
 
@@ -171,7 +169,6 @@ public class AsyncExecutionTests {
 	public static class AsyncClassBean {
 
 		public void doSomething(int i) {
-			System.out.println(Thread.currentThread().getName() + ": " + i);
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 		}
 
@@ -194,7 +191,6 @@ public class AsyncExecutionTests {
 	public static class AsyncInterfaceBean implements AsyncInterface {
 
 		public void doSomething(int i) {
-			System.out.println(Thread.currentThread().getName() + ": " + i);
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 		}
 
@@ -224,7 +220,6 @@ public class AsyncExecutionTests {
 		}
 
 		public void doSomething(int i) {
-			System.out.println(Thread.currentThread().getName() + ": " + i);
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 		}
 
@@ -235,7 +230,7 @@ public class AsyncExecutionTests {
 	}
 
 
-	public static class AsyncMethodListener implements ApplicationListener {
+	public static class AsyncMethodListener implements ApplicationListener<ApplicationEvent> {
 
 		@Async
 		public void onApplicationEvent(ApplicationEvent event) {
@@ -246,7 +241,7 @@ public class AsyncExecutionTests {
 
 
 	@Async
-	public static class AsyncClassListener implements ApplicationListener {
+	public static class AsyncClassListener implements ApplicationListener<ApplicationEvent> {
 
 		public AsyncClassListener() {
 			listenerConstructed++;

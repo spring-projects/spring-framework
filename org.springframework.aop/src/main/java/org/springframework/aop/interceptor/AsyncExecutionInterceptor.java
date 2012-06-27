@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * AOP Alliance <code>MethodInterceptor</code> that processes method invocations
  * asynchronously, using a given {@link org.springframework.core.task.AsyncTaskExecutor}.
- * Typically used with the {@link org.springframework.context.task.Async} annotation.
+ * Typically used with the {@link org.springframework.scheduling.annotation.Async} annotation.
  *
  * <p>In terms of target method signatures, any parameter types are supported.
  * However, the return type is constrained to either <code>void</code> or
@@ -55,13 +55,15 @@ public class AsyncExecutionInterceptor implements MethodInterceptor, Ordered {
 
 
 	/**
-	 * Create a new AsyncExecutionInterceptor.
-	 * @param asyncExecutor the Spring AsyncTaskExecutor to delegate to
+	 * Create a new {@code AsyncExecutionInterceptor}.
+	 * @param executor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
+	 * or {@link java.util.concurrent.ExecutorService}) to delegate to.
 	 */
 	public AsyncExecutionInterceptor(AsyncTaskExecutor asyncExecutor) {
 		Assert.notNull(asyncExecutor, "TaskExecutor must not be null");
 		this.asyncExecutor = asyncExecutor;
 	}
+
 
 	/**
 	 * Create a new AsyncExecutionInterceptor.
@@ -74,20 +76,21 @@ public class AsyncExecutionInterceptor implements MethodInterceptor, Ordered {
 
 
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
-		Future result = this.asyncExecutor.submit(new Callable<Object>() {
-			public Object call() throws Exception {
-				try {
-					Object result = invocation.proceed();
-					if (result instanceof Future) {
-						return ((Future) result).get();
+		Future<?> result = this.asyncExecutor.submit(
+				new Callable<Object>() {
+					public Object call() throws Exception {
+						try {
+							Object result = invocation.proceed();
+							if (result instanceof Future) {
+								return ((Future<?>) result).get();
+							}
+						}
+						catch (Throwable ex) {
+							ReflectionUtils.rethrowException(ex);
+						}
+						return null;
 					}
-				}
-				catch (Throwable ex) {
-					ReflectionUtils.rethrowException(ex);
-				}
-				return null;
-			}
-		});
+				});
 		if (Future.class.isAssignableFrom(invocation.getMethod().getReturnType())) {
 			return result;
 		}
