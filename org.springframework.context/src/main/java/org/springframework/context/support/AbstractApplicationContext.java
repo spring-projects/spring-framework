@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -378,14 +378,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * {@inheritDoc}
-	 * <p>The parent {@linkplain #getEnvironment() environment} is
-	 * delegated to this (child) context if the parent is a
-	 * {@link ConfigurableApplicationContext} implementation.
+	 * <p>The parent {@linkplain ApplicationContext#getEnvironment() environment} is
+	 * {@linkplain ConfigurableEnvironment#merge(ConfigurableEnvironment) merged} with
+	 * this (child) application context environment if the parent is non-{@code null} and
+	 * its environment is an instance of {@link ConfigurableEnvironment}.
+	 * @see ConfigurableEnvironment#merge(ConfigurableEnvironment)
 	 */
 	public void setParent(ApplicationContext parent) {
 		this.parent = parent;
-		if (parent instanceof ConfigurableApplicationContext) {
-			this.setEnvironment(((ConfigurableApplicationContext)parent).getEnvironment());
+		if (parent != null) {
+			Object parentEnvironment =  parent.getEnvironment();
+			if (parentEnvironment instanceof ConfigurableEnvironment) {
+				this.environment.merge((ConfigurableEnvironment)parentEnvironment);
+			}
 		}
 	}
 
@@ -506,7 +511,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * <p>Replace any stub property sources with actual instances.
 	 * @see org.springframework.core.env.PropertySource.StubPropertySource
-	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initSerlvetPropertySources
+	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources
 	 */
 	protected void initPropertySources() {
 		// For subclasses: do nothing by default.
