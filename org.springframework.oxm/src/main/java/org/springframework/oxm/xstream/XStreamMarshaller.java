@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -202,7 +202,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * @param aliases
 	 * @throws ClassNotFoundException
 	 * @throws NoSuchFieldException
-	 * @see XStream#aliasField(String, Class, String) 
+	 * @see XStream#aliasField(String, Class, String)
 	 */
 	public void setFieldAliases(Map<String, String> aliases) throws ClassNotFoundException, NoSuchFieldException {
 		for (Map.Entry<String, String> entry : aliases.entrySet()) {
@@ -483,7 +483,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		else {
 			throw new IllegalArgumentException("DOMSource contains neither Document nor Element");
 		}
-		return unmarshal(streamReader);
+		try {
+			return getXStream().unmarshal(streamReader);
+		}
+		catch (Exception ex) {
+			throw convertXStreamException(ex, false);
+		}
 	}
 
 	@Override
@@ -499,7 +504,14 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) throws XmlMappingException {
-		return unmarshal(new StaxReader(new QNameMap(), streamReader));
+		try {
+			HierarchicalStreamReader hierarchicalStreamReader =
+					new StaxReader(new QNameMap(),streamReader);
+			return getXStream().unmarshal(hierarchicalStreamReader);
+		}
+		catch (Exception ex) {
+			throw convertXStreamException(ex, false);
+		}
 	}
 
 	@Override
@@ -509,11 +521,18 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
-		if (streamDriver != null) {
-			return unmarshal(streamDriver.createReader(reader));
+		try {
+			HierarchicalStreamReader streamReader;
+			if (this.streamDriver != null) {
+				streamReader = this.streamDriver.createReader(reader);
+			}
+			else {
+				streamReader = new XppReader(reader);
+			}
+			return getXStream().unmarshal(streamReader);
 		}
-		else {
-			return unmarshal(new XppReader(reader));
+		catch (Exception ex) {
+			throw convertXStreamException(ex, false);
 		}
 	}
 
@@ -524,16 +543,6 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		throw new UnsupportedOperationException(
 				"XStreamMarshaller does not support unmarshalling using SAX XMLReaders");
 	}
-
-	private Object unmarshal(HierarchicalStreamReader streamReader) {
-		try {
-			return this.getXStream().unmarshal(streamReader);
-		}
-		catch (Exception ex) {
-			throw convertXStreamException(ex, false);
-		}
-	}
-
 
 	/**
 	 * Convert the given XStream exception to an appropriate exception from the
