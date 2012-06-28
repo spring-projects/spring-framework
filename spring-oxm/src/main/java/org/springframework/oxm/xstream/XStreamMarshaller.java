@@ -202,7 +202,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * @param aliases
 	 * @throws ClassNotFoundException
 	 * @throws NoSuchFieldException
-	 * @see XStream#aliasField(String, Class, String) 
+	 * @see XStream#aliasField(String, Class, String)
 	 */
 	public void setFieldAliases(Map<String, String> aliases) throws ClassNotFoundException, NoSuchFieldException {
 		for (Map.Entry<String, String> entry : aliases.entrySet()) {
@@ -473,17 +473,17 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected Object unmarshalDomNode(Node node) throws XmlMappingException {
-		try {
-			HierarchicalStreamReader streamReader;
-			if (node instanceof Document) {
-				streamReader = new DomReader((Document) node);
-			}
-			else if (node instanceof Element) {
-				streamReader = new DomReader((Element) node);
-			}
-			else {
+		HierarchicalStreamReader streamReader;
+		if (node instanceof Document) {
+			streamReader = new DomReader((Document) node);
+		}
+		else if (node instanceof Element) {
+			streamReader = new DomReader((Element) node);
+		}
+		else {
 			throw new IllegalArgumentException("DOMSource contains neither Document nor Element");
-			}
+		}
+		try {
 			return getXStream().unmarshal(streamReader);
 		}
 		catch (Exception ex) {
@@ -523,8 +523,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	protected Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
 		try {
 			HierarchicalStreamReader streamReader;
-			if (streamDriver != null) {
-				streamReader = streamDriver.createReader(reader);
+			if (this.streamDriver != null) {
+				streamReader = this.streamDriver.createReader(reader);
 			}
 			else {
 				streamReader = new XppReader(reader);
