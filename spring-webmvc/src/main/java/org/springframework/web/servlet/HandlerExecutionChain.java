@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.request.async.AbstractDelegatingCallable;
 import org.springframework.web.context.request.async.AsyncExecutionChain;
 
 /**
@@ -170,7 +171,10 @@ public class HandlerExecutionChain {
 				try {
 					AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) interceptor;
 					AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-					chain.addDelegatingCallable(asyncInterceptor.getAsyncCallable(request, response, this.handler));
+					AbstractDelegatingCallable callable = asyncInterceptor.getAsyncCallable(request, response, this.handler);
+					if (callable != null) {
+						chain.addDelegatingCallable(callable);
+					}
 				}
 				catch (Throwable ex) {
 					logger.error("HandlerInterceptor.addAsyncCallables threw exception", ex);
