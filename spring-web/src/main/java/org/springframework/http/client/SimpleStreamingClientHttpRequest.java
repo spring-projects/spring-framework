@@ -114,6 +114,11 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 		}
 
 		@Override
+		public void write(byte[] b, int off, int let) throws IOException {
+			out.write(b, off, let);
+		}
+		
+		@Override
 		public void close() throws IOException {
 		}
 	}
