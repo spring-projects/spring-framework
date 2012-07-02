@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.type.classreading;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -38,15 +39,19 @@ import org.springframework.core.type.ClassMetadata;
 final class SimpleMetadataReader implements MetadataReader {
 
 	private final Resource resource;
+
 	private final ClassMetadata classMetadata;
+
 	private final AnnotationMetadata annotationMetadata;
 
+
 	SimpleMetadataReader(Resource resource, ClassLoader classLoader) throws IOException {
-		InputStream is = resource.getInputStream();
+		InputStream is = new BufferedInputStream(resource.getInputStream());
 		ClassReader classReader = null;
 		try {
 			classReader = new ClassReader(is);
-		} finally {
+		}
+		finally {
 			is.close();
 		}
 
@@ -70,4 +75,5 @@ final class SimpleMetadataReader implements MetadataReader {
 	public AnnotationMetadata getAnnotationMetadata() {
 		return this.annotationMetadata;
 	}
+
 }
