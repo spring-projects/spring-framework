@@ -19,6 +19,8 @@ package org.springframework.web.portlet;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -31,6 +33,7 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.validation.BindException;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 import org.springframework.web.portlet.handler.ParameterHandlerMapping;
+import org.springframework.web.portlet.mvc.EventAwareController;
 import org.springframework.web.portlet.mvc.SimpleFormController;
 
 /**
@@ -86,7 +89,7 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 	}
 
 
-	public static class TestFormController extends SimpleFormController {
+	public static class TestFormController extends SimpleFormController implements EventAwareController {
 
 		TestFormController() {
 			super();
@@ -98,6 +101,11 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 		public void doSubmitAction(Object command) {
 			TestBean testBean = (TestBean) command;
 			testBean.setAge(testBean.getAge() + 10);
+		}
+
+		public void handleEventRequest(EventRequest request,
+				EventResponse response) throws Exception {
+			response.setRenderParameter("event", request.getEvent().getName());
 		}
 
 		public ModelAndView showForm(RenderRequest request, RenderResponse response, BindException errors) throws Exception {
