@@ -746,16 +746,7 @@
           <option name="XML_TEXT_WRAP" value="0" />
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>
-        <ADDITIONAL_INDENT_OPTIONS fileType="gsp">
-          <option name="INDENT_SIZE" value="2" />
-        </ADDITIONAL_INDENT_OPTIONS>
-        <ADDITIONAL_INDENT_OPTIONS fileType="sass">
-          <option name="INDENT_SIZE" value="2" />
-        </ADDITIONAL_INDENT_OPTIONS>
         <ADDITIONAL_INDENT_OPTIONS fileType="txt">
-          <option name="INDENT_SIZE" value="2" />
-        </ADDITIONAL_INDENT_OPTIONS>
-        <ADDITIONAL_INDENT_OPTIONS fileType="yml">
           <option name="INDENT_SIZE" value="2" />
         </ADDITIONAL_INDENT_OPTIONS>
         <codeStyleSettings language="CFML">
@@ -797,6 +788,11 @@
           <option name="WHILE_BRACE_FORCE" value="3" />
           <option name="FOR_BRACE_FORCE" value="3" />
           <option name="PARENT_SETTINGS_INSTALLED" value="true" />
+        </codeStyleSettings>
+        <codeStyleSettings language="GSP">
+          <indentOptions>
+            <option name="INDENT_SIZE" value="2" />
+          </indentOptions>
         </codeStyleSettings>
         <codeStyleSettings language="Groovy">
           <option name="KEEP_LINE_BREAKS" value="false" />
