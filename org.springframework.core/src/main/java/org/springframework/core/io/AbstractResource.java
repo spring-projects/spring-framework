@@ -170,7 +170,7 @@ public abstract class AbstractResource implements Resource {
 	 * This implementation always returns <code>null</code>,
 	 * assuming that this resource type does not have a filename.
 	 */
-	public String getFilename() throws IllegalStateException {
+	public String getFilename() {
 		return null;
 	}
 
