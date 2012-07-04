@@ -19,12 +19,12 @@ package org.springframework.web.portlet;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.portlet.PortletContext;
 import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletSecurityException;
 import javax.portlet.PortletSession;
-import javax.portlet.UnavailableException;
 
 import junit.framework.TestCase;
 
@@ -35,6 +35,9 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
+import org.springframework.mock.web.portlet.MockEvent;
+import org.springframework.mock.web.portlet.MockEventRequest;
+import org.springframework.mock.web.portlet.MockEventResponse;
 import org.springframework.mock.web.portlet.MockPortletConfig;
 import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockPortletSession;
@@ -134,6 +137,57 @@ public class DispatcherPortletTests extends TestCase {
 		MockActionResponse response = new MockActionResponse();
 		request.setParameter("action", "invalid");
 		simpleDispatcherPortlet.processAction(request, response);
+		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
+		assertNotNull(exceptionParam);
+		assertTrue(exceptionParam.startsWith(NoHandlerFoundException.class.getName()));
+	}
+	
+
+	public void testSimpleInvalidActionRequestWithoutHandling() throws Exception {
+		MockActionRequest request = new MockActionRequest();
+		MockActionResponse response = new MockActionResponse();
+		request.setParameter("action", "invalid");
+		simpleDispatcherPortlet.setExposeActionException(false);
+		try {
+			simpleDispatcherPortlet.processAction(request, response);
+			fail("Should have thrown a " + NoHandlerFoundException.class);
+		}
+		catch (NoHandlerFoundException e) {
+			//expected
+		}
+	}
+
+	public void testSimpleValidEventRequest() throws Exception {
+		MockEvent event = new MockEvent("test-event");
+		MockEventRequest request = new MockEventRequest(event);
+		MockEventResponse response = new MockEventResponse();
+		request.setParameter("action", "form");
+		simpleDispatcherPortlet.processEvent(request, response);
+		assertEquals("test-event", response.getRenderParameter("event"));
+	}
+
+	public void testSimpleInvalidEventRequest() throws Exception {
+		MockEvent event = new MockEvent("test-event");
+		MockEventRequest request = new MockEventRequest(event);
+		MockEventResponse response = new MockEventResponse();
+		request.setParameter("action", "invalid");
+		try {
+			simpleDispatcherPortlet.processEvent(request, response);
+			fail("Should have thrown a " + NoHandlerFoundException.class);
+		}
+		catch (NoHandlerFoundException e) {
+			//expected
+		}
+	}
+	
+
+	public void testSimpleInvalidEventRequestWithHandling() throws Exception {
+		MockEvent event = new MockEvent("event");
+		MockEventRequest request = new MockEventRequest(event);
+		MockEventResponse response = new MockEventResponse();
+		request.setParameter("action", "invalid");
+		simpleDispatcherPortlet.setExposeEventException(true);
+		simpleDispatcherPortlet.processEvent(request, response);
 		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNotNull(exceptionParam);
 		assertTrue(exceptionParam.startsWith(NoHandlerFoundException.class.getName()));
