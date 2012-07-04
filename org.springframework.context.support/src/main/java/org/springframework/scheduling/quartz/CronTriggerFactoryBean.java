@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,7 @@ import org.springframework.util.ReflectionUtils;
  * @since 3.1
  * @see #setName
  * @see #setGroup
- * @see #setStartTime
- * @see #setJobName
- * @see #setJobGroup
+ * @see #setStartDelay
  * @see #setJobDetail
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean#setTriggers
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean#setJobDetails
@@ -147,10 +145,9 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	 * Set the start delay in milliseconds.
 	 * <p>The start delay is added to the current system time (when the bean starts)
 	 * to control the start time of the trigger.
-	 * @param startDelay the start delay, in milliseconds
 	 */
 	public void setStartDelay(long startDelay) {
-		Assert.state(startDelay >= 0, "Start delay cannot be negative.");
+		Assert.isTrue(startDelay >= 0, "Start delay cannot be negative");
 		this.startDelay = startDelay;
 	}
 

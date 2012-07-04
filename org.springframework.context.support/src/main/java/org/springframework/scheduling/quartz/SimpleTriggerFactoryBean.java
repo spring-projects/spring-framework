@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,7 @@ import org.springframework.util.ReflectionUtils;
  * @since 3.1
  * @see #setName
  * @see #setGroup
- * @see #setStartTime
- * @see #setJobName
- * @see #setJobGroup
+ * @see #setStartDelay
  * @see #setJobDetail
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean#setTriggers
  * @see org.springframework.scheduling.quartz.SchedulerFactoryBean#setJobDetails
@@ -83,6 +81,8 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	private long startDelay;
 
 	private long repeatInterval;
+
+	private int repeatCount = -1;
 
 	private int priority;
 
@@ -145,10 +145,9 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	 * Set the start delay in milliseconds.
 	 * <p>The start delay is added to the current system time (when the bean starts)
 	 * to control the start time of the trigger.
-	 * @param startDelay the start delay, in milliseconds
 	 */
 	public void setStartDelay(long startDelay) {
-		Assert.state(startDelay >= 0, "Start delay cannot be negative.");
+		Assert.isTrue(startDelay >= 0, "Start delay cannot be negative");
 		this.startDelay = startDelay;
 	}
 
@@ -157,6 +156,14 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	 */
 	public void setRepeatInterval(long repeatInterval) {
 		this.repeatInterval = repeatInterval;
+	}
+
+	/**
+	 * Specify the number of times this trigger is supposed to fire.
+	 * <p>Default is to repeat indefinitely.
+	 */
+	public void setRepeatCount(int repeatCount) {
+		this.repeatCount = repeatCount;
 	}
 
 	/**
@@ -218,6 +225,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		sti.setJobDataMap(this.jobDataMap);
 		sti.setStartTime(this.startTime);
 		sti.setRepeatInterval(this.repeatInterval);
+		sti.setRepeatCount(this.repeatCount);
 		sti.setPriority(this.priority);
 		sti.setMisfireInstruction(this.misfireInstruction);
 		this.simpleTrigger = sti;
@@ -250,7 +258,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		pvs.add("jobDataMap", this.jobDataMap);
 		pvs.add("startTime", this.startTime);
 		pvs.add("repeatInterval", this.repeatInterval);
-		pvs.add("repeatCount", -1);
+		pvs.add("repeatCount", this.repeatCount);
 		pvs.add("priority", this.priority);
 		pvs.add("misfireInstruction", this.misfireInstruction);
 		bw.setPropertyValues(pvs);
