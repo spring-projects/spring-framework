@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ import org.springframework.web.servlet.ViewResolver;
  * as loaded by {@link org.springframework.web.context.ContextLoaderListener},
  * if any, will be shared.
  *
- * <p>Thanks to Rainer Schmitz and Nick Lothian for their suggestions!
+ * <p>Thanks to Rainer Schmitz, Nick Lothian and Eric Dalquist for their suggestions!
  *
  * @author William G. Thompson, Jr.
  * @author John A. Lewis
@@ -241,6 +241,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	/** Detect all ViewResolvers or just expect "viewResolver" bean? */
 	private boolean detectAllViewResolvers = true;
 
+	/** Whether exceptions thrown during doAction should be forwarded to doRender */
+	private boolean forwardActionException = true;
+
+	/** Whether exceptions thrown during doEvent should be forwarded to doRender */
+	private boolean forwardEventException = false;
+
 	/** URL that points to the ViewRendererServlet */
 	private String viewRendererUrl = DEFAULT_VIEW_RENDERER_URL;
 
@@ -303,6 +309,28 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	public void setDetectAllViewResolvers(boolean detectAllViewResolvers) {
 		this.detectAllViewResolvers = detectAllViewResolvers;
+	}
+
+	/**
+	 * Set whether to forward exceptions thrown during the action phase
+	 * to the render phase via a session attribute.
+	 * <p>Default is true. Turn this off if you want the portlet container
+	 * to provide immediate exception handling for action requests.
+	 * @see #exposeActionException(javax.portlet.PortletRequest, javax.portlet.StateAwareResponse, Exception)
+	 */
+	public void setForwardActionException(boolean forwardActionException) {
+		this.forwardActionException = forwardActionException;
+	}
+
+	/**
+	 * Set whether to forward exceptions thrown during the event phase
+	 * to the render phase via a session attribute.
+	 * <p>Default is false. Turn this on if you want the {@link DispatcherPortlet}
+	 * to forward the exception to the render phase, similar to what it does
+	 * for {@link #setForwardActionException action exceptions} by default.
+	 */
+	public void setForwardEventException(boolean forwardEventException) {
+		this.forwardEventException = forwardEventException;
 	}
 
 	/**
@@ -648,12 +676,17 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			// Trigger after-completion for thrown exception.
 			triggerAfterActionCompletion(mappedHandler, interceptorIndex, processedRequest, response, ex);
 			// Forward the exception to the render phase to be displayed.
-			try {
-				exposeActionException(request, response, ex);
-				logger.debug("Caught exception during action phase - forwarding to render phase", ex);
+			if (this.forwardActionException) {
+				try {
+					exposeActionException(request, response, ex);
+					logger.debug("Caught exception during action phase - forwarding to render phase", ex);
+				}
+				catch (IllegalStateException ex2) {
+					// Probably sendRedirect called... need to rethrow exception immediately.
+					throw ex;
+				}
 			}
-			catch (IllegalStateException ex2) {
-				// Probably sendRedirect called... need to rethrow exception immediately.
+			else {
 				throw ex;
 			}
 		}
@@ -921,12 +954,17 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			// Trigger after-completion for thrown exception.
 			triggerAfterEventCompletion(mappedHandler, interceptorIndex, request, response, ex);
 			// Forward the exception to the render phase to be displayed.
-			try {
-				exposeActionException(request, response, ex);
-				logger.debug("Caught exception during event phase - forwarding to render phase", ex);
+			if (this.forwardEventException) {
+				try {
+					exposeActionException(request, response, ex);
+					logger.debug("Caught exception during event phase - forwarding to render phase", ex);
+				}
+				catch (IllegalStateException ex2) {
+					// Probably sendRedirect called... need to rethrow exception immediately.
+					throw ex;
+				}
 			}
-			catch (IllegalStateException ex2) {
-				// Probably sendRedirect called... need to rethrow exception immediately.
+			else {
 				throw ex;
 			}
 		}
@@ -963,8 +1001,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * Return the HandlerExecutionChain for this request.
 	 * Try all handler mappings in order.
 	 * @param request current portlet request
-	 * @param cache whether to cache the HandlerExecutionChain in a request attribute
-	 * @return the HandlerExceutionChain, or null if no handler could be found
+	 * @return the HandlerExecutionChain, or null if no handler could be found
 	 */
 	protected HandlerExecutionChain getHandler(PortletRequest request) throws Exception {
 		for (HandlerMapping hm : this.handlerMappings) {
