@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1.2 (2012-06-??)
+Changes in version 3.1.2 (2012-07-05)
 -------------------------------------
 
 * removed INDEX.LIST entries from Spring jar META-INF dirs
@@ -13,6 +13,7 @@ Changes in version 3.1.2 (2012-06-??)
 * fixed @PropertySource placeholder resolution to apply to all specified values
 * JDBC parameter binding uses JDBC 3.0 ParameterMetaData (if available) for type determination
 * EhCacheFactoryBean applies listeners and enabled/disabled flags to existing cache regions as well
+* added "repeatCount" bean property to Quartz SimpleTriggerFactoryBean
 * ServletContextResource's getFile implementation falls back to getRealPath for non-existent files
 * fixed StandardServletMultipartResolver compatibility with Resin (only deleting actual file parts)
 * fix RequestConditionHolder to return null when no match is found
@@ -28,6 +29,8 @@ Changes in version 3.1.2 (2012-06-??)
 * raise RestClientException for unknown HTTP status codes
 * support executor qualification with @Async#value
 * fix issue with encoded params in UriComponentsBuilder
+* XStreamMarshaller converts StreamException to Spring exception in case of unmarshalling an empty stream
+* corrected DispatcherPortlet behavior to not forward event exceptions to the render phase by default
 
 
 Changes in version 3.1.1 (2012-02-16)
