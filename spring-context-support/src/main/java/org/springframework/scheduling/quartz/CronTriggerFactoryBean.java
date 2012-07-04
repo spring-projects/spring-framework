@@ -145,10 +145,9 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	 * Set the start delay in milliseconds.
 	 * <p>The start delay is added to the current system time (when the bean starts)
 	 * to control the start time of the trigger.
-	 * @param startDelay the start delay, in milliseconds
 	 */
 	public void setStartDelay(long startDelay) {
-		Assert.state(startDelay >= 0, "Start delay cannot be negative.");
+		Assert.isTrue(startDelay >= 0, "Start delay cannot be negative");
 		this.startDelay = startDelay;
 	}
 
