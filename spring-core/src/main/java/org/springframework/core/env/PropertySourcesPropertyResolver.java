@@ -72,6 +72,9 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 			Object value;
 			if ((value = propertySource.getProperty(key)) != null) {
 				Class<?> valueType = value.getClass();
+				if (String.class.equals(valueType)) {
+					value = this.resolveRequiredPlaceholders((String) value);
+				}
 				if (debugEnabled) {
 					logger.debug(
 							format("Found key '%s' in [%s] with type [%s] and value '%s'",

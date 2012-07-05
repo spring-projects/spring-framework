@@ -171,7 +171,8 @@ public class PropertyPlaceholderHelper {
 					startIndex = buf.indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
 				}
 				else {
-					throw new IllegalArgumentException("Could not resolve placeholder '" + placeholder + "'");
+					throw new IllegalArgumentException("Could not resolve placeholder '" +
+							placeholder + "'" + " in string value [" + strVal + "]");
 				}
 
 				visitedPlaceholders.remove(originalPlaceholder);
