@@ -16,6 +16,7 @@ Changes in version 3.2 M2 (2012-08-xx)
 * added support for the HTTP PATCH method
 * enable smart suffix pattern match in @RequestMapping methods (SPR-7632)
 * DispatcherPortlet does not forward event exceptions to the render phase by default (SPR-9287)
+* add defaultCharset property to StringHttpMessageConverter
 
 
 Changes in version 3.2 M1 (2012-05-28)

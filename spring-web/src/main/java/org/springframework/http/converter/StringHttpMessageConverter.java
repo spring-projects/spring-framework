@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,14 +41,27 @@ import org.springframework.util.FileCopyUtils;
  */
 public class StringHttpMessageConverter extends AbstractHttpMessageConverter<String> {
 
-	public static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
+	private final Charset defaultCharset;
 
 	private final List<Charset> availableCharsets;
 
 	private boolean writeAcceptCharset = true;
 
+	/**
+	 * A default constructor that uses {@code "ISO-8859-1"} as the default charset.
+	 * @see #StringHttpMessageConverter(Charset)
+	 */
 	public StringHttpMessageConverter() {
-		super(new MediaType("text", "plain", DEFAULT_CHARSET), MediaType.ALL);
+		this(Charset.forName("ISO-8859-1"));
+	}
+
+	/**
+	 * A constructor accepting a default charset to use if the requested content
+	 * type does not specify one.
+	 */
+	public StringHttpMessageConverter(Charset defaultCharset) {
+		super(new MediaType("text", "plain", defaultCharset), MediaType.ALL);
+		this.defaultCharset = defaultCharset;
 		this.availableCharsets = new ArrayList<Charset>(Charset.availableCharsets().values());
 	}
 
@@ -108,7 +121,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 			return contentType.getCharSet();
 		}
 		else {
-			return DEFAULT_CHARSET;
+			return this.defaultCharset;
 		}
 	}
 
