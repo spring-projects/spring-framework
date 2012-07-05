@@ -124,13 +124,10 @@ public class HandlerMethod {
 	 * Note that if the bean type is a CGLIB-generated class, the original, user-defined class is returned.
 	 */
 	public Class<?> getBeanType() {
-		if (bean instanceof String) {
-			String beanName = (String) bean;
-			return beanFactory.getType(beanName);
-		}
-		else {
-			return ClassUtils.getUserClass(bean.getClass());
-		}
+		Class<?> clazz = (this.bean instanceof String)
+				? this.beanFactory.getType((String) this.bean) : this.bean.getClass();
+
+		return ClassUtils.getUserClass(clazz);
 	}
 
 	/**
@@ -138,7 +135,7 @@ public class HandlerMethod {
 	 * Otherwise it returns the same method as {@link #getMethod()}.
 	 */
 	protected Method getBridgedMethod() {
-		return bridgedMethod;
+		return this.bridgedMethod;
 	}
 
 	/**
@@ -153,7 +150,7 @@ public class HandlerMethod {
 			}
 			this.parameters = p;
 		}
-		return parameters;
+		return this.parameters;
 	}
 
 	/**
@@ -197,7 +194,7 @@ public class HandlerMethod {
 			String beanName = (String) this.bean;
 			handler = this.beanFactory.getBean(beanName);
 		}
-		return new HandlerMethod(handler, method);
+		return new HandlerMethod(handler, this.method);
 	}
 
 	@Override
