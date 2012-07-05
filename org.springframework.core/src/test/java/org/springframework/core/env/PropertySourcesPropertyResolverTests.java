@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,19 @@
 
 package org.springframework.core.env;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionException;
 import org.springframework.mock.env.MockPropertySource;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link PropertySourcesPropertyResolver}.
@@ -351,6 +349,39 @@ public class PropertySourcesPropertyResolverTests {
 		testProperties.put("bar", "");
 		propertyResolver.validateRequiredProperties();
 	}
+
+	@Test
+	public void resolveNestedPropertyPlaceholders() {
+		MutablePropertySources ps = new MutablePropertySources();
+		ps.addFirst(new MockPropertySource()
+			.withProperty("p1", "v1")
+			.withProperty("p2", "v2")
+			.withProperty("p3", "${p1}:${p2}")              // nested placeholders
+			.withProperty("p4", "${p3}")                    // deeply nested placeholders
+			.withProperty("p5", "${p1}:${p2}:${bogus}")     // unresolvable placeholder
+			.withProperty("p6", "${p1}:${p2}:${bogus:def}") // unresolvable w/ default
+			.withProperty("pL", "${pR}")                    // cyclic reference left
+			.withProperty("pR", "${pL}")                    // cyclic reference right
+		);
+		PropertySourcesPropertyResolver pr = new PropertySourcesPropertyResolver(ps);
+		assertThat(pr.getProperty("p1"), equalTo("v1"));
+		assertThat(pr.getProperty("p2"), equalTo("v2"));
+		assertThat(pr.getProperty("p3"), equalTo("v1:v2"));
+		assertThat(pr.getProperty("p4"), equalTo("v1:v2"));
+		try {
+			pr.getProperty("p5");
+		} catch (IllegalArgumentException ex) {
+			assertThat(ex.getMessage(), Matchers.containsString(
+					"Could not resolve placeholder 'bogus' in string value [${p1}:${p2}:${bogus}]"));
+		}
+		assertThat(pr.getProperty("p6"), equalTo("v1:v2:def"));
+		try {
+			pr.getProperty("pL");
+		} catch (StackOverflowError ex) {
+			// no explicit handling for cyclic references for now
+		}
+	}
+
 
 	static interface SomeType { }
 	static class SpecificType implements SomeType { }
