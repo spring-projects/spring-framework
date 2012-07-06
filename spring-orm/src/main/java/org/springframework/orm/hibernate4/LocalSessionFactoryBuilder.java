@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,16 @@ import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 import javax.sql.DataSource;
+import javax.transaction.TransactionManager;
 
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory;
+import org.hibernate.service.jta.platform.internal.WebSphereExtendedJtaPlatform;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -39,6 +43,8 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -49,6 +55,11 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>This is designed for programmatic use, e.g. in {@code @Bean} factory methods.
  * Consider using {@link LocalSessionFactoryBean} for XML bean definition files.
+ *
+ * <p><b>NOTE:</b> To set up Hibernate 4 for Spring-driven JTA transactions, make
+ * sure to either use the {@link #setJtaTransactionManager} method or to set the
+ * "hibernate.transaction.factory_class" property to {@link CMTTransactionFactory}.
+ * Otherwise, Hibernate's smart flushing mechanism won't work properly.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -97,17 +108,59 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * Create a new LocalSessionFactoryBuilder for the given DataSource.
 	 * @param dataSource the JDBC DataSource that the resulting Hibernate SessionFactory should be using
 	 * (may be <code>null</code>)
-	 * @param classLoader the ResourceLoader to load application classes from
+	 * @param resourceLoader the ResourceLoader to load application classes from
 	 */
 	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader) {
 		getProperties().put(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
 		if (dataSource != null) {
 			getProperties().put(Environment.DATASOURCE, dataSource);
 		}
-		getProperties().put("hibernate.classLoader.application", resourceLoader.getClassLoader());
+		getProperties().put(AvailableSettings.APP_CLASSLOADER, resourceLoader.getClassLoader());
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 
+
+	/**
+	 * Set the Spring {@link JtaTransactionManager} or the JTA {@link TransactionManager}
+	 * to be used with Hibernate, if any. Allows for using a Spring-managed transaction
+	 * manager for Hibernate 4's session and cache synchronization, with the
+	 * "hibernate.transaction.jta.platform" automatically set to it. Also sets
+	 * "hibernate.transaction.factory_class" to {@link CMTTransactionFactory},
+	 * instructing Hibernate to interact with externally managed transactions.
+	 * <p>A passed-in Spring {@link JtaTransactionManager} needs to contain a JTA
+	 * {@link TransactionManager} reference to be usable here, except for the WebSphere
+	 * case where we'll automatically set {@link WebSphereExtendedJtaPlatform} accordingly.
+	 * <p>Note: If this is set, the Hibernate settings should not contain a JTA platform
+	 * setting to avoid meaningless double configuration.
+	 */
+	public LocalSessionFactoryBuilder setJtaTransactionManager(Object jtaTransactionManager) {
+		Assert.notNull(jtaTransactionManager, "Transaction manager reference must not be null");
+		if (jtaTransactionManager instanceof JtaTransactionManager) {
+			boolean webspherePresent = ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager", getClass().getClassLoader());
+			if (webspherePresent) {
+				getProperties().put(AvailableSettings.JTA_PLATFORM, new WebSphereExtendedJtaPlatform());
+			}
+			else {
+				JtaTransactionManager jtaTm = (JtaTransactionManager) jtaTransactionManager;
+				if (jtaTm.getTransactionManager() == null) {
+					throw new IllegalArgumentException(
+							"Can only apply JtaTransactionManager which has a TransactionManager reference set");
+				}
+				getProperties().put(AvailableSettings.JTA_PLATFORM,
+						new ConfigurableJtaPlatform(jtaTm.getTransactionManager(), jtaTm.getUserTransaction()));
+			}
+		}
+		else if (jtaTransactionManager instanceof TransactionManager) {
+			getProperties().put(AvailableSettings.JTA_PLATFORM,
+					new ConfigurableJtaPlatform((TransactionManager) jtaTransactionManager, null));
+		}
+		else {
+			throw new IllegalArgumentException(
+					"Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
+		}
+		getProperties().put(AvailableSettings.TRANSACTION_STRATEGY, new CMTTransactionFactory());
+		return this;
+	}
 
 	/**
 	 * Add the given annotated classes in a batch.
