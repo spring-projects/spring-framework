@@ -48,6 +48,12 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * However, in practice, it is closer to <code>AnnotationSessionFactoryBean</code> since
  * its core purpose is to bootstrap a <code>SessionFactory</code> from annotation scanning.
  *
+ * <p><b>NOTE:</b> To set up Hibernate 4 for Spring-driven JTA transactions, make
+ * sure to either specify the {@link #setJtaTransactionManager "jtaTransactionManager"}
+ * bean property or to set the "hibernate.transaction.factory_class" property to
+ * {@link org.hibernate.engine.transaction.internal.jta.CMTTransactionFactory}.
+ * Otherwise, Hibernate's smart flushing mechanism won't work properly.
+ *
  * @author Juergen Hoeller
  * @since 3.1
  * @see #setDataSource
@@ -81,6 +87,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	private String[] annotatedPackages;
 
 	private String[] packagesToScan;
+
+	private Object jtaTransactionManager;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -226,7 +234,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 	/**
 	 * Specify annotated entity classes to register with this Hibernate SessionFactory.
-	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(String)
+	 * @see org.hibernate.cfg.Configuration#addAnnotatedClass(Class)
 	 */
 	public void setAnnotatedClasses(Class<?>[] annotatedClasses) {
 		this.annotatedClasses = annotatedClasses;
@@ -248,6 +256,16 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 */
 	public void setPackagesToScan(String... packagesToScan) {
 		this.packagesToScan = packagesToScan;
+	}
+
+	/**
+	 * Set the Spring {@link org.springframework.transaction.jta.JtaTransactionManager}
+	 * or the JTA {@link javax.transaction.TransactionManager} to be used with Hibernate,
+	 * if any.
+	 * @see LocalSessionFactoryBuilder#setJtaTransactionManager
+	 */
+	public void setJtaTransactionManager(Object jtaTransactionManager) {
+		this.jtaTransactionManager = jtaTransactionManager;
 	}
 
 	public void setResourceLoader(ResourceLoader resourceLoader) {
@@ -328,6 +346,10 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 
 		if (this.packagesToScan != null) {
 			sfb.scanPackages(this.packagesToScan);
+		}
+
+		if (this.jtaTransactionManager != null) {
+			sfb.setJtaTransactionManager(this.jtaTransactionManager);
 		}
 
 		// Build SessionFactory instance.
