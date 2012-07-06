@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1.2 (2012-07-05)
+Changes in version 3.1.2 (2012-07-09)
 -------------------------------------
 
 * removed INDEX.LIST entries from Spring jar META-INF dirs
@@ -12,23 +12,25 @@ Changes in version 3.1.2 (2012-07-05)
 * fixed MutablePropertySources "get" implementation to correctly return null if not found
 * fixed @PropertySource placeholder resolution to apply to all specified values
 * JDBC parameter binding uses JDBC 3.0 ParameterMetaData (if available) for type determination
+* added "jtaTransactionManager" property to Hibernate 4 LocalSessionFactoryBean/Builder
 * EhCacheFactoryBean applies listeners and enabled/disabled flags to existing cache regions as well
 * added "repeatCount" bean property to Quartz SimpleTriggerFactoryBean
+* support executor qualification with @Async#value
 * ServletContextResource's getFile implementation falls back to getRealPath for non-existent files
 * fixed StandardServletMultipartResolver compatibility with Resin (only deleting actual file parts)
-* fix RequestConditionHolder to return null when no match is found
-* fix concurrency issue in AnnotationMethodHandlerExceptionResolver
-* fix issue with parsing invalid Content-Type or Accept headers
-* add Jackson 2 HttpMessageConverter and View types
+* fixed RequestConditionHolder to return null when no match is found
+* fixed concurrency issue in AnnotationMethodHandlerExceptionResolver
+* fixed issue with parsing invalid Content-Type or Accept headers
+* added "defaultCharset" property to StringHttpMessageConverter
+* added Jackson 2 HttpMessageConverter and View types
 * translate IOException on EOF from Jackson to HttpMessageNotReadableException
 * fix content negotiation issue when sorting selected media types by quality value
 * raise RestClientException instead of IllegalArgumentException for unknown status codes
 * discover controllers based on type-level @RequestMapping in new @MVC support classes
-* fix issue with suffix pattern in AnnotationMethodHandlerAdapter
+* fixed issue with suffix pattern in AnnotationMethodHandlerAdapter
 * merge rather than add URI vars in ExtendedServletRequestDataBinder
 * raise RestClientException for unknown HTTP status codes
-* support executor qualification with @Async#value
-* fix issue with encoded params in UriComponentsBuilder
+* fixed issue with encoded params in UriComponentsBuilder
 * XStreamMarshaller converts StreamException to Spring exception in case of unmarshalling an empty stream
 * corrected DispatcherPortlet behavior to not forward event exceptions to the render phase by default
 

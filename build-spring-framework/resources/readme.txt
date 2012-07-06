@@ -1,5 +1,5 @@
-SPRING FRAMEWORK 3.1.1 (February 2012)
---------------------------------------
+SPRING FRAMEWORK 3.1.2 (July 2012)
+----------------------------------
 http://www.springsource.org
 
 1. INTRODUCTION
