@@ -20,6 +20,7 @@ Changes in version 3.2 M2 (2012-08-xx)
 * DispatcherPortlet does not forward event exceptions to the render phase by default (SPR-9287)
 * add defaultCharset property to StringHttpMessageConverter
 * add @ExceptionResolver annotation to detect classes with @ExceptionHandler methods
+* move RSS/Atom message converter registration ahead of jackson/jaxb2
 
 
 Changes in version 3.2 M1 (2012-05-28)

@@ -302,14 +302,17 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			messageConverters.setSource(source);
 			messageConverters.add(createConverterBeanDefinition(ByteArrayHttpMessageConverter.class, source));
 
-			RootBeanDefinition stringConverterDef = createConverterBeanDefinition(StringHttpMessageConverter.class,
-					source);
+			RootBeanDefinition stringConverterDef = createConverterBeanDefinition(StringHttpMessageConverter.class, source);
 			stringConverterDef.getPropertyValues().add("writeAcceptCharset", false);
 			messageConverters.add(stringConverterDef);
 
 			messageConverters.add(createConverterBeanDefinition(ResourceHttpMessageConverter.class, source));
 			messageConverters.add(createConverterBeanDefinition(SourceHttpMessageConverter.class, source));
 			messageConverters.add(createConverterBeanDefinition(XmlAwareFormHttpMessageConverter.class, source));
+			if (romePresent) {
+				messageConverters.add(createConverterBeanDefinition(AtomFeedHttpMessageConverter.class, source));
+				messageConverters.add(createConverterBeanDefinition(RssChannelHttpMessageConverter.class, source));
+			}
 			if (jaxb2Present) {
 				messageConverters
 						.add(createConverterBeanDefinition(Jaxb2RootElementHttpMessageConverter.class, source));
@@ -320,16 +323,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			else if (jacksonPresent) {
 				messageConverters.add(createConverterBeanDefinition(MappingJacksonHttpMessageConverter.class, source));
 			}
-			if (romePresent) {
-				messageConverters.add(createConverterBeanDefinition(AtomFeedHttpMessageConverter.class, source));
-				messageConverters.add(createConverterBeanDefinition(RssChannelHttpMessageConverter.class, source));
-			}
 		}
 		return messageConverters;
 	}
 
-	private RootBeanDefinition createConverterBeanDefinition(Class<? extends HttpMessageConverter> converterClass,
-			Object source) {
+	private RootBeanDefinition createConverterBeanDefinition(
+			Class<? extends HttpMessageConverter> converterClass, Object source) {
+
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(converterClass);
 		beanDefinition.setSource(source);
 		beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

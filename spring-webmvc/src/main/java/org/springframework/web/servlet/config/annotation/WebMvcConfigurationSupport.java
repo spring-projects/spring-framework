@@ -138,6 +138,20 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  */
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
+	private static final boolean jaxb2Present =
+			ClassUtils.isPresent("javax.xml.bind.Binder", WebMvcConfigurationSupport.class.getClassLoader());
+
+	private static final boolean jackson2Present =
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", WebMvcConfigurationSupport.class.getClassLoader()) &&
+					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", WebMvcConfigurationSupport.class.getClassLoader());
+
+	private static final boolean jacksonPresent =
+			ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", WebMvcConfigurationSupport.class.getClassLoader()) &&
+					ClassUtils.isPresent("org.codehaus.jackson.JsonGenerator", WebMvcConfigurationSupport.class.getClassLoader());
+
+	private static boolean romePresent =
+			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", WebMvcConfigurationSupport.class.getClassLoader());
+
 	private ServletContext servletContext;
 
 	private ApplicationContext applicationContext;
@@ -435,20 +449,18 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		messageConverters.add(new ResourceHttpMessageConverter());
 		messageConverters.add(new SourceHttpMessageConverter<Source>());
 		messageConverters.add(new XmlAwareFormHttpMessageConverter());
-
-		ClassLoader classLoader = getClass().getClassLoader();
-		if (ClassUtils.isPresent("javax.xml.bind.Binder", classLoader)) {
-			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
-		}
-		if (ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader)) {
-			messageConverters.add(new MappingJackson2HttpMessageConverter());
-		}
-		else if (ClassUtils.isPresent("org.codehaus.jackson.map.ObjectMapper", classLoader)) {
-			messageConverters.add(new MappingJacksonHttpMessageConverter());
-		}
-		if (ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", classLoader)) {
+		if (romePresent) {
 			messageConverters.add(new AtomFeedHttpMessageConverter());
 			messageConverters.add(new RssChannelHttpMessageConverter());
+		}
+		if (jaxb2Present) {
+			messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
+		}
+		if (jackson2Present) {
+			messageConverters.add(new MappingJackson2HttpMessageConverter());
+		}
+		else if (jacksonPresent) {
+			messageConverters.add(new MappingJacksonHttpMessageConverter());
 		}
 	}
 
