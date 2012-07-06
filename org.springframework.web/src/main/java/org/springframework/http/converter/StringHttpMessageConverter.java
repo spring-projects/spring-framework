@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import org.springframework.util.FileCopyUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write strings.
  *
- * <p>By default, this converter supports all media types (<code>&#42;&#47;&#42;</code>), and writes with a {@code
- * Content-Type} of {@code text/plain}. This can be overridden by setting the {@link
- * #setSupportedMediaTypes(java.util.List) supportedMediaTypes} property.
+ * <p>By default, this converter supports all media types (<code>&#42;&#47;&#42;</code>),
+ * and writes with a {@code Content-Type} of {@code text/plain}. This can be overridden
+ * by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -43,12 +43,28 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
 
+	private final Charset defaultCharset;
+
 	private final List<Charset> availableCharsets;
 
 	private boolean writeAcceptCharset = true;
 
+
+	/**
+	 * A default constructor that uses {@code "ISO-8859-1"} as the default charset.
+	 * @see #StringHttpMessageConverter(Charset)
+	 */
 	public StringHttpMessageConverter() {
-		super(new MediaType("text", "plain", DEFAULT_CHARSET), MediaType.ALL);
+		this(DEFAULT_CHARSET);
+	}
+
+	/**
+	 * A constructor accepting a default charset to use if the requested content
+	 * type does not specify one.
+	 */
+	public StringHttpMessageConverter(Charset defaultCharset) {
+		super(new MediaType("text", "plain", defaultCharset), MediaType.ALL);
+		this.defaultCharset = defaultCharset;
 		this.availableCharsets = new ArrayList<Charset>(Charset.availableCharsets().values());
 	}
 
@@ -59,6 +75,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	public void setWriteAcceptCharset(boolean writeAcceptCharset) {
 		this.writeAcceptCharset = writeAcceptCharset;
 	}
+
 
 	@Override
 	public boolean supports(Class<?> clazz) {
@@ -79,13 +96,13 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		}
 		catch (UnsupportedEncodingException ex) {
 			// should not occur
-			throw new InternalError(ex.getMessage());
+			throw new IllegalStateException(ex);
 		}
 	}
 
 	@Override
 	protected void writeInternal(String s, HttpOutputMessage outputMessage) throws IOException {
-		if (writeAcceptCharset) {
+		if (this.writeAcceptCharset) {
 			outputMessage.getHeaders().setAcceptCharset(getAcceptedCharsets());
 		}
 		Charset charset = getContentTypeCharset(outputMessage.getHeaders().getContentType());
@@ -94,9 +111,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	/**
 	 * Return the list of supported {@link Charset}.
-	 *
 	 * <p>By default, returns {@link Charset#availableCharsets()}. Can be overridden in subclasses.
-	 *
 	 * @return the list of accepted charsets
 	 */
 	protected List<Charset> getAcceptedCharsets() {
@@ -108,7 +123,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 			return contentType.getCharSet();
 		}
 		else {
-			return DEFAULT_CHARSET;
+			return this.defaultCharset;
 		}
 	}
 
