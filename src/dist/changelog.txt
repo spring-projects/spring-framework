@@ -10,13 +10,14 @@ Changes in version 3.2 M2 (2012-08-xx)
 * infer return type of parameterized factory methods (SPR-9493)
 * used BufferedInputStream in SimpleMetaDataReader to double performance (SPR-9528)
 * added "repeatCount" bean property to Quartz SimpleTriggerFactoryBean (SPR-9521)
+* added "jtaTransactionManager" property to Hibernate 4 LocalSessionFactoryBean/Builder (SPR-9480)
 * raise RestClientException instead of IllegalArgumentException for unknown status codes
-* add JacksonObjectMapperFactoryBean for configuring a Jackson ObjectMapper in XML
+* added "defaultCharset" property to StringHttpMessageConverter (SPR-9487)
+* added JacksonObjectMapperFactoryBean for configuring a Jackson ObjectMapper in XML
 * added ContentNegotiationManager/ContentNegotiationStrategy to resolve requested media types
-* added support for the HTTP PATCH method
+* added support for the HTTP PATCH method to Spring MVC and to RestTemplate (SPR-7985)
 * enable smart suffix pattern match in @RequestMapping methods (SPR-7632)
 * DispatcherPortlet does not forward event exceptions to the render phase by default (SPR-9287)
-* add defaultCharset property to StringHttpMessageConverter
 
 
 Changes in version 3.2 M1 (2012-05-28)
