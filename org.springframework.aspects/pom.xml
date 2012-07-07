@@ -6,12 +6,12 @@
   <groupId>org.springframework</groupId>
   <artifactId>spring-aspects</artifactId>
   <packaging>jar</packaging>
-  <version>3.1.2.BUILD-SNAPSHOT</version>
+  <version>3.1.2.RELEASE</version>
   <parent>
     <groupId>org.springframework</groupId>
     <artifactId>spring-parent</artifactId>
     <relativePath>../org.springframework.spring-parent</relativePath>
-    <version>3.1.2.BUILD-SNAPSHOT</version>
+    <version>3.1.2.RELEASE</version>
   </parent>
   <licenses>
     <license>
