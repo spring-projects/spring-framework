@@ -3694,16 +3694,21 @@ public class SimpleController {
       and invokes <interfacename>@ExceptionHandler</interfacename> methods.</para></note>
     </section>
 
-    <section id="mvc-ann-rest-handler-exception-resolvers">
-      <title><classname>DefaultHandlerExceptionResolver</classname>
-      and <classname>ResponseStatusExceptionResolver</classname></title>
+    <section id="mvc-ann-rest-spring-mvc-exceptions">
+      <title>Handling of Spring MVC Exceptions</title>
 
-      <para>By default, the <classname>DispatcherServlet</classname> registers
-      the <classname>DefaultHandlerExceptionResolver</classname>. This
-      resolver handles certain standard Spring MVC exceptions by setting a
-      specific response status code. This is useful when responding to programmatic
-      clients (e.g. Ajax, non-browser) in which the client uses the response code
-      to interpret the result.
+      <para>Spring MVC may raise a number of exceptions while processing a request.
+      A <classname>SimpleMappingExceptionResolver</classname> can be used to easily
+      map any exception to a default error view or to more specific error views if
+      desired. However when responding to programmatic clients you may prefer to
+      translate specific exceptions to the appropriate status that indicates a
+      client error (4xx) or a server error (5xx).</para>
+
+      <para>For this reason Spring MVC provides the
+      <classname>DefaultHandlerExceptionResolver</classname>, which translates specific
+      Spring MVC exceptions by setting a specific response status code. By default,
+      this resolver is registered by the <classname>DispatcherServlet</classname>.
+      The following table describes some of the exceptions it handles:
       <informaltable>
           <tgroup cols="2">
             <thead>
@@ -3715,6 +3720,12 @@ public class SimpleController {
             </thead>
 
             <tbody>
+              <row>
+                <entry><classname>BindException</classname></entry>
+
+                <entry>400 (Bad Request)</entry>
+              </row>
+
               <row>
                 <entry><classname>ConversionNotSupportedException</classname></entry>
 
@@ -3752,7 +3763,19 @@ public class SimpleController {
               </row>
 
               <row>
+                <entry><classname>MethodArgumentNotValidException</classname></entry>
+
+                <entry>400 (Bad Request)</entry>
+              </row>
+
+              <row>
                 <entry><classname>MissingServletRequestParameterException</classname></entry>
+
+                <entry>400 (Bad Request)</entry>
+              </row>
+
+              <row>
+                <entry><classname>MissingServletRequestPartException</classname></entry>
 
                 <entry>400 (Bad Request)</entry>
               </row>
@@ -3773,19 +3796,53 @@ public class SimpleController {
         </informaltable>
         </para>
 
-        <para>The <classname>DispatcherServlet</classname> also registers the
-        <classname>ResponseStatusExceptionResolver</classname>, which handles
-        exceptions annotated with <interfacename>@ResponseStatus</interfacename>
-        by setting the response status code to that indicated in the annotation.
-        Once again this is useful in scenarios with programmatic clients.</para>
-
-        <para>Note however that if you explicitly register one or more
+        <note><para>If you explicitly register one or more
         <interfacename>HandlerExceptionResolver</interfacename> instances in your configuration
         then the defaults registered by the <classname>DispatcherServlet</classname> are
         cancelled. This is standard behavior with regards to
         <classname>DispatcherServlet</classname> defaults.
-        See <xref linkend="mvc-servlet-special-bean-types"/> for more details.</para>
+        See <xref linkend="mvc-servlet-special-bean-types"/> for more details.</para></note>
+
+        <para>If building a REST API, then it's very likely you will want to
+        write some additional information about the error to the body of the response
+        consistent with the API's error handling throughout. This includes the handling of
+        Spring MVC exceptions, for which the <classname>DefaultHandlerExceptionResolver</classname>
+        only sets the status code and doesn't assume how or what content should be written
+        to the body.</para>
+
+        <para>Instead you can create an <interfacename>@ExceptionResolver</interfacename>
+        class that handles each of the exceptions handled by the
+        <classname>DefaultHandlerExceptionResolver</classname> while also writing
+        developer-friendly API error information to the response body consistent with
+        the rest of all API error handling of the application. For example:</para>
+
+      <programlisting language="java">@ExceptionResolver
+public class ApplicationExceptionResolver {
+
+  @ExceptionHandler
+  public ResponseEntity handleMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex) {
+    MyApiError error = ... ;
+    return new ResponseEntity(error, HttpStatus.SC_NOT_ACCEPTABLE);
+  }
+
+  // more @ExceptionHandler methods ...
+
+}</programlisting>
     </section>
+
+    <section id="mvc-ann-annotated-exceptions">
+      <title>Annotating Business Exceptions With <interfacename>@ResponseStatus</interfacename></title>
+
+      <para>A business exception can be annotated with
+      <interfacename>@ResponseStatus</interfacename>. When the exception is raised,
+      the <classname>ResponseStatusExceptionResolver</classname> handles it by
+      setting the status of the response accordingly.
+      By default the <classname>DispatcherServlet</classname> registers
+      the <classname>ResponseStatusExceptionResolver</classname> and it is
+      available for use.</para>
+
+    </section>
+
   </section>
 
   <section id="mvc-coc">
