@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,15 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,6 +68,9 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
  * @see #handleHttpMessageNotReadable
  * @see #handleHttpMessageNotWritable
  * @see #handleMethodArgumentNotValidException
+ * @see #handleMissingServletRequestParameter
+ * @see #handleMissingServletRequestPart
+ * @see #handleBindException
  */
 public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
@@ -135,6 +141,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 			else if (ex instanceof MissingServletRequestPartException) {
 				return handleMissingServletRequestPartException((MissingServletRequestPartException) ex, request, response, handler);
+			}
+			else if (ex instanceof BindException) {
+				return handleBindException((BindException) ex, request, response, handler);
 			}
 		}
 		catch (Exception handlerException) {
@@ -346,8 +355,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
-	 * Handle the case where an argument annotated with {@code @Valid} such as 
-	 * an {@link RequestBody} or {@link RequestPart} argument fails validation. 
+	 * Handle the case where an argument annotated with {@code @Valid} such as
+	 * an {@link RequestBody} or {@link RequestPart} argument fails validation.
 	 * An HTTP 400 error is sent back to the client.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -362,8 +371,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
-	 * Handle the case where an @{@link RequestPart}, a {@link MultipartFile}, 
-	 * or a {@code javax.servlet.http.Part} argument is required but missing. 
+	 * Handle the case where an {@linkplain RequestPart @RequestPart}, a {@link MultipartFile},
+	 * or a {@code javax.servlet.http.Part} argument is required but is missing.
 	 * An HTTP 400 error is sent back to the client.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
@@ -374,6 +383,23 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleMissingServletRequestPartException(MissingServletRequestPartException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
  		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		return new ModelAndView();
+	}
+
+	/**
+	 * Handle the case where an {@linkplain ModelAttribute @ModelAttribute} method
+	 * argument has binding or validation errors and is not followed by another
+	 * method argument of type {@link BindingResult}.
+	 * By default an HTTP 400 error is sent back to the client.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler
+	 * @return an empty ModelAndView indicating the exception was handled
+	 * @throws IOException potentially thrown from response.sendError()
+	 */
+	protected ModelAndView handleBindException(BindException ex, HttpServletRequest request,
+			HttpServletResponse response, Object handler) throws IOException {
+		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 		return new ModelAndView();
 	}
 
