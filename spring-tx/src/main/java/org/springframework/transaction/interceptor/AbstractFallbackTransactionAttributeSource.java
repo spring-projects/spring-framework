@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.util.ObjectUtils;
 /**
  * Abstract implementation of {@link TransactionAttributeSource} that caches
  * attributes for methods and implements a fallback policy: 1. specific target
- * method; 2. target class; 3. declaring method; 4. declaring class/interface.
+ * method; 2. target class; 3 user class; 4. declaring method; 5. declaring class/interface.
  *
  * <p>Defaults to using the target class's transaction attribute if none is
  * associated with the target method. Any transaction attribute associated with
@@ -154,6 +154,12 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			return txAtt;
 		}
 
+		// Third try is the transaction attribute on the target class.
+		txAtt = findTransactionAttribute(userClass);
+		if (txAtt != null) {
+			return txAtt;
+		}
+		
 		if (specificMethod != method) {
 			// Fallback is to look at the original method.
 			txAtt = findTransactionAttribute(method);

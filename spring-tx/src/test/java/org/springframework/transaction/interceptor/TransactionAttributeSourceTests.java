@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.transaction.interceptor;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -26,6 +27,7 @@ import java.util.Properties;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 
 /**
  * Unit tests for the various {@link TransactionAttributeSource} implementations.
@@ -158,5 +160,23 @@ public final class TransactionAttributeSourceTests {
 				Object.class.getMethod("hashCode", (Class[]) null), null);
 		assertNull(ta);
 	}
+	
+ 	/**
+	 * SPR-9375: we recover @Transactional information for the following case
+	 * - A Interface
+	 * - B Abstract class implementing interface
+	 * - C Class extending B and annotated with @Transactional
+	 * 
+	 * If we try to recover the information from a method defined in A and implemented
+	 * in B that is not annotated we should get the information coming from the @Transactional
+	 * annotation in C.
+ 	 */
+ 	public void testTransactionalAnnotationFromParentClassIsTaken() throws Exception {
+ 		AnnotationTransactionAttributeSource source = new AnnotationTransactionAttributeSource();
+		Method searchedMethod = SimpleTestInterface.class.getMethod("justAMethod");
+		TransactionAttribute attribute =
+				source.getTransactionAttribute(searchedMethod, SimpleSubClass.class);
+ 		assertEquals("theTransactionManager", attribute.getQualifier());
+ 	}
 
 }
