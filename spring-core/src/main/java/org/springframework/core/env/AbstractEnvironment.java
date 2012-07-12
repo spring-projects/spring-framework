@@ -16,8 +16,11 @@
 
 package org.springframework.core.env;
 
-import java.security.AccessControlException;
+import static java.lang.String.format;
+import static org.springframework.util.StringUtils.commaDelimitedListToStringArray;
+import static org.springframework.util.StringUtils.trimAllWhitespace;
 
+import java.security.AccessControlException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -25,14 +28,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import static java.lang.String.*;
-
-import static org.springframework.util.StringUtils.*;
 
 /**
  * Abstract base class for {@link Environment} implementations. Supports the notion of
@@ -320,10 +318,29 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	protected boolean isProfileActive(String profile) {
 		this.validateProfile(profile);
-		return this.doGetActiveProfiles().contains(profile)
-				|| (this.doGetActiveProfiles().isEmpty() && this.doGetDefaultProfiles().contains(profile));
+		return containsProfile(this.doGetActiveProfiles(), profile)
+				|| (this.doGetActiveProfiles().isEmpty() && (containsProfile(this.doGetDefaultProfiles(), profile)));
 	}
 
+	private boolean containsProfile(Set<String> profiles, String profile) {
+	    return profiles.contains(profile) || containsWildcardProfile(profiles, profile);
+	}
+	
+	private boolean containsWildcardProfile(Set<String> profiles, String profile) {
+	    if (!profile.contains("*")) {
+	        return false;
+	    } else {
+	        String regExpProfile = profile.replace("*", ".*");
+	        for (String p : profiles) {
+	            if (p.matches(regExpProfile)) {
+	                return true;
+	            }
+	        }
+	        
+	        return false;
+	    }
+	}
+	
 	/**
 	 * Validate the given profile, called internally prior to adding to the set of
 	 * active or default profiles.
@@ -338,6 +355,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		Assert.hasText(profile, "Invalid profile [" + profile + "]: must contain text");
 		Assert.isTrue(profile.charAt(0) != '!',
 				"Invalid profile [" + profile + "]: must not begin with the ! operator");
+		Assert.isTrue(!profile.contains("*") || profile.indexOf("*") == profile.lastIndexOf("*"),
+		                "Invalid profile [" + profile + "]: only one * wildcard allowed");
 	}
 
 	public MutablePropertySources getPropertySources() {

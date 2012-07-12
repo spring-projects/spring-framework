@@ -57,6 +57,11 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * {@code @Profile({"p1", "!p2"})}, registration will occur if profile 'p1' is active or
  * if profile 'p2' is not active.
  *
+ * <p>If a given profile contains one asterisk (*) character, it is considered to be wildcard. The
+ * annotated will be registered if there is at least one matching (regexp) profile active. e.g. for
+ * {@code @Profile({"p1-dev", "p2-*"})}, registration will occur if profile 'p1-development'
+ * is active or if any profile such as 'p2-dev', 'p2-test' or 'p2-prod' is active.
+ *
  * <p>If the {@code @Profile} annotation is omitted, registration will occur, regardless
  * of which (if any) profiles are active.
  *
