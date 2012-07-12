@@ -3666,7 +3666,7 @@ public class SimpleController {
 }</programlisting>
 
       <para>The <classname>@ExceptionHandler</classname> value can be set to
-      an array of Exception types. If an exception is thrown matches one of
+      an array of Exception types. If an exception is thrown that matches one of
       the types in the list, then the method annotated with the matching
       <classname>@ExceptionHandler</classname> will be invoked. If the
       annotation value is not set then the exception types listed as method
@@ -3687,7 +3687,7 @@ public class SimpleController {
 
       <note><para>To better understand how <interfacename>@ExceptionHandler</interfacename>
       methods work, consider that in Spring MVC there is only one abstraction
-      for handling exception and that's the
+      for handling exceptions and that's the
       <interfacename>HandlerExceptionResolver</interfacename>. There is a special
       implementation of that interface,
       the <classname>ExceptionHandlerExceptionResolver</classname>, which detects
