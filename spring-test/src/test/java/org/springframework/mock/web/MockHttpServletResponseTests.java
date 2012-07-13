@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.mock.web;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
@@ -195,4 +197,20 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals("XY", response.getContentAsString());
 	}
 
+	public void testSendRedirect() throws IOException {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		String redirectUrl = "/redirect";
+		response.sendRedirect(redirectUrl);
+		assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, response.getStatus());
+		assertEquals(redirectUrl, response.getHeader("Location"));
+		assertEquals(redirectUrl, response.getRedirectedUrl());
+		assertEquals(true, response.isCommitted());
+	}
+
+	public void testLocationHeaderUpdatesGetRedirectedUrl() {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		String redirectUrl = "/redirect";
+		response.setHeader("Location", redirectUrl);
+		assertEquals(redirectUrl, response.getRedirectedUrl());
+	}
 }
