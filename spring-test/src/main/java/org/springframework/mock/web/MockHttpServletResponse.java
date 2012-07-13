@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	
 	private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
+	private static final String LOCATION_HEADER = "Location";
+
 	//---------------------------------------------------------------------
 	// ServletResponse properties
 	//---------------------------------------------------------------------
@@ -94,8 +96,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private int status = HttpServletResponse.SC_OK;
 
 	private String errorMessage;
-
-	private String redirectedUrl;
 
 	private String forwardedUrl;
 
@@ -411,12 +411,13 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			throw new IllegalStateException("Cannot send redirect - response is already committed");
 		}
 		Assert.notNull(url, "Redirect URL must not be null");
-		this.redirectedUrl = url;
+		setHeader(LOCATION_HEADER, url);
+		setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
 		setCommitted(true);
 	}
 
 	public String getRedirectedUrl() {
-		return this.redirectedUrl;
+		return getHeader(LOCATION_HEADER);
 	}
 
 	public void setDateHeader(String name, long value) {
