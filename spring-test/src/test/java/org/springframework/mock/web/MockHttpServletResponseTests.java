@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,43 +16,54 @@
 
 package org.springframework.mock.web;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import javax.servlet.http.HttpServletResponse;
+
+import org.junit.Test;
 
 import org.springframework.web.util.WebUtils;
 
 /**
+ * Unit tests for {@link MockHttpServletResponse}.
+ *
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Rossen Stoyanchev
+ * @author Rob Winch
+ * @author Sam Brannen
  * @since 19.02.2006
  */
-public class MockHttpServletResponseTests extends TestCase {
+public class MockHttpServletResponseTests {
 
-	public void testSetContentType() {
+	private MockHttpServletResponse response = new MockHttpServletResponse();
+
+
+	@Test
+	public void setContentType() {
 		String contentType = "test/plain";
-		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType(contentType);
 		assertEquals(contentType, response.getContentType());
 		assertEquals(contentType, response.getHeader("Content-Type"));
 		assertEquals(WebUtils.DEFAULT_CHARACTER_ENCODING, response.getCharacterEncoding());
 	}
 
-	public void testSetContentTypeUTF8() {
+	@Test
+	public void setContentTypeUTF8() {
 		String contentType = "test/plain;charset=UTF-8";
-		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType(contentType);
 		assertEquals("UTF-8", response.getCharacterEncoding());
 		assertEquals(contentType, response.getContentType());
 		assertEquals(contentType, response.getHeader("Content-Type"));
 	}
-	
-	public void testContentTypeHeader() {
+
+	@Test
+	public void contentTypeHeader() {
 		String contentType = "test/plain";
-		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader("Content-Type", contentType);
 		assertEquals(contentType, response.getContentType());
 		assertEquals(contentType, response.getHeader("Content-Type"));
@@ -65,9 +76,9 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals(WebUtils.DEFAULT_CHARACTER_ENCODING, response.getCharacterEncoding());
 	}
 
-	public void testContentTypeHeaderUTF8() {
+	@Test
+	public void contentTypeHeaderUTF8() {
 		String contentType = "test/plain;charset=UTF-8";
-		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.setHeader("Content-Type", contentType);
 		assertEquals(contentType, response.getContentType());
 		assertEquals(contentType, response.getHeader("Content-Type"));
@@ -80,8 +91,8 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals("UTF-8", response.getCharacterEncoding());
 	}
 
-	public void testSetContentTypeThenCharacterEncoding() {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void setContentTypeThenCharacterEncoding() {
 		response.setContentType("test/plain");
 		response.setCharacterEncoding("UTF-8");
 		assertEquals("test/plain", response.getContentType());
@@ -89,8 +100,8 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals("UTF-8", response.getCharacterEncoding());
 	}
 
-	public void testSetCharacterEncodingThenContentType() {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void setCharacterEncodingThenContentType() {
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("test/plain");
 		assertEquals("test/plain", response.getContentType());
@@ -98,24 +109,23 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals("UTF-8", response.getCharacterEncoding());
 	}
 
-	public void testContentLength() {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void contentLength() {
 		response.setContentLength(66);
 		assertEquals(66, response.getContentLength());
 		assertEquals("66", response.getHeader("Content-Length"));
 	}
-	
-	public void testContentLengthHeader() {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+
+	@Test
+	public void contentLengthHeader() {
 		response.addHeader("Content-Length", "66");
-		assertEquals(66,response.getContentLength());
+		assertEquals(66, response.getContentLength());
 		assertEquals("66", response.getHeader("Content-Length"));
 	}
-	
-	public void testHttpHeaderNameCasingIsPreserved() throws Exception {
-		final String headerName = "Header1";
 
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void httpHeaderNameCasingIsPreserved() throws Exception {
+		final String headerName = "Header1";
 		response.addHeader(headerName, "value1");
 		Set<String> responseHeaders = response.getHeaderNames();
 		assertNotNull(responseHeaders);
@@ -123,8 +133,8 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals("HTTP header casing not being preserved", headerName, responseHeaders.iterator().next());
 	}
 
-	public void testServletOutputStreamCommittedWhenBufferSizeExceeded() throws IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void servletOutputStreamCommittedWhenBufferSizeExceeded() throws IOException {
 		assertFalse(response.isCommitted());
 		response.getOutputStream().write('X');
 		assertFalse(response.isCommitted());
@@ -134,8 +144,8 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals(size + 1, response.getContentAsByteArray().length);
 	}
 
-	public void testServletOutputStreamCommittedOnFlushBuffer() throws IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void servletOutputStreamCommittedOnFlushBuffer() throws IOException {
 		assertFalse(response.isCommitted());
 		response.getOutputStream().write('X');
 		assertFalse(response.isCommitted());
@@ -144,8 +154,8 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals(1, response.getContentAsByteArray().length);
 	}
 
-	public void testServletWriterCommittedWhenBufferSizeExceeded() throws IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void servletWriterCommittedWhenBufferSizeExceeded() throws IOException {
 		assertFalse(response.isCommitted());
 		response.getWriter().write("X");
 		assertFalse(response.isCommitted());
@@ -157,8 +167,8 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals(size + 1, response.getContentAsByteArray().length);
 	}
 
-	public void testServletOutputStreamCommittedOnOutputStreamFlush() throws IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void servletOutputStreamCommittedOnOutputStreamFlush() throws IOException {
 		assertFalse(response.isCommitted());
 		response.getOutputStream().write('X');
 		assertFalse(response.isCommitted());
@@ -167,8 +177,8 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals(1, response.getContentAsByteArray().length);
 	}
 
-	public void testServletWriterCommittedOnWriterFlush() throws IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void servletWriterCommittedOnWriterFlush() throws IOException {
 		assertFalse(response.isCommitted());
 		response.getWriter().write("X");
 		assertFalse(response.isCommitted());
@@ -177,22 +187,39 @@ public class MockHttpServletResponseTests extends TestCase {
 		assertEquals(1, response.getContentAsByteArray().length);
 	}
 
-	public void testServletWriterAutoFlushedForString() throws IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void servletWriterAutoFlushedForString() throws IOException {
 		response.getWriter().write("X");
 		assertEquals("X", response.getContentAsString());
 	}
 
-	public void testServletWriterAutoFlushedForChar() throws IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void servletWriterAutoFlushedForChar() throws IOException {
 		response.getWriter().write('X');
 		assertEquals("X", response.getContentAsString());
 	}
 
-	public void testServletWriterAutoFlushedForCharArray() throws IOException {
-		MockHttpServletResponse response = new MockHttpServletResponse();
+	@Test
+	public void servletWriterAutoFlushedForCharArray() throws IOException {
 		response.getWriter().write("XY".toCharArray());
 		assertEquals("XY", response.getContentAsString());
+	}
+
+	@Test
+	public void sendRedirect() throws IOException {
+		String redirectUrl = "/redirect";
+		response.sendRedirect(redirectUrl);
+		assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, response.getStatus());
+		assertEquals(redirectUrl, response.getHeader("Location"));
+		assertEquals(redirectUrl, response.getRedirectedUrl());
+		assertTrue(response.isCommitted());
+	}
+
+	@Test
+	public void locationHeaderUpdatesGetRedirectedUrl() {
+		String redirectUrl = "/redirect";
+		response.setHeader("Location", redirectUrl);
+		assertEquals(redirectUrl, response.getRedirectedUrl());
 	}
 
 }

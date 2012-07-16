@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	
 	private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
+	private static final String LOCATION_HEADER = "Location";
+
 	//---------------------------------------------------------------------
 	// ServletResponse properties
 	//---------------------------------------------------------------------
@@ -94,8 +96,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private int status = HttpServletResponse.SC_OK;
 
 	private String errorMessage;
-
-	private String redirectedUrl;
 
 	private String forwardedUrl;
 
@@ -306,7 +306,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	/**
 	 * Return the primary value for the given header as a String, if any.
 	 * Will return the first value in case of multiple values.
-	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
+	 * <p>As of Servlet 3.0, this method is also defined in HttpServletResponse.
 	 * As of Spring 3.1, it returns a stringified value for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValue(String)} for raw Object access.
 	 * @param name the name of the header
@@ -319,7 +319,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return all values for the given header as a List of Strings.
-	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
+	 * <p>As of Servlet 3.0, this method is also defined in HttpServletResponse.
 	 * As of Spring 3.1, it returns a List of stringified values for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValues(String)} for raw Object access.
 	 * @param name the name of the header
@@ -374,7 +374,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * returning the given URL String as-is.
 	 * <p>Can be overridden in subclasses, appending a session id or the like
 	 * in a redirect-specific fashion. For general URL encoding rules,
-	 * override the common {@link #encodeURL} method instead, appyling
+	 * override the common {@link #encodeURL} method instead, applying
 	 * to redirect URLs as well as to general URLs.
 	 */
 	public String encodeRedirectURL(String url) {
@@ -411,12 +411,13 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			throw new IllegalStateException("Cannot send redirect - response is already committed");
 		}
 		Assert.notNull(url, "Redirect URL must not be null");
-		this.redirectedUrl = url;
+		setHeader(LOCATION_HEADER, url);
+		setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
 		setCommitted(true);
 	}
 
 	public String getRedirectedUrl() {
-		return this.redirectedUrl;
+		return getHeader(LOCATION_HEADER);
 	}
 
 	public void setDateHeader(String name, long value) {
