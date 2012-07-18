@@ -144,7 +144,7 @@ public class AsyncExecutionChainTests {
 		this.chain.addDelegatingCallable(new IntegerIncrementingCallable());
 		this.chain.addDelegatingCallable(new IntegerIncrementingCallable());
 
-		DeferredResult deferredResult = new DeferredResult();
+		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
 		this.chain.startDeferredResultProcessing(deferredResult);
 
 		assertTrue(this.asyncWebRequest.isAsyncStarted());
@@ -159,7 +159,7 @@ public class AsyncExecutionChainTests {
 		this.asyncWebRequest.startAsync();
 		this.asyncWebRequest.complete();
 
-		DeferredResult deferredResult = new DeferredResult();
+		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
 		this.chain.startDeferredResultProcessing(deferredResult);
 		deferredResult.set(1);
 	}

@@ -20,8 +20,8 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
@@ -35,15 +35,9 @@ import org.springframework.web.context.request.async.DeferredResult.DeferredResu
 public class DeferredResultTests {
 
 	@Test
-	public void canHandleTimeout() {
-		assertFalse(new DeferredResult().canHandleTimeout());
-		assertTrue(new DeferredResult("foo").canHandleTimeout());
-	}
-
-	@Test
 	public void set() {
 		DeferredResultHandler resultHandler = createMock(DeferredResultHandler.class);
-		DeferredResult deferredResult = new DeferredResult();
+		DeferredResult<String> deferredResult = new DeferredResult<String>();
 		deferredResult.init(resultHandler);
 
 		resultHandler.handle("foo");
@@ -55,34 +49,35 @@ public class DeferredResultTests {
 	}
 
 	@Test
+	public void getTimeoutHandler() {
+		assertNull(new DeferredResult<String>().getTimeoutHandler());
+		assertNotNull(new DeferredResult<String>("foo").getTimeoutHandler());
+	}
+
+	@Test
 	public void handleTimeout() {
 		DeferredResultHandler resultHandler = createMock(DeferredResultHandler.class);
-		DeferredResult deferredResult = new DeferredResult("foo");
-		deferredResult.init(resultHandler);
-
 		resultHandler.handle("foo");
 		replay(resultHandler);
 
-		deferredResult.handleTimeout();
+		DeferredResult<String> deferredResult = new DeferredResult<String>("foo");
+		deferredResult.init(resultHandler);
+
+		deferredResult.getTimeoutHandler().run();
 
 		verify(resultHandler);
 	}
 
-	@Test(expected=IllegalStateException.class)
-	public void handleTimeout_timeoutResultNone() {
-		new DeferredResult().handleTimeout();
-	}
-
 	@Test
-	public void setAfterHandleTimeout() {
+	public void setAfterTimeoutValueUsed() {
 		DeferredResultHandler resultHandler = createMock(DeferredResultHandler.class);
-		DeferredResult deferredResult = new DeferredResult("foo");
-		deferredResult.init(resultHandler);
-
 		resultHandler.handle("foo");
 		replay(resultHandler);
 
-		deferredResult.handleTimeout();
+		DeferredResult<String> deferredResult = new DeferredResult<String>("foo");
+		deferredResult.init(resultHandler);
+
+		deferredResult.getTimeoutHandler().run();
 
 		verify(resultHandler);
 
@@ -96,14 +91,13 @@ public class DeferredResultTests {
 	}
 
 	@Test
-	public void setBeforeHandleTimeout() {
+	public void setBeforeTimeoutValueUsed() {
 		DeferredResultHandler resultHandler = createMock(DeferredResultHandler.class);
-		DeferredResult deferredResult = new DeferredResult("foo");
-		deferredResult.init(resultHandler);
-
 		resultHandler.handle("foo");
 		replay(resultHandler);
 
+		DeferredResult<String> deferredResult = new DeferredResult<String>("foo");
+		deferredResult.init(resultHandler);
 		deferredResult.set("foo");
 
 		verify(resultHandler);
@@ -111,7 +105,7 @@ public class DeferredResultTests {
 		reset(resultHandler);
 		replay(resultHandler);
 
-		deferredResult.handleTimeout();
+		deferredResult.getTimeoutHandler().run();
 
 		verify(resultHandler);
 	}

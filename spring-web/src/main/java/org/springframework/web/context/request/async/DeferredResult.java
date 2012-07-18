@@ -47,68 +47,68 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public final class DeferredResult {
+public final class DeferredResult<V> {
 
-	private final static Object TIMEOUT_RESULT_NONE = new Object();
-
-	private Object result;
-
-	private final Object timeoutResult;
+	private V result;
 
 	private DeferredResultHandler resultHandler;
 
-	private final CountDownLatch readySignal = new CountDownLatch(1);
+	private final V timeoutValue;
 
-	private final ReentrantLock timeoutLock = new ReentrantLock();
+	private final boolean timeoutValueSet;
+
+	private boolean timeoutValueUsed;
+
+	private final CountDownLatch initializationLatch = new CountDownLatch(1);
+
+	private final ReentrantLock setLock = new ReentrantLock();
 
 	/**
 	 * Create a new instance.
 	 */
 	public DeferredResult() {
-		this(TIMEOUT_RESULT_NONE);
+		this.timeoutValue = null;
+		this.timeoutValueSet = false;
 	}
 
 	/**
-	 * Create a new instance and also provide a default result to use if a
-	 * timeout occurs before {@link #set(Object)} is called.
+	 * Create a new instance also providing a default value to set if a timeout
+	 * occurs before {@link #set(Object)} is called.
 	 */
-	public DeferredResult(Object timeoutResult) {
-		this.timeoutResult = timeoutResult;
-	}
-
-	boolean canHandleTimeout() {
-		return this.timeoutResult != TIMEOUT_RESULT_NONE;
+	public DeferredResult(V timeoutValue) {
+		this.timeoutValue = timeoutValue;
+		this.timeoutValueSet = true;
 	}
 
 	/**
-	 * Complete async processing with the given result. If the DeferredResult is
-	 * not yet fully initialized, this method will block and wait for that to
+	 * Complete async processing with the given value. If the DeferredResult is
+	 * not fully initialized yet, this method will block and wait for that to
 	 * occur before proceeding. See the class level javadoc for more details.
 	 *
 	 * @throws StaleAsyncWebRequestException if the underlying async request
 	 * has already timed out or ended due to a network error.
 	 */
-	public void set(Object result) throws StaleAsyncWebRequestException {
-		if (this.timeoutLock.tryLock() && (this.result != this.timeoutResult)) {
+	public void set(V value) throws StaleAsyncWebRequestException {
+		if (this.setLock.tryLock() && (!this.timeoutValueUsed)) {
 			try {
-				handle(result);
+				handle(value);
 			}
 			finally {
-				this.timeoutLock.unlock();
+				this.setLock.unlock();
 			}
 		}
 		else {
-			// A timeout is in progress
-			throw new StaleAsyncWebRequestException("Async request already timed out");
+			// A timeout is in progress or has already occurred
+			throw new StaleAsyncWebRequestException("Async request timed out");
 		}
 	}
 
 	/**
-	 * A variant of {@link #set(Object)} that absorbs a potential, resulting
+	 * An alternative to {@link #set(Object)} that absorbs a potential
 	 * {@link StaleAsyncWebRequestException}.
 	 * @return {@code false} if the outcome was a {@code StaleAsyncWebRequestException}
 	 */
-	public boolean trySet(Object result) throws StaleAsyncWebRequestException {
+	public boolean trySet(V result) throws StaleAsyncWebRequestException {
 		try {
 			set(result);
 			return true;
@@ -119,29 +119,12 @@ public final class DeferredResult {
 		return false;
 	}
 
-	/**
-	 * Invoked to complete async processing when a timeout occurs before
-	 * {@link #set(Object)} is called. Or if {@link #set(Object)} is already in
-	 * progress, this method blocks, waits for it to complete, and then returns.
-	 */
-	void handleTimeout() {
-		Assert.state(canHandleTimeout(), "Can't handle timeout");
-		this.timeoutLock.lock();
-		try {
-			if (this.result == null) {
-				handle(this.timeoutResult);
-			}
-		}
-		finally {
-			this.timeoutLock.unlock();
-		}
-	}
-
-	private void handle(Object result) throws StaleAsyncWebRequestException {
+	private void handle(V result) throws StaleAsyncWebRequestException {
 		Assert.isNull(this.result, "A deferred result can be set once only");
 		this.result = result;
+		this.timeoutValueUsed = (this.timeoutValueSet && (this.result == this.timeoutValue));
 		try {
-			this.readySignal.await(10, TimeUnit.SECONDS);
+			this.initializationLatch.await(10, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e) {
 			throw new IllegalStateException(
@@ -153,9 +136,35 @@ public final class DeferredResult {
 		this.resultHandler.handle(result);
 	}
 
+	/**
+	 * Return a handler to use to complete processing using the default timeout value
+	 * provided via {@link #DeferredResult(Object)} or {@code null} if no timeout
+	 * value was provided.
+	 */
+	Runnable getTimeoutHandler() {
+		if (!this.timeoutValueSet) {
+			return null;
+		}
+		return new Runnable() {
+			public void run() { useTimeoutValue(); }
+		};
+	}
+
+	private void useTimeoutValue() {
+		this.setLock.lock();
+		try {
+			if (this.result == null) {
+				handle(this.timeoutValue);
+				this.timeoutValueUsed = true;
+			}
+		} finally {
+			this.setLock.unlock();
+		}
+	}
+
 	void init(DeferredResultHandler handler) {
 		this.resultHandler = handler;
-		this.readySignal.countDown();
+		this.initializationLatch.countDown();
 	}
 
 

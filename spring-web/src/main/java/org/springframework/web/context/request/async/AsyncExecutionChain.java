@@ -181,7 +181,7 @@ public final class AsyncExecutionChain {
 	 * the threading model, i.e. whether a TaskExecutor is used.
 	 * @see DeferredResult
 	 */
-	public void startDeferredResultProcessing(final DeferredResult deferredResult) {
+	public void startDeferredResultProcessing(final DeferredResult<?> deferredResult) {
 		Assert.notNull(deferredResult, "DeferredResult is required");
 		startAsync();
 		deferredResult.init(new DeferredResultHandler() {
@@ -193,13 +193,7 @@ public final class AsyncExecutionChain {
 				new AsyncExecutionChainRunnable(asyncWebRequest, buildChain()).run();
 			}
 		});
-		if (deferredResult.canHandleTimeout()) {
-			this.asyncWebRequest.setTimeoutHandler(new Runnable() {
-				public void run() {
-					deferredResult.handleTimeout();
-				}
-			});
-		}
+		this.asyncWebRequest.setTimeoutHandler(deferredResult.getTimeoutHandler());
 	}
 
 

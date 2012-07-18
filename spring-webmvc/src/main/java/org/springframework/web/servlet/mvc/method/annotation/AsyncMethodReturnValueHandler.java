@@ -63,7 +63,7 @@ public class AsyncMethodReturnValueHandler implements HandlerMethodReturnValueHa
 			chain.startCallableChainProcessing();
 		}
 		else if (DeferredResult.class.isAssignableFrom(paramType)) {
-			chain.startDeferredResultProcessing((DeferredResult) returnValue);
+			chain.startDeferredResultProcessing((DeferredResult<?>) returnValue);
 		}
 		else {
 			// should never happen..
