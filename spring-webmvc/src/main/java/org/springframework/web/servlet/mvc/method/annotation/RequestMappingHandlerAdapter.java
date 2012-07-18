@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.transform.Source;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -665,15 +667,26 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	private AsyncWebRequest createAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		AsyncWebRequest asyncRequest;
 		if (ClassUtils.hasMethod(ServletRequest.class, "startAsync")) {
-			asyncRequest = new org.springframework.web.context.request.async.StandardServletAsyncWebRequest(request, response);
+			AsyncWebRequest asyncRequest = instantiateStandardServletAsyncWebRequest(request, response);
 			asyncRequest.setTimeout(this.asyncRequestTimeout);
+			return asyncRequest;
 		}
 		else {
-			asyncRequest = new NoOpAsyncWebRequest(request, response);
+			return new NoOpAsyncWebRequest(request, response);
 		}
-		return asyncRequest;
+	}
+
+	private AsyncWebRequest instantiateStandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
+		String className = "org.springframework.web.context.request.async.StandardServletAsyncWebRequest";
+		try {
+			Class<?> clazz = ClassUtils.forName(className, this.getClass().getClassLoader());
+			Constructor<?> constructor = clazz.getConstructor(HttpServletRequest.class, HttpServletResponse.class);
+			return (AsyncWebRequest) BeanUtils.instantiateClass(constructor , request, response);
+		}
+		catch (Throwable t) {
+			throw new IllegalStateException("Failed to instantiate StandardServletAsyncWebRequest", t);
+		}
 	}
 
 	private ServletInvocableHandlerMethod createRequestMappingMethod(HandlerMethod handlerMethod,

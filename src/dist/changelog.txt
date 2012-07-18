@@ -22,7 +22,8 @@ Changes in version 3.2 M2 (2012-08-xx)
 * add @ExceptionResolver annotation to detect classes with @ExceptionHandler methods
 * move RSS/Atom message converter registration ahead of jackson/jaxb2
 * handle BindException in DefaultHandlerExceptionResolver
-* Parameterize DefaultResult type
+* parameterize DefaultResult type
+* use reflection to instantiate StandardServletAsyncWebRequest
 
 
 Changes in version 3.2 M1 (2012-05-28)
