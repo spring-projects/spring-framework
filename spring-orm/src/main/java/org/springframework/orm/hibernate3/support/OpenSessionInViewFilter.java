@@ -217,7 +217,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 					closeSession(sessionHolder.getSession(), sessionFactory);
 				}
 				else {
-					if (!chain.pop()) {
+					if (chain.isAsyncStarted()) {
 						throw new IllegalStateException("Deferred close is not supported with async requests.");
 					}
 					// deferred close mode
