@@ -273,6 +273,18 @@
 									</xsd:attribute>
 								</xsd:complexType>
 							</xsd:element>
+							<xsd:element name="exclude-mapping" minOccurs="0" maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:attribute name="path" type="xsd:string" use="required">
+										<xsd:annotation>
+											<xsd:documentation><![CDATA[
+	A path into the application that should not be intercepted by this interceptor.
+	Exact path mapping URIs (such as "/admin") are supported as well as Ant-stype path patterns (such as /admin/**).
+											]]></xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
+								</xsd:complexType>
+							</xsd:element>
 							<xsd:choice>
 								<xsd:element ref="beans:bean">
 									<xsd:annotation>

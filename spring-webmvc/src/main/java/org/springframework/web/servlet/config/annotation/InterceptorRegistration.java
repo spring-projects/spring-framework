@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 
 /**
- * Encapsulates a {@link HandlerInterceptor} and an optional list of URL patterns.
- * Results in the creation of a {@link MappedInterceptor} if URL patterns are provided.
- * 
+ * Assists with the creation of a {@link MappedInterceptor}.
+ *
  * @author Rossen Stoyanchev
  * @author Keith Donald
  * @since 3.1
@@ -35,8 +35,10 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 public class InterceptorRegistration {
 
 	private final HandlerInterceptor interceptor;
-	
-	private final List<String> pathPatterns = new ArrayList<String>();
+
+	private final List<String> includePatterns = new ArrayList<String>();
+
+	private final List<String> excludePatterns = new ArrayList<String>();
 
 	/**
 	 * Creates an {@link InterceptorRegistration} instance.
@@ -47,22 +49,39 @@ public class InterceptorRegistration {
 	}
 
 	/**
-	 * Adds one or more URL patterns to which the registered interceptor should apply to.
-	 * If no URL patterns are provided, the interceptor applies to all paths.
+	 * Add URL patterns to which the registered interceptor should apply to.
 	 */
-	public void addPathPatterns(String... pathPatterns) {
-		this.pathPatterns.addAll(Arrays.asList(pathPatterns));
+	public InterceptorRegistration addPathPatterns(String... patterns) {
+		this.includePatterns.addAll(Arrays.asList(patterns));
+		return this;
 	}
 
 	/**
-	 * Returns the underlying interceptor. If URL patterns are provided the returned type is 
+	 * Add URL patterns to which the registered interceptor should not apply to.
+	 */
+	public InterceptorRegistration excludePathPatterns(String... patterns) {
+		this.excludePatterns.addAll(Arrays.asList(patterns));
+		return this;
+	}
+
+	/**
+	 * Returns the underlying interceptor. If URL patterns are provided the returned type is
 	 * {@link MappedInterceptor}; otherwise {@link HandlerInterceptor}.
 	 */
 	protected Object getInterceptor() {
-		if (pathPatterns.isEmpty()) {
-			return interceptor;
+		if (this.includePatterns.isEmpty()) {
+			return this.interceptor;
 		}
-		return new MappedInterceptor(pathPatterns.toArray(new String[pathPatterns.size()]), interceptor);
+		return new MappedInterceptor(toArray(this.includePatterns), toArray(this.excludePatterns), interceptor);
+	}
+
+	private static String[] toArray(List<String> list) {
+		if (CollectionUtils.isEmpty(list)) {
+			return null;
+		}
+		else {
+			return list.toArray(new String[list.size()]);
+		}
 	}
 
 }

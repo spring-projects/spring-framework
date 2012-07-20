@@ -4453,7 +4453,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(new LocalInterceptor());
+    registry.addInterceptor(new LocaleInterceptor());
+    registry.addInterceptor(new ThemeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**");
     registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/secure/*");
  }
 
@@ -4463,6 +4464,11 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
       <programlisting language="xml">&lt;mvc:interceptors&gt;
     &lt;bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" /&gt;
+    &lt;mvc:interceptor&gt;
+        &lt;mapping path="/**"/&gt;
+        &lt;exclude-mapping path="/admin/**"/&gt;
+        &lt;bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" /&gt;
+    &lt;/mvc:interceptor&gt;
     &lt;mvc:interceptor&gt;
         &lt;mapping path="/secure/*"/&gt;
         &lt;bean class="org.example.SecurityInterceptor" /&gt;

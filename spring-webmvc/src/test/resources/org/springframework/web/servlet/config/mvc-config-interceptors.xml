@@ -3,7 +3,7 @@
     xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
 
 	<mvc:annotation-driven />
 
@@ -12,6 +12,8 @@
 		<ref bean="log4jInterceptor"/>
 		<mvc:interceptor>
 			<mvc:mapping path="/**" />
+			<mvc:exclude-mapping path="/admin/**" />
+			<mvc:exclude-mapping path="/images/**" />
 			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
 		</mvc:interceptor>
 		<mvc:interceptor>

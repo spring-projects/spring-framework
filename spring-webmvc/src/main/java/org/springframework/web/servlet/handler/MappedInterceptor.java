@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,30 +29,50 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * @since 3.0
  */
 public final class MappedInterceptor {
-	
-	private final String[] pathPatterns;
-	
+
+	private final String[] includePatterns;
+
+	private final String[] excludePatterns;
+
 	private final HandlerInterceptor interceptor;
 
+
+	/**
+	 * Create a new MappedInterceptor instance.
+	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
+	 * @param interceptor the HandlerInterceptor instance to map to the given patterns
+	 */
+	public MappedInterceptor(String[] includePatterns, HandlerInterceptor interceptor) {
+		this(includePatterns, null, interceptor);
+	}
 
 	/**
 	 * Create a new MappedInterceptor instance.
 	 * @param pathPatterns the path patterns to map with a {@code null} value matching to all paths
 	 * @param interceptor the HandlerInterceptor instance to map to the given patterns
 	 */
-	public MappedInterceptor(String[] pathPatterns, HandlerInterceptor interceptor) {
-		this.pathPatterns = pathPatterns;
+	public MappedInterceptor(String[] includePatterns, String[] excludePatterns, HandlerInterceptor interceptor) {
+		this.includePatterns = includePatterns;
+		this.excludePatterns = excludePatterns;
 		this.interceptor = interceptor;
 	}
 
 	/**
 	 * Create a new MappedInterceptor instance.
-	 * @param pathPatterns the path patterns to map with a {@code null} value matching to all paths
+	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
 	 * @param interceptor the WebRequestInterceptor instance to map to the given patterns
 	 */
-	public MappedInterceptor(String[] pathPatterns, WebRequestInterceptor interceptor) {
-		this.pathPatterns = pathPatterns;
-		this.interceptor = new WebRequestHandlerInterceptorAdapter(interceptor);
+	public MappedInterceptor(String[] includePatterns, WebRequestInterceptor interceptor) {
+		this(includePatterns, null, interceptor);
+	}
+
+	/**
+	 * Create a new MappedInterceptor instance.
+	 * @param includePatterns the path patterns to map with a {@code null} value matching to all paths
+	 * @param interceptor the WebRequestInterceptor instance to map to the given patterns
+	 */
+	public MappedInterceptor(String[] includePatterns, String[] excludePatterns, WebRequestInterceptor interceptor) {
+		this(includePatterns, excludePatterns, new WebRequestHandlerInterceptorAdapter(interceptor));
 	}
 
 
@@ -60,7 +80,7 @@ public final class MappedInterceptor {
 	 * The path into the application the interceptor is mapped to.
 	 */
 	public String[] getPathPatterns() {
-		return this.pathPatterns;
+		return this.includePatterns;
 	}
 
 	/**
@@ -69,19 +89,26 @@ public final class MappedInterceptor {
 	public HandlerInterceptor getInterceptor() {
 		return this.interceptor;
 	}
-	
+
 	/**
-	 * Returns {@code true} if the interceptor applies to the given request path. 
+	 * Returns {@code true} if the interceptor applies to the given request path.
 	 * @param lookupPath the current request path
 	 * @param pathMatcher a path matcher for path pattern matching
 	 */
 	public boolean matches(String lookupPath, PathMatcher pathMatcher) {
-		if (pathPatterns == null) {
+		if (this.excludePatterns != null) {
+			for (String pattern : this.excludePatterns) {
+				if (pathMatcher.match(pattern, lookupPath)) {
+					return false;
+				}
+			}
+		}
+		if (this.includePatterns == null) {
 			return true;
 		}
 		else {
-			for (String pathPattern : pathPatterns) {
-				if (pathMatcher.match(pathPattern, lookupPath)) {
+			for (String pattern : this.includePatterns) {
+				if (pathMatcher.match(pattern, lookupPath)) {
 					return true;
 				}
 			}
