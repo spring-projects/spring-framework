@@ -81,14 +81,14 @@ public class RequestContextFilter extends OncePerRequestFilter {
 		initContextHolders(request, attributes);
 
 		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.addDelegatingCallable(getChainedCallable(request, attributes));
+		chain.push(getChainedCallable(request, attributes));
 
 		try {
 			filterChain.doFilter(request, response);
 		}
 		finally {
 			resetContextHolders();
-			if (chain.isAsyncStarted()) {
+			if (!chain.pop()) {
 				return;
 			}
 			attributes.requestCompleted();
@@ -121,7 +121,7 @@ public class RequestContextFilter extends OncePerRequestFilter {
 			public Object call() throws Exception {
 				initContextHolders(request, requestAttributes);
 				try {
-					getNextCallable().call();
+					getNext().call();
 				}
 				finally {
 					resetContextHolders();

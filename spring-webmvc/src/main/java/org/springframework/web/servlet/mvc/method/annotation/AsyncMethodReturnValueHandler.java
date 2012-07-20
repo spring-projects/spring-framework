@@ -59,8 +59,8 @@ public class AsyncMethodReturnValueHandler implements HandlerMethodReturnValueHa
 		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(servletRequest);
 
 		if (Callable.class.isAssignableFrom(paramType)) {
-			chain.setCallable((Callable<Object>) returnValue);
-			chain.startCallableChainProcessing();
+			chain.setLastCallable((Callable<Object>) returnValue);
+			chain.startCallableProcessing();
 		}
 		else if (DeferredResult.class.isAssignableFrom(paramType)) {
 			chain.startDeferredResultProcessing((DeferredResult<?>) returnValue);

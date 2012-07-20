@@ -39,7 +39,7 @@ public class StaleAsyncRequestCheckingCallableTests {
 	public void setUp() {
 		this.asyncWebRequest = EasyMock.createMock(AsyncWebRequest.class);
 		this.callable = new StaleAsyncRequestCheckingCallable(asyncWebRequest);
-		this.callable.setNextCallable(new Callable<Object>() {
+		this.callable.setNext(new Callable<Object>() {
 			public Object call() throws Exception {
 				return 1;
 			}

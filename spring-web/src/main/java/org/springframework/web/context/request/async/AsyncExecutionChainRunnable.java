@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 3.2
  *
- * @see AsyncExecutionChain#startCallableChainProcessing()
+ * @see AsyncExecutionChain#startCallableProcessing()
  * @see AsyncExecutionChain#startDeferredResultProcessing(DeferredResult)
  */
 public class AsyncExecutionChainRunnable implements Runnable {

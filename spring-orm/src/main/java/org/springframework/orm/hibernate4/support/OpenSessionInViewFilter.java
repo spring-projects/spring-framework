@@ -119,7 +119,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			SessionHolder sessionHolder = new SessionHolder(session);
 			TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 
-			chain.addDelegatingCallable(getAsyncCallable(request, sessionFactory, sessionHolder));
+			chain.push(getAsyncCallable(request, sessionFactory, sessionHolder));
 		}
 
 		try {
@@ -130,7 +130,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			if (!participate) {
 				SessionHolder sessionHolder =
 						(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
-				if (chain.isAsyncStarted()) {
+				if (!chain.pop()) {
 					return;
 				}
 				logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
@@ -198,7 +198,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			public Object call() throws Exception {
 				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 				try {
-					getNextCallable().call();
+					getNext().call();
 				}
 				finally {
 					SessionHolder sessionHolder =

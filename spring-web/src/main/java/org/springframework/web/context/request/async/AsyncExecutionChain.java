@@ -16,8 +16,8 @@
 
 package org.springframework.web.context.request.async;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.concurrent.Callable;
 
 import javax.servlet.ServletRequest;
@@ -31,18 +31,20 @@ import org.springframework.web.context.request.async.DeferredResult.DeferredResu
 
 /**
  * The central class for managing async request processing, mainly intended as
- * an SPI and typically not by non-framework classes.
+ * an SPI and not typically used directly by application classes.
  *
- * <p>An async execution chain consists of a sequence of Callable instances and
- * represents the work required to complete request processing in a separate
- * thread. To construct the chain, each layer in the call stack of a normal
- * request (e.g. filter, servlet) may contribute an
- * {@link AbstractDelegatingCallable} when a request is being processed.
- * For example the DispatcherServlet might contribute a Callable that
- * performs view resolution while a HandlerAdapter might contribute a Callable
- * that returns the ModelAndView, etc. The last Callable is the one that
- * actually produces an application-specific value, for example the Callable
- * returned by an {@code @RequestMapping} method.
+ * <p>An async execution chain consists of a sequence of Callable instances that
+ * represent the work required to complete request processing in a separate thread.
+ * To construct the chain, each level of the call stack pushes an
+ * {@link AbstractDelegatingCallable} during the course of a normal request and
+ * pops (removes) it on the way out. If async processing has not started, the pop
+ * operation succeeds and the processing continues as normal, or otherwise if async
+ * processing has begun, the main processing thread must be exited.
+ *
+ * <p>For example the DispatcherServlet might contribute a Callable that completes
+ * view resolution or the HandlerAdapter might contribute a Callable that prepares a
+ * ModelAndView while the last Callable in the chain is usually associated with the
+ * application, e.g. the return value of an {@code @RequestMapping} method.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -51,13 +53,13 @@ public final class AsyncExecutionChain {
 
 	public static final String CALLABLE_CHAIN_ATTRIBUTE = AsyncExecutionChain.class.getName() + ".CALLABLE_CHAIN";
 
-	private final List<AbstractDelegatingCallable> delegatingCallables = new ArrayList<AbstractDelegatingCallable>();
+	private final Deque<AbstractDelegatingCallable> callables = new ArrayDeque<AbstractDelegatingCallable>();
 
-	private Callable<Object> callable;
+	private Callable<Object> lastCallable;
 
 	private AsyncWebRequest asyncWebRequest;
 
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("AsyncExecutionChain");
+	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
 
 	/**
 	 * Private constructor
@@ -68,7 +70,7 @@ public final class AsyncExecutionChain {
 
 	/**
 	 * Obtain the AsyncExecutionChain for the current request.
-	 * Or if not found, create an instance and associate it with the request.
+	 * Or if not found, create it and associate it with the request.
 	 */
 	public static AsyncExecutionChain getForCurrentRequest(ServletRequest request) {
 		AsyncExecutionChain chain = (AsyncExecutionChain) request.getAttribute(CALLABLE_CHAIN_ATTRIBUTE);
@@ -81,7 +83,7 @@ public final class AsyncExecutionChain {
 
 	/**
 	 * Obtain the AsyncExecutionChain for the current request.
-	 * Or if not found, create an instance and associate it with the request.
+	 * Or if not found, create it and associate it with the request.
 	 */
 	public static AsyncExecutionChain getForCurrentRequest(WebRequest request) {
 		int scope = RequestAttributes.SCOPE_REQUEST;
@@ -94,105 +96,106 @@ public final class AsyncExecutionChain {
 	}
 
 	/**
-	 * Provide an instance of an AsyncWebRequest.
-	 * This property must be set before async request processing can begin.
+	 * Provide an instance of an AsyncWebRequest -- required for async processing.
 	 */
 	public void setAsyncWebRequest(AsyncWebRequest asyncRequest) {
+		Assert.state(!isAsyncStarted(), "Cannot set AsyncWebRequest after the start of async processing.");
 		this.asyncWebRequest = asyncRequest;
 	}
 
 	/**
-	 * Provide an AsyncTaskExecutor to use when
-	 * {@link #startCallableChainProcessing()} is invoked, for example when a
-	 * controller method returns a Callable.
-	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used.
+	 * Provide an AsyncTaskExecutor for use with {@link #startCallableProcessing()}.
+	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used. Applications are
+	 * advised to provide a TaskExecutor configured for production use.
+	 * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setAsyncTaskExecutor
 	 */
 	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
-	 * Whether async request processing has started through one of:
-	 * <ul>
-	 * 	<li>{@link #startCallableChainProcessing()}
-	 * 	<li>{@link #startDeferredResultProcessing(DeferredResult)}
-	 * </ul>
+	 * Push an async Callable for the current stack level. This method should be
+	 * invoked before delegating to the next level of the stack where async
+	 * processing may start.
+	 */
+	public void push(AbstractDelegatingCallable callable) {
+		Assert.notNull(callable, "Async Callable is required");
+		this.callables.addFirst(callable);
+	}
+
+	/**
+	 * Pop the Callable of the current stack level. Ensure this method is invoked
+	 * after delegation to the next level of the stack where async processing may
+	 * start. The pop operation succeeds if async processing did not start.
+	 * @return {@code true} if the Callable was removed, or {@code false}
+	 * 	otherwise (i.e. async started).
+	 */
+	public boolean pop() {
+		if (isAsyncStarted()) {
+			return false;
+		}
+		else {
+			this.callables.removeFirst();
+			return true;
+		}
+	}
+
+	/**
+	 * Whether async request processing has started.
 	 */
 	public boolean isAsyncStarted() {
 		return ((this.asyncWebRequest != null) && this.asyncWebRequest.isAsyncStarted());
 	}
 
 	/**
-	 * Add a Callable with logic required to complete request processing in a
-	 * separate thread. See {@link AbstractDelegatingCallable} for details.
+	 * Set the last Callable, e.g. the one returned by the controller.
 	 */
-	public void addDelegatingCallable(AbstractDelegatingCallable callable) {
+	public AsyncExecutionChain setLastCallable(Callable<Object> callable) {
 		Assert.notNull(callable, "Callable required");
-		this.delegatingCallables.add(callable);
-	}
-
-	/**
-	 * Add the last Callable, for example the one returned by the controller.
-	 * This property must be set prior to invoking
-	 * {@link #startCallableChainProcessing()}.
-	 */
-	public AsyncExecutionChain setCallable(Callable<Object> callable) {
-		Assert.notNull(callable, "Callable required");
-		this.callable = callable;
+		this.lastCallable = callable;
 		return this;
 	}
 
 	/**
-	 * Start the async execution chain by submitting an
-	 * {@link AsyncExecutionChainRunnable} instance to the TaskExecutor provided via
-	 * {@link #setTaskExecutor(AsyncTaskExecutor)} and returning immediately.
-	 * @see AsyncExecutionChainRunnable
+	 * Start async processing and execute the async chain with an AsyncTaskExecutor.
+	 * This method returns immediately.
 	 */
-	public void startCallableChainProcessing() {
-		startAsync();
+	public void startCallableProcessing() {
+		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest was not set");
+		this.asyncWebRequest.startAsync();
 		this.taskExecutor.execute(new AsyncExecutionChainRunnable(this.asyncWebRequest, buildChain()));
 	}
 
-	private void startAsync() {
-		Assert.state(this.asyncWebRequest != null, "An AsyncWebRequest is required to start async processing");
-		this.asyncWebRequest.startAsync();
-	}
-
 	private Callable<Object> buildChain() {
-		Assert.state(this.callable != null, "The last callable is required to build the async chain");
-		this.delegatingCallables.add(new StaleAsyncRequestCheckingCallable(asyncWebRequest));
-		Callable<Object> result = this.callable;
-		for (int i = this.delegatingCallables.size() - 1; i >= 0; i--) {
-			AbstractDelegatingCallable callable = this.delegatingCallables.get(i);
-			callable.setNextCallable(result);
-			result = callable;
+		Assert.state(this.lastCallable != null, "The last Callable was not set");
+		AbstractDelegatingCallable head = new StaleAsyncRequestCheckingCallable(this.asyncWebRequest);
+		head.setNext(this.lastCallable);
+		for (AbstractDelegatingCallable callable : this.callables) {
+			callable.setNext(head);
+			head = callable;
 		}
-		return result;
+		return head;
 	}
 
 	/**
-	 * Mark the start of async request processing accepting the provided
-	 * DeferredResult and initializing it such that if
-	 * {@link DeferredResult#set(Object)} is called (from another thread),
-	 * the set Object value will be processed with the execution chain by
-	 * invoking {@link AsyncExecutionChainRunnable}.
-	 * <p>The resulting processing from this method is identical to
-	 * {@link #startCallableChainProcessing()}. The main difference is in
-	 * the threading model, i.e. whether a TaskExecutor is used.
-	 * @see DeferredResult
+	 * Start async processing and initialize the given DeferredResult so when
+	 * its value is set, the async chain is executed with an AsyncTaskExecutor.
 	 */
 	public void startDeferredResultProcessing(final DeferredResult<?> deferredResult) {
 		Assert.notNull(deferredResult, "DeferredResult is required");
-		startAsync();
+		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest was not set");
+		this.asyncWebRequest.startAsync();
+
 		deferredResult.init(new DeferredResultHandler() {
 			public void handle(Object result) {
 				if (asyncWebRequest.isAsyncCompleted()) {
-					throw new StaleAsyncWebRequestException("Async request processing already completed");
+					throw new StaleAsyncWebRequestException("Too late to set DeferredResult: " + result);
 				}
-				setCallable(new PassThroughCallable(result));
-				new AsyncExecutionChainRunnable(asyncWebRequest, buildChain()).run();
+				setLastCallable(new PassThroughCallable(result));
+				taskExecutor.execute(new AsyncExecutionChainRunnable(asyncWebRequest, buildChain()));
 			}
 		});
+
 		this.asyncWebRequest.setTimeoutHandler(deferredResult.getTimeoutHandler());
 	}
 

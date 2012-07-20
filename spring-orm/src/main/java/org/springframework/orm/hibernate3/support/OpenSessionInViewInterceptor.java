@@ -181,7 +181,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 		return new AbstractDelegatingCallable() {
 			public Object call() throws Exception {
 				TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
-				getNextCallable().call();
+				getNext().call();
 				return null;
 			}
 		};

@@ -817,8 +817,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		AsyncExecutionChain asyncChain = AsyncExecutionChain.getForCurrentRequest(request);
-
 		if (logger.isDebugEnabled()) {
 			String requestUri = urlPathHelper.getRequestUri(request);
 			logger.debug("DispatcherServlet with name '" + getServletName() + "' processing " + request.getMethod() +
@@ -853,13 +851,14 @@ public class DispatcherServlet extends FrameworkServlet {
 		request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
 		request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE, this.flashMapManager);
 
-		asyncChain.addDelegatingCallable(getServiceAsyncCallable(request, attributesSnapshot));
+		AsyncExecutionChain asyncChain = AsyncExecutionChain.getForCurrentRequest(request);
+		asyncChain.push(getServiceAsyncCallable(request, attributesSnapshot));
 
 		try {
 			doDispatch(request, response);
 		}
 		finally {
-			if (asyncChain.isAsyncStarted()) {
+			if (!asyncChain.pop()) {
 				return;
 			}
 			// Restore the original attribute snapshot, in case of an include.
@@ -881,7 +880,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					logger.debug("Resuming asynchronous processing of " + request.getMethod() +
 							" request for [" + urlPathHelper.getRequestUri(request) + "]");
 				}
-				getNextCallable().call();
+				getNext().call();
 				if (attributesSnapshot != null) {
 					restoreAttributesAfterInclude(request, attributesSnapshot);
 				}
@@ -904,7 +903,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HttpServletRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
+
 		AsyncExecutionChain asyncChain = AsyncExecutionChain.getForCurrentRequest(request);
+		boolean asyncStarted = false;
 
 		try {
 			ModelAndView mv = null;
@@ -941,22 +942,23 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
-				mappedHandler.addDelegatingCallables(processedRequest, response);
+				mappedHandler.pushInterceptorCallables(processedRequest, response);
+				asyncChain.push(getDispatchAsyncCallable(mappedHandler, request, response, processedRequest));
 
-				asyncChain.addDelegatingCallable(
-						getDispatchAsyncCallable(mappedHandler, request, response, processedRequest));
-
-				// Actually invoke the handler.
-				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
-
-				if (asyncChain.isAsyncStarted()) {
-					mappedHandler.applyPostHandleAsyncStarted(processedRequest, response);
-					logger.debug("Exiting request thread and leaving the response open");
-					return;
+				try {
+					// Actually invoke the handler.
+					mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+				}
+				finally {
+					asyncStarted = !asyncChain.pop();
+					mappedHandler.popInterceptorCallables(processedRequest, response, asyncStarted);
+					if (asyncStarted) {
+						logger.debug("Exiting request thread and leaving the response open");
+						return;
+					}
 				}
 
 				applyDefaultViewName(request, mv);
-
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -971,7 +973,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			triggerAfterCompletionWithError(processedRequest, response, mappedHandler, err);
 		}
 		finally {
-			if (asyncChain.isAsyncStarted()) {
+			if (asyncStarted) {
 				return;
 			}
 			// Clean up any resources used by a multipart request.
@@ -1044,7 +1046,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					ModelAndView mv = null;
 					Exception dispatchException = null;
 					try {
-						mv = (ModelAndView) getNextCallable().call();
+						mv = (ModelAndView) getNext().call();
 						applyDefaultViewName(processedRequest, mv);
 						mappedHandler.applyPostHandle(request, response, mv);
 					}

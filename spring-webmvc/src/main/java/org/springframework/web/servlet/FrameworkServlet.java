@@ -906,7 +906,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		initContextHolders(request, localeContext, requestAttributes);
 
 		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.addDelegatingCallable(getAsyncCallable(startTime, request, response,
+		chain.push(getAsyncCallable(startTime, request, response,
 				previousLocaleContext, previousAttributes, localeContext, requestAttributes));
 
 		try {
@@ -917,7 +917,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		}
 		finally {
 			resetContextHolders(request, previousLocaleContext, previousAttributes);
-			if (chain.isAsyncStarted()) {
+			if (!chain.pop()) {
 				return;
 			}
 			finalizeProcessing(startTime, request, response, requestAttributes, failureCause);
@@ -1018,7 +1018,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 				initContextHolders(request, localeContext, requestAttributes);
 				Throwable unhandledFailure = null;
 				try {
-					getNextCallable().call();
+					getNext().call();
 				}
 				catch (Throwable t) {
 					unhandledFailure = t;

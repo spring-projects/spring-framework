@@ -63,7 +63,7 @@ public class AsyncExecutionChainTests {
 		this.chain = AsyncExecutionChain.getForCurrentRequest(this.request);
 		this.chain.setTaskExecutor(new SyncTaskExecutor());
 		this.chain.setAsyncWebRequest(this.asyncWebRequest);
-		this.chain.addDelegatingCallable(this.resultSavingCallable);
+		this.chain.push(this.resultSavingCallable);
 	}
 
 	@Test
@@ -79,29 +79,32 @@ public class AsyncExecutionChainTests {
 
 		this.asyncWebRequest.startAsync();
 		assertTrue(this.chain.isAsyncStarted());
+	}
 
+	@Test(expected=IllegalStateException.class)
+	public void setAsyncWebRequestAfterAsyncStarted() {
+		this.asyncWebRequest.startAsync();
 		this.chain.setAsyncWebRequest(null);
-		assertFalse(this.chain.isAsyncStarted());
 	}
 
 	@Test
 	public void startCallableChainProcessing() throws Exception {
-		this.chain.addDelegatingCallable(new IntegerIncrementingCallable());
-		this.chain.addDelegatingCallable(new IntegerIncrementingCallable());
-		this.chain.setCallable(new Callable<Object>() {
+		this.chain.push(new IntegerIncrementingCallable());
+		this.chain.push(new IntegerIncrementingCallable());
+		this.chain.setLastCallable(new Callable<Object>() {
 			public Object call() throws Exception {
 				return 1;
 			}
 		});
 
-		this.chain.startCallableChainProcessing();
+		this.chain.startCallableProcessing();
 
 		assertEquals(3, this.resultSavingCallable.result);
 	}
 
 	@Test
 	public void startCallableChainProcessing_staleRequest() {
-		this.chain.setCallable(new Callable<Object>() {
+		this.chain.setLastCallable(new Callable<Object>() {
 			public Object call() throws Exception {
 				return 1;
 			}
@@ -109,7 +112,7 @@ public class AsyncExecutionChainTests {
 
 		this.asyncWebRequest.startAsync();
 		this.asyncWebRequest.complete();
-		this.chain.startCallableChainProcessing();
+		this.chain.startCallableProcessing();
 		Exception ex = this.resultSavingCallable.exception;
 
 		assertNotNull(ex);
@@ -119,11 +122,11 @@ public class AsyncExecutionChainTests {
 	@Test
 	public void startCallableChainProcessing_requiredCallable() {
 		try {
-			this.chain.startCallableChainProcessing();
+			this.chain.startCallableProcessing();
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), containsString("last callable is required"));
+			assertEquals(ex.getMessage(), "The last Callable was not set");
 		}
 	}
 
@@ -131,18 +134,18 @@ public class AsyncExecutionChainTests {
 	public void startCallableChainProcessing_requiredAsyncWebRequest() {
 		this.chain.setAsyncWebRequest(null);
 		try {
-			this.chain.startCallableChainProcessing();
+			this.chain.startCallableProcessing();
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), containsString("AsyncWebRequest is required"));
+			assertEquals(ex.getMessage(), "AsyncWebRequest was not set");
 		}
 	}
 
 	@Test
 	public void startDeferredResultProcessing() throws Exception {
-		this.chain.addDelegatingCallable(new IntegerIncrementingCallable());
-		this.chain.addDelegatingCallable(new IntegerIncrementingCallable());
+		this.chain.push(new IntegerIncrementingCallable());
+		this.chain.push(new IntegerIncrementingCallable());
 
 		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
 		this.chain.startDeferredResultProcessing(deferredResult);
@@ -228,7 +231,7 @@ public class AsyncExecutionChainTests {
 
 		public Object call() throws Exception {
 			try {
-				this.result = getNextCallable().call();
+				this.result = getNext().call();
 			}
 			catch (Exception ex) {
 				this.exception = ex;
@@ -241,7 +244,7 @@ public class AsyncExecutionChainTests {
 	private static class IntegerIncrementingCallable extends AbstractDelegatingCallable {
 
 		public Object call() throws Exception {
-			return ((Integer) getNextCallable().call() + 1);
+			return ((Integer) getNext().call() + 1);
 		}
 	}
 

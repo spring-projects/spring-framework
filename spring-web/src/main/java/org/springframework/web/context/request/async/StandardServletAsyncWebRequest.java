@@ -76,8 +76,8 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 				"in async request processing. This is done in Java code using the Servlet API " +
 				"or by adding \"<async-supported>true</async-supported>\" to servlet and " +
 				"filter declarations in web.xml.");
-		assertNotStale();
 		Assert.state(!isAsyncStarted(), "Async processing already started");
+		Assert.state(!isAsyncCompleted(), "Cannot use async request that has completed");
 		this.asyncContext = getRequest().startAsync(getRequest(), getResponse());
 		this.asyncContext.addListener(this);
 		if (this.timeout != null) {
@@ -106,10 +106,6 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		catch (IOException ioEx) {
 			// absorb
 		}
-	}
-
-	private void assertNotStale() {
-		Assert.state(!isAsyncCompleted(), "Cannot use async request after completion");
 	}
 
 	// ---------------------------------------------------------------------

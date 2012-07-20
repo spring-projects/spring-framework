@@ -137,7 +137,7 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 		return new AbstractDelegatingCallable() {
 			public Object call() throws Exception {
 				TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
-				getNextCallable().call();
+				getNext().call();
 				return null;
 			}
 		};

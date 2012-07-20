@@ -24,6 +24,7 @@ Changes in version 3.2 M2 (2012-08-xx)
 * handle BindException in DefaultHandlerExceptionResolver
 * parameterize DeferredResult type
 * use reflection to instantiate StandardServletAsyncWebRequest
+* fix issue with forward before async request processing
 
 
 Changes in version 3.2 M1 (2012-05-28)

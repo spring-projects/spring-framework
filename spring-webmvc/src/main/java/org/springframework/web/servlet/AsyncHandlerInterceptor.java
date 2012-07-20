@@ -64,19 +64,17 @@ public interface AsyncHandlerInterceptor extends HandlerInterceptor {
 	AbstractDelegatingCallable getAsyncCallable(HttpServletRequest request, HttpServletResponse response, Object handler);
 
 	/**
-	 * Invoked <em>after</em> the execution of a handler if the handler started
+	 * Invoked <em>after</em> the execution of a handler but only if the handler started
 	 * async processing instead of handling the request. Effectively this method
-	 * is invoked on the way out of the main processing thread instead of
-	 * {@link #postHandle(WebRequest, org.springframework.ui.ModelMap)}. The
-	 * <code>postHandle</code> method is invoked after the request is handled
-	 * in the async thread.
-	 * <p>Implementations of this method can ensure ThreadLocal attributes bound
-	 * to the main thread are cleared and also prepare for binding them to the
-	 * async thread.
+	 * is invoked instead of {@link #postHandle(WebRequest, org.springframework.ui.ModelMap)}
+	 * on the way out of the main processing thread allowing implementations
+	 * to ensure ThreadLocal attributes are cleared. The <code>postHandle</code>
+	 * invocation is effectively delayed until after async processing when the
+	 * request has actually been handled.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance examination
 	 */
-	void postHandleAsyncStarted(HttpServletRequest request, HttpServletResponse response, Object handler);
+	void postHandleAfterAsyncStarted(HttpServletRequest request, HttpServletResponse response, Object handler);
 
 }

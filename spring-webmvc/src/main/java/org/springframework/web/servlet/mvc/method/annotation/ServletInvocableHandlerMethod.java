@@ -91,9 +91,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	public final void invokeAndHandle(ServletWebRequest webRequest,
 			ModelAndViewContainer mavContainer, Object... providedArgs) throws Exception {
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(webRequest.getRequest());
-		chain.addDelegatingCallable(geAsyncCallable(webRequest, mavContainer, providedArgs));
-
 		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
 
 		setResponseStatus(webRequest);
@@ -111,14 +108,20 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		mavContainer.setRequestHandled(false);
 
+		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(webRequest.getRequest());
+		chain.push(geAsyncCallable(webRequest, mavContainer, providedArgs));
+
 		try {
 			this.returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
-
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(getReturnValueHandlingErrorMessage("Error handling return value", returnValue), ex);
 			}
 			throw ex;
+		}
+		finally {
+			chain.pop();
 		}
 	}
 
@@ -131,7 +134,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		return new AbstractDelegatingCallable() {
 			public Object call() throws Exception {
 				mavContainer.setRequestHandled(false);
-				new CallableHandlerMethod(getNextCallable()).invokeAndHandle(webRequest, mavContainer, providedArgs);
+				new CallableHandlerMethod(getNext()).invokeAndHandle(webRequest, mavContainer, providedArgs);
 				return null;
 			}
 		};

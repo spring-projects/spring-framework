@@ -196,13 +196,13 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		beforeRequest(request, getBeforeMessage(request));
 
 		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.addDelegatingCallable(getAsyncCallable(request));
+		chain.push(getAsyncCallable(request));
 
 		try {
 			filterChain.doFilter(request, response);
 		}
 		finally {
-			if (chain.isAsyncStarted()) {
+			if (!chain.pop()) {
 				return;
 			}
 			afterRequest(request, getAfterMessage(request));
@@ -296,7 +296,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	private AbstractDelegatingCallable getAsyncCallable(final HttpServletRequest request) {
 		return new AbstractDelegatingCallable() {
 			public Object call() throws Exception {
-				getNextCallable().call();
+				getNext().call();
 				afterRequest(request, getAfterMessage(request));
 				return null;
 			}

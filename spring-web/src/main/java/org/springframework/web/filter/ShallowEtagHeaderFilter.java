@@ -61,11 +61,11 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		ShallowEtagResponseWrapper responseWrapper = new ShallowEtagResponseWrapper(response);
 
 		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.addDelegatingCallable(getAsyncCallable(request, response, responseWrapper));
+		chain.push(getAsyncCallable(request, response, responseWrapper));
 
 		filterChain.doFilter(request, responseWrapper);
 
-		if (chain.isAsyncStarted()) {
+		if (!chain.pop()) {
 			return;
 		}
 
@@ -80,7 +80,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 		return new AbstractDelegatingCallable() {
 			public Object call() throws Exception {
-				getNextCallable().call();
+				getNext().call();
 				updateResponse(request, response, responseWrapper);
 				return null;
 			}

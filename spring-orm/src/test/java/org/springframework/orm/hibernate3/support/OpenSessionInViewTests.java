@@ -176,7 +176,7 @@ public class OpenSessionInViewTests {
 		verify(sf);
 		verify(session);
 
-		asyncCallable.setNextCallable(new Callable<Object>() {
+		asyncCallable.setNext(new Callable<Object>() {
 			public Object call() {
 				return null;
 			}
@@ -484,7 +484,7 @@ public class OpenSessionInViewTests {
 		verify(asyncWebRequest);
 
 		chain.setTaskExecutor(new SyncTaskExecutor());
-		chain.setCallable(new Callable<Object>() {
+		chain.setLastCallable(new Callable<Object>() {
 			public Object call() {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				return null;
@@ -503,7 +503,7 @@ public class OpenSessionInViewTests {
 		replay(sf);
 		replay(session);
 
-		chain.startCallableChainProcessing();
+		chain.startCallableProcessing();
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 
 		verify(sf);

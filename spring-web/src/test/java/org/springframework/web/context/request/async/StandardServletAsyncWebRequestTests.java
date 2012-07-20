@@ -141,7 +141,7 @@ public class StandardServletAsyncWebRequestTests {
 			fail("expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertEquals("Cannot use async request after completion", ex.getMessage());
+			assertEquals("Cannot use async request that has completed", ex.getMessage());
 		}
 	}
 

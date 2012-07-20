@@ -653,14 +653,17 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
 
 		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.addDelegatingCallable(getAsyncCallable(mavContainer, modelFactory, webRequest));
 		chain.setAsyncWebRequest(createAsyncWebRequest(request, response));
 		chain.setTaskExecutor(this.taskExecutor);
+		chain.push(getAsyncCallable(mavContainer, modelFactory, webRequest));
 
-		requestMappingMethod.invokeAndHandle(webRequest, mavContainer);
-
-		if (chain.isAsyncStarted()) {
-			return null;
+		try {
+			requestMappingMethod.invokeAndHandle(webRequest, mavContainer);
+		}
+		finally {
+			if (!chain.pop()) {
+				return null;
+			}
 		}
 
 		return getModelAndView(mavContainer, modelFactory, webRequest);
@@ -758,7 +761,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 		return new AbstractDelegatingCallable() {
 			public Object call() throws Exception {
-				getNextCallable().call();
+				getNext().call();
 				return getModelAndView(mavContainer, modelFactory, webRequest);
 			}
 		};

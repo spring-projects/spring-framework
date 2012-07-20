@@ -75,7 +75,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		}
 		else {
 			AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-			chain.addDelegatingCallable(getAsyncCallable(request, alreadyFilteredAttributeName));
+			chain.push(getAsyncCallable(request, alreadyFilteredAttributeName));
 
 			// Do invoke this filter...
 			request.setAttribute(alreadyFilteredAttributeName, Boolean.TRUE);
@@ -83,7 +83,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 				doFilterInternal(httpRequest, httpResponse, filterChain);
 			}
 			finally {
-				if (chain.isAsyncStarted()) {
+				if (!chain.pop()) {
 					return;
 				}
 				// Remove the "already filtered" request attribute for this request.
@@ -129,7 +129,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 
 		return new AbstractDelegatingCallable() {
 			public Object call() throws Exception {
-				getNextCallable().call();
+				getNext().call();
 				request.removeAttribute(alreadyFilteredAttributeName);
 				return null;
 			}

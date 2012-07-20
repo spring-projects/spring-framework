@@ -68,7 +68,7 @@ public class WebRequestHandlerInterceptorAdapter implements AsyncHandlerIntercep
 		return null;
 	}
 
-	public void postHandleAsyncStarted(HttpServletRequest request, HttpServletResponse response, Object handler) {
+	public void postHandleAfterAsyncStarted(HttpServletRequest request, HttpServletResponse response, Object handler) {
 		if (this.requestInterceptor instanceof AsyncWebRequestInterceptor) {
 			AsyncWebRequestInterceptor asyncInterceptor = (AsyncWebRequestInterceptor) this.requestInterceptor;
 			DispatcherServletWebRequest webRequest = new DispatcherServletWebRequest(request, response);
